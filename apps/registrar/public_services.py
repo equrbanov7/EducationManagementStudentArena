@@ -53,6 +53,7 @@ from . import status  # noqa: F401
 from . import student_group_names  # noqa: F401 — tələbənin cari reyestr qrupunun adı (süzgəclər, 2026-10-25)
 from . import subgroup_rollup  # noqa: F401
 from . import subject_merge_apply  # noqa: F401 — açılışın fənn düzəlişi icazəsi (legacy kod toqquşması, 2026-10-26)
+from . import teacher_journal_list  # noqa: F401
 from . import transcript  # noqa: F401
 from . import transfer  # noqa: F401
 from . import exam_eligibility as eligibility_rules  # noqa: F401
@@ -149,6 +150,7 @@ __all__ = [
     "journal_hygiene_actions",
     "journal_hygiene_rows",
     "journal_scope",
+    "teacher_journal_list",
     "sync_workload_journal_shares",
     "append_reviewed_onomastics_roster",
     "reviewed_onomastics_access_snapshot",

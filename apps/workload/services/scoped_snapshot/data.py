@@ -177,6 +177,13 @@ def collect(*, student_secret):
         "lesson_teacher_hours": lesson_teacher_hours,
         "enrollment_status_counts": enrollment_status_counts,
         "syllabus_versions": syllabus_versions,
+        "syllabus_shares": rows(
+            "syllabus.SyllabusShare",
+            ("id", "offering_id", "syllabus_id", "source", "created_by_id", "created_at", "updated_at"),
+            offering_id__in=offering_ids,
+            offering__organization_id=ORG,
+            syllabus__organization_id=ORG,
+        ),
         **student_sets(period_ids, student_secret),
         **collect_worker1068(),
         **collect_food_teacher_identity(),

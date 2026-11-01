@@ -1,0 +1,309 @@
+{
+  "academic_year": "2026/2027",
+  "assignments": [
+    {
+      "activity": "lecture",
+      "hours": 30,
+      "id": "0deb9ee5-a565-4743-ba49-78075a793dd8",
+      "is_hourly_paid": false,
+      "row_id": "098516e1-0e61-432e-9884-725a63283f97",
+      "teacher_id": 8349
+    },
+    {
+      "activity": "seminar",
+      "hours": 15,
+      "id": "53d9bed2-b60d-451b-983c-ae938cebaf40",
+      "is_hourly_paid": false,
+      "row_id": "098516e1-0e61-432e-9884-725a63283f97",
+      "teacher_id": 8349
+    }
+  ],
+  "case": {
+    "after_subject": "7589f20a-b921-4d30-8a40-065252999840",
+    "before_subject": "76baf791-53e9-43dc-a10f-958be2c9b5d9",
+    "bridge": [
+      {
+        "entity_type": "group_unit",
+        "legacy_pk": "792",
+        "source_row_hash": "7f3c0664d85ae019128269b9d06e2ae83ee6fdef54a562a1472799326eebbb6d",
+        "state": "migrated",
+        "target_model_label": "organizations.orgunit",
+        "target_pk": "c2955f44-f2fb-4982-89f7-37a1f174561a"
+      },
+      {
+        "entity_type": "group_unit",
+        "legacy_pk": "803",
+        "source_row_hash": "d613ea9d63ec04ee4caa56956877ef7292db36726e1c6e7f0abfb58f3012cb0e",
+        "state": "migrated",
+        "target_model_label": "organizations.orgunit",
+        "target_pk": "eee00e67-ca42-48b9-8217-dd03027855aa"
+      },
+      {
+        "entity_type": "lesson_subject",
+        "legacy_pk": "2038",
+        "source_row_hash": "cbbc2da4dd9c6d8a42b537d94d1435faee8d328b7aa343a8ad4aefd3d814fed3",
+        "state": "migrated",
+        "target_model_label": "registrar.subject",
+        "target_pk": "76baf791-53e9-43dc-a10f-958be2c9b5d9"
+      },
+      {
+        "entity_type": "lesson_subject",
+        "legacy_pk": "53",
+        "source_row_hash": "99a8b57ed5692051a9a0ee10b31dcd50e71acc0851215f68665db56334ababec",
+        "state": "migrated",
+        "target_model_label": "registrar.subject",
+        "target_pk": "7589f20a-b921-4d30-8a40-065252999840"
+      },
+      {
+        "entity_type": "worker",
+        "legacy_pk": "910",
+        "source_row_hash": "29e16cf83f682b43754e66cdbcecd93fe7268c866d6edf5f73a22da95372bed8",
+        "state": "migrated",
+        "target_model_label": "auth.user",
+        "target_pk": "8349"
+      },
+      {
+        "entity_type": "worker_materialisation",
+        "legacy_pk": "910",
+        "source_row_hash": "88ce5b25372a9bd1b45a608f3044e6dce919d818794b00d5d6f7b26b536f7ff1",
+        "state": "migrated",
+        "target_model_label": "auth.user",
+        "target_pk": "8349"
+      }
+    ],
+    "counts": {
+      "022ec803-2f2d-40ab-a471-b21aad426832": {
+        "enrollment_state_md5": "1b135674a0f4770f20d1faaa2def3f10",
+        "enrollments": 35,
+        "lesson_state_md5": "8b3cb8348d8d7e7fbc1efb9b5ec43dd1",
+        "lessons": 10,
+        "mark_state_md5": "559183081d5cea3eef241209211d6c61",
+        "marks": 341,
+        "offering_id": "022ec803-2f2d-40ab-a471-b21aad426832"
+      },
+      "5202619f-d4cb-49b4-b840-775163fa75df": {
+        "enrollment_state_md5": "ee5c4c11f205d4ab2ed577750011dbb4",
+        "enrollments": 36,
+        "lesson_state_md5": "00d06a6660213d65f5e676acbf811a41",
+        "lessons": 8,
+        "mark_state_md5": "33a2169154fabea499cb494501f549d4",
+        "marks": 278,
+        "offering_id": "5202619f-d4cb-49b4-b840-775163fa75df"
+      },
+      "740322bb-94f2-4733-a543-86178ab4fd23": {
+        "enrollment_state_md5": "f4e5b065305b55d50c8f10be592b1691",
+        "enrollments": 33,
+        "lesson_state_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "lessons": 0,
+        "mark_state_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "marks": 0,
+        "offering_id": "740322bb-94f2-4733-a543-86178ab4fd23"
+      }
+    },
+    "donor": {
+      "approved_version_id": "0394a94f-8f17-4c00-a1c7-a8dc75d40d04",
+      "body_sha256": "419ca92fc30aab47bcd63b0330465ae5595e6a80cf9d3d06a96c53ebabae7766",
+      "id": "e0705cf9-f015-46f5-a930-62c5bb6cfe75"
+    },
+    "empty": "740322bb-94f2-4733-a543-86178ab4fd23",
+    "filled": "5202619f-d4cb-49b4-b840-775163fa75df",
+    "group": {
+      "code": "",
+      "id": "eee00e67-ca42-48b9-8217-dd03027855aa",
+      "is_active": true,
+      "name": "235 İT ing",
+      "parent_id": "167cf0ad-8089-4929-98c1-5405797e229f",
+      "settings": {
+        "degree_level": "bachelor",
+        "education_form": "full_time",
+        "sector": "en"
+      },
+      "unit_type": "group"
+    },
+    "offerings": {
+      "022ec803-2f2d-40ab-a471-b21aad426832": {
+        "group_id": "c2955f44-f2fb-4982-89f7-37a1f174561a",
+        "id": "022ec803-2f2d-40ab-a471-b21aad426832",
+        "instructor_id": 8349,
+        "is_active": true,
+        "lesson_hours": 45,
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "subject_id": "76baf791-53e9-43dc-a10f-958be2c9b5d9"
+      },
+      "5202619f-d4cb-49b4-b840-775163fa75df": {
+        "group_id": "eee00e67-ca42-48b9-8217-dd03027855aa",
+        "id": "5202619f-d4cb-49b4-b840-775163fa75df",
+        "instructor_id": 8349,
+        "is_active": true,
+        "lesson_hours": 45,
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "subject_id": "7589f20a-b921-4d30-8a40-065252999840"
+      },
+      "740322bb-94f2-4733-a543-86178ab4fd23": {
+        "group_id": "eee00e67-ca42-48b9-8217-dd03027855aa",
+        "id": "740322bb-94f2-4733-a543-86178ab4fd23",
+        "instructor_id": 8349,
+        "is_active": true,
+        "lesson_hours": 45,
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "subject_id": "76baf791-53e9-43dc-a10f-958be2c9b5d9"
+      }
+    },
+    "row_id": "098516e1-0e61-432e-9884-725a63283f97",
+    "subjects": {
+      "7589f20a-b921-4d30-8a40-065252999840": {
+        "chair_unit_id": null,
+        "code": "QKU-53",
+        "id": "7589f20a-b921-4d30-8a40-065252999840",
+        "name": "Kompüter diaqnostikası"
+      },
+      "76baf791-53e9-43dc-a10f-958be2c9b5d9": {
+        "chair_unit_id": null,
+        "code": "QKU-2038",
+        "id": "76baf791-53e9-43dc-a10f-958be2c9b5d9",
+        "name": "Kompüterlərin diaqnostikası"
+      }
+    },
+    "teacher": 8349
+  },
+  "extra_students": {
+    "2948": {
+      "legacy_id": 3140,
+      "source_group_id": "f7497ed6-be85-422d-9d90-4aa61d642dca",
+      "source_points": 1
+    },
+    "6770": {
+      "legacy_id": 9025,
+      "source_group_id": "2b471dec-7783-49f1-b17e-cb9acae77f31",
+      "source_points": 7
+    },
+    "6789": {
+      "legacy_id": 9044,
+      "source_group_id": "2b471dec-7783-49f1-b17e-cb9acae77f31",
+      "source_points": 7
+    }
+  },
+  "groups": {
+    "c2955f44-f2fb-4982-89f7-37a1f174561a": {
+      "code": "",
+      "id": "c2955f44-f2fb-4982-89f7-37a1f174561a",
+      "is_active": true,
+      "name": "235 K İNG",
+      "parent_id": "ebe03333-5978-4ac2-b6c9-9659525790cd",
+      "settings": {
+        "degree_level": "bachelor",
+        "education_form": "full_time",
+        "sector": "en"
+      },
+      "unit_type": "group"
+    },
+    "eee00e67-ca42-48b9-8217-dd03027855aa": {
+      "code": "",
+      "id": "eee00e67-ca42-48b9-8217-dd03027855aa",
+      "is_active": true,
+      "name": "235 İT ing",
+      "parent_id": "167cf0ad-8089-4929-98c1-5405797e229f",
+      "settings": {
+        "degree_level": "bachelor",
+        "education_form": "full_time",
+        "sector": "en"
+      },
+      "unit_type": "group"
+    }
+  },
+  "king": "022ec803-2f2d-40ab-a471-b21aad426832",
+  "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+  "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+  "rosters": {
+    "022ec803-2f2d-40ab-a471-b21aad426832": {
+      "count": 35,
+      "sha256": "85825d4a5e3916c80dec60ca753f158bf181e8726dd879b56e5d6fd900b0c810"
+    },
+    "5202619f-d4cb-49b4-b840-775163fa75df": {
+      "count": 36,
+      "sha256": "43d4e38f055d8af675879b6e6ab0b12663b4b249d122802b93988ac9a6798267"
+    },
+    "740322bb-94f2-4733-a543-86178ab4fd23": {
+      "count": 33,
+      "sha256": "95345e2edff845f1a88eac528fafd159ebeb6188d95279d48f041f5264ef4db8"
+    }
+  },
+  "row_fields": {
+    "consult_hours": 0,
+    "credits": "5\n4",
+    "degree_level": "bachelor",
+    "education_form": "eyani",
+    "exam_hours": 0,
+    "groups_text": "235 K ing\n235 İT ing",
+    "lab_plan": 0,
+    "lab_total": 0,
+    "lecture_plan": 30,
+    "lecture_total": 30,
+    "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+    "postgrad_hours": 0,
+    "practice_production_hours": 0,
+    "practice_research_hours": 0,
+    "row_kind": "teaching",
+    "season": "fall",
+    "seminar_plan": 15,
+    "seminar_total": 15,
+    "specialty_id": "ebe03333-5978-4ac2-b6c9-9659525790cd",
+    "student_count": 34,
+    "subgroup_count": 1,
+    "subject_text": "ATMF II blok:\n1. Kompüterlərin diaqnostikası\n2. Qərarqəbuletmə sistemləri",
+    "task_id": "663dbec7-6043-4b12-9f69-9d1278a1b7cb",
+    "thesis_hours": 0,
+    "total_hours": 45,
+    "union_count": 1
+  },
+  "row_id": "098516e1-0e61-432e-9884-725a63283f97",
+  "source": {
+    "current_marks_preserved": 619,
+    "declared_hours": 45,
+    "existing_own_approved_share_authorized": true,
+    "known_43_of_45_source_is_not_truncated_or_completed": true,
+    "missing_source_seminar_hours": 2,
+    "official_groups_text": "235 K ing\n235 İT ing",
+    "official_hours": {
+      "lecture": 30,
+      "seminar": 15,
+      "total": 45
+    },
+    "official_row": 50,
+    "official_sha256": "7630be3cbe9bfe7050e2f308fae8c4959c35bd298967f5e3f2b77a0ab4a9cb09",
+    "official_subject_text": "ATMF II blok:\n1. Kompüterlərin diaqnostikası+\n2. Qərarqəbuletmə sistemləri",
+    "official_table": 1,
+    "official_teacher_text": "Heydərova Aida Şahsuvar q.",
+    "source_body_approval_copy_authorized_by_this_scope": false,
+    "source_body_sha256": "419ca92fc30aab47bcd63b0330465ae5595e6a80cf9d3d06a96c53ebabae7766",
+    "source_direct_syllabus": 8343,
+    "source_journals": {
+      "14932": {
+        "group": 803,
+        "semester": 14,
+        "subject": 53,
+        "uniqid": "iqigmK4t8X"
+      },
+      "14966": {
+        "group": 792,
+        "semester": 14,
+        "subject": 2038,
+        "uniqid": "9jQZnNCsNr"
+      }
+    },
+    "source_point_rows": 523,
+    "source_syllabus_subject": 53,
+    "source_worker_id": 910,
+    "topic_hours": {
+      "lecture": 30,
+      "seminar": 13
+    }
+  },
+  "task": {
+    "academic_year": "2026/2027",
+    "chair_id": "723f5382-82c4-4627-9e69-739b8b3d8325",
+    "id": "663dbec7-6043-4b12-9f69-9d1278a1b7cb",
+    "revision": 0,
+    "status": "amended"
+  }
+}

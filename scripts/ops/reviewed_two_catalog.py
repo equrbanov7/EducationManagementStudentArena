@@ -18,6 +18,7 @@ PREFIX = "reviewed_two_catalog: "
 CONTEXTS = {"repair_reviewed_two_catalog": (PREFIX, 2), "repair_reviewed_vefa_catalog": ("reviewed_vefa_catalog: ", 1)}
 CONTEXTS["repair_reviewed_catalog_load_chain"] = ("reviewed_catalog_load_chain: ", 3)
 CONTEXTS["repair_reviewed_gunel_duplicate"] = ("reviewed_gunel_duplicate: ", 2)
+CONTEXTS["repair_reviewed_aida_catalog"] = ("reviewed_aida_catalog: ", 2)
 
 
 class Refused(ValueError):
@@ -95,12 +96,16 @@ def summary(raw, *, apply, undo, baseline="", prefix=PREFIX, expected_rows=2):
 def safe_failure(stderr):
     if not isinstance(stderr, str) or len(stderr) > 65536:
         return "reviewed_two_catalog_command_refused"
-    match = re.fullmatch(r"CommandError: (gunel_[a-z0-9_]+)\n?", stderr)
+    match = re.fullmatch(r"CommandError: ((?:gunel|aida)_[a-z0-9_]+)\n?", stderr)
     if match:
-        path = ROOT / "apps/workload/services/reviewed_gunel_duplicate_spec.py"
+        filename, symbol = {
+            "gunel": ("reviewed_gunel_duplicate_spec.py", "GUNEL_SAFE_GUARDS"),
+            "aida": ("reviewed_aida_catalog_spec.py", "AIDA_SAFE_GUARDS"),
+        }[match[1].split("_", 1)[0]]
+        path = ROOT / "apps/workload/services" / filename
         for node in ast.parse(path.read_text()).body:
             if isinstance(node, ast.Assign) and any(
-                isinstance(target, ast.Name) and target.id == "GUNEL_SAFE_GUARDS" for target in node.targets
+                isinstance(target, ast.Name) and target.id == symbol for target in node.targets
             ):
                 value = node.value
                 if isinstance(value, ast.Call) and isinstance(value.func, ast.Name) and value.func.id == "frozenset":
