@@ -159,6 +159,7 @@ def prepared_host(tmp_path, monkeypatch, result):
         return SimpleNamespace(returncode=0, stdout=raw(result), stderr="")
 
     monkeypatch.setattr(host, "source", source)
+    monkeypatch.setattr(host, "write_private_source", lambda *args, **kwargs: None)
     monkeypatch.setattr(host.subprocess, "run", execute)
     return host, commands, runs
 

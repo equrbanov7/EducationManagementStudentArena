@@ -86,6 +86,7 @@ class BlankDraftWorkflowTests(unittest.TestCase):
                 patch.object(runner, "verify_head"),
                 patch.object(runner, "command", side_effect=command),
                 patch.object(runner, "source_command", side_effect=command),
+                patch.object(runner, "write_private_source"),
             ):
                 with patch.object(runner, "source", side_effect=source):
                     with self.assertRaisesRegex(ValueError, "supplied_baseline_changed"):

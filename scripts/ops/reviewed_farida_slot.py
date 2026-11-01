@@ -13,6 +13,7 @@ from blank_draft_syllabus_restore import inputs
 from fixed_release_asset import download
 from four_cell_history_export import diagnostics
 from journal_export_pack import sha
+from private_container_source import write_private_source
 from reviewed_followup import CONTAINER, ROOT, command, verify_head
 
 TAG = "reviewed-farida-inferred-slot-20261101"
@@ -28,7 +29,7 @@ KEYS = set(
 
 
 class SourceFailure(ValueError):
-    def __init__(self, fields, guard=None):
+    def __init__(self, fields, guard=None):  # noqa: B042 - Keep private diagnostics out of exception messages.
         self.fields = fields
         self.guard = guard
         super().__init__(fields, guard)
@@ -155,7 +156,7 @@ def execute(value, env):
     try:
         target = source(folder, env)
         command(["docker", "exec", CONTAINER, "mkdir", "-m", "700", remote])
-        command(["docker", "cp", str(target), CONTAINER + ":" + remote + "/source.json"])
+        write_private_source(target, remote + "/source.json", SOURCE_SHA, container=CONTAINER)
         args += ["--file", remote + "/source.json", "--sha256", SOURCE_SHA]
         result = subprocess.run(
             ["docker", "exec", CONTAINER, "python", "manage.py", "repair_reviewed_farida_slot", *args],

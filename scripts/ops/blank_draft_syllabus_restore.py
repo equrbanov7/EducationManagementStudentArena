@@ -11,6 +11,7 @@ from pathlib import Path
 from fixed_release_asset import download
 from four_cell_history_export import diagnostics
 from journal_export_pack import sha
+from private_container_source import write_private_source
 from reviewed_followup import CONTAINER, command, verify_head
 
 TAG = "blank-draft-syllabi-v2-20261101"
@@ -159,7 +160,7 @@ def execute(value, env):
         if not undo:
             target = source(folder, env)
             command(["docker", "exec", CONTAINER, "mkdir", "-m", "700", remote])
-            command(["docker", "cp", str(target), CONTAINER + ":" + remote + "/source.json"])
+            write_private_source(target, remote + "/source.json", SOURCE_SHA, container=CONTAINER)
             args += ["--file", remote + "/source.json", "--sha256", SOURCE_SHA]
         raw = source_command(["docker", "exec", CONTAINER, "python", "manage.py", "recover_blank_draft_syllabi", *args])
         result = summary(raw, apply=apply, undo=undo)
