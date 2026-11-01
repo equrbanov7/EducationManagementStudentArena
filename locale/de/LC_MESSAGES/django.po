@@ -113236,4 +113236,3 @@ msgstr "Lehrperson"
 msgctxt "accounts.syllabus"
 msgid "Yeni qaralama saxlanılır"
 msgstr "Neuer Entwurf bleibt erhalten"
-

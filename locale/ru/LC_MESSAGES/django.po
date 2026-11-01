@@ -112374,4 +112374,3 @@ msgstr "Преподаватель"
 msgctxt "accounts.syllabus"
 msgid "Yeni qaralama saxlanılır"
 msgstr "Новый черновик сохранён"
-

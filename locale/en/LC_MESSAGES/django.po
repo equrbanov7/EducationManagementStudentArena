@@ -112179,4 +112179,3 @@ msgstr "Teaching instructor"
 msgctxt "accounts.syllabus"
 msgid "Yeni qaralama saxlanılır"
 msgstr "New draft is retained"
-

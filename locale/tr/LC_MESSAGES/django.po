@@ -111565,4 +111565,3 @@ msgstr "Dersi veren öğretim elemanı"
 msgctxt "accounts.syllabus"
 msgid "Yeni qaralama saxlanılır"
 msgstr "Yeni taslak korunur"
-
