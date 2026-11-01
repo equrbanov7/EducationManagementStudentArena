@@ -3,6 +3,7 @@
 from collections import defaultdict
 from types import SimpleNamespace
 
+from django.apps import apps as django_apps
 from django.db.models import BooleanField, Case, Count, Exists, OuterRef, Q, Sum, Value, When
 from django.utils import timezone
 
@@ -59,6 +60,20 @@ def own_visible_queryset(queryset, user, organization):
     return project(authorized, user, organization, observed=observed)
 
 
+def _recorded_exam_attempts(user):
+    """Exact linked, non-trial academic activity; drafts alone supply no history."""
+    return (
+        django_apps.get_model("exams", "ExamAttempt")
+        .objects.filter(
+            exam__organization_id=OuterRef("organization_id"),
+            exam__journal_offerings=OuterRef("pk"),
+            is_trial=False,
+            status__in=("in_progress", "submitted", "expired"),
+        )
+        .filter(Q(exam__author=user) | Q(exam__journal_teacher=user))
+    )
+
+
 def project(queryset, user, organization, *, observed=()):
     """Do not add a single offering to the already-authorized own/share/observer set."""
     if queryset.query.is_empty():
@@ -67,13 +82,17 @@ def project(queryset, user, organization, *, observed=()):
             "journal_has_records",
             "journal_is_owned_past_history",
             "journal_is_master_history",
+            "journal_has_assessment_history",
         }
         flags.update(f"journal_{prefix}_{kind}" for prefix in ("current", "recorded") for kind in KINDS)
         flags.update(f"journal_master_{kind}" for kind in KINDS)
         return queryset.annotate(**{name: Value(False) for name in flags})
     filters = _workload_filters(queryset, user, organization)
     recorded = recorded_lessons(user).filter(organization_id=OuterRef("organization_id"), offering_id=OuterRef("pk"))
-    annotations = {"journal_has_records": Exists(recorded)}
+    annotations = {
+        "journal_has_records": Exists(recorded),
+        "journal_has_assessment_history": Exists(_recorded_exam_attempts(user)),
+    }
     master = identity_q(user, organization)
     master_marks = historical_marks()
     annotations["journal_is_master_history"] = Case(
@@ -114,6 +133,7 @@ def project(queryset, user, organization, *, observed=()):
     return queryset.annotate(**annotations).filter(
         Q(journal_is_current_load=True)
         | Q(journal_has_records=True)
+        | Q(journal_has_assessment_history=True)
         | Q(journal_is_owned_past_history=True)
         | Q(journal_is_master_history=True)
         | Q(pk__in=observed)
