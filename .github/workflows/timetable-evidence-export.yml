@@ -1,0 +1,53 @@
+name: Fixed current timetable evidence (encrypted, read-only)
+on:
+  workflow_dispatch:
+    inputs:
+      actor:
+        description: "Aktiv təşkilat superadmini"
+        type: string
+        required: true
+      batch:
+        description: "Sabit ≤25 jurnal: timetable-review-001…008"
+        type: choice
+        required: true
+        options:
+          - timetable-review-001
+          - timetable-review-002
+          - timetable-review-003
+          - timetable-review-004
+          - timetable-review-005
+          - timetable-review-006
+          - timetable-review-007
+          - timetable-review-008
+permissions:
+  contents: read
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  export:
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Verify deployed HEAD and capture fixed encrypted timetable evidence
+        id: capture
+        run: python3 scripts/ops/timetable_evidence_export.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: wcu-timetable-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ steps.capture.outputs.artifact_dir }}/snapshot.enc.json
+            ${{ steps.capture.outputs.artifact_dir }}/capture-manifest.json
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+      - name: Remove private temporary ciphertext and public key
+        if: always()
+        run: |
+          set -euo pipefail
+          docker exec educationmanagementstudentarena-app-1 rm -rf -- "/tmp/wcu-timetable-evidence-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" || true
+          rm -rf -- "$RUNNER_TEMP/timetable-evidence-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"

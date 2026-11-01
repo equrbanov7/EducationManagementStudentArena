@@ -129,7 +129,14 @@ class InferTimetableFromLessonsTest(TestCase):
     def _call(self, *args) -> str:
         out = StringIO()
         call_command(
-            "infer_timetable_from_lessons", "--org", "itt-univ", "--period", "Payız 2026/2027", *args, stdout=out
+            "infer_timetable_from_lessons",
+            "--legacy-heuristics",
+            "--org",
+            "itt-univ",
+            "--period",
+            "Payız 2026/2027",
+            *args,
+            stdout=out,
         )
         return out.getvalue()
 
@@ -333,6 +340,7 @@ class MovedClassLatestWinsTest(TestCase):
         out = StringIO()
         call_command(
             "infer_timetable_from_lessons",
+            "--legacy-heuristics",
             "--org",
             "mv-univ",
             "--period",

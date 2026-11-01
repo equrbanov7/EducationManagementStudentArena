@@ -68,6 +68,9 @@ INTENTIONAL_EXEMPTIONS = {
     # Fixed-four text-free history reader owns a fresh RR READ ONLY transaction;
     # no enclosing worker transaction is possible. Actual command and both-RLS tests.
     "apps/workload/management/commands/export_wcu_four_cell_history.py",
+    # Fixed <=25 timetable roots own fresh tenant-local RR READ ONLY transaction;
+    # outer wrapper would invalidate SET TRANSACTION. Capture/outer-atomic regression tested.
+    "apps/workload/management/commands/export_wcu_timetable_evidence.py",
     # Fixed English metadata reader requires a fresh RR READ ONLY transaction;
     # tenant/actor SET LOCAL, DB write rejection and both RLS modes are tested.
     "apps/workload/management/commands/export_wcu_english_level_evidence.py",

@@ -152,7 +152,14 @@ class InferTimetableRulesTest(TestCase):
     def _call(self, *args) -> dict:
         out = StringIO()
         call_command(
-            "infer_timetable_from_lessons", "--org", "itr-univ", "--period", "Payız 2026/2027", *args, stdout=out
+            "infer_timetable_from_lessons",
+            "--legacy-heuristics",
+            "--org",
+            "itr-univ",
+            "--period",
+            "Payız 2026/2027",
+            *args,
+            stdout=out,
         )
         return _counts(out.getvalue())
 

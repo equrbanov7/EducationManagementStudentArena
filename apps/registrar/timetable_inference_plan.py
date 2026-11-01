@@ -463,7 +463,10 @@ def run_inference(
     source: str = "infer_timetable_from_lessons",
 ) -> Plan:
     """Dry-run (defolt — heç nə yazılmır) və ya yazı (kilid altında yenidən qurulan plan)."""
+    from .timetable_inference_safety import secure_units, validate_rules
+
     rules = rules or Rules()
+    validate_rules(rules)
     facts, stats = load_facts(
         organization=organization,
         period=period,
@@ -471,6 +474,7 @@ def run_inference(
         date_to=date_to,
         teacher=teacher,
         snap_minutes=rules.snap_minutes,
+        safe_mode=rules.safe_mode,
     )
     budgets = weekly_budgets({fact.offering_id for fact in facts}) if rules.hours_cap else None
     units = build_units(
@@ -481,6 +485,8 @@ def run_inference(
         budgets=budgets,
         recent_since=date_to - dt.timedelta(days=rules.recent_days - 1) if rules.recent_days > 0 else None,
     )
+    if rules.safe_mode:
+        secure_units(units)
     options = {"facts": stats, "actor": actor, "fill_rooms": rules.fill_rooms, "source": source}
     if not apply:
         return build_plan(organization=organization, period=period, units=units, **options)

@@ -1,50 +1,17 @@
-"""Jurnal dərslərindən həftəlik cədvəlin çıxarılması — analiz qatı (sahib 2026-10-24, qaydalar 2026-10-25).
+"""Recorded lessons → conservative timetable inference (read-only unless explicitly applied).
 
-Sahib: «hər müəllimin faktiki keçdiyi dərs saatlarını nəzərə alaraq dərs cədvəlini rəsmiləşdir — dəqiq
-bilək ki, bu müəllim bu saatda dərs deyir; üst/alt həftə, mühazirə və seminar; patok bir slot qalsın».
-2026-10-25: «jurnalı ÇOXLUQ olaraq yazdığı dərs saatlarına əsasən, alt-üst həftə və s. hər şey nəzərə alınaraq».
-``backfill_teacher_lessons``-in TƏRSİ: orada slot → dərs, burada keçirilmiş dərs (``Lesson``) → slot.
-Yazı / toqquşma / hesabat qatı: :mod:`apps.registrar.timetable_inference_plan`.
+Default rules require the lesson's own instructor, a real valid start/end pair,
+at least two dates, and exact written times. Anonymous/synthesised legacy history
+is not assigned to the current offering owner. Missing end times are not guessed;
+bell snapping and one-recent-lesson weekly promotion are disabled.
 
-QAYDALAR
---------
-* FAKT: semestrin [from, to] aralığındakı dərs sətri (``Lesson``) — tarix, başlama/bitmə saatı, növ,
-  EFFEKTİV müəllim (``Lesson.instructor``, boşdursa jurnal sahibi — ``schedule.effective_instructor_id`` ilə
-  eyni qayda), otaq. Saatı olmayan, cədvəldən KƏNAR işarəli (``off_schedule_reason`` — əvəzetmə /
-  kompensasiya), müəllimsiz və passiv açılışın dərsləri sayılır, amma slot üçün işlənmir.
-* ZƏNG (2026-10-25): redaktor yalnız universitetin standart zənglərini qəbul edir
-  (``schedule.STANDARD_LESSON_TIMES``). Standartdan kənar başlama (11:30, 10:00, 13:30 …) ən yaxın standart
-  zəngə ``snap_minutes`` (defolt 25 dəq) daxilindədirsə ona çəkilir (``snapped``) — eyni dərsin 11:30 / 11:50
-  yazılışları bir vahiddə toplanır; uzaqdırsa olduğu kimi qalır.
-* AÇAR: müəllim × həftə günü × başlama saatı × dərs növü. Açar daxilində ``min_occurrences``-dən (defolt 2)
-  AZ tarixli açılış birdəfəlik / kompensasiya dərsidir (``below_threshold``) — o, axına QOŞULMUR (əvvəl bir
-  təsadüfi dərs başqa fənnin axınına yapışıb bütün axını «qarışıq fənn» edirdi). Qalan açılışlar tarixlərinin
-  ƏKSƏRİYYƏTİNDƏ birlikdədirsə (ortaq tarix × 2 ≥ kiçik dəstin tarixi) birləşdirilir — bu, AXINDIR (patok:
-  bir dərs, bir neçə qrup). Hər komponent bir VAHİDDİR; fərqli tarixlərdə eyni saatı paylaşan açılışlar
-  (məs. A qrupu üst, B qrupu alt həftə) ayrı vahidlərdir.
-* AXIN bölünmür: vahidin bütün qrupları EYNİ gün/saat/həftə növü/otaqla yazılır. 2026-10-25-dən birgə
-  MƏŞĞƏLƏ də axındır (``schedule.is_joint_lecture`` — eyni müəllim + fənn + EYNİ növ). Fərqli fənlərdən
-  yığılmış axın (``stream_mixed_subjects``) cədvəl modelində ifadə oluna bilmir — qeyri-müəyyən, yazılmır.
-* HƏFTƏ (çoxluq qaydası): hər tarixin üst/alt pariteti ``schedule.week_parity`` ilə (dövrün ilk həftəsi =
-  üst/odd — jurnalın «Aktivləşdir»i və ``backfill_teacher_lessons`` ilə EYNİ). Azlıq paritetin payı
-  ``parity_tolerance``-dən (defolt 0.25) çox deyilsə çoxluq qalib — azlıq kompensasiya sayılır (3 üst + 1 alt →
-  üst); əks halda hər həftə (``all``). RİM 2026-10-27 (MR-8): dərslər ən azı İKİ cüt ARDICIL həftədə keçirilibsə
-  (:func:`consecutive_week_pairs` ≥ ``MIN_CONSECUTIVE_WEEK_PAIRS``) dərs HƏR HƏFTƏdir — üst/alt dərs heç vaxt ardıcıl
-  iki həftədə olmur; 4 tarixdən birinin buraxılması (bayram, xəstəlik) onu «alt həftə» etmir.
-* BİTMƏ SAATI: ən çox rast gələn; yoxdursa standart zəngin sonu; standartdan kənar başlamada ən yaxın zəngin
-  müddəti.
-* KÖÇÜRÜLMÜŞ DƏRS («sonuncu qalib»): eyni qrup dəsti (qrup / axın) × eyni növ üçün iki yararlı vahidin tarix
-  aralıqları KƏSİŞMİRSƏ köhnəsi yazılmır — eyni müəllimdə ``moved_later`` (saat dəyişib), fərqli müəllimdə
-  ``teacher_changed`` (fənn başqa müəllimə verilib). Aralıqları kəsişən vahidlər (həftədə iki mühazirə,
-  paralel alt qrup) hər ikisi qalır.
-* AZLIQ / HƏFTƏLİK SAAT (çoxluq qaydası, 2026-10-25): eyni açılış × növ üzrə ən güclü vahid qalır; plan / yük
-  saatı (``budgets``: ``{(açılış, növ): həftəlik slot}``; ``all`` = 1, üst/alt = 0.5) dolubsa ondan xeyli zəif
-  vahid kompensasiyadır (``over_weekly_hours``), saat məlum deyilsə yarısından zəif vahid (``minority_slot``).
-  Müntəzəm (güclü) vahid plan saatından artıq olsa da qalır — jurnal faktdır. Bax :func:`apply_weekly_budget`.
-* YENİ BAŞLAMIŞ AÇILIŞ: ilk dərsi aralığın son ``recent_days`` (defolt 14) günündədirsə və heç bir yararlı
-  vahidi yoxdursa son dərsinin günü / saatı hər həftə slotu olur (``recent_start``) — :func:`promote_recent`.
-* OTAQ (2026-10-25): vahidin dərslərində ən çox yazılan otaq (bərabərlikdə ən son istifadə olunan); yoxdursa
-  müəllimin həmin gün/saatdakı, sonra ümumən ən çox yazdığı otaq — :func:`assign_rooms`. Toqquşursa otaqsız.
+Historical heuristics remain available only through explicit legacy mode for a
+separately reviewed plan. Existing document/manual slots are preserved by the
+planner; no timetable is deleted or overwritten here. Lecture, seminar and lab
+remain distinct; a shared lecture does not prove a shared seminar.
+
+The inference is a proposal from recorded facts, not independent source authority.
+Source imports and actual schedule discrepancies require their own fresh evidence.
 """
 
 from __future__ import annotations
@@ -57,11 +24,12 @@ from django.db.models import Q
 
 from apps.registrar import schedule
 from apps.registrar.models import Lesson, SlotKind, WeekType
+from apps.registrar.timetable_inference_safety import inference_teacher, positive_allocations
 
 DEFAULT_MIN_OCCURRENCES = 2
 DEFAULT_PARITY_TOLERANCE = 0.25
-DEFAULT_SNAP_MINUTES = 25
-DEFAULT_RECENT_DAYS = 14
+DEFAULT_SNAP_MINUTES = 0
+DEFAULT_RECENT_DAYS = 0
 #: Bu qədər (və çox) cüt ardıcıl həftədə dərs varsa slot hər həftədir (üst/alt deyil) — RİM 2026-10-27.
 MIN_CONSECUTIVE_WEEK_PAIRS = 2
 MAX_ROOM_CANDIDATES = 8  # əsas + 7 növbəti otaq (tutulubsa)
@@ -87,6 +55,7 @@ FACT_KEYS = (
     "no_time",
     "off_schedule",
     "no_teacher",
+    "no_current_allocation",
     "inactive_offering",
     "unknown_kind",
     "legacy",
@@ -103,6 +72,7 @@ class Rules:
     hours_cap: bool = True
     fill_rooms: bool = True
     recent_days: int = DEFAULT_RECENT_DAYS
+    safe_mode: bool = True
 
 
 @dataclass(frozen=True)
@@ -213,7 +183,7 @@ def _room_label(name, code) -> str:
 
 
 def load_facts(
-    *, organization, period, date_from, date_to, teacher=None, snap_minutes: int = DEFAULT_SNAP_MINUTES
+    *, organization, period, date_from, date_to, teacher=None, snap_minutes: int = DEFAULT_SNAP_MINUTES, safe_mode=True
 ) -> tuple[list[LessonFact], Counter]:
     """Aralığın dərsləri → slot üçün yararlı faktlar + sayğac (``FACT_KEYS``)."""
     queryset = Lesson.objects.filter(
@@ -221,8 +191,10 @@ def load_facts(
     )
     if teacher is not None:
         queryset = queryset.filter(Q(instructor=teacher) | Q(instructor__isnull=True, offering__instructor=teacher))
+    allocation_proof = positive_allocations(organization, period) if safe_mode else None
     fields = (
         "offering_id",
+        "offering__group_id",
         "offering__subject_id",
         "offering__is_active",
         "date",
@@ -239,12 +211,27 @@ def load_facts(
     stats: Counter = Counter({key: 0 for key in FACT_KEYS})
     facts = []
     for row in queryset.values_list(*fields).iterator(chunk_size=5000):
-        offering_id, subject_id, active, day, start, end, kind, own, owner, room_name, room_code, off, legacy = row
+        (
+            offering_id,
+            group_id,
+            subject_id,
+            active,
+            day,
+            start,
+            end,
+            kind,
+            own,
+            owner,
+            room_name,
+            room_code,
+            off,
+            legacy,
+        ) = row
         stats["lessons"] += 1
         if legacy:
             stats["legacy"] += 1
-        teacher_id = own or owner
-        if start is None:
+        teacher_id = inference_teacher(own, owner, legacy, safe_mode=safe_mode)
+        if start is None or safe_mode and (end is None or end <= start):
             stats["no_time"] += 1
         elif (off or "").strip():
             stats["off_schedule"] += 1
@@ -252,6 +239,8 @@ def load_facts(
             stats["no_teacher"] += 1
         elif not active:
             stats["inactive_offering"] += 1
+        elif safe_mode and (subject_id, group_id, teacher_id, kind) not in allocation_proof:
+            stats["no_current_allocation"] += 1
         elif kind not in SlotKind.values:
             stats["unknown_kind"] += 1
         else:

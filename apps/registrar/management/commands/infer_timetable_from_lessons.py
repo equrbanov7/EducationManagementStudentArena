@@ -16,7 +16,7 @@ bilək ki, bu müəllim bu saatda dərs deyir; üst/alt həftə, mühazirə, sem
 
     manage.py infer_timetable_from_lessons --org qku --period "Payız 2026/2027" [--teacher ad.soyad] \\
         [--date-from 2026-09-15] [--date-to 2026-10-24] [--min-occurrences 2] [--parity-tolerance 0.25] \\
-        [--snap-minutes 25] [--no-hours-cap] [--no-fill-rooms] [--recent-days 14] [--report /tmp/tt.csv] \\
+        [--snap-minutes 0] [--no-hours-cap] [--no-fill-rooms] [--recent-days 0] [--report /tmp/tt.csv] \\
         [--apply --actor <istifadəçi> --i-know-this-is-production]
 """
 
@@ -33,12 +33,11 @@ from apps.registrar.management.commands.import_timetable_docx import _disposable
 from apps.registrar.timetable_inference import (
     DEFAULT_MIN_OCCURRENCES,
     DEFAULT_PARITY_TOLERANCE,
-    DEFAULT_RECENT_DAYS,
-    DEFAULT_SNAP_MINUTES,
     FACT_KEYS,
     Rules,
 )
 from apps.registrar.timetable_inference_plan import ACTIONS, REPORT_HEADER, run_inference, usernames_for
+from apps.registrar.timetable_inference_safety import configure_options
 from core.export_safety import safe_csv_writer
 from core.rls import apply_rls_request_context, bypass_rls
 from core.rls_pooling import rls_worker_atomic
@@ -85,8 +84,8 @@ class Command(BaseCommand):
         parser.add_argument(
             "--snap-minutes",
             type=int,
-            default=DEFAULT_SNAP_MINUTES,
-            help="Standartdan kənar başlamanı bu qədər dəqiqə daxilində ən yaxın zəngə çək (0 = çəkmə; defolt 25)",
+            default=None,
+            help="Standartdan kənar başlamanı bu qədər dəqiqə daxilində ən yaxın zəngə çək (0 = çəkmə; defolt 0; legacy 25)",
         )
         parser.add_argument(
             "--no-hours-cap",
@@ -101,8 +100,13 @@ class Command(BaseCommand):
         parser.add_argument(
             "--recent-days",
             type=int,
-            default=DEFAULT_RECENT_DAYS,
-            help="Son N gündə başlamış açılışın tək dərsi də slot olur (0 = söndür; defolt 14)",
+            default=None,
+            help="Son N gündə başlamış açılışın tək dərsi də slot olur (0 = söndür; defolt 0; legacy 14)",
+        )
+        parser.add_argument(
+            "--legacy-heuristics",
+            action="store_true",
+            help="Yalnız ayrıca yoxlanmış köhnə inference planı: müəllifsiz tarixçə, saat təxmini və tək dərs",
         )
         parser.add_argument("--report", default="", help="Sətir-sətir CSV hesabat faylının yolu")
         parser.add_argument("--apply", action="store_true", help="Faktiki yaz (defolt: dry-run)")
@@ -110,6 +114,7 @@ class Command(BaseCommand):
         parser.add_argument("--i-know-this-is-production", action="store_true", help="Markersiz bazada icazə")
 
     def handle(self, *args, **options):
+        safe_mode = configure_options(options)
         if not 1 <= int(options["min_occurrences"]) <= 52:
             raise CommandError("timetable_infer_bad_min_occurrences: 1..52")
         if not 0 <= float(options["parity_tolerance"]) < 0.5:
@@ -125,6 +130,7 @@ class Command(BaseCommand):
             hours_cap=not options["no_hours_cap"],
             fill_rooms=not options["no_fill_rooms"],
             recent_days=int(options["recent_days"]),
+            safe_mode=safe_mode,
         )
         Organization = django_apps.get_model("organizations", "Organization")
         user_model = django_apps.get_model("auth", "User")
