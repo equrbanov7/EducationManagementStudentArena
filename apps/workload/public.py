@@ -469,4 +469,5 @@ from .services import applied_math_repair  # noqa: E402,F401
 from .services.mr118_journal_binding import MR118Error, repair_mr118_journal_binding  # noqa: E402,F401
 from .services.mr123_subject_repair import MR123Error, repair_mr123_subject  # noqa: E402,F401
 from .services.qosqar_duplicate_repair import DuplicateError, repair_qosqar_duplicate  # noqa: E402,F401
+from .services.qosqar_journals_repair import JournalsError, repair_qosqar_journals  # noqa: E402,F401
 from .services.qosqar_modelling_repair import ModellingError, repair_qosqar_modelling  # noqa: E402,F401
