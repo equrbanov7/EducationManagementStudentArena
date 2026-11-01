@@ -426,6 +426,12 @@
             openAssign(app);
         } else if (action === "resubmit") {
             openCreate("resubmit", app);
+        } else if (action === "close_waiting") {
+            confirm(NS.t("confirmCloseWaitingTitle"), NS.t("confirmCloseWaitingText"), function () {
+                NS.submitAction(app.id, "close_waiting", {}).then(function () {
+                    close("confirm");
+                });
+            });
         } else if (action === "close") {
             confirm(NS.t("confirmCloseTitle"), NS.t("confirmCloseText"), function () {
                 NS.submitAction(app.id, "close", { text: "" }).then(function () {

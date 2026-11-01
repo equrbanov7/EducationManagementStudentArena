@@ -262,6 +262,7 @@ def detail_payload(application, *, user) -> dict:
             sla_days=application.kind.sla_days,
             today=timezone.localdate(),
             is_open=application.is_open,
+            waiting_for_sender=application.status == ApplicationStatus.WAITING_INFO,
             status_label=application.status_label,
             holidays=calendar_for(application.organization_id),
         ),

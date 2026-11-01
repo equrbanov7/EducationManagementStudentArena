@@ -85,6 +85,10 @@ CELERY_RESULT_EXPIRES = _env_int_setting("CELERY_RESULT_EXPIRES", 3600, minimum=
 from celery.schedules import crontab  # noqa: E402
 
 CELERY_BEAT_SCHEDULE = {
+    "applications-close-stale-waiting-info": {
+        "task": "applications.close_stale_waiting_info",
+        "schedule": 3600.0,
+    },
     # Auto-finish supervised attempts whose resume window elapsed without the
     # student returning.  Runs every minute so the supervision monitor never
     # shows stale open rows long after an exam has ended.

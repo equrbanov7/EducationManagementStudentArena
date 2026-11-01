@@ -98,7 +98,11 @@ def test_handler_counts_match_old_distinct_formula(world):
         expected = {
             "inbox_open": _old_count(inbox.filter(status__in=OPEN_STATUSES)),
             "new_unseen": _old_count(inbox.filter(status=ApplicationStatus.SUBMITTED)),
-            "overdue": _old_count(inbox.filter(status__in=OPEN_STATUSES, sla_due_on__lt=timezone.localdate())),
+            "overdue": _old_count(
+                inbox.filter(status__in=OPEN_STATUSES, sla_due_on__lt=timezone.localdate()).exclude(
+                    status=ApplicationStatus.WAITING_INFO
+                )
+            ),
             "watching": _old_count(watching.filter(status__in=OPEN_STATUSES)),
         }
         assert queries.handler_kpis(organization=org, user=handler) == expected, handler.username

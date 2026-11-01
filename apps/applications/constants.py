@@ -176,6 +176,7 @@ MIN_NOTE_LENGTH = 10
 #: «Həll olundu» statusunda cavabsız qalan müraciət neçə iş günündən sonra
 #: avtomatik bağlanır (dizayn §3.4 «tələbə təsdiqləyir və ya avtomatik»).
 AUTO_CLOSE_WORKING_DAYS = 5
+WAITING_INFO_WORKING_DAYS = 3
 
 #: Siyahı səhifələməsi.
 PAGE_SIZE = 30
@@ -436,6 +437,7 @@ __all__ = [
     "ALLOWED_ATTACHMENT_EXTENSIONS",
     "ATTACHMENT_ACCEPT",
     "AUTO_CLOSE_WORKING_DAYS",
+    "WAITING_INFO_WORKING_DAYS",
     "BADGE_PALETTES",
     "CLOSED_STATUSES",
     "DEFAULT_KIND_SEED",

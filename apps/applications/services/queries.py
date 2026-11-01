@@ -54,7 +54,11 @@ def _stat_q(stat: str) -> Q:
     if stat == "closed":
         return Q(status__in=CLOSED_STATUSES)
     if stat == "overdue":
-        return Q(status__in=OPEN_STATUSES) & Q(sla_due_on__lt=timezone.localdate())
+        return (
+            Q(status__in=OPEN_STATUSES)
+            & ~Q(status=ApplicationStatus.WAITING_INFO)
+            & Q(sla_due_on__lt=timezone.localdate())
+        )
     return Q()
 
 
@@ -162,7 +166,7 @@ def sender_counts(*, organization, user) -> dict:
         Application.objects.filter(organization=organization, created_by=user, deleted_at__isnull=True),
         open=Q(status__in=OPEN_STATUSES),
         waiting_info=Q(status=ApplicationStatus.WAITING_INFO),
-        resolved=Q(status__in=_RESOLVED_STATUSES),
+        resolved=Q(status=ApplicationStatus.RESOLVED) | Q(status=ApplicationStatus.CLOSED, resolved_at__isnull=False),
     )
 
 
@@ -196,7 +200,7 @@ def handler_inbox_counts(*, organization, user) -> dict:
         ),
         inbox_open=open_q,
         new_unseen=Q(status=ApplicationStatus.SUBMITTED),
-        overdue=open_q & Q(sla_due_on__lt=timezone.localdate()),
+        overdue=open_q & ~Q(status=ApplicationStatus.WAITING_INFO) & Q(sla_due_on__lt=timezone.localdate()),
     )
 
 

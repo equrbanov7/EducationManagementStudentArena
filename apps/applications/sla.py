@@ -70,10 +70,19 @@ def working_days_between(start: date, end: date, holidays=None) -> int:
     return count * step
 
 
-def sla_banner(*, due_on: date, sla_days: int, today: date, is_open: bool, status_label: str, holidays=None) -> dict:
+def sla_banner(
+    *,
+    due_on: date,
+    sla_days: int,
+    today: date,
+    is_open: bool,
+    status_label: str,
+    holidays=None,
+    waiting_for_sender=False,
+) -> dict:
     """Detal panelinin SLA zolağı üçün hazır məlumat (dizayn §4.7).
 
-    ``tone``: ``ontime`` | ``overdue`` | ``closed``; ``days`` müsbət ədəddir.
+    ``tone``: ``ontime`` | ``overdue`` | ``waiting`` | ``closed``; ``days`` mənfi deyil.
     """
     if not is_open:
         return {
@@ -82,6 +91,10 @@ def sla_banner(*, due_on: date, sla_days: int, today: date, is_open: bool, statu
             "sla_days": int(sla_days or 0),
             "status_label": status_label,
         }
+    if waiting_for_sender:
+        from .constants import WAITING_INFO_WORKING_DAYS
+
+        return {"tone": "waiting", "days": 0, "sla_days": WAITING_INFO_WORKING_DAYS, "status_label": status_label}
     if due_on is None:
         return {"tone": "ontime", "days": 0, "sla_days": int(sla_days or 0), "status_label": status_label}
     remaining = working_days_between(today, due_on, holidays)

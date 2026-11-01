@@ -122,7 +122,7 @@ class Application(UUIDModel, TimeStampedModel):
     @property
     def is_overdue(self) -> bool:
         """Açıq VƏ cavab müddəti keçib (iş günü ilə hesablanmış ``sla_due_on``)."""
-        if not self.is_open or self.sla_due_on is None:
+        if not self.is_open or self.status == ApplicationStatus.WAITING_INFO or self.sla_due_on is None:
             return False
         return timezone.localdate() > self.sla_due_on
 

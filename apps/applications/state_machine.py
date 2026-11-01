@@ -61,6 +61,7 @@ class Action:
     REJECT = "reject"
     REOPEN = "reopen"
     CLOSE = "close"
+    CLOSE_WAITING = "close_waiting"
     CANCEL = "cancel"
 
 
@@ -176,6 +177,12 @@ RULES = {
         target=ApplicationStatus.CLOSED.value,
         actor=ACTOR_SENDER,
     ),
+    Action.CLOSE_WAITING: ActionRule(
+        name=Action.CLOSE_WAITING,
+        sources=frozenset({ApplicationStatus.WAITING_INFO.value}),
+        target=ApplicationStatus.CLOSED.value,
+        actor=ACTOR_HANDLER,
+    ),
     Action.CANCEL: ActionRule(
         name=Action.CANCEL,
         sources=frozenset(OPEN_STATUSES),
@@ -188,6 +195,7 @@ RULES = {
 HANDLER_ACTIONS = (
     Action.RESOLVE,
     Action.REQUEST_INFO,
+    Action.CLOSE_WAITING,
     Action.FORWARD,
     Action.RETURN_FOR_CORRECTION,
     Action.REJECT,

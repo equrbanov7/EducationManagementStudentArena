@@ -17,6 +17,7 @@ from ..state_machine import ACTOR_HANDLER, Action, TransitionDenied, ensure_allo
 from . import access, notify
 from .action_lock import refresh_for_action
 from .submit import attach_files
+from .waiting_info import close, close_waiting, resume_sender_comment, resume_sla
 
 #: ``TransitionDenied`` mətnlərinin konteksti (``state_machine._CTX`` ilə eyni).
 _CTX = "applications.transition"
@@ -171,9 +172,18 @@ def add_comment(*, application, user, text: str, is_internal: bool = False, file
         is_internal = False
     ensure_allowed(action=Action.ADD_COMMENT, status=application.status, text=text)
     responder = _ResponderAct(user, application) if is_handler else None
-    event = _write_event(application, kind=EventKind.COMMENT, actor=user, text=text, is_internal=is_internal)
+    old = application.status
+    resumed = resume_sender_comment(application, user, is_internal=is_internal)
+    event = _write_event(
+        application,
+        kind=EventKind.COMMENT,
+        actor=user,
+        text=text,
+        is_internal=is_internal,
+        old=old if resumed else None,
+    )
     attach_files(application, files, event=event, uploaded_by=user)
-    _touch(application, [])
+    _touch(application, ["status", "sla_due_on"] if resumed else [])
     notify.audit(
         application,
         action=notify.AUDIT_UPDATE,
@@ -430,7 +440,8 @@ def provide_info(*, application, user, text: str, files=None, request=None):
     rule = _guard(user, application, Action.PROVIDE_INFO, text)
     old = application.status
     application.status = rule.target
-    _touch(application, ["status"])
+    resume_sla(application)
+    _touch(application, ["status", "sla_due_on"])
     event = _write_event(application, kind=EventKind.INFO_PROVIDED, actor=user, text=text, old=old)
     attach_files(application, files, event=event, uploaded_by=user)
     notify.audit(
@@ -524,19 +535,6 @@ def reopen(*, application, user, text: str, files=None, request=None):
 
 
 @transaction.atomic
-def close(*, application, user, text: str = "", request=None):
-    """Müraciət sahibi «Həll olunub» nəticəsini təsdiqləyir."""
-    rule = _guard(user, application, Action.CLOSE)
-    old = application.status
-    application.status = rule.target
-    application.closed_at = timezone.now()
-    _touch(application, ["status", "closed_at"])
-    _write_event(application, kind=EventKind.CLOSED, actor=user, text=text, old=old)
-    notify.audit(application, action=notify.AUDIT_UPDATE, actor=user, event_kind=EventKind.CLOSED, request=request)
-    return application
-
-
-@transaction.atomic
 def cancel(*, application, user, reason: str = "", request=None):
     """Müraciət sahibi açıq müraciəti geri götürür."""
     rule = _guard(user, application, Action.CANCEL)
@@ -575,6 +573,7 @@ ACTION_DISPATCH = {
     Action.REJECT: reject,
     Action.REOPEN: reopen,
     Action.CLOSE: close,
+    Action.CLOSE_WAITING: close_waiting,
     Action.CANCEL: cancel,
 }
 

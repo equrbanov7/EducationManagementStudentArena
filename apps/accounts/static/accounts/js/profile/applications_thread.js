@@ -41,6 +41,7 @@
     var BUTTONS = [
         ["resolve", "actResolve", "apx-btn apx-btn--primary"],
         ["request_info", "actRequestInfo", "apx-btn"],
+        ["close_waiting", "actCloseWaiting", "apx-btn"],
         ["forward", "actForward", "apx-btn apx-btn--outline"],
         ["return_for_correction", "actReturn", "apx-btn"],
         ["reject", "actReject", "apx-btn apx-btn--danger"],
@@ -73,6 +74,9 @@
         }
         if (sla.tone === "closed") {
             return NS.t("slaClosed", { status: String(sla.status_label || "").toLocaleLowerCase("az") });
+        }
+        if (sla.tone === "waiting") {
+            return NS.t("slaWaiting", { n: sla.sla_days });
         }
         if (sla.tone === "overdue") {
             return NS.t("slaOverdue", { n: sla.days, m: sla.sla_days });

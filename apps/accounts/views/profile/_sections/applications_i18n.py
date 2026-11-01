@@ -60,6 +60,9 @@ def _detail() -> dict:
         ),
         "slaOntime": pgettext(_CTX, "Cavab müddətinə {n} iş günü qalıb (norma {m} iş günü)"),
         "slaOverdue": pgettext(_CTX, "Cavab müddəti {n} gün keçib (norma {m} iş günü)"),
+        "slaWaiting": pgettext(
+            _CTX, "Müraciət sahibindən əlavə məlumat gözlənilir; {n} iş günü cavab gəlməsə bağlanacaq."
+        ),
         "slaClosed": pgettext(_CTX, "Müraciət bağlanıb — {status}"),
         "noteSenderOpen": pgettext(
             _CTX,
@@ -85,6 +88,11 @@ def _detail() -> dict:
 def _actions() -> dict:
     return {
         "actResolve": pgettext(_CTX, "Həll olundu — bağla"),
+        "actCloseWaiting": pgettext(_CTX, "Cavab yazmadan bağla"),
+        "confirmCloseWaitingTitle": pgettext(_CTX, "Gözləyən müraciəti bağla"),
+        "confirmCloseWaitingText": pgettext(
+            _CTX, "Əlavə məlumat gözlənilən müraciət bağlanacaq; həll olunmuş sayılmayacaq."
+        ),
         "actRequestInfo": pgettext(_CTX, "Əlavə məlumat istə"),
         "actForward": pgettext(_CTX, "Başqa şöbəyə yönləndir"),
         "actReject": pgettext(_CTX, "Rədd et"),
