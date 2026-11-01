@@ -1,8 +1,9 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const path = require('node:path');
 const { JSDOM } = require('jsdom');
-const source = fs.readFileSync('apps/live_exam/static/js/player/bombs.js', 'utf8');
+const source = fs.readFileSync(path.resolve(__dirname, '../../apps/live_exam/static/js/player/bombs.js'), 'utf8');
 const load = () => import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 function fixture({ reduced = false, storage } = {}) {
     const dom = new JSDOM('<div id="lxpViews"><div><p class="lxp-kicker">Sual1</p><div class="lxp-result"></div></div></div>');
@@ -55,8 +56,8 @@ test('teacher selects a per-question rule and it locks when the game starts', as
     const posted = [];
     global.__bombHostState = state;
     global.__bombPost = async (url, data) => { posted.push({ url, data }); return { ok: true, settings: data }; };
-    let code = fs.readFileSync('apps/live_exam/static/js/host_lobby/bomb_drawer.js', 'utf8');
-    const texts = fs.readFileSync('apps/live_exam/static/js/host_lobby/bomb_text.js', 'utf8');
+    let code = fs.readFileSync(path.resolve(__dirname, '../../apps/live_exam/static/js/host_lobby/bomb_drawer.js'), 'utf8');
+    const texts = fs.readFileSync(path.resolve(__dirname, '../../apps/live_exam/static/js/host_lobby/bomb_text.js'), 'utf8');
     const textModule = 'data:text/javascript;base64,' + Buffer.from(texts).toString('base64');
     code = code.replace(/import \{ bombText \} from '[^']+';/, `import { bombText } from '${textModule}';`)
         .replace(/import \{ state \} from '[^']+';/, 'const state = globalThis.__bombHostState;')
