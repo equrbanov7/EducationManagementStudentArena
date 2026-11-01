@@ -100,6 +100,12 @@ TRANSITION_MESSAGES = {
     "copy.target_approved": pgettext_lazy(
         _CTX, "Bu fənn/dövr üçün təsdiqlənmiş sillabus var — üstünə köçürmək olmaz, yeni versiya açın."
     ),
+    "version.source_lineage_invalid": pgettext_lazy(
+        _CTX, "Mənbə versiyalarının əlaqəsi etibarsızdır. Məzmun dəyişdirilmədi; RİM-ə müraciət edin."
+    ),
+    "version.source_lineage_busy": pgettext_lazy(
+        _CTX, "Bu təşkilatda başqa sillabus kopyalanır. Bir qədər sonra yenidən cəhd edin."
+    ),
     "version.base_missing": pgettext_lazy(_CTX, "Mənbə versiya tapılmadı."),
     "version.kind_unknown": pgettext_lazy(_CTX, "Versiya növü tanınmır."),
     "section.unknown": pgettext_lazy(_CTX, "Bölmə tanınmır."),

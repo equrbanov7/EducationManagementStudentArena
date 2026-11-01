@@ -14,12 +14,15 @@ from ..constants import OPEN_STATUSES, PERM_EDIT, SyllabusStatus
 from ..models import ChangeKind, Syllabus, SyllabusSection, SyllabusVersion
 from ..state_machine import TransitionDenied
 from .scoping import is_author
+from .source_lineage import lock_lineage, validate_source
 
 
+@transaction.atomic
 def copy_into_existing(target, *, base, actor, request=None):
     """Mövcud dosyeyə köçürmə: növbəti minor qaralama + mənbənin bölmələri."""
     from .drafts import recompute_completion
 
+    lock_lineage(target.organization_id)
     latest = target.versions.order_by("-major", "-minor").first()
     major, minor = (latest.major, latest.minor + 1) if latest is not None else (1, 0)
     version = SyllabusVersion.objects.create(
@@ -34,6 +37,7 @@ def copy_into_existing(target, *, base, actor, request=None):
         plan_hours=dict(base.plan_hours or {}),
         created_by=actor.user,
     )
+    validate_source(organization_id=target.organization_id, target_id=version.pk, source=base)
     # `_create_sections` `drafts`-dədir; dövri idxaldan qaçmaq üçün çağırış vaxtı.
     # `_create_sections` / `create_draft` / `ensure_chair_unit` `drafts`-dədir;
     # dövri idxaldan qaçmaq üçün çağırış vaxtı idxal edilir.
@@ -75,6 +79,7 @@ def copy_from_previous(*, source_syllabus, target_period, actor, offering=None, 
 
     from .drafts import _create_sections, create_draft, ensure_chair_unit, recompute_completion
 
+    lock_lineage(source_syllabus.organization_id)
     ensure_chair_unit(source_syllabus)
     base = source_syllabus.approved_version or source_syllabus.versions.order_by("-major", "-minor").first()
     if base is None:
@@ -118,6 +123,7 @@ def copy_from_previous(*, source_syllabus, target_period, actor, offering=None, 
         plan_hours=base.plan_hours,
         request=request,
     )
+    validate_source(organization_id=syllabus.organization_id, target_id=version.pk, source=base)
     SyllabusVersion.objects.filter(pk=version.pk).update(change_kind=ChangeKind.COPIED, source_version=base)
     version.change_kind = ChangeKind.COPIED
     version.source_version = base

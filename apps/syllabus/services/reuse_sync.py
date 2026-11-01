@@ -17,6 +17,7 @@ from ..state_machine import TransitionDenied
 from . import reuse_rules as rules
 from .reuse import _approve_as_reuse, _denied, _new_draft
 from .scoping import is_author
+from .source_lineage import lock_lineage
 
 
 def _snapshot_is_behind(base, mirrored_version_id, copied_at) -> bool:
@@ -64,6 +65,7 @@ def linked_summary(sources) -> dict:
 @transaction.atomic
 def sync_from_source(*, target_syllabus, actor, plan_hours=None, request=None):
     """Bağlı hədəfi mənbənin YENİ təsdiqlənmiş versiyasına çəkir (qərar 4 — əl ilə)."""
+    lock_lineage(target_syllabus.organization_id)
     target = (
         Syllabus.objects.select_for_update(of=("self",))
         .select_related("offering", "reused_from", "reused_from__approved_version", "approved_version")

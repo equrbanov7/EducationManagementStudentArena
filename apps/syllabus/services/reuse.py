@@ -51,6 +51,7 @@ from ..state_machine import Transition, TransitionDenied, check
 from ..week_plan import fit_rows_to_hours
 from . import reuse_rules as rules
 from .scoping import is_author
+from .source_lineage import lock_lineage, validate_source
 
 
 @dataclass(frozen=True)
@@ -248,6 +249,7 @@ def _approve_as_reuse(draft, *, syllabus, source, base, actor, plan_hours, reque
         is_author=author,
         in_scope=author,
     )
+    validate_source(organization_id=syllabus.organization_id, target_id=locked.pk, source=base)
     snapshot = section_data_map(locked) if replaced else None
     # Məzmun mənbənin EYNİ nüsxəsidir, YALNIZ qiymətləndirmə bölgüsü hədəfin CARİ qaydasına gətirilir
     # (sahib 2026-10-11: köhnə qaydada təsdiqlənmiş «midterm 20 + sərbəst iş 10» bağlananda midterm 30 olur;
@@ -352,6 +354,7 @@ def link(*, source, target, actor, request=None):
     """
     from .units import ensure_chair_unit
 
+    lock_lineage(source.organization_id)
     source = rules.reuse_root(source)
     _validate_target(source, target, actor)
     ensure_chair_unit(source)
@@ -371,6 +374,7 @@ def copy_adjust(*, source, target, actor, request=None, previous=False):
     from ..rules import for_version as rule_for_version
     from .drafts import _inherited_data, create_draft, recompute_completion, section_data_map
 
+    lock_lineage(source.organization_id)
     source = rules.reuse_root(source)
     _validate_target(source, target, actor, previous=previous)
     code = rules.copy_code(source, actor=actor, target=target.syllabus)
@@ -399,6 +403,7 @@ def copy_adjust(*, source, target, actor, request=None, previous=False):
         syllabus = _lock(target.syllabus)
         version = _working_draft(syllabus, actor=actor, plan_hours=hours, request=request)
         snapshot = section_data_map(version)
+    validate_source(organization_id=syllabus.organization_id, target_id=version.pk, source=base)
     hours = hours or rules.normalize_hours(version.plan_hours)
     base_map = {row.section_id: row.data for row in base.sections.all()}
     # Bölgü HƏDƏF versiyanın qaydasının standartıdır (sahib 2026-10-10: sərbəst işsiz → midterm 30).
