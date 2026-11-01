@@ -139,8 +139,8 @@ def _claims(academic, offering_map):
     return output
 
 
-def _capture():
-    actor = require_readonly()
+def _capture(*, actor=None):
+    actor = require_readonly() if actor is None else actor
     reader = Rows()
     offerings = _family(reader)
     family_ids = {row["id"] for row in offerings}

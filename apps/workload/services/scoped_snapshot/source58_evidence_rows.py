@@ -265,7 +265,7 @@ def budget():
         yield
 
 
-def require_readonly():
+def require_context(*, read_only_required=True):
     if connection.vendor != "postgresql" or not connection.in_atomic_block:
         raise EvidenceLimit("source58_readonly_postgresql_required")
     with connection.cursor() as cursor:
@@ -273,7 +273,12 @@ def require_readonly():
             "SELECT current_setting('transaction_read_only'), current_setting('app.current_org_id', true), current_setting('app.bypass_rls', true), current_setting('app.current_user_id', true)"
         )
         readonly, organization, bypass, actor = cursor.fetchone()
-    if readonly != "on" or organization != fixed.ORG or bypass not in (None, "", "off", "0", "false"):
+    if (
+        read_only_required
+        and readonly != "on"
+        or organization != fixed.ORG
+        or bypass not in (None, "", "off", "0", "false")
+    ):
         raise EvidenceLimit("source58_readonly_tenant_context_required")
     if (
         not actor
@@ -291,6 +296,10 @@ def require_readonly():
     ):
         raise EvidenceLimit("source58_active_scoped_superadmin_required")
     return int(actor)
+
+
+def require_readonly():
+    return require_context()
 
 
 def export_budget(data):

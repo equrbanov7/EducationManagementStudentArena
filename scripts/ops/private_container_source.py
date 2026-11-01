@@ -9,7 +9,9 @@ import subprocess
 from pathlib import Path
 
 MAX_BYTES = 8 * 1024 * 1024
-PATH_PATTERN = r"/tmp/wcu-(?:blank-draft-syllabus|half-pair-hours|farida-slot)-[1-9][0-9]*-[1-9][0-9]*/source\.json"
+PATH_PATTERN = (
+    r"/tmp/wcu-(?:blank-draft-syllabus|half-pair-hours|farida-slot|source58-qb)-[1-9][0-9]*-[1-9][0-9]*/source\.json"
+)
 
 # Code and non-secret identity/digest arguments only; source bytes travel on stdin.
 WRITER = r"""
@@ -21,7 +23,7 @@ try:
     uid=os.geteuid()
     if uid==0 or not 0<size<=limit<=8388608:
         raise ValueError()
-    if not re.fullmatch(r"/tmp/wcu-(?:blank-draft-syllabus|half-pair-hours|farida-slot)-[1-9][0-9]*-[1-9][0-9]*/source\.json",str(path)):
+    if not re.fullmatch(r"/tmp/wcu-(?:blank-draft-syllabus|half-pair-hours|farida-slot|source58-qb)-[1-9][0-9]*-[1-9][0-9]*/source\.json",str(path)):
         raise ValueError()
     parent=path.parent.lstat()
     if not stat.S_ISDIR(parent.st_mode) or parent.st_uid!=uid or stat.S_IMODE(parent.st_mode)!=0o700:

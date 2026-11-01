@@ -477,3 +477,9 @@ from .services.qosqar_journals_repair import JournalsError, repair_qosqar_journa
 from .services.qosqar_modelling_repair import ModellingError, repair_qosqar_modelling  # noqa: E402,F401
 from .services.source28_recovery_history import fixed_source28_recovery_history  # noqa: E402,F401
 from .services.source28_spec import source28_recovery_spec  # noqa: E402,F401
+from .services.source58_recovery_evidence import (  # noqa: E402,F401
+    fixed_source58_recovery_evidence,
+    fixed_source58_source_scope,
+)
+
+__all__ += ["fixed_source58_recovery_evidence", "fixed_source58_source_scope"]
