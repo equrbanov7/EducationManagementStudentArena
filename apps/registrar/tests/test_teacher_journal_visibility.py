@@ -83,12 +83,13 @@ class TeacherJournalVisibilityTests(TestCase):
         for kind in ("lecture", "seminar", "lab"):
             self.assertEqual([o.pk for o in self.context(kind=kind)["offerings"]], [offering.pk])
 
-    def test_stale_empty_owner_and_manual_legacy_share_supply_no_current_load(self):
+    def test_current_owner_and_active_share_are_current_without_workload(self):
+        # Sahib 2026-11-02: admin müəllimin jurnalını görürsə, müəllim də öz siyahısında görür.
         own = self.offering(instructor=self.teacher)
         shared_stack = make_structure(self.org, code="TVS")
         shared = self.offering(instructor=self.other, stack=shared_stack)
         JournalShare.objects.create(organization=self.org, offering=shared, teacher=self.teacher, source="legacy")
-        self.assertEqual(self.context()["offerings"], [])
+        self.assertEqual({o.pk for o in self.context()["offerings"]}, {own.pk, shared.pk})
         self.assertEqual(self.context(teaching="history")["offerings"], [])
         self.assertTrue(CourseOffering.objects.filter(pk=own.pk).exists())
         self.assertTrue(JournalShare.objects.filter(offering=shared, is_active=True).exists())

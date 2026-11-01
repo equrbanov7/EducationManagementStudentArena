@@ -112,11 +112,15 @@ def project(queryset, user, organization, *, observed=()):
         output_field=BooleanField(),
     )
     current = Q(pk__in=[])
+    # Sahib 2026-11-02 («admin görür, müəllim görmür — köklü həll»): cari semestrdə müəllimin
+    # SAHİB olduğu və ya AKTİV PAYI olan jurnal yük təyinatı olmasa da cari siyahıdadır; pay öz növləri ilə.
+    active_period = Q(period__is_current=True) | Q(period__end_date__gte=timezone.localdate())
     for kind, condition in filters.items():
         shares = JournalShare.objects.filter(teacher=user, is_active=True).filter(
             Q(kinds=[]) | Q(kinds__contains=[kind])
         )
         condition &= Q(instructor=user) | Q(pk__in=shares.values("offering_id"))
+        condition |= active_period & (Q(instructor=user) | Q(pk__in=shares.values("offering_id")))
         annotations[f"journal_current_{kind}"] = Case(
             When(condition, then=Value(True)), default=Value(False), output_field=BooleanField()
         )
