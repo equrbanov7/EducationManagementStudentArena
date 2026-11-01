@@ -39,6 +39,18 @@ class Source58CompiledScopeTests(SimpleTestCase):
         with self.assertRaises(TypeError):
             evidence.collect_source58_evidence(offering_ids=["arbitrary"])
 
+    def test_registrar_public_facade_keeps_canonical_read_only_function_exports(self):
+        from apps.registrar import public
+
+        for name, owner in {
+            "credit_hours_map": "apps.registrar.absence_credit_read",
+            "effective_hours": "apps.registrar.absence_credit_read",
+            "carry_over_map": "apps.registrar.guest_merge",
+            "absence_counter_preview": "apps.registrar.absence_evidence",
+        }.items():
+            self.assertIn(name, public.__all__)
+            self.assertEqual(getattr(public, name).__module__, owner)
+
 
 class Source58Fixture:
     def make_fixture(self):
@@ -313,6 +325,21 @@ class Source58EvidenceTests(Source58Fixture, TestCase):
         self.assertFalse(result["source58_history_coverage"][0]["all_grade_history_resolved"])
         self.assertNotIn("MASKED_PERSON", json.dumps(result, default=str))
 
+    def test_thousands_of_reference_ids_have_bounded_regex_compilation_and_keep_unknown_history(self):
+        from apps.workload.services.scoped_snapshot.source58_evidence_history import collect_history
+
+        audit = apps.get_model("audit.AuditLog").objects.create(
+            organization=self.org,
+            user=self.actor,
+            action="update",
+            resource_type="registrar.grade.full-edit",
+            resource_id="masked",
+            changes=[],
+        )
+        result = collect_history(referenced_ids={str(uuid.uuid4()) for _ in range(4000)})
+        self.assertEqual(result["source58_unlocatable_grade_history"][0]["id"], str(audit.pk))
+        self.assertTrue(result["source58_unlocatable_grade_history"][0]["unresolved_history_hold"])
+
     def test_unknown_large_workload_prefix_is_never_exempted_as_known_receipt(self):
         apps.get_model("audit.AuditLog").objects.create(
             organization=self.org,
@@ -375,6 +402,19 @@ class Source58EvidenceTests(Source58Fixture, TestCase):
         self.assertIn("readonly", result["source58_scope"][0]["status"])
         self.enrollment.refresh_from_db()
         self.assertEqual(self.enrollment.absence_hours, 99)
+
+    def test_missing_fixed_course_or_enrollment_is_unknown_not_complete_zero_evidence(self):
+        with patch.object(
+            fixed, "OFFERINGS", {**fixed.OFFERINGS, str(uuid.uuid4()): dict(next(iter(fixed.OFFERINGS.values())))}
+        ):
+            result = self.collect()
+        self.assertEqual(result["source58_scope"][0]["status"], "source58_fixed_courses_missing")
+        self.assertEqual(result["source58_scope"][0]["credit_excuse_coverage"], "UNKNOWN")
+        cases = {point: dict(case, enrollment_id=str(uuid.uuid4())) for point, case in fixed.CASES.items()}
+        with patch.object(fixed, "CASES", cases):
+            result = self.collect()
+        self.assertEqual(result["source58_scope"][0]["status"], "source58_fixed_enrollments_missing")
+        self.assertFalse(result["source58_scope"][0]["bounded_reference_closure_collected"])
 
 
 class Source58RealReadOnlyTests(Source58Fixture, TransactionTestCase):

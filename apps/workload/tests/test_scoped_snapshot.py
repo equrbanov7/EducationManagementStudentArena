@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.db import connection
-from django.test import TransactionTestCase
+from django.test import TransactionTestCase, override_settings
 
 from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives import hashes, serialization
@@ -109,6 +109,40 @@ class ScopedSnapshotTests(TransactionTestCase):
         self.assertIn("read-only", str(raised.exception))
         self.row.refresh_from_db()
         self.assertEqual(self.row.lecture_total, 30)
+
+    def test_registered_source58_runs_once_inside_fixed_tenant_rr_readonly_in_both_rls_modes(self):
+        from apps.workload.services.scoped_snapshot import collect_source58_evidence
+
+        for scoped in (False, True):
+
+            def checked():
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "SELECT current_setting('transaction_read_only'), current_setting('transaction_isolation'), current_setting('app.current_org_id'), current_setting('app.current_user_id'), current_setting('app.bypass_rls')"
+                    )
+                    readonly, isolation, organization, actor, bypass = cursor.fetchone()
+                self.assertEqual(
+                    (readonly, isolation, organization, actor, bypass),
+                    ("on", "repeatable read", str(self.org.pk), str(self.actor.pk), "off"),
+                )
+                return collect_source58_evidence()
+
+            with (
+                self.subTest(scoped=scoped),
+                override_settings(RLS_TRANSACTION_SCOPED=scoped),
+                patch(
+                    "apps.workload.services.scoped_snapshot.collect_source58_evidence", side_effect=checked
+                ) as collector,
+            ):
+                snapshot = capture(self.actor.username)
+            collector.assert_called_once_with()
+            source = snapshot["data"]["source58_scope"][0]
+            self.assertEqual(source["status"], "source58_fixed_courses_missing")
+            self.assertEqual(source["credit_excuse_coverage"], "UNKNOWN")
+            self.assertFalse(source["bounded_reference_closure_collected"])
+            self.assertFalse(source["eligible_for_apply"])
+            self.assertFalse(source["registered_writer"])
+            self.assertIn("source58_scope", snapshot["schema_fields"])
 
     def test_envelope_roundtrip_tamper_and_key_pin(self):
         private = rsa.generate_private_key(public_exponent=65537, key_size=3072)

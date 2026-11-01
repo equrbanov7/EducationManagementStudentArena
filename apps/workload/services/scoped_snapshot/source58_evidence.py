@@ -1,4 +1,4 @@
-"""Closed Source58 SELECT-only evidence; deliberately unregistered and never a writer."""
+"""Closed Source58 SELECT-only evidence in the standard snapshot; never a writer."""
 
 from collections import Counter
 
@@ -144,11 +144,15 @@ def _capture():
     reader = Rows()
     offerings = _family(reader)
     family_ids = {row["id"] for row in offerings}
+    if set(fixed.OFFERINGS) - family_ids:
+        raise EvidenceLimit("source58_fixed_courses_missing")
     initial = reader.read(model("registrar.Enrollment")._base_manager.filter(offering_id__in=family_ids), cap=1000)
     target_ids = {case["enrollment_id"] for case in fixed.CASES.values()}
     enrollments = _closure(
         reader, "registrar.Enrollment", {row["id"] for row in initial} | target_ids, "superseded_by_id"
     )
+    if target_ids - enrollments.keys():
+        raise EvidenceLimit("source58_fixed_enrollments_missing")
     credits = {}
     for _depth in range(MAX_DEPTH):
         current = reader.read(
@@ -353,7 +357,7 @@ def _capture():
 
 
 def collect_source58_evidence():
-    """Internal no-argument integration target; intentionally absent from snapshot registration."""
+    """Internal fixed-scope reader inside the caller's tenant-bound read-only transaction."""
     try:
         with budget():
             return _capture()

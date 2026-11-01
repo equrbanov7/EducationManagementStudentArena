@@ -18,6 +18,7 @@ from .source58_evidence_rows import MAX_ROWS, EvidenceLimit
 
 MAX_AUDIT_ROWS = 1000
 MAX_RAW_AUDIT_BYTES = 8 * 1024 * 1024
+AUDIT_REFERENCE_CHUNK = 64
 
 
 def _labels(cases):
@@ -48,15 +49,23 @@ def collect_history(*, referenced_ids):
     locator = audit_locator(cases) | Q(resource_id__in=referenced_ids)
     Audit = model("audit.AuditLog")
     table = connection.ops.quote_name(Audit._meta.db_table)
-    pattern = "(" + "|".join(re.escape(pk) for pk in sorted(referenced_ids)) + ")"
+    ordered_ids = sorted(referenced_ids)
+    # PostgreSQL's regex compiler allocates a superlinear transition matrix for
+    # thousands of alternatives. Small fixed chunks bound compilation memory.
+    patterns = [
+        "(" + "|".join(re.escape(pk) for pk in ordered_ids[start : start + AUDIT_REFERENCE_CHUNK]) + ")"
+        for start in range(0, len(ordered_ids), AUDIT_REFERENCE_CHUNK)
+    ]
     points = "(^|[^0-9])(" + "|".join(str(point) for point in sorted(cases)) + ")([^0-9]|$)"
-    if len(pattern.encode()) > 1024 * 1024:
+    if sum(len(pattern.encode()) for pattern in patterns) > 1024 * 1024:
         raise EvidenceLimit("source58_audit_locator_byte_budget")
     for field in ("changes", "old_values", "new_values"):
+        for pattern in patterns:
+            locator |= Q(RawSQL(f"COALESCE({table}.{field}::text ~ %s, FALSE)", [pattern], output_field=BooleanField()))
         locator |= Q(
             RawSQL(
-                f"(COALESCE({table}.{field}::text ~ %s, FALSE) OR COALESCE({table}.{field}::text ~ %s, FALSE))",
-                [pattern, points],
+                f"COALESCE({table}.{field}::text ~ %s, FALSE)",
+                [points],
                 output_field=BooleanField(),
             )
         )
