@@ -1,4 +1,4 @@
-"""Two full-name source proofs: fill only own syllabi; never repair course/journal FKs."""
+"""Four fixed own-source proofs: fill only syllabi; never repair course/journal FKs."""
 
 import hashlib
 import html
@@ -64,18 +64,72 @@ def spec_for(row):
         allowed_owners=(row["author_id"],),
         batch_prefix="namesrc-",
         label="Pinned full-name own syllabus",
-        authority="User-authorized current migration approval; legacy approval is not asserted. Only the two pinned raw journal catalogue mismatches are accepted: explicit full custom course name, own source subject/author, exact group/term, direct source pointer and official contact hours/credit agree. No journal or course metadata is changed.",
+        authority="User-authorized current migration approval; legacy approval is not asserted. Only four pinned raw journal catalogue mismatches are accepted: exact full custom title or the pinned official DOCX full-course option with independently verified aggregate/per-group hours, own source subject/author, exact group/term and direct source pointer agree. No journal or course metadata is changed.",
         note="Müəllifin tam jurnal adı, birbaşa mənbə sillabusu və rəsmi yükü ilə təsdiqlənmiş öz sillabusu bərpa olunub.",
         group_id=row["group_id"],
         contact_hours=(units["lecture"], units["seminar"], 0, units["lab"]),
     )
 
 
+def _official_title(entry, row):
+    proof = entry["proof"]
+    items = proof["official_row"]["nonpersonal_cells"]
+    cells = {str(item["column"]): item["text"] for item in items}
+    if (
+        proof["official_docx_sha256"] != row["official_docx_sha256"]
+        or proof["official_row"]["table_0based"] != 0
+        or proof["official_row"]["row_1based"] != 17
+        or normalized(proof["official_full_course_title"]) != normalized(row["source_course_title"])
+        or proof["raw_subject_options"] != row["official_subject_options"]
+        or cells.get("2") != row["official_subject_options"]
+    ):
+        raise RestoreError("official_source_course_title_scope")
+    # The source's printed45 minus lecture15 and zero unrelated hours uniquely
+    # verifies seminar30 = two15h contacts; it does not amend the live workload.
+    arithmetic = proof["arithmetic"]
+    if (
+        cells.get("4") != "15"
+        or cells.get("5") != "15+2"
+        or cells.get("10") != "45"
+        or any(cells.get(str(index), "") not in ("", "0") for index in (*range(6, 10), *range(11, 23)))
+        or tuple(
+            arithmetic[key]
+            for key in (
+                "lecture_total",
+                "printed_fall_total",
+                "other_fall_hours",
+                "seminar_total",
+                "seminar_contact_unit",
+                "seminar_contact_multiplier",
+            )
+        )
+        != (15, 45, 0, 30, 15, 2)
+        or (row["source_plan_units"], row["row_totals"], row["subgroup_count"], row["hours"], row["credits"])
+        != ({"lecture": 15, "seminar": 15, "lab": 0}, {"lecture": 15, "seminar": 30, "lab": 0}, 2, 30, "3")
+    ):
+        raise RestoreError("official_source_aggregate_per_group_hours_scope")
+    if (
+        len(cells) != len(items)
+        or any(cells.get(key) != value for key, value in row["official_columns"].items())
+        or core.digest(proof) != row["official_proof_digest"]
+    ):
+        raise RestoreError("pinned_official_source_proof_changed")
+
+
 def _source(entry, row):
     source, journal, lesson = entry["source"], entry["source_journal"], entry["source_lesson"]
     suffix = " - (2026/2027 payız)"
     title = normalized(journal["name"])
-    if not title.endswith(suffix) or title[: -len(suffix)].strip() != normalized(row["source_course_title"]):
+    authority = row.get("title_authority", "explicit_full_custom_journal_name")
+    if authority == "official_docx_full_course_with_verified_aggregate_hours":
+        if journal["name"] != row["source_journal_name"] or not title.endswith(suffix):
+            raise RestoreError("source_group_journal_name_scope")
+        _official_title(entry, row)
+    elif (
+        authority != "explicit_full_custom_journal_name"
+        or not title.endswith(suffix)
+        or title[: -len(suffix)].strip() != normalized(row["source_course_title"])
+    ):
         raise RestoreError("source_full_custom_course_name_scope")
     if normalized(lesson["name"]) != normalized(row["source_course_title"]):
         raise RestoreError("source_lesson_full_name_scope")

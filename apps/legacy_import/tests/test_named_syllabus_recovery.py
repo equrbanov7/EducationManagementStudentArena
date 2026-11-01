@@ -35,58 +35,76 @@ class NamedSyllabusRecoveryTests(TestCase):
         self.rows, self.targets, self.authors = [], [], []
         self.payload = {"format": recovery.FORMAT, "entries": {}}
         for index, original in enumerate(recovery.ROWS):
-            pinned = copy.deepcopy(original)
-            author = self.teacher if index == 0 else get_user_model().objects.create_user("named-second-author")
-            activate_member(self.org, author, "snapshot_teacher", permissions=TEACHER_PERMS)
-            UserProfile.objects.filter(user=author).update(organization=self.org, access_state="active")
-            title = f"Named course {'I' if index == 0 else 'II'}"
-            subject = Subject.objects.create(organization=self.org, code=pinned["subject_code"], name=title)
-            groups = [
-                OrgUnit.objects.create(
-                    organization=self.org,
-                    name=f"Named {index}-{n}",
-                    slug=f"named-{index}-{n}",
-                    unit_type="group",
-                    parent=self.stack["specialty"],
-                )
-                for n in range(3)
-            ]
-            stack = {**self.stack, "subject": subject, "group": groups[0]}
-            workload = make_row(
-                self.task,
-                stack,
-                lecture_total=pinned["row_totals"]["lecture"],
-                seminar_total=pinned["row_totals"]["seminar"],
-            )
-            for key, value in {
-                **{k + "_plan": v for k, v in pinned["source_plan_units"].items()},
-                "credits": pinned["credits"],
-                "degree_level": pinned["degree_level"],
-                "education_form": pinned["education_form"],
-                "total_hours": pinned["row_total_hours"],
-                "union_count": pinned["union_count"],
-                "subgroup_count": pinned["subgroup_count"],
-            }.items():
-                setattr(workload, key, value)
-            workload.save()
-            workload.groups.set(groups)
-            for allocation in pinned["assignments"]:
-                TeacherAssignment.objects.create(
-                    organization=self.org,
-                    row=workload,
-                    teacher=author,
-                    activity=allocation["activity"],
-                    hours=allocation["hours"],
-                    is_hourly_paid=allocation["is_hourly_paid"],
-                )
-            offering = CourseOffering.objects.create(
+            self._target_fixture(index, copy.deepcopy(original))
+        self.addCleanup(patch.stopall)
+        patch.object(recovery, "ROWS", tuple(self.rows)).start()
+        patch.object(recovery.timezone, "localdate", return_value=self.stack["period"].start_date).start()
+
+    def _context_fixture(self, index, pinned):
+        if index == 3:
+            return self.authors[2], self.targets[2].subject, self.shared_groups, self.shared_workload
+        author = self.teacher if index == 0 else get_user_model().objects.create_user(f"named-author-{index}")
+        activate_member(self.org, author, "snapshot_teacher", permissions=TEACHER_PERMS)
+        UserProfile.objects.filter(user=author).update(organization=self.org, access_state="active")
+        subject = Subject.objects.create(
+            organization=self.org, code=pinned["subject_code"], name=f"Named course {('I', 'II', 'III')[index]}"
+        )
+        groups = [
+            OrgUnit.objects.create(
                 organization=self.org,
-                subject=subject,
-                period=self.stack["period"],
-                group=groups[0],
-                instructor=author,
-                lesson_hours=pinned["hours"],
+                name=f"Named {index}-{n}",
+                slug=f"named-{index}-{n}",
+                unit_type="group",
+                parent=self.stack["specialty"],
             )
+            for n in range(len(pinned["row_group_ids"]))
+        ]
+        workload = make_row(
+            self.task,
+            {**self.stack, "subject": subject, "group": groups[0]},
+            lecture_total=pinned["row_totals"]["lecture"],
+            seminar_total=pinned["row_totals"]["seminar"],
+        )
+        for key, value in {
+            **{k + "_plan": v for k, v in pinned["source_plan_units"].items()},
+            "credits": pinned["credits"],
+            "degree_level": pinned["degree_level"],
+            "education_form": pinned["education_form"],
+            "total_hours": pinned["row_total_hours"],
+            "union_count": pinned["union_count"],
+            "subgroup_count": pinned["subgroup_count"],
+        }.items():
+            setattr(workload, key, value)
+        workload.save()
+        workload.groups.set(groups)
+        for allocation in pinned["assignments"]:
+            TeacherAssignment.objects.create(
+                organization=self.org,
+                row=workload,
+                teacher=author,
+                activity=allocation["activity"],
+                hours=allocation["hours"],
+                is_hourly_paid=allocation["is_hourly_paid"],
+            )
+        if index == 2:
+            self.shared_groups, self.shared_workload = groups, workload
+        return author, subject, groups, workload
+
+    def _target_fixture(self, index, pinned):
+        author, subject, groups, workload = self._context_fixture(index, pinned)
+        title = subject.name
+        group = groups[1] if index == 3 else groups[0]
+        offering = CourseOffering.objects.create(
+            organization=self.org,
+            subject=subject,
+            period=self.stack["period"],
+            group=group,
+            instructor=author,
+            lesson_hours=pinned["hours"],
+        )
+        if index == 3:
+            source = copy.deepcopy(self.payload["entries"][self.rows[2]["offering_id"]]["source"])
+        else:
             source = plan()["source"]
             source.update(
                 id=pinned["source_syllabus_id"],
@@ -111,53 +129,72 @@ class NamedSyllabusRecoveryTests(TestCase):
             source["sections"]["sillabus_serbest_is"] = [
                 [200 + n, f"Full selfwork topic {n}"] for n in range(index + 3)
             ]
-            journal = dict(
-                id=pinned["journal_id"],
-                teacher_id=pinned["source_author"],
-                lesson_id=pinned["journal_lesson"],
-                sillabus_id=source["id"],
-                name=title + " - (2026/2027 Payız)",
-                semestr=14,
-                active=1,
-                fake=0,
-                sonra_sil=0,
-                fenn_saati=pinned["hours"],
-                kredit=pinned["credits"],
-                groups_id=json.dumps(pinned["source_group_ids"]),
-            )
-            lesson = {"id": source["lesson_id"], "name": title}
-            sections, _codes = recovery.build_section_data(recovery.document_for(source))
-            pinned.update(
-                offering_id=str(offering.pk),
-                row_id=str(workload.pk),
-                task_id=str(self.task.pk),
-                author_id=author.pk,
-                subject_id=str(subject.pk),
-                group_id=str(groups[0].pk),
-                row_group_ids=sorted(str(g.pk) for g in groups),
-                period_id=str(offering.period_id),
-                uniqid=source["uniqid"],
-                source_course_title=title,
-                source_journal_name=journal["name"],
-                source_digest=recovery.core.digest(source),
-                journal_digest=recovery.core.digest(journal),
-                source_lesson_digest=recovery.core.digest(lesson),
-                selfwork_rows=index + 3,
-                selfwork_topics=index + 3,
-                converted_content_digest=recovery.core.digest(sections),
-                assignments=[{**a, "teacher_id": author.pk} for a in pinned["assignments"]],
-            )
-            self.payload["entries"][str(offering.pk)] = {
-                "source": source,
-                "source_journal": journal,
-                "source_lesson": lesson,
+        official = pinned.get("title_authority") == "official_docx_full_course_with_verified_aggregate_hours"
+        journal = dict(
+            id=pinned["journal_id"],
+            teacher_id=pinned["source_author"],
+            lesson_id=pinned["journal_lesson"],
+            sillabus_id=source["id"],
+            name=(f"Group-coded journal {index}" if official else title) + " - (2026/2027 Payız)",
+            semestr=14,
+            active=1,
+            fake=0,
+            sonra_sil=0,
+            fenn_saati=pinned["hours"],
+            kredit=pinned["credits"],
+            groups_id=json.dumps(pinned["source_group_ids"]),
+        )
+        lesson = {"id": source["lesson_id"], "name": title}
+        sections, _codes = recovery.build_section_data(recovery.document_for(source))
+        pinned.update(
+            offering_id=str(offering.pk),
+            row_id=str(workload.pk),
+            task_id=str(self.task.pk),
+            author_id=author.pk,
+            subject_id=str(subject.pk),
+            group_id=str(group.pk),
+            row_group_ids=sorted(str(g.pk) for g in groups),
+            period_id=str(offering.period_id),
+            uniqid=source["uniqid"],
+            source_course_title=title,
+            source_journal_name=journal["name"],
+            source_digest=recovery.core.digest(source),
+            journal_digest=recovery.core.digest(journal),
+            source_lesson_digest=recovery.core.digest(lesson),
+            selfwork_rows=len(source["sections"]["sillabus_serbest_is"]),
+            selfwork_topics=len(sections["self"]["topics"]),
+            converted_content_digest=recovery.core.digest(sections),
+            assignments=[{**a, "teacher_id": author.pk} for a in pinned["assignments"]],
+        )
+        entry = {"source": source, "source_journal": journal, "source_lesson": lesson}
+        if official:
+            options = f"ÜFS II blok:\n1. {title} +\n2. Other course"
+            pinned["official_subject_options"] = options
+            columns = {**pinned["official_columns"], "2": options}
+            proof = {
+                "official_docx_sha256": pinned["official_docx_sha256"],
+                "official_full_course_title": title,
+                "raw_subject_options": options,
+                "official_row": {
+                    "table_0based": 0,
+                    "row_1based": 17,
+                    "nonpersonal_cells": [{"column": int(k), "text": v} for k, v in columns.items()],
+                },
+                "arithmetic": {
+                    "lecture_total": 15,
+                    "printed_fall_total": 45,
+                    "other_fall_hours": 0,
+                    "seminar_total": 30,
+                    "seminar_contact_unit": 15,
+                    "seminar_contact_multiplier": 2,
+                },
             }
-            self.rows.append(pinned)
-            self.targets.append(offering)
-            self.authors.append(author)
-        self.addCleanup(patch.stopall)
-        patch.object(recovery, "ROWS", tuple(self.rows)).start()
-        patch.object(recovery.timezone, "localdate", return_value=self.stack["period"].start_date).start()
+            pinned["official_proof_digest"] = recovery.core.digest(proof)
+            entry["proof"] = proof
+        self.payload["entries"][str(offering.pk)] = entry
+        self.rows.append(pinned)
+        self.targets.append(offering)
+        self.authors.append(author)
 
     def command(self, *, apply=False, undo="", data=None, org=None):
         raw = json.dumps(data or self.payload, ensure_ascii=False, sort_keys=True).encode()
@@ -176,13 +213,15 @@ class NamedSyllabusRecoveryTests(TestCase):
     def own(self):
         return Syllabus.objects.filter(offering_id__in=[o.pk for o in self.targets])
 
-    def test_two_target_dry_apply_full_selfwork_repeat_and_exact_id_archive_undo(self):
+    def test_four_target_three_source_dry_apply_full_selfwork_repeat_and_exact_id_archive_undo(self):
+        self.assertEqual(len({row["source_digest"] for row in self.rows}), 3)
+        self.assertEqual(self.rows[2]["row_id"], self.rows[3]["row_id"])
         before = [recovery.core.metadata_digest(o) for o in self.targets]
-        self.assertIn("syllabi_created=2", self.command())
+        self.assertIn("syllabi_created=4", self.command())
         self.assertFalse(self.own().exists())
         output = self.command(apply=True)
         batch = output.split("batch=")[1].strip()
-        self.assertIn("selfwork_restored=7", output)
+        self.assertIn("selfwork_restored=17", output)
         ids = set(self.own().values_list("pk", flat=True))
         for row, offering in zip(self.rows, self.targets):
             syllabus = self.own().get(offering=offering)
@@ -194,9 +233,9 @@ class NamedSyllabusRecoveryTests(TestCase):
             self.assertEqual(recovery.core.digest(sections), row["converted_content_digest"])
             offering.refresh_from_db()
         self.assertEqual(before, [recovery.core.metadata_digest(o) for o in self.targets])
-        self.assertIn("already_present=2", self.command(apply=True))
+        self.assertIn("already_present=4", self.command(apply=True))
         self.assertEqual(ids, set(self.own().values_list("pk", flat=True)))
-        self.assertIn("syllabi_retired=2", self.command(apply=True, undo=batch))
+        self.assertIn("syllabi_retired=4", self.command(apply=True, undo=batch))
         self.assertEqual(ids, set(self.own().values_list("pk", flat=True)))
         self.assertFalse(self.own().filter(is_active=True).exists())
         self.assertIn("already_undone=1", self.command(apply=True, undo=batch))
@@ -232,13 +271,76 @@ class NamedSyllabusRecoveryTests(TestCase):
             self.command(apply=True, data=data)
         self.assertFalse(self.own().exists())
 
-    def test_existing_draft_on_second_target_rolls_back_first_import(self):
+    def test_official_source_unrelated_hours_aggregate_unit_multiplier_and_credit_cannot_drift(self):
+        oid = self.rows[2]["offering_id"]
+        for column, value in ((4, "16"), (5, "15+3"), (6, "1"), (7, "2"), (10, "46"), (11, "1")):
+            data = copy.deepcopy(self.payload)
+            cells = data["entries"][oid]["proof"]["official_row"]["nonpersonal_cells"]
+            next(cell for cell in cells if cell["column"] == column)["text"] = value
+            with self.assertRaisesMessage(CommandError, "official_source_aggregate_per_group_hours_scope"):
+                self.command(apply=True, data=data)
+        for key, value in (
+            ("seminar_total", 29),
+            ("seminar_contact_unit", 14),
+            ("seminar_contact_multiplier", 1),
+            ("other_fall_hours", 1),
+        ):
+            data = copy.deepcopy(self.payload)
+            data["entries"][oid]["proof"]["arithmetic"][key] = value
+            with self.assertRaisesMessage(CommandError, "official_source_aggregate_per_group_hours_scope"):
+                self.command(apply=True, data=data)
+        data = copy.deepcopy(self.payload)
+        data["entries"][oid]["source_journal"]["kredit"] = "4"
+        with self.assertRaisesMessage(CommandError, "journal_source_scope"):
+            self.command(apply=True, data=data)
+        self.assertFalse(self.own().exists())
+
+    def test_official_full_course_option_and_group_header_remain_fixed(self):
+        oid = self.rows[2]["offering_id"]
+        for key, value in (
+            ("official_docx_sha256", "0" * 64),
+            ("official_full_course_title", "Other generic course"),
+            ("raw_subject_options", "Other II course"),
+        ):
+            data = copy.deepcopy(self.payload)
+            data["entries"][oid]["proof"][key] = value
+            with self.assertRaisesMessage(CommandError, "official_source_course_title_scope"):
+                self.command(apply=True, data=data)
+        data = copy.deepcopy(self.payload)
+        data["entries"][oid]["source_journal"]["name"] = self.rows[2]["source_course_title"] + " - (2026/2027 Payız)"
+        with self.assertRaisesMessage(CommandError, "source_group_journal_name_scope"):
+            self.command(apply=True, data=data)
+        self.assertFalse(self.own().exists())
+
+    def test_official_live_per_group_hours_multiplier_and_assignment_are_pinned(self):
+        row = recovery.core.model("workload.TeachingTaskRow").objects.get(pk=self.rows[2]["row_id"])
+        for key, value in (("seminar_plan", 14), ("subgroup_count", 1)):
+            original = getattr(row, key)
+            setattr(row, key, value)
+            row.save(update_fields=[key])
+            with self.assertRaisesMessage(CommandError, "live_official_workload_scope_changed"):
+                self.command(apply=True)
+            setattr(row, key, original)
+            row.save(update_fields=[key])
+        target = self.targets[2]
+        target.lesson_hours = 31
+        target.save(update_fields=["lesson_hours"])
+        with self.assertRaisesMessage(CommandError, "live_course_title_or_contact_hours_changed"):
+            self.command(apply=True)
+        target.lesson_hours = 30
+        target.save(update_fields=["lesson_hours"])
+        TeacherAssignment.objects.filter(row=row, activity="seminar").update(hours=29)
+        with self.assertRaisesMessage(CommandError, "live_workload_assignment_changed"):
+            self.command(apply=True)
+        self.assertFalse(self.own().exists())
+
+    def test_existing_draft_on_fourth_target_rolls_back_first_three_imports(self):
         existing = Syllabus.objects.create(
             organization=self.org,
-            offering=self.targets[1],
-            subject=self.targets[1].subject,
-            period=self.targets[1].period,
-            author=self.authors[1],
+            offering=self.targets[-1],
+            subject=self.targets[-1].subject,
+            period=self.targets[-1].period,
+            author=self.authors[-1],
         )
         with self.assertRaisesMessage(CommandError, "existing_syllabus_no_overwrite"):
             self.command(apply=True)
@@ -303,17 +405,21 @@ class NamedSyllabusRecoveryTests(TestCase):
         with self.assertRaisesRegex(CommandError, "author_(identity_scope|permission_missing)"):
             self.command(apply=True)
 
-    def test_second_source_new_share_blocks_entire_undo(self):
+    def test_fourth_target_new_share_blocks_entire_undo(self):
         batch = self.command(apply=True).split("batch=")[1].strip()
-        target = self.targets[1]
+        target = self.targets[-1]
         syllabus = self.own().get(offering=target)
         group = OrgUnit.objects.create(
             organization=self.org, name="New consumer", slug="named-new-consumer", unit_type="group"
         )
         consumer = CourseOffering.objects.create(
-            organization=self.org, subject=target.subject, period=target.period, group=group, instructor=self.authors[1]
+            organization=self.org,
+            subject=target.subject,
+            period=target.period,
+            group=group,
+            instructor=self.authors[-1],
         )
         link_legacy_share(syllabus=syllabus, offering=consumer, user=self.actor)
         with self.assertRaisesMessage(CommandError, "undo_content_or_usage_changed"):
             self.command(apply=True, undo=batch)
-        self.assertEqual(self.own().filter(is_active=True, approved_version__status="approved").count(), 2)
+        self.assertEqual(self.own().filter(is_active=True, approved_version__status="approved").count(), 4)
