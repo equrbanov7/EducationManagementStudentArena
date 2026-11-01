@@ -21,7 +21,16 @@ from .limits import query_budget
 
 
 def capture(username, batch):
+    return _capture(username, batch)
+
+
+def _capture(username, batch, *, _forensic=False):
     selection = spec.batch_spec(batch)
+    if _forensic:
+        from ..syllabus_forensic_spec import BATCHES
+
+        if batch not in BATCHES or len(selection["offerings"]) != 20:
+            raise SnapshotError("syllabus_root_scope_invalid")
     if connection.vendor != "postgresql" or connection.in_atomic_block:
         raise SnapshotError("fresh_postgresql_transaction_required")
     with transaction.atomic():
@@ -49,7 +58,7 @@ def capture(username, batch):
             if actor is None:
                 raise SnapshotError("active_fixed_tenant_superuser_required")
             apply_rls_request_context(user_id=actor, org_id=spec.ORG, bypass=False, local=True)
-            data = collect(selection)
+            data = collect(selection, _forensic=True) if _forensic else collect(selection)
             with connection.cursor() as cursor:
                 cursor.execute("SHOW transaction_read_only")
                 if cursor.fetchone()[0] != "on":
@@ -82,6 +91,17 @@ def capture(username, batch):
                 "counts": {key: len(rows) for key, rows in data.items()},
                 "schema_fields": {key: sorted({field for row in rows for field in row}) for key, rows in data.items()},
             }
+            if _forensic:
+                from ..syllabus_forensic_spec import FORMAT
+
+                snapshot["format"] = FORMAT
+                snapshot["coverage"].update(
+                    closure_complete=False,
+                    lineage_visited_complete=True,
+                    lineage_integrity=False,
+                    normal_content_export_usable=False,
+                    cycle_affected_root_count=sum(r["lineage_cycle_affected"] for r in data["held_roots"]),
+                )
             if len(json.dumps(snapshot, cls=DjangoJSONEncoder, ensure_ascii=False).encode()) > spec.MAX_OUTPUT_BYTES:
                 raise SnapshotError("syllabus_output_byte_budget_exceeded")
             return snapshot

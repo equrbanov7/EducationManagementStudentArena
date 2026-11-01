@@ -174,7 +174,35 @@ def validate_scalar(key, value):
         fail()
 
 
+def reject_cycles(data):
+    for objects, pointer in (
+        ({row["id"]: row for row in data["versions"]}, "source_version_id"),
+        ({row["id"]: row for row in data["syllabi"] if row["body_included"]}, "reused_from_id"),
+    ):
+        for start in objects:
+            current, seen = start, set()
+            while current in objects:
+                if current in seen:
+                    fail()
+                seen.add(current)
+                current = objects[current][pointer]
+
+
 def validate(payload):
+    return _validate(payload)
+
+
+def _validate(payload, *, _forensic=False):
+    schemas = SCHEMAS
+    forensic = None
+    if _forensic:
+        import importlib.util
+
+        path = Path(__file__).resolve().parents[2] / "apps/workload/services/syllabus_forensic_spec.py"
+        definition = importlib.util.spec_from_file_location("fixed_body_forensics", path)
+        forensic = importlib.util.module_from_spec(definition)
+        definition.loader.exec_module(forensic)
+        schemas = {**SCHEMAS, **forensic.SCHEMAS}
     if not isinstance(payload, dict):
         fail()
     if len(json.dumps(payload, ensure_ascii=False).encode()) > MAX_BYTES:
@@ -188,7 +216,7 @@ def validate(payload):
         payload.get("academic_year"),
         payload.get("period_id"),
         payload.get("registry_sha256"),
-    ) != (FORMAT, ORG, "2026/2027", PERIOD, REGISTRY_SHA):
+    ) != (forensic.FORMAT if _forensic else FORMAT, ORG, "2026/2027", PERIOD, REGISTRY_SHA):
         fail()
     if (
         payload["read_only"] is not True
@@ -197,11 +225,13 @@ def validate(payload):
         or not re.fullmatch(r"chair-cells-\d{3}", payload["batch"])
     ):
         fail()
+    if _forensic and payload["batch"] not in forensic.BATCHES:
+        fail()
     encoded = REGISTRY_PATH.read_bytes()
     if hashlib.sha256(encoded).hexdigest() != REGISTRY_SHA:
         fail()
     expected = json.loads(encoded)["batches"].get(payload["batch"])
-    if expected != payload["selection"]:
+    if expected != payload["selection"] or (_forensic and len(expected["offerings"]) != 20):
         fail()
     validate_scalar("captured_at", payload["captured_at"])
     validate_scalar("actor_id", payload["actor_id"])
@@ -210,11 +240,11 @@ def validate(payload):
     data = payload["data"]
     if (
         not isinstance(data, dict)
-        or set(data) != set(SCHEMAS)
+        or set(data) != set(schemas)
         or not isinstance(payload["counts"], dict)
-        or set(payload["counts"]) != set(SCHEMAS)
+        or set(payload["counts"]) != set(schemas)
         or not isinstance(payload["schema_fields"], dict)
-        or set(payload["schema_fields"]) != set(SCHEMAS)
+        or set(payload["schema_fields"]) != set(schemas)
     ):
         fail()
     caps = {
@@ -228,6 +258,8 @@ def validate(payload):
         "cohorts": 25,
         "ledger": 5000,
     }
+    if _forensic:
+        caps.update(lineage_edges=4000, lineage_cycles=800, held_roots=25)
     if any(not isinstance(v, list) for v in data.values()) or sum(len(v) for v in data.values()) > 110000:
         fail()
     for table, values in data.items():
@@ -238,10 +270,20 @@ def validate(payload):
             or payload["counts"][table] != len(values)
         ):
             fail()
-        if payload["schema_fields"][table] != (sorted(SCHEMAS[table]) if values else []):
+        if payload["schema_fields"][table] != (sorted(schemas[table]) if values else []):
             fail()
         for row in values:
-            if not isinstance(row, dict) or set(row) != SCHEMAS[table] or row["organization_id"] != ORG:
+            if _forensic and table in forensic.SCHEMAS:
+                if not isinstance(row, dict) or set(row) != schemas[table]:
+                    fail()
+                if table == "held_roots" and (
+                    row["organization_id"] != ORG
+                    or not is_uuid(row["offering_id"])
+                    or type(row["lineage_cycle_affected"]) is not bool
+                ):
+                    fail()
+                continue
+            if not isinstance(row, dict) or set(row) != schemas[table] or row["organization_id"] != ORG:
                 fail()
             if "id" in row and not is_uuid(row["id"]):
                 fail()
@@ -266,7 +308,15 @@ def validate(payload):
         )
     ):
         fail()
-    if coverage != {
+    if _forensic and (
+        any(
+            type(coverage.get(key)) is not bool
+            for key in ("lineage_visited_complete", "lineage_integrity", "normal_content_export_usable")
+        )
+        or type(coverage.get("cycle_affected_root_count")) is not int
+    ):
+        fail()
+    expected_coverage = {
         "lookup_complete": True,
         "closure_complete": True,
         "truncated": False,
@@ -277,7 +327,16 @@ def validate(payload):
         "course_context_count": len(data["offerings"]),
         "absence_claim": False,
         "automatic_content_verdict": False,
-    }:
+    }
+    if _forensic:
+        expected_coverage.update(
+            closure_complete=False,
+            lineage_visited_complete=True,
+            lineage_integrity=False,
+            normal_content_export_usable=False,
+            cycle_affected_root_count=sum(r["lineage_cycle_affected"] is True for r in data["held_roots"]),
+        )
+    if coverage != expected_coverage:
         fail()
     offering_ids = {r["id"] for r in data["offerings"]}
     syllabus_ids = {r["id"] for r in data["syllabi"]}
@@ -335,4 +394,18 @@ def validate(payload):
             r["offering_id"] == share["offering_id"] and r["selected_syllabus_id"] == share["syllabus_id"]
             for r in data["roots"]
         ):
+            fail()
+
+    if not _forensic:
+        reject_cycles(data)
+    if _forensic:
+        import importlib.util
+
+        definition = importlib.util.spec_from_file_location(
+            "fixed_lineage_graph", Path(__file__).with_name("syllabus_lineage_scope.py")
+        )
+        graph_module = importlib.util.module_from_spec(definition)
+        definition.loader.exec_module(graph_module)
+        expected_analysis = forensic.analysis(data, graph_builder=graph_module.contract.graph)
+        if any(data[table] != rows for table, rows in expected_analysis.items()):
             fail()

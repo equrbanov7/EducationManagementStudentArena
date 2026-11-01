@@ -34,7 +34,7 @@ def exact_get(label, ids, limit):
     return objects
 
 
-def closure(syllabi, versions):
+def closure(syllabi, versions, *, _forensic=False):
     """Only referenced current/approved/source ancestry; visited IDs terminate legitimate forks."""
     sy, ve = {str(s.pk): s for s in syllabi}, {str(v.pk): v for v in versions}
     for _ in range(spec.MAX_CLOSURE_DEPTH):
@@ -66,7 +66,9 @@ def closure(syllabi, versions):
                     seen, current = set(), start
                     while current in objects:
                         if current in seen:
-                            raise SnapshotError("syllabus_lineage_cycle")
+                            if not _forensic:
+                                raise SnapshotError("syllabus_lineage_cycle")
+                            break
                         seen.add(current)
                         target = getattr(objects[current], attr)
                         current = str(target) if target else None
@@ -122,7 +124,12 @@ def ledger(offering_ids, subject_ids, author_ids, syllabus_ids, version_ids, sec
     ]
 
 
-def collect(selection):
+def collect(selection, *, _forensic=False):
+    if _forensic:
+        from ..syllabus_forensic_spec import BATCHES
+
+        if len(selection["offerings"]) != 20 or not any(selection == spec.batch_spec(batch) for batch in BATCHES):
+            raise SnapshotError("syllabus_root_scope_invalid")
     selected = {row["id"] for row in selection["offerings"]}
     if not 1 <= len(selected) <= spec.MAX_COURSES or len(selected) != len(selection["offerings"]):
         raise SnapshotError("syllabus_root_scope_invalid")
@@ -180,7 +187,7 @@ def collect(selection):
                 ),
             }
         )
-    syllabi, versions = closure([*owned, *chosen], effective)
+    syllabi, versions = closure([*owned, *chosen], effective, _forensic=_forensic)
     all_syllabi = {str(s.pk): s for s in [*candidates, *syllabi.values()]}
     if len(all_syllabi) > spec.MAX_SYLLABI:
         raise SnapshotError("syllabus_candidate_budget_exceeded")
@@ -270,6 +277,10 @@ def collect(selection):
         {s.pk for s in sections},
         {o.group_id for o in offerings if o.group_id},
     )
+    if _forensic:
+        from ..syllabus_forensic_spec import analysis
+
+        data.update(analysis(data))
     if sum(map(len, data.values())) > spec.MAX_ROWS:
         raise SnapshotError("syllabus_total_row_budget_exceeded")
     return data

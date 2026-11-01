@@ -57,6 +57,9 @@ INTENTIONAL_EXEMPTIONS = {
     # transaction; no outer worker wrapper is possible. Both RLS modes and DB-level
     # write rejection: apps/workload/tests/test_syllabus_content_export.py.
     "apps/workload/management/commands/export_wcu_syllabus_content.py",
+    # Fixed027/029 forensic content uses the same fresh RR READ ONLY capture;
+    # outer worker atomic would prevent setting its isolation/read-only boundary.
+    "apps/workload/management/commands/export_wcu_syllabus_forensic.py",
     # Fixed027 pointer-only diagnostic independently owns fresh tenant RR READ ONLY;
     # actual DB write rejection, RLS modes and strict normal-cycle rejection tested.
     "apps/workload/management/commands/export_wcu_syllabus_lineage_diagnostic.py",
