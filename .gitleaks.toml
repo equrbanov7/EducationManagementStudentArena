@@ -29,6 +29,13 @@ regexes = [
     # public SubjectPublicKeyInfo DER. This is an integrity pin, not a credential.
     '''^f21b002d94fdd65fb346e557e6eb85109f60bda3afa8d8c5a2a14e4b9fc922bf$''',
 
+    # Recomputed ORM field/reverse-relation SHA-256 pins for
+    # appeals.AnswerKeyCorrection and appeals.KeyCorrectionCredit in
+    # reviewed_two_catalog_schema_pins.json. "Key" in model names triggers
+    # generic-api-key; these two exact schema digests are not credentials.
+    '''^a1d780887edbd822a8d4f20a2677c8fbdac3e233d82d7577596358b3746fe2a8$''',
+    '''^4232fee3c11f0e4b23da466f6c10bf2c6207dc6b1609e829b6149b218c741bb4$''',
+
     # Django SECRET_KEY placeholders used in CI jobs
     '''^ci-build-placeholder-not-for-production$''',
     '''^ci-smoke-secret-key-not-for-production-use$''',
