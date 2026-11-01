@@ -20,10 +20,10 @@ def result(status="dry_run"):
         "status": status,
         "baseline": "a" * 64,
         "receipt": None,
-        "cases": 1,
-        "human_drafts_preserved": 1,
-        "versions_created": int(status == "applied"),
-        "versions_archived": int(status == "undone"),
+        "cases": 2,
+        "human_drafts_preserved": 2,
+        "versions_created": 2 * int(status == "applied"),
+        "versions_archived": 2 * int(status == "undone"),
     }
     if status != "dry_run":
         value.update(receipt="11111111-2222-4333-8444-555555555555", after_baseline="b" * 64)
@@ -47,8 +47,8 @@ class BlankDraftWorkflowTests(unittest.TestCase):
         self.assertIn("--apply", args)
 
     def test_summary_rejects_body_fields_wrong_scope_and_mode(self):
-        self.assertEqual(runner.summary(json.dumps(result()), apply=False, undo=False)["cases"], 1)
-        for extra in ({"body": "private"}, {"cases": 2}, {"human_drafts_preserved": 0}, {"receipt": "unsafe"}):
+        self.assertEqual(runner.summary(json.dumps(result()), apply=False, undo=False)["cases"], 2)
+        for extra in ({"body": "private"}, {"cases": 3}, {"human_drafts_preserved": 0}, {"receipt": "unsafe"}):
             value = result()
             value.update(extra)
             with self.assertRaises(ValueError):

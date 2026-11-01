@@ -1,4 +1,4 @@
-name: Reviewed source syllabus beside fixed blank draft
+name: Reviewed own-source syllabi beside preserved drafts
 on:
   workflow_dispatch:
     inputs:

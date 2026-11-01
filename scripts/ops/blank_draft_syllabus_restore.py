@@ -1,4 +1,4 @@
-"""Fixed source syllabus append beside a preserved blank draft; no generic scope."""
+"""Fixed own-source syllabi append beside two preserved human drafts; no generic scope."""
 
 import json
 import os
@@ -12,10 +12,10 @@ from four_cell_history_export import diagnostics
 from journal_export_pack import sha
 from reviewed_followup import CONTAINER, command, verify_head
 
-TAG = "blank-draft-syllabi-20261101"
-ASSET = "blank-draft-syllabi-source.json.enc"
-SOURCE_SHA = "e08e49e4574245c2bb5216a95adaae261fd6ec87a9d7ffd98758ae2761a293f9"
-CIPHER_SHA = "ab6ba6e839c3a45b6ac821ca95cb86cb458b6fff976119b98235ee2152bf80d1"
+TAG = "blank-draft-syllabi-v2-20261101"
+ASSET = "blank-draft-syllabi-v2-source.json.enc"
+SOURCE_SHA = "fa399fb889a2f6758d201bd051e834f1d6b9c40970761e49a023ae48add3dccc"
+CIPHER_SHA = "1ec926499f3b862d84630087376b3f5ae5e11e3fb9ab9c9f405db6942052805c"
 REPO = "equrbanov7/EducationManagementStudentArena"
 HEX = r"[a-f0-9]{64}"
 UUID = r"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
@@ -84,11 +84,11 @@ def summary(raw, *, apply, undo):
         if key in value and (not isinstance(value[key], str) or not re.fullmatch(HEX, value[key])):
             raise ValueError("syllabus_summary_hash_required")
     for key in ("cases", "human_drafts_preserved", "versions_created", "versions_archived"):
-        if type(value[key]) is not int or value[key] not in (0, 1):
+        if type(value[key]) is not int or value[key] not in (0, 2):
             raise ValueError("syllabus_summary_count_required")
-    if value["cases"] != 1 or value["human_drafts_preserved"] != 1:
-        raise ValueError("single_preserved_draft_required")
-    expected_counts = (1, 0) if value["status"] == "applied" else (0, 1) if value["status"] == "undone" else (0, 0)
+    if value["cases"] != 2 or value["human_drafts_preserved"] != 2:
+        raise ValueError("two_preserved_drafts_required")
+    expected_counts = (2, 0) if value["status"] == "applied" else (0, 2) if value["status"] == "undone" else (0, 0)
     if (value["versions_created"], value["versions_archived"]) != expected_counts:
         raise ValueError("syllabus_operation_counts_changed")
     receipt = value["receipt"]
