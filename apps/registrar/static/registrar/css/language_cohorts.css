@@ -11,7 +11,7 @@
 .lc-create p { margin: 0; }
 .lc-create .errorlist { color: #b91c1c; grid-column: 1 / -1; }
 .lc-page input:not([type=checkbox]), .lc-page select { display: block; width: 100%; min-height: 42px; border: 1px solid #94a3b8; border-radius: 6px; padding: 8px; background: var(--card-bg, #fff); color: inherit; }
-.lc-page button { min-height: 42px; padding: 8px 16px; border: 0; border-radius: 6px; color: #fff; background: #1d4ed8; cursor: pointer; justify-self: start; }
+.lc-page button[type=submit] { min-height: 42px; padding: 8px 16px; border: 0; border-radius: 6px; color: #fff; background: #1d4ed8; cursor: pointer; justify-self: start; }
 .lc-page button:focus-visible, .lc-page summary:focus-visible, .lc-page a:focus-visible, .lc-scroll:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
 .lc-scroll { overflow-x: auto; margin-block: 16px; }
 .lc-page table { width: 100%; border-collapse: collapse; min-width: 520px; }

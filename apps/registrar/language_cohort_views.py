@@ -102,6 +102,16 @@ class CohortForm(forms.Form):
             .order_by("last_name", "first_name", "pk")
         )
 
+        for field in self.fields.values():
+            if isinstance(field.widget, forms.Select):
+                field.widget.attrs.update(
+                    {
+                        "class": "bootstrap-single-select__native",
+                        "data-bootstrap-select": "",
+                        "data-live-search": "true",
+                    }
+                )
+
 
 def _organization(request):
     org = getattr(request, "organization", None)

@@ -95,6 +95,34 @@ class LanguageCohortTests(_GuestRosterBase):
         response = self._client(self.teacher).get(reverse("registrar:language_cohort_detail", args=[cohort.pk]))
         self.assertEqual(response.status_code, 200)
 
+    def test_create_and_level_picker_selects_use_searchable_project_widgets(self):
+        from html.parser import HTMLParser
+
+        class Selects(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.attributes = []
+
+            def handle_starttag(self, tag, attrs):
+                if tag == "select":
+                    self.attributes.append(dict(attrs))
+
+        cohort = self.create()
+        client = self._client(self.coordinator)
+        for url in (
+            reverse("registrar:language_cohorts"),
+            reverse("registrar:language_cohort_detail", args=[cohort.pk]),
+        ):
+            response = client.get(url)
+            self.assertEqual(response.status_code, 200)
+            parser = Selects()
+            parser.feed(response.content.decode())
+            self.assertTrue(parser.attributes)
+            for attrs in parser.attributes:
+                self.assertIn("data-bootstrap-select", attrs)
+                self.assertEqual(attrs.get("data-live-search"), "true")
+                self.assertIn("bootstrap-single-select__native", attrs.get("class", ""))
+
     def test_teacher_and_out_of_scope_staff_cannot_create(self):
         for actor in (self.teacher, self.outsider):
             with self.assertRaises(PermissionDenied):
