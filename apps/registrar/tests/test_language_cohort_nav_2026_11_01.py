@@ -77,6 +77,33 @@ class LanguageCohortNavTests(_GuestRosterBase):
         self.assertNotIn(link, self._sidebar(self.plain_teacher))
         self.assertNotIn(link, self._sidebar(self.student))
 
+    def _render_journal_item(self, user, layout):
+        from django.template.loader import render_to_string
+        from django.test import RequestFactory
+
+        request = RequestFactory().get("/")
+        request.user = user
+        request.organization = self.org
+        return render_to_string(
+            "accounts/profile/sidebar/items/_my_journal.html",
+            {
+                "allowed_sections": {"my-journal"},
+                "role_capabilities": {"is_student": False},
+                "sidebar_layout": layout,
+                "profile_base_url": "/profile/",
+            },
+            request=request,
+        )
+
+    def test_roster_staff_on_the_compact_teacher_layout_still_gets_the_link_beside_the_journal(self):
+        """Tam akkordeonda bənd «Tədris şöbəsi»ndədir; kompakt müəllim düzümündə o qrup yoxdur —
+        roster əhatəli heyət keçidi itirməməlidir (review tapıntısı, 2026-11-01)."""
+        link = f'href="{reverse("registrar:language_cohorts")}"'
+        self.assertIn(link, self._render_journal_item(self.coordinator, "teacher"))
+        self.assertNotIn(link, self._render_journal_item(self.coordinator, "full"))
+        self.assertIn(link, self._render_journal_item(self.teacher, "full"))
+        self.assertNotIn(link, self._render_journal_item(self.plain_teacher, "teacher"))
+
     def test_nav_tag_is_computed_once_per_request(self):
         from django.template import Context, Template
         from django.test import RequestFactory

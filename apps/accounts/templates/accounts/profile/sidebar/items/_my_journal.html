@@ -24,5 +24,7 @@
     </a>
     {% endif %}
 </li>
-{% language_cohort_nav as lc_nav %}{% if lc_nav.teacher %}{% include "accounts/profile/sidebar/items/_language_cohorts.html" %}{% endif %}
+{% comment %}Səviyyə qrupları: roster əhatəsi olmayan müəllimdə həmişə burada; roster əhatəli heyətdə
+yalnız kompakt düzümdə (tam akkordeonda bənd «Tədris şöbəsi → Qruplar»-ın yanındadır — dublikat olmasın).{% endcomment %}
+{% language_cohort_nav as lc_nav %}{% if lc_nav.teacher or lc_nav.staff and sidebar_layout != "full" %}{% include "accounts/profile/sidebar/items/_language_cohorts.html" %}{% endif %}
 {% endif %}
