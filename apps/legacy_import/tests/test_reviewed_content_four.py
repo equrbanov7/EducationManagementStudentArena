@@ -496,3 +496,17 @@ class FourCellsTests(TestCase):
         self.assertIn("mode=undo", output.getvalue())
         self.assertIn("deleted_marks=4", output.getvalue())
         self.assertNotIn("PRIVATE", output.getvalue())
+
+    def test_active_access_state_cannot_override_deleted_or_blocked_profile(self):
+        from django.utils import timezone
+
+        user = get_user_model().objects.get(pk=next(iter(fixed.CASES.values()))[4])
+        profile = user.profile
+        for field, value in [("is_deleted", True), ("deleted_at", timezone.now()), ("blocked_at", timezone.now())]:
+            original = getattr(profile, field)
+            setattr(profile, field, value)
+            profile.save(update_fields=[field])
+            with self.subTest(field=field), self.assertRaisesMessage(ContentError, "active_tenant_student_required"):
+                self.execute()
+            setattr(profile, field, original)
+            profile.save(update_fields=[field])

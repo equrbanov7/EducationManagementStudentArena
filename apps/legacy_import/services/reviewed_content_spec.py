@@ -336,3 +336,10 @@ from .reviewed_content_four_spec import TARGETS as _FOUR_TARGETS  # noqa: E402
 
 TARGETS.update(_FOUR_TARGETS)
 JOURNAL_GROUPS.update({14211: (812,), 14302: (765,)})
+
+# One actual dated 28-PRESENT seminar; no generic absence-only lesson exception.
+from .reviewed_content_28_spec import SPEC as _SPEC_28  # noqa: E402
+from .reviewed_content_28_spec import TARGET as _TARGET_28  # noqa: E402
+
+TARGETS[_TARGET_28] = _SPEC_28
+JOURNAL_GROUPS[14434] = (782,)

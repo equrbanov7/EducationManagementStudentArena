@@ -3,12 +3,14 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.core.management.base import BaseCommand, CommandError
-from django.db import DatabaseError
+from django.db import DatabaseError, transaction
 
+from apps.workload.public import describe_read_only_export_error, render_read_only_export_error
 from core.rls import apply_rls_request_context, reset_rls_context
 from core.rls_pooling import rls_worker_atomic
 
 from ...services.reviewed_content import execute
+from ...services.reviewed_content_28_spec import TARGET as SOURCE28_TARGET
 from ...services.reviewed_content_contract import ContentError, load_payload
 from ...services.reviewed_content_spec import ORG
 from ...services.reviewed_content_state import model
@@ -27,6 +29,7 @@ class Command(BaseCommand):
         parser.add_argument("--apply", action="store_true")
 
     @rls_worker_atomic()
+    @transaction.atomic
     def handle(self, *args, **options):
         if options["org"] != "qku":
             raise CommandError("fixed_tenant_slug_required")
@@ -51,6 +54,10 @@ class Command(BaseCommand):
                 expected_baseline=options["expected_baseline"],
             )
         except ContentError as exc:
+            fields = self._source28_diagnostic(exc, options)
+            if fields is not None:
+                code = fields["guard"] if fields["guard"] != "unclassified" else "reviewed_source28_guard_failed"
+                raise CommandError(code) from exc
             raise CommandError(str(exc)) from exc
         except (
             KeyError,
@@ -62,6 +69,7 @@ class Command(BaseCommand):
             ValidationError,
             DatabaseError,
         ) as exc:
+            self._source28_diagnostic(exc, options)
             raise CommandError("reviewed_content_canonical_guard_rejected") from exc
         finally:
             reset_rls_context()
@@ -69,3 +77,11 @@ class Command(BaseCommand):
         self.stdout.write(
             "reviewed_content: mode=" + mode + " " + " ".join(f"{key}={value}" for key, value in sorted(result.items()))
         )
+
+    def _source28_diagnostic(self, exc, options):
+        if options["targets"] == [SOURCE28_TARGET]:
+            stage = "source28_apply" if options["apply"] else "source28_history"
+            fields = describe_read_only_export_error(exc, stage)
+            self.stderr.write("reviewed_source28_diagnostic: " + render_read_only_export_error(fields))
+            return fields
+        return None

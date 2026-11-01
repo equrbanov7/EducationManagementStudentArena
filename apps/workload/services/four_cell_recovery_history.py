@@ -9,8 +9,8 @@ from .scoped_snapshot.four_cell_history_spec import ORG
 from .syllabus_content_export.limits import query_budget
 
 
-def fixed_four_recovery_history(*, actor, organization):
-    """No input selector or writes; caller's outer atomic owns recovery and rollback."""
+def validate_fixed_recovery_actor(*, actor, organization):
+    """Common fixed-tenant actor/transaction guard, without collecting any scope."""
     if (
         connection.vendor != "postgresql"
         or not connection.in_atomic_block
@@ -35,5 +35,10 @@ def fixed_four_recovery_history(*, actor, organization):
         .exists()
     ):
         raise ValueError("fixed_four_tenant_inactive")
+
+
+def fixed_four_recovery_history(*, actor, organization):
+    """No input selector or writes; caller's outer atomic owns recovery and rollback."""
+    validate_fixed_recovery_actor(actor=actor, organization=organization)
     with query_budget():
         return collect_available_history()

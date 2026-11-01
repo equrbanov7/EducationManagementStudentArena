@@ -135,9 +135,15 @@ def fresh_guard(state, *, actor, organization, lock=False):
         "contrary_clear_delete_or_malformed_intent",
     )
     require(not state.closed, "closed_history_target")
-    uids = {c[4] for c in fixed.CASES.values()}
+    uids = {c[4] for c in fixed.CASES.values()} | {s["teacher_id"] for s in fixed.TARGETS.values()}
     profiles = model("accounts.UserProfile").objects.filter(
-        organization_id=ORG, user_id__in=uids, access_state="active", user__is_active=True
+        organization_id=ORG,
+        user_id__in=uids,
+        access_state="active",
+        user__is_active=True,
+        is_deleted=False,
+        deleted_at__isnull=True,
+        blocked_at__isnull=True,
     )
     require(set(profiles.values_list("user_id", flat=True)) == uids, "active_tenant_student_required")
     for oid in fixed.TARGETS:

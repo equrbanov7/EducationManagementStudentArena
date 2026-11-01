@@ -10,6 +10,7 @@ from apps.registrar.public import gradebook
 from core.audit import log_action
 from core.constants import AuditAction
 
+from . import reviewed_content_28 as source28
 from . import reviewed_content_four as four
 from . import reviewed_content_plan as planner
 from .reviewed_content_contract import ContentError, validate_payload
@@ -99,20 +100,28 @@ def execute(*, data, source_sha256, user, organization, apply=False, expected_ba
 
     source_guard(data, source_sha256)
     four.source_guard(data, source_sha256)
+    source28.source_guard(data, source_sha256)
     state = CurrentState(data, actor=user, lock=apply)
     four_before = (
         four.fresh_guard(state, actor=user, organization=organization, lock=apply) if four.selected(data) else None
     )
+    source28_before = source28.fresh_guard(state, actor=user, organization=organization, lock=apply)
     before = state.fingerprint()
     if four_before is not None:
         before["fixed_four_available_evidence"] = digest(four_before)
+    if source28_before is not None:
+        before["fixed_source28_available_evidence"] = digest(source28_before)
     baseline = digest({"source": source_sha256, "targets": targets, "current": before})
     if expected_baseline and expected_baseline != baseline:
         raise ContentError("fresh_live_baseline_changed")
     decision = planner.build(state)
     four.decision_guard(data, decision)
+    source28.decision_guard(data, decision)
     extra_receipt = four.receipt(four_before, decision)
-    if extra_receipt:
+    if source28_before is not None:
+        extra_receipt.update(source28.receipt(source28_before, decision))
+        extra_receipt["fixed_source28_recovery"]["before_state_fingerprint"] = digest(state.fingerprint())
+    if "fixed_four_recovery" in extra_receipt:
         extra_receipt["fixed_four_recovery"]["before_state_fingerprint"] = digest(state.fingerprint())
     result = {"baseline": baseline, **dict(sorted(decision.counts.items()))}
     if not apply:
@@ -125,6 +134,11 @@ def execute(*, data, source_sha256, user, organization, apply=False, expected_ba
         and four.fresh_guard(state, actor=user, organization=organization, lock=True) != four_before
     ):
         raise ContentError("reviewed_four_evidence_changed_before_write")
+    if (
+        source28_before is not None
+        and source28.fresh_guard(state, actor=user, organization=organization, lock=True) != source28_before
+    ):
+        raise ContentError("reviewed_source28_evidence_changed_before_write")
     _write(decision)
     _verify_created(state, decision)
     created_lessons = [str(lesson.pk) for lesson in decision.lessons.values()]
@@ -140,7 +154,13 @@ def execute(*, data, source_sha256, user, organization, apply=False, expected_ba
         four_after = four.fresh_guard(after_state, actor=user, organization=organization, lock=True)
         if four_after["available_history"] != four_before["available_history"]:
             raise ContentError("reviewed_four_contrary_evidence_changed_during_write")
+    if source28_before is not None:
+        source28_after = source28.fresh_guard(
+            after_state, actor=user, organization=organization, lock=True, allow_created=True
+        )
+        source28.after_guard(source28_before, source28_after)
     again = planner.build(after_state)
+    source28.decision_guard(data, again)
     if again.marks or again.lessons:
         raise ContentError("source_recovery_not_idempotent")
     batch = f"content-{timezone.now():%Y%m%d-%H%M%S}-{uuid.uuid4().hex[:8]}"

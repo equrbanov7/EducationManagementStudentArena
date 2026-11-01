@@ -36,7 +36,8 @@ RESOURCE_CODES = {
 }
 
 
-def mark_ids():
+def mark_ids(*, _cases=None):
+    cases = CASES if _cases is None else _cases
     return {
         point: str(
             uuid.uuid5(
@@ -44,7 +45,7 @@ def mark_ids():
                 f"reviewed-source-mark:{c['lesson_id']}:{c['enrollment_id']}",
             )
         )
-        for point, c in CASES.items()
+        for point, c in cases.items()
     }
 
 
@@ -76,9 +77,10 @@ def typed_refs(value):
     return result
 
 
-def case_ids(refs):
+def case_ids(refs, *, _cases=None):
+    cases = CASES if _cases is None else _cases
     result = []
-    for point, c in CASES.items():
+    for point, c in cases.items():
         enrs = refs.get("enrollment_id", set()) | refs.get("enrollment_ref", set())
         lessons = refs.get("lesson_id", set()) | refs.get("lesson_ref", set())
         # An enrollment alone is a source-claim locator, not proof of this particular slot.
@@ -87,9 +89,10 @@ def case_ids(refs):
     return result
 
 
-def project_audit(row, labels):
+def project_audit(row, labels, *, _cases=None, _undo_operation="fixed_four_undo"):
+    cases = CASES if _cases is None else _cases
     refs = typed_refs([row.get(k) for k in ["changes", "old_values", "new_values"]])
-    ids = case_ids(refs)
+    ids = case_ids(refs, _cases=cases)
     changes = []
     raws = row.get("changes") or []
     if not isinstance(raws, list):
@@ -97,11 +100,11 @@ def project_audit(row, labels):
     for index, change in enumerate(raws):
         if not isinstance(change, dict):
             continue
-        direct = case_ids(typed_refs(change))
+        direct = case_ids(typed_refs(change), _cases=cases)
         lesson_deleted = (
             change.get("student") == "—" and change.get("old") == "dərs sütunu" and change.get("new") == "silindi"
         )
-        for point, c in CASES.items():
+        for point, c in cases.items():
             expected = labels.get(c["student_id"])
             if (
                 lesson_deleted
@@ -145,23 +148,27 @@ def project_audit(row, labels):
                     "new_numeric": numeric(new),
                     "clear_evidence": not blank(old) and blank(new),
                     "lesson_delete_evidence": lesson_deleted,
-                    "time_absent_from_legacy_audit_label": point not in case_ids(typed_refs(change)),
+                    "time_absent_from_legacy_audit_label": point not in case_ids(typed_refs(change), _cases=cases),
                     "matching": (
-                        "typed_pair" if point in case_ids(typed_refs(change)) else "current_exact_label_and_date_kind"
+                        "typed_pair"
+                        if point in case_ids(typed_refs(change), _cases=cases)
+                        else "current_exact_label_and_date_kind"
                     ),
                 }
             )
         ids.extend(direct)
     resource = str(row.get("resource_id") or "")
     direct = [
-        point for point, c in CASES.items() if resource in {c["lesson_id"], c["enrollment_id"], mark_ids()[point]}
+        point
+        for point, c in cases.items()
+        if resource in {c["lesson_id"], c["enrollment_id"], mark_ids(_cases=cases)[point]}
     ]
     deleted = row["action"].lower() == "delete"
     if deleted:
-        direct.extend(point for point, c in CASES.items() if resource == c["offering_id"])
+        direct.extend(point for point, c in cases.items() if resource == c["offering_id"])
     ids.extend(direct)
-    known = {c[k] for c in CASES.values() for k in ["offering_id", "lesson_id", "enrollment_id"]}
-    known |= set(mark_ids().values())
+    known = {c[k] for c in cases.values() for k in ["offering_id", "lesson_id", "enrollment_id"]}
+    known |= set(mark_ids(_cases=cases).values())
     code = row.get("resource_type")
     return {
         "id": str(row["id"]),
@@ -186,7 +193,7 @@ def project_audit(row, labels):
         "source_undo_marker": bool(
             code == "legacy_import.reviewed_content"
             and isinstance(row.get("new_values"), dict)
-            and row["new_values"].get("operation") == "fixed_four_undo"
+            and row["new_values"].get("operation") == _undo_operation
         ),
         "unresolved_scope_row": not bool(ids),
         "contrary_clear_evidence": any(c["clear_evidence"] for c in changes),
@@ -221,15 +228,22 @@ def collect_four_cell_history():
     return collect_available_history()
 
 
-def collect_available_history():
+def collect_available_history(*, _scope=None):
     """SELECT-only core; internal sanctioned writer also needs fresh contrary evidence."""
     if connection.vendor != "postgresql" or not connection.in_atomic_block:
         raise ValueError("four_cell_atomic_pg_required")
+    from .history_scope import approved_history_scope
+
+    if _scope is not None and not approved_history_scope(_scope):
+        raise ValueError("compiled_history_scope_required")
+    cases = CASES if _scope is None else _scope.cases
+    prefix = "four_cell_history" if _scope is None else _scope.prefix
+    undo_operation = "fixed_four_undo" if _scope is None else _scope.undo_operation
     model = apps.get_model
-    ids = {c[k] for c in CASES.values() for k in ["offering_id", "lesson_id", "enrollment_id"]}
-    enrs = {c["enrollment_id"] for c in CASES.values()}
-    lessons = {c["lesson_id"] for c in CASES.values()}
-    ids |= set(mark_ids().values())
+    ids = {c[k] for c in cases.values() for k in ["offering_id", "lesson_id", "enrollment_id"]}
+    enrs = {c["enrollment_id"] for c in cases.values()}
+    lessons = {c["lesson_id"] for c in cases.values()}
+    ids |= set(mark_ids(_cases=cases).values())
     query = Q(resource_id__in=ids)
     # Source-key text search has only hardcoded UUIDs, never a caller-supplied selector.
     # It includes imported/merge/delete manifests whose resource_id is a batch UUID.
@@ -263,13 +277,13 @@ def collect_available_history():
     for user in (
         model("auth.User")
         .objects.filter(
-            pk__in={c["student_id"] for c in CASES.values()},
+            pk__in={c["student_id"] for c in cases.values()},
             profile__organization_id=ORG,
         )
         .only("id", "first_name", "last_name", "username")
     ):
         items = {}
-        for point, c in CASES.items():
+        for point, c in cases.items():
             if c["student_id"] != user.pk:
                 continue
             items[point] = set()
@@ -285,7 +299,10 @@ def collect_available_history():
     audits = []
     changes = []
     for row in values:
-        projected, matched = project_audit(row, labels)
+        if _scope is None:
+            projected, matched = project_audit(row, labels)
+        else:
+            projected, matched = project_audit(row, labels, _cases=cases, _undo_operation=undo_operation)
         audits.append(projected)
         changes.extend(matched)
     if len(changes) > MAX_ROWS:
@@ -307,13 +324,13 @@ def collect_available_history():
             organization_id=ORG,
             source_system="myedu_mariadb",
             source_table__in=["journals_dates_points", "journals_dates_points_archive"],
-            source_pk__in=CASES,
+            source_pk__in=cases,
         ),
         "registrar.LegacyGradeArtifact": model("registrar.LegacyGradeArtifact").objects.filter(
             organization_id=ORG,
             source_system="myedu_mariadb",
             source_table__in=["journals_dates_points", "journals_dates_points_archive"],
-            source_pk__in=CASES,
+            source_pk__in=cases,
         ),
     }
     fields = {
@@ -414,6 +431,8 @@ def collect_available_history():
         ],
         "journal_marks": ["NcAA2ymEa8", "knqwDXQuIs"],
     }
+    if _scope is not None:
+        key_sets = _scope.source_keys
     source_keys = Q()
     for entity, keys in key_sets.items():
         source_keys |= Q(entity_type=entity, legacy_pk__in=keys)
@@ -467,16 +486,17 @@ def collect_available_history():
             row["source_row_hash"] = None
         row["raw_record_sha256"] = row.pop("_raw_sha")
         ledger.append(row)
-    return {
-        "four_cell_history_ledger": ledger,
-        "four_cell_history_audits": audits,
-        "four_cell_history_changes": changes,
-        "four_cell_history_evidence": evidence,
-        "four_cell_history_scope": [
+    result = {
+        prefix + "_ledger": ledger,
+        prefix + "_audits": audits,
+        prefix + "_changes": changes,
+        prefix + "_evidence": evidence,
+        prefix
+        + "_scope": [
             {
                 "organization_id": ORG,
-                "fixed_cases_sha256": digest(CASES),
-                "case_ids": sorted(CASES),
+                "fixed_cases_sha256": digest(cases),
+                "case_ids": sorted(cases),
                 "available_scope_collected": True,
                 "audit_rows": len(audits),
                 "matched_change_rows": len(changes),
@@ -498,3 +518,16 @@ def collect_available_history():
             }
         ],
     }
+
+    if _scope is not None:
+        result[prefix + "_scope"][0]["tenant_unlocatable_lesson_delete_audits"] = (
+            model("audit.AuditLog")
+            .objects.filter(
+                organization_id=ORG,
+                action__iexact="delete",
+                resource_type__in=["registrar.Lesson", "registrar.lesson"],
+            )
+            .exclude(query)
+            .count()
+        )
+    return result
