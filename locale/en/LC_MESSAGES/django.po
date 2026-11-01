@@ -111594,3 +111594,498 @@ msgstr "Attendance"
 #: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:6
 msgid "Əvvəlki jurnal qeydləri"
 msgstr "Previous journal records"
+
+msgid "Bu baxış yalnız oxumaq üçündür. Cari yük təyinatı yaratmır."
+msgstr ""
+"This view is read-only. It does not create a current teaching assignment."
+
+msgid "Bu dərs növü üzrə səviyyə qrupunun saat həddi aşılır."
+msgstr ""
+"The hour limit for this lesson type in the level group would be exceeded."
+
+msgid ""
+"Bu müəllim, fənn və semestr üçün jurnal artıq mövcuddur. Mövcud jurnalı açın"
+" və ya ayrıca yeni qrup yaratmağı təsdiqləyin."
+msgstr ""
+"A journal already exists for this instructor, subject and semester. Open it "
+"or confirm that you want a separate new group."
+
+msgid "Bu səviyyə qrupunda seçilmiş dərs növü təyin edilməyib."
+msgstr "The selected lesson type has not been assigned to this level group."
+
+msgid ""
+"Cari səviyyədən keçid ayrıca təsdiqlənməlidir; mənbə qeydiyyatı dəyişib."
+msgstr ""
+"The move from the current level must be confirmed separately; the source "
+"enrollment has changed."
+
+msgid "Eyni səviyyə, semestr və müəllimin qiymətləndirmə mənbəyi"
+msgstr "Assessment source with the same level, semester and instructor"
+
+msgid "Giriş balının maksimumu (mənbə seçilməyibsə)"
+msgstr "Maximum entry score (if no source is selected)"
+
+msgid "Hədəf qeydiyyatı artıq aktivdir və ya tarixçəsi ayrıca yoxlanmalıdır."
+msgstr ""
+"The target enrollment is already active or its history needs a separate "
+"review."
+
+msgid "Laboratoriya saatı"
+msgstr "Laboratory hours"
+
+msgid ""
+"Mövcud eyni səviyyə jurnalından ayrıca yeni qrup yaratmağı təsdiqləyirəm"
+msgstr ""
+"I confirm creating a separate new group alongside the existing journal for "
+"this level"
+
+msgid "Mühazirə saatı"
+msgstr "Lecture hours"
+
+msgid "Mühazirə, seminar və laboratoriya saatlarını açıq daxil edin."
+msgstr "Enter lecture, seminar and laboratory hours explicitly."
+
+msgid ""
+"Müəllifi göstərilməyən köçürülmüş qeydlər sizin adınıza keçirilmiş dərs kimi"
+" hesablanmır."
+msgstr ""
+"Imported records without an identified author are not counted as lessons "
+"taught by you."
+
+msgid "Növlər üzrə saatlar ümumi dərs saatına bərabər olmalıdır."
+msgstr "The hours by lesson type must equal the total contact hours."
+
+msgid "Qiymətləndirmə bal hədləri uyğun deyil."
+msgstr "The assessment score limits are inconsistent."
+
+msgid "Qiymətləndirmə mənbəyi eyni fənn, semestr və müəllimə aid olmalıdır."
+msgstr ""
+"The assessment source must belong to the same subject, semester and "
+"instructor."
+
+msgid "Qiymətləndirmə mənbəyi seçin və ya hər üç bal həddini açıq daxil edin."
+msgstr ""
+"Select an assessment source or explicitly enter all three score limits."
+
+msgid "Qrup adı"
+msgstr "Group name"
+
+msgid "Qrup adı və 1–300 arası dərs saatı tələb olunur."
+msgstr "A group name and between 1 and 300 contact hours are required."
+
+msgid "Seminar / praktiki məşğələ saatı"
+msgstr "Seminar / practical session hours"
+
+msgid "Seçilmiş mənbə jurnalında qiymətləndirmə sxemi yoxdur."
+msgstr "The selected source journal has no assessment scheme."
+
+msgid "Siyahı yeniləndi. Əvvəlki qiymətlər öz jurnalında saxlanılır."
+msgstr ""
+"The roster has been updated. Previous grades remain in their original "
+"journal."
+
+msgid "Səbəb 10–500 simvol olmalıdır."
+msgstr "The reason must contain 10–500 characters."
+
+msgid "Səviyyə dəyişdirildi"
+msgstr "Level changed"
+
+msgid "Səviyyə fənni"
+msgstr "Level subject"
+
+msgid "Səviyyə fənni və aktiv müəllim seçilməlidir."
+msgstr "Select a level subject and an active instructor."
+
+msgid "Səviyyə qrupunun siyahısını səviyyə idarəetməsindən dəyişin."
+msgstr "Change the level group's roster through level management."
+
+msgid "Səviyyə qrupunun əlaqələri dəyişib; inzibati yoxlama tələb olunur."
+msgstr ""
+"The level group's links have changed; an administrative review is required."
+
+msgid ""
+"Təkrar/intensiv və əvəzlənmiş qeydiyyat üçün ayrıca inzibati qərar tələb "
+"olunur."
+msgstr ""
+"Retake, intensive and superseded enrollments require a separate "
+"administrative decision."
+
+msgid "Tələbənin aktiv təşkilat profili və üzvlüyü yoxdur."
+msgstr "The student has no active organization profile and membership."
+
+msgid ""
+"Tələbənin bu dil ailəsində birdən çox aktiv jurnalı var; inzibati yoxlama "
+"tələb olunur."
+msgstr ""
+"The student has more than one active journal in this language family; an "
+"administrative review is required."
+
+msgid "Tələbənin cari əsas qrupu ayrıca yoxlanmalıdır."
+msgstr "The student's current home group needs a separate review."
+
+msgid "Tələbənin uyğun aktiv akademik qeydi yoxdur."
+msgstr "The student has no eligible active academic record."
+
+msgid "Yalnız cari aktiv semestr və aktiv səviyyə fənni seçilə bilər."
+msgstr ""
+"Only a current active semester and an active level subject may be selected."
+
+msgid "Yekun imtahanın minimum balı (mənbə seçilməyibsə)"
+msgstr "Minimum final exam score (if no source is selected)"
+
+msgid "Çıxarıldı"
+msgstr "Removed"
+
+msgid "Ümumi keçid balı (mənbə seçilməyibsə)"
+msgstr "Overall passing score (if no source is selected)"
+
+msgid "Əlavə edildi"
+msgstr "Added"
+
+msgid "Əməliyyat düzgün deyil."
+msgstr "Invalid action."
+
+#, python-format
+msgctxt "accounts.hr_analytics"
+msgid "Ən az yüklənənlər (<70%%)"
+msgstr "Least loaded (<70%%)"
+
+#, python-format
+msgctxt "accounts.hr_analytics"
+msgid "Ən çox yüklənənlər (>100%%)"
+msgstr "Most loaded (>100%%)"
+
+#, python-format
+msgctxt "registrar.language_cohort"
+msgid "%(level)s səviyyəsinə əlavə et"
+msgstr "Add to the %(level)s level"
+
+msgctxt "registrar.language_cohort"
+msgid "Ad, soyad, ata adı və ya əsas qrup"
+msgstr "First name, surname, patronymic or home group"
+
+msgctxt "registrar.language_cohort"
+msgid "Aktiv tələbə yoxdur."
+msgstr "No active students."
+
+msgctxt "registrar.language_cohort"
+msgid "Axtar"
+msgstr "Search"
+
+msgctxt "registrar.language_cohort"
+msgid "Bal"
+msgstr "Score"
+
+msgctxt "registrar.language_cohort"
+msgid "Bir neçə aktiv dil jurnalı var. İnzibati yoxlama tələb olunur."
+msgstr ""
+"There are several active language journals. An administrative review is "
+"required."
+
+msgctxt "registrar.language_cohort"
+msgid "Bu semestr və dil ailəsi üzrə başqa aktiv səviyyə qeydiyyatı yoxdur."
+msgstr ""
+"There is no other active level enrollment for this semester and language "
+"family."
+
+#, python-format
+msgctxt "registrar.language_cohort"
+msgid ""
+"Cari səviyyə: %(subject)s. Bu qeydiyyat tarixçəyə keçəcək; əvvəlki qiymətlər"
+" yerində qalacaq."
+msgstr ""
+"Current level: %(subject)s. This enrollment will move to history; previous "
+"grades will remain where they are."
+
+msgctxt "registrar.language_cohort"
+msgid "Davamiyyət"
+msgstr "Attendance"
+
+msgctxt "registrar.language_cohort"
+msgid "Dərs növü"
+msgstr "Lesson type"
+
+msgctxt "registrar.language_cohort"
+msgid "Girişiniz olan başqa səviyyə jurnalı yoxdur."
+msgstr "No other level journals are available to you."
+
+msgctxt "registrar.language_cohort"
+msgid "Hələ idarə olunan səviyyə qrupu yoxdur."
+msgstr "There are no managed level groups yet."
+
+msgctxt "registrar.language_cohort"
+msgid "Jurnal bağlıdır və ya semestr cari deyil. Siyahı yalnız oxunur."
+msgstr ""
+"The journal is closed or the semester is not current. The roster is read-"
+"only."
+
+msgctxt "registrar.language_cohort"
+msgid "Jurnalı aç"
+msgstr "Open journal"
+
+msgctxt "registrar.language_cohort"
+msgid ""
+"Kafedra əhatəniz daxilində qrup yaradın və müəllim təyin edin. Mövcud "
+"səviyyə jurnallarını aşağıdan açın; onlar təkrar yaradılmır."
+msgstr ""
+"Create a group within your department scope and assign an instructor. Open "
+"existing level journals below; they are not recreated."
+
+msgctxt "registrar.language_cohort"
+msgid "Mövcud səviyyə jurnalları"
+msgstr "Existing level journals"
+
+msgctxt "registrar.language_cohort"
+msgid "Qiymətlər silinmir. Tələbə avtomatik başqa səviyyəyə qaytarılmır."
+msgstr ""
+"Grades are not deleted. The student is not automatically returned to another"
+" level."
+
+msgctxt "registrar.language_cohort"
+msgid "Qrupdan çıxar"
+msgstr "Remove from group"
+
+msgctxt "registrar.language_cohort"
+msgid "Qrupu aç"
+msgstr "Open group"
+
+msgctxt "registrar.language_cohort"
+msgid "Qrupu yarat"
+msgstr "Create the group"
+
+msgctxt "registrar.language_cohort"
+msgid "Saat"
+msgstr "Hours"
+
+msgctxt "registrar.language_cohort"
+msgid "Saxlanılan xana yoxdur."
+msgstr "No saved cells."
+
+msgctxt "registrar.language_cohort"
+msgid "Səbəb"
+msgstr "Reason"
+
+msgctxt "registrar.language_cohort"
+msgid ""
+"Səviyyə qrupu müxtəlif əsas qruplardan tələbələri bir jurnalda birləşdirir. "
+"Tələbələrin akademik qrupları dəyişmir."
+msgstr ""
+"A level group combines students from different home groups in one journal. "
+"Students' academic groups do not change."
+
+msgctxt "registrar.language_cohort"
+msgid "Səviyyə qrupunu seç"
+msgstr "Select a level group"
+
+msgctxt "registrar.language_cohort"
+msgid "Səviyyə qrupunun tələbələri"
+msgstr "Students in the level group"
+
+msgctxt "registrar.language_cohort"
+msgid "Tarix"
+msgstr "Date"
+
+msgctxt "registrar.language_cohort"
+msgid "Tarixçə yoxdur."
+msgstr "No history."
+
+msgctxt "registrar.language_cohort"
+msgid "Tələbə"
+msgstr "Student"
+
+msgctxt "registrar.language_cohort"
+msgid "Tələbə əlavə et / səviyyəsini dəyiş"
+msgstr "Add a student / change their level"
+
+msgctxt "registrar.language_cohort"
+msgid "Tələbələr"
+msgstr "Students"
+
+msgctxt "registrar.language_cohort"
+msgid "Uyğun tələbə tapılmadı."
+msgstr "No eligible student found."
+
+msgctxt "registrar.language_cohort"
+msgid "Xarici dil səviyyə qrupları"
+msgstr "Foreign language level groups"
+
+msgctxt "registrar.language_cohort"
+msgid ""
+"Yalnız əsas qrup əhatənizdə və ya artıq girişiniz olan uyğun dil jurnalında "
+"oxuyan tələbələr göstərilir. Axtarış ən çox 50 nəticə göstərir."
+msgstr ""
+"Only students within your home-group scope or enrolled in a relevant "
+"language journal you can already access are shown. Search displays up to 50 "
+"results."
+
+msgctxt "registrar.language_cohort"
+msgid ""
+"Yalnız əvvəlki qeydiyyatın saxlanılan xanaları göstərilir. Bu ballar cari "
+"səviyyə jurnalına əlavə edilmir."
+msgstr ""
+"Only saved cells from the previous enrollment are shown. These scores are "
+"not added to the current level journal."
+
+msgctxt "registrar.language_cohort"
+msgid ""
+"Yeni qrup və müəllim təyinatını səlahiyyətli koordinator və ya RİM edir. Öz "
+"qrupunuzun tələbələrini aşağıdan idarə edə bilərsiniz."
+msgstr ""
+"An authorized coordinator or RIM creates new groups and assigns instructors."
+" You can manage students in your own group below."
+
+msgctxt "registrar.language_cohort"
+msgid "Yeni səviyyə qrupu yarat"
+msgstr "Create a new level group"
+
+msgctxt "registrar.language_cohort"
+msgid "Yerləşdirmə tarixçəsi"
+msgstr "Placement history"
+
+msgctxt "registrar.language_cohort"
+msgid "Çıxarmağı təsdiqlə"
+msgstr "Confirm removal"
+
+msgctxt "registrar.language_cohort"
+msgid "İdarə olunan səviyyə qrupları"
+msgstr "Managed level groups"
+
+msgctxt "registrar.language_cohort"
+msgid "Əməliyyat"
+msgstr "Action"
+
+msgctxt "registrar.language_cohort"
+msgid "Əsas qrup"
+msgstr "Home group"
+
+msgctxt "registrar.language_cohort"
+msgid ""
+"Əsas qrup dəyişmir. Səviyyə dəyişəndə əvvəlki qeydiyyat tarixçəyə keçir; "
+"qiymət və davamiyyət əvvəlki jurnalda qalır, yeni jurnala köçürülmür."
+msgstr ""
+"The home group does not change. On a level change, the previous enrollment "
+"moves to history; grades and attendance remain in the previous journal and "
+"are not transferred to the new one."
+
+msgctxt "registrar.language_cohort"
+msgid ""
+"Əvvəldən mövcud jurnallar və qeydlər saxlanılır. Bu siyahı onları yeni qrupa"
+" çevirmir."
+msgstr ""
+"Existing journals and records are retained. This list does not convert them "
+"into a new group."
+
+msgctxt "registrar.language_cohort"
+msgid "Əvvəlki qiymətlər"
+msgstr "Previous grades"
+
+msgctxt "registrar.language_cohort"
+msgid "Əvvəlki səviyyə qeydləri"
+msgstr "Previous level records"
+
+msgctxt "registrar.language_cohort"
+msgid "Əvvəlki səviyyə qiymətləri"
+msgstr "Previous level grades"
+
+msgctxt "registrar.language_cohort"
+msgid "Əvvəlki səviyyədən keçidi təsdiqləyirəm"
+msgstr "I confirm the move from the previous level"
+
+msgctxt "registrar.language_cohort"
+msgid "← Elektron jurnal"
+msgstr "← Electronic journal"
+
+msgctxt "registrar.language_cohort"
+msgid "← Səviyyə qrupları"
+msgstr "← Level groups"
+
+msgctxt "registrar.language_cohort"
+msgid "← Səviyyə qrupu"
+msgstr "← Level group"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid ""
+"Qaytarılma ödənilmiş cəhdin verilmədiyini tanıyır: «İmtahana gəlmədi» ilə "
+"sayılmış 25%% cəhdi tələbəyə geri qayıdır. Rədd / geri götürmə cəhd saymır —"
+" orada bu seçim təsirsizdir. Qərardan sonra dəyişmir."
+msgstr ""
+"A refund acknowledges that the paid attempt was not taken: the 25%% attempt "
+"counted as 'Did not attend' is returned to the student. Rejection or "
+"withdrawal does not count as an attempt, so this option has no effect there."
+" It cannot be changed after the decision."
+
+msgctxt "organizations.permission.label"
+msgid "Üzrlü qayıbı səbəblə dəyişmək və geri almaq"
+msgstr "Change and undo excused absences with a reason"
+
+msgctxt "registrar.excused_management"
+msgid "Son düzəlişi geri al"
+msgstr "Undo last correction"
+
+msgctxt "registrar.excused_management"
+msgid "Səbəb 3–500 simvol olmalıdır."
+msgstr "The reason must contain 3–500 characters."
+
+msgctxt "registrar.excused_management"
+msgid "Səbəb qeydini saxlamaq mümkün olmadı."
+msgstr "The reason note could not be saved."
+
+msgctxt "registrar.excused_management"
+msgid "Xana dəyişib. Jurnalı yeniləyib təkrar edin."
+msgstr "The cell has changed. Reload the journal and try again."
+
+msgctxt "registrar.excused_management"
+msgid ""
+"Yalnız davamiyyət dəyişir. Səbəb və əvvəlki dəyər tarixçədə saxlanılır; "
+"sənəd yükləmək tələb olunmur."
+msgstr ""
+"Only attendance changes. The reason and previous value remain in history; no"
+" document upload is required."
+
+msgctxt "registrar.excused_management"
+msgid "Yeni davamiyyət seç"
+msgstr "Select the new attendance status"
+
+msgctxt "registrar.excused_management"
+msgid "Yeni davamiyyəti seçin: iştirak və ya qayıb."
+msgstr "Select the new attendance status: present or absent."
+
+msgctxt "registrar.excused_management"
+msgid "Üzrlü qayıb düzəlişi"
+msgstr "Excused absence correction"
+
+msgctxt "registrar.excused_management"
+msgid "Üzrlü qayıbı səbəblə dəyiş və ya geri al"
+msgstr "Change or undo an excused absence with a reason"
+
+msgctxt "registrar.excused_management"
+msgid "Əməliyyat"
+msgstr "Action"
+
+msgctxt "registrar.excused_management"
+msgid ""
+"Əvvəlki dəyəri məlum olmayan köçürülmüş üq üçün yeni davamiyyəti açıq seçin."
+" Köhnə sənəd saxlanılır."
+msgstr ""
+"For an imported excused absence with an unknown previous value, explicitly "
+"select the new attendance status. The old document is retained."
+
+msgctxt "registrar.language_cohort"
+msgid "Qayıb limiti 10 q/b-dir; 11 q/b imtahana buraxılmır."
+msgstr "The absence limit is 10 q/b; 11 q/b bars exam admission."
+
+msgctxt "registrar.language_cohort"
+msgid ""
+"Səviyyə qaydası: davamiyyət 10, seminar 10, midterm 10, imtahan 70 bal. "
+"Qayıb limiti 10 q/b-dir; 11 q/b olduqda imtahana buraxılmır."
+msgstr ""
+"Level policy: attendance 10, seminar 10, midterm 10 and final exam 70 "
+"points. The absence limit is 10 q/b; at 11 q/b the student is not admitted "
+"to the exam."
+
+msgctxt "registrar.language_cohort"
+msgid "Əvvəlki xam bal saxlanılır; hesablamada ən çox 10 bal nəzərə alınır."
+msgstr ""
+"The original entered score is retained; calculations count no more than 10 "
+"points."

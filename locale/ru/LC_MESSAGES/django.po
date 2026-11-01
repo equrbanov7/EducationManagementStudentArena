@@ -111787,3 +111787,499 @@ msgstr "Посещаемость"
 #: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:6
 msgid "Əvvəlki jurnal qeydləri"
 msgstr "Предыдущие записи журнала"
+
+msgid "Bu baxış yalnız oxumaq üçündür. Cari yük təyinatı yaratmır."
+msgstr ""
+"Этот просмотр доступен только для чтения. Он не создаёт текущего назначения "
+"учебной нагрузки."
+
+msgid "Bu dərs növü üzrə səviyyə qrupunun saat həddi aşılır."
+msgstr "Будет превышен лимит часов этого вида занятий в уровневой группе."
+
+msgid ""
+"Bu müəllim, fənn və semestr üçün jurnal artıq mövcuddur. Mövcud jurnalı açın"
+" və ya ayrıca yeni qrup yaratmağı təsdiqləyin."
+msgstr ""
+"Для этого преподавателя, предмета и семестра журнал уже существует. Откройте"
+" его или подтвердите создание отдельной новой группы."
+
+msgid "Bu səviyyə qrupunda seçilmiş dərs növü təyin edilməyib."
+msgstr "Выбранный вид занятий не назначен этой уровневой группе."
+
+msgid ""
+"Cari səviyyədən keçid ayrıca təsdiqlənməlidir; mənbə qeydiyyatı dəyişib."
+msgstr ""
+"Переход с текущего уровня нужно подтвердить отдельно; исходная запись о "
+"зачислении изменилась."
+
+msgid "Eyni səviyyə, semestr və müəllimin qiymətləndirmə mənbəyi"
+msgstr "Источник оценивания того же уровня, семестра и преподавателя"
+
+msgid "Giriş balının maksimumu (mənbə seçilməyibsə)"
+msgstr "Максимальный семестровый балл (если источник не выбран)"
+
+msgid "Hədəf qeydiyyatı artıq aktivdir və ya tarixçəsi ayrıca yoxlanmalıdır."
+msgstr ""
+"Целевая запись о зачислении уже активна или её история требует отдельной "
+"проверки."
+
+msgid "Laboratoriya saatı"
+msgstr "Лабораторные часы"
+
+msgid ""
+"Mövcud eyni səviyyə jurnalından ayrıca yeni qrup yaratmağı təsdiqləyirəm"
+msgstr ""
+"Подтверждаю создание отдельной новой группы наряду с существующим журналом "
+"этого уровня"
+
+msgid "Mühazirə saatı"
+msgstr "Часы лекций"
+
+msgid "Mühazirə, seminar və laboratoriya saatlarını açıq daxil edin."
+msgstr "Явно укажите часы лекций, семинаров и лабораторных занятий."
+
+msgid ""
+"Müəllifi göstərilməyən köçürülmüş qeydlər sizin adınıza keçirilmiş dərs kimi"
+" hesablanmır."
+msgstr ""
+"Импортированные записи без указанного автора не учитываются как проведённые "
+"вами занятия."
+
+msgid "Növlər üzrə saatlar ümumi dərs saatına bərabər olmalıdır."
+msgstr ""
+"Сумма часов по видам занятий должна совпадать с общим числом учебных часов."
+
+msgid "Qiymətləndirmə bal hədləri uyğun deyil."
+msgstr "Пороговые значения оценивания не согласованы."
+
+msgid "Qiymətləndirmə mənbəyi eyni fənn, semestr və müəllimə aid olmalıdır."
+msgstr ""
+"Источник оценивания должен относиться к тому же предмету, семестру и "
+"преподавателю."
+
+msgid "Qiymətləndirmə mənbəyi seçin və ya hər üç bal həddini açıq daxil edin."
+msgstr ""
+"Выберите источник оценивания или явно укажите все три пороговых значения."
+
+msgid "Qrup adı"
+msgstr "Название группы"
+
+msgid "Qrup adı və 1–300 arası dərs saatı tələb olunur."
+msgstr "Необходимо указать название группы и от 1 до 300 учебных часов."
+
+msgid "Seminar / praktiki məşğələ saatı"
+msgstr "Часы семинаров / практических занятий"
+
+msgid "Seçilmiş mənbə jurnalında qiymətləndirmə sxemi yoxdur."
+msgstr "В выбранном исходном журнале нет схемы оценивания."
+
+msgid "Siyahı yeniləndi. Əvvəlki qiymətlər öz jurnalında saxlanılır."
+msgstr "Список обновлён. Прежние оценки сохранены в исходном журнале."
+
+msgid "Səbəb 10–500 simvol olmalıdır."
+msgstr "Причина должна содержать 10–500 символов."
+
+msgid "Səviyyə dəyişdirildi"
+msgstr "Уровень изменён"
+
+msgid "Səviyyə fənni"
+msgstr "Предмет с языковым уровнем"
+
+msgid "Səviyyə fənni və aktiv müəllim seçilməlidir."
+msgstr "Выберите предмет с языковым уровнем и активного преподавателя."
+
+msgid "Səviyyə qrupunun siyahısını səviyyə idarəetməsindən dəyişin."
+msgstr "Изменяйте список уровневой группы через раздел управления уровнями."
+
+msgid "Səviyyə qrupunun əlaqələri dəyişib; inzibati yoxlama tələb olunur."
+msgstr ""
+"Связи уровневой группы изменились; требуется административная проверка."
+
+msgid ""
+"Təkrar/intensiv və əvəzlənmiş qeydiyyat üçün ayrıca inzibati qərar tələb "
+"olunur."
+msgstr ""
+"Для повторного обучения, интенсивных курсов и заменённых записей о "
+"зачислении требуется отдельное административное решение."
+
+msgid "Tələbənin aktiv təşkilat profili və üzvlüyü yoxdur."
+msgstr "У студента нет активного профиля и членства в организации."
+
+msgid ""
+"Tələbənin bu dil ailəsində birdən çox aktiv jurnalı var; inzibati yoxlama "
+"tələb olunur."
+msgstr ""
+"У студента несколько активных журналов в этой группе языковых предметов; "
+"требуется административная проверка."
+
+msgid "Tələbənin cari əsas qrupu ayrıca yoxlanmalıdır."
+msgstr "Текущая основная группа студента требует отдельной проверки."
+
+msgid "Tələbənin uyğun aktiv akademik qeydi yoxdur."
+msgstr "У студента нет подходящей активной академической записи."
+
+msgid "Yalnız cari aktiv semestr və aktiv səviyyə fənni seçilə bilər."
+msgstr ""
+"Можно выбрать только текущий активный семестр и активный предмет с языковым "
+"уровнем."
+
+msgid "Yekun imtahanın minimum balı (mənbə seçilməyibsə)"
+msgstr "Минимальный балл итогового экзамена (если источник не выбран)"
+
+msgid "Çıxarıldı"
+msgstr "Удалён"
+
+msgid "Ümumi keçid balı (mənbə seçilməyibsə)"
+msgstr "Общий проходной балл (если источник не выбран)"
+
+msgid "Əlavə edildi"
+msgstr "Добавлено"
+
+msgid "Əməliyyat düzgün deyil."
+msgstr "Недопустимое действие."
+
+#, python-format
+msgctxt "accounts.hr_analytics"
+msgid "Ən az yüklənənlər (<70%%)"
+msgstr "Наименее загруженные (<70%%)"
+
+#, python-format
+msgctxt "accounts.hr_analytics"
+msgid "Ən çox yüklənənlər (>100%%)"
+msgstr "Наиболее загруженные (>100%%)"
+
+#, python-format
+msgctxt "registrar.language_cohort"
+msgid "%(level)s səviyyəsinə əlavə et"
+msgstr "Добавить на уровень %(level)s"
+
+msgctxt "registrar.language_cohort"
+msgid "Ad, soyad, ata adı və ya əsas qrup"
+msgstr "Имя, фамилия, отчество или основная группа"
+
+msgctxt "registrar.language_cohort"
+msgid "Aktiv tələbə yoxdur."
+msgstr "Нет активных студентов."
+
+msgctxt "registrar.language_cohort"
+msgid "Axtar"
+msgstr "Поиск"
+
+msgctxt "registrar.language_cohort"
+msgid "Bal"
+msgstr "Балл"
+
+msgctxt "registrar.language_cohort"
+msgid "Bir neçə aktiv dil jurnalı var. İnzibati yoxlama tələb olunur."
+msgstr ""
+"Есть несколько активных языковых журналов. Требуется административная "
+"проверка."
+
+msgctxt "registrar.language_cohort"
+msgid "Bu semestr və dil ailəsi üzrə başqa aktiv səviyyə qeydiyyatı yoxdur."
+msgstr ""
+"В этом семестре и этой группе языковых предметов нет другого активного "
+"зачисления по уровню."
+
+#, python-format
+msgctxt "registrar.language_cohort"
+msgid ""
+"Cari səviyyə: %(subject)s. Bu qeydiyyat tarixçəyə keçəcək; əvvəlki qiymətlər"
+" yerində qalacaq."
+msgstr ""
+"Текущий уровень: %(subject)s. Эта запись о зачислении перейдёт в историю; "
+"прежние оценки останутся на месте."
+
+msgctxt "registrar.language_cohort"
+msgid "Davamiyyət"
+msgstr "Посещаемость"
+
+msgctxt "registrar.language_cohort"
+msgid "Dərs növü"
+msgstr "Тип занятия"
+
+msgctxt "registrar.language_cohort"
+msgid "Girişiniz olan başqa səviyyə jurnalı yoxdur."
+msgstr "Нет других доступных вам журналов по уровням."
+
+msgctxt "registrar.language_cohort"
+msgid "Hələ idarə olunan səviyyə qrupu yoxdur."
+msgstr "Пока нет управляемых уровневых групп."
+
+msgctxt "registrar.language_cohort"
+msgid "Jurnal bağlıdır və ya semestr cari deyil. Siyahı yalnız oxunur."
+msgstr ""
+"Журнал закрыт или семестр не является текущим. Список доступен только для "
+"чтения."
+
+msgctxt "registrar.language_cohort"
+msgid "Jurnalı aç"
+msgstr "Открыть журнал"
+
+msgctxt "registrar.language_cohort"
+msgid ""
+"Kafedra əhatəniz daxilində qrup yaradın və müəllim təyin edin. Mövcud "
+"səviyyə jurnallarını aşağıdan açın; onlar təkrar yaradılmır."
+msgstr ""
+"Создайте группу в пределах доступной вам кафедры и назначьте преподавателя. "
+"Существующие журналы по уровням открываются ниже; они не создаются повторно."
+
+msgctxt "registrar.language_cohort"
+msgid "Mövcud səviyyə jurnalları"
+msgstr "Существующие журналы по уровням"
+
+msgctxt "registrar.language_cohort"
+msgid "Qiymətlər silinmir. Tələbə avtomatik başqa səviyyəyə qaytarılmır."
+msgstr ""
+"Оценки не удаляются. Студент не возвращается автоматически на другой "
+"уровень."
+
+msgctxt "registrar.language_cohort"
+msgid "Qrupdan çıxar"
+msgstr "Убрать из группы"
+
+msgctxt "registrar.language_cohort"
+msgid "Qrupu aç"
+msgstr "Открыть группу"
+
+msgctxt "registrar.language_cohort"
+msgid "Qrupu yarat"
+msgstr "Создать группу"
+
+msgctxt "registrar.language_cohort"
+msgid "Saat"
+msgstr "Часы"
+
+msgctxt "registrar.language_cohort"
+msgid "Saxlanılan xana yoxdur."
+msgstr "Нет сохранённых ячеек."
+
+msgctxt "registrar.language_cohort"
+msgid "Səbəb"
+msgstr "Причина"
+
+msgctxt "registrar.language_cohort"
+msgid ""
+"Səviyyə qrupu müxtəlif əsas qruplardan tələbələri bir jurnalda birləşdirir. "
+"Tələbələrin akademik qrupları dəyişmir."
+msgstr ""
+"Уровневая группа объединяет в одном журнале студентов из разных основных "
+"групп. Академические группы студентов не меняются."
+
+msgctxt "registrar.language_cohort"
+msgid "Səviyyə qrupunu seç"
+msgstr "Выберите уровневую группу"
+
+msgctxt "registrar.language_cohort"
+msgid "Səviyyə qrupunun tələbələri"
+msgstr "Студенты уровневой группы"
+
+msgctxt "registrar.language_cohort"
+msgid "Tarix"
+msgstr "Дата"
+
+msgctxt "registrar.language_cohort"
+msgid "Tarixçə yoxdur."
+msgstr "Истории нет."
+
+msgctxt "registrar.language_cohort"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "registrar.language_cohort"
+msgid "Tələbə əlavə et / səviyyəsini dəyiş"
+msgstr "Добавить студента / изменить уровень"
+
+msgctxt "registrar.language_cohort"
+msgid "Tələbələr"
+msgstr "Студенты"
+
+msgctxt "registrar.language_cohort"
+msgid "Uyğun tələbə tapılmadı."
+msgstr "Подходящий студент не найден."
+
+msgctxt "registrar.language_cohort"
+msgid "Xarici dil səviyyə qrupları"
+msgstr "Группы по уровню иностранного языка"
+
+msgctxt "registrar.language_cohort"
+msgid ""
+"Yalnız əsas qrup əhatənizdə və ya artıq girişiniz olan uyğun dil jurnalında "
+"oxuyan tələbələr göstərilir. Axtarış ən çox 50 nəticə göstərir."
+msgstr ""
+"Показаны только студенты основных групп в пределах ваших полномочий либо "
+"учащиеся в соответствующем языковом журнале, к которому у вас уже есть "
+"доступ. Поиск показывает до 50 результатов."
+
+msgctxt "registrar.language_cohort"
+msgid ""
+"Yalnız əvvəlki qeydiyyatın saxlanılan xanaları göstərilir. Bu ballar cari "
+"səviyyə jurnalına əlavə edilmir."
+msgstr ""
+"Показаны только сохранённые ячейки предыдущего зачисления. Эти баллы не "
+"добавляются в текущий журнал уровня."
+
+msgctxt "registrar.language_cohort"
+msgid ""
+"Yeni qrup və müəllim təyinatını səlahiyyətli koordinator və ya RİM edir. Öz "
+"qrupunuzun tələbələrini aşağıdan idarə edə bilərsiniz."
+msgstr ""
+"Новые группы и назначения преподавателей оформляет уполномоченный "
+"координатор или РИМ. Ниже можно управлять студентами своей группы."
+
+msgctxt "registrar.language_cohort"
+msgid "Yeni səviyyə qrupu yarat"
+msgstr "Создать новую уровневую группу"
+
+msgctxt "registrar.language_cohort"
+msgid "Yerləşdirmə tarixçəsi"
+msgstr "История размещений"
+
+msgctxt "registrar.language_cohort"
+msgid "Çıxarmağı təsdiqlə"
+msgstr "Подтвердить удаление из группы"
+
+msgctxt "registrar.language_cohort"
+msgid "İdarə olunan səviyyə qrupları"
+msgstr "Управляемые уровневые группы"
+
+msgctxt "registrar.language_cohort"
+msgid "Əməliyyat"
+msgstr "Действие"
+
+msgctxt "registrar.language_cohort"
+msgid "Əsas qrup"
+msgstr "Основная группа"
+
+msgctxt "registrar.language_cohort"
+msgid ""
+"Əsas qrup dəyişmir. Səviyyə dəyişəndə əvvəlki qeydiyyat tarixçəyə keçir; "
+"qiymət və davamiyyət əvvəlki jurnalda qalır, yeni jurnala köçürülmür."
+msgstr ""
+"Основная группа не меняется. При смене уровня прежнее зачисление переходит в"
+" историю; оценки и посещаемость остаются в прежнем журнале и не переносятся "
+"в новый."
+
+msgctxt "registrar.language_cohort"
+msgid ""
+"Əvvəldən mövcud jurnallar və qeydlər saxlanılır. Bu siyahı onları yeni qrupa"
+" çevirmir."
+msgstr ""
+"Существующие журналы и записи сохраняются. Этот список не преобразует их в "
+"новую группу."
+
+msgctxt "registrar.language_cohort"
+msgid "Əvvəlki qiymətlər"
+msgstr "Прежние оценки"
+
+msgctxt "registrar.language_cohort"
+msgid "Əvvəlki səviyyə qeydləri"
+msgstr "Записи предыдущего уровня"
+
+msgctxt "registrar.language_cohort"
+msgid "Əvvəlki səviyyə qiymətləri"
+msgstr "Оценки предыдущего уровня"
+
+msgctxt "registrar.language_cohort"
+msgid "Əvvəlki səviyyədən keçidi təsdiqləyirəm"
+msgstr "Подтверждаю переход с предыдущего уровня"
+
+msgctxt "registrar.language_cohort"
+msgid "← Elektron jurnal"
+msgstr "← Электронный журнал"
+
+msgctxt "registrar.language_cohort"
+msgid "← Səviyyə qrupları"
+msgstr "← Уровневые группы"
+
+msgctxt "registrar.language_cohort"
+msgid "← Səviyyə qrupu"
+msgstr "← Уровневая группа"
+
+#, python-format
+msgctxt "registrar.retake"
+msgid ""
+"Qaytarılma ödənilmiş cəhdin verilmədiyini tanıyır: «İmtahana gəlmədi» ilə "
+"sayılmış 25%% cəhdi tələbəyə geri qayıdır. Rədd / geri götürmə cəhd saymır —"
+" orada bu seçim təsirsizdir. Qərardan sonra dəyişmir."
+msgstr ""
+"Возврат подтверждает, что оплаченная попытка не была использована: попытка "
+"за 25%%, учтённая как «Не явился на экзамен», возвращается студенту. Отказ "
+"или отзыв не считается попыткой, поэтому этот выбор там не влияет. После "
+"решения изменить нельзя."
+
+msgctxt "organizations.permission.label"
+msgid "Üzrlü qayıbı səbəblə dəyişmək və geri almaq"
+msgstr "Изменять и отменять уважительные пропуски с указанием причины"
+
+msgctxt "registrar.excused_management"
+msgid "Son düzəlişi geri al"
+msgstr "Отменить последнее исправление"
+
+msgctxt "registrar.excused_management"
+msgid "Səbəb 3–500 simvol olmalıdır."
+msgstr "Причина должна содержать 3–500 символов."
+
+msgctxt "registrar.excused_management"
+msgid "Səbəb qeydini saxlamaq mümkün olmadı."
+msgstr "Не удалось сохранить примечание с причиной."
+
+msgctxt "registrar.excused_management"
+msgid "Xana dəyişib. Jurnalı yeniləyib təkrar edin."
+msgstr "Ячейка изменилась. Обновите журнал и повторите попытку."
+
+msgctxt "registrar.excused_management"
+msgid ""
+"Yalnız davamiyyət dəyişir. Səbəb və əvvəlki dəyər tarixçədə saxlanılır; "
+"sənəd yükləmək tələb olunmur."
+msgstr ""
+"Меняется только посещаемость. Причина и прежнее значение сохраняются в "
+"истории; загружать документ не требуется."
+
+msgctxt "registrar.excused_management"
+msgid "Yeni davamiyyət seç"
+msgstr "Выберите новый статус посещаемости"
+
+msgctxt "registrar.excused_management"
+msgid "Yeni davamiyyəti seçin: iştirak və ya qayıb."
+msgstr "Выберите новый статус посещаемости: присутствовал или отсутствовал."
+
+msgctxt "registrar.excused_management"
+msgid "Üzrlü qayıb düzəlişi"
+msgstr "Исправление уважительного пропуска"
+
+msgctxt "registrar.excused_management"
+msgid "Üzrlü qayıbı səbəblə dəyiş və ya geri al"
+msgstr "Изменить или отменить уважительный пропуск с указанием причины"
+
+msgctxt "registrar.excused_management"
+msgid "Əməliyyat"
+msgstr "Действие"
+
+msgctxt "registrar.excused_management"
+msgid ""
+"Əvvəlki dəyəri məlum olmayan köçürülmüş üq üçün yeni davamiyyəti açıq seçin."
+" Köhnə sənəd saxlanılır."
+msgstr ""
+"Для импортированного уважительного пропуска с неизвестным прежним значением "
+"явно выберите новый статус посещаемости. Старый документ сохраняется."
+
+msgctxt "registrar.language_cohort"
+msgid "Qayıb limiti 10 q/b-dir; 11 q/b imtahana buraxılmır."
+msgstr ""
+"Лимит пропусков — 10 q/b; при 11 q/b студент не допускается к экзамену."
+
+msgctxt "registrar.language_cohort"
+msgid ""
+"Səviyyə qaydası: davamiyyət 10, seminar 10, midterm 10, imtahan 70 bal. "
+"Qayıb limiti 10 q/b-dir; 11 q/b olduqda imtahana buraxılmır."
+msgstr ""
+"Правило уровневых групп: посещаемость — 10, семинар — 10, промежуточный "
+"экзамен — 10, итоговый экзамен — 70 баллов. Лимит пропусков — 10 q/b; при 11"
+" q/b студент не допускается к экзамену."
+
+msgctxt "registrar.language_cohort"
+msgid "Əvvəlki xam bal saxlanılır; hesablamada ən çox 10 bal nəzərə alınır."
+msgstr ""
+"Сохраняется исходный введённый балл; в расчёте учитывается не более 10 "
+"баллов."
