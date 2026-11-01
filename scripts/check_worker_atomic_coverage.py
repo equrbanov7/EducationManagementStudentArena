@@ -60,6 +60,8 @@ INTENTIONAL_EXEMPTIONS = {
     # Fixed027 pointer-only diagnostic independently owns fresh tenant RR READ ONLY;
     # actual DB write rejection, RLS modes and strict normal-cycle rejection tested.
     "apps/workload/management/commands/export_wcu_syllabus_lineage_diagnostic.py",
+    # Fresh fixed Four/Source28 metadata-only RR READ ONLY transaction; PG write-rejection tests.
+    "apps/workload/management/commands/export_wcu_recovery_audit_diagnostic.py",
     # Fixed-four text-free history reader owns a fresh RR READ ONLY transaction;
     # no enclosing worker transaction is possible. Actual command and both-RLS tests.
     "apps/workload/management/commands/export_wcu_four_cell_history.py",

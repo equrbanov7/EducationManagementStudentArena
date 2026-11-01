@@ -240,17 +240,12 @@ def collect_available_history(*, _scope=None):
     prefix = "four_cell_history" if _scope is None else _scope.prefix
     undo_operation = "fixed_four_undo" if _scope is None else _scope.undo_operation
     model = apps.get_model
-    ids = {c[k] for c in cases.values() for k in ["offering_id", "lesson_id", "enrollment_id"]}
+    from .recovery_audit_scope import audit_locator, audit_queryset
+
     enrs = {c["enrollment_id"] for c in cases.values()}
     lessons = {c["lesson_id"] for c in cases.values()}
-    ids |= set(mark_ids(_cases=cases).values())
-    query = Q(resource_id__in=ids)
-    # Source-key text search has only hardcoded UUIDs, never a caller-supplied selector.
-    # It includes imported/merge/delete manifests whose resource_id is a batch UUID.
-    for field in ["changes", "old_values", "new_values"]:
-        for pk in ids:
-            query |= Q(**{field + "__icontains": pk})
-    audit = model("audit.AuditLog").objects.filter(organization_id=ORG).filter(query).order_by("created_at", "pk")
+    query = audit_locator(cases)
+    audit = audit_queryset(cases)
     pre = bounded(annotated(audit).values("id", "_raw_bytes"))
     if sum(r["_raw_bytes"] for r in pre) > MAX_AUDIT_BYTES or any(r["_raw_bytes"] > 1024 * 1024 for r in pre):
         raise ValueError("four_cell_audit_byte_budget_exceeded")
