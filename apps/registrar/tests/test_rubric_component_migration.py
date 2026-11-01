@@ -7,21 +7,21 @@ from django.conf import settings
 from django.db import connection, transaction
 from django.db.migrations.executor import MigrationExecutor
 from django.db.migrations.recorder import MigrationRecorder
-from django.test import TransactionTestCase
 
 import pytest
 
 from core.rls import bypass_rls
+from tests.historical_migration_case import HistoricalMigrationTestCase
 
-# Miqrasiya round-trip (migrate → sıfıra → geri) testləri xdist-də 4 worker-in
-# paralel miqrasiyası altında 300 s qlobal limiti keçə bilir (Develop run
-# 33778014237 flake-i); modul üçün limit ayrıca qaldırılır.
+# Real tarixi PostgreSQL sxemi hər case-in öz bazasındadır; worker sxemi/seed-i dəyişmir.
+# Mövcud timeout saxlanır; migration body və STOP assertion-ları eynidir.
 pytestmark = pytest.mark.timeout(1200)
 
 
-class CriterionComponentMigrationTest(TransactionTestCase):
+class CriterionComponentMigrationTest(HistoricalMigrationTestCase):
     migrate_from = ("registrar", "0043_correction_reversal_ledger")
     migrate_to = ("registrar", "0044_criterion_score_component_identity")
+    historical_migration_target = migrate_to
 
     def setUp(self):
         super().setUp()
@@ -30,7 +30,6 @@ class CriterionComponentMigrationTest(TransactionTestCase):
         if self._migrations_disabled:
             self.skipTest("MigrationExecutor testi --no-migrations rejimində işləmir.")
         executor = MigrationExecutor(connection)
-        self.latest_targets = executor.loader.graph.leaf_nodes()
         executor.migrate([self.migrate_to])
         if connection.vendor == "postgresql":
             with connection.cursor() as cursor:
@@ -39,46 +38,16 @@ class CriterionComponentMigrationTest(TransactionTestCase):
                     "GREATEST((SELECT COALESCE(MAX(id), 1) FROM auth_user), 1))"
                 )
 
-    def _fixture_teardown(self):
-        if getattr(self, "_migrations_disabled", False):
-            return super()._fixture_teardown()
-        executor = MigrationExecutor(connection)
-        applied = MigrationRecorder(connection).migration_qs.filter(app=self.migrate_to[0], name=self.migrate_to[1])
-        if not applied.exists():
-            old_apps = executor.loader.project_state([self.migrate_from]).apps
-            with bypass_rls():
-                old_apps.get_model("registrar", "CriterionScore").objects.all().delete()
-            executor.migrate([self.migrate_to])
-
-        new_apps = MigrationExecutor(connection).loader.project_state([self.migrate_to]).apps
-        with bypass_rls(), transaction.atomic():
-            new_apps.get_model("registrar", "CriterionScore").objects.all().delete()
-            new_apps.get_model("registrar", "ComponentScore").objects.all().delete()
-        MigrationExecutor(connection).migrate(self.latest_targets)
-        truncate_guard_tables = []
-        if connection.vendor == "postgresql":
-            with connection.cursor() as cursor:
-                cursor.execute("""
-                    SELECT DISTINCT c.relname
-                      FROM pg_catalog.pg_trigger t
-                      JOIN pg_catalog.pg_class c ON c.oid = t.tgrelid
-                      JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
-                     WHERE n.nspname = 'public' AND NOT t.tgisinternal
-                       AND (t.tgtype & 32) = 32
-                    """)
-                truncate_guard_tables = [row[0] for row in cursor.fetchall()]
-                for table in truncate_guard_tables:
-                    cursor.execute(f"ALTER TABLE {connection.ops.quote_name(table)} DISABLE TRIGGER USER")
-        try:
-            super()._fixture_teardown()
-        finally:
-            if truncate_guard_tables:
-                with connection.cursor() as cursor:
-                    for table in truncate_guard_tables:
-                        cursor.execute(f"ALTER TABLE {connection.ops.quote_name(table)} ENABLE TRIGGER USER")
-
     def _apps(self, target):
         return MigrationExecutor(connection).loader.project_state([target]).apps
+
+    def _score_evidence(self):
+        with transaction.atomic(), bypass_rls(), connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT id, organization_id, criterion_id, enrollment_id, points "
+                "FROM registrar_criterionscore ORDER BY id"
+            )
+            return cursor.fetchall()
 
     def _fixture(self, apps, *, component_count=1):
         suffix = uuid.uuid4().hex[:10]
@@ -167,11 +136,13 @@ class CriterionComponentMigrationTest(TransactionTestCase):
         }
 
     def _migrate_forward_fails(self, code):
+        before = self._score_evidence()
         with self.assertRaisesRegex(RuntimeError, code):
             MigrationExecutor(connection).migrate([self.migrate_to])
         self.assertFalse(
             MigrationRecorder(connection).migration_qs.filter(app=self.migrate_to[0], name=self.migrate_to[1]).exists()
         )
+        self.assertEqual(self._score_evidence(), before)
 
     def test_valid_evidence_survives_reverse_forward_round_trip(self):
         apps = self._apps(self.migrate_to)

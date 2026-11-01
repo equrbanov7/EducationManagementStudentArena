@@ -3,31 +3,30 @@
 from django.contrib.auth import get_user_model
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
-from django.test import TransactionTestCase
 
 import pytest
 
 from apps.exams.services.access_code_crypto import decrypt_access_code
 from core.constants import OrganizationType
+from tests.historical_migration_case import HistoricalMigrationTestCase
 
-# Miqrasiya round-trip (migrate → sıfıra → geri) testləri xdist-də 4 worker-in
-# paralel miqrasiyası altında 300 s qlobal limiti keçə bilir (Develop run
-# 33778014237 flake-i); modul üçün limit ayrıca qaldırılır.
+# Real tarixi PostgreSQL sxemi hər case-in öz bazasındadır; worker sxemi/seed-i dəyişmir.
+# Mövcud timeout saxlanır; migration body və STOP assertion-ları eynidir.
 pytestmark = [pytest.mark.postgres, pytest.mark.timeout(1200)]
 User = get_user_model()
 
 
 @pytest.mark.skipif(connection.vendor != "postgresql", reason="Migration rollback is verified on PostgreSQL.")
-class AccessCodeMigrationRollbackTests(TransactionTestCase):
+class AccessCodeMigrationRollbackTests(HistoricalMigrationTestCase):
     reset_sequences = True
 
     migrate_from = ("exams", "0050_access_code_encrypted_at_rest")
+    historical_migration_target = migrate_from
     migrate_to = ("exams", "0049_attempt_autosave_revision")
 
     def setUp(self):
         super().setUp()
         executor = MigrationExecutor(connection)
-        self.latest_targets = executor.loader.graph.leaf_nodes()
         executor.migrate([self.migrate_from])
         self._realign_sequences()
 
@@ -42,11 +41,6 @@ class AccessCodeMigrationRollbackTests(TransactionTestCase):
                 "SELECT setval(pg_get_serial_sequence('auth_user', 'id'), "
                 "GREATEST((SELECT COALESCE(MAX(id), 1) FROM auth_user), 1))"
             )
-
-    def tearDown(self):
-        # Restore the full graph before TransactionTestCase flushes the DB.
-        MigrationExecutor(connection).migrate(self.latest_targets)
-        super().tearDown()
 
     def test_reverse_migration_restores_plaintext_for_the_old_charfield(self):
         # 2026-10-17: exams-i 0050-yə qaytarmaq asılılıq zənciri ilə (accounts 0030 → organizations 0057 → …)

@@ -7,20 +7,20 @@ from django.conf import settings
 from django.db import connection
 from django.db.migrations.executor import MigrationExecutor
 from django.db.migrations.recorder import MigrationRecorder
-from django.test import TransactionTestCase
 
 import pytest
 
 from core.rls import bypass_rls
+from tests.historical_migration_case import HistoricalMigrationTestCase
 
-# Miqrasiya round-trip (migrate → sıfıra → geri) testləri xdist-də 4 worker-in
-# paralel miqrasiyası altında 300 s qlobal limiti keçə bilir (Develop run
-# 33778014237 flake-i); modul üçün limit ayrıca qaldırılır.
+# Real tarixi PostgreSQL sxemi hər case-in öz bazasındadır; worker sxemi/seed-i dəyişmir.
+# Mövcud timeout saxlanır; migration body və STOP assertion-ları eynidir.
 pytestmark = pytest.mark.timeout(1200)
 
 
-class ReferenceIdentityMigrationTest(TransactionTestCase):
+class ReferenceIdentityMigrationTest(HistoricalMigrationTestCase):
     migrate_from = ("registrar", "0044_criterion_score_component_identity")
+    historical_migration_target = migrate_from
     migrate_to = ("registrar", "0045_reference_identity_and_group_transfer")
 
     def setUp(self):
@@ -30,7 +30,6 @@ class ReferenceIdentityMigrationTest(TransactionTestCase):
         if self._migrations_disabled:
             self.skipTest("MigrationExecutor testi --no-migrations rejimində işləmir.")
         executor = MigrationExecutor(connection)
-        self.latest_targets = executor.loader.graph.leaf_nodes()
         executor.migrate([self.migrate_from])
         if connection.vendor == "postgresql":
             with connection.cursor() as cursor:
@@ -38,35 +37,6 @@ class ReferenceIdentityMigrationTest(TransactionTestCase):
                     "SELECT setval(pg_get_serial_sequence('auth_user', 'id'), "
                     "GREATEST((SELECT COALESCE(MAX(id), 1) FROM auth_user), 1))"
                 )
-
-    def _fixture_teardown(self):
-        if getattr(self, "_migrations_disabled", False):
-            return super()._fixture_teardown()
-        recorder = MigrationRecorder(connection)
-        applied = recorder.migration_qs.filter(app=self.migrate_to[0], name=self.migrate_to[1])
-        if not applied.exists():
-            MigrationExecutor(connection).migrate([self.migrate_to])
-        MigrationExecutor(connection).migrate(self.latest_targets)
-        truncate_guard_tables = []
-        if connection.vendor == "postgresql":
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    "SELECT DISTINCT c.relname FROM pg_catalog.pg_trigger t "
-                    "JOIN pg_catalog.pg_class c ON c.oid = t.tgrelid "
-                    "JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace "
-                    "WHERE n.nspname = 'public' AND NOT t.tgisinternal "
-                    "AND (t.tgtype & 32) = 32"
-                )
-                truncate_guard_tables = [row[0] for row in cursor.fetchall()]
-                for table in truncate_guard_tables:
-                    cursor.execute(f"ALTER TABLE {connection.ops.quote_name(table)} DISABLE TRIGGER USER")
-        try:
-            return super()._fixture_teardown()
-        finally:
-            if truncate_guard_tables:
-                with connection.cursor() as cursor:
-                    for table in truncate_guard_tables:
-                        cursor.execute(f"ALTER TABLE {connection.ops.quote_name(table)} ENABLE TRIGGER USER")
 
     def _apps(self, target):
         return MigrationExecutor(connection).loader.project_state([target]).apps
