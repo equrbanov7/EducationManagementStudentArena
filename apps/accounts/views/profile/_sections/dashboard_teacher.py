@@ -16,7 +16,7 @@ sorğu sayı artmır.
 from __future__ import annotations
 
 from django.urls import reverse
-from django.utils.translation import pgettext, pgettext_lazy
+from django.utils.translation import gettext, pgettext, pgettext_lazy
 
 from . import dashboard_lessons as lessons
 from .dashboard_widgets import (
@@ -85,7 +85,7 @@ def _offering_row(row) -> dict:
     meta = [row["group_name"]] if row["group_name"] else []
     meta.append(pgettext(_CTX, "%(count)s tələbə") % {"count": row["students"]})
     if row.get("is_history"):
-        meta.append(pgettext(_CTX, "Tarixçə: cari yük təyinatı yoxdur"))
+        meta.append(gettext("Tarixçə: cari yük təyinatı yoxdur"))
     held, plan = row["held_hours"], row["plan_hours"]
     if plan:
         value = pgettext(_CTX, "keçirilib %(held)s / %(plan)s saat") % {"held": held, "plan": plan}
