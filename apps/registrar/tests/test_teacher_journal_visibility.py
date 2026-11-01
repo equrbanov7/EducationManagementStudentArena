@@ -381,3 +381,122 @@ class TeacherJournalVisibilityTests(TestCase):
         self.task.status = TaskStatus.CANCELLED
         self.task.save(update_fields=["status"])
         self.assertEqual(self.context()["offerings"], [])
+
+    def handed_legacy(self, *, kind="seminar", recorded=True, stack=None):
+        stack = stack or make_structure(self.org, code="TV-HAND")
+        offering = self.offering(instructor=self.teacher, stack=stack)
+        event = TeachingHandover.objects.create(
+            organization=self.org,
+            offering=offering,
+            from_instructor=self.other,
+            to_instructor=self.teacher,
+            performed_by=self.org.owner,
+            reason="Current canonical handover of a populated legacy journal",
+        )
+        lesson = None
+        if recorded:
+            lesson = Lesson.objects.create(
+                organization=self.org,
+                offering=offering,
+                date=timezone.localdate(),
+                kind=kind,
+                hours=2,
+                instructor=self.other,
+                created_by=self.other,
+            )
+        return offering, event, lesson, stack
+
+    def test_canonical_current_handover_exposes_existing_kind_without_claiming_old_teacher_hours(self):
+        offering, _event, lesson, _stack = self.handed_legacy()
+        rows = self.context()["offerings"]
+        self.assertEqual([row.pk for row in rows], [offering.pk])
+        self.assertEqual(rows[0].slot_kinds, ["seminar"])
+        self.assertEqual((rows[0].journal_own_lessons, rows[0].journal_own_hours), (0, 0))
+        self.assertEqual(self.context(kind="lecture")["offerings"], [])
+        self.assertEqual([row.pk for row in self.context(kind="seminar")["offerings"]], [offering.pk])
+        self.assertEqual(self.context(teaching="history")["offerings"], [])
+        self.assertTrue(is_direct_editor(self.teacher, offering))
+        lesson.refresh_from_db()
+        self.assertEqual((lesson.instructor_id, lesson.created_by_id), (self.other.pk, self.other.pk))
+
+    def test_handover_with_empty_journal_or_future_lesson_does_not_revive_empty_owner(self):
+        offering, _event, _lesson, _stack = self.handed_legacy(recorded=False)
+        self.assertEqual(self.context()["offerings"], [])
+        import datetime
+
+        Lesson.objects.create(
+            organization=self.org,
+            offering=offering,
+            instructor=self.other,
+            hours=2,
+            date=timezone.localdate() + datetime.timedelta(days=1),
+        )
+        self.assertEqual(self.context()["offerings"], [])
+
+    def test_reverted_or_no_longer_owned_handover_supplies_no_current_assignment(self):
+        offering, event, _lesson, _stack = self.handed_legacy()
+        TeachingHandover.objects.filter(pk=event.pk).update(
+            reverted_at=timezone.now(), reverted_by=self.org.owner, revert_reason="Explicit undo"
+        )
+        self.assertEqual(self.context()["offerings"], [])
+        TeachingHandover.objects.filter(pk=event.pk).update(reverted_at=None, reverted_by=None, revert_reason="")
+        CourseOffering.objects.filter(pk=offering.pk).update(instructor=self.other)
+        self.assertEqual(self.context()["offerings"], [])
+
+    def test_handover_does_not_override_draft_cancelled_or_zero_official_row(self):
+        _offering, _event, _lesson, stack = self.handed_legacy()
+        task = make_task(self.org, stack["chair"], status=TaskStatus.DRAFT)
+        make_row(task, stack, lecture_total=0, seminar_total=0, lab_total=0)
+        self.assertEqual(self.context()["offerings"], [])
+        for status in (TaskStatus.CANCELLED, TaskStatus.AMENDED):
+            task.status = status
+            task.save(update_fields=["status"])
+            self.assertEqual(self.context()["offerings"], [])
+
+    def test_handover_child_cannot_bypass_its_registered_parent_draft_row(self):
+        child = self.child("handover")
+        self.handed_legacy(stack={**self.stack, "group": child})
+        self.task.status = TaskStatus.DRAFT
+        self.task.save(update_fields=["status"])
+        self.assertEqual(self.context()["offerings"], [])
+
+    def test_handover_does_not_expand_another_teachers_restricted_share(self):
+        offering, event, _lesson, _stack = self.handed_legacy(kind="lecture")
+        CourseOffering.objects.filter(pk=offering.pk).update(instructor=self.other)
+        TeachingHandover.objects.filter(pk=event.pk).update(to_instructor=self.other)
+        JournalShare.objects.create(organization=self.org, offering=offering, teacher=self.teacher, kinds=["seminar"])
+        self.assertEqual(self.context()["offerings"], [])
+        self.assertEqual(self.context(kind="lecture")["offerings"], [])
+
+    def test_handover_excludes_inactive_and_noncurrent_courses(self):
+        offering, _event, _lesson, _stack = self.handed_legacy()
+        CourseOffering.objects.filter(pk=offering.pk).update(is_active=False)
+        self.assertEqual(self.context()["offerings"], [])
+        CourseOffering.objects.filter(pk=offering.pk).update(is_active=True)
+        period = offering.period
+        period.is_current = False
+        period.save(update_fields=["is_current"])
+        self.assertEqual(self.context()["offerings"], [])
+        period.is_current, period.is_active = True, False
+        period.save(update_fields=["is_current", "is_active"])
+        self.assertEqual(self.context()["offerings"], [])
+
+    def test_handover_does_not_open_unassigned_intensive_course(self):
+        offering = CourseOffering.objects.create(
+            organization=self.org,
+            subject=self.stack["subject"],
+            period=self.stack["period"],
+            instructor=self.teacher,
+            course_format="intensive",
+            starts_on=timezone.localdate(),
+            ends_on=timezone.localdate(),
+        )
+        TeachingHandover.objects.create(
+            organization=self.org,
+            offering=offering,
+            from_instructor=self.other,
+            to_instructor=self.teacher,
+            performed_by=self.org.owner,
+        )
+        self.lesson(offering, instructor=self.other, hours=2)
+        self.assertEqual(self.context()["offerings"], [])

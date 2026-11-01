@@ -9,6 +9,7 @@ from django.utils import timezone
 
 from core.group_identity import canonical_aliases
 
+from .current_handover_journals import kind_filters as handover_kind_filters
 from .journal_assignment_sources import teacher_journal_assignments
 from .journal_master_history import attach as attach_master_history
 from .journal_master_history import historical_marks, identity_q
@@ -112,11 +113,13 @@ def project(queryset, user, organization, *, observed=()):
         output_field=BooleanField(),
     )
     current = Q(pk__in=[])
+    handed_over = handover_kind_filters(user, organization)
     for kind, condition in filters.items():
         shares = JournalShare.objects.filter(teacher=user, is_active=True).filter(
             Q(kinds=[]) | Q(kinds__contains=[kind])
         )
         condition &= Q(instructor=user) | Q(pk__in=shares.values("offering_id"))
+        condition |= handed_over[kind]
         annotations[f"journal_current_{kind}"] = Case(
             When(condition, then=Value(True)), default=Value(False), output_field=BooleanField()
         )
