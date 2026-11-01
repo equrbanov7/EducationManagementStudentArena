@@ -104,6 +104,8 @@ from .constants import (
     SectionKey,
     SyllabusStatus,
 )
+from .content_fingerprints import content_fingerprints
+from .content_fingerprints import typed_hours as syllabus_content_hours
 from .document import build_document  # noqa: F401
 from .editing import approved_edits_enabled
 from .policy import assessment_weights, standard_midterm, standard_project, standard_splits  # noqa: F401
@@ -354,6 +356,8 @@ def build_review_queue_context(
 
 
 __all__ = [
+    "content_fingerprints",
+    "syllabus_content_hours",
     "EDITABLE_STATUSES",
     "approved_edits_enabled",
     "build_document",
