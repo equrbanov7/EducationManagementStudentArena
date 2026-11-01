@@ -1580,7 +1580,7 @@ jobs:
             grep -E '^it8179_load: mode=(dry_run|apply)( ([a-z_]+=[0-9]+|baseline=[0-9a-f]{64}))*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
-              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              grep -Eo 'CommandError: [a-z0-9_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
               rm -f "$RUNNER_TEMP/out.log"
               exit "$status"
             fi
