@@ -56,6 +56,7 @@ LOCK_TIME = "time"  # müəllim yazıb, pəncərə bitib
 LOCK_LEGACY = "legacy"  # köhnə sistemdən köçürülüb (``entered_by`` boş)
 LOCK_CORRECTED = "corrected"  # RİM-in rəsmi (sənədli) düzəlişi var
 LOCK_ENTRY = "entry"  # balsız i/e xanası, amma dərsin yazma müddəti bitib (sahib 2026-10-26)
+LOCK_UNSUPPORTED_SCORE = "unsupported_score"  # əvvəlki rəqəm növün adi formasında silinə bilməz
 
 #: «RİM-ə müraciət edib təqdimat yazın» keçidinin müraciət növü — müəllimin göndərə bildiyi və RİM-ə gedən
 #: YEGANƏ növ «Texniki problem»dir (qeydi: «Sistemə giriş, jurnal, e-poçt»). Ayrıca «Jurnal düzəlişi» növü
@@ -157,7 +158,7 @@ def reopens_presence(mark, *, now=None, window=None) -> bool:
     return is_open_presence(mark) and not _within_window(mark, now=now or timezone.now(), window=window)
 
 
-def mark_lock_reason(mark, *, now=None, window=None, entry_open=True) -> str:
+def mark_lock_reason(mark, *, now=None, window=None, entry_open=True, unsupported_score=False) -> str:
     """Müəllim bu xananı DƏYİŞƏ bilmirsə səbəb (``LOCK_TIME`` / ``LOCK_LEGACY`` / ``LOCK_ENTRY``), bilirsə «».
 
     Boş xana (``None``) kilidli deyil (yeni qeyd :class:`EntryRule`-a tabedir). Kilid İLK yazılışdan
@@ -169,6 +170,8 @@ def mark_lock_reason(mark, *, now=None, window=None, entry_open=True) -> str:
     """
     if mark is None:
         return ""
+    if unsupported_score:
+        return LOCK_UNSUPPORTED_SCORE
     now = now or timezone.now()
     if _within_window(mark, now=now, window=window):
         return ""
@@ -181,6 +184,11 @@ def mark_lock_reason(mark, *, now=None, window=None, entry_open=True) -> str:
 
 def lock_message(reason: str, *, window=None) -> str:
     """Kilidli xananın istifadəçi mətni (UI dialoqu, forma xəbərdarlığı, avtomatik yadda saxlamanın 409-u)."""
+    if reason == LOCK_UNSUPPORTED_SCORE:
+        return pgettext(
+            _CTX,
+            "Bu dərs növündə saxlanmış əvvəlki bal müəllim tərəfindən dəyişdirilə bilməz. Düzəliş üçün RİM-ə müraciət edin.",
+        )
     if reason == LOCK_LEGACY:
         return pgettext(
             _CTX,
@@ -286,6 +294,7 @@ def template_context(today=None) -> dict:
             LOCK_TIME: lock_message(LOCK_TIME, window=mark_window),
             LOCK_LEGACY: lock_message(LOCK_LEGACY),
             LOCK_ENTRY: lock_message(LOCK_ENTRY),
+            LOCK_UNSUPPORTED_SCORE: lock_message(LOCK_UNSUPPORTED_SCORE),
         },
         "mark_lock_request_url": fix_request_url(),
     }
@@ -302,6 +311,7 @@ __all__ = [
     "LOCK_ENTRY",
     "LOCK_LEGACY",
     "LOCK_TIME",
+    "LOCK_UNSUPPORTED_SCORE",
     "MARK_EDIT_WINDOW",
     "activation_start",
     "activation_write_window",

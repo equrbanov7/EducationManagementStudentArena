@@ -113154,3 +113154,28 @@ msgid ""
 msgstr ""
 "Sie sind nicht zur Prüfung zugelassen: %(count)s unentschuldigte Fehltermine"
 " überschreiten die Grenze von %(limit)s für diese Stufe."
+
+msgid "Adınıza keçirilmiş birgə dərslər"
+msgstr "Von Ihnen gehaltene gemeinsame Lehrveranstaltungen"
+
+msgid "Birgə keçirilmiş dərslər"
+msgstr "Gemeinsam gehaltene Lehrveranstaltungen"
+
+msgid "Qrupların ayrıca qeydləri"
+msgstr "Separate Gruppenaufzeichnungen"
+
+msgid "Müəllifi göstərilməyən tarixçə"
+msgstr "Historie ohne eingetragene Lehrkraft"
+
+msgid "Ayrıca keçirilmiş dərslər"
+msgstr "Separat gehaltene Lehrveranstaltungen"
+
+msgid "Bu qeydlər birgə keçirilmiş dərs saatlarına əlavə edilmir; tam tarixçədə ayrıca saxlanılır."
+msgstr "Diese Einträge werden nicht zu den gemeinsamen Unterrichtsstunden addiert und bleiben separat in der vollständigen Historie erhalten."
+
+msgid "Yalnız oxu"
+msgstr "Nur lesen"
+
+msgctxt "registrar.journal_timing"
+msgid "Bu dərs növündə saxlanmış əvvəlki bal müəllim tərəfindən dəyişdirilə bilməz. Düzəliş üçün RİM-ə müraciət edin."
+msgstr "Die bereits gespeicherte Note für diese Unterrichtsart kann von der Lehrkraft nicht geändert werden. Wenden Sie sich für eine Korrektur an RIM."

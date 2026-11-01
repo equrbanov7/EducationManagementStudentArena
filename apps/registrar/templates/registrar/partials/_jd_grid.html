@@ -9,7 +9,7 @@ Dəyişikliklər localStorage qaralamasına düşür (journal_grid.js).{% endcom
 sonra eyni ünvana (`action=save_marks`, `autosave=1` → JSON) gedir; «Yadda saxla» düyməsi ehtiyat
 yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.py.{% endcomment %}
 <form method="post" class="journal-form" data-jd-marks-form data-jd-draft="grid"{% if full_edit_active %} data-jd-full-edit{% endif %}{% if can_edit and journal.lessons and not correction_mode %} data-jd-autosave data-jd-autosave-url="{% url 'registrar:journal_detail' offering.id %}"{% endif %}
-      {% if can_edit and not correction_mode %}data-jd-lock-msg-time="{{ mark_lock_messages.time }}" data-jd-lock-msg-legacy="{{ mark_lock_messages.legacy }}" data-jd-lock-msg-entry="{{ mark_lock_messages.entry }}" data-jd-lock-url="{{ mark_lock_request_url }}" data-jd-lock-title="{% trans 'Xana kilidlidir' context 'registrar.journal_timing' %}" data-jd-lock-confirm="{% trans 'RİM-ə müraciət yaz' context 'registrar.journal_timing' %}" data-jd-lock-cancel="{% trans 'Bağla' context 'registrar.journal_timing' %}"{% endif %}>
+      {% if can_edit and not correction_mode %}data-jd-lock-msg-time="{{ mark_lock_messages.time }}" data-jd-lock-msg-legacy="{{ mark_lock_messages.legacy }}" data-jd-lock-msg-entry="{{ mark_lock_messages.entry }}" data-jd-lock-msg-unsupported_score="{{ mark_lock_messages.unsupported_score }}" data-jd-lock-url="{{ mark_lock_request_url }}" data-jd-lock-title="{% trans 'Xana kilidlidir' context 'registrar.journal_timing' %}" data-jd-lock-confirm="{% trans 'RİM-ə müraciət yaz' context 'registrar.journal_timing' %}" data-jd-lock-cancel="{% trans 'Bağla' context 'registrar.journal_timing' %}"{% endif %}>
     {% csrf_token %}
     <input type="hidden" name="action" value="save_marks">
     {% if full_edit_active %}{# «Data bərpası»: səbəb dialoqundan (journal_full_edit.js) — hər avtomatik göndərişə qoşulur #}<input type="hidden" name="full_edit_reason" value="" data-jd-autosave-extra data-jd-fe-reason>{% endif %}
@@ -253,12 +253,12 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                                     {% if can_edit and cell.lock_reason %}{% with lk=cell.lock_reason %}
                                     {% if cell.mark.status == 'absent' %}<span class="jd2-ro jd2-ro--qb jd2-ro--locked" data-jd-lock="{{ lk }}">q/b</span>
                                     {% elif cell.mark.status == 'excused' %}<span class="jd2-ro jd2-ro--uq jd2-ro--locked" data-jd-lock="{{ lk }}">üq</span>
-                                    {% elif cell.allows_score and cell.mark.score is not None %}<span class="jd2-ro jd2-ro--ie jd2-ro--locked" data-jd-lock="{{ lk }}">{{ cell.mark.score|floatformat:'-2' }}</span>
+                                    {% elif cell.mark.score is not None %}<span class="jd2-ro jd2-ro--ie jd2-ro--locked" data-jd-lock="{{ lk }}">{{ cell.mark.score|floatformat:'-2' }}</span>
                                     {% else %}<span class="jd2-ro jd2-ro--ie jd2-ro--locked" data-jd-lock="{{ lk }}">i/e</span>{% endif %}
                                     {% endwith %}{% else %}
                                     {% if cell.mark.status == 'absent' %}<span class="jd2-ro jd2-ro--qb">q/b</span>
                                     {% elif cell.mark.status == 'excused' %}<span class="jd2-ro jd2-ro--uq">üq</span>
-                                    {% elif cell.allows_score and cell.mark.score is not None %}<span class="jd2-ro jd2-ro--ie">{{ cell.mark.score|floatformat:'-2' }}</span>
+                                    {% elif cell.mark.score is not None %}<span class="jd2-ro jd2-ro--ie">{{ cell.mark.score|floatformat:'-2' }}</span>
                                     {% else %}<span class="jd2-ro jd2-ro--ie">i/e</span>{% endif %}
                                     {% endif %}
                                 {% else %}<span class="jd2-ro jd2-ro--empty">—</span>{% endif %}

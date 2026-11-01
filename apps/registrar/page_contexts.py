@@ -230,6 +230,17 @@ def journal_list_context(user, request=None) -> dict:
 
     if not is_broad and teaching_view == "current":
         qs = joint_journal_list.project(qs, organization=organization, user=user, selected_kind=selected_kind)
+    elif is_broad and selected_teacher:
+        from .joint_journal_observation import project as project_observed
+
+        qs = project_observed(
+            qs,
+            organization=organization,
+            actor=user,
+            teacher_id=selected_teacher,
+            selected_kind=selected_kind,
+            request=request,
+        )
     paginator = Paginator(qs, 20)
     page_obj = paginator.get_page(request.GET.get("page") if request is not None else None)
     row_offset = page_obj.start_index() - 1 if page_obj else 0
@@ -245,7 +256,7 @@ def journal_list_context(user, request=None) -> dict:
         teacher_journal_list.attach(user, page_offerings, selected_kind=selected_kind)
     attach_labels(page_offerings, within=base_qs)
     jls.attach(page_offerings, occurrences)
-    joint_journal_list.attach(page_offerings)
+    joint_journal_list.attach(page_offerings, user=user)
     querystring = ""
     if request is not None:
         params = request.GET.copy()

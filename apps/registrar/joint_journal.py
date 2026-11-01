@@ -191,7 +191,7 @@ def save_marks(*, organization, user, source_row_id, kind, entries, request=None
     joint = _locked_joint(organization, user, source_row_id, kind)
     entries = list(entries)
     lessons = {
-        str(lesson.pk): lesson.offering_id
+        str(lesson.pk): lesson
         for lesson in Lesson.objects.filter(organization=organization, offering_id__in=joint.offering_ids, kind=kind)
     }
     enrollments = {
@@ -204,7 +204,7 @@ def save_marks(*, organization, user, source_row_id, kind, entries, request=None
     seen = set()
     for entry in entries:
         lesson_id, enrollment_id = str(entry.get("lesson_id")), str(entry.get("enrollment_id"))
-        offering_id = lessons.get(lesson_id)
+        offering_id = getattr(lessons.get(lesson_id), "offering_id", None)
         pair = (lesson_id, enrollment_id)
         if (
             offering_id is None
@@ -215,16 +215,19 @@ def save_marks(*, organization, user, source_row_id, kind, entries, request=None
             raise JointJournalError("Xana birgə jurnalın dərs və tələbə əhatəsinə aid deyil.")
         seen.add(pair)
         batches[offering_id].append(entry)
-    protected = (
-        LessonMark.objects.filter(
-            organization=organization,
-            lesson_id__in=[pair[0] for pair in seen],
-            enrollment_id__in=[pair[1] for pair in seen],
+    protected = LessonMark.objects.filter(
+        organization=organization,
+        lesson_id__in=[pair[0] for pair in seen],
+        enrollment_id__in=[pair[1] for pair in seen],
+    ).values_list("lesson_id", "enrollment_id", "status", "score")
+    if any(
+        (str(lesson_id), str(enrollment_id)) in seen
+        and (
+            status not in ("present", "absent")
+            or (score is not None and not gradebook.lesson_allows_score(lessons[str(lesson_id)]))
         )
-        .exclude(status__in=("present", "absent"))
-        .values_list("lesson_id", "enrollment_id")
-    )
-    if any((str(lesson_id), str(enrollment_id)) in seen for lesson_id, enrollment_id in protected):
+        for lesson_id, enrollment_id, status, score in protected
+    ):
         raise JointJournalError("Üzrlü və digər qorunan davamiyyət qeydləri burada dəyişdirilə bilməz.")
     written = 0
     for offering in joint.offerings:

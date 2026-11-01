@@ -134,13 +134,16 @@ def attach(user, offerings, *, selected_kind=""):
         return
     ids = [offering.pk for offering in offerings]
     contributions = {
-        row["offering_id"]: row["count"]
-        for row in recorded_lessons(user).filter(offering_id__in=ids).values("offering_id").annotate(count=Count("pk"))
+        (row["offering_id"], row["kind"]): row["count"]
+        for row in recorded_lessons(user)
+        .filter(offering_id__in=ids)
+        .values("offering_id", "kind")
+        .annotate(count=Count("pk"))
     }
     taught = {
-        row["offering_id"]: row
+        (row["offering_id"], row["kind"]): row
         for row in Lesson.objects.filter(offering_id__in=ids, instructor=user, date__lte=timezone.localdate())
-        .values("offering_id")
+        .values("offering_id", "kind")
         .annotate(count=Count("pk"), hours=Sum("hours"))
     }
     labels = dict(SlotKind.choices)
@@ -157,8 +160,10 @@ def attach(user, offerings, *, selected_kind=""):
         shown = [kind for kind in kinds if kind == selected_kind] if selected_kind else kinds
         offering_labels = dict(kind_choices(offering, labels))
         offering.kind_label = " · ".join(str(offering_labels[kind]) for kind in shown)
-        offering.journal_own_lessons = taught.get(offering.pk, {}).get("count", 0)
-        offering.journal_own_hours = taught.get(offering.pk, {}).get("hours", 0)
-        offering.journal_contributed_lessons = contributions.get(offering.pk, 0)
+        entry_kind = getattr(offering, "journal_entry_kind", "") or selected_kind
+        count_kinds = [entry_kind] if entry_kind in KINDS else KINDS
+        offering.journal_own_lessons = sum(taught.get((offering.pk, kind), {}).get("count", 0) for kind in count_kinds)
+        offering.journal_own_hours = sum(taught.get((offering.pk, kind), {}).get("hours", 0) for kind in count_kinds)
+        offering.journal_contributed_lessons = sum(contributions.get((offering.pk, kind), 0) for kind in count_kinds)
         offering.journal_own_history_link = not current and bool(offering.journal_contributed_lessons)
         attach_master_history(offering, kind=selected_kind)

@@ -7,8 +7,9 @@
     <a href="{% url 'registrar:journal_list' %}">← Elektron jurnal</a>
     <h1>{{ joint.group_label }} · {{ kind_label }}</h1>
     <p>{{ offering.subject.name }} · {{ offering.period.name }}</p>
+    {% include "registrar/partials/_joint_record_summary.html" with own_lessons=joint_record.own_lessons own_hours=joint_record.own_hours history=joint_record.history record_teacher=joint_observed_teacher %}
     <p>Birgə dərsin davamiyyət və ballarını bütün qruplar üçün burada yazın. Son 12 dərs göstərilir.</p>
-    {% if joint_locked %}<p role="status">Birgə jurnalın açılışlarından biri kilidlidir. Jurnal yalnız oxunur.</p>{% else %}
+    {% if joint_read_only %}<p role="status">{% trans "Yalnız oxu" %}</p>{% elif joint_locked %}<p role="status">Birgə jurnalın açılışlarından biri kilidlidir. Jurnal yalnız oxunur.</p>{% else %}
     <details class="joint-create">
         <summary>Yeni birgə dərs</summary>
         <form method="post">
@@ -27,8 +28,9 @@
         </form>
     </details>
     {% endif %}
-    <form method="post">
+    {% if not joint_read_only %}<form method="post">
         {% csrf_token %}<input type="hidden" name="action" value="save_marks">
+    {% endif %}
         <div class="joint-grid-scroll">
             <table class="joint-grid">
                 <caption>{{ joint.group_label }} — {{ kind_label }} · {{ rows|length }} tələbə</caption>
@@ -56,8 +58,8 @@
                 </tbody>
             </table>
         </div>
-        {% if columns %}{% if not joint_locked %}<button type="submit">Bütün qruplar üçün yadda saxla</button>{% endif %}{% else %}<p>Bu dərs növündə hələ dərs qeydi yoxdur.</p>{% endif %}
-    </form>
+        {% if columns %}{% if not joint_locked and not joint_read_only %}<button type="submit">Bütün qruplar üçün yadda saxla</button>{% endif %}{% else %}<p>Bu dərs növündə hələ dərs qeydi yoxdur.</p>{% endif %}
+    {% if not joint_read_only %}</form>{% endif %}
     <details><summary>Qrup jurnalları və tam tarixçə</summary><ul>
         {% for member in joint.offerings %}<li><a href="{% url 'registrar:journal_detail' member.pk %}?kind={{ joint.kind }}">{{ member.group.name }} — tam jurnal və əvvəlki qeydlər</a></li>{% endfor %}
     </ul></details>

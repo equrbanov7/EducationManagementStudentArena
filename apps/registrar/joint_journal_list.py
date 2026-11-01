@@ -1,6 +1,7 @@
 """Teacher-only virtual entries, projected before pagination and after ORM filters."""
 
 from copy import copy
+from urllib.parse import urlencode
 
 from django.db.models import Count
 from django.urls import reverse
@@ -10,23 +11,36 @@ from .models import Enrollment
 from .practical_label import kind_choices
 
 
-def project(queryset, *, organization, user, selected_kind):
+def project(queryset, *, organization, user, selected_kind, observer=None, observer_request=None):
     joints = selections(organization=organization, user=user)
+    if observer is not None:
+        from .joint_journal_observation import allowed
+
+        joints = allowed(joints, observer, request=observer_request)
     if not joints:
         return queryset
     # The already-authorized and filtered set remains the outer boundary. A
     # joint candidate cannot restore a group removed by year/season/kind/scope.
     offerings = list(queryset)
-    allowed = {offering.pk for offering in offerings if offering.journal_is_current_load}
+    allowed_ids = {offering.pk for offering in offerings if observer is not None or offering.journal_is_current_load}
     joints = [
         joint
         for joint in joints
-        if joint.offering_ids <= allowed and (not selected_kind or joint.kind == selected_kind)
+        if joint.offering_ids <= allowed_ids and (not selected_kind or joint.kind == selected_kind)
     ]
     if not joints:
         return offerings
     by_pair = {(pk, joint.kind): joint for joint in joints for pk in joint.offering_ids}
     affected = set().union(*(joint.offering_ids for joint in joints))
+    if observer is not None:
+        from .teacher_journal_list import project as project_teacher
+
+        current = {
+            offering.pk: offering for offering in project_teacher(queryset.filter(pk__in=affected), user, organization)
+        }
+        if not affected <= current.keys():
+            return offerings
+        offerings = [current.get(offering.pk, offering) for offering in offerings]
     emitted, entries = set(), []
     for offering in offerings:
         if offering.pk not in affected:
@@ -44,16 +58,20 @@ def project(queryset, *, organization, user, selected_kind):
             entry = copy(offering)
             entry.journal_entry_kind = kind
             entry.joint_selection = joint
+            if observer is not None:
+                entry.joint_observed_teacher = user
             entry.journal_entry_url = (
                 reverse("registrar:joint_journal", args=[joint.source_row_id, kind])
                 if joint
                 else f"{reverse('registrar:journal_detail', args=[offering.pk])}?kind={kind}"
             )
+            if joint and observer is not None:
+                entry.journal_entry_url += "?" + urlencode({"teacher": user.pk, "observe": "1"})
             entries.append(entry)
     return entries
 
 
-def attach(entries):
+def attach(entries, *, user=None):
     joints = [entry.joint_selection for entry in entries if getattr(entry, "joint_selection", None)]
     ids = set().union(*(joint.offering_ids for joint in joints)) if joints else set()
     counts = (
@@ -77,3 +95,16 @@ def attach(entries):
         if joint:
             entry.journal_group_name = joint.group_label
             entry.student_count = sum(counts.get(pk, 0) for pk in joint.offering_ids)
+    if user is not None:
+        from .teacher_journal_list import attach as attach_teacher
+
+        observed = {}
+        for entry in entries:
+            teacher = getattr(entry, "joint_observed_teacher", None)
+            if teacher is not None:
+                observed.setdefault(teacher, []).append(entry)
+        for teacher, rows in observed.items():
+            attach_teacher(teacher, rows)
+        from .joint_journal_records import attach as attach_records
+
+        attach_records(entries, user)

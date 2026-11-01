@@ -112098,3 +112098,28 @@ msgid ""
 msgstr ""
 "You are not admitted to the exam: %(count)s unexcused absences exceed this "
 "level's limit of %(limit)s."
+
+msgid "Adınıza keçirilmiş birgə dərslər"
+msgstr "Joint lessons taught by you"
+
+msgid "Birgə keçirilmiş dərslər"
+msgstr "Joint lessons taught"
+
+msgid "Qrupların ayrıca qeydləri"
+msgstr "Separate group records"
+
+msgid "Müəllifi göstərilməyən tarixçə"
+msgstr "History with no recorded instructor"
+
+msgid "Ayrıca keçirilmiş dərslər"
+msgstr "Separately taught lessons"
+
+msgid "Bu qeydlər birgə keçirilmiş dərs saatlarına əlavə edilmir; tam tarixçədə ayrıca saxlanılır."
+msgstr "These records are excluded from joint teaching hours and remain separate in the full history."
+
+msgid "Yalnız oxu"
+msgstr "Read only"
+
+msgctxt "registrar.journal_timing"
+msgid "Bu dərs növündə saxlanmış əvvəlki bal müəllim tərəfindən dəyişdirilə bilməz. Düzəliş üçün RİM-ə müraciət edin."
+msgstr "The previously stored score for this lesson type cannot be changed by the teacher. Contact RIM for a correction."

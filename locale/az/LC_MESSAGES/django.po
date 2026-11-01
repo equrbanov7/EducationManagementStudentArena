@@ -111583,3 +111583,28 @@ msgid ""
 msgstr ""
 "İmtahana buraxılmırsınız: %(count)s üzrsüz qayıb bu səviyyənin %(limit)s q/b"
 " həddini keçir."
+
+msgid "Adınıza keçirilmiş birgə dərslər"
+msgstr "Adınıza keçirilmiş birgə dərslər"
+
+msgid "Birgə keçirilmiş dərslər"
+msgstr "Birgə keçirilmiş dərslər"
+
+msgid "Qrupların ayrıca qeydləri"
+msgstr "Qrupların ayrıca qeydləri"
+
+msgid "Müəllifi göstərilməyən tarixçə"
+msgstr "Müəllifi göstərilməyən tarixçə"
+
+msgid "Ayrıca keçirilmiş dərslər"
+msgstr "Ayrıca keçirilmiş dərslər"
+
+msgid "Bu qeydlər birgə keçirilmiş dərs saatlarına əlavə edilmir; tam tarixçədə ayrıca saxlanılır."
+msgstr "Bu qeydlər birgə keçirilmiş dərs saatlarına əlavə edilmir; tam tarixçədə ayrıca saxlanılır."
+
+msgid "Yalnız oxu"
+msgstr "Yalnız oxu"
+
+msgctxt "registrar.journal_timing"
+msgid "Bu dərs növündə saxlanmış əvvəlki bal müəllim tərəfindən dəyişdirilə bilməz. Düzəliş üçün RİM-ə müraciət edin."
+msgstr "Bu dərs növündə saxlanmış əvvəlki bal müəllim tərəfindən dəyişdirilə bilməz. Düzəliş üçün RİM-ə müraciət edin."

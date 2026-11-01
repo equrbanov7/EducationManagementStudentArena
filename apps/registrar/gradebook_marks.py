@@ -188,6 +188,16 @@ def save_marks(
         clearing = entry.get("status") == CLEAR
         if clearing and (mark is None or not full_edit):
             continue  # «təmizlə» yalnız data bərpası rejimində və yalnız mövcud xanada
+        if (
+            mark is not None
+            and mark.score is not None
+            and not gradebook.lesson_allows_score(lesson)
+            and not clearing
+            and entry.get("score") not in (None, "")
+            and parse_lesson_score(entry.get("score")) != mark.score
+        ):
+            rejected += 1  # An unsupported replacement is not an instruction to erase the old number.
+            continue
         lock = ""
         reopened = False  # pəncərədən kənar balsız i/e — dəyişikliyi YENİ qeyd kimi yazılır (sahib 2026-10-26)
         if mark is not None and (mark.pk in corrected_ids or (full_edit and mark.status == AttendanceStatus.EXCUSED)):
@@ -195,7 +205,13 @@ def save_marks(
         elif mark is not None:
             reopened = journal_edit_windows.reopens_presence(mark, now=now, window=lock_window)
             entry_open = entry_rule.allows(lesson) if (reopened and entry_rule is not None) else True
-            lock = journal_edit_windows.mark_lock_reason(mark, now=now, window=lock_window, entry_open=entry_open)
+            lock = journal_edit_windows.mark_lock_reason(
+                mark,
+                now=now,
+                window=lock_window,
+                entry_open=entry_open,
+                unsupported_score=mark.score is not None and not gradebook.lesson_allows_score(lesson),
+            )
         bypass = journal_locked  # bağlı jurnalda hər yazı data bərpasıdır
         if lock:
             # Kilidli xana yazılmır. Grid-in geri göndərdiyi EYNİ dəyər səssiz keçir; fərqli dəyər — kilid cavabı.
@@ -372,6 +388,11 @@ def _differs(mark, entry, lesson) -> bool:
     if status != mark.status:
         return True
     raw = entry.get("score")
+    if not gradebook.lesson_allows_score(lesson):
+        # A lecture form has no score input. Omission must not turn a stored
+        # legacy number (including zero) into empty. Explicit RIM clear/change
+        # still follows the existing full-edit reason and audit gates.
+        return mark.score is not None and raw not in (None, "") and parse_lesson_score(raw) != mark.score
     if status == AttendanceStatus.ABSENT or not gradebook.lesson_allows_score(lesson) or raw in (None, ""):
         score = None
     else:

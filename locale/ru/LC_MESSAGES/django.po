@@ -112292,3 +112292,28 @@ msgid ""
 msgstr ""
 "Вы не допущены к экзамену: число пропусков без уважительной причины "
 "(%(count)s) превышает предел для этого уровня (%(limit)s)."
+
+msgid "Adınıza keçirilmiş birgə dərslər"
+msgstr "Проведённые вами совместные занятия"
+
+msgid "Birgə keçirilmiş dərslər"
+msgstr "Проведённые совместные занятия"
+
+msgid "Qrupların ayrıca qeydləri"
+msgstr "Отдельные записи групп"
+
+msgid "Müəllifi göstərilməyən tarixçə"
+msgstr "История без указанного преподавателя"
+
+msgid "Ayrıca keçirilmiş dərslər"
+msgstr "Отдельно проведённые занятия"
+
+msgid "Bu qeydlər birgə keçirilmiş dərs saatlarına əlavə edilmir; tam tarixçədə ayrıca saxlanılır."
+msgstr "Эти записи не добавляются к часам совместных занятий и хранятся отдельно в полной истории."
+
+msgid "Yalnız oxu"
+msgstr "Только чтение"
+
+msgctxt "registrar.journal_timing"
+msgid "Bu dərs növündə saxlanmış əvvəlki bal müəllim tərəfindən dəyişdirilə bilməz. Düzəliş üçün RİM-ə müraciət edin."
+msgstr "Преподаватель не может изменить ранее сохранённый балл для этого вида занятия. Для исправления обратитесь в РИМ."

@@ -23,8 +23,8 @@ def _session_key(lesson):
     return (lesson.date, lesson.start_time, lesson.end_time, lesson.topic, lesson.hours, lesson.instructor_id)
 
 
-def _grid(joint, user):
-    locked = any(gradebook.journal_is_locked(offering) for offering in joint.offerings)
+def _grid(joint, user, *, read_only=False):
+    locked = read_only or any(gradebook.journal_is_locked(offering) for offering in joint.offerings)
     fields = ("date", "start_time", "end_time", "topic", "hours", "instructor_id")
     # Determine ambiguity over ALL historical lessons, before either member or
     # combined windows. An ordinal among truncated duplicates is not identity.
@@ -61,7 +61,13 @@ def _grid(joint, user):
     for offering, journal in journals:
         for row in journal["rows"]:
             for cell in row["cells"]:
-                if locked or (cell["mark"] and cell["mark"].status not in ("present", "absent")):
+                if locked or (
+                    cell["mark"]
+                    and (
+                        cell["mark"].status not in ("present", "absent")
+                        or (cell["mark"].score is not None and not cell["allows_score"])
+                    )
+                ):
                     cell["writable"] = False
             own = {lesson_keys[cell["lesson"].pk]: cell for cell in row["cells"]}
             rows.append({**row, "group": offering.group, "cells": [own.get(key) for key in keys]})
@@ -98,6 +104,16 @@ def detail(request, source_row_id, kind):
     organization = getattr(request, "organization", None)
     if organization is None:
         raise Http404
+    if "teacher" in request.GET:
+        from .joint_journal_observation import detail as observed_detail
+
+        return observed_detail(
+            request,
+            organization=organization,
+            source_row_id=source_row_id,
+            kind=kind,
+            teacher_id=request.GET["teacher"],
+        )
     args = dict(organization=organization, user=request.user, source_row_id=source_row_id, kind=kind)
     joint = joint_journal.resolve(**args)
     url = reverse("registrar:joint_journal", args=[source_row_id, kind])
@@ -132,13 +148,25 @@ def detail(request, source_row_id, kind):
         except AuditWriteFailed:
             messages.error(request, audit_failure_message())
         return redirect(url)
-    columns, rows = _grid(joint, request.user)
-    slots = list(
-        ScheduleSlot.objects.filter(
-            organization=organization,
-            offering=joint.offerings[0],
-            kind=kind,
-            is_parked=False,
+    return _render_detail(request, joint, record_user=request.user)
+
+
+def _render_detail(request, joint, *, record_user, read_only=False):
+    organization, kind = joint.offerings[0].organization, joint.kind
+    columns, rows = _grid(joint, request.user, read_only=read_only)
+    from .joint_journal_records import summaries
+
+    joint_record = summaries([joint], record_user)[joint.source_row_id, joint.kind]
+    slots = (
+        []
+        if read_only
+        else list(
+            ScheduleSlot.objects.filter(
+                organization=organization,
+                offering=joint.offerings[0],
+                kind=kind,
+                is_parked=False,
+            )
         )
     )
     for slot in slots:
@@ -151,6 +179,9 @@ def detail(request, source_row_id, kind):
             "offering": joint.offerings[0],
             "columns": columns,
             "rows": rows,
+            "joint_record": joint_record,
+            "joint_read_only": read_only,
+            "joint_observed_teacher": record_user if read_only else None,
             "kind_label": dict(kind_choices(joint.offerings[0]))[kind],
             "slots": slots,
             "today": timezone.localdate(),

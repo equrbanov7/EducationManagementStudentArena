@@ -190,7 +190,7 @@
 
         // Qrup seçimi cədvəlində sətir kliki (düymənin özü istisna).
         var listRow = event.target.closest("[data-jl-href]");
-        if (listRow && !event.target.closest("a, button, input, select")) {
+        if (listRow && !event.target.closest("a, button, input, select, details, summary")) {
             window.location.href = listRow.getAttribute("data-jl-href");
             return;
         }

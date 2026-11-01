@@ -306,7 +306,11 @@ def get_offering_journal(
             corrected = mark is not None and mark.id in corrected_mark_ids
             # Balsız i/e xanası pəncərədən sonra da dəyişir — dərsə yeni qeyd yazmaq olursa (sahib 2026-10-26).
             lock_reason = journal_edit_windows.mark_lock_reason(
-                mark, now=now, window=lock_window, entry_open=markable[lesson.id]
+                mark,
+                now=now,
+                window=lock_window,
+                entry_open=markable[lesson.id],
+                unsupported_score=mark is not None and mark.score is not None and not lesson_allows_score(lesson),
             )
             locked = corrected or bool(lock_reason)
             cells.append(

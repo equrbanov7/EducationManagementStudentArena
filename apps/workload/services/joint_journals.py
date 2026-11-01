@@ -4,10 +4,29 @@ No name matching, logical alias expansion, or implicit intensive/level grouping.
 This is evidence, never authorization: registrar verifies each physical journal.
 """
 
+from core.group_language_identity import group_language_issues
+
 from ..constants import RowKind
 from ..models import TeachingTaskRow
 from .offering_rules import HOUR_FIELDS, per_group_hours, plan_reached_chair
 from .offering_shares import KINDS, _assignment_group
+
+
+def _single_contact(row, kind):
+    plan_field, total_field, multiplier_field = HOUR_FIELDS[kind]
+    contact = per_group_hours(row)[kind]
+    if contact <= 0 or getattr(row, multiplier_field) != 1 or getattr(row, total_field) != contact:
+        return False
+    plan = getattr(row, plan_field)
+    if plan > 0:
+        return contact == plan
+    # Older official imports populated totals and multipliers, leaving ALL
+    # contact-plan fields at zero. The canonical per-group-hours rule already
+    # supports that representation. A partially specified newer plan remains
+    # ambiguous; neither a timetable nor a partial teacher allocation fixes it.
+    return all(getattr(row, fields[0]) == 0 for fields in HOUR_FIELDS.values()) and row.total_hours >= sum(
+        getattr(row, fields[1]) for fields in HOUR_FIELDS.values()
+    )
 
 
 def joint_journal_candidates(*, organization, teacher_id):
@@ -38,6 +57,9 @@ def joint_journal_candidates(*, organization, teacher_id):
             for group in groups
         ):
             continue
+        legacy_plans_missing = all(getattr(row, fields[0]) == 0 for fields in HOUR_FIELDS.values())
+        if group_language_issues(groups, require_structured=legacy_plans_missing):
+            continue
         if any(
             len(
                 {str((group.settings or {}).get(key)).casefold() for group in groups if (group.settings or {}).get(key)}
@@ -47,18 +69,12 @@ def joint_journal_candidates(*, organization, teacher_id):
         ):
             continue
         for kind in sorted(KINDS):
-            plan_field, total_field, multiplier_field = HOUR_FIELDS[kind]
             contact = per_group_hours(row)[kind]
             # Identical imported timetable slots cannot erase official separate
             # groups: 15 × 2 seminars (30 allocated hours) are still two classes.
-            # Missing/contradictory plans and partial allocations prove no joint
+            # Contradictory/mixed plans and partial allocations prove no joint
             # contact, even when the same teacher appears in every group.
-            if (
-                getattr(row, plan_field) <= 0
-                or contact != getattr(row, plan_field)
-                or getattr(row, total_field) != contact
-                or getattr(row, multiplier_field) != 1
-            ):
+            if not _single_contact(row, kind):
                 continue
             assignments = [a for a in row.assignments.all() if a.activity == kind and a.hours > 0]
             # A subgroup note, vacant balance or second teacher needs an explicit

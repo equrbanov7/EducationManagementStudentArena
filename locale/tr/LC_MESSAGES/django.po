@@ -111483,3 +111483,28 @@ msgid ""
 msgstr ""
 "Sınava kabul edilmiyorsunuz: %(count)s mazeretsiz devamsızlık, bu seviyenin "
 "%(limit)s devamsızlık sınırını aşıyor."
+
+msgid "Adınıza keçirilmiş birgə dərslər"
+msgstr "Birlikte işlediğiniz dersler"
+
+msgid "Birgə keçirilmiş dərslər"
+msgstr "Birlikte işlenen dersler"
+
+msgid "Qrupların ayrıca qeydləri"
+msgstr "Grupların ayrı kayıtları"
+
+msgid "Müəllifi göstərilməyən tarixçə"
+msgstr "Öğretim elemanı belirtilmeyen geçmiş kayıtlar"
+
+msgid "Ayrıca keçirilmiş dərslər"
+msgstr "Ayrı işlenen dersler"
+
+msgid "Bu qeydlər birgə keçirilmiş dərs saatlarına əlavə edilmir; tam tarixçədə ayrıca saxlanılır."
+msgstr "Bu kayıtlar birlikte işlenen ders saatlerine eklenmez; tam geçmişte ayrı olarak tutulur."
+
+msgid "Yalnız oxu"
+msgstr "Salt okunur"
+
+msgctxt "registrar.journal_timing"
+msgid "Bu dərs növündə saxlanmış əvvəlki bal müəllim tərəfindən dəyişdirilə bilməz. Düzəliş üçün RİM-ə müraciət edin."
+msgstr "Bu ders türünde daha önce kaydedilmiş puan öğretim elemanı tarafından değiştirilemez. Düzeltme için RİM'e başvurun."
