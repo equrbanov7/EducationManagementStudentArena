@@ -112317,3 +112317,25 @@ msgstr "Только чтение"
 msgctxt "registrar.journal_timing"
 msgid "Bu dərs növündə saxlanmış əvvəlki bal müəllim tərəfindən dəyişdirilə bilməz. Düzəliş üçün RİM-ə müraciət edin."
 msgstr "Преподаватель не может изменить ранее сохранённый балл для этого вида занятия. Для исправления обратитесь в РИМ."
+
+#: apps/registrar/templates/registrar/partials/_joint_record_summary.html:3
+msgid "Birgə qeydə alınmış dərslər"
+msgstr "Совместно зарегистрированные занятия"
+
+#: apps/registrar/templates/registrar/partials/_joint_record_summary.html:18
+msgid ""
+"Bu qeydlər birgə qeydə alınmış dərs saatlarına əlavə edilmir; tam tarixçədə "
+"ayrıca saxlanılır."
+msgstr ""
+"Эти записи не добавляются к часам совместно зарегистрированных занятий и "
+"сохраняются отдельно в полной истории."
+
+#: apps/registrar/templates/registrar/partials/_joint_journal_grid.html:6
+#: apps/registrar/templates/registrar/partials/_joint_journal_grid.html:7
+msgid "Keçirilmiş dərslər"
+msgstr "Проведённые занятия"
+
+#: apps/registrar/templates/registrar/partials/_joint_journal_grid.html:29
+msgctxt "registrar.language_cohort"
+msgid "Jurnal qrupu"
+msgstr "Группа журнала"

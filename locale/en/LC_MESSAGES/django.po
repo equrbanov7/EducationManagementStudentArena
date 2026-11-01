@@ -112123,3 +112123,25 @@ msgstr "Read only"
 msgctxt "registrar.journal_timing"
 msgid "Bu dərs növündə saxlanmış əvvəlki bal müəllim tərəfindən dəyişdirilə bilməz. Düzəliş üçün RİM-ə müraciət edin."
 msgstr "The previously stored score for this lesson type cannot be changed by the teacher. Contact RIM for a correction."
+
+#: apps/registrar/templates/registrar/partials/_joint_record_summary.html:3
+msgid "Birgə qeydə alınmış dərslər"
+msgstr "Jointly recorded lessons"
+
+#: apps/registrar/templates/registrar/partials/_joint_record_summary.html:18
+msgid ""
+"Bu qeydlər birgə qeydə alınmış dərs saatlarına əlavə edilmir; tam tarixçədə "
+"ayrıca saxlanılır."
+msgstr ""
+"These records are not added to the jointly recorded lesson hours; they "
+"remain separate in the full history."
+
+#: apps/registrar/templates/registrar/partials/_joint_journal_grid.html:6
+#: apps/registrar/templates/registrar/partials/_joint_journal_grid.html:7
+msgid "Keçirilmiş dərslər"
+msgstr "Lessons taught"
+
+#: apps/registrar/templates/registrar/partials/_joint_journal_grid.html:29
+msgctxt "registrar.language_cohort"
+msgid "Jurnal qrupu"
+msgstr "Journal group"

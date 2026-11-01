@@ -113179,3 +113179,25 @@ msgstr "Nur lesen"
 msgctxt "registrar.journal_timing"
 msgid "Bu dərs növündə saxlanmış əvvəlki bal müəllim tərəfindən dəyişdirilə bilməz. Düzəliş üçün RİM-ə müraciət edin."
 msgstr "Die bereits gespeicherte Note für diese Unterrichtsart kann von der Lehrkraft nicht geändert werden. Wenden Sie sich für eine Korrektur an RIM."
+
+#: apps/registrar/templates/registrar/partials/_joint_record_summary.html:3
+msgid "Birgə qeydə alınmış dərslər"
+msgstr "Gemeinsam erfasste Unterrichtsstunden"
+
+#: apps/registrar/templates/registrar/partials/_joint_record_summary.html:18
+msgid ""
+"Bu qeydlər birgə qeydə alınmış dərs saatlarına əlavə edilmir; tam tarixçədə "
+"ayrıca saxlanılır."
+msgstr ""
+"Diese Einträge werden nicht zu den gemeinsam erfassten Unterrichtsstunden "
+"addiert; sie bleiben im vollständigen Verlauf separat erhalten."
+
+#: apps/registrar/templates/registrar/partials/_joint_journal_grid.html:6
+#: apps/registrar/templates/registrar/partials/_joint_journal_grid.html:7
+msgid "Keçirilmiş dərslər"
+msgstr "Abgehaltener Unterricht"
+
+#: apps/registrar/templates/registrar/partials/_joint_journal_grid.html:29
+msgctxt "registrar.language_cohort"
+msgid "Jurnal qrupu"
+msgstr "Klassenbuchgruppe"

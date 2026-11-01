@@ -111508,3 +111508,25 @@ msgstr "Salt okunur"
 msgctxt "registrar.journal_timing"
 msgid "Bu dərs növündə saxlanmış əvvəlki bal müəllim tərəfindən dəyişdirilə bilməz. Düzəliş üçün RİM-ə müraciət edin."
 msgstr "Bu ders türünde daha önce kaydedilmiş puan öğretim elemanı tarafından değiştirilemez. Düzeltme için RİM'e başvurun."
+
+#: apps/registrar/templates/registrar/partials/_joint_record_summary.html:3
+msgid "Birgə qeydə alınmış dərslər"
+msgstr "Birlikte kaydedilen dersler"
+
+#: apps/registrar/templates/registrar/partials/_joint_record_summary.html:18
+msgid ""
+"Bu qeydlər birgə qeydə alınmış dərs saatlarına əlavə edilmir; tam tarixçədə "
+"ayrıca saxlanılır."
+msgstr ""
+"Bu kayıtlar birlikte kaydedilen ders saatlerine eklenmez; tam geçmişte ayrı "
+"olarak saklanır."
+
+#: apps/registrar/templates/registrar/partials/_joint_journal_grid.html:6
+#: apps/registrar/templates/registrar/partials/_joint_journal_grid.html:7
+msgid "Keçirilmiş dərslər"
+msgstr "İşlenen dersler"
+
+#: apps/registrar/templates/registrar/partials/_joint_journal_grid.html:29
+msgctxt "registrar.language_cohort"
+msgid "Jurnal qrupu"
+msgstr "Ders defteri grubu"
