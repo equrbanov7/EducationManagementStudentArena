@@ -28,9 +28,10 @@ KONTEKST: ``modal_role`` — "student" | "teacher" | "manage" (statistika / «Ju
                 </div>
                 {% if modal_role == 'student' %}
                 <div class="sgx-modal-stats" data-sgx-row="stats"
+                     data-abs-label="{% trans 'qayıb saatı' context 'registrar.schedule' %}"
                      data-barred-label="{% trans 'Kəsilir' context 'registrar.schedule' %}"
                      data-ok-label="{% trans 'Normal' context 'registrar.schedule' %}">
-                    <div class="sgx-stat-card"><b data-sgx-f="abs"></b><small>{% trans "qayıb saatı" context "registrar.schedule" %}</small></div>
+                    <div class="sgx-stat-card"><b data-sgx-f="abs"></b><small data-sgx-f="abs_label">{% trans "qayıb saatı" context "registrar.schedule" %}</small></div>
                     <div class="sgx-stat-card"><b data-sgx-f="entry"></b><small>{% trans "giriş balı" context "registrar.schedule" %}</small></div>
                     <div class="sgx-stat-card sgx-stat-card--status"><b data-sgx-f="status"></b><small>{% trans "status" context "registrar.schedule" %}</small></div>
                 </div>

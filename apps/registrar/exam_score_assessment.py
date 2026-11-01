@@ -86,7 +86,9 @@ def midterm_cap() -> int:
 def cap_for(offering, assessment, *, scheme=None) -> int:
     """İmtahanın tavanı: midterm 30 (RİM qaydası), final — sxemdən (50)."""
     if assessment == MIDTERM:
-        return midterm_cap()
+        from .language_level_grading import MIDTERM_MAX, is_level
+
+        return MIDTERM_MAX if is_level(offering) else midterm_cap()
     from . import finals, gradebook
 
     scheme = scheme or gradebook.ensure_assessment_scheme(offering=offering)

@@ -53,13 +53,13 @@ imtahana buraxılıram? (status badge — rəng + MƏTN, handoff §7) → sillab
         <div class="msx-metric__head">
             <span class="msx-metric__label">{% trans "Qayıb" context "profile.subjects" %}</span>
             <span class="msx-metric__value">
-                <strong>{{ j.absence_hours|floatformat:"-1" }}</strong> / {{ j.allowed_absence|floatformat:0 }} {% trans "saat" context "profile.subjects" %}
+                <strong>{% if j.eligibility.limit_unit == 'qb_count' %}{{ j.eligibility.absence_count }}{% else %}{{ j.absence_hours|floatformat:"-1" }}{% endif %}</strong> / {% if j.eligibility.limit_unit == 'qb_count' %}{{ j.eligibility.limit_count }}{% else %}{{ j.allowed_absence|floatformat:0 }}{% endif %} {% if j.eligibility.limit_unit == 'qb_count' %}{% trans "Q/b" context "registrar.records" %}{% else %}{% trans "saat" context "profile.subjects" %}{% endif %}
                 {% if row.eligibility.limit_percent %}<span class="msx-metric__hint">({% trans "limit" context "profile.subjects" %} {{ row.eligibility.limit_percent }}%)</span>{% endif %}
             </span>
         </div>
-        {% if j.allowed_absence %}
-        <progress class="msx-bar msx-bar--absence is-{{ row.ui.status }}" value="{{ j.absence_hours|default:0 }}" max="{{ j.allowed_absence }}"
-                  aria-label="{% trans 'Qayıb saatı / icazə verilən limit' context 'profile.subjects' %}"></progress>
+        {% if j.allowed_absence or j.eligibility.limit_unit == 'qb_count' %}
+        <progress class="msx-bar msx-bar--absence is-{{ row.ui.status }}" value="{% if j.eligibility.limit_unit == 'qb_count' %}{{ j.eligibility.absence_count }}{% else %}{{ j.absence_hours|default:0 }}{% endif %}" max="{% if j.eligibility.limit_unit == 'qb_count' %}{{ j.eligibility.limit_count }}{% else %}{{ j.allowed_absence }}{% endif %}"
+                  aria-label="{% if j.eligibility.limit_unit == 'qb_count' or row.eligibility.limit_unit == 'qb_count' %}{% trans 'Q/b' context 'registrar.records' %}{% else %}{% trans 'Qayıb saatı / icazə verilən limit' context 'profile.subjects' %}{% endif %}"></progress>
         {% endif %}
         <p class="msx-metric__foot">{% trans "Keçirilən dərs" context "profile.subjects" %}: <strong>{{ j.lessons_held }}</strong></p>
     </div>
@@ -125,13 +125,13 @@ imtahana buraxılıram? (status badge — rəng + MƏTN, handoff §7) → sillab
         <div class="msx-metric__head">
             <span class="msx-metric__label">{% trans "Qayıb" context "profile.subjects" %}</span>
             <span class="msx-metric__value">
-                <strong>{{ row.eligibility.absence_hours|floatformat:"-1" }}</strong> / {{ row.eligibility.allowed_hours|floatformat:0 }} {% trans "saat" context "profile.subjects" %}
-                <span class="msx-metric__hint">({% trans "limit" context "profile.subjects" %} {{ row.eligibility.limit_percent }}%)</span>
+                <strong>{% if row.eligibility.limit_unit == 'qb_count' %}{{ row.eligibility.absence_count }}{% else %}{{ row.eligibility.absence_hours|floatformat:"-1" }}{% endif %}</strong> / {{ row.eligibility.allowed_hours|floatformat:0 }} {% if row.eligibility.limit_unit == 'qb_count' %}{% trans "Q/b" context "registrar.records" %}{% else %}{% trans "saat" context "profile.subjects" %}{% endif %}
+                {% if row.eligibility.limit_percent %}<span class="msx-metric__hint">({% trans "limit" context "profile.subjects" %} {{ row.eligibility.limit_percent }}%)</span>{% endif %}
             </span>
         </div>
         {% if row.eligibility.allowed_hours %}
-        <progress class="msx-bar msx-bar--absence is-{{ row.ui.status }}" value="{{ row.eligibility.absence_hours|default:0 }}" max="{{ row.eligibility.allowed_hours }}"
-                  aria-label="{% trans 'Qayıb saatı / icazə verilən limit' context 'profile.subjects' %}"></progress>
+        <progress class="msx-bar msx-bar--absence is-{{ row.ui.status }}" value="{% if row.eligibility.limit_unit == 'qb_count' %}{{ row.eligibility.absence_count }}{% else %}{{ row.eligibility.absence_hours|default:0 }}{% endif %}" max="{{ row.eligibility.allowed_hours }}"
+                  aria-label="{% if j.eligibility.limit_unit == 'qb_count' or row.eligibility.limit_unit == 'qb_count' %}{% trans 'Q/b' context 'registrar.records' %}{% else %}{% trans 'Qayıb saatı / icazə verilən limit' context 'profile.subjects' %}{% endif %}"></progress>
         {% endif %}
     </div>
     {% endif %}

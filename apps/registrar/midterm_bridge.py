@@ -164,8 +164,17 @@ def _write(
     component, enrollment, existing = lock_component(component, enrollment)
     if _overridden(component, enrollment, attempt_finished_at):
         return OVERRIDDEN, existing
-    score = 0 if is_expelled else exam_bridge.scale_percent(score_percent, component.max_score)
+    from .language_level_grading import MIDTERM_MAX, is_level
+
+    level = is_level(offering)
+    cap = MIDTERM_MAX if level else component.max_score
+    score = 0 if is_expelled else exam_bridge.scale_percent(score_percent, cap)
     old_score = existing.score if existing is not None else None
+    if level and old_score is not None and old_score > cap:
+        if existing.exam_source == source:
+            return UNCHANGED, existing  # Replay never rewrites the old stored scale.
+        if not existing.exam_source:
+            return OVERRIDDEN, existing  # Unattributed legacy scores require an explicit reviewed edit.
     score_changed = old_score is None or old_score != score
     if not score_changed and existing.exam_source == source:
         return UNCHANGED, existing
@@ -256,15 +265,30 @@ def student_interim_rows(interim, components, enrollment) -> list[dict]:
     rows = {
         cs.component_id: cs for cs in ComponentScore.objects.filter(component__in=components, enrollment=enrollment)
     }
+    from copy import copy
+
+    from . import language_level_grading as levels
+
+    level = levels.is_level(enrollment.offering)
+    displayed = []
+    for component in components:
+        item = copy(component) if level else component
+        if level:
+            item.max_score = levels.MIDTERM_MAX
+        displayed.append(item)
     return [
         {
             "component": c,
-            "score": getattr(rows.get(c.id), "score", None),
+            "score": (
+                levels.midterm_total([c], {c.pk: rows[c.pk].score})
+                if level and c.pk in rows
+                else getattr(rows.get(c.id), "score", None)
+            ),
             "held_on": c.held_on,
             "label": interim.label_for(i),
             "auto": is_auto_score(rows.get(c.id)),
         }
-        for i, c in enumerate(components)
+        for i, c in enumerate(displayed)
     ]
 
 

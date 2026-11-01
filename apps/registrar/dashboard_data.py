@@ -56,6 +56,8 @@ from apps.registrar.models import (
     WeekType,
 )
 
+from . import student_display_policy as student_policy
+
 #: «Növbəti dərs günü» axtarışının üfüqü — iki həftə hər iki pariteti (üst/alt) örtür.
 NEXT_DAY_HORIZON_DAYS = 14
 
@@ -121,7 +123,7 @@ def student_record(organization, user):
     )
 
 
-def _interim_items(spec, components, scores) -> list:
+def _interim_items(spec, components, scores, *, offering=None) -> list:
     """Aralıq qiymətləndirmənin görünən xanaları — midterm: 1, kollokvium: K1–K3.
 
     Midterm rejimində yalnız «Midterm» adlı KOLLOKVIUM komponenti götürülür
@@ -131,6 +133,18 @@ def _interim_items(spec, components, scores) -> list:
     (müəllim jurnalı açmayıb) xana boş, tavan rejimdən gəlir.
     """
     interim = sorted((c for c in components if c.kind == ComponentKind.KOLLOKVIUM), key=lambda c: (c.order, c.name))
+    from . import language_level_grading as levels
+
+    if offering is not None and levels.is_level(offering):
+        spec = interim_assessment.spec_for_offering(offering)
+        visible = any(component.pk in scores for component in interim)
+        return [
+            {
+                "label": spec.label_for(0),
+                "score": levels.midterm_total(interim, scores) if visible else None,
+                "max": levels.MIDTERM_MAX,
+            }
+        ]
     if spec.is_midterm:
         key = interim_assessment.MIDTERM_COMPONENT_NAME.lower()
         primary = next((c for c in interim if c.name.strip().lower() == key), None)
@@ -155,8 +169,8 @@ def _interim_items(spec, components, scores) -> list:
 
 
 def _risk_key(row):
-    allowed = row["allowed_hours"]
-    used = (row["absence_hours"] / allowed) if allowed > 0 else Decimal("0")
+    absent, allowed = student_policy.absence_usage(row["eligibility"])
+    used = (absent / allowed) if allowed > 0 else Decimal("0")
     return (STATUS_RISK_ORDER.get(row["status"], 9), -used, row["subject_name"].lower())
 
 
@@ -207,13 +221,15 @@ def student_subjects(*, organization, record, period) -> dict:
     for enrollment in enrollments:
         offering = enrollment.offering
         scheme = getattr(offering, "assessment_scheme", None)
-        cap = scheme.entry_score_max if scheme else 50
+        cap = student_policy.entry_cap(offering, scheme)
         kwargs = batch.entry_kwargs(enrollment)
         entry = gradebook.entry_score_for(enrollment, cap, **kwargs)
         lesson_hours = exam_eligibility.lesson_hours_for(offering, hours_map=hours_map)
         allowed = Decimal(lesson_hours) * Decimal(limit_percent) / Decimal(100)
-        eligibility = exam_eligibility.resolve(
-            absence_hours=enrollment.absence_hours or 0,
+        eligibility = student_policy.eligibility(
+            enrollment,
+            absence_count=kwargs.get("absence_count"),
+            absence_hours=kwargs.get("absence_hours", enrollment.absence_hours or 0),
             lesson_hours=lesson_hours,
             allowed_hours=allowed,
             limit_percent=limit_percent,
@@ -226,14 +242,14 @@ def student_subjects(*, organization, record, period) -> dict:
                 "enrollment_id": enrollment.id,
                 "offering_id": offering.id,
                 "subject_name": getattr(offering.subject, "name", "") or "—",
-                "absence_hours": Decimal(enrollment.absence_hours or 0),
+                "absence_hours": Decimal(eligibility["absence_hours"] or 0),
                 "lesson_hours": Decimal(lesson_hours),
-                "allowed_hours": allowed,
+                "allowed_hours": eligibility["allowed_hours"],
                 "status": eligibility_status(eligibility),
                 "eligibility": eligibility,
                 "entry_score": entry,
                 "entry_max": int(cap),
-                "interim": _interim_items(result["spec"], kwargs["components"], scores),
+                "interim": _interim_items(result["spec"], kwargs["components"], scores, offering=offering),
             }
         )
     result["rows"] = sorted(rows, key=_risk_key)

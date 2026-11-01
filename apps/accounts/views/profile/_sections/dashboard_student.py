@@ -21,6 +21,8 @@ from collections import Counter
 
 from django.utils.translation import pgettext, pgettext_lazy
 
+from apps.registrar.public import absence_usage
+
 from . import dashboard_lessons as lessons
 from .dashboard_widgets import (
     SUBJECT_ROW_LIMIT,
@@ -124,9 +126,11 @@ def student_today(*, organization, record, period, allowed_sections, today, now)
 def _attendance_row(row, period) -> dict:
     status = row["status"]
     label, tone = STATUS_CHIPS.get(status, STATUS_CHIPS["unknown"])
-    allowed = row["allowed_hours"]
-    absent = row["absence_hours"]
-    if allowed > 0:
+    absent, allowed = absence_usage(row["eligibility"])
+    if row["eligibility"].get("limit_unit") == "qb_count":
+        value = f"{pgettext('registrar.records', 'Q/b')} {fmt_number(absent)} / {fmt_number(allowed)}"
+        bar = {"value": plain_number(min(absent, allowed)), "max": plain_number(allowed)}
+    elif allowed > 0:
         value = pgettext(_CTX, "qayıb %(absent)s / icazə %(allowed)s saat") % {
             "absent": fmt_number(absent),
             "allowed": fmt_number(allowed),

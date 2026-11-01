@@ -18,6 +18,8 @@ from apps.registrar import analytics_cache, analytics_display, journal_scope, sc
 from apps.registrar.journal_group_identity import attach_labels, filter_group
 from apps.registrar.models import CourseOffering, StudentAcademicRecord
 
+from . import student_display_policy as student_policy
+
 
 def _profile_section_prefix(section: str) -> str:
     return f"{reverse('accounts:profile')}?section={section}&"
@@ -517,7 +519,7 @@ def _student_offering_stats(user, organization, record, period) -> dict:
             student=user,
             offering__period=period,
             status=Enrollment.Status.ENROLLED,
-        ).select_related("offering", "offering__assessment_scheme")
+        ).select_related("offering", "offering__subject", "offering__assessment_scheme")
     )
     # Buraxılış statusu donmuş açılışlar — toplu dəst (iki sabit sorğu), sətir başına sorğu YOX.
     offering_ids = [e.offering_id for e in enrollments]
@@ -529,11 +531,14 @@ def _student_offering_stats(user, organization, record, period) -> dict:
     for enrollment in enrollments:
         offering = enrollment.offering
         scheme = getattr(offering, "assessment_scheme", None)
-        cap = scheme.entry_score_max if scheme else 50
+        cap = student_policy.entry_cap(offering, scheme)
         total_hours = exam_eligibility.lesson_hours_for(offering, hours_map=hours_map)
         allowed = total_hours * Decimal(limit_percent) / Decimal(100)
-        eligibility = exam_eligibility.resolve(
-            absence_hours=enrollment.absence_hours,
+        entry_kwargs = batch.entry_kwargs(enrollment)
+        eligibility = student_policy.eligibility(
+            enrollment,
+            absence_count=entry_kwargs.get("absence_count"),
+            absence_hours=entry_kwargs.get("absence_hours", enrollment.absence_hours),
             lesson_hours=total_hours,
             allowed_hours=allowed,
             limit_percent=limit_percent,
@@ -543,9 +548,9 @@ def _student_offering_stats(user, organization, record, period) -> dict:
             frozen=offering.id in frozen_ids,
         )
         stats[offering.id] = {
-            "absence_hours": enrollment.absence_hours,
-            "allowed_absence": allowed,
-            "entry_score": gradebook.entry_score_for(enrollment, cap, **batch.entry_kwargs(enrollment)),
+            "absence_hours": eligibility["absence_hours"],
+            "allowed_absence": eligibility["allowed_hours"],
+            "entry_score": gradebook.entry_score_for(enrollment, cap, **entry_kwargs),
             "entry_score_max": cap,
             "barred": eligibility["barred"],
             "attendance_score": eligibility["attendance_score"],

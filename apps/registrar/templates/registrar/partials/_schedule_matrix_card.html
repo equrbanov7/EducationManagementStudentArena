@@ -60,7 +60,9 @@ müəllimə «Jurnalı aç» keçidi verilmir (jurnal sahibinindir; modal keçid
         {% if teacher %}data-teacher="{{ teacher.get_full_name|default:teacher.username }}"{% endif %}
         {% endif %}
         {% if item.stats %}
-        data-abs="{{ item.stats.absence_hours }}"
+        data-abs="{% if item.stats.eligibility.limit_unit == 'qb_count' %}{{ item.stats.eligibility.absence_count }}{% else %}{{ item.stats.absence_hours }}{% endif %}"
+        data-abs-unit="{% if item.stats.eligibility.limit_unit == 'qb_count' %}{% trans 'Q/b' context 'registrar.records' %}{% else %}{% trans 'saat' context 'registrar.journal' %}{% endif %}"
+        data-abs-label="{% if item.stats.eligibility.limit_unit == 'qb_count' %}{% trans 'Q/b' context 'registrar.records' %}{% else %}{% trans 'qayıb saatı' context 'registrar.schedule' %}{% endif %}"
         data-abs-limit="{{ item.stats.allowed_absence|floatformat:0 }}"
         data-entry="{{ item.stats.entry_score|floatformat:'-2' }}"
         data-entry-max="{{ item.stats.entry_score_max }}"

@@ -31,6 +31,9 @@ from apps.registrar.services import enroll_student_in_subject
 from apps.registrar.signals import student_group_changed
 from apps.registrar.teaching_hours import recorded_teaching_hours
 
+from . import student_display_policy as student_policy
+from .student_display_policy import absence_usage  # noqa: F401 — query-free dashboard public contract
+
 # İmtahan mərkəzi ↔ jurnal körpüsü — exams tərəfindən bu fasad üzərindən çağırılır
 # (apps/registrar/exam_bridge.py). Re-eksport, boundary-safe.
 __all__ = [
@@ -387,7 +390,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
             section_kinds.append({"value": m.lesson.kind, "label": m.lesson.get_kind_display()})
 
     scheme = getattr(offering, "assessment_scheme", None)
-    cap = scheme.entry_score_max if scheme else 50
+    cap = student_policy.entry_cap(offering, scheme)
     journal_row = next((s for s in summary["subjects"] if s["enrollment"].id == enrollment.id), None)
 
     # TƏK MƏNBƏ: davamiyyət balı DA, buraxılış qərarı DA resolver-dən gəlir.
@@ -412,17 +415,13 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     selfwork_active = standard is None or standard.selfwork_active
     selfwork = journal_extras.get_selfwork_board(offering, with_structure=False) if selfwork_active else {}
     own_selfwork = next((r for r in selfwork.get("rows", []) if r["enrollment"].id == enrollment.id), None)
-    dav_eligibility = exam_eligibility.resolve(
-        absence_hours=enrollment.absence_hours,
-        lesson_hours=dav_lesson_hours,
-        limit_percent=dav_limit_percent,
-        exempt=bool(record.national_athlete_exemption),
-        frozen=exam_eligibility.is_frozen(offering),
+    dav_eligibility = student_policy.detail_eligibility(
+        enrollment, journal_row, record, dav_lesson_hours, dav_limit_percent
     )
     dav_score = dav_eligibility["attendance_score"]
     dav_barred = dav_eligibility["barred"]
     koll_entered = [k["score"] for k in kollokviums if k["score"] is not None]
-    koll_sum = sum(koll_entered, Decimal("0"))
+    koll_sum = student_policy.midterm_display_total(offering, standard, koll_entered)
     selfwork_total = own_selfwork["total"] if own_selfwork else 0
     koll_avg = (koll_sum / len(koll_entered)).quantize(Decimal("0.1")) if koll_entered else None
     # Bölgü hissələri KANONİK entry ilə uzlaşır: "dərs balları" qalıq kimi

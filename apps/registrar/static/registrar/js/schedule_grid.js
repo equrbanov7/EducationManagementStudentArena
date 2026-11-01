@@ -86,7 +86,8 @@
             var hasStats = d.abs !== undefined;
             statsWrap.hidden = !hasStats;
             if (hasStats) {
-                setField(modal, "abs", d.abs + " / " + (d.absLimit || "?") + " saat");
+                setField(modal, "abs", d.abs + " / " + (d.absLimit || "?") + " " + (d.absUnit || "saat"));
+                setField(modal, "abs_label", d.absLabel || statsWrap.dataset.absLabel);
                 setField(modal, "entry", d.entry + " / " + (d.entryMax || ""));
                 var statusCard = statsWrap.querySelector(".sgx-stat-card--status");
                 var barred = d.barred === "1";

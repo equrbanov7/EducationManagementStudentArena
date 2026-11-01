@@ -38,6 +38,7 @@ from . import grade_audit, interim_components
 from .audit_write import AuditWriteFailed, audit_failure_message
 from .corrections import correction_author_name
 from .gradebook import journal_is_locked
+from .language_level_grading import MIDTERM_MAX, is_level
 from .models import (
     AssessmentComponent,
     ComponentScore,
@@ -121,7 +122,7 @@ class _MidtermSave:
             raise journal_locked_error()
         component = midterm_component(self.offering)
         component = AssessmentComponent.objects.select_for_update().get(pk=component.pk)
-        cap = int(component.max_score)
+        cap = MIDTERM_MAX if is_level(self.offering) else int(component.max_score)
         keys = [str(row.get("enrollment_id") or "") for row in ordered]
         enrollments = {
             str(e.pk): e
@@ -163,12 +164,18 @@ class _MidtermSave:
 
     def _decide(self, slot, score_row, cap, author):
         row, enrollment = slot["row"], slot["enrollment"]
+        old_score = score_row.score if score_row is not None else None
+        if is_level(self.offering) and old_score is not None and old_score > cap and not row.get("question_scores"):
+            _, submitted = entry_service.clean_row_score(
+                score=row.get("score"), question_scores=None, sheet=None, cap=old_score
+            )
+            if submitted == old_score:
+                return None  # An unchanged historical raw value is never re-scaled on save.
         cleaned, new_score = entry_service.clean_row_score(
             score=row.get("score"), question_scores=row.get("question_scores"), sheet=self.sheet, cap=cap
         )
         if new_score is None:
             return None  # boş sahə = toxunma
-        old_score = score_row.score if score_row is not None else None
         # Müəllimin jurnalda əl ilə yazdığı (mənbəsiz) midterm balı və kağız tarixçəsi yoxdur → bu, kağız
         # nəticənin İLK köçürülməsidir (köhnə bal audit üçün ``old_score``-da qalır, təsdiq sərbəstdir).
         teacher_written = score_row is not None and not score_row.exam_source and not self._has_paper(enrollment)
@@ -340,7 +347,7 @@ def roster_for_offering(*, offering) -> dict:
     entries_qs = ExamScoreEntry.objects.filter(enrollment__in=enrollments, assessment=ExamAssessment.MIDTERM)
     for entry in entries_qs.select_related("entered_by", "sheet"):
         history.setdefault(entry.enrollment_id, []).append(entry)
-    cap = int(component.max_score)
+    cap = MIDTERM_MAX if is_level(offering) else int(component.max_score)
     rows = []
     for enrollment in enrollments:
         entries = history.get(enrollment.pk, [])

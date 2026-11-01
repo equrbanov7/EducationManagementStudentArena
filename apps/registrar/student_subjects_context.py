@@ -49,6 +49,7 @@ from apps.registrar.cabinet_policy import (
     other_period_subject_rows,
 )
 from apps.registrar.models import AssessmentScheme, ComponentKind
+from apps.registrar.student_display_policy import absence_usage
 
 #: «Limitə yaxın» həddi — icazəli qayıbın 75%-i.  Jurnalın xəbərdarlıq siyahısı
 #: (:func:`apps.registrar.student_journal_context.warnings_for`) ilə EYNİ hədd:
@@ -81,8 +82,8 @@ def eligibility_status(eligibility) -> str:
         return "barred"
     if not eligibility.get("hours_known", True):
         return "unknown"
-    allowed = _dec(eligibility.get("allowed_hours"))
-    if allowed > 0 and _dec(eligibility.get("absence_hours")) >= allowed * NEAR_LIMIT_RATIO:
+    used, allowed = absence_usage(eligibility)
+    if allowed > 0 and used >= allowed * NEAR_LIMIT_RATIO:
         return "near"
     return "ok"
 

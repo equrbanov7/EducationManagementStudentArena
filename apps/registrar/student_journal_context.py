@@ -23,6 +23,7 @@ from decimal import Decimal
 
 from django.utils.translation import pgettext_lazy
 
+from apps.registrar.student_display_policy import absence_usage
 from apps.registrar.student_subjects_context import NEAR_LIMIT_RATIO, eligibility_status, fmt_score
 
 _CTX = "registrar.journal"
@@ -43,8 +44,8 @@ def warnings_for(subject_rows) -> list:
         journal = row["journal"]
         if journal["eligibility"]["frozen"]:
             continue
-        allowed = journal["allowed_absence"] or 0
-        near = allowed > 0 and Decimal(str(journal["absence_hours"] or 0)) >= Decimal(str(allowed)) * NEAR_LIMIT_RATIO
+        used, allowed = absence_usage(journal["eligibility"])
+        near = allowed > 0 and used >= allowed * NEAR_LIMIT_RATIO
         if journal["barred"] or near:
             result.append(row)
     return result

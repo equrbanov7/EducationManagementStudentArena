@@ -309,7 +309,7 @@ def carry_over_map(target_ids, *, with_entry_score: bool = True) -> dict:
         return {}
     predecessors = list(
         Enrollment.objects.filter(superseded_by_id__in=target_ids, status=Enrollment.Status.DROPPED).select_related(
-            "offering", "offering__group"
+            "offering", "offering__group", "offering__subject"
         )
     )
     if not predecessors:
@@ -362,6 +362,27 @@ def carry_over_map(target_ids, *, with_entry_score: bool = True) -> dict:
     return result
 
 
+def _level_source_inputs(predecessors):
+    """Prepared level inputs keep carry-over summaries independent of roster size."""
+    from . import language_level_grading
+
+    levels = [source for source in predecessors if language_level_grading.is_level(source.offering)]
+    if not levels:
+        return {}
+    metrics = language_level_grading.absence_metrics(levels)
+    scores = {}
+    for row in ComponentScore.objects.filter(enrollment_id__in=[source.pk for source in levels]):
+        scores.setdefault(row.enrollment_id, []).append(row)
+    return {
+        source.pk: {
+            "absence_count": metrics[source.pk]["count"],
+            "absence_hours": metrics[source.pk]["hours"],
+            "component_scores": scores.get(source.pk, []),
+        }
+        for source in levels
+    }
+
+
 def _source_entry_scores(predecessors, marks_by_enrollment):
     """``({mənbə_enrollment_id: giriş_balı}, {offering_id: tavan})`` — TOPLU oxu.
 
@@ -370,7 +391,7 @@ def _source_entry_scores(predecessors, marks_by_enrollment):
     tavanları mənbə açılışlar üzrə İKİ sorğu ilə oxunur; işarələr onsuz da
     yaddaşdadır. Sxem YARADILMIR (bu, oxu yoludur) — yoxdursa model defoltu.
     """
-    from apps.registrar import gradebook
+    from apps.registrar import gradebook, language_level_grading
 
     offering_ids = {source.offering_id for source in predecessors}
     components: dict = {}
@@ -379,12 +400,20 @@ def _source_entry_scores(predecessors, marks_by_enrollment):
     caps = dict(
         AssessmentScheme.objects.filter(offering_id__in=offering_ids).values_list("offering_id", "entry_score_max")
     )
+    caps = {
+        source.offering_id: language_level_grading.entry_cap(
+            source.offering.subject.name, caps.get(source.offering_id, DEFAULT_ENTRY_SCORE_MAX)
+        )
+        for source in predecessors
+    }
+    level_inputs = _level_source_inputs(predecessors)
     scores = {
         source.pk: gradebook.entry_score_for(
             source,
             caps.get(source.offering_id, DEFAULT_ENTRY_SCORE_MAX),
             marks=marks_by_enrollment.get(source.pk, []),
             components=components.get(source.offering_id, []),
+            **level_inputs.get(source.pk, {}),
         )
         for source in predecessors
     }

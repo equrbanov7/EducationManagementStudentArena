@@ -97,10 +97,13 @@ def save_rows(*, offering, rows, by_user, request=None, sheet=None, policy, rule
 
 
 def _active_enrollments(offering, *related):
-    return {
+    rows = {
         str(enrollment.id): enrollment
         for enrollment in offering.enrollments.filter(status=Enrollment.Status.ENROLLED).select_related(*related)
     }
+    for enrollment in rows.values():
+        enrollment.offering = offering
+    return rows
 
 
 def _cached_relation(instance, name):
