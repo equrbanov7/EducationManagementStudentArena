@@ -1,7 +1,7 @@
 """«Dəyərləndirilmiş nəticələr» — Excel ixracı (sahib 2026-10-27).
 
 İcazə qapısı ``review_results`` ilə EYNİDİR (``can_review_submissions`` + bölmə icazəli olmalıdır);
-sətirlər ekrandakı siyahının özüdür (eyni kollektor → eyni əhatə, süzgəc və sıralama, səhifələməsiz).
+sətirlər eyni kollektorun əhatə və süzgəclərindədir, səhifələməsiz; qrup vərəqlərində fənn üzrə sıralanır.
 Sütunlar imtahanın öz nəticə səhifəsinin ixracı ilə eynidir (``apps.exams.public.build_results_xlsx``).
 """
 
@@ -36,6 +36,7 @@ def review_results_export(request):
         build_review_export_rows(items),
         sheet_title=pgettext("accounts.review_results", "Dəyərləndirilmiş nəticələr"),
         filename_stem="review-results",
+        group_sheets=True,
     )
     response = HttpResponse(data, content_type=content_type)
     response["Content-Disposition"] = f'attachment; filename="{filename}"'

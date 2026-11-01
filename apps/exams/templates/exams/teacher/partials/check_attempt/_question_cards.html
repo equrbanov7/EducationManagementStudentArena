@@ -145,7 +145,7 @@ yeniləyir. `.data-store` dialoq üçün mətn mənbəyidir (köhnə JS müqavil
             <p class="tca-score__error" id="tca-q-{{ q.id }}-err" data-tca-score-error="hidden_score_{{ q.id }}" role="alert" hidden>{% trans "Balı tam ədədlə yazın (məs. 4)." context "exams.teacher.grading" %}</p>
             <div class="tca-score__quick" role="group" aria-label="{% trans 'Tez bal' context 'exams.teacher.grading' %}">
                 <button type="button" class="ems-btn ems-btn--sm" data-tca-quick="0">0</button>
-                <button type="button" class="ems-btn ems-btn--sm" data-tca-quick="max">{% trans "Tam bal" context "exams.attempt_review" %}</button>
+                <button type="button" class="ems-btn ems-btn--sm" data-tca-quick="max">{% trans "Tam bal" context "exams.attempt_review" %} · MAX {{ item.max_points }}</button>
             </div>
         </div>
         <div class="tca-fb">

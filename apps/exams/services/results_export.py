@@ -2,7 +2,7 @@
 
 «Dəyərləndirilmiş nəticələr» (`/accounts/profile/?section=review-results`) və imtahanın öz
 nəticə səhifəsi (`/exams/<slug>/results/`) EYNİ sütunlarla ixrac edir: ``COLUMNS``. Sətirlər
-çağıranın verdiyi sıradadır (ekrandakı süzgəc + sıralama) — burada süzgəc yoxdur.
+çağıranın verdiyi əhatədədir — burada süzgəc yoxdur. Qruplu ixrac fənnə görə sıralanır.
 
 * :func:`exam_attempt_rows` — imtahan cəhdlərindən sətir lüğətləri (bal / maks / faiz, test
   sayğacları, «Yoxlayan», zal + kompüter, müddət, status, uzaqlaşdırma səbəbi, apellyasiya).
@@ -212,17 +212,42 @@ def _cell_value(value):
     return str(value) if not isinstance(value, (int, float)) else value
 
 
-def build_results_xlsx(rows, *, sheet_title: str, filename_stem: str):
-    """(filename, content_type, bytes) — ``rows``: ``COLUMNS`` açarlı lüğətlər, verilən sırada."""
+def build_results_xlsx(rows, *, sheet_title: str, filename_stem: str, group_sheets: bool = False):
+    """Workbook bytes; grouped exports sort subjects within each current-group tab."""
     from openpyxl import Workbook
+
+    workbook = Workbook()
+    if group_sheets:
+        from .results_export_groups import grouped_result_rows
+
+        groups = grouped_result_rows(rows)
+    else:
+        groups = [(sheet_title, rows)]
+    for index, (title, group_rows) in enumerate(groups):
+        sheet = workbook.active if index == 0 else workbook.create_sheet()
+        _write_result_sheet(sheet, group_rows, title=title)
+
+    buffer = BytesIO()
+    workbook.save(buffer)
+    stamp = timezone.localtime().strftime("%Y%m%d-%H%M")
+    filename = f"{slugify(filename_stem) or 'results'}-{stamp}.xlsx"
+    return filename, XLSX_CONTENT_TYPE, buffer.getvalue()
+
+
+def _write_result_sheet(sheet, rows, *, title):
     from openpyxl.styles import Alignment, Font, PatternFill
     from openpyxl.utils import get_column_letter
 
-    workbook = Workbook()
-    sheet = workbook.active
     # Vərəq adında `/ \ ? * [ ] :` qadağandır (openpyxl ValueError) — boşluqla əvəzlənir.
-    safe_title = "".join(" " if ch in "/\\?*[]:" else ch for ch in sheet_title).strip("'").strip()
-    sheet.title = ((safe_title[:28] + "…") if len(safe_title) > 30 else safe_title) or "Results"
+    safe_title = "".join(" " if ch in "/\\?*[]:" else ch for ch in title).strip("'").strip()
+    base = safe_title[:31] or "Results"
+    used = {other.title.casefold() for other in sheet.parent if other is not sheet}
+    candidate, number = base, 1
+    while candidate.casefold() in used:
+        suffix = f" ({number})"
+        candidate = base[: 31 - len(suffix)] + suffix
+        number += 1
+    sheet.title = candidate
 
     header_font = Font(bold=True, color="FFFFFF")
     header_fill = PatternFill("solid", fgColor="2563EB")
@@ -243,12 +268,7 @@ def build_results_xlsx(rows, *, sheet_title: str, filename_stem: str):
             if isinstance(value, datetime):
                 cell.number_format = "DD.MM.YYYY HH:MM"
     sheet.freeze_panes = "A2"
-
-    buffer = BytesIO()
-    workbook.save(buffer)
-    stamp = timezone.localtime().strftime("%Y%m%d-%H%M")  # fayl adı yerli saatla (Asia/Baku)
-    filename = f"{slugify(filename_stem) or 'results'}-{stamp}.xlsx"
-    return filename, XLSX_CONTENT_TYPE, buffer.getvalue()
+    sheet.auto_filter.ref = sheet.dimensions
 
 
 __all__ = [

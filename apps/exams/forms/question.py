@@ -20,6 +20,13 @@ class ExamQuestionCreateForm(forms.ModelForm):
     MIN_TEST_OPTIONS = 2
     FREE_TEXT_EXAM_TYPES = {"written", "coding"}
 
+    points = forms.IntegerField(
+        label=pgettext_lazy("exams.template.exam_statistics", "table_max_points"),
+        min_value=1,
+        required=False,
+        widget=forms.NumberInput(attrs={"class": "form-control", "min": 1, "step": 1}),
+    )
+
     # ---- Variant field-ləri ----
     option1_text = forms.CharField(
         label=pgettext_lazy("exams.form.question.label", "option_1"),
@@ -69,6 +76,7 @@ class ExamQuestionCreateForm(forms.ModelForm):
         model = ExamQuestion
         fields = [
             "text",
+            "points",
             "block",
             "language",
             "answer_mode",
@@ -301,6 +309,11 @@ class ExamQuestionCreateForm(forms.ModelForm):
                     }
                 )
         return options
+
+    def clean_points(self):
+        # Older modal clients omit this field; preserve the saved ceiling on edit.
+        value = self.cleaned_data.get("points")
+        return value if value is not None else (self.instance.points or 1)
 
     def clean_language(self):
         return self.cleaned_data.get("language") or self._fallback_language()

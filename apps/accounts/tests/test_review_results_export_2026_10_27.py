@@ -148,6 +148,22 @@ class _Base(TestCase):
 
 
 class ReviewResultsExportTest(_Base):
+    def test_export_groups_are_separate_tabs_with_subject_order(self):
+        students = self.world["students"]
+        names = {students[0].pk: "Q10", students[1].pk: "Q2", students[2].pk: "Q10"}
+        self._login(self.teacher)
+        with mock.patch("apps.registrar.student_group_names.current_group_names", return_value=names):
+            response = self.client.get(reverse(EXPORT))
+        self.assertEqual(response.status_code, 200)
+        workbook = load_workbook(BytesIO(response.content))
+        self.assertEqual(workbook.sheetnames, ["Q2", "Q10"])
+        self.assertEqual([sheet.max_row - 1 for sheet in workbook], [2, 4])
+        for sheet in workbook:
+            header, *body = list(sheet.values)
+            rows = [dict(zip(header, row)) for row in body]
+            self.assertEqual({row["Qruplar"] for row in rows}, {sheet.title})
+            self.assertEqual([row["Fənn"] or "" for row in rows], sorted(row["Fənn"] or "" for row in rows))
+
     def test_export_has_unified_columns_hall_computer_and_checker(self):
         header, rows = self._export()
         self.assertEqual(tuple(header), HEADERS)
