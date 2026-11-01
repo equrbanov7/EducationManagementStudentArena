@@ -7,6 +7,7 @@ import io
 import json
 import tempfile
 from unittest.mock import patch
+from uuid import uuid4
 
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
@@ -353,3 +354,71 @@ class AppliedMathRecoveryTests(TestCase):
         document = Syllabus.objects.get(offering=self.filled)
         self.assertTrue(document.is_active)
         self.assertEqual(document.current_version.status, "approved")
+
+    def hygiene(self, enrollment):
+        return self.state.model("registrar.JournalHygieneDecision").objects.create(
+            organization=self.org,
+            enrollment=enrollment,
+            batch=uuid4(),
+            category="empty_subject",
+            reason_code="reviewed_empty",
+            from_status="enrolled",
+            to_status="dropped",
+            evidence={"retained": "append-only evidence"},
+            evidence_digest="1" * 64,
+            reason="Reviewed historical empty journal decision",
+            decided_by=self.actor,
+        )
+
+    def test_append_only_hygiene_decision_preserved_exactly_apply_and_undo(self):
+        Enrollment.objects.filter(pk=self.empty_enrollment.pk).update(status="dropped")
+        decision = self.hygiene(self.empty_enrollment)
+        before = self.state.records(type(decision).objects.filter(pk=decision.pk))
+        dry = self.call()
+        self.call(apply=True, expected_baseline=dry["baseline"])
+        self.assertEqual(before, self.state.records(type(decision).objects.filter(pk=decision.pk)))
+        undo = self.call(undo=True)
+        self.call(undo=True, apply=True, expected_baseline=undo["baseline"])
+        self.assertEqual(before, self.state.records(type(decision).objects.filter(pk=decision.pk)))
+        self.empty_enrollment.refresh_from_db()
+        self.assertEqual(self.empty_enrollment.status, "dropped")
+
+    def test_hygiene_decision_foreign_enrollment_refused(self):
+        decision = self.hygiene(self.enrollments[0])
+        helper = recovery.domain.schedule
+        original = helper._children
+
+        def mismatched_children(label, ids):
+            yield from original(label, ids)
+            if label == "registrar.Enrollment" and str(self.empty_enrollment.pk) in set(map(str, ids)):
+                yield "registrar.JournalHygieneDecision", type(decision).objects.filter(pk=decision.pk)
+
+        with patch.object(helper, "_children", side_effect=mismatched_children):
+            with self.assertRaisesRegex(ValueError, "retained_hygiene_decision_source_enrollment_changed"):
+                self.call()
+
+    def test_external_recognition_beneath_hygiene_remains_blocked(self):
+        decision = self.hygiene(self.empty_enrollment)
+        recognition = self.state.model("registrar.ExternalCreditRecognition").objects.create(
+            organization=self.org,
+            student=self.empty_enrollment.student,
+            subject=self.empty.subject,
+            period=self.empty.period,
+            exempt_decision=decision,
+            program="erasmus",
+            institution="Source university",
+            country="AZ",
+            foreign_subject="Reviewed subject",
+            foreign_credit=3,
+            foreign_grade="80",
+            study_period="2026/2027",
+            recognized_score=80,
+            credit=3,
+            document="private/no-file-created.pdf",
+            created_by=self.actor,
+        )
+        with self.assertRaisesRegex(
+            ValueError, "empty_offering_has_content_or_history_registrar_externalcreditrecognition"
+        ):
+            self.call()
+        self.assertTrue(type(recognition).objects.filter(pk=recognition.pk).exists())

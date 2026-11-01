@@ -86,7 +86,7 @@ def validate_empty(source_id, target_id):
     """
     source, target = _pair(source_id, target_id)
     schedule_lock.lock_for_offering(source)
-    allowed = CONFIG | {"registrar.ScheduleSlot"}
+    allowed = CONFIG | {"registrar.ScheduleSlot", "registrar.JournalHygieneDecision"}
     pending = [("registrar.CourseOffering", [source.pk])]
     seen = set()
     while pending:
@@ -104,6 +104,14 @@ def validate_empty(source_id, target_id):
             if child in ("registrar.Enrollment", "registrar.AssessmentComponent", "registrar.JournalShare"):
                 if any(str(r["offering_id"]) != str(source.pk) for r in values):
                     raise state.DuplicateError("empty_configuration_cross_offering")
+            if child == "registrar.JournalHygieneDecision":
+                # Append-only hygiene evidence is retained byte-for-byte, never
+                # reverted or treated as permission to accept graded history.
+                enrollment_ids = {r["enrollment_id"] for r in values}
+                if label != "registrar.Enrollment" or state.model("registrar.Enrollment").objects.filter(
+                    organization_id=state.ORG, offering=source, pk__in=enrollment_ids
+                ).count() != len(enrollment_ids):
+                    raise state.DuplicateError("retained_hygiene_decision_source_enrollment_changed")
             if child == "registrar.JournalShare_enrollments":
                 enrollment_ids = {r["enrollment_id"] for r in values}
                 share_ids = {r["journalshare_id"] for r in values}

@@ -1,6 +1,7 @@
 """Both fixed repairs preserve schedules, academic history, metadata and undo identities."""
 
 from unittest.mock import patch
+from uuid import uuid4
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -254,6 +255,82 @@ class ScheduleCases:
         )
         with self.assertRaisesMessage(qosqar_schedule.state.DuplicateError, "empty_offering_has_content_or_history"):
             self.call()
+
+    def hygiene(self, enrollment):
+        return qosqar_schedule.state.model("registrar.JournalHygieneDecision").objects.create(
+            organization=self.org,
+            enrollment=enrollment,
+            batch=uuid4(),
+            category="empty_subject",
+            reason_code="reviewed_empty",
+            from_status="enrolled",
+            to_status="dropped",
+            evidence={"retained": "append-only source evidence"},
+            evidence_digest="1" * 64,
+            reason="Reviewed historical empty journal decision",
+            decided_by=self.actor,
+        )
+
+    def test_append_only_hygiene_decision_is_byte_identical_through_apply_and_undo(self):
+        self.prepare()
+        enrollment = self.source.enrollments.get()
+        type(enrollment).objects.filter(pk=enrollment.pk).update(status="dropped")
+        decision = self.hygiene(enrollment)
+        original = qosqar_schedule.state.records(type(decision).objects.filter(pk=decision.pk))
+        dry = self.call()
+        self.call(apply=True, expected_baseline=dry["baseline"])
+        self.assertEqual(original, qosqar_schedule.state.records(type(decision).objects.filter(pk=decision.pk)))
+        undo = self.call(undo=True)
+        self.call(undo=True, apply=True, expected_baseline=undo["baseline"])
+        self.assertEqual(original, qosqar_schedule.state.records(type(decision).objects.filter(pk=decision.pk)))
+        enrollment.refresh_from_db()
+        self.assertEqual(enrollment.status, "dropped")
+
+    def test_hygiene_from_other_offering_is_not_a_source_history_exception(self):
+        self.prepare()
+        decision = self.hygiene(self.target.enrollments.first())
+        original = qosqar_schedule._children
+        source_enrollment = self.source.enrollments.get()
+
+        def mismatched_children(label, ids):
+            yield from original(label, ids)
+            if label == "registrar.Enrollment" and str(source_enrollment.pk) in set(map(str, ids)):
+                yield "registrar.JournalHygieneDecision", type(decision).objects.filter(pk=decision.pk)
+
+        with patch.object(qosqar_schedule, "_children", side_effect=mismatched_children):
+            with self.assertRaisesMessage(
+                qosqar_schedule.state.DuplicateError, "retained_hygiene_decision_source_enrollment_changed"
+            ):
+                self.call()
+
+    def test_external_recognition_beneath_hygiene_still_blocks_retirement(self):
+        self.prepare()
+        enrollment = self.source.enrollments.get()
+        decision = self.hygiene(enrollment)
+        recognition = qosqar_schedule.state.model("registrar.ExternalCreditRecognition").objects.create(
+            organization=self.org,
+            student=enrollment.student,
+            subject=self.source.subject,
+            period=self.source.period,
+            exempt_decision=decision,
+            program="erasmus",
+            institution="Source university",
+            country="AZ",
+            foreign_subject="Reviewed subject",
+            foreign_credit=3,
+            foreign_grade="80",
+            study_period="2026/2027",
+            recognized_score=80,
+            credit=3,
+            document="private/no-file-created.pdf",
+            created_by=self.actor,
+        )
+        with self.assertRaisesMessage(
+            qosqar_schedule.state.DuplicateError,
+            "empty_offering_has_content_or_history_registrar_externalcreditrecognition",
+        ):
+            self.call()
+        self.assertTrue(type(recognition).objects.filter(pk=recognition.pk).exists())
 
     def test_unreviewed_pair_never_gets_schedule_exception(self):
         self.prepare()
