@@ -4,6 +4,7 @@ from django.db.models import Q
 
 from apps.registrar.public import absence_limit, attendance_score
 
+from ..group_projection import project_group_settings
 from ..people import is_assignable_teacher
 from ..repair_fingerprints import academic_database_fingerprint, academic_queries
 from ..sbio235_state import RepairError, digest, model, records
@@ -93,10 +94,24 @@ def _identities(organization, cases):
     )
     if set(map(str, siblings.values_list("pk", flat=True).distinct())) != set(row_pins):
         raise RepairError("unreviewed_sibling_source_row")
+    tenant_group_ids = set(
+        model("organizations.OrgUnit")
+        .objects.filter(organization=organization, unit_type="group")
+        .values_list("pk", flat=True)
+    )
     for offering in offerings:
         group = offering.group
         if (
-            digest([group.name, group.code, str(group.parent_id), group.settings, group.unit_type, group.is_active])
+            digest(
+                [
+                    group.name,
+                    group.code,
+                    str(group.parent_id),
+                    project_group_settings(group.settings, canonical_group_ids=tenant_group_ids),
+                    group.unit_type,
+                    group.is_active,
+                ]
+            )
             != spec.GROUP_IDENTITIES[str(group.pk)]
         ):
             raise RepairError("source_group_identity_changed")

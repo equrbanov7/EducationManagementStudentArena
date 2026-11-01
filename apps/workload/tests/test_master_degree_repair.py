@@ -126,6 +126,31 @@ class MasterDegreeRepairTests(TestCase):
         self.row.refresh_from_db()
         self.assertEqual(self.row.degree_level, "bachelor")
 
+    def test_exported_settings_projection_preserves_unexported_live_settings(self):
+        from apps.workload.services.group_projection import project_group_settings
+
+        before_settings = json.loads(json.dumps(self.group.settings))
+        fixed.ROWS[str(self.row.pk)]["groups"][str(self.group.pk)]["settings"] = project_group_settings(
+            self.group.settings, canonical_group_ids=[self.group.pk]
+        )
+        applied = self.apply()
+        self.group.refresh_from_db()
+        self.assertEqual(self.group.settings, before_settings)
+        undo = self.run_repair(undo=applied["receipt"])
+        self.run_repair(undo=applied["receipt"], apply=True, expected_baseline=undo["baseline"])
+        self.group.refresh_from_db()
+        self.assertEqual(self.group.settings, before_settings)
+
+    def test_unexported_settings_are_still_part_of_the_live_baseline(self):
+        dry = self.run_repair()
+        self.group.settings = {**self.group.settings, "unexported_note": {"keep": True}}
+        self.group.save(update_fields=["settings"])
+        with self.assertRaisesMessage(repair.RepairError, "baseline_changed"):
+            self.run_repair(apply=True, expected_baseline=dry["baseline"])
+        self.row.refresh_from_db()
+        self.mark.refresh_from_db()
+        self.assertEqual((self.row.degree_level, self.mark.score), ("bachelor", 9))
+
     def test_undo_rejects_later_grade_change(self):
         result = self.apply()
         LessonMark.objects.filter(pk=self.mark.pk).update(score=8)

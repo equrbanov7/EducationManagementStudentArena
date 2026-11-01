@@ -243,6 +243,30 @@ class ReviewedChairContactsTests(TestCase):
         dry = self.run_repair()
         return self.run_repair(apply=True, expected_baseline=dry["baseline"])
 
+    def test_exported_group_identity_does_not_discard_private_live_settings(self):
+        expected = {}
+        for group in self.groups:
+            group.settings = {**group.settings, "unexported_details": {"preserve": True}}
+            group.save(update_fields=["settings"])
+            expected[group.pk] = copy.deepcopy(group.settings)
+        applied = self.apply()
+        for group in self.groups:
+            group.refresh_from_db()
+            self.assertEqual(group.settings, expected[group.pk])
+        undo = self.run_repair(undo=applied["receipt"])
+        self.run_repair(undo=applied["receipt"], apply=True, expected_baseline=undo["baseline"])
+        for group in self.groups:
+            group.refresh_from_db()
+            self.assertEqual(group.settings, expected[group.pk])
+
+    def test_private_group_setting_drift_after_dry_still_rejects(self):
+        dry = self.run_repair()
+        group = self.groups[0]
+        group.settings = {**group.settings, "unexported_details": {"later": True}}
+        group.save(update_fields=["settings"])
+        with self.assertRaisesMessage(RepairError, "baseline_changed"):
+            self.run_repair(apply=True, expected_baseline=dry["baseline"])
+
     def test_mixed_task_owner_kind_and_plan_correction_preserves_grade_and_content_then_undo(self):
         before, _ = state.snapshot(self.org, state.selection(""))
         dry = self.run_repair()

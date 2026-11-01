@@ -1,7 +1,5 @@
 """WCU workload reconciliation: explicit field allowlists, no student-level data."""
 
-import uuid
-
 from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.db import connection
@@ -9,6 +7,7 @@ from django.db.models import Count, Q, Sum
 
 from core.permissions import has_permission
 
+from ..group_projection import project_group_settings
 from .food_teacher_identity import collect_food_teacher_identity
 from .repair_history import collect_math_history
 from .roster_tokens import tokenize
@@ -64,20 +63,7 @@ def collect(*, student_secret):
     groups = rows("organizations.OrgUnit", ("id", "name", "code", "parent_id", "unit_type", "is_active", "settings"))
     tenant_group_ids = {group["id"] for group in groups if group["unit_type"] == "group"}
     for group in groups:
-        canonical = (group["settings"] or {}).get("canonical_group")
-        group["settings"] = {
-            k: v
-            for k, v in (group["settings"] or {}).items()
-            if k in {"parent_group", "degree_level", "education_form", "language", "sector", "language_level_cohort"}
-            and isinstance(v, (str, int, bool))
-            and (k != "language_level_cohort" or isinstance(v, bool))
-        }
-        try:
-            canonical_id = uuid.UUID(str(canonical))
-        except (ValueError, TypeError, AttributeError):
-            continue
-        if canonical_id in tenant_group_ids:
-            group["settings"]["canonical_group"] = str(canonical_id)
+        group["settings"] = project_group_settings(group["settings"], canonical_group_ids=tenant_group_ids)
     links = list(
         apps.get_model("workload.TeachingTaskRow")
         .objects.filter(organization_id=ORG, id__in=plan_ids, groups__organization_id=ORG)

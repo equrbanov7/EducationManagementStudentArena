@@ -16,6 +16,7 @@ from core.audit import log_action
 from core.constants import AuditAction
 
 from . import master_degree_spec as fixed
+from .group_projection import project_group_settings
 
 RESOURCE = "workload.master_degree10"
 
@@ -87,6 +88,11 @@ def snapshot(organization):
     }
     if set(groups) != group_ids:
         raise RepairError("fixed_groups_missing")
+    tenant_group_ids = set(
+        model("organizations.OrgUnit")
+        ._base_manager.filter(organization=organization, unit_type="group")
+        .values_list("pk", flat=True)
+    )
     keys = []
     for row in rows:
         spec = fixed.ROWS[str(row.pk)]
@@ -104,7 +110,8 @@ def snapshot(organization):
                 str(group.organization_id) != fixed.ORG
                 or str(group.parent_id) != expected["parent_id"]
                 or group.name != expected["name"]
-                or group.settings != expected["settings"]
+                or project_group_settings(group.settings, canonical_group_ids=tenant_group_ids)
+                != project_group_settings(expected["settings"], canonical_group_ids=tenant_group_ids)
                 or group.settings.get("degree_level") != "master"
                 or group.unit_type != "group"
                 or not group.is_active
