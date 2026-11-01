@@ -1,6 +1,7 @@
 """Teacher's single contact-kind journal over source-proven physical groups."""
 
 import uuid
+from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -101,6 +102,14 @@ def _entries(post):
 
 @login_required
 def detail(request, source_row_id, kind):
+    from .joint_journal_ui import enabled
+
+    if request.method != "POST" and not enabled():
+        url = reverse("registrar:journal_list")
+        teacher = request.GET.get("teacher", "")
+        if teacher.isascii() and teacher.isdigit() and 0 < len(teacher) <= 19:
+            url += "?" + urlencode({"teacher": teacher})
+        return redirect(url)
     organization = getattr(request, "organization", None)
     if organization is None:
         raise Http404

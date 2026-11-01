@@ -5,7 +5,7 @@ from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -22,6 +22,7 @@ from . import test_joint_journal as fixture
 User = get_user_model()
 
 
+@override_settings(REGISTRAR_JOINT_JOURNAL_UI_ENABLED=True)
 class LegacyJointContactTests(TestCase):
     select = fixture.JointJournalTests.select
     args = fixture.JointJournalTests.args

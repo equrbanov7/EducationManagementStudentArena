@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
-from django.test import Client, RequestFactory, TestCase
+from django.test import Client, RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -21,6 +21,7 @@ from apps.workload.tests.factories import TEACHER_PERMS, activate_member, make_o
 User = get_user_model()
 
 
+@override_settings(REGISTRAR_JOINT_JOURNAL_UI_ENABLED=True)
 class JointJournalTests(TestCase):
     @classmethod
     def setUpTestData(cls):

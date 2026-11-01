@@ -1,7 +1,7 @@
 """Selected-teacher projection stays read-only inside every member's actor scope."""
 
 from django.contrib.auth import get_user_model
-from django.test import Client, RequestFactory, TestCase
+from django.test import Client, RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 from apps.organizations.models import Membership
@@ -15,6 +15,7 @@ from . import test_joint_legacy_contact as fixture
 User = get_user_model()
 
 
+@override_settings(REGISTRAR_JOINT_JOURNAL_UI_ENABLED=True)
 class JointJournalObservationTests(TestCase):
     @classmethod
     def setUpTestData(cls):

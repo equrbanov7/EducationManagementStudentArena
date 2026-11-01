@@ -12,6 +12,10 @@ from .practical_label import kind_choices
 
 
 def project(queryset, *, organization, user, selected_kind, observer=None, observer_request=None):
+    from .joint_journal_ui import enabled
+
+    if not enabled():
+        return queryset
     joints = selections(organization=organization, user=user)
     if observer is not None:
         from .joint_journal_observation import allowed
