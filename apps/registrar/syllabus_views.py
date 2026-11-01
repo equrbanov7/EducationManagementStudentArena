@@ -84,7 +84,8 @@ def _resolve(request, offering_id):
         version = syllabus_services.approved_version_for(syllabus)
     else:
         state = syllabus_services.offering_syllabus_state(syllabus)
-        version = state["version"]
+        # Oxu paneli qüvvədə olan nüsxədir; qaralama profil redaktorunda qalır.
+        version = state["approved_version"] or state["version"]
     if version is None:
         raise Http404
     return offering, syllabus, version, mode

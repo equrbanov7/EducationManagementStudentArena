@@ -342,7 +342,7 @@ class JournalSyllabusBridgeTest(TestCase):
         self.assertEqual(student_payload["version"], "v1.0")
 
         teacher_payload = self._client(self.teacher).get(self._json_url()).json()
-        self.assertEqual(teacher_payload["version"], "v1.1")
+        self.assertEqual(teacher_payload["version"], "v1.0")
 
     def test_student_cabinet_exposes_the_button_only_when_approved(self):
         from apps.registrar.public import build_student_journal_context

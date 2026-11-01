@@ -127,7 +127,9 @@ def journal_syllabus_notice(offering, *, has_lessons: bool | None = None, journa
     """
     syllabus = syllabus_services.syllabus_for_offering_obj(offering)
     state = syllabus_services.offering_syllabus_state(syllabus)
-    key = state["state"]
+    # Jurnal dərc olunmuş nüsxəni göstərir; redaktor açıq qaralamanı saxlayır.
+    published = state["approved_version"]
+    key = STATE_APPROVED if published is not None else state["state"]
     tone, title, message = _NOTICE.get(key, (None, None, None))
     if key == STATE_MISSING and has_lessons is False:
         tone, title, message = _MISSING_BEFORE_LESSONS
@@ -138,13 +140,13 @@ def journal_syllabus_notice(offering, *, has_lessons: bool | None = None, journa
     else:
         link = _profile_link("syllabus-editor", syllabus=syllabus.pk)
 
-    version = state["version"]
+    version = published or state["version"]
     return {
         "state": key,
         "tone": tone,
         "title": title,
         "message": message,
-        "reason": state["reason"],
+        "reason": "" if published is not None else state["reason"],
         "reason_label": REASON_LABEL,
         "action_label": _ACTION_LABEL.get(key),
         "action_url": link,
