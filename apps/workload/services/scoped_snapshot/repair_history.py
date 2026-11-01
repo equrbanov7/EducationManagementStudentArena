@@ -160,6 +160,8 @@ def project(cls, row):
 
 
 def collect_math_history():
+    from .repair_contact_rights import collect_contact_rights
+
     def bounded_ids(query):
         values = list(query[: MAX_ROWS + 1])
         if len(values) > MAX_ROWS:
@@ -213,6 +215,7 @@ def collect_math_history():
             children = rel.related_model._base_manager.filter(**{lookup + "__in": keys}).values_list("pk", flat=True)
             pending.setdefault(rel.related_model._meta.label, set()).update(bounded_ids(children))
     return {
+        **collect_contact_rights(),
         "repair_math_history": sorted(output, key=lambda item: (item["model_label"], str(item["id"]))),
         "repair_math_history_scope": [
             {

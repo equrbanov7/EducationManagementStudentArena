@@ -3,6 +3,7 @@
 import re
 import uuid
 from datetime import datetime
+from pathlib import Path
 
 ORG = "526cfa63-4f80-4bba-a7a7-61c8fbb3d918"
 TASK = "743c143e-254a-4ef1-bf73-c368a477cc2f"
@@ -104,6 +105,14 @@ def typed_material(value):
 
 
 def validate(payload):
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "workload_contact_rights_scope", Path(__file__).with_name("workload_contact_rights_scope.py")
+    )
+    region = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(region)
+    region.validate(payload)
     data = payload.get("data", {})
     keys = {"repair_math_history", "repair_math_history_scope"}
     if not keys.intersection(data):
