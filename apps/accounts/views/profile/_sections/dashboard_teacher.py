@@ -84,6 +84,8 @@ def teacher_today(*, organization, user, period, allowed_sections, today, now) -
 def _offering_row(row) -> dict:
     meta = [row["group_name"]] if row["group_name"] else []
     meta.append(pgettext(_CTX, "%(count)s tələbə") % {"count": row["students"]})
+    if row.get("is_history"):
+        meta.append(pgettext(_CTX, "Tarixçə: cari yük təyinatı yoxdur"))
     held, plan = row["held_hours"], row["plan_hours"]
     if plan:
         value = pgettext(_CTX, "keçirilib %(held)s / %(plan)s saat") % {"held": held, "plan": plan}
@@ -96,7 +98,8 @@ def _offering_row(row) -> dict:
         "meta": " · ".join(meta),
         "value": value,
         "bar": bar,
-        "url": reverse("registrar:journal_detail", args=[row["offering_id"]]),
+        "url": reverse("registrar:journal_detail", args=[row["offering_id"]])
+        + ("?own_history=1" if row.get("own_history") else ""),
     }
 
 

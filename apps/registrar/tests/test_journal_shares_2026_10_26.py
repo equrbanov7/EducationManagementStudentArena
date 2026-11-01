@@ -334,6 +334,7 @@ class ListsTest(_ShareBase):
     def test_dashboard_and_exam_wizard_include_share_offering(self):
         self._share(self.seminarist, kinds=[], enrollments=[self.e2])
         with bypass_rls():
+            seed_current_journal_load(self.offering, teacher=self.seminarist)
             data = dashboard_data.teacher_offerings(organization=self.org, teacher=self.seminarist, period=self.period)
             wizard = set(exam_journal_link.teacher_offerings(self.org, self.seminarist, period=self.period))
         self.assertEqual([(row["offering_id"], row["students"]) for row in data["rows"]], [(self.offering.pk, 1)])

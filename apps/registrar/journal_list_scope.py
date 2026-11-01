@@ -60,16 +60,9 @@ def journal_list_base(user, request=None):
     # Fənni TƏHVİL VERMİŞ köhnə müəllim jurnalı YALNIZ-OXU görməyə davam edir (bax
     # apps/registrar/handover.is_handover_observer) — siyahıda sətir olmasaydı, ona gedən
     # yeganə keçid itərdi. Yazma hüququ `is_direct_editor`-dədir, təhvildən sonra False.
-    from apps.registrar.handover import observer_offering_ids
+    from apps.registrar.teacher_journal_list import own_visible_queryset
 
-    observed = observer_offering_ids(user, organization) if organization is not None else set()
-    from apps.registrar.journal_own_history import eligible, offering_ids
-    from apps.registrar.teacher_journal_list import project
-
-    if not eligible(user, organization):
-        return project(base_qs.none(), user, organization), False
-    authorized = base_qs.filter(own_q | Q(pk__in=observed) | Q(pk__in=offering_ids(user, organization)))
-    return project(authorized, user, organization, observed=observed), False
+    return own_visible_queryset(base_qs, user, organization), False
 
 
 __all__ = ["journal_list_base"]

@@ -44,6 +44,21 @@ def _workload_filters(queryset, user, organization):
     return filters
 
 
+def own_visible_queryset(queryset, user, organization):
+    """Personal list authority and projection shared by the journal page and dashboard."""
+    from .handover import observer_offering_ids
+    from .journal_own_history import eligible, offering_ids
+    from .journal_shares import own_or_shared_q
+
+    if not eligible(user, organization):
+        return project(queryset.none(), user, organization)
+    observed = observer_offering_ids(user, organization)
+    authorized = queryset.filter(
+        own_or_shared_q(user) | Q(pk__in=observed) | Q(pk__in=offering_ids(user, organization))
+    )
+    return project(authorized, user, organization, observed=observed)
+
+
 def project(queryset, user, organization, *, observed=()):
     """Do not add a single offering to the already-authorized own/share/observer set."""
     if queryset.query.is_empty():

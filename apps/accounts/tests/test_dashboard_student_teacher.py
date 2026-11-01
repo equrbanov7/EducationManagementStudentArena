@@ -46,14 +46,15 @@ from apps.registrar.models import (
     StudentAcademicRecord,
     Subject,
 )
+from apps.registrar.tests.journal_load_fixtures import seed_current_journal_load
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
 
 User = get_user_model()
 
-#: Sorğu büdcəsi (yalnız bölmənin öz sorğuları) — brief C: tələbə ≤ 14, müəllim ≤ 18.
+#: Sabit büdcə: tələbə ≤14; müəllim ≤24 (ortaq cari-yük/tarixçə proyeksiyası +6).
 STUDENT_QUERY_BUDGET = 14
-TEACHER_QUERY_BUDGET = 18
+TEACHER_QUERY_BUDGET = 24
 
 #: `student_many`-nin fənləri: (qayıb saatı, dərs saatı) → 25% limitlə status.
 SUBJECT_PLAN = (
@@ -160,6 +161,8 @@ class DashboardContentBase(TestCase):
                         lesson_hours=lesson_hours,
                     )
                 )
+            for offering in cls.offerings:
+                seed_current_journal_load(offering)
             cls.enrollments = []
             for index, (absence, _hours) in enumerate(SUBJECT_PLAN):
                 cls.enrollments.append(

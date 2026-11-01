@@ -340,7 +340,7 @@ def _per_offering(queryset, aggregate):
 
 
 def teacher_offerings(*, organization, teacher, period, today=None) -> dict:
-    """Müəllimin cari dövrdəki jurnalları — TAM say + sətir məlumatı, TƏK sorğu.
+    """Müəllimin cari dövrdəki jurnalları — TAM say və sabit sayda sorğu.
 
     ``held_hours`` — bu günə qədər keçirilmiş dərslərin saat cəmi,
     ``plan_hours`` — açılışın semestr dərs saatı (``lesson_hours``; 0 = təyin
@@ -352,13 +352,14 @@ def teacher_offerings(*, organization, teacher, period, today=None) -> dict:
     if organization is None or teacher is None or period is None:
         return result
     today = today or timezone.localdate()
-    from .journal_shares import own_or_shared_q, scoped_student_counts
+    from .journal_shares import scoped_student_counts
+    from .teacher_journal_list import own_visible_queryset
 
-    # Öz jurnalları + bölünmüş jurnalın payı (sahib 2026-10-26); payda tələbə sayı yalnız öz tələbələri.
+    visible = own_visible_queryset(
+        CourseOffering.objects.filter(organization=organization, period=period, is_active=True), teacher, organization
+    )
     offerings = list(
-        CourseOffering.objects.filter(organization=organization, period=period, is_active=True)
-        .filter(own_or_shared_q(teacher))
-        .select_related("subject", "group")
+        visible.select_related("subject", "group")
         .annotate(
             dash_students=_per_offering(Enrollment.objects.filter(status=Enrollment.Status.ENROLLED), Count("id")),
             dash_held_hours=_per_offering(Lesson.objects.filter(date__lte=today), Sum("hours")),
@@ -376,6 +377,8 @@ def teacher_offerings(*, organization, teacher, period, today=None) -> dict:
             "held_hours": int(offering.dash_held_hours or 0),
             "lessons_held": int(offering.dash_lessons or 0),
             "plan_hours": int(offering.lesson_hours or 0),
+            "is_history": not offering.journal_is_current_load,
+            "own_history": not offering.journal_is_current_load and offering.journal_has_records,
         }
         for offering in offerings
     ]
