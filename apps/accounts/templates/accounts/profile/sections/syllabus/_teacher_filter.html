@@ -1,0 +1,14 @@
+{% load i18n %}
+<div class="syl-field">
+  <label for="syl-teacher">{% trans "Müəllif / dərs deyən müəllim" context "accounts.syllabus" %}</label>
+  <div class="bootstrap-single-select bootstrap-single-select--ems syl-selectwrap">
+    <select id="syl-teacher" class="syl-select bootstrap-single-select__native" data-syl-filter="teacher"
+            data-bootstrap-select data-live-search="true"
+            data-live-search-placeholder="{% trans 'Müəllimin adı ilə axtar…' context 'accounts.syllabus' %}">
+      <option value="">{% trans "Bütün müəllimlər" context "accounts.syllabus" %}</option>
+      {% for option in sl.filter_options.teachers %}
+      <option value="{{ option.key }}" {% if option.key == sl.filters.teacher %}selected{% endif %}>{{ option.label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</div>

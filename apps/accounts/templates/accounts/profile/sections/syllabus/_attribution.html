@@ -1,0 +1,6 @@
+{% load i18n %}
+<span class="syl-meta" data-syllabus-author>{% trans "Müəllif" context "accounts.syllabus" %}: {{ row.author_name|default:"—" }}</span>
+{% if row.teacher_name and row.teacher_name != row.author_name %}
+<span class="syl-meta" data-syllabus-teacher>{% trans "Dərs deyən müəllim" context "accounts.syllabus" %}: {{ row.teacher_name }}</span>
+{% endif %}
+{% if row.draft_note %}<span class="syl-meta" data-syllabus-draft-preserved>{{ row.draft_note }}</span>{% endif %}

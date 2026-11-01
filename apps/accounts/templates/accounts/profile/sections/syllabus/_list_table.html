@@ -25,6 +25,7 @@ və sticky). Cədvəl `overflow-x:auto` konteynerində sürüşür — səhifə 
           <th scope="row" class="syl-cell-subject">
             <span class="syl-code">{{ row.code }}</span>
             <span class="syl-name">{{ row.name }}</span>
+            {% include "accounts/profile/sections/syllabus/_attribution.html" %}
             {% if row.program %}<span class="syl-meta">{{ row.program }}</span>{% endif %}
           </th>
           <td class="syl-cell-period">
@@ -66,7 +67,7 @@ və sticky). Cədvəl `overflow-x:auto` konteynerində sürüşür — səhifə 
                       data-syl-action="{{ action.key }}"
                       data-row-kind="{{ row.kind }}"
                       data-id="{{ row.id }}"
-                      data-version="{{ row.version_id }}"
+                      data-version="{% if action.key == 'view' and row.read_version_id %}{{ row.read_version_id }}{% else %}{{ row.version_id }}{% endif %}"
                       data-pdf="{{ row.pdf_url }}"
                       data-name="{{ row.name }}">{{ action.label }}</button>
               {% endfor %}

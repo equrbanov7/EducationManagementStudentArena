@@ -12,6 +12,7 @@ server sorğusu yoxdur, seçim `localStorage`-da yadda saxlanılır).
       <span class="syl-badge syl-badge--{{ row.status_tone }}">{{ row.status_label }}</span>
     </div>
     <h3 class="syl-card__title">{{ row.name }}</h3>
+    {% include "accounts/profile/sections/syllabus/_attribution.html" %}
     {% if row.program %}<p class="syl-meta">{{ row.program }}</p>{% endif %}
     <p class="syl-meta">{{ row.year|default:"—" }} · {{ row.semester }} · {{ row.version_label }}</p>
     <div class="syl-card__progress">
@@ -37,7 +38,7 @@ server sorğusu yoxdur, seçim `localStorage`-da yadda saxlanılır).
               data-syl-action="{{ action.key }}"
               data-row-kind="{{ row.kind }}"
               data-id="{{ row.id }}"
-              data-version="{{ row.version_id }}"
+              data-version="{% if action.key == 'view' and row.read_version_id %}{{ row.read_version_id }}{% else %}{{ row.version_id }}{% endif %}"
               data-pdf="{{ row.pdf_url }}"
               data-name="{{ row.name }}">{{ action.label }}</button>
       {% endfor %}

@@ -47,6 +47,7 @@ from apps.syllabus.public import (
 from core.search_text import tolerant_q
 
 from .labels import STATUS_TONES
+from .list_attribution import published_counts, published_queryset, published_sort, teacher_filter, teacher_options
 from .reuse_context import page_flags
 from .rows import build_missing_row, build_row
 
@@ -90,6 +91,11 @@ SCOPE_LABELS = {"": ALL_CHIP, SCOPE_MINE: pgettext_lazy(_CTX, "Mənim fənlərim
 #: Səhifə sətirlərinin JOIN-ləri — təsdiqləyən/rəyçi + bağ (mənbə qrupu, mənbənin
 #: qüvvədə olan versiyası, bağlı versiyanın mənbə qrupu) sətir başına sorğu açmasın.
 _PAGE_RELATED = (
+    "author__profile",
+    "offering__instructor__profile",
+    "approved_version__approved_by",
+    "approved_version__reviewer",
+    "approved_version__source_version__syllabus__offering__group",
     "current_version__approved_by",
     "current_version__reviewer",
     "current_version__source_version__syllabus__offering__group",
@@ -113,7 +119,7 @@ def _missing_rows(*, organization, user, syllabi, academic_year: str, semester: 
     """
     queryset = (
         CourseOffering.objects.filter(organization=organization, is_active=True, instructor=user)
-        .select_related("subject", "period")
+        .select_related("subject", "period", "instructor__profile")
         .order_by("subject__code", "pk")
     )
     if academic_year:
@@ -203,7 +209,10 @@ def _overdue_filter(*, now, sla: int) -> Q:
     ``submitted_at <= now - (sla + 1) gün``.
     """
     cutoff = now - _dt.timedelta(days=sla + 1)
-    return Q(current_version__status__in=sorted(QUEUE_STATUSES), current_version__submitted_at__lte=cutoff)
+    return Q(
+        current_version__status__in=sorted(QUEUE_STATUSES),
+        current_version__submitted_at__lte=cutoff,
+    ) & ~Q(approved_version__status=SyllabusStatus.APPROVED)
 
 
 class _MissingThenSyllabi:
@@ -393,6 +402,7 @@ def build_syllabus_list_section(request, *, organization) -> dict:
     scope = SCOPE_MINE if _text(request, "scope") == SCOPE_MINE else ""
 
     unit = _text(request, "unit")
+    teacher = _text(request, "teacher")
     # Sahib 2026-10-27: müəllim (yalnız öz əhatəsi) siyahıda YALNIZ cari tədris ilini görür — köhnə illərin
     # sillabusları burada göstərilmir («Keçən ildən köçür» öz köhnə sillabusunu yenə tapır).
     current_year_only = not services.has_broad_view_scope(
@@ -412,7 +422,7 @@ def build_syllabus_list_section(request, *, organization) -> dict:
         # gəlməzdi; süzgəc aşağıda tətbiq olunur. Audit 2026-09-13 (perf F-12
         # yan tapıntısı): «missing» ötürüləndə dəst boşalır və sillabusu OLAN
         # açılışlar da «sillabussuz» görünürdü, KPI-lar sıfırlanırdı.
-        statuses=[status] if status and status not in VIRTUAL_STATUS_KEYS else None,
+        statuses=None,
         search=search,
         sort=sort if sort in SORT_LABELS else "recent",
     )
@@ -423,7 +433,8 @@ def build_syllabus_list_section(request, *, organization) -> dict:
     # Kafedra siyahısı GÖRÜNƏN dəstdən çıxarılır — ayrıca struktur sorğusu
     # açmırıq ki, əhatəsiz istifadəçiyə bütün org-un kafedraları sızmasın.
     units = _chair_units(visible)
-    syllabi = visible
+    teachers = teacher_options(visible, request.user)
+    syllabi = published_queryset(teacher_filter(visible, teacher))
     if semester:
         syllabi = syllabi.filter(period__name=semester)
     if unit:
@@ -432,6 +443,10 @@ def build_syllabus_list_section(request, *, organization) -> dict:
         except ValueError:
             syllabi = syllabi.none()
 
+    context["counts"] = published_counts(syllabi)
+    if status and status not in VIRTUAL_STATUS_KEYS:
+        syllabi = syllabi.filter(_published_status=status)
+    syllabi = published_sort(syllabi, sort)
     now = timezone.now()
     sla = sla_days(organization)
     overdue_q = _overdue_filter(now=now, sla=sla)
@@ -449,7 +464,7 @@ def build_syllabus_list_section(request, *, organization) -> dict:
             search=search,
             actor=context["actor"],
         )
-        if status in ("", "missing")
+        if status in ("", "missing") and (not teacher or teacher == str(request.user.pk))
         else []
     )
     if not context["can_create"]:
@@ -486,6 +501,7 @@ def build_syllabus_list_section(request, *, organization) -> dict:
                 "year": academic_year,
                 "semester": semester,
                 "unit": unit,
+                "teacher": teacher,
                 "status": status,
                 "sort": sort,
                 "view": view_mode,
@@ -497,6 +513,7 @@ def build_syllabus_list_section(request, *, organization) -> dict:
                 "years": years,
                 "semesters": seasons,
                 "units": units,
+                "teachers": teachers,
                 "sorts": [{"key": key, "label": label} for key, label in SORT_LABELS.items()],
             },
             "page": {

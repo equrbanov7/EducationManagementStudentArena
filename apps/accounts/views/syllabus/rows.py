@@ -19,6 +19,7 @@ from django.utils.translation import pgettext_lazy
 from apps.syllabus.public import STATUS_NEXT_STEP, SyllabusStatus, approved_edits_enabled, reuse_approval_note
 
 from .labels import NEXT_STEP_TONES, STATUS_TONES
+from .list_attribution import DRAFT_PRESERVED, attribution, published_version
 
 _CTX = "accounts.syllabus"
 
@@ -236,7 +237,8 @@ def build_row(syllabus, *, now=None, can_copy: bool = False, reuse=None, viewer=
     ``reuse`` — ``reuse_context.page_flags``; ``viewer`` — ``{"user_id", "can_edit"}``:
     verilibsə sətrin əməlləri baxanın ÖZ dosyesi olub-olmamasına görə daraldılır.
     """
-    version = syllabus.current_version
+    current = syllabus.current_version
+    version = current
     status = version.status if version is not None else SyllabusStatus.DRAFT.value
     percent = version.completion_percent if version is not None else 0
     year, semester = _period_labels(syllabus.period)
@@ -255,7 +257,17 @@ def build_row(syllabus, *, now=None, can_copy: bool = False, reuse=None, viewer=
         shared_note = str(_SHARED_WITH) % {"groups": ", ".join(shared)}
         reuse_note = f"{reuse_note} · {shared_note}" if reuse_note else shared_note
     urls = detail_urls(syllabus.pk)
+    display = published_version(syllabus)
+    preserved = display is not None and current is not None and display.pk != current.pk
+    if preserved:
+        status = display.status
+        percent = display.completion_percent
+        if "view" not in keys:
+            keys = ["view"] + keys
     return {
+        **attribution(syllabus=syllabus),
+        "draft_note": DRAFT_PRESERVED if preserved else "",
+        "read_version_id": str(display.pk) if display is not None else "",
         "kind": "syllabus",
         "id": str(syllabus.pk),
         "detail_url": urls["detail"],
@@ -267,13 +279,13 @@ def build_row(syllabus, *, now=None, can_copy: bool = False, reuse=None, viewer=
         "program": syllabus.program.display_label if syllabus.program_id else "",
         "year": year,
         "semester": semester,
-        "version_label": version.label if version is not None else _DASH,
+        "version_label": display.label if display is not None else _DASH,
         "percent": percent,
         "percent_tone": percent_tone(percent),
         "status_key": status,
         "status_label": SyllabusStatus(status).label,
         "status_tone": STATUS_TONES.get(status, "neutral"),
-        "approver": approver_text(syllabus, version, now=now),
+        "approver": approver_text(syllabus, display, now=now),
         "next_step": (
             pgettext_lazy(_CTX, "Düzəlişlər avtomatik təsdiqlənir")
             if "edit" in keys
@@ -298,6 +310,8 @@ def build_missing_row(offering, *, can_copy: bool = False, siblings: int = 0) ->
     else:
         keys = ["create"] + (["copy"] if can_copy else [])
     return {
+        **attribution(offering=offering),
+        "draft_note": "",
         "kind": "missing",
         "id": str(offering.pk),
         # Sillabus dosyesi hələ yoxdur → detal səhifəsi də yoxdur (link gizlənir).
