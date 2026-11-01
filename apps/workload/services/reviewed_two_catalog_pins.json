@@ -1,0 +1,579 @@
+{
+  "academic_year": "2026/2027",
+  "case_proof_sha256": "4eb25258399a51936e9cc1e979cd72918a4f21c95439c0f4e9168cfbdae01040",
+  "cases": [
+    {
+      "after_subject": "698585d2-2eb5-4a63-a299-94880fed19c1",
+      "assignments": [
+        {
+          "activity": "seminar",
+          "hours": 45,
+          "id": "2e9ac716-b148-45e7-b0e5-eecfcaec5a00",
+          "is_hourly_paid": true,
+          "row_id": "9091ea05-f899-46cc-b542-220f0b86142f",
+          "teacher_id": 8353
+        },
+        {
+          "activity": "lecture",
+          "hours": 45,
+          "id": "3648464f-0ca7-40d2-9ed6-ea8fcbf97db6",
+          "is_hourly_paid": true,
+          "row_id": "9091ea05-f899-46cc-b542-220f0b86142f",
+          "teacher_id": 8353
+        }
+      ],
+      "before_subject": "09c52e60-96fa-48f7-b2ac-91efe1435a65",
+      "bridge": [
+        {
+          "entity_type": "lesson_subject",
+          "legacy_pk": "289",
+          "source_row_hash": "a0fba9c71d4d9e457d0b241a5b7301d847d48b22fcadfad948e853c315b1763e",
+          "state": "migrated",
+          "target_model_label": "registrar.subject",
+          "target_pk": "698585d2-2eb5-4a63-a299-94880fed19c1"
+        },
+        {
+          "entity_type": "worker_materialisation",
+          "legacy_pk": "914",
+          "source_row_hash": "067ea0233de4d63f00b380701b665f2bfc4f60a1ca136a987cf3f4b5434f83e9",
+          "state": "migrated",
+          "target_model_label": "auth.user",
+          "target_pk": "8353"
+        },
+        {
+          "entity_type": "group_unit",
+          "legacy_pk": "654",
+          "source_row_hash": "d296af88305e0b1260fa26355b1951f75d6a5a106fc045439c33855332a12dd6",
+          "state": "migrated",
+          "target_model_label": "organizations.orgunit",
+          "target_pk": "b5d250d8-ed52-486c-b501-a8a00b5c692d"
+        },
+        {
+          "entity_type": "worker",
+          "legacy_pk": "914",
+          "source_row_hash": "13d301b4d0bc0486bd237e4cc6290ad8359a9d4a792ea3c6fcee773d7ddb0571",
+          "state": "migrated",
+          "target_model_label": "auth.user",
+          "target_pk": "8353"
+        }
+      ],
+      "counts": {
+        "36046244-e8c2-48ff-a807-409828a83814": {
+          "enrollment_state_md5": "228ebae8c91d842fe46b5ed16520bb77",
+          "enrollments": 13,
+          "lesson_state_md5": "ed6754af9433aae4c6e53505973da00f",
+          "lessons": 18,
+          "mark_state_md5": "3cfd5ca29b1ee9fc09beed17d9b8a02c",
+          "marks": 221,
+          "offering_id": "36046244-e8c2-48ff-a807-409828a83814"
+        },
+        "b1a6317a-eddf-4e4e-8340-9b69acb69ec2": {
+          "enrollment_state_md5": "ec8f41dcd037b1ad6dd624c15ee74c7c",
+          "enrollments": 13,
+          "lesson_state_md5": "d41d8cd98f00b204e9800998ecf8427e",
+          "lessons": 0,
+          "mark_state_md5": "d41d8cd98f00b204e9800998ecf8427e",
+          "marks": 0,
+          "offering_id": "b1a6317a-eddf-4e4e-8340-9b69acb69ec2"
+        }
+      },
+      "donor": {
+        "approved_version_id": "bb73ff73-ebbe-44fc-8693-6e1d7fa87bd0",
+        "author_id": 8353,
+        "body_sha256": "651bf981a13e55727e111c9c0c596ac92eb8e2b28f3b944d9fb551794804521c",
+        "current_version_id": "bb73ff73-ebbe-44fc-8693-6e1d7fa87bd0",
+        "id": "a0a64baf-3bd4-49bd-a456-51f5ae75bdcd",
+        "is_active": true,
+        "offering_id": "36046244-e8c2-48ff-a807-409828a83814",
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "reused_from_id": null,
+        "subject_id": "698585d2-2eb5-4a63-a299-94880fed19c1"
+      },
+      "empty": "b1a6317a-eddf-4e4e-8340-9b69acb69ec2",
+      "filled": "36046244-e8c2-48ff-a807-409828a83814",
+      "group": {
+        "code": "",
+        "id": "b5d250d8-ed52-486c-b501-a8a00b5c692d",
+        "is_active": true,
+        "name": "534 DBİ az",
+        "parent_id": "c9f71693-8387-4e15-b2ba-e6cbf272c37c",
+        "settings": {
+          "degree_level": "bachelor",
+          "education_form": "full_time",
+          "sector": "az"
+        },
+        "unit_type": "group"
+      },
+      "offerings": {
+        "36046244-e8c2-48ff-a807-409828a83814": {
+          "group_id": "b5d250d8-ed52-486c-b501-a8a00b5c692d",
+          "id": "36046244-e8c2-48ff-a807-409828a83814",
+          "instructor_id": 8353,
+          "is_active": true,
+          "lesson_hours": 90,
+          "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+          "subject_id": "698585d2-2eb5-4a63-a299-94880fed19c1"
+        },
+        "b1a6317a-eddf-4e4e-8340-9b69acb69ec2": {
+          "group_id": "b5d250d8-ed52-486c-b501-a8a00b5c692d",
+          "id": "b1a6317a-eddf-4e4e-8340-9b69acb69ec2",
+          "instructor_id": 8353,
+          "is_active": true,
+          "lesson_hours": 90,
+          "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+          "subject_id": "09c52e60-96fa-48f7-b2ac-91efe1435a65"
+        }
+      },
+      "roster": {
+        "count": 13,
+        "sha256": "74e1d57bffcdda3a4eab4752f9a8f313cca4b420ec8439fd8e7dfe6f1ae3f0a0"
+      },
+      "row_fields": {
+        "consult_hours": 0,
+        "credits": "8",
+        "degree_level": "bachelor",
+        "education_form": "eyani",
+        "exam_hours": 0,
+        "groups_text": "534 DBİ",
+        "lab_plan": 0,
+        "lab_total": 0,
+        "lecture_plan": 45,
+        "lecture_total": 45,
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "postgrad_hours": 0,
+        "practice_production_hours": 0,
+        "practice_research_hours": 0,
+        "row_kind": "teaching",
+        "season": "fall",
+        "seminar_plan": 45,
+        "seminar_total": 45,
+        "specialty_id": "c9f71693-8387-4e15-b2ba-e6cbf272c37c",
+        "student_count": 10,
+        "subgroup_count": 1,
+        "subject_text": "İnformasiya və kommunikasiya texnologiyaları",
+        "task_id": "663dbec7-6043-4b12-9f69-9d1278a1b7cb",
+        "thesis_hours": 0,
+        "total_hours": 90,
+        "union_count": 1
+      },
+      "row_id": "9091ea05-f899-46cc-b542-220f0b86142f",
+      "source": {
+        "body_sha256": "651bf981a13e55727e111c9c0c596ac92eb8e2b28f3b944d9fb551794804521c",
+        "chair_id": "723f5382-82c4-4627-9e69-739b8b3d8325",
+        "journal": {
+          "active": 1,
+          "fake": 0,
+          "fenn_saati": 90,
+          "groups_id": "[\"654\"]",
+          "id": 14015,
+          "lesson_id": 289,
+          "name": "İnformasiya və kommunikasiya texnologiyaları - (2026/2027 Payız)",
+          "semestr": 14,
+          "sillabus_id": 8512,
+          "sonra_sil": 0,
+          "teacher_id": 914,
+          "uniqid": "UuB0gz1E24"
+        },
+        "official": [
+          {
+            "raw_cells": {
+              "1": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": ""
+              },
+              "10": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": ""
+              },
+              "11": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": "90"
+              },
+              "12": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": ""
+              },
+              "13": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": ""
+              },
+              "14": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": ""
+              },
+              "15": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": ""
+              },
+              "16": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": ""
+              },
+              "17": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": ""
+              },
+              "18": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": ""
+              },
+              "19": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": ""
+              },
+              "2": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": "534 DBİ"
+              },
+              "20": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": ""
+              },
+              "21": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": ""
+              },
+              "22": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": ""
+              },
+              "23": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": ""
+              },
+              "24": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": "90"
+              },
+              "25": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": ""
+              },
+              "26": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": "90"
+              },
+              "3": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": "İnformasiya və kommunikasiya texnologiyaları"
+              },
+              "4": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": "10"
+              },
+              "5": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": "45"
+              },
+              "6": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": "45"
+              },
+              "7": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": ""
+              },
+              "8": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": ""
+              },
+              "9": {
+                "cell_type": "docx_text",
+                "formula": null,
+                "value": ""
+              }
+            },
+            "row": 107,
+            "sheet": "table-1",
+            "source_sha256": "7630be3cbe9bfe7050e2f308fae8c4959c35bd298967f5e3f2b77a0ab4a9cb09",
+            "teacher_anchor": {
+              "exact_teacher_full_triple": true,
+              "row": 98
+            }
+          }
+        ],
+        "validation_only_no_copy": true
+      },
+      "subjects": {
+        "09c52e60-96fa-48f7-b2ac-91efe1435a65": {
+          "chair_unit_id": null,
+          "code": "SAYT-0007",
+          "id": "09c52e60-96fa-48f7-b2ac-91efe1435a65",
+          "name": "İnformasiya və kommunikasiya texnologiyaları"
+        },
+        "698585d2-2eb5-4a63-a299-94880fed19c1": {
+          "chair_unit_id": null,
+          "code": "QKU-289",
+          "id": "698585d2-2eb5-4a63-a299-94880fed19c1",
+          "name": "İnformasiya komnukasiya texnologiyaları"
+        }
+      },
+      "teacher": 8353
+    },
+    {
+      "after_subject": "0081ceca-f270-44df-af3c-da1fe2b1ac0a",
+      "assignments": [
+        {
+          "activity": "seminar",
+          "hours": 15,
+          "id": "01a2f18e-6b7f-4f8a-84af-d5003e047ad3",
+          "is_hourly_paid": false,
+          "row_id": "fd924dd7-1799-4810-a0d7-d0277f9e55a4",
+          "teacher_id": 7942
+        },
+        {
+          "activity": "lecture",
+          "hours": 30,
+          "id": "68da7de3-0114-426f-8d7e-42a92de61ec1",
+          "is_hourly_paid": false,
+          "row_id": "fd924dd7-1799-4810-a0d7-d0277f9e55a4",
+          "teacher_id": 7942
+        }
+      ],
+      "before_subject": "ac53d96a-97d6-4402-b45a-6bc2da5088da",
+      "bridge": [
+        {
+          "entity_type": "lesson_subject",
+          "legacy_pk": "2499",
+          "source_row_hash": "ca3f500c446bfee43ce4847e1cf7891f79e68fcba056ed93e46f16090cdb69b6",
+          "state": "migrated",
+          "target_model_label": "registrar.subject",
+          "target_pk": "0081ceca-f270-44df-af3c-da1fe2b1ac0a"
+        },
+        {
+          "entity_type": "group_unit",
+          "legacy_pk": "834",
+          "source_row_hash": "7b0041c5b272b0a7f7c641b34191f32864d20f77396f6beeace2877786018bac",
+          "state": "migrated",
+          "target_model_label": "organizations.orgunit",
+          "target_pk": "4c8e770a-f2a1-4db4-8337-6bbe4505e6d4"
+        },
+        {
+          "entity_type": "worker",
+          "legacy_pk": "442",
+          "source_row_hash": "6e7ebd8b41da5e4e31850d5da56d41d1368b4f9834bbb5cf7c92f26e5a4c9764",
+          "state": "migrated",
+          "target_model_label": "auth.user",
+          "target_pk": "7942"
+        },
+        {
+          "entity_type": "worker_materialisation",
+          "legacy_pk": "442",
+          "source_row_hash": "1d0e168aefb745f3f5a4b2859b39032dea705b3d555b6f76b3bd2c57a8025b8b",
+          "state": "migrated",
+          "target_model_label": "auth.user",
+          "target_pk": "7942"
+        }
+      ],
+      "counts": {
+        "0858f3cf-76eb-47b3-8842-4098e32c17a2": {
+          "enrollment_state_md5": "fefee7730a5753ae58f515f32fa0db3c",
+          "enrollments": 2,
+          "lesson_state_md5": "3a73650ba616d0435de3dee270fd9d9a",
+          "lessons": 8,
+          "mark_state_md5": "4cd349189d43c78992c0d3e93b5d7474",
+          "marks": 16,
+          "offering_id": "0858f3cf-76eb-47b3-8842-4098e32c17a2"
+        },
+        "2241fd3f-735a-4a78-a2c2-14ec7a7edf92": {
+          "enrollment_state_md5": "69722da80251db48eb68c21384f61e7d",
+          "enrollments": 2,
+          "lesson_state_md5": "d41d8cd98f00b204e9800998ecf8427e",
+          "lessons": 0,
+          "mark_state_md5": "d41d8cd98f00b204e9800998ecf8427e",
+          "marks": 0,
+          "offering_id": "2241fd3f-735a-4a78-a2c2-14ec7a7edf92"
+        }
+      },
+      "donor": {
+        "approved_version_id": "8491327c-5581-46cf-ac4e-21f4185302a7",
+        "author_id": 7942,
+        "body_sha256": "d3ca410f040a76723c5e29bd5ee42025956651bf05ec04ced21d918024bd8f57",
+        "current_version_id": "8491327c-5581-46cf-ac4e-21f4185302a7",
+        "id": "a5a36ee2-03d9-4146-9596-b30639eacbc3",
+        "is_active": true,
+        "offering_id": "0858f3cf-76eb-47b3-8842-4098e32c17a2",
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "reused_from_id": null,
+        "subject_id": "0081ceca-f270-44df-af3c-da1fe2b1ac0a"
+      },
+      "empty": "2241fd3f-735a-4a78-a2c2-14ec7a7edf92",
+      "filled": "0858f3cf-76eb-47b3-8842-4098e32c17a2",
+      "group": {
+        "code": "",
+        "id": "4c8e770a-f2a1-4db4-8337-6bbe4505e6d4",
+        "is_active": true,
+        "name": "510/5 E",
+        "parent_id": "80be201d-3ea3-4fc5-a930-62866a0d3d88",
+        "settings": {
+          "degree_level": "master",
+          "education_form": "full_time",
+          "sector": "az"
+        },
+        "unit_type": "group"
+      },
+      "offerings": {
+        "0858f3cf-76eb-47b3-8842-4098e32c17a2": {
+          "group_id": "4c8e770a-f2a1-4db4-8337-6bbe4505e6d4",
+          "id": "0858f3cf-76eb-47b3-8842-4098e32c17a2",
+          "instructor_id": 7942,
+          "is_active": true,
+          "lesson_hours": 45,
+          "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+          "subject_id": "0081ceca-f270-44df-af3c-da1fe2b1ac0a"
+        },
+        "2241fd3f-735a-4a78-a2c2-14ec7a7edf92": {
+          "group_id": "4c8e770a-f2a1-4db4-8337-6bbe4505e6d4",
+          "id": "2241fd3f-735a-4a78-a2c2-14ec7a7edf92",
+          "instructor_id": 7942,
+          "is_active": true,
+          "lesson_hours": 45,
+          "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+          "subject_id": "ac53d96a-97d6-4402-b45a-6bc2da5088da"
+        }
+      },
+      "roster": {
+        "count": 2,
+        "sha256": "6109566f041894947ded08e3090d1db7c9c749599bac8b157b4750975133c0cd"
+      },
+      "row_fields": {
+        "consult_hours": 0,
+        "credits": "",
+        "degree_level": "master",
+        "education_form": "eyani",
+        "exam_hours": 0,
+        "groups_text": "510/5 E",
+        "lab_plan": 0,
+        "lab_total": 0,
+        "lecture_plan": 30,
+        "lecture_total": 30,
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "postgrad_hours": 0,
+        "practice_production_hours": 0,
+        "practice_research_hours": 0,
+        "row_kind": "teaching",
+        "season": "fall",
+        "seminar_plan": 15,
+        "seminar_total": 15,
+        "specialty_id": "80be201d-3ea3-4fc5-a930-62866a0d3d88",
+        "student_count": 0,
+        "subgroup_count": 1,
+        "subject_text": "Aqroiqlim ehtiyyatları və onların kənd təsərrüfatında rolu",
+        "task_id": "f9e57565-648f-4365-b533-db04007796d2",
+        "thesis_hours": 0,
+        "total_hours": 45,
+        "union_count": 1
+      },
+      "row_id": "fd924dd7-1799-4810-a0d7-d0277f9e55a4",
+      "source": {
+        "body_sha256": "d3ca410f040a76723c5e29bd5ee42025956651bf05ec04ced21d918024bd8f57",
+        "chair_id": "6cb37f21-4d0f-4858-8c53-1f09d4d0efda",
+        "journal": {
+          "active": 1,
+          "fake": 0,
+          "fenn_saati": 45,
+          "groups_id": "[\"834\"]",
+          "id": 14676,
+          "lesson_id": 2499,
+          "name": "Aqroiqlim ehtiyyatları və onların kənd təsərrüfatında rolu  - (2026/2027 Payız)",
+          "semestr": 14,
+          "sillabus_id": 8489,
+          "sonra_sil": 0,
+          "teacher_id": 442,
+          "uniqid": "ehF4qjctxi"
+        },
+        "official": [
+          {
+            "raw_cells": {
+              "B23": {
+                "cell_type": "s",
+                "formula": null,
+                "value": "510/5E"
+              },
+              "C23": {
+                "cell_type": "s",
+                "formula": null,
+                "value": "Aqroiqlim ehtiyyatları və onların kənd təsərrüfatında rolu"
+              },
+              "D23": {
+                "cell_type": "numeric",
+                "formula": null,
+                "value": "6"
+              },
+              "E23": {
+                "cell_type": "numeric",
+                "formula": null,
+                "value": "2"
+              },
+              "G23": {
+                "cell_type": "numeric",
+                "formula": null,
+                "value": "30"
+              },
+              "H23": {
+                "cell_type": "numeric",
+                "formula": null,
+                "value": "15"
+              },
+              "I23": {
+                "cell_type": "s",
+                "formula": null,
+                "value": "-"
+              }
+            },
+            "row": 23,
+            "sheet": "Dərs yükü",
+            "source_sha256": "38c3ed762cc25426e8966006432928525a9e66f58605c6d506ed93557e9f60da",
+            "teacher_anchor": {
+              "exact_teacher_full_triple": true,
+              "row": 18
+            }
+          }
+        ],
+        "validation_only_no_copy": true
+      },
+      "subjects": {
+        "0081ceca-f270-44df-af3c-da1fe2b1ac0a": {
+          "chair_unit_id": null,
+          "code": "QKU-2499",
+          "id": "0081ceca-f270-44df-af3c-da1fe2b1ac0a",
+          "name": "Aqroiqlim ehtiyatları və kənd təsərrüfatı"
+        },
+        "ac53d96a-97d6-4402-b45a-6bc2da5088da": {
+          "chair_unit_id": "6cb37f21-4d0f-4858-8c53-1f09d4d0efda",
+          "code": "QKU-2717",
+          "id": "ac53d96a-97d6-4402-b45a-6bc2da5088da",
+          "name": "Aqroiqlim ehtiyyatları və onların kənd təsərrüfatında rolu"
+        }
+      },
+      "teacher": 7942
+    }
+  ],
+  "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+  "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372"
+}

@@ -24,6 +24,7 @@ from .leyla_references import collect_leyla_references
 from .request_content import collect_request_content
 from .request_syllabus import collect_request_syllabus
 from .source58_evidence import collect_source58_evidence
+from .two_catalog_references import collect_two_catalog_references
 
 KEY_FINGERPRINT = "f21b002d94fdd65fb346e557e6eb85109f60bda3afa8d8c5a2a14e4b9fc922bf"
 FORMAT = "wcu-workload-snapshot/1"
@@ -57,6 +58,7 @@ def capture(username):
         data.update(collect_request_syllabus())
         data.update(collect_leyla_references())
         data.update(collect_ilahe_references())
+        data.update(collect_two_catalog_references())
         data.update(collect_source58_evidence())
         if not data["tasks"]:
             raise SnapshotError("fixed_org_tasks_missing")
