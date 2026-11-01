@@ -14,11 +14,14 @@
         <form method="post">
             {% csrf_token %}<input type="hidden" name="action" value="add_lesson">
             <label>Tarix <input type="date" name="date" value="{{ today|date:'Y-m-d' }}" max="{{ today|date:'Y-m-d' }}" required></label>
-            <label>Cədvəl dərsi
-                <select name="slot_id" required>
-                    {% for slot in slots %}<option value="{{ slot.pk }}">{{ slot.weekday_label }} · {{ slot.start_time|time:'H:i' }}–{{ slot.end_time|time:'H:i' }} · {{ slot.get_week_type_display }}{% if slot.room %} · {{ slot.room }}{% endif %}</option>{% endfor %}
-                </select>
-            </label>
+            <div class="joint-slot-field">
+                <label for="joint-slot">Cədvəl dərsi</label>
+                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                    <select id="joint-slot" name="slot_id" required class="bootstrap-single-select__native" data-bootstrap-select>
+                        {% for slot in slots %}<option value="{{ slot.pk }}">{{ slot.weekday_label }} · {{ slot.start_time|time:'H:i' }}–{{ slot.end_time|time:'H:i' }} · {{ slot.get_week_type_display }}{% if slot.room %} · {{ slot.room }}{% endif %}</option>{% endfor %}
+                    </select>
+                </div>
+            </div>
             <label>Mövzu <input type="text" name="topic" maxlength="255" required></label>
             <button type="submit">Bütün qruplara dərs əlavə et</button>
         </form>
@@ -38,11 +41,13 @@
                     {% if cell %}
                         {% if cell.writable %}
                         <label class="joint-sr">{{ row.student.get_full_name }} · {{ cell.lesson.date|date:'d.m.Y' }} · davamiyyət</label>
-                        <select name="att__{{ cell.lesson.pk }}__{{ row.enrollment.pk }}" aria-label="Davamiyyət: {{ row.student.get_full_name }} — {{ cell.lesson.date|date:'d.m.Y' }}">
+                        <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select class="bootstrap-single-select__native" data-bootstrap-select name="att__{{ cell.lesson.pk }}__{{ row.enrollment.pk }}" aria-label="Davamiyyət: {{ row.student.get_full_name }} — {{ cell.lesson.date|date:'d.m.Y' }}">
                             <option value="" {% if not cell.mark %}selected{% endif %}>—</option>
                             <option value="present" {% if cell.mark.status == 'present' %}selected{% endif %}>i/e</option>
                             <option value="absent" {% if cell.mark.status == 'absent' %}selected{% endif %}>q/b</option>
                         </select>
+                        </div>
                         {% if cell.allows_score %}<input aria-label="Bal: {{ row.student.get_full_name }} — {{ cell.lesson.date|date:'d.m.Y' }}" type="number" min="0" max="10" step="1" name="score__{{ cell.lesson.pk }}__{{ row.enrollment.pk }}" value="{{ cell.mark.score|default_if_none:'' }}">{% endif %}
                         {% else %}<span title="Xana kilidlidir">{{ cell.mark.get_status_display|default:'—' }}{% if cell.mark.score != None %} · {{ cell.mark.score }}{% endif %} 🔒</span>{% endif %}
                     {% else %}<span title="Bu qrup üçün həmin tarixdə ayrıca dərs qeydi yoxdur">—</span>{% endif %}
