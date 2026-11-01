@@ -31,6 +31,7 @@ from typing import Any
 from django.utils import timezone
 from django.utils.translation import pgettext
 
+from apps.live_exam.bombs import result_fields
 from apps.live_exam.constants import PLAYER_FINAL_SUSPENSE_SECONDS, PLAYER_LEADERBOARD_SECONDS, PLAYER_RESULT_SECONDS
 from apps.live_exam.domain.question_config import resolve_question_config
 from apps.live_exam.domain.session import (
@@ -52,6 +53,8 @@ _ANSWER_FIELDS = (
     "is_correct",
     "answer_ms",
     "awarded_points",
+    "bomb_triggered",
+    "score_reset_amount",
 )
 _PLAYER_FIELDS = (
     "id",
@@ -192,7 +195,10 @@ def build_reveal_bundle(session, question_id: int, *, revealed_at=None, exam_que
 
     answers_by_speed = sorted(answers, key=speed_order_key)
     speed_rank = {answer["id"]: index + 1 for index, answer in enumerate(answers_by_speed)}
-    awarded_by_player = {answer["player_id"]: safe_int(answer["awarded_points"], 0) for answer in answers}
+    awarded_by_player = {
+        answer["player_id"]: safe_int(answer["awarded_points"], 0) - safe_int(answer["score_reset_amount"], 0)
+        for answer in answers
+    }
 
     ordered = sorted(players, key=leaderboard_key)
     before = sorted(
@@ -224,6 +230,7 @@ def build_reveal_bundle(session, question_id: int, *, revealed_at=None, exam_que
             "accessory_key": player["accessory_key"],
             "is_correct": bool(answer["is_correct"]),
             "awarded_points": safe_int(answer["awarded_points"], 0),
+            **result_fields(answer),
             "total_score": safe_int(player["score"], 0),
             "answer_ms": safe_int(answer["answer_ms"], 0),
             "answer_rank": speed_rank[answer["id"]],
@@ -286,6 +293,7 @@ def build_reveal_bundle(session, question_id: int, *, revealed_at=None, exam_que
                 "choice_ids": answer_choice_ids(answer),
                 "is_correct": bool(answer["is_correct"]),
                 "awarded_points": safe_int(answer["awarded_points"], 0),
+                **result_fields(answer),
                 "total_score": safe_int(player["score"], 0),
                 "answer_ms": safe_int(answer["answer_ms"], 0),
                 "answer_rank": speed_rank[answer["id"]],
@@ -316,9 +324,9 @@ def pre_question_ranks(session, question_id: int | None) -> dict[int, dict[str, 
     awarded: dict[int, int] = {}
     if question_id:
         for row in LiveAnswer.objects.filter(session_id=session.id, question_id=question_id).values(
-            "player_id", "awarded_points"
+            "player_id", "awarded_points", "score_reset_amount"
         ):
-            awarded[row["player_id"]] = safe_int(row["awarded_points"], 0)
+            awarded[row["player_id"]] = safe_int(row["awarded_points"], 0) - safe_int(row["score_reset_amount"], 0)
     before = [{**player, "score": safe_int(player["score"], 0) - awarded.get(player["id"], 0)} for player in players]
     return _rank_fields(sorted(before, key=leaderboard_key))
 

@@ -1,0 +1,24 @@
+.lxp-bomb-rule, .lxp-bomb-notice {
+    padding: .8rem 1rem;
+    border: 2px solid #ffbd65;
+    border-radius: 1rem;
+    color: #fff4dc;
+    background: #58320d;
+    font-weight: 700;
+    line-height: 1.5;
+}
+.lxp-bomb-burst {
+    position: absolute;
+    pointer-events: none;
+    inset: 25% 0 auto;
+    text-align: center;
+    font-size: clamp(4rem, 20vw, 9rem);
+    animation: live-bomb-burst 950ms ease-out forwards;
+}
+@keyframes live-bomb-burst {
+    0% { transform: scale(.2) rotate(-15deg); opacity: 0; }
+    25% { transform: scale(1.15) rotate(8deg); opacity: 1; }
+    65% { transform: scale(.95) rotate(-3deg); opacity: 1; }
+    100% { transform: scale(1.6); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .lxp-bomb-burst { display: none; animation: none; } }

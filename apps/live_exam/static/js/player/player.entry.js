@@ -1,5 +1,8 @@
+import { bombText } from '../host_lobby/bomb_text.js?v=lx20261019s';
+import { installBombUI } from './bombs.js?v=lx20261019s';
+import { state } from './state.js?v=lx20261019s';
 // LX-FE-PLAYER (2026-09-29): iştirakçı ekranının giriş nöqtəsi.
-import { SESSION_SETTINGS } from './config.js?v=lx20261019s';
+import { BOOTSTRAP, SESSION_SETTINGS, prefersReducedMotion } from './config.js?v=lx20261019s';
 import { fetchState, setSnapshotHandlers } from './api.js?v=lx20261019s';
 import { bindPlayerEvents } from './events.js?v=lx20261019s';
 import { bindCopyGuard } from './guard.js?v=lx20261019s';
@@ -50,3 +53,14 @@ openPlayerSocket({
 
 fetchState();
 startStatePolling();
+
+let bombStorage;
+try {
+    bombStorage = window.sessionStorage;
+} catch (_) {
+    bombStorage = null;
+}
+installBombUI({
+    state, pin: BOOTSTRAP.pin, document, storage: bombStorage,
+    reducedMotion: prefersReducedMotion, labels: bombText(document.documentElement.lang),
+});

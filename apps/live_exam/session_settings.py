@@ -19,6 +19,7 @@ from typing import Any
 from django.utils.translation import pgettext
 
 from apps.accounts.public import ProfileRole
+from apps.live_exam.bombs import normalize_bomb_questions
 from apps.live_exam.constants import DEFAULT_PRESENTATION_STYLE, PRESENTATION_FORMAL, PRESENTATION_STYLE_KEYS
 from apps.live_exam.domain.session import coerce_question_seconds
 from apps.live_exam.text_safety import sanitize_player_text
@@ -63,6 +64,7 @@ DEFAULT_SESSION_SETTINGS: dict[str, Any] = {
     "typed_typo_tolerance": True,
     "multi_scoring": MULTI_SCORING_PARTIAL,
     "typed_questions": {},
+    "bomb_questions": [],
     # 2026-10-08 (L2): «Hər sual üçün vaxt» — ``None`` = standart (sualın / imtahanın vaxtı,
     # boşdursa 30 s); rəqəm = HƏR sual bu qədər saniyə (5–300). Növbəti sualdan tətbiq olunur.
     "question_time_seconds": None,
@@ -73,7 +75,7 @@ DEFAULT_SESSION_SETTINGS: dict[str, Any] = {
 PRESENTATION_STYLE_KEY = "presentation_style"
 
 #: Oyunçulara / anonim izləyicilərə HEÇ VAXT göndərilməyən açarlar.
-PRIVATE_SETTING_KEYS = frozenset({"typed_questions"})
+PRIVATE_SETTING_KEYS = frozenset({"typed_questions", "bomb_questions"})
 
 BOOLEAN_SETTING_KEYS = {
     "show_questions_on_devices",
@@ -292,6 +294,12 @@ def normalize_session_setting_updates(
     if "typed_questions" in raw:
         updates["typed_questions"] = normalize_typed_questions(raw.get("typed_questions"), session=session)
 
+    if "bomb_questions" in raw:
+        try:
+            updates["bomb_questions"] = normalize_bomb_questions(raw["bomb_questions"], session=session)
+        except ValueError as exc:
+            raise SessionSettingsError(str(exc)) from None
+
     if "question_time_seconds" in raw:
         updates["question_time_seconds"] = _question_seconds_update(raw.get("question_time_seconds"), strict=session)
 
@@ -456,6 +464,7 @@ def host_question_catalog(session) -> list[dict[str, Any]]:
                 "index": index,
                 "text": get_question_text(question),
                 "typed_eligible": eligible,
+                "bomb_eligible": eligible or any(option.is_correct for option in question.options.all()),
                 "typed_default_accepted": defaults,
                 "typed": bool(entry is not None and eligible),
                 "accepted": list((entry or {}).get("accepted") or []),

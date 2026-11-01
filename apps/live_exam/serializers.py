@@ -14,6 +14,7 @@ from django.db.models.expressions import ExpressionWrapper
 from django.db.models.functions import Coalesce
 from django.utils.translation import pgettext
 
+from apps.live_exam.bombs import result_fields
 from apps.live_exam.constants import ANSWER_LATENCY_GRACE_SECONDS
 from apps.live_exam.domain.question_config import resolve_question_config
 from apps.live_exam.domain.session import (
@@ -70,7 +71,7 @@ def serialize_top(session: LiveSession, limit: int = 10) -> list[dict[str, Any]]
 
 
 def serialize_top_before_question(session: LiveSession, question_id: int, limit: int = 10) -> list[dict[str, Any]]:
-    # Subquery: total awarded_points for this player on this question.
+    # Net game-score change: award minus any persisted bomb reset.
     awarded_subquery = (
         LiveAnswer.objects.filter(
             session=session,
@@ -78,11 +79,11 @@ def serialize_top_before_question(session: LiveSession, question_id: int, limit:
             player_id=OuterRef("id"),
         )
         .values("player_id")
-        .annotate(total=Sum("awarded_points"))
+        .annotate(total=Sum("awarded_points") - Sum("score_reset_amount"))
         .values("total")[:1]
     )
 
-    # Annotate each player with score_before = score - awarded_for_question,
+    # Annotate each player with score_before = score - net_change_for_question,
     # then sort and limit entirely in the DB — no full-list Python sort required.
     players = (
         session.players.annotate(
@@ -182,6 +183,7 @@ def serialize_question_results(session: LiveSession, question_id: int, limit: in
                 "accessory_key": answer.player.accessory_key,
                 "is_correct": bool(answer.is_correct),
                 "awarded_points": safe_int(answer.awarded_points, 0),
+                **result_fields(answer),
                 "total_score": safe_int(answer.player.score, 0),
                 "answer_ms": safe_int(answer.answer_ms, 0),
                 "answer_rank": safe_int(speed_rank_lookup.get(answer.id), 0),
@@ -236,6 +238,7 @@ def personal_result_from_answer(session, answer, *, player=None, config=None, ra
         "choice_ids": choice_ids,
         "is_correct": bool(answer.is_correct),
         "awarded_points": safe_int(answer.awarded_points, 0),
+        **result_fields(answer),
         "total_score": safe_int(owner.score, 0),
         "answer_ms": safe_int(answer.answer_ms, 0),
         "streak": safe_int(getattr(owner, "streak", 0), 0),

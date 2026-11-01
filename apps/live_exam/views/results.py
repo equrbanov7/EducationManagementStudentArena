@@ -263,7 +263,7 @@ def teacher_live_session_detail(request, slug, pin):
         .annotate(
             correct_count=Count("answers", filter=Q(answers__is_correct=True)),
             total_answers=Count("answers"),
-            total_points=Sum("answers__awarded_points"),
+            total_points=Sum("answers__awarded_points") - Sum("answers__score_reset_amount"),
         )
     )
     players = [player for player in listed_players if player.removed_at is None]

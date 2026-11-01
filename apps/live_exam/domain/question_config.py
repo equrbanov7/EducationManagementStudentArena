@@ -36,6 +36,7 @@ class QuestionConfig:
     accepted: tuple[str, ...]
     typo_tolerance: bool
     multi_scoring: str
+    is_bomb: bool = False
 
     @property
     def is_text(self) -> bool:
@@ -47,7 +48,7 @@ class QuestionConfig:
         return not self.is_text and not self.correct_ids
 
     def to_payload_fields(self) -> dict[str, Any]:
-        fields: dict[str, Any] = {"answer_input": self.answer_input}
+        fields: dict[str, Any] = {"answer_input": self.answer_input, "is_bomb": self.is_bomb}
         if self.is_text:
             fields["text_max_length"] = TEXT_MAX_LENGTH
         return fields
@@ -71,11 +72,20 @@ def _live_rules(session, exam_question) -> dict[str, Any]:
         if eligible:
             answer_input = ANSWER_INPUT_TEXT
             accepted = dedupe_accepted(typed_entry.get("accepted") or []) or defaults
+    is_bomb = int(exam_question.id) in settings.get("bomb_questions", [])
+    # Bomb penalties must retain the published answer key/selection limits.
+    bomb_key = None
+    if is_bomb:
+        correct_ids = [option.id for option in exam_question.options.all() if option.is_correct]
+        is_multi, max_select = selection_limits(exam_question, len(correct_ids))
+        bomb_key = {"correct_ids": correct_ids, "is_multi": is_multi, "max_select": max_select}
     return {
+        "bomb_key": bomb_key,
         "answer_input": answer_input,
         "accepted": accepted,
         "typo_tolerance": bool(settings.get("typed_typo_tolerance", True)),
         "multi_scoring": settings.get("multi_scoring") or MULTI_SCORING_PARTIAL,
+        "is_bomb": is_bomb,
     }
 
 
@@ -83,6 +93,9 @@ def resolve_question_config(session, exam_question) -> QuestionConfig:
     """Sualın effektiv qaydası (dondurulmuş snapshot → canlı ayarlar)."""
     rules = _frozen_snapshot(session, exam_question.id) or _live_rules(session, exam_question)
     correct_ids = tuple(option.id for option in exam_question.options.all() if option.is_correct)
+    bomb_key = rules.get("bomb_key") if rules.get("is_bomb") is True else None
+    if isinstance(bomb_key, dict):
+        correct_ids = tuple(int(value) for value in bomb_key.get("correct_ids", []))
     answer_input = rules.get("answer_input")
     if answer_input != ANSWER_INPUT_TEXT:
         answer_input = ANSWER_INPUT_CHOICE
@@ -93,6 +106,8 @@ def resolve_question_config(session, exam_question) -> QuestionConfig:
         is_multi, max_select = False, 1
     else:
         is_multi, max_select = selection_limits(exam_question, len(correct_ids))
+        if isinstance(bomb_key, dict):
+            is_multi, max_select = bool(bomb_key["is_multi"]), max(1, safe_int(bomb_key["max_select"], 1))
     return QuestionConfig(
         question_id=int(exam_question.id),
         answer_input=answer_input,
@@ -102,6 +117,7 @@ def resolve_question_config(session, exam_question) -> QuestionConfig:
         accepted=tuple(str(value) for value in (rules.get("accepted") or []) if str(value).strip()),
         typo_tolerance=bool(rules.get("typo_tolerance", True)),
         multi_scoring=multi_scoring,
+        is_bomb=rules.get("is_bomb") is True,
     )
 
 

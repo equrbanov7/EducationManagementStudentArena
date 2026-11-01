@@ -236,6 +236,8 @@ class LiveAnswer(models.Model):
     is_correct = models.BooleanField(default=False)  # “perfect match” kimi saxlayacağıq
     answer_ms = models.IntegerField(default=0)
     awarded_points = models.IntegerField(default=0)
+    bomb_triggered = models.BooleanField(default=False)
+    score_reset_amount = models.PositiveIntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -244,7 +246,14 @@ class LiveAnswer(models.Model):
             models.UniqueConstraint(
                 fields=["session", "player", "question_id"],
                 name="uniq_answer_per_player_question",
-            )
+            ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(bomb_triggered=False, score_reset_amount=0)
+                    | models.Q(bomb_triggered=True, is_correct=False, awarded_points=0)
+                ),
+                name="liveans_bomb_ledger_consistent",
+            ),
         ]
         indexes = [
             # Reveal/distribution/progress queries all filter on (session, question).

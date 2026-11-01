@@ -1,3 +1,4 @@
+import { mountBombDrawer } from './bomb_drawer.js?v=lx20261019s';
 import { bindDebugToggle, log, tr } from './utils.js?v=lx20261019s';
 import { state } from './state.js?v=lx20261019s';
 import { setSfxVolume, stopAllLoops } from './audio.js?v=lx20261019s';
@@ -45,6 +46,7 @@ log(tr("hostReady", "Host ready"));
 bindAudioUnlockEvents();
 mountSoundDock();
 mountTypedDrawer();
+mountBombDrawer();
 renderTimeSettings();
 ensureInitialStateSync();
 startStatePolling();

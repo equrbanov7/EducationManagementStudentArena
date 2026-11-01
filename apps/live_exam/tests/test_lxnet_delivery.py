@@ -390,7 +390,13 @@ class PlayerAssetPrefetchTest(TestCase):
         on_disk = {f"player/{path.name}" for path in PLAYER_JS_DIR.glob("*.js")} - {"player/player.entry.js"}
         # Ortaq SAF modullar (`../host_lobby/…`) da preload olunur — 1-ci sual əlavə RTT gözləmir.
         self.assertEqual(
-            names - on_disk, {"host_lobby/stage_logic.js", "host_lobby/code_text.js", "host_lobby/style_mode.js"}
+            names - on_disk,
+            {
+                "host_lobby/stage_logic.js",
+                "host_lobby/code_text.js",
+                "host_lobby/style_mode.js",
+                "host_lobby/bomb_text.js",
+            },
         )
         self.assertLessEqual(on_disk, names)
         self.assertIn("player/clock.js", names)

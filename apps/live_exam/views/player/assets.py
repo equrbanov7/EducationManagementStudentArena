@@ -23,7 +23,7 @@ from django.templatetags.static import static
 
 PLAYER_JS_DIR = Path(__file__).resolve().parents[2] / "static" / "js" / "player"
 ENTRY_MODULE = "player.entry.js"
-ENTRY_VERSION = "lxp-20261019s"
+ENTRY_VERSION = "lxp-bomb20261101"
 #: ``./x.js`` və ortaq SAF modullar ``../host_lobby/x.js`` (stage_logic.js, code_text.js — 2026-10-19).
 _IMPORT_RE = re.compile(
     r"""(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)(['"])(\./|\.\./host_lobby/)([\w.-]+\.js)(\?v=[\w.-]+)?\1"""
@@ -39,6 +39,7 @@ PLAYER_CSS = (
     ("css/player/_round.css", "lxp-20261019"),
     ("css/player/_answer.css", "lxp-20261019m4"),
     ("css/player/_reveal.css", "lxp-20260930"),
+    ("css/player/_bomb.css", "lxbomb20261101"),
     ("css/player/_finale.css", "lxp-20260929"),
     ("css/live_code_text.css", "lx-20261019"),
     # 2026-10-19: «Rəsmi» təqdimat üslubu qatı (body[data-lx-style="formal"]) — SONDA, üstələyir.

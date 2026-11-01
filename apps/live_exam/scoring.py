@@ -31,6 +31,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.exams.models import ExamQuestion
+from apps.live_exam.bombs import bomb_score_effect
 from apps.live_exam.constants import ANSWER_LATENCY_GRACE_SECONDS
 from apps.live_exam.delivery import late_delivery_shift_ms, question_seen_at
 from apps.live_exam.domain.question_config import resolve_question_config
@@ -255,6 +256,8 @@ def _score_submission(session, question, config, *, option_ids, text, answer_ms,
         return None, _error("bad_payload")
     # Tapılmayan/başqa suala aid id-lər saxta yükdür (paylanmanı da korlayardı).
     valid_option_ids = {option.id for option in question.options.all()}
+    if config.is_bomb and not set(config.correct_ids) <= valid_option_ids:
+        return None, _error("question_not_accepting_answers")
     chosen = set(int(value) for value in option_ids or [])
     if not chosen or not chosen <= valid_option_ids:
         return None, _error("bad_payload")
@@ -317,6 +320,8 @@ def _persist_answer(*, pin, player_id, client_id, question_id, option_ids, text,
         if error:
             return False, error, None, False, session
 
+        bomb_triggered, reset_amount, points = bomb_score_effect(config, score, player.score)
+        score["awarded_points"] = points
         answer = LiveAnswer.objects.create(
             session=session,
             player=player,
@@ -327,13 +332,15 @@ def _persist_answer(*, pin, player_id, client_id, question_id, option_ids, text,
             is_correct=score["is_correct"],
             answer_ms=score["answer_ms"],
             awarded_points=score["awarded_points"],
+            bomb_triggered=bomb_triggered,
+            score_reset_amount=reset_amount,
         )
 
         # Audit 2026-09-28 LXBE-06: seriya oyunçu sətri kilidli olduğu üçün itmir.
         if not config.is_neutral:
             player.streak = int(player.streak or 0) + 1 if score["is_correct"] else 0
             player.best_streak = max(int(player.best_streak or 0), int(player.streak))
-        player.score = int(player.score or 0) + int(score["awarded_points"])
+        player.score = 0 if bomb_triggered else int(player.score or 0) + int(score["awarded_points"])
         player.last_seen = received_at
         player.save(update_fields=["score", "streak", "best_streak", "last_seen"])
 
