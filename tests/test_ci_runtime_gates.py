@@ -57,7 +57,7 @@ def test_pr_keeps_coverage_when_compatibility_suite_moves_out():
     assert "github.event_name == 'pull_request'" in jobs["coverage-combine"]["if"]
     gate = jobs["ci-success"]["steps"][0]
     assert "github.event_name == 'pull_request'" in gate["env"]["COVERAGE_GATE_REQUIRED"]
-    assert "coverage report --fail-under=68" in str(jobs["coverage-combine"])
+    assert "coverage xml --fail-under=68" in str(jobs["coverage-combine"])
 
 
 def test_duration_cache_stays_inside_checkout_to_preserve_nodeid_namespace():
@@ -70,3 +70,41 @@ def test_duration_cache_stays_inside_checkout_to_preserve_nodeid_namespace():
     assert upload["with"]["path"] == "${{ github.workspace }}/test_durations.shard-${{ inputs.shard }}.json"
     assert '--splits "$SHARDS" --group "$SHARD" --splitting-algorithm least_duration' in run
     assert "--ignore=tests/e2e" in run
+
+
+def test_xml_coverage_gate_rejects_low_coverage_and_preserves_report(tmp_path):
+    """Exercise the real coverage CLI: XML must fail closed at the same 68% gate."""
+    import subprocess
+    import sys
+    import xml.etree.ElementTree as ET
+
+    program = tmp_path / "sample.py"
+    program.write_text(
+        "import os\nif os.environ.get('NEVER_COVERED'):\n    a = 1\n    b = 2\n    c = 3\n    d = 4\nelse:\n    value = 2\n"
+    )
+    config = tmp_path / ".coveragerc"
+    config.write_text("[run]\nbranch = True\n")
+    prefix = [sys.executable, "-m", "coverage"]
+    measured = subprocess.run(
+        [*prefix, "run", f"--rcfile={config}", str(program)], cwd=tmp_path, capture_output=True, text=True
+    )
+    assert measured.returncode == 0, measured.stderr
+    gate = subprocess.run(
+        [*prefix, "xml", f"--rcfile={config}", "--fail-under=68", "-o", "coverage.xml"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert gate.returncode == 2, gate.stdout + gate.stderr
+    report = ET.parse(tmp_path / "coverage.xml").getroot()
+    assert float(report.attrib["line-rate"]) < 0.68
+    # The same XML command accepts a fully exercised program.
+    program.write_text("value = 2\n")
+    subprocess.run([*prefix, "run", f"--rcfile={config}", str(program)], cwd=tmp_path, check=True)
+    gate = subprocess.run(
+        [*prefix, "xml", f"--rcfile={config}", "--fail-under=68", "-o", "coverage.xml"],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert gate.returncode == 0, gate.stdout + gate.stderr

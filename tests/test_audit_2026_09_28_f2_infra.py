@@ -288,7 +288,7 @@ def test_release_path_combines_shard_coverage_and_ci_success_requires_it():
     assert "refs/heads/main" in combine["if"] and "refs/heads/Staging" in combine["if"]
     script = "\n".join(step.get("run", "") for step in combine["steps"])
     assert "coverage combine coverage-data" in script
-    assert "coverage report --fail-under=68" in script
+    assert "coverage xml --fail-under=68" in script
     assert "coverage-combine" in jobs["ci-success"]["needs"]
     check = jobs["ci-success"]["steps"][0]["run"]
     assert 'COVERAGE_GATE_REQUIRED" == "1" && "${{ needs.coverage-combine.result }}" != "success"' in check

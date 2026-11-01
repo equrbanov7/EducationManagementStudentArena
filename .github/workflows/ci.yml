@@ -157,8 +157,8 @@ jobs:
           echo "Shard data files: ${count}"
           test "$count" -eq 8
           coverage combine coverage-data
-          coverage report --fail-under=68 --skip-covered --sort=cover | tail -n 40
-          coverage xml -o coverage.xml
+          # XML həm 68% qapısını tətbiq edir, həm artefaktı yazır: source iki dəfə analiz olunmur.
+          coverage xml --fail-under=68 -o coverage.xml
 
       - name: 📤 Upload combined coverage
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
