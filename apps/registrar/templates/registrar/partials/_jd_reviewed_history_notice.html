@@ -1,0 +1,11 @@
+{% load i18n %}
+{% if reviewed_history_notice %}
+<div class="jd2-sylbar jd2-sylbar--info" role="note" data-reviewed-journal-history>
+    <i class="fas fa-clock-rotate-left jd2-sylbar__icon" aria-hidden="true"></i>
+    <div class="jd2-sylbar__text">
+        <b class="jd2-sylbar__title">{% trans "Əvvəlki jurnal qeydləri" %} · {{ reviewed_history_notice.student_count }} {% trans "tələbə" %}</b>
+        <span class="jd2-sylbar__msg">{% trans "Bu tələbələrin əvvəlki qeydləri" %} <a href="{{ reviewed_history_notice.url }}">{{ reviewed_history_notice.journal_label }}</a> {% trans "jurnalında saxlanır." %}</span>
+        <span class="jd2-sylbar__hint">{% trans "Cari dərslər bu jurnalda ayrıca aparılır." %}</span>
+    </div>
+</div>
+{% endif %}

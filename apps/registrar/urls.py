@@ -22,6 +22,7 @@ from . import (
     journal_lesson_lookup,
     journal_list_lookup,
     journal_list_unit_lookup,
+    journal_reviewed_history,
     lessons_log_views,
     pdf_views,
     practical_toggle,
@@ -161,5 +162,6 @@ urlpatterns = [
     path("<uuid:offering_id>/kollokvium/", journal_actions.kollokvium_save, name="journal_kollokvium_save"),
     path("<uuid:offering_id>/serbest/", journal_actions.selfwork_action, name="journal_selfwork_action"),
     path("<uuid:offering_id>/kurs-isi/", journal_actions.coursework_save, name="journal_coursework_save"),
+    path("<uuid:offering_id>/evvelki-qeydler/", journal_reviewed_history.detail, name="reviewed_journal_history"),
     path("<uuid:offering_id>/", views.journal_detail, name="journal_detail"),
 ]

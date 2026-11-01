@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Əvvəlki jurnal qeydləri" %}{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h1>{% trans "Əvvəlki jurnal qeydləri" %}</h1>
+    <p>{{ target.group.name }} · {{ target.subject.name }} · {{ target.period.name }} · {{ student_count }} {% trans "tələbə" %}</p>
+    <p>{% trans "Bu səhifə yalnız əvvəlki qeydləri göstərir. Cari dərslər ayrıca jurnalda aparılır." %}</p>
+    <p><a href="{% url 'registrar:journal_detail' source.id %}">{% trans "Cari jurnala qayıt" %}</a></p>
+    <div class="table-responsive" tabindex="0" role="region" aria-label="{% trans 'Əvvəlki jurnal qeydləri' %}">
+        <table class="table table-striped table-sm">
+            <thead><tr><th scope="col">{% trans "Tarix" %}</th><th scope="col">{% trans "Saat" %}</th><th scope="col">{% trans "Növ" %}</th><th scope="col">{% trans "Tələbə" %}</th><th scope="col">{% trans "İştirak" %}</th><th scope="col">{% trans "Bal" %}</th><th scope="col">{% trans "Qeyd müəllifi" %}</th></tr></thead>
+            <tbody>
+                {% for mark in rows %}
+                <tr><td>{{ mark.lesson.date|date:"d.m.Y" }}</td><td>{{ mark.lesson.start_time|time:"H:i"|default:"—" }}</td><td>{{ mark.lesson.get_kind_display }}</td><td>{{ mark.enrollment.student.get_full_name|default:mark.enrollment.student.username }}</td><td>{{ mark.get_status_display }}</td><td>{{ mark.score|default_if_none:"—" }}</td><td>{% if mark.entered_by %}{{ mark.entered_by.get_full_name|default:mark.entered_by.username }}{% else %}{% trans "Məlum deyil" %}{% endif %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
