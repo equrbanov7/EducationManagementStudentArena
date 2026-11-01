@@ -25,6 +25,10 @@ MAPS = (
     ("lesson_subject", "536", "registrar.subject", SUBJECTS[1]),
     ("course_offering", "15047", "registrar.courseoffering", OFFERING),
     ("course_offering", "15051", "registrar.courseoffering", SIBLING),
+    # Source70 SHA1a1b24629be432e4e81ca19ebfa357353cd2856d031aa83ea2dd7773b5a0ee88:
+    # import identities are exact case-sensitive uniqid:group, never journal numbers.
+    ("course_offering", "rWlLLOIQn0:934", "registrar.courseoffering", OFFERING),
+    ("course_offering", "ujYj5scjwh:935", "registrar.courseoffering", SIBLING),
     ("syllabus_document", "8668", "syllabus.syllabus", None),
     ("syllabus_document", "6117", "syllabus.syllabus", None),
 )
@@ -70,6 +74,8 @@ def _typed_maps():
                 "legacy_pk": legacy,
                 "expected_model": label,
                 "expected_target": target,
+                "required_for_coverage": not (entity == "course_offering" and legacy in {"15047", "15051"}),
+                "numeric_journal_id_not_import_identity": entity == "course_offering" and legacy in {"15047", "15051"},
                 "count": len(matches),
                 "absent": not matches,
                 "target_present": all(present) if matches else None,

@@ -20,8 +20,11 @@ say və tam-sətir hash-ləridir; qiymət, topic, tələbə adı və sillabus m�
 
 Typed map source namespace `myedu_mariadb` ilə dəqiq aşağıdakı açarlar üçün
 yoxlanır: worker209 və worker_materialisation209, group_unit934/935,
-lesson_subject535/536, course_offering15047/15051,
+lesson_subject535/536, course_offering`rWlLLOIQn0:934`/`ujYj5scjwh:935`,
 syllabus_document8668/6117. Eyni rəqəmli başqa entity namespace alias sayılmır.
+15047/15051 numeric journal açarları əlavə diaqnostikadır və
+`required_for_coverage=false` daşıyır; mövcud olsalar belə composite import
+identity sübutunu əvəz etmirlər. Uniqid böyük/kiçik hərfləri dəqiq saxlanır.
 Çatışmayan mapping, yanlış model/target/state, etibarsız UUID və cari tenantda
 olmayan target ayrıca görünür. Sillabus8668 doğru direct source namizədidir;
 6117 tarixi ikinci hissə məzmunu kimi yalnız nəzərdən keçirilir və qorunur.

@@ -655,6 +655,38 @@ class ReviewedLeylaCatalogTests(TestCase):
         self.assertTrue(maps[("worker", "209")]["conflict"])
         self.assertTrue(maps[("syllabus_document", "8668")]["conflict"])
 
+    def test_ilahe_import_identity_requires_exact_composite_not_numeric_journal(self):
+        probe = self._ilahe_diag_scope()
+        self._ilahe_map(
+            entity="course_offering", legacy="15047", label="registrar.courseoffering", target=self.filled[0].pk
+        )
+        result = probe.collect_ilahe_references()
+        maps = {(r["entity_type"], r["legacy_pk"]): r for r in result["ilahe_typed_maps"]}
+        numeric = maps[("course_offering", "15047")]
+        self.assertFalse(numeric["required_for_coverage"])
+        self.assertTrue(numeric["numeric_journal_id_not_import_identity"])
+        self.assertTrue(maps[("course_offering", "rWlLLOIQn0:934")]["absent"])
+        self._ilahe_map(
+            entity="course_offering",
+            legacy="rWlLLOIQn0:934",
+            label="registrar.courseoffering",
+            target=self.filled[0].pk,
+        )
+        # Wrong case is a separate opaque key, never a case-insensitive source alias.
+        self._ilahe_map(
+            entity="course_offering",
+            legacy="ujyj5scjwh:935",
+            label="registrar.courseoffering",
+            target=self.filled[1].pk,
+        )
+        result = probe.collect_ilahe_references()
+        maps = {(r["entity_type"], r["legacy_pk"]): r for r in result["ilahe_typed_maps"]}
+        exact = maps[("course_offering", "rWlLLOIQn0:934")]
+        self.assertTrue(exact["required_for_coverage"])
+        self.assertFalse(exact["absent"])
+        self.assertFalse(exact["conflict"])
+        self.assertTrue(maps[("course_offering", "ujYj5scjwh:935")]["absent"])
+
     def test_ilahe_probe_retains_other_teacher_cohorts_and_shared_human_draft(self):
         probe = self._ilahe_diag_scope()
         outsider = User.objects.create_user("ilahe-conflicting-owner")
