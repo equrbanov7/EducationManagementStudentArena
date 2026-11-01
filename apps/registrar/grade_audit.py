@@ -67,7 +67,7 @@ def _stamp_impersonation(changes, request):
     return list(changes) + [stamp]
 
 
-def log_grade_changes(*, offering, by_user, kind, changes, fail_closed=False, request=None):
+def log_grade_changes(*, offering, by_user, kind, changes, fail_closed=False, request=None, reason=""):
     """Write one aggregated grade-change audit entry.
 
     ``kind``  — short slug (``mark`` / ``component`` / ``final`` / ``resit``).
@@ -87,11 +87,13 @@ def log_grade_changes(*, offering, by_user, kind, changes, fail_closed=False, re
     # qaytarmır (əvvəl qiymətlər itir, müəllimə isə «yadda saxlanıldı» deyilirdi).
     create_audit_row(
         fail_closed=fail_closed,
-        **grade_change_row(offering=offering, by_user=by_user, kind=kind, changes=changes, request=request),
+        **grade_change_row(
+            offering=offering, by_user=by_user, kind=kind, changes=changes, request=request, reason=reason
+        ),
     )
 
 
-def grade_change_row(*, offering, by_user, kind, changes, request=None) -> dict:
+def grade_change_row(*, offering, by_user, kind, changes, request=None, reason="") -> dict:
     """``log_grade_changes``-in yazdığı ``AuditLog`` sahələri (INSERT etmədən).
 
     2026-10-08: toplu imtahan balı yazısı (``exam_score_bulk``) eyni sətirləri bir
@@ -108,7 +110,7 @@ def grade_change_row(*, offering, by_user, kind, changes, request=None) -> dict:
         "resource_id": str(offering.pk),
         "resource_repr": f"{offering.subject.code} — qiymət dəyişikliyi ({len(changes)})",
         "changes": changes,
-        "new_values": {"count": len(changes)},
+        "new_values": {"count": len(changes), **({"reason": reason} if reason else {})},
         "reason": f"{len(changes)} qiymət dəyişikliyi ({kind}).",
     }
 

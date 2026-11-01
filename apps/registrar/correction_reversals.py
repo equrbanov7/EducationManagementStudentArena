@@ -102,7 +102,7 @@ def _select_grade_correction(*, mark, correction_id, offering=None):
     return correction, False
 
 
-def _create_reversal(*, correction, target_field, actor):
+def _create_reversal(*, correction, target_field, actor, reason_note=""):
     from .integrity import validate_same_organization_actor
 
     validate_same_organization_actor(
@@ -115,6 +115,7 @@ def _create_reversal(*, correction, target_field, actor):
         organization=correction.organization,
         reverted_by=actor,
         reverted_by_ref=str(actor.pk),
+        reason_note=reason_note,
         **{target_field: correction},
     )
     reversal.full_clean()
@@ -137,20 +138,24 @@ def _write_audit(*, offering, actor, request, reversal, kind, item, old, new, en
         kind=kind,
         changes=changes,
         fail_closed=True,
+        **({"reason": reversal.reason_note} if reversal.reason_note else {}),
     )
     log_action(
         action=AuditAction.UPDATE,
         user=actor,
         organization=offering.organization,
         obj=reversal,
-        reason=kind,
+        reason=f"{kind}: {reversal.reason_note}" if reversal.reason_note else kind,
+        new_values={"reason_note": reversal.reason_note} if reversal.reason_note else None,
         request=request,
         changes=[{"field": str(item), "old": str(old), "new": str(new)}],
     )
 
 
 @transaction.atomic
-def revert_last_grade_correction(*, mark=None, by_user, request=None, correction_id=None, offering=None) -> bool:
+def revert_last_grade_correction(
+    *, mark=None, by_user, request=None, correction_id=None, offering=None, reason_note=""
+) -> bool:
     """Reverse exactly one active grade correction without deleting evidence."""
     correction, already_reversed = _select_grade_correction(
         mark=mark,
@@ -159,6 +164,9 @@ def revert_last_grade_correction(*, mark=None, by_user, request=None, correction
     )
     if correction is None:
         return False
+    from .excused_management import reversal_reason
+
+    reason_note = reversal_reason(request, offering, correction, reason_note)
     if already_reversed:
         return True
     from .correction_target_locks import lock_grade_for_reversal
@@ -180,6 +188,7 @@ def revert_last_grade_correction(*, mark=None, by_user, request=None, correction
         correction=correction,
         target_field="journal_correction",
         actor=actor,
+        reason_note=reason_note,
     )
     if correction.created_mark and not mark.corrections.filter(reversal__isnull=True).exists():
         with journal_unlock():

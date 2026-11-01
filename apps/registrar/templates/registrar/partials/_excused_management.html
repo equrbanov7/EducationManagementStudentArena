@@ -1,0 +1,47 @@
+{% load i18n %}
+<div class="corr-modal" hidden data-excused-modal>
+    <div class="corr-modal-backdrop" data-excused-close></div>
+    <div class="corr-modal-card" role="dialog" aria-modal="true" aria-labelledby="excusedTitle">
+        <div class="corr-modal-head">
+            <h2 id="excusedTitle">{% trans "Üzrlü qayıb düzəlişi" context "registrar.excused_management" %}</h2>
+            <button type="button" class="corr-modal-x" data-excused-close aria-label="{% trans 'Bağla' context 'registrar.correction' %}">&times;</button>
+        </div>
+        <form method="post" action="{{ excused_management_url }}" data-excused-form>
+            {% csrf_token %}
+            <input type="hidden" name="mark_id">
+            <input type="hidden" name="expected_status">
+            <input type="hidden" name="expected_correction_id">
+            <p class="corr-modal-meta" data-excused-cell></p>
+            <p>{% trans "Yalnız davamiyyət dəyişir. Səbəb və əvvəlki dəyər tarixçədə saxlanılır; sənəd yükləmək tələb olunmur." context "registrar.excused_management" %}</p>
+            <label class="corr-field">
+                <span class="corr-field-label">{% trans "Əməliyyat" context "registrar.excused_management" %}</span>
+                <div class="bootstrap-single-select">
+                    <select name="operation" class="corr-input form-select bootstrap-single-select__native" data-bootstrap-select required>
+                        <option value="change">{% trans "Yeni davamiyyət seç" context "registrar.excused_management" %}</option>
+                        <option value="reverse">{% trans "Son düzəlişi geri al" context "registrar.excused_management" %}</option>
+                    </select>
+                </div>
+            </label>
+            <label class="corr-field" data-excused-status-wrap>
+                <span class="corr-field-label">{% trans "Yeni davamiyyət" context "registrar.correction" %}</span>
+                <div class="bootstrap-single-select">
+                    <select name="new_status" class="corr-input form-select bootstrap-single-select__native" data-bootstrap-select required>
+                        <option value="">—</option>
+                        <option value="present">{% trans "İştirak (iə)" context "registrar.correction" %}</option>
+                        <option value="absent">{% trans "Qayıb (qb)" context "registrar.correction" %}</option>
+                    </select>
+                </div>
+            </label>
+            <p data-excused-legacy>{% trans "Əvvəlki dəyəri məlum olmayan köçürülmüş üq üçün yeni davamiyyəti açıq seçin. Köhnə sənəd saxlanılır." context "registrar.excused_management" %}</p>
+            <label class="corr-field">
+                <span class="corr-field-label">{% trans "Səbəb" context "registrar.correction" %} <b class="corr-req">*</b></span>
+                <textarea name="reason" rows="3" class="corr-input" required minlength="3" maxlength="500"></textarea>
+            </label>
+            <p class="corr-modal-error" role="alert" data-excused-error hidden></p>
+            <div class="corr-modal-foot">
+                <button type="button" class="corr-btn corr-btn--ghost" data-excused-close>{% trans "İmtina" context "registrar.correction" %}</button>
+                <button type="submit" class="corr-btn corr-btn--primary" data-excused-submit>{% trans "Təsdiqlə" context "registrar.correction" %}</button>
+            </div>
+        </form>
+    </div>
+</div>

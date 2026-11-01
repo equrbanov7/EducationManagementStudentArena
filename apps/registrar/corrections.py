@@ -137,6 +137,7 @@ def apply_correction(
     by_user,
     request=None,
     was_empty: bool = False,
+    audit_reason: str = "",
 ) -> JournalCorrection:
     """Bir jurnal xanasına rəsmi düzəliş tətbiq et (hamısı bir transaksiyada).
 
@@ -220,6 +221,7 @@ def apply_correction(
         by_user=by_user,
         kind="correction",
         fail_closed=True,
+        **({"reason": audit_reason} if audit_reason else {}),
         changes=[
             {
                 "student": grade_audit.student_label(enrollment),
@@ -495,6 +497,8 @@ def _entry(c: JournalCorrection, *, include_document: bool) -> dict:
         "id": str(c.id),
         "date": c.created_at.strftime("%d.%m.%Y %H:%M"),
         "field": c.field,
+        "excused_related": c.field == CorrectionField.ATTENDANCE
+        and AttendanceStatus.EXCUSED in (c.old_status, c.new_status),
         "field_display": c.get_field_display(),
         "old": (
             _att_display(c.old_status)

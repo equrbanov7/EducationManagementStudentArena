@@ -254,10 +254,11 @@ def _serialize_entry(row, names, impersonation_key) -> dict:
 
 
 def _label_with_reason(kind, row) -> str:
-    """Data bərpası sətrində səbəb də görünsün: «Data bərpası (səbəb ilə) — <səbəb>»."""
+    """Show the recorded reason for recovery and reason-based correction events."""
     label = kind_label(kind)
     values = row.new_values if isinstance(row.new_values, dict) else {}
-    reason = str(values.get("reason") or "") if kind == "full-edit" else ""
+    explained = kind in ("full-edit", "correction") or kind.endswith("-revert")
+    reason = str(values.get("reason") or "") if explained else ""
     return f"{label} — {reason}" if reason else label
 
 

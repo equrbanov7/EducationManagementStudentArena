@@ -12,6 +12,7 @@ from . import (
     correction_views,
     credit_recognition_views,
     curriculum_actions,
+    excused_views,
     guest_roster_views,
     holiday_actions,
     individual_plan_views,
@@ -61,6 +62,7 @@ urlpatterns = [
     # silindi — düzəliş rejimi `journal_detail?correct=1`-dir; JS-in işlətdiyi tətbiq/sil qalır.
     path("duzelis/<uuid:offering_id>/tetbiq/", correction_views.correction_apply, name="correction_apply"),
     path("duzelis/<uuid:offering_id>/sil/", correction_views.correction_delete, name="correction_delete"),
+    path("duzelis/<uuid:offering_id>/uzrlu-qayib/", excused_views.manage, name="excused_management"),
     # Ekran 03/04 — akademik kataloq əməlləri (JSON POST, `catalog.manage`).
     path("kataloq/emel/", catalog_actions.catalog_action, name="catalog_action"),
     # İxtisasın «Ətraflı» çekmecəsi — OXU (`catalog.view`), 2026-09-09.

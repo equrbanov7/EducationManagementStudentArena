@@ -1,0 +1,10 @@
+{% load i18n journal_names %}{% if cell.excused_action %}
+<button type="button" class="corr-fixed-badge" data-excused-open
+        data-mark-id="{{ cell.mark.pk }}" data-status="{{ cell.mark.status }}"
+        data-correction-id="{{ cell.excused_action.expected_id }}"
+        data-can-change="{% if cell.excused_action.can_change %}1{% else %}0{% endif %}"
+        data-can-reverse="{% if cell.excused_action.reverse_id %}1{% else %}0{% endif %}"
+        data-student="{{ row.student|journal_name }}" data-date="{{ cell.lesson.date|date:'d.m.Y' }}"
+        aria-label="{% trans 'Üzrlü qayıbı səbəblə dəyiş və ya geri al' context 'registrar.excused_management' %}"
+        title="{% trans 'Üzrlü qayıbı səbəblə dəyiş və ya geri al' context 'registrar.excused_management' %}"><i class="fas fa-rotate-left" aria-hidden="true"></i></button>
+{% endif %}

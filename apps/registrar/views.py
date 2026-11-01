@@ -309,6 +309,9 @@ def journal_detail(request, offering_id):
     from .journal_reviewed_history import detail_context
 
     context.update(detail_context(request, offering, context))
+    from .excused_management import page_context as excused_context
+
+    context.update(excused_context(request, offering, context))
     return render(request, "registrar/journal_detail.html", context)
 
 

@@ -416,6 +416,8 @@ class CorrectionReversal(ImmutableCorrectionEvidence):
         editable=False,
     )
 
+    reason_note = models.CharField(max_length=500, blank=True, default="")
+
     objects = models.Manager()
 
     class Meta:

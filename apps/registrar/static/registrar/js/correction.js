@@ -180,7 +180,7 @@
         : "";
       // Yalnız ƏN SON düzəliş geri alına bilər (zəncir pozulmasın).
       var delBtn =
-        idx === lastCorrectionIdx
+        idx === lastCorrectionIdx && !(c.excused_related && document.querySelector("[data-excused-modal]"))
           ? '<button type="button" class="corr-hist-del" data-corr-del data-corr-id="' +
             esc(String(c.id || "")) + '">' + gettext("Düzəlişi geri al") + "</button>"
           : "";

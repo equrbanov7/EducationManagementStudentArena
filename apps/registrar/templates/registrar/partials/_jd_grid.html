@@ -264,6 +264,7 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                                 {% else %}<span class="jd2-ro jd2-ro--empty">—</span>{% endif %}
                                 {% if cell.corrected %}<button type="button" class="corr-fixed-badge" data-corr-history="{{ cell.mark.id }}" title="{% trans 'Düzəliş olunub — tarixçəni gör' context 'registrar.correction' %}">✎</button>{% elif cell.legacy_excuse %}<button type="button" class="corr-fixed-badge corr-excuse-badge" data-corr-history="{{ cell.mark.id }}" title="{% trans 'Üzrlü qayıb sənədi var — bax' context 'registrar.legacy_excuse' %}">✎</button>{% endif %}
                                 {% endif %}
+                                {% if cell.excused_action %}{% include "registrar/partials/_excused_cell_action.html" %}{% endif %}
                             </td>
                             {% endfor %}
                             <td class="jd2-td-qayib">

@@ -327,6 +327,7 @@
         </div>
     </div>
     {% include "registrar/partials/_jd_history_drawer.html" %}
+    {% if excused_management_url %}{% include "registrar/partials/_excused_management.html" %}{% endif %}
 </div>
 {% if syllabus_notice.can_open %}{% include "registrar/partials/_syllabus_drawer.html" %}{% endif %}
 {# Hərəkətsiz jurnal N dəqiqədən sonra bağlanır — əvvəl avtomatik yadda saxlanılır (sahib 2026-10-27). Düzəliş rejimində yox. #}
@@ -335,6 +336,7 @@
 
 {% block extraJs %}
     <script src="{% static 'registrar/js/journal_detail.js' %}?v=20260715-jbatch2"></script>
+    {% if excused_management_url %}<script src="{% static 'registrar/js/excused_management.js' %}?v=20261101"></script>{% endif %}
     <script src="{% static 'registrar/js/syllabus_view.js' %}?v=20261025-weeks"></script>
     {# Korpus → otaq kaskadı journal_grid.js-dən ƏVVƏL yüklənir (o, modulu boot-da oxuyur). #}
     {# Seçilmiş tarixin cədvəl slotu (otaq + saat, sahib 2026-10-17) — otaq kaskadı ondan oxuyur. #}

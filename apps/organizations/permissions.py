@@ -136,6 +136,7 @@ PERMISSION_CATEGORIES = {
     "journal": [
         "journal.view",
         "journal.correct",
+        "journal.excused.manage",
         "journal.close",
         "journal.roster",
         "journal.reassign",
@@ -378,12 +379,11 @@ PERMISSION_LABELS = {
     "assignment.delete": pgettext_lazy(_PERM_CTX, "Sərbəst işi silmək"),
     "project.delete": pgettext_lazy(_PERM_CTX, "Kurs işini silmək"),
     "lab.delete": pgettext_lazy(_PERM_CTX, "Lab işini silmək"),
-    # grading
     "grade.view": pgettext_lazy(_PERM_CTX, "Qiymətlərə baxış"),
     "grade.input": pgettext_lazy(_PERM_CTX, "Qiymət yazmaq"),
-    # journal
     "journal.view": pgettext_lazy(_PERM_CTX, "Jurnala baxış"),
     "journal.correct": pgettext_lazy(_PERM_CTX, "Jurnalda sənədli düzəliş etmək"),
+    "journal.excused.manage": pgettext_lazy(_PERM_CTX, "Üzrlü qayıbı səbəblə dəyişmək və geri almaq"),
     "journal.close": pgettext_lazy(_PERM_CTX, "Semestr sonu jurnalları bağlamaq/açmaq"),
     "journal.roster": pgettext_lazy(_PERM_CTX, "Jurnala alt qrupdan tələbə əlavə etmək/çıxarmaq"),
     "journal.reassign": pgettext_lazy(_PERM_CTX, "Fənni başqa müəllimə təhvil vermək"),
