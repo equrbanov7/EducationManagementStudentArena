@@ -564,6 +564,120 @@ class ReviewedLeylaCatalogTests(TestCase):
         self.assertEqual(offering["count"], 6)
         self.assertEqual(len(result["leyla_subject_cohorts"]), 6)
 
+    def _ilahe_diag_scope(self):
+        from apps.workload.services.scoped_snapshot import ilahe_references as probe
+
+        pins = {
+            "ORG": str(self.org.pk),
+            "TEACHER": self.teacher.pk,
+            "PERIOD": str(self.period.pk),
+            "ROW": str(self.rows[0].pk),
+            "OFFERING": str(self.filled[0].pk),
+            "SIBLING": str(self.filled[1].pk),
+            "SUBJECTS": (str(self.filled[0].subject_id), str(self.empty[0].subject_id)),
+            "GROUPS": (str(self.filled[0].group_id), str(self.filled[1].group_id)),
+        }
+        targets = {
+            str(probe.TEACHER): str(pins["TEACHER"]),
+            probe.OFFERING: pins["OFFERING"],
+            probe.SIBLING: pins["SIBLING"],
+            **dict(zip(probe.SUBJECTS, pins["SUBJECTS"])),
+            **dict(zip(probe.GROUPS, pins["GROUPS"])),
+        }
+        self.patches.enter_context(
+            patch.object(
+                probe,
+                "MAPS",
+                tuple(
+                    (entity, legacy, label, targets.get(target, target)) for entity, legacy, label, target in probe.MAPS
+                ),
+            )
+        )
+        for name, value in pins.items():
+            self.patches.enter_context(patch.object(probe, name, value))
+        return probe
+
+    def _ilahe_map(self, *, entity="worker", legacy="209", label="auth.user", target=None):
+        return apps.get_model("legacy_import.LegacyEntityMap").objects.create(
+            organization=self.org,
+            source_system="myedu_mariadb",
+            entity_type=entity,
+            legacy_pk=legacy,
+            target_model_label=label,
+            target_pk=str(target or self.teacher.pk),
+            state="migrated",
+            source_row_hash="c" * 64,
+            transform_version="fixture_v1",
+            created_run=apps.get_model("legacy_import.LegacyMigrationRun")
+            .objects.filter(organization=self.org)
+            .first(),
+        )
+
+    def test_ilahe_probe_is_select_only_and_never_exports_lesson_text_or_scores(self):
+        probe = self._ilahe_diag_scope()
+
+        def select_only(execute, sql, params, many, context):
+            self.assertTrue(sql.lstrip().upper().startswith("SELECT"), sql)
+            self.assertNotIn("FOR UPDATE", sql.upper())
+            return execute(sql, params, many, context)
+
+        with connection.execute_wrapper(select_only):
+            result = probe.collect_ilahe_references()
+        models = {item["model"]: item for item in result["ilahe_reference_graph"]}
+        self.assertIn("registrar.LessonMark", models)
+        self.assertIn("syllabus.SyllabusVersion", models)
+        self.assertNotIn("Actual source class", str(result))
+        for row in models["registrar.LessonMark"]["rows"]:
+            self.assertNotIn("score", row)
+            self.assertNotIn("topic", row)
+        self.assertFalse(WorkloadAmendment.objects.filter(organization=self.org).exists())
+
+    def test_ilahe_probe_reports_absent_typed_maps_without_numeric_namespace_alias(self):
+        probe = self._ilahe_diag_scope()
+        self._ilahe_map(entity="unrelated_worker", legacy="209")
+        result = probe.collect_ilahe_references()
+        maps = {(r["entity_type"], r["legacy_pk"]): r for r in result["ilahe_typed_maps"]}
+        self.assertTrue(maps[("worker", "209")]["absent"])
+        self.assertNotIn(("unrelated_worker", "209"), maps)
+        self.assertTrue(maps[("syllabus_document", "8668")]["absent"])
+        self._ilahe_map()
+        result = probe.collect_ilahe_references()
+        worker = next(r for r in result["ilahe_typed_maps"] if r["entity_type"] == "worker")
+        self.assertFalse(worker["conflict"])
+        self.assertTrue(worker["target_present"])
+
+    def test_ilahe_probe_reports_wrong_model_target_and_invalid_syllabus_map(self):
+        probe = self._ilahe_diag_scope()
+        self._ilahe_map(label="registrar.subject", target=self.filled[0].subject_id)
+        self._ilahe_map(entity="syllabus_document", legacy="8668", label="syllabus.syllabus", target="invalid-target")
+        result = probe.collect_ilahe_references()
+        maps = {(r["entity_type"], r["legacy_pk"]): r for r in result["ilahe_typed_maps"]}
+        self.assertTrue(maps[("worker", "209")]["conflict"])
+        self.assertTrue(maps[("syllabus_document", "8668")]["conflict"])
+
+    def test_ilahe_probe_retains_other_teacher_cohorts_and_shared_human_draft(self):
+        probe = self._ilahe_diag_scope()
+        outsider = User.objects.create_user("ilahe-conflicting-owner")
+        activate_member(self.org, outsider, "teacher", permissions=TEACHER_PERMS)
+        CourseOffering.objects.filter(pk=self.filled[0].pk).update(instructor=outsider)
+        syl, _ = self.syllabi[2]
+        apps.get_model("syllabus.SyllabusShare").objects.create(
+            organization=self.org, syllabus=syl, offering=self.filled[0], source="teacher", created_by=self.teacher
+        )
+        draft = apps.get_model("syllabus.SyllabusVersion").objects.create(
+            organization=self.org, syllabus=syl, major=2, minor=1, status="draft", created_by=self.teacher
+        )
+        apps.get_model("syllabus.SyllabusSection").objects.create(
+            organization=self.org, version=draft, section_id="desc", data={"description": "PRIVATE_ILAHE_DRAFT"}
+        )
+        result = probe.collect_ilahe_references()
+        cohort = next(row for row in result["ilahe_subject_cohorts"] if row["id"] == str(self.filled[0].pk))
+        self.assertTrue(cohort["different_instructor"])
+        versions = next(r for r in result["ilahe_reference_graph"] if r["model"] == "syllabus.SyllabusVersion")
+        self.assertIn(str(draft.pk), {r["pk"] for r in versions["rows"]})
+        self.assertNotIn("PRIVATE_ILAHE_DRAFT", str(result))
+        self.assertTrue(type(draft).objects.filter(pk=draft.pk, status="draft").exists())
+
     def test_new_canonical_teacher_workload_authority_is_not_overwritten(self):
         row = make_row(self.task, self.stacks[0])
         row.subject = self.old_subjects[0]
