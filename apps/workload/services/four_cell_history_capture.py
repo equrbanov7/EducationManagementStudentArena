@@ -18,7 +18,7 @@ from .scoped_snapshot import SnapshotError, encrypt
 from .scoped_snapshot.four_cell_history import CASES, ORG, annotated, bounded, collect_four_cell_history, digest
 from .syllabus_content_export.limits import query_budget
 
-FORMAT = "wcu-four-cell-history/1"
+FORMAT = "wcu-four-cell-history/2"
 MAX_BYTES = 8 * 1024 * 1024
 PERIOD = "a4f88744-8d49-4772-84ef-c28a96c3b372"
 CURRENT_FIELDS = {

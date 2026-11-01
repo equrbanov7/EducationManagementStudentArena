@@ -246,11 +246,27 @@ def collect_available_history(*, _scope=None):
     lessons = {c["lesson_id"] for c in cases.values()}
     query = audit_locator(cases)
     audit = audit_queryset(cases)
-    pre = bounded(annotated(audit).values("id", "_raw_bytes"))
-    if sum(r["_raw_bytes"] for r in pre) > MAX_AUDIT_BYTES or any(r["_raw_bytes"] > 1024 * 1024 for r in pre):
+    from . import workload_audit_receipt_spec as thin_spec
+    from . import workload_audit_receipts as thin
+
+    pre = bounded(annotated(audit).values("id", "_raw_bytes", "_raw_sha"))
+    fixed_ids = {str(row["id"]) for row in pre} & thin_spec.PINS.keys()
+    for row in pre:
+        if str(row["id"]) in fixed_ids and row["_raw_sha"] != thin_spec.PINS[str(row["id"])][1]:
+            raise ValueError("fixed_workload_receipt_row_changed")
+    raw_pre = [row for row in pre if str(row["id"]) not in fixed_ids]
+    raw_bytes = sum(row["_raw_bytes"] for row in raw_pre)
+    if raw_bytes > MAX_AUDIT_BYTES or any(row["_raw_bytes"] > 1024 * 1024 for row in raw_pre):
+        raise ValueError("four_cell_audit_byte_budget_exceeded")
+    thin_rows = thin.preview(annotated(audit.filter(pk__in=fixed_ids)))
+    if {str(row["id"]) for row in thin_rows} != fixed_ids:
+        raise ValueError("fixed_workload_receipt_scope_changed")
+    thin_audits = [thin.project(row) for row in thin_rows]
+    thin_bytes = len(json.dumps(thin_audits, cls=DjangoJSONEncoder, ensure_ascii=False).encode())
+    if raw_bytes + thin_bytes > MAX_AUDIT_BYTES:
         raise ValueError("four_cell_audit_byte_budget_exceeded")
     values = bounded(
-        annotated(audit).values(
+        annotated(audit.exclude(pk__in=fixed_ids)).values(
             "id",
             "organization_id",
             "created_at",
@@ -263,6 +279,7 @@ def collect_available_history(*, _scope=None):
             "new_values",
             "reason",
             "_raw_sha",
+            "_raw_bytes",
         )
     )
     # Grade audit's canonical student label is User.get_full_name() or username, not source names.
@@ -291,13 +308,20 @@ def collect_available_history(*, _scope=None):
             "student_label_sha256": digest(user.get_full_name() or user.username),
             "item_sha256_by_point": {k: sorted(v) for k, v in items.items()},
         }
-    audits = []
+    audits = list(thin_audits)
     changes = []
     for row in values:
         if _scope is None:
             projected, matched = project_audit(row, labels)
         else:
             projected, matched = project_audit(row, labels, _cases=cases, _undo_operation=undo_operation)
+        projected = {
+            **projected,
+            "projection": "parsed_audit",
+            "json_hash_policy": thin_spec.JSON_PYTHON_POLICY,
+            "row_hash_policy": thin_spec.ROW_SQL_POLICY,
+            "source_raw_bytes": row["_raw_bytes"],
+        }
         audits.append(projected)
         changes.extend(matched)
     if len(changes) > MAX_ROWS:
@@ -494,6 +518,12 @@ def collect_available_history(*, _scope=None):
                 "case_ids": sorted(cases),
                 "available_scope_collected": True,
                 "audit_rows": len(audits),
+                "audit_projection_version": 2,
+                "source_audit_raw_bytes": sum(row["_raw_bytes"] for row in pre),
+                "raw_parser_source_bytes": raw_bytes,
+                "thin_projection_bytes": thin_bytes,
+                "verified_workload_receipts": len(thin_audits),
+                "raw_parsed_audits": len(values),
                 "matched_change_rows": len(changes),
                 "unresolved_scope_rows": sum(r["unresolved_scope_row"] for r in audits),
                 "audit_is_best_effort": True,

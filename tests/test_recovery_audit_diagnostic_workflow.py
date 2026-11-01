@@ -63,7 +63,8 @@ def test_distinct_format_no_raw_json_or_extra_scope():
         scope.validate(value)
 
 
-def test_actual_crypto_roundtrip_is_private_and_normal_syllabus_decoder_refuses(tmp_path, monkeypatch):
+@pytest.mark.parametrize("version", [1, 2])
+def test_actual_crypto_roundtrip_is_private_and_normal_syllabus_decoder_refuses(tmp_path, monkeypatch, version):
     from apps.workload.services import scoped_snapshot
 
     private = rsa.generate_private_key(public_exponent=65537, key_size=3072)
@@ -74,7 +75,12 @@ def test_actual_crypto_roundtrip_is_private_and_normal_syllabus_decoder_refuses(
 
     der = private.public_key().public_bytes(serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo)
     monkeypatch.setattr(scoped_snapshot, "KEY_FINGERPRINT", hashlib.sha256(der).hexdigest())
-    encoded = json.dumps(scoped_snapshot.encrypt(payload(), public)).encode()
+    value = payload()
+    if version == 2:
+        value["format"] = "wcu-recovery-audit-diagnostic/2"
+        for section in value["data"].values():
+            section["receipt_semantic_previews"] = []
+    encoded = json.dumps(scoped_snapshot.encrypt(value, public)).encode()
     secret = private.private_bytes(
         serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption()
     )
@@ -84,7 +90,7 @@ def test_actual_crypto_roundtrip_is_private_and_normal_syllabus_decoder_refuses(
 
     monkeypatch.setattr(decoder, "KEY_FINGERPRINT", hashlib.sha256(der).hexdigest())
     decoded = decoder.decrypt_snapshot(encoded, secret)
-    assert decoded == payload()
+    assert decoded == value
     target = decoder.write_new_snapshot(decoded, tmp_path)
     assert target.stat().st_mode & 0o077 == 0
     with pytest.raises(ValueError):

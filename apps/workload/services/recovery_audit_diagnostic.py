@@ -16,7 +16,7 @@ from .scoped_snapshot.recovery_audit_scope import audit_queryset
 from .source28_spec import history_scope
 from .syllabus_content_export.limits import query_budget
 
-FORMAT = "wcu-recovery-audit-diagnostic/1"
+FORMAT = "wcu-recovery-audit-diagnostic/2"
 
 
 def metadata(cases):
@@ -70,7 +70,33 @@ def metadata(cases):
                 },
             }
         )
+    from .scoped_snapshot import workload_audit_receipt_spec as thin_spec
+    from .scoped_snapshot import workload_audit_receipts as thin
+
+    previews = []
+    for row in thin.preview(query):
+        try:
+            thin.validate(row)
+            verified = True
+        except ValueError:
+            verified = False
+        previews.append(
+            {
+                "id": str(row["id"]),
+                "raw_record_sha256": row["_raw_sha"],
+                "raw_bytes": row["_raw_bytes"],
+                "created_at": row["created_at"],
+                "user_id": row["user_id"],
+                "row_hash_matches": row["_raw_sha"] == thin_spec.PINS[str(row["id"])][1],
+                "semantic_checks_passed": verified,
+                "grade_apply_authority": False,
+                "json_hash_policy": thin_spec.JSON_SQL_POLICY,
+                "row_hash_policy": thin_spec.ROW_SQL_POLICY,
+                "proof": row["_thin"],
+            }
+        )
     return {
+        "receipt_semantic_previews": previews,
         "rows": result,
         "row_count": len(result),
         "total_raw_bytes": sum(row["raw_bytes"] for row in result),

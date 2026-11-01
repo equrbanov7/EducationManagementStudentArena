@@ -23,6 +23,26 @@ HASH = re.compile(r"^[a-f0-9]{64}$")
 AUDIT = set(
     "id organization_id created_at user_id action resource_kind resource_kind_sha256 resource_id resource_id_sha256 case_ids raw_record_sha256 old_values_sha256 new_values_sha256 changes_sha256 reason_present malformed_intent source_undo_marker unresolved_scope_row contrary_clear_evidence contrary_delete_evidence".split()
 )
+V2_AUDIT = {"projection", "json_hash_policy", "row_hash_policy", "source_raw_bytes"}
+V2_THIN = {
+    "receipt_family",
+    "manifest_sha256",
+    "selection_sha256",
+    "before_baseline_sha256",
+    "after_baseline_sha256",
+    "protected_academic_sql_sha256",
+    "before_sql_sha256",
+    "receipt_semantics_validated",
+}
+V2_SCOPE = {
+    "audit_projection_version",
+    "source_audit_raw_bytes",
+    "raw_parser_source_bytes",
+    "thin_projection_bytes",
+    "verified_workload_receipts",
+    "raw_parsed_audits",
+}
+
 CHANGE = set(
     "audit_id source_point_id change_index old_sha256 new_sha256 old_blank new_blank old_numeric new_numeric clear_evidence lesson_delete_evidence time_absent_from_legacy_audit_label matching".split()
 )
@@ -47,16 +67,22 @@ CURRENT = {
     ),
 }
 BOOL = set(
-    "reason_present malformed_intent source_undo_marker unresolved_scope_row contrary_clear_evidence contrary_delete_evidence old_blank new_blank clear_evidence lesson_delete_evidence time_absent_from_legacy_audit_label available_scope_collected audit_is_best_effort absence_of_audit_is_not_proof_of_no_deletion automatic_apply_authority is_archive created_mark is_deletion is_active is_legacy_synthesised".split()
+    "receipt_semantics_validated reason_present malformed_intent source_undo_marker unresolved_scope_row contrary_clear_evidence contrary_delete_evidence old_blank new_blank clear_evidence lesson_delete_evidence time_absent_from_legacy_audit_label available_scope_collected audit_is_best_effort absence_of_audit_is_not_proof_of_no_deletion automatic_apply_authority is_archive created_mark is_deletion is_active is_legacy_synthesised".split()
 )
 NUMBERS = set(
-    "source_point_id change_index audit_rows matched_change_rows unresolved_scope_rows tenant_unlocatable_mark_delete_audits tenant_deleted_lesson_corrections_unlocatable actor_id student_id instructor_id created_by_id added_by_id corrected_by_id reverted_by_id decided_by_id user_id source_pk room_id syllabus_week".split()
+    "source_raw_bytes audit_projection_version source_audit_raw_bytes raw_parser_source_bytes thin_projection_bytes verified_workload_receipts raw_parsed_audits source_point_id change_index audit_rows matched_change_rows unresolved_scope_rows tenant_unlocatable_mark_delete_audits tenant_deleted_lesson_corrections_unlocatable actor_id student_id instructor_id created_by_id added_by_id corrected_by_id reverted_by_id decided_by_id user_id source_pk room_id syllabus_week".split()
 )
 TIMESTAMPS = {"created_at", "updated_at", "reverted_at", "captured_at"}
 SCORES = {"old_numeric", "new_numeric", "old_score", "new_score", "absence_hours", "hours", "lesson_hours"}
 CODES = {
     "action": {"create", "update", "delete", "view", "other"},
+    "projection": {"parsed_audit", "verified_workload_receipt"},
+    "receipt_family": {"reviewed", "owner"},
+    "json_hash_policy": {"postgres-jsonb-text-utf8-sha256/1", "python-json-ascii-sorted-compact-sha256/1"},
+    "row_hash_policy": {"postgres-row_to_json-text-utf8-sha256/1"},
     "resource_kind": {
+        "workload.reviewed_source_batch",
+        "workload.owner_activity_batch",
         "registrar.grade.mark",
         "registrar.grade.full-edit",
         "registrar.Lesson",
@@ -132,6 +158,13 @@ def identity(value):
 def scalar(key, value):
     if value is None:
         return key not in BOOL and key not in {
+            "source_raw_bytes",
+            "audit_projection_version",
+            "source_audit_raw_bytes",
+            "raw_parser_source_bytes",
+            "thin_projection_bytes",
+            "verified_workload_receipts",
+            "raw_parsed_audits",
             "source_point_id",
             "change_index",
             "audit_rows",
@@ -205,7 +238,7 @@ def validate(payload):
     if (
         not isinstance(payload, dict)
         or set(payload) != top
-        or payload["format"] != "wcu-four-cell-history/1"
+        or payload["format"] not in {"wcu-four-cell-history/1", "wcu-four-cell-history/2"}
         or payload["organization_id"] != ORG
         or payload["period_id"] != PERIOD
         or payload["academic_year"] != "2026/2027"
@@ -219,6 +252,7 @@ def validate(payload):
         raise ValueError("four_cell_history_scope_invalid")
     if len(json.dumps(payload, ensure_ascii=False).encode()) > MAX_BYTES:
         raise ValueError("four_cell_history_byte_budget")
+    version2 = payload["format"] == "wcu-four-cell-history/2"
     data = payload["data"]
     if (
         not isinstance(data, dict)
@@ -244,6 +278,12 @@ def validate(payload):
                 if allowed is None
                 else allowed
             )
+            if version2 and table == "four_cell_history_audits":
+                fields = (
+                    fields | V2_AUDIT | (V2_THIN if row.get("projection") == "verified_workload_receipt" else set())
+                )
+            if version2 and table == "four_cell_history_scope":
+                fields = fields | V2_SCOPE
             if not set(row) <= fields or any(not scalar(k, v) for k, v in row.items()):
                 raise ValueError("four_cell_history_untyped_value")
             if "organization_id" in row and row["organization_id"] != ORG:
@@ -269,6 +309,11 @@ def validate(payload):
                 if unique in seen:
                     raise ValueError("four_cell_history_duplicate_record")
                 seen.add(unique)
+            if table == "four_cell_history_audits":
+                if version2:
+                    validate_audit_v2(row)
+                elif row["resource_kind"] in {"workload.reviewed_source_batch", "workload.owner_activity_batch"}:
+                    raise ValueError("four_cell_history_v1_receipt_projection_forbidden")
             if table == "four_cell_history_current":
                 expected = {
                     "registrar.CourseOffering": OFFERINGS,
@@ -298,7 +343,72 @@ def validate(payload):
         != sum(row["unresolved_scope_row"] for row in data["four_cell_history_audits"])
     ):
         raise ValueError("four_cell_history_coverage_invalid")
+    if version2:
+        audits = data["four_cell_history_audits"]
+        verified = [row for row in audits if row["projection"] == "verified_workload_receipt"]
+        parsed = [row for row in audits if row["projection"] == "parsed_audit"]
+        if (
+            scope["audit_projection_version"] != 2
+            or scope["verified_workload_receipts"] != len(verified)
+            or scope["raw_parsed_audits"] != len(parsed)
+            or scope["source_audit_raw_bytes"] != sum(row["source_raw_bytes"] for row in audits)
+            or scope["raw_parser_source_bytes"] != sum(row["source_raw_bytes"] for row in parsed)
+            or scope["raw_parser_source_bytes"] + scope["thin_projection_bytes"] > MAX_BYTES
+            or any(row["source_raw_bytes"] > 1024 * 1024 for row in parsed)
+        ):
+            raise ValueError("four_cell_history_projection_coverage_invalid")
     audit_ids = {row["id"] for row in data["four_cell_history_audits"]}
     if any(row["audit_id"] not in audit_ids for row in data["four_cell_history_changes"]):
         raise ValueError("four_cell_history_audit_reference_missing")
     return payload
+
+
+def validate_audit_v2(row):
+    import importlib.util
+    from pathlib import Path
+
+    definition = importlib.util.spec_from_file_location(
+        "compiled_workload_receipt_pins",
+        Path(__file__).resolve().parents[2] / "apps/workload/services/scoped_snapshot/workload_audit_receipt_spec.py",
+    )
+    contract = importlib.util.module_from_spec(definition)
+    definition.loader.exec_module(contract)
+    if any(
+        not isinstance(value, str) or not HASH.fullmatch(value) for key, value in row.items() if key.endswith("sha256")
+    ):
+        raise ValueError("four_cell_history_audit_hash_missing")
+    if row["row_hash_policy"] != contract.ROW_SQL_POLICY:
+        raise ValueError("four_cell_history_hash_policy_invalid")
+    if row["projection"] == "parsed_audit":
+        if row["json_hash_policy"] != contract.JSON_PYTHON_POLICY:
+            raise ValueError("four_cell_history_hash_policy_invalid")
+        if row["resource_kind"] in {value[0] for value in contract.FAMILIES.values()}:
+            # A receipt cannot gain the resolved-nongrade meaning through the raw parser.
+            if not row["unresolved_scope_row"]:
+                raise ValueError("four_cell_history_unverified_receipt_invalid")
+        return
+    family, sha = contract.PINS.get(row["id"], (None, None))
+    if any(row.get(key) != value for key, value in contract.FIELD_PINS.get(row["id"], {}).items()):
+        raise ValueError("four_cell_history_receipt_field_hash_invalid")
+    if (
+        family != row["receipt_family"]
+        or row["raw_record_sha256"] != sha
+        or row["resource_kind"] != contract.FAMILIES[family][0]
+        or row["json_hash_policy"] != contract.JSON_SQL_POLICY
+        or row["receipt_semantics_validated"] is not True
+        or row["action"] != "update"
+        or row["resource_id"] is not None
+        or row["case_ids"] != []
+        or not row["reason_present"]
+        or any(
+            row[k]
+            for k in (
+                "contrary_clear_evidence",
+                "contrary_delete_evidence",
+                "malformed_intent",
+                "source_undo_marker",
+                "unresolved_scope_row",
+            )
+        )
+    ):
+        raise ValueError("four_cell_history_verified_receipt_invalid")

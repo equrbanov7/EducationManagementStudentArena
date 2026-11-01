@@ -33,7 +33,12 @@ def uid(value):
 def validate(payload):
     if not isinstance(payload, dict) or set(payload) != ROOT:
         fail()
-    if payload["format"] != FORMAT or payload["organization_id"] != ORG or payload["read_only"] is not True:
+    version2 = payload["format"] == "wcu-recovery-audit-diagnostic/2"
+    if (
+        payload["format"] not in {FORMAT, "wcu-recovery-audit-diagnostic/2"}
+        or payload["organization_id"] != ORG
+        or payload["read_only"] is not True
+    ):
         fail()
     if any(payload[k] is not False for k in ("eligible_for_apply", "absence_claim", "raw_body_included")):
         fail()
@@ -45,7 +50,11 @@ def validate(payload):
     if not isinstance(payload["data"], dict) or set(payload["data"]) != {"four", "source28"}:
         fail()
     for scope in payload["data"].values():
-        if not isinstance(scope, dict) or set(scope) != SCOPE or not isinstance(scope["rows"], list):
+        if (
+            not isinstance(scope, dict)
+            or set(scope) != (SCOPE | {"receipt_semantic_previews"} if version2 else SCOPE)
+            or not isinstance(scope["rows"], list)
+        ):
             fail()
         if scope["raw_json_fetched"] is not False or scope["history_cleared_for_apply"] is not False:
             fail()
@@ -57,6 +66,43 @@ def validate(payload):
             or scope["strict_total_budget"] != 8 * 1024 * 1024
         ):
             fail()
+        if version2:
+            import importlib.util
+            from pathlib import Path
+
+            path = Path(__file__).with_name("workload_receipt_preview_scope.py")
+            definition = importlib.util.spec_from_file_location("fixed_receipt_semantic_shape", path)
+            validator = importlib.util.module_from_spec(definition)
+            definition.loader.exec_module(validator)
+            previews = scope["receipt_semantic_previews"]
+            if (
+                not isinstance(previews, list)
+                or len(previews) > 4
+                or len({r.get("id") for r in previews if isinstance(r, dict)}) != len(previews)
+            ):
+                fail()
+            for preview in previews:
+                validator.validate(preview)
+                matching = [row for row in scope["rows"] if row["id"] == preview["id"]]
+                if (
+                    len(matching) != 1
+                    or matching[0]["raw_record_sha256"] != preview["raw_record_sha256"]
+                    or matching[0]["raw_bytes"] != preview["raw_bytes"]
+                ):
+                    fail()
+                if (
+                    any(
+                        matching[0][field + "_sha"] != preview["proof"][field + "_sql_sha256"]
+                        for field in ("old_values", "new_values", "changes")
+                    )
+                    or matching[0]["resource_id_sha256"] != preview["proof"]["resource_id_sql_sha256"]
+                ):
+                    fail()
+                try:
+                    if datetime.fromisoformat(preview["created_at"]).tzinfo is None:
+                        fail()
+                except (ValueError, TypeError):
+                    fail()
         seen = set()
         for row in scope["rows"]:
             if not isinstance(row, dict) or set(row) != ROW:
