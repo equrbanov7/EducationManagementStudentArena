@@ -2,7 +2,8 @@
 
 `export_wcu_syllabus_content` is an independent encrypted export. It does not
 change the workload/journal-cell collector, existing decoder, producer or
-workflow. Workflow wiring and production capture are a separate release step.
+workflow. The separate `syllabus-content-export.yml` workflow accepts only an
+actor and one pinned batch. Production capture is a separate operator step.
 
 The command accepts an actor, one existing `chair-cells-NNN` batch, public key,
 and a new output path. It reuses the existing ninety-batch registry and its
@@ -60,3 +61,13 @@ matching the existing two read-only exports: an outer worker transaction would
 prevent `SET TRANSACTION ... READ ONLY`. The delegated collector rejects nested
 transactions and its actual PostgreSQL no-DML and both-RLS tests cover this
 boundary. It is not a general bypass option.
+
+The standalone workflow compares checkout HEAD with the deployed container's
+`/app/build-info.json` before opening the capture. It shares the existing
+`production-deploy` concurrency lock, masks the validated actor, and uploads
+only the exact encrypted artifact and public capture manifest for one day.
+The manifest binds run/attempt, HEAD, batch, registry and encrypted SHA. It is
+not authenticated plaintext evidence: the offline decoder must still validate
+the envelope and payload and the consumer must record its plaintext SHA. An
+oversized batch fails whole; there is no skip or automatic split. No current
+ninety-batch journal workflow, producer or decoder is modified.

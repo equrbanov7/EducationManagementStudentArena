@@ -57,3 +57,14 @@ Output prefix is `onomastics_roster`, with `mode`, `status`, `baseline`, numeric
 uploaded assets. The original contacts command intentionally refuses its old
 selected-roster pins after this supplement; it must not normalize or overwrite
 the newly reviewed rights. This command is not a general roster expansion path.
+
+The independent `reviewed-onomastics-roster.yml` workflow exposes only `actor`,
+`baseline`, `undo`, `apply` and `confirm`. It invokes the exact command above;
+apply requires a fresh baseline and `confirm=APPLY`, and undo uses the exact
+append receipt UUID. No teacher, student, source, group or kind selectors are
+accepted. Checkout HEAD must match deployed `/app/build-info.json`; the job
+shares the `production-deploy` concurrency lock. Only the fixed safe summary
+is printed. A timeout or missing summary after a possible apply requires
+receipt inspection before retry; this wrapper never dispatches an automatic
+retry. Rollback order is append first, then contacts, with a new dry baseline
+for each operation. Existing Math and contacts workflow routes are unchanged.

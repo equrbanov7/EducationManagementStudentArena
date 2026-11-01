@@ -1,0 +1,43 @@
+name: WCU syllabus content fingerprints (encrypted, read-only)
+on:
+  workflow_dispatch:
+    inputs:
+      actor:
+        description: "Aktiv təşkilat superadmini"
+        type: string
+        required: true
+      batch:
+        description: "Sabit chair-cells-NNN sillabus məzmunu audit paketi"
+        type: string
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  reviewed:
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Capture fixed syllabus batch with deployed HEAD verification
+        id: capture
+        run: python3 scripts/ops/reviewed_followup.py syllabus
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: wcu-syllabus-content-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ steps.capture.outputs.artifact_dir }}/snapshot.enc.json
+            ${{ steps.capture.outputs.artifact_dir }}/capture-manifest.json
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+      - name: Remove temporary encrypted local artifact
+        if: always()
+        run: |
+          set -euo pipefail
+          rm -rf -- "$RUNNER_TEMP/syllabus-content-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"

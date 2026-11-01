@@ -1,0 +1,44 @@
+name: Reviewed Onomastics fixed home-roster supplement
+on:
+  workflow_dispatch:
+    inputs:
+      actor:
+        description: "Aktiv təşkilat superadmini"
+        type: string
+        required: true
+      baseline:
+        description: "Apply üçün bu əmrin təzə dry-run SHA256 nəticəsi"
+        type: string
+        required: false
+        default: ""
+      undo:
+        description: "Yalnız bu əlavənin apply receipt UUID-si; boş = əlavə planı"
+        type: string
+        required: false
+        default: ""
+      apply:
+        description: "Yalnız contacts düzəlişindən sonra sabit 10 bağlantını əlavə et"
+        type: boolean
+        required: false
+        default: false
+      confirm:
+        description: "Apply üçün APPLY"
+        type: string
+        required: false
+        default: ""
+permissions:
+  contents: read
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  reviewed:
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Execute fixed append or strict receipt undo with deployed HEAD verification
+        run: python3 scripts/ops/reviewed_followup.py onomastics
