@@ -131,6 +131,7 @@ def assign_teacher(
     assignment=None,
     request=None,
     sync_offerings: bool = True,
+    existing_owner_authority=None,
 ) -> TeacherAssignment:
     """Bir fəaliyyət üzrə saatı müəllimə (və ya «Vakant»a) bağlayır."""
     task = row.task
@@ -160,6 +161,8 @@ def assign_teacher(
         )
 
     teacher = None
+    if existing_owner_authority is not None and not teacher_id:
+        raise WorkloadDenied("workload.reviewed_identity_invalid", "reviewed_existing_owner_authority_required")
     if teacher_id:
         from django.contrib.auth import get_user_model
 
@@ -167,7 +170,23 @@ def assign_teacher(
         if teacher is None:
             raise WorkloadDenied("workload.teacher_not_found", "Müəllim tapılmadı.")
         # Başqa kafedranın müəllimi (saathesabı) — bu kafedrada ƏLAVƏ üzvlük alır, ştatı dəyişmir (2026-10-25).
-        ensure_assignable_teacher(task.organization, task.chair, teacher, actor_user=getattr(actor, "user", None))
+        if existing_owner_authority is None:
+            ensure_assignable_teacher(task.organization, task.chair, teacher, actor_user=getattr(actor, "user", None))
+        else:
+            from .mr34_teacher_authority import validate
+
+            validate(
+                existing_owner_authority,
+                organization=task.organization,
+                actor=actor,
+                row=locked,
+                assignment=assignment,
+                teacher=teacher,
+                activity=activity,
+                hours=hours,
+                groups_note=groups_note,
+                hourly=is_hourly_paid,
+            )
 
     if assignment is None:
         assignment = TeacherAssignment(organization=task.organization, row=locked)
