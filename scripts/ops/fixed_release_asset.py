@@ -120,7 +120,9 @@ def download(*, repo, tag, asset, target, sha256, max_bytes, token):
         or not 0 < max_bytes <= 16 * 1024 * 1024
     ):
         raise ValueError("release_fixed_scope_required")
-    if not isinstance(token, str) or not re.fullmatch(r"[A-Za-z0-9_]{1,2048}", token):
+    # Installation/JWT credentials can contain punctuation; validate header safety,
+    # not a particular GitHub token prefix. Never log or normalize the credential.
+    if not isinstance(token, str) or not 1 <= len(token) <= 4096 or not re.fullmatch(r"[A-Za-z0-9._~+/-]+=*", token):
         raise ValueError("release_token_required")
     if target.exists() or target.is_symlink() or not target.parent.is_dir() or target.parent.stat().st_mode & 0o077:
         raise ValueError("release_private_target_required")

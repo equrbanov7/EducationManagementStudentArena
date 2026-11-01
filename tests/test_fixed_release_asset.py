@@ -179,3 +179,38 @@ class FixedReleaseTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OpaqueBearerCredentialTests(unittest.TestCase):
+    def test_installation_and_jwt_punctuation_are_sent_only_to_fixed_api(self):
+        fixture = FixedReleaseTests()
+        for token in ("v1.synthetic-installation.token", "eyJ.synthetic_payload.signature-part", "abc+/._~-=="):
+            with self.subTest(token_format="synthetic"), tempfile.TemporaryDirectory() as folder:
+                received = []
+
+                def fake_get(url, credential, cap, *, received=received, **kwargs):
+                    received.append((url, credential))
+                    return json.dumps(fixture.metadata()).encode() if len(received) == 1 else b"cipher"
+
+                args = fixture.kwargs(folder)
+                args["token"] = token
+                with patch.object(asset, "_get", side_effect=fake_get):
+                    path = asset.download(**args)
+                self.assertEqual(path.read_bytes(), b"cipher")
+                self.assertTrue(
+                    all(url.startswith(asset.API + "/repos/" + asset.REPOSITORY + "/") for url, _ in received)
+                )
+                self.assertTrue(all(credential == token for _, credential in received))
+
+    def test_header_injection_whitespace_unicode_and_unbounded_credentials_refused_before_network(self):
+        fixture = FixedReleaseTests()
+        for token in (None, "", "a b", "a\rb", "a\nb", "a\tb", "Bearer abc", "gizliə", "a=b", "=", "a" * 4097):
+            with self.subTest(invalid_format=True), tempfile.TemporaryDirectory() as folder:
+                args = fixture.kwargs(folder)
+                args["token"] = token
+                with (
+                    patch.object(asset, "_get") as transport,
+                    self.assertRaisesRegex(ValueError, "release_token_required"),
+                ):
+                    asset.download(**args)
+                transport.assert_not_called()
