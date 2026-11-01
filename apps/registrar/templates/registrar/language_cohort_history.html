@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% load static journal_names i18n %}
+{% block title %}{% trans "Əvvəlki səviyyə qeydləri" context "registrar.language_cohort" %}{% endblock %}
+{% block extraCss %}<link rel="stylesheet" href="{% static 'registrar/css/language_cohorts.css' %}">{% endblock %}
+{% block content %}<main class="lc-page">
+<a href="{% url 'registrar:language_cohort_detail' event.cohort_id %}">{% trans "← Səviyyə qrupu" context "registrar.language_cohort" %}</a>
+<h1>{% trans "Əvvəlki səviyyə qeydləri" context "registrar.language_cohort" %}</h1>
+<p>{{ event.student|journal_name }} · {{ event.home_group.name }}</p>
+<p>{{ event.source_enrollment.offering.subject.name }} · {{ event.source_enrollment.offering.period.name }}</p>
+<p>{% trans "Yalnız əvvəlki qeydiyyatın saxlanılan xanaları göstərilir. Bu ballar cari səviyyə jurnalına əlavə edilmir." context "registrar.language_cohort" %}</p>
+<div class="lc-scroll" role="region" aria-label="{% trans 'Əvvəlki səviyyə qiymətləri' context 'registrar.language_cohort' %}" tabindex="0"><table>
+<thead><tr><th>{% trans "Tarix" context "registrar.language_cohort" %}</th><th>{% trans "Dərs növü" context "registrar.language_cohort" %}</th><th>{% trans "Saat" context "registrar.language_cohort" %}</th><th>{% trans "Davamiyyət" context "registrar.language_cohort" %}</th><th>{% trans "Bal" context "registrar.language_cohort" %}</th></tr></thead>
+<tbody>{% for mark in marks %}<tr><td>{{ mark.lesson.date|date:"d.m.Y" }} {{ mark.lesson.start_time|time:"H:i" }}</td><td>{{ mark.lesson.get_kind_display }}</td><td>{{ mark.lesson.hours }}</td><td>{{ mark.get_status_display }}</td><td>{{ mark.score|default_if_none:"—" }}</td></tr>{% empty %}<tr><td colspan="5">{% trans "Saxlanılan xana yoxdur." context "registrar.language_cohort" %}</td></tr>{% endfor %}</tbody>
+</table></div></main>{% endblock %}

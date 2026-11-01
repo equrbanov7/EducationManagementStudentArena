@@ -10,7 +10,11 @@ def register_teacher_journal_assignments(provider):
 
 
 def teacher_journal_assignments(*, organization, teacher_id):
-    return _provider(organization=organization, teacher_id=teacher_id) if _provider is not None else {}
+    from .language_cohort_journal import teacher_assignments
+
+    result = dict(_provider(organization=organization, teacher_id=teacher_id)) if _provider is not None else {}
+    result.update(teacher_assignments(organization=organization, teacher_id=teacher_id))
+    return result
 
 
 def register_joint_journal_candidates(provider):

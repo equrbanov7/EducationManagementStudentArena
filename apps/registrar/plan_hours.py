@@ -77,6 +77,10 @@ def plan_hours_for_offering(offering):
     """
     if offering is None:
         return {}
+    from .language_cohort_journal import hours_for_offering
+
+    if cohort_hours := hours_for_offering(offering):
+        return cohort_hours
     from core.academic_rules import syllabus_hours_from_load
 
     def from_plan(program_only=False):

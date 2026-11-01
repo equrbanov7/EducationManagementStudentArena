@@ -1,4 +1,5 @@
-{% load journal_names i18n %}
+{% load journal_names i18n language_cohort_links %}
+{% language_cohort_manage_entry offering request.user %}
 {% comment %}Qiymətləndirmə tabı (mockup): solda TƏQVİM PLANI (kurs mövzuları +
 keçirilmə tarixi), sağda davamiyyət/bal grid-i. Başlıqlar sadədir (yalnız tarix
 + BU GÜN). Lecture xanası: i/e·q/b çipi. Seminar/lab xanası: bal (0-10) + q/b —
@@ -144,7 +145,7 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                             <td class="jd2-td-student">
                                 <div class="jd2-stu-inner">
                                     <span class="jd2-stu-no">{{ forloop.counter }}</span>
-                                    <span class="jd2-stu-name" data-jd-hint-name>{{ row.student|journal_name }} <small>· {{ row.home_group.name|default:"—" }}</small></span>
+                                    <span class="jd2-stu-name" data-jd-hint-name>{{ row.student|journal_name }}</span><small class="badge rounded-pill text-bg-light border" title="{% trans 'Əsas qrup' context 'registrar.language_cohort' %}">{{ row.home_group.name|default:"—" }}</small>
                                     {% if can_exempt %}{# «Fəndən azad et» — yalnız bu jurnaldan (sahib 2026-10-15) #}
                                     <button type="button" class="jse-row-btn" data-jse-open="{{ row.enrollment.id }}" data-jse-student="{{ row.student|journal_name }}"
                                             title="{% trans 'Fəndən azad et — tələbə qrupda qalır, yalnız bu jurnaldan çıxır' context 'registrar.subject_exempt' %}"

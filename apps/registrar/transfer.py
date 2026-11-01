@@ -31,6 +31,8 @@ def _validate_scope(record, new_group, period):
     organization_id = record.organization_id
     if getattr(new_group, "organization_id", None) != organization_id:
         raise ValidationError(pgettext("registrar.transfer", "Yeni qrup tələbənin təşkilatına aid deyil."))
+    if (getattr(new_group, "settings", None) or {}).get("language_level_cohort") is True:
+        raise ValidationError("Səviyyə qrupu akademik əsas qrup kimi seçilə bilməz.")
     if getattr(new_group, "unit_type", None) != OrgUnitType.GROUP:
         raise ValidationError(pgettext("registrar.transfer", "Yeni struktur vahidi akademik qrup olmalıdır."))
     if period is not None and getattr(period, "organization_id", None) != organization_id:

@@ -67,8 +67,9 @@ def collect(*, student_secret):
         group["settings"] = {
             k: v
             for k, v in (group["settings"] or {}).items()
-            if k in {"parent_group", "degree_level", "education_form", "language", "sector"}
+            if k in {"parent_group", "degree_level", "education_form", "language", "sector", "language_level_cohort"}
             and isinstance(v, (str, int, bool))
+            and (k != "language_level_cohort" or isinstance(v, bool))
         }
         try:
             canonical_id = uuid.UUID(str(canonical))

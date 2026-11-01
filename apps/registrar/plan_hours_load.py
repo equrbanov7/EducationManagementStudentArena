@@ -104,6 +104,10 @@ def workload_hours_for_offering(offering) -> dict:
     """Açılışın (fənn + dövr + qrup) yük sətirlərindən BİR QRUPUN bölgüsü (``{}`` — sətir yoxdur)."""
     if offering is None or not (getattr(offering, "subject_id", None) and getattr(offering, "period_id", None)):
         return {}
+    from .language_cohort_journal import hours_for_offering
+
+    if cohort_hours := hours_for_offering(offering):
+        return cohort_hours
     TaskRow = _task_row_model()
     if TaskRow is None:
         return {}
@@ -144,6 +148,9 @@ def workload_hours_by_offering(offerings) -> dict:
             and row.period_id == offering.period_id
             and (not offering.group_id or offering.group_id in group_ids)
         )
+    from .language_cohort_journal import hours_by_offering
+
+    result.update(hours_by_offering(offerings))
     return result
 
 

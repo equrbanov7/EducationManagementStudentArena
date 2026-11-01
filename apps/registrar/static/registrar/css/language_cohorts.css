@@ -1,0 +1,20 @@
+.lc-page { max-width: 1120px; margin: 24px auto; padding: 0 20px 40px; color: var(--text-primary, #172b4d); }
+.lc-page h1 { font-size: clamp(1.5rem, 3vw, 2.1rem); }
+.lc-page p { line-height: 1.6; }
+.lc-card { border: 1px solid var(--border-color, #cbd5e1); border-radius: 12px; padding: 16px; margin: 16px 0; background: var(--card-bg, #fff); }
+.lc-list { list-style: none; padding: 0; }
+.lc-list > li { margin-block: 12px; }
+.lc-page summary { cursor: pointer; font-weight: 600; padding-block: 8px; }
+.lc-page form { display: grid; gap: 12px; margin-block: 12px; }
+.lc-page label { display: block; }
+.lc-create { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); align-items: end; }
+.lc-create p { margin: 0; }
+.lc-create .errorlist { color: #b91c1c; grid-column: 1 / -1; }
+.lc-page input:not([type=checkbox]), .lc-page select { display: block; width: 100%; min-height: 42px; border: 1px solid #94a3b8; border-radius: 6px; padding: 8px; background: var(--card-bg, #fff); color: inherit; }
+.lc-page button { min-height: 42px; padding: 8px 16px; border: 0; border-radius: 6px; color: #fff; background: #1d4ed8; cursor: pointer; justify-self: start; }
+.lc-page button:focus-visible, .lc-page summary:focus-visible, .lc-page a:focus-visible, .lc-scroll:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+.lc-scroll { overflow-x: auto; margin-block: 16px; }
+.lc-page table { width: 100%; border-collapse: collapse; min-width: 520px; }
+.lc-page th, .lc-page td { padding: 12px; border-bottom: 1px solid var(--border-color, #cbd5e1); text-align: left; vertical-align: top; }
+.lc-page td form { min-width: 230px; }
+@media (max-width: 600px) { .lc-page { padding-inline: 12px; } .lc-create { grid-template-columns: 1fr; } }

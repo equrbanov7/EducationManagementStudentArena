@@ -3,6 +3,7 @@
 from collections import defaultdict
 
 from django.apps import apps
+from django.db import models
 from django.db.models import Exists, OuterRef, Q
 
 from .models import Lesson, ScheduleSlot
@@ -51,4 +52,5 @@ def apply_kind_filter(queryset, kind):
         Q(pk__in=ScheduleSlot.objects.filter(kind=kind).values("offering_id"))
         | Q(pk__in=Lesson.objects.filter(kind=kind).values("offering_id"))
         | Q(_journal_planned_kind=True)
+        | Q(language_cohort__organization_id=models.F("organization_id"), **{f"language_cohort__{kind}_hours__gt": 0})
     )

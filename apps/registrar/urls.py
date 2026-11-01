@@ -24,6 +24,8 @@ from . import (
     journal_list_unit_lookup,
     journal_master_history,
     journal_reviewed_history,
+    language_cohort_history,
+    language_cohort_views,
     lessons_log_views,
     pdf_views,
     practical_toggle,
@@ -38,6 +40,13 @@ from . import (
 app_name = "registrar"
 
 urlpatterns = [
+    path(
+        "seviyye/<uuid:cohort_id>/tarixce/<uuid:event_id>/",
+        language_cohort_history.detail,
+        name="language_cohort_history",
+    ),
+    path("seviyye/", language_cohort_views.index, name="language_cohorts"),
+    path("seviyye/<uuid:cohort_id>/", language_cohort_views.detail, name="language_cohort_detail"),
     path("duzelis/<uuid:offering_id>/umumi-uzrlu/", absence_credit_views.apply, name="absence_credit_apply"),
     path("", views.journal_list, name="journal_list"),
     path("birge/<uuid:source_row_id>/<str:kind>/", joint_journal_views.detail, name="joint_journal"),

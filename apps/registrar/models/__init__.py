@@ -86,6 +86,7 @@ from .kollokvium_window import (
     KollokviumExtraGrant,
     KollokviumWindow,
 )
+from .language_cohort import LanguageLevelCohort, LanguageLevelPlacement
 from .legacy_excuse import (
     LEGACY_EXCUSE_EXTENSIONS,
     LegacyExcuseDocument,
@@ -124,6 +125,8 @@ from .subgroup_placement import SubgroupPlacementEvent, SubgroupPlacementKind
 from .transfer_evidence import GroupTransferEvidence
 
 __all__ = [
+    "LanguageLevelCohort",
+    "LanguageLevelPlacement",
     "AbsenceCredit",
     "CourseFormat",
     "AcademicStatus",

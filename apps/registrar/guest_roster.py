@@ -355,6 +355,9 @@ def add_guest_student(*, offering, student, by_user, source_group=None, reason="
     """
     if by_user is None or not getattr(by_user, "pk", None):
         raise ValidationError(pgettext(_CTX, "Əməliyyat üçün icraçı tələb olunur."))
+    from .language_cohort_journal import require_cohort_placement_surface
+
+    require_cohort_placement_surface(offering)
     assert_roster_open(offering)
     if release_source:
         reason = guest_merge.validate_reason(reason)
@@ -452,6 +455,9 @@ def remove_guest_student(*, offering, enrollment, by_user, reason=""):
     """Alt qrupdan əlavə olunmuş tələbəni jurnaldan çıxar (soft — tarixçə qalır)."""
     if by_user is None or not getattr(by_user, "pk", None):
         raise ValidationError(pgettext(_CTX, "Əməliyyat üçün icraçı tələb olunur."))
+    from .language_cohort_journal import require_cohort_placement_surface
+
+    require_cohort_placement_surface(offering)
     assert_roster_open(offering)
     enrollment = (
         Enrollment.objects.select_for_update(of=("self",))

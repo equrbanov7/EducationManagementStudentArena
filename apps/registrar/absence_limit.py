@@ -36,6 +36,8 @@ from apps.registrar import exam_eligibility, read_memo
 from apps.registrar.exam_eligibility import DEFAULT_LIMIT_PERCENT
 from apps.registrar.models import StudentAcademicRecord
 
+from .student_academic_context import contexts_for_students
+
 
 def limit_percent_for_record(record) -> int:
     """Akademik qeydin proqram həddi; qeyd/proqram yoxdursa defolt (25)."""
@@ -65,24 +67,14 @@ def limit_percent_for_enrollment(enrollment) -> int:
     )
 
 
-@read_memo.per_id("limit_pct", ids_arg="student_ids", result="dict", namespace_arg="organization_id")  # PERF-1
 def limit_percent_map_for_students(*, organization_id, student_ids) -> dict:
-    """``student_id → hədd`` — TƏK sorğu; qeydsiz tələbə lüğətdə YOXDUR (çağıran defoltu tətbiq edir).
-
-    Seçim qaydası :func:`limit_percent_for_student` ilə birə-bir (İLK pk qeyd).
-    """
-    ids = {sid for sid in student_ids if sid is not None}
-    if organization_id is None or not ids:
-        return {}
-    result: dict = {}
-    rows = (
-        StudentAcademicRecord.objects.filter(organization_id=organization_id, student_id__in=ids)
-        .select_related("program")
-        .order_by("pk")
-    )
-    for record in rows:
-        result.setdefault(record.student_id, limit_percent_for_record(record))
-    return result
+    """Student-specific limits from the shared batch; first-pk selection is unchanged."""
+    return {
+        student_id: limit_percent_for_record(context.first_record)
+        for student_id, context in contexts_for_students(
+            organization_id=organization_id, student_ids=student_ids
+        ).items()
+    }
 
 
 #: Həddin bu payına çatanda «limitə yaxın» xəbərdarlığı (qrid + «Yekun» tabı eyni nisbət).
@@ -101,12 +93,20 @@ def near_limit(absence_hours, row_limit: RowLimit, *, frozen: bool, barred: bool
     return Decimal(absence_hours) >= row_limit.allowed_hours * WARN_RATIO
 
 
+class RowLimits(dict):
+    """Numeric limit mapping with already-read home-group presentation metadata."""
+
+    home_groups = None
+
+
 def row_limits(*, organization_id, enrollments, total_hours) -> dict:
     """``student_id → RowLimit`` — qrid / «Yekun» sətirləri üçün (tək sorğu, sətir sayından asılı deyil)."""
-    limits = limit_percent_map_for_students(
-        organization_id=organization_id, student_ids=[e.student_id for e in enrollments]
-    )
-    result: dict = {}
+    contexts = contexts_for_students(organization_id=organization_id, student_ids=[e.student_id for e in enrollments])
+    limits = {student_id: limit_percent_for_record(context.first_record) for student_id, context in contexts.items()}
+    result = RowLimits()
+    result.home_groups = {
+        student_id: context.home_group for student_id, context in contexts.items() if context.home_group is not None
+    }
     for enrollment in enrollments:
         percent = limits.get(enrollment.student_id, DEFAULT_LIMIT_PERCENT)
         result[enrollment.student_id] = RowLimit(percent, Decimal(total_hours) * Decimal(percent) / Decimal(100))

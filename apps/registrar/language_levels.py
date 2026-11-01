@@ -22,7 +22,8 @@ def level_of(name) -> str:
     match = LEVEL_RE.search(str(name or ""))
     if not match:
         return ""
-    return re.sub(r"[\s-]+", "-", match.group(1).lower()).replace("intermadiate", "intermediate")
+    value = re.sub(r"[\s-]+", "-", match.group(1).lower()).replace("intermadiate", "intermediate")
+    return {"preintermediate": "pre-intermediate", "upperintermediate": "upper-intermediate"}.get(value, value)
 
 
 def is_level_subject(name) -> bool:

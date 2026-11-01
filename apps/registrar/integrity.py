@@ -155,6 +155,8 @@ def validate_instructor_assignment(*, organization, instructor, field_name="inst
 
 def validate_student_record_target(*, organization, student, program, curriculum, group=None) -> None:
     """Validate the core parent and member links of a student academic record."""
+    if group is not None and (group.settings or {}).get("language_level_cohort") is True:
+        raise ValidationError({"group": "Səviyyə qrupu akademik əsas qrup kimi seçilə bilməz."})
     validate_same_organization(
         organization=organization,
         program=program,

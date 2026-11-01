@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% load static journal_names i18n %}
+{% block title %}{% trans "Xarici dil səviyyə qrupları" context "registrar.language_cohort" %}{% endblock %}
+{% block extraCss %}<link rel="stylesheet" href="{% static 'registrar/css/language_cohorts.css' %}">{% endblock %}
+{% block content %}
+<main class="lc-page">
+  <a href="{% url 'registrar:journal_list' %}">{% trans "← Elektron jurnal" context "registrar.language_cohort" %}</a>
+  <h1>{% trans "Xarici dil səviyyə qrupları" context "registrar.language_cohort" %}</h1>
+  <p>{% trans "Səviyyə qrupu müxtəlif əsas qruplardan tələbələri bir jurnalda birləşdirir. Tələbələrin akademik qrupları dəyişmir." context "registrar.language_cohort" %}</p>
+  {% include "accounts/profile/_messages.html" %}
+  {% if form %}<details class="lc-card"><summary>{% trans "Yeni səviyyə qrupu yarat" context "registrar.language_cohort" %}</summary>
+    <p>{% trans "Kafedra əhatəniz daxilində qrup yaradın və müəllim təyin edin. Mövcud səviyyə jurnallarını aşağıdan açın; onlar təkrar yaradılmır." context "registrar.language_cohort" %}</p>
+    <form method="post" class="lc-create">{% csrf_token %}{{ form.as_p }}<button type="submit">{% trans "Qrupu yarat" context "registrar.language_cohort" %}</button></form>
+  </details>{% else %}<p>{% trans "Yeni qrup və müəllim təyinatını səlahiyyətli koordinator və ya RİM edir. Öz qrupunuzun tələbələrini aşağıdan idarə edə bilərsiniz." context "registrar.language_cohort" %}</p>{% endif %}
+  <h2>{% trans "İdarə olunan səviyyə qrupları" context "registrar.language_cohort" %}</h2>
+  <ul class="lc-list">{% for cohort in cohorts %}<li class="lc-card">
+    <a href="{% url 'registrar:language_cohort_detail' cohort.pk %}"><strong>{{ cohort.name }} · {{ cohort.level|title }}</strong></a>
+    <p>{{ cohort.department.name }} · {{ cohort.period.name }} · {{ cohort.offering.instructor|journal_name }}</p>
+    <a href="{% url 'registrar:journal_detail' cohort.offering_id %}">{% trans "Jurnalı aç" context "registrar.language_cohort" %}</a>
+  </li>{% empty %}<li>{% trans "Hələ idarə olunan səviyyə qrupu yoxdur." context "registrar.language_cohort" %}</li>{% endfor %}</ul>
+  <h2>{% trans "Mövcud səviyyə jurnalları" context "registrar.language_cohort" %}</h2>
+  <p>{% trans "Əvvəldən mövcud jurnallar və qeydlər saxlanılır. Bu siyahı onları yeni qrupa çevirmir." context "registrar.language_cohort" %}</p>
+  <ul class="lc-list">{% for offering in existing %}<li class="lc-card"><a href="{% url 'registrar:journal_detail' offering.pk %}">{{ offering.subject.name }} · {{ offering.group.name|default:"—" }}</a> · {{ offering.period.name }}</li>{% empty %}<li>{% trans "Girişiniz olan başqa səviyyə jurnalı yoxdur." context "registrar.language_cohort" %}</li>{% endfor %}</ul>
+</main>
+{% endblock %}

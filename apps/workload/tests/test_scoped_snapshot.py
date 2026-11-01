@@ -72,6 +72,19 @@ class ScopedSnapshotTests(TransactionTestCase):
         self.assertEqual(teacher["patronymic"], "Father")
         self.assertEqual(self.task.rows.count(), 1)
 
+    def test_level_cohort_marker_is_exported_only_as_boolean(self):
+        group = self.stack["group"]
+        group.settings = {"language_level_cohort": True, "unreviewed": "PRIVATE_COHORT_SENTINEL"}
+        group.save(update_fields=["settings"])
+        snapshot = capture(self.actor.username)
+        exported = next(row for row in snapshot["data"]["groups"] if row["id"] == group.pk)
+        self.assertIs(exported["settings"]["language_level_cohort"], True)
+        self.assertNotIn("PRIVATE_COHORT_SENTINEL", json.dumps(snapshot, default=str))
+        group.settings = {"language_level_cohort": "PRIVATE_COHORT_SENTINEL"}
+        group.save(update_fields=["settings"])
+        snapshot = capture(self.actor.username)
+        self.assertNotIn("PRIVATE_COHORT_SENTINEL", json.dumps(snapshot, default=str))
+
     @staticmethod
     def _deny_sensitive_auth_selection(execute, sql, params, many, context):
         if 'FROM "auth_user"' in sql:

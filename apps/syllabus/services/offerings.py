@@ -96,9 +96,14 @@ def syllabus_for_offering(
     # daxilində əvvəlki kimi `Meta.ordering` (`subject__code`) + `pk`.
     from ..models import SyllabusShare
 
+    cohort_rules = None
     tiers = []
     if offering_id is not None:
         tiers.append(Q(offering_id=offering_id))
+        from .language_cohort_source import rules
+
+        cohort_rules = rules(organization=organization, offering_id=offering_id)
+        tiers.append(cohort_rules[2])
         if _with_share:
             shared = SyllabusShare.objects.filter(offering_id=offering_id).order_by().values("syllabus_id")
             tiers.append(Q(pk__in=Subquery(shared)))
@@ -122,15 +127,24 @@ def syllabus_for_offering(
     # PERF-1 F-14 (2026-10-17): pillə seçimi JOIN-suz alt-sorğuda (yalnız sıralama üçün `subject`), 9 cədvəllik
     # `select_related` isə xarici sorğuda PK bərabərliyi ilə — Case/OR pillələri JOIN-larla birgə planlaşdırılmır.
     # Planlaşdırma ~6 → ~3 ms (icra 0,3 ms); round-trip yenə BİRDİR (jurnal / sərbəst iş sorğu büdcələri dəyişmir).
+    candidates = Syllabus.objects.filter(organization=organization, is_active=True)
+    if cohort_rules is not None:
+        candidates = candidates.alias(_language_cohort=cohort_rules[0]).filter(
+            Q(_language_cohort=False) | cohort_rules[1]
+        )
     tier_pick = (
-        Syllabus.objects.filter(organization=organization, is_active=True)
-        .filter(combined)
-        .annotate(_tier=rank)
-        .order_by("_tier", "subject__code", "pk")
-        .values("pk")[:1]
+        candidates.filter(combined).annotate(_tier=rank).order_by("_tier", "subject__code", "pk").values("pk")[:1]
     )
     related = ("offering", "approved_version") if _metadata_only else _RELATED
-    found = Syllabus.objects.select_related(*related).filter(pk=Subquery(tier_pick)).first()
+    chosen = Syllabus.objects.select_related(*related).filter(pk=Subquery(tier_pick))
+    if cohort_rules is not None:
+        chosen = chosen.annotate(**cohort_rules[3])
+    found = chosen.first()
+    if found is not None and cohort_rules is not None:
+        from .language_cohort_source import valid_result
+
+        if not valid_result(found, offering_id):
+            return None
     if found is not None and _with_share and not _share_applies(found, offering_id, instructor_id):
         return syllabus_for_offering(
             organization=organization,

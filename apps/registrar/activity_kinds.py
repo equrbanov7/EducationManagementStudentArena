@@ -266,6 +266,18 @@ def bits_expression(prefix: str = ""):
 
     offering_id = OuterRef(ref("id"))
     planned = Coalesce(NullIf(_curriculum_bits(ref), Value(0)), _workload_bits(ref), Value(0), output_field=_INT)
+    from .models import LanguageLevelCohort
+
+    cohorts = LanguageLevelCohort.objects.filter(
+        offering_id=offering_id,
+        organization_id=OuterRef(ref("organization_id")),
+        group_id=OuterRef(ref("group_id")),
+        period_id=OuterRef(ref("period_id")),
+    )
+    cohort_bits = _flag(Exists(cohorts.filter(seminar_hours__gt=0)), SEMINAR_BIT) + _flag(
+        Exists(cohorts.filter(lab_hours__gt=0)), LAB_BIT
+    )
+    planned = Case(When(Exists(cohorts), then=cohort_bits), default=planned, output_field=_INT)
     slots = _flag(Exists(ScheduleSlot.objects.filter(offering_id=offering_id, kind=SEMINAR)), SEMINAR_BIT) + _flag(
         Exists(ScheduleSlot.objects.filter(offering_id=offering_id, kind=LAB)), LAB_BIT
     )

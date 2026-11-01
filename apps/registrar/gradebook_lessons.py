@@ -204,6 +204,9 @@ def create_lesson(
         kind=kind,
     ):
         raise LessonRuleError("Eyni gündə eyni dərs saatına artıq dərs var — üst-üstə düşür.")
+    from .language_cohort_journal import validate_lesson
+
+    validate_lesson(offering=offering, kind=kind, hours=new_hours)
     ensure_assessment_scheme(offering=offering)
     topic = clean_topic(topic)
     lesson = Lesson.objects.create(
@@ -330,6 +333,9 @@ def update_lesson(
         ):
             raise LessonRuleError("Eyni gündə eyni dərs saatına artıq dərs var — üst-üstə düşür.")
     if fields:
+        from .language_cohort_journal import validate_lesson
+
+        validate_lesson(offering=offering, kind=lesson.kind, hours=lesson.hours, exclude_id=lesson.pk)
         lesson.save(update_fields=fields)
         if "hours" in fields and before["hours"] != lesson.hours:
             # Saat dəyişibsə qayıb saatı (25 % buraxılış həddi) bu dərsin işarələri üzrə yenidən hesablanır.

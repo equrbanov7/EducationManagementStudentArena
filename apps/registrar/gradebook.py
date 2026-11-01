@@ -209,12 +209,6 @@ def get_offering_journal(
     # üzvüdürsə provenans qalsa da çip yalan danışmamalıdır (bax guest_roster).
     from apps.registrar import guest_merge, guest_roster
 
-    from .journal_home_groups import home_group_map
-
-    home_groups = home_group_map(
-        organization_id=offering.organization_id, student_ids=[e.student_id for e in enrollments]
-    )
-
     guest_ids = [e.id for e in enrollments if e.source_group_id]
     current_groups = guest_roster.current_group_map(
         organization_id=offering.organization_id,
@@ -254,6 +248,7 @@ def get_offering_journal(
     row_limits = absence_limit.row_limits(
         organization_id=offering.organization_id, enrollments=enrollments, total_hours=total_hours
     )
+    home_groups = row_limits.home_groups
     entry_batch.provide_attendance(hours_map={offering.id: total_hours}, limits=row_limits, exempt_ids=exempt_ids)
 
     # Bölünmüş jurnal: yalnız əhatədəki sətirlər GÖSTƏRİLİR (giriş balı/buraxılış yuxarıda bütün sətirlər üçün).
