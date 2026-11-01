@@ -253,10 +253,9 @@ def apply_correction(
 
 
 def _lesson_time_str(lesson) -> str:
-    """Dərsin saat aralığını "HH:MM–HH:MM" mətni kimi (snapshot üçün)."""
-    if lesson.start_time and lesson.end_time:
-        return f"{lesson.start_time.strftime('%H:%M')}–{lesson.end_time.strftime('%H:%M')}"
-    return ""
+    from .lesson_correction_times import snapshot
+
+    return snapshot(lesson)
 
 
 @transaction.atomic

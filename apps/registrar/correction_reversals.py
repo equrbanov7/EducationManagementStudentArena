@@ -225,9 +225,9 @@ def revert_last_grade_correction(
 
 
 def _lesson_time(lesson):
-    if lesson.start_time and lesson.end_time:
-        return f"{lesson.start_time.strftime('%H:%M')}–{lesson.end_time.strftime('%H:%M')}"
-    return ""
+    from .lesson_correction_times import snapshot
+
+    return snapshot(lesson)
 
 
 @transaction.atomic
@@ -264,19 +264,20 @@ def revert_last_lesson_correction(*, lesson, by_user, request=None, correction_i
         correction.new_topic,
         correction.new_instructor_id,
     )
-    if current != expected:
+    from .lesson_correction_times import matches, restore
+
+    if current[:3] + current[4:] != expected[:3] + expected[4:] or not matches(lesson, correction):
         raise _stale_error()
+    try:
+        start, end = restore(correction)
+    except ValueError as exc:
+        raise _stale_error() from exc
     actor = _real_actor(by_user, request)
     reversal = _create_reversal(
         correction=correction,
         target_field="lesson_correction",
         actor=actor,
     )
-    start = end = None
-    if correction.old_time and "–" in correction.old_time:
-        from apps.registrar import schedule as schedule_service
-
-        start, end = schedule_service.parse_time_slot(correction.old_time.replace("–", "|"))
     try:
         ok = update_lesson(
             lesson=lesson,
@@ -284,8 +285,8 @@ def revert_last_lesson_correction(*, lesson, by_user, request=None, correction_i
             kind=correction.old_kind or None,
             topic=correction.old_topic,
             hours=correction.old_hours,
-            start_time=start or "",
-            end_time=end or "",
+            start_time=start,
+            end_time=end,
             instructor=correction.old_instructor,
             allow_past=True,
             allow_locked=True,
