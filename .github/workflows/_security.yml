@@ -94,8 +94,10 @@ jobs:
             ignores=(--ignore-vuln GHSA-vpp8-g58w-m8mp --ignore-vuln CVE-2026-106454 --ignore-vuln CVE-2026-115774 --ignore-vuln CVE-2026-115775
                      --ignore-vuln CVE-2026-115776 --ignore-vuln CVE-2026-115778 --ignore-vuln CVE-2026-115877
                      --ignore-vuln CVE-2026-83813)
-            pip-audit -r "$lock" --require-hashes --disable-pip --desc on "${ignores[@]}" || {
-              echo "::error::❌ pip-audit found vulnerable dependencies in ${lock}! Fix them before merging."
+            # PyPI TLS handshakes can exceed pip-audit's 15s default on runners.
+            # A timeout still blocks the job, just like an advisory finding.
+            pip-audit -r "$lock" --require-hashes --disable-pip --timeout 60 --desc on "${ignores[@]}" || {
+              echo "::error::❌ pip-audit failed for ${lock}; review the advisory or network error above."
               exit 1
             }
           done
