@@ -60,3 +60,36 @@ def test_multiline_shell_and_unused_source_arguments_fail_closed():
         {"ROSTER_TAG": "unreviewed"},
     ):
         assert run_args(**changes).returncode != 0
+
+
+def test_it8179_source_dispatch_requires_source_and_fresh_baseline():
+    def run(**changes):
+        env = {
+            **os.environ,
+            "BATCH": "a" * 64,
+            "ROW_SUBJECT": "",
+            "ROW_GROUP": "",
+            "APPLY": "false",
+            "ORG": "qku",
+            "GITHUB_RUN_ID": "42",
+            **changes,
+        }
+        return subprocess.run(
+            [
+                "bash",
+                "-c",
+                "set -euo pipefail\nsuperadmin_actor() { printf admin; }\nmatch() { [[ $1 != *$'\\n'* && $1 != *$'\\r'* ]] && printf '%s' \"$1\" | grep -Eq -- \"$2\"; }\nsource scripts/ops/it8179_args.sh\nprintf '%s\\n' \"${args[@]}\"",
+            ],
+            cwd=ROOT,
+            env=env,
+            capture_output=True,
+            text=True,
+        )
+
+    dry = run()
+    assert dry.returncode == 0, dry.stderr
+    assert "/tmp/it8179_source_42.docx" in dry.stdout
+    assert run(APPLY="true").returncode != 0
+    assert run(APPLY="true", ROW_SUBJECT="b" * 64).returncode == 0
+    assert run(BATCH="a" * 64 + "\n").returncode != 0
+    assert run(ROW_GROUP="unreviewed").returncode != 0
