@@ -9,6 +9,7 @@ from django.db.models import Count, Q, Sum
 
 from core.permissions import has_permission
 
+from .food_teacher_identity import collect_food_teacher_identity
 from .roster_tokens import tokenize
 from .worker_identity import collect_worker1068
 
@@ -190,6 +191,7 @@ def collect(*, student_secret):
         "syllabus_versions": syllabus_versions,
         **student_sets(period_ids, student_secret),
         **collect_worker1068(),
+        **collect_food_teacher_identity(),
     }
 
 
