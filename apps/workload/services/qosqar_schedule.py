@@ -201,6 +201,10 @@ def plan(source_id, target_id):
         exact = [s for s in targets if not s.is_deleted and not s.is_parked and _signature(s) == _signature(slot)]
         if len(exact) > 1:
             raise state.DuplicateError("ambiguous_target_schedule_signature")
+        if not exact and any(not s.is_deleted and not s.is_parked and s.kind == slot.kind for s in targets):
+            # A different timetable for an existing kind requires review even
+            # when its dates/times do not overlap the duplicate's timetable.
+            raise state.DuplicateError("reviewed_schedule_competing_kind_timetables")
         for other in targets:
             if other.is_deleted or other.is_parked or other in exact:
                 continue

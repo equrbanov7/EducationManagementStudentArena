@@ -47,7 +47,9 @@ class ScheduleCases:
         second = self.slot(weekday=4, kind="seminar")
         parked = self.slot(weekday=5, is_parked=True, park_reason="Existing operator decision")
         deleted = self.slot(weekday=6, is_deleted=True)
-        retained = self.slot(self.target, weekday=3, start_time="13:35", end_time="15:05", kind="seminar")
+        retained = self.slot(
+            self.target, weekday=3, start_time="13:35", end_time="15:05", kind="seminar", is_parked=True
+        )
         before = self.capture()
         dry = self.call()
         self.assertEqual(dry["schedule_slots_to_park"], 2)
@@ -114,6 +116,41 @@ class ScheduleCases:
             qosqar_schedule.state.digest(before["schedule"]), qosqar_schedule.state.digest(self.capture()["schedule"])
         )
 
+    def test_nonoverlapping_existing_same_kind_timetable_refuses_atomically(self):
+        self.prepare()
+        source = self.slot()
+        target = self.slot(self.target, weekday=3, start_time="13:35", end_time="15:05")
+        before = self.capture()
+        baseline = qosqar_schedule.state.digest(before)
+        for apply in (False, True):
+            with self.assertRaisesMessage(
+                qosqar_schedule.state.DuplicateError, "reviewed_schedule_competing_kind_timetables"
+            ):
+                self.call(apply=apply, expected_baseline=baseline)
+            self.assertEqual(qosqar_schedule.state.digest(before), qosqar_schedule.state.digest(self.capture()))
+        source.refresh_from_db()
+        target.refresh_from_db()
+        self.assertFalse(source.is_parked)
+        self.assertFalse(target.is_parked)
+
+    def test_missing_kind_is_copied_and_other_active_kind_preserved(self):
+        self.prepare()
+        source = self.slot(kind="seminar")
+        target = self.slot(self.target, weekday=3, start_time="13:35", end_time="15:05", kind="lecture")
+        before = self.capture()
+        dry = self.call()
+        self.assertEqual((dry["schedule_slots_to_park"], dry["schedule_slots_to_create"]), (1, 1))
+        self.call(apply=True, expected_baseline=dry["baseline"])
+        source.refresh_from_db()
+        self.assertTrue(source.is_parked)
+        replacement = ScheduleSlot.objects.get(offering=self.target, kind="seminar")
+        self.assertEqual(qosqar_schedule._signature(source), qosqar_schedule._signature(replacement))
+        after = self.capture()
+        old = next(row for row in before["schedule"] if str(row["id"]) == str(target.pk))
+        current = next(row for row in after["schedule"] if str(row["id"]) == str(target.pk))
+        self.assertEqual(qosqar_schedule.state.digest(old), qosqar_schedule.state.digest(current))
+        self.assertEqual(self.call()["already_present"], 1)
+
     def test_source_lesson_prevents_any_schedule_change(self):
         self.prepare()
         slot = self.slot()
@@ -139,10 +176,10 @@ class ScheduleCases:
     def test_target_conflict_and_duplicate_signature_refuse_without_parking(self):
         self.prepare()
         source = self.slot()
-        conflict = self.slot(self.target, end_time="10:15")
+        conflict = self.slot(self.target, end_time="10:15", kind="seminar")
         with self.assertRaisesMessage(qosqar_schedule.state.DuplicateError, "conflicting_target_schedule_slot"):
             self.call()
-        ScheduleSlot.objects.filter(pk=conflict.pk).update(end_time="10:00")
+        ScheduleSlot.objects.filter(pk=conflict.pk).update(end_time="10:00", kind="lecture")
         self.slot(self.target)
         with self.assertRaisesMessage(qosqar_schedule.state.DuplicateError, "ambiguous_target_schedule_signature"):
             self.call()
@@ -152,7 +189,7 @@ class ScheduleCases:
     def test_full_source_and_target_schedule_baseline_drift_refuses_apply(self):
         self.prepare()
         source = self.slot()
-        target = self.slot(self.target, weekday=3)
+        target = self.slot(self.target, weekday=3, kind="seminar")
         dry = self.call()
         ScheduleSlot.objects.filter(pk=target.pk).update(park_reason="Changed after dry-run")
         with self.assertRaisesMessage(qosqar_schedule.state.DuplicateError, "fresh_live_baseline_changed"):
