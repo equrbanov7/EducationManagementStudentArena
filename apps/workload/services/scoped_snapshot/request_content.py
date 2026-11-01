@@ -95,6 +95,13 @@ OFFERINGS += (
 )
 
 
+# Existing source-proven history: no duplicate import into empty sibling journals.
+OFFERINGS += (
+    "31a04416-e4a8-4fb2-8298-36793660f63d",
+    "c8bddaad-99b2-476e-80e0-5d87562ec676",
+)
+
+
 def collect_request_content():
     """Called only inside the parent repeatable-read read-only RLS transaction.
 

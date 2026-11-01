@@ -17,6 +17,15 @@ from .reviewed_content_contract import ContentError
 from .reviewed_content_spec import ORG
 
 
+def reviewed_family_groups(target_id, groups):
+    """Read the official336 row's pinned partner before proposing a second copy.
+
+    Legacy936 can resolve elsewhere. The identity bridge has already checked
+    both official row groups. This expands reads, never enrollments or writes.
+    """
+    return set(groups) | ({fixed.OTHER_GROUP} if target_id == fixed.TARGET else set())
+
+
 def canonical_part(value):
     value = unicodedata.normalize("NFC", html.unescape(value)).replace("İ", "i").replace("I", "ı")
     return " ".join(unicodedata.normalize("NFC", value.casefold()).replace("i\u0307", "i").split())

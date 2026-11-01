@@ -83,6 +83,7 @@ class CurrentState:
 
         reviewed_student_bridge(data, self.student_maps, lock=lock)
         from .reviewed_content_336_bridge import bridge as reviewed_336_bridge
+        from .reviewed_content_336_bridge import reviewed_family_groups
 
         self.reviewed_identity_evidence = reviewed_336_bridge(data, self.student_maps, lock=lock)
         teacher_ids = {s["teacher_id"] for s in self.selected.values()}
@@ -148,7 +149,9 @@ class CurrentState:
             }:
                 raise ContentError("source_worker_ledger_conflict")
             journal = journals[spec["journal_uniqid"]]
-            family_groups = set().union(*(self.group_maps[str(g)] for g in journal["groups_id"]))
+            family_groups = reviewed_family_groups(
+                pk, set().union(*(self.group_maps[str(g)] for g in journal["groups_id"]))
+            )
             family = model("registrar.CourseOffering").objects.filter(
                 organization_id=ORG,
                 subject_id=spec["subject_id"],

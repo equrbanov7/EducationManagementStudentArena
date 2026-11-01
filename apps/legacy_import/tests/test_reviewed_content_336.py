@@ -244,6 +244,49 @@ class Reviewed336Tests(TestCase):
         self.assertEqual(audit.new_values["reviewed_identity_evidence"]["identity_proof_sha256"], fixed.PROOF_SHA)
         self.assertEqual(audit.new_values["reviewed_identity_evidence"]["current_assignment"]["lecture_hours"], 0)
 
+    def test_official_joint_partner_cells_prevent_second_copy(self):
+        from apps.legacy_import.services.reviewed_content_plan import build
+        from apps.legacy_import.services.reviewed_content_state import CurrentState
+
+        canonical = CourseOffering.objects.create(
+            organization=self.org,
+            subject=self.target.subject,
+            period=self.target.period,
+            group_id=fixed.OTHER_GROUP,
+            instructor=self.target.instructor,
+            lesson_hours=30,
+        )
+        data = validate_payload(self.raw, target_ids=[fixed.TARGET])
+        decision = build(CurrentState(data, actor=self.admin))
+        self.assertEqual(len(decision.marks), 102)
+        enrollments = {
+            uid: Enrollment.objects.create(organization=self.org, offering=canonical, student_id=uid)
+            for uid, _ in self.pairs.values()
+        }
+        for lesson in decision.lessons.values():
+            lesson.offering = canonical
+            lesson.save(force_insert=True)
+        for mark in decision.marks:
+            mark.enrollment = enrollments[mark.enrollment.student_id]
+        LessonMark.objects.bulk_create(decision.marks)
+        existing_ids = set(LessonMark.objects.filter(lesson__offering=canonical).values_list("pk", flat=True))
+        dry = self.execute()
+        self.assertEqual(dry["existing_identical_cells"], 102)
+        self.assertEqual((dry["missing_marks"], dry["missing_lessons"]), (0, 0))
+        result = self.execute(apply=True, expected_baseline=dry["baseline"])
+        self.assertEqual(result["already_done"], 1)
+        self.assertFalse(Lesson.objects.filter(offering=self.target).exists())
+        self.assertEqual(
+            set(LessonMark.objects.filter(lesson__offering=canonical).values_list("pk", flat=True)), existing_ids
+        )
+        mark = LessonMark.objects.filter(lesson__offering=canonical, status="present").first()
+        mark.score = 3 if mark.score != 3 else 4
+        mark.save(update_fields=["score"])
+        changed = self.execute()
+        self.assertEqual(changed["existing_conflicting_cells_kept"], 1)
+        self.assertEqual(changed["missing_marks"], 0)
+        self.assertNotEqual(changed["baseline"], dry["baseline"])
+
     def test_az_case_and_suffix_are_bounded(self):
         self.assertEqual(
             bridge.identity_hash("AİŞƏ", "YUSİFOVA", "İLKİN QIZI"), bridge.identity_hash("Aişə", "Yusifova", "İlkin")
