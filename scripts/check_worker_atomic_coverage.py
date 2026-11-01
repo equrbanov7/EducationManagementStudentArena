@@ -60,6 +60,9 @@ INTENTIONAL_EXEMPTIONS = {
     # Fixed-four text-free history reader owns a fresh RR READ ONLY transaction;
     # no enclosing worker transaction is possible. Actual command and both-RLS tests.
     "apps/workload/management/commands/export_wcu_four_cell_history.py",
+    # Fixed English metadata reader requires a fresh RR READ ONLY transaction;
+    # tenant/actor SET LOCAL, DB write rejection and both RLS modes are tested.
+    "apps/workload/management/commands/export_wcu_english_level_evidence.py",
     # ExamSupervisionConsumer yalnız channel-layer group send/discard edir;
     # `scope["user"]` və feature-flag settings oxuyur; DB sorğusu yoxdur.
     "apps/exams/consumers.py",

@@ -1,0 +1,26 @@
+"""Fixed metadata-only evidence scope; never changes the25-course raw-cell cap."""
+
+ORG = "526cfa63-4f80-4bba-a7a7-61c8fbb3d918"
+YEAR = "2026/2027"
+PERIOD = "a4f88744-8d49-4772-84ef-c28a96c3b372"
+FORMAT = "wcu-english-level-evidence/1"
+SOURCE_FORMAT = "wcu-english-level-source/1"
+SOURCE_COUNT = 1235
+MAX_COURSES = 150
+MAX_ENROLLMENTS = 5000
+MAX_PLACEMENTS = 10000
+MAX_PROFILES = 50000
+MAX_TEACHERS = 1000
+MAX_SHARE_LINKS = 5000
+MAX_ROWS = 30000
+MAX_BYTES = 16 * 1024 * 1024
+SOURCE_SHA = "1d06b6165e80bdb229967900fa44143c45477d8ec234737b1a8486cbf6dd276c"
+SOURCE_IDS_SHA = "167cc7da18c7cea0a93bab1f4dbf0551f389599af6f946f936f7482267ad0c79"
+SUBJECTS = (
+    "1c409524-1215-4567-b2ab-f47c99724e9e",
+    "4b19ee24-88d5-4f56-a6a9-f1515b3543b7",
+    "779335f1-5f6f-459d-bd1b-fd778381dbe6",
+    "82caa125-5875-4757-bf68-ca87dc18a2ed",
+    "9001c218-1cac-4988-8d33-bf342bd3925c",
+    "936802bc-c52c-4594-977f-a10e3be59dcb",
+)
