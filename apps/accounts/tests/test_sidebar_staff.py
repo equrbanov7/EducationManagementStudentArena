@@ -26,6 +26,7 @@ from django.template.loader import get_template
 from django.test import Client, RequestFactory, SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 
+from apps.accounts.templatetags.nav_icons import SPRITE_VERSION
 from apps.accounts.templatetags.profile_shell import (
     SIDEBAR_FILTER_MIN_ITEMS,
     SIDEBAR_LAYOUT_NEUTRAL_SECTIONS,
@@ -268,7 +269,7 @@ class StaffSidebarRenderTest(TestCase):
         self.assertIn('data-sidebar-layout="student"', aside)
         tasks = aside[aside.index('data-sidebar-section="tasks"') : aside.index('data-sidebar-section="communication"')]
         self.assertIn('href="/accounts/profile/?section=evaluation-survey"', tasks)
-        self.assertIn('ems-nav.svg?v=20261018-calculator#clipboard-pen-line"', tasks)
+        self.assertIn(f'ems-nav.svg?v={SPRITE_VERSION}#clipboard-pen-line"', tasks)
         self.assertRegex(tasks, r'<span class="sidebar-menu-badge[^"]*" data-badge-key="evaluation_survey"></span>')
         self.assertNotIn("evaluation-survey", self._render(STUDENT_SECTIONS, caps))
 

@@ -8,7 +8,7 @@ from . import guest_roster, language_cohorts
 from .journal_access import can_edit_journal, can_observe_journal
 from .journal_list_scope import journal_list_base
 from .journal_shares import own_or_shared_q
-from .language_levels import level_family, level_of
+from .language_levels import LEVEL_RE, level_family, level_of
 from .models import AcademicStatus, CourseOffering, Enrollment, StudentAcademicRecord
 
 
@@ -17,9 +17,14 @@ def existing_level_journals(user, organization):
     queryset = CourseOffering.objects.filter(organization=organization, is_active=True).filter(
         Q(pk__in=queryset.values("pk")) | own_or_shared_q(user)
     )
+    # Səviyyə fənləri DB-də süzülür (2026-11-01): korrektor/koordinator üçün əhatə
+    # BÜTÜN jurnallardır (1700+) — hamısını çəkib Python-da yoxlamaq səhifəni ləngidirdi.
+    # `level_of` dəqiq qaydası (yazı variantları) yenə Python-da təsdiqlənir.
     return [
         row
-        for row in queryset.filter(organization=organization, language_cohort__isnull=True)
+        for row in queryset.filter(
+            organization=organization, language_cohort__isnull=True, subject__name__iregex=LEVEL_RE.pattern
+        )
         .select_related("subject", "group", "period", "instructor", "organization")
         .order_by("subject__name", "group__name")
         if level_of(row.subject.name) and (can_edit_journal(user, row) or can_observe_journal(user, row))

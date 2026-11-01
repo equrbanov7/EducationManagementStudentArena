@@ -167,6 +167,30 @@ def unit_in_scope(user, organization, unit_id) -> bool:
     return org_unit_model.objects.filter(organization=organization, pk=unit_id).filter(scope.unit_subtree_q()).exists()
 
 
+def units_in_scope(user, organization, unit_ids):
+    """``unit_in_scope`` ilə EYNİ qayda, amma bir çağırışda çoxlu vahid: əhatədəki id dəsti.
+
+    N cohort/jurnal üçün N ayrı `exists()` əvəzinə bir sorğu (2026-11-01 — səviyyə
+    qrupları səhifəsinin gecikməsi). Superuser/org-wide → verilən id-lərin hamısı;
+    struktur əhatəsi yoxdursa → boş dəst. ``None`` id heç vaxt əhatədə sayılmır.
+    """
+    wanted = {unit_id for unit_id in unit_ids if unit_id is not None}
+    if not wanted:
+        return set()
+    if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
+        return wanted
+    scope = _scope(user, organization)
+    if not scope.has_structure_access:
+        return set()
+    if scope.is_org_wide:
+        return wanted
+    from django.apps import apps as django_apps
+
+    org_unit_model = django_apps.get_model("organizations", "OrgUnit")
+    rows = org_unit_model.objects.filter(organization=organization, pk__in=wanted).filter(scope.unit_subtree_q())
+    return set(rows.values_list("pk", flat=True))
+
+
 def scoped_group_queryset(user, organization):
     """Aktorun seçə biləcəyi AKADEMİK QRUPLAR (fail-closed, alt-ağac üzrə)."""
     from django.apps import apps as django_apps

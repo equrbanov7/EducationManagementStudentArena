@@ -113236,3 +113236,38 @@ msgstr "Lehrperson"
 msgctxt "accounts.syllabus"
 msgid "Yeni qaralama saxlanılır"
 msgstr "Neuer Entwurf bleibt erhalten"
+
+#: apps/accounts/templates/accounts/profile/sidebar/items/_language_cohorts.html
+msgctxt "profile.sidebar"
+msgid "Xarici dil səviyyə qrupları"
+msgstr "Fremdsprachengruppen nach Niveau"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "Kabinet"
+msgstr "Mein Bereich"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "İdarə et"
+msgstr "Verwalten"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "Müəllim"
+msgstr "Lehrkraft"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "Kafedra"
+msgstr "Lehrstuhl"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "Semestr"
+msgstr "Semester"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "Fənn"
+msgstr "Fach"

@@ -1,4 +1,4 @@
-{% load i18n nav_icons %}
+{% load i18n nav_icons language_cohort_links %}
 {% comment %}«Elektron jurnal» — İKİ variant, bir bənd:
 • tələbə: jurnal xülasəsi profil shell-inin sağ panelində açılır (sidebar qalır);
 • müəllim/admin: jurnal iş sahəsi ayrıca URL-də YENİ TABDA açılır (sidebar yoxdur).
@@ -24,4 +24,7 @@
     </a>
     {% endif %}
 </li>
+{% comment %}Səviyyə qrupları: roster əhatəsi olmayan müəllimdə həmişə burada; roster əhatəli heyətdə
+yalnız kompakt düzümdə (tam akkordeonda bənd «Tədris şöbəsi → Qruplar»-ın yanındadır — dublikat olmasın).{% endcomment %}
+{% language_cohort_nav as lc_nav %}{% if lc_nav.teacher or lc_nav.staff and sidebar_layout != "full" %}{% include "accounts/profile/sidebar/items/_language_cohorts.html" %}{% endif %}
 {% endif %}
