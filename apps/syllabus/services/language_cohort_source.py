@@ -9,16 +9,24 @@ def rules(*, organization, offering_id):
         organization=organization,
         offering_id=offering_id,
     )
-    subject = Subquery(cohort.values("offering__subject_id")[:1])
+    # Scalar FK columns keep the ranked syllabus subquery JOIN-free except
+    # its existing subject-code ordering, including ordinary non-cohort lookups.
+    offering_model = apps.get_model("registrar", "CourseOffering")
+    target = offering_model.objects.filter(organization=organization, pk=offering_id)
+    subject = Subquery(target.values("subject_id")[:1])
     period = Subquery(cohort.values("period_id")[:1])
-    teacher = Subquery(cohort.values("offering__instructor_id")[:1])
+    teacher = Subquery(target.values("instructor_id")[:1])
+    exact_sources = (
+        offering_model.objects.filter(
+            organization=organization, subject_id=subject, period_id=period, instructor_id=teacher
+        )
+        .order_by()
+        .values("pk")
+    )
     source = Q(
         offering_id=Subquery(cohort.values("source_offering_id")[:1]),
         approved_version__isnull=False,
-        offering__organization=organization,
-        offering__subject_id=subject,
-        offering__period_id=period,
-        offering__instructor_id=teacher,
+        offering_id__in=Subquery(exact_sources),
     )
     exact = Q(subject_id=subject, period_id=period, author_id=teacher) & (Q(offering_id=offering_id) | source)
     metadata = {f"_lc_{kind}": Subquery(cohort.values(f"{kind}_hours")[:1]) for kind in ("lecture", "seminar", "lab")}
