@@ -111741,3 +111741,49 @@ msgstr "Для сотрудника необходимо выбрать долж
 #: apps/registrar/templates/registrar/partials/_journal_teacher_record.html:3
 msgid "Birgə dərs: bütün qrupların tələbələri"
 msgstr "Совместное занятие: студенты всех групп"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:8
+msgid ""
+"Bu səhifə yalnız əvvəlki qeydləri göstərir. Cari dərslər ayrıca jurnalda "
+"aparılır."
+msgstr ""
+"На этой странице показаны только предыдущие записи. Текущие занятия ведутся "
+"в отдельном журнале."
+
+#: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:7
+msgid "Bu tələbələrin əvvəlki qeydləri"
+msgstr "Предыдущие записи этих студентов"
+
+#: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:8
+msgid "Cari dərslər bu jurnalda ayrıca aparılır."
+msgstr "Текущие занятия ведутся в этом журнале отдельно."
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:9
+msgid "Cari jurnala qayıt"
+msgstr "Вернуться к текущему журналу"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:15
+msgid "Məlum deyil"
+msgstr "Неизвестно"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:12
+msgid "Qeyd müəllifi"
+msgstr "Автор записи"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:12
+msgid "Saat"
+msgstr "Время"
+
+#: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:7
+msgid "jurnalında saxlanır."
+msgstr "хранятся в этом журнале."
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:12
+msgid "İştirak"
+msgstr "Посещаемость"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:3
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:6
+#: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:6
+msgid "Əvvəlki jurnal qeydləri"
+msgstr "Предыдущие записи журнала"

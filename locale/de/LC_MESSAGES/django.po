@@ -112580,3 +112580,50 @@ msgstr "Für den Mitarbeiter muss eine Position oder Rolle ausgewählt werden."
 #: apps/registrar/templates/registrar/partials/_journal_teacher_record.html:3
 msgid "Birgə dərs: bütün qrupların tələbələri"
 msgstr "Gemeinsame Lehrveranstaltung: Studierende aller Gruppen"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:8
+msgid ""
+"Bu səhifə yalnız əvvəlki qeydləri göstərir. Cari dərslər ayrıca jurnalda "
+"aparılır."
+msgstr ""
+"Diese Seite zeigt nur frühere Einträge. Aktuelle Lehrveranstaltungen werden "
+"in einem separaten Journal geführt."
+
+#: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:7
+msgid "Bu tələbələrin əvvəlki qeydləri"
+msgstr "Die früheren Einträge dieser Studierenden sind im"
+
+#: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:8
+msgid "Cari dərslər bu jurnalda ayrıca aparılır."
+msgstr ""
+"Aktuelle Lehrveranstaltungen werden in diesem Journal separat geführt."
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:9
+msgid "Cari jurnala qayıt"
+msgstr "Zum aktuellen Journal zurück"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:15
+msgid "Məlum deyil"
+msgstr "Unbekannt"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:12
+msgid "Qeyd müəllifi"
+msgstr "Eintrag erstellt von"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:12
+msgid "Saat"
+msgstr "Uhrzeit"
+
+#: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:7
+msgid "jurnalında saxlanır."
+msgstr "Journal gespeichert."
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:12
+msgid "İştirak"
+msgstr "Anwesenheit"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:3
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:6
+#: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:6
+msgid "Əvvəlki jurnal qeydləri"
+msgstr "Frühere Journaleinträge"

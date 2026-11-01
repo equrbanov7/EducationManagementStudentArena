@@ -110956,3 +110956,49 @@ msgstr "Personel için bir görev veya rol seçilmelidir."
 #: apps/registrar/templates/registrar/partials/_journal_teacher_record.html:3
 msgid "Birgə dərs: bütün qrupların tələbələri"
 msgstr "Ortak ders: tüm grupların öğrencileri"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:8
+msgid ""
+"Bu səhifə yalnız əvvəlki qeydləri göstərir. Cari dərslər ayrıca jurnalda "
+"aparılır."
+msgstr ""
+"Bu sayfa yalnızca önceki kayıtları gösterir. Güncel dersler ayrı bir yoklama"
+" defterinde tutulur."
+
+#: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:7
+msgid "Bu tələbələrin əvvəlki qeydləri"
+msgstr "Bu öğrencilerin önceki kayıtları"
+
+#: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:8
+msgid "Cari dərslər bu jurnalda ayrıca aparılır."
+msgstr "Güncel dersler bu yoklama defterinde ayrı olarak tutulur."
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:9
+msgid "Cari jurnala qayıt"
+msgstr "Güncel yoklama defterine dön"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:15
+msgid "Məlum deyil"
+msgstr "Bilinmiyor"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:12
+msgid "Qeyd müəllifi"
+msgstr "Kaydı giren"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:12
+msgid "Saat"
+msgstr "Ders saati"
+
+#: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:7
+msgid "jurnalında saxlanır."
+msgstr "yoklama defterinde saklanır."
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:12
+msgid "İştirak"
+msgstr "Katılım"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:3
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:6
+#: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:6
+msgid "Əvvəlki jurnal qeydləri"
+msgstr "Önceki yoklama defteri kayıtları"

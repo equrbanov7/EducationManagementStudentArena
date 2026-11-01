@@ -111059,3 +111059,49 @@ msgstr "Əməkdaş üçün vəzifə / rol seçilməlidir."
 #: apps/registrar/templates/registrar/partials/_journal_teacher_record.html:3
 msgid "Birgə dərs: bütün qrupların tələbələri"
 msgstr "Birgə dərs: bütün qrupların tələbələri"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:8
+msgid ""
+"Bu səhifə yalnız əvvəlki qeydləri göstərir. Cari dərslər ayrıca jurnalda "
+"aparılır."
+msgstr ""
+"Bu səhifə yalnız əvvəlki qeydləri göstərir. Cari dərslər ayrıca jurnalda "
+"aparılır."
+
+#: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:7
+msgid "Bu tələbələrin əvvəlki qeydləri"
+msgstr "Bu tələbələrin əvvəlki qeydləri"
+
+#: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:8
+msgid "Cari dərslər bu jurnalda ayrıca aparılır."
+msgstr "Cari dərslər bu jurnalda ayrıca aparılır."
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:9
+msgid "Cari jurnala qayıt"
+msgstr "Cari jurnala qayıt"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:15
+msgid "Məlum deyil"
+msgstr "Məlum deyil"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:12
+msgid "Qeyd müəllifi"
+msgstr "Qeyd müəllifi"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:12
+msgid "Saat"
+msgstr "Saat"
+
+#: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:7
+msgid "jurnalında saxlanır."
+msgstr "jurnalında saxlanır."
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:12
+msgid "İştirak"
+msgstr "İştirak"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:3
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:6
+#: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:6
+msgid "Əvvəlki jurnal qeydləri"
+msgstr "Əvvəlki jurnal qeydləri"

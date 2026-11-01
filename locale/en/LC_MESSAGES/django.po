@@ -111548,3 +111548,49 @@ msgstr "A position or role must be selected for the staff member."
 #: apps/registrar/templates/registrar/partials/_journal_teacher_record.html:3
 msgid "Birgə dərs: bütün qrupların tələbələri"
 msgstr "Joint class: students from all groups"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:8
+msgid ""
+"Bu səhifə yalnız əvvəlki qeydləri göstərir. Cari dərslər ayrıca jurnalda "
+"aparılır."
+msgstr ""
+"This page shows previous records only. Current classes are recorded in a "
+"separate journal."
+
+#: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:7
+msgid "Bu tələbələrin əvvəlki qeydləri"
+msgstr "Previous records for these students are stored in the"
+
+#: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:8
+msgid "Cari dərslər bu jurnalda ayrıca aparılır."
+msgstr "Current classes are recorded separately in this journal."
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:9
+msgid "Cari jurnala qayıt"
+msgstr "Back to the current journal"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:15
+msgid "Məlum deyil"
+msgstr "Unknown"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:12
+msgid "Qeyd müəllifi"
+msgstr "Entry author"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:12
+msgid "Saat"
+msgstr "Time"
+
+#: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:7
+msgid "jurnalında saxlanır."
+msgstr "journal."
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:12
+msgid "İştirak"
+msgstr "Attendance"
+
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:3
+#: apps/registrar/templates/registrar/reviewed_journal_history.html:6
+#: apps/registrar/templates/registrar/partials/_jd_reviewed_history_notice.html:6
+msgid "Əvvəlki jurnal qeydləri"
+msgstr "Previous journal records"
