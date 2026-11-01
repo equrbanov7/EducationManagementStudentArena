@@ -10,6 +10,10 @@ Fənn, semestr və fiziki qrup birlikdə uyğunlaşdırılır. İdarə edilmiş 
 alias metadata-sı oxunur; tarixi FK dəyişmir. Ana qrupa qeydiyyatlı alt qruplar yalnız
 explicit parent_group izi, eyni təşkilat/ixtisas və ziddiyyətsiz dil/sektor/təhsil
 metadatası ilə tanınır. Konkret alt qrup qeydi digər alt qruplara yayılmır.
+Tək qruplu yük sətrində qrupu dəqiq adlandırmayan sərbəst qeyd (məs. səviyyə payı
+«935 ing», MR123, 2026-11-02) yalnız həmin qrupun özünə aiddir — alt qruplara keçmir;
+çox qruplu sətirdə belə qeyd əvvəlki kimi heç bir qrup vermir. Jurnal yenə yalnız
+müəllim onun sahibi və ya aktiv pay sahibidirsə görünür.
 
 **Əvvəlki jurnal qeydlərim** görünüşü cari yükü olmayan, lakin müəllimin real
 Lesson.instructor/created_by və ya LessonMark.entered_by qeydi olan jurnalları

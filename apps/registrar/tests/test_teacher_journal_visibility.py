@@ -303,6 +303,22 @@ class TeacherJournalVisibilityTests(TestCase):
         self.assertEqual({key[2] for key in keys}, {self.stack["group"].pk, one.pk, two.pk})
         self.assertNotIn(english.pk, {key[2] for key in keys})
 
+    def test_free_text_level_note_on_single_group_row_needs_share_and_stays_on_that_group(self):
+        # MR123: «935 ing» səviyyə payı — sahib başqasıdır, müəllimin aktiv payı var.
+        child = self.child("1")
+        self.assignment(groups_note="935 ing")
+        keys = teacher_journal_assignments(organization=self.org, teacher_id=self.teacher.pk)
+        self.assertEqual({key[2] for key in keys}, {self.stack["group"].pk})
+        self.assertNotIn(child.pk, {key[2] for key in keys})
+        shared = self.offering(instructor=self.other)
+        self.assertEqual(self.context()["offerings"], [])
+        JournalShare.objects.create(organization=self.org, offering=shared, teacher=self.teacher, kinds=["seminar"])
+        self.assertEqual([o.pk for o in self.context()["offerings"]], [shared.pk])
+        # Çox qruplu sətirdə qeyri-müəyyən qeyd əvvəlki kimi heç bir qrup vermir.
+        self.row.groups.add(make_structure(self.org, code="TVN")["group"])
+        self.assertEqual(teacher_journal_assignments(organization=self.org, teacher_id=self.teacher.pk), {})
+        self.assertEqual(self.context()["offerings"], [])
+
     def test_registered_children_with_unknown_metadata_remain_valid_but_other_parent_does_not(self):
         self.assignment()
         child = self.child("unknown", sector="az")

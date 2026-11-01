@@ -38,7 +38,8 @@ def teacher_journal_assignments(*, organization, teacher_id):
     """Canonical (subject, period, group) → kinds; (None, None, id) is an exact intensive offering.
 
     Draft/cancelled/vacant/zero-hour entries and ambiguous free-text subgroup notes
-    supply no current journal. Physical subgroup IDs remain distinct. Explicit
+    supply no current journal; on a single-group row such a note names a part of that
+    one group, never its registered children. Physical subgroup IDs remain distinct. Explicit
     managed logical aliases are folded without altering any historical FK.
     """
     if organization is None or teacher_id is None:
@@ -93,6 +94,10 @@ def teacher_journal_assignments(*, organization, teacher_id):
                         applies = (
                             applies is True or _assignment_group(assignment, row, parent, known_groups=known) is True
                         )
+                    elif applies is None and len(row_groups) == 1:
+                        # MR123 (2026-11-02): tək qruplu sətirdə sərbəst qeyd («935 ing» səviyyəsi)
+                        # yalnız həmin qrupun özüdür — alt qrupa yayılmır; siyahı yenə sahib/pay tələb edir.
+                        applies = True
                     if applies is True:
                         result[(row.subject_id, row.period_id, canonical.pk)].add(assignment.activity)
     return dict(result)
