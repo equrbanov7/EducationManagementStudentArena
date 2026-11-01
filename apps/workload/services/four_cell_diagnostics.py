@@ -157,7 +157,12 @@ GUARDS |= {
     "reviewed_source28_enrollment_ledger_conflict",
 }
 
-PREFIXES = {"four_cell_history_diagnostic", "syllabus_content_diagnostic", "reviewed_source28_diagnostic"}
+PREFIXES = {
+    "four_cell_history_diagnostic",
+    "syllabus_content_diagnostic",
+    "reviewed_source28_diagnostic",
+    "english_level_diagnostic",
+}
 
 FIELDS = ("stage", "class", "cause", "module", "function", "line", "guard")
 

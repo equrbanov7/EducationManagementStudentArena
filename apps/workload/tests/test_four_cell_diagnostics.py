@@ -96,3 +96,10 @@ class FourDiagnosticsTests(SimpleTestCase):
         cause.__cause__ = outer
         self.assertEqual(safe.describe(outer, "source28_undo")["guard"], fields["guard"])
         self.assertIsNone(safe.parse(line, prefix="PRIVATE_arbitrary_prefix"))
+
+    def test_english_prefix_is_explicit_and_other_names_stay_closed(self):
+        fields = safe.describe(ValueError("source_capture_failed"), "capture")
+        line = "english_level_diagnostic: " + safe.render(fields)
+        self.assertEqual(safe.parse(line, prefix="english_level_diagnostic"), fields)
+        self.assertIsNone(safe.parse(line))
+        self.assertIsNone(safe.parse(line, prefix="unreviewed_diagnostic"))
