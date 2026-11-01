@@ -337,6 +337,7 @@ on:
           - repair_qosqar_modelling
           - repair_qosqar_journals
           - repair_applied_math_journal
+          - repair_master_degree_metadata
           - repair_mr112_hours
           - repair_mr123_subject
           - repair_request_schedule_labels
@@ -551,7 +552,7 @@ jobs:
       REPLACE_TEACHER_SLOTS: ${{ github.event.inputs.replace_teacher_slots }}
     steps:
       - name: 📥 Checkout (struktur planı)
-        if: (((github.event.inputs.command == 'repair_si135_legacy_roster' || github.event.inputs.command == 'repair_bi_mu536_legacy_roster') || github.event.inputs.command == 'repair_tspx_legacy_roster' || github.event.inputs.command == 'repair_reviewed_workload_batch' || github.event.inputs.command == 'repair_reviewed_journal_content' || github.event.inputs.command == 'recover_mr46_syllabus' || github.event.inputs.command == 'recover_mr27_journal' || github.event.inputs.command == 'recover_six_workload_syllabi' || github.event.inputs.command == 'repair_qosqar_modelling' || (github.event.inputs.command == 'recover_empty_workload_syllabi' || (github.event.inputs.command == 'recover_genetics_workload_syllabus' || github.event.inputs.command == 'recover_named_workload_syllabi')) || github.event.inputs.command == 'recover_workload_syllabi' || github.event.inputs.command == 'apply_org_structure' || github.event.inputs.command == 'repair_233ke_group_alias' || github.event.inputs.command == 'repair_sbio235_workload' || github.event.inputs.command == 'repair_cavid_source_batch') || (github.event.inputs.command == 'repair_applied_math_journal')) || (github.event.inputs.command == 'repair_qosqar_journals')
+        if: (((github.event.inputs.command == 'repair_si135_legacy_roster' || github.event.inputs.command == 'repair_bi_mu536_legacy_roster') || github.event.inputs.command == 'repair_tspx_legacy_roster' || github.event.inputs.command == 'repair_reviewed_workload_batch' || github.event.inputs.command == 'repair_reviewed_journal_content' || github.event.inputs.command == 'recover_mr46_syllabus' || github.event.inputs.command == 'recover_mr27_journal' || github.event.inputs.command == 'recover_six_workload_syllabi' || github.event.inputs.command == 'repair_qosqar_modelling' || (github.event.inputs.command == 'recover_empty_workload_syllabi' || (github.event.inputs.command == 'recover_genetics_workload_syllabus' || github.event.inputs.command == 'recover_named_workload_syllabi')) || github.event.inputs.command == 'recover_workload_syllabi' || github.event.inputs.command == 'apply_org_structure' || github.event.inputs.command == 'repair_233ke_group_alias' || github.event.inputs.command == 'repair_sbio235_workload' || github.event.inputs.command == 'repair_cavid_source_batch') || (github.event.inputs.command == 'repair_applied_math_journal')) || (github.event.inputs.command == 'repair_qosqar_journals') || github.event.inputs.command == 'repair_master_degree_metadata'
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
@@ -784,6 +785,8 @@ jobs:
               source scripts/ops/named_syllabus_args.sh ;;
             repair_qosqar_journals)
               source scripts/ops/qosqar_journals_args.sh ;;
+            repair_master_degree_metadata)
+              source scripts/ops/master_degree_args.sh ;;
             repair_applied_math_journal)
               source scripts/ops/applied_math_args.sh ;;
             repair_mr123_subject)
@@ -1569,6 +1572,16 @@ jobs:
           elif [ "$COMMAND" = "repair_qosqar_journals" ]; then
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^qosqar_journals: mode=(dry_run|apply)( ([a-z_]+=[0-9]+|baseline=[0-9a-f]{64}))*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "repair_master_degree_metadata" ]; then
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^master_degree: status=(dry_run|applied|already_applied|already_undone) planned=[0-9]+ applied=[01] baseline=[0-9a-f]{64}( receipt=[0-9a-f-]{36})?$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true

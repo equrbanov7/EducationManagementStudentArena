@@ -20,6 +20,7 @@ class Command(BaseCommand):
         parser.add_argument("--expected-baseline", default="")
         parser.add_argument("--undo", default="")
         parser.add_argument("--apply", action="store_true")
+        parser.add_argument("--safe-summary", action="store_true")
 
     @rls_worker_atomic()
     @transaction.atomic
@@ -41,4 +42,13 @@ class Command(BaseCommand):
             raise CommandError(str(exc)) from exc
         finally:
             reset_rls_context()
-        self.stdout.write(json.dumps(result, sort_keys=True))
+        if options["safe_summary"]:
+            summary = (
+                f"master_degree: status={result['status']} planned={result['planned']} "
+                f"applied={int(result['applied'])} baseline={result['baseline']}"
+            )
+            if result["receipt"]:
+                summary += f" receipt={result['receipt']}"
+            self.stdout.write(summary)
+        else:
+            self.stdout.write(json.dumps(result, sort_keys=True))

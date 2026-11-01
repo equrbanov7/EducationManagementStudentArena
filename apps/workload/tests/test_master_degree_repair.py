@@ -170,6 +170,13 @@ class MasterDegreeRepairTests(TestCase):
             stdout=output,
         )
         self.assertTrue(json.loads(output.getvalue())["applied"])
+        output = StringIO()
+        call_command("repair_master_degree_metadata", actor=self.actor.username, safe_summary=True, stdout=output)
+        self.assertRegex(
+            output.getvalue(),
+            r"^master_degree: status=already_applied planned=0 applied=0 baseline=[a-f0-9]{64} receipt=[a-f0-9-]{36}\n$",
+        )
+        self.assertNotIn(self.student.username, output.getvalue())
 
 
 class MasterDegreeCommandTransactionTests(TransactionTestCase):
