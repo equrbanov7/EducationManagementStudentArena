@@ -9,6 +9,8 @@ from django.utils import timezone
 from core.group_identity import canonical_aliases
 
 from .journal_assignment_sources import teacher_journal_assignments
+from .journal_master_history import attach as attach_master_history
+from .journal_master_history import historical_marks, identity_q
 from .journal_own_history import recorded_lessons
 from .models import Enrollment, JournalShare, Lesson, SlotKind
 from .practical_label import kind_choices
@@ -45,12 +47,23 @@ def _workload_filters(queryset, user, organization):
 def project(queryset, user, organization, *, observed=()):
     """Do not add a single offering to the already-authorized own/share/observer set."""
     if queryset.query.is_empty():
-        flags = {"journal_is_current_load", "journal_has_records", "journal_is_owned_past_history"}
+        flags = {
+            "journal_is_current_load",
+            "journal_has_records",
+            "journal_is_owned_past_history",
+            "journal_is_master_history",
+        }
         flags.update(f"journal_{prefix}_{kind}" for prefix in ("current", "recorded") for kind in KINDS)
+        flags.update(f"journal_master_{kind}" for kind in KINDS)
         return queryset.annotate(**{name: Value(False) for name in flags})
     filters = _workload_filters(queryset, user, organization)
     recorded = recorded_lessons(user).filter(organization_id=OuterRef("organization_id"), offering_id=OuterRef("pk"))
     annotations = {"journal_has_records": Exists(recorded)}
+    master = identity_q(user, organization)
+    master_marks = historical_marks()
+    annotations["journal_is_master_history"] = Case(
+        When(master, then=Exists(master_marks)), default=Value(False), output_field=BooleanField()
+    )
     registered = Enrollment.objects.filter(organization_id=OuterRef("organization_id"), offering_id=OuterRef("pk"))
     # Existing ownership is canonical read authority. A populated past journal
     # remains discoverable, without attributing anonymous legacy lessons/hours.
@@ -74,6 +87,11 @@ def project(queryset, user, organization, *, observed=()):
             When(condition, then=Value(True)), default=Value(False), output_field=BooleanField()
         )
         annotations[f"journal_recorded_{kind}"] = Exists(recorded.filter(kind=kind))
+        annotations[f"journal_master_{kind}"] = Case(
+            When(master, then=Exists(master_marks.filter(lesson__kind=kind))),
+            default=Value(False),
+            output_field=BooleanField(),
+        )
         current |= condition
     annotations["journal_is_current_load"] = Case(
         When(current, then=Value(True)), default=Value(False), output_field=BooleanField()
@@ -82,6 +100,7 @@ def project(queryset, user, organization, *, observed=()):
         Q(journal_is_current_load=True)
         | Q(journal_has_records=True)
         | Q(journal_is_owned_past_history=True)
+        | Q(journal_is_master_history=True)
         | Q(pk__in=observed)
     )
 
@@ -98,7 +117,10 @@ def select_view(queryset, request):
 def filter_kind(queryset, kind):
     return queryset.filter(
         Q(journal_is_current_load=True, **{f"journal_current_{kind}": True})
-        | Q(journal_is_current_load=False, **{f"journal_recorded_{kind}": True})
+        | (
+            Q(journal_is_current_load=False)
+            & (Q(**{f"journal_recorded_{kind}": True}) | Q(**{f"journal_master_{kind}": True}))
+        )
     )
 
 
@@ -125,7 +147,12 @@ def attach(user, offerings, *, selected_kind=""):
     for offering in offerings:
         current = offering.journal_is_current_load
         prefix = "journal_current_" if current else "journal_recorded_"
-        kinds = [kind for kind in KINDS if getattr(offering, f"{prefix}{kind}", False)]
+        kinds = [
+            kind
+            for kind in KINDS
+            if getattr(offering, f"{prefix}{kind}", False)
+            or (not current and getattr(offering, f"journal_master_{kind}", False))
+        ]
         offering.slot_kinds = kinds
         shown = [kind for kind in kinds if kind == selected_kind] if selected_kind else kinds
         offering_labels = dict(kind_choices(offering, labels))
@@ -134,3 +161,4 @@ def attach(user, offerings, *, selected_kind=""):
         offering.journal_own_hours = taught.get(offering.pk, {}).get("hours", 0)
         offering.journal_contributed_lessons = contributions.get(offering.pk, 0)
         offering.journal_own_history_link = not current and bool(offering.journal_contributed_lessons)
+        attach_master_history(offering, kind=selected_kind)
