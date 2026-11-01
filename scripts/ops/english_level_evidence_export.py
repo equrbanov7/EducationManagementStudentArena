@@ -45,7 +45,7 @@ def source_command(argv):
         raise ValueError("english_source_output_budget")
     if result.returncode:
         output = result.stdout + "\n" + result.stderr
-        fields = diagnostics().parse(output.replace("english_level_diagnostic: ", "four_cell_history_diagnostic: "))
+        fields = diagnostics().parse(output, prefix="english_level_diagnostic")
         if fields is None:
             fields = diagnostics().describe(ValueError("source_capture_failed"), "source_capture")
         raise SourceCaptureFailure(fields)

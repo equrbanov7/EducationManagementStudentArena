@@ -22,6 +22,7 @@ STAGES = {
 }
 CLASSES = {
     "contenterror",
+    "restoreerror",
     "exception",
     "valueerror",
     "typeerror",
@@ -157,11 +158,51 @@ GUARDS |= {
     "reviewed_source28_enrollment_ledger_conflict",
 }
 
+GUARDS |= {
+    "active_fixed_tenant_superadmin_required",
+    "complete_source_tables_required",
+    "current_dossier_metadata_changed",
+    "current_dossier_scope_changed",
+    "current_period_or_contact_hours_changed",
+    "current_pointers_changed",
+    "current_post_restore_graph_changed",
+    "current_review_history_changed",
+    "current_share_or_reuse_changed",
+    "current_versions_changed",
+    "exact_source_identity_mapping_changed",
+    "fixed_cases_required",
+    "fixed_loaded_cases_required",
+    "fixed_source_packet_scope",
+    "fixed_state_budget_exceeded",
+    "fresh_baseline_required",
+    "human_draft_changed",
+    "human_draft_not_empty",
+    "human_draft_sections_changed",
+    "official_source_workload_changed",
+    "pinned_own_source_changed",
+    "pinned_source_packet_changed",
+    "previous_undo_requires_review",
+    "protected_journal_content_changed",
+    "restored_source_status_changed",
+    "reviewed_apply_receipt_missing",
+    "reviewed_receipt_source_scope_changed",
+    "source_assignment_geometry_changed",
+    "source_author_inactive_or_deleted",
+    "source_conversion_or_plan_changed",
+    "source_group_sector_degree_changed",
+    "source_import_content_mismatch",
+    "source_packet_shape",
+    "source_partial_group_geometry_unreviewed",
+    "source_topic_or_selfwork_scope",
+    "unexpected_cohort_context",
+}
+
 PREFIXES = {
     "four_cell_history_diagnostic",
     "syllabus_content_diagnostic",
     "reviewed_source28_diagnostic",
     "english_level_diagnostic",
+    "blank_draft_syllabus_diagnostic",
 }
 
 FIELDS = ("stage", "class", "cause", "module", "function", "line", "guard")
@@ -195,7 +236,8 @@ def describe(exc, stage):
     }
     for frame in reversed(traceback.extract_tb(exc.__traceback__)):
         if not any(
-            part in frame.filename for part in ("/apps/workload/", "/apps/syllabus/", "/core/", "/scripts/ops/")
+            part in frame.filename
+            for part in ("/apps/workload/", "/apps/syllabus/", "/apps/legacy_import/", "/core/", "/scripts/ops/")
         ):
             continue
         module = Path(frame.filename).stem

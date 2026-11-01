@@ -1,0 +1,49 @@
+name: Reviewed source syllabus beside fixed blank draft
+on:
+  workflow_dispatch:
+    inputs:
+      actor:
+        description: "Aktiv təşkilat superadmini"
+        type: string
+        required: true
+      baseline:
+        description: "Tətbiq üçün təzə dry-run SHA256"
+        type: string
+        default: ""
+      undo:
+        description: "Yalnız bu bərpanın tətbiq receipt UUID-si"
+        type: string
+        default: ""
+      apply:
+        description: "Sabit mənbə versiyasını əlavə et və ya dəqiq receipt-i geri al"
+        type: boolean
+        default: false
+      confirm:
+        description: "Tətbiq üçün APPLY"
+        type: string
+        default: ""
+permissions:
+  contents: read
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  reviewed:
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Recover fixed source with fresh baseline and deployed HEAD verification
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
+        run: python3 scripts/ops/blank_draft_syllabus_restore.py
+      - name: Remove private temporary source
+        if: always()
+        run: |
+          set -euo pipefail
+          docker exec educationmanagementstudentarena-app-1 rm -rf -- "/tmp/wcu-blank-draft-syllabus-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" || true
+          rm -rf -- "$RUNNER_TEMP/blank-draft-syllabus-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
