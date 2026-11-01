@@ -1,0 +1,44 @@
+name: Reviewed Leyla fixed catalog discovery repair
+on:
+  workflow_dispatch:
+    inputs:
+      actor:
+        description: "Aktiv təşkilat superadmini"
+        type: string
+        required: true
+      baseline:
+        description: "Tətbiq və geri alma üçün təzə dry-run baseline SHA256"
+        type: string
+        default: ""
+      schedule_sha:
+        description: "İrəli tətbiq üçün təzə dry-run schedule SHA256"
+        type: string
+        default: ""
+      undo:
+        description: "Yalnız bu düzəlişin əvvəlki tətbiq receipt UUID-si"
+        type: string
+        default: ""
+      apply:
+        description: "İki sabit yük sətri / üç jurnal cütü / altı cədvəl slotu; yaxud receipt üzrə geri alma"
+        type: boolean
+        default: false
+      confirm:
+        description: "Tətbiq və geri alma üçün APPLY"
+        type: string
+        default: ""
+permissions:
+  contents: read
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  reviewed:
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Guarded fixed Leyla discovery repair with deployed HEAD and fresh hashes
+        run: python3 scripts/ops/reviewed_leyla_catalog.py
