@@ -111,6 +111,8 @@ class FinalsBatch:
         "flags",
         "activity_bits",
         "pending_bits",
+        "level_absence_counts",
+        "level_absence_hours",
     )
 
     def __init__(self, **kwargs):
@@ -128,6 +130,9 @@ class FinalsBatch:
             "selfwork_points": self.selfwork_points.get((enrollment.id, offering_id), 0),
             "rule": self.rule_for(enrollment),
         }
+        if self.level_absence_counts and enrollment.pk in self.level_absence_counts:
+            kwargs["absence_count"] = self.level_absence_counts[enrollment.pk]
+            kwargs["absence_hours"] = self.level_absence_hours[enrollment.pk]
         if self.marks_by_enrollment is not None:
             kwargs["marks"] = self.marks_by_enrollment.get(enrollment.id, [])
         return kwargs
@@ -143,7 +148,7 @@ class FinalsBatch:
     def rule_for(self, enrollment):
         """Açılışın rejimi + (Midterm-də) buraxılış qərarının İŞLƏTDİYİ davamiyyət girişləri."""
         offering = enrollment.offering
-        if not self.is_midterm(offering):
+        if not self.is_midterm(offering) and enrollment.pk not in (self.level_absence_counts or {}):
             return entry_standard.LEGACY
         if not self.attendance_ready:
             self._load_attendance()
@@ -375,12 +380,15 @@ def build(
     """
     enrollments = list(enrollments)
     enr_ids = [e.id for e in enrollments]
+    from . import language_level_grading
+
     offerings = {}
     for enrollment in enrollments:
         offering = enrollment.offering
         if offering is not None:
             offerings.setdefault(offering.id, offering)
     offering_ids = list(offerings)
+    level_ids = {o.pk for o in offerings.values() if language_level_grading.is_level_name(o.subject.name)}
     # Yeni qaydanın RİM bayraqları BİR dəfə (sətir başına oxu yox) — bütün sətirlərin qaydası eynidir.
     flags = entry_standard.rule_flags()
 
@@ -422,13 +430,18 @@ def build(
         lesson_sum_offerings = [
             oid
             for oid in offering_ids
-            if midterm_by_offering.get(oid)
+            if oid in level_ids
+            or midterm_by_offering.get(oid)
             or not any(c.kind == ComponentKind.GENERIC for c in components_by_offering.get(oid, []))
         ]
         if lesson_sum_offerings:
             wanted = [e.id for e in enrollments if e.offering_id in set(lesson_sum_offerings)]
             marks = LessonMark.objects.filter(enrollment_id__in=wanted)
-            if flags.activity_split and any(midterm_by_offering.get(oid) for oid in lesson_sum_offerings):
+            if level_ids:
+                marks = marks.select_related("lesson")
+            if level_ids or (
+                flags.activity_split and any(midterm_by_offering.get(oid) for oid in lesson_sum_offerings)
+            ):
                 marks = activity_kinds.annotate_kind(marks)  # 5 + 5 üçün dərs növü — eyni sorğu
             marks_by_enrollment = defaultdict(list)
             for mark in marks:
@@ -466,6 +479,10 @@ def build(
         data["limit_percent_by_student"] = _student_limits(enrollments)
         data["exempt_student_ids"] = _exempt_ids(enrollments)
 
+    level_enrollments = [e for e in enrollments if e.offering_id in level_ids]
+    level_metrics = language_level_grading.absence_metrics(level_enrollments) if level_enrollments else {}
+    data["level_absence_counts"] = {pk: metric["count"] for pk, metric in level_metrics.items()}
+    data["level_absence_hours"] = {pk: metric["hours"] for pk, metric in level_metrics.items()}
     return FinalsBatch(**data)
 
 

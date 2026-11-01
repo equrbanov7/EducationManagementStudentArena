@@ -20,7 +20,7 @@ from decimal import ROUND_HALF_UP, Decimal
 from django.db.models import Count, DecimalField, F, Sum
 from django.db.models.functions import Cast, Least
 
-from apps.registrar import credit_source, entry_standard, exam_eligibility, finals, gradebook
+from apps.registrar import credit_source, entry_standard, exam_eligibility, finals, gradebook, language_level_analytics
 from apps.registrar.models import (
     AssessmentComponent,
     AssessmentScheme,
@@ -184,6 +184,9 @@ def _credit_resolver(records, offering_ids, offerings=None):
 
 
 def _evaluate(enrollment, maps):
+    override = language_level_analytics.evaluation_override(enrollment, maps)
+    if override is not None:
+        return override
     offering = enrollment.offering
     scheme = maps["schemes"].get(offering.id)
     entry_max = scheme.entry_score_max if scheme else _DEFAULT_ENTRY_MAX
@@ -437,6 +440,7 @@ def build_evaluation_maps_for(organization, *, enrollment_ids, offering_ids, stu
     )
     records = _records(organization, student_ids)
     return {
+        "language_enrollment_ids": enrollment_ids,
         "schemes": _scheme_map(offering_ids),
         # Buraxılış statusu DONDURULMUŞ açılışlar (tarixi/köçürülmüş + bağlı
         # jurnal). Toplu dəst — per-enrollment yoxlama N+1 olardı; bax

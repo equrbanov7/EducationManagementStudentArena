@@ -25,6 +25,7 @@ from apps.registrar import (
     gradebook,
     gradebook_components,
     grading_scale,
+    language_level_grading,
     read_memo,
     services,
 )
@@ -79,7 +80,7 @@ def entry_score_for(enrollment, cap) -> Decimal:
 
 
 def exam_score_max(scheme) -> int:
-    return max(0, 100 - scheme.entry_score_max)
+    return max(0, 100 - language_level_grading.normalized_scheme(scheme).entry_score_max)
 
 
 def athlete_exemption(enrollment) -> bool:
@@ -130,6 +131,7 @@ def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=N
     scheme = scheme or getattr(enrollment.offering, "assessment_scheme", None)
     if scheme is None:
         scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
+    scheme = language_level_grading.normalized_scheme(scheme, offering=enrollment.offering)
     if organization is None:
         organization = scheme.organization
 
@@ -198,6 +200,8 @@ def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=N
         hours_map=hours_map,
         # Donma dəsti də toplu gəlir — ``None`` olduqda açılış başına sorğu olur.
         frozen=frozen,
+        absence_count=batch.level_absence_counts.get(enrollment.pk) if batch is not None else None,
+        absence_hours=batch.level_absence_hours.get(enrollment.pk) if batch is not None else None,
     )
     barred = eligibility["barred"]
 

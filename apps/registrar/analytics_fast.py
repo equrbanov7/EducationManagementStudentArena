@@ -62,7 +62,15 @@ from decimal import ROUND_HALF_UP, Decimal
 from django.db.models import Count, DecimalField, F, IntegerField, Q, Sum, TextField, Value
 from django.db.models.functions import Cast, Least
 
-from apps.registrar import analytics, credit_source, entry_standard, exam_eligibility, selfwork_points
+from apps.registrar import (
+    analytics,
+    credit_source,
+    entry_standard,
+    exam_eligibility,
+    language_level_analytics,
+    language_level_grading,
+    selfwork_points,
+)
 from apps.registrar.models import (
     AssessmentComponent,
     AssessmentScheme,
@@ -364,6 +372,12 @@ def build_period_analytics(*, organization, period, scope_q=None) -> dict:
         organization, flat.values("student_id"), subject_ids={row[14] for row in info.values()}
     )
 
+    level_ids = [row[7] for row in info.values() if language_level_grading.is_level_name(row[10])]
+    level_results = (
+        language_level_analytics.results_for(flat, organization=organization, offering_ids=level_ids)
+        if level_ids
+        else {}
+    )
     overall = analytics._Bucket("overall", "")
     programs: dict = {}
     groups: dict = {}
@@ -473,6 +487,11 @@ def build_period_analytics(*, organization, period, scope_q=None) -> dict:
         failed = barred or (graded and not passed)
         absent = absence_hours or 0
 
+        if enrollment_key in level_results:
+            level_result = level_results[enrollment_key]
+            barred, graded, total, passed, failed = (
+                level_result[k] for k in ("barred", "graded", "total", "passed", "failed")
+            )
         overall.add_row(student_key, absent, lesson_hours, barred, graded, total, passed, failed, credit)
 
         if program_id is not None:
