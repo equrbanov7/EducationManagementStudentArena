@@ -1,11 +1,7 @@
 """Available Source58 history, exact pinned workload receipts and explicit unknowns."""
 
 import json
-import re
 
-from django.db import connection
-from django.db.models import BooleanField, Q
-from django.db.models.expressions import RawSQL
 from django.utils.translation import override
 
 from ..reviewed_leyla_catalog_graph import model, normal
@@ -18,7 +14,6 @@ from .source58_evidence_rows import MAX_ROWS, EvidenceLimit
 
 MAX_AUDIT_ROWS = 1000
 MAX_RAW_AUDIT_BYTES = 8 * 1024 * 1024
-AUDIT_REFERENCE_CHUNK = 64
 
 
 def _labels(cases):
@@ -46,33 +41,19 @@ def _labels(cases):
 
 def collect_history(*, referenced_ids):
     cases = fixed.HISTORY_SCOPE.cases
-    locator = audit_locator(cases) | Q(resource_id__in=referenced_ids)
+    try:
+        locator = audit_locator(cases, referenced_ids=referenced_ids, source_points=cases)
+    except ValueError as exc:
+        raise EvidenceLimit("source58_audit_locator_byte_budget") from exc
     Audit = model("audit.AuditLog")
-    table = connection.ops.quote_name(Audit._meta.db_table)
-    ordered_ids = sorted(referenced_ids)
-    # PostgreSQL's regex compiler allocates a superlinear transition matrix for
-    # thousands of alternatives. Small fixed chunks bound compilation memory.
-    patterns = [
-        "(" + "|".join(re.escape(pk) for pk in ordered_ids[start : start + AUDIT_REFERENCE_CHUNK]) + ")"
-        for start in range(0, len(ordered_ids), AUDIT_REFERENCE_CHUNK)
-    ]
-    points = "(^|[^0-9])(" + "|".join(str(point) for point in sorted(cases)) + ")([^0-9]|$)"
-    if sum(len(pattern.encode()) for pattern in patterns) > 1024 * 1024:
-        raise EvidenceLimit("source58_audit_locator_byte_budget")
-    for field in ("changes", "old_values", "new_values"):
-        for pattern in patterns:
-            locator |= Q(RawSQL(f"COALESCE({table}.{field}::text ~ %s, FALSE)", [pattern], output_field=BooleanField()))
-        locator |= Q(
-            RawSQL(
-                f"COALESCE({table}.{field}::text ~ %s, FALSE)",
-                [points],
-                output_field=BooleanField(),
-            )
-        )
     query = Audit._base_manager.filter(organization_id=fixed.ORG).filter(locator).order_by("created_at", "pk")
     pre = list(annotated(query).values("id", "_raw_bytes", "_raw_sha")[: MAX_AUDIT_ROWS + 1])
     if len(pre) > MAX_AUDIT_ROWS:
         raise EvidenceLimit("source58_audit_row_budget")
+    # The expensive complete locator runs once. Every subsequent projection
+    # and complement uses this bounded, complete PK set without rescanning JSON.
+    matched_ids = [row["id"] for row in pre]
+    query = Audit._base_manager.filter(organization_id=fixed.ORG, pk__in=matched_ids).order_by("created_at", "pk")
     pinned = {str(row["id"]) for row in pre} & thin_spec.PINS.keys()
     for row in pre:
         if str(row["id"]) in pinned and row["_raw_sha"] != thin_spec.PINS[str(row["id"])][1]:
@@ -129,12 +110,12 @@ def collect_history(*, referenced_ids):
         .filter(
             resource_type__in=("registrar.LessonMark", "registrar.lessonmark", "registrar.Lesson", "registrar.lesson")
         )
-        .exclude(locator)
+        .exclude(pk__in=matched_ids)
     )
     unlocated_grade = Audit._base_manager.filter(
         organization_id=fixed.ORG,
         resource_type__in=("registrar.grade.mark", "registrar.grade.full-edit"),
-    ).exclude(locator)
+    ).exclude(pk__in=matched_ids)
     unlocated_rows = list(
         annotated(unlocated_grade)
         .order_by("pk")

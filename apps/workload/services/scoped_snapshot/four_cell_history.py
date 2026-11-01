@@ -240,16 +240,18 @@ def collect_available_history(*, _scope=None):
     prefix = "four_cell_history" if _scope is None else _scope.prefix
     undo_operation = "fixed_four_undo" if _scope is None else _scope.undo_operation
     model = apps.get_model
-    from .recovery_audit_scope import audit_locator, audit_queryset
+    from .recovery_audit_scope import audit_queryset
 
     enrs = {c["enrollment_id"] for c in cases.values()}
     lessons = {c["lesson_id"] for c in cases.values()}
-    query = audit_locator(cases)
     audit = audit_queryset(cases)
     from . import workload_audit_receipt_spec as thin_spec
     from . import workload_audit_receipts as thin
 
     pre = bounded(annotated(audit).values("id", "_raw_bytes", "_raw_sha"))
+    matched_ids = [row["id"] for row in pre]
+    query = Q(pk__in=matched_ids)
+    audit = model("audit.AuditLog").objects.filter(organization_id=ORG, pk__in=matched_ids).order_by("created_at", "pk")
     fixed_ids = {str(row["id"]) for row in pre} & thin_spec.PINS.keys()
     for row in pre:
         if str(row["id"]) in fixed_ids and row["_raw_sha"] != thin_spec.PINS[str(row["id"])][1]:

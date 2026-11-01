@@ -1,21 +1,22 @@
 """Fixed recovery audit locator shared by strict recovery and metadata diagnostics."""
 
 from django.apps import apps
-from django.db.models import Q
 
 from .four_cell_history_spec import ORG
+from .history_reference_locator import reference_locator
 
 
-def audit_locator(cases):
+def audit_locator(cases, *, referenced_ids=(), source_points=()):
     from .four_cell_history import mark_ids
 
     ids = {c[k] for c in cases.values() for k in ("offering_id", "lesson_id", "enrollment_id")}
     ids |= set(mark_ids(_cases=cases).values())
-    query = Q(resource_id__in=ids)
-    for field in ("changes", "old_values", "new_values"):
-        for pk in ids:
-            query |= Q(**{field + "__icontains": pk})
-    return query
+    return reference_locator(
+        apps.get_model("audit.AuditLog")._meta.db_table,
+        insensitive_ids=ids,
+        literal_ids=referenced_ids,
+        source_points=source_points,
+    )
 
 
 def audit_queryset(cases):
