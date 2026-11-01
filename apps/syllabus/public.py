@@ -411,3 +411,13 @@ from .public_exports import *  # noqa: E402,F401,F403
 from .public_exports import __all__ as _api_exports  # noqa: E402
 
 __all__ += [name for name in _api_exports if name not in __all__]
+
+
+def lock_source_lineage(organization_id):
+    """Serialize fixed provenance repair with normal copy/reuse transactions."""
+    from .services.source_lineage import lock_lineage
+
+    return lock_lineage(organization_id)
+
+
+__all__.append("lock_source_lineage")
