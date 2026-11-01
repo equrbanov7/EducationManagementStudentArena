@@ -8,6 +8,8 @@ from . import reviewed_content_four_spec as fixed
 from .reviewed_content_contract import ContentError
 from .reviewed_content_spec import ORG
 from .reviewed_content_state import digest, model
+from .reviewed_four_cleanup import PINS as CLEANUP_PINS
+from .reviewed_four_cleanup import permits_reviewed_cleanup
 
 
 def selected(data):
@@ -127,7 +129,7 @@ def fresh_guard(state, *, actor, organization, lock=False):
     require(
         not any(
             r["contrary_clear_evidence"]
-            or r["contrary_delete_evidence"]
+            or (r["contrary_delete_evidence"] and not permits_reviewed_cleanup(r, state.data))
             or r["malformed_intent"]
             or r["source_undo_marker"]
             for r in history["four_cell_history_audits"]
@@ -172,7 +174,21 @@ def fresh_guard(state, *, actor, organization, lock=False):
                 and lessons[0].hours == 2,
                 "exact_existing_lesson_changed",
             )
-    return {"available_history": history, "canonical_cells": _canonical_cells(lock=lock)}
+    reviewed_cleanup = [
+        {
+            "audit_id": row["id"],
+            "raw_record_sha256": row["raw_record_sha256"],
+            "old_values_sha256": row["old_values_sha256"],
+            "classification": CLEANUP_PINS[row["id"]]["classification"],
+        }
+        for row in history["four_cell_history_audits"]
+        if permits_reviewed_cleanup(row, state.data)
+    ]
+    return {
+        "available_history": history,
+        "canonical_cells": _canonical_cells(lock=lock),
+        "reviewed_technical_cleanup": reviewed_cleanup,
+    }
 
 
 def decision_guard(data, decision):
@@ -208,6 +224,7 @@ def receipt(before, decision):
             "source_review_sha256": fixed.SOURCE_REVIEW_SHA,
             "source_row_hashes": {str(k): v for k, v in fixed.ROW_HASHES.items()},
             "available_history_sha256": digest(before["available_history"]),
+            "reviewed_technical_cleanup": before["reviewed_technical_cleanup"],
             "all_canonical_cells_sha256": digest(before["canonical_cells"]),
             "best_effort_audit_limitation_acknowledged": True,
             "core_course_enrollment_ledger_claimed": False,
