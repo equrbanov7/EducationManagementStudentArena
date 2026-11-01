@@ -113216,3 +113216,24 @@ msgid ""
 msgstr ""
 "In dieser Organisation wird gerade ein anderer Lehrplan kopiert. Versuchen "
 "Sie es in Kürze erneut."
+
+msgctxt "accounts.syllabus"
+msgid "Müəllif / dərs deyən müəllim"
+msgstr "Autor / Lehrperson"
+
+msgctxt "accounts.syllabus"
+msgid "Müəllimin adı ilə axtar…"
+msgstr "Nach Lehrperson suchen…"
+
+msgctxt "accounts.syllabus"
+msgid "Bütün müəllimlər"
+msgstr "Alle Lehrkräfte"
+
+msgctxt "accounts.syllabus"
+msgid "Dərs deyən müəllim"
+msgstr "Lehrperson"
+
+msgctxt "accounts.syllabus"
+msgid "Yeni qaralama saxlanılır"
+msgstr "Neuer Entwurf bleibt erhalten"
+

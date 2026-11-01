@@ -112354,3 +112354,24 @@ msgid ""
 msgstr ""
 "В этой организации копируется другой силлабус. Повторите попытку немного "
 "позже."
+
+msgctxt "accounts.syllabus"
+msgid "Müəllif / dərs deyən müəllim"
+msgstr "Автор / преподаватель"
+
+msgctxt "accounts.syllabus"
+msgid "Müəllimin adı ilə axtar…"
+msgstr "Поиск по имени преподавателя…"
+
+msgctxt "accounts.syllabus"
+msgid "Bütün müəllimlər"
+msgstr "Все преподаватели"
+
+msgctxt "accounts.syllabus"
+msgid "Dərs deyən müəllim"
+msgstr "Преподаватель"
+
+msgctxt "accounts.syllabus"
+msgid "Yeni qaralama saxlanılır"
+msgstr "Новый черновик сохранён"
+

@@ -112159,3 +112159,24 @@ msgid ""
 msgstr ""
 "Another syllabus is being copied in this organization. Please try again "
 "shortly."
+
+msgctxt "accounts.syllabus"
+msgid "Müəllif / dərs deyən müəllim"
+msgstr "Author / teaching instructor"
+
+msgctxt "accounts.syllabus"
+msgid "Müəllimin adı ilə axtar…"
+msgstr "Search by teacher name…"
+
+msgctxt "accounts.syllabus"
+msgid "Bütün müəllimlər"
+msgstr "All teachers"
+
+msgctxt "accounts.syllabus"
+msgid "Dərs deyən müəllim"
+msgstr "Teaching instructor"
+
+msgctxt "accounts.syllabus"
+msgid "Yeni qaralama saxlanılır"
+msgstr "New draft is retained"
+

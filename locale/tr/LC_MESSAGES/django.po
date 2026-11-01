@@ -111545,3 +111545,24 @@ msgid ""
 msgstr ""
 "Bu kuruluşta başka bir ders izlencesi kopyalanıyor. Biraz sonra yeniden "
 "deneyin."
+
+msgctxt "accounts.syllabus"
+msgid "Müəllif / dərs deyən müəllim"
+msgstr "Yazar / dersi veren öğretim elemanı"
+
+msgctxt "accounts.syllabus"
+msgid "Müəllimin adı ilə axtar…"
+msgstr "Öğretim elemanı adına göre ara…"
+
+msgctxt "accounts.syllabus"
+msgid "Bütün müəllimlər"
+msgstr "Tüm öğretim elemanları"
+
+msgctxt "accounts.syllabus"
+msgid "Dərs deyən müəllim"
+msgstr "Dersi veren öğretim elemanı"
+
+msgctxt "accounts.syllabus"
+msgid "Yeni qaralama saxlanılır"
+msgstr "Yeni taslak korunur"
+

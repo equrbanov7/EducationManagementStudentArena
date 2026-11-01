@@ -111644,3 +111644,24 @@ msgid ""
 "Bu təşkilatda başqa sillabus kopyalanır. Bir qədər sonra yenidən cəhd edin."
 msgstr ""
 "Bu təşkilatda başqa sillabus kopyalanır. Bir qədər sonra yenidən cəhd edin."
+
+msgctxt "accounts.syllabus"
+msgid "Müəllif / dərs deyən müəllim"
+msgstr "Müəllif / dərs deyən müəllim"
+
+msgctxt "accounts.syllabus"
+msgid "Müəllimin adı ilə axtar…"
+msgstr "Müəllimin adı ilə axtar…"
+
+msgctxt "accounts.syllabus"
+msgid "Bütün müəllimlər"
+msgstr "Bütün müəllimlər"
+
+msgctxt "accounts.syllabus"
+msgid "Dərs deyən müəllim"
+msgstr "Dərs deyən müəllim"
+
+msgctxt "accounts.syllabus"
+msgid "Yeni qaralama saxlanılır"
+msgstr "Yeni qaralama saxlanılır"
+
