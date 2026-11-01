@@ -283,6 +283,11 @@
         }
         var placeholder = form.querySelector("[data-sr-group-select] option");
         var text = placeholder ? placeholder.textContent : "—";
+        var groupSelect = form.querySelector("[data-sr-group-select]");
+        // Siyahı ilk 50 qrupdur; axtarış serverdə gedir ki, «2535 ML» kimi qalan qruplar da tapılsın.
+        if (groupSelect) {
+            groupSelect.setAttribute("data-live-search-url", host.getAttribute("data-sr-groups-url"));
+        }
         window.EMSCore.fetchJSON(host.getAttribute("data-sr-groups-url") + "?limit=50")
             .then(function (payload) {
                 fillSelect(form.querySelector("[data-sr-group-select]"), payload.results || [], text);

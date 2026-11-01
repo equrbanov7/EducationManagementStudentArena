@@ -174,6 +174,63 @@
             searchInput.addEventListener("keydown", onSearchKeydown);
         }
 
+        // Server axtarışı (2026-11-02): `data-live-search-url` olanda sorğu serverə gedir (`?q=…`) və
+        // variantlar cavabla ({results: [{id, text}]}) əvəzlənir — yerli siyahı ilk N ilə məhdud olanda
+        // (tələbə hərəkəti «Yeni qrup», 50) qalanlar da tapılsın. Seçili variant və placeholder saxlanılır.
+        var remoteQuery = null;
+        var remoteTimer = null;
+        var remoteSeq = 0;
+
+        function scheduleRemoteSearch() {
+            var url = select.getAttribute("data-live-search-url");
+            var query = searchInput.value.trim();
+            if (!url || query === remoteQuery) {
+                return;
+            }
+            remoteQuery = query;
+            window.clearTimeout(remoteTimer);
+            remoteTimer = window.setTimeout(function () {
+                var seq = ++remoteSeq;
+                var target = new URL(url, window.location.href);
+                target.searchParams.set("q", query);
+                target.searchParams.set("limit", "50");
+                fetch(target.toString(), { credentials: "same-origin", headers: { Accept: "application/json" } })
+                    .then(function (response) {
+                        return response.ok ? response.json() : Promise.reject(response.status);
+                    })
+                    .then(function (payload) {
+                        if (seq === remoteSeq) {
+                            replaceRemoteOptions(payload.results || [], query);
+                        }
+                    })
+                    .catch(function () {
+                        remoteQuery = null; // növbəti hərfdə yenidən cəhd
+                    });
+            }, 250);
+        }
+
+        function replaceRemoteOptions(rows, query) {
+            var current = normalizeValue(select.value);
+            Array.prototype.slice.call(select.options).forEach(function (option, index) {
+                var keep = (index === 0 && !option.value) || (current && option.value === current);
+                if (!keep) {
+                    option.remove();
+                }
+            });
+            rows.forEach(function (row) {
+                if (normalizeValue(row.id) === current) {
+                    return;
+                }
+                var option = document.createElement("option");
+                option.value = row.id;
+                option.textContent = row.text;
+                // Server dözümlü axtarışla tapıb — yerli süzgəc onu gizlətməsin.
+                option.setAttribute("data-search", query);
+                select.appendChild(option);
+            });
+            buildMenu();
+        }
+
         function searchActive() {
             return Boolean(searchWrap && searchWrap.parentNode === menu);
         }
@@ -208,6 +265,7 @@
                 searchEmpty.hidden = visible > 0;
             }
             menu.scrollTop = 0; // uyğunluqlar başdan görünsün (köhnə sürüşmə yerində qalmasın)
+            scheduleRemoteSearch();
         }
 
         function focusSearch(event) {
