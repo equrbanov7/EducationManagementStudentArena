@@ -6,6 +6,11 @@ on:
         description: "Aktiv superadmin istifadəçi adı; sabitWCU2026/27metadata ixracı"
         type: string
         required: true
+      journal_batch:
+        description: "Optional pinned chair-cells-NNN read-only journal audit batch"
+        type: string
+        required: false
+        default: ""
 permissions:
   contents: read
 concurrency:
@@ -19,6 +24,7 @@ jobs:
     env:
       APP_CONTAINER: educationmanagementstudentarena-app-1
       ACTOR: ${{ inputs.actor }}
+      JOURNAL_BATCH: ${{ inputs.journal_batch }}
       EXPORT_DIR: /tmp/wcu-workload-export-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -31,8 +37,14 @@ jobs:
           mkdir -m 700 "$RUNNER_TEMP/wcu-workload-export"
           docker exec "$APP_CONTAINER" mkdir -m 700 "$EXPORT_DIR"
           docker cp scripts/data/wcu_workload_export_public.pem "$APP_CONTAINER:$EXPORT_DIR/public.pem"
-          docker exec "$APP_CONTAINER" python manage.py export_wcu_workload_snapshot \
-            --actor "$ACTOR" --public-key "$EXPORT_DIR/public.pem" --output "$EXPORT_DIR/snapshot.enc.json"
+          command=export_wcu_workload_snapshot
+          args=(--actor "$ACTOR" --public-key "$EXPORT_DIR/public.pem" --output "$EXPORT_DIR/snapshot.enc.json")
+          if [ -n "$JOURNAL_BATCH" ]; then
+            [[ "$JOURNAL_BATCH" =~ ^chair-cells-[0-9]{3}$ ]] || { echo "invalid_pinned_journal_batch" >&2; exit 2; }
+            command=export_wcu_journal_cells
+            args+=(--batch "$JOURNAL_BATCH")
+          fi
+          docker exec "$APP_CONTAINER" python manage.py "$command" "${args[@]}"
           docker cp "$APP_CONTAINER:$EXPORT_DIR/snapshot.enc.json" "$RUNNER_TEMP/wcu-workload-export/snapshot.enc.json"
           test -s "$RUNNER_TEMP/wcu-workload-export/snapshot.enc.json"
           sha256sum "$RUNNER_TEMP/wcu-workload-export/snapshot.enc.json"

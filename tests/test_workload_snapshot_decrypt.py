@@ -4,6 +4,8 @@ import base64
 import hashlib
 import importlib.util
 import json
+import os
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -90,7 +92,8 @@ class ExportWorkflowTests(unittest.TestCase):
         workflow = yaml.safe_load(path.read_text())
         triggers = workflow.get("on", workflow.get(True))
         self.assertEqual(set(triggers), {"workflow_dispatch"})
-        self.assertEqual(set(triggers["workflow_dispatch"]["inputs"]), {"actor"})
+        self.assertEqual(set(triggers["workflow_dispatch"]["inputs"]), {"actor", "journal_batch"})
+        self.assertEqual(triggers["workflow_dispatch"]["inputs"]["journal_batch"]["default"], "")
         self.assertEqual(workflow["permissions"], {"contents": "read"})
         self.assertEqual(workflow["concurrency"]["group"], "production-deploy")
         steps = workflow["jobs"]["export"]["steps"]
@@ -99,6 +102,53 @@ class ExportWorkflowTests(unittest.TestCase):
         self.assertTrue(upload["with"]["path"].endswith("/snapshot.enc.json"))
         self.assertNotIn("pg_dump", json.dumps(workflow))
         self.assertNotIn("bypass_rls", json.dumps(workflow))
+
+    def test_pinned_batch_routes_only_reviewed_command_and_rejects_shell_or_unbounded_input(self):
+        import yaml
+
+        root = PATH.parents[2]
+        workflow = yaml.safe_load((root / ".github/workflows/workload-scoped-export.yml").read_text())
+        script = next(
+            step["run"] for step in workflow["jobs"]["export"]["steps"] if step.get("name", "").startswith("Read fixed")
+        )
+        for batch in ("", "chair-cells-001", "../all", "chair-cells-001\n", "$(id)"):
+            with self.subTest(batch=batch), tempfile.TemporaryDirectory() as folder:
+                directory = Path(folder)
+                docker = directory / "docker"
+                docker.write_text(
+                    "#!/usr/bin/env python3\nimport json,os,sys\nfrom pathlib import Path\n"
+                    "args=sys.argv[1:]\n"
+                    "if 'manage.py' in args: Path(os.environ['ARG_LOG']).write_text(json.dumps(args))\n"
+                    "if len(args)>2 and args[0]=='cp' and args[1].startswith('audit-app:'): Path(args[2]).write_text('encrypted-fixture')\n"
+                )
+                docker.chmod(0o700)
+                log = directory / "arguments.json"
+                result = subprocess.run(
+                    ["bash", "-c", script],
+                    cwd=root,
+                    env={
+                        **os.environ,
+                        "PATH": folder + os.pathsep + os.environ["PATH"],
+                        "RUNNER_TEMP": folder,
+                        "APP_CONTAINER": "audit-app",
+                        "ACTOR": "audit-admin",
+                        "EXPORT_DIR": "/tmp/fixed-audit",
+                        "JOURNAL_BATCH": batch,
+                        "ARG_LOG": str(log),
+                    },
+                    capture_output=True,
+                    text=True,
+                )
+                if batch in ("", "chair-cells-001"):
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    args = json.loads(log.read_text())
+                    command = "export_wcu_journal_cells" if batch else "export_wcu_workload_snapshot"
+                    self.assertIn(command, args)
+                    self.assertEqual("--batch" in args, bool(batch))
+                    self.assertTrue((directory / "wcu-workload-export/snapshot.enc.json").is_file())
+                else:
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertFalse(log.exists())
 
 
 class StudentSetTokenTests(unittest.TestCase):
