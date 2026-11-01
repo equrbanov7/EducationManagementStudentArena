@@ -76,7 +76,7 @@ def preview_summary(snapshot):
 @transaction.atomic
 def repair(*, organization, actor, expected_baseline="", apply=False, undo=""):
     # Validate even early idempotent/undo returns. No actor or membership additions.
-    state.validate_fixed_recovery_actor(actor=actor, organization=organization)
+    state.validate_actor(organization, actor, lock=apply)
     if apply:
         state.lock_scope(organization)
     previous = receipts(organization).filter(new_values__kind="apply").first()
@@ -105,13 +105,27 @@ def repair(*, organization, actor, expected_baseline="", apply=False, undo=""):
         (not apply or bool(expected_baseline)) and (not expected_baseline or expected_baseline == baseline),
         "half_pair_fresh_baseline_required",
     )
+    proposal = before
+    if undo and record:
+        original = {r["enrollment_id"]: r for r in record["before"]["preview"]}
+        proposal = {
+            **before,
+            "preview": [
+                {**r, "after_derived": original[r["enrollment_id"]]["before_derived"]} for r in before["preview"]
+            ],
+        }
+    goal = 2 if undo else 1
     result = {
+        "planned_lessons": len(spec.CASES) if before["hours"] != goal else 0,
+        "preserved_marks": sum(c.get("mark_count", len(c.get("marks", ()))) for c in spec.CASES),
+        "raw_qb_count_delta": 0,
+        "raw_own_hours_delta": before["fixed_absent_cells"] * (goal - before["hours"]),
         "baseline": baseline,
         "receipt": str(previous.resource_id) if previous else None,
         "lessons_changed": 0,
         "marks_changed": 0,
         "credits_changed": 0,
-        **preview_summary(before),
+        **preview_summary(proposal),
     }
     if record:
         state.require(

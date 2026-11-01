@@ -1,4 +1,4 @@
-"""Exactly two source-proven hours-only corrections; never modify a journal cell."""
+"""Three source-proven own-class hours-only corrections; never modify a journal cell."""
 
 import json
 
@@ -63,8 +63,8 @@ class Command(BaseCommand):
             self.stderr.write("reviewed_half_pair_guard: " + token)
             self.stderr.write("reviewed_half_pair_diagnostic: " + render(describe(exc, "capture")))
             # Only code-owned finite refusal tokens, never arbitrary source/SQL values.
-            raise CommandError("half_pair_review_refused") from exc
+            raise CommandError("half_pair_review_refused") from None
         except (ObjectDoesNotExist, ValidationError, DatabaseError, OSError, ValueError) as exc:
             self.stderr.write("reviewed_half_pair_diagnostic: " + render(describe(exc, "capture")))
-            raise CommandError("half_pair_current_scope_unavailable") from exc
+            raise CommandError("half_pair_current_scope_unavailable") from None
         self.stdout.write("reviewed_half_pair_hours: " + json.dumps(result, sort_keys=True))

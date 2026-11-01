@@ -1,11 +1,14 @@
-"""Locked source/current scope and credit-aware previews for exactly two existing lessons."""
+"""Locked source/current scope and credit-aware previews for three compiled own classes."""
 
 import datetime as dt
+import json
+from decimal import Decimal
 
 from django.db.models import Q
 
 from . import reviewed_half_pair_spec as spec
 from .four_cell_recovery_history import validate_fixed_recovery_actor
+from .group_projection import project_group_settings
 from .repair_fingerprints import academic_queries, queryset_database_fingerprint
 from .sbio235_state import RepairError, digest, model, records
 
@@ -16,8 +19,11 @@ def require(condition, code):
 
 
 def bounded(query, *, lock=False, cap=5000):
-    require(query.count() <= cap, "half_pair_row_budget")
-    return records(query, lock=lock)
+    if lock:
+        query = query.select_for_update()
+    rows = list(query.order_by("pk").values()[: cap + 1])
+    require(len(rows) <= cap, "half_pair_row_budget")
+    return json.loads(json.dumps(rows, default=str))
 
 
 def lock_scope(org):
@@ -36,8 +42,92 @@ def lock_scope(org):
     list(family.order_by("pk").select_for_update())
 
 
-def capture(org, actor, *, hours, lock=False, correction_ids=()):
+def historical_scope(org, *, lock):
+    if not any(c.get("authority") == "historical_own_class_only_no_current_assignment" for c in spec.CASES):
+        return {}
+    pin = spec.HISTORICAL_ROW
+    row = model("workload.TeachingTaskRow").objects.filter(organization=org, pk=pin["id"])
+    require(row.count() == 1, "half_pair_historical_row_missing")
+    obj = row.first()
+    require(
+        all(str(getattr(obj, key)) == str(value) for key, value in pin["fields"].items()),
+        "half_pair_historical_zero_allocation_row_changed",
+    )
+    assignments = model("workload.TeacherAssignment").objects.filter(organization=org, row_id=pin["id"])
+    require(not assignments.exists(), "half_pair_historical_allocation_graph_changed")
+    require(
+        set(str(pk) for pk in obj.groups.values_list("pk", flat=True)) == {pin["group_id"]},
+        "half_pair_historical_group_geometry_changed",
+    )
+    group_query = model("organizations.OrgUnit").objects.filter(organization=org, pk=spec.HISTORICAL_GROUP["id"])
+    require(group_query.count() == 1, "half_pair_historical_group_missing")
+    group = group_query.first()
+    for key in ("id", "parent_id", "is_active", "unit_type"):
+        require(
+            str(getattr(group, key)) == str(spec.HISTORICAL_GROUP[key]), "half_pair_historical_group_identity_changed"
+        )
+    tenant_groups = model("organizations.OrgUnit").objects.filter(organization=org)
+    require(tenant_groups.count() <= 5000, "half_pair_group_identity_budget")
+    require(
+        project_group_settings(group.settings, canonical_group_ids=tenant_groups.values_list("pk", flat=True))
+        == spec.HISTORICAL_GROUP["settings"],
+        "half_pair_historical_group_geometry_changed",
+    )
+    bridge = model("legacy_import.LegacyEntityMap")
+    scope = Q(pk__in=[])
+    for pinrow in spec.HISTORICAL_BRIDGE:
+        scope |= Q(
+            entity_type=pinrow["entity_type"], legacy_pk=pinrow["legacy_pk"], source_system=pinrow["source_system"]
+        )
+    bridge_query = bridge.objects.filter(scope, organization=org)
+    rows = bounded(bridge_query, lock=lock, cap=8)
+    actual = {r["id"]: r for r in rows}
+    require(set(actual) == {r["id"] for r in spec.HISTORICAL_BRIDGE}, "half_pair_historical_dimension_bridge_conflict")
+    for expected in spec.HISTORICAL_BRIDGE:
+        require(
+            all(str(actual[expected["id"]][key]) == str(value) for key, value in expected.items()),
+            "half_pair_historical_dimension_bridge_changed",
+        )
+    through = row.first().groups.through.objects.filter(teachingtaskrow_id=obj.pk)
+    for query in (row, assignments, through, group_query):
+        bounded(query, lock=lock, cap=50)
+    return {
+        "row": queryset_database_fingerprint(row),
+        "assignments": queryset_database_fingerprint(assignments),
+        "row_groups": queryset_database_fingerprint(through),
+        "dimension_bridge": {"count": len(rows), "sha256": digest(rows)},
+        "group": queryset_database_fingerprint(group_query),
+    }
+
+
+def mark_pin(row):
+    return (
+        str(row[0]),
+        str(row[1]),
+        row[2],
+        format(Decimal(str(row[3])).normalize(), "f") if row[3] is not None else None,
+        row[4],
+    )
+
+
+def validate_actor(org, actor, *, lock=False):
     validate_fixed_recovery_actor(actor=actor, organization=org)
+    profile = model("accounts.UserProfile").objects.filter(
+        user=actor,
+        access_state="active",
+        is_deleted=False,
+        deleted_at__isnull=True,
+        deleted_by__isnull=True,
+        blocked_at__isnull=True,
+        blocked_by__isnull=True,
+    )
+    if lock:
+        profile = profile.select_for_update()
+    require(profile.exists(), "half_pair_active_actor_profile_required")
+
+
+def capture(org, actor, *, hours, lock=False, correction_ids=()):
+    validate_actor(org, actor, lock=lock)
     ids = [c["offering"]["id"] for c in spec.CASES]
     courses = model("registrar.CourseOffering").objects.filter(organization=org, pk__in=ids).order_by("pk")
     if lock:
@@ -61,8 +151,7 @@ def capture(org, actor, *, hours, lock=False, correction_ids=()):
         "half_pair_official_assignment_changed",
     )
     require(
-        set(str(pk) for pk in row.first().groups.values_list("pk", flat=True))
-        == {c["offering"]["group_id"] for c in spec.CASES},
+        set(str(pk) for pk in row.first().groups.values_list("pk", flat=True)) == set(spec.ALLOCATION_GROUPS),
         "half_pair_official_group_geometry_changed",
     )
     require(
@@ -91,6 +180,7 @@ def capture(org, actor, *, hours, lock=False, correction_ids=()):
                 require(False, "half_pair_prior_direct_hours_edit_requires_review")
     lessons = []
     touched = set()
+    fixed_absent_cells = 0
     for case in spec.CASES:
         query = model("registrar.Lesson").objects.filter(organization=org, pk=case["lesson"]["id"])
         if lock:
@@ -103,11 +193,15 @@ def capture(org, actor, *, hours, lock=False, correction_ids=()):
             require(str(actual) == str(value), "half_pair_current_lesson_identity_changed")
         require(lesson.hours == hours, "half_pair_hours_changed")
         marks = model("registrar.LessonMark").objects.filter(organization=org, lesson=lesson)
-        actual = {
-            (str(r[0]), str(r[1]), *r[2:])
-            for r in marks.values_list("id", "enrollment_id", "status", "score", "entered_by_id")
-        }
-        require(actual == {tuple(r) for r in case["marks"]}, "half_pair_source_proven_marks_changed")
+        actual = {mark_pin(r) for r in marks.values_list("id", "enrollment_id", "status", "score", "entered_by_id")}
+        if "marks_sha256" in case:
+            require(
+                len(actual) == case["mark_count"] and digest(sorted(actual)) == case["marks_sha256"],
+                "half_pair_source_proven_marks_changed",
+            )
+        else:
+            require(actual == {mark_pin(r) for r in case["marks"]}, "half_pair_source_proven_marks_changed")
+        fixed_absent_cells += sum(r[2] == "absent" for r in actual)
         touched.update(r[1] for r in actual)
         corrections = model("registrar.LessonCorrection").objects.filter(organization=org, lesson=lesson)
         require(
@@ -168,14 +262,18 @@ def capture(org, actor, *, hours, lock=False, correction_ids=()):
         if not credit["reverses_id"] and credit["id"] not in reversed_ids:
             active[credit["enrollment_id"]] = active.get(credit["enrollment_id"], 0) + credit["hours"]
     # Protect every raw field, not only status/value. Exclude only sanctioned hour/cache fields.
-    protected = {}
+    protected = {"historical_authority_no_rights_granted": historical_scope(org, lock=lock)}
     for name, query in academic_queries(organization_id=org.pk, offerings=family_courses).items():
         if name == "lesson":
             query = query.exclude(pk__in=[lesson.pk for lesson in lessons])
         if name == "enrollment":
             query = query.values(*[f.attname for f in enr._meta.concrete_fields if f.name != "absence_hours"])
-        require(query.count() <= 50000, "half_pair_protected_row_budget")
-        protected[name] = queryset_database_fingerprint(query)
+        # One bounded SQL probe also fingerprints the complete accepted set.
+        # cap+1 is rejected, never presented as a truncated full fingerprint.
+        probe = query.order_by("pk").values("pk")[:50001]
+        fingerprint = queryset_database_fingerprint(query.filter(pk__in=probe))
+        require(fingerprint["count"] <= 50000, "half_pair_protected_row_budget")
+        protected[name] = fingerprint
     for name, query in {"credits": credit_query, "row": row, "assignments": assignments}.items():
         protected[name] = queryset_database_fingerprint(query)
     journal_corrections = model("registrar.JournalCorrection").objects.filter(
@@ -274,6 +372,7 @@ def capture(org, actor, *, hours, lock=False, correction_ids=()):
             }
         )
     return {
+        "fixed_absent_cells": fixed_absent_cells,
         "available_grade_audits": digest(audit_rows),
         "corrections": correction_fingerprint,
         "reversals": reversal_fingerprint,

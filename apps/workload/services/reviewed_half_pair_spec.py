@@ -1,14 +1,20 @@
-"""Fixed source-proven October15 half-pair lessons; no arbitrary target registry."""
+"""Three source-proven own classes; no foreign-copy repair or teaching-right grant."""
 
 ORG = "526cfa63-4f80-4bba-a7a7-61c8fbb3d918"
-RESOURCE = "workload.reviewed_half_pair_hours"
+
+RESOURCE = "workload.reviewed_half_pair_hours_v3"
+
 ROW = "729e017c-e22d-4439-9f26-a45f17644c69"
+
 ASSIGNMENTS = {
     "65134326-501a-4bb2-9789-048df6344e39": (8425, "seminar", 15, False),
     "96f1e7d8-7826-482c-b428-0aa51cc272e8": (8425, "lecture", 30, False),
 }
-SOURCE_PROOF_SHA = "7b4d0f118439f7eb0d7875c9c606e8376cfdf2fee41004e3244c05887f0e509c"
+
+SOURCE_PROOF_SHA = "127a1dbe67fcc2f1e5aa9756988032cd6d3b0c36ef8d3be934ee5d79cc4ec96a"
+
 SOURCE_UNIT = "documented_post2024_pair_0.5_to_academic1"
+
 CASES = [
     {
         "offering": {
@@ -108,10 +114,42 @@ CASES = [
             ("fb7d8dc9-0e31-4d44-871a-12e612c8389e", "c5d02616-7e33-4122-ae53-a82ad814a2b8", "present", None, None),
         ],
     },
+    {
+        "offering": {
+            "id": "9b4eac07-c2b8-49d1-b415-2a6cce779373",
+            "group_id": "eee00e67-ca42-48b9-8217-dd03027855aa",
+            "instructor_id": 8425,
+            "is_active": True,
+            "lesson_hours": 45,
+            "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+            "subject_id": "255a9553-35e4-4603-85c9-17e8cea7d46b",
+        },
+        "lesson": {
+            "id": "d9ebc358-d775-44d6-bf90-0a6d6bb15ceb",
+            "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+            "offering_id": "9b4eac07-c2b8-49d1-b415-2a6cce779373",
+            "date": "2026-10-15",
+            "start_time": "16:55:00",
+            "end_time": None,
+            "kind": "seminar",
+            "created_by_id": None,
+            "instructor_id": None,
+            "is_legacy_synthesised": False,
+            "room_id": 271,
+            "syllabus_week": 5,
+            "topic": "Cloud Storage Object, Block, File, Storage Classes, Backup, DR",
+        },
+        "source_journal_id": 14938,
+        "source_metadata_id": 319858,
+        "source_metadata_sha256": "d9447000d7984e72db733eb007d8aaab9a7de3c4ea1c9b6ebe51850e0a0c56b0",
+        "authority": "historical_own_class_only_no_current_assignment",
+        "mark_count": 34,
+        "marks_sha256": "071c9f3eee8e0a22ec099f7e393bbed29b0d5880eb53d0f1919807fa1c3a9651",
+    },
 ]
 
 GUARDS = (
-    "half_pair_receipt_source_scope_changed",
+    "half_pair_active_actor_profile_required",
     "half_pair_canonical_counter_mismatch",
     "half_pair_counter_family_changed",
     "half_pair_course_family_budget",
@@ -126,6 +164,15 @@ GUARDS = (
     "half_pair_fixed_courses_missing",
     "half_pair_fixed_tenant_required",
     "half_pair_fresh_baseline_required",
+    "half_pair_group_identity_budget",
+    "half_pair_historical_allocation_graph_changed",
+    "half_pair_historical_dimension_bridge_changed",
+    "half_pair_historical_dimension_bridge_conflict",
+    "half_pair_historical_group_geometry_changed",
+    "half_pair_historical_group_identity_changed",
+    "half_pair_historical_group_missing",
+    "half_pair_historical_row_missing",
+    "half_pair_historical_zero_allocation_row_changed",
     "half_pair_hours_changed",
     "half_pair_lock_scope_budget",
     "half_pair_mark_enrollment_tenant_conflict",
@@ -138,6 +185,7 @@ GUARDS = (
     "half_pair_private_source_required",
     "half_pair_protected_data_changed",
     "half_pair_protected_row_budget",
+    "half_pair_receipt_source_scope_changed",
     "half_pair_reversal_refused",
     "half_pair_review_refused",
     "half_pair_row_budget",
@@ -149,3 +197,76 @@ GUARDS = (
     "half_pair_undone_requires_review",
     "half_pair_unresolved_grade_audit",
 )
+
+TWO_CASE_SOURCE_SHA = "7b4d0f118439f7eb0d7875c9c606e8376cfdf2fee41004e3244c05887f0e509c"
+
+ALLOCATION_GROUPS = ["2b471dec-7783-49f1-b17e-cb9acae77f31", "9974b86c-6df9-4565-9002-c67ac2ba18da"]
+
+HISTORICAL_ROW = {
+    "id": "f14f2953-5c83-420c-bf64-668c074b0332",
+    "group_id": "eee00e67-ca42-48b9-8217-dd03027855aa",
+    "fields": {
+        "task_id": "b27fed69-e18d-4f33-b183-f46810c13d29",
+        "subject_id": "255a9553-35e4-4603-85c9-17e8cea7d46b",
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "lecture_plan": 30,
+        "lecture_total": 0,
+        "seminar_plan": 15,
+        "seminar_total": 0,
+        "total_hours": 0,
+        "union_count": 0,
+        "subgroup_count": 0,
+    },
+    "positive_current_allocations": 0,
+}
+
+HISTORICAL_BRIDGE = [
+    {
+        "id": "3dc5ba4a-6465-4919-a78b-f64b4731477f",
+        "source_system": "myedu_mariadb",
+        "entity_type": "worker",
+        "legacy_pk": "987",
+        "source_row_hash": "38aa390422e3ca07d5c1966a4064d226349b2aa51fbfac1b79910de1ed4e5749",
+        "state": "migrated",
+        "target_model_label": "auth.user",
+        "target_pk": "8425",
+    },
+    {
+        "id": "8f9cd3ce-bb7d-4c07-a21a-18277830c58c",
+        "source_system": "myedu_mariadb",
+        "entity_type": "worker_materialisation",
+        "legacy_pk": "987",
+        "source_row_hash": "dfb3f013194265e3c0277a3499ff94ba14b3facec320755d9df4ec269e60c7a8",
+        "state": "migrated",
+        "target_model_label": "auth.user",
+        "target_pk": "8425",
+    },
+    {
+        "id": "a235d228-b134-4c6a-b41f-2849b4b5b1dc",
+        "source_system": "myedu_mariadb",
+        "entity_type": "group_unit",
+        "legacy_pk": "803",
+        "source_row_hash": "d613ea9d63ec04ee4caa56956877ef7292db36726e1c6e7f0abfb58f3012cb0e",
+        "state": "migrated",
+        "target_model_label": "organizations.orgunit",
+        "target_pk": "eee00e67-ca42-48b9-8217-dd03027855aa",
+    },
+    {
+        "id": "efd2026d-2d95-4e75-ba87-0c08e313b502",
+        "source_system": "myedu_mariadb",
+        "entity_type": "lesson_subject",
+        "legacy_pk": "2488",
+        "source_row_hash": "ea863aa2a0ecb23bf5405110265ebc4e2c9bea8022af6b74bd7cfad20c696b27",
+        "state": "migrated",
+        "target_model_label": "registrar.subject",
+        "target_pk": "255a9553-35e4-4603-85c9-17e8cea7d46b",
+    },
+]
+
+HISTORICAL_GROUP = {
+    "id": "eee00e67-ca42-48b9-8217-dd03027855aa",
+    "is_active": True,
+    "parent_id": "167cf0ad-8089-4929-98c1-5405797e229f",
+    "settings": {"degree_level": "bachelor", "education_form": "full_time", "sector": "en"},
+    "unit_type": "group",
+}
