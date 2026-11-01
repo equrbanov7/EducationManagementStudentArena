@@ -32,6 +32,8 @@ T = datetime.time
 
 
 class InferTimetableRoomsTest(TestCase):
+    """Tarixi NULL müəllif/saat və otaq ehtimalları yalnız açıq legacy rejimindədir."""
+
     @classmethod
     def setUpTestData(cls):
         today = timezone.localdate()
@@ -115,10 +117,18 @@ class InferTimetableRoomsTest(TestCase):
                 kind=SlotKind.SEMINAR,
             )
 
-    def _call(self, *args) -> dict:
+    def _call(self, *args, legacy=True) -> dict:
         out = StringIO()
+        flags = ("--legacy-heuristics",) if legacy else ()
         call_command(
-            "infer_timetable_from_lessons", "--org", "itm-univ", "--period", "Payız 2026/2027", *args, stdout=out
+            "infer_timetable_from_lessons",
+            *flags,
+            "--org",
+            "itm-univ",
+            "--period",
+            "Payız 2026/2027",
+            *args,
+            stdout=out,
         )
         return _counts(out.getvalue())
 
@@ -152,6 +162,44 @@ class InferTimetableRoomsTest(TestCase):
         self.assertEqual(self._room(2), ["A-101"])
         self.assertEqual(self._room(6), [""])
         self.assertEqual(self._call("--apply", "--i-know-this-is-production")["rooms_filled"], "0")
+
+    def test_strict_default_does_not_infer_from_unattributed_missing_end_history(self):
+        counts = self._call("--apply", "--i-know-this-is-production", legacy=False)
+        self.assertEqual((counts["written"], counts["rooms_filled"]), ("0", "0"))
+        self.assertEqual(self._room(1), [])
+        self.assertEqual(self._room(2), [])
+        self.assertEqual(self._room(6), [""])  # rəsmi slot saxlanır
+
+    def test_strict_default_uses_own_room_but_never_borrows_another_courses_room(self):
+        from apps.workload.models import TeacherAssignment, TeachingTask, TeachingTaskRow
+
+        with bypass_rls():
+            chair = OrgUnit.objects.create(
+                organization=self.org, name="ITM chair", slug="itm-chair", unit_type=OrgUnitType.CHAIR
+            )
+            task = TeachingTask.objects.create(
+                organization=self.org, chair=chair, academic_year=self.period.academic_year, status="distributed"
+            )
+            for index, kind, end in ((1, "lecture", T(10)), (2, "seminar", T(11, 40))):
+                offering = self.o[index]
+                Lesson.objects.filter(offering=offering).update(instructor=self.teacher, end_time=end)
+                row = TeachingTaskRow.objects.create(
+                    organization=self.org,
+                    task=task,
+                    period=self.period,
+                    subject=offering.subject,
+                    **{kind + "_total": 30},
+                )
+                row.groups.add(offering.group)
+                TeacherAssignment.objects.create(
+                    organization=self.org, row=row, teacher=self.teacher, activity=kind, hours=30
+                )
+        counts = self._call("--apply", "--i-know-this-is-production", legacy=False)
+        self.assertEqual(counts["written"], "2")
+        self.assertEqual(self._room(1), ["B-202"])  # öz dərslərindən real otaq
+        self.assertEqual(self._room(2), [""])  # eyni müəllimin başqa dərsindən otaq götürülmür
+        self.assertEqual((counts["room_from_teacher"], counts["room_from_teacher_slot"]), ("0", "0"))
+        self.assertEqual(self._room(6), [""])  # rəsmi docx slotu yenə dəyişmir
 
 
 class MostUsedRoomTest(SimpleTestCase):
