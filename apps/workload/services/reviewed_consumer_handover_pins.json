@@ -1,0 +1,89 @@
+{
+  "bridge": [
+    {
+      "entity_type": "group_unit",
+      "legacy_pk": "657",
+      "target_model_label": "organizations.orgunit",
+      "target_pk": "a5841412-893b-43db-8e65-47214bcd7f51",
+      "state": "migrated",
+      "source_row_hash": "51c4c6acd5d97036e100aa78bdad6a7ad1f8d259ec93d39d189b58bf0b452157",
+      "transform_version": "rehearsal-identity-v1.3770759730bc"
+    },
+    {
+      "entity_type": "lesson_subject",
+      "legacy_pk": "1478",
+      "target_model_label": "registrar.subject",
+      "target_pk": "ca51bef9-4364-448b-b1e4-aeb9d507d5c3",
+      "state": "migrated",
+      "source_row_hash": "35e3ffb776db96c250accd581bf9517948b959ffa00ff6688ff176856bcc15fd",
+      "transform_version": "rehearsal-identity-v1.3770759730bc"
+    },
+    {
+      "entity_type": "worker",
+      "legacy_pk": "613",
+      "target_model_label": "auth.user",
+      "target_pk": "8103",
+      "state": "migrated",
+      "source_row_hash": "04be3017b43ab579339452ab2bca62e17a9fdbdba7651225b74f736075b9bda1",
+      "transform_version": "rehearsal-identity-v1.3770759730bc"
+    },
+    {
+      "entity_type": "worker",
+      "legacy_pk": "774",
+      "target_model_label": "auth.user",
+      "target_pk": "8218",
+      "state": "migrated",
+      "source_row_hash": "0eef71fdd5804071313e206c69eecbbd0b36cc45ca0c2c0fff516cbd894665bb",
+      "transform_version": "rehearsal-identity-v1.3770759730bc"
+    },
+    {
+      "entity_type": "worker_materialisation",
+      "legacy_pk": "613",
+      "target_model_label": "auth.user",
+      "target_pk": "8103",
+      "state": "migrated",
+      "source_row_hash": "5efe62219a7c152d3f28eeab047b999d3ae4ab0bdc67de7465853c08e2076b1b",
+      "transform_version": "rehearsal-identity-v1.3770759730bc"
+    },
+    {
+      "entity_type": "worker_materialisation",
+      "legacy_pk": "774",
+      "target_model_label": "auth.user",
+      "target_pk": "8218",
+      "state": "migrated",
+      "source_row_hash": "94bba5e88cc9c64b03812dbb8bb35e3d8eca3dbd5ab4ba2fa008d22ce0ade6cc",
+      "transform_version": "rehearsal-identity-v1.3770759730bc"
+    }
+  ],
+  "safe_guards": [
+    "consumer_active_share_requires_review",
+    "consumer_actor_scope_refused",
+    "consumer_assignment_identity_changed",
+    "consumer_canonical_handover_blocked",
+    "consumer_closed_journal",
+    "consumer_corrected_without_matching_receipt",
+    "consumer_course_identity_changed",
+    "consumer_current_handover_time_required",
+    "consumer_exact_handover_count_required",
+    "consumer_exact_receipt_required",
+    "consumer_exact_undo_failed",
+    "consumer_exact_undo_write_count",
+    "consumer_fixed_allocation_changed",
+    "consumer_fixed_course_required",
+    "consumer_fixed_tenant_required",
+    "consumer_fresh_baseline_required",
+    "consumer_fresh_counts_changed",
+    "consumer_full_graph_preservation_failed",
+    "consumer_handover_identity_changed",
+    "consumer_handover_undo_metadata_changed",
+    "consumer_other_positive_allocation",
+    "consumer_postgresql_required",
+    "consumer_prior_receipt_requires_review",
+    "consumer_source_bridge_changed",
+    "consumer_teacher_identity_changed",
+    "consumer_teacher_not_assignable",
+    "consumer_two_live_teachers_required",
+    "consumer_undo_state_changed",
+    "consumer_unknown_handover"
+  ]
+}
