@@ -15,6 +15,7 @@ HEX = r"[a-f0-9]{64}"
 UUID = r"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
 PREFIX = "reviewed_two_catalog: "
 CONTEXTS = {"repair_reviewed_two_catalog": (PREFIX, 2), "repair_reviewed_vefa_catalog": ("reviewed_vefa_catalog: ", 1)}
+CONTEXTS["repair_reviewed_catalog_load_chain"] = ("reviewed_catalog_load_chain: ", 3)
 
 
 class Refused(ValueError):
@@ -78,8 +79,8 @@ def summary(raw, *, apply, undo, baseline="", prefix=PREFIX, expected_rows=2):
         status not in allowed
         or changed != str(int(status in {"applied", "undone"}))
         or rows != ("0" if repeated else str(expected_rows))
-        or int(models) > 115
-        or int(protected_rows) > 20000
+        or int(models) > (230 if expected_rows == 3 else 115)
+        or int(protected_rows) > (40000 if expected_rows == 3 else 20000)
     ):
         raise ValueError("two_catalog_summary_mode_scope_changed")
     if (receipt == "none") != (status == "dry_run") or baseline and actual_baseline != baseline:
@@ -92,7 +93,7 @@ def summary(raw, *, apply, undo, baseline="", prefix=PREFIX, expected_rows=2):
 def safe_failure(stderr):
     if not isinstance(stderr, str) or len(stderr) > 65536:
         return "reviewed_two_catalog_command_refused"
-    match = re.fullmatch(r"CommandError: (two_catalog_[a-z0-9_]+)\n?", stderr)
+    match = re.fullmatch(r"CommandError: ((?:two_catalog|catalog_chain)_[a-z0-9_]+)\n?", stderr)
     if match:
         spec = importlib.util.spec_from_file_location(
             "fixed_two_catalog_codes", ROOT / "apps/workload/services/reviewed_two_catalog_spec.py"
@@ -111,6 +112,8 @@ def execute(value, env, *, command="repair_reviewed_two_catalog", prefix=PREFIX,
     if CONTEXTS.get(command) != (prefix, expected_rows):
         raise ValueError("fixed_catalog_context_required")
     actor, args, apply, undo = inputs(value)
+    if expected_rows == 3 and undo:
+        raise ValueError("fixed_chain_no_undo_input")
     if any(
         not isinstance(env.get(key), str) or not re.fullmatch(r"[1-9][0-9]*", env[key])
         for key in ("GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT")

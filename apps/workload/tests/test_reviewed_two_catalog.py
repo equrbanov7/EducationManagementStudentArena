@@ -306,10 +306,18 @@ class TwoCatalogTests(TestCase):
 
         with CaptureQueriesContext(connection) as captured:
             data = collect_two_catalog_references()
-        self.assertTrue(data["two_catalog_reference_scope"]["schema_matches_reviewed"])
-        self.assertFalse(data["two_catalog_reference_scope"]["eligible_for_apply"])
+        self.assertTrue(data["two_catalog_reference_scope"][0]["schema_matches_reviewed"])
+        self.assertFalse(data["two_catalog_reference_scope"][0]["eligible_for_apply"])
+        fields = {key: sorted({field for row in values for field in row}) for key, values in data.items()}
+        self.assertEqual(fields["two_catalog_reference_scope"], sorted(data["two_catalog_reference_scope"][0]))
         graph = {r["model"]: r for r in data["two_catalog_reference_graph"]}
         self.assertGreater(graph["syllabus.SyllabusVersion"]["count"], 2)
+        native = state.snapshot(self.org)["protected"]
+        derived = {
+            label: {"count": node["count"], "sha256": node.get("subject_invariant_sha256", node["sha256"])}
+            for label, node in graph.items()
+        }
+        self.assertEqual(derived, native)
         self.assertNotIn("Meaningful human draft", json.dumps(data))
         self.assertFalse(
             any(q["sql"].lstrip().upper().startswith(("INSERT", "UPDATE", "DELETE", "ALTER")) for q in captured)

@@ -116,3 +116,26 @@ class TwoCatalogHostTests(TestCase):
         self.assertEqual(docker.call_count, 1)
         self.assertIn("repair_reviewed_vefa_catalog", docker.call_args.args[0])
         self.assertNotIn("repair_reviewed_two_catalog", docker.call_args.args[0])
+
+    def test_atomic_three_context_is_fixed_and_supports_two_graph_budgets(self):
+        line = (
+            self.line.replace("reviewed_two_catalog:", "reviewed_catalog_load_chain:")
+            .replace("rows=2", "rows=3")
+            .replace("models=20", "models=150")
+        )
+        with (
+            patch.object(self.host, "verify_head"),
+            patch.object(
+                self.host.subprocess, "run", return_value=SimpleNamespace(returncode=0, stdout=line, stderr="")
+            ) as docker,
+            contextlib.redirect_stdout(StringIO()),
+        ):
+            result = self.host.execute(
+                self.inputs,
+                self.env,
+                command="repair_reviewed_catalog_load_chain",
+                prefix="reviewed_catalog_load_chain: ",
+                expected_rows=3,
+            )
+        self.assertEqual(result, line)
+        self.assertIn("repair_reviewed_catalog_load_chain", docker.call_args.args[0])

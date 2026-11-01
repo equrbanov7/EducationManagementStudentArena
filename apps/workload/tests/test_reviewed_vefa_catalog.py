@@ -76,8 +76,8 @@ class VefaCatalogTests(TestCase):
 
     def test_readonly_full_graph_and_command_are_single_case_and_safe(self):
         data = collect_vefa_catalog_references()
-        self.assertEqual(data["vefa_catalog_reference_scope"]["rows"], [self.pin["row_id"]])
-        self.assertFalse(data["vefa_catalog_reference_scope"]["eligible_for_apply"])
+        self.assertEqual(data["vefa_catalog_reference_scope"][0]["rows"], [self.pin["row_id"]])
+        self.assertFalse(data["vefa_catalog_reference_scope"][0]["eligible_for_apply"])
         output = StringIO()
         call_command("repair_reviewed_vefa_catalog", actor=self.actor.username, stdout=output)
         self.assertIn("reviewed_vefa_catalog: status=dry_run rows=1 applied=0", output.getvalue())

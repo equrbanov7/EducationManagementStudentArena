@@ -29,16 +29,24 @@ def collect_two_catalog_references(*, contract=spec, prefix="two_catalog"):
         },
         lock=False,
     )
+    projected = reference_metadata(rows)
+    for node in projected:
+        if node["model"] == "workload.TeachingTaskRow":
+            node["subject_invariant_sha256"] = digest(
+                [{k: v for k, v in row.items() if k != "subject_id"} for row in rows[node["model"]]]
+            )
     return {
-        prefix + "_reference_graph": reference_metadata(rows),
+        prefix + "_reference_graph": projected,
         prefix
-        + "_reference_scope": {
-            "source_sha256": digest([p["source"] for p in contract.CASES]),
-            "schema_sha256": digest(schema.fingerprints()),
-            "schema_matches_reviewed": schema.fingerprints() == contract.SCHEMA,
-            "eligible_for_apply": False,
-            "source_validation_only_no_copy": True,
-            "offerings": sorted(offerings),
-            "rows": sorted(p["row_id"] for p in contract.CASES),
-        },
+        + "_reference_scope": [
+            {
+                "source_sha256": digest([p["source"] for p in contract.CASES]),
+                "schema_sha256": digest(schema.fingerprints()),
+                "schema_matches_reviewed": schema.fingerprints() == contract.SCHEMA,
+                "eligible_for_apply": False,
+                "source_validation_only_no_copy": True,
+                "offerings": sorted(offerings),
+                "rows": sorted(p["row_id"] for p in contract.CASES),
+            }
+        ],
     }

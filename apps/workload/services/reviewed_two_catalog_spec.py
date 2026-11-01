@@ -75,3 +75,17 @@ SAFE_GUARDS = frozenset(
         "two_catalog_unreviewed_workload_graph",
     ]
 )
+
+SAFE_GUARDS = SAFE_GUARDS | frozenset(
+    [
+        "catalog_chain_exact_receipt_required",
+        "catalog_chain_fixed_disjoint_contracts_required",
+        "catalog_chain_fresh_baseline_required",
+        "catalog_chain_native_apply_required",
+        "catalog_chain_native_repeat_required",
+        "catalog_chain_partial_existing_state",
+        "catalog_chain_protected_graph_changed",
+        "catalog_chain_reviewed_guard_failed",
+        "catalog_chain_snapshot_failed",
+    ]
+)

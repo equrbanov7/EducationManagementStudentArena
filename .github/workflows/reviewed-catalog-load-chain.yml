@@ -1,0 +1,36 @@
+name: Reviewed fixed three load FKs atomic source chain
+on:
+  workflow_dispatch:
+    inputs:
+      actor:
+        description: "Aktiv təşkilat superadmini"
+        type: string
+        required: true
+      expected_graph:
+        description: "Eyni HEAD üzrə şifrəli təzə PRE-də iki sabit graph-ın birgə SHA256"
+        type: string
+        default: ""
+      apply:
+        description: "Nigar+Aruz və sonra Vəfa fallback: yalnız 3 yük FK, bir atomik əməliyyat"
+        type: boolean
+        default: false
+      confirm:
+        description: "Tətbiq üçün APPLY"
+        type: string
+        default: ""
+permissions:
+  contents: read
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  reviewed:
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Fixed PRE graph bound dry apply and zero-write repeat
+        run: python3 scripts/ops/reviewed_catalog_load_chain.py

@@ -58,7 +58,9 @@ def actor_scope(org, actor, *, contract=spec):
 
 def _identity(org, pin, contract=spec):
     Offering = model("registrar.CourseOffering")
-    objects = list(Offering._base_manager.select_for_update().filter(pk__in=pin["offerings"]).order_by("pk"))
+    objects = list(
+        Offering._base_manager.select_for_update().filter(pk__in=pin["offerings"], organization=org).order_by("pk")
+    )
     require({str(o.pk) for o in objects} == set(pin["offerings"]), "two_catalog_fixed_courses_missing")
     for obj in objects:
         require(
