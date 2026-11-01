@@ -41,7 +41,7 @@ from contextlib import nullcontext
 from decimal import Decimal
 
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Q, Sum
 from django.utils import timezone
 
 from apps.registrar import grade_audit, journal_edit_windows
@@ -382,7 +382,7 @@ def _differs(mark, entry, lesson) -> bool:
 def recompute_absence_hours_many(enrollments) -> dict:
     """``{enrollment_id: saat}`` — bir neçə qeydiyyatın qayıb saatı TOPLU (sətir sayından asılı deyil).
 
-    Sorğular: 1 aqreqat (öz q/b xanaları) + yalnız «alt qrupdan əlavə» sətir varsa
+    Sorğular: 1 aqreqat (öz q/b xanaları və dəqiq keçid) + əvvəlki qeydiyyat varsa
     birləşmə köçürməsi (:func:`guest_merge.carry_over_map`, 2 toplu) + dəyişən
     sayğaclar üçün 1 toplu ``UPDATE``. Qayda :func:`recompute_absence_hours` ilə
     birə-birdir (o, bunu tək sətirlə çağırır). Üzrlü güzəştlər bir toplu
@@ -395,6 +395,8 @@ def recompute_absence_hours_many(enrollments) -> dict:
         return {}
     # Historical source-cell changes also refresh their active target counter.
     # Use raw cells + credits below, never a predecessor's cached counter.
+    from .enrollment_history import annotate_predecessor, predecessors
+
     by_id = {row.pk: row for row in enrollments}
     pending = list(enrollments)
     while pending:
@@ -404,7 +406,9 @@ def recompute_absence_hours_many(enrollments) -> dict:
         pending = (
             list(
                 Enrollment.objects.filter(
-                    pk__in=successor_ids,
+                    pk__in=predecessors()
+                    .filter(pk__in=[row.pk for row in pending], superseded_by_id__in=successor_ids)
+                    .values("superseded_by_id"),
                     organization_id__in={row.organization_id for row in pending},
                 )
             )
@@ -413,17 +417,20 @@ def recompute_absence_hours_many(enrollments) -> dict:
         )
         by_id.update((row.pk, row) for row in pending)
     enrollments = list(by_id.values())
-    own = dict(
-        LessonMark.objects.filter(
-            enrollment_id__in=[enrollment.pk for enrollment in enrollments], status=AttendanceStatus.ABSENT
-        )
-        .values("enrollment_id")
-        .annotate(total=Sum("lesson__hours"))
-        .values_list("enrollment_id", "total")
+    # The existing own-hours aggregate also detects history: ordinary writes
+    # retain one SELECT, including rows with no marks.
+    aggregates = (
+        annotate_predecessor(Enrollment.objects.filter(pk__in=by_id))
+        .annotate(own_hours=Sum("lesson_marks__lesson__hours", filter=Q(lesson_marks__status=AttendanceStatus.ABSENT)))
+        .values_list("pk", "own_hours", "has_exact_predecessor")
     )
-    # ALT QRUP BİRLƏŞMƏSİ: əvvəlki jurnalda yığılmış qayıb saatı ÜSTƏGƏL (adi sətirlərdə sorğu yoxdur).
-    guest_ids = [enrollment.pk for enrollment in enrollments if getattr(enrollment, "source_group_id", None)]
-    carried = guest_merge.carry_over_map(guest_ids, with_entry_score=False) if guest_ids else {}
+    own = {}
+    carry_ids = []
+    for enrollment_id, hours, has_history in aggregates:
+        own[enrollment_id] = hours
+        if has_history:
+            carry_ids.append(enrollment_id)
+    carried = guest_merge.carry_over_map(carry_ids, with_entry_score=False) if carry_ids else {}
 
     from .absence_credit_read import credit_hours_map, effective_hours
 

@@ -307,10 +307,12 @@ def carry_over_map(target_ids, *, with_entry_score: bool = True) -> dict:
     target_ids = [value for value in target_ids if value]
     if not target_ids:
         return {}
+    from .enrollment_history import predecessors as exact_predecessors
+
     predecessors = list(
-        Enrollment.objects.filter(superseded_by_id__in=target_ids, status=Enrollment.Status.DROPPED).select_related(
-            "offering", "offering__group", "offering__subject"
-        )
+        exact_predecessors()
+        .filter(superseded_by_id__in=target_ids)
+        .select_related("offering", "offering__group", "offering__subject")
     )
     if not predecessors:
         return {}
@@ -423,12 +425,14 @@ def _source_entry_scores(predecessors, marks_by_enrollment):
 def carried_absence_hours(enrollment) -> int:
     """Bu qeydiyyata birləşmə ilə köçürülmüş qayıb saatı (yoxdursa 0).
 
-    Yalnız «alt qrupdan əlavə» sətirləri üçün sorğu edilir — adi sətirlərdə
-    əlavə sorğu OLMUR. Bal hesablanmır (``with_entry_score=False``): bu funksiya
+    Əvvəlcədən annotasiya varsa keçidsiz sətir əlavə sorğu etmir; xam yazı
+    çağıranı üçün dəqiq əlaqə yoxlanılır. Bal hesablanmır: bu funksiya
     HƏR işarə yazılışında (``recompute_absence_hours``) çağırılır, bal isə
     yalnız görünüş üçündür.
     """
-    if getattr(enrollment, "source_group_id", None) is None:
+    from .enrollment_history import has_predecessor
+
+    if not has_predecessor(enrollment):
         return 0
     summary = carry_over_map([enrollment.pk], with_entry_score=False).get(enrollment.pk)
     return int(summary["absence_hours"]) if summary else 0

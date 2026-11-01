@@ -176,11 +176,15 @@ def enrolled_roster(offering) -> list:
     Açıq sahədə açılış başına bir dəfə; hər çağırış öz siyahı NÜSXƏSİNİ alır."""
     from apps.registrar.models import Enrollment
 
+    from .enrollment_history import annotate_predecessor
+
     memo = bucket("roster")
     if memo is not None and offering.pk in memo:
         return list(memo[offering.pk])
     rows = list(
-        offering.enrollments.filter(status=Enrollment.Status.ENROLLED)
+        annotate_predecessor(
+            offering.enrollments.filter(status=Enrollment.Status.ENROLLED, organization_id=offering.organization_id)
+        )
         .select_related("student", "student__profile", "source_group")
         .order_by("student__last_name", "student__username")
     )

@@ -54,7 +54,8 @@ def absence_counts(enrollments, *, marks_by_enrollment=None, carry_counts=None):
     Aggregate hour credits do not alter this displayed count. EXCUSED cells do
     not count. Distinct lesson hours never turn one displayed q/b into two.
     """
-    from .models import Enrollment, LessonMark
+    from .enrollment_history import predecessors
+    from .models import LessonMark
 
     groups = defaultdict(list)
     for enrollment in enrollments:
@@ -91,8 +92,7 @@ def absence_counts(enrollments, *, marks_by_enrollment=None, carry_counts=None):
                     enrollment__organization_id=organization_id,
                     lesson__organization_id=organization_id,
                     lesson__offering_id=F("enrollment__offering_id"),
-                    enrollment__superseded_by_id__in=ids,
-                    enrollment__status=Enrollment.Status.DROPPED,
+                    enrollment_id__in=predecessors().filter(superseded_by_id__in=ids).values("pk"),
                     status="absent",
                 )
                 .values("enrollment__superseded_by_id")
@@ -106,7 +106,8 @@ def absence_counts(enrollments, *, marks_by_enrollment=None, carry_counts=None):
 def absence_metrics(enrollments):
     """Grid-identical count and effective hours, in three queries per tenant."""
     from .absence_credit_read import credit_hours_map, effective_hours
-    from .models import Enrollment, LessonMark
+    from .enrollment_history import predecessors
+    from .models import LessonMark
 
     grouped = defaultdict(list)
     for enrollment in enrollments:
@@ -127,7 +128,7 @@ def absence_metrics(enrollments):
             .annotate(count=Count("pk"), hours=Sum("lesson__hours"))
         )
         sources = list(
-            base.filter(enrollment__superseded_by_id__in=ids, enrollment__status=Enrollment.Status.DROPPED)
+            base.filter(enrollment_id__in=predecessors().filter(superseded_by_id__in=ids).values("pk"))
             .values("enrollment_id", "enrollment__superseded_by_id")
             .annotate(count=Count("pk"), hours=Sum("lesson__hours"))
         )

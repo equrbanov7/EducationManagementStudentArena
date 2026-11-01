@@ -224,8 +224,8 @@ def get_offering_journal(
         organization_id=offering.organization_id,
         student_ids=[e.student_id for e in enrollments if e.source_group_id],
     )
-    # Birləşmə ilə gələn əvvəlki jurnal işi (yalnız qonaq sətirlər üçün, tək sorğu).
-    carry_ids = [e.pk for e in enrollments] if level_policy else guest_ids
+    # Dəqiq supersession tarixçəsi qonaq/provenans işarəsindən asılı deyil.
+    carry_ids = [e.pk for e in enrollments if e.source_group_id or e.has_exact_predecessor]
     carry_map = guest_merge.carry_over_map(carry_ids)
     guest_docs = guest_roster.guest_document_map(guest_ids)  # alt-qrup sənədi (təqdimat)
     # «Alt qrup» çipi yalnız sənədli yerləşdirməyə (sahib 2026-10-25: köçürmənin sənədsiz sətirlərini göstərmə).
