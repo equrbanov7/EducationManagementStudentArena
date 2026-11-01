@@ -31,7 +31,7 @@ class SourceFailure(ValueError):
     def __init__(self, fields, guard=None):
         self.fields = fields
         self.guard = guard
-        super().__init__("fixed_farida_slot_refused")
+        super().__init__(fields, guard)
 
 
 def source_failure(raw):
