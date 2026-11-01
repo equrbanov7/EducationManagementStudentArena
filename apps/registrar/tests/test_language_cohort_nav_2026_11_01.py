@@ -88,7 +88,12 @@ class LanguageCohortNavTests(_GuestRosterBase):
             "accounts/profile/sidebar/items/_my_journal.html",
             {
                 "allowed_sections": {"my-journal"},
-                "role_capabilities": {"is_student": False},
+                # Kabinetdəki kimi: rol/əhatə bayraqları artıq hesablanıb (sorğusuz qapı).
+                "role_capabilities": {
+                    "is_student": False,
+                    "is_teacher": user in (self.teacher, self.plain_teacher),
+                    "can_manage_journal_roster": user == self.coordinator,
+                },
                 "sidebar_layout": layout,
                 "profile_base_url": "/profile/",
             },

@@ -26,21 +26,33 @@ _NAV_CACHE_ATTR = "_ems_language_cohort_nav"
 _HIDDEN = {"staff": False, "teacher": False, "visible": False, "url": ""}
 
 
-def _compute_nav(request):
+def _own_level_offering_exists(user, organization):
+    return (
+        CourseOffering.objects.filter(organization=organization, is_active=True, subject__name__iregex=LEVEL_RE.pattern)
+        .filter(Q(instructor=user) | Q(shares__teacher=user, shares__is_active=True))
+        .exists()
+    )
+
+
+def _compute_nav(request, capabilities=None):
+    """Kabinet renderində `role_capabilities` (artıq hesablanmış rol/əhatə bayraqları) sorğu büdcəsini
+    qoruyur: `journal.roster` əhatəsi olmayan və müəllim olmayan istifadəçi üçün HEÇ BİR sorğu getmir
+    (kabinet büdcə testləri üzvlük oxularını sayır). Bayraqlar yoxdursa (müstəqil səhifə) tam yoxlama."""
     organization = getattr(request, "organization", None)
     user = getattr(request, "user", None)
     if not (organization and user and user.is_authenticated and user.is_active):
         return dict(_HIDDEN)
-    staff = department_choices(user, organization).exists()
-    teacher = False
-    if not staff and is_authorized_instructor(organization=organization, instructor=user):
+    caps = capabilities if isinstance(capabilities, dict) else None
+    if caps is None:
+        staff = department_choices(user, organization).exists()
         teacher = (
-            CourseOffering.objects.filter(
-                organization=organization, is_active=True, subject__name__iregex=LEVEL_RE.pattern
-            )
-            .filter(Q(instructor=user) | Q(shares__teacher=user, shares__is_active=True))
-            .exists()
+            not staff
+            and is_authorized_instructor(organization=organization, instructor=user)
+            and _own_level_offering_exists(user, organization)
         )
+    else:
+        staff = bool(caps.get("can_manage_journal_roster")) and department_choices(user, organization).exists()
+        teacher = not staff and bool(caps.get("is_teacher")) and _own_level_offering_exists(user, organization)
     return {
         "staff": staff,
         "teacher": teacher,
@@ -57,7 +69,7 @@ def language_cohort_nav(context):
         return dict(_HIDDEN)
     cached = getattr(request, _NAV_CACHE_ATTR, None)
     if cached is None:
-        cached = _compute_nav(request)
+        cached = _compute_nav(request, context.get("role_capabilities"))
         try:
             setattr(request, _NAV_CACHE_ATTR, cached)
         except AttributeError:  # pragma: no cover — yalnız-oxu request obyekti
