@@ -25,7 +25,7 @@ register = template.Library()
 
 #: Sprite faylı (``static/`` altında) və keş-buster (dev-də manifest heşi yoxdur).
 SPRITE_PATH = "vendor/lucide/ems-nav.svg"
-SPRITE_VERSION = "20261018-calculator"
+SPRITE_VERSION = "20261101-languages"
 
 
 def sprite_url():

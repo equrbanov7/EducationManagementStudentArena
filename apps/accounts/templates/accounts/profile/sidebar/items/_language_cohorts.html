@@ -1,0 +1,14 @@
+{% load i18n nav_icons %}
+{% comment %}«Xarici dil səviyyə qrupları» — səviyyə qruplarının reyestri (2026-11-01).
+Əvvəl jurnal siyahısının üstündə üzən düymə idi; sahib: «sidebara qrupların yanına
+qoy, eyni hissəyə». Görünürlük `language_cohort_nav` tag-ındandır (çağıran şablon
+`lc_nav.staff` / `lc_nav.teacher` ilə qapıyır). Səhifə kabinet qabığından kənar
+müstəqil URL-dir — «Elektron jurnal» bəndi kimi yeni tabda açılır.{% endcomment %}
+<li class="sidebar-menu-item">
+    <a href="{% url 'registrar:language_cohorts' %}" target="_blank" rel="noopener"
+       class="sidebar-menu-link">
+        {% nav_icon "languages" "sidebar-menu-icon" %}
+        <span class="sidebar-menu-text">{% trans "Xarici dil səviyyə qrupları" context "profile.sidebar" %}</span>
+        {% nav_icon "external-link" "sidebar-menu-ext" %}
+    </a>
+</li>

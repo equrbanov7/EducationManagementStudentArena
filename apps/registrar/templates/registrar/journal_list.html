@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n language_cohort_links %}
+{% load static i18n %}
 
 {% block title %}{% trans "Elektron jurnal" context "registrar.journal" %} - {{ site_brand_name }}{% endblock %}
 
@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block content %}
-{% include "accounts/profile/_messages.html" %}{% language_cohort_entry %}
+{% include "accounts/profile/_messages.html" %}
 {% include "registrar/partials/_journal_list_content.html" %}
 {% endblock %}
 

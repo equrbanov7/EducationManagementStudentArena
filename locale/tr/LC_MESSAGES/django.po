@@ -111565,3 +111565,38 @@ msgstr "Dersi veren öğretim elemanı"
 msgctxt "accounts.syllabus"
 msgid "Yeni qaralama saxlanılır"
 msgstr "Yeni taslak korunur"
+
+#: apps/accounts/templates/accounts/profile/sidebar/items/_language_cohorts.html
+msgctxt "profile.sidebar"
+msgid "Xarici dil səviyyə qrupları"
+msgstr "Yabancı dil seviye grupları"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "Kabinet"
+msgstr "Panelim"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "İdarə et"
+msgstr "Yönet"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "Müəllim"
+msgstr "Öğretmen"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "Kafedra"
+msgstr "Bölüm"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "Semestr"
+msgstr "Dönem"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "Fənn"
+msgstr "Ders"

@@ -111664,3 +111664,38 @@ msgstr "Dərs deyən müəllim"
 msgctxt "accounts.syllabus"
 msgid "Yeni qaralama saxlanılır"
 msgstr "Yeni qaralama saxlanılır"
+
+#: apps/accounts/templates/accounts/profile/sidebar/items/_language_cohorts.html
+msgctxt "profile.sidebar"
+msgid "Xarici dil səviyyə qrupları"
+msgstr "Xarici dil səviyyə qrupları"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "Kabinet"
+msgstr "Kabinet"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "İdarə et"
+msgstr "İdarə et"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "Kafedra"
+msgstr "Kafedra"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "Semestr"
+msgstr "Semestr"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "Fənn"
+msgstr "Fənn"

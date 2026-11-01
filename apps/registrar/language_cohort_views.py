@@ -17,7 +17,7 @@ from . import guest_roster, language_cohort_placement, language_cohort_query, la
 from .integrity import eligible_instructor_user_ids
 from .journal_home_groups import home_group_map
 from .language_cohort_history import can_view_source
-from .language_levels import level_of
+from .language_levels import LEVEL_RE, level_of
 from .models import Enrollment, LanguageLevelCohort, Subject
 
 
@@ -66,7 +66,11 @@ class CohortForm(forms.Form):
         self.fields["period"].queryset = apps.get_model("organizations", "AcademicPeriod").objects.filter(
             organization=organization, is_active=True, is_current=True
         )
-        subjects = Subject.objects.filter(organization=organization, is_active=True).order_by("name")
+        # Səviyyə fənləri DB-də süzülür (2026-11-01: 1700+ fənn/jurnalı Python-da gəzmək
+        # səhifəni ləngidirdi); `level_of` dəqiq yazı qaydası yenə Python-da təsdiqlənir.
+        subjects = Subject.objects.filter(
+            organization=organization, is_active=True, name__iregex=LEVEL_RE.pattern
+        ).order_by("name")
         self.fields["subject"].queryset = subjects.filter(pk__in=[row.pk for row in subjects if level_of(row.name)])
         from types import SimpleNamespace
 
@@ -75,11 +79,18 @@ class CohortForm(forms.Form):
         from .models import CourseOffering
 
         source_scope, _broad = journal_list_base(actor, SimpleNamespace(organization=organization))
+        # İcazə yoxlaması (sətir başına sorğu) yalnız real namizədlərdə: cari dövrün
+        # qiymətləndirmə sxemli SƏVİYYƏ jurnalları — aşağıdakı yekun süzgəclə eynidir.
+        source_candidates = source_scope.filter(
+            is_active=True,
+            period__is_current=True,
+            period__is_active=True,
+            assessment_scheme__isnull=False,
+            subject_id__in=self.fields["subject"].queryset.values("pk"),
+        ).select_related("organization", "group", "period", "subject", "instructor")
         source_ids = [
             source.pk
-            for source in source_scope.filter(assessment_scheme__isnull=False).select_related(
-                "organization", "group", "period", "subject", "instructor"
-            )
+            for source in source_candidates
             if can_edit_journal(actor, source) or can_observe_journal(actor, source)
         ]
         self.fields["source_offering"].queryset = (

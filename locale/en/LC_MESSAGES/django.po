@@ -112179,3 +112179,38 @@ msgstr "Teaching instructor"
 msgctxt "accounts.syllabus"
 msgid "Yeni qaralama saxlanılır"
 msgstr "New draft is retained"
+
+#: apps/accounts/templates/accounts/profile/sidebar/items/_language_cohorts.html
+msgctxt "profile.sidebar"
+msgid "Xarici dil səviyyə qrupları"
+msgstr "Foreign language level groups"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "Kabinet"
+msgstr "Cabinet"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "İdarə et"
+msgstr "Manage"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "Müəllim"
+msgstr "Teacher"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "Kafedra"
+msgstr "Department"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "Semestr"
+msgstr "Semester"
+
+#: apps/registrar/templates/registrar/language_cohorts.html
+msgctxt "registrar.language_cohort"
+msgid "Fənn"
+msgstr "Subject"

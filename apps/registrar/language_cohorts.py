@@ -55,10 +55,36 @@ def can_manage(user, cohort):
 
 
 def authorized_cohorts(user, organization):
-    rows = LanguageLevelCohort.objects.filter(organization=organization).select_related(
-        "organization", "department", "group", "period", "offering__subject", "offering__instructor"
+    """``can_manage`` ilə eyni qayda, toplu: əhatə BİR dəfə hesablanır (N×exists əvəzinə 1 sorğu)."""
+    rows = list(
+        LanguageLevelCohort.objects.filter(organization=organization)
+        .select_related("organization", "department", "group", "period", "offering__subject", "offering__instructor")
+        .order_by("-period__start_date", "department__name", "name")
     )
-    return [row for row in rows.order_by("-period__start_date", "department__name", "name") if can_manage(user, row)]
+    if not rows or not _active_actor(user):
+        return []
+    managed = guest_roster.units_in_scope(user, organization, {row.department_id for row in rows})
+    instructor_ok = None
+    result = []
+    for row in rows:
+        if row.department_id in managed:
+            result.append(row)
+            continue
+        if row.offering.instructor_id == user.pk:
+            if instructor_ok is None:
+                instructor_ok = is_authorized_instructor(organization=organization, instructor=user)
+            if instructor_ok:
+                result.append(row)
+    return result
+
+
+def _active_actor(user):
+    return bool(
+        user
+        and user.is_authenticated
+        and user.is_active
+        and getattr(getattr(user, "profile", None), "access_state", None) == "active"
+    )
 
 
 def source_access(user, enrollment):

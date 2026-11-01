@@ -1,50 +1,93 @@
 {% extends "base.html" %}{% load static journal_names i18n %}
+{% comment %}Səviyyə qrupunun idarəsi — tələbə siyahısı, əlavə/çıxarma, yerləşdirmə tarixçəsi
+(2026-11-01 redizayn; forma sahələri və POST müqaviləsi dəyişməyib). Inline CSS/JS yoxdur.{% endcomment %}
 {% block title %}{{ cohort.name }} · {{ cohort.level|title }}{% endblock %}
-{% block extraCss %}<link rel="stylesheet" href="{% static 'registrar/css/language_cohorts.css' %}">{% endblock %}
+{% block extraCss %}<link rel="stylesheet" href="{% static 'registrar/css/language_cohorts.css' %}?v=20261101-redesign">{% endblock %}
 {% block content %}
-<main class="lc-page">
-  <a href="{% url 'registrar:language_cohorts' %}">{% trans "← Səviyyə qrupları" context "registrar.language_cohort" %}</a>
-  <h1>{{ cohort.name }} · {{ cohort.level|title }}</h1>
-  <p>{% trans "Səviyyə qaydası: davamiyyət 10, seminar 10, midterm 10, imtahan 70 bal. Qayıb limiti 10 q/b-dir; 11 q/b olduqda imtahana buraxılmır." context "registrar.language_cohort" %}</p>
-  <form method="get" action="{% url 'registrar:language_cohorts' %}" class="lc-search"><label for="lc-cohort-picker">{% trans "Səviyyə qrupunu seç" context "registrar.language_cohort" %}
-  </label><div class="bootstrap-single-select bootstrap-single-select--ems">
-    <select id="lc-cohort-picker" name="cohort" class="bootstrap-single-select__native" data-bootstrap-select data-live-search="true">{% for option in level_choices %}<option value="{{ option.pk }}"{% if option.pk == cohort.pk %} selected{% endif %}>{{ option.level|title }} · {{ option.name }}</option>{% endfor %}</select>
-  </div><button type="submit">{% trans "Qrupu aç" context "registrar.language_cohort" %}</button></form>
-  <p>{{ cohort.offering.subject.name }} · {{ cohort.department.name }} · {{ cohort.period.name }}</p>
-  <p>{% trans "Əsas qrup dəyişmir. Səviyyə dəyişəndə əvvəlki qeydiyyat tarixçəyə keçir; qiymət və davamiyyət əvvəlki jurnalda qalır, yeni jurnala köçürülmür." context "registrar.language_cohort" %}</p>
-  <a href="{% url 'registrar:journal_detail' cohort.offering_id %}">{% trans "Jurnalı aç" context "registrar.language_cohort" %}</a>
+<div class="lc-page">
+  <nav class="lc-crumbs" aria-label="{% trans 'Xarici dil səviyyə qrupları' context 'registrar.language_cohort' %}">
+    <a href="{% url 'accounts:profile' %}">{% trans "Kabinet" context "registrar.language_cohort" %}</a>
+    <span class="lc-crumbs__sep" aria-hidden="true">›</span>
+    <a href="{% url 'registrar:journal_list' %}">{% trans "Elektron jurnal" context "registrar.journal" %}</a>
+    <span class="lc-crumbs__sep" aria-hidden="true">›</span>
+    <a href="{% url 'registrar:language_cohorts' %}">{% trans "Xarici dil səviyyə qrupları" context "registrar.language_cohort" %}</a>
+    <span class="lc-crumbs__sep" aria-hidden="true">›</span>
+    <span aria-current="page">{{ cohort.name }}</span>
+  </nav>
+
+  <header class="lc-head">
+    <div class="lc-mark" aria-hidden="true"><i class="fas fa-language"></i></div>
+    <div class="lc-head__text">
+      <h1 class="lc-title">{{ cohort.name }} <span class="lc-chip">{{ cohort.level|title }}</span></h1>
+      <dl class="lc-meta lc-meta--inline">
+        <div><dt>{% trans "Fənn" context "registrar.language_cohort" %}</dt><dd>{{ cohort.offering.subject.name }}</dd></div>
+        <div><dt>{% trans "Kafedra" context "registrar.language_cohort" %}</dt><dd>{{ cohort.department.name }}</dd></div>
+        <div><dt>{% trans "Semestr" context "registrar.language_cohort" %}</dt><dd>{{ cohort.period.name }}</dd></div>
+        <div><dt>{% trans "Müəllim" context "registrar.language_cohort" %}</dt><dd>{{ cohort.offering.instructor|journal_name }}</dd></div>
+      </dl>
+    </div>
+    <div class="lc-head__meta">
+      <span class="lc-count"><b>{{ rows|length }}</b> {% trans "Tələbələr" context "registrar.language_cohort" %}</span>
+      <a class="lc-btn lc-btn--primary lc-btn--sm" href="{% url 'registrar:journal_detail' cohort.offering_id %}"><i class="fas fa-book-open" aria-hidden="true"></i> {% trans "Jurnalı aç" context "registrar.language_cohort" %}</a>
+    </div>
+  </header>
+
+  <div class="lc-card">
+    <form method="get" action="{% url 'registrar:language_cohorts' %}" class="lc-picker">
+      <div class="lc-picker__field">
+        <label class="lc-field__label" for="lc-cohort-picker">{% trans "Səviyyə qrupunu seç" context "registrar.language_cohort" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+          <select id="lc-cohort-picker" name="cohort" class="bootstrap-single-select__native" data-bootstrap-select data-live-search="true">{% for option in level_choices %}<option value="{{ option.pk }}"{% if option.pk == cohort.pk %} selected{% endif %}>{{ option.level|title }} · {{ option.name }}</option>{% endfor %}</select>
+        </div>
+      </div>
+      <button type="submit" class="lc-btn lc-btn--ghost">{% trans "Qrupu aç" context "registrar.language_cohort" %}</button>
+    </form>
+  </div>
+
+  <p class="lc-rule"><i class="fas fa-circle-info" aria-hidden="true"></i><span>{% trans "Səviyyə qaydası: davamiyyət 10, seminar 10, midterm 10, imtahan 70 bal. Qayıb limiti 10 q/b-dir; 11 q/b olduqda imtahana buraxılmır." context "registrar.language_cohort" %} {% trans "Əsas qrup dəyişmir. Səviyyə dəyişəndə əvvəlki qeydiyyat tarixçəyə keçir; qiymət və davamiyyət əvvəlki jurnalda qalır, yeni jurnala köçürülmür." context "registrar.language_cohort" %}</span></p>
   {% include "accounts/profile/_messages.html" %}
-  {% if not roster_open %}<p role="status">{% trans "Jurnal bağlıdır və ya semestr cari deyil. Siyahı yalnız oxunur." context "registrar.language_cohort" %}</p>{% endif %}
-  <h2>{% trans "Tələbələr" context "registrar.language_cohort" %}</h2>
-  <div class="lc-scroll" role="region" aria-label="{% trans 'Səviyyə qrupunun tələbələri' context 'registrar.language_cohort' %}" tabindex="0"><table>
-    <thead><tr><th>{% trans "Tələbə" context "registrar.language_cohort" %}</th><th>{% trans "Əsas qrup" context "registrar.language_cohort" %}</th><th>{% trans "Əməliyyat" context "registrar.language_cohort" %}</th></tr></thead><tbody>
-    {% for row in rows %}<tr><th scope="row">{{ row.enrollment.student|journal_name }}</th><td>{{ row.home_group.name|default:"—" }}</td><td>
-      {% if roster_open %}<details><summary>{% trans "Qrupdan çıxar" context "registrar.language_cohort" %}</summary><form method="post">{% csrf_token %}
-        <input type="hidden" name="action" value="remove"><input type="hidden" name="enrollment" value="{{ row.enrollment.pk }}">
-        <p>{% trans "Qiymətlər silinmir. Tələbə avtomatik başqa səviyyəyə qaytarılmır." context "registrar.language_cohort" %}</p>
-        <label>{% trans "Səbəb" context "registrar.language_cohort" %} <input name="reason" minlength="10" maxlength="500" required></label><button type="submit">{% trans "Çıxarmağı təsdiqlə" context "registrar.language_cohort" %}</button>
-      </form></details>{% endif %}
-    </td></tr>{% empty %}<tr><td colspan="3">{% trans "Aktiv tələbə yoxdur." context "registrar.language_cohort" %}</td></tr>{% endfor %}
-    </tbody></table></div>
-  {% if roster_open %}<section class="lc-card">
-    <h2>{% trans "Tələbə əlavə et / səviyyəsini dəyiş" context "registrar.language_cohort" %}</h2>
-    <p>{% trans "Yalnız əsas qrup əhatənizdə və ya artıq girişiniz olan uyğun dil jurnalında oxuyan tələbələr göstərilir. Axtarış ən çox 50 nəticə göstərir." context "registrar.language_cohort" %}</p>
-    <form method="get" class="lc-search"><label>{% trans "Ad, soyad, ata adı və ya əsas qrup" context "registrar.language_cohort" %} <input type="search" name="q" value="{{ query }}" maxlength="150"></label><button type="submit">{% trans "Axtar" context "registrar.language_cohort" %}</button></form>
-    <ul class="lc-list">{% for item in candidates %}<li>
-      <details><summary>{{ item.record.student|journal_name }} · {{ item.record.group.name }}</summary>
-      {% if item.ambiguous %}<p>{% trans "Bir neçə aktiv dil jurnalı var. İnzibati yoxlama tələb olunur." context "registrar.language_cohort" %}</p>{% else %}
-      <form method="post">{% csrf_token %}<input type="hidden" name="action" value="place"><input type="hidden" name="record" value="{{ item.record.pk }}">
+  {% if not roster_open %}<p class="lc-status" role="status"><i class="fas fa-lock" aria-hidden="true"></i><span>{% trans "Jurnal bağlıdır və ya semestr cari deyil. Siyahı yalnız oxunur." context "registrar.language_cohort" %}</span></p>{% endif %}
+
+  <section class="lc-section" aria-labelledby="lc-students-title">
+    <div class="lc-section__head"><h2 id="lc-students-title" class="lc-section__title">{% trans "Tələbələr" context "registrar.language_cohort" %}</h2><span class="lc-count"><b>{{ rows|length }}</b></span></div>
+    <div class="lc-card lc-scroll" role="region" aria-label="{% trans 'Səviyyə qrupunun tələbələri' context 'registrar.language_cohort' %}" tabindex="0">
+      <table class="lc-table">
+        <thead><tr><th scope="col">{% trans "Tələbə" context "registrar.language_cohort" %}</th><th scope="col">{% trans "Əsas qrup" context "registrar.language_cohort" %}</th><th scope="col">{% trans "Əməliyyat" context "registrar.language_cohort" %}</th></tr></thead>
+        <tbody>
+        {% for row in rows %}<tr><th scope="row">{{ row.enrollment.student|journal_name }}</th><td><span class="lc-chip lc-chip--muted">{{ row.home_group.name|default:"—" }}</span></td><td>
+          {% if roster_open %}<details class="lc-row-action"><summary>{% trans "Qrupdan çıxar" context "registrar.language_cohort" %}</summary><form method="post" class="lc-inline">{% csrf_token %}
+            <input type="hidden" name="action" value="remove"><input type="hidden" name="enrollment" value="{{ row.enrollment.pk }}">
+            <p>{% trans "Qiymətlər silinmir. Tələbə avtomatik başqa səviyyəyə qaytarılmır." context "registrar.language_cohort" %}</p>
+            <label>{% trans "Səbəb" context "registrar.language_cohort" %} <input name="reason" minlength="10" maxlength="500" required></label><button type="submit" class="lc-btn lc-btn--danger lc-btn--sm">{% trans "Çıxarmağı təsdiqlə" context "registrar.language_cohort" %}</button>
+          </form></details>{% else %}—{% endif %}
+        </td></tr>{% empty %}<tr><td colspan="3" class="lc-empty">{% trans "Aktiv tələbə yoxdur." context "registrar.language_cohort" %}</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  {% if roster_open %}<section class="lc-section lc-card" aria-labelledby="lc-add-title">
+    <div class="lc-section__head"><h2 id="lc-add-title" class="lc-section__title">{% trans "Tələbə əlavə et / səviyyəsini dəyiş" context "registrar.language_cohort" %}</h2></div>
+    <p class="lc-section__hint">{% trans "Yalnız əsas qrup əhatənizdə və ya artıq girişiniz olan uyğun dil jurnalında oxuyan tələbələr göstərilir. Axtarış ən çox 50 nəticə göstərir." context "registrar.language_cohort" %}</p>
+    <form method="get" class="lc-search"><label>{% trans "Ad, soyad, ata adı və ya əsas qrup" context "registrar.language_cohort" %} <input type="search" name="q" value="{{ query }}" maxlength="150"></label><button type="submit" class="lc-btn lc-btn--ghost"><i class="fas fa-magnifying-glass" aria-hidden="true"></i> {% trans "Axtar" context "registrar.language_cohort" %}</button></form>
+    <ul class="lc-candidates">{% for item in candidates %}<li>
+      <details class="lc-candidate"><summary><span>{{ item.record.student|journal_name }}</span><span class="lc-chip lc-chip--muted">{{ item.record.group.name }}</span></summary>
+      <div class="lc-candidate__body">
+      {% if item.ambiguous %}<p class="lc-status"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i><span>{% trans "Bir neçə aktiv dil jurnalı var. İnzibati yoxlama tələb olunur." context "registrar.language_cohort" %}</span></p>{% else %}
+      <form method="post" class="lc-inline">{% csrf_token %}<input type="hidden" name="action" value="place"><input type="hidden" name="record" value="{{ item.record.pk }}">
         {% for source in item.sources %}<p>{% blocktrans with subject=source.offering.subject.name context "registrar.language_cohort" %}Cari səviyyə: {{ subject }}. Bu qeydiyyat tarixçəyə keçəcək; əvvəlki qiymətlər yerində qalacaq.{% endblocktrans %}</p>
-          <label><input type="checkbox" name="source" value="{{ source.pk }}" required> {% trans "Əvvəlki səviyyədən keçidi təsdiqləyirəm" context "registrar.language_cohort" %}</label>
+          <label class="lc-check"><input type="checkbox" name="source" value="{{ source.pk }}" required> <span>{% trans "Əvvəlki səviyyədən keçidi təsdiqləyirəm" context "registrar.language_cohort" %}</span></label>
         {% empty %}<p>{% trans "Bu semestr və dil ailəsi üzrə başqa aktiv səviyyə qeydiyyatı yoxdur." context "registrar.language_cohort" %}</p>{% endfor %}
-        <label>{% trans "Səbəb" context "registrar.language_cohort" %} <input name="reason" minlength="10" maxlength="500" required></label><button type="submit">{% blocktrans with level=cohort.level|title context "registrar.language_cohort" %}{{ level }} səviyyəsinə əlavə et{% endblocktrans %}</button>
-      </form>{% endif %}</details>
-    </li>{% empty %}<li>{% trans "Uyğun tələbə tapılmadı." context "registrar.language_cohort" %}</li>{% endfor %}</ul>
+        <label>{% trans "Səbəb" context "registrar.language_cohort" %} <input name="reason" minlength="10" maxlength="500" required></label><button type="submit" class="lc-btn lc-btn--primary lc-btn--sm">{% blocktrans with level=cohort.level|title context "registrar.language_cohort" %}{{ level }} səviyyəsinə əlavə et{% endblocktrans %}</button>
+      </form>{% endif %}
+      </div></details>
+    </li>{% empty %}<li class="lc-empty">{% trans "Uyğun tələbə tapılmadı." context "registrar.language_cohort" %}</li>{% endfor %}</ul>
   </section>{% endif %}
-  <details class="lc-card"><summary>{% trans "Yerləşdirmə tarixçəsi" context "registrar.language_cohort" %}</summary>
-    <div class="lc-scroll" tabindex="0"><table><thead><tr><th>{% trans "Tarix" context "registrar.language_cohort" %}</th><th>{% trans "Tələbə" context "registrar.language_cohort" %}</th><th>{% trans "Əsas qrup" context "registrar.language_cohort" %}</th><th>{% trans "Əməliyyat" context "registrar.language_cohort" %}</th><th>{% trans "Səbəb" context "registrar.language_cohort" %}</th></tr></thead><tbody>
-      {% for event in events %}<tr><td>{{ event.created_at|date:"d.m.Y H:i" }}</td><td>{{ event.student|journal_name }}</td><td>{{ event.home_group.name }}</td><td>{{ event.action_label }}{% if event.can_view_history %}<br><a href="{% url 'registrar:language_cohort_history' cohort.pk event.pk %}">{% trans "Əvvəlki qiymətlər" context "registrar.language_cohort" %}</a>{% endif %}</td><td>{{ event.reason }}</td></tr>{% empty %}<tr><td colspan="5">{% trans "Tarixçə yoxdur." context "registrar.language_cohort" %}</td></tr>{% endfor %}
+
+  <details class="lc-card lc-history"><summary><i class="fas fa-clock-rotate-left" aria-hidden="true"></i> {% trans "Yerləşdirmə tarixçəsi" context "registrar.language_cohort" %}</summary>
+    <div class="lc-scroll" tabindex="0"><table class="lc-table lc-table--compact"><thead><tr><th scope="col">{% trans "Tarix" context "registrar.language_cohort" %}</th><th scope="col">{% trans "Tələbə" context "registrar.language_cohort" %}</th><th scope="col">{% trans "Əsas qrup" context "registrar.language_cohort" %}</th><th scope="col">{% trans "Əməliyyat" context "registrar.language_cohort" %}</th><th scope="col">{% trans "Səbəb" context "registrar.language_cohort" %}</th></tr></thead><tbody>
+      {% for event in events %}<tr><td>{{ event.created_at|date:"d.m.Y H:i" }}</td><td>{{ event.student|journal_name }}</td><td>{{ event.home_group.name }}</td><td>{{ event.action_label }}{% if event.can_view_history %}<br><a href="{% url 'registrar:language_cohort_history' cohort.pk event.pk %}">{% trans "Əvvəlki qiymətlər" context "registrar.language_cohort" %}</a>{% endif %}</td><td>{{ event.reason }}</td></tr>{% empty %}<tr><td colspan="5" class="lc-empty">{% trans "Tarixçə yoxdur." context "registrar.language_cohort" %}</td></tr>{% endfor %}
     </tbody></table></div>
   </details>
-</main>
+</div>
 {% endblock %}

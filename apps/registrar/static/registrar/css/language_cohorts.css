@@ -1,20 +1,190 @@
-.lc-page { max-width: 1120px; margin: 24px auto; padding: 0 20px 40px; color: var(--text-primary, #172b4d); }
-.lc-page h1 { font-size: clamp(1.5rem, 3vw, 2.1rem); }
-.lc-page p { line-height: 1.6; }
-.lc-card { border: 1px solid var(--border-color, #cbd5e1); border-radius: 12px; padding: 16px; margin: 16px 0; background: var(--card-bg, #fff); }
-.lc-list { list-style: none; padding: 0; }
-.lc-list > li { margin-block: 12px; }
-.lc-page summary { cursor: pointer; font-weight: 600; padding-block: 8px; }
-.lc-page form { display: grid; gap: 12px; margin-block: 12px; }
-.lc-page label { display: block; }
-.lc-create { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); align-items: end; }
-.lc-create p { margin: 0; }
-.lc-create .errorlist { color: #b91c1c; grid-column: 1 / -1; }
-.lc-page input:not([type=checkbox]), .lc-page select { display: block; width: 100%; min-height: 42px; border: 1px solid #94a3b8; border-radius: 6px; padding: 8px; background: var(--card-bg, #fff); color: inherit; }
-.lc-page button[type=submit] { min-height: 42px; padding: 8px 16px; border: 0; border-radius: 6px; color: #fff; background: #1d4ed8; cursor: pointer; justify-self: start; }
-.lc-page button:focus-visible, .lc-page summary:focus-visible, .lc-page a:focus-visible, .lc-scroll:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
-.lc-scroll { overflow-x: auto; margin-block: 16px; }
-.lc-page table { width: 100%; border-collapse: collapse; min-width: 520px; }
-.lc-page th, .lc-page td { padding: 12px; border-bottom: 1px solid var(--border-color, #cbd5e1); text-align: left; vertical-align: top; }
-.lc-page td form { min-width: 230px; }
-@media (max-width: 600px) { .lc-page { padding-inline: 12px; } .lc-create { grid-template-columns: 1fr; } }
+/* ═══ Xarici dil səviyyə qrupları — 2026-11-01 redizayn ════════════════════
+   Sahib: «dizaynı və s. də təkmilləşdir, daha yaxşı et». Elektron jurnalın
+   (journal_list.css) başlıq dili: işarə kvadratı + başlıq + say çipləri; yalnız
+   `design-tokens.css` tokenləri (hex icad edilmir). Struktur:
+     .lc-crumbs   — kabinet › jurnal › səviyyə qrupları
+     .lc-head     — işarə + başlıq + say çipləri (+ qrup seçici detal səhifəsində)
+     .lc-rule     — qiymətləndirmə qaydası (info zolağı)
+     .lc-create   — «Yeni səviyyə qrupu yarat» (details) + .lc-form grid
+     .lc-grid     — idarə olunan qrupların kartları (.lc-cohort)
+     .lc-card     — cədvəl kartı (.lc-table) / tarixçə
+   Inline stil/skript YOXDUR (CSP). JS qarmaqları dəyişməyib (bootstrap-select). */
+
+.lc-page {
+    max-width: 1120px; margin: 0 auto; padding: var(--ems-sp-5) var(--ems-sp-5) var(--ems-sp-8);
+    color: var(--ems-text); font-size: var(--ems-fs-base);
+}
+.lc-page a { color: var(--ems-primary-700); }
+.lc-page a:hover { color: var(--ems-primary-800); }
+.lc-page :is(a, button, summary, input, select):focus-visible { outline: 3px solid var(--ems-primary-400); outline-offset: 2px; }
+
+/* ── Breadcrumb ───────────────────────────────────────────────────────────── */
+.lc-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ems-sp-2); margin-bottom: var(--ems-sp-4); font-size: var(--ems-fs-sm); color: var(--ems-text-muted); }
+.lc-crumbs a { color: var(--ems-text-muted); text-decoration: none; }
+.lc-crumbs a:hover { color: var(--ems-primary-700); text-decoration: underline; }
+.lc-crumbs [aria-current="page"] { color: var(--ems-text); font-weight: 600; }
+.lc-crumbs__sep { color: var(--ems-neutral-400); }
+
+/* ── Başlıq ───────────────────────────────────────────────────────────────── */
+.lc-head { display: flex; align-items: flex-start; gap: var(--ems-sp-4); margin-bottom: var(--ems-sp-5); }
+.lc-mark {
+    flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+    width: 46px; height: 46px; border-radius: var(--ems-r-xl);
+    background: var(--ems-primary-600); color: var(--ems-neutral-0);
+    box-shadow: var(--ems-sh-nav-active); font-size: var(--ems-fs-xl);
+}
+.lc-head__text { min-width: 0; flex: 1 1 280px; }
+.lc-title { margin: 0; font-size: var(--ems-fs-2xl); font-weight: 800; letter-spacing: -0.2px; line-height: 1.15; }
+.lc-title .lc-chip { vertical-align: middle; margin-left: var(--ems-sp-2); }
+.lc-sub { margin: 4px 0 0; color: var(--ems-text-muted); font-weight: 500; line-height: 1.5; }
+.lc-head__meta { margin-left: auto; display: flex; flex-wrap: wrap; align-items: center; gap: var(--ems-sp-2); }
+.lc-count {
+    display: inline-flex; align-items: baseline; gap: 5px; padding: 6px 12px;
+    border-radius: var(--ems-r-pill); background: var(--ems-primary-50); color: var(--ems-primary-700);
+    font-size: var(--ems-fs-sm); font-weight: 700; white-space: nowrap;
+}
+.lc-count b { font-size: var(--ems-fs-md); font-weight: 800; }
+.lc-count--muted { background: var(--ems-neutral-100); color: var(--ems-neutral-700); }
+
+/* ── Qayda / vəziyyət zolaqları ───────────────────────────────────────────── */
+.lc-rule, .lc-status, .lc-hint {
+    display: flex; gap: var(--ems-sp-3); align-items: flex-start; margin: 0 0 var(--ems-sp-4);
+    padding: var(--ems-sp-3) var(--ems-sp-4); border-radius: var(--ems-r-lg); line-height: 1.5;
+}
+.lc-rule { background: var(--ems-primary-50); color: var(--ems-primary-800); border-left: 4px solid var(--ems-primary-500); }
+.lc-hint { background: var(--ems-neutral-50); color: var(--ems-neutral-700); border: 1px solid var(--ems-border); }
+.lc-status { background: var(--ems-warning-bg); color: var(--ems-warning-800); border-left: 4px solid var(--ems-warning-500); }
+.lc-rule i, .lc-status i, .lc-hint i { margin-top: 3px; flex: 0 0 auto; }
+
+/* ── Kart / bölmə ─────────────────────────────────────────────────────────── */
+.lc-card {
+    border: 1px solid var(--ems-border); border-radius: var(--ems-r-2xl); background: var(--ems-neutral-0);
+    box-shadow: var(--ems-sh-card); padding: var(--ems-sp-4) var(--ems-sp-5); margin: 0 0 var(--ems-sp-5);
+}
+.lc-section { margin: var(--ems-sp-6) 0 0; }
+.lc-section__head { display: flex; align-items: center; gap: var(--ems-sp-3); margin-bottom: var(--ems-sp-3); }
+.lc-section__title { margin: 0; font-size: var(--ems-fs-lg); font-weight: 800; letter-spacing: -0.1px; }
+.lc-section__hint { margin: 0 0 var(--ems-sp-3); color: var(--ems-text-muted); font-size: var(--ems-fs-sm); line-height: 1.5; }
+.lc-empty { padding: var(--ems-sp-5); border: 1px dashed var(--ems-neutral-300); border-radius: var(--ems-r-xl); color: var(--ems-text-muted); text-align: center; }
+
+/* ── Yarat (details) + forma ──────────────────────────────────────────────── */
+.lc-create { padding: 0; overflow: hidden; }
+.lc-create__summary {
+    display: flex; align-items: center; gap: var(--ems-sp-3); flex-wrap: wrap;
+    padding: var(--ems-sp-4) var(--ems-sp-5); cursor: pointer; list-style: none; font-weight: 700;
+}
+.lc-create__summary::-webkit-details-marker { display: none; }
+.lc-create__summary::after { content: "\f078"; font-family: "Font Awesome 6 Free"; font-weight: 900; margin-left: auto; color: var(--ems-neutral-400); transition: transform .15s ease; }
+.lc-create[open] > .lc-create__summary { border-bottom: 1px solid var(--ems-border); }
+.lc-create[open] > .lc-create__summary::after { transform: rotate(180deg); }
+.lc-create__icon {
+    display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px;
+    border-radius: var(--ems-r-md); background: var(--ems-primary-100); color: var(--ems-primary-700); flex: 0 0 auto;
+}
+.lc-create__hint { flex-basis: 100%; margin: 0; font-weight: 500; color: var(--ems-text-muted); font-size: var(--ems-fs-sm); }
+.lc-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: var(--ems-sp-4); padding: var(--ems-sp-5); }
+.lc-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.lc-field--wide { grid-column: 1 / -1; }
+.lc-field__label { font-size: var(--ems-fs-xs); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ems-neutral-600); }
+.lc-field__help { color: var(--ems-text-muted); font-size: var(--ems-fs-xs); }
+.lc-check { display: flex; align-items: flex-start; gap: var(--ems-sp-2); font-weight: 600; cursor: pointer; }
+.lc-check input { margin-top: 4px; width: 18px; height: 18px; accent-color: var(--ems-primary-600); }
+.lc-page .lc-form input:not([type=checkbox]), .lc-page .lc-form select, .lc-page .lc-search input, .lc-page .lc-inline input {
+    width: 100%; min-height: 42px; padding: 8px 12px; border: 1px solid var(--ems-neutral-300); border-radius: var(--ems-r-md);
+    background: var(--ems-neutral-0); color: var(--ems-text); font: inherit;
+}
+.lc-page .lc-form input:disabled { background: var(--ems-neutral-50); color: var(--ems-neutral-500); }
+.lc-field.is-invalid input, .lc-field.is-invalid select { border-color: var(--ems-danger-500); }
+.lc-page .errorlist { margin: 0; padding: 0; list-style: none; color: var(--ems-danger-700); font-size: var(--ems-fs-sm); }
+.lc-form__errors { grid-column: 1 / -1; padding: var(--ems-sp-3) var(--ems-sp-4); border-radius: var(--ems-r-lg); background: var(--ems-danger-bg); border: 1px solid var(--ems-danger-bd); color: var(--ems-danger-700); }
+.lc-form__actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; }
+
+/* ── Düymələr / çiplər ────────────────────────────────────────────────────── */
+.lc-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 8px 16px;
+    border-radius: var(--ems-r-md); border: 1px solid transparent; font: inherit; font-weight: 700; text-decoration: none; cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+.lc-btn--primary { background: var(--ems-primary-600); color: var(--ems-neutral-0); }
+.lc-btn--primary:hover { background: var(--ems-primary-700); color: var(--ems-neutral-0); }
+.lc-btn--ghost { background: var(--ems-neutral-0); color: var(--ems-primary-700); border-color: var(--ems-primary-200); }
+.lc-btn--ghost:hover { background: var(--ems-primary-50); color: var(--ems-primary-800); }
+.lc-btn--danger { background: var(--ems-neutral-0); color: var(--ems-danger-700); border-color: var(--ems-danger-bd); }
+.lc-btn--danger:hover { background: var(--ems-danger-bg); }
+.lc-btn--sm { min-height: 34px; padding: 6px 12px; font-size: var(--ems-fs-sm); }
+.lc-chip {
+    display: inline-flex; align-items: center; padding: 3px 10px; border-radius: var(--ems-r-pill);
+    background: var(--ems-success-bg); color: var(--ems-success-700); border: 1px solid var(--ems-success-bd);
+    font-size: var(--ems-fs-xs); font-weight: 800; letter-spacing: .03em; text-transform: uppercase; white-space: nowrap;
+}
+.lc-chip--muted { background: var(--ems-neutral-100); color: var(--ems-neutral-700); border-color: var(--ems-neutral-200); text-transform: none; letter-spacing: 0; }
+
+/* ── Qrup kartları ────────────────────────────────────────────────────────── */
+.lc-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: var(--ems-sp-4); }
+.lc-cohort {
+    display: flex; flex-direction: column; gap: var(--ems-sp-3); padding: var(--ems-sp-4) var(--ems-sp-5);
+    border: 1px solid var(--ems-border); border-radius: var(--ems-r-2xl); background: var(--ems-neutral-0); box-shadow: var(--ems-sh-card);
+    transition: box-shadow .15s ease, border-color .15s ease;
+}
+.lc-cohort:hover { border-color: var(--ems-primary-200); box-shadow: var(--ems-sh-raised); }
+.lc-cohort__top { display: flex; align-items: center; justify-content: space-between; gap: var(--ems-sp-2); }
+.lc-cohort__period { font-size: var(--ems-fs-xs); font-weight: 600; color: var(--ems-text-muted); }
+.lc-cohort__name { margin: 0; font-size: var(--ems-fs-lg); font-weight: 800; line-height: 1.25; }
+.lc-cohort__name a { color: var(--ems-text); text-decoration: none; }
+.lc-cohort__name a:hover { color: var(--ems-primary-700); }
+.lc-meta { margin: 0; display: grid; gap: 6px; }
+.lc-meta > div { display: grid; grid-template-columns: 84px 1fr; gap: var(--ems-sp-2); align-items: baseline; }
+.lc-meta dt { margin: 0; font-size: var(--ems-fs-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--ems-neutral-500); }
+.lc-meta dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.lc-meta--inline { display: flex; flex-wrap: wrap; gap: var(--ems-sp-2) var(--ems-sp-5); }
+.lc-meta--inline > div { grid-template-columns: auto 1fr; }
+.lc-actions { margin-top: auto; display: flex; flex-wrap: wrap; gap: var(--ems-sp-2); padding-top: var(--ems-sp-2); }
+
+/* ── Cədvəllər ────────────────────────────────────────────────────────────── */
+.lc-scroll { overflow-x: auto; }
+.lc-table { width: 100%; border-collapse: collapse; min-width: 560px; }
+.lc-table th, .lc-table td { padding: 12px 14px; border-bottom: 1px solid var(--ems-border); text-align: left; vertical-align: top; }
+.lc-table thead th { font-size: var(--ems-fs-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--ems-neutral-600); background: var(--ems-neutral-50); }
+.lc-table tbody tr:last-child td, .lc-table tbody tr:last-child th { border-bottom: 0; }
+.lc-table tbody tr:hover { background: var(--ems-neutral-50); }
+.lc-table th[scope="row"] { font-weight: 700; }
+.lc-table td form { min-width: 240px; }
+.lc-table--compact td, .lc-table--compact th { padding: 10px 12px; }
+
+/* ── Detal səhifəsi: qrup seçici, axtarış, namizədlər ─────────────────────── */
+.lc-picker { display: flex; align-items: flex-end; gap: var(--ems-sp-2); flex-wrap: wrap; }
+.lc-picker__field { display: flex; flex-direction: column; gap: 6px; min-width: 240px; flex: 1 1 240px; }
+.lc-search { display: flex; align-items: flex-end; gap: var(--ems-sp-2); flex-wrap: wrap; margin-bottom: var(--ems-sp-4); }
+.lc-search label { display: flex; flex-direction: column; gap: 6px; flex: 1 1 260px; font-weight: 700; font-size: var(--ems-fs-sm); }
+.lc-candidates { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--ems-sp-2); }
+.lc-candidate { border: 1px solid var(--ems-border); border-radius: var(--ems-r-xl); background: var(--ems-neutral-0); }
+.lc-candidate > summary { padding: var(--ems-sp-3) var(--ems-sp-4); cursor: pointer; font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: var(--ems-sp-3); }
+.lc-candidate > summary::-webkit-details-marker { display: none; }
+.lc-candidate > summary::after { content: "\f067"; font-family: "Font Awesome 6 Free"; font-weight: 900; color: var(--ems-primary-600); }
+.lc-candidate[open] > summary { border-bottom: 1px solid var(--ems-border); }
+.lc-candidate[open] > summary::after { content: "\f068"; }
+.lc-candidate__body { padding: var(--ems-sp-3) var(--ems-sp-4) var(--ems-sp-4); }
+.lc-inline { display: grid; gap: var(--ems-sp-3); }
+.lc-inline p { margin: 0; color: var(--ems-text-muted); font-size: var(--ems-fs-sm); line-height: 1.5; }
+.lc-inline label { display: flex; flex-direction: column; gap: 6px; font-weight: 700; font-size: var(--ems-fs-sm); }
+.lc-inline .lc-check { font-weight: 600; }
+.lc-row-action > summary { cursor: pointer; font-weight: 700; color: var(--ems-danger-700); list-style: none; }
+.lc-row-action > summary::-webkit-details-marker { display: none; }
+.lc-row-action[open] > summary { margin-bottom: var(--ems-sp-2); }
+.lc-history > summary { cursor: pointer; font-weight: 800; font-size: var(--ems-fs-lg); list-style: none; display: flex; align-items: center; gap: var(--ems-sp-2); }
+.lc-history > summary::-webkit-details-marker { display: none; }
+.lc-history > summary::after { content: "\f078"; font-family: "Font Awesome 6 Free"; font-weight: 900; margin-left: auto; color: var(--ems-neutral-400); }
+.lc-history[open] > summary { margin-bottom: var(--ems-sp-3); }
+.lc-history[open] > summary::after { transform: rotate(180deg); }
+
+/* ── Mobil ────────────────────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+    .lc-page { padding-inline: var(--ems-sp-4); }
+    .lc-head { flex-wrap: wrap; }
+    .lc-head__meta { margin-left: 0; width: 100%; }
+    .lc-form { grid-template-columns: 1fr; padding: var(--ems-sp-4); }
+    .lc-grid { grid-template-columns: 1fr; }
+    .lc-table { min-width: 480px; }
+    .lc-btn { width: 100%; }
+    .lc-actions .lc-btn { width: auto; flex: 1 1 120px; }
+}
