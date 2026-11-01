@@ -63,3 +63,12 @@ python scripts/ops/decrypt_english_level_evidence.py --input CIPHERTEXT --privat
 The standalone decoder rejects unknown keys, foreign references, wrong scope,
 invalid enums, unbounded payloads and any claim of write authority. It creates a
 new private file only. Existing snapshot contracts and decoders are unchanged.
+
+The `english-level-evidence.yml` manual workflow accepts only the actor. Its
+host wrapper verifies the running image SHA, downloads one pinned ciphertext
+release asset, verifies both cipher and plaintext SHA, and uses `STAFF_PLAN_KEY`
+only through the masked OpenSSL environment. The fixed input contains sensitive
+identity evidence and is never an artifact. Container and host temporary input
+paths are removed on normal completion and by the workflow's always-cleanup.
+Only the encrypted output and a source/run/HEAD-bound manifest are uploaded.
+The workflow has no apply mode or enrollment/placement mutation command.
