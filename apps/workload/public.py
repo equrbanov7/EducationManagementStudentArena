@@ -483,3 +483,10 @@ from .services.source58_recovery_evidence import (  # noqa: E402,F401
 )
 
 __all__ += ["fixed_source58_recovery_evidence", "fixed_source58_source_scope"]
+
+# Read-only management evidence: complete bounded graph and empty-table schema.
+from .services import reviewed_leyla_catalog_graph as reviewed_catalog_graph  # noqa: E402,F401
+from .services import reviewed_two_catalog_schema as reviewed_catalog_schema  # noqa: E402,F401
+from .services.offering_rules import plan_reached_chair  # noqa: E402,F401
+
+__all__ += ["reviewed_catalog_graph", "reviewed_catalog_schema", "plan_reached_chair"]
