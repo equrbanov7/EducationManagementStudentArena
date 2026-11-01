@@ -56,6 +56,8 @@ from . import subject_merge_apply  # noqa: F401 — açılışın fənn düzəli
 from . import transcript  # noqa: F401
 from . import transfer  # noqa: F401
 from . import exam_eligibility as eligibility_rules  # noqa: F401
+from .absence_credit_read import credit_hours_map, effective_hours  # noqa: F401
+from .absence_evidence import absence_counter_preview  # noqa: F401
 from .attendance import DEFAULT_ABSENCE_LIMIT_PERCENT  # noqa: F401
 from .attendance import attendance_score  # noqa: F401
 from .cabinet_policy import transcript_policy  # noqa: F401
@@ -68,6 +70,7 @@ from .curriculum_registry import build_curriculum_editor  # noqa: F401
 from .gradebook import recompute_absence_hours  # noqa: F401
 from .grading_scale import bands_text  # noqa: F401
 from .grading_scale import is_custom  # noqa: F401
+from .guest_merge import carry_over_map  # noqa: F401
 from .guest_roster import add_guest_student  # noqa: F401
 from .handover_actions import REVERT_BLOCKER_CODES  # noqa: F401
 from .integrity import validate_active_member as validate_active_student_member  # noqa: F401
@@ -101,6 +104,10 @@ from .syllabus_reuse_targets import programs_by_offering  # noqa: F401
 from .teaching_activity import instructor_activity  # noqa: F401 — «Kadr analitikası» (2026-10-11)
 
 __all__ = [
+    "absence_counter_preview",
+    "credit_hours_map",
+    "effective_hours",
+    "carry_over_map",
     "validate_active_student_member",
     "create_reviewed_subject",
     "exact_title_candidates",
