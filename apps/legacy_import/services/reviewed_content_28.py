@@ -7,6 +7,7 @@ from django.db import connection
 from apps.workload.public import fixed_source28_recovery_history
 
 from . import reviewed_content_28_spec as fixed
+from . import reviewed_source28_history as reviewed_history
 from .reviewed_content_contract import ContentError
 from .reviewed_content_spec import ORG
 from .reviewed_content_state import digest, model
@@ -159,6 +160,7 @@ def fresh_guard(state, *, actor, organization, lock=False, allow_created=False):
     except ValueError as exc:
         raise ContentError("reviewed_source28_fresh_history_or_allocation_unavailable") from exc
     receipt_ids = _receipt_ids()
+    reviewed = reviewed_history.classify(history["source28_history_audits"], state.data)
     _ledger(history["source28_history_ledger"])
     require(not history["source28_history_evidence"], "correction_hygiene_or_sourceclaim_requires_review")
     require(
@@ -168,7 +170,7 @@ def fresh_guard(state, *, actor, organization, lock=False, allow_created=False):
             or r["malformed_intent"]
             or r["source_undo_marker"]
             for r in history["source28_history_audits"]
-            if r["action"] != "view"
+            if r["action"] != "view" and r["id"] not in reviewed
         ),
         "contrary_history_requires_review",
     )
@@ -181,7 +183,10 @@ def fresh_guard(state, *, actor, organization, lock=False, allow_created=False):
     )
     require(
         not any(
-            r["unresolved_scope_row"] and r["action"] != "view" and r["id"] not in receipt_ids
+            r["unresolved_scope_row"]
+            and r["action"] != "view"
+            and r["id"] not in receipt_ids
+            and r["id"] not in reviewed
             for r in history["source28_history_audits"]
         ),
         "unresolved_course_audit_requires_review",
@@ -217,6 +222,7 @@ def fresh_guard(state, *, actor, organization, lock=False, allow_created=False):
     canonical = _canonical(lock=lock, allow_created=allow_created or bool(receipt_ids))
     return {
         "available_history": history,
+        "reviewed_nonconflicting_history": list(reviewed.values()),
         "canonical_cells": canonical,
         "absence_hours": {c["enrollment_id"]: enrs[c["enrollment_id"]].absence_hours for c in fixed.CASES.values()},
     }
@@ -260,6 +266,7 @@ def receipt(before, decision):
         "fixed_source28_recovery": {
             "source_review_sha256": fixed.SOURCE_REVIEW_SHA,
             "available_history_sha256": digest(before["available_history"]),
+            "reviewed_nonconflicting_history": before["reviewed_nonconflicting_history"],
             "before_absence_hours": before["absence_hours"],
             "source_metadata_id": fixed.METADATA_ID,
             "hours_semantics": "documented_pair1_to_academic2_after2024_02_01",

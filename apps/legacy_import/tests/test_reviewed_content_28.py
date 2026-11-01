@@ -22,6 +22,7 @@ from apps.audit.models import AuditLog
 from apps.legacy_import.models import LegacyEntityMap
 from apps.legacy_import.services import reviewed_content as service
 from apps.legacy_import.services import reviewed_content_28_spec as fixed
+from apps.legacy_import.services import reviewed_source28_history as history_review
 from apps.legacy_import.services.ledger import create_run, start_run
 from apps.legacy_import.services.reviewed_content_28_undo import undo
 from apps.legacy_import.services.reviewed_content_contract import ContentError, validate_payload
@@ -242,6 +243,9 @@ class Source28Tests(TestCase):
         )
 
     def setUp(self):
+        self.history_pins = patch.dict(history_review.PINS, {}, clear=True)
+        self.history_pins.start()
+        self.addCleanup(self.history_pins.stop)
         apply_rls_request_context(user_id=self.actor.pk, org_id=ORG, bypass=False)
         self.addCleanup(reset_rls_context)
         self.raw = copy.deepcopy(self.raw)
