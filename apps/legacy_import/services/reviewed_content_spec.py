@@ -330,3 +330,9 @@ JOURNAL_GROUPS.update({14088: (835, 843), 15287: (829,)})
 
 TARGETS[_TARGET_336] = _SPEC_336
 JOURNAL_GROUPS[14917] = (936, 937)
+
+# Four individually reviewed blank cells in two pre-existing exact lessons.
+from .reviewed_content_four_spec import TARGETS as _FOUR_TARGETS  # noqa: E402
+
+TARGETS.update(_FOUR_TARGETS)
+JOURNAL_GROUPS.update({14211: (812,), 14302: (765,)})

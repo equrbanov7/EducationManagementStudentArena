@@ -18,6 +18,7 @@ COMMANDS = {
     "repair_tspx_legacy_roster",
     "repair_reviewed_workload_batch",
     "repair_reviewed_journal_content",
+    "undo_reviewed_four_cells",
 }
 
 

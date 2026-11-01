@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Sourced API for guarded encrypted source manifests.
 # shellcheck disable=SC2154
+if [ "${COMMAND:-}" = undo_reviewed_four_cells ]; then
+  source scripts/ops/reviewed_four_undo_args.sh
+  return
+fi
 if [ "${COMMAND:-}" = repair_reviewed_journal_content ]; then
   source scripts/ops/reviewed_content_args.sh
   return

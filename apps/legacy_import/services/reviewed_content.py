@@ -10,6 +10,7 @@ from apps.registrar.public import gradebook
 from core.audit import log_action
 from core.constants import AuditAction
 
+from . import reviewed_content_four as four
 from . import reviewed_content_plan as planner
 from .reviewed_content_contract import ContentError, validate_payload
 from .reviewed_content_spec import ORG, RESOURCE
@@ -97,18 +98,33 @@ def execute(*, data, source_sha256, user, organization, apply=False, expected_ba
     from .reviewed_content_336_bridge import source_guard
 
     source_guard(data, source_sha256)
+    four.source_guard(data, source_sha256)
     state = CurrentState(data, actor=user, lock=apply)
+    four_before = (
+        four.fresh_guard(state, actor=user, organization=organization, lock=apply) if four.selected(data) else None
+    )
     before = state.fingerprint()
+    if four_before is not None:
+        before["fixed_four_available_evidence"] = digest(four_before)
     baseline = digest({"source": source_sha256, "targets": targets, "current": before})
     if expected_baseline and expected_baseline != baseline:
         raise ContentError("fresh_live_baseline_changed")
     decision = planner.build(state)
+    four.decision_guard(data, decision)
+    extra_receipt = four.receipt(four_before, decision)
+    if extra_receipt:
+        extra_receipt["fixed_four_recovery"]["before_state_fingerprint"] = digest(state.fingerprint())
     result = {"baseline": baseline, **dict(sorted(decision.counts.items()))}
     if not apply:
         return result
     if not decision.marks:
         return {**result, "already_done": 1}
     untouched = protected(state, touched=decision.touched)
+    if (
+        four_before is not None
+        and four.fresh_guard(state, actor=user, organization=organization, lock=True) != four_before
+    ):
+        raise ContentError("reviewed_four_evidence_changed_before_write")
     _write(decision)
     _verify_created(state, decision)
     created_lessons = [str(lesson.pk) for lesson in decision.lessons.values()]
@@ -120,6 +136,10 @@ def execute(*, data, source_sha256, user, organization, apply=False, expected_ba
         raise ContentError("existing_academic_content_roster_or_author_changed")
     # Re-audit the actual new cell keys: a repeat must propose no more inserts.
     after_state = CurrentState(data, actor=user)
+    if four_before is not None:
+        four_after = four.fresh_guard(after_state, actor=user, organization=organization, lock=True)
+        if four_after["available_history"] != four_before["available_history"]:
+            raise ContentError("reviewed_four_contrary_evidence_changed_during_write")
     again = planner.build(after_state)
     if again.marks or again.lessons:
         raise ContentError("source_recovery_not_idempotent")
@@ -132,6 +152,7 @@ def execute(*, data, source_sha256, user, organization, apply=False, expected_ba
         resource_id=batch,
         reason="Baxılmış köhnə jurnal mənbəsindən yalnız çatışmayan xanaların bərpası",
         new_values={
+            **extra_receipt,
             "source_sha256": source_sha256,
             "reviewed_identity_evidence": state.reviewed_identity_evidence,
             "target_ids": targets,
