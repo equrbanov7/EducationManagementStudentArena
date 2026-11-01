@@ -174,6 +174,10 @@
             searchInput.addEventListener("keydown", onSearchKeydown);
         }
 
+        var remoteSearch = window.EMSBootstrapRemoteSearch
+            ? window.EMSBootstrapRemoteSearch(select, function () { return searchInput; }, buildMenu)
+            : function () {};
+
         function searchActive() {
             return Boolean(searchWrap && searchWrap.parentNode === menu);
         }
@@ -208,6 +212,7 @@
                 searchEmpty.hidden = visible > 0;
             }
             menu.scrollTop = 0; // uyğunluqlar başdan görünsün (köhnə sürüşmə yerində qalmasın)
+            remoteSearch();
         }
 
         function focusSearch(event) {

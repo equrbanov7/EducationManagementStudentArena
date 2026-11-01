@@ -283,9 +283,16 @@
         }
         var placeholder = form.querySelector("[data-sr-group-select] option");
         var text = placeholder ? placeholder.textContent : "—";
+        var groupSelect = form.querySelector("[data-sr-group-select]");
+        if (groupSelect) {
+            groupSelect.setAttribute("data-live-search-url", host.getAttribute("data-sr-groups-url"));
+        }
         window.EMSCore.fetchJSON(host.getAttribute("data-sr-groups-url") + "?limit=50")
             .then(function (payload) {
-                fillSelect(form.querySelector("[data-sr-group-select]"), payload.results || [], text);
+                // Gec gələn ilkin siyahı müəllimin server axtarışını və seçimini əzməsin.
+                if (!groupSelect || !groupSelect._emsRemoteSearchStarted) {
+                    fillSelect(groupSelect, payload.results || [], text);
+                }
             })
             .catch(function () {
                 /* seçici boş qalır — server onsuz da məcburiyyəti yoxlayır */
