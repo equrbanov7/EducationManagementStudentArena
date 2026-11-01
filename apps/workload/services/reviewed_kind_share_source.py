@@ -28,7 +28,7 @@ CELL_HASHES = {
     "B101": "8ad1b5f38ef898e4159ef8d731106c305edefb5f8f212fea29ebc27daf254cb3",
     "C101": "ba5cb62038fb67dd4287c3aaafcbfdbd997d007f59b1c4558d737e12cc088b0a",
 }
-GROUP_KEY_SHA = "258872bad38aced71ee539842eeb1e5c70bfa24d71ea2890b208593b1a61adcb"
+GROUP_TEXT_SHA256 = "258872bad38aced71ee539842eeb1e5c70bfa24d71ea2890b208593b1a61adcb"
 TEACHER_NAME_SHA = "9391c9dcfc26a18ac2b8b6bc2adb9a2f8d3352af04f8040047b652b8f0e74001"
 RESOURCE = "workload.reviewed_biostat_seminar_share"
 

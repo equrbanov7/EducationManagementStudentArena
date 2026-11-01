@@ -90,7 +90,7 @@ def prepare(*, organization, lock=False):
     if (
         not offering.group.is_active
         or offering.group.unit_type != "group"
-        or spec.text_sha(spec.normalized(offering.group.name).replace(" ", "")) != spec.GROUP_KEY_SHA
+        or spec.text_sha(spec.normalized(offering.group.name).replace(" ", "")) != spec.GROUP_TEXT_SHA256
         or group_settings.get("parent_group")
         or any(
             spec.normalized(group_settings[key]) not in ("az", "aze", "azərbaycan", "azerbaijani", "azərbaycan dili")

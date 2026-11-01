@@ -1,3 +1,9 @@
 # 2026-09-27: git tarixçəsi yenidən yazıldı (sirr/şəxsi məlumat təmizliyi) — əvvəlki SHA-ya bağlı
 # fingerprint-lər etibarsızdır və silindi. Nümunə (placeholder) dəyərlər `.gitleaks.toml` allowlist
 # regex-lərindədir. Yeni istisna yalnız real yanlış-pozitiv üçün, dəqiq fingerprint ilə əlavə olunur.
+
+# NONSECRET: SHA-256 of the normalized physical group label; verified against
+# the source-pinned official XLSX B101 group member and current group metadata.
+# An integrity comparison, not credential material. The constant is now named
+# GROUP_TEXT_SHA256; only this original historical finding is excluded.
+b98a9f01203145e5c2ea49e184f5fd9cd64603c3:apps/workload/services/reviewed_kind_share_source.py:generic-api-key:31
