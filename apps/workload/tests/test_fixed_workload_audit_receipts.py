@@ -126,6 +126,52 @@ class FixedWorkloadReceiptTests(Base):
             self.assertEqual(result["four_cell_history_scope"][0]["verified_workload_receipts"], 2)
         self.assertEqual(before, self.fingerprint())
 
+    def test_authenticated_october_receipt_schema_versions_preserve_all_bytes(self):
+        # Actual encrypted diagnostic 41326871426: all three reviewed receipts
+        # omit later provenance; the oldest also predates before.electives.
+        for electives in (False, True):
+            for choices in (False, True):
+
+                def historical(kwargs, electives=electives, choices=choices):
+                    value = kwargs["new_values"]
+                    value["details"].pop("detached_objection_provenance")
+                    if not electives:
+                        value["before"].pop("electives")
+                    if choices:
+                        value["details"]["created_elective_choice_ids"] = []
+
+                with self.subTest(electives=electives, choices=choices):
+                    obj = self.receipt(size=128, mutate=historical)
+                    self.enterContext(patch.object(spec, "WITHOUT_PROVENANCE", (*spec.WITHOUT_PROVENANCE, str(obj.pk))))
+                    if not electives:
+                        self.enterContext(
+                            patch.object(spec, "WITHOUT_ELECTIVES", (*spec.WITHOUT_ELECTIVES, str(obj.pk)))
+                        )
+                    before = self.fingerprint()
+                    for bypass in (False, True):
+                        rows = self.read(bypass)["four_cell_history_audits"]
+                        self.assertTrue(
+                            any(r["id"] == str(obj.pk) and r.get("receipt_semantics_validated") for r in rows)
+                        )
+                    self.assertEqual(before, self.fingerprint())
+
+    def test_historical_schema_does_not_accept_other_omissions_or_bad_optional_arrays(self):
+        mutations = [
+            lambda v: v["before"].pop("electives"),
+            lambda v: v["details"].pop("detached_objection_provenance"),
+            lambda v: v["before"].pop("extensions"),
+            lambda v: v["details"].pop("created_row_ids"),
+            lambda v: v["details"].update(unknown_intent=[]),
+            lambda v: v["details"].update(created_elective_choice_ids=["private-not-uuid"]),
+            lambda v: v["details"].update(detached_objection_provenance={}),
+        ]
+        for index, mutate in enumerate(mutations):
+            with self.subTest(index=index):
+                obj = self.receipt(size=128, mutate=lambda k, mutate=mutate: mutate(k["new_values"]))
+                row = thin.preview(annotated(AuditLog.objects.filter(pk=obj.pk)))[0]
+                with self.assertRaisesRegex(ValueError, "receipt_semantics_unverified"):
+                    thin.validate(row)
+
     def test_changed_hash_and_forged_semantics_are_never_accepted(self):
         obj = self.receipt()
         with (

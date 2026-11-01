@@ -78,6 +78,12 @@ def expression(table, family):
     before_shape = [f"{keys(history)}={array(history_keys)}", f"jsonb_typeof({before}->'history')='object'"] + [
         array_shape(f"({before}->{literal(key)})") for key in sorted(before_arrays)
     ]
+    # The authenticated October 30 receipts predate electives/provenance support.
+    # Full row + field hashes remain mandatory; only these closed schema versions
+    # are accepted, never arbitrary missing fields or unknown intent keys.
+    before_versions = [spec.BEFORE[family]]
+    if family == "reviewed":
+        before_versions.append(tuple(k for k in spec.BEFORE[family] if k != "electives"))
     pairs = {
         "resource_valid": f'{table}."resource_type"={literal(resource)}',
         "reason_valid": f'{table}."reason"={literal(reason)}',
@@ -86,7 +92,14 @@ def expression(table, family):
         "null_intent_fields": f'{table}."old_values" IS NULL AND {table}."changes" IS NULL',
         "kind": f"CASE WHEN {nv}->>'kind' IN ('apply','undo') THEN {nv}->>'kind' ELSE NULL END",
         "top_keys_valid": f"jsonb_typeof({nv})='object' AND {keys(nv)}={array(spec.TOP[family])}",
-        "before_keys_valid": f"jsonb_typeof({before})='object' AND {keys(before)}={array(spec.BEFORE[family])}",
+        "before_keys_valid": f"jsonb_typeof({before})='object' AND ("
+        + " OR ".join(
+            f"({keys(before)}={array(version)}"
+            + (f' AND {table}."id"::text=ANY({array(spec.WITHOUT_ELECTIVES)})' if index else "")
+            + ")"
+            for index, version in enumerate(before_versions)
+        )
+        + ")",
         "before_structure_valid": " AND ".join(before_shape),
         "top_known_keys": f"ARRAY(SELECT k FROM unnest({keys(nv)}) k WHERE k=ANY({array(spec.TOP[family])}) ORDER BY k)",
         "before_known_keys": f"ARRAY(SELECT k FROM unnest({keys(before)}) k WHERE k=ANY({array(spec.BEFORE[family])}) ORDER BY k)",
@@ -117,18 +130,43 @@ def expression(table, family):
         )
     if family == "reviewed":
         details = f"({nv}->'details')"
-        allowed_details = [spec.DETAILS, tuple(sorted((*spec.DETAILS, "created_elective_choice_ids")))]
+        required_details = tuple(k for k in spec.DETAILS if k != "detached_objection_provenance")
+        allowed_details = [
+            tuple(sorted((*required_details, *extra)))
+            for extra in (
+                (),
+                ("detached_objection_provenance",),
+                ("created_elective_choice_ids",),
+                ("detached_objection_provenance", "created_elective_choice_ids"),
+            )
+        ]
         pairs["details_known_keys"] = (
             f"ARRAY(SELECT k FROM unnest({keys(details)}) k WHERE k=ANY({array(tuple(sorted((*spec.DETAILS, 'created_elective_choice_ids'))))}) ORDER BY k)"
         )
         pairs["details_keys_valid"] = (
             f"jsonb_typeof({details})='object' AND ("
-            + " OR ".join(f"{keys(details)}={array(v)}" for v in allowed_details)
+            + " OR ".join(
+                f"({keys(details)}={array(v)}"
+                + (
+                    f' AND {table}."id"::text=ANY({array(spec.WITHOUT_PROVENANCE)})'
+                    if "detached_objection_provenance" not in v
+                    else ""
+                )
+                + ")"
+                for v in allowed_details
+            )
             + ")"
         )
-        pairs["details_structure_valid"] = " AND ".join(
-            array_shape(f"({details}->{literal(key)})", ids=key != "detached_objection_provenance")
-            for key in spec.DETAILS
+        pairs["details_structure_valid"] = (
+            " AND ".join(
+                array_shape(f"({details}->{literal(key)})", ids=key != "detached_objection_provenance")
+                for key in required_details
+            )
+            + " AND "
+            + " AND ".join(
+                f"(NOT ({details} ? {literal(key)}) OR {array_shape(f'({details}->{literal(key)})', ids=key != 'detached_objection_provenance')})"
+                for key in ("detached_objection_provenance", "created_elective_choice_ids")
+            )
         )
         pairs["protected_matches_before"] = (
             f"({before}->'academic') - 'offering' - CASE WHEN ({protected} ? 'handover') THEN '' ELSE 'handover' END - CASE WHEN ({protected} ? 'journal_share') THEN '' ELSE 'journal_share' END = {protected}"

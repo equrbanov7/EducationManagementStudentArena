@@ -88,3 +88,11 @@ FIELD_PINS = {
         "source_raw_bytes": 2601318,
     },
 }
+
+# Authenticated diagnostic 41326871426 (8c06e8a527d8): closed historic schemas.
+WITHOUT_ELECTIVES = ("ba4a6e4a-3c10-409a-9c51-f3f4ba9c3ba8",)
+WITHOUT_PROVENANCE = (
+    "005343b3-adcb-4774-a03e-792259cd89af",
+    "528a2d9e-04d7-4638-9a45-4d519e30cdc8",
+    "ba4a6e4a-3c10-409a-9c51-f3f4ba9c3ba8",
+)
