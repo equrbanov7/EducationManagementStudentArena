@@ -12,6 +12,7 @@ from core.constants import AuditAction
 from ..constants import AmendmentReason, TaskStatus
 from . import qosqar_duplicate_state as common
 from . import qosqar_schedule
+from .qosqar_reviewed_workload import validate_alternates
 from .row_edit import save_row_amended
 from .scoping import resolve_actor
 
@@ -129,13 +130,12 @@ def validate(offerings, row, *, corrected, sections):
         .exists()
     ):
         raise ModellingError("target_catalogue_offering_collision")
-    if (
+    validate_alternates(
         model("workload.TeachingTaskRow")
         .objects.filter(organization_id=ORG, period_id=PERIOD, groups__pk=GROUP, subject_id__in=(OLD, NEW, ALTERNATE))
-        .exclude(pk=ROW)
-        .exists()
-    ):
-        raise ModellingError("alternate_workload_requires_review")
+        .exclude(pk=ROW),
+        group=GROUP,
+    )
     if (
         str(row.task_id),
         str(row.subject_id),

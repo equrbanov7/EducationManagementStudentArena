@@ -12,6 +12,7 @@ from apps.registrar.models import CourseOffering, Enrollment, Lesson, LessonMark
 from apps.syllabus.models import SyllabusShare
 from apps.workload.models import TeacherAssignment
 from apps.workload.services import qosqar_journals_repair as service
+from apps.workload.services import qosqar_reviewed_workload as workload_review
 from apps.workload.tests import test_qosqar_modelling_repair as modelling_fixture
 from apps.workload.tests import test_scoped_snapshot as fixtures
 from apps.workload.tests.factories import make_row
@@ -38,7 +39,12 @@ class QosqarJournalsTests(TestCase):
         for row in (keep, duplicate):
             for kind in ("lecture", "seminar"):
                 TeacherAssignment.objects.create(
-                    organization=self.org, row=row, teacher=self.teacher, activity=kind, hours=45
+                    organization=self.org,
+                    row=row,
+                    teacher=self.teacher,
+                    activity=kind,
+                    hours=45,
+                    is_hourly_paid=row == duplicate,
                 )
         self.other_source = CourseOffering.objects.create(
             organization=self.org,
@@ -90,6 +96,13 @@ class QosqarJournalsTests(TestCase):
         type(keep).objects.filter(pk__in=(keep.pk, duplicate.pk, self.row.pk)).update(credits=7)
         self.keep, self.duplicate = keep, duplicate
         self.state, self.mod = state, mod
+        self.patches.enter_context(
+            patch.object(
+                workload_review,
+                "RETIRING_ASSIGNMENTS",
+                set(map(str, duplicate.assignments.values_list("pk", flat=True))),
+            )
+        )
 
     def call(self, **kwargs):
         return service.repair_qosqar_journals(
@@ -342,3 +355,77 @@ class QosqarJournalsTests(TestCase):
         with self.assertRaisesRegex(ValueError, "duplicate_row_has_history"):
             self.call()
         self.assertEqual(original, self.state.records(cls.objects.filter(pk=review.pk)))
+
+    def zero_choice(self):
+        choice = make_row(self.task, {**self.stack, "subject": self.source.subject}, lecture_total=0, seminar_total=0)
+        choice.groups.set([self.target.group])
+        for key, value in {
+            "subject_text": "ATMF XII blok: \n1.Kompüterlərdə modelləşdirmə\n2. Avtomatlar nəzəriyyəsi",
+            "groups_text": "233 İT",
+            "lecture_plan": 45,
+            "seminar_plan": 45,
+            "total_hours": 0,
+            "union_count": 0,
+            "subgroup_count": 0,
+            "credits": 7,
+            "student_count": 17,
+        }.items():
+            setattr(choice, key, value)
+        choice.save()
+        self.patches.enter_context(patch.object(workload_review, "ZERO_CHOICE_ROW", str(choice.pk)))
+        return choice
+
+    def test_exact_zero_choice_and_paid_retirement_provenance_survive_apply_undo(self):
+        self.prepare()
+        choice = self.zero_choice()
+        before = self.state.capture()
+        dry = self.call()
+        self.call(apply=True, expected_baseline=dry["baseline"])
+        self.assertTrue(type(choice).objects.filter(pk=choice.pk, total_hours=0).exists())
+        self.assertFalse(TeacherAssignment.objects.filter(row_id=self.duplicate.pk).exists())
+        undo = self.call(undo=True)
+        self.call(undo=True, apply=True, expected_baseline=undo["baseline"])
+        after = self.state.capture()
+        for key in ("rows", "groups", "group_links", "assignments"):
+            self.assertEqual(self.state.digest(before[key]), self.state.digest(after[key]))
+        self.assertEqual(TeacherAssignment.objects.filter(row_id=self.duplicate.pk, is_hourly_paid=True).count(), 2)
+        self.assertFalse(TeacherAssignment.objects.filter(row=self.keep, is_hourly_paid=True).exists())
+
+    def test_zero_choice_positive_load_assignment_or_identity_drift_holds(self):
+        self.prepare()
+        choice = self.zero_choice()
+        for changes in ({"lecture_total": 1}, {"subject_text": "Other choice"}, {"subgroup_count": 1}):
+            original = {key: getattr(choice, key) for key in changes}
+            type(choice).objects.filter(pk=choice.pk).update(**changes)
+            with self.assertRaisesRegex(ValueError, "zero_choice_workload_changed"):
+                self.call()
+            type(choice).objects.filter(pk=choice.pk).update(**original)
+        type(choice).objects.filter(pk=choice.pk).update(lecture_total=1)
+        TeacherAssignment.objects.create(
+            organization=self.org, row=choice, teacher=self.teacher, activity="lecture", hours=1
+        )
+        with self.assertRaisesRegex(ValueError, "zero_choice_workload_changed"):
+            self.call()
+
+    def test_pay_basis_guard_is_exact_for_retiring_and_retained_rows(self):
+        self.prepare()
+        for row, changed, original in ((self.duplicate, False, True), (self.keep, True, False)):
+            row.assignments.update(is_hourly_paid=changed)
+            with self.assertRaisesRegex(ValueError, "pay_basis_changed"):
+                self.call()
+            row.assignments.update(is_hourly_paid=original)
+
+    def test_recreated_retiring_assignment_with_same_quantity_is_not_whitelisted(self):
+        self.prepare()
+        item = self.duplicate.assignments.get(activity="lecture")
+        item.delete()
+        TeacherAssignment.objects.create(
+            organization=self.org,
+            row=self.duplicate,
+            teacher=self.teacher,
+            activity="lecture",
+            hours=45,
+            is_hourly_paid=True,
+        )
+        with self.assertRaisesRegex(ValueError, "retiring_assignment_ids_changed"):
+            self.call()

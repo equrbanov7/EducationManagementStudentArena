@@ -2,6 +2,7 @@
 
 from . import qosqar_duplicate_state as duplicate
 from . import qosqar_modelling_repair as modelling
+from .qosqar_reviewed_workload import validate_retiring_assignments
 
 model, digest, records = duplicate.model, duplicate.digest, duplicate.records
 Error = duplicate.DuplicateError
@@ -196,6 +197,11 @@ def validate(*, sections, corrected):
             )
         ):
             raise Error("reviewed_workload_credit_multiplier_or_other_hours_changed")
-        if reviewed.assignments.filter(is_hourly_paid=True).exists():
+        # The explicitly retired duplicate's two existing paid assignments are
+        # part of the approved retirement, not a payroll validation or rewrite.
+        paid = str(reviewed.pk) == duplicate.REMOVE_ROW
+        if paid:
+            validate_retiring_assignments(reviewed)
+        if reviewed.assignments.exclude(is_hourly_paid=paid).exists():
             raise Error("reviewed_assignment_pay_basis_changed")
     return offerings, row, syllabus

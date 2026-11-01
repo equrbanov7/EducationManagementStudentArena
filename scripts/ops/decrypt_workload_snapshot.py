@@ -64,6 +64,15 @@ def decrypt_snapshot(encoded, private_key_bytes):
         validator = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(validator)
         validator.validate(payload)
+    else:
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location(
+            "workload_history_scope", Path(__file__).with_name("workload_history_scope.py")
+        )
+        validator = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(validator)
+        validator.validate(payload)
     return payload
 
 

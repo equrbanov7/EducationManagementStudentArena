@@ -1,6 +1,7 @@
 """Pure crypto/local-file checks, runnable with unittest without PostgreSQL."""
 
 import base64
+import copy
 import hashlib
 import importlib.util
 import json
@@ -82,6 +83,87 @@ class DecryptSnapshotTests(unittest.TestCase):
             self.assertNotEqual(a, b)
             self.assertEqual(a.stat().st_mode & 0o777, 0o600)
             self.assertEqual(old.read_text(), "untouched")
+
+    def history_payload(self):
+        spec = importlib.util.spec_from_file_location("history_scope", PATH.with_name("workload_history_scope.py"))
+        scope = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(scope)
+        row = dict.fromkeys(scope.FIELDS)
+        row.update(
+            model_label="workload.TeachingTaskRow",
+            id=scope.ROW,
+            organization_id=scope.ORG,
+            created_at="2026-11-01T03:00:00Z",
+            updated_at="2026-11-01T03:00:00Z",
+            foreign_keys={"organization_id": scope.ORG, "task_id": scope.TASK},
+            foreign_key_models={"organization_id": "organizations.Organization", "task_id": "workload.TeachingTask"},
+            material={"total_hours": 45},
+            old_material={},
+            new_material={},
+            raw_record_sha256="1" * 64,
+            note_present=False,
+            document_present=False,
+        )
+        declaration = dict(
+            organization_id=scope.ORG,
+            task_id=scope.TASK,
+            row_id=scope.ROW,
+            expected_assignment_ids=sorted(scope.ASSIGNMENTS),
+            actual_assignment_ids=[],
+            root_present=True,
+            closure_rows=1,
+            typed_metadata_only=True,
+            automatic_apply_authority=False,
+        )
+        return {
+            "data": {"repair_math_history": [row], "repair_math_history_scope": [declaration]},
+            "schema_fields": {
+                "repair_math_history": sorted(scope.FIELDS),
+                "repair_math_history_scope": sorted(scope.SCOPE_FIELDS),
+            },
+        }
+
+    def test_old_41_section_and_additive_math_history_payloads_roundtrip(self):
+        old = {"data": {f"existing_section_{i}": [] for i in range(41)}}
+        for extra in (old, self.history_payload()):
+            with (
+                self.subTest(history="repair_math_history" in extra["data"]),
+                patch.object(decoder, "KEY_FINGERPRINT", self.fingerprint),
+            ):
+                result = decoder.decrypt_snapshot(json.dumps(self.envelope(**extra)).encode(), self.private)
+                self.assertEqual(result["data"], extra["data"])
+
+    def test_math_history_decoder_rejects_raw_json_notes_scope_and_closure_tampering(self):
+        original = self.history_payload()
+        cases = []
+        value = copy.deepcopy(original)
+        value["data"]["repair_math_history"][0]["old_material"] = {"note": "PRIVATE"}
+        cases.append(value)
+        value = copy.deepcopy(original)
+        value["data"]["repair_math_history"][0]["raw_note"] = "PRIVATE"
+        cases.append(value)
+        value = copy.deepcopy(original)
+        value["data"]["repair_math_history"][0]["material"] = {"phone": 123456789}
+        cases.append(value)
+        value = copy.deepcopy(original)
+        value["data"]["repair_math_history"][0]["created_at"] = "PRIVATE"
+        cases.append(value)
+        value = copy.deepcopy(original)
+        value["data"]["repair_math_history"][0]["organization_id"] = "FOREIGN"
+        cases.append(value)
+        value = copy.deepcopy(original)
+        value["data"]["repair_math_history_scope"][0]["automatic_apply_authority"] = True
+        cases.append(value)
+        value = copy.deepcopy(original)
+        value["data"]["repair_math_history"][0]["id"] = "00000000-0000-4000-8000-000000000000"
+        cases.append(value)
+        value = copy.deepcopy(original)
+        del value["data"]["repair_math_history_scope"]
+        cases.append(value)
+        for extra in cases:
+            with self.subTest(extra=cases.index(extra)), patch.object(decoder, "KEY_FINGERPRINT", self.fingerprint):
+                with self.assertRaisesRegex(ValueError, "math_history"):
+                    decoder.decrypt_snapshot(json.dumps(self.envelope(**extra)).encode(), self.private)
 
 
 class ExportWorkflowTests(unittest.TestCase):
