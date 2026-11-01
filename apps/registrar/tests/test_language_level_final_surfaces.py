@@ -71,3 +71,42 @@ class LanguageLevelFinalSurfacesTests(TestCase):
             self.assertEqual(fast["totals"]["barred"], 1)
             self.assertEqual(raw, list(LessonMark.objects.order_by("pk").values("id", "score", "status", "lesson_id")))
             self.assertTrue(all(score == 70 for score in FinalGrade.objects.values_list("exam_score", flat=True)))
+
+    def test_legacy_exam_over_70_is_preserved_but_effective_result_uses_level_ceiling(self):
+        with bypass_rls():
+            self.level_fixture()
+            enrollment = self.enrollments[0]
+            FinalGrade.objects.filter(enrollment=enrollment).update(exam_score=90)
+            single = finals.compute_final_result(enrollment=enrollment)
+            batch = finals_batch.build(self.enrollments, organization=self.org)
+            batched = finals.compute_final_result(enrollment=enrollment, batch=batch)
+            self.assertEqual(single["exam_score"], Decimal(90))
+            self.assertEqual(single["effective_exam"], Decimal(70))
+            self.assertEqual(single["total"], single["entry_score"] + 70)
+            self.assertEqual(single["total"], batched["total"])
+            self.assertEqual(FinalGrade.objects.get(enrollment=enrollment).exam_score, Decimal(90))
+
+    def test_zero_planned_hours_historical_level_single_and_batch_agree(self):
+        with bypass_rls():
+            self.level_fixture()
+            self.offering.lesson_hours = 0
+            self.offering.save(update_fields=["lesson_hours"])
+            enrollment = self.enrollments[0]
+            single = finals.compute_final_result(enrollment=enrollment)
+            batch = finals_batch.build(self.enrollments, organization=self.org)
+            batched = finals.compute_final_result(enrollment=enrollment, batch=batch)
+            self.assertEqual(single["entry_score"], batched["entry_score"])
+            self.assertEqual(single["entry_parts"].attendance, batched["entry_parts"].attendance)
+
+    def test_historical_level_athlete_exception_is_equal_in_entry_and_final_batches(self):
+        with bypass_rls():
+            self.level_fixture()
+            enrollment = self.enrollments[2]
+            LessonMark.objects.filter(enrollment=enrollment).update(status="absent", score=None)
+            entry_batch = finals_batch.entry_batch(self.enrollments)
+            single = gradebook.entry_score_for(enrollment, 30)
+            batched = gradebook.entry_score_for(enrollment, 30, **entry_batch.entry_kwargs(enrollment))
+            self.assertEqual(single, batched)
+            self.assertGreater(single, Decimal(10))
+            result = finals.compute_final_result(enrollment=enrollment)
+            self.assertFalse(result["barred"])

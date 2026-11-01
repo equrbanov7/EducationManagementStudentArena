@@ -207,7 +207,11 @@ class FinalsBatch:
         """Yalnız giriş balı dəstində Midterm açılışı var, çağıran girişləri verməyib → TOPLU oxu
         (``with_finals=True`` ilə EYNİ mənbələr, yalnız Midterm açılışlarının sətirləri üçün)."""
         provided = self.attendance_provided or set()
-        rows = [e for e in self.enrollments or () if self.midterm_by_offering.get(e.offering_id)]
+        rows = [
+            e
+            for e in self.enrollments or ()
+            if self.midterm_by_offering.get(e.offering_id) or e.pk in (self.level_absence_counts or {})
+        ]
         if "hours" not in provided:
             missing = {e.offering_id for e in rows if not (e.offering.lesson_hours or 0) > 0}
             self.hours_map = exam_eligibility.lesson_hours_map(list(missing)) if missing else {}

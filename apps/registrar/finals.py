@@ -140,7 +140,7 @@ def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=N
         # Midterm rejimi (2026/2027-dən): giriş balının davamiyyəti buraxılış qərarının EYNİ
         # girişlərindən — onlar burada BİR dəfə oxunur və aşağıda resolver-ə də ötürülür.
         entry_kwargs = {"rule": entry_standard.rule_for(enrollment, organization=organization)}
-        if entry_kwargs["rule"].midterm:
+        if entry_kwargs["rule"].midterm or language_level_grading.is_level(enrollment.offering):
             limit_percent = absence_limit.limit_percent_for_enrollment(enrollment)
             exempt = athlete_exemption(enrollment) if exempt is None else bool(exempt)
             if hours_map is None and not (enrollment.offering.lesson_hours or 0) > 0:
@@ -183,6 +183,8 @@ def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=N
     exam_score = final_grade.exam_score if (final_grade and final_grade.exam_score is not None) else None
     resit_done = bool(resit and resit.resit_score is not None)
     effective_exam = resit.resit_score if resit_done else exam_score
+    if effective_exam is not None and language_level_grading.is_level(enrollment.offering):
+        effective_exam = min(Decimal(language_level_grading.EXAM_MAX), max(Decimal(0), effective_exam))
 
     # TƏK MƏNBƏ: «tamamlanmış təkrar imtahan qadağanı qaldırır» qaydası da artıq
     # resolver-in içindədir (``resit_done=``), burada TƏKRARLANMIR.  Tarixi/
