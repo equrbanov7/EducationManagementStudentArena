@@ -339,8 +339,10 @@ def update_lesson(
         lesson.save(update_fields=fields)
         if "hours" in fields and before["hours"] != lesson.hours:
             # Saat dəyişibsə qayıb saatı (25 % buraxılış həddi) bu dərsin işarələri üzrə yenidən hesablanır.
-            for mark in LessonMark.objects.filter(lesson=lesson).select_related("enrollment"):
-                recompute_absence_hours(enrollment=mark.enrollment)
+            from .gradebook_marks import recompute_absence_hours_many
+
+            marks = LessonMark.objects.filter(lesson=lesson).select_related("enrollment")
+            recompute_absence_hours_many([mark.enrollment for mark in marks])
         if audit:
             _audit_lesson_update(offering, lesson, before, by_user)
     return True

@@ -61,8 +61,9 @@ from .attendance import attendance_score  # noqa: F401
 from .cabinet_policy import transcript_policy  # noqa: F401
 from .catalog_registry import build_programs_registry  # noqa: F401
 from .catalog_registry import build_subject_catalog  # noqa: F401
+from .correction_reversals import revert_last_lesson_correction  # noqa: F401
 from .corrections import CORRECT_PERMISSION  # noqa: F401
-from .corrections import apply_correction  # noqa: F401
+from .corrections import apply_correction, apply_lesson_correction  # noqa: F401
 from .curriculum_registry import build_curriculum_editor  # noqa: F401
 from .gradebook import recompute_absence_hours  # noqa: F401
 from .grading_scale import bands_text  # noqa: F401
@@ -112,6 +113,8 @@ __all__ = [
     "RULES",
     "analytics",
     "apply_correction",
+    "apply_lesson_correction",
+    "revert_last_lesson_correction",
     "attendance_score",
     "bands_text",
     "build_curriculum_editor",
