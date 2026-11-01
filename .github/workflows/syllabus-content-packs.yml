@@ -1,0 +1,51 @@
+name: WCU syllabus content fixed packs (encrypted, read-only)
+run-name: 'Syllabus content: ${{ inputs.pack }}'
+on:
+  workflow_dispatch:
+    inputs:
+      actor:
+        description: "Aktiv təşkilat superadmini"
+        type: string
+        required: true
+      pack:
+        description: "Sabit syllabus-pack-NNN; ən çox 5 müstəqil ardıcıl audit"
+        type: string
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  export:
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Mask operator and validate pinned pack
+        run: python3 scripts/ops/syllabus_pack_inputs.py
+      - name: Capture independent encrypted batches sequentially
+        run: python3 scripts/ops/syllabus_export_pack.py
+      - name: Validate only durable manifest-listed encrypted artifacts
+        id: finalize
+        if: always()
+        run: python3 scripts/ops/syllabus_export_pack.py --finalize
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always() && steps.finalize.outputs.syllabus_pack_artifact_ready == 'true'
+        with:
+          name: wcu-syllabus-pack-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/syllabus-pack-${{ github.run_id }}-${{ github.run_attempt }}/*.enc.json
+            ${{ runner.temp }}/syllabus-pack-${{ github.run_id }}-${{ github.run_attempt }}/pack-manifest.json
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+      - name: Remove private temporary artifacts
+        if: always()
+        run: |
+          set -euo pipefail
+          docker exec educationmanagementstudentarena-app-1 rm -rf -- "/tmp/wcu-syllabus-pack-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" || true
+          rm -rf -- "$RUNNER_TEMP/syllabus-pack-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" "$RUNNER_TEMP/syllabus-pack-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-quarantine"

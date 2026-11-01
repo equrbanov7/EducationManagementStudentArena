@@ -57,6 +57,9 @@ INTENTIONAL_EXEMPTIONS = {
     # transaction; no outer worker wrapper is possible. Both RLS modes and DB-level
     # write rejection: apps/workload/tests/test_syllabus_content_export.py.
     "apps/workload/management/commands/export_wcu_syllabus_content.py",
+    # Fixed-four text-free history reader owns a fresh RR READ ONLY transaction;
+    # no enclosing worker transaction is possible. Actual command and both-RLS tests.
+    "apps/workload/management/commands/export_wcu_four_cell_history.py",
     # ExamSupervisionConsumer yalnız channel-layer group send/discard edir;
     # `scope["user"]` və feature-flag settings oxuyur; DB sorğusu yoxdur.
     "apps/exams/consumers.py",
