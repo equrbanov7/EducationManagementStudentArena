@@ -1,8 +1,7 @@
-"""Read-only counts of proven joint teaching, with separate physical history.
+"""Read-only common session counts, with authorship and physical history separate.
 
-One logical session requires exactly one identical explicitly owned lesson in
-EVERY physical group. Unknown authors, duplicate rows and different topics,
-times or hours never acquire joint teaching attribution through this view.
+Exactly one full matching session per member forms a common recorded session.
+NULL authors remain unknown; matching headers never create teacher attribution.
 """
 
 from collections import defaultdict
@@ -12,7 +11,7 @@ from django.utils import timezone
 
 from .models import Lesson
 
-FIELDS = ("date", "start_time", "end_time", "kind", "topic", "hours", "instructor_id")
+FIELDS = ("date", "start_time", "end_time", "kind", "topic", "hours", "instructor_id", "room_id")
 
 
 def summaries(joints, user):
@@ -30,21 +29,20 @@ def summaries(joints, user):
         lessons[row["offering_id"], row["kind"]].append(row)
     result = {}
     for joint in joints:
-        owned = defaultdict(lambda: defaultdict(list))
-        anonymous = defaultdict(list)
+        sessions = defaultdict(lambda: defaultdict(list))
         for offering in joint.offerings:
             for row in lessons[offering.pk, joint.kind]:
-                if row["instructor_id"] is None:
-                    anonymous[offering.pk].append(row)
-                else:
-                    signature = tuple(row[field] for field in FIELDS)
-                    owned[signature][offering.pk].append(row)
+                signature = tuple(row[field] for field in FIELDS)
+                sessions[signature][offering.pk].append(row)
         common = {
             signature: rows
-            for signature, rows in owned.items()
+            for signature, rows in sessions.items()
             if set(rows) == joint.offering_ids and all(len(values) == 1 for values in rows.values())
         }
         matched = {row["id"] for rows in common.values() for values in rows.values() for row in values}
+        owned = {
+            signature: rows for signature, rows in common.items() if signature[FIELDS.index("instructor_id")] == user.pk
+        }
         history = []
         for offering in joint.offerings:
             unmatched = [
@@ -52,18 +50,25 @@ def summaries(joints, user):
                 for row in lessons[offering.pk, joint.kind]
                 if row["instructor_id"] == user.pk and row["id"] not in matched
             ]
+            anonymous = [
+                row
+                for row in lessons[offering.pk, joint.kind]
+                if row["instructor_id"] is None and row["id"] not in matched
+            ]
             history.append(
                 {
                     "group": offering.group,
-                    "anonymous_lessons": len(anonymous[offering.pk]),
-                    "anonymous_hours": sum(row["hours"] for row in anonymous[offering.pk]),
+                    "anonymous_lessons": len(anonymous),
+                    "anonymous_hours": sum(row["hours"] for row in anonymous),
                     "separate_own_lessons": len(unmatched),
                     "separate_own_hours": sum(row["hours"] for row in unmatched),
                 }
             )
         result[joint.source_row_id, joint.kind] = {
-            "own_lessons": len(common),
-            "own_hours": sum(signature[FIELDS.index("hours")] for signature in common),
+            "common_lessons": len(common),
+            "common_hours": sum(signature[FIELDS.index("hours")] for signature in common),
+            "own_lessons": len(owned),
+            "own_hours": sum(signature[FIELDS.index("hours")] for signature in owned),
             "history": [row for row in history if row["anonymous_lessons"] or row["separate_own_lessons"]],
         }
     return result
@@ -82,6 +87,8 @@ def attach(entries, user):
         if joint:
             teacher = getattr(entry, "joint_observed_teacher", None) or user
             record = records[teacher][joint.source_row_id, joint.kind]
+            entry.journal_common_lessons = record["common_lessons"]
+            entry.journal_common_hours = record["common_hours"]
             entry.journal_own_lessons = record["own_lessons"]
             entry.journal_own_hours = record["own_hours"]
             entry.joint_history_records = record["history"]

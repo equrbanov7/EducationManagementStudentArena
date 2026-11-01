@@ -1,5 +1,8 @@
 {% load i18n %}
 <div class="jl-subject-sub">
+    <span>{% trans "Birgə qeydə alınmış dərslər" %}: {{ common_lessons }} {% trans "dərs" %} / {{ common_hours }} {% trans "saat" %}</span>
+</div>
+<div class="jl-subject-sub">
     <span>{% if record_teacher %}{{ record_teacher.get_full_name|default:record_teacher.username }} · {% trans "Birgə keçirilmiş dərslər" %}{% else %}{% trans "Adınıza keçirilmiş birgə dərslər" %}{% endif %}: {{ own_lessons }} {% trans "dərs" %} / {{ own_hours }} {% trans "saat" %}</span>
 </div>
 {% if history %}
@@ -12,6 +15,6 @@
             {% if record.separate_own_lessons %}{% trans "Ayrıca keçirilmiş dərslər" %}: {{ record.separate_own_lessons }} {% trans "dərs" %} / {{ record.separate_own_hours }} {% trans "saat" %}{% endif %}
         </li>
     {% endfor %}</ul>
-    <p>{% trans "Bu qeydlər birgə keçirilmiş dərs saatlarına əlavə edilmir; tam tarixçədə ayrıca saxlanılır." %}</p>
+    <p>{% trans "Bu qeydlər birgə qeydə alınmış dərs saatlarına əlavə edilmir; tam tarixçədə ayrıca saxlanılır." %}</p>
 </details>
 {% endif %}

@@ -2,7 +2,7 @@
 {% if offering.journal_entry_kind %}
 <div class="jl-subject-sub">{% if offering.joint_selection %}{% trans "Birgə dərs: bütün qrupların tələbələri" %}{% else %}{% trans "Cari dərs yükü" %}{% endif %}</div>
 {% if offering.joint_selection %}
-{% include "registrar/partials/_joint_record_summary.html" with own_lessons=offering.journal_own_lessons own_hours=offering.journal_own_hours history=offering.joint_history_records record_teacher=offering.joint_observed_teacher %}
+{% include "registrar/partials/_joint_record_summary.html" with common_lessons=offering.journal_common_lessons common_hours=offering.journal_common_hours own_lessons=offering.journal_own_lessons own_hours=offering.journal_own_hours history=offering.joint_history_records record_teacher=offering.joint_observed_teacher %}
 {% else %}
 <div class="jl-subject-sub">{% trans "Adınıza keçirilmiş" %}: {{ offering.journal_own_lessons }} {% trans "dərs" %} / {{ offering.journal_own_hours }} {% trans "saat" %}</div>
 {% endif %}

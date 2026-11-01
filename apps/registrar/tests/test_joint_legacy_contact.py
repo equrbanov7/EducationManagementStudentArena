@@ -3,8 +3,10 @@
 import datetime
 from decimal import Decimal
 
+from django.apps import apps
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
+from django.template.loader import render_to_string
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -87,7 +89,7 @@ class LegacyJointContactTests(TestCase):
         response = self._client().get(reverse("registrar:joint_journal", args=[self.row.pk, "lecture"]))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.context["rows"]), 38)
-        self.assertContains(response, 'class="joint-grid-scroll"')
+        self.assertContains(response, "joint-grid-scroll")
         self.assertEqual(len([entry for entry in entries if entry.journal_entry_kind == "seminar"]), 2)
 
     def test_english_same_slot_not_in_official_pair_and_mixed_sector_rejected(self):
@@ -173,7 +175,7 @@ class LegacyJointContactTests(TestCase):
         TeacherAssignment.objects.filter(row=self.row, activity="seminar").update(hours=30)
         self.assertEqual({joint.kind for joint in self.select()}, {"lecture"})
 
-    def test_unique_explicit_own_session_once_anonymous10_vs5_separate_per_kind(self):
+    def test_common_anonymous_core5_plus_owned1_excludes_extra5_from_primary(self):
         own = self.lessons()
         for count, offering in zip((10, 5), self.offerings):
             for n in range(count):
@@ -192,15 +194,28 @@ class LegacyJointContactTests(TestCase):
             kind="seminar",
             hours=3,
         )
+        before = list(Lesson.objects.order_by("pk").values())
         record = self.summary()
         self.assertEqual((record["own_lessons"], record["own_hours"]), (1, 2))
-        self.assertEqual(sorted(row["anonymous_lessons"] for row in record["history"]), [5, 10])
+        self.assertEqual((record["common_lessons"], record["common_hours"]), (6, 12))
+        self.assertEqual(
+            [(r["group"].pk, r["anonymous_lessons"], r["anonymous_hours"]) for r in record["history"]],
+            [(self.offerings[0].group_id, 5, 10)],
+        )
         entries = self.context()["offerings"]
         (merged,) = [entry for entry in entries if entry.joint_selection]
         self.assertEqual((merged.journal_own_lessons, merged.journal_own_hours), (1, 2))
+        self.assertEqual((merged.journal_common_lessons, merged.journal_common_hours), (6, 12))
+        card = render_to_string("registrar/partials/_journal_teacher_record.html", {"offering": merged})
+        self.assertIn("Birgə qeydə alınmış dərslər: 6 dərs / 12 saat", card)
+        self.assertIn("Adınıza keçirilmiş birgə dərslər: 1 dərs / 2 saat", card)
+        response = self._client().get(reverse("registrar:joint_journal", args=[self.row.pk, "lecture"]))
+        self.assertContains(response, "Birgə qeydə alınmış dərslər: 6 dərs / 12 saat")
+        self.assertContains(response, "Adınıza keçirilmiş birgə dərslər: 1 dərs / 2 saat")
         seminars = {entry.pk: entry for entry in entries if entry.journal_entry_kind == "seminar"}
         self.assertEqual(seminars[self.offerings[0].pk].journal_own_hours, 3)
         self.assertEqual(seminars[self.offerings[1].pk].journal_own_hours, 0)
+        self.assertEqual(before, list(Lesson.objects.order_by("pk").values()))
         self.assertEqual(
             set(Lesson.objects.filter(pk__in=[x.pk for x in own]).values_list("instructor_id", flat=True)),
             {self.teacher.pk},
@@ -214,6 +229,7 @@ class LegacyJointContactTests(TestCase):
             setattr(second, field, value)
             second.save(update_fields=[field])
             record = self.summary()
+            self.assertEqual(record["common_lessons"], 0)
             self.assertEqual(record["own_lessons"], 0)
             self.assertEqual(sum(row["separate_own_lessons"] for row in record["history"]), 2)
             columns, rows = _grid(joint_journal.resolve(**self.args()), self.teacher)
@@ -230,6 +246,40 @@ class LegacyJointContactTests(TestCase):
             hours=2,
         )
         self.assertEqual(self.summary()["own_lessons"], 0)
+
+    def test_anonymous_duplicate_or_different_room_keeps_physical_history(self):
+        first, second = self.lessons()
+        Lesson.objects.filter(pk__in=[first.pk, second.pk]).update(instructor=None)
+        room = apps.get_model("exams", "ExamRoom").objects.create(organization=self.org, name="Room", code="room")
+        second.room = room
+        second.save(update_fields=["room"])
+        record = self.summary()
+        self.assertEqual(record["common_lessons"], 0)
+        self.assertEqual(sum(r["anonymous_lessons"] for r in record["history"]), 2)
+        second.room = None
+        second.save(update_fields=["room"])
+        self.assertEqual(self.summary()["common_lessons"], 1)
+        first.refresh_from_db()
+        first.pk = None
+        first.save()
+        record = self.summary()
+        self.assertEqual((record["common_lessons"], record["own_lessons"]), (0, 0))
+        self.assertEqual(sum(r["anonymous_lessons"] for r in record["history"]), 3)
+
+    def test_common_seminar_uses_stored_four_hours_without_source_guess(self):
+        for day in (1, 2):
+            for offering in self.offerings:
+                Lesson.objects.create(
+                    organization=self.org,
+                    offering=offering,
+                    kind="seminar",
+                    hours=2,
+                    date=timezone.localdate() - datetime.timedelta(days=day),
+                )
+        joint = joint_journal.JointJournal(self.row.pk, "seminar", tuple(self.offerings))
+        record = summaries([joint], self.teacher)[joint.source_row_id, joint.kind]
+        self.assertEqual((record["common_lessons"], record["common_hours"], record["own_lessons"]), (2, 4, 0))
+        self.assertEqual(record["history"], [])
 
     def test_unsupported_lecture_zero_and_number_never_become_empty_in_joint_or_normal(self):
         lessons = self.lessons()

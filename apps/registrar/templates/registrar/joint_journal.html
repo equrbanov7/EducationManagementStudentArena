@@ -43,7 +43,7 @@
             </div>
         </div>
         <div class="joint-record-summary">
-            {% include "registrar/partials/_joint_record_summary.html" with own_lessons=joint_record.own_lessons own_hours=joint_record.own_hours history=joint_record.history record_teacher=joint_observed_teacher %}
+            {% include "registrar/partials/_joint_record_summary.html" with common_lessons=joint_record.common_lessons common_hours=joint_record.common_hours own_lessons=joint_record.own_lessons own_hours=joint_record.own_hours history=joint_record.history record_teacher=joint_observed_teacher %}
         </div>
         {% include "registrar/partials/_joint_journal_grid.html" %}
     </section>
