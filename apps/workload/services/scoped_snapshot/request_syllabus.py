@@ -64,6 +64,17 @@ OFFERINGS += (
 )
 
 
+# Exact Economics source82 handover review: retained owner8132 history, source owner9551.
+# Evidence only; do not infer a teacher/date reassignment from missing attribution.
+ECONOMICS_INTRO_OFFERINGS = (
+    "9e2322c8-06e9-40e8-ac72-100a83f4e821",
+    "af39bfdc-ce5d-4fd3-9983-e0e29792909f",
+    "7a62f438-d684-4710-a29c-ed867f7ee30b",
+    "de94fc77-9188-4bc1-9527-5c240a5d56c8",
+)
+OFFERINGS += ECONOMICS_INTRO_OFFERINGS
+
+
 def collect_request_syllabus():
     offerings = apps.get_model("registrar.CourseOffering").objects.filter(organization_id=ORG, pk__in=OFFERINGS)
     shares = apps.get_model("syllabus.SyllabusShare").objects.filter(

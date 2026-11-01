@@ -73,3 +73,17 @@ class RequestContentTests(TransactionTestCase):
         self.assertEqual(rows[0]["id"], slot.pk)
         self.assertTrue(rows[0]["is_parked"])
         self.assertEqual(set(rows[0]), {f.attname for f in ScheduleSlot._meta.concrete_fields})
+
+
+def test_economics_intro_history_review_has_same_bounded_content_and_syllabus_scope():
+    from apps.workload.services.scoped_snapshot import request_content, request_syllabus
+
+    expected = {
+        "9e2322c8-06e9-40e8-ac72-100a83f4e821",
+        "af39bfdc-ce5d-4fd3-9983-e0e29792909f",
+        "7a62f438-d684-4710-a29c-ed867f7ee30b",
+        "de94fc77-9188-4bc1-9527-5c240a5d56c8",
+    }
+    for module in (request_content, request_syllabus):
+        assert set(module.ECONOMICS_INTRO_OFFERINGS) == expected
+        assert all(module.OFFERINGS.count(key) == 1 for key in expected)
