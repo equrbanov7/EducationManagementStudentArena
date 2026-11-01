@@ -1,0 +1,298 @@
+{
+  "academic_year": "2026/2027",
+  "assignments": [
+    {
+      "activity": "lecture",
+      "hours": 45,
+      "id": "4a458d44-da58-4592-8847-dd74e5feea9b",
+      "is_hourly_paid": false,
+      "row_id": "0dc079d9-ec43-471d-a607-828571bf60f9",
+      "teacher_id": 8215
+    },
+    {
+      "activity": "lecture",
+      "hours": 45,
+      "id": "8a0407da-9c0a-49e6-9f85-51b6b6753b90",
+      "is_hourly_paid": false,
+      "row_id": "d537121e-22c5-4d90-8223-99f585375db6",
+      "teacher_id": 8215
+    },
+    {
+      "activity": "seminar",
+      "hours": 30,
+      "id": "8d58ff1c-463d-4aff-ad76-aad7e9660f9d",
+      "is_hourly_paid": false,
+      "row_id": "0dc079d9-ec43-471d-a607-828571bf60f9",
+      "teacher_id": 8215
+    },
+    {
+      "activity": "seminar",
+      "hours": 30,
+      "id": "b6127cb9-807d-4da1-a1a7-a16b153531c0",
+      "is_hourly_paid": false,
+      "row_id": "d537121e-22c5-4d90-8223-99f585375db6",
+      "teacher_id": 8215
+    }
+  ],
+  "case": {
+    "after_subject": "7c8694f4-2d41-42d4-9ed1-1b67a95ffa26",
+    "before_subject": "d7fb4e89-d147-4720-82c9-eee97e4d56a3",
+    "bridge": [
+      {
+        "entity_type": "group_unit",
+        "legacy_pk": "713",
+        "source_row_hash": "6f26cd6f40be996968efc522d344c37cf3b85237a3c11325d3d906052e2d6cdf",
+        "state": "migrated",
+        "target_model_label": "organizations.orgunit",
+        "target_pk": "727e9f99-3c74-4bd4-a0ec-d9e42f61e7f4"
+      },
+      {
+        "entity_type": "lesson_subject",
+        "legacy_pk": "1713",
+        "source_row_hash": "bbce5a223ac006f2fabc342f068b86445c90788469f66c4749fbbf89a46c76eb",
+        "state": "migrated",
+        "target_model_label": "registrar.subject",
+        "target_pk": "7c8694f4-2d41-42d4-9ed1-1b67a95ffa26"
+      },
+      {
+        "entity_type": "worker",
+        "legacy_pk": "771",
+        "source_row_hash": "b4b2248736af6d603b036dbcb3359e441d0eb36d180fb847bcf787ce5129b8b7",
+        "state": "migrated",
+        "target_model_label": "auth.user",
+        "target_pk": "8215"
+      },
+      {
+        "entity_type": "worker_materialisation",
+        "legacy_pk": "771",
+        "source_row_hash": "086194292cecffe7dc2cedaf601bd22bb34d2cb9833cda3080cf8b2963491bc6",
+        "state": "migrated",
+        "target_model_label": "auth.user",
+        "target_pk": "8215"
+      }
+    ],
+    "counts": {
+      "7d2e1aa3-0fd5-43f7-b377-b5b5ed379cdc": {
+        "enrollment_state_md5": "7e66b58fc057b56e68ac43d9f8c397ed",
+        "enrollments": 26,
+        "lesson_state_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "lessons": 0,
+        "mark_state_md5": "d41d8cd98f00b204e9800998ecf8427e",
+        "marks": 0,
+        "offering_id": "7d2e1aa3-0fd5-43f7-b377-b5b5ed379cdc"
+      },
+      "a88e570b-480f-4c8f-a5ae-803de1c056c9": {
+        "enrollment_state_md5": "63eebefb72579dd7c0b138c62c8c3811",
+        "enrollments": 26,
+        "lesson_state_md5": "3fa3b591ab9fd98c50d1bc6e3d9ecd68",
+        "lessons": 17,
+        "mark_state_md5": "ed32599c3229321251095fe7e08436cc",
+        "marks": 416,
+        "offering_id": "a88e570b-480f-4c8f-a5ae-803de1c056c9"
+      }
+    },
+    "donor": {
+      "approved_version_id": "8d7e577b-2fb1-4e20-8de4-3d5d442ff6b9",
+      "body_sha256": "f6cc75c6b00fb3a8d12e3f668dd48f21ec92cb8a86f497e28cb7ef457e352cb3",
+      "id": "69774caa-d2c2-4f3c-b430-c421f80a591f"
+    },
+    "empty": "7d2e1aa3-0fd5-43f7-b377-b5b5ed379cdc",
+    "filled": "a88e570b-480f-4c8f-a5ae-803de1c056c9",
+    "group": {
+      "code": "",
+      "id": "727e9f99-3c74-4bd4-a0ec-d9e42f61e7f4",
+      "is_active": true,
+      "name": "134 Sİ rus",
+      "parent_id": "b5c3fefe-7ffe-4478-9bc3-9cd80e43ce48",
+      "settings": {
+        "degree_level": "bachelor",
+        "education_form": "full_time",
+        "sector": "ru"
+      },
+      "unit_type": "group"
+    },
+    "offerings": {
+      "7d2e1aa3-0fd5-43f7-b377-b5b5ed379cdc": {
+        "group_id": "727e9f99-3c74-4bd4-a0ec-d9e42f61e7f4",
+        "id": "7d2e1aa3-0fd5-43f7-b377-b5b5ed379cdc",
+        "instructor_id": 8215,
+        "is_active": true,
+        "lesson_hours": 75,
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "subject_id": "d7fb4e89-d147-4720-82c9-eee97e4d56a3"
+      },
+      "a88e570b-480f-4c8f-a5ae-803de1c056c9": {
+        "group_id": "727e9f99-3c74-4bd4-a0ec-d9e42f61e7f4",
+        "id": "a88e570b-480f-4c8f-a5ae-803de1c056c9",
+        "instructor_id": 8215,
+        "is_active": true,
+        "lesson_hours": 75,
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "subject_id": "7c8694f4-2d41-42d4-9ed1-1b67a95ffa26"
+      }
+    },
+    "roster": {
+      "count": 26,
+      "sha256": "ca8f01d6cf9368af6fcc1c5ed7b9abe540e6f66d71853db6554705093fe08ced"
+    },
+    "row_id": "d537121e-22c5-4d90-8223-99f585375db6",
+    "source": {
+      "credits": "6",
+      "groups_text": "134 Sİ rus",
+      "hours": {
+        "lecture": 45,
+        "seminar": 30
+      },
+      "source_body_sha256": "f6cc75c6b00fb3a8d12e3f668dd48f21ec92cb8a86f497e28cb7ef457e352cb3",
+      "source_file_sha256": "004f0b410c8940f175e37a8b5e6746c9160e0b81c180362d3a55e579664d49b3",
+      "source_group_id": 713,
+      "source_journal_id": 14113,
+      "source_journal_uniqid": "4uQfbmLLOD",
+      "source_sheet_row": 17,
+      "source_subject_id": 1713,
+      "source_syllabus_id": 8459,
+      "source_worker_id": 771,
+      "subject_text": "Fərdlər,qruplar və ailələrlə sosial iş",
+      "teacher_text": "Günel Hüseynova Rasim"
+    },
+    "subjects": {
+      "7c8694f4-2d41-42d4-9ed1-1b67a95ffa26": {
+        "chair_unit_id": null,
+        "code": "QKU-1713",
+        "id": "7c8694f4-2d41-42d4-9ed1-1b67a95ffa26",
+        "name": "Fərdlər ,qruplar və ailərlə sosial iş"
+      },
+      "d7fb4e89-d147-4720-82c9-eee97e4d56a3": {
+        "chair_unit_id": null,
+        "code": "SAYT-0036",
+        "id": "d7fb4e89-d147-4720-82c9-eee97e4d56a3",
+        "name": "Fərdlər,qruplar və ailələrlə sosial iş"
+      }
+    },
+    "teacher": 8215
+  },
+  "duplicate": "0dc079d9-ec43-471d-a607-828571bf60f9",
+  "groups": {
+    "0dc079d9-ec43-471d-a607-828571bf60f9": [
+      "727e9f99-3c74-4bd4-a0ec-d9e42f61e7f4"
+    ],
+    "d537121e-22c5-4d90-8223-99f585375db6": [
+      "727e9f99-3c74-4bd4-a0ec-d9e42f61e7f4"
+    ]
+  },
+  "keeper": "d537121e-22c5-4d90-8223-99f585375db6",
+  "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+  "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+  "row_after": {
+    "0dc079d9-ec43-471d-a607-828571bf60f9": {
+      "lecture_plan": 0,
+      "lecture_total": 0,
+      "seminar_plan": 0,
+      "seminar_total": 0,
+      "total_hours": 0
+    },
+    "d537121e-22c5-4d90-8223-99f585375db6": {
+      "credits": "6",
+      "credits_value": 6,
+      "subject_id": "7c8694f4-2d41-42d4-9ed1-1b67a95ffa26"
+    }
+  },
+  "row_before": {
+    "0dc079d9-ec43-471d-a607-828571bf60f9": {
+      "lecture_plan": 45,
+      "lecture_total": 45,
+      "seminar_plan": 30,
+      "seminar_total": 30,
+      "total_hours": 75
+    },
+    "d537121e-22c5-4d90-8223-99f585375db6": {
+      "credits": "",
+      "credits_value": 0,
+      "subject_id": "d7fb4e89-d147-4720-82c9-eee97e4d56a3"
+    }
+  },
+  "row_invariants": {
+    "0dc079d9-ec43-471d-a607-828571bf60f9": {
+      "consult_hours": 0,
+      "credits": "6",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "134 Sİ rus",
+      "lab_plan": 0,
+      "lab_total": 0,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "fall",
+      "specialty_id": "b5c3fefe-7ffe-4478-9bc3-9cd80e43ce48",
+      "student_count": 0,
+      "subgroup_count": 1,
+      "subject_id": "7c8694f4-2d41-42d4-9ed1-1b67a95ffa26",
+      "subject_text": "Fərdlər ,qruplar və ailərlə sosial iş",
+      "task_id": "2e350e27-745c-42bd-9ca8-128041007ca3",
+      "thesis_hours": 0,
+      "union_count": 1
+    },
+    "d537121e-22c5-4d90-8223-99f585375db6": {
+      "consult_hours": 0,
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "134 Sİ rus",
+      "lab_plan": 0,
+      "lab_total": 0,
+      "lecture_plan": 45,
+      "lecture_total": 45,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "fall",
+      "seminar_plan": 30,
+      "seminar_total": 30,
+      "specialty_id": "b5c3fefe-7ffe-4478-9bc3-9cd80e43ce48",
+      "student_count": 0,
+      "subgroup_count": 1,
+      "subject_text": "Fərdlər,qruplar və ailələrlə sosial iş",
+      "task_id": "a2415422-6b68-4752-920c-47502b6a5ae1",
+      "thesis_hours": 0,
+      "total_hours": 75,
+      "union_count": 1
+    }
+  },
+  "source": {
+    "credits": "6",
+    "groups_text": "134 Sİ rus",
+    "hours": {
+      "lecture": 45,
+      "seminar": 30
+    },
+    "source_body_sha256": "f6cc75c6b00fb3a8d12e3f668dd48f21ec92cb8a86f497e28cb7ef457e352cb3",
+    "source_file_sha256": "004f0b410c8940f175e37a8b5e6746c9160e0b81c180362d3a55e579664d49b3",
+    "source_group_id": 713,
+    "source_journal_id": 14113,
+    "source_journal_uniqid": "4uQfbmLLOD",
+    "source_sheet_row": 17,
+    "source_subject_id": 1713,
+    "source_syllabus_id": 8459,
+    "source_worker_id": 771,
+    "subject_text": "Fərdlər,qruplar və ailələrlə sosial iş",
+    "teacher_text": "Günel Hüseynova Rasim"
+  },
+  "tasks": {
+    "2e350e27-745c-42bd-9ca8-128041007ca3": {
+      "academic_year": "2026/2027",
+      "chair_id": "14a08ffe-b0e5-4433-a1af-e787e057a4be",
+      "id": "2e350e27-745c-42bd-9ca8-128041007ca3"
+    },
+    "a2415422-6b68-4752-920c-47502b6a5ae1": {
+      "academic_year": "2026/2027",
+      "chair_id": "30ab6eaf-ff06-4378-9800-1566a2cf3769",
+      "id": "a2415422-6b68-4752-920c-47502b6a5ae1"
+    }
+  }
+}
