@@ -1,10 +1,13 @@
-"""Fixed-four diagnostics: code locations and closed tokens, never exception values."""
+"""Closed diagnostics for pinned read-only exports; never exception values."""
 
 import re
 import traceback
 from pathlib import Path
 
 STAGES = {
+    "source28_history",
+    "source28_apply",
+    "source28_undo",
     "input",
     "capture",
     "encrypt",
@@ -18,6 +21,7 @@ STAGES = {
     "publish_output",
 }
 CLASSES = {
+    "contenterror",
     "exception",
     "valueerror",
     "typeerror",
@@ -77,6 +81,84 @@ GUARDS = {
     "source_capture_failed",
     "source_diagnostic_output_budget",
 }
+GUARDS |= {
+    "readonly_transaction_required",
+    "syllabus_version_enum_unknown",
+    "syllabus_closure_tenant_mismatch",
+    "syllabus_lineage_reference_missing",
+    "syllabus_lineage_budget_exceeded",
+    "syllabus_version_owner_mismatch",
+    "syllabus_lineage_cycle",
+    "syllabus_lineage_depth_exceeded",
+    "syllabus_root_scope_invalid",
+    "syllabus_root_period_mismatch",
+    "syllabus_candidate_budget_exceeded",
+    "syllabus_source_body_byte_budget_exceeded",
+    "syllabus_body_shape_budget_exceeded",
+    "syllabus_topic_budget_exceeded",
+    "syllabus_total_row_budget_exceeded",
+    "syllabus_output_byte_budget_exceeded",
+    "syllabus_envelope_byte_budget_exceeded",
+    "syllabus_capture_failed",
+    "syllabus_transport_failed",
+    "syllabus_ciphertext_invalid",
+    "syllabus_summary_invalid",
+}
+GUARDS |= {
+    "reviewed_source28_present_only_must_not_change_existing_qb_counter",
+    "reviewed_source28_unchanged_created_rows_required",
+    "reviewed_source28_exact_private_source_and_single_target_required",
+    "reviewed_source28_only_normal_seminar_present",
+    "reviewed_source28_additional_source_claim_requires_review",
+    "reviewed_source28_ambiguous_original_recovery_receipt",
+    "reviewed_source28_unlocatable_deletion_requires_review",
+    "reviewed_source28_existing_content_without_original_recovery_receipt",
+    "reviewed_source28_unlocatable_lesson_deletion_requires_review",
+    "reviewed_source28_closed_or_locked_target",
+    "reviewed_source28_batch_invalid",
+    "reviewed_source28_existing_lesson_changed",
+    "reviewed_source28_course_ledger_conflict",
+    "reviewed_source28_original_recovery_receipt_bindings_changed",
+    "reviewed_source28_single_original_receipt_required",
+    "reviewed_source28_source_ledger_state_changed",
+    "reviewed_source28_tenant_actor_required",
+    "reviewed_source28_all_typed_identity_ledgers_required",
+    "reviewed_source28_undo_baseline_changed",
+    "reviewed_source28_contrary_history_requires_review",
+    "reviewed_source28_content_changed_after_recovery",
+    "reviewed_source28_undo_created_row_has_additional_references",
+    "reviewed_source28_undo_repeat_drift",
+    "reviewed_source28_undo_original_state_not_restored",
+    "reviewed_source28_fresh_history_or_allocation_unavailable",
+    "reviewed_source28_typed_source_ledger_conflict",
+    "reviewed_source28_canonical_copy_or_current_value_requires_review",
+    "reviewed_source28_actual_calendar_seminar_required",
+    "reviewed_source28_undo_fresh_baseline_required",
+    "reviewed_source28_canonical_course_budget",
+    "reviewed_source28_original_source28_receipt_changed",
+    "reviewed_source28_undo_protected_content_changed",
+    "compiled_history_scope_required",
+    "reviewed_source28_history_changed_during_write",
+    "reviewed_source28_exact_active_enrollment_changed",
+    "source28_exact_current_kind_owner_allocation_changed",
+    "reviewed_source28_only_28_present_source_points",
+    "reviewed_source28_single_lesson_only",
+    "reviewed_source28_current_value_conflict",
+    "reviewed_source28_fixed_source28_package_required",
+    "reviewed_source28_active_tenant_profiles_required",
+    "reviewed_source28_exact_calendar_rows_required",
+    "reviewed_source28_exact_present_mark_required",
+    "reviewed_source28_current_home_group_requires_review",
+    "reviewed_source28_all_28_cells_must_resolve",
+    "reviewed_source28_correction_hygiene_or_sourceclaim_requires_review",
+    "reviewed_source28_existing_canonical_slot_requires_review",
+    "reviewed_source28_atomic_required",
+    "reviewed_source28_unresolved_course_audit_requires_review",
+    "reviewed_source28_enrollment_ledger_conflict",
+}
+
+PREFIXES = {"four_cell_history_diagnostic", "syllabus_content_diagnostic", "reviewed_source28_diagnostic"}
+
 FIELDS = ("stage", "class", "cause", "module", "function", "line", "guard")
 
 
@@ -87,7 +169,16 @@ def describe(exc, stage):
         token = type(value).__name__.lower()
         return token if token in CLASSES else "exception"
 
-    code = exc.args[0] if len(exc.args) == 1 and isinstance(exc.args[0], str) else None
+    code = None
+    current, seen = exc, set()
+    for _ in range(8):
+        if current is None or id(current) in seen:
+            break
+        seen.add(id(current))
+        value = current.args[0] if len(current.args) == 1 and isinstance(current.args[0], str) else None
+        if value in GUARDS:
+            code = value  # Prefer the deepest known cause over an outer generic guard.
+        current = current.__cause__
     fields = {
         "stage": stage if stage in STAGES else "input",
         "class": name(exc),
@@ -98,7 +189,9 @@ def describe(exc, stage):
         "guard": code if code in GUARDS else "unclassified",
     }
     for frame in reversed(traceback.extract_tb(exc.__traceback__)):
-        if not any(part in frame.filename for part in ("/apps/workload/", "/core/", "/scripts/ops/")):
+        if not any(
+            part in frame.filename for part in ("/apps/workload/", "/apps/syllabus/", "/core/", "/scripts/ops/")
+        ):
             continue
         module = Path(frame.filename).stem
         if re.fullmatch(r"[a-z_][a-z0-9_]{0,63}", module) and re.fullmatch(r"[a-z_][a-z0-9_]{0,63}", frame.name):
@@ -122,10 +215,12 @@ def render(fields):
     return " ".join(f"{key}={fields[key]}" for key in FIELDS)
 
 
-def parse(output):
+def parse(output, *, prefix="four_cell_history_diagnostic"):
+    if prefix not in PREFIXES:
+        return None
     found = []
     for line in output.splitlines():
-        if not line.startswith("four_cell_history_diagnostic: "):
+        if not line.startswith(prefix + ": "):
             continue
         pairs = re.findall(r"([a-z]+)=([a-z0-9_]+)", line)
         fields = dict(pairs)
@@ -133,7 +228,7 @@ def parse(output):
             continue
         try:
             fields["line"] = int(fields["line"])
-            if line != "four_cell_history_diagnostic: " + render(fields):
+            if line != prefix + ": " + render(fields):
                 continue
         except (KeyError, TypeError, ValueError):
             continue

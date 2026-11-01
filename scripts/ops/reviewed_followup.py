@@ -1,5 +1,6 @@
 """Two fixed standalone workflows: encrypted syllabus audit and reviewed roster append."""
 
+import importlib.util
 import json
 import os
 import re
@@ -52,12 +53,32 @@ def inputs(kind, value):
     return "repair_onomastics_roster", args
 
 
+def closed_diagnostics():
+    path = ROOT / "apps/workload/services/four_cell_diagnostics.py"
+    spec = importlib.util.spec_from_file_location("pinned_readonly_safe_diagnostics", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _syllabus_diagnostic(exc, output=""):
+    safe = closed_diagnostics()
+    fields = safe.parse(output, prefix="syllabus_content_diagnostic") if len(output) <= 65536 else None
+    fields = fields or safe.describe(exc, "source_capture")
+    print("syllabus_content_host_stage=source_capture", file=sys.stderr)
+    print("syllabus_content_diagnostic: " + safe.render(fields), file=sys.stderr)
+
+
 def command(argv, timeout=180):
     try:
         result = subprocess.run(argv, capture_output=True, text=True, timeout=timeout)
-    except Exception:
+    except Exception as exc:
+        if argv[:6] == ["docker", "exec", CONTAINER, "python", "manage.py", "export_wcu_syllabus_content"]:
+            _syllabus_diagnostic(exc)
         raise ValueError("followup_transport_failed") from None
     if result.returncode:
+        if argv[:6] == ["docker", "exec", CONTAINER, "python", "manage.py", "export_wcu_syllabus_content"]:
+            _syllabus_diagnostic(ValueError("followup_command_refused"), result.stdout + "\n" + result.stderr)
         raise ValueError("followup_command_refused")
     return result.stdout
 

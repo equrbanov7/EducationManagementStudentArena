@@ -202,6 +202,60 @@ class PackTests(unittest.TestCase):
         self.assertIn("*.enc.json", upload["with"]["path"])
         self.assertNotIn("*.json\n", upload["with"]["path"])
 
+    def test_safe_source_diagnostic_retains_inner_code_and_pack_batch_stage(self):
+        import contextlib
+        import io
+
+        safe = pack.diagnostics()
+        fields = safe.describe(ValueError("syllabus_body_shape_budget_exceeded"), "capture")
+        raw = "syllabus_content_diagnostic: " + safe.render(fields)
+        completed = subprocess.CompletedProcess(
+            [], 1, "PRIVATE_SOURCE_BODY", raw + "\nCommandError: syllabus_content_export_refused"
+        )
+        err = io.StringIO()
+        with patch.object(pack, "command", return_value=completed), contextlib.redirect_stderr(err):
+            with self.assertRaises(pack.PackError):
+                pack.capture_row(
+                    {"batch": "chair-cells-027"}, "PRIVATE_OPERATOR", "/tmp/fixed", self.folder, self.folder, HEAD
+                )
+        self.assertIn("syllabus_content_host_stage=source_capture batch=chair-cells-027", err.getvalue())
+        self.assertIn("guard=syllabus_body_shape_budget_exceeded", err.getvalue())
+        self.assertNotIn("PRIVATE", err.getvalue())
+        self.assertNotIn("syllabus_body_shape_budget_exceeded", pack.BUDGET_CODES)
+
+    def test_single_batch_host_preserves_same_safe_source_code_but_other_commands_unchanged(self):
+        import contextlib
+        import io
+
+        import reviewed_followup as followup
+
+        fields = pack.diagnostics().describe(ValueError("syllabus_version_enum_unknown"), "capture")
+        completed = subprocess.CompletedProcess(
+            [], 1, "PRIVATE", "syllabus_content_diagnostic: " + pack.diagnostics().render(fields)
+        )
+        argv = [
+            "docker",
+            "exec",
+            followup.CONTAINER,
+            "python",
+            "manage.py",
+            "export_wcu_syllabus_content",
+            "--actor",
+            "PRIVATE",
+        ]
+        err = io.StringIO()
+        with patch.object(followup.subprocess, "run", return_value=completed), contextlib.redirect_stderr(err):
+            with self.assertRaises(ValueError):
+                followup.command(argv)
+        self.assertIn("guard=syllabus_version_enum_unknown", err.getvalue())
+        self.assertNotIn("PRIVATE", err.getvalue())
+        err = io.StringIO()
+        argv[5] = "repair_onomastics_roster"
+        with patch.object(followup.subprocess, "run", return_value=completed), contextlib.redirect_stderr(err):
+            with self.assertRaises(ValueError):
+                followup.command(argv)
+        self.assertEqual(err.getvalue(), "")
+
 
 if __name__ == "__main__":
     unittest.main()

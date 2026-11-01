@@ -83,3 +83,16 @@ class FourDiagnosticsTests(SimpleTestCase):
             self.assertIn(expected, stderr.getvalue())
             self.assertNotIn("PRIVATE", stderr.getvalue())
             self.assertNotIn("SQL", stderr.getvalue())
+
+    def test_source28_closed_cause_chain_prefers_known_inner_guard_and_is_cycle_bounded(self):
+        cause = ValueError("source28_exact_current_kind_owner_allocation_changed")
+        outer = type("ContentError", (ValueError,), {})("reviewed_source28_fresh_history_or_allocation_unavailable")
+        outer.__cause__ = cause
+        fields = safe.describe(outer, "source28_history")
+        self.assertEqual(fields["class"], "contenterror")
+        self.assertEqual(fields["guard"], "source28_exact_current_kind_owner_allocation_changed")
+        line = "reviewed_source28_diagnostic: " + safe.render(fields)
+        self.assertEqual(safe.parse(line, prefix="reviewed_source28_diagnostic"), fields)
+        cause.__cause__ = outer
+        self.assertEqual(safe.describe(outer, "source28_undo")["guard"], fields["guard"])
+        self.assertIsNone(safe.parse(line, prefix="PRIVATE_arbitrary_prefix"))

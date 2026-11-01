@@ -17,7 +17,9 @@ from journal_export_pack import (
 )
 from journal_export_pack import pack_batches as journal_batches
 from journal_export_pack import sha
-from reviewed_followup import CONTAINER, PUBLIC_PEM_SHA, verify_head
+from reviewed_followup import CONTAINER, PUBLIC_PEM_SHA
+from reviewed_followup import closed_diagnostics as diagnostics
+from reviewed_followup import verify_head
 
 MAX_BYTES = 8 * 1024 * 1024 * 4 // 3 + 4096
 BUDGET_CODES = {
@@ -173,11 +175,27 @@ def checked(argv):
 
 
 def capture_row(row, actor, remote, folder, quarantine, head):
+    progress = {"stage": "verify_head", "inner": None}
+    try:
+        return _capture_row(row, actor, remote, folder, quarantine, head, progress)
+    except Exception as exc:
+        safe = diagnostics()
+        fields = progress["inner"] or safe.describe(exc, progress["stage"])
+        batch = row.get("batch", "")
+        if not isinstance(batch, str) or not re.fullmatch(r"chair-cells-[0-9]{3}", batch):
+            batch = "unknown"
+        print("syllabus_content_host_stage=" + progress["stage"] + " batch=" + batch, file=sys.stderr)
+        print("syllabus_content_diagnostic: " + safe.render(fields), file=sys.stderr)
+        raise
+
+
+def _capture_row(row, actor, remote, folder, quarantine, head, progress):
     try:
         verify_head(head)
     except Exception:
         raise PackError("deployed_head_changed") from None
     output = remote + "/" + row["batch"] + ".enc.json"
+    progress["stage"] = "source_capture"
     result = command(
         [
             "docker",
@@ -197,6 +215,9 @@ def capture_row(row, actor, remote, folder, quarantine, head):
         ]
     )
     if result.returncode:
+        raw = result.stdout + "\n" + result.stderr
+        if len(raw) <= 65536:
+            progress["inner"] = diagnostics().parse(raw, prefix="syllabus_content_diagnostic")
         codes = re.findall(r"CommandError: ([a-z_]+)\s*$", result.stdout + result.stderr, re.MULTILINE)
         raise PackError(
             next(
@@ -204,6 +225,7 @@ def capture_row(row, actor, remote, folder, quarantine, head):
                 "syllabus_capture_failed",
             )
         )
+    progress["stage"] = "verify_cipher"
     matches = re.findall(
         r"^encrypted_sha256=([a-f0-9]{64}) roots=([0-9]+) versions=([0-9]+)\s*$",
         result.stdout,
@@ -215,7 +237,9 @@ def capture_row(row, actor, remote, folder, quarantine, head):
     if int(count) != roots(row["batch"]) or not 0 <= int(versions) <= 500:
         raise PackError("syllabus_summary_invalid")
     path = quarantine / (row["batch"] + ".enc.json")
+    progress["stage"] = "copy_cipher"
     checked(["docker", "cp", CONTAINER + ":" + output, str(path)])
+    progress["stage"] = "verify_cipher"
     if cipher(path) != expected:
         raise PackError("syllabus_ciphertext_invalid")
     path.chmod(0o600)
