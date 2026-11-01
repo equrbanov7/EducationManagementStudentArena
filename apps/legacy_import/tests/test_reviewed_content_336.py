@@ -248,6 +248,14 @@ class Reviewed336Tests(TestCase):
         from apps.legacy_import.services.reviewed_content_plan import build
         from apps.legacy_import.services.reviewed_content_state import CurrentState
 
+        OrgUnit.objects.filter(pk=fixed.OTHER_GROUP).update(slug="336-f1")
+        OrgUnit.objects.create(
+            organization=self.org,
+            name="Different migrated group936",
+            slug="myedu-grp-936",
+            unit_type="group",
+            parent=self.target.group.parent,
+        )
         canonical = CourseOffering.objects.create(
             organization=self.org,
             subject=self.target.subject,
