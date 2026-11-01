@@ -8,7 +8,7 @@ from ..group_projection import project_group_settings
 from ..people import is_assignable_teacher
 from ..repair_fingerprints import academic_database_fingerprint, academic_queries
 from ..sbio235_state import RepairError, digest, model, records
-from . import spec
+from . import retained_rights, spec
 
 KINDS = ("lecture", "seminar", "lab")
 RESOURCE = "workload.reviewed_chair_contacts"
@@ -48,10 +48,12 @@ def _identities(organization, cases):
     teacher_ids = {
         a[side]["teacher_id"] for r in row_pins.values() for a in r["assignments"] for side in ("old", "new") if a[side]
     }
+    reviewed = retained_rights.validate(organization, offering_pins)
     if (
         model("registrar.JournalShare")
         .objects.filter(offering_id__in=offering_pins, teacher_id__in=teacher_ids, is_active=True)
         .exclude(source="workload")
+        .exclude(offering_id__in=reviewed)
         .exists()
     ):
         raise RepairError("source_teacher_manual_share_requires_separate_review")

@@ -1,7 +1,9 @@
 """One AppliedMath A/B identity swap: complete bounded snapshots, no grade relocation."""
 
+import sys
 from decimal import Decimal
 
+from . import applied_math_history as history
 from . import qosqar_duplicate_state as common
 
 ORG = common.ORG
@@ -52,6 +54,7 @@ def capture():
     rows = model("workload.TeachingTaskRow").objects.filter(pk__in=(KEEP_ROW, REMOVE_ROW), organization_id=ORG)
     return {
         "academic": graph(),
+        "history": history.capture(sys.modules[__name__]),
         "rows": records(rows),
         "group_links": records(
             model("workload.TeachingTaskRow").groups.through.objects.filter(
@@ -75,6 +78,7 @@ def protected(value):
     ]
     return {
         "academic": graph,
+        "history": history.protected(value["history"]),
         "subjects": value["subjects"],
         "task": [{k: v for k, v in r.items() if k not in ("status", "updated_at")} for r in value["task"]],
         "rows": [r for r in value["rows"] if str(r["id"]) == KEEP_ROW],
@@ -194,10 +198,7 @@ def validate(*, corrected=False):
             raise DuplicateError("fixed_allocations_changed")
     if not corrected:
         common.reject_row_history(rows[REMOVE_ROW])
-        # The common helper's generic reverse checks are reused; its fixed-task
-        # generic amendment lookup is supplemented with this exact task here.
-        if model("workload.WorkloadAmendment").objects.filter(task_id=TASK, target_id=REMOVE_ROW).exists():
-            raise DuplicateError("wrong_row_has_prior_amendment")
+        history.validate_before(sys.modules[__name__])
     return offerings, rows
 
 

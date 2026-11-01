@@ -8,7 +8,7 @@ from core.audit import log_action
 from core.constants import AuditAction
 
 from ..sbio235_state import RepairError, digest, model
-from . import actions, spec, state
+from . import actions, retained_rights, spec, state
 
 
 def _same(old, new, allowed, code):
@@ -119,6 +119,8 @@ def desired(cases, current):
                 s for s in current["shares"] if s["offering_id"] == pk and s["is_active"] and s["source"] == "workload"
             ]
             expected_kinds = teacher_kinds if len(teacher_kinds) > 1 else {}
+            if retained_rights.accepts(cases, current, pk, expected_kinds):
+                continue
             if {s["teacher_id"]: set(s["kinds"]) for s in active} != expected_kinds:
                 return False
     return True
