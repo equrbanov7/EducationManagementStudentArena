@@ -6,6 +6,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import yaml
@@ -143,7 +144,11 @@ class ScopeTests(unittest.TestCase):
                     Path(args[3]).write_bytes(raw)
                 return ""
 
-            with patch.object(runner, "verify_head"), patch.object(runner, "command", side_effect=command):
+            with (
+                patch.object(runner, "verify_head"),
+                patch.object(runner, "command", side_effect=command),
+                patch.object(runner, "source_command", side_effect=command),
+            ):
                 runner.capture("admin", env)
             target = Path(folder) / "four-cell-history-42-1"
             self.assertEqual({p.name for p in target.iterdir()}, {"snapshot.enc.json", "capture-manifest.json"})
@@ -164,6 +169,52 @@ class ScopeTests(unittest.TestCase):
         upload = next(s for s in steps if "upload-artifact@" in s.get("uses", ""))
         self.assertNotIn("*.json", upload["with"]["path"])
         self.assertEqual(upload["with"]["retention-days"], 1)
+
+    def test_failed_inner_source_preserves_only_whitelisted_diagnostic_and_host_stage(self):
+        fields = runner.diagnostics().describe(ValueError("four_cell_audit_byte_budget_exceeded"), "capture")
+        raw = "four_cell_history_diagnostic: " + runner.diagnostics().render(fields)
+        completed = SimpleNamespace(
+            returncode=1, stdout="PRIVATE_OPERATOR SQL", stderr=raw + "\nCommandError: PRIVATE_REASON"
+        )
+        with patch.object(runner.subprocess, "run", return_value=completed):
+            with self.assertRaises(runner.CaptureFailure) as caught:
+                runner.source_command(["PRIVATE_ACTOR"])
+        self.assertEqual(caught.exception.fields, fields)
+        self.assertEqual(caught.exception.host_stage, "source_capture")
+        self.assertNotIn("PRIVATE", str(caught.exception))
+        self.assertNotIn("PRIVATE", runner.diagnostics().render(caught.exception.fields))
+
+    def test_no_valid_inner_diagnostic_has_fixed_fallback_and_transport_is_not_retried(self):
+        completed = SimpleNamespace(returncode=1, stdout="PRIVATE_SQL", stderr="PASSWORD_CONTACT")
+        with patch.object(runner.subprocess, "run", return_value=completed) as invoke:
+            with self.assertRaises(runner.CaptureFailure) as caught:
+                runner.source_command(["PRIVATE_ACTOR"])
+            invoke.assert_called_once()
+        self.assertEqual(caught.exception.fields["guard"], "source_capture_failed")
+        self.assertEqual(caught.exception.fields["stage"], "source_capture")
+        with patch.object(runner.subprocess, "run", side_effect=TimeoutError("PRIVATE_OPERATOR")) as invoke:
+            with self.assertRaises(TimeoutError):
+                runner.source_command(["PRIVATE_ACTOR"])
+            invoke.assert_called_once()
+
+    def test_main_emits_fixed_safe_outer_stage_not_exception_message(self):
+        import contextlib
+        import io
+
+        fields = runner.diagnostics().describe(ValueError("four_cell_history_row_budget_exceeded"), "capture")
+        err = io.StringIO()
+        with tempfile.TemporaryDirectory() as folder:
+            event = Path(folder) / "event.json"
+            event.write_text(json.dumps({"inputs": {"actor": "private.operator"}}))
+            with (
+                patch.dict(runner.os.environ, {"GITHUB_EVENT_PATH": str(event)}),
+                patch.object(runner, "capture", side_effect=runner.CaptureFailure(fields, host_stage="source_capture")),
+                contextlib.redirect_stderr(err),
+            ):
+                self.assertEqual(runner.main(), 2)
+        self.assertIn("four_cell_history_host_stage=source_capture", err.getvalue())
+        self.assertIn("guard=four_cell_history_row_budget_exceeded", err.getvalue())
+        self.assertNotIn("private.operator", err.getvalue())
 
 
 if __name__ == "__main__":

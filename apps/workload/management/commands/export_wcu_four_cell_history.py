@@ -2,6 +2,7 @@
 
 from django.core.management.base import BaseCommand, CommandError
 
+from ...services.four_cell_diagnostics import describe, render
 from ...services.four_cell_history_capture import capture, save_encrypted
 
 
@@ -12,10 +13,13 @@ class Command(BaseCommand):
         parser.add_argument("--output", required=True)
 
     def handle(self, *args, **options):
+        stage = "capture"
         try:
             payload = capture(options["actor"])
+            stage = "encrypt"
             sha = save_encrypted(payload, options["public_key"], options["output"])
-        except Exception:
+        except Exception as exc:
+            self.stderr.write("four_cell_history_diagnostic: " + render(describe(exc, stage)))
             raise CommandError("four_cell_history_export_refused") from None
         counts = payload["counts"]
         self.stdout.write(
