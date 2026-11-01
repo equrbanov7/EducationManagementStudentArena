@@ -17,6 +17,7 @@ reyestrindəki qaydaya əməl et (tarixli qovluq + FIX_REPORT tarixçəsi).
 | [frontend/](./frontend/) | AJAX-safe JS pattern-i, UI rəng tokenləri miqrasiyası |
 | [prompts/](./prompts/) | Xarici agentlər (Codex və s.) üçün hazırlanmış task prompt-ları |
 | [qa/](./qa/) | QA auditləri (E2E, skip/xfail) |
+| [rim/](./rim/) | RİM reyestrləri: kafedra «problem blankları»nın canlı nəticə vəziyyəti (tətbiq olunan / gözləyən / guard ilə dayanan case-lər, run ID və qəbzlər) |
 
 ## Tez-tez axtarılanlar
 
