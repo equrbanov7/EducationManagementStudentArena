@@ -16,7 +16,7 @@ from ..services import reviewed_two_catalog_schema as schema
 from ..services.reviewed_leyla_catalog_graph import bounded, digest
 from ..services.sbio235_state import RepairError
 from . import test_reviewed_asef_stream as asef_fixture
-from .factories import TEACHER_PERMS, activate_member, make_row
+from .factories import TEACHER_PERMS, activate_member, make_row, make_structure, make_task
 
 
 class History636PartitionTests(TestCase):
@@ -233,3 +233,16 @@ class History636PartitionTests(TestCase):
         mark.refresh_from_db()
         self.assertEqual(mark.status, "excused")
         self.assertFalse(type(self.keeper).objects.filter(pk=spec.PINS["new_row"]).exists())
+
+    def test_foreign_english_seminar_task_and_teacher_are_preserved_without_new_membership(self):
+        foreign = make_structure(self.org, code="HISTORY-FOREIGN")
+        task = make_task(self.org, foreign["chair"], status="amended")
+        activate_member(self.org, self.other, "teacher", permissions=TEACHER_PERMS, scope_unit=foreign["chair"])
+        type(self.third).objects.filter(pk=self.third.pk).update(task=task)
+        spec.PINS["rows"][str(self.third.pk)]["task_id"] = str(task.pk)
+        memberships = list(apps.get_model("organizations.Membership").objects.order_by("pk").values())
+        self.apply()
+        self.third.refresh_from_db()
+        self.assertEqual(self.third.task_id, task.pk)
+        self.assertEqual(list(apps.get_model("organizations.Membership").objects.order_by("pk").values()), memberships)
+        self.assertEqual(TeacherAssignment.objects.get(row=self.third).teacher_id, self.other.pk)

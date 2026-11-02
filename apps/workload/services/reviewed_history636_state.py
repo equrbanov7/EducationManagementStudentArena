@@ -57,17 +57,13 @@ def snapshot(org, actor):
         {str(u["id"]): u["username"] for u in users} == p["usernames"] and all(u["is_active"] for u in users),
         "history636_teacher_identity_changed",
     )
-    for teacher_id, row_ids in (
-        (p["teacher"], list(p["rows"])),
-        (
-            p["other_teacher"],
-            [next(a["row_id"] for a in p["assignments"].values() if a["teacher_id"] == p["other_teacher"])],
-        ),
-    ):
-        for task_id in {p["rows"][r]["task_id"] for r in row_ids}:
-            task = model("workload.TeachingTask").objects.select_related("chair").get(pk=task_id)
-            teacher = model("auth.User").objects.get(pk=teacher_id)
-            require(is_assignable_teacher(org, task.chair, teacher), "history636_teacher_scope_changed")
+    other_row = next(a["row_id"] for a in p["assignments"].values() if a["teacher_id"] == p["other_teacher"])
+    # Check only the destination of the NEW lecture allocation. The old foreign
+    # lecture is removed, not recreated or used to grant another membership.
+    for teacher_id, task_id in ((p["teacher"], p["task"]), (p["other_teacher"], p["rows"][other_row]["task_id"])):
+        task = model("workload.TeachingTask").objects.select_related("chair").get(pk=task_id)
+        teacher = model("auth.User").objects.get(pk=teacher_id)
+        require(is_assignable_teacher(org, task.chair, teacher), "history636_teacher_scope_changed")
     groups = bounded(model("organizations.OrgUnit").objects.filter(organization=org, pk__in=p["groups"]), cap=3)
     require(
         {g["id"] for g in groups} == set(p["groups"]) and all(same(g, p["group_pins"][g["id"]]) for g in groups),
