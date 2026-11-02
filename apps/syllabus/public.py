@@ -81,7 +81,7 @@ BÖLMƏ MƏZMUN SXEMİ (``SyllabusSection.data``) — bax
 
 from __future__ import annotations
 
-from . import completion as completion_rules
+from . import completion as completion_rules  # noqa: F401 — testlər `evaluate`-i bu ad ilə əvəzləyir
 from .assessment_formula import (  # noqa: F401
     activity_kinds_for_syllabus,
     activity_label,
@@ -116,6 +116,7 @@ from .services import (  # noqa: F401
     approved_version_for,
     available_actions,
     can_view,
+    completion_report,
     coverage_report,
     has_broad_view_scope,
     has_decision_scope,
@@ -231,13 +232,8 @@ def build_syllabus_editor_context(request, *, organization, version) -> dict:
     # Sahib 2026-10-10/11: qayda cari RİM tənzimləməsidir (semestrdən asılı deyil) — sərbəst işsiz
     # qaydada `self` bölməsi yoxdur (redaktorda 9 bölmə, faiz 7 qayda bölməsi üzrə), data saxlanılır.
     rule = rule_for_version(version, organization)
-    report = completion_rules.evaluate(
-        section_data_map(version),
-        version.plan_hours or {},
-        assessment_weights(organization, selfwork=rule.selfwork),
-        selfwork=rule.selfwork,
-        accepted_splits=standard_splits(organization),
-    )
+    # MR-000143: bal bölgüsü saxlanan cütdən yox, cari qaydadan (``completion_report``) — xülasənin «100 bal»-ı ilə eyni.
+    report = completion_report(version, organization)
     sections = [
         {
             "id": section_id,
