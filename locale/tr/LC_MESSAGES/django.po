@@ -111683,3 +111683,50 @@ msgctxt "accounts.rim.staff_scope"
 msgid "Yalnız seçilmiş laborant təyinatı köçürülür. Digər rollar saxlanılır."
 msgstr ""
 "Yalnızca seçilen laborant görevlendirmesi taşınır. Diğer roller korunur."
+
+msgctxt "workload.history_restore"
+msgid "Cari yükə bərpa et"
+msgstr "Güncel yüke geri yükle"
+
+msgctxt "workload.history_restore"
+msgid "Tarixi jurnalın cari yükü"
+msgstr "Geçmiş günlüğün güncel yükü"
+
+msgctxt "workload.history_restore"
+msgid "Ümumi saat"
+msgstr "Toplam saat"
+
+msgctxt "workload.history_restore"
+msgid ""
+"Dərs növlərinin plan saatlarını ayrıca göstərin. Əvvəlki qeydlər "
+"dəyişdirilmir."
+msgstr ""
+"Her ders türünün plan saatlerini ayrı belirtin. Önceki kayıtlar değişmez."
+
+msgctxt "workload.history_restore"
+msgid "Geri"
+msgstr "Geri"
+
+msgctxt "workload.history_restore"
+msgid "Kafedra"
+msgstr "Bölüm"
+
+msgctxt "workload.history_restore"
+msgid "Səbəb"
+msgstr "Gerekçe"
+
+msgctxt "workload.history_restore"
+msgid "Təsdiqli sillabus"
+msgstr "Onaylı ders izlencesi"
+
+msgctxt "workload.history_restore"
+msgid "Cari dərs yükü bərpa edildi."
+msgstr "Güncel ders yükü geri yüklendi."
+
+msgctxt "workload.history_restore"
+msgid ""
+"Mənbə sillabusu və jurnal qeydləri yenidən yoxlanmalıdır; dəyişiklik "
+"edilmədi."
+msgstr ""
+"Kaynak izlence ve günlük kayıtları yeniden kontrol edilmelidir; değişiklik "
+"yapılmadı."

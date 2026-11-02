@@ -39,3 +39,16 @@ def teacher_journal_plan_hours(*, organization, teacher_id):
     if _plan_provider is None:
         return {}
     return _plan_provider(organization=organization, teacher_id=teacher_id)
+
+
+_restore_provider = None
+
+
+def register_history_restore_actions(provider):
+    global _restore_provider
+    _restore_provider = provider
+
+
+def attach_history_restore_actions(request, offerings):
+    if _restore_provider is not None:
+        _restore_provider(request, offerings)

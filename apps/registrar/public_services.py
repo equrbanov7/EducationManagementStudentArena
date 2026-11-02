@@ -216,4 +216,7 @@ from .practical_label import offering_is_practical  # noqa: E402,F401
 
 __all__.append("offering_is_practical")
 
+from .journal_assignment_sources import register_history_restore_actions  # noqa: E402,F401
 from .reviewed_catalog import create_reviewed_subject, exact_title_candidates  # noqa: E402,F401
+
+__all__.append("register_history_restore_actions")

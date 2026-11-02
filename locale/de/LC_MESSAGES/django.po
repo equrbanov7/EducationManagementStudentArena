@@ -113358,3 +113358,51 @@ msgid "Yalnız seçilmiş laborant təyinatı köçürülür. Digər rollar saxl
 msgstr ""
 "Nur die ausgewählte Zuordnung der Laborassistenz wird verschoben. Andere "
 "Rollen bleiben erhalten."
+
+msgctxt "workload.history_restore"
+msgid "Cari yükə bərpa et"
+msgstr "In aktuelle Lehrlast übernehmen"
+
+msgctxt "workload.history_restore"
+msgid "Tarixi jurnalın cari yükü"
+msgstr "Aktuelle Lehrlast des bisherigen Journals"
+
+msgctxt "workload.history_restore"
+msgid "Ümumi saat"
+msgstr "Gesamtstunden"
+
+msgctxt "workload.history_restore"
+msgid ""
+"Dərs növlərinin plan saatlarını ayrıca göstərin. Əvvəlki qeydlər "
+"dəyişdirilmir."
+msgstr ""
+"Geben Sie die geplanten Stunden je Unterrichtsart getrennt an. Bisherige "
+"Einträge bleiben unverändert."
+
+msgctxt "workload.history_restore"
+msgid "Geri"
+msgstr "Zurück"
+
+msgctxt "workload.history_restore"
+msgid "Kafedra"
+msgstr "Fachbereich"
+
+msgctxt "workload.history_restore"
+msgid "Səbəb"
+msgstr "Begründung"
+
+msgctxt "workload.history_restore"
+msgid "Təsdiqli sillabus"
+msgstr "Genehmigter Lehrplan"
+
+msgctxt "workload.history_restore"
+msgid "Cari dərs yükü bərpa edildi."
+msgstr "Aktuelle Lehrlast wiederhergestellt."
+
+msgctxt "workload.history_restore"
+msgid ""
+"Mənbə sillabusu və jurnal qeydləri yenidən yoxlanmalıdır; dəyişiklik "
+"edilmədi."
+msgstr ""
+"Der Quelllehrplan und die Journaleinträge müssen erneut geprüft werden; es "
+"wurden keine Änderungen vorgenommen."

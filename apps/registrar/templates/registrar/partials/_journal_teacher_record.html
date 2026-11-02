@@ -17,3 +17,5 @@
 {% if offering.journal_prior_history_available and not offering.journal_own_lessons and not offering.journal_own_hours %}
 <div class="jl-subject-sub">{% trans "Əvvəlki jurnal qeydləri mövcuddur" context "registrar.journal_history" %}</div>
 {% endif %}
+
+{% include "registrar/partials/_journal_history_restore.html" %}

@@ -421,3 +421,11 @@ def lock_source_lineage(organization_id):
 
 
 __all__.append("lock_source_lineage")
+
+from .services.history_restore import approved_restore_sources, bind_approved_restore_source  # noqa: E402
+
+__all__ += ["approved_restore_sources", "bind_approved_restore_source"]
+
+from .state_machine import TransitionDenied  # noqa: E402,F401
+
+__all__.append("TransitionDenied")

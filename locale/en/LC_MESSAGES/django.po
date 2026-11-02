@@ -112298,3 +112298,51 @@ msgid "Yalnız seçilmiş laborant təyinatı köçürülür. Digər rollar saxl
 msgstr ""
 "Only the selected laboratory assistant affiliation is moved. Other roles are"
 " preserved."
+
+msgctxt "workload.history_restore"
+msgid "Cari yükə bərpa et"
+msgstr "Restore to current workload"
+
+msgctxt "workload.history_restore"
+msgid "Tarixi jurnalın cari yükü"
+msgstr "Current workload of historical journal"
+
+msgctxt "workload.history_restore"
+msgid "Ümumi saat"
+msgstr "Total hours"
+
+msgctxt "workload.history_restore"
+msgid ""
+"Dərs növlərinin plan saatlarını ayrıca göstərin. Əvvəlki qeydlər "
+"dəyişdirilmir."
+msgstr ""
+"Specify planned hours separately for each lesson type. Existing records "
+"remain unchanged."
+
+msgctxt "workload.history_restore"
+msgid "Geri"
+msgstr "Back"
+
+msgctxt "workload.history_restore"
+msgid "Kafedra"
+msgstr "Department"
+
+msgctxt "workload.history_restore"
+msgid "Səbəb"
+msgstr "Reason"
+
+msgctxt "workload.history_restore"
+msgid "Təsdiqli sillabus"
+msgstr "Approved syllabus"
+
+msgctxt "workload.history_restore"
+msgid "Cari dərs yükü bərpa edildi."
+msgstr "Current workload restored."
+
+msgctxt "workload.history_restore"
+msgid ""
+"Mənbə sillabusu və jurnal qeydləri yenidən yoxlanmalıdır; dəyişiklik "
+"edilmədi."
+msgstr ""
+"The source syllabus and journal records must be checked again; no changes "
+"were made."

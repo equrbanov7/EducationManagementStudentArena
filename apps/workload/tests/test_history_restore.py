@@ -1,0 +1,331 @@
+"""Real source-bound current allocation, preserving journal rows byte for byte."""
+
+from unittest.mock import patch
+
+from django.contrib.auth import get_user_model
+from django.test import RequestFactory, TestCase
+from django.urls import reverse
+from django.utils import timezone
+
+from apps.organizations.models import Membership
+from apps.registrar.models import CourseOffering, Enrollment, Lesson, LessonMark
+from core.reviewed_graph import digest, graph
+from core.rls import bypass_rls
+
+from ..constants import TaskStatus
+from ..models import TeacherAssignment, TeachingTaskRow
+from ..services import history_restore as service
+from ..services.scoping import WorkloadDenied
+from .factories import TEACHER_PERMS, activate_member, make_org, make_row, make_structure, make_task
+
+
+class HistoryRestoreTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        with bypass_rls():
+            cls.org = make_org("history-restore")
+            cls.admin = cls.org.owner
+            cls.admin.is_superuser = True
+            cls.admin.save(update_fields=["is_superuser"])
+            cls.stack = make_structure(cls.org, code="HR")
+            cls.teacher = get_user_model().objects.create_user("history_restore_teacher")
+            cls.other = get_user_model().objects.create_user("history_restore_other")
+            for user in (cls.teacher, cls.other):
+                activate_member(cls.org, user, "teacher", permissions=TEACHER_PERMS, scope_unit=cls.stack["chair"])
+            cls.task = make_task(cls.org, cls.stack["chair"], status=TaskStatus.DISTRIBUTED)
+            cls.offering = CourseOffering.objects.create(
+                organization=cls.org,
+                subject=cls.stack["subject"],
+                period=cls.stack["period"],
+                group=cls.stack["group"],
+                instructor=cls.teacher,
+                lesson_hours=75,
+            )
+            cls.lesson = Lesson.objects.create(
+                organization=cls.org,
+                offering=cls.offering,
+                date=timezone.localdate(),
+                kind="lecture",
+                hours=2,
+                instructor=cls.teacher,
+            )
+            cls.student = get_user_model().objects.create_user("history_restore_student")
+            Membership.objects.create(organization=cls.org, user=cls.student, role=cls.org.roles.get(name="student"))
+            cls.enrollment = Enrollment.objects.create(organization=cls.org, offering=cls.offering, student=cls.student)
+            LessonMark.objects.create(organization=cls.org, lesson=cls.lesson, enrollment=cls.enrollment, score=8)
+            cls.hours = {"lecture": 45, "seminar": 30, "lab": 0}
+
+    def request(self, user=None, *, real=None, mode=None):
+        request = RequestFactory().post("/")
+        request.user, request.organization = user or self.admin, self.org
+        if real is not None:
+            request.real_user, request.is_view_as, request.view_as_mode = real, True, mode
+        return request
+
+    def restore(self, **kwargs):
+        data = {
+            "request": self.request(),
+            "offering_id": self.offering.pk,
+            "chair_id": self.stack["chair"].pk,
+            "hours": self.hours,
+            "reason": "Mövcud dərsləri olan jurnalın cari yükü bərpa edilir.",
+        }
+        return service.restore(**{**data, **kwargs})
+
+    def graph(self):
+        return digest(graph({"registrar.CourseOffering": [self.offering.pk]}, organization_id=self.org.pk))
+
+    def test_new_row_actual_allocations_current_visibility_and_exact_graph_preserved(self):
+        from apps.registrar.teacher_journal_list import own_visible_queryset
+
+        with bypass_rls():
+            before = self.graph()
+            result = self.restore()
+            self.assertEqual(result["status"], "restored")
+            self.assertEqual(self.graph(), before)
+            self.assertEqual(
+                set(
+                    TeacherAssignment.objects.filter(row_id=result["row_id"]).values_list(
+                        "activity", "hours", "teacher_id"
+                    )
+                ),
+                {("lecture", 45, self.teacher.pk), ("seminar", 30, self.teacher.pk)},
+            )
+            current = own_visible_queryset(
+                CourseOffering.objects.filter(pk=self.offering.pk), self.teacher, self.org
+            ).get()
+            self.assertTrue(current.journal_is_current_load)
+            self.assertTrue(current.journal_current_lecture)
+            self.assertTrue(current.journal_current_seminar)
+            self.assertFalse(current.journal_current_lab)
+
+    def test_identical_repeat_does_not_double_assign_or_change_graph(self):
+        with bypass_rls():
+            self.restore()
+            row_count = TeachingTaskRow.objects.count()
+            assignment_ids = set(TeacherAssignment.objects.values_list("pk", flat=True))
+            before = self.graph()
+            self.assertEqual(self.restore()["status"], "already_restored")
+            self.assertEqual(TeachingTaskRow.objects.count(), row_count)
+            self.assertEqual(set(TeacherAssignment.objects.values_list("pk", flat=True)), assignment_ids)
+            self.assertEqual(before, self.graph())
+
+    def test_existing_vacant_capacity_is_reused_not_added(self):
+        with bypass_rls():
+            row = make_row(self.task, self.stack, lecture_total=45, seminar_total=30)
+            vacancy = TeacherAssignment.objects.create(organization=self.org, row=row, activity="lecture", hours=45)
+            self.restore()
+            vacancy.refresh_from_db()
+            self.assertEqual(vacancy.teacher_id, self.teacher.pk)
+            self.assertEqual(TeachingTaskRow.objects.count(), 1)
+            self.assertEqual(TeacherAssignment.objects.count(), 2)
+
+    def test_conflicting_other_teacher_assignment_refuses_without_writes(self):
+        with bypass_rls():
+            row = make_row(self.task, self.stack, lecture_total=45, seminar_total=30)
+            assignment = TeacherAssignment.objects.create(
+                organization=self.org, row=row, activity="lecture", hours=45, teacher=self.other
+            )
+            before = self.graph()
+            with self.assertRaisesMessage(WorkloadDenied, "başqa müəllimə"):
+                self.restore()
+            assignment.refresh_from_db()
+            self.assertEqual(assignment.teacher_id, self.other.pk)
+            self.assertEqual(before, self.graph())
+            self.assertEqual(TeacherAssignment.objects.count(), 1)
+
+    def test_explicit_split_must_equal_existing_contact_and_not_erase_taught_kind(self):
+        with bypass_rls():
+            for hours in (
+                {"lecture": 6, "seminar": 0, "lab": 0},
+                {"lecture": 0, "seminar": 75, "lab": 0},
+                {"lecture": True, "seminar": 74, "lab": 0},
+            ):
+                with self.assertRaises(WorkloadDenied):
+                    self.restore(hours=hours)
+            self.assertEqual(TeacherAssignment.objects.count(), 0)
+
+    def test_regular_teacher_cannot_restore_own_load(self):
+        with bypass_rls():
+            with self.assertRaises(WorkloadDenied):
+                self.restore(request=self.request(self.teacher))
+            self.assertEqual(TeacherAssignment.objects.count(), 0)
+
+    def test_full_view_as_uses_real_authority_readonly_and_limited_do_not(self):
+        with bypass_rls():
+            for mode in ("readonly", "limited"):
+                with self.assertRaises(WorkloadDenied):
+                    self.restore(request=self.request(self.teacher, real=self.admin, mode=mode))
+            self.assertEqual(
+                self.restore(request=self.request(self.teacher, real=self.admin, mode="full"))["status"], "restored"
+            )
+            self.assertEqual(set(TeacherAssignment.objects.values_list("assigned_by_id", flat=True)), {self.admin.pk})
+
+    def test_other_tenant_offering_and_closed_old_period_refused(self):
+        with bypass_rls():
+            other_org = make_org("history-restore-foreign")
+            with self.assertRaises(WorkloadDenied):
+                self.restore(request=self.request(), offering_id=other_org.pk)
+            period = self.stack["period"]
+            period.is_current = False
+            period.save(update_fields=["is_current"])
+            with self.assertRaises(WorkloadDenied):
+                self.restore()
+            self.assertEqual(TeacherAssignment.objects.count(), 0)
+
+    def test_anonymous_or_other_authored_history_does_not_supply_current_authority(self):
+        with bypass_rls():
+            self.lesson.instructor = self.other
+            self.lesson.save(update_fields=["instructor"])
+            with self.assertRaises(WorkloadDenied):
+                self.restore()
+            self.assertEqual(TeacherAssignment.objects.count(), 0)
+
+    def test_multigroup_patok_row_does_not_expand_restore_to_other_groups(self):
+        with bypass_rls():
+            row = make_row(self.task, self.stack, lecture_total=45, seminar_total=30)
+            other = self.stack["group"].__class__.objects.create(
+                organization=self.org,
+                name="Other physical group",
+                slug="history-restore-other-group",
+                unit_type="group",
+                parent=self.stack["specialty"],
+            )
+            row.groups.add(other)
+            with self.assertRaisesMessage(WorkloadDenied, "Çoxqruplu"):
+                self.restore()
+            self.assertEqual(TeacherAssignment.objects.count(), 0)
+
+    def test_academic_write_from_unexpected_hook_rolls_back_whole_restore(self):
+        original = service.assign_amended
+
+        def corrupted(*args, **kwargs):
+            value = original(*args, **kwargs)
+            LessonMark.objects.filter(lesson=self.lesson).update(score=9)
+            return value
+
+        with bypass_rls():
+            before = self.graph()
+            with patch.object(service, "assign_amended", side_effect=corrupted), self.assertRaises(WorkloadDenied):
+                self.restore()
+            self.assertEqual(self.graph(), before)
+            self.assertEqual(TeacherAssignment.objects.count(), 0)
+            self.assertEqual(TeachingTaskRow.objects.count(), 0)
+
+    def test_form_requires_csrf_and_reason_and_success_redirects_to_existing_journal(self):
+        self.client.force_login(self.admin)
+        session = self.client.session
+        session["active_organization_id"] = str(self.org.pk)
+        session.save()
+        url = reverse("workload:history_restore", args=[self.offering.pk])
+        page = self.client.get(url)
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, "csrfmiddlewaretoken")
+        response = self.client.post(url, {"chair": self.stack["chair"].pk, **self.hours, "reason": ""})
+        self.assertEqual(response.status_code, 200)
+        with bypass_rls():
+            self.assertEqual(TeacherAssignment.objects.count(), 0)
+        response = self.client.post(
+            url,
+            {
+                "chair": self.stack["chair"].pk,
+                **self.hours,
+                "reason": "Tarixi jurnalın cari yükü təsdiq edilərək bərpa olunur.",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("registrar:journal_detail", args=[self.offering.pk]))
+
+    def syllabus_source(self, *, sector="az", other_subject=False):
+        from apps.syllabus.models import Syllabus, SyllabusSection, SyllabusVersion
+
+        group = self.stack["group"].__class__.objects.create(
+            organization=self.org,
+            name="Syllabus source",
+            slug="source-" + str(CourseOffering.objects.count()),
+            unit_type="group",
+            parent=self.stack["specialty"],
+            settings={"sector": sector},
+        )
+        subject = self.stack["subject"]
+        if other_subject:
+            subject = subject.__class__.objects.create(organization=self.org, code="WRONG", name="Wrong subject")
+        course = CourseOffering.objects.create(
+            organization=self.org,
+            subject=subject,
+            period=self.stack["period"],
+            group=group,
+            instructor=self.teacher,
+            lesson_hours=75,
+        )
+        syllabus = Syllabus.objects.create(
+            organization=self.org,
+            offering=course,
+            subject=subject,
+            period=self.stack["period"],
+            author=self.teacher,
+            chair_unit=self.stack["chair"],
+        )
+        version = SyllabusVersion.objects.create(
+            organization=self.org,
+            syllabus=syllabus,
+            status="approved",
+            locked_at=timezone.now(),
+            approval_source="migration",
+            plan_hours=self.hours,
+            completion_percent=100,
+        )
+        SyllabusSection.objects.create(
+            organization=self.org,
+            version=version,
+            section_id="week",
+            data={"rows": [{"topic": "Genuine source topic", **self.hours}]},
+        )
+        syllabus.approved_version = version
+        syllabus.save(update_fields=["approved_version"])
+        self.offering.group.settings = {"sector": "az"}
+        self.offering.group.save(update_fields=["settings"])
+        return syllabus
+
+    def test_unique_exact_approved_source_bound_without_copying_content_or_marks(self):
+        from apps.syllabus.models import SyllabusShare, SyllabusVersion
+        from core.reviewed_graph import rows
+
+        with bypass_rls():
+            source = self.syllabus_source()
+            before = digest(rows(source.approved_version.sections.all()))
+            versions = SyllabusVersion.objects.count()
+            result = self.restore()
+            self.assertEqual(result["syllabus_status"], "approved_bound")
+            self.assertEqual(SyllabusShare.objects.get(offering=self.offering).syllabus_id, source.pk)
+            self.assertEqual(SyllabusVersion.objects.count(), versions)
+            self.assertEqual(digest(rows(source.approved_version.sections.all())), before)
+            self.assertEqual(LessonMark.objects.get(lesson=self.lesson).score, 8)
+            self.assertEqual(self.restore()["syllabus_status"], "already_approved")
+
+    def test_wrong_subject_and_language_never_bound(self):
+        from apps.syllabus.models import SyllabusShare
+
+        with bypass_rls():
+            self.syllabus_source(other_subject=True)
+            self.syllabus_source(sector="en")
+            self.assertEqual(self.restore()["syllabus_status"], "missing")
+            self.assertFalse(SyllabusShare.objects.filter(offering=self.offering).exists())
+
+    def test_ambiguous_source_requires_explicit_choice_before_any_load_write(self):
+        from apps.syllabus.models import SyllabusShare
+
+        with bypass_rls():
+            first = self.syllabus_source()
+            self.syllabus_source()
+            with self.assertRaisesMessage(WorkloadDenied, "Bir neçə"):
+                self.restore()
+            self.assertEqual(TeacherAssignment.objects.count(), 0)
+            self.restore(syllabus_id=str(first.pk))
+            self.assertEqual(SyllabusShare.objects.get(offering=self.offering).syllabus_id, first.pk)
+
+    def test_plan_prefill_uses_exact_approved_plan_not_taught_hours(self):
+        with bypass_rls():
+            self.assertFalse(any(service.previous_plan(self.offering)[0].values()))
+            self.syllabus_source()
+            self.assertEqual(service.previous_plan(self.offering)[0], self.hours)

@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% load i18n %}
+{% block title %}{% trans "Cari yükə bərpa et" context "workload.history_restore" %}{% endblock %}
+{% block content %}
+<section class="container py-4" style="max-width: 760px;">
+  <div class="card"><div class="card-body">
+    <h1 class="h4">{% trans "Tarixi jurnalın cari yükü" context "workload.history_restore" %}</h1>
+    <p><strong>{{ offering.instructor.get_full_name }}</strong> · {{ offering.group.name }} · {{ offering.subject.name }}</p>
+    <p>{% trans "Ümumi saat" context "workload.history_restore" %}: <strong>{{ offering.lesson_hours }}</strong></p>
+    <p>{% trans "Dərs növlərinin plan saatlarını ayrıca göstərin. Əvvəlki qeydlər dəyişdirilmir." context "workload.history_restore" %}</p>
+    <p>{{ plan_provenance }}</p>
+    <form method="post">{% csrf_token %}{{ restore_form.as_p }}
+      <button class="btn btn-primary" type="submit">{% trans "Cari yükə bərpa et" context "workload.history_restore" %}</button>
+      <a class="btn btn-outline-secondary" href="{% url 'registrar:journal_detail' offering.pk %}?own_history=1">{% trans "Geri" context "workload.history_restore" %}</a>
+    </form>
+  </div></div>
+</section>
+{% endblock %}
