@@ -68,6 +68,11 @@ INTENTIONAL_EXEMPTIONS = {
     # Fixed-four text-free history reader owns a fresh RR READ ONLY transaction;
     # no enclosing worker transaction is possible. Actual command and both-RLS tests.
     "apps/workload/management/commands/export_wcu_four_cell_history.py",
+    # Source58 full-audit chunk diagnostic owns fresh RR READ ONLY + fixed tenant,
+    # bypass=False. An outer worker atomic would break its fresh-transaction guard.
+    # Real PG write rejection/context/outer-atomic tests: test_source58_audit_capture.py;
+    # rationale: docs/REVIEWED_SOURCE58_AUDIT_CHUNKS.md (no recovery authority).
+    "apps/workload/management/commands/export_wcu_source58_audit_chunks.py",
     # Fixed <=25 timetable roots own fresh tenant-local RR READ ONLY transaction;
     # outer wrapper would invalidate SET TRANSACTION. Capture/outer-atomic regression tested.
     "apps/workload/management/commands/export_wcu_timetable_evidence.py",

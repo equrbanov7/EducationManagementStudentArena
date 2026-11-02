@@ -38,3 +38,12 @@ Komanda: `export_wcu_source58_audit_chunks --actor USER --public-key PUBLIC_PEM
 --output NEW_CIPHERTEXT_ZIP`. Yalnız xüsusi workflow transportu tətbiqdəki
 public key pinini və encrypted-before-copy qaydasını təmin edir. Lokal
 hazırlama zamanı workflow dispatch, native execute və prod yazısı edilməyib.
+
+## Worker atomic audit istisnası
+
+`check_worker_atomic_coverage.py` yalnız bu komanda üçün dəqiq istisna saxlayır.
+Səbəb DB-yə toxunmaması deyil: bütün oxumalar `capture()` daxilində özü açdığı
+**yeni REPEATABLE READ READ ONLY** transaction-da, sabit təşkilat və
+`bypass=False` RLS kontekstində edilir. Xarici `worker_atomic` bu fresh guard-ı
+pozardı. `test_source58_audit_capture.py` real PostgreSQL-də write rejection,
+outer-atomic rəddi, dəyişməz auditlər və tenant/user/bypass kontekstini yoxlayır.

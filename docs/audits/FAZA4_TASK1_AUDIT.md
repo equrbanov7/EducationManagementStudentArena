@@ -67,3 +67,20 @@ Bu invarianti qorumaq üçün `scripts/check_worker_atomic_coverage.py` (növbə
 - **Yeni gap yoxdur.**
 
 Task 1 üzrə əlavə kod dəyişikliyi lazım deyil. Növbəti addım: Task 2 (izolyasiya testlərini transaction-pooling üçün gücləndir).
+
+
+## 2026-11-02 əlavə audit: Source58 read-only forensic exporter
+
+`export_wcu_source58_audit_chunks.py` üçün dəqiq `INTENTIONAL_EXEMPTIONS`
+girişi əlavə edildi. Bu komanda **DB-yə toxunur**; `capture()` özü yeni
+PostgreSQL REPEATABLE READ READ ONLY transaction açır, sabit tenant və aktiv
+superadmini yoxlayır, `bypass=False` lokal RLS kontekstini qurur. Xaricdən
+`rls_worker_atomic()` ilə sarınması fresh-transaction guard-ını pozardı.
+Bu səbəbdən istisna yalnız həmin exact command yoluna aiddir.
+
+`apps/workload/tests/test_source58_audit_capture.py` real PG-də hər iki RLS
+rejimində read-only/isolation/org/user/bypass dəyərlərini yoxlayır, Python
+SELECT-only wrapper-dən kənar göndərilən real UPDATE-in server tərəfindən
+SQLSTATE25006 ilə rədd edilməsini və bütün ilkin audit baytlarının saxlanmasını
+təsdiqləyir. Outer-atomic və başqa tenantla əlaqəsiz superadmin də rədd edilir.
+Əlavə bərpa/yazı hüququ verilmir; full chunk sübutu avtomatik apply icazəsi deyil.
