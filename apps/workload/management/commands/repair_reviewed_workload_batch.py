@@ -41,6 +41,7 @@ class Command(BaseCommand):
                 civil_source_partition,
                 reviewed_history636_repair,
                 reviewed_history636_spec,
+                reviewed_kamile_load,
                 reviewed_language_level_load,
                 reviewed_split_kind_load,
             )
@@ -48,6 +49,7 @@ class Command(BaseCommand):
             special = {
                 civil_source_partition.FORMAT: civil_source_partition.run,
                 reviewed_history636_spec.FORMAT: reviewed_history636_repair.run,
+                reviewed_kamile_load.FORMAT: reviewed_kamile_load.run,
                 reviewed_language_level_load.FORMAT: reviewed_language_level_load.run,
                 reviewed_split_kind_load.FORMAT: reviewed_split_kind_load.run,
                 reviewed_split_kind_load.RECLAIM_FORMAT: reviewed_split_kind_load.run,

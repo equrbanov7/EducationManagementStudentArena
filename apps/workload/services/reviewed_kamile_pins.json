@@ -1,0 +1,1326 @@
+{
+  "assignments_after": {
+    "0500393a-3f96-4506-8164-2bc5c878e436": {
+      "activity": "lecture",
+      "hours": 30,
+      "id": "0500393a-3f96-4506-8164-2bc5c878e436",
+      "is_hourly_paid": false,
+      "row_id": "e9067c73-3453-474b-be1b-5cbae938855c",
+      "teacher_id": 8429
+    },
+    "09441880-8f73-599a-af16-3bf5d68453d1": {
+      "activity": "seminar",
+      "hours": 3,
+      "id": "09441880-8f73-599a-af16-3bf5d68453d1",
+      "is_hourly_paid": false,
+      "row_id": "e9067c73-3453-474b-be1b-5cbae938855c",
+      "teacher_id": null
+    },
+    "0f9a9366-642a-499e-9c3e-c12f07eb277f": {
+      "activity": "lecture",
+      "hours": 15,
+      "id": "0f9a9366-642a-499e-9c3e-c12f07eb277f",
+      "is_hourly_paid": false,
+      "row_id": "aabb1f5c-6a98-4a8d-8b86-39fd2ff4635c",
+      "teacher_id": 8429
+    },
+    "19f0e9f1-8b81-4297-a96f-c3d6dc335902": {
+      "activity": "seminar",
+      "hours": 10,
+      "id": "19f0e9f1-8b81-4297-a96f-c3d6dc335902",
+      "is_hourly_paid": false,
+      "row_id": "9e106bab-bf85-4a71-8491-c0227a8cf7fd",
+      "teacher_id": null
+    },
+    "1b9ae837-818c-4d9a-9fc1-62518fe113f6": {
+      "activity": "seminar",
+      "hours": 30,
+      "id": "1b9ae837-818c-4d9a-9fc1-62518fe113f6",
+      "is_hourly_paid": true,
+      "row_id": "58935ed2-bc29-4c88-a1da-4d98b92a8b9c",
+      "teacher_id": 8429
+    },
+    "25c0e44d-bf86-4cdd-ba94-5318120a30ba": {
+      "activity": "seminar",
+      "hours": 15,
+      "id": "25c0e44d-bf86-4cdd-ba94-5318120a30ba",
+      "is_hourly_paid": false,
+      "row_id": "aabb1f5c-6a98-4a8d-8b86-39fd2ff4635c",
+      "teacher_id": 8429
+    },
+    "2b9fee37-9cad-4891-a9f9-35b0c5939f2f": {
+      "activity": "lecture",
+      "hours": 30,
+      "id": "2b9fee37-9cad-4891-a9f9-35b0c5939f2f",
+      "is_hourly_paid": false,
+      "row_id": "779c5ee7-c818-41ce-8c47-6bba6cd39e4a",
+      "teacher_id": 8429
+    },
+    "529192f1-4090-4aee-8ce2-b9432bcbc30c": {
+      "activity": "lecture",
+      "hours": 45,
+      "id": "529192f1-4090-4aee-8ce2-b9432bcbc30c",
+      "is_hourly_paid": false,
+      "row_id": "708c50c1-3ca3-4c72-824c-173e4bf5e520",
+      "teacher_id": 8429
+    },
+    "56bedcdd-9610-4423-ad0f-09760a66413c": {
+      "activity": "lecture",
+      "hours": 38,
+      "id": "56bedcdd-9610-4423-ad0f-09760a66413c",
+      "is_hourly_paid": false,
+      "row_id": "f9055261-4d8d-428b-a28c-875a94aa7f55",
+      "teacher_id": null
+    },
+    "5db0ad65-fbf8-4b96-8f04-8fb46743e771": {
+      "activity": "lab",
+      "hours": 10,
+      "id": "5db0ad65-fbf8-4b96-8f04-8fb46743e771",
+      "is_hourly_paid": false,
+      "row_id": "9769235a-a517-4d6f-b157-b8a8eab840b1",
+      "teacher_id": null
+    },
+    "6008f5da-529a-4244-a727-bf49bd5ef1f6": {
+      "activity": "lecture",
+      "hours": 30,
+      "id": "6008f5da-529a-4244-a727-bf49bd5ef1f6",
+      "is_hourly_paid": false,
+      "row_id": "9769235a-a517-4d6f-b157-b8a8eab840b1",
+      "teacher_id": null
+    },
+    "6938b650-3810-4606-8105-d83011ecd863": {
+      "activity": "seminar",
+      "hours": 15,
+      "id": "6938b650-3810-4606-8105-d83011ecd863",
+      "is_hourly_paid": false,
+      "row_id": "bbe24c0e-dde2-430c-ae96-c3d86daa1a11",
+      "teacher_id": 8429
+    },
+    "7ffa5f56-75a9-4a04-ba82-f0ce64f48557": {
+      "activity": "lecture",
+      "hours": 30,
+      "id": "7ffa5f56-75a9-4a04-ba82-f0ce64f48557",
+      "is_hourly_paid": false,
+      "row_id": "502cfe57-2781-42d0-b5f9-f480d95401fa",
+      "teacher_id": 8429
+    },
+    "86c6e100-3f65-4f6e-9f1f-f9e1de576515": {
+      "activity": "lecture",
+      "hours": 30,
+      "id": "86c6e100-3f65-4f6e-9f1f-f9e1de576515",
+      "is_hourly_paid": false,
+      "row_id": "9e106bab-bf85-4a71-8491-c0227a8cf7fd",
+      "teacher_id": null
+    },
+    "88415d13-6d16-4b4e-acf2-7aea12be2b98": {
+      "activity": "seminar",
+      "hours": 12,
+      "id": "88415d13-6d16-4b4e-acf2-7aea12be2b98",
+      "is_hourly_paid": false,
+      "row_id": "e9067c73-3453-474b-be1b-5cbae938855c",
+      "teacher_id": 8429
+    },
+    "8ab2368a-1e5a-4bd4-9839-467adb2937df": {
+      "activity": "lab",
+      "hours": 5,
+      "id": "8ab2368a-1e5a-4bd4-9839-467adb2937df",
+      "is_hourly_paid": false,
+      "row_id": "9e106bab-bf85-4a71-8491-c0227a8cf7fd",
+      "teacher_id": null
+    },
+    "8d51108e-559b-4487-a6cb-19b56718c9e7": {
+      "activity": "seminar",
+      "hours": 30,
+      "id": "8d51108e-559b-4487-a6cb-19b56718c9e7",
+      "is_hourly_paid": false,
+      "row_id": "708c50c1-3ca3-4c72-824c-173e4bf5e520",
+      "teacher_id": 8429
+    },
+    "8e9beedc-91b0-4660-b775-0b946da1e396": {
+      "activity": "seminar",
+      "hours": 30,
+      "id": "8e9beedc-91b0-4660-b775-0b946da1e396",
+      "is_hourly_paid": false,
+      "row_id": "c436a0e5-9269-4280-bfbe-f48717a32608",
+      "teacher_id": 8429
+    },
+    "9621778d-3dd0-5196-b6f7-8f43bfb36ceb": {
+      "activity": "seminar",
+      "hours": 30,
+      "id": "9621778d-3dd0-5196-b6f7-8f43bfb36ceb",
+      "is_hourly_paid": false,
+      "row_id": "c436a0e5-9269-4280-bfbe-f48717a32608",
+      "teacher_id": null
+    },
+    "9d1b4af3-6d67-4c65-9075-b4cfe8f3fa9b": {
+      "activity": "seminar",
+      "hours": 30,
+      "id": "9d1b4af3-6d67-4c65-9075-b4cfe8f3fa9b",
+      "is_hourly_paid": false,
+      "row_id": "852cc56a-2a37-4563-9947-ae6eb60f571b",
+      "teacher_id": 8429
+    },
+    "a6b2ae46-d0c7-4976-aff8-74eb4337f35f": {
+      "activity": "seminar",
+      "hours": 20,
+      "id": "a6b2ae46-d0c7-4976-aff8-74eb4337f35f",
+      "is_hourly_paid": false,
+      "row_id": "9769235a-a517-4d6f-b157-b8a8eab840b1",
+      "teacher_id": null
+    },
+    "aff09a7f-a588-4775-84b1-fe06346f566d": {
+      "activity": "seminar",
+      "hours": 30,
+      "id": "aff09a7f-a588-4775-84b1-fe06346f566d",
+      "is_hourly_paid": false,
+      "row_id": "c3d6a5b7-86be-424a-a472-6cbb8ca406e2",
+      "teacher_id": null
+    },
+    "b4d463c5-8b80-4a8a-a820-8bfbf227a95f": {
+      "activity": "seminar",
+      "hours": 37,
+      "id": "b4d463c5-8b80-4a8a-a820-8bfbf227a95f",
+      "is_hourly_paid": false,
+      "row_id": "f9055261-4d8d-428b-a28c-875a94aa7f55",
+      "teacher_id": null
+    },
+    "b8511908-60d7-4e29-9496-de7350de9583": {
+      "activity": "lecture",
+      "hours": 30,
+      "id": "b8511908-60d7-4e29-9496-de7350de9583",
+      "is_hourly_paid": false,
+      "row_id": "bbe24c0e-dde2-430c-ae96-c3d86daa1a11",
+      "teacher_id": 8429
+    },
+    "c138b5f3-51c7-4f3e-8280-58c358a2e376": {
+      "activity": "seminar",
+      "hours": 30,
+      "id": "c138b5f3-51c7-4f3e-8280-58c358a2e376",
+      "is_hourly_paid": false,
+      "row_id": "502cfe57-2781-42d0-b5f9-f480d95401fa",
+      "teacher_id": 8429
+    },
+    "ca39bb3f-25fb-40e6-acb5-228e42e51bb1": {
+      "activity": "lecture",
+      "hours": 30,
+      "id": "ca39bb3f-25fb-40e6-acb5-228e42e51bb1",
+      "is_hourly_paid": false,
+      "row_id": "c3d6a5b7-86be-424a-a472-6cbb8ca406e2",
+      "teacher_id": null
+    },
+    "d93d3bee-4c61-4cbf-8889-0a14c60b6e8e": {
+      "activity": "seminar",
+      "hours": 30,
+      "id": "d93d3bee-4c61-4cbf-8889-0a14c60b6e8e",
+      "is_hourly_paid": false,
+      "row_id": "779c5ee7-c818-41ce-8c47-6bba6cd39e4a",
+      "teacher_id": 8429
+    },
+    "df90accb-787e-4e0a-9a5d-75050d5f7825": {
+      "activity": "lecture",
+      "hours": 45,
+      "id": "df90accb-787e-4e0a-9a5d-75050d5f7825",
+      "is_hourly_paid": false,
+      "row_id": "852cc56a-2a37-4563-9947-ae6eb60f571b",
+      "teacher_id": 8429
+    },
+    "e01ef9e4-b49c-47b9-868c-d1093644a724": {
+      "activity": "lecture",
+      "hours": 30,
+      "id": "e01ef9e4-b49c-47b9-868c-d1093644a724",
+      "is_hourly_paid": true,
+      "row_id": "58935ed2-bc29-4c88-a1da-4d98b92a8b9c",
+      "teacher_id": 8429
+    },
+    "e90e96a7-2cad-478c-853f-ea85741ae086": {
+      "activity": "lecture",
+      "hours": 45,
+      "id": "e90e96a7-2cad-478c-853f-ea85741ae086",
+      "is_hourly_paid": false,
+      "row_id": "c436a0e5-9269-4280-bfbe-f48717a32608",
+      "teacher_id": 8429
+    }
+  },
+  "assignments_before": {
+    "0500393a-3f96-4506-8164-2bc5c878e436": {
+      "activity": "lecture",
+      "hours": 30,
+      "id": "0500393a-3f96-4506-8164-2bc5c878e436",
+      "is_hourly_paid": false,
+      "row_id": "e9067c73-3453-474b-be1b-5cbae938855c",
+      "teacher_id": 8429
+    },
+    "0f9a9366-642a-499e-9c3e-c12f07eb277f": {
+      "activity": "lecture",
+      "hours": 15,
+      "id": "0f9a9366-642a-499e-9c3e-c12f07eb277f",
+      "is_hourly_paid": false,
+      "row_id": "aabb1f5c-6a98-4a8d-8b86-39fd2ff4635c",
+      "teacher_id": 8429
+    },
+    "19f0e9f1-8b81-4297-a96f-c3d6dc335902": {
+      "activity": "seminar",
+      "hours": 10,
+      "id": "19f0e9f1-8b81-4297-a96f-c3d6dc335902",
+      "is_hourly_paid": false,
+      "row_id": "9e106bab-bf85-4a71-8491-c0227a8cf7fd",
+      "teacher_id": 8429
+    },
+    "1b9ae837-818c-4d9a-9fc1-62518fe113f6": {
+      "activity": "seminar",
+      "hours": 30,
+      "id": "1b9ae837-818c-4d9a-9fc1-62518fe113f6",
+      "is_hourly_paid": true,
+      "row_id": "58935ed2-bc29-4c88-a1da-4d98b92a8b9c",
+      "teacher_id": 8429
+    },
+    "25c0e44d-bf86-4cdd-ba94-5318120a30ba": {
+      "activity": "seminar",
+      "hours": 15,
+      "id": "25c0e44d-bf86-4cdd-ba94-5318120a30ba",
+      "is_hourly_paid": false,
+      "row_id": "aabb1f5c-6a98-4a8d-8b86-39fd2ff4635c",
+      "teacher_id": 8429
+    },
+    "2b9fee37-9cad-4891-a9f9-35b0c5939f2f": {
+      "activity": "lecture",
+      "hours": 30,
+      "id": "2b9fee37-9cad-4891-a9f9-35b0c5939f2f",
+      "is_hourly_paid": false,
+      "row_id": "779c5ee7-c818-41ce-8c47-6bba6cd39e4a",
+      "teacher_id": null
+    },
+    "529192f1-4090-4aee-8ce2-b9432bcbc30c": {
+      "activity": "lecture",
+      "hours": 30,
+      "id": "529192f1-4090-4aee-8ce2-b9432bcbc30c",
+      "is_hourly_paid": false,
+      "row_id": "708c50c1-3ca3-4c72-824c-173e4bf5e520",
+      "teacher_id": 8429
+    },
+    "56bedcdd-9610-4423-ad0f-09760a66413c": {
+      "activity": "lecture",
+      "hours": 38,
+      "id": "56bedcdd-9610-4423-ad0f-09760a66413c",
+      "is_hourly_paid": false,
+      "row_id": "f9055261-4d8d-428b-a28c-875a94aa7f55",
+      "teacher_id": 8429
+    },
+    "5db0ad65-fbf8-4b96-8f04-8fb46743e771": {
+      "activity": "lab",
+      "hours": 10,
+      "id": "5db0ad65-fbf8-4b96-8f04-8fb46743e771",
+      "is_hourly_paid": false,
+      "row_id": "9769235a-a517-4d6f-b157-b8a8eab840b1",
+      "teacher_id": 8429
+    },
+    "6008f5da-529a-4244-a727-bf49bd5ef1f6": {
+      "activity": "lecture",
+      "hours": 30,
+      "id": "6008f5da-529a-4244-a727-bf49bd5ef1f6",
+      "is_hourly_paid": false,
+      "row_id": "9769235a-a517-4d6f-b157-b8a8eab840b1",
+      "teacher_id": 8429
+    },
+    "6938b650-3810-4606-8105-d83011ecd863": {
+      "activity": "seminar",
+      "hours": 15,
+      "id": "6938b650-3810-4606-8105-d83011ecd863",
+      "is_hourly_paid": false,
+      "row_id": "bbe24c0e-dde2-430c-ae96-c3d86daa1a11",
+      "teacher_id": 8429
+    },
+    "7ffa5f56-75a9-4a04-ba82-f0ce64f48557": {
+      "activity": "lecture",
+      "hours": 30,
+      "id": "7ffa5f56-75a9-4a04-ba82-f0ce64f48557",
+      "is_hourly_paid": false,
+      "row_id": "502cfe57-2781-42d0-b5f9-f480d95401fa",
+      "teacher_id": 8429
+    },
+    "86c6e100-3f65-4f6e-9f1f-f9e1de576515": {
+      "activity": "lecture",
+      "hours": 30,
+      "id": "86c6e100-3f65-4f6e-9f1f-f9e1de576515",
+      "is_hourly_paid": false,
+      "row_id": "9e106bab-bf85-4a71-8491-c0227a8cf7fd",
+      "teacher_id": 8429
+    },
+    "88415d13-6d16-4b4e-acf2-7aea12be2b98": {
+      "activity": "seminar",
+      "hours": 15,
+      "id": "88415d13-6d16-4b4e-acf2-7aea12be2b98",
+      "is_hourly_paid": false,
+      "row_id": "e9067c73-3453-474b-be1b-5cbae938855c",
+      "teacher_id": 8429
+    },
+    "8ab2368a-1e5a-4bd4-9839-467adb2937df": {
+      "activity": "lab",
+      "hours": 5,
+      "id": "8ab2368a-1e5a-4bd4-9839-467adb2937df",
+      "is_hourly_paid": false,
+      "row_id": "9e106bab-bf85-4a71-8491-c0227a8cf7fd",
+      "teacher_id": 8429
+    },
+    "8d51108e-559b-4487-a6cb-19b56718c9e7": {
+      "activity": "seminar",
+      "hours": 45,
+      "id": "8d51108e-559b-4487-a6cb-19b56718c9e7",
+      "is_hourly_paid": false,
+      "row_id": "708c50c1-3ca3-4c72-824c-173e4bf5e520",
+      "teacher_id": 8429
+    },
+    "8e9beedc-91b0-4660-b775-0b946da1e396": {
+      "activity": "seminar",
+      "hours": 60,
+      "id": "8e9beedc-91b0-4660-b775-0b946da1e396",
+      "is_hourly_paid": false,
+      "row_id": "c436a0e5-9269-4280-bfbe-f48717a32608",
+      "teacher_id": 8429
+    },
+    "9d1b4af3-6d67-4c65-9075-b4cfe8f3fa9b": {
+      "activity": "seminar",
+      "hours": 30,
+      "id": "9d1b4af3-6d67-4c65-9075-b4cfe8f3fa9b",
+      "is_hourly_paid": false,
+      "row_id": "852cc56a-2a37-4563-9947-ae6eb60f571b",
+      "teacher_id": 8429
+    },
+    "a6b2ae46-d0c7-4976-aff8-74eb4337f35f": {
+      "activity": "seminar",
+      "hours": 20,
+      "id": "a6b2ae46-d0c7-4976-aff8-74eb4337f35f",
+      "is_hourly_paid": false,
+      "row_id": "9769235a-a517-4d6f-b157-b8a8eab840b1",
+      "teacher_id": 8429
+    },
+    "aff09a7f-a588-4775-84b1-fe06346f566d": {
+      "activity": "seminar",
+      "hours": 30,
+      "id": "aff09a7f-a588-4775-84b1-fe06346f566d",
+      "is_hourly_paid": false,
+      "row_id": "c3d6a5b7-86be-424a-a472-6cbb8ca406e2",
+      "teacher_id": 8429
+    },
+    "b4d463c5-8b80-4a8a-a820-8bfbf227a95f": {
+      "activity": "seminar",
+      "hours": 37,
+      "id": "b4d463c5-8b80-4a8a-a820-8bfbf227a95f",
+      "is_hourly_paid": false,
+      "row_id": "f9055261-4d8d-428b-a28c-875a94aa7f55",
+      "teacher_id": 8429
+    },
+    "b8511908-60d7-4e29-9496-de7350de9583": {
+      "activity": "lecture",
+      "hours": 30,
+      "id": "b8511908-60d7-4e29-9496-de7350de9583",
+      "is_hourly_paid": false,
+      "row_id": "bbe24c0e-dde2-430c-ae96-c3d86daa1a11",
+      "teacher_id": 8429
+    },
+    "c138b5f3-51c7-4f3e-8280-58c358a2e376": {
+      "activity": "seminar",
+      "hours": 30,
+      "id": "c138b5f3-51c7-4f3e-8280-58c358a2e376",
+      "is_hourly_paid": false,
+      "row_id": "502cfe57-2781-42d0-b5f9-f480d95401fa",
+      "teacher_id": 8429
+    },
+    "ca39bb3f-25fb-40e6-acb5-228e42e51bb1": {
+      "activity": "lecture",
+      "hours": 30,
+      "id": "ca39bb3f-25fb-40e6-acb5-228e42e51bb1",
+      "is_hourly_paid": false,
+      "row_id": "c3d6a5b7-86be-424a-a472-6cbb8ca406e2",
+      "teacher_id": 8429
+    },
+    "d93d3bee-4c61-4cbf-8889-0a14c60b6e8e": {
+      "activity": "lab",
+      "hours": 30,
+      "id": "d93d3bee-4c61-4cbf-8889-0a14c60b6e8e",
+      "is_hourly_paid": false,
+      "row_id": "779c5ee7-c818-41ce-8c47-6bba6cd39e4a",
+      "teacher_id": null
+    },
+    "df90accb-787e-4e0a-9a5d-75050d5f7825": {
+      "activity": "lecture",
+      "hours": 45,
+      "id": "df90accb-787e-4e0a-9a5d-75050d5f7825",
+      "is_hourly_paid": false,
+      "row_id": "852cc56a-2a37-4563-9947-ae6eb60f571b",
+      "teacher_id": 8429
+    },
+    "e01ef9e4-b49c-47b9-868c-d1093644a724": {
+      "activity": "lecture",
+      "hours": 30,
+      "id": "e01ef9e4-b49c-47b9-868c-d1093644a724",
+      "is_hourly_paid": true,
+      "row_id": "58935ed2-bc29-4c88-a1da-4d98b92a8b9c",
+      "teacher_id": 8429
+    },
+    "e90e96a7-2cad-478c-853f-ea85741ae086": {
+      "activity": "lecture",
+      "hours": 45,
+      "id": "e90e96a7-2cad-478c-853f-ea85741ae086",
+      "is_hourly_paid": false,
+      "row_id": "c436a0e5-9269-4280-bfbe-f48717a32608",
+      "teacher_id": 8429
+    }
+  },
+  "courses": {
+    "08781fed-8f7b-484e-8514-4a43c98c378e": {
+      "group_id": "4917a78c-ae49-44bf-b45c-0a9be6a47782",
+      "id": "08781fed-8f7b-484e-8514-4a43c98c378e",
+      "instructor_id": 8429,
+      "is_active": true,
+      "lesson_hours": 45,
+      "period_id": "4c81ff31-e755-4c30-a836-e0bb2599577b",
+      "subject_id": "49c5d3ff-b796-42dc-81eb-930a1f47bd4b"
+    },
+    "12d529b7-c4ba-43f7-a428-32a39fe5aa29": {
+      "group_id": "1aa83a07-55bc-4f0b-94a7-d81f413752cd",
+      "id": "12d529b7-c4ba-43f7-a428-32a39fe5aa29",
+      "instructor_id": 8429,
+      "is_active": true,
+      "lesson_hours": 45,
+      "period_id": "4c81ff31-e755-4c30-a836-e0bb2599577b",
+      "subject_id": "49c5d3ff-b796-42dc-81eb-930a1f47bd4b"
+    },
+    "3e8573b4-5cb2-4076-af0f-f15daa2b5e27": {
+      "group_id": "9d1b56cf-0a24-4fb2-9be0-4eed5b979d61",
+      "id": "3e8573b4-5cb2-4076-af0f-f15daa2b5e27",
+      "instructor_id": 8429,
+      "is_active": true,
+      "lesson_hours": 45,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "subject_id": "d3f91bb6-8a57-48ca-9b13-7b74aea33088"
+    },
+    "54357ece-6c81-4be4-8bc4-a49f46e88d4f": {
+      "group_id": "189f8a1c-dbcf-4ec7-ab23-645549d78ad1",
+      "id": "54357ece-6c81-4be4-8bc4-a49f46e88d4f",
+      "instructor_id": 8429,
+      "is_active": true,
+      "lesson_hours": 60,
+      "period_id": "4c81ff31-e755-4c30-a836-e0bb2599577b",
+      "subject_id": "9cca10a8-03e5-423c-abed-61d30563934e"
+    },
+    "6b4fc624-06f3-4358-b24f-e420138c66ad": {
+      "group_id": "1aa83a07-55bc-4f0b-94a7-d81f413752cd",
+      "id": "6b4fc624-06f3-4358-b24f-e420138c66ad",
+      "instructor_id": 8429,
+      "is_active": true,
+      "lesson_hours": 30,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "subject_id": "722288d2-4d71-4ae6-98eb-c6f63bb4c50c"
+    },
+    "8daaec47-1ba2-4507-a57f-52d6a406fabc": {
+      "group_id": "6dd9a058-83ac-45f2-80a2-20327f6ca44a",
+      "id": "8daaec47-1ba2-4507-a57f-52d6a406fabc",
+      "instructor_id": 8429,
+      "is_active": true,
+      "lesson_hours": 75,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "subject_id": "215f1821-689d-4cdd-a251-5de892d9ce6c"
+    },
+    "94caf8d6-f1a8-4eef-ba40-4bd8a5bc9ff2": {
+      "group_id": "9d1b56cf-0a24-4fb2-9be0-4eed5b979d61",
+      "id": "94caf8d6-f1a8-4eef-ba40-4bd8a5bc9ff2",
+      "instructor_id": 8429,
+      "is_active": true,
+      "lesson_hours": 60,
+      "period_id": "4c81ff31-e755-4c30-a836-e0bb2599577b",
+      "subject_id": "e6bf6a37-20fe-4e1c-b6b0-f8482695ad23"
+    },
+    "a537cba9-66c8-4eee-a7ed-171b3e6682ce": {
+      "group_id": "9d1b56cf-0a24-4fb2-9be0-4eed5b979d61",
+      "id": "a537cba9-66c8-4eee-a7ed-171b3e6682ce",
+      "instructor_id": 8429,
+      "is_active": true,
+      "lesson_hours": 75,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "subject_id": "30812cfb-1601-4b30-acaf-dab66deec107"
+    },
+    "a71524e7-abae-49ff-89a5-7bece805ffc7": {
+      "group_id": "47b4d98a-59b0-4a78-9a64-67a238274c6e",
+      "id": "a71524e7-abae-49ff-89a5-7bece805ffc7",
+      "instructor_id": null,
+      "is_active": true,
+      "lesson_hours": 60,
+      "period_id": "4c81ff31-e755-4c30-a836-e0bb2599577b",
+      "subject_id": "cd140afb-5920-4e17-854c-3b012de9c0fb"
+    },
+    "bc43c298-975e-4a1e-9b5a-f53cb7e845e1": {
+      "group_id": "e6f9fba6-57dc-4786-bb38-3f10470500ca",
+      "id": "bc43c298-975e-4a1e-9b5a-f53cb7e845e1",
+      "instructor_id": 8429,
+      "is_active": true,
+      "lesson_hours": 75,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "subject_id": "215f1821-689d-4cdd-a251-5de892d9ce6c"
+    },
+    "c123476e-7a8a-4b79-9123-9ea996af5a66": {
+      "group_id": "eafd5e70-6e40-497b-a9ea-dccd4643b664",
+      "id": "c123476e-7a8a-4b79-9123-9ea996af5a66",
+      "instructor_id": 8429,
+      "is_active": true,
+      "lesson_hours": 75,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "subject_id": "cdebda19-631f-4f95-81ee-c6df59adea20"
+    },
+    "f90ca270-3279-43c3-83fe-c2ae27d7b574": {
+      "group_id": "4bbfa907-90ec-4439-81c7-29df5c7656c9",
+      "id": "f90ca270-3279-43c3-83fe-c2ae27d7b574",
+      "instructor_id": 8429,
+      "is_active": true,
+      "lesson_hours": 60,
+      "period_id": "4c81ff31-e755-4c30-a836-e0bb2599577b",
+      "subject_id": "cd140afb-5920-4e17-854c-3b012de9c0fb"
+    },
+    "fccd0aa9-2d81-4b32-a9be-e37daa2b2713": {
+      "group_id": "9d1b56cf-0a24-4fb2-9be0-4eed5b979d61",
+      "id": "fccd0aa9-2d81-4b32-a9be-e37daa2b2713",
+      "instructor_id": 8429,
+      "is_active": true,
+      "lesson_hours": 45,
+      "period_id": "4c81ff31-e755-4c30-a836-e0bb2599577b",
+      "subject_id": "98e121e2-f8b1-40a7-b6ad-6268bec6dce2"
+    }
+  },
+  "expected": {
+    "fall": 297,
+    "lesson_grade_roster_syllabus_writes": 0,
+    "new_rows_or_courses": 0,
+    "new_vacant_splits": 2,
+    "own_assignments_after": 18,
+    "own_assignments_before": 26,
+    "row_and_course_deletions": 0,
+    "spring": 225,
+    "teacher_after": 522,
+    "teacher_before": 735,
+    "total_row_capacity_before_after": 795,
+    "vacant_hours_after": 273,
+    "vacant_hours_before": 60,
+    "vacated_existing_assignments": 10
+  },
+  "groups": {
+    "189f8a1c-dbcf-4ec7-ab23-645549d78ad1": {
+      "code": "",
+      "id": "189f8a1c-dbcf-4ec7-ab23-645549d78ad1",
+      "is_active": true,
+      "name": "234 SBİO İNG",
+      "parent_id": "4130b324-7267-4e14-b550-564443fcff4f",
+      "settings": {
+        "degree_level": "bachelor",
+        "education_form": "full_time",
+        "sector": "ru"
+      },
+      "unit_type": "group"
+    },
+    "1aa83a07-55bc-4f0b-94a7-d81f413752cd": {
+      "code": "",
+      "id": "1aa83a07-55bc-4f0b-94a7-d81f413752cd",
+      "is_active": true,
+      "name": "236 SBİO",
+      "parent_id": "4130b324-7267-4e14-b550-564443fcff4f",
+      "settings": {
+        "education_form": "full_time"
+      },
+      "unit_type": "group"
+    },
+    "47b4d98a-59b0-4a78-9a64-67a238274c6e": {
+      "code": "",
+      "id": "47b4d98a-59b0-4a78-9a64-67a238274c6e",
+      "is_active": true,
+      "name": "235 BİO ing",
+      "parent_id": "220404d6-70bc-4bd7-98bf-3df83f06c2b5",
+      "settings": {
+        "degree_level": "bachelor",
+        "education_form": "full_time",
+        "sector": "en"
+      },
+      "unit_type": "group"
+    },
+    "4917a78c-ae49-44bf-b45c-0a9be6a47782": {
+      "code": "",
+      "id": "4917a78c-ae49-44bf-b45c-0a9be6a47782",
+      "is_active": true,
+      "name": "236 M",
+      "parent_id": "e04e3d1f-613b-438f-897f-b771112e3edc",
+      "settings": {
+        "education_form": "full_time"
+      },
+      "unit_type": "group"
+    },
+    "4bbfa907-90ec-4439-81c7-29df5c7656c9": {
+      "code": "",
+      "id": "4bbfa907-90ec-4439-81c7-29df5c7656c9",
+      "is_active": true,
+      "name": "235 BİO az",
+      "parent_id": "220404d6-70bc-4bd7-98bf-3df83f06c2b5",
+      "settings": {
+        "degree_level": "bachelor",
+        "education_form": "full_time",
+        "sector": "az"
+      },
+      "unit_type": "group"
+    },
+    "6dd9a058-83ac-45f2-80a2-20327f6ca44a": {
+      "code": "",
+      "id": "6dd9a058-83ac-45f2-80a2-20327f6ca44a",
+      "is_active": true,
+      "name": "235 SBİO-2",
+      "parent_id": "4130b324-7267-4e14-b550-564443fcff4f",
+      "settings": {
+        "degree_level": "bachelor",
+        "education_form": "full_time",
+        "parent_group": "bc10eead-aa10-4e07-8ca5-319b83018b57",
+        "sector": "az"
+      },
+      "unit_type": "group"
+    },
+    "9d1b56cf-0a24-4fb2-9be0-4eed5b979d61": {
+      "code": "",
+      "id": "9d1b56cf-0a24-4fb2-9be0-4eed5b979d61",
+      "is_active": true,
+      "name": "234 SBİO az",
+      "parent_id": "4130b324-7267-4e14-b550-564443fcff4f",
+      "settings": {
+        "degree_level": "bachelor",
+        "education_form": "full_time",
+        "sector": "az"
+      },
+      "unit_type": "group"
+    },
+    "e6f9fba6-57dc-4786-bb38-3f10470500ca": {
+      "code": "",
+      "id": "e6f9fba6-57dc-4786-bb38-3f10470500ca",
+      "is_active": true,
+      "name": "235 SBİO-1",
+      "parent_id": "4130b324-7267-4e14-b550-564443fcff4f",
+      "settings": {
+        "degree_level": "bachelor",
+        "education_form": "full_time",
+        "parent_group": "bc10eead-aa10-4e07-8ca5-319b83018b57",
+        "sector": "az"
+      },
+      "unit_type": "group"
+    },
+    "eafd5e70-6e40-497b-a9ea-dccd4643b664": {
+      "code": "",
+      "id": "eafd5e70-6e40-497b-a9ea-dccd4643b664",
+      "is_active": true,
+      "name": "233 SBİO az",
+      "parent_id": "4130b324-7267-4e14-b550-564443fcff4f",
+      "settings": {
+        "degree_level": "bachelor",
+        "education_form": "full_time",
+        "sector": "az"
+      },
+      "unit_type": "group"
+    }
+  },
+  "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+  "owner_changes": {
+    "a71524e7-abae-49ff-89a5-7bece805ffc7": {
+      "before_instructor_id": null,
+      "instructor_id": 8429
+    }
+  },
+  "row_changes": {
+    "708c50c1-3ca3-4c72-824c-173e4bf5e520": {
+      "lecture_plan": 45,
+      "lecture_total": 45,
+      "seminar_plan": 30,
+      "seminar_total": 30
+    },
+    "779c5ee7-c818-41ce-8c47-6bba6cd39e4a": {
+      "lab_plan": 0,
+      "lab_total": 0,
+      "seminar_plan": 30,
+      "seminar_total": 30
+    }
+  },
+  "row_groups": {
+    "502cfe57-2781-42d0-b5f9-f480d95401fa": [
+      "4bbfa907-90ec-4439-81c7-29df5c7656c9"
+    ],
+    "58935ed2-bc29-4c88-a1da-4d98b92a8b9c": [
+      "9d1b56cf-0a24-4fb2-9be0-4eed5b979d61"
+    ],
+    "708c50c1-3ca3-4c72-824c-173e4bf5e520": [
+      "eafd5e70-6e40-497b-a9ea-dccd4643b664"
+    ],
+    "779c5ee7-c818-41ce-8c47-6bba6cd39e4a": [
+      "47b4d98a-59b0-4a78-9a64-67a238274c6e"
+    ],
+    "852cc56a-2a37-4563-9947-ae6eb60f571b": [
+      "9d1b56cf-0a24-4fb2-9be0-4eed5b979d61"
+    ],
+    "9769235a-a517-4d6f-b157-b8a8eab840b1": [
+      "1aa83a07-55bc-4f0b-94a7-d81f413752cd"
+    ],
+    "9e106bab-bf85-4a71-8491-c0227a8cf7fd": [
+      "4917a78c-ae49-44bf-b45c-0a9be6a47782"
+    ],
+    "aabb1f5c-6a98-4a8d-8b86-39fd2ff4635c": [
+      "1aa83a07-55bc-4f0b-94a7-d81f413752cd"
+    ],
+    "bbe24c0e-dde2-430c-ae96-c3d86daa1a11": [
+      "9d1b56cf-0a24-4fb2-9be0-4eed5b979d61"
+    ],
+    "c3d6a5b7-86be-424a-a472-6cbb8ca406e2": [
+      "189f8a1c-dbcf-4ec7-ab23-645549d78ad1"
+    ],
+    "c436a0e5-9269-4280-bfbe-f48717a32608": [
+      "e6f9fba6-57dc-4786-bb38-3f10470500ca"
+    ],
+    "e9067c73-3453-474b-be1b-5cbae938855c": [
+      "9d1b56cf-0a24-4fb2-9be0-4eed5b979d61"
+    ],
+    "f9055261-4d8d-428b-a28c-875a94aa7f55": [
+      "6dd9a058-83ac-45f2-80a2-20327f6ca44a"
+    ]
+  },
+  "rows": {
+    "502cfe57-2781-42d0-b5f9-f480d95401fa": {
+      "consult_hours": 0,
+      "credits": "5",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "235 BİO az",
+      "id": "502cfe57-2781-42d0-b5f9-f480d95401fa",
+      "lab_plan": 0,
+      "lab_total": 0,
+      "lecture_plan": 30,
+      "lecture_total": 30,
+      "period_id": "4c81ff31-e755-4c30-a836-e0bb2599577b",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "spring",
+      "seminar_plan": 30,
+      "seminar_total": 30,
+      "specialty_id": "220404d6-70bc-4bd7-98bf-3df83f06c2b5",
+      "student_count": 22,
+      "subgroup_count": 1,
+      "subject_id": "cd140afb-5920-4e17-854c-3b012de9c0fb",
+      "subject_text": "Onurğalı heyvanlar",
+      "task_id": "bbfc4e1a-91f2-4cff-acd0-c813a6f0e01f",
+      "thesis_hours": 0,
+      "total_hours": 60,
+      "union_count": 1
+    },
+    "58935ed2-bc29-4c88-a1da-4d98b92a8b9c": {
+      "consult_hours": 0,
+      "credits": "5",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "234 SBİO az",
+      "id": "58935ed2-bc29-4c88-a1da-4d98b92a8b9c",
+      "lab_plan": 0,
+      "lab_total": 0,
+      "lecture_plan": 30,
+      "lecture_total": 30,
+      "period_id": "4c81ff31-e755-4c30-a836-e0bb2599577b",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "spring",
+      "seminar_plan": 30,
+      "seminar_total": 30,
+      "specialty_id": "4130b324-7267-4e14-b550-564443fcff4f",
+      "student_count": 17,
+      "subgroup_count": 1,
+      "subject_id": "e6bf6a37-20fe-4e1c-b6b0-f8482695ad23",
+      "subject_text": "ATMF VIII blok\n1.Hidrologiya\n2.Dekorativ su bitkiləri\n3.Bataqlıq su bitkiləri",
+      "task_id": "bbfc4e1a-91f2-4cff-acd0-c813a6f0e01f",
+      "thesis_hours": 0,
+      "total_hours": 60,
+      "union_count": 1
+    },
+    "708c50c1-3ca3-4c72-824c-173e4bf5e520": {
+      "consult_hours": 0,
+      "credits": "6",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "233 SBİO az",
+      "id": "708c50c1-3ca3-4c72-824c-173e4bf5e520",
+      "lab_plan": 0,
+      "lab_total": 0,
+      "lecture_plan": 30,
+      "lecture_total": 30,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "fall",
+      "seminar_plan": 45,
+      "seminar_total": 45,
+      "specialty_id": "4130b324-7267-4e14-b550-564443fcff4f",
+      "student_count": 15,
+      "subgroup_count": 1,
+      "subject_id": "cdebda19-631f-4f95-81ee-c6df59adea20",
+      "subject_text": "Balıqların akvakulturası",
+      "task_id": "bbfc4e1a-91f2-4cff-acd0-c813a6f0e01f",
+      "thesis_hours": 0,
+      "total_hours": 75,
+      "union_count": 1
+    },
+    "779c5ee7-c818-41ce-8c47-6bba6cd39e4a": {
+      "consult_hours": 0,
+      "credits": "5",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "235 BİO ing",
+      "id": "779c5ee7-c818-41ce-8c47-6bba6cd39e4a",
+      "lab_plan": 30,
+      "lab_total": 30,
+      "lecture_plan": 30,
+      "lecture_total": 30,
+      "period_id": "4c81ff31-e755-4c30-a836-e0bb2599577b",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "spring",
+      "seminar_plan": 0,
+      "seminar_total": 0,
+      "specialty_id": "220404d6-70bc-4bd7-98bf-3df83f06c2b5",
+      "student_count": 23,
+      "subgroup_count": 1,
+      "subject_id": "cd140afb-5920-4e17-854c-3b012de9c0fb",
+      "subject_text": "Onurğalı heyvanlar",
+      "task_id": "bbfc4e1a-91f2-4cff-acd0-c813a6f0e01f",
+      "thesis_hours": 0,
+      "total_hours": 60,
+      "union_count": 1
+    },
+    "852cc56a-2a37-4563-9947-ae6eb60f571b": {
+      "consult_hours": 0,
+      "credits": "7",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "234 SBİO az",
+      "id": "852cc56a-2a37-4563-9947-ae6eb60f571b",
+      "lab_plan": 0,
+      "lab_total": 0,
+      "lecture_plan": 45,
+      "lecture_total": 45,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "fall",
+      "seminar_plan": 30,
+      "seminar_total": 30,
+      "specialty_id": "4130b324-7267-4e14-b550-564443fcff4f",
+      "student_count": 17,
+      "subgroup_count": 1,
+      "subject_id": "30812cfb-1601-4b30-acaf-dab66deec107",
+      "subject_text": "Akvakulturada monitorinq və tədqiqat metodikası",
+      "task_id": "bbfc4e1a-91f2-4cff-acd0-c813a6f0e01f",
+      "thesis_hours": 0,
+      "total_hours": 75,
+      "union_count": 1
+    },
+    "9769235a-a517-4d6f-b157-b8a8eab840b1": {
+      "consult_hours": 0,
+      "credits": "7",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "236 SBİO",
+      "id": "9769235a-a517-4d6f-b157-b8a8eab840b1",
+      "lab_plan": 5,
+      "lab_total": 10,
+      "lecture_plan": 30,
+      "lecture_total": 30,
+      "period_id": "4c81ff31-e755-4c30-a836-e0bb2599577b",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "spring",
+      "seminar_plan": 10,
+      "seminar_total": 20,
+      "specialty_id": "4130b324-7267-4e14-b550-564443fcff4f",
+      "student_count": 50,
+      "subgroup_count": 2,
+      "subject_id": "49c5d3ff-b796-42dc-81eb-930a1f47bd4b",
+      "subject_text": "Botanika",
+      "task_id": "bbfc4e1a-91f2-4cff-acd0-c813a6f0e01f",
+      "thesis_hours": 0,
+      "total_hours": 60,
+      "union_count": 1
+    },
+    "9e106bab-bf85-4a71-8491-c0227a8cf7fd": {
+      "consult_hours": 0,
+      "credits": "4",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "236 M",
+      "id": "9e106bab-bf85-4a71-8491-c0227a8cf7fd",
+      "lab_plan": 5,
+      "lab_total": 5,
+      "lecture_plan": 30,
+      "lecture_total": 30,
+      "period_id": "4c81ff31-e755-4c30-a836-e0bb2599577b",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "spring",
+      "seminar_plan": 10,
+      "seminar_total": 10,
+      "specialty_id": "e04e3d1f-613b-438f-897f-b771112e3edc",
+      "student_count": 40,
+      "subgroup_count": 1,
+      "subject_id": "49c5d3ff-b796-42dc-81eb-930a1f47bd4b",
+      "subject_text": "Botanika",
+      "task_id": "bbfc4e1a-91f2-4cff-acd0-c813a6f0e01f",
+      "thesis_hours": 0,
+      "total_hours": 45,
+      "union_count": 1
+    },
+    "aabb1f5c-6a98-4a8d-8b86-39fd2ff4635c": {
+      "consult_hours": 0,
+      "credits": "3",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "236 SBİO",
+      "id": "aabb1f5c-6a98-4a8d-8b86-39fd2ff4635c",
+      "lab_plan": 0,
+      "lab_total": 0,
+      "lecture_plan": 15,
+      "lecture_total": 15,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "fall",
+      "seminar_plan": 15,
+      "seminar_total": 15,
+      "specialty_id": "4130b324-7267-4e14-b550-564443fcff4f",
+      "student_count": 50,
+      "subgroup_count": 2,
+      "subject_id": "722288d2-4d71-4ae6-98eb-c6f63bb4c50c",
+      "subject_text": "İxtisasa giriş və ixtisasın inkişaf tarixi",
+      "task_id": "bbfc4e1a-91f2-4cff-acd0-c813a6f0e01f",
+      "thesis_hours": 0,
+      "total_hours": 30,
+      "union_count": 1
+    },
+    "bbe24c0e-dde2-430c-ae96-c3d86daa1a11": {
+      "consult_hours": 0,
+      "credits": "4",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "234 SBİO az",
+      "id": "bbe24c0e-dde2-430c-ae96-c3d86daa1a11",
+      "lab_plan": 0,
+      "lab_total": 0,
+      "lecture_plan": 30,
+      "lecture_total": 30,
+      "period_id": "4c81ff31-e755-4c30-a836-e0bb2599577b",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "spring",
+      "seminar_plan": 15,
+      "seminar_total": 15,
+      "specialty_id": "4130b324-7267-4e14-b550-564443fcff4f",
+      "student_count": 17,
+      "subgroup_count": 1,
+      "subject_id": "98e121e2-f8b1-40a7-b6ad-6268bec6dce2",
+      "subject_text": "ATMF X blok\n1.Balıqçılıq, ov alətləri və balıqtutma üsulları\n2.İdman balıqçılığı və balıq turizmi \n3.Dekorativ balıqçılıq",
+      "task_id": "bbfc4e1a-91f2-4cff-acd0-c813a6f0e01f",
+      "thesis_hours": 0,
+      "total_hours": 45,
+      "union_count": 1
+    },
+    "c3d6a5b7-86be-424a-a472-6cbb8ca406e2": {
+      "consult_hours": 0,
+      "credits": "5",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "234 SBİO ing",
+      "id": "c3d6a5b7-86be-424a-a472-6cbb8ca406e2",
+      "lab_plan": 0,
+      "lab_total": 0,
+      "lecture_plan": 30,
+      "lecture_total": 30,
+      "period_id": "4c81ff31-e755-4c30-a836-e0bb2599577b",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "spring",
+      "seminar_plan": 30,
+      "seminar_total": 30,
+      "specialty_id": "4130b324-7267-4e14-b550-564443fcff4f",
+      "student_count": 16,
+      "subgroup_count": 1,
+      "subject_id": "9cca10a8-03e5-423c-abed-61d30563934e",
+      "subject_text": "Su onurğasızlarının akvakulturası",
+      "task_id": "bbfc4e1a-91f2-4cff-acd0-c813a6f0e01f",
+      "thesis_hours": 0,
+      "total_hours": 60,
+      "union_count": 1
+    },
+    "c436a0e5-9269-4280-bfbe-f48717a32608": {
+      "consult_hours": 0,
+      "credits": "7",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "235 SBİO",
+      "id": "c436a0e5-9269-4280-bfbe-f48717a32608",
+      "lab_plan": 0,
+      "lab_total": 0,
+      "lecture_plan": 45,
+      "lecture_total": 45,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "fall",
+      "seminar_plan": 30,
+      "seminar_total": 60,
+      "specialty_id": "4130b324-7267-4e14-b550-564443fcff4f",
+      "student_count": 46,
+      "subgroup_count": 2,
+      "subject_id": "215f1821-689d-4cdd-a251-5de892d9ce6c",
+      "subject_text": "ATMF II blok\n1.Su toksikologiyası\n2.Hidrokimya\n3.Hidromorfologiya",
+      "task_id": "bbfc4e1a-91f2-4cff-acd0-c813a6f0e01f",
+      "thesis_hours": 0,
+      "total_hours": 105,
+      "union_count": 1
+    },
+    "e9067c73-3453-474b-be1b-5cbae938855c": {
+      "consult_hours": 0,
+      "credits": "4",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "234 SBİO az",
+      "id": "e9067c73-3453-474b-be1b-5cbae938855c",
+      "lab_plan": 0,
+      "lab_total": 0,
+      "lecture_plan": 30,
+      "lecture_total": 30,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "fall",
+      "seminar_plan": 15,
+      "seminar_total": 15,
+      "specialty_id": "4130b324-7267-4e14-b550-564443fcff4f",
+      "student_count": 17,
+      "subgroup_count": 1,
+      "subject_id": "d3f91bb6-8a57-48ca-9b13-7b74aea33088",
+      "subject_text": "ATMF V blok\n1.Balıq anatomiyası və fiziologiyası\n2.Balıq embrionologiyası\n3.Balıq taksonomiyası və ekologiyası",
+      "task_id": "bbfc4e1a-91f2-4cff-acd0-c813a6f0e01f",
+      "thesis_hours": 0,
+      "total_hours": 45,
+      "union_count": 1
+    },
+    "f9055261-4d8d-428b-a28c-875a94aa7f55": {
+      "consult_hours": 0,
+      "credits": "7",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "235 SBİO-2",
+      "id": "f9055261-4d8d-428b-a28c-875a94aa7f55",
+      "lab_plan": 0,
+      "lab_total": 0,
+      "lecture_plan": 38,
+      "lecture_total": 38,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "fall",
+      "seminar_plan": 37,
+      "seminar_total": 37,
+      "specialty_id": "4130b324-7267-4e14-b550-564443fcff4f",
+      "student_count": 0,
+      "subgroup_count": 1,
+      "subject_id": "215f1821-689d-4cdd-a251-5de892d9ce6c",
+      "subject_text": "Su toksikologiyası",
+      "task_id": "bbfc4e1a-91f2-4cff-acd0-c813a6f0e01f",
+      "thesis_hours": 0,
+      "total_hours": 75,
+      "union_count": 1
+    }
+  },
+  "source_sha256": "3885ce23baf153d666214ede5980e253e49a6c51eec7a68bf9070e8e44ec7c01",
+  "subjects": {
+    "215f1821-689d-4cdd-a251-5de892d9ce6c": {
+      "chair_unit_id": null,
+      "code": "QKU-1157",
+      "id": "215f1821-689d-4cdd-a251-5de892d9ce6c",
+      "name": "Su toksikologiyası"
+    },
+    "30812cfb-1601-4b30-acaf-dab66deec107": {
+      "chair_unit_id": null,
+      "code": "QKU-1151",
+      "id": "30812cfb-1601-4b30-acaf-dab66deec107",
+      "name": "Akvakulturada monitorinq və tədqiqat metodikası"
+    },
+    "49c5d3ff-b796-42dc-81eb-930a1f47bd4b": {
+      "chair_unit_id": null,
+      "code": "QKU-863",
+      "id": "49c5d3ff-b796-42dc-81eb-930a1f47bd4b",
+      "name": "Botanika"
+    },
+    "722288d2-4d71-4ae6-98eb-c6f63bb4c50c": {
+      "chair_unit_id": null,
+      "code": "QKU-1142",
+      "id": "722288d2-4d71-4ae6-98eb-c6f63bb4c50c",
+      "name": "İxtisasa giriş və ixtisasın inkişaf tarixi"
+    },
+    "98e121e2-f8b1-40a7-b6ad-6268bec6dce2": {
+      "chair_unit_id": null,
+      "code": "QKU-1187",
+      "id": "98e121e2-f8b1-40a7-b6ad-6268bec6dce2",
+      "name": "Dekorativ balıqçılıq"
+    },
+    "9cca10a8-03e5-423c-abed-61d30563934e": {
+      "chair_unit_id": null,
+      "code": "SAYT-0039",
+      "id": "9cca10a8-03e5-423c-abed-61d30563934e",
+      "name": "Su onurğasızlarının akvakulturası"
+    },
+    "cd140afb-5920-4e17-854c-3b012de9c0fb": {
+      "chair_unit_id": null,
+      "code": "QKU-1235",
+      "id": "cd140afb-5920-4e17-854c-3b012de9c0fb",
+      "name": "Onurğalı heyvanlar"
+    },
+    "cdebda19-631f-4f95-81ee-c6df59adea20": {
+      "chair_unit_id": null,
+      "code": "QKU-1149",
+      "id": "cdebda19-631f-4f95-81ee-c6df59adea20",
+      "name": "Balıqların akvakulturası"
+    },
+    "d3f91bb6-8a57-48ca-9b13-7b74aea33088": {
+      "chair_unit_id": null,
+      "code": "QKU-1171",
+      "id": "d3f91bb6-8a57-48ca-9b13-7b74aea33088",
+      "name": "Balıq embrionologiyası"
+    },
+    "e6bf6a37-20fe-4e1c-b6b0-f8482695ad23": {
+      "chair_unit_id": null,
+      "code": "QKU-1179",
+      "id": "e6bf6a37-20fe-4e1c-b6b0-f8482695ad23",
+      "name": "Hidrologiya"
+    }
+  },
+  "syllabi": {
+    "3f12a9dd-3fac-48db-8545-af533efd2321": {
+      "approved_version_id": "b3d1e4fd-b719-4b71-9c7d-81ccb1992706",
+      "author_id": 8429,
+      "current_version_id": "b3d1e4fd-b719-4b71-9c7d-81ccb1992706",
+      "id": "3f12a9dd-3fac-48db-8545-af533efd2321",
+      "is_active": true,
+      "offering_id": "8daaec47-1ba2-4507-a57f-52d6a406fabc",
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "reused_from_id": null,
+      "subject_id": "215f1821-689d-4cdd-a251-5de892d9ce6c"
+    },
+    "4625ad8b-7ce2-4e0d-94ed-ebb7a0d67db9": {
+      "approved_version_id": "2c70c0e5-1a2c-40c7-a9c6-eefeb2236a99",
+      "author_id": 8429,
+      "current_version_id": "2c70c0e5-1a2c-40c7-a9c6-eefeb2236a99",
+      "id": "4625ad8b-7ce2-4e0d-94ed-ebb7a0d67db9",
+      "is_active": true,
+      "offering_id": "6b4fc624-06f3-4358-b24f-e420138c66ad",
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "reused_from_id": null,
+      "subject_id": "722288d2-4d71-4ae6-98eb-c6f63bb4c50c"
+    },
+    "4e0a8d4a-2e22-4111-819b-79d9c0218919": {
+      "approved_version_id": "2a28d4df-5a12-469e-a5e2-d802efcf4ba5",
+      "author_id": 8429,
+      "current_version_id": "2a28d4df-5a12-469e-a5e2-d802efcf4ba5",
+      "id": "4e0a8d4a-2e22-4111-819b-79d9c0218919",
+      "is_active": true,
+      "offering_id": "bc43c298-975e-4a1e-9b5a-f53cb7e845e1",
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "reused_from_id": null,
+      "subject_id": "215f1821-689d-4cdd-a251-5de892d9ce6c"
+    },
+    "62872d98-eb8d-4ae1-8337-bf5a76161349": {
+      "approved_version_id": "a43d1639-baae-46bc-87b7-4c561cef497b",
+      "author_id": 8429,
+      "current_version_id": "a43d1639-baae-46bc-87b7-4c561cef497b",
+      "id": "62872d98-eb8d-4ae1-8337-bf5a76161349",
+      "is_active": true,
+      "offering_id": "a537cba9-66c8-4eee-a7ed-171b3e6682ce",
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "reused_from_id": null,
+      "subject_id": "30812cfb-1601-4b30-acaf-dab66deec107"
+    },
+    "74f7bdea-4885-4185-b0ab-2e6bc1acdfb6": {
+      "approved_version_id": "0a7ce3ec-cadf-4e19-bfee-5b7eac46c7ea",
+      "author_id": 8429,
+      "current_version_id": "0a7ce3ec-cadf-4e19-bfee-5b7eac46c7ea",
+      "id": "74f7bdea-4885-4185-b0ab-2e6bc1acdfb6",
+      "is_active": true,
+      "offering_id": "c123476e-7a8a-4b79-9123-9ea996af5a66",
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "reused_from_id": null,
+      "subject_id": "cdebda19-631f-4f95-81ee-c6df59adea20"
+    },
+    "f8ed5a52-e634-4c51-aaa0-8f42df2380f0": {
+      "approved_version_id": "82fc6dc3-1142-4d11-bb41-20da15e58960",
+      "author_id": 8429,
+      "current_version_id": "82fc6dc3-1142-4d11-bb41-20da15e58960",
+      "id": "f8ed5a52-e634-4c51-aaa0-8f42df2380f0",
+      "is_active": true,
+      "offering_id": "3e8573b4-5cb2-4076-af0f-f15daa2b5e27",
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "reused_from_id": null,
+      "subject_id": "d3f91bb6-8a57-48ca-9b13-7b74aea33088"
+    }
+  },
+  "tasks": {
+    "bbfc4e1a-91f2-4cff-acd0-c813a6f0e01f": {
+      "academic_year": "2026/2027",
+      "chair_id": "99856a60-d755-497c-a475-eb5f79fb26eb",
+      "id": "bbfc4e1a-91f2-4cff-acd0-c813a6f0e01f",
+      "revision": 0,
+      "status": "amended"
+    }
+  },
+  "teacher": 8429,
+  "teacher_identity": {
+    "first_name": "Kamilə",
+    "id": 8429,
+    "is_active": true,
+    "last_name": "Mürvətova",
+    "patronymic": "Habil",
+    "username": "kamile.murvetova2"
+  },
+  "year": "2026/2027"
+}
