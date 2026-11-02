@@ -11,7 +11,7 @@ from django.views.decorators.http import require_http_methods
 from apps.syllabus.public import TransitionDenied, approved_restore_sources
 
 from ..constants import Activity
-from ..services.history_restore import KINDS, plan, previous_plan, restore, syllabus_context
+from ..services.history_restore import KINDS, plan, previous_plan, restore, shared_rows, syllabus_context
 from ..services.scoping import WorkloadDenied
 
 CTX = "workload.history_restore"
@@ -91,5 +91,10 @@ def history_restore(request, offering_id):
     return render(
         request,
         "workload/history_restore.html",
-        {"restore_form": form, "offering": course, "plan_provenance": provenance},
+        {
+            "restore_form": form,
+            "offering": course,
+            "plan_provenance": provenance,
+            "shared_row": shared_rows(actor.organization, [course]).get(course.pk),
+        },
     )

@@ -111730,3 +111730,19 @@ msgid ""
 msgstr ""
 "Kaynak izlence ve günlük kayıtları yeniden kontrol edilmelidir; değişiklik "
 "yapılmadı."
+
+msgctxt "workload.history_restore"
+msgid "Bu jurnalın yükü çoxqruplu (patok) sətirdədir"
+msgstr "Bu defterin yükü çok gruplu (akış) satırdadır"
+
+msgctxt "workload.history_restore"
+msgid "Ortaq mühazirə bütün qruplara aiddir, ona görə müəllim «Yük bölgüsü»ndə həmin sətirdə təyin edilir. Jurnal qeydləri dəyişmir."
+msgstr "Ortak ders tüm gruplara aittir; bu nedenle öğretim elemanı «Yük dağılımı» bölümünde o satıra atanır. Defter kayıtları değişmez."
+
+msgctxt "workload.history_restore"
+msgid "Yük bölgüsündə aç"
+msgstr "Yük dağılımında aç"
+
+msgctxt "workload.history_restore"
+msgid "Patok sətri"
+msgstr "Akış satırı"

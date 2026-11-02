@@ -112346,3 +112346,19 @@ msgid ""
 msgstr ""
 "The source syllabus and journal records must be checked again; no changes "
 "were made."
+
+msgctxt "workload.history_restore"
+msgid "Bu jurnalın yükü çoxqruplu (patok) sətirdədir"
+msgstr "This journal's load is in a multi-group (stream) row"
+
+msgctxt "workload.history_restore"
+msgid "Ortaq mühazirə bütün qruplara aiddir, ona görə müəllim «Yük bölgüsü»ndə həmin sətirdə təyin edilir. Jurnal qeydləri dəyişmir."
+msgstr "The shared lecture belongs to every group, so the teacher is assigned on that row in «Load distribution». Journal records do not change."
+
+msgctxt "workload.history_restore"
+msgid "Yük bölgüsündə aç"
+msgstr "Open in load distribution"
+
+msgctxt "workload.history_restore"
+msgid "Patok sətri"
+msgstr "Stream row"

@@ -14,7 +14,7 @@ from core.reviewed_graph import digest, graph
 from ..constants import AmendmentReason, RowKind, TaskStatus
 from ..models import TeacherAssignment, TeachingTask, TeachingTaskRow
 from .history_restore_zero_plan import zero_placeholder_plan
-from .row_edit import assign_amended, save_row_amended
+from .row_edit import assign_amended, distribution_edit_url, save_row_amended
 from .scoping import WorkloadDenied, ensure_can_distribute, ensure_can_manage, manageable_chairs, resolve_actor
 
 KINDS = ("lecture", "seminar", "lab")
@@ -132,6 +132,50 @@ def _matching_rows(course):
         groups=course.group,
         row_kind=RowKind.TEACHING,
     ).exclude(task__status=TaskStatus.CANCELLED)
+
+
+def shared_rows(organization, courses):
+    """Journals whose load sits in a multi-group (patok) or duplicated row: restore() always refuses them.
+
+    The shared lecture belongs to every group of the patok, so who teaches it is a «Yük bölgüsü» decision;
+    the journal list shows that row instead of a button that cannot succeed.
+    """
+    courses = [course for course in courses if course.group_id is not None]
+    if not courses:
+        return {}
+    rows = list(
+        TeachingTaskRow.objects.filter(
+            organization=organization,
+            task__organization=organization,
+            row_kind=RowKind.TEACHING,
+            period_id__in={c.period_id for c in courses},
+            subject_id__in={c.subject_id for c in courses},
+            groups__in={c.group_id for c in courses},
+        )
+        .exclude(task__status=TaskStatus.CANCELLED)
+        .distinct()
+        .select_related("task")
+        .prefetch_related("groups")
+    )
+    blocked = {}
+    for course in courses:
+        matches = [
+            row
+            for row in rows
+            if row.subject_id == course.subject_id
+            and row.period_id == course.period_id
+            and any(group.pk == course.group_id for group in row.groups.all())
+        ]
+        if not matches or (len(matches) == 1 and {g.pk for g in matches[0].groups.all()} == {course.group_id}):
+            continue
+        row = next((r for r in matches if len(r.groups.all()) > 1), matches[0])
+        blocked[course.pk] = {
+            "groups": ", ".join(sorted(group.name for group in row.groups.all())),
+            "url": distribution_edit_url(
+                chair_id=row.task.chair_id, academic_year=row.task.academic_year, row_id=row.pk
+            ),
+        }
+    return blocked
 
 
 @transaction.atomic
@@ -344,6 +388,11 @@ def attach_actions(request, offerings):
                 and any(not known or str(c.pk) in known for c in chairs)
             ):
                 course.history_load_restore_url = reverse("workload:history_restore", args=[course.pk])
+        restorable = [course for course in candidates if getattr(course, "history_load_restore_url", None)]
+        for pk, shared in shared_rows(actor.organization, restorable).items():
+            course = next(c for c in restorable if c.pk == pk)
+            course.history_load_restore_url = None
+            course.history_load_restore_shared = shared
         from .history_restore_actions import attach_automatic_plans
 
         attach_automatic_plans(actor.organization, candidates)

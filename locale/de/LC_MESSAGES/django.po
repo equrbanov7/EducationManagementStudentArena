@@ -113406,3 +113406,19 @@ msgid ""
 msgstr ""
 "Der Quelllehrplan und die Journaleinträge müssen erneut geprüft werden; es "
 "wurden keine Änderungen vorgenommen."
+
+msgctxt "workload.history_restore"
+msgid "Bu jurnalın yükü çoxqruplu (patok) sətirdədir"
+msgstr "Die Lehrlast dieses Journals steht in einer gruppenübergreifenden (Strom-)Zeile"
+
+msgctxt "workload.history_restore"
+msgid "Ortaq mühazirə bütün qruplara aiddir, ona görə müəllim «Yük bölgüsü»ndə həmin sətirdə təyin edilir. Jurnal qeydləri dəyişmir."
+msgstr "Die gemeinsame Vorlesung gehört allen Gruppen, daher wird die Lehrkraft in dieser Zeile unter «Lastverteilung» zugeordnet. Die Journaleinträge ändern sich nicht."
+
+msgctxt "workload.history_restore"
+msgid "Yük bölgüsündə aç"
+msgstr "In der Lastverteilung öffnen"
+
+msgctxt "workload.history_restore"
+msgid "Patok sətri"
+msgstr "Stromzeile"
