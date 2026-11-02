@@ -26,7 +26,7 @@ text-free schema təsdiqlənmədən plaintext yaratmır; output yeni private fay
 
 ## Syllabus capture pack-ləri
 
-`syllabus-content-packs.yml` mövcud 90/1791 registry-ni 19 fixed pack-də, hər
+`syllabus-content-packs.yml` mövcud 91/1791 registry-ni 19 fixed pack-də, hər
 pack üçün ən çox 5 ardıcıl müstəqil capture ilə oxuyur. Hər çağırış ayrıca
 READ ONLY transaction, köhnə cap və müstəqil cipher saxlayır. Union cap
 artırılmır. Held, quarantine, not_attempted və always-finalizer explicitdir;

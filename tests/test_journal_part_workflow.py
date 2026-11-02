@@ -122,7 +122,9 @@ class JournalPartWorkflowTests(unittest.TestCase):
     def test_input_masks_before_env_and_refuses_selectors_injection(self):
         for parent, actor, valid in [
             ("chair-cells-040", "audit_operator", True),
-            ("chair-cells-070", "audit_operator", True),
+            ("chair-cells-069", "audit_operator", True),
+            ("chair-cells-070", "audit_operator", False),
+            ("chair-cells-091", "audit_operator", False),
             ("chair-cells-042", "audit_operator", False),
             ("$(id)", "audit_operator", False),
             ("chair-cells-043", "bad\nINJECT=x", False),

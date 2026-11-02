@@ -11,7 +11,7 @@ from .chair_cells_export.spec import batch_spec as parent_spec
 from .scoped_snapshot import SnapshotError
 
 FORMAT = "wcu-journal-cells-part/1"
-PARENTS = tuple(f"chair-cells-{number:03}" for number in (40, 43, 53, 64, 65, 66, 67, 68, 69, 70))
+PARENTS = tuple(f"chair-cells-{number:03}" for number in (40, 43, 53, 64, 65, 66, 67, 68, 69))
 PARTS = tuple(f"{parent}-part-{index:03}" for parent in PARENTS for index in (1, 2))
 POLICY = "wcu-chair-cells-reviewed-halves/1"
 

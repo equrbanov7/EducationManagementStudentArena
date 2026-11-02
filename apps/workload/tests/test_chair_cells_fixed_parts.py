@@ -116,7 +116,11 @@ class FixedJournalPartsTests(TransactionTestCase):
         self.parent_pin.stop()
         self.scope_pin.stop()
         try:
-            self.assertEqual(len(parts.PARTS), 2 * len(parts.PARENTS))
+            self.assertEqual((len(parts.PARENTS), len(parts.PARTS)), (9, 18))
+            self.assertEqual(parts.PARENTS, self.scope.PARENTS)
+            self.assertEqual(parts.PARTS, self.scope.PARTS)
+            self.assertEqual(len(batch_spec("chair-cells-070")["offerings"]), 2)
+            self.assertEqual(len(batch_spec("chair-cells-091")["offerings"]), 18)
             for parent in parts.PARENTS:
                 first, sha1, name1 = parts.selection(parent + "-part-001")
                 second, sha2, name2 = parts.selection(parent + "-part-002")
@@ -124,9 +128,19 @@ class FixedJournalPartsTests(TransactionTestCase):
                 self.assertEqual((name1, name2, sha1), (parent, parent, sha2))
                 self.assertEqual(self.scope.selection(parent + "-part-001"), (first, sha1))
                 self.assertEqual(self.scope.selection(parent + "-part-002"), (second, sha2))
-            for name in ("chair-cells-042-part-001", "chair-cells-043", "chair-cells-043-part-003", "$(id)"):
+            for name in (
+                "chair-cells-042-part-001",
+                "chair-cells-043",
+                "chair-cells-043-part-003",
+                "$(id)",
+                "chair-cells-070-part-001",
+                "chair-cells-070-part-002",
+                "chair-cells-091-part-001",
+            ):
                 with self.assertRaisesRegex(SnapshotError, "fixed_journal_part"):
                     parts.selection(name)
+                with self.assertRaisesRegex(ValueError, "fixed_part"):
+                    self.scope.selection(name)
         finally:
             self.parent_pin.start()
             self.scope_pin.start()

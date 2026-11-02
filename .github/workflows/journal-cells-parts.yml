@@ -7,7 +7,7 @@ on:
         type: string
         required: true
       journal_parent:
-        description: "One reviewed held parent:040,043,053,064,065,066,067,068,069,070 (chair-cells-NNN)"
+        description: "One reviewed held parent:040,043,053,064,065,066,067,068,069 (chair-cells-NNN)"
         type: string
         required: true
 permissions:

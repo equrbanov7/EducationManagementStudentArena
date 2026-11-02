@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY_SHA = "52e620563eea6080993111f9e51bf8f0a9f5689115bd3632e0dcb3048b45773d"
-PARENTS = tuple(f"chair-cells-{number:03}" for number in (40, 43, 53, 64, 65, 66, 67, 68, 69, 70))
+PARENTS = tuple(f"chair-cells-{number:03}" for number in (40, 43, 53, 64, 65, 66, 67, 68, 69))
 PARTS = tuple(f"{parent}-part-{index:03}" for parent in PARENTS for index in (1, 2))
 FORMAT = "wcu-journal-cells-part/1"
 POLICY = "wcu-chair-cells-reviewed-halves/1"

@@ -1,13 +1,24 @@
 # Fixed supplementary journal-cell partitions
 
-The primary90-batch registry and its SHA
-`1783da2b28d6a669266d09f7c313ea8a4d1b59a80e76b730f2dcda20a0cc7b87`
-remain unchanged. Primary completion was80/90; the exact held parents are
-040,043,053,064,065,066,067,068,069,070, each with20 roots and the existing
-`history_course_budget_exceeded_split_batch` refusal.
+The current primary registry contains91 batches and1791 unique roots; its SHA is
+`52e620563eea6080993111f9e51bf8f0a9f5689115bd3632e0dcb3048b45773d`.
+The fixed supplementary parent set is040,043,053,064,065,066,067,068,069.
+Each remaining parent must still contain exactly20 roots.
 
-The additive `export_wcu_journal_cells_part` command accepts only20 enumerated
-selectors: `chair-cells-NNN-part-001` and `-002` for those ten parents.
+The additive `export_wcu_journal_cells_part` command accepts only18 enumerated
+selectors: `chair-cells-NNN-part-001` and `-002` for those nine parents.
+Parent070 was split into the complete two-root070 batch and the complete
+18-root091 batch; both remain valid full captures. Neither supports new part
+captures.070-part-001/002 and091-part-001/002 are explicitly rejected; the20-root
+parent guard is retained, and no history limit is increased.
+
+Historical070 ciphertext/raw evidence is retained. Earlier sealed readers paired
+with the old90-batch registry SHA
+`1783da2b28d6a669266d09f7c313ea8a4d1b59a80e76b730f2dcda20a0cc7b87`
+remain the authority for interpreting those old20-root partitions. Do not retag,
+rewrite or count an old070 part as a current two-root070 capture. The historical
+80/90 primary completion number is not the current91-batch completion claim.
+
 Each selects the ordered first10 or second10 roots from the pinned parent.
 There is no arbitrary ID input. The command delegates to the existing `_capture`
 with that exact subset, inside the existing query budget and a fresh PostgreSQL
@@ -55,6 +66,6 @@ fixed deployed head is required. Already verified proofs are retained; uncertain
 POST state is reconciled rather than blindly retried. The global consumer also
 checks overlaps with primary captures, with temporal drift held explicitly.
 One completed pair contributes one logical batch and20 seeds to the existing
-90/1791 denominator. Partial pairs contribute no complete-parent coverage.
+91/1791 denominator. Partial pairs contribute no complete-parent coverage.
 Coverage is pinned current-fall evidence, not all years or newly unregistered
 courses, and never authorizes a data repair.
