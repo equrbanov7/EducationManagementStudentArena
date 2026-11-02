@@ -108,6 +108,7 @@ HOSTS = [
     ("blank_draft_syllabus_restore", "blank-draft-syllabus", "recover_blank_draft_syllabi"),
     ("reviewed_half_pair_hours", "half-pair-hours", "repair_reviewed_half_pair_hours"),
     ("reviewed_farida_slot", "farida-slot", "repair_reviewed_farida_slot"),
+    ("reviewed_solmaz_catalog", "reviewed-solmaz", "repair_reviewed_solmaz_catalog"),
 ]
 
 
@@ -144,3 +145,51 @@ def test_copy_failure_cleans_both_locations_without_management(tmp_path, monkeyp
     assert not (tmp_path / (prefix + "-1-1")).exists()
     assert commands[-1][-2:] == ["--", "/tmp/wcu-" + prefix + "-1-1"]
     assert not any(management in argv or "cp" in argv for argv in commands)
+
+
+def test_exact_solmaz_transport_namespace_matches_host_and_embedded_writer(tmp_path):
+    import ast
+    import re
+
+    host = load("reviewed_solmaz_catalog")
+    path = source(tmp_path)
+    remote = "/tmp/wcu-reviewed-solmaz-41394241699-1/source.json"
+    receipt = dict(uid=1000, mode=0o600, size=len(PAYLOAD), sha256=SHA)
+    with patch.object(
+        transport.subprocess,
+        "run",
+        return_value=SimpleNamespace(returncode=0, stdout=json.dumps(receipt).encode(), stderr=b""),
+    ) as run:
+        assert transport.write_private_source(path, remote, SHA, container=host.CONTAINER) == receipt
+    assert run.call_args.args[0][7] == remote
+    patterns = [
+        n.args[0].value
+        for n in ast.walk(ast.parse(transport.WRITER))
+        if isinstance(n, ast.Call)
+        and isinstance(n.func, ast.Attribute)
+        and n.func.attr == "fullmatch"
+        and isinstance(n.args[0], ast.Constant)
+    ]
+    assert patterns == [transport.PATH_PATTERN]
+    assert re.fullmatch(patterns[0], remote)
+
+
+@pytest.mark.parametrize(
+    "remote",
+    [
+        "/tmp/wcu-reviewed-solmaz-0-1/source.json",
+        "/tmp/wcu-reviewed-solmaz-1-0/source.json",
+        "/tmp/wcu-reviewed-solmaz-123-other/source.json",
+        "/tmp/wcu-reviewed-solmaz-123-1/../source.json",
+        "/tmp/wcu-reviewed-solmaz-123-1/other.json",
+        "/tmp/wcu-reviewed-solmaz-extra-123-1/source.json",
+        "/tmp/wcu-reviewed-pervin-123-1/source.json",
+    ],
+)
+def test_solmaz_transport_does_not_accept_other_scope_or_run_shape(tmp_path, remote):
+    with (
+        patch.object(transport.subprocess, "run") as run,
+        pytest.raises(ValueError, match="fixed_private_source_target_required"),
+    ):
+        transport.write_private_source(source(tmp_path), remote, SHA, container="app-fixture")
+    run.assert_not_called()
