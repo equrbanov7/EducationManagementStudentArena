@@ -2,6 +2,7 @@
 
 from ..constants import RowKind
 from ..models import TeachingTaskRow
+from .history_restore_zero_plan import zero_placeholder_plan
 
 KINDS = ("lecture", "seminar", "lab")
 RELEASED = ("approved", "distributed", "amended")
@@ -38,10 +39,15 @@ def attach_automatic_plans(organization, offerings):
         row = matches[0]
         if {group.pk for group in row.groups.all()} != {course.group_id}:
             continue  # A patok is one teacher allocation, never separate automatic rows.
-        hours = {kind: row.activity_total(kind) for kind in KINDS}
+        assignments = list(row.assignments.all())
+        hours = zero_placeholder_plan(
+            row,
+            course=course,
+            group_ids={course.group_id},
+            assignments=assignments,
+        ) or {kind: row.activity_total(kind) for kind in KINDS}
         if sum(hours.values()) != course.lesson_hours or not sum(hours.values()):
             continue
-        assignments = list(row.assignments.all())
         if any(a.teacher_id not in (None, course.instructor_id) for a in assignments):
             continue
         if any(sum(a.activity == kind for a in assignments) > 1 for kind in KINDS):

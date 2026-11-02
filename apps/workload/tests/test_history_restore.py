@@ -488,3 +488,83 @@ class HistoryRestoreTest(TestCase):
         self.assertContains(response, 'href="#id_reason"')
         with bypass_rls():
             self.assertEqual(TeacherAssignment.objects.count(), 0)
+
+    def zero_placeholder(self):
+        row = make_row(self.task, self.stack, lecture_total=0, seminar_total=0)
+        row.lecture_plan, row.seminar_plan = 45, 30
+        row.union_count = row.subgroup_count = 0
+        row.save(update_fields=["lecture_plan", "seminar_plan", "union_count", "subgroup_count"])
+        return row
+
+    def test_exact_zero_placeholder_restores_same_row_plan_once_and_preserves_journal(self):
+        with bypass_rls():
+            row = self.zero_placeholder()
+            before = self.graph()
+            self.assertEqual(service.previous_plan(self.offering)[0], self.hours)
+            self.offering.journal_is_current_load = False
+            service.attach_actions(self.request(self.teacher, real=self.admin, mode="full"), [self.offering])
+            self.assertEqual(self.offering.history_load_restore_plan["lecture"], 45)
+            result = self.restore()
+            row.refresh_from_db()
+            self.assertEqual(result["row_id"], str(row.pk))
+            self.assertEqual(
+                (row.lecture_total, row.seminar_total, row.union_count, row.subgroup_count), (45, 30, 1, 1)
+            )
+            self.assertEqual(TeachingTaskRow.objects.count(), 1)
+            self.assertEqual(self.graph(), before)
+            self.assertEqual(self.restore()["status"], "already_restored")
+            self.assertEqual(TeacherAssignment.objects.count(), 2)
+
+    def test_zero_placeholder_does_not_expand_positive_or_noncontact_capacity(self):
+        with bypass_rls():
+            row = self.zero_placeholder()
+            for field, value in (("lecture_total", 1), ("consult_hours", 1), ("union_count", 1), ("subgroup_count", 2)):
+                setattr(row, field, value)
+                row.save(update_fields=[field])
+                with self.assertRaises(WorkloadDenied):
+                    self.restore()
+                setattr(row, field, 0)
+                row.save(update_fields=[field])
+            self.assertEqual(TeacherAssignment.objects.count(), 0)
+
+    def test_zero_placeholder_requires_its_own_exact_plan_not_operator_invented_split(self):
+        with bypass_rls():
+            self.zero_placeholder()
+            with self.assertRaises(WorkloadDenied):
+                self.restore(hours={"lecture": 30, "seminar": 45, "lab": 0})
+            self.assertEqual(TeacherAssignment.objects.count(), 0)
+
+    def test_zero_placeholder_capacity_and_academic_graph_roll_back_together(self):
+        original = service.assign_amended
+
+        def corrupt(**kwargs):
+            result = original(**kwargs)
+            LessonMark.objects.filter(lesson=self.lesson).update(score=7)
+            return result
+
+        with bypass_rls():
+            row = self.zero_placeholder()
+            before = self.graph()
+            with patch.object(service, "assign_amended", side_effect=corrupt), self.assertRaises(WorkloadDenied):
+                self.restore()
+            row.refresh_from_db()
+            self.assertEqual((row.lecture_total, row.seminar_total, row.union_count, row.subgroup_count), (0, 0, 0, 0))
+            self.assertEqual(self.graph(), before)
+            self.assertEqual(TeacherAssignment.objects.count(), 0)
+
+    def test_zero_placeholder_any_existing_assignment_blocks_even_noncontact_or_vacancy(self):
+        from types import SimpleNamespace
+
+        from ..services.history_restore_zero_plan import zero_placeholder_plan
+
+        with bypass_rls():
+            row = self.zero_placeholder()
+            for activity, teacher in (("exam", self.other.pk), ("consult", None), ("lecture", self.teacher.pk)):
+                self.assertIsNone(
+                    zero_placeholder_plan(
+                        row,
+                        course=self.offering,
+                        group_ids={self.offering.group_id},
+                        assignments=[SimpleNamespace(activity=activity, teacher_id=teacher, hours=1)],
+                    )
+                )

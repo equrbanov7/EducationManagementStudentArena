@@ -13,6 +13,7 @@ from core.reviewed_graph import digest, graph
 
 from ..constants import AmendmentReason, RowKind, TaskStatus
 from ..models import TeacherAssignment, TeachingTask, TeachingTaskRow
+from .history_restore_zero_plan import zero_placeholder_plan
 from .row_edit import assign_amended, save_row_amended
 from .scoping import WorkloadDenied, ensure_can_distribute, ensure_can_manage, manageable_chairs, resolve_actor
 
@@ -177,14 +178,22 @@ def restore(*, request, offering_id, chair_id, hours, reason, syllabus_id=""):
         "Eyni jurnal üçün başqa və ya bir neçə yük sətri var; bölgüdə uyğunlaşdırın.",
     )
     row = rows[0] if rows else None
+    placeholder_plan = None
     if row is not None:
+        row_groups = set(row.groups.values_list("pk", flat=True))
         _require(
-            set(row.groups.values_list("pk", flat=True)) == {course.group_id},
+            row_groups == {course.group_id},
             "patok",
             "Çoxqruplu yük sətirini yük bölgüsündə bərpa edin.",
         )
+        placeholder_plan = zero_placeholder_plan(
+            row,
+            course=course,
+            group_ids=row_groups,
+            assignments=list(TeacherAssignment.objects.select_for_update().filter(row=row)),
+        )
         _require(
-            all(row.activity_total(kind) == hours[kind] for kind in KINDS),
+            all(row.activity_total(kind) == hours[kind] for kind in KINDS) or placeholder_plan == hours,
             "plan_changed",
             "Mövcud yük sətrinin saatları ilə bərpa saatları uyğun gəlmir.",
         )
@@ -228,6 +237,12 @@ def restore(*, request, offering_id, chair_id, hours, reason, syllabus_id=""):
             data[kind + "_plan"] = hours[kind]
             data[kind + "_total"] = hours[kind]
         row = save_row_amended(task=task, actor=actor, data=data, amend=amend, request=request, sync_offerings=False)
+    if placeholder_plan is not None:
+        data = {kind + "_total": hours[kind] for kind in KINDS}
+        data.update(union_count=int(hours["lecture"] > 0), subgroup_count=int(hours["seminar"] > 0 or hours["lab"] > 0))
+        row = save_row_amended(
+            task=task, row=row, actor=actor, data=data, amend=amend, request=request, sync_offerings=False
+        )
     for kind in KINDS:
         if not hours[kind]:
             continue
@@ -339,7 +354,12 @@ def attach_actions(request, offerings):
 def previous_plan(course):
     rows = list(_matching_rows(course).filter(task__status__in=RELEASED))
     if len(rows) == 1 and set(rows[0].groups.values_list("pk", flat=True)) == {course.group_id}:
-        hours = {kind: rows[0].activity_total(kind) for kind in KINDS}
+        hours = zero_placeholder_plan(
+            rows[0],
+            course=course,
+            group_ids={course.group_id},
+            assignments=list(TeacherAssignment.objects.filter(row=rows[0])),
+        ) or {kind: rows[0].activity_total(kind) for kind in KINDS}
         if sum(hours.values()) == course.lesson_hours:
             return hours, "Mövcud təsdiqli yük sətri: " + str(rows[0].pk)
     sources = approved_restore_sources(course, context_for=syllabus_context)
