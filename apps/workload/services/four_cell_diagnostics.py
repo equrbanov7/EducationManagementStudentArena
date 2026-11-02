@@ -22,6 +22,7 @@ STAGES = {
 }
 CLASSES = {
     "contenterror",
+    "evidencelimit",
     "restoreerror",
     "exception",
     "valueerror",
@@ -221,6 +222,37 @@ GUARDS |= {
     "source_partial_group_geometry_unreviewed",
     "source_topic_or_selfwork_scope",
     "unexpected_cohort_context",
+}
+
+# Exact fixed Source58 reader guards; exception values remain forbidden.
+GUARDS |= {
+    "history_numeric_source_points_required",
+    "history_reference_byte_budget",
+    "source58_active_scoped_superadmin_required",
+    "source58_auth_metadata_budget",
+    "source58_chunk_audit_count_budget",
+    "source58_chunk_identity_invalid",
+    "source58_chunk_incomplete_inventory",
+    "source58_chunk_raw_changed",
+    "source58_chunk_total_budget",
+    "source58_credit_enrollment_closure_depth",
+    "source58_cross_tenant_reference",
+    "source58_dangling_reference",
+    "source58_diagnostic_inventory_budget",
+    "source58_export_byte_budget",
+    "source58_fixed_courses_missing",
+    "source58_fixed_enrollments_missing",
+    "source58_mark_forward_reference_missing",
+    "source58_query_or_time_budget",
+    "source58_readonly_postgresql_required",
+    "source58_readonly_tenant_context_required",
+    "source58_reference_cycle",
+    "source58_reverse_budget",
+    "source58_reverse_depth_budget",
+    "source58_row_budget",
+    "source58_select_only_required",
+    "source58_time_budget",
+    "source58_total_row_or_byte_budget",
 }
 
 PREFIXES = {

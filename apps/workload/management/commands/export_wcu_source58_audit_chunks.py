@@ -2,6 +2,7 @@
 
 from django.core.management.base import BaseCommand, CommandError
 
+from ...services.four_cell_diagnostics import describe, render
 from ...services.source58_audit_diagnostic import capture
 
 
@@ -13,6 +14,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         try:
             sha = capture(options["actor"], options["public_key"], options["output"])
-        except Exception:
+        except Exception as exc:
+            self.stderr.write("four_cell_history_diagnostic: " + render(describe(exc, "capture")))
             raise CommandError("source58_audit_diagnostic_refused") from None
         self.stdout.write("encrypted_sha256=" + sha)

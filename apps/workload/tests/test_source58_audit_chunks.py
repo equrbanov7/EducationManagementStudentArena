@@ -125,7 +125,10 @@ def test_command_redacts_arbitrary_exception_details(capsys):
         with pytest.raises(CommandError, match="^source58_audit_diagnostic_refused$") as error:
             command.Command().handle(actor="operator", public_key="key", output="cipher")
     assert error.value.__suppress_context__
-    assert capsys.readouterr() == ("", "")
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "four_cell_history_diagnostic: stage=capture" in captured.err
+    assert "private-user-and-QB" not in captured.err
 
 
 def test_command_emits_only_cipher_digest(capsys):
@@ -134,3 +137,22 @@ def test_command_emits_only_cipher_digest(capsys):
     with patch.object(command, "capture", return_value="a" * 64):
         command.Command().handle(actor="operator", public_key="key", output="cipher")
     assert capsys.readouterr() == ("encrypted_sha256=" + "a" * 64 + "\n", "")
+
+
+def test_command_emits_known_guard_with_closed_parser_without_private_values(capsys):
+    from django.core.management.base import CommandError
+
+    from apps.workload.management.commands import export_wcu_source58_audit_chunks as command
+    from apps.workload.services.four_cell_diagnostics import parse
+    from apps.workload.services.scoped_snapshot.source58_evidence_rows import EvidenceLimit
+
+    with patch.object(command, "capture", side_effect=EvidenceLimit("source58_diagnostic_inventory_budget")):
+        with pytest.raises(CommandError):
+            command.Command().handle(actor="PRIVATE_ACTOR", public_key="PRIVATE_PATH", output="PRIVATE_OUTPUT")
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert "PRIVATE_" not in captured.err
+    fields = parse(captured.err)
+    assert fields["guard"] == "source58_diagnostic_inventory_budget"
+    assert fields["class"] == "evidencelimit"
+    assert len(captured.err.splitlines()[0].encode()) <= 256
