@@ -1,0 +1,605 @@
+{
+  "keepers": {
+    "33d151a6-f636-4dc7-b380-e8befdd094dc": {
+      "groups": [
+        "e1bba8dc-3d35-486e-a95c-2e43ad6a6e94",
+        "0a1783b0-1f13-41ff-bbeb-51652b68b70d",
+        "10e6920c-a69d-4117-acc9-8b4c8b033962",
+        "0967e0e5-9911-432e-a26e-bc88a76772af"
+      ],
+      "lecture_plan": 15,
+      "lecture_total": 15,
+      "seminar_plan": 15,
+      "seminar_total": 30,
+      "subgroup_count": 2
+    },
+    "877bfa4a-dba6-47d1-83c5-d7b0eec1b2fb": {
+      "groups": [
+        "f488b31c-69a9-44ee-89a2-1f539c0b1538",
+        "b0eb032d-c0f1-45a7-b885-78418c29c107"
+      ],
+      "lecture_plan": 15,
+      "lecture_total": 15,
+      "seminar_plan": 15,
+      "seminar_total": 30,
+      "subgroup_count": 2
+    },
+    "9062ca93-d7af-447e-9aaa-8dbe541b44d1": {
+      "groups": [
+        "822d03b7-0ac2-4bd9-a844-0f00aed1dab1",
+        "d79f349e-ca6b-46c3-bd1b-19f2b9c16f22",
+        "1c50d60d-b18a-4836-bdca-7e778eb21664",
+        "a2cdaed4-fb67-41df-94ad-81e97b7c79da"
+      ],
+      "lecture_plan": 30,
+      "lecture_total": 30,
+      "seminar_plan": 30,
+      "seminar_total": 90,
+      "subgroup_count": 3
+    },
+    "b2725626-e9b6-46f9-875e-94180626c912": {
+      "groups": [
+        "14afed62-6d55-4cdc-b58d-c1407a909859",
+        "cc3dc2da-f694-4674-965f-2857c3fa7ac3"
+      ],
+      "lecture_plan": 30,
+      "lecture_total": 30,
+      "seminar_plan": 30,
+      "seminar_total": 60,
+      "subgroup_count": 2
+    },
+    "cba8016e-07ad-437f-b7fe-68b5c521bf0f": {
+      "groups": [
+        "c82fd28e-6d72-43b7-b420-b1659df422af",
+        "0f1d2f23-0ddb-4dbe-8064-c48d85b1c546"
+      ],
+      "lecture_plan": 15,
+      "lecture_total": 15,
+      "seminar_plan": 15,
+      "seminar_total": 15,
+      "subgroup_count": 1
+    },
+    "f4c1e73f-5174-4032-a9d4-d40c0ac6406b": {
+      "groups": [
+        "9a71e896-c941-435d-88ef-fe51e72d14a5",
+        "5fc85a2c-7ef5-41ad-9846-b207aaf7117f"
+      ],
+      "lecture_plan": 15,
+      "lecture_total": 15,
+      "seminar_plan": 15,
+      "seminar_total": 30,
+      "subgroup_count": 2
+    }
+  },
+  "official_total": {
+    "lecture": 195,
+    "seminar": 375
+  },
+  "organization": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+  "period": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+  "protected_policy": "all current reverse academic graph; no schedule/course/roster/grade/syllabus writes",
+  "required_teacher_hours": 915,
+  "result_teacher_hours": 570,
+  "rows": {
+    "078ccb48-99c9-4b44-a236-e9a3bb999ca2": {
+      "assignments": [
+        {
+          "activity": "lecture",
+          "hours": 8,
+          "id": "2e1ed9ad-aa1e-48c1-9a65-8f43de1eb0a1",
+          "is_hourly_paid": false,
+          "row_id": "078ccb48-99c9-4b44-a236-e9a3bb999ca2",
+          "teacher_id": 7723
+        },
+        {
+          "activity": "seminar",
+          "hours": 7,
+          "id": "e69b4582-b438-4790-a881-e564fc3926a9",
+          "is_hourly_paid": false,
+          "row_id": "078ccb48-99c9-4b44-a236-e9a3bb999ca2",
+          "teacher_id": 7723
+        }
+      ],
+      "groups": [
+        "5fc85a2c-7ef5-41ad-9846-b207aaf7117f",
+        "9a71e896-c941-435d-88ef-fe51e72d14a5"
+      ],
+      "row": {
+        "consult_hours": 0,
+        "credits": "3",
+        "degree_level": "bachelor",
+        "education_form": "eyani",
+        "exam_hours": 0,
+        "groups_text": "635Qrafik, 635İnteryer",
+        "id": "078ccb48-99c9-4b44-a236-e9a3bb999ca2",
+        "lab_plan": 0,
+        "lab_total": 0,
+        "lecture_plan": 8,
+        "lecture_total": 8,
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "postgrad_hours": 0,
+        "practice_production_hours": 0,
+        "practice_research_hours": 0,
+        "row_kind": "teaching",
+        "season": "fall",
+        "seminar_plan": 7,
+        "seminar_total": 7,
+        "specialty_id": "013088a5-ccaf-430b-9b6f-1410228175b7",
+        "student_count": 0,
+        "subgroup_count": 1,
+        "subject_id": "6d3ff61d-d2f8-4757-a1e6-28a09009b86f",
+        "subject_text": "Mülki müdafiə",
+        "task_id": "f9e57565-648f-4365-b533-db04007796d2",
+        "thesis_hours": 0,
+        "total_hours": 15,
+        "union_count": 2
+      }
+    },
+    "3cc161b1-189a-4bec-bfb2-fff6372b4a50": {
+      "assignments": [
+        {
+          "activity": "seminar",
+          "hours": 15,
+          "id": "793c24f2-715c-4e8f-85ee-b6a213a440b3",
+          "is_hourly_paid": false,
+          "row_id": "3cc161b1-189a-4bec-bfb2-fff6372b4a50",
+          "teacher_id": 7723
+        }
+      ],
+      "groups": [
+        "b0eb032d-c0f1-45a7-b885-78418c29c107"
+      ],
+      "row": {
+        "consult_hours": 0,
+        "credits": "3",
+        "degree_level": "bachelor",
+        "education_form": "eyani",
+        "exam_hours": 0,
+        "groups_text": "236 BT",
+        "id": "3cc161b1-189a-4bec-bfb2-fff6372b4a50",
+        "lab_plan": 0,
+        "lab_total": 0,
+        "lecture_plan": 15,
+        "lecture_total": 0,
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "postgrad_hours": 0,
+        "practice_production_hours": 0,
+        "practice_research_hours": 0,
+        "row_kind": "teaching",
+        "season": "fall",
+        "seminar_plan": 15,
+        "seminar_total": 15,
+        "specialty_id": "e3416913-98eb-4986-98fb-61168ae65e3a",
+        "student_count": 0,
+        "subgroup_count": 1,
+        "subject_id": "6d3ff61d-d2f8-4757-a1e6-28a09009b86f",
+        "subject_text": "Mülki müdafiə",
+        "task_id": "f9e57565-648f-4365-b533-db04007796d2",
+        "thesis_hours": 0,
+        "total_hours": 15,
+        "union_count": 0
+      }
+    },
+    "3d260142-e02b-440d-9541-1c4ce5286d8f": {
+      "assignments": [
+        {
+          "activity": "seminar",
+          "hours": 15,
+          "id": "ada23944-a8f0-4203-bdc4-8241e04c8f2d",
+          "is_hourly_paid": false,
+          "row_id": "3d260142-e02b-440d-9541-1c4ce5286d8f",
+          "teacher_id": 7723
+        },
+        {
+          "activity": "lecture",
+          "hours": 15,
+          "id": "c6ffee51-a3c9-4e3d-83e5-ad34df3a093a",
+          "is_hourly_paid": false,
+          "row_id": "3d260142-e02b-440d-9541-1c4ce5286d8f",
+          "teacher_id": 7723
+        }
+      ],
+      "groups": [
+        "5fc85a2c-7ef5-41ad-9846-b207aaf7117f"
+      ],
+      "row": {
+        "consult_hours": 0,
+        "credits": "3",
+        "degree_level": "bachelor",
+        "education_form": "eyani",
+        "exam_hours": 0,
+        "groups_text": "635İnteryer",
+        "id": "3d260142-e02b-440d-9541-1c4ce5286d8f",
+        "lab_plan": 0,
+        "lab_total": 0,
+        "lecture_plan": 15,
+        "lecture_total": 15,
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "postgrad_hours": 0,
+        "practice_production_hours": 0,
+        "practice_research_hours": 0,
+        "row_kind": "teaching",
+        "season": "fall",
+        "seminar_plan": 15,
+        "seminar_total": 15,
+        "specialty_id": "ddd0320b-963c-4d83-91b1-b06f8b6b92b0",
+        "student_count": 0,
+        "subgroup_count": 1,
+        "subject_id": "6d3ff61d-d2f8-4757-a1e6-28a09009b86f",
+        "subject_text": "Mülki müdafiə",
+        "task_id": "f9e57565-648f-4365-b533-db04007796d2",
+        "thesis_hours": 0,
+        "total_hours": 30,
+        "union_count": 1
+      }
+    },
+    "5131ca14-91ee-4c60-b85e-dc1c426b63db": {
+      "assignments": [
+        {
+          "activity": "seminar",
+          "hours": 30,
+          "id": "3b0ed6e2-80a2-4051-8641-07b8ca2410df",
+          "is_hourly_paid": false,
+          "row_id": "5131ca14-91ee-4c60-b85e-dc1c426b63db",
+          "teacher_id": 7723
+        },
+        {
+          "activity": "lecture",
+          "hours": 30,
+          "id": "e9ef3be8-1b4f-4098-84ab-13e215ed0f01",
+          "is_hourly_paid": false,
+          "row_id": "5131ca14-91ee-4c60-b85e-dc1c426b63db",
+          "teacher_id": 7723
+        }
+      ],
+      "groups": [
+        "14afed62-6d55-4cdc-b58d-c1407a909859"
+      ],
+      "row": {
+        "consult_hours": 0,
+        "credits": "6",
+        "degree_level": "bachelor",
+        "education_form": "eyani",
+        "exam_hours": 0,
+        "groups_text": "135TSPX-1",
+        "id": "5131ca14-91ee-4c60-b85e-dc1c426b63db",
+        "lab_plan": 0,
+        "lab_total": 0,
+        "lecture_plan": 30,
+        "lecture_total": 30,
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "postgrad_hours": 0,
+        "practice_production_hours": 0,
+        "practice_research_hours": 0,
+        "row_kind": "teaching",
+        "season": "fall",
+        "seminar_plan": 30,
+        "seminar_total": 30,
+        "specialty_id": "81533d25-bd78-416c-947f-5dbcb28f9bc3",
+        "student_count": 0,
+        "subgroup_count": 1,
+        "subject_id": "a7a2d80a-5140-49ff-ad68-a351c1210759",
+        "subject_text": "Mülki müdafiə və ilkin tibbi yardım",
+        "task_id": "f9e57565-648f-4365-b533-db04007796d2",
+        "thesis_hours": 0,
+        "total_hours": 60,
+        "union_count": 1
+      }
+    },
+    "687f6ead-cfba-4edc-af1b-9727ea23c23d": {
+      "assignments": [
+        {
+          "activity": "lecture",
+          "hours": 15,
+          "id": "4bb15113-5a36-4f8d-a581-f0f72df6dac9",
+          "is_hourly_paid": false,
+          "row_id": "687f6ead-cfba-4edc-af1b-9727ea23c23d",
+          "teacher_id": 7723
+        },
+        {
+          "activity": "seminar",
+          "hours": 15,
+          "id": "90256231-45b0-4675-8975-3593f68fdd8e",
+          "is_hourly_paid": false,
+          "row_id": "687f6ead-cfba-4edc-af1b-9727ea23c23d",
+          "teacher_id": 7723
+        }
+      ],
+      "groups": [
+        "9a71e896-c941-435d-88ef-fe51e72d14a5"
+      ],
+      "row": {
+        "consult_hours": 0,
+        "credits": "3",
+        "degree_level": "bachelor",
+        "education_form": "eyani",
+        "exam_hours": 0,
+        "groups_text": "635Qrafik",
+        "id": "687f6ead-cfba-4edc-af1b-9727ea23c23d",
+        "lab_plan": 0,
+        "lab_total": 0,
+        "lecture_plan": 15,
+        "lecture_total": 15,
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "postgrad_hours": 0,
+        "practice_production_hours": 0,
+        "practice_research_hours": 0,
+        "row_kind": "teaching",
+        "season": "fall",
+        "seminar_plan": 15,
+        "seminar_total": 15,
+        "specialty_id": "013088a5-ccaf-430b-9b6f-1410228175b7",
+        "student_count": 0,
+        "subgroup_count": 1,
+        "subject_id": "6d3ff61d-d2f8-4757-a1e6-28a09009b86f",
+        "subject_text": "Mülki müdafiə",
+        "task_id": "f9e57565-648f-4365-b533-db04007796d2",
+        "thesis_hours": 0,
+        "total_hours": 30,
+        "union_count": 1
+      }
+    },
+    "6c4c6383-043c-4d07-a227-db56c5f5f27e": {
+      "assignments": [
+        {
+          "activity": "lecture",
+          "hours": 15,
+          "id": "372cec01-988f-44fb-afee-40053e86060f",
+          "is_hourly_paid": false,
+          "row_id": "6c4c6383-043c-4d07-a227-db56c5f5f27e",
+          "teacher_id": 7723
+        },
+        {
+          "activity": "seminar",
+          "hours": 15,
+          "id": "8a5806ff-b5ec-4008-a7d8-f1d2f8e9d1a6",
+          "is_hourly_paid": false,
+          "row_id": "6c4c6383-043c-4d07-a227-db56c5f5f27e",
+          "teacher_id": 7723
+        }
+      ],
+      "groups": [
+        "a2823ece-f60e-4d06-8b6b-83552e2baa52"
+      ],
+      "row": {
+        "consult_hours": 0,
+        "credits": "3",
+        "degree_level": "bachelor",
+        "education_form": "eyani",
+        "exam_hours": 0,
+        "groups_text": "135 Si-1",
+        "id": "6c4c6383-043c-4d07-a227-db56c5f5f27e",
+        "lab_plan": 0,
+        "lab_total": 0,
+        "lecture_plan": 15,
+        "lecture_total": 15,
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "postgrad_hours": 0,
+        "practice_production_hours": 0,
+        "practice_research_hours": 0,
+        "row_kind": "teaching",
+        "season": "fall",
+        "seminar_plan": 15,
+        "seminar_total": 15,
+        "specialty_id": "b5c3fefe-7ffe-4478-9bc3-9cd80e43ce48",
+        "student_count": 0,
+        "subgroup_count": 1,
+        "subject_id": "6d3ff61d-d2f8-4757-a1e6-28a09009b86f",
+        "subject_text": "Mülki müdafiə",
+        "task_id": "f9e57565-648f-4365-b533-db04007796d2",
+        "thesis_hours": 0,
+        "total_hours": 30,
+        "union_count": 1
+      }
+    },
+    "7136c10c-dfca-452e-a148-2e4ad6c96c02": {
+      "assignments": [
+        {
+          "activity": "seminar",
+          "hours": 15,
+          "id": "20e4bbaf-cfad-4472-9246-c652760351a2",
+          "is_hourly_paid": false,
+          "row_id": "7136c10c-dfca-452e-a148-2e4ad6c96c02",
+          "teacher_id": 7723
+        },
+        {
+          "activity": "lecture",
+          "hours": 15,
+          "id": "3fac6a11-f7a3-4317-8c7c-919226987f30",
+          "is_hourly_paid": false,
+          "row_id": "7136c10c-dfca-452e-a148-2e4ad6c96c02",
+          "teacher_id": 7723
+        }
+      ],
+      "groups": [
+        "0967e0e5-9911-432e-a26e-bc88a76772af",
+        "10e6920c-a69d-4117-acc9-8b4c8b033962"
+      ],
+      "row": {
+        "consult_hours": 0,
+        "credits": "3",
+        "degree_level": "bachelor",
+        "education_form": "eyani",
+        "exam_hours": 0,
+        "groups_text": "336T1, 336T2",
+        "id": "7136c10c-dfca-452e-a148-2e4ad6c96c02",
+        "lab_plan": 0,
+        "lab_total": 0,
+        "lecture_plan": 15,
+        "lecture_total": 15,
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "postgrad_hours": 0,
+        "practice_production_hours": 0,
+        "practice_research_hours": 0,
+        "row_kind": "teaching",
+        "season": "fall",
+        "seminar_plan": 15,
+        "seminar_total": 15,
+        "specialty_id": "2f1383f2-d8db-450b-85fc-35aebd26b606",
+        "student_count": 0,
+        "subgroup_count": 1,
+        "subject_id": "6d3ff61d-d2f8-4757-a1e6-28a09009b86f",
+        "subject_text": "Mülki müdafiə",
+        "task_id": "f9e57565-648f-4365-b533-db04007796d2",
+        "thesis_hours": 0,
+        "total_hours": 30,
+        "union_count": 2
+      }
+    },
+    "b1ccdaa6-ade4-4b33-be41-9e41d53c585f": {
+      "assignments": [
+        {
+          "activity": "seminar",
+          "hours": 60,
+          "id": "1ad1a61a-65e0-446f-aa9b-1be7d3150572",
+          "is_hourly_paid": false,
+          "row_id": "b1ccdaa6-ade4-4b33-be41-9e41d53c585f",
+          "teacher_id": 7723
+        },
+        {
+          "activity": "lecture",
+          "hours": 30,
+          "id": "39ab247d-a7e7-4ab5-a9fe-d49e39a77101",
+          "is_hourly_paid": false,
+          "row_id": "b1ccdaa6-ade4-4b33-be41-9e41d53c585f",
+          "teacher_id": 7723
+        }
+      ],
+      "groups": [
+        "d79f349e-ca6b-46c3-bd1b-19f2b9c16f22"
+      ],
+      "row": {
+        "consult_hours": 0,
+        "credits": "6",
+        "degree_level": "bachelor",
+        "education_form": "eyani",
+        "exam_hours": 0,
+        "groups_text": "533T2",
+        "id": "b1ccdaa6-ade4-4b33-be41-9e41d53c585f",
+        "lab_plan": 0,
+        "lab_total": 0,
+        "lecture_plan": 30,
+        "lecture_total": 30,
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "postgrad_hours": 0,
+        "practice_production_hours": 0,
+        "practice_research_hours": 0,
+        "row_kind": "teaching",
+        "season": "fall",
+        "seminar_plan": 60,
+        "seminar_total": 60,
+        "specialty_id": "668e4283-7de8-40ae-a7d7-487e856a2a8a",
+        "student_count": 0,
+        "subgroup_count": 1,
+        "subject_id": "a7a2d80a-5140-49ff-ad68-a351c1210759",
+        "subject_text": "Mülki müdafiə və ilkin tibbi yardım",
+        "task_id": "f9e57565-648f-4365-b533-db04007796d2",
+        "thesis_hours": 0,
+        "total_hours": 90,
+        "union_count": 1
+      }
+    },
+    "d816d27e-d943-4f01-8fd2-64814959a542": {
+      "assignments": [
+        {
+          "activity": "seminar",
+          "hours": 15,
+          "id": "0cc364d6-6b01-45f2-882b-8f17bff6353b",
+          "is_hourly_paid": false,
+          "row_id": "d816d27e-d943-4f01-8fd2-64814959a542",
+          "teacher_id": 7723
+        },
+        {
+          "activity": "lecture",
+          "hours": 15,
+          "id": "98b50870-c1d2-43b4-8f18-284a32d1614b",
+          "is_hourly_paid": false,
+          "row_id": "d816d27e-d943-4f01-8fd2-64814959a542",
+          "teacher_id": 7723
+        }
+      ],
+      "groups": [
+        "dd4a2787-69b5-4cb3-848c-4be4c9b440aa"
+      ],
+      "row": {
+        "consult_hours": 0,
+        "credits": "3",
+        "degree_level": "bachelor",
+        "education_form": "eyani",
+        "exam_hours": 0,
+        "groups_text": "135Si-2",
+        "id": "d816d27e-d943-4f01-8fd2-64814959a542",
+        "lab_plan": 0,
+        "lab_total": 0,
+        "lecture_plan": 15,
+        "lecture_total": 15,
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "postgrad_hours": 0,
+        "practice_production_hours": 0,
+        "practice_research_hours": 0,
+        "row_kind": "teaching",
+        "season": "fall",
+        "seminar_plan": 15,
+        "seminar_total": 15,
+        "specialty_id": "b5c3fefe-7ffe-4478-9bc3-9cd80e43ce48",
+        "student_count": 0,
+        "subgroup_count": 1,
+        "subject_id": "6d3ff61d-d2f8-4757-a1e6-28a09009b86f",
+        "subject_text": "Mülki müdafiə",
+        "task_id": "f9e57565-648f-4365-b533-db04007796d2",
+        "thesis_hours": 0,
+        "total_hours": 30,
+        "union_count": 1
+      }
+    },
+    "deb9ca55-09ce-480d-94d5-6b48632cd442": {
+      "assignments": [
+        {
+          "activity": "seminar",
+          "hours": 15,
+          "id": "e698f43d-d591-4617-b84a-a077c09c5882",
+          "is_hourly_paid": false,
+          "row_id": "deb9ca55-09ce-480d-94d5-6b48632cd442",
+          "teacher_id": 7723
+        }
+      ],
+      "groups": [
+        "0a1783b0-1f13-41ff-bbeb-51652b68b70d",
+        "e1bba8dc-3d35-486e-a95c-2e43ad6a6e94"
+      ],
+      "row": {
+        "consult_hours": 0,
+        "credits": "3",
+        "degree_level": "bachelor",
+        "education_form": "eyani",
+        "exam_hours": 0,
+        "groups_text": "336 F1, 336F2",
+        "id": "deb9ca55-09ce-480d-94d5-6b48632cd442",
+        "lab_plan": 0,
+        "lab_total": 0,
+        "lecture_plan": 15,
+        "lecture_total": 0,
+        "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+        "postgrad_hours": 0,
+        "practice_production_hours": 0,
+        "practice_research_hours": 0,
+        "row_kind": "teaching",
+        "season": "fall",
+        "seminar_plan": 15,
+        "seminar_total": 15,
+        "specialty_id": "a664e31d-badf-46b6-9844-1ce4ad167e9d",
+        "student_count": 0,
+        "subgroup_count": 1,
+        "subject_id": "6d3ff61d-d2f8-4757-a1e6-28a09009b86f",
+        "subject_text": "Mülki müdafiə",
+        "task_id": "f9e57565-648f-4365-b533-db04007796d2",
+        "thesis_hours": 0,
+        "total_hours": 15,
+        "union_count": 0
+      }
+    }
+  },
+  "source_sha256": "5e5bb05a993956c0519e0b5fc0e72548391de44b110f8460cb2ed7ca9493314d",
+  "teacher": 7723,
+  "teacher_username": "elsen.emrahov"
+}
