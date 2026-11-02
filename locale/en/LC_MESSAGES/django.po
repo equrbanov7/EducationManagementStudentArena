@@ -112230,3 +112230,39 @@ msgstr "Additional information is awaited from the applicant; the application wi
 msgctxt "applications"
 msgid "Əlavə məlumat gözlənilən müraciət bağlanacaq; həll olunmuş sayılmayacaq."
 msgstr "The application awaiting additional information will be closed; it will not count as resolved."
+
+#: apps/registrar/templates/registrar/journal_own_history.html
+msgid ""
+"Bu fənn üzrə cari dərs yükü təyinatınız yoxdur. Yalnız əvvəl adınıza "
+"keçirilmiş və ya sizin yazdığınız dərslər göstərilir. Şəxsən daxil etdiyiniz"
+" xanalar və adınıza keçirilmiş dərslərdə daxil edən şəxsi məlum olmayan "
+"qeydlər göstərilir. Tarixçə yalnız oxunur."
+msgstr ""
+"You have no current teaching assignment for this subject. Only lessons "
+"previously taught by you or created by you are shown. The cells you entered "
+"and records with an unknown entering author in lessons taught by you are "
+"displayed. History is read-only."
+
+#: apps/registrar/templates/registrar/journal_own_history.html
+msgid "Bu dərsdə görünən bal/davamiyyət qeydi yoxdur."
+msgstr "There are no visible grade or attendance records for this lesson."
+
+#: apps/registrar/templates/registrar/journal_own_history.html
+msgid "Mənbə"
+msgstr "Source"
+
+#: apps/registrar/templates/registrar/journal_own_history.html
+msgid "Öz daxil etdiyiniz qeyd"
+msgstr "Record entered by you"
+
+#: apps/registrar/templates/registrar/journal_own_history.html
+msgid "Daxil edən şəxs məlum deyil"
+msgstr "Entering author unknown"
+
+msgctxt "accounts.dashboard"
+msgid "Tarixçə: cari yük təyinatı yoxdur"
+msgstr "History: no current teaching assignment"
+
+msgctxt "accounts.syllabus"
+msgid "Yeni qaralama saxlanılır"
+msgstr "Saving a new draft"

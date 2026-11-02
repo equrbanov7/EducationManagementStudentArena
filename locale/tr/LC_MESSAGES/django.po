@@ -111616,3 +111616,39 @@ msgstr "Başvuru sahibinden ek bilgi bekleniyor; {n} iş günü içinde yanıt g
 msgctxt "applications"
 msgid "Əlavə məlumat gözlənilən müraciət bağlanacaq; həll olunmuş sayılmayacaq."
 msgstr "Ek bilgi bekleyen başvuru kapatılacak; çözülmüş sayılmayacak."
+
+#: apps/registrar/templates/registrar/journal_own_history.html
+msgid ""
+"Bu fənn üzrə cari dərs yükü təyinatınız yoxdur. Yalnız əvvəl adınıza "
+"keçirilmiş və ya sizin yazdığınız dərslər göstərilir. Şəxsən daxil etdiyiniz"
+" xanalar və adınıza keçirilmiş dərslərdə daxil edən şəxsi məlum olmayan "
+"qeydlər göstərilir. Tarixçə yalnız oxunur."
+msgstr ""
+"Bu ders için güncel ders yükü atamanız yok. Yalnızca daha önce verdiğiniz "
+"veya oluşturduğunuz dersler gösterilir. Girdiğiniz hücreler ve verdiğiniz "
+"derslerde giriş yapanı bilinmeyen kayıtlar görüntülenir. Geçmiş yalnızca "
+"okunabilir."
+
+#: apps/registrar/templates/registrar/journal_own_history.html
+msgid "Bu dərsdə görünən bal/davamiyyət qeydi yoxdur."
+msgstr "Bu ders için görüntülenebilen not veya devam kaydı yok."
+
+#: apps/registrar/templates/registrar/journal_own_history.html
+msgid "Mənbə"
+msgstr "Kaynak"
+
+#: apps/registrar/templates/registrar/journal_own_history.html
+msgid "Öz daxil etdiyiniz qeyd"
+msgstr "Sizin girdiğiniz kayıt"
+
+#: apps/registrar/templates/registrar/journal_own_history.html
+msgid "Daxil edən şəxs məlum deyil"
+msgstr "Giriş yapan kişi bilinmiyor"
+
+msgctxt "accounts.dashboard"
+msgid "Tarixçə: cari yük təyinatı yoxdur"
+msgstr "Geçmiş: güncel ders yükü ataması yok"
+
+msgctxt "accounts.syllabus"
+msgid "Yeni qaralama saxlanılır"
+msgstr "Yeni taslak kaydediliyor"

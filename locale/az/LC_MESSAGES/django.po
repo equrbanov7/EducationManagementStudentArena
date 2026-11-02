@@ -111715,3 +111715,39 @@ msgstr "Müraciət sahibindən əlavə məlumat gözlənilir; {n} iş günü cav
 msgctxt "applications"
 msgid "Əlavə məlumat gözlənilən müraciət bağlanacaq; həll olunmuş sayılmayacaq."
 msgstr "Əlavə məlumat gözlənilən müraciət bağlanacaq; həll olunmuş sayılmayacaq."
+
+#: apps/registrar/templates/registrar/journal_own_history.html
+msgid ""
+"Bu fənn üzrə cari dərs yükü təyinatınız yoxdur. Yalnız əvvəl adınıza "
+"keçirilmiş və ya sizin yazdığınız dərslər göstərilir. Şəxsən daxil etdiyiniz"
+" xanalar və adınıza keçirilmiş dərslərdə daxil edən şəxsi məlum olmayan "
+"qeydlər göstərilir. Tarixçə yalnız oxunur."
+msgstr ""
+"Bu fənn üzrə cari dərs yükü təyinatınız yoxdur. Yalnız əvvəl adınıza "
+"keçirilmiş və ya sizin yazdığınız dərslər göstərilir. Şəxsən daxil etdiyiniz"
+" xanalar və adınıza keçirilmiş dərslərdə daxil edən şəxsi məlum olmayan "
+"qeydlər göstərilir. Tarixçə yalnız oxunur."
+
+#: apps/registrar/templates/registrar/journal_own_history.html
+msgid "Bu dərsdə görünən bal/davamiyyət qeydi yoxdur."
+msgstr "Bu dərsdə görünən bal/davamiyyət qeydi yoxdur."
+
+#: apps/registrar/templates/registrar/journal_own_history.html
+msgid "Mənbə"
+msgstr "Mənbə"
+
+#: apps/registrar/templates/registrar/journal_own_history.html
+msgid "Öz daxil etdiyiniz qeyd"
+msgstr "Öz daxil etdiyiniz qeyd"
+
+#: apps/registrar/templates/registrar/journal_own_history.html
+msgid "Daxil edən şəxs məlum deyil"
+msgstr "Daxil edən şəxs məlum deyil"
+
+msgctxt "accounts.dashboard"
+msgid "Tarixçə: cari yük təyinatı yoxdur"
+msgstr "Tarixçə: cari yük təyinatı yoxdur"
+
+msgctxt "accounts.syllabus"
+msgid "Yeni qaralama saxlanılır"
+msgstr "Yeni qaralama saxlanılır"

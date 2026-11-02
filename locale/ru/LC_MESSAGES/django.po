@@ -112425,3 +112425,39 @@ msgstr "Ожидается дополнительная информация о�
 msgctxt "applications"
 msgid "Əlavə məlumat gözlənilən müraciət bağlanacaq; həll olunmuş sayılmayacaq."
 msgstr "Обращение, ожидающее дополнительной информации, будет закрыто; оно не будет считаться решённым."
+
+#: apps/registrar/templates/registrar/journal_own_history.html
+msgid ""
+"Bu fənn üzrə cari dərs yükü təyinatınız yoxdur. Yalnız əvvəl adınıza "
+"keçirilmiş və ya sizin yazdığınız dərslər göstərilir. Şəxsən daxil etdiyiniz"
+" xanalar və adınıza keçirilmiş dərslərdə daxil edən şəxsi məlum olmayan "
+"qeydlər göstərilir. Tarixçə yalnız oxunur."
+msgstr ""
+"По этому предмету у вас нет текущей учебной нагрузки. Показаны только "
+"занятия, которые вы ранее проводили или создали. Отображаются внесённые вами"
+" ячейки и записи с неизвестным автором ввода на проведённых вами занятиях. "
+"История доступна только для чтения."
+
+#: apps/registrar/templates/registrar/journal_own_history.html
+msgid "Bu dərsdə görünən bal/davamiyyət qeydi yoxdur."
+msgstr "Для этого занятия нет видимых записей об оценках или посещаемости."
+
+#: apps/registrar/templates/registrar/journal_own_history.html
+msgid "Mənbə"
+msgstr "Источник"
+
+#: apps/registrar/templates/registrar/journal_own_history.html
+msgid "Öz daxil etdiyiniz qeyd"
+msgstr "Внесённая вами запись"
+
+#: apps/registrar/templates/registrar/journal_own_history.html
+msgid "Daxil edən şəxs məlum deyil"
+msgstr "Автор ввода неизвестен"
+
+msgctxt "accounts.dashboard"
+msgid "Tarixçə: cari yük təyinatı yoxdur"
+msgstr "История: текущая учебная нагрузка не назначена"
+
+msgctxt "accounts.syllabus"
+msgid "Yeni qaralama saxlanılır"
+msgstr "Сохраняется новый черновик"
