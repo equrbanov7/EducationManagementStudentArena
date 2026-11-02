@@ -320,3 +320,60 @@ class History636PartitionTests(TestCase):
             section.save(update_fields=["data"])
             with self.assertRaisesMessage(CommandError, "history636_approved_body_changed"):
                 self.command(path, sha)
+
+    def full_group_settings_fixture(self):
+        group = self.row_groups[0]
+        settings = {
+            "degree_level": "bachelor",
+            "education_form": "full_time",
+            "sector": "az",
+            "language_sector": "az",
+            "admission_year": 2026,
+            "legacy": {"group_id": 930, "retained": True},
+        }
+        type(group).objects.filter(pk=group.pk).update(settings=settings)
+        spec.PINS["group_pins"][str(group.pk)]["settings"] = {
+            k: settings[k] for k in ("degree_level", "education_form", "sector")
+        }
+        return group, settings
+
+    def test_projected_source_identity_accepts_real_legacy_extras_and_preserves_full_settings(self):
+        group, settings = self.full_group_settings_fixture()
+        self.apply()
+        group.refresh_from_db()
+        self.assertEqual(group.settings, settings)
+
+    def test_each_pinned_group_setting_drift_is_refused(self):
+        group, settings = self.full_group_settings_fixture()
+        for key, wrong in (("degree_level", "master"), ("education_form", "part_time"), ("sector", "en")):
+            with self.subTest(key=key):
+                type(group).objects.filter(pk=group.pk).update(settings={**settings, key: wrong})
+                with self.assertRaisesMessage(RepairError, "history636_group_identity_changed"):
+                    self.execute()
+        type(group).objects.filter(pk=group.pk).update(settings=settings)
+
+    def test_unexported_group_metadata_change_invalidates_reviewed_baseline(self):
+        group, settings = self.full_group_settings_fixture()
+        dry = self.execute()
+        changed = {**settings, "legacy": {**settings["legacy"], "retained": "new legitimate metadata"}}
+        type(group).objects.filter(pk=group.pk).update(settings=changed)
+        with self.assertRaisesMessage(RepairError, "history636_fresh_baseline_required"):
+            self.execute(apply=True, expected_baseline=dry["baseline"])
+        group.refresh_from_db()
+        self.assertEqual(group.settings, changed)
+
+    def test_unexported_group_metadata_is_in_full_post_preservation_guard(self):
+        group, settings = self.full_group_settings_fixture()
+        dry = self.execute()
+        actual_write = repair._write
+
+        def write_then_corrupt(before, org, actor):
+            actual_write(before, org, actor)
+            type(group).objects.filter(pk=group.pk).update(settings={**settings, "unexpected_added_setting": True})
+
+        with patch.object(repair, "_write", side_effect=write_then_corrupt):
+            with self.assertRaisesMessage(RepairError, "history636_full_graph_preservation_failed"):
+                self.execute(apply=True, expected_baseline=dry["baseline"])
+        group.refresh_from_db()
+        self.assertEqual(group.settings, settings)
+        self.assertFalse(type(self.keeper).objects.filter(pk=spec.PINS["new_row"]).exists())

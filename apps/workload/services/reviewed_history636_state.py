@@ -8,6 +8,7 @@ from apps.registrar.public import schedule_lock
 
 from . import reviewed_history636_spec as spec
 from . import reviewed_two_catalog_schema as schema
+from .group_projection import project_group_settings
 from .people import is_assignable_teacher
 from .reviewed_leyla_catalog_graph import bounded, digest, graph, model, require
 from .scoping import ensure_can_distribute, resolve_actor
@@ -69,7 +70,14 @@ def snapshot(org, actor):
         require(is_assignable_teacher(org, task.chair, teacher), "history636_teacher_scope_changed")
     groups = bounded(model("organizations.OrgUnit").objects.filter(organization=org, pk__in=p["groups"]), cap=3)
     require(
-        {g["id"] for g in groups} == set(p["groups"]) and all(same(g, p["group_pins"][g["id"]]) for g in groups),
+        {g["id"] for g in groups} == set(p["groups"])
+        and all(
+            same(
+                {**g, "settings": project_group_settings(g["settings"], canonical_group_ids=p["groups"])},
+                p["group_pins"][g["id"]],
+            )
+            for g in groups
+        ),
         "history636_group_identity_changed",
     )
     rows = bounded(
