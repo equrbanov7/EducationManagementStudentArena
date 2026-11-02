@@ -28,9 +28,7 @@ class Command(BaseCommand):
             raise CommandError("jale_merge_explicit_target_required")
         with rls_worker_atomic(), transaction.atomic(), bypass_rls():
             actor = apps.get_model("auth.User").objects.get(pk=service.ACTOR)
-            organization = apps.get_model("organizations.Organization").objects.get(
-                pk=service.ORG
-            )
+            organization = apps.get_model("organizations.Organization").objects.get(pk=service.ORG)
             apply_rls_request_context(user_id=actor.pk, org_id=organization.pk)
             try:
                 if options["apply"]:
@@ -48,7 +46,5 @@ class Command(BaseCommand):
             descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
             os.fchmod(descriptor, 0o600)
             with os.fdopen(descriptor, "w") as stream:
-                json.dump(
-                    result, stream, ensure_ascii=False, sort_keys=True, default=str
-                )
+                json.dump(result, stream, ensure_ascii=False, sort_keys=True, default=str)
             self.stdout.write("Jalə reviewed report saved; no credentials exported.")

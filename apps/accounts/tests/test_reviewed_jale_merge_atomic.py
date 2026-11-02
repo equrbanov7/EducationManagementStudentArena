@@ -28,12 +28,8 @@ class ReviewedJaleMergeAtomicTests(TransactionTestCase):
             return original(*args, **kwargs)
 
         for scoped in (False, True):
-            with self.subTest(transaction_scoped=scoped), override_settings(
-                RLS_TRANSACTION_SCOPED=scoped
-            ):
-                with TemporaryDirectory() as directory, patch.object(
-                    service, "snapshot", side_effect=snapshot
-                ):
+            with self.subTest(transaction_scoped=scoped), override_settings(RLS_TRANSACTION_SCOPED=scoped):
+                with TemporaryDirectory() as directory, patch.object(service, "snapshot", side_effect=snapshot):
                     report = Path(directory) / "report.json"
                     Command().handle(
                         report=str(report),

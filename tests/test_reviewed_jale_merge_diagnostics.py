@@ -9,9 +9,7 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts/ops"))
-loader = importlib.util.spec_from_file_location(
-    "jale_merge_diagnostics", ROOT / "scripts/ops/reviewed_jale_merge.py"
-)
+loader = importlib.util.spec_from_file_location("jale_merge_diagnostics", ROOT / "scripts/ops/reviewed_jale_merge.py")
 host = importlib.util.module_from_spec(loader)
 loader.loader.exec_module(host)
 
@@ -42,13 +40,14 @@ class JaleMergeDiagnosticTests(TestCase):
             self.assertEqual(host.safe_failure(raw), "reviewed_jale_merge_refused")
 
     def test_failure_is_stopped_before_report_read_or_any_retry(self):
-        with patch.object(host, "verify_head"), patch.object(
-            host.subprocess,
-            "run",
-            return_value=SimpleNamespace(
-                returncode=1, stderr="CommandError: jale_merge_actor_scope\n", stdout=""
-            ),
-        ) as run:
+        with (
+            patch.object(host, "verify_head"),
+            patch.object(
+                host.subprocess,
+                "run",
+                return_value=SimpleNamespace(returncode=1, stderr="CommandError: jale_merge_actor_scope\n", stdout=""),
+            ) as run,
+        ):
             with self.assertRaises(host.NativeRefused) as caught:
                 host.execute(
                     {"apply": "false"},

@@ -49,11 +49,7 @@ def execute(value, env):
         raise ValueError("jale_merge_apply_type")
     apply = apply is True or apply == "true"
     baseline, confirm = value.get("baseline", ""), value.get("confirm", "")
-    if (
-        not isinstance(baseline, str)
-        or baseline
-        and not re.fullmatch(r"[a-f0-9]{64}", baseline)
-    ):
+    if not isinstance(baseline, str) or baseline and not re.fullmatch(r"[a-f0-9]{64}", baseline):
         raise ValueError("jale_merge_baseline_type")
     if apply and (not baseline or confirm != "APPLY") or not apply and confirm:
         raise ValueError("jale_merge_fresh_baseline_confirmation")
@@ -110,16 +106,10 @@ def execute(value, env):
             "soft_deleted_alias",
             "moved_relations",
         }
-        if (
-            not isinstance(data, dict)
-            or not set(data) <= allowed
-            or data.get("canonical") != 7730
-        ):
+        if not isinstance(data, dict) or not set(data) <= allowed or data.get("canonical") != 7730:
             raise ValueError("jale_merge_report_shape")
         output = Path("jale-merge-report.json")
-        output.write_text(
-            json.dumps(data, sort_keys=True, ensure_ascii=False), encoding="utf-8"
-        )
+        output.write_text(json.dumps(data, sort_keys=True, ensure_ascii=False), encoding="utf-8")
         output.chmod(0o600)
         print("reviewed_jale_merge report_ready=1 apply=" + str(int(apply)))
     finally:
