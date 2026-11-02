@@ -1,0 +1,40 @@
+name: Reviewed Nezife fixed scheduled lesson label
+on:
+  workflow_dispatch:
+    inputs:
+      actor:
+        description: "Aktiv təşkilat superadmini"
+        type: string
+        required: true
+      baseline:
+        description: "Tətbiq və geri alma üçün təzə dry-run SHA256"
+        type: string
+        default: ""
+      undo:
+        description: "Yalnız bu düzəlişin əvvəlki tətbiq receipt UUID-si"
+        type: string
+        default: ""
+      apply:
+        description: "Yalnız təsdiqlənmiş1dərsin köhnə cədvəldənkənar nişanı silinir;21xana dəyişmir"
+        type: boolean
+        default: false
+      confirm:
+        description: "Tətbiq və geri alma üçün APPLY"
+        type: string
+        default: ""
+permissions:
+  contents: read
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  reviewed:
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Fixed scheduled lesson label correction with deployed HEAD and fresh baseline
+        run: python3 scripts/ops/reviewed_nezife_label.py
