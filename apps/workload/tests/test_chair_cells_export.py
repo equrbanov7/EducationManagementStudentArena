@@ -89,6 +89,19 @@ class ChairCellsExportTests(TransactionTestCase):
         with self.assertRaisesRegex(SnapshotError, "pinned_batch"):
             batch_spec(str(self.offering.id))
 
+    def test_ilahe_history_seeds_split_without_global_partition_loss(self):
+        selected = batch_spec("chair-cells-070")["offerings"]
+        residual = batch_spec("chair-cells-091")["offerings"]
+        self.assertEqual(
+            {row["id"] for row in selected},
+            {
+                "caad2073-173d-48e1-89fd-3c4405c4b87d",
+                "f1882bc7-c5d0-43ac-ba3f-7ce8c30f4e76",
+            },
+        )
+        self.assertEqual(len(residual), 18)
+        self.assertFalse({row["id"] for row in selected} & {row["id"] for row in residual})
+
     def test_schema_exact_history_ids_timestamps_and_no_auth_data(self):
         before = list(LessonMark.objects.values())
         result = capture(self.actor.username, "chair-cells-001")

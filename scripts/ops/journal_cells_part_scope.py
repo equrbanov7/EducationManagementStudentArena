@@ -9,7 +9,7 @@ from datetime import datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-REGISTRY_SHA = "1783da2b28d6a669266d09f7c313ea8a4d1b59a80e76b730f2dcda20a0cc7b87"
+REGISTRY_SHA = "52e620563eea6080993111f9e51bf8f0a9f5689115bd3632e0dcb3048b45773d"
 PARENTS = tuple(f"chair-cells-{number:03}" for number in (40, 43, 53, 64, 65, 66, 67, 68, 69, 70))
 PARTS = tuple(f"{parent}-part-{index:03}" for parent in PARENTS for index in (1, 2))
 FORMAT = "wcu-journal-cells-part/1"

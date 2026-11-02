@@ -9,7 +9,7 @@ from pathlib import Path
 
 ORG = "526cfa63-4f80-4bba-a7a7-61c8fbb3d918"
 PERIOD = "a4f88744-8d49-4772-84ef-c28a96c3b372"
-REGISTRY_SHA = "1783da2b28d6a669266d09f7c313ea8a4d1b59a80e76b730f2dcda20a0cc7b87"
+REGISTRY_SHA = "52e620563eea6080993111f9e51bf8f0a9f5689115bd3632e0dcb3048b45773d"
 FORMAT = "wcu-syllabus-content/1"
 REGISTRY_PATH = Path(__file__).resolve().parents[2] / "apps/workload/services/chair_cells_export/batches.json"
 MAX_BYTES = 8 * 1024 * 1024

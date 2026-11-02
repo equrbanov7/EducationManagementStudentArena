@@ -41,7 +41,7 @@ class PackTests(unittest.TestCase):
     def test_exact_registry_caps_and_priority(self):
         values = pack.packs()
         flat = [label for group in values.values() for label in group]
-        self.assertEqual((len(values), len(flat), len(set(flat))), (19, 90, 90))
+        self.assertEqual((len(values), len(flat), len(set(flat))), (19, 91, 91))
         self.assertLessEqual(max(map(len, values.values())), 5)
         self.assertEqual(flat[:8], [f"chair-cells-{n:03}" for n in (1, 2, 89, 43, 76, 77, 82, 55)])
         with self.assertRaises(pack.PackError):

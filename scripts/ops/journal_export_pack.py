@@ -12,8 +12,8 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-BATCH_SHA = "1783da2b28d6a669266d09f7c313ea8a4d1b59a80e76b730f2dcda20a0cc7b87"
-PACK_SHA = "30a57f6bf7810672eb2db687e636c6250784d74543b9dee5c9320aba2be0b35b"
+BATCH_SHA = "52e620563eea6080993111f9e51bf8f0a9f5689115bd3632e0dcb3048b45773d"
+PACK_SHA = "51d63053cd85393314f3a36f186af6b8c1255b3b3c004244bfe606412fe72114"
 KEY_SHA = "f21b002d94fdd65fb346e557e6eb85109f60bda3afa8d8c5a2a14e4b9fc922bf"
 MAX_BYTES = 128 * 1024 * 1024
 ERRORS = {
@@ -61,8 +61,8 @@ def packs():
     labels = [batch for group in result.values() for batch in group]
     if (
         list(result) != [f"journal-pack-{n:03}" for n in range(1, 20)]
-        or len(labels) != 90
-        or set(labels) != {f"chair-cells-{n:03}" for n in range(1, 91)}
+        or len(labels) != 91
+        or set(labels) != {f"chair-cells-{n:03}" for n in range(1, 92)}
         or any(not 1 <= len(group) <= 5 for group in result.values())
         or result["journal-pack-001"] != ["chair-cells-001", "chair-cells-002"]
     ):

@@ -1,6 +1,6 @@
 {
   "format": "wcu-journal-export-packs/1",
-  "batch_registry_sha256": "1783da2b28d6a669266d09f7c313ea8a4d1b59a80e76b730f2dcda20a0cc7b87",
+  "batch_registry_sha256": "52e620563eea6080993111f9e51bf8f0a9f5689115bd3632e0dcb3048b45773d",
   "packs": {
     "journal-pack-001": [
       "chair-cells-001",
@@ -128,7 +128,8 @@
     "journal-pack-019": [
       "chair-cells-087",
       "chair-cells-088",
-      "chair-cells-090"
+      "chair-cells-090",
+      "chair-cells-091"
     ]
   }
 }
