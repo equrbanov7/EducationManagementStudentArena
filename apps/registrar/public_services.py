@@ -220,3 +220,8 @@ from .journal_assignment_sources import register_history_restore_actions  # noqa
 from .reviewed_catalog import create_reviewed_subject, exact_title_candidates  # noqa: E402,F401
 
 __all__.append("register_history_restore_actions")
+
+# SYS-1 (2026-11-03): köçürülmüş giriş balını köhnə rəsmi vərəqə bərabərləşdirmək — legacy_import delta fazası.
+from .legacy_entry_alignment import EntryAlignment, align_archive_entries  # noqa: E402,F401
+
+__all__ += ["EntryAlignment", "align_archive_entries"]

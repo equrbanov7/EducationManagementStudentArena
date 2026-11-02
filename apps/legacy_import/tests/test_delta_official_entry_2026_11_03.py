@@ -1,0 +1,353 @@
+"""SYS-1 (2026-11-03): tarixi giriş balı köhnə sistemin RƏSMİ bal vərəqinə (``balvereqi_logs``) bərabərləşdirilir.
+
+Yoxlanılır: vərəq HTML-inin oxunuşu; hədəf qaydası (Yekun − sayılan imtahan, yoxsa çap olunmuş Giriş); vərəq
+cədvəlinin jurnal ailəsinə bağlanması (imtahanla semestr seçimi, qrup dəyişəndə tələbə ilə tutuşdurma, ambiqü);
+faza: dry-run heç nə yazmır, yalnız arxiv xanası dəyişir, keçid/kəsr sayılır, audit sətri yazılır, müəllimin
+yazdığı xanaya toxunulmur, ikinci qaçış 0 yazı, paket adi fazalarla RƏDD olunur.
+"""
+
+import datetime as dt
+from decimal import Decimal
+from unittest import mock
+
+from django.contrib.auth import get_user_model
+from django.test import SimpleTestCase, TestCase
+
+from apps.audit.models import AuditLog
+from apps.legacy_import.services.delta.apply import execute
+from apps.legacy_import.services.delta.official_entry import OfficialEntryPhaseMismatch
+from apps.legacy_import.services.delta.official_entry_extract import JournalIndex
+from apps.legacy_import.services.delta.official_entry_sheets import SheetRow, SheetTable, parse_export, target_entry
+from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
+from apps.registrar.models import (
+    AssessmentComponent,
+    ComponentScore,
+    CourseOffering,
+    Enrollment,
+    FinalGrade,
+    Subject,
+)
+from core.constants import AcademicPeriodType, OrganizationType
+from core.rls import bypass_rls
+
+User = get_user_model()
+D = Decimal
+
+
+def _sheet_row(sid, entry, exam, total, resit="", attendance="9.46 bal"):
+    cell = '<td style="vnd.ms-excel.numberformat:0.0;">{}</td>'
+    return (
+        f'<tr class="user_{sid}"><td>1</td><td>Ad Soyad</td><td>{attendance}</td><td>8</td>'
+        + cell.format("29 &mdash; 0")
+        + f'<td class="total_point_1" id="t_{sid}">{entry}</td>'
+        + cell.format(exam)
+        + cell.format("0 / 0")
+        + f'<td class="a{sid}">{total}</td>'
+        + cell.format(resit)
+        + "<td></td><td></td></tr>"
+    )
+
+
+def _export(rows, *, group=669, subject="Hava və suyun keyfiyyəti ,&amp;ccedil;irklənməsi", teacher="&amp;Uuml;lkər Q"):
+    body = (
+        f'<table data-id="{group}" id="export_table_to_excel_{group}" data-name="234 EKO ing"><thead><tr><td>'
+        f"Müəllim:  {teacher} <br>Fənn:       {subject}<br>Qrup: 234 EKO ing<br></td></tr></thead><tbody>"
+        + "".join(rows)
+        + "<tr><td>Seçilmiş dərs saatı: 75</td></tr></tbody></table>"
+    )
+    # ``balvereqi_logs.data`` HTML-i bir dəfə entity-qaçırılmış saxlayır.
+    return body.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+
+
+class SheetParsingTests(SimpleTestCase):
+    def test_parse_export_reads_group_subject_and_rows(self):
+        tables = parse_export(
+            _export([_sheet_row(7131, 34, 17, 51), _sheet_row(7129, 47, 25, 71, attendance="2 bal  (Kəsr)")])
+        )
+        self.assertEqual(len(tables), 1)
+        table = tables[0]
+        self.assertEqual((table.group_id, table.hours), (669, 75))
+        self.assertEqual(table.subject, "Hava və suyun keyfiyyəti ,çirklənməsi")
+        self.assertEqual(table.teacher, "Ülkər Q")
+        first, second = table.rows
+        self.assertEqual(
+            (first.student_id, first.entry, first.exam, first.total, first.resit), (7131, D(34), D(17), D(51), None)
+        )
+        self.assertFalse(first.attendance_fail)
+        self.assertTrue(second.attendance_fail)
+
+    def test_target_prefers_total_minus_counted_exam(self):
+        self.assertEqual(target_entry({"entry": "34", "exam": "17", "total": "51"}), (D(34), "total"))
+        # Çap olunmuş Giriş yuvarlaqlaşdırma ilə 1 yuxarı: rəsmi yekun 71 qalsın deyə hədəf 46.
+        self.assertEqual(target_entry({"entry": "47", "exam": "25", "total": "71"}), (D(46), "total"))
+        # T.imtahan yekunu izah edir.
+        self.assertEqual(target_entry({"entry": "24", "exam": "15", "total": "51", "resit": "27"}), (D(24), "total"))
+        # T.imtahan = 0 → təkrar imtahan yoxdur.
+        self.assertEqual(target_entry({"entry": "24", "exam": "46", "total": "70", "resit": "0"}), (D(24), "total"))
+
+    def test_target_falls_back_to_printed_entry(self):
+        self.assertEqual(target_entry({"entry": "40", "exam": None, "total": None}), (D(40), "entry"))
+        self.assertEqual(
+            target_entry({"entry": "30", "exam": "15", "total": "45", "concession": "0 / 2"}), (D(30), "total")
+        )
+        self.assertEqual(target_entry({"entry": "30", "exam": "15", "total": "60"}), (D(30), "entry"))
+
+    def test_target_refuses_out_of_range(self):
+        self.assertEqual(target_entry({"entry": "-3", "exam": None, "total": None}), (None, "out_of_range"))
+        self.assertEqual(target_entry({"entry": None}), (None, "no_entry"))
+
+
+def _journal(pk, uniqid, *, semestr, group=669, lesson=1, teacher=1, parent=0, students='["7131"]', added="2026-02-03"):
+    return {
+        "id": pk,
+        "uniqid": uniqid,
+        "parent_id": parent,
+        "lesson_id": lesson,
+        "teacher_id": teacher,
+        "groups_id": f'["{group}"]',
+        "students_id": students,
+        "semestr": semestr,
+        "added_date": f"{added}T10:00:00",
+        "fake": 0,
+        "sonra_sil": 0,
+        "fenn_saati": 75,
+    }
+
+
+EXAM_17 = D(17)
+
+
+def _table(*, group=669, exam=EXAM_17, resit=None, teacher="Ülkər Q"):
+    row = SheetRow(
+        student_id=7131, entry=D(34), exam=exam, total=D(51), resit=resit, concession="0 / 0", attendance_fail=False
+    )
+    return SheetTable(group_id=group, subject="Fizika", teacher=teacher, hours=75, rows=(row,))
+
+
+class JournalMatchingTests(SimpleTestCase):
+    lessons = [{"id": 1, "name": "Fizika"}]
+    workers = [{"id": 1, "first_name": "Ülkər", "last_name": "Q", "father_name": ""}]
+
+    def test_exam_scores_pick_the_autumn_journal_over_a_newer_spring_one(self):
+        journals = [_journal(1, "autumn", semestr=11, added="2025-09-12"), _journal(2, "spring", semestr=12)]
+        finals = [{"journal_uniqid": "autumn", "student_id": 7131, "point": "17"}]
+        index = JournalIndex(journals, self.lessons, self.workers, finals)
+        self.assertEqual(index.choose(_table(), "2026-02-10 12:00:00"), (1, "matched"))
+
+    def test_split_journals_form_one_family(self):
+        journals = [_journal(10, "seminar", semestr=12), _journal(11, "lecture", semestr=12, parent=10, teacher=2)]
+        index = JournalIndex(journals, self.lessons, self.workers, [])
+        root, outcome = index.choose(_table(), "2026-07-06 12:00:00")
+        self.assertEqual((root, outcome), (10, "matched"))
+        self.assertEqual(index.uniqids(root), ["lecture", "seminar"])
+
+    def test_changed_group_matches_by_students(self):
+        index = JournalIndex([_journal(1, "j", semestr=12, group=700)], self.lessons, self.workers, [])
+        self.assertEqual(index.choose(_table(group=669), "2026-07-06 12:00:00"), (1, "matched_by_students"))
+
+    def test_identical_rivals_in_two_semesters_are_ambiguous(self):
+        journals = [_journal(1, "a", semestr=11, added="2025-09-12"), _journal(2, "b", semestr=12, added="2025-09-12")]
+        index = JournalIndex(journals, self.lessons, self.workers, [])
+        self.assertEqual(index.choose(_table(), "2026-07-06 12:00:00"), (None, "ambiguous"))
+
+    def test_unknown_subject_has_no_candidate(self):
+        index = JournalIndex(
+            [_journal(1, "j", semestr=12, lesson=2)], self.lessons + [{"id": 2, "name": "Kimya"}], [], []
+        )
+        self.assertEqual(index.choose(_table(), "2026-07-06 12:00:00"), (None, "no_candidate"))
+
+
+def _row(uniqid, sid, *, entry, exam, total, resit=None, semestr=12):
+    return {
+        "family": 1,
+        "journals": [uniqid],
+        "semestr": semestr,
+        "student_id": sid,
+        "export_id": 1,
+        "export_time": "2026-07-06 12:20:14",
+        "entry": entry,
+        "exam": exam,
+        "total": total,
+        "resit": resit,
+        "concession": "0 / 0",
+        "attendance_fail": False,
+    }
+
+
+def _bundle(rows):
+    empty = (
+        "departments specialities groups subjects workers students journals lesson_dates points excuse_windows "
+        "syllabi lesson_topics"
+    ).split()
+    return {
+        "snapshot": {"sha256": "0" * 64, "full_semesters": [], "phases": ["official_entry"], "official_entry": {}},
+        **{name: [] for name in empty},
+        "periods": [],
+        "official_entries": rows,
+    }
+
+
+class OfficialEntryPhaseTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.actor = User.objects.create_superuser("sys1_actor", "sys1@example.test", "x")
+        with bypass_rls():
+            cls.org = Organization.objects.create(
+                name="Sys1 Univ",
+                slug="sys1-univ",
+                org_type=OrganizationType.UNIVERSITY,
+                owner=cls.actor,
+                status="active",
+                is_active=True,
+            )
+            chair = OrgUnit.objects.create(organization=cls.org, name="Ekologiya", slug="s1-chair", unit_type="chair")
+            period = AcademicPeriod.objects.create(
+                organization=cls.org,
+                name="Yaz",
+                academic_year="2025/2026",
+                period_type=AcademicPeriodType.SEMESTER,
+                start_date=dt.date(2026, 2, 1),
+                end_date=dt.date(2026, 6, 30),
+                is_current=False,
+            )
+            subject = Subject.objects.create(organization=cls.org, code="QKU-1498", name="Hava və su", chair_unit=chair)
+            cls.offering = CourseOffering.objects.create(organization=cls.org, subject=subject, period=period)
+            cls.archive = AssessmentComponent.objects.create(
+                organization=cls.org,
+                offering=cls.offering,
+                name="Davamiyyət və sərbəst iş (arxiv)",
+                kind="generic",
+                max_score=50,
+                order=0,
+            )
+            kollokvium = [
+                AssessmentComponent.objects.create(
+                    organization=cls.org,
+                    offering=cls.offering,
+                    name=f"Kollokvium {i}",
+                    kind="kollokvium",
+                    max_score=10,
+                    order=i,
+                )
+                for i in (1, 2, 3)
+            ]
+            cls.students = {}
+            for sid, archive_score, k_scores, exam in (
+                (7131, "14", (6, 7, 6), "17"),  # 33 + 17 = 50 kəsr → rəsmi 34 + 17 = 51 keçib
+                (7132, "20", (5, 5, 5), "30"),  # artıq rəsmi dəyərdədir (35)
+                (7133, "10", (5, 5, 5), "20"),  # xananı müəllim yazıb → toxunulmur
+                (7135, "14", (6, 7, 6), "17"),  # rəsmi yekun 25 % ilə (34+20=54), yeni sistemdə 25 % yoxdur
+            ):
+                user = User.objects.create_user(
+                    f"s{sid}", f"s{sid}@example.test", "x", first_name="T", last_name=str(sid)
+                )
+                Membership.objects.create(
+                    user=user,
+                    organization=cls.org,
+                    role=cls.org.roles.get(name="student"),
+                    is_primary=True,
+                    is_active=True,
+                )
+                enrollment = Enrollment.objects.create(organization=cls.org, student=user, offering=cls.offering)
+                ComponentScore.objects.create(
+                    organization=cls.org,
+                    component=cls.archive,
+                    enrollment=enrollment,
+                    score=D(archive_score),
+                    entered_by=cls.actor if sid == 7133 else None,
+                )
+                for component, score in zip(kollokvium, k_scores):
+                    ComponentScore.objects.create(
+                        organization=cls.org, component=component, enrollment=enrollment, score=score
+                    )
+                FinalGrade.objects.create(organization=cls.org, enrollment=enrollment, exam_score=D(exam))
+                cls.students[sid] = enrollment
+
+    def _rows(self):
+        return [
+            _row("ZMRpRj5xOW", 7131, entry="34", exam="17", total="51"),
+            _row("ZMRpRj5xOW", 7132, entry="35", exam="30", total="65"),
+            _row("ZMRpRj5xOW", 7133, entry="30", exam="20", total="50"),
+            _row("ZMRpRj5xOW", 7135, entry="34", exam="17", total="54", resit="20"),
+            _row("ZMRpRj5xOW", 9999, entry="30", exam="20", total="50"),  # ledger-də yoxdur
+            _row("ZMRpRj5xOW", 7134, entry="-2", exam=None, total=None),
+        ]
+
+    def _run(self, *, apply, bundle=None, phases=("official_entry",)):
+        ledger = {f"ZMRpRj5xOW:{sid}": str(enrollment.pk) for sid, enrollment in self.students.items()}
+
+        def fake(_organization, entity_type, legacy_pks=None):
+            found = ledger if entity_type == "journal_enrollment" else {}
+            keys = {str(key) for key in legacy_pks or found}
+            return {key: value for key, value in found.items() if key in keys}
+
+        with mock.patch("apps.legacy_import.services.delta.resolve.ledger_map", fake), bypass_rls():
+            return execute(
+                organization=self.org,
+                actor=self.actor,
+                bundle=bundle or _bundle(self._rows()),
+                apply=apply,
+                until=dt.date(2026, 11, 3),
+                tag="delta-sys1",
+                phases=phases,
+            )
+
+    def _archive(self, sid):
+        with bypass_rls():
+            return ComponentScore.objects.get(component=self.archive, enrollment=self.students[sid]).score
+
+    def test_dry_run_counts_but_writes_nothing(self):
+        run = self._run(apply=False)
+        self.assertEqual(run.counters["official_entry.sem12.written"], 1)
+        self.assertEqual(run.counters["official_entry.fail_to_pass"], 1)
+        self.assertEqual(self._archive(7131), D("14"))
+
+    def test_apply_raises_only_the_archive_cell_and_reports(self):
+        run = self._run(apply=True)
+        counters = run.counters
+        self.assertEqual(counters["official_entry.sem12.written"], 1)
+        self.assertEqual(counters["official_entry.sem12.written_from_total"], 1)
+        self.assertEqual(counters["official_entry.sem12.fail_to_pass"], 1)
+        self.assertEqual(counters["official_entry.sem12.same"], 1)
+        self.assertEqual(counters["official_entry.sem12.skip_edited_kept"], 1)
+        self.assertEqual(counters["official_entry.sem12.skip_enrollment_unresolved"], 1)
+        self.assertEqual(counters["official_entry.sem12.skip_out_of_range"], 1)
+        # Yarım düzəliş (giriş düz, 25 % yoxdur) nəticəni rəsmi yekundan uzaqlaşdırardı → yazılmır, siyahıya düşür.
+        self.assertEqual(counters["official_entry.sem12.skip_total_mismatch"], 1)
+        self.assertEqual(self._archive(7135), D("14"))
+        mismatch = [row for row in run.name_rows if row[0] == "official_entry_total_mismatch"]
+        self.assertEqual(len(mismatch), 1)
+        self.assertIn("rəsmi 54", mismatch[0][2])
+        self.assertEqual(self._archive(7131), D("15"))
+        self.assertEqual(self._archive(7132), D("20"))
+        self.assertEqual(self._archive(7133), D("10"))
+        with bypass_rls():
+            kollokvium = ComponentScore.objects.filter(enrollment=self.students[7131], component__kind="kollokvium")
+            self.assertEqual(sorted(cs.score for cs in kollokvium), [D(6), D(6), D(7)])
+            audit = AuditLog.objects.get(resource_type="registrar.grade.component", resource_id=str(self.offering.pk))
+        self.assertEqual(audit.changes[0]["old"], "14")
+        self.assertEqual(audit.changes[0]["new"], "15")
+        self.assertIn("SYS-1", audit.new_values["reason"])
+        flips = [row for row in run.name_rows if row[0] == "official_entry_fail_to_pass"]
+        self.assertEqual(len(flips), 1)
+        self.assertIn("giriş 33→34", flips[0][2])
+        self.assertIn("yekun 50→51", flips[0][2])
+
+    def test_second_run_writes_nothing(self):
+        self._run(apply=True)
+        run = self._run(apply=True)
+        self.assertEqual(run.counters["official_entry.sem12.written"], 0)
+        self.assertEqual(run.counters["official_entry.sem12.same"], 2)
+
+    def test_conflicting_targets_for_one_enrollment_are_skipped(self):
+        rows = [
+            _row("ZMRpRj5xOW", 7131, entry="34", exam="17", total="51"),
+            _row("ZMRpRj5xOW", 7131, entry="36", exam=None, total=None),
+        ]
+        run = self._run(apply=True, bundle=_bundle(rows))
+        self.assertEqual(run.counters["official_entry.sem12.skip_target_conflict"], 1)
+        self.assertEqual(self._archive(7131), D("14"))
+
+    def test_bundle_rejects_other_phases(self):
+        with self.assertRaises(OfficialEntryPhaseMismatch):
+            self._run(apply=False, phases=("official_entry", "lessons"))
