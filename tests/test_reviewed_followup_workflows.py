@@ -26,7 +26,10 @@ def test_fixed_syllabus_registry_and_no_write_inputs():
     name, args = helper.inputs("syllabus", {"actor": "test.admin", "batch": "chair-cells-089"})
     assert name == "export_wcu_syllabus_content"
     assert args == ["--actor", "test.admin", "--batch", "chair-cells-089"]
-    for change in ({"batch": "chair-cells-091"}, {"apply": "true"}, {"actor": "x\n::warning::y"}):
+    name, args = helper.inputs("syllabus", {"actor": "test.admin", "batch": "chair-cells-091"})
+    assert name == "export_wcu_syllabus_content"
+    assert args == ["--actor", "test.admin", "--batch", "chair-cells-091"]
+    for change in ({"batch": "chair-cells-092"}, {"apply": "true"}, {"actor": "x\n::warning::y"}):
         with pytest.raises(ValueError):
             helper.inputs("syllabus", {"actor": "admin", "batch": "chair-cells-001", **change})
 

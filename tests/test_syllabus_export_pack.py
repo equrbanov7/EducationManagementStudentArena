@@ -83,12 +83,15 @@ class PackTests(unittest.TestCase):
     def finalized(self, name="syllabus-pack-001"):
         return pack.finalize(name=name, folder=self.folder, head=HEAD, run_id=42, attempt=1)
 
-    def test_exact_19_packs_90_roots_and_no_new_selectors(self):
+    def test_exact_19_packs_91_batches_1791_roots_and_no_new_selectors(self):
         names = [f"syllabus-pack-{n:03}" for n in range(1, 20)]
         batches = [b for name in names for b in pack.batches(name)]
-        self.assertEqual(len(batches), 90)
-        self.assertEqual(len(set(batches)), 90)
+        self.assertEqual(len(batches), 91)
+        self.assertEqual(len(set(batches)), 91)
         self.assertEqual(sum(pack.roots(b) for b in batches), 1791)
+        self.assertEqual(pack.roots("chair-cells-070"), 2)
+        self.assertEqual(pack.roots("chair-cells-091"), 18)
+        self.assertIn("chair-cells-091", pack.batches("syllabus-pack-019"))
         self.assertTrue(all(1 <= len(pack.batches(name)) <= 5 for name in names))
         self.assertEqual(inputs.validate({"actor": "admin", "pack": names[0]}), ("admin", names[0]))
         for value in [
