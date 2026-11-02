@@ -1,4 +1,4 @@
-{% load i18n ems_ui %}
+{% load i18n l10n ems_ui %}
 {% comment %}«Fənlərim» — bir fənn kartı (kontekst: `row`, bax
 `apps.registrar.student_subjects_context.enrich_subject_rows`).
 
@@ -48,18 +48,18 @@ imtahana buraxılıram? (status badge — rəng + MƏTN, handoff §7) → sillab
         <progress class="msx-bar msx-bar--score" value="{{ j.entry_score }}" max="{{ j.entry_score_max|default:1 }}"
                   aria-label="{% trans 'Giriş balı' context 'profile.subjects' %}"></progress>
     </div>
-    {# ── Davamiyyət: qayıb saatı / icazəli hədd ─────────────────────────────── #}
+    {# ── Davamiyyət: q/b / icazəli q/b (1 q/b = 2 saatlıq dərs; qərar saatla, exam_eligibility.resolve) ── #}
     <div class="msx-metric msx-metric--absence">
         <div class="msx-metric__head">
             <span class="msx-metric__label">{% trans "Qayıb" context "profile.subjects" %}</span>
             <span class="msx-metric__value">
-                <strong>{% if j.eligibility.limit_unit == 'qb_count' %}{{ j.eligibility.absence_count }}{% else %}{{ j.absence_hours|floatformat:"-1" }}{% endif %}</strong> / {% if j.eligibility.limit_unit == 'qb_count' %}{{ j.eligibility.limit_count }}{% else %}{{ j.allowed_absence|floatformat:0 }}{% endif %} {% if j.eligibility.limit_unit == 'qb_count' %}{% trans "Q/b" context "registrar.records" %}{% else %}{% trans "saat" context "profile.subjects" %}{% endif %}
+                <strong>{{ j.eligibility.absence_count|floatformat:"-1" }}</strong>{% if j.eligibility.limit_count is not None %} / {{ j.eligibility.limit_count }}{% endif %} {% trans "Q/b" context "registrar.records" %}
                 {% if row.eligibility.limit_percent %}<span class="msx-metric__hint">({% trans "limit" context "profile.subjects" %} {{ row.eligibility.limit_percent }}%)</span>{% endif %}
             </span>
         </div>
-        {% if j.allowed_absence or j.eligibility.limit_unit == 'qb_count' %}
-        <progress class="msx-bar msx-bar--absence is-{{ row.ui.status }}" value="{% if j.eligibility.limit_unit == 'qb_count' %}{{ j.eligibility.absence_count }}{% else %}{{ j.absence_hours|default:0 }}{% endif %}" max="{% if j.eligibility.limit_unit == 'qb_count' %}{{ j.eligibility.limit_count }}{% else %}{{ j.allowed_absence }}{% endif %}"
-                  aria-label="{% if j.eligibility.limit_unit == 'qb_count' or row.eligibility.limit_unit == 'qb_count' %}{% trans 'Q/b' context 'registrar.records' %}{% else %}{% trans 'Qayıb saatı / icazə verilən limit' context 'profile.subjects' %}{% endif %}"></progress>
+        {% if j.eligibility.limit_count %}
+        <progress class="msx-bar msx-bar--absence is-{{ row.ui.status }}" value="{{ j.eligibility.absence_count|unlocalize }}" max="{{ j.eligibility.limit_count }}"
+                  aria-label="{% trans 'Q/b' context 'registrar.records' %}"></progress>
         {% endif %}
         <p class="msx-metric__foot">{% trans "Keçirilən dərs" context "profile.subjects" %}: <strong>{{ j.lessons_held }}</strong></p>
     </div>
@@ -125,13 +125,13 @@ imtahana buraxılıram? (status badge — rəng + MƏTN, handoff §7) → sillab
         <div class="msx-metric__head">
             <span class="msx-metric__label">{% trans "Qayıb" context "profile.subjects" %}</span>
             <span class="msx-metric__value">
-                <strong>{% if row.eligibility.limit_unit == 'qb_count' %}{{ row.eligibility.absence_count }}{% else %}{{ row.eligibility.absence_hours|floatformat:"-1" }}{% endif %}</strong> / {{ row.eligibility.allowed_hours|floatformat:0 }} {% if row.eligibility.limit_unit == 'qb_count' %}{% trans "Q/b" context "registrar.records" %}{% else %}{% trans "saat" context "profile.subjects" %}{% endif %}
+                <strong>{{ row.eligibility.absence_count|floatformat:"-1" }}</strong>{% if row.eligibility.limit_count is not None %} / {{ row.eligibility.limit_count }}{% endif %} {% trans "Q/b" context "registrar.records" %}
                 {% if row.eligibility.limit_percent %}<span class="msx-metric__hint">({% trans "limit" context "profile.subjects" %} {{ row.eligibility.limit_percent }}%)</span>{% endif %}
             </span>
         </div>
-        {% if row.eligibility.allowed_hours %}
-        <progress class="msx-bar msx-bar--absence is-{{ row.ui.status }}" value="{% if row.eligibility.limit_unit == 'qb_count' %}{{ row.eligibility.absence_count }}{% else %}{{ row.eligibility.absence_hours|default:0 }}{% endif %}" max="{{ row.eligibility.allowed_hours }}"
-                  aria-label="{% if j.eligibility.limit_unit == 'qb_count' or row.eligibility.limit_unit == 'qb_count' %}{% trans 'Q/b' context 'registrar.records' %}{% else %}{% trans 'Qayıb saatı / icazə verilən limit' context 'profile.subjects' %}{% endif %}"></progress>
+        {% if row.eligibility.limit_count %}
+        <progress class="msx-bar msx-bar--absence is-{{ row.ui.status }}" value="{{ row.eligibility.absence_count|unlocalize }}" max="{{ row.eligibility.limit_count }}"
+                  aria-label="{% trans 'Q/b' context 'registrar.records' %}"></progress>
         {% endif %}
     </div>
     {% endif %}

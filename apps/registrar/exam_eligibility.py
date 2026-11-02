@@ -432,8 +432,7 @@ def resolve(
     kimi qəbul edir ki, mövcud canlı davranış dəyişməsin.  Tarixi datada isə
     məsələ öz-özünə bağlanır: ölçülmüş 1,599 ziddiyyətin hamısı donmuş
     dilimlərdədir, orada isə məxrəc heç oxunmur.  Canlı məxrəcin vahidləşdirilməsi
-    AYRICA qərardır (bax modul docstring, 3-cü sərhəd halı: eyni-ölçü məxrəcə
-    keçid 2,176 qərarı dəyişir).
+    AYRICA qərardır (bax modul docstring, 3-cü sərhəd halı: eyni-ölçü məxrəcə keçid 2,176 qərarı dəyişir).
     """
     absent = _as_decimal(absence_hours)
     percent = _as_decimal(limit_percent if limit_percent is not None else DEFAULT_LIMIT_PERCENT)
@@ -489,6 +488,7 @@ def resolve(
         "lesson_hours": lesson_hours,
         "allowed_hours": allowed,
         "limit_percent": limit_percent,
+        **attendance.qb_display(absent, allowed if hours_known else None),  # q/b göstərişi (saat ÷ 2)
         "notice": notice,
         "frozen_badge": FROZEN_BADGE if frozen else None,
     }

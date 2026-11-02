@@ -133,9 +133,9 @@ Bu günün qeydləri də DƏRHAL görünür (sahib 2026-10-15). Azad fənlər (F
     {# ── KPI kartları ───────────────────────────────────────────────────── #}
     <div class="ems-kpis ems-kpis--4 sj-kpis">
         <div class="ems-kpi {% if d.journal.barred %}ems-kpi--accent-danger{% elif d.journal.absence_hours %}ems-kpi--accent-warning{% else %}ems-kpi--accent-success{% endif %}">
-            <div class="ems-kpi__label">{% trans "QAYIB (LİMİT" context "registrar.journal" %} {% if d.journal.eligibility.limit_unit == 'qb_count' %}{{ d.journal.eligibility.limit_count }}{% else %}{{ d.journal.allowed_absence|floatformat:0 }}{% endif %} {% if d.journal.eligibility.limit_unit == 'qb_count' %}{% trans "Q/b" context "registrar.records" %}){% else %}{% trans "SAAT)" context "registrar.journal" %}{% endif %}</div>
-            <div class="ems-kpi__value">{% if d.journal.eligibility.limit_unit == 'qb_count' %}{{ d.journal.eligibility.absence_count }}{% else %}{{ d.journal.absence_hours }}{% endif %}<span class="ems-kpi__unit">{% if d.journal.eligibility.limit_unit == 'qb_count' %}{% trans "Q/b" context "registrar.records" %}{% else %}{% trans "saat" context "registrar.journal" %}{% endif %}</span></div>
-            <progress class="ems-progress{% if d.journal.barred %} ems-progress--danger{% endif %}" value="{% if d.journal.eligibility.limit_unit == 'qb_count' %}{{ d.journal.eligibility.absence_count }}{% else %}{{ d.journal.absence_hours|default:0|unlocalize }}{% endif %}" max="{% if d.journal.eligibility.limit_unit == 'qb_count' %}{{ d.journal.eligibility.limit_count }}{% else %}{{ d.journal.allowed_absence|default:1|unlocalize }}{% endif %}" aria-hidden="true"></progress>
+            <div class="ems-kpi__label">{% trans "QAYIB (LİMİT" context "registrar.journal" %} {{ d.journal.eligibility.limit_count|default_if_none:"—" }} {% trans "Q/b" context "registrar.records" %})</div>
+            <div class="ems-kpi__value">{{ d.journal.eligibility.absence_count|floatformat:"-1" }}<span class="ems-kpi__unit">{% trans "Q/b" context "registrar.records" %}</span></div>
+            <progress class="ems-progress{% if d.journal.barred %} ems-progress--danger{% endif %}" value="{{ d.journal.eligibility.absence_count|default:0|unlocalize }}" max="{{ d.journal.eligibility.limit_count|default:1 }}" aria-hidden="true"></progress>
         </div>
         {% if d.interim.is_midterm %}
         {# 2026/2027-dən: TƏK midterm (0–30; sərbəst iş açıqdırsa 0–20) — orta bal yoxdur, balın özü; şkala komponentin tavanından. #}
@@ -322,7 +322,7 @@ Bu günün qeydləri də DƏRHAL görünür (sahib 2026-10-15). Azad fənlər (F
     {# ── Alt legend + digər fənlər üzrə xəbərdarlıqlar ───────────────────── #}
     <div class="sj-foot">
         <p class="sj-foot__legend">
-            <b class="sjx-att sjx-att--ie">i/e</b> {% trans "iştirak edib" context "registrar.journal" %} · <b class="sjx-att sjx-att--qb">q/b</b> {% trans "qayıb" context "registrar.journal" %} · {% trans "qayıb limiti" context "registrar.journal" %}: {% if d.journal.eligibility.limit_unit == 'qb_count' %}{{ d.journal.eligibility.limit_count }}{% else %}{{ d.journal.allowed_absence|floatformat:0 }}{% endif %} {% if d.journal.eligibility.limit_unit == 'qb_count' %}{% trans "Q/b" context "registrar.records" %}{% else %}{% trans "saat" context "registrar.journal" %}{% endif %}
+            <b class="sjx-att sjx-att--ie">i/e</b> {% trans "iştirak edib" context "registrar.journal" %} · <b class="sjx-att sjx-att--qb">q/b</b> {% trans "qayıb" context "registrar.journal" %} · {% trans "qayıb limiti" context "registrar.journal" %}: {{ d.journal.eligibility.limit_count|default_if_none:"—" }} {% trans "Q/b" context "registrar.records" %}
         </p>
         {% for w in sec.warnings %}
         {% if w.enrollment.id != d.enrollment.id %}
@@ -330,9 +330,9 @@ Bu günün qeydləri də DƏRHAL görünür (sahib 2026-10-15). Azad fənlər (F
             <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
             <div class="ems-banner__body">
             {% if w.journal.barred %}
-            {{ w.subject.name }} {% trans "üzrə qayıb limiti keçilib — imtahana buraxılmırsınız" context "registrar.journal" %} ({% if w.journal.eligibility.limit_unit == 'qb_count' %}{{ w.journal.eligibility.absence_count }}{% else %}{{ w.journal.absence_hours }}{% endif %}/{% if w.journal.eligibility.limit_unit == 'qb_count' %}{{ w.journal.eligibility.limit_count }}{% else %}{{ w.journal.allowed_absence|floatformat:0 }}{% endif %} {% if w.journal.eligibility.limit_unit == 'qb_count' %}{% trans "Q/b" context "registrar.records" %}{% else %}{% trans "saat" context "registrar.journal" %}{% endif %})
+            {{ w.subject.name }} {% trans "üzrə qayıb limiti keçilib — imtahana buraxılmırsınız" context "registrar.journal" %} ({{ w.journal.eligibility.absence_count|floatformat:"-1" }}/{{ w.journal.eligibility.limit_count|default_if_none:"—" }} {% trans "Q/b" context "registrar.records" %})
             {% else %}
-            {{ w.subject.name }} {% trans "üzrə qayıb limitinə yaxınlaşırsınız" context "registrar.journal" %} — {% if w.journal.eligibility.limit_unit == 'qb_count' %}{{ w.journal.eligibility.absence_count }}{% else %}{{ w.journal.absence_hours }}{% endif %}/{% if w.journal.eligibility.limit_unit == 'qb_count' %}{{ w.journal.eligibility.limit_count }}{% else %}{{ w.journal.allowed_absence|floatformat:0 }}{% endif %} {% if w.journal.eligibility.limit_unit == 'qb_count' %}{% trans "Q/b" context "registrar.records" %}{% else %}{% trans "saat" context "registrar.journal" %}{% endif %}
+            {{ w.subject.name }} {% trans "üzrə qayıb limitinə yaxınlaşırsınız" context "registrar.journal" %} — {{ w.journal.eligibility.absence_count|floatformat:"-1" }}/{{ w.journal.eligibility.limit_count|default_if_none:"—" }} {% trans "Q/b" context "registrar.records" %}
             {% endif %}
             </div>
         </div>

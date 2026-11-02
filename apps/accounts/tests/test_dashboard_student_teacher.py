@@ -293,10 +293,11 @@ class StudentDashboardContentTest(DashboardContentBase):
         self.assertEqual(statuses, ["barred", "near", "unknown", "ok", "ok"])
         barred, near = card["rows"][0], card["rows"][1]
         self.assertEqual(barred["title"], "Fənn 2")
-        self.assertEqual(barred["value"], "qayıb 10 / icazə 7,5 saat")
-        self.assertEqual(barred["bar"], {"value": "7.5", "max": "7.5"})
+        # q/b ilə (1 q/b = 2 saat): 10 saat → 5 q/b; icazə 7,5 saat → 3 q/b (aşağı, müəllim qridi kimi).
+        self.assertEqual(barred["value"], "Q/b 5 / 3")
+        self.assertEqual(barred["bar"], {"value": "3", "max": "3"})
         self.assertEqual(barred["status_label"], "Limit keçib — imtahana buraxılmır")
-        self.assertEqual(near["value"], "qayıb 6 / icazə 7,5 saat")
+        self.assertEqual(near["value"], "Q/b 3 / 3")
         self.assertIsNone(card["rows"][2]["bar"])  # dərs saatı yoxdur → zolaq yoxdur
         self.assertEqual(card["tone"], "danger")
         self.assertEqual(
