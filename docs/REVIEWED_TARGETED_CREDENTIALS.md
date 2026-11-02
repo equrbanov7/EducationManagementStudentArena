@@ -1,19 +1,28 @@
 # Müraciətdə istənmiş ilkin parolların məhdud çatdırılması
 
 Bu alət parol istəyən **7 müəllimə** və MR27 üzrə yaradılmış **2 magistr tələbəyə** aiddir. Ayrıca `behruz-one` yalnız7363 Bəhruz Quluzadə Kərimin9622 kodlu aktivləşməmiş hesabıdır.
-`staff-seven`, `magistr-two`, `behruz-one` xaric hədəf qəbul etmir. İstifadəçi adı, dəyişməz istifadəçi ID-si,
+Dördüncü `turkan-one` yalnız11597 / `turkan.aliyeva` / Türkan Aliyeva Asəfin ilkin girişidir.
+`staff-seven`, `magistr-two`, `behruz-one`, `turkan-one` xaric hədəf qəbul etmir. İstifadəçi adı, dəyişməz istifadəçi ID-si,
 ad/soyad/ata adı, təşkilat və aktiv rol tam uyğun gəlməlidir. Magistrlərdə tələbə kodu
 10127/10128, cari 510/6BİEO magistr qrupu və qeydiyyat statusu da yoxlanılır.
 
 Mənbə: magistr/kafedra problem blankları, 27 oktyabr şəxsiyyət müqayisəsi, MR27-in
 30 oktyabr bərpası, 1 noyabr `chair-cells-040-part-002` mapping ledger-i və 2 noyabr canlı RİM
-kartları. Magistr ID-ləri12030/12031 ayrıca canlı RİM-də təsdiqlənib. Vəfa/Türkan ad
-uyğunsuzluğuna görə daxil edilməyib; digər4 giriş şikayəti aktiv hesab diaqnostikasıdır.
+kartları. Magistr ID-ləri12030/12031 ayrıca canlı RİM-də təsdiqlənib. Türkan11597 canlı
+RİM kartında Asəf ata adı və Marketinq və idarəetmə kafedrası ilə təsdiqlənib; köhnə
+worker1028 eyni tam ad və Menecment kafedrasına aiddir. Ramil7099 və Amil11816 daxil
+edilmir. Vəfa Aqil/Azər uyğunsuzluğu açıqdır; onun hesabı bu batch-də yoxdur.
 
 Aktivləşmiş, bloklanmış, arxivdə və silinmiş hesabların parolları dəyişmir. Arxiv və ya
 akademik status bərpa olunmur. `force`, fakültə və sərbəst istifadəçi siyahısı yoxdur.
 Yalnız aktivləşməmiş hesabda mövcud `issue_staff_credentials._issue` ilk-giriş axını
 istifadə edilir: e-poçt/OTP və şəxsi yeni parol yenə tələb olunur.
+
+`turkan-one` daha sərt qorunur: aktiv müəllim üzvlüyü tələb olunur; assistant təkbaşına
+kifayət etmir. Email təsdiqsiz, ilk parol dəyişməsi məcburi, `last_login` və
+`profile_completed_at` boş olmalıdır. Bu sahələr də kilidli baseline-ə daxildir.
+Şəxsi profilini quran və ya daxil olan hesabın parolu bu alətlə rotasiya edilmir.
+Heç bir yeni rol, akademik qeyd, fənn və ya jurnal yaradılmır.
 
 ## İcra
 

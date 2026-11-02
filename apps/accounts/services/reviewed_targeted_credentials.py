@@ -32,6 +32,7 @@ STUDENTS = [
 ]
 BATCHES = {
     "staff-seven": STAFF,
+    "turkan-one": [(11597, "turkan.aliyeva", "Türkan", "Aliyeva", "Asəf")],
     "magistr-two": STUDENTS,
     "behruz-one": [(7363, "behruz.quluzade", "Bəhruz", "Quluzadə", "Kərim", "9622")],
 }
@@ -110,6 +111,15 @@ def _snapshot(batch, organization):
             and permitted
         )
         pending = not (profile.email_verified and not profile.password_change_required)
+        if batch == "turkan-one":
+            # This reviewed unactivated teacher is not a general credential rotation.
+            safe = safe and "teacher" in roles
+            pending = (
+                not profile.email_verified
+                and profile.password_change_required
+                and profile.profile_completed_at is None
+                and user.last_login is None
+            )
         reason = "eligible" if safe and pending else "activated" if safe else "inactive_or_scope"
         result.append(
             dict(
@@ -128,6 +138,8 @@ def _snapshot(batch, organization):
                 verified=profile.email_verified,
                 required=profile.password_change_required,
                 memberships=memberships,
+                last_login=user.last_login,
+                profile_completed_at=profile.profile_completed_at,
                 academic=academic,
                 reason=reason,
             )

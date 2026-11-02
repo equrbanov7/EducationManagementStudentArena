@@ -12,7 +12,7 @@ from journal_export_pack import ROOT, envelope_digest, sha
 from reviewed_followup import CONTAINER, PUBLIC_PEM_SHA, verify_head
 
 PREFIX = "reviewed_targeted_credentials: "
-COUNTS = {"staff-seven": 7, "magistr-two": 2, "behruz-one": 1}
+COUNTS = {"staff-seven": 7, "magistr-two": 2, "behruz-one": 1, "turkan-one": 1}
 HEX = r"[a-f0-9]{64}"
 
 

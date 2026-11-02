@@ -16,7 +16,7 @@ spec.loader.exec_module(op)
 
 
 def test_exact_batches_no_mass_or_force_input():
-    assert op.COUNTS == {"staff-seven": 7, "magistr-two": 2, "behruz-one": 1}
+    assert op.COUNTS == {"staff-seven": 7, "magistr-two": 2, "behruz-one": 1, "turkan-one": 1}
     with pytest.raises(ValueError):
         op.inputs({"actor": "admin", "batch": "all"})
     with pytest.raises(ValueError):
@@ -125,3 +125,26 @@ def test_transport_preserves_preexisting_private_directory(monkeypatch, tmp_path
             dict(GITHUB_RUN_ID="1", GITHUB_RUN_ATTEMPT="1", GITHUB_SHA="a" * 40, RUNNER_TEMP=str(tmp_path)),
         )
     assert sentinel.read_text() == "existing-ciphertext"
+
+
+@pytest.mark.parametrize(
+    "batch,count,review", [("staff-seven", 7, 0), ("magistr-two", 2, 0), ("behruz-one", 1, 1), ("turkan-one", 1, 0)]
+)
+def test_all_exact_batch_protocol_counts(batch, count, review):
+    assert op.inputs({"actor": "admin", "batch": batch}) == ("admin", batch, False, "")
+    raw = {**valid(), "requested": count, "eligible": count, "skipped": 0, "academic_review_required": review}
+    assert op.summary(op.PREFIX + json.dumps(raw), batch=batch, apply=False, baseline="")["requested"] == count
+    raw.update(status="applied", issued=count, encrypted_sha256="b" * 64)
+    assert op.summary(op.PREFIX + json.dumps(raw), batch=batch, apply=True, baseline="a" * 64)["issued"] == count
+    raw["requested"] += 1
+    with pytest.raises(ValueError):
+        op.summary(op.PREFIX + json.dumps(raw), batch=batch, apply=True, baseline="a" * 64)
+
+
+def test_turkan_workflow_and_native_fixed_identity():
+    text = (ROOT / ".github/workflows/reviewed-targeted-credentials.yml").read_text()
+    assert "options: [magistr-two, staff-seven, behruz-one, turkan-one]" in text
+    from apps.accounts.services.reviewed_targeted_credentials import BATCHES
+
+    assert BATCHES["turkan-one"] == [(11597, "turkan.aliyeva", "Türkan", "Aliyeva", "Asəf")]
+    assert not any(pin[0] in (7099, 11816) for pin in BATCHES["turkan-one"])

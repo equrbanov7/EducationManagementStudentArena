@@ -234,3 +234,60 @@ class TargetedPendingTests(TestCase):
             )
             self.assertEqual(applied["issued"], 1)
             self.assertEqual(StudentAcademicRecord.objects.filter(pk=record.pk).values().get(), before)
+
+    def turkan_op(self, **kwargs):
+        pin = [(self.user.pk, self.user.username, "First", "Last", "Father")]
+        with patch.dict(op.BATCHES, {"turkan-one": pin}, clear=True):
+            return op.issue(organization=self.org, actor=self.actor, batch="turkan-one", **kwargs)
+
+    def test_turkan_pending_encrypted_only_and_old_baseline_cannot_rotate_again(self):
+        # Reuse the complete authenticated decrypt, unrelated-user and stale-repeat assertions.
+        with patch.object(self, "run_op", self.turkan_op):
+            self.test_apply_encrypted_csv_only_exact_target_and_stale_repeat_refused()
+
+    def test_turkan_requires_never_personally_configured_account(self):
+        from django.utils import timezone
+
+        changes = [
+            ("email_verified", True),
+            ("password_change_required", False),
+            ("profile_completed_at", timezone.now()),
+        ]
+        for field, value in changes:
+            with self.subTest(field=field):
+                profile = self.user.profile
+                before = getattr(profile, field)
+                setattr(profile, field, value)
+                profile.save(update_fields=[field])
+                self.assertEqual(self.turkan_op()["eligible"], 0)
+                setattr(profile, field, before)
+                profile.save(update_fields=[field])
+        self.user.last_login = timezone.now()
+        self.user.save(update_fields=["last_login"])
+        self.assertEqual(self.turkan_op()["eligible"], 0)
+
+    def test_turkan_personal_activation_after_dry_changes_guard_without_issuance(self):
+        from django.utils import timezone
+
+        dry = self.turkan_op()
+        before = self.user.password
+        self.user.last_login = timezone.now()
+        self.user.save(update_fields=["last_login"])
+        with self.assertRaises(ValueError):
+            self.turkan_op(apply=True, baseline=dry["baseline"], public_key=self.public, output=self.output)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.password, before)
+        self.assertFalse(self.output.exists())
+
+    def test_turkan_teacher_membership_required_assistant_only_not_sufficient(self):
+        from django.apps import apps
+
+        Membership = apps.get_model("organizations.Membership")
+        Membership.objects.filter(user=self.user, organization=self.org).update(is_active=False)
+        activate_member(self.org, self.user, "assistant")
+        self.assertEqual(self.turkan_op()["eligible"], 0)
+
+    def test_turkan_fixed_id_refuses_other_same_name_account(self):
+        pin = [(7099, self.user.username, "First", "Last", "Father")]
+        with patch.dict(op.BATCHES, {"turkan-one": pin}, clear=True), self.assertRaises(ValueError):
+            op.issue(organization=self.org, actor=self.actor, batch="turkan-one")
