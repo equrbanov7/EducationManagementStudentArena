@@ -24,6 +24,9 @@ def collect_jale_account_inventory():
             continue
         model = rel.related_model
         field = rel.field.attname
+        # Export the ORM relation name, not a raw identifier-column label.
+        # In particular, the general snapshot never emits a student_id key/value.
+        relation_name = rel.field.name
         names = {f.name for f in model._meta.concrete_fields}
         scoped = "organization" in names
         shared_auth = model._meta.app_label == "auth"
@@ -36,7 +39,7 @@ def collect_jale_account_inventory():
                 result.append(
                     {
                         "model": model._meta.label,
-                        "field": field,
+                        "field": relation_name,
                         "user_id": teacher,
                         "classification": "tenant_scope_unresolved_no_rows_read",
                     }
@@ -46,7 +49,7 @@ def collect_jale_account_inventory():
             result.append(
                 {
                     "model": model._meta.label,
-                    "field": field,
+                    "field": relation_name,
                     "user_id": teacher,
                     "classification": "tenant_scoped" if scoped else "shared_auth_metadata",
                     "count_or_lower_bound": len(rows),

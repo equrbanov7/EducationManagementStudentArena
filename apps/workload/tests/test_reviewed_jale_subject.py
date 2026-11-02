@@ -1,6 +1,7 @@
 """Real PostgreSQL: retain106cells/15lessons/15enrollments and rebind one subject only."""
 
 import datetime as dt
+import json
 from contextlib import ExitStack
 from decimal import Decimal
 from unittest.mock import patch
@@ -286,10 +287,9 @@ class ReviewedJaleSubjectTests(TestCase):
         courses = next(
             r
             for r in rows
-            if r["model"] == "registrar.CourseOffering"
-            and r["field"] == "instructor_id"
-            and r["user_id"] == self.other.pk
+            if r["model"] == "registrar.CourseOffering" and r["field"] == "instructor" and r["user_id"] == self.other.pk
         )
         self.assertEqual(courses["count_or_lower_bound"], 4)
         self.assertEqual(len(courses["raw_record_sha256"]), 64)
         self.assertTrue(all(not {"password", "phone", "fin", "email"} & row.keys() for row in rows))
+        self.assertNotIn('"student_id"', json.dumps(data, default=str))
