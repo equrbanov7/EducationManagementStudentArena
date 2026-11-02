@@ -17,6 +17,8 @@ from apps.workload.services import reviewed_jale_subject_repair as repair
 from apps.workload.services import reviewed_jale_subject_spec as spec
 from apps.workload.services import reviewed_jale_subject_state as state
 from apps.workload.services.reviewed_leyla_catalog_graph import RepairError
+from apps.workload.services.scoped_snapshot import jale_account_inventory as inventory
+from apps.workload.services.scoped_snapshot import jale_handovers as export
 from apps.workload.tests.factories import TEACHER_PERMS, activate_member, make_org, make_structure
 
 User = get_user_model()
@@ -35,6 +37,7 @@ class ReviewedJaleSubjectTests(TestCase):
         cls.teacher = User.objects.create_user("jale-lifelong-preserved", first_name="Jalə", last_name="Qəniyeva")
         cls.other = User.objects.create_user("jale-separate-preserved", first_name="Jalə", last_name="Qəniyeva")
         activate_member(cls.org, cls.teacher, "teacher", permissions=TEACHER_PERMS)
+        activate_member(cls.org, cls.other, "teacher", permissions=TEACHER_PERMS)
         cls.stack = make_structure(cls.org, code="JS")
         cls.old = Subject.objects.create(organization=cls.org, code="WRONG1797", name="Wrong computer printing")
         cls.new = cls.stack["subject"]
@@ -56,12 +59,21 @@ class ReviewedJaleSubjectTests(TestCase):
                 subject=cls.old if i == 0 else cls.new,
                 period=cls.stack["period"],
                 group=group,
-                instructor=None,
+                instructor=cls.other,
                 lesson_hours=150,
             )
             cls.courses.append(course)
             JournalShare.objects.create(
                 organization=cls.org, offering=course, teacher=cls.teacher, kinds=[], source="legacy"
+            )
+            apps.get_model("registrar.TeachingHandover").objects.create(
+                organization=cls.org,
+                offering=course,
+                from_instructor=None,
+                to_instructor=cls.other,
+                performed_by=cls.actor,
+                reason="MR-000082 canonical account handover; legacy authorship retained",
+                deactivated_share_ids=[],
             )
         enrs = []
         for i in range(15):
@@ -112,6 +124,9 @@ class ReviewedJaleSubjectTests(TestCase):
             "NEW_SUBJECT": str(self.new.pk),
             "TEACHER": self.teacher.pk,
             "SEPARATE_ACCOUNT": self.other.pk,
+            "CURRENT_OWNER": self.other.pk,
+            "HANDOVER_ACTOR": self.actor.pk,
+            "FULL_COUNTS": {"registrar.Enrollment": 15, "registrar.Lesson": 15, "registrar.LessonMark": 106},
             "SOURCE_SYLLABUS": str(self.source.pk),
             "SOURCE_VERSION": str(self.version.pk),
             "SOURCE_BODY_SHA": content_fingerprints({s.section_id: s.data for s in self.version.sections.all()})[
@@ -206,3 +221,75 @@ class ReviewedJaleSubjectTests(TestCase):
             with self.assertRaisesRegex(RepairError, "without_receipt"):
                 self.run_repair()
         self.assertEqual(audit.resource_id, applied["receipt"])
+
+    def test_wrong_owner_and_unrecorded_handover_are_refused(self):
+        CourseOffering.objects.filter(pk=self.courses[0].pk).update(instructor=self.teacher)
+        with self.assertRaisesRegex(RepairError, "course_identity_changed"):
+            self.run_repair()
+        CourseOffering.objects.filter(pk=self.courses[0].pk).update(instructor=self.other)
+        apps.get_model("registrar.TeachingHandover").objects.filter(offering=self.courses[0]).update(
+            reverted_at=timezone.now()
+        )
+        with self.assertRaisesRegex(RepairError, "handover_chain_changed"):
+            self.run_repair()
+
+    def test_handover_history_and_all_original_shares_are_unchanged(self):
+        Handovers = apps.get_model("registrar.TeachingHandover")
+        before = list(Handovers.objects.filter(organization=self.org).order_by("pk").values())
+        shares = list(JournalShare.objects.filter(organization=self.org).order_by("pk").values())
+        dry = self.run_repair()
+        self.run_repair(apply=True, expected_baseline=dry["baseline"])
+        self.assertEqual(before, list(Handovers.objects.filter(organization=self.org).order_by("pk").values()))
+        self.assertEqual(shares, list(JournalShare.objects.filter(organization=self.org).order_by("pk").values()))
+        self.assertTrue(
+            all(
+                c.instructor_id == self.other.pk
+                for c in CourseOffering.objects.filter(pk__in=[c.pk for c in self.courses])
+            )
+        )
+
+    def test_extra_handover_or_whole_family_cell_count_change_stops(self):
+        Handovers = apps.get_model("registrar.TeachingHandover")
+        Handovers.objects.create(
+            organization=self.org,
+            offering=self.courses[0],
+            to_instructor=self.other,
+            performed_by=self.actor,
+            reason="Unexpected additional transfer",
+        )
+        with self.assertRaisesRegex(RepairError, "handover_chain_changed"):
+            self.run_repair()
+
+    def test_readonly_handover_export_has_exact_tenant_and_no_credentials(self):
+        with (
+            patch.object(export, "ORG", str(self.org.pk)),
+            patch.object(export, "OFFERINGS", [str(c.pk) for c in self.courses]),
+            patch.object(export, "TEACHERS", (self.teacher.pk, self.other.pk)),
+        ):
+            data = export.collect_jale_handovers()
+        self.assertEqual(len(data["jale_current_handovers"]), 4)
+        self.assertEqual(len(data["jale_current_journal_shares"]), 4)
+        self.assertEqual(len(data["jale_account_memberships"]), 2)
+        for rows in data.values():
+            self.assertTrue(all(str(row["organization_id"]) == str(self.org.pk) for row in rows))
+            self.assertTrue(all(not {"password", "phone", "fin", "email"} & row.keys() for row in rows))
+        self.assertTrue(all("MR-000082" in row["reason"] for row in data["jale_current_handovers"]))
+
+    def test_pair_inventory_is_opaque_fixed_tenant_and_not_merge_authority(self):
+        with (
+            patch.object(inventory, "ORG", str(self.org.pk)),
+            patch.object(inventory, "TEACHERS", (self.teacher.pk, self.other.pk)),
+        ):
+            data = inventory.collect_jale_account_inventory()
+        self.assertFalse(data["jale_account_inventory_limits"][0]["eligible_for_merge"])
+        rows = data["jale_account_reference_inventory"]
+        courses = next(
+            r
+            for r in rows
+            if r["model"] == "registrar.CourseOffering"
+            and r["field"] == "instructor_id"
+            and r["user_id"] == self.other.pk
+        )
+        self.assertEqual(courses["count_or_lower_bound"], 4)
+        self.assertEqual(len(courses["raw_record_sha256"]), 64)
+        self.assertTrue(all(not {"password", "phone", "fin", "email"} & row.keys() for row in rows))

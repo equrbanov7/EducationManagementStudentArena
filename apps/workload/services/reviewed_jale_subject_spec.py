@@ -8,6 +8,9 @@ OLD_SUBJECT = "e3e63883-9808-4de7-8aad-0b0b6d4f1638"
 NEW_SUBJECT = "2721e9cf-16b9-4bee-bf4d-e48834a76778"
 TEACHER = 8388
 SEPARATE_ACCOUNT = 7730
+CURRENT_OWNER = 7730
+HANDOVER_ACTOR = 8444
+FULL_COUNTS = {"registrar.Enrollment": 55, "registrar.Lesson": 66, "registrar.LessonMark": 616}
 SOURCE_SYLLABUS = "e9e60484-61e1-4bed-a608-0c3249ee474c"
 SOURCE_VERSION = "337215a5-8b91-4d1a-b2d9-518dea55439b"
 SOURCE_BODY_SHA = "7467042c71c304cfcaa4ecd0807b747bd8271fe1b0dc09e01f1ce113cdeee890"
@@ -42,6 +45,8 @@ SAFE_GUARDS = (
     "jale_exact_journal_shares_changed",
     "jale_exact_receipt_required",
     "jale_fixed_course_identity_changed",
+    "jale_current_owner_not_eligible",
+    "jale_exact_handover_chain_changed",
     "jale_fresh_baseline_required",
     "jale_new_subject_collision",
     "jale_own_source_topics_changed",

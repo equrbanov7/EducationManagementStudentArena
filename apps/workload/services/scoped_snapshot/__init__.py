@@ -19,6 +19,8 @@ from core.rls import apply_rls_request_context
 
 from .data import ORG, YEAR, collect
 from .ilahe_references import collect_ilahe_references
+from .jale_account_inventory import collect_jale_account_inventory
+from .jale_handovers import collect_jale_handovers
 from .journal_diagnostics import collect_journal_diagnostics
 from .leyla_references import collect_leyla_references
 from .request_content import collect_request_content
@@ -59,6 +61,8 @@ def capture(username):
         data.update(collect_request_syllabus())
         data.update(collect_leyla_references())
         data.update(collect_ilahe_references())
+        data.update(collect_jale_handovers())
+        data.update(collect_jale_account_inventory())
         data.update(collect_two_catalog_references())
         data.update(collect_vefa_catalog_references())
         data.update(collect_source58_evidence())

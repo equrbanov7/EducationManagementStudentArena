@@ -2,7 +2,7 @@
 
 from django.db.models import Q
 
-from apps.registrar.public import schedule_lock
+from apps.registrar.public import eligible_instructor_user_ids, schedule_lock
 from apps.syllabus.public import content_fingerprints
 
 from . import reviewed_jale_subject_spec as spec
@@ -71,6 +71,29 @@ def _protected(rows):
     return result
 
 
+def _handovers(org):
+    """Require the four already completed canonical handovers, never infer a merge."""
+    rows = bounded(
+        model("registrar.TeachingHandover")._base_manager.filter(organization=org, offering_id__in=spec.OFFERINGS),
+        cap=5,
+    )
+    require(
+        len(rows) == 4
+        and {row["offering_id"] for row in rows} == set(spec.OFFERINGS)
+        and all(
+            row["from_instructor_id"] is None
+            and row["to_instructor_id"] == spec.CURRENT_OWNER
+            and row["performed_by_id"] == spec.HANDOVER_ACTOR
+            and row["reverted_at"] is None
+            and row["reverted_by_id"] is None
+            and row["deactivated_share_ids"] == []
+            for row in rows
+        ),
+        "jale_exact_handover_chain_changed",
+    )
+    return {"count": 4, "sha256": digest(rows)}
+
+
 def snapshot(org):
     schedule_lock.lock_schedule(org.pk, spec.PERIOD)
     courses = bounded(
@@ -86,11 +109,16 @@ def snapshot(org):
             row["subject_id"] == subject
             and row["group_id"] == spec.OFFERINGS[row["id"]]
             and row["period_id"] == spec.PERIOD
-            and row["instructor_id"] is None
+            and row["instructor_id"] == spec.CURRENT_OWNER
             and row["lesson_hours"] == 150
             and row["is_active"],
             "jale_fixed_course_identity_changed",
         )
+    require(
+        spec.CURRENT_OWNER in eligible_instructor_user_ids(organization=org),
+        "jale_current_owner_not_eligible",
+    )
+    handovers = _handovers(org)
     require(
         not model("registrar.CourseOffering")
         ._base_manager.filter(organization=org, subject_id=spec.NEW_SUBJECT, group_id=spec.GROUP, period_id=spec.PERIOD)
@@ -137,6 +165,8 @@ def snapshot(org):
     )
     account_state = {"users": user_hashes, "profiles": digest(profiles), "memberships": digest(memberships)}
     protected_graph = graph(spec.ORG, {"registrar.CourseOffering": set(spec.OFFERINGS)})
+    for label, count in spec.FULL_COUNTS.items():
+        require(len(protected_graph.get(label, [])) == count, "jale_protected_counts_changed")
     root_graph = graph(spec.ORG, {"registrar.CourseOffering": {spec.TARGET}})
     for label, count in spec.COUNTS.items():
         require(len(root_graph.get(label, [])) == count, "jale_protected_counts_changed")
@@ -165,6 +195,7 @@ def snapshot(org):
         "accounts": account_state,
         "bridge": _bridge(org),
         "source": _source_body(org),
+        "current_owner_handovers": handovers,
         "academic": _protected(protected_graph),
         "soft_history": {label: {"count": len(rows), "sha256": digest(rows)} for label, rows in soft.items()},
     }

@@ -1,0 +1,38 @@
+name: Reviewed Jale canonical identity consolidation
+on:
+  workflow_dispatch:
+    inputs:
+      baseline:
+        description: "Təzə dry-run hesabatının SHA256-i"
+        type: string
+        default: ""
+      apply:
+        description: "Yalnız təsdiqlənmiş8388→7730; tarixçə və worker949 qorunur"
+        type: boolean
+        default: false
+      confirm:
+        description: "Tətbiq üçün APPLY"
+        type: string
+        default: ""
+permissions:
+  contents: read
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  reviewed:
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Fixed identity merge guarded by deployed HEAD and exhaustive fresh census
+        run: python3 scripts/ops/reviewed_jale_merge.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: reviewed-jale-merge-${{ github.run_id }}-${{ github.run_attempt }}
+          path: jale-merge-report.json
+          retention-days: 3
+          if-no-files-found: error
