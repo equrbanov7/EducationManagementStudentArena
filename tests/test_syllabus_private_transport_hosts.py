@@ -16,7 +16,7 @@ import pytest
 
 OPS = Path(__file__).resolve().parents[1] / "scripts/ops"
 sys.path.insert(0, str(OPS))
-import private_container_source as transport
+import private_container_source as transport  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
