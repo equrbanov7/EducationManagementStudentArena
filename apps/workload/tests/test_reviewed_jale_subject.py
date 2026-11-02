@@ -17,7 +17,7 @@ from apps.workload.services import reviewed_ilahe_subject_state as actor_state
 from apps.workload.services import reviewed_jale_subject_repair as repair
 from apps.workload.services import reviewed_jale_subject_spec as spec
 from apps.workload.services import reviewed_jale_subject_state as state
-from apps.workload.services.reviewed_leyla_catalog_graph import RepairError
+from apps.workload.services.reviewed_leyla_catalog_graph import RepairError, digest
 from apps.workload.services.scoped_snapshot import jale_account_inventory as inventory
 from apps.workload.services.scoped_snapshot import jale_handovers as export
 from apps.workload.tests.factories import TEACHER_PERMS, activate_member, make_org, make_structure
@@ -127,6 +127,11 @@ class ReviewedJaleSubjectTests(TestCase):
             "SEPARATE_ACCOUNT": self.other.pk,
             "CURRENT_OWNER": self.other.pk,
             "HANDOVER_ACTOR": self.actor.pk,
+            "HANDOVER_IDS": {
+                str(row.offering_id): str(row.pk)
+                for row in apps.get_model("registrar.TeachingHandover").objects.filter(organization=self.org)
+            },
+            "HANDOVER_REASON_SHA256": digest("MR-000082 canonical account handover; legacy authorship retained"),
             "FULL_COUNTS": {"registrar.Enrollment": 15, "registrar.Lesson": 15, "registrar.LessonMark": 106},
             "SOURCE_SYLLABUS": str(self.source.pk),
             "SOURCE_VERSION": str(self.version.pk),
@@ -231,6 +236,20 @@ class ReviewedJaleSubjectTests(TestCase):
         apps.get_model("registrar.TeachingHandover").objects.filter(offering=self.courses[0]).update(
             reverted_at=timezone.now()
         )
+        with self.assertRaisesRegex(RepairError, "handover_chain_changed"):
+            self.run_repair()
+
+    def test_exact_handover_actor_id_and_reason_are_pinned(self):
+        Handovers = apps.get_model("registrar.TeachingHandover")
+        target = Handovers.objects.get(offering=self.courses[0])
+        Handovers.objects.filter(pk=target.pk).update(performed_by=self.teacher)
+        with self.assertRaisesRegex(RepairError, "handover_chain_changed"):
+            self.run_repair()
+        Handovers.objects.filter(pk=target.pk).update(performed_by=self.actor)
+        with patch.object(spec, "HANDOVER_IDS", {**spec.HANDOVER_IDS, str(target.offering_id): "wrong-event"}):
+            with self.assertRaisesRegex(RepairError, "handover_chain_changed"):
+                self.run_repair()
+        Handovers.objects.filter(pk=target.pk).update(reason="Unreviewed replacement reason")
         with self.assertRaisesRegex(RepairError, "handover_chain_changed"):
             self.run_repair()
 

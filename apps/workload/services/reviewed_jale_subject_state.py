@@ -81,7 +81,9 @@ def _handovers(org):
         len(rows) == 4
         and {row["offering_id"] for row in rows} == set(spec.OFFERINGS)
         and all(
-            row["from_instructor_id"] is None
+            row["id"] == spec.HANDOVER_IDS.get(row["offering_id"])
+            and digest(row["reason"]) == spec.HANDOVER_REASON_SHA256
+            and row["from_instructor_id"] is None
             and row["to_instructor_id"] == spec.CURRENT_OWNER
             and row["performed_by_id"] == spec.HANDOVER_ACTOR
             and row["reverted_at"] is None
