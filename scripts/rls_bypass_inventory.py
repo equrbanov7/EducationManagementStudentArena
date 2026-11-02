@@ -47,6 +47,16 @@ CATEGORY_RULES = (
     ("apps/exams/views/student/final_center.py", "B", "final mərkəzi PIN axını"),
     ("apps/exams/services/exam_center_gate.py", "B", "imtahan mərkəzi qapısı"),
     ("apps/exams/tasks.py", "D", "Celery (sorğu konteksti yoxdur; job sətri org FK-lıdır)"),
+    (
+        "apps/applications/tasks.py",
+        "D",
+        "saatlıq cavabsız sorğu bağlanması (rls_worker_atomic; kilidli sətrin öz tenantı)",
+    ),
+    (
+        "apps/applications/management/commands/close_stale_waiting_info.py",
+        "C",
+        "idarə əmri (ops konteksti; istəyə bağlı --org, kilidli sətrin öz tenantı)",
+    ),
     # 2026-10-21: sınaq imtahanının silinməsi — --org + DƏQİQ --slug + --expect-title, defolt dry-run, prod kill-switch.
     (
         "apps/exams/management/commands/purge_trial_exam.py",

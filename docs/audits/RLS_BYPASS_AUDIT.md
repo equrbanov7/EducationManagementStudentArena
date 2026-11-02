@@ -11,6 +11,17 @@ görür. Hər istifadə potensial cross-tenant sızıntı nöqtəsidir. Kod baza
 **303 çağırış / 181 fayl** var (test faylları xaric; 2026-10-23, skriptlə sayılıb; CI qapısı `core/tests/test_secaudit_2026_10_07_rls_bypass_inventory.py` — aşağıya bax). Bu sənəd onları kateqoriyalaşdırır
 ki, gələcəkdə hər biri qəsdən və əsaslandırılmış qalsın.
 
+## 2026-11-02: cavabsız müraciətlərin bağlanması
+
+`apps/applications/tasks.py` D kateqoriyalı saatlıq Celery işidir;
+`apps/applications/management/commands/close_stale_waiting_info.py` isə C
+kateqoriyalı ops əmridir. Hər ikisi `rls_worker_atomic()` daxilində işləyir.
+HTTP istifadəçisinə bypass verilmir. Əmr `--org` veriləndə yalnız həmin
+təşkilatı seçir; saatlıq iş bütün təşkilatların cavabsız sorğularını emal edir.
+Xidmət hər müraciəti `(pk, organization_id)` ilə kilidləyib statusu,
+silinməni, cavab tarixçəsini və təşkilatın iş günü təqvimini yenidən yoxlayır.
+Yazı, hadisə və bildiriş eyni müraciətin tenantına bağlı qalır.
+
 ## Sayım (fayl üzrə, test xaric) — 2026-10-23 yeniləməsi
 
 > **Mənbə:** `venv/bin/python scripts/rls_bypass_inventory.py --markdown` — cədvəl
