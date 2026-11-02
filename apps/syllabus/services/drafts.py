@@ -138,6 +138,28 @@ def section_data_map(version) -> dict:
     return {row.section_id: (row.data or {}) for row in version.sections.all()}
 
 
+def completion_report(version, organization=None):
+    """Tamamlanma hesabatı — redaktor, göndərmə və keş EYNİ qaydanı oxusun deyə tək giriş.
+
+    MR-000143: bal bölgüsü (``midterm``/``project``) SİSTEMİNDİR — ``save_section`` gələn dəyəri
+    hər halda cari standartla əvəzləyir, redaktorda onun inputu yoxdur, xülasə «100 bal» göstərir.
+    Köçürülmüş versiyanın saxlanan 0/0 cütü ona görə «40 bal paylanmayıb» kimi oxunmamalıdır:
+    yoxlamaya ``_inherited_data``-nın qurduğu (cari qaydaya uyğun) bölgü verilir; data YAZILMIR.
+    """
+    organization = organization or version.organization
+    rule = rule_for_version(version, organization)
+    section_map = section_data_map(version)
+    assess = SectionKey.ASSESS.value
+    section_map[assess] = _inherited_data(assess, section_map, organization, selfwork=rule.selfwork)
+    return completion_rules.evaluate(
+        section_map,
+        version.plan_hours or {},
+        assessment_weights(organization, selfwork=rule.selfwork),
+        selfwork=rule.selfwork,
+        accepted_splits=standard_splits(organization),
+    )
+
+
 def recompute_completion(version, *, persist: bool = True):
     """Biznes qaydalarına görə tamamlanmanı yenidən hesablayır.
 
@@ -146,15 +168,7 @@ def recompute_completion(version, *, persist: bool = True):
     :mod:`apps.syllabus.completion`-dır. Qayda cari RİM tənzimləməsidir — semestrdən asılı
     deyil (sahib 2026-10-10/11: sərbəst işsiz qaydada ``self`` faizə daxil deyil, keşi toxunulmur).
     """
-    organization = version.organization
-    rule = rule_for_version(version, organization)
-    report = completion_rules.evaluate(
-        section_data_map(version),
-        version.plan_hours or {},
-        assessment_weights(organization, selfwork=rule.selfwork),
-        selfwork=rule.selfwork,
-        accepted_splits=standard_splits(organization),
-    )
+    report = completion_report(version)
     if persist:
         for row in version.sections.all():
             if row.section_id not in report.sections:
@@ -563,6 +577,7 @@ __all__ = [
     "SectionConflict",
     "assess_split_is_valid",
     "blank_section_data",
+    "completion_report",
     "create_draft",
     "create_next_version",
     "default_assess_data",

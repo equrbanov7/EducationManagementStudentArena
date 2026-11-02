@@ -192,22 +192,25 @@ def test_a_partial_assessment_payload_still_lands_on_the_standard(world):
     assert (data["midterm"], data["project"]) == (20, 10)
 
 
-def test_an_unallocated_split_blocks_submission(world):
+def test_a_stored_unallocated_split_does_not_block_submission(world):
+    """MR-000143: bal bölgüsü SİSTEMİNDİR (sahib 2026-09-20) — müəllimin onu dəyişən inputu yoxdur.
+
+    Köçürmənin yazdığı 0/0 cütü tamamlanmanı bağlamamalıdır (əvvəl «40 bal tam paylanmayıb» qapısı
+    müəllimi düzəldə bilmədiyi xəbərdarlıqla saxlayırdı); yoxlama cari qaydanın standartını oxuyur,
+    saxlanan data isə toxunulmur."""
     _syllabus, version, actor = _draft(world)
     data = complete_section_data()
     _fill(version, actor, data)
     assert version.completion_percent == 100
-    # Bölgünü DOMEN qatından pozuruq (HTTP səthi buna icazə vermir) — məqsəd
-    # tamamlanma qaydasının qapını bağladığını göstərməkdir.
     row = version.sections.get(section_id=SectionKey.ASSESS.value)
     row.data = {"midterm": 0, "project": 0}
     row.save(update_fields=["data"])
-    services.recompute_completion(version)
+    report = services.recompute_completion(version)
     version.refresh_from_db()
-    assert version.completion_percent < 100
-    with pytest.raises(TransitionDenied) as excinfo:
-        services.submit(version=version, actor=actor)
-    assert excinfo.value.code == "transition.incomplete"
+    assert "assess.split_mismatch" not in {issue.code for issue in report.issues}
+    assert version.completion_percent == 100
+    row.refresh_from_db()
+    assert row.data == {"midterm": 0, "project": 0}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
