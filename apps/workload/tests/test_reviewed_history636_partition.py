@@ -248,3 +248,75 @@ class History636PartitionTests(TestCase):
         self.assertEqual(self.third.task_id, task.pk)
         self.assertEqual(list(apps.get_model("organizations.Membership").objects.order_by("pk").values()), memberships)
         self.assertEqual(TeacherAssignment.objects.get(row=self.third).teacher_id, self.other.pk)
+
+    def command(self, path, sha, **options):
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        from ..management.commands import repair_reviewed_workload_batch as command
+
+        self.org.slug = "qku"
+        self.org.save(update_fields=["slug"])
+        output = StringIO()
+        with patch.object(command, "ORG", spec.ORG):
+            call_command(
+                "repair_reviewed_workload_batch",
+                actor=self.actor.username,
+                manifest=path,
+                manifest_sha256=sha,
+                lines=[164],
+                stdout=output,
+                **options,
+            )
+        tokens = output.getvalue().strip().split()
+        self.assertEqual(tokens.pop(0), "reviewed_source:")
+        self.assertRegex(
+            output.getvalue(),
+            r"^reviewed_source: mode=(dry_run|apply|undo)( (baseline=[a-f0-9]{64}|batch=source-[0-9]{8}-[0-9]{6}-[a-f0-9]{8}|[a-z_]+=[0-9]+))+\n$",
+        )
+        return dict(x.split("=", 1) for x in tokens)
+
+    def private_manifest(self, directory):
+        import hashlib
+        import json
+        from pathlib import Path
+
+        path = Path(directory) / "manifest.json"
+        raw = json.dumps({"format": spec.FORMAT, "organization_id": spec.ORG, "source": spec.PINS["source"]}).encode()
+        path.write_bytes(raw)
+        path.chmod(0o600)
+        return str(path), hashlib.sha256(raw).hexdigest()
+
+    def test_real_command_private_manifest_rls_dry_apply_repeat_undo_host_contract(self):
+        from tempfile import TemporaryDirectory
+
+        with TemporaryDirectory() as directory:
+            path, sha = self.private_manifest(directory)
+            before = state.snapshot(self.org, self.actor)
+            dry = self.command(path, sha)
+            self.assertEqual(dry["mode"], "dry_run")
+            self.assertEqual(state.snapshot(self.org, self.actor), before)
+            applied = self.command(path, sha, apply=True, expected_baseline=dry["baseline"])
+            self.assertEqual(applied["applied"], "1")
+            repeat = self.command(path, sha)
+            self.assertEqual(repeat["already_done"], "1")
+            self.assertEqual(repeat["batch"], applied["batch"])
+            undo_dry = self.command(path, sha, undo=applied["batch"])
+            self.command(path, sha, undo=applied["batch"], apply=True, expected_baseline=undo_dry["baseline"])
+            self.assertEqual(state.snapshot(self.org, self.actor), before)
+
+    def test_real_command_translates_graph_guard_and_rejects_wrong_plaintext_hash(self):
+        from tempfile import TemporaryDirectory
+
+        from django.core.management import CommandError
+
+        with TemporaryDirectory() as directory:
+            path, sha = self.private_manifest(directory)
+            with self.assertRaisesMessage(CommandError, "manifest_sha256_mismatch"):
+                self.command(path, "0" * 64)
+            section = self.versions[0].sections.first()
+            section.data = {"private_body": "must never reach command output"}
+            section.save(update_fields=["data"])
+            with self.assertRaisesMessage(CommandError, "history636_approved_body_changed"):
+                self.command(path, sha)

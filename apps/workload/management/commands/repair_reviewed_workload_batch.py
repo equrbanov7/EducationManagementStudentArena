@@ -73,6 +73,8 @@ class Command(BaseCommand):
                 undo=options["undo"],
                 apply=options["apply"],
             )
+            if manifest.get("format") == reviewed_history636_spec.FORMAT:
+                result = reviewed_history636_repair.command_result(result)
         except (RepairError, WorkloadDenied) as exc:
             raise CommandError(getattr(exc, "code", str(exc))) from exc
         except (KeyError, TypeError, ValueError, OSError) as exc:

@@ -1,8 +1,10 @@
 """One source-reviewed partition: workload/contact/plan only; no QB or grade writes."""
 
+import re
 import uuid
 
 from django.db import transaction
+from django.utils import timezone
 
 from apps.syllabus.public import write_version_plan_hours
 from core.audit import log_action
@@ -135,7 +137,7 @@ def run(*, manifest, manifest_sha, lines, organization, user, expected_baseline=
         require(state.protected(before) == state.protected(after), "history636_full_graph_preservation_failed")
         if undo:
             require(digest(after) == previous.old_values["before_sha256"], "history636_exact_undo_failed")
-        receipt = undo or str(uuid.uuid4())
+        receipt = undo or f"source-{timezone.now():%Y%m%d-%H%M%S}-{uuid.uuid4().hex[:8]}"
         log_action(
             AuditAction.UPDATE,
             user=user,
@@ -156,3 +158,22 @@ def run(*, manifest, manifest_sha, lines, organization, user, expected_baseline=
         return summary("undone" if undo else "applied", before, baseline, receipt)
     except GraphError as exc:
         raise RepairError(str(exc)) from exc
+
+
+def command_result(result):
+    """Existing encrypted-source host protocol: hashes, source batch and numbers only."""
+    receipt = result["receipt"]
+    if not re.fullmatch(r"[a-f0-9]{64}", result["baseline"]) or (
+        receipt != "none" and not re.fullmatch(r"source-[0-9]{8}-[0-9]{6}-[a-f0-9]{8}", receipt)
+    ):
+        raise RepairError("history636_summary_contract_invalid")
+    return {
+        "baseline": result["baseline"],
+        **({"batch": receipt} if receipt != "none" else {}),
+        "applied": int(result["status"] in {"applied", "undone"}),
+        "already_done": int(result["status"].startswith("already_")),
+        **{
+            key: result[key]
+            for key in ("journals", "load_rows", "shared_lecture", "separate_seminars", "qb_writes", "body_writes")
+        },
+    }
