@@ -404,3 +404,41 @@ class HistoryRestoreTest(TestCase):
                 [s.pk for s in approved_restore_sources(self.offering, context_for=service.syllabus_context)],
                 [source.pk],
             )
+
+    def test_one_click_exact_row_reuses_previous_plan_and_preserves_graph(self):
+        with bypass_rls():
+            make_row(self.task, self.stack, lecture_total=45, seminar_total=30)
+            self.offering.journal_is_current_load = False
+            request = self.request(self.teacher, real=self.admin, mode="full")
+            service.attach_actions(request, [self.offering])
+            self.assertEqual(self.offering.history_load_restore_plan["lecture"], 45)
+            self.assertEqual(self.offering.history_load_restore_plan["seminar"], 30)
+            before = self.graph()
+        self.client.force_login(self.admin)
+        session = self.client.session
+        session["active_organization_id"] = str(self.org.pk)
+        session.save()
+        response = self.client.post(self.offering.history_load_restore_url, self.offering.history_load_restore_plan)
+        self.assertEqual(response.status_code, 302)
+        with bypass_rls():
+            self.assertEqual(self.graph(), before)
+            self.assertEqual(TeacherAssignment.objects.count(), 2)
+
+    def test_one_click_never_splits_a_patok_or_invents_plan_from_taught_hours(self):
+        with bypass_rls():
+            self.offering.journal_is_current_load = False
+            request = self.request(self.teacher, real=self.admin, mode="full")
+            service.attach_actions(request, [self.offering])
+            self.assertFalse(hasattr(self.offering, "history_load_restore_plan"))
+            row = make_row(self.task, self.stack, lecture_total=45, seminar_total=30)
+            other = self.stack["group"].__class__.objects.create(
+                organization=self.org,
+                name="Second patok group",
+                slug="patok-source",
+                unit_type="group",
+                parent=self.stack["specialty"],
+            )
+            row.groups.add(other)
+            service.attach_actions(request, [self.offering])
+            self.assertFalse(hasattr(self.offering, "history_load_restore_plan"))
+            self.assertEqual(TeachingTaskRow.objects.count(), 1)

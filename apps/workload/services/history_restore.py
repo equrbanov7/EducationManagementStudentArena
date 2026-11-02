@@ -329,6 +329,9 @@ def attach_actions(request, offerings):
                 and any(not known or str(c.pk) in known for c in chairs)
             ):
                 course.history_load_restore_url = reverse("workload:history_restore", args=[course.pk])
+        from .history_restore_actions import attach_automatic_plans
+
+        attach_automatic_plans(actor.organization, candidates)
     except WorkloadDenied:
         return
 

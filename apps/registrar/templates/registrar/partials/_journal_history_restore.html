@@ -1,3 +1,10 @@
 {% load i18n %}{% if offering.history_load_restore_url %}
+{% if offering.history_load_restore_plan %}
+<form method="post" action="{{ offering.history_load_restore_url }}">{% csrf_token %}
+  {% for key, value in offering.history_load_restore_plan.items %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}
+  <button class="jl-open-btn" type="submit">{% trans "Cari yükə bərpa et" context "workload.history_restore" %}</button>
+</form>
+{% else %}
 <a class="jl-open-btn" href="{{ offering.history_load_restore_url }}">{% trans "Cari yükə bərpa et" context "workload.history_restore" %}</a>
+{% endif %}
 {% endif %}
