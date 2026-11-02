@@ -55,8 +55,14 @@ def detail(request, offering):
         raise Http404
     from django.core.paginator import Paginator
 
-    marks = LessonMark.objects.filter(organization=offering.organization, entered_by=request.user).select_related(
-        "enrollment__student"
+    marks = (
+        LessonMark.objects.filter(
+            organization=offering.organization,
+            lesson__organization=offering.organization,
+            enrollment__organization=offering.organization,
+        )
+        .filter(Q(entered_by=request.user) | Q(entered_by__isnull=True, lesson__instructor=request.user))
+        .select_related("enrollment__student")
     )
     lessons = lessons.order_by("date", "start_time", "pk").prefetch_related(
         Prefetch("marks", queryset=marks, to_attr="author_marks")

@@ -50,7 +50,8 @@ Tətbiqdən sonra müəllimin öz hesabında `Əvvəlki jurnal qeydlərim`→202
 633patokunun3fiziki jurnalı hərəsi6dərs/12saat tarixi kimi görünməlidir. Cari yük yenə0qalır.
 Tarixi hüceyrələr dəyişmir; normal jurnalın başqa müəllimə aid məlumatlarına giriş genişlənmir.
 
-Mövcud tarixi görünüş yalnız `entered_by=user` xanalarını göstərirdi. Bu metadata əməliyyatı
-NULL daxil edən şəxsi uydurmur. Ona görə müəllimin faktiki keçdiyi dərsdə NULL müəllifli
-köhnə xanaların yalnız oxunan göstərilməsi ayrıca UI commit-də hazırlanır; bu native
-əməliyyatın grade/source-author invariantları dəyişmir.
+Ayrıca UI commit tarixi görünüşdə faktiki `Lesson.instructor=user` olduqda `entered_by=NULL`
+xanalarını yalnız oxunan göstərir və «Daxil edən şəxs məlum deyil» işarəsi qoyur. Şəxsin
+`created_by` olması təkbaşına bu xanaları açmır; başqa müəllimin daxil etdiyi qeydlər
+öz müəllifliyi kimi təqdim edilmir və bu görünüşdə gizli qalır. Mənbə müəllifliyi NULL saxlanır;
+normal jurnalın yazı və roster/final qiymət səlahiyyətləri artırılmır.
