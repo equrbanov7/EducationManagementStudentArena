@@ -183,7 +183,7 @@ def test_exact_solmaz_transport_namespace_matches_host_and_embedded_writer(tmp_p
         "/tmp/wcu-reviewed-solmaz-123-1/../source.json",
         "/tmp/wcu-reviewed-solmaz-123-1/other.json",
         "/tmp/wcu-reviewed-solmaz-extra-123-1/source.json",
-        "/tmp/wcu-reviewed-pervin-123-1/source.json",
+        "/tmp/wcu-reviewed-unapproved-123-1/source.json",
     ],
 )
 def test_solmaz_transport_does_not_accept_other_scope_or_run_shape(tmp_path, remote):
