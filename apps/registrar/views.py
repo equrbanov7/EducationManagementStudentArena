@@ -276,7 +276,11 @@ def journal_detail(request, offering_id):
         "is_corrector_only": can_correct and not is_direct_editor,
         "correction_reasons": CorrectionReason.choices,
         # #7/#8/#9 keçirilmiş saat + növ-müəllimləri; dərs modalı üçün müəllim seçimləri.
-        "teaching_summary": journal_extras.journal_teaching_summary(offering),
+        "teaching_summary": journal_extras.journal_teaching_summary(
+            offering,
+            personal_actor=request.user if is_direct_editor and not (can_correct or roster_scope) else None,
+            scope=share_scope,
+        ),
         "lesson_teacher_choices": journal_extras.has_lesson_teacher_choices(offering),
         # Dərs otağı: korpus → otaq kaskadı (korpus = otağın sahəsi); defolt korpus — campus.py.
         "lesson_rooms": rooms,

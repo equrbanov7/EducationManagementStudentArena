@@ -373,67 +373,11 @@ def calendar_plan(offering, lessons, today):
     return plan
 
 
-def journal_teaching_summary(offering):
-    """Fənn açılışının dərs-saat mənzərəsi + növ-müəllimləri (bir sorğuda).
+def journal_teaching_summary(offering, *, personal_actor=None, scope=None):
+    """Full journal by default; explicit editor context projects its current teaching share."""
+    from .journal_teaching_heading import summarize
 
-    Qaytarır:
-      * ``kinds`` — YALNIZ MÖVCUD dərs növləri (mühazirə/seminar/lab); hər biri üçün
-        keçirilmiş saat + o növü keçən müəllim(lər)in adı. Yalnız bir növ varsa yalnız
-        o görünür (#8); 2 müəllim arasında bölünübsə hər növün öz müəllimi (#9).
-      * ``held_total`` keçirilmiş toplam saat, ``total`` fənnin tam saatı,
-        ``remaining`` qalan saat (#7). ``over`` — həddi keçibsə True (#6 göstərişi).
-    """
-    from django.utils import timezone
-
-    from apps.registrar.models import Lesson
-
-    lessons = list(
-        Lesson.objects.filter(offering=offering)
-        .select_related("instructor")
-        .only("kind", "hours", "date", "instructor__first_name", "instructor__last_name", "instructor__username")
-    )
-    fallback = offering.instructor
-    today = timezone.localdate()
-    by_kind: dict = {}
-    scheduled_total = 0
-    for lesson in lessons:
-        row = by_kind.setdefault(lesson.kind, {"held": 0, "teachers": {}})
-        hours = int(lesson.hours or 0)
-        scheduled_total += hours
-        # «Keçirilmiş» yalnız bu günə qədərki dərslərdir; gələcək tarixli dərs
-        # planlaşdırılmışdır (QA 2026-09-05 JOURNAL-TEACHER-11).
-        if lesson.date is None or lesson.date <= today:
-            row["held"] += hours
-        inst = lesson.instructor or fallback
-        if inst is not None:
-            row["teachers"][inst.id] = (inst.get_full_name() or "").strip() or inst.username
-    from .practical_label import kind_choices
-
-    labels = dict(kind_choices(offering))  # «praktiki» açılış: seminar → «Praktiki məşğələ»
-    order = {"lecture": 0, "seminar": 1, "lab": 2}
-    kinds = [
-        {
-            "kind": kind,
-            "label": labels.get(kind, kind),
-            "held": data["held"],
-            "teachers": list(data["teachers"].values()),
-        }
-        for kind, data in by_kind.items()
-    ]
-    kinds.sort(key=lambda k: order.get(k["kind"], 9))
-    held_total = sum(k["held"] for k in kinds)
-    total = int(offering.lesson_hours or 0)
-    return {
-        "kinds": kinds,
-        "held_total": held_total,
-        # Bütün (gələcək daxil) dərslərin saatı — saat həddi bununla yoxlanır.
-        "scheduled_total": scheduled_total,
-        "total": total,
-        "remaining": max(0, total - scheduled_total) if total else None,
-        "over": bool(total and scheduled_total > total),
-        # İntensiv kurs (2026-10-25): keçirilmiş saat plan saatına çatıb — başlıqda «Kurs tamamlandı».
-        "completed": bool(total and held_total >= total),
-    }
+    return summarize(offering, personal_actor=personal_actor, scope=scope)
 
 
 def has_lesson_teacher_choices(offering) -> bool:

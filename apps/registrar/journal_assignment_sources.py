@@ -2,6 +2,7 @@
 
 _provider = None
 _joint_provider = None
+_plan_provider = None
 
 
 def register_teacher_journal_assignments(provider):
@@ -27,3 +28,14 @@ def joint_journal_candidates(*, organization, teacher_id):
     if _joint_provider is None:
         return []
     return _joint_provider(organization=organization, teacher_id=teacher_id)
+
+
+def register_teacher_journal_plan_hours(provider):
+    global _plan_provider
+    _plan_provider = provider
+
+
+def teacher_journal_plan_hours(*, organization, teacher_id):
+    if _plan_provider is None:
+        return {}
+    return _plan_provider(organization=organization, teacher_id=teacher_id)

@@ -34,7 +34,7 @@ def _registered_children(organization, groups):
     return found
 
 
-def teacher_journal_assignments(*, organization, teacher_id):
+def _assignment_map(*, organization, teacher_id, include_hours=False):
     """Canonical (subject, period, group) → kinds; (None, None, id) is an exact intensive offering.
 
     Draft/cancelled/vacant/zero-hour entries and ambiguous free-text subgroup notes
@@ -67,7 +67,7 @@ def teacher_journal_assignments(*, organization, teacher_id):
     groups = [group for row in rows for group in row.groups.all()]
     children = _registered_children(organization, groups) if groups else {}
     aliases = canonical_aliases(groups)
-    result = defaultdict(set)
+    result = defaultdict(lambda: defaultdict(int)) if include_hours else defaultdict(set)
     for row in rows:
         if row.row_kind == RowKind.INTENSIVE:
             offering = row.intensive_offering
@@ -79,7 +79,12 @@ def teacher_journal_assignments(*, organization, teacher_id):
                 and offering.subject_id == row.subject_id
                 and offering.period_id == row.period_id
             ):
-                result[(None, None, offering.pk)].update(a.activity for a in row.journal_assignments)
+                for assignment in row.journal_assignments:
+                    key = (None, None, offering.pk)
+                    if include_hours:
+                        result[key][assignment.activity] += assignment.hours
+                    else:
+                        result[key].add(assignment.activity)
             continue
         row_groups = list(row.groups.all())
         known = row_groups + [child for group in row_groups for child in children.get(group.pk, ())]
@@ -99,5 +104,17 @@ def teacher_journal_assignments(*, organization, teacher_id):
                         # yalnız həmin qrupun özüdür — alt qrupa yayılmır; siyahı yenə sahib/pay tələb edir.
                         applies = True
                     if applies is True:
-                        result[(row.subject_id, row.period_id, canonical.pk)].add(assignment.activity)
+                        key = (row.subject_id, row.period_id, canonical.pk)
+                        if include_hours:
+                            result[key][assignment.activity] += assignment.hours
+                        else:
+                            result[key].add(assignment.activity)
     return dict(result)
+
+
+def teacher_journal_assignments(*, organization, teacher_id):
+    return _assignment_map(organization=organization, teacher_id=teacher_id)
+
+
+def teacher_journal_plan_hours(*, organization, teacher_id):
+    return _assignment_map(organization=organization, teacher_id=teacher_id, include_hours=True)
