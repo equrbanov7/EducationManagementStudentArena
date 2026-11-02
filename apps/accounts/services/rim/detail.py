@@ -175,6 +175,9 @@ def serialize_detail(user, actor: RimActor):
         manageable and row["archive_restore"] and row["archive_restore"]["can_restore"]
     )
     # Rol təyinatı RİM-də TƏKRAR YARADILMIR — kanonik bölməyə dərin link.
+    from .staff_scope import card
+
+    row["staff_scope"] = card(actor, user) if manageable and status != "deleted" else None
     row["role_assignment_url"] = f"{reverse('accounts:profile')}?section=role-assignment"
     return row
 

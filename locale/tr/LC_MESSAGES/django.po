@@ -111666,3 +111666,20 @@ msgid ""
 msgstr ""
 "Seçilen bölümde ek öğretmen görevlendirmesi oluşturulur. Önceki bölümler, "
 "asıl iş yeri ve geçmiş korunur."
+
+msgctxt "accounts.rim.staff_scope"
+msgid "Laborantın kafedrası"
+msgstr "Laborantın bölümü"
+
+msgctxt "accounts.rim.staff_scope"
+msgid "Dəyişiklik səbəbi"
+msgstr "Değişiklik nedeni"
+
+msgctxt "accounts.rim.staff_scope"
+msgid "Kafedranı dəyiş"
+msgstr "Bölümü değiştir"
+
+msgctxt "accounts.rim.staff_scope"
+msgid "Yalnız seçilmiş laborant təyinatı köçürülür. Digər rollar saxlanılır."
+msgstr ""
+"Yalnızca seçilen laborant görevlendirmesi taşınır. Diğer roller korunur."

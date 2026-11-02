@@ -29,12 +29,9 @@ ORG_WIDE_STAFF_ROLES = frozenset(
 
 
 def assign_scope(user, organization):
-    from apps.organizations.public import get_permission_scope
+    from apps.organizations.public import membership_assignment_scope
 
-    scope = get_permission_scope(user, organization, "role.assign")
-    if not scope.has_structure_access:
-        scope = get_permission_scope(user, organization, "org.manage_members")
-    return scope
+    return membership_assignment_scope(user, organization)
 
 
 def actor_is_unit_scoped(user, organization) -> bool:

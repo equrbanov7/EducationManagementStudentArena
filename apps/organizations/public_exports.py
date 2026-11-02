@@ -34,6 +34,7 @@ from .kafedra_units import is_kafedra_unit  # noqa: F401
 from .kafedra_units import kafedra_q  # noqa: F401
 from .kafedra_units import kafedra_unit_types  # noqa: F401
 from .kafedra_units import narrow_kafedra_rows  # noqa: F401
+from .membership_scope_correction import correct_membership_unit, membership_assignment_scope  # noqa: F401
 from .overview import build_overview_data  # noqa: F401
 from .permissions import get_permission_label  # noqa: F401
 from .request_memberships import drop_request_memberships  # noqa: F401
@@ -80,6 +81,8 @@ from .views.shared._helpers import _can_manage_organization as can_manage_organi
 from .views.shared._helpers import _has_org_permission as has_org_permission  # noqa: F401
 
 __all__ = [
+    "correct_membership_unit",
+    "membership_assignment_scope",
     "CABINET_MODULES",
     "EMPTY_SCOPE",
     "KAFEDRA_UNIT_TYPES",

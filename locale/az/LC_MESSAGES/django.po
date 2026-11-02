@@ -111765,3 +111765,19 @@ msgid ""
 msgstr ""
 "Seçilmiş kafedrada əlavə müəllim təyinatı yaradılır. Əvvəlki kafedralar, "
 "əsas iş yeri və tarixçə saxlanılır."
+
+msgctxt "accounts.rim.staff_scope"
+msgid "Laborantın kafedrası"
+msgstr "Laborantın kafedrası"
+
+msgctxt "accounts.rim.staff_scope"
+msgid "Dəyişiklik səbəbi"
+msgstr "Dəyişiklik səbəbi"
+
+msgctxt "accounts.rim.staff_scope"
+msgid "Kafedranı dəyiş"
+msgstr "Kafedranı dəyiş"
+
+msgctxt "accounts.rim.staff_scope"
+msgid "Yalnız seçilmiş laborant təyinatı köçürülür. Digər rollar saxlanılır."
+msgstr "Yalnız seçilmiş laborant təyinatı köçürülür. Digər rollar saxlanılır."

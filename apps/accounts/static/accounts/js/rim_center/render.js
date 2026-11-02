@@ -386,7 +386,9 @@
         if (user.actions && user.actions.edit) {
             html += editForm(user);
         }
+        if (ns.staffScope) { html += ns.staffScope.render(user); }
         bodyEl.innerHTML = html;
+        if (window.EMSBootstrapSelect) { window.EMSBootstrapSelect.init(bodyEl); }
         mountPhone(bodyEl, user);
     };
 })(window, document);

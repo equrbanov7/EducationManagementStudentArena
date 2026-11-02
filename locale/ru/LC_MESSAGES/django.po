@@ -112475,3 +112475,20 @@ msgid ""
 msgstr ""
 "В выбранной кафедре создаётся дополнительное назначение преподавателя. "
 "Прежние кафедры, основное место работы и история сохраняются."
+
+msgctxt "accounts.rim.staff_scope"
+msgid "Laborantın kafedrası"
+msgstr "Кафедра лаборанта"
+
+msgctxt "accounts.rim.staff_scope"
+msgid "Dəyişiklik səbəbi"
+msgstr "Причина изменения"
+
+msgctxt "accounts.rim.staff_scope"
+msgid "Kafedranı dəyiş"
+msgstr "Изменить кафедру"
+
+msgctxt "accounts.rim.staff_scope"
+msgid "Yalnız seçilmiş laborant təyinatı köçürülür. Digər rollar saxlanılır."
+msgstr ""
+"Переносится только выбранное назначение лаборанта. Другие роли сохраняются."

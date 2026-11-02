@@ -51,6 +51,7 @@ ALLOWED_ACTIONS = frozenset(
         "soft_delete",
         "restore",
         "edit",
+        "move_staff_scope",
     }
 )
 
@@ -166,6 +167,19 @@ def rim_action(request):
             # «uğur» mesajı ilə aldadılmamalıdır (QA Y-1).
             extra["restore_notices"] = list(result.notices)
             message = " ".join(("Hesab bərpa edildi.", *result.notices))
+        elif action == "move_staff_scope":
+            from apps.accounts.services.rim.staff_scope import move
+
+            extra["staff_scope_result"] = move(
+                actor,
+                target,
+                membership_id=payload.get("membership_id"),
+                unit_id=payload.get("unit_id"),
+                expected_unit_id=payload.get("expected_unit_id"),
+                reason=reason,
+                request=request,
+            )
+            message = "Kafedra təyinatı yeniləndi."
         else:  # action == "edit"
             # ``phone_country`` — telefon xanasının ölkə seçimi (``core.phone``); ayrıca sahə kimi saxlanmır.
             fields = {name: payload[name] for name in (*EDITABLE_FIELDS, "phone_country") if name in payload}

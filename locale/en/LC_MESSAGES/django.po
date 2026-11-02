@@ -112280,3 +112280,21 @@ msgid ""
 msgstr ""
 "An additional teaching affiliation is created in the selected department. "
 "Existing departments, the primary workplace and history are preserved."
+
+msgctxt "accounts.rim.staff_scope"
+msgid "Laborantın kafedrası"
+msgstr "Laboratory assistant department"
+
+msgctxt "accounts.rim.staff_scope"
+msgid "Dəyişiklik səbəbi"
+msgstr "Reason for change"
+
+msgctxt "accounts.rim.staff_scope"
+msgid "Kafedranı dəyiş"
+msgstr "Change department"
+
+msgctxt "accounts.rim.staff_scope"
+msgid "Yalnız seçilmiş laborant təyinatı köçürülür. Digər rollar saxlanılır."
+msgstr ""
+"Only the selected laboratory assistant affiliation is moved. Other roles are"
+" preserved."
