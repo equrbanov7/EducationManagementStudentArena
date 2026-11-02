@@ -8,9 +8,7 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "scripts/ops"))
-loader = importlib.util.spec_from_file_location(
-    "solmaz_host_test", ROOT / "scripts/ops/reviewed_solmaz_catalog.py"
-)
+loader = importlib.util.spec_from_file_location("solmaz_host_test", ROOT / "scripts/ops/reviewed_solmaz_catalog.py")
 host = importlib.util.module_from_spec(loader)
 loader.loader.exec_module(host)
 
@@ -31,11 +29,7 @@ class SolmazHostTests(TestCase):
             protected_rows="550",
         )
         fields.update(changes)
-        return (
-            "reviewed_solmaz_catalog: "
-            + " ".join(f"{k}={v}" for k, v in fields.items())
-            + "\n"
-        )
+        return "reviewed_solmaz_catalog: " + " ".join(f"{k}={v}" for k, v in fields.items()) + "\n"
 
     def test_inputs_dry_default_and_boolean_strings_no_arbitrary_scope(self):
         self.assertFalse(host.inputs({"actor": "operator"})[2])
@@ -63,9 +57,7 @@ class SolmazHostTests(TestCase):
                 host.inputs(value)
 
     def test_summary_exact_counts_source_budget_and_receipt(self):
-        self.assertEqual(
-            host.summary(self.raw(), apply=False, undo=False)["teacher_hours"], "180"
-        )
+        self.assertEqual(host.summary(self.raw(), apply=False, undo=False)["teacher_hours"], "180")
         receipt = "11111111-1111-4111-8111-111111111111"
         applied = self.raw(
             status="applied",
@@ -76,9 +68,7 @@ class SolmazHostTests(TestCase):
             new_shares="2",
             teacher_hours="165",
         )
-        self.assertEqual(
-            host.summary(applied, apply=True, undo=False)["receipt"], receipt
-        )
+        self.assertEqual(host.summary(applied, apply=True, undo=False)["receipt"], receipt)
         for changes in (
             {"new_shares": "3"},
             {"teacher_hours": "165"},
