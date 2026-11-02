@@ -137,4 +137,5 @@ def run(*, organization, actor, apply=False, expected_baseline="", undo=""):
             "source_sha256": spec.PINS["source_sha256"],
         },
     )
-    return result("undone" if undo else "applied", after, undo or receipt)
+    # Host confirms the exact pre-write baseline; audit retains the post-write SHA.
+    return result("undone" if undo else "applied", before, undo or receipt)

@@ -1,6 +1,10 @@
 """Real PostgreSQL preservation, identity, stale guards and exact-PK rollback."""
 
+import importlib.util
+import json
+import sys
 from copy import deepcopy
+from pathlib import Path
 from unittest.mock import patch
 
 from django.apps import apps
@@ -199,7 +203,7 @@ class GunayEthnographyTests(TestCase):
         self.assertEqual([45, 45], sorted(c["lesson_hours"] for c in after["courses"]))
         self.assertEqual(60, sum(a["hours"] for a in after["assignments"]))
         self.assertEqual("already_applied", self.run_repair()["status"])
-        undone = self.run_repair(apply=True, expected_baseline=applied["baseline"], undo=applied["receipt"])
+        undone = self.run_repair(apply=True, expected_baseline=self.run_repair()["baseline"], undo=applied["receipt"])
         self.assertEqual("undone", undone["status"])
         self.assertEqual(digest(before), digest(state.snapshot(self.org)))
         self.assertEqual("already_undone", self.run_repair(undo=applied["receipt"])["status"])
@@ -244,3 +248,41 @@ class GunayEthnographyTests(TestCase):
         ):
             self.run_repair(apply=True, expected_baseline=dry["baseline"])
         self.assertEqual(dry["baseline"], self.run_repair()["baseline"])
+
+    def test_first_apply_undo_and_repeat_native_results_pass_strict_host_parser(self):
+        ops = Path(__file__).resolve().parents[3] / "scripts/ops"
+        sys.path.insert(0, str(ops))
+        loader = importlib.util.spec_from_file_location(
+            "gunay_host_baseline_contract", ops / "reviewed_gunay_ethnography.py"
+        )
+        host = importlib.util.module_from_spec(loader)
+        loader.loader.exec_module(host)
+
+        def parse(value, **kwargs):
+            return host.summary(host.PREFIX + json.dumps(value), **kwargs)
+
+        before = state.snapshot(self.org)
+        dry = self.run_repair()
+        applied = self.run_repair(apply=True, expected_baseline=dry["baseline"])
+        parse(applied, apply=True, undo="", baseline=dry["baseline"])
+        self.assertEqual(applied["baseline"], dry["baseline"])
+        after = state.snapshot(self.org)
+        repeat = self.run_repair()
+        parse(repeat, apply=False, undo="")
+        self.assertEqual(repeat["baseline"], digest(after))
+        self.assertEqual(repeat["receipt"], applied["receipt"])
+        self.assertNotEqual(repeat["baseline"], applied["baseline"])
+        audit = apps.get_model("audit.AuditLog").objects.get(
+            resource_type=spec.RESOURCE, resource_id=applied["receipt"]
+        )
+        self.assertEqual(audit.old_values["before_sha256"], digest(before))
+        self.assertEqual(audit.new_values["after_sha256"], digest(after))
+        self.assertEqual(audit.new_values["protected_sha256"], digest(state.protected(after)))
+        self.assertEqual(state.protected(before), state.protected(after))
+        undone = self.run_repair(apply=True, expected_baseline=repeat["baseline"], undo=applied["receipt"])
+        parse(undone, apply=True, undo=applied["receipt"], baseline=repeat["baseline"])
+        self.assertEqual(undone["baseline"], digest(after))
+        repeated_undo = self.run_repair(undo=applied["receipt"])
+        parse(repeated_undo, apply=False, undo=applied["receipt"])
+        self.assertEqual(repeated_undo["baseline"], digest(before))
+        self.assertEqual(repeated_undo["receipt"], applied["receipt"])
