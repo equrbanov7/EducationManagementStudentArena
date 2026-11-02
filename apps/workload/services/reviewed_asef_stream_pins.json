@@ -1,0 +1,379 @@
+{
+  "assignments": {
+    "456c1e77-5514-477a-9b1c-bb7b57bb6802": {
+      "activity": "lecture",
+      "hours": 8,
+      "id": "456c1e77-5514-477a-9b1c-bb7b57bb6802",
+      "is_hourly_paid": false,
+      "row_id": "62f97cad-2420-47af-8a2f-9f24d976efa0",
+      "teacher_id": 8172
+    },
+    "65f53c84-0014-43cc-9f5c-5be56d2e7f60": {
+      "activity": "seminar",
+      "hours": 22,
+      "id": "65f53c84-0014-43cc-9f5c-5be56d2e7f60",
+      "is_hourly_paid": false,
+      "row_id": "7208d941-3d72-434d-a480-c687bfc4e729",
+      "teacher_id": 8172
+    },
+    "6d363573-52e0-4015-80db-5ac2118b2acf": {
+      "activity": "lecture",
+      "hours": 23,
+      "id": "6d363573-52e0-4015-80db-5ac2118b2acf",
+      "is_hourly_paid": false,
+      "row_id": "7208d941-3d72-434d-a480-c687bfc4e729",
+      "teacher_id": 8172
+    },
+    "97b3b31c-12f8-4720-8c37-8576bf4069ab": {
+      "activity": "seminar",
+      "hours": 7,
+      "id": "97b3b31c-12f8-4720-8c37-8576bf4069ab",
+      "is_hourly_paid": false,
+      "row_id": "62f97cad-2420-47af-8a2f-9f24d976efa0",
+      "teacher_id": 8172
+    }
+  },
+  "bi_parent": "b7bc07b8-c91f-47fb-bd38-f712ae99c1db",
+  "body_sha256": {
+    "3a961498-e5ac-48aa-a985-6fccea4c9a67": "6d6a4153519a93a180d4a584900478b24edb79b12755bb535aa84fee8ddceebb",
+    "bf042438-d490-42bb-a405-f4d46c8f9566": "6d6a4153519a93a180d4a584900478b24edb79b12755bb535aa84fee8ddceebb",
+    "d1bd6676-2c3c-4ac9-a74e-c59d27a16fe4": "6d6a4153519a93a180d4a584900478b24edb79b12755bb535aa84fee8ddceebb"
+  },
+  "bridge": [
+    {
+      "entity_type": "lesson_subject",
+      "legacy_pk": "1861",
+      "source_row_hash": "6fc46b0141bb11a5971ca824a31a15285d08adbe6d696cb032f8e9236e00e7ec",
+      "state": "migrated",
+      "target_model_label": "registrar.subject",
+      "target_pk": "9bb8cda9-6199-4d27-8544-794b8eb48d8c",
+      "transform_version": "rehearsal-identity-v1.3770759730bc"
+    },
+    {
+      "entity_type": "worker",
+      "legacy_pk": "726",
+      "source_row_hash": "8c1b769e8fe8a72e0ff8ca3f88575e1822839171b66f64d5ccdd1e0439474f6d",
+      "state": "migrated",
+      "target_model_label": "auth.user",
+      "target_pk": "8172",
+      "transform_version": "rehearsal-identity-v1.3770759730bc"
+    },
+    {
+      "entity_type": "worker_materialisation",
+      "legacy_pk": "726",
+      "source_row_hash": "d740326f4efdf2bfbd8a9aaff0d11191b2ac459ec334f0f71d2092efa8425c80",
+      "state": "migrated",
+      "target_model_label": "auth.user",
+      "target_pk": "8172",
+      "transform_version": "rehearsal-identity-v1.3770759730bc"
+    }
+  ],
+  "chair": "cc6b3bcb-c318-4faf-b929-37b5339b8ca4",
+  "counts": {
+    "195f0bf3-64cf-4af2-a933-a48e3d2d7c59": {
+      "enrollments": 27,
+      "lessons": 8,
+      "marks": 123
+    },
+    "3f4f9d58-25f4-40ca-b585-e1a8c79cb33c": {
+      "enrollments": 9,
+      "lessons": 11,
+      "marks": 53
+    },
+    "95666bd3-9583-424a-bd6a-7eef0dd772c8": {
+      "enrollments": 39,
+      "lessons": 11,
+      "marks": 309
+    }
+  },
+  "courses": {
+    "195f0bf3-64cf-4af2-a933-a48e3d2d7c59": {
+      "group_id": "c7757f1c-b4b7-4423-8ec5-485f435ec4a5",
+      "id": "195f0bf3-64cf-4af2-a933-a48e3d2d7c59",
+      "instructor_id": 8172,
+      "is_active": true,
+      "lesson_hours": 45,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "subject_id": "9bb8cda9-6199-4d27-8544-794b8eb48d8c"
+    },
+    "3f4f9d58-25f4-40ca-b585-e1a8c79cb33c": {
+      "group_id": "e49610ef-4b19-4baf-a8d7-63df36495908",
+      "id": "3f4f9d58-25f4-40ca-b585-e1a8c79cb33c",
+      "instructor_id": 8172,
+      "is_active": true,
+      "lesson_hours": 30,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "subject_id": "9bb8cda9-6199-4d27-8544-794b8eb48d8c"
+    },
+    "95666bd3-9583-424a-bd6a-7eef0dd772c8": {
+      "group_id": "69eb55b0-c261-4dea-ad65-7bf04dc4e32e",
+      "id": "95666bd3-9583-424a-bd6a-7eef0dd772c8",
+      "instructor_id": 8172,
+      "is_active": true,
+      "lesson_hours": 15,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "subject_id": "9bb8cda9-6199-4d27-8544-794b8eb48d8c"
+    }
+  },
+  "duplicate": "62f97cad-2420-47af-8a2f-9f24d976efa0",
+  "groups": {
+    "69eb55b0-c261-4dea-ad65-7bf04dc4e32e": {
+      "code": "",
+      "id": "69eb55b0-c261-4dea-ad65-7bf04dc4e32e",
+      "is_active": true,
+      "name": "536 Bİ2",
+      "parent_id": "0e7f196d-3f73-423b-a566-4386a5d43ab3",
+      "settings": {
+        "degree_level": "bachelor",
+        "education_form": "full_time",
+        "parent_group": "b7bc07b8-c91f-47fb-bd38-f712ae99c1db",
+        "sector": "az"
+      },
+      "unit_type": "group"
+    },
+    "b7bc07b8-c91f-47fb-bd38-f712ae99c1db": {
+      "code": "",
+      "id": "b7bc07b8-c91f-47fb-bd38-f712ae99c1db",
+      "is_active": true,
+      "name": "536 Bİ",
+      "parent_id": "0e7f196d-3f73-423b-a566-4386a5d43ab3",
+      "settings": {
+        "education_form": "full_time"
+      },
+      "unit_type": "group"
+    },
+    "c7757f1c-b4b7-4423-8ec5-485f435ec4a5": {
+      "code": "",
+      "id": "c7757f1c-b4b7-4423-8ec5-485f435ec4a5",
+      "is_active": true,
+      "name": "536 MRK",
+      "parent_id": "0880b4cf-da12-439f-a2f7-2ef3698c9135",
+      "settings": {
+        "education_form": "full_time"
+      },
+      "unit_type": "group"
+    },
+    "e49610ef-4b19-4baf-a8d7-63df36495908": {
+      "code": "",
+      "id": "e49610ef-4b19-4baf-a8d7-63df36495908",
+      "is_active": true,
+      "name": "536 Bi 1",
+      "parent_id": "0e7f196d-3f73-423b-a566-4386a5d43ab3",
+      "settings": {
+        "degree_level": "bachelor",
+        "education_form": "full_time",
+        "parent_group": "b7bc07b8-c91f-47fb-bd38-f712ae99c1db",
+        "sector": "az"
+      },
+      "unit_type": "group"
+    }
+  },
+  "keeper": "7208d941-3d72-434d-a480-c687bfc4e729",
+  "name": [
+    "Asəf",
+    "Qəribov",
+    "Heydər"
+  ],
+  "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+  "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+  "row_after": {
+    "62f97cad-2420-47af-8a2f-9f24d976efa0": {
+      "lecture_plan": 0,
+      "lecture_total": 0,
+      "seminar_plan": 0,
+      "seminar_total": 0,
+      "total_hours": 0
+    },
+    "7208d941-3d72-434d-a480-c687bfc4e729": {
+      "groups_text": "536 MRK, 536 Bİ1, 536 Bİ2",
+      "lecture_plan": 30,
+      "lecture_total": 30,
+      "seminar_plan": 30,
+      "seminar_total": 30,
+      "specialty_id": null,
+      "subgroup_count": 1,
+      "total_hours": 60,
+      "union_count": 2
+    }
+  },
+  "row_before": {
+    "62f97cad-2420-47af-8a2f-9f24d976efa0": {
+      "consult_hours": 0,
+      "credits": "4",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "536 Bİ2",
+      "id": "62f97cad-2420-47af-8a2f-9f24d976efa0",
+      "lab_plan": 0,
+      "lab_total": 0,
+      "lecture_plan": 8,
+      "lecture_total": 8,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "fall",
+      "seminar_plan": 7,
+      "seminar_total": 7,
+      "specialty_id": "0e7f196d-3f73-423b-a566-4386a5d43ab3",
+      "student_count": 0,
+      "subgroup_count": 1,
+      "subject_id": "9bb8cda9-6199-4d27-8544-794b8eb48d8c",
+      "subject_text": "Müəssisənin iqtisadiyyatı",
+      "task_id": "e083925e-6320-4355-b775-467b404d4571",
+      "thesis_hours": 0,
+      "total_hours": 15,
+      "union_count": 1
+    },
+    "7208d941-3d72-434d-a480-c687bfc4e729": {
+      "consult_hours": 0,
+      "credits": "4",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "536 MRK",
+      "id": "7208d941-3d72-434d-a480-c687bfc4e729",
+      "lab_plan": 0,
+      "lab_total": 0,
+      "lecture_plan": 23,
+      "lecture_total": 23,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "fall",
+      "seminar_plan": 22,
+      "seminar_total": 22,
+      "specialty_id": "0880b4cf-da12-439f-a2f7-2ef3698c9135",
+      "student_count": 0,
+      "subgroup_count": 1,
+      "subject_id": "9bb8cda9-6199-4d27-8544-794b8eb48d8c",
+      "subject_text": "Müəssisənin iqtisadiyyatı",
+      "task_id": "e083925e-6320-4355-b775-467b404d4571",
+      "thesis_hours": 0,
+      "total_hours": 45,
+      "union_count": 1
+    }
+  },
+  "row_groups_after": {
+    "62f97cad-2420-47af-8a2f-9f24d976efa0": [
+      "69eb55b0-c261-4dea-ad65-7bf04dc4e32e"
+    ],
+    "7208d941-3d72-434d-a480-c687bfc4e729": [
+      "69eb55b0-c261-4dea-ad65-7bf04dc4e32e",
+      "c7757f1c-b4b7-4423-8ec5-485f435ec4a5",
+      "e49610ef-4b19-4baf-a8d7-63df36495908"
+    ]
+  },
+  "row_groups_before": {
+    "62f97cad-2420-47af-8a2f-9f24d976efa0": [
+      "69eb55b0-c261-4dea-ad65-7bf04dc4e32e"
+    ],
+    "7208d941-3d72-434d-a480-c687bfc4e729": [
+      "c7757f1c-b4b7-4423-8ec5-485f435ec4a5"
+    ]
+  },
+  "source": {
+    "authenticated_standard_run": 41337139853,
+    "authenticated_standard_sha256": "914ecb023cab02a39fcbf6f66eaf774e9104957cc118f1cc82806d4dabb8b98a",
+    "cells": {
+      "A9": "i.ü.f.d.,dos Qəribov Asəf Heydər oğlu",
+      "B9": "536 MRK, 536 Bİ",
+      "C9": "Müəssisənin( firmanın) iqtisadiyyatı",
+      "D9": "6",
+      "E9": "52",
+      "F9": "bəli",
+      "G9": "30",
+      "H9": "30"
+    },
+    "hourly_status_unchanged": true,
+    "interpretation": "one shared30L30S stream; BI parent covers its two registered subgroups; no duplicate teacher hours",
+    "legacy_subject": 1861,
+    "legacy_syllabus": 8444,
+    "legacy_teacher": 726,
+    "retained_credit": "4",
+    "row": 9,
+    "sheet": "Dərs yükü",
+    "source_schema": "source XLSX raw OOXML; no formulas/merges/multiplier in G9,H9",
+    "xlsx_sha256": "37557f086dd1b3a1d31c53d76e755ed65302b6cb326ebe7856a71db21c5cc2da"
+  },
+  "subject": "9bb8cda9-6199-4d27-8544-794b8eb48d8c",
+  "subject_pin": {
+    "chair_unit_id": null,
+    "code": "QKU-1861",
+    "id": "9bb8cda9-6199-4d27-8544-794b8eb48d8c",
+    "name": "Müəssisənin iqtisadiyyatı"
+  },
+  "syllabi": {
+    "9c2a80b0-61f4-4547-aaa1-f40963fc1f7a": {
+      "approved_version_id": "d1bd6676-2c3c-4ac9-a74e-c59d27a16fe4",
+      "author_id": 8172,
+      "current_version_id": "d1bd6676-2c3c-4ac9-a74e-c59d27a16fe4",
+      "id": "9c2a80b0-61f4-4547-aaa1-f40963fc1f7a",
+      "is_active": true,
+      "offering_id": "95666bd3-9583-424a-bd6a-7eef0dd772c8",
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "reused_from_id": null,
+      "subject_id": "9bb8cda9-6199-4d27-8544-794b8eb48d8c"
+    },
+    "c58aef78-9d18-4a81-a6c3-397655018224": {
+      "approved_version_id": "3a961498-e5ac-48aa-a985-6fccea4c9a67",
+      "author_id": 8172,
+      "current_version_id": "3a961498-e5ac-48aa-a985-6fccea4c9a67",
+      "id": "c58aef78-9d18-4a81-a6c3-397655018224",
+      "is_active": true,
+      "offering_id": "195f0bf3-64cf-4af2-a933-a48e3d2d7c59",
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "reused_from_id": null,
+      "subject_id": "9bb8cda9-6199-4d27-8544-794b8eb48d8c"
+    },
+    "d0b8343f-5009-4e46-9570-ad8d616167d1": {
+      "approved_version_id": "bf042438-d490-42bb-a405-f4d46c8f9566",
+      "author_id": 8172,
+      "current_version_id": "bf042438-d490-42bb-a405-f4d46c8f9566",
+      "id": "d0b8343f-5009-4e46-9570-ad8d616167d1",
+      "is_active": true,
+      "offering_id": "3f4f9d58-25f4-40ca-b585-e1a8c79cb33c",
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "reused_from_id": null,
+      "subject_id": "9bb8cda9-6199-4d27-8544-794b8eb48d8c"
+    }
+  },
+  "task": "e083925e-6320-4355-b775-467b404d4571",
+  "task_pin": {
+    "academic_year": "2026/2027",
+    "chair_id": "cc6b3bcb-c318-4faf-b929-37b5339b8ca4",
+    "id": "e083925e-6320-4355-b775-467b404d4571",
+    "revision": 0,
+    "status": "amended"
+  },
+  "teacher": 8172,
+  "teacher_fall_hours": 180,
+  "version_before": {
+    "3a961498-e5ac-48aa-a985-6fccea4c9a67": {
+      "plan_hours": {
+        "lecture": 23,
+        "seminar": 22
+      },
+      "status": "approved",
+      "syllabus_id": "c58aef78-9d18-4a81-a6c3-397655018224"
+    },
+    "bf042438-d490-42bb-a405-f4d46c8f9566": {
+      "plan_hours": {},
+      "status": "approved",
+      "syllabus_id": "d0b8343f-5009-4e46-9570-ad8d616167d1"
+    },
+    "d1bd6676-2c3c-4ac9-a74e-c59d27a16fe4": {
+      "plan_hours": {
+        "lecture": 8,
+        "seminar": 7
+      },
+      "status": "approved",
+      "syllabus_id": "9c2a80b0-61f4-4547-aaa1-f40963fc1f7a"
+    }
+  },
+  "year": "2026/2027"
+}
