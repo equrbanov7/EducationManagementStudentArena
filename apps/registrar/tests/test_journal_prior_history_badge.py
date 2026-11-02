@@ -140,7 +140,11 @@ class PriorJournalBadgeTests(TestCase):
             organization=self.org, offering=self.target, teacher=self.teacher, kinds=["seminar"]
         )
         share.enrollments.add(outside_enrollment)
-        self.assertEqual(available(self.teacher, [self.target], organization=self.org), set())
+        from apps.registrar import read_memo
+
+        with read_memo.scope():
+            read_memo.enrolled_roster(self.target)
+            self.assertEqual(available(self.teacher, [self.target], organization=self.org), set())
         JournalShare.objects.filter(pk=share.pk).delete()
         self.assertEqual(
             available(
@@ -151,3 +155,27 @@ class PriorJournalBadgeTests(TestCase):
             ),
             set(),
         )
+
+    def test_warm_exact_roster_without_predecessor_needs_no_badge_queries(self):
+        from apps.registrar import read_memo
+
+        Enrollment.objects.filter(pk=self.source_enr.pk).update(superseded_by=None)
+        with read_memo.scope():
+            rows = read_memo.enrolled_roster(self.target)
+            self.assertFalse(any(row.has_exact_predecessor for row in rows))
+            with self.assertNumQueries(0):
+                self.assertEqual(available(self.teacher, [self.target], organization=self.org), set())
+
+    def test_warm_roster_with_exact_history_preserves_kind_guard(self):
+        from apps.registrar import read_memo
+
+        with read_memo.scope():
+            self.assertTrue(read_memo.enrolled_roster(self.target)[0].has_exact_predecessor)
+            self.assertEqual(
+                available(self.teacher, [self.target], organization=self.org, kinds={self.target.pk: ["seminar"]}),
+                {self.target.pk},
+            )
+            self.assertEqual(
+                available(self.teacher, [self.target], organization=self.org, kinds={self.target.pk: ["lecture"]}),
+                set(),
+            )

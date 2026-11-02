@@ -19,6 +19,19 @@ def available(user, offerings, *, organization, kinds=None, enrollment_ids=None)
     from .teacher_journal_list import own_visible_queryset
 
     ids = {o.pk for o in offerings if o.organization_id == organization.pk}
+    # Journal detail has already read this exact, tenant-scoped roster with
+    # annotate_predecessor. A warm negative is authoritative for this request:
+    # no exact predecessor means no eligible carry marks, without re-running
+    # owner/share authorization and workload queries just to render a hint.
+    # An absent memo is NOT a negative; standalone/list callers retain the full
+    # authorization and predecessor validation below. Enrollment writes clear it.
+    from .read_memo import bucket
+
+    roster = bucket("roster")
+    if roster is not None:
+        ids = {oid for oid in ids if oid not in roster or any(row.has_exact_predecessor for row in roster[oid])}
+    if not ids:
+        return set()
     authorized = own_visible_queryset(
         CourseOffering.objects.filter(organization=organization, pk__in=ids), user, organization
     ).values("pk")
