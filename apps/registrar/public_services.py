@@ -212,4 +212,8 @@ __all__ = [
     "transfer",
 ]
 
+from .practical_label import offering_is_practical  # noqa: E402,F401
+
+__all__.append("offering_is_practical")
+
 from .reviewed_catalog import create_reviewed_subject, exact_title_candidates  # noqa: E402,F401

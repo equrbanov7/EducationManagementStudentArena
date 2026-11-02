@@ -43,8 +43,12 @@ def _approved_plan_rows(offering) -> list:
     return syllabus_services.week_plan_rows(week)
 
 
-def _week_entry(index, entry) -> dict:
-    kinds = tuple(kind for kind in SYLLABUS_HOUR_KINDS if _positive(entry.get(kind)))
+def _week_entry(index, entry, *, practical=False) -> dict:
+    kinds = tuple(
+        kind
+        for kind in SYLLABUS_HOUR_KINDS
+        if _positive(entry.get(kind)) or kind == "seminar" and practical and _positive(entry.get("practical"))
+    )
     return {"week": index, "title": str(entry.get("topic") or "").strip()[:255], "kinds": kinds}
 
 
@@ -54,7 +58,10 @@ def syllabus_week_rows(offering, *, plan_rows=None) -> list:
     ``week`` — ``Lesson.syllabus_week``-in semantikası: ``week.rows``-da 1-dən sıra, boş mövzulu sətirlər
     də sayılır (``title`` boş qalır). Yalnız ``APPROVED`` versiya; yoxdursa boş siyahı."""
     rows = _approved_plan_rows(offering) if plan_rows is None else plan_rows
-    return [_week_entry(index, entry) for index, entry in enumerate(rows, start=1)]
+    from .practical_label import offering_is_practical
+
+    practical = offering_is_practical(offering)
+    return [_week_entry(index, entry, practical=practical) for index, entry in enumerate(rows, start=1)]
 
 
 def syllabus_topic_rows(offering):

@@ -1,0 +1,54 @@
+name: Reviewed own BASE five-course syllabus bank
+on:
+  workflow_dispatch:
+    inputs:
+      batch:
+        description: "Sabit qrup: ordinary iki adi, design üç Dizayn, all beşi"
+        type: choice
+        options: [all, ordinary, design]
+        default: all
+      actor:
+        description: "Aktiv təşkilat superadmini"
+        type: string
+        required: true
+      baseline:
+        description: "Tətbiq üçün təzə dry-run SHA256"
+        type: string
+        default: ""
+      undo:
+        description: "Yalnız bu sabit düzəlişin UUID qəbzi"
+        type: string
+        default: ""
+      apply:
+        description: "Dörd öz aktiv baza sillabusunu beş fənnə bağla; akademik məlumat və yüklər dəyişmir"
+        type: boolean
+        default: false
+      confirm:
+        description: "Tətbiq və geri alma üçün APPLY"
+        type: string
+        default: ""
+permissions:
+  contents: read
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  reviewed:
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Sealed own-source version and full current preservation proof
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
+        run: python3 scripts/ops/own_base_syllabus_bank.py
+      - name: Remove private temporary source
+        if: always()
+        run: |
+          set -euo pipefail
+          docker exec educationmanagementstudentarena-app-1 rm -rf -- "/tmp/wcu-reviewed-ownbase-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" || true
+          rm -rf -- "$RUNNER_TEMP/reviewed-ownbase-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
