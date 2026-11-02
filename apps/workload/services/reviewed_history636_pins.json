@@ -1,0 +1,322 @@
+{
+  "assignments": {
+    "46d8c1b1-ff82-4037-83ce-eb44ad4a48b7": {
+      "activity": "lecture",
+      "hours": 15,
+      "id": "46d8c1b1-ff82-4037-83ce-eb44ad4a48b7",
+      "is_hourly_paid": false,
+      "row_id": "dc54bb07-e547-45d0-879a-437b819f819a",
+      "teacher_id": 7739
+    },
+    "54a9bf94-634c-4e7e-a861-985ea6b4cc4e": {
+      "activity": "lecture",
+      "hours": 15,
+      "id": "54a9bf94-634c-4e7e-a861-985ea6b4cc4e",
+      "is_hourly_paid": false,
+      "row_id": "3d0a71dc-2ea8-4487-9a7b-a5a4c6c7c9a7",
+      "teacher_id": 7739
+    },
+    "9504e4cb-bc40-46d6-b814-328eeb7a65ba": {
+      "activity": "seminar",
+      "hours": 15,
+      "id": "9504e4cb-bc40-46d6-b814-328eeb7a65ba",
+      "is_hourly_paid": false,
+      "row_id": "dc54bb07-e547-45d0-879a-437b819f819a",
+      "teacher_id": 7739
+    },
+    "9e10d653-a8ea-4e07-99af-85a15d314508": {
+      "activity": "seminar",
+      "hours": 30,
+      "id": "9e10d653-a8ea-4e07-99af-85a15d314508",
+      "is_hourly_paid": false,
+      "row_id": "3d0a71dc-2ea8-4487-9a7b-a5a4c6c7c9a7",
+      "teacher_id": 8133
+    },
+    "a52e2b5a-3723-4d35-bd54-d2f0817731ad": {
+      "activity": "seminar",
+      "hours": 15,
+      "id": "a52e2b5a-3723-4d35-bd54-d2f0817731ad",
+      "is_hourly_paid": false,
+      "row_id": "b51aef11-96a7-4ed4-9d7f-0cee3f50b7d9",
+      "teacher_id": 7739
+    }
+  },
+  "chair": "14a08ffe-b0e5-4433-a1af-e787e057a4be",
+  "courses": {
+    "823aa6ad-b389-4407-b4d4-d9880b7364ca": {
+      "group_id": "fbc305d2-67ea-47c0-b3ae-8aed14fb47db",
+      "id": "823aa6ad-b389-4407-b4d4-d9880b7364ca",
+      "instructor_id": 7739,
+      "is_active": true,
+      "lesson_hours": 30,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "subject_id": "1223109c-2757-4cb4-b521-2c53cb2ee43c"
+    },
+    "f2e0d46b-52c9-4d11-ac49-511d4e345fb7": {
+      "group_id": "0bab05bd-74fc-4ed2-965a-6cd39bf17df6",
+      "id": "f2e0d46b-52c9-4d11-ac49-511d4e345fb7",
+      "instructor_id": 7739,
+      "is_active": true,
+      "lesson_hours": 30,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "subject_id": "1223109c-2757-4cb4-b521-2c53cb2ee43c"
+    },
+    "f3369dd0-bef6-4a7d-b8cd-4d40a112aa32": {
+      "group_id": "a67f9976-0b4d-4826-9d9f-ad1f5218e680",
+      "id": "f3369dd0-bef6-4a7d-b8cd-4d40a112aa32",
+      "instructor_id": 7739,
+      "is_active": true,
+      "lesson_hours": 45,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "subject_id": "1223109c-2757-4cb4-b521-2c53cb2ee43c"
+    }
+  },
+  "group_pins": {
+    "0bab05bd-74fc-4ed2-965a-6cd39bf17df6": {
+      "code": "",
+      "id": "0bab05bd-74fc-4ed2-965a-6cd39bf17df6",
+      "is_active": true,
+      "name": "636/2 az",
+      "parent_id": "8571bc7d-dd8a-4a4c-849c-83fcd41ff705",
+      "settings": {
+        "degree_level": "bachelor",
+        "education_form": "full_time",
+        "sector": "az"
+      },
+      "unit_type": "group"
+    },
+    "a67f9976-0b4d-4826-9d9f-ad1f5218e680": {
+      "code": "",
+      "id": "a67f9976-0b4d-4826-9d9f-ad1f5218e680",
+      "is_active": true,
+      "name": "636/3 ing",
+      "parent_id": "8571bc7d-dd8a-4a4c-849c-83fcd41ff705",
+      "settings": {
+        "degree_level": "bachelor",
+        "education_form": "full_time",
+        "sector": "en"
+      },
+      "unit_type": "group"
+    },
+    "fbc305d2-67ea-47c0-b3ae-8aed14fb47db": {
+      "code": "",
+      "id": "fbc305d2-67ea-47c0-b3ae-8aed14fb47db",
+      "is_active": true,
+      "name": "636/1 az",
+      "parent_id": "8571bc7d-dd8a-4a4c-849c-83fcd41ff705",
+      "settings": {
+        "degree_level": "bachelor",
+        "education_form": "full_time",
+        "sector": "az"
+      },
+      "unit_type": "group"
+    }
+  },
+  "groups": [
+    "0bab05bd-74fc-4ed2-965a-6cd39bf17df6",
+    "a67f9976-0b4d-4826-9d9f-ad1f5218e680",
+    "fbc305d2-67ea-47c0-b3ae-8aed14fb47db"
+  ],
+  "new_assignment": "92d520e5-8156-52d4-b879-a482f64fa399",
+  "new_row": "8e72b151-8dca-537e-b24a-05189d6c224c",
+  "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+  "other_teacher": 8133,
+  "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+  "row_groups": {
+    "3d0a71dc-2ea8-4487-9a7b-a5a4c6c7c9a7": "a67f9976-0b4d-4826-9d9f-ad1f5218e680",
+    "b51aef11-96a7-4ed4-9d7f-0cee3f50b7d9": "0bab05bd-74fc-4ed2-965a-6cd39bf17df6",
+    "dc54bb07-e547-45d0-879a-437b819f819a": "fbc305d2-67ea-47c0-b3ae-8aed14fb47db"
+  },
+  "rows": {
+    "3d0a71dc-2ea8-4487-9a7b-a5a4c6c7c9a7": {
+      "consult_hours": 0,
+      "credits": "5",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "636/3 ing",
+      "id": "3d0a71dc-2ea8-4487-9a7b-a5a4c6c7c9a7",
+      "lab_plan": 0,
+      "lab_total": 0,
+      "lecture_plan": 15,
+      "lecture_total": 15,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "fall",
+      "seminar_plan": 30,
+      "seminar_total": 30,
+      "specialty_id": "8571bc7d-dd8a-4a4c-849c-83fcd41ff705",
+      "student_count": 0,
+      "subgroup_count": 1,
+      "subject_id": "1223109c-2757-4cb4-b521-2c53cb2ee43c",
+      "subject_text": "Azərbaycan tarixi",
+      "task_id": "e083925e-6320-4355-b775-467b404d4571",
+      "thesis_hours": 0,
+      "total_hours": 45,
+      "union_count": 1
+    },
+    "b51aef11-96a7-4ed4-9d7f-0cee3f50b7d9": {
+      "consult_hours": 0,
+      "credits": "5",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "636/2 az",
+      "id": "b51aef11-96a7-4ed4-9d7f-0cee3f50b7d9",
+      "lab_plan": 0,
+      "lab_total": 0,
+      "lecture_plan": 15,
+      "lecture_total": 0,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "fall",
+      "seminar_plan": 15,
+      "seminar_total": 15,
+      "specialty_id": "8571bc7d-dd8a-4a4c-849c-83fcd41ff705",
+      "student_count": 0,
+      "subgroup_count": 1,
+      "subject_id": "1223109c-2757-4cb4-b521-2c53cb2ee43c",
+      "subject_text": "Azərbaycan tarixi",
+      "task_id": "2e350e27-745c-42bd-9ca8-128041007ca3",
+      "thesis_hours": 0,
+      "total_hours": 15,
+      "union_count": 0
+    },
+    "dc54bb07-e547-45d0-879a-437b819f819a": {
+      "consult_hours": 0,
+      "credits": "5",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "636/1 az",
+      "id": "dc54bb07-e547-45d0-879a-437b819f819a",
+      "lab_plan": 0,
+      "lab_total": 0,
+      "lecture_plan": 15,
+      "lecture_total": 15,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "fall",
+      "seminar_plan": 15,
+      "seminar_total": 15,
+      "specialty_id": "8571bc7d-dd8a-4a4c-849c-83fcd41ff705",
+      "student_count": 0,
+      "subgroup_count": 1,
+      "subject_id": "1223109c-2757-4cb4-b521-2c53cb2ee43c",
+      "subject_text": "Azərbaycan tarixi",
+      "task_id": "2e350e27-745c-42bd-9ca8-128041007ca3",
+      "thesis_hours": 0,
+      "total_hours": 30,
+      "union_count": 1
+    }
+  },
+  "source": {
+    "english_seminar_source": 14256,
+    "journals": [
+      14289,
+      14255,
+      14284,
+      14256
+    ],
+    "lecture": 30,
+    "raw_lecture_total": 30,
+    "raw_seminar_total": 60,
+    "row": 39,
+    "selection": 164,
+    "seminar": 30,
+    "sha256": "57f0fdb5babaa7ab693c5623426982ac268a84691702fac6b68610f567bd3f9d",
+    "sheet": "Dərs yükü"
+  },
+  "subject_id": "1223109c-2757-4cb4-b521-2c53cb2ee43c",
+  "syllabi": {
+    "2801466c-2a19-4c7a-aad0-578e7a8db3c6": {
+      "approved_version_id": "ea83c34c-630e-4ad4-996b-0cac72b57209",
+      "author_id": 7739,
+      "current_version_id": "ea83c34c-630e-4ad4-996b-0cac72b57209",
+      "id": "2801466c-2a19-4c7a-aad0-578e7a8db3c6",
+      "is_active": true,
+      "offering_id": "f2e0d46b-52c9-4d11-ac49-511d4e345fb7",
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "reused_from_id": null,
+      "subject_id": "1223109c-2757-4cb4-b521-2c53cb2ee43c"
+    },
+    "51b20091-0c4f-4981-9c8c-3d9d3f87ee03": {
+      "approved_version_id": "59731f9f-313b-4344-997d-d206e980bfd8",
+      "author_id": 7739,
+      "current_version_id": "59731f9f-313b-4344-997d-d206e980bfd8",
+      "id": "51b20091-0c4f-4981-9c8c-3d9d3f87ee03",
+      "is_active": true,
+      "offering_id": "823aa6ad-b389-4407-b4d4-d9880b7364ca",
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "reused_from_id": null,
+      "subject_id": "1223109c-2757-4cb4-b521-2c53cb2ee43c"
+    },
+    "cf569e73-9193-45eb-95fc-7957196062da": {
+      "approved_version_id": "33d64bfb-7c41-40e7-bafd-05721666c9c7",
+      "author_id": 8133,
+      "current_version_id": "33d64bfb-7c41-40e7-bafd-05721666c9c7",
+      "id": "cf569e73-9193-45eb-95fc-7957196062da",
+      "is_active": true,
+      "offering_id": "f3369dd0-bef6-4a7d-b8cd-4d40a112aa32",
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "reused_from_id": null,
+      "subject_id": "1223109c-2757-4cb4-b521-2c53cb2ee43c"
+    }
+  },
+  "task": "2e350e27-745c-42bd-9ca8-128041007ca3",
+  "teacher": 7739,
+  "usernames": {
+    "7739": "sevinc.nasibova",
+    "8133": "nuride.eliyeva.206_2qx"
+  },
+  "versions": {
+    "33d64bfb-7c41-40e7-bafd-05721666c9c7": {
+      "after_plan": {
+        "seminar": 30
+      },
+      "body_sha256": "be8cf760b0ea04c543b93512185b4be8dc519264b6272320bbfeea40e3652c84",
+      "plan_hours": {
+        "lecture": 15,
+        "seminar": 30
+      },
+      "status": "approved",
+      "syllabus_id": "cf569e73-9193-45eb-95fc-7957196062da"
+    },
+    "59731f9f-313b-4344-997d-d206e980bfd8": {
+      "after_plan": {
+        "lecture": 30,
+        "seminar": 30
+      },
+      "body_sha256": "1489685b7cb8f2965826dae3fc29b2c297d894a30a57e8c3728979ba04388766",
+      "plan_hours": {
+        "lecture": 15,
+        "seminar": 15
+      },
+      "status": "approved",
+      "syllabus_id": "51b20091-0c4f-4981-9c8c-3d9d3f87ee03"
+    },
+    "ea83c34c-630e-4ad4-996b-0cac72b57209": {
+      "after_plan": {
+        "lecture": 30,
+        "seminar": 30
+      },
+      "body_sha256": "1489685b7cb8f2965826dae3fc29b2c297d894a30a57e8c3728979ba04388766",
+      "plan_hours": {
+        "lecture": 15,
+        "seminar": 15
+      },
+      "status": "approved",
+      "syllabus_id": "2801466c-2a19-4c7a-aad0-578e7a8db3c6"
+    }
+  },
+  "year": "2026/2027"
+}
