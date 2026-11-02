@@ -80,7 +80,7 @@ Giriş balı və standartın hissələri eyni kanonik hesabdan gəlir.{% endcomm
                 </td>
                 <td class="jd2-fb-qeyd">
                     {% if row.barred %}<span class="jd2-qeyd jd2-qeyd--barred">{% trans "Qayıb limiti keçib — imtahana buraxılmır" context "registrar.journal" %}</span>
-                    {% elif row.warning %}<span class="jd2-qeyd jd2-qeyd--warn">{% trans "Qayıb limitinə yaxın" context "registrar.journal" %} ({{ row.absence_hours }}/{{ final_breakdown.allowed_absence|floatformat:0 }} {% trans "saat" context "registrar.journal" %})</span>
+                    {% elif row.warning %}<span class="jd2-qeyd jd2-qeyd--warn">{% trans "Qayıb limitinə yaxın" context "registrar.journal" %} ({{ row.absence_hours }}/{{ row.allowed_absence|floatformat:"-2" }} {% trans "saat" context "registrar.journal" %})</span>
                     {% else %}<span class="jd2-qeyd">—</span>{% endif %}
                     {% comment %}Çox cəhd (M2) + apellyasiya sətirləri (Audit 2026-09-28 EXA-03).{% endcomment %}
                     {% include "registrar/partials/_exam_attempt_history.html" with attempts=row.attempts %}

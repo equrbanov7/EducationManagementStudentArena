@@ -99,3 +99,23 @@ def attendance_score_from_count(
     :func:`attendance_score` (real ``absence_hours``) üstündür."""
     absent_hours = _as_decimal(absence_count) * HOURS_PER_ABSENCE
     return attendance_score(lesson_hours, absent_hours, limit_percent=limit_percent, exempt=exempt)
+
+
+def qb_display(absence_hours, allowed_hours):
+    """Saat qaydasının q/b ilə GÖSTƏRİŞİ: ``{"absence_count", "limit_count" | None}``.
+
+    Qərar saatladır (:func:`attendance_score`, ``exam_eligibility.resolve``), amma tələbə
+    və müəllim qayıbı q/b ilə sayır: 1 q/b = bir 2 saatlıq dərs (:data:`HOURS_PER_ABSENCE`).
+    Tələbə səthləri əvvəl xam SAATI və ``floatformat:0`` ilə YUXARI yuvarlanmış saat
+    limitini göstərirdi — 1 q/b «2», 30 saatlıq fəndə kəsilmiş 4 q/b isə «8 / 8 saat» kimi
+    oxunurdu (2026-11 tələbə müraciətləri).  İcazəli q/b müəllim qridinin «limit N q/b»
+    sütunu kimi AŞAĞI yuvarlanır, ona görə 2 saatlıq dərslərdə
+    ``buraxılmış > icazəli`` ⇔ saat qaydası üzrə ``barred`` (qayda dəyişmir).
+    ``allowed_hours=None`` (məxrəc naməlum) → icazəli q/b ``None``.
+    """
+    per_qb = Decimal(HOURS_PER_ABSENCE)
+    count = _as_decimal(absence_hours) / per_qb
+    if count == count.to_integral_value():
+        count = count.to_integral_value()  # «4», «4.00» yox
+    limit = None if allowed_hours is None else int(_as_decimal(allowed_hours) // per_qb)
+    return {"absence_count": count, "limit_count": limit}

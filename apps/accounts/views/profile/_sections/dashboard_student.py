@@ -18,10 +18,9 @@ Rəqəmlər ``apps.registrar.public.dashboard_data.student_subjects``-dən gəli
 from __future__ import annotations
 
 from collections import Counter
+from decimal import Decimal
 
 from django.utils.translation import pgettext, pgettext_lazy
-
-from apps.registrar.public import absence_usage
 
 from . import dashboard_lessons as lessons
 from .dashboard_widgets import (
@@ -126,19 +125,18 @@ def student_today(*, organization, record, period, allowed_sections, today, now)
 def _attendance_row(row, period) -> dict:
     status = row["status"]
     label, tone = STATUS_CHIPS.get(status, STATUS_CHIPS["unknown"])
-    absent, allowed = absence_usage(row["eligibility"])
-    if row["eligibility"].get("limit_unit") == "qb_count":
+    # Göstəriş q/b ilədir (1 q/b = 2 saatlıq dərs) — müəllim qridi və rəsmi cədvəllə eyni vahid;
+    # saat cəmi «1 q/b» əvəzinə «2» kimi oxunurdu (2026-11 müraciətləri). Qərar ``resolve()``-dadır.
+    eligibility = row["eligibility"]
+    absent = Decimal(str(eligibility.get("absence_count") or 0))
+    limit = eligibility.get("limit_count")
+    if limit is not None and eligibility.get("hours_known", True):
+        allowed = Decimal(limit)
         value = f"{pgettext('registrar.records', 'Q/b')} {fmt_number(absent)} / {fmt_number(allowed)}"
-        bar = {"value": plain_number(min(absent, allowed)), "max": plain_number(allowed)}
-    elif allowed > 0:
-        value = pgettext(_CTX, "qayıb %(absent)s / icazə %(allowed)s saat") % {
-            "absent": fmt_number(absent),
-            "allowed": fmt_number(allowed),
-        }
-        bar = {"value": plain_number(min(absent, allowed)), "max": plain_number(allowed)}
+        bar = {"value": plain_number(min(absent, allowed)), "max": plain_number(allowed)} if allowed > 0 else None
     else:
         value = pgettext(_CTX, "qayıb %(absent)s saat · fənnin dərs saatı təyin olunmayıb") % {
-            "absent": fmt_number(absent)
+            "absent": fmt_number(Decimal(str(eligibility.get("absence_hours") or 0)))
         }
         bar = None
     return {
@@ -154,7 +152,7 @@ def _attendance_row(row, period) -> dict:
 
 
 def student_attendance(*, record, period, subjects, allowed_sections) -> dict | None:
-    """Hər fənn üçün «qayıb X / icazə Y saat» + limit zolağı + status çipi."""
+    """Hər fənn üçün «Q/b X / Y» (1 q/b = 2 saatlıq dərs) + limit zolağı + status çipi."""
     if "my-journal" not in allowed_sections:
         return None
     key, title, icon = "student-attendance", pgettext(_CTX, "Davamiyyət — fənlər üzrə"), "fa-user-check"
