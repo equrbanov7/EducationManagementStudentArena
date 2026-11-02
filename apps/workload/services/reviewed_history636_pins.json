@@ -273,6 +273,10 @@
     }
   },
   "task": "2e350e27-745c-42bd-9ca8-128041007ca3",
+  "task_chairs": {
+    "2e350e27-745c-42bd-9ca8-128041007ca3": "14a08ffe-b0e5-4433-a1af-e787e057a4be",
+    "e083925e-6320-4355-b775-467b404d4571": "cc6b3bcb-c318-4faf-b929-37b5339b8ca4"
+  },
   "teacher": 7739,
   "usernames": {
     "7739": "sevinc.nasibova",

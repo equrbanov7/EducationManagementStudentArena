@@ -87,6 +87,7 @@ class History636PartitionTests(TestCase):
             new_row=str(uuid.uuid4()),
             new_assignment=str(uuid.uuid4()),
         )
+        pin["task_chairs"] = {str(self.task.pk): str(self.task.chair_id)}
         pin["group_pins"] = {
             r["id"]: r for r in bounded(apps.get_model("organizations.OrgUnit").objects.filter(pk__in=pin["groups"]))
         }
@@ -240,6 +241,7 @@ class History636PartitionTests(TestCase):
         activate_member(self.org, self.other, "teacher", permissions=TEACHER_PERMS, scope_unit=foreign["chair"])
         type(self.third).objects.filter(pk=self.third.pk).update(task=task)
         spec.PINS["rows"][str(self.third.pk)]["task_id"] = str(task.pk)
+        spec.PINS["task_chairs"][str(task.pk)] = str(task.chair_id)
         memberships = list(apps.get_model("organizations.Membership").objects.order_by("pk").values())
         self.apply()
         self.third.refresh_from_db()

@@ -46,7 +46,10 @@ def snapshot(org, actor):
     tasks = bounded(model("workload.TeachingTask").objects.filter(organization=org, pk__in=task_ids), cap=2)
     require(
         {t["id"] for t in tasks} == task_ids
-        and all(t["status"] == "amended" and t["academic_year"] == p["year"] for t in tasks),
+        and all(
+            t["status"] == "amended" and t["academic_year"] == p["year"] and t["chair_id"] == p["task_chairs"][t["id"]]
+            for t in tasks
+        ),
         "history636_tasks_changed",
     )
     allocation_actor = resolve_actor(actor, org)
