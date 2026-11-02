@@ -38,10 +38,22 @@ def history_restore(request, offering_id):
     except WorkloadDenied:
         raise Http404 from None
     initial, provenance = previous_plan(course)
+    if initial:
+        initial["reason"] = "Tarixi jurnalın əvvəlki təsdiqlənmiş dərs yükü bərpa olunur."
     form = RestoreForm(request.POST if request.method == "POST" else None, initial=initial)
     sources = approved_restore_sources(course, context_for=syllabus_context)
     form.fields["syllabus"].choices = [("", "Avtomatik: yalnız bir dəqiq uyğun mənbə varsa")] + [
-        (str(s.pk), str(s.offering.group.name) + " · " + str(s.approved_version.plan_hours)) for s in sources
+        (
+            str(s.pk),
+            str(s.offering.group.name)
+            + " · "
+            + " · ".join(
+                str(Activity(kind).label) + ": " + str(s.approved_version.plan_hours.get(kind, 0))
+                for kind in KINDS
+                if s.approved_version.plan_hours.get(kind, 0)
+            ),
+        )
+        for s in sources
     ]
     own_source = next((s for s in sources if s.offering_id == course.pk), None)
     if own_source is not None or len(sources) == 1:
@@ -51,6 +63,11 @@ def history_restore(request, offering_id):
     form.fields["chair"].choices = [(str(chair.pk), chair.name) for chair in chairs]
     if len(chairs) == 1:
         form.initial["chair"] = str(chairs[0].pk)
+    for name, field in form.fields.items():
+        field.widget.attrs["class"] = "form-select" if isinstance(field.widget, forms.Select) else "form-control"
+        if form.is_bound and form[name].errors:
+            field.widget.attrs["aria-describedby"] = "restore-" + name + "-errors"
+            field.widget.attrs["aria-invalid"] = "true"
     if request.method == "POST" and form.is_valid():
         try:
             restore(

@@ -1,17 +1,35 @@
-{% extends "base.html" %}{% load i18n %}
+{% extends "base.html" %}{% load i18n static %}
 {% block title %}{% trans "Cari yükə bərpa et" context "workload.history_restore" %}{% endblock %}
+{% block extraCss %}<link rel="stylesheet" href="{% static 'workload/css/history_restore.css' %}">{% endblock %}
 {% block content %}
-<section class="container py-4" style="max-width: 760px;">
-  <div class="card"><div class="card-body">
-    <h1 class="h4">{% trans "Tarixi jurnalın cari yükü" context "workload.history_restore" %}</h1>
-    <p><strong>{{ offering.instructor.get_full_name }}</strong> · {{ offering.group.name }} · {{ offering.subject.name }}</p>
-    <p>{% trans "Ümumi saat" context "workload.history_restore" %}: <strong>{{ offering.lesson_hours }}</strong></p>
+<section class="history-restore">
+  <a class="history-restore__back" href="{% url 'registrar:journal_detail' offering.pk %}?own_history=1">← {% trans "Geri" context "workload.history_restore" %}</a>
+  <header class="history-restore__header">
+    <span class="history-restore__icon" aria-hidden="true"><i class="fas fa-book-open"></i></span>
+    <div><h1>{% trans "Tarixi jurnalın cari yükü" context "workload.history_restore" %}</h1><p>{{ offering.instructor.get_full_name }} · {{ offering.group.name }}</p></div>
+  </header>
+  <div class="history-restore__card">
+    <div class="history-restore__subject"><strong>{{ offering.subject.name }}</strong><span>{% trans "Ümumi saat" context "workload.history_restore" %}: <b>{{ offering.lesson_hours }}</b></span></div>
     <p>{% trans "Dərs növlərinin plan saatlarını ayrıca göstərin. Əvvəlki qeydlər dəyişdirilmir." context "workload.history_restore" %}</p>
-    <p>{{ plan_provenance }}</p>
-    <form method="post">{% csrf_token %}{{ restore_form.as_p }}
-      <button class="btn btn-primary" type="submit">{% trans "Cari yükə bərpa et" context "workload.history_restore" %}</button>
-      <a class="btn btn-outline-secondary" href="{% url 'registrar:journal_detail' offering.pk %}?own_history=1">{% trans "Geri" context "workload.history_restore" %}</a>
+    <p class="history-restore__source">{{ plan_provenance }}</p>
+    {% if restore_form.errors %}<div class="history-restore__errors" role="alert" tabindex="-1" data-restore-errors>
+      {% for error in restore_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+      {% for field in restore_form %}{% for error in field.errors %}<p><a href="#{{ field.id_for_label }}">{{ field.label }}</a>: {{ error }}</p>{% endfor %}{% endfor %}
+    </div>{% endif %}
+    <form method="post" data-history-restore>{% csrf_token %}
+      <div class="history-restore__grid">
+      {% for field in restore_form %}<div class="history-restore__field{% if field.name == 'reason' or field.name == 'syllabus' or field.name == 'chair' %} history-restore__wide{% endif %}">
+        <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} <span aria-hidden="true">*</span>{% endif %}</label>
+        {{ field }}
+        {% if field.errors %}<div id="restore-{{ field.name }}-errors" class="history-restore__field-errors">{{ field.errors }}</div>{% endif %}
+      </div>{% endfor %}
+      </div>
+      <div class="history-restore__actions">
+        <a class="btn btn-outline-secondary" href="{% url 'registrar:journal_detail' offering.pk %}?own_history=1">{% trans "Geri" context "workload.history_restore" %}</a>
+        <button class="btn btn-primary" type="submit" data-restore-submit><span class="history-restore__spinner" aria-hidden="true"></span>{% trans "Cari yükə bərpa et" context "workload.history_restore" %}</button>
+      </div>
     </form>
-  </div></div>
+  </div>
 </section>
 {% endblock %}
+{% block extraJs %}<script src="{% static 'workload/js/history_restore.js' %}" defer></script>{% endblock %}

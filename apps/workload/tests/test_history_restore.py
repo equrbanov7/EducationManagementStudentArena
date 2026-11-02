@@ -442,3 +442,49 @@ class HistoryRestoreTest(TestCase):
             service.attach_actions(request, [self.offering])
             self.assertFalse(hasattr(self.offering, "history_load_restore_plan"))
             self.assertEqual(TeachingTaskRow.objects.count(), 1)
+
+    def test_actual_full_view_as_middleware_post_restores_and_attributes_real_actor(self):
+        with bypass_rls():
+            make_row(self.task, self.stack, lecture_total=45, seminar_total=30)
+        self.client.force_login(self.admin)
+        session = self.client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+        started = self.client.post(reverse("accounts:view_as_start"), {"user_id": self.teacher.pk, "org": self.org.pk})
+        self.assertEqual(started.status_code, 302)
+        self.assertIn("view_as_state", self.client.session)
+        url = reverse("workload:history_restore", args=[self.offering.pk])
+        page = self.client.get(url)
+        self.assertEqual(page.status_code, 200)
+        response = self.client.post(
+            url,
+            {
+                "chair": self.stack["chair"].pk,
+                **self.hours,
+                "reason": "Previous exact workload restored by authorized operator.",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        with bypass_rls():
+            self.assertEqual(TeacherAssignment.objects.count(), 2)
+            self.assertEqual(set(TeacherAssignment.objects.values_list("assigned_by_id", flat=True)), {self.admin.pk})
+
+    def test_restore_validation_is_visible_and_source_labels_are_not_python_dicts(self):
+        with bypass_rls():
+            self.syllabus_source()
+        self.client.force_login(self.admin)
+        session = self.client.session
+        session["active_organization_id"] = str(self.org.pk)
+        session.save()
+        url = reverse("workload:history_restore", args=[self.offering.pk])
+        page = self.client.get(url)
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, 'class="form-control"')
+        self.assertContains(page, "Mühazirə: 45")
+        self.assertNotContains(page, "&#x27;lecture&#x27;")
+        self.assertTrue(page.context["restore_form"].initial["reason"])
+        response = self.client.post(url, {"chair": self.stack["chair"].pk, **self.hours, "reason": ""})
+        self.assertContains(response, 'role="alert"')
+        self.assertContains(response, 'href="#id_reason"')
+        with bypass_rls():
+            self.assertEqual(TeacherAssignment.objects.count(), 0)
