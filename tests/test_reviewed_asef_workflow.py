@@ -26,7 +26,7 @@ def payload(**changes):
             "receipt": "none",
             "protected": "b" * 64,
             "lessons": 30,
-            "marks": 432,
+            "marks": 485,
             "enrollments": 75,
             "stream_hours": 60,
             "journals": 3,
@@ -41,7 +41,14 @@ def test_fixed_dry_summary():
 
 @pytest.mark.parametrize(
     "changes",
-    [{"marks": 431}, {"lessons": True}, {"arbitrary": "secret"}, {"protected": "oops"}, {"status": "applied"}],
+    [
+        {"marks": 432},
+        {"marks": 484},
+        {"lessons": True},
+        {"arbitrary": "secret"},
+        {"protected": "oops"},
+        {"status": "applied"},
+    ],
 )
 def test_changed_summary_refused(changes):
     with pytest.raises(ValueError):
@@ -80,3 +87,13 @@ def test_apply_requires_fresh_baseline_and_confirmation():
     with pytest.raises(ValueError):
         operator.inputs({"actor": "operator", "apply": True})
     assert operator.inputs({"actor": "operator", "apply": True, "baseline": "a" * 64, "confirm": "APPLY"})[2]
+
+
+def test_native_pinned_485_mark_result_is_accepted_by_host_transport():
+    from apps.workload.services import reviewed_asef_stream_repair as native
+
+    with patch.object(native.state, "protected", return_value={}):
+        result = native.result("dry_run", {}, "a" * 64)
+    assert (result["lessons"], result["marks"], result["enrollments"]) == (30, 485, 75)
+    output = operator.summary(operator.PREFIX + json.dumps(result), apply=False, undo="")
+    assert json.loads(output[len(operator.PREFIX) :])["marks"] == 485

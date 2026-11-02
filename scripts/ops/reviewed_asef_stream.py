@@ -17,7 +17,7 @@ def summary(raw, *, apply, undo, baseline=""):
     if not isinstance(raw, str) or len(raw) > 4096 or len(raw.splitlines()) != 1 or not raw.startswith(PREFIX):
         raise ValueError("asef_fixed_summary_required")
     result = json.loads(raw[len(PREFIX) :])
-    fixed = {"lessons": 30, "marks": 432, "enrollments": 75, "stream_hours": 60, "journals": 3}
+    fixed = {"lessons": 30, "marks": 485, "enrollments": 75, "stream_hours": 60, "journals": 3}
     keys = {*fixed, "status", "applied", "count", "baseline", "receipt", "protected"}
     if not isinstance(result, dict) or set(result) != keys:
         raise ValueError("asef_summary_fields_changed")
