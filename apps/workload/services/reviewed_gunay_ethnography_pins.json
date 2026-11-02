@@ -1,0 +1,251 @@
+{
+  "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+  "teacher": 7847,
+  "chair": "14a08ffe-b0e5-4433-a1af-e787e057a4be",
+  "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+  "subject": "b0c3647f-56d4-46f1-b5d9-314c30e8b8df",
+  "source_sha256": "57f0fdb5babaa7ab693c5623426982ac268a84691702fac6b68610f567bd3f9d",
+  "source_sheet": "Dərs yükü",
+  "source_row": 10,
+  "rows": {
+    "10c8a209-c0df-4cb8-a7eb-075ecb257c10": {
+      "consult_hours": 0,
+      "credits": "4",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "536 TB2",
+      "id": "10c8a209-c0df-4cb8-a7eb-075ecb257c10",
+      "lab_plan": 0,
+      "lab_total": 0,
+      "lecture_plan": 10,
+      "lecture_total": 10,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "fall",
+      "seminar_plan": 5,
+      "seminar_total": 5,
+      "specialty_id": "6544c0e7-37ed-4f58-b3e2-e766e39478d5",
+      "student_count": 0,
+      "subgroup_count": 1,
+      "subject_id": "b0c3647f-56d4-46f1-b5d9-314c30e8b8df",
+      "subject_text": "Etnoqrafiya",
+      "task_id": "2e350e27-745c-42bd-9ca8-128041007ca3",
+      "thesis_hours": 0,
+      "total_hours": 15,
+      "union_count": 1
+    },
+    "669b2fa9-ac44-4bff-93d5-41a18da1fdad": {
+      "consult_hours": 0,
+      "credits": "4",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "536 TB1",
+      "id": "669b2fa9-ac44-4bff-93d5-41a18da1fdad",
+      "lab_plan": 0,
+      "lab_total": 0,
+      "lecture_plan": 10,
+      "lecture_total": 10,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "fall",
+      "seminar_plan": 5,
+      "seminar_total": 5,
+      "specialty_id": "6544c0e7-37ed-4f58-b3e2-e766e39478d5",
+      "student_count": 0,
+      "subgroup_count": 1,
+      "subject_id": "b0c3647f-56d4-46f1-b5d9-314c30e8b8df",
+      "subject_text": "Etnoqrafiya",
+      "task_id": "2e350e27-745c-42bd-9ca8-128041007ca3",
+      "thesis_hours": 0,
+      "total_hours": 15,
+      "union_count": 1
+    },
+    "7b4209f5-8c62-4011-90de-f535bc8bab68": {
+      "consult_hours": 0,
+      "credits": "4",
+      "degree_level": "bachelor",
+      "education_form": "eyani",
+      "exam_hours": 0,
+      "groups_text": "536 TB1, 536 TB2",
+      "id": "7b4209f5-8c62-4011-90de-f535bc8bab68",
+      "lab_plan": 0,
+      "lab_total": 0,
+      "lecture_plan": 20,
+      "lecture_total": 20,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "postgrad_hours": 0,
+      "practice_production_hours": 0,
+      "practice_research_hours": 0,
+      "row_kind": "teaching",
+      "season": "fall",
+      "seminar_plan": 10,
+      "seminar_total": 10,
+      "specialty_id": "6544c0e7-37ed-4f58-b3e2-e766e39478d5",
+      "student_count": 0,
+      "subgroup_count": 1,
+      "subject_id": "b0c3647f-56d4-46f1-b5d9-314c30e8b8df",
+      "subject_text": "Etnoqrafiya",
+      "task_id": "2e350e27-745c-42bd-9ca8-128041007ca3",
+      "thesis_hours": 0,
+      "total_hours": 30,
+      "union_count": 2
+    }
+  },
+  "groups": {
+    "7b4209f5-8c62-4011-90de-f535bc8bab68": [
+      "68a74d63-d9ee-4497-a0d4-d211c53a506b",
+      "7b0bf86e-d20e-4dba-b41b-0d88a1f04141"
+    ],
+    "669b2fa9-ac44-4bff-93d5-41a18da1fdad": [
+      "68a74d63-d9ee-4497-a0d4-d211c53a506b"
+    ],
+    "10c8a209-c0df-4cb8-a7eb-075ecb257c10": [
+      "7b0bf86e-d20e-4dba-b41b-0d88a1f04141"
+    ]
+  },
+  "assignments": {
+    "1ef83b24-b35e-45e6-9970-f79c889eb4ba": {
+      "activity": "seminar",
+      "hours": 5,
+      "id": "1ef83b24-b35e-45e6-9970-f79c889eb4ba",
+      "is_hourly_paid": false,
+      "row_id": "669b2fa9-ac44-4bff-93d5-41a18da1fdad",
+      "teacher_id": 7847
+    },
+    "3392a32b-e09b-47e3-84ef-aeab1908685e": {
+      "activity": "seminar",
+      "hours": 10,
+      "id": "3392a32b-e09b-47e3-84ef-aeab1908685e",
+      "is_hourly_paid": false,
+      "row_id": "7b4209f5-8c62-4011-90de-f535bc8bab68",
+      "teacher_id": 7847
+    },
+    "535fcbc5-a65a-4f27-aebc-48ffe940628c": {
+      "activity": "lecture",
+      "hours": 10,
+      "id": "535fcbc5-a65a-4f27-aebc-48ffe940628c",
+      "is_hourly_paid": false,
+      "row_id": "669b2fa9-ac44-4bff-93d5-41a18da1fdad",
+      "teacher_id": 7847
+    },
+    "5ab7bb9a-00be-41c6-8060-33fda623ca12": {
+      "activity": "lecture",
+      "hours": 10,
+      "id": "5ab7bb9a-00be-41c6-8060-33fda623ca12",
+      "is_hourly_paid": false,
+      "row_id": "10c8a209-c0df-4cb8-a7eb-075ecb257c10",
+      "teacher_id": 7847
+    },
+    "6301f930-6aea-44e7-9e0a-b02557b866ff": {
+      "activity": "lecture",
+      "hours": 20,
+      "id": "6301f930-6aea-44e7-9e0a-b02557b866ff",
+      "is_hourly_paid": false,
+      "row_id": "7b4209f5-8c62-4011-90de-f535bc8bab68",
+      "teacher_id": 7847
+    },
+    "82afb582-81ae-4526-9d51-ab23a357fa5f": {
+      "activity": "seminar",
+      "hours": 5,
+      "id": "82afb582-81ae-4526-9d51-ab23a357fa5f",
+      "is_hourly_paid": false,
+      "row_id": "10c8a209-c0df-4cb8-a7eb-075ecb257c10",
+      "teacher_id": 7847
+    }
+  },
+  "courses": {
+    "56a45d70-be00-4b1c-9d91-03072185e241": {
+      "group_id": "68a74d63-d9ee-4497-a0d4-d211c53a506b",
+      "id": "56a45d70-be00-4b1c-9d91-03072185e241",
+      "instructor_id": 7847,
+      "is_active": true,
+      "lesson_hours": 30,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "subject_id": "b0c3647f-56d4-46f1-b5d9-314c30e8b8df"
+    },
+    "914bfb49-b6b5-4a14-b1eb-183f879624a6": {
+      "group_id": "7b0bf86e-d20e-4dba-b41b-0d88a1f04141",
+      "id": "914bfb49-b6b5-4a14-b1eb-183f879624a6",
+      "instructor_id": 7847,
+      "is_active": true,
+      "lesson_hours": 30,
+      "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+      "subject_id": "b0c3647f-56d4-46f1-b5d9-314c30e8b8df"
+    }
+  },
+  "removed": [
+    "3392a32b-e09b-47e3-84ef-aeab1908685e",
+    "535fcbc5-a65a-4f27-aebc-48ffe940628c",
+    "5ab7bb9a-00be-41c6-8060-33fda623ca12"
+  ],
+  "after_hours": {
+    "6301f930-6aea-44e7-9e0a-b02557b866ff": 30,
+    "1ef83b24-b35e-45e6-9970-f79c889eb4ba": 15,
+    "82afb582-81ae-4526-9d51-ab23a357fa5f": 15
+  },
+  "row_after": {
+    "7b4209f5-8c62-4011-90de-f535bc8bab68": {
+      "lecture_plan": 30,
+      "lecture_total": 30,
+      "seminar_plan": 0,
+      "seminar_total": 0,
+      "total_hours": 30
+    },
+    "669b2fa9-ac44-4bff-93d5-41a18da1fdad": {
+      "lecture_plan": 0,
+      "lecture_total": 0,
+      "seminar_plan": 15,
+      "seminar_total": 15,
+      "total_hours": 15
+    },
+    "10c8a209-c0df-4cb8-a7eb-075ecb257c10": {
+      "lecture_plan": 0,
+      "lecture_total": 0,
+      "seminar_plan": 15,
+      "seminar_total": 15,
+      "total_hours": 15
+    }
+  },
+  "typed_source_proof": {
+    "worker": 311,
+    "subject": 1672,
+    "semester": 14,
+    "syllabus": 2032,
+    "syllabus_declared_hours": 45,
+    "shared_lecture": {
+      "journal": 14989,
+      "groups": [
+        961,
+        962
+      ],
+      "kind": 1,
+      "hours": 30
+    },
+    "separate_seminars": [
+      {
+        "journal": 14990,
+        "groups": [
+          961
+        ],
+        "kind": 0,
+        "hours": 15
+      },
+      {
+        "journal": 14991,
+        "groups": [
+          962
+        ],
+        "kind": 0,
+        "hours": 15
+      }
+    ]
+  }
+}
