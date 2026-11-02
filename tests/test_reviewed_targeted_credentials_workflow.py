@@ -83,7 +83,8 @@ def test_workflow_encrypted_only():
     assert "persist-credentials: false" in text
 
 
-def test_local_decoder_authenticated_csv_roundtrip_and_tamper(monkeypatch):
+@pytest.mark.parametrize("batch", ["staff-seven", "magistr-two", "behruz-one", "turkan-one"])
+def test_local_decoder_authenticated_csv_roundtrip_and_tamper(monkeypatch, batch):
     import hashlib
 
     from cryptography.hazmat.primitives import serialization
@@ -105,9 +106,16 @@ def test_local_decoder_authenticated_csv_roundtrip_and_tamper(monkeypatch):
         serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption()
     )
     csv = "ad_soyad_ata_adi,username,ilkin_parol\nPrivate Name,private.user,private-password\n"
-    payload = dict(format="wcu-targeted-credentials/1", batch="magistr-two", baseline="a" * 64, csv=csv)
+    assert decoder.COUNTS == op.COUNTS
+    payload = dict(format="wcu-targeted-credentials/1", batch=batch, baseline="a" * 64, csv=csv)
     envelope = encrypt_export(payload, public, fingerprint=finger)
     assert decoder.decode(json.dumps(envelope).encode(), private) == csv
+    for invalid in (
+        {**payload, "batch": "turkan-all"},
+        {**payload, "batch": "turkan-one", "csv": csv + "Other Name,other.user,synthetic-only\n"},
+    ):
+        with pytest.raises(ValueError):
+            decoder.decode(json.dumps(encrypt_export(invalid, public, fingerprint=finger)).encode(), private)
     envelope["ciphertext"] = "invalid"
     with pytest.raises(binascii.Error):
         decoder.decode(json.dumps(envelope).encode(), private)

@@ -15,7 +15,7 @@ from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 FINGERPRINT = "f21b002d94fdd65fb346e557e6eb85109f60bda3afa8d8c5a2a14e4b9fc922bf"
-COUNTS = {"staff-seven": 7, "magistr-two": 2, "behruz-one": 1}
+COUNTS = {"staff-seven": 7, "magistr-two": 2, "behruz-one": 1, "turkan-one": 1}
 
 
 def decode(encoded, private_bytes):
