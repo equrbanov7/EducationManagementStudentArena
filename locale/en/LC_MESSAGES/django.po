@@ -112214,3 +112214,19 @@ msgstr "Semester"
 msgctxt "registrar.language_cohort"
 msgid "Fənn"
 msgstr "Subject"
+
+msgctxt "applications"
+msgid "Cavab yazmadan bağla"
+msgstr "Close without replying"
+
+msgctxt "applications"
+msgid "Gözləyən müraciəti bağla"
+msgstr "Close waiting application"
+
+msgctxt "applications"
+msgid "Müraciət sahibindən əlavə məlumat gözlənilir; {n} iş günü cavab gəlməsə bağlanacaq."
+msgstr "Additional information is awaited from the applicant; the application will close if there is no reply within {n} working days."
+
+msgctxt "applications"
+msgid "Əlavə məlumat gözlənilən müraciət bağlanacaq; həll olunmuş sayılmayacaq."
+msgstr "The application awaiting additional information will be closed; it will not count as resolved."

@@ -113271,3 +113271,19 @@ msgstr "Semester"
 msgctxt "registrar.language_cohort"
 msgid "Fənn"
 msgstr "Fach"
+
+msgctxt "applications"
+msgid "Cavab yazmadan bağla"
+msgstr "Ohne Antwort schließen"
+
+msgctxt "applications"
+msgid "Gözləyən müraciəti bağla"
+msgstr "Wartenden Antrag schließen"
+
+msgctxt "applications"
+msgid "Müraciət sahibindən əlavə məlumat gözlənilir; {n} iş günü cavab gəlməsə bağlanacaq."
+msgstr "Zusätzliche Informationen vom Antragsteller werden erwartet; ohne Antwort innerhalb von {n} Arbeitstagen wird der Antrag geschlossen."
+
+msgctxt "applications"
+msgid "Əlavə məlumat gözlənilən müraciət bağlanacaq; həll olunmuş sayılmayacaq."
+msgstr "Der Antrag, für den zusätzliche Informationen erwartet werden, wird geschlossen; er gilt nicht als gelöst."

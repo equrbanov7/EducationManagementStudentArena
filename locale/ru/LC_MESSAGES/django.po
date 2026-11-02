@@ -112409,3 +112409,19 @@ msgstr "Семестр"
 msgctxt "registrar.language_cohort"
 msgid "Fənn"
 msgstr "Предмет"
+
+msgctxt "applications"
+msgid "Cavab yazmadan bağla"
+msgstr "Закрыть без ответа"
+
+msgctxt "applications"
+msgid "Gözləyən müraciəti bağla"
+msgstr "Закрыть ожидающее обращение"
+
+msgctxt "applications"
+msgid "Müraciət sahibindən əlavə məlumat gözlənilir; {n} iş günü cavab gəlməsə bağlanacaq."
+msgstr "Ожидается дополнительная информация от заявителя; обращение будет закрыто при отсутствии ответа в течение {n} рабочих дней."
+
+msgctxt "applications"
+msgid "Əlavə məlumat gözlənilən müraciət bağlanacaq; həll olunmuş sayılmayacaq."
+msgstr "Обращение, ожидающее дополнительной информации, будет закрыто; оно не будет считаться решённым."

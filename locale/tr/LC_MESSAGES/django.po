@@ -111600,3 +111600,19 @@ msgstr "Dönem"
 msgctxt "registrar.language_cohort"
 msgid "Fənn"
 msgstr "Ders"
+
+msgctxt "applications"
+msgid "Cavab yazmadan bağla"
+msgstr "Yanıt yazmadan kapat"
+
+msgctxt "applications"
+msgid "Gözləyən müraciəti bağla"
+msgstr "Bekleyen başvuruyu kapat"
+
+msgctxt "applications"
+msgid "Müraciət sahibindən əlavə məlumat gözlənilir; {n} iş günü cavab gəlməsə bağlanacaq."
+msgstr "Başvuru sahibinden ek bilgi bekleniyor; {n} iş günü içinde yanıt gelmezse başvuru kapatılacak."
+
+msgctxt "applications"
+msgid "Əlavə məlumat gözlənilən müraciət bağlanacaq; həll olunmuş sayılmayacaq."
+msgstr "Ek bilgi bekleyen başvuru kapatılacak; çözülmüş sayılmayacak."

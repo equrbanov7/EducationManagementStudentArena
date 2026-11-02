@@ -111699,3 +111699,19 @@ msgstr "Semestr"
 msgctxt "registrar.language_cohort"
 msgid "Fənn"
 msgstr "Fənn"
+
+msgctxt "applications"
+msgid "Cavab yazmadan bağla"
+msgstr "Cavab yazmadan bağla"
+
+msgctxt "applications"
+msgid "Gözləyən müraciəti bağla"
+msgstr "Gözləyən müraciəti bağla"
+
+msgctxt "applications"
+msgid "Müraciət sahibindən əlavə məlumat gözlənilir; {n} iş günü cavab gəlməsə bağlanacaq."
+msgstr "Müraciət sahibindən əlavə məlumat gözlənilir; {n} iş günü cavab gəlməsə bağlanacaq."
+
+msgctxt "applications"
+msgid "Əlavə məlumat gözlənilən müraciət bağlanacaq; həll olunmuş sayılmayacaq."
+msgstr "Əlavə məlumat gözlənilən müraciət bağlanacaq; həll olunmuş sayılmayacaq."
