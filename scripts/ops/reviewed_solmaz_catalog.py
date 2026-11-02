@@ -33,7 +33,9 @@ class Refused(ValueError):
 def summary(raw, *, apply, undo, baseline=""):
     if not isinstance(raw, str) or len(raw) > 8192:
         raise ValueError("solmaz_safe_summary_required")
-    match = re.fullmatch(r"reviewed_solmaz_catalog: ((?:[a-z][a-z0-9_]*=[a-zA-Z0-9_-]+ ?)+)\n?", raw)
+    match = re.fullmatch(
+        r"reviewed_solmaz_catalog: ((?:[a-z][a-z0-9_]*=[a-zA-Z0-9_-]+ ?)+)\n?", raw
+    )
     if match is None:
         raise ValueError("solmaz_safe_summary_required")
     pairs = re.findall(r"([a-z][a-z0-9_]*)=([a-zA-Z0-9_-]+)", match[1])
@@ -53,7 +55,11 @@ def summary(raw, *, apply, undo, baseline=""):
     }
     if len(pairs) != len(value) or set(value) != fields:
         raise ValueError("solmaz_summary_fields_changed")
-    statuses = {"dry_run", "already_undone"} if undo else {"dry_run", "already_applied", "already_undone"}
+    statuses = (
+        {"dry_run", "already_undone"}
+        if undo
+        else {"dry_run", "already_applied", "already_undone"}
+    )
     if apply:
         statuses.add("undone" if undo else "applied")
     status = value["status"]
@@ -67,15 +73,21 @@ def summary(raw, *, apply, undo, baseline=""):
     changed = status in ("applied", "undone")
     if (value["after_baseline"] != value["baseline"]) != changed:
         raise ValueError("solmaz_summary_post_state_changed")
-    if value["applied"] != str(int(changed)) or (value["new_source_versions"], value["new_shares"]) != (
-        ("1", "2") if status == "applied" else ("0", "0")
-    ):
+    if value["applied"] != str(int(changed)) or (
+        value["new_source_versions"],
+        value["new_shares"],
+    ) != (("1", "2") if status == "applied" else ("0", "0")):
         raise ValueError("solmaz_summary_write_counts_changed")
-    expected_hours = "165" if status in ("applied", "already_applied") or (undo and status == "dry_run") else "180"
+    expected_hours = (
+        "165"
+        if status in ("applied", "already_applied") or (undo and status == "dry_run")
+        else "180"
+    )
     if value["teacher_hours"] != expected_hours:
         raise ValueError("solmaz_summary_official_budget_changed")
     if (status == "dry_run" and not undo and value["receipt"] != "none") or not (
-        re.fullmatch(UUID, value["receipt"]) or (status == "dry_run" and not undo and value["receipt"] == "none")
+        re.fullmatch(UUID, value["receipt"])
+        or (status == "dry_run" and not undo and value["receipt"] == "none")
     ):
         raise ValueError("solmaz_summary_receipt_required")
     if not all(
@@ -90,7 +102,11 @@ def safe_failure(stderr):
     if not isinstance(stderr, str) or len(stderr) > 65536:
         return "solmaz_command_refused"
     match = re.fullmatch(r"CommandError: (solmaz_[a-z0-9_]{1,100})\n?", stderr)
-    known = {"solmaz_active_superadmin_required", "solmaz_current_evidence_unavailable", "solmaz_reviewed_guard_failed"}
+    known = {
+        "solmaz_active_superadmin_required",
+        "solmaz_current_evidence_unavailable",
+        "solmaz_reviewed_guard_failed",
+    }
     for file in (ROOT / "apps/legacy_import/services").glob("reviewed_solmaz_*.py"):
         for node in ast.walk(ast.parse(file.read_text())):
             if (
@@ -102,8 +118,20 @@ def safe_failure(stderr):
                 and isinstance(node.args[1].value, str)
             ):
                 known.add(node.args[1].value)
+            # These exact identity guards flow through a local pins helper;
+            # its third argument is the reviewed literal error code.
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Name)
+                and node.func.id == "require_pins"
+                and len(node.args) > 2
+                and isinstance(node.args[2], ast.Constant)
+                and isinstance(node.args[2].value, str)
+            ):
+                known.add(node.args[2].value)
     known |= {
-        "solmaz_protected_" + key + "_changed" for key in ("protected", "authority", "credits", "official_context")
+        "solmaz_protected_" + key + "_changed"
+        for key in ("protected", "authority", "credits", "official_context")
     }
     return match[1] if match and match[1] in known else "solmaz_command_refused"
 
@@ -149,7 +177,12 @@ def source(folder, env):
         capture_output=True,
         timeout=30,
     )
-    if result.returncode or target.is_symlink() or not target.is_file() or not 0 < target.stat().st_size <= MAX_SOURCE:
+    if (
+        result.returncode
+        or target.is_symlink()
+        or not target.is_file()
+        or not 0 < target.stat().st_size <= MAX_SOURCE
+    ):
         raise ValueError("solmaz_fixed_decryption_failed")
     target.chmod(0o600)
     if hashlib.sha256(target.read_bytes()).hexdigest() != SOURCE_SHA:
@@ -160,7 +193,9 @@ def source(folder, env):
 def execute(value, env):
     actor, args, apply, undo = inputs(value)
     run, attempt = (env.get(k, "") for k in ("GITHUB_RUN_ID", "GITHUB_RUN_ATTEMPT"))
-    if not all(isinstance(v, str) and re.fullmatch(r"[1-9][0-9]*", v) for v in (run, attempt)):
+    if not all(
+        isinstance(v, str) and re.fullmatch(r"[1-9][0-9]*", v) for v in (run, attempt)
+    ):
         raise ValueError("solmaz_workflow_identity_required")
     print("::add-mask::" + actor, flush=True)
     verify_head(env.get("GITHUB_SHA", ""))
@@ -170,7 +205,9 @@ def execute(value, env):
     try:
         target = source(folder, env)
         command(["docker", "exec", CONTAINER, "mkdir", "-m", "700", remote])
-        write_private_source(target, remote + "/source.json", SOURCE_SHA, container=CONTAINER)
+        write_private_source(
+            target, remote + "/source.json", SOURCE_SHA, container=CONTAINER
+        )
         result = subprocess.run(
             [
                 "docker",
@@ -195,7 +232,9 @@ def execute(value, env):
             raise Refused(safe_failure(result.stderr))
         if result.stderr:
             raise ValueError("solmaz_unexpected_stderr")
-        parsed = summary(result.stdout, apply=apply, undo=undo, baseline=value.get("baseline", ""))
+        parsed = summary(
+            result.stdout, apply=apply, undo=undo, baseline=value.get("baseline", "")
+        )
         print(result.stdout.strip())
         return parsed
     finally:
