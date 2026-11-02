@@ -159,6 +159,27 @@
 .jl-page .jl-row:hover .jl-open-btn,
 .jl-page .jl-open-btn:hover { background: var(--ems-primary-600); border-color: var(--ems-primary-600); color: var(--ems-neutral-0); }
 .jl-page .jl-open-btn:focus-visible { outline: 2px solid var(--ems-primary-300); outline-offset: 2px; }
+/* Tarixçə jurnalı → cari yükə bərpa (2026-11-02): «Jurnalı aç»-dan ayrı, ikinci dərəcəli əməliyyat;
+   sətrin hover-i onu mavi CTA-ya çevirmir. Patok sətrində düymə yox, «Yük bölgüsü» keçidli qeyd. */
+.jl-page .jl-restore { display: inline-block; margin: 6px 0 0; }
+.jl-page .jl-restore-btn {
+    display: inline-flex; align-items: center; gap: 6px; min-height: var(--ems-h-chip); margin-top: 6px;
+    padding: 0 12px; border-radius: var(--ems-r-pill); white-space: nowrap; text-decoration: none; cursor: pointer;
+    border: 1px solid var(--ems-warning-bd); background: var(--ems-warning-50); color: var(--ems-warning-800);
+    font-size: var(--ems-fs-sm); font-weight: 700;
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+.jl-page .jl-restore .jl-restore-btn { margin-top: 0; }
+.jl-page .jl-restore-btn i { font-size: var(--ems-fs-2xs); }
+.jl-page .jl-restore-btn:hover { background: var(--ems-warning-100); border-color: var(--ems-warning-600); color: var(--ems-warning-800); }
+.jl-page .jl-restore-btn:focus-visible { outline: 2px solid var(--ems-warning-500); outline-offset: 2px; }
+.jl-page .jl-restore-note {
+    display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 6px;
+    padding: 4px 12px; border-radius: var(--ems-r-lg); background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700); font-size: var(--ems-fs-sm); font-weight: 600;
+}
+.jl-page .jl-restore-note i { font-size: var(--ems-fs-2xs); color: var(--ems-neutral-500); }
+.jl-page .jl-restore-note a { color: var(--ems-primary-700); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
 .jl-page .jl-badge--master { background: var(--ems-sky-100); color: var(--ems-sky-800); }
 
 /* Cədvəldəki növbəti / hazırda gedən dərs (sahib 2026-09-27) — siyahı da bu sıra ilə düzülür. */
@@ -225,6 +246,7 @@
         font-size: var(--ems-fs-xs); font-weight: 800; letter-spacing: 0.05em; color: var(--ems-neutral-500);
     }
     .jl-page .jl-open-btn { display: flex; justify-content: center; width: 100%; min-height: 44px; }
+    .jl-page .jl-restore, .jl-page .jl-restore-btn { display: flex; justify-content: center; width: 100%; min-height: 44px; }
     .jl-page .jl-next { white-space: normal; padding-top: 4px; padding-bottom: 4px; }
     .jl-page .jl-subject-sub { flex-wrap: wrap; }
 

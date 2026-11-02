@@ -23,3 +23,8 @@
 @keyframes restore-spin { to { transform:rotate(360deg); } }
 @media(max-width:600px) { .history-restore { padding:20px 12px 32px; } .history-restore__card { padding:20px 16px; } .history-restore__grid { grid-template-columns:1fr; } .history-restore__subject { align-items:flex-start; flex-direction:column; } .history-restore__actions { flex-direction:column-reverse; } .history-restore__actions .btn { width:100%; min-height:46px; } }
 @media(prefers-reduced-motion:reduce) { .history-restore__spinner { animation:none; } }
+.history-restore__shared { display:flex; gap:14px; align-items:flex-start; margin-top:20px; padding:16px 18px; border:1px solid var(--ems-warning-bd); border-radius:var(--ems-r-lg); background:var(--ems-warning-bg); color:var(--ems-warning-800); }
+.history-restore__shared i { margin-top:3px; }
+.history-restore__shared strong { display:block; margin-bottom:4px; overflow-wrap:anywhere; }
+.history-restore__shared p { margin:0; color:var(--ems-text); }
+@media(max-width:600px) { .history-restore__actions .btn-primary { width:100%; min-height:46px; } }

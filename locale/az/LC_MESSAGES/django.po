@@ -111829,3 +111829,19 @@ msgid ""
 msgstr ""
 "Mənbə sillabusu və jurnal qeydləri yenidən yoxlanmalıdır; dəyişiklik "
 "edilmədi."
+
+msgctxt "workload.history_restore"
+msgid "Bu jurnalın yükü çoxqruplu (patok) sətirdədir"
+msgstr "Bu jurnalın yükü çoxqruplu (patok) sətirdədir"
+
+msgctxt "workload.history_restore"
+msgid "Ortaq mühazirə bütün qruplara aiddir, ona görə müəllim «Yük bölgüsü»ndə həmin sətirdə təyin edilir. Jurnal qeydləri dəyişmir."
+msgstr "Ortaq mühazirə bütün qruplara aiddir, ona görə müəllim «Yük bölgüsü»ndə həmin sətirdə təyin edilir. Jurnal qeydləri dəyişmir."
+
+msgctxt "workload.history_restore"
+msgid "Yük bölgüsündə aç"
+msgstr "Yük bölgüsündə aç"
+
+msgctxt "workload.history_restore"
+msgid "Patok sətri"
+msgstr "Patok sətri"

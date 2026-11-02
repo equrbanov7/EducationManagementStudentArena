@@ -12,6 +12,18 @@
     <div class="history-restore__subject"><strong>{{ offering.subject.name }}</strong><span>{% trans "Ümumi saat" context "workload.history_restore" %}: <b>{{ offering.lesson_hours }}</b></span></div>
     <p>{% trans "Dərs növlərinin plan saatlarını ayrıca göstərin. Əvvəlki qeydlər dəyişdirilmir." context "workload.history_restore" %}</p>
     <p class="history-restore__source">{{ plan_provenance }}</p>
+    {% if shared_row %}<div class="history-restore__shared" role="status">
+      <i class="fas fa-users" aria-hidden="true"></i>
+      <div>
+        <strong>{% trans "Bu jurnalın yükü çoxqruplu (patok) sətirdədir" context "workload.history_restore" %}: {{ shared_row.groups }}</strong>
+        <p>{% trans "Ortaq mühazirə bütün qruplara aiddir, ona görə müəllim «Yük bölgüsü»ndə həmin sətirdə təyin edilir. Jurnal qeydləri dəyişmir." context "workload.history_restore" %}</p>
+      </div>
+    </div>
+    <div class="history-restore__actions">
+      <a class="btn btn-outline-secondary" href="{% url 'registrar:journal_detail' offering.pk %}?own_history=1">{% trans "Geri" context "workload.history_restore" %}</a>
+      <a class="btn btn-primary" href="{{ shared_row.url }}">{% trans "Yük bölgüsündə aç" context "workload.history_restore" %}</a>
+    </div>
+    {% else %}
     {% if restore_form.errors %}<div class="history-restore__errors" role="alert" tabindex="-1" data-restore-errors>
       {% for error in restore_form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
       {% for field in restore_form %}{% for error in field.errors %}<p><a href="#{{ field.id_for_label }}">{{ field.label }}</a>: {{ error }}</p>{% endfor %}{% endfor %}
@@ -29,6 +41,7 @@
         <button class="btn btn-primary" type="submit" data-restore-submit><span class="history-restore__spinner" aria-hidden="true"></span>{% trans "Cari yükə bərpa et" context "workload.history_restore" %}</button>
       </div>
     </form>
+    {% endif %}
   </div>
 </section>
 {% endblock %}

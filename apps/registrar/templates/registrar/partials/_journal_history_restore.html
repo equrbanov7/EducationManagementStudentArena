@@ -1,10 +1,16 @@
 {% load i18n %}{% if offering.history_load_restore_url %}
 {% if offering.history_load_restore_plan %}
-<form method="post" action="{{ offering.history_load_restore_url }}">{% csrf_token %}
+<form class="jl-restore" method="post" action="{{ offering.history_load_restore_url }}">{% csrf_token %}
   {% for key, value in offering.history_load_restore_plan.items %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}
-  <button class="jl-open-btn" type="submit">{% trans "Cari yükə bərpa et" context "workload.history_restore" %}</button>
+  <button class="jl-restore-btn" type="submit"><i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Cari yükə bərpa et" context "workload.history_restore" %}</button>
 </form>
 {% else %}
-<a class="jl-open-btn" href="{{ offering.history_load_restore_url }}">{% trans "Cari yükə bərpa et" context "workload.history_restore" %}</a>
+<a class="jl-restore-btn" href="{{ offering.history_load_restore_url }}"><i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Cari yükə bərpa et" context "workload.history_restore" %}</a>
 {% endif %}
+{% elif offering.history_load_restore_shared %}
+<div class="jl-restore-note">
+  <i class="fas fa-users" aria-hidden="true"></i>
+  <span>{% trans "Patok sətri" context "workload.history_restore" %}: {{ offering.history_load_restore_shared.groups }}</span>
+  <a href="{{ offering.history_load_restore_shared.url }}">{% trans "Yük bölgüsündə aç" context "workload.history_restore" %}</a>
+</div>
 {% endif %}

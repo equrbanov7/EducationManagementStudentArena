@@ -3,6 +3,7 @@
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -442,6 +443,50 @@ class HistoryRestoreTest(TestCase):
             service.attach_actions(request, [self.offering])
             self.assertFalse(hasattr(self.offering, "history_load_restore_plan"))
             self.assertEqual(TeachingTaskRow.objects.count(), 1)
+
+    def test_vacant_patok_row_shows_distribution_link_instead_of_a_failing_restore(self):
+        with bypass_rls():
+            row = make_row(self.task, self.stack, lecture_total=45, seminar_total=60)
+            other = self.stack["group"].__class__.objects.create(
+                organization=self.org,
+                name="Shared lecture group",
+                slug="history-restore-shared-lecture",
+                unit_type="group",
+                parent=self.stack["specialty"],
+            )
+            row.groups.add(other)
+            self.offering.journal_is_current_load = False
+            service.attach_actions(self.request(self.teacher, real=self.admin, mode="full"), [self.offering])
+            self.assertIsNone(self.offering.history_load_restore_url)
+            shared = self.offering.history_load_restore_shared
+            self.assertIn("Shared lecture group", shared["groups"])
+            self.assertIn(self.stack["group"].name, shared["groups"])
+            self.assertIn("section=workload-distribution", shared["url"])
+            self.assertIn("row=" + str(row.pk), shared["url"])
+            listed = render_to_string("registrar/partials/_journal_history_restore.html", {"offering": self.offering})
+            self.assertIn("jl-restore-note", listed)
+            self.assertNotIn("jl-restore-btn", listed)
+        self.client.force_login(self.admin)
+        session = self.client.session
+        session["active_organization_id"] = str(self.org.pk)
+        session.save()
+        page = self.client.get(reverse("workload:history_restore", args=[self.offering.pk]))
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, "history-restore__shared")
+        self.assertContains(page, "row=" + str(row.pk))
+        self.assertNotContains(page, "data-restore-submit")
+        with bypass_rls():
+            self.assertEqual(TeacherAssignment.objects.count(), 0)
+
+    def test_single_group_restore_keeps_secondary_list_button(self):
+        with bypass_rls():
+            make_row(self.task, self.stack, lecture_total=45, seminar_total=30)
+            self.offering.journal_is_current_load = False
+            service.attach_actions(self.request(self.teacher, real=self.admin, mode="full"), [self.offering])
+            self.assertFalse(hasattr(self.offering, "history_load_restore_shared"))
+            listed = render_to_string("registrar/partials/_journal_history_restore.html", {"offering": self.offering})
+            self.assertIn('class="jl-restore-btn"', listed)
+            self.assertNotIn("jl-open-btn", listed)
 
     def test_actual_full_view_as_middleware_post_restores_and_attributes_real_actor(self):
         with bypass_rls():

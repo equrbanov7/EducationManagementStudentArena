@@ -112540,3 +112540,19 @@ msgid ""
 msgstr ""
 "Необходимо повторно проверить исходный силлабус и записи журнала; изменения "
 "не внесены."
+
+msgctxt "workload.history_restore"
+msgid "Bu jurnalın yükü çoxqruplu (patok) sətirdədir"
+msgstr "Нагрузка этого журнала находится в многогрупповой (поточной) строке"
+
+msgctxt "workload.history_restore"
+msgid "Ortaq mühazirə bütün qruplara aiddir, ona görə müəllim «Yük bölgüsü»ndə həmin sətirdə təyin edilir. Jurnal qeydləri dəyişmir."
+msgstr "Общая лекция относится ко всем группам, поэтому преподаватель назначается в этой строке в разделе «Распределение нагрузки». Записи журнала не меняются."
+
+msgctxt "workload.history_restore"
+msgid "Yük bölgüsündə aç"
+msgstr "Открыть в распределении нагрузки"
+
+msgctxt "workload.history_restore"
+msgid "Patok sətri"
+msgstr "Поточная строка"
