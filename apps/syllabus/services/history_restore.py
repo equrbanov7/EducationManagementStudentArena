@@ -29,7 +29,7 @@ def _language(group):
     return values.get(str(settings.get("language") or settings.get("sector") or "").casefold(), "")
 
 
-def approved_restore_sources(offering, *, chair_id=None, hours=None):
+def approved_restore_sources(offering, *, chair_id=None, hours=None, context_for=None):
     """Exact subject/period/author/language and genuine approved topics; never fuzzy titles."""
     result = []
     candidates = (
@@ -60,8 +60,12 @@ def approved_restore_sources(offering, *, chair_id=None, hours=None):
         plan = {kind: parsed["hours"][kind] for kind in ("lecture", "seminar", "lab")}
         if sum(plan.values()) != offering.lesson_hours or hours is not None and plan != hours:
             continue
-        if source.offering_id != offering.pk and (not language or _language(source.offering.group) != language):
-            continue
+        if source.offering_id != offering.pk:
+            if not language or _language(source.offering.group) != language or context_for is None:
+                continue
+            target_context, source_context = context_for(offering), context_for(source.offering)
+            if target_context is None or source_context != target_context:
+                continue
         if chair_id is not None and str(source.chair_unit_id) != str(chair_id):
             continue
         sections = {section.section_id: section.data for section in version.sections.all()}
@@ -75,7 +79,7 @@ def approved_restore_sources(offering, *, chair_id=None, hours=None):
 
 
 @transaction.atomic
-def bind_approved_restore_source(*, offering, actor, chair_id, hours, selected_id="", request=None):
+def bind_approved_restore_source(*, offering, actor, chair_id, hours, selected_id="", request=None, context_for=None):
     """Authorized workload operator chooses an existing teacher-owned approved body.
 
     Only the existing share relation is created; no draft, version, authorship,
@@ -90,7 +94,7 @@ def bind_approved_restore_source(*, offering, actor, chair_id, hours, selected_i
         or not actor.covers_unit(chair_id, "workload.distribute")
     ):
         raise TransitionDenied("transition.permission_denied")
-    candidates = approved_restore_sources(offering, chair_id=chair_id, hours=hours)
+    candidates = approved_restore_sources(offering, chair_id=chair_id, hours=hours, context_for=context_for)
     source = (
         next((s for s in candidates if str(s.pk) == str(selected_id)), None)
         if selected_id
@@ -113,7 +117,12 @@ def bind_approved_restore_source(*, offering, actor, chair_id, hours, selected_i
     source.offering.__class__.objects.select_for_update().get(pk=source.offering_id)
     source.approved_version.__class__.objects.select_for_update().get(pk=source.approved_version_id)
     source = next(
-        (s for s in approved_restore_sources(offering, chair_id=chair_id, hours=hours) if s.pk == source.pk), None
+        (
+            s
+            for s in approved_restore_sources(offering, chair_id=chair_id, hours=hours, context_for=context_for)
+            if s.pk == source.pk
+        ),
+        None,
     )
     if source is None:
         raise TransitionDenied("reuse.source_not_approved")

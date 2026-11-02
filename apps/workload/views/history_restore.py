@@ -11,7 +11,7 @@ from django.views.decorators.http import require_http_methods
 from apps.syllabus.public import TransitionDenied, approved_restore_sources
 
 from ..constants import Activity
-from ..services.history_restore import KINDS, plan, previous_plan, restore
+from ..services.history_restore import KINDS, plan, previous_plan, restore, syllabus_context
 from ..services.scoping import WorkloadDenied
 
 CTX = "workload.history_restore"
@@ -39,7 +39,7 @@ def history_restore(request, offering_id):
         raise Http404 from None
     initial, provenance = previous_plan(course)
     form = RestoreForm(request.POST if request.method == "POST" else None, initial=initial)
-    sources = approved_restore_sources(course)
+    sources = approved_restore_sources(course, context_for=syllabus_context)
     form.fields["syllabus"].choices = [("", "Avtomatik: yalnız bir dəqiq uyğun mənbə varsa")] + [
         (str(s.pk), str(s.offering.group.name) + " · " + str(s.approved_version.plan_hours)) for s in sources
     ]

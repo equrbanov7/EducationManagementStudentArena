@@ -79,10 +79,38 @@ def _actor_chairs(actor):
     return list(manageable_chairs(actor).filter(scope.unit_subtree_q()))
 
 
+def _unknown_chair_allowed(actor):
+    return all(actor.scope_for(key).is_org_wide for key in ("workload.manage", "workload.distribute"))
+
+
+def syllabus_context(course):
+    from apps.registrar.public import credit_source, program_for_offering
+
+    parent_id = getattr(course.group, "parent_id", None) if course.group_id else None
+    programs = (
+        apps.get_model("registrar.Program").objects.filter(
+            organization_id=course.organization_id, specialty_unit_id=parent_id, is_active=True
+        )
+        if parent_id
+        else None
+    )
+    if programs is None or programs.count() != 1:
+        return None
+    program = program_for_offering(course)
+    if program is None or not program.degree_level or not program.education_form:
+        return None
+    credits = credit_source.plan_credit_for_offering(course)
+    if not credits or credits <= 0:
+        return None
+    return program.degree_level, program.education_form, credits
+
+
 def available_chairs(actor, course):
     known = offering_chairs.official_offering_chairs(
         course.__class__.objects.filter(pk=course.pk, organization=actor.organization), actor.organization.pk
     ).get(course.pk, frozenset())
+    if not known and not _unknown_chair_allowed(actor):
+        return []
     return [chair for chair in _actor_chairs(actor) if not known or str(chair.pk) in known]
 
 
@@ -177,7 +205,7 @@ def restore(*, request, offering_id, chair_id, hours, reason, syllabus_id=""):
         )
         for kind in KINDS
     )
-    sources = approved_restore_sources(course, chair_id=chair.pk, hours=hours)
+    sources = approved_restore_sources(course, chair_id=chair.pk, hours=hours, context_for=syllabus_context)
     own_source = next((source for source in sources if source.offering_id == course.pk), None)
     if not syllabus_id and own_source is not None:
         syllabus_id = str(own_source.pk)
@@ -220,7 +248,13 @@ def restore(*, request, offering_id, chair_id, hours, reason, syllabus_id=""):
             sync_offerings=False,
         )
     syllabus = bind_approved_restore_source(
-        offering=course, actor=actor, chair_id=chair.pk, hours=hours, selected_id=syllabus_id, request=request
+        offering=course,
+        actor=actor,
+        chair_id=chair.pk,
+        hours=hours,
+        selected_id=syllabus_id,
+        request=request,
+        context_for=syllabus_context,
     )
     after_graph = graph({"registrar.CourseOffering": [course.pk]}, organization_id=actor.organization.pk)
     if syllabus["share_id"]:
@@ -289,7 +323,11 @@ def attach_actions(request, offerings):
         )
         for course in candidates:
             known = mapping.get(course.pk, frozenset())
-            if course.pk in ids and any(not known or str(c.pk) in known for c in chairs):
+            if (
+                course.pk in ids
+                and (known or _unknown_chair_allowed(actor))
+                and any(not known or str(c.pk) in known for c in chairs)
+            ):
                 course.history_load_restore_url = reverse("workload:history_restore", args=[course.pk])
     except WorkloadDenied:
         return
@@ -301,7 +339,7 @@ def previous_plan(course):
         hours = {kind: rows[0].activity_total(kind) for kind in KINDS}
         if sum(hours.values()) == course.lesson_hours:
             return hours, "Mövcud təsdiqli yük sətri: " + str(rows[0].pk)
-    sources = approved_restore_sources(course)
+    sources = approved_restore_sources(course, context_for=syllabus_context)
     shapes = {tuple(int(s.approved_version.plan_hours.get(kind, 0)) for kind in KINDS) for s in sources}
     if len(shapes) == 1:
         return dict(zip(KINDS, shapes.pop())), "Müəllimin uyğun təsdiqli sillabus planı"

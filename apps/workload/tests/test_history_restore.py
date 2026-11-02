@@ -329,3 +329,78 @@ class HistoryRestoreTest(TestCase):
             self.assertFalse(any(service.previous_plan(self.offering)[0].values()))
             self.syllabus_source()
             self.assertEqual(service.previous_plan(self.offering)[0], self.hours)
+
+    def test_unit_scope_unknown_chair_denies_plan_post_and_action_but_known_chair_works(self):
+        from core.constants import RoleScopeType
+
+        with bypass_rls():
+            manager = get_user_model().objects.create_user("history_unit_manager")
+            activate_member(
+                self.org,
+                manager,
+                "history_unit_manager",
+                scope_unit=self.stack["chair"],
+                scope_type=RoleScopeType.UNIT,
+                permissions=["workload.manage", "workload.distribute"],
+            )
+            request = self.request(manager)
+            self.assertIsNone(self.stack["subject"].chair_unit_id)
+            with self.assertRaises(WorkloadDenied):
+                service.plan(request, self.offering.pk)
+            with self.assertRaises(WorkloadDenied):
+                self.restore(request=request)
+            self.assertEqual(TeacherAssignment.objects.count(), 0)
+            self.stack["subject"].chair_unit = self.stack["chair"]
+            self.stack["subject"].save(update_fields=["chair_unit"])
+            self.assertTrue(service.plan(request, self.offering.pk)[2])
+            self.assertEqual(self.restore(request=request)["status"], "restored")
+
+    def test_unit_scope_unknown_chair_get_is_not_found(self):
+        from core.constants import RoleScopeType
+
+        with bypass_rls():
+            manager = get_user_model().objects.create_user("history_unit_get_manager")
+            activate_member(
+                self.org,
+                manager,
+                "history_unit_get_manager",
+                scope_unit=self.stack["chair"],
+                scope_type=RoleScopeType.UNIT,
+                permissions=["workload.manage", "workload.distribute"],
+            )
+        self.client.force_login(manager)
+        session = self.client.session
+        session["active_organization_id"] = str(self.org.pk)
+        session.save()
+        url = reverse("workload:history_restore", args=[self.offering.pk])
+        self.assertEqual(self.client.get(url).status_code, 404)
+        self.assertEqual(
+            self.client.post(
+                url, {"chair": self.stack["chair"].pk, **self.hours, "reason": "Explicit reason"}
+            ).status_code,
+            404,
+        )
+
+    def test_cross_course_syllabus_context_degree_form_credit_mismatch_and_unknown_fail_closed(self):
+        from apps.syllabus.public import approved_restore_sources
+
+        with bypass_rls():
+            source = self.syllabus_source()
+            target_context = service.syllabus_context(self.offering)
+            self.assertEqual(target_context, ("bachelor", "full_time", 6))
+            for source_context in (
+                ("master", "full_time", 6),
+                ("bachelor", "part_time", 6),
+                ("bachelor", "full_time", 4),
+                None,
+            ):
+
+                def context(course, source_context=source_context):
+                    return target_context if course.pk == self.offering.pk else source_context
+
+                self.assertEqual(approved_restore_sources(self.offering, context_for=context), [])
+            self.assertEqual(approved_restore_sources(self.offering), [])
+            self.assertEqual(
+                [s.pk for s in approved_restore_sources(self.offering, context_for=service.syllabus_context)],
+                [source.pk],
+            )
