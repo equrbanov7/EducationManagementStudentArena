@@ -205,3 +205,7 @@ def attach(user, offerings, *, selected_kind=""):
         offering.journal_contributed_lessons = sum(contributions.get((offering.pk, kind), 0) for kind in count_kinds)
         offering.journal_own_history_link = not current and bool(offering.journal_contributed_lessons)
         attach_master_history(offering, kind=selected_kind)
+
+    from .journal_prior_history_badge import attach as attach_prior_history
+
+    attach_prior_history(user, offerings, selected_kind=selected_kind)

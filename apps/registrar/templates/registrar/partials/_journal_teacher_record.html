@@ -14,3 +14,6 @@
     <span>· {% trans "Qeyd daxil etdiyiniz" %}: {{ offering.journal_contributed_lessons }} {% trans "dərs" %}</span>
 </div>
 {% endif %}
+{% if offering.journal_prior_history_available and not offering.journal_own_lessons and not offering.journal_own_hours %}
+<div class="jl-subject-sub">{% trans "Əvvəlki jurnal qeydləri mövcuddur" context "registrar.journal_history" %}</div>
+{% endif %}

@@ -112266,3 +112266,9 @@ msgstr "History: no current teaching assignment"
 msgctxt "accounts.syllabus"
 msgid "Yeni qaralama saxlanılır"
 msgstr "Saving a new draft"
+
+#: apps/registrar/templates/registrar/partials/_journal_teacher_record.html:19
+#: apps/registrar/templates/registrar/partials/_journal_teaching_heading.html:28
+msgctxt "registrar.journal_history"
+msgid "Əvvəlki jurnal qeydləri mövcuddur"
+msgstr "Previous journal records are available"

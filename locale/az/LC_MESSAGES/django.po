@@ -111751,3 +111751,9 @@ msgstr "Tarixçə: cari yük təyinatı yoxdur"
 msgctxt "accounts.syllabus"
 msgid "Yeni qaralama saxlanılır"
 msgstr "Yeni qaralama saxlanılır"
+
+#: apps/registrar/templates/registrar/partials/_journal_teacher_record.html:19
+#: apps/registrar/templates/registrar/partials/_journal_teaching_heading.html:28
+msgctxt "registrar.journal_history"
+msgid "Əvvəlki jurnal qeydləri mövcuddur"
+msgstr "Əvvəlki jurnal qeydləri mövcuddur"

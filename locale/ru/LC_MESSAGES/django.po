@@ -112461,3 +112461,9 @@ msgstr "История: текущая учебная нагрузка не на
 msgctxt "accounts.syllabus"
 msgid "Yeni qaralama saxlanılır"
 msgstr "Сохраняется новый черновик"
+
+#: apps/registrar/templates/registrar/partials/_journal_teacher_record.html:19
+#: apps/registrar/templates/registrar/partials/_journal_teaching_heading.html:28
+msgctxt "registrar.journal_history"
+msgid "Əvvəlki jurnal qeydləri mövcuddur"
+msgstr "Доступны записи предыдущего журнала"

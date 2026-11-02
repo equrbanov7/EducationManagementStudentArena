@@ -49,6 +49,16 @@ def summarize(offering, *, personal_actor=None, scope=None):
         result["kinds"].sort(key=lambda row: ("lecture", "seminar", "lab").index(row["kind"]))
     if personal_actor is not None:
         result["history"] = _summary(offering, permitted, total=None)
+    if personal_actor is not None and not result["held_total"]:
+        from .journal_prior_history_badge import available
+
+        result["prior_history_available"] = offering.pk in available(
+            personal_actor,
+            [offering],
+            organization=offering.organization,
+            kinds={offering.pk: allowed},
+            enrollment_ids={offering.pk: getattr(scope, "enrollment_ids", None)},
+        )
     return result
 
 

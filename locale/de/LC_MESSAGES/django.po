@@ -113325,3 +113325,9 @@ msgstr "Verlauf: kein aktueller Lehrauftrag"
 msgctxt "accounts.syllabus"
 msgid "Yeni qaralama saxlanılır"
 msgstr "Neuer Entwurf wird gespeichert"
+
+#: apps/registrar/templates/registrar/partials/_journal_teacher_record.html:19
+#: apps/registrar/templates/registrar/partials/_journal_teaching_heading.html:28
+msgctxt "registrar.journal_history"
+msgid "Əvvəlki jurnal qeydləri mövcuddur"
+msgstr "Frühere Journaleinträge sind vorhanden"
