@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 _raw = Path(__file__).with_name("reviewed_solmaz_pins.json").read_bytes()
-if hashlib.sha256(_raw).hexdigest() != "2326a67f0592588e7d971f9eb720f6687aab76fba13f0514278288fb1f533e5e":
+if hashlib.sha256(_raw).hexdigest() != "e42e18559e19f9b2f845b3ce61e28be5f2b97037dc23c543c95c1847d2fb3cf7":
     raise ValueError("solmaz_compiled_scope_changed")
 PINS = json.loads(_raw)
 ORG = PINS["organization_id"]
