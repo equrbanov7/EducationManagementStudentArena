@@ -111845,3 +111845,11 @@ msgstr "Yük bölgüsündə aç"
 msgctxt "workload.history_restore"
 msgid "Patok sətri"
 msgstr "Patok sətri"
+
+msgctxt "accounts.syllabus"
+msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
+msgstr "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
+
+msgctxt "accounts.syllabus"
+msgid "Müəllif, ad, nəşr ili — alt-alta və ya bir sətirdə, vergüllə."
+msgstr "Müəllif, ad, nəşr ili — alt-alta və ya bir sətirdə, vergüllə."

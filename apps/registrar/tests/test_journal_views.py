@@ -231,12 +231,11 @@ class JournalViewTest(TestCase):
         with bypass_rls():
             self.assertFalse(Lesson.objects.filter(offering=self.offering).exists())
 
-    def test_add_lesson_topic_over_255_is_rejected_not_500(self):
-        """QA 2026-09-05 JOURNAL-TEACHER-01: 255+ simvol mövzu DB DataError (500) verirdi."""
+    def _post_lesson_topic(self, topic):
         from django.utils import timezone as _tz
 
         client = self._client(self.teacher)
-        resp = client.post(
+        return client.post(
             reverse("registrar:journal_detail", args=[self.offering.id]),
             {
                 "action": "add_lesson",
@@ -244,12 +243,29 @@ class JournalViewTest(TestCase):
                 "lesson_kind": "seminar",
                 "lesson_hours": "2",
                 "lesson_time": "08:30|10:00",
-                "lesson_topic": "M" * 300,
+                "lesson_topic": topic,
             },
             follow=True,
         )
+
+    def test_add_lesson_long_topic_is_saved_in_full(self):
+        """Sahib 2026-11-03: «mövzu adında uzunluq məsələsi olmasın» — 255+ simvol mövzu kəsilmədən yazılır.
+
+        Əvvəl `Lesson.topic` CharField(255) idi və 300 simvolluq mövzu «ən çox 255 simvol» ilə rədd edilirdi."""
+        topic = "Uzun mövzu adı " + "M" * 600
+        resp = self._post_lesson_topic(topic)
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, "255 simvol")
+        with bypass_rls():
+            lesson = Lesson.objects.get(offering=self.offering)
+        self.assertEqual(lesson.topic, topic)
+
+    def test_add_lesson_topic_over_sanity_limit_is_rejected_not_500(self):
+        """QA 2026-09-05 JOURNAL-TEACHER-01: həddən böyük mövzu 500 deyil, forma xətası verir (hədd indi 20000)."""
+        from apps.registrar.gradebook_lessons import MAX_TOPIC_LENGTH
+
+        resp = self._post_lesson_topic("M" * (MAX_TOPIC_LENGTH + 1))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, f"{MAX_TOPIC_LENGTH} simvol")
         with bypass_rls():
             self.assertFalse(Lesson.objects.filter(offering=self.offering).exists())
 

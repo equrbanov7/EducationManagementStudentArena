@@ -26,7 +26,6 @@ from .constants import (
     MIN_OUTCOMES,
     MIN_PRIMARY_SOURCES,
     MIN_SELFWORK_TOPIC_CHARS,
-    MIN_SOURCE_CHARS,
     MIN_TOPIC_CHARS,
     RULE_SECTIONS,
     SELFWORK_OPTIONS,
@@ -80,12 +79,15 @@ def _int(value) -> int:
 
 
 def _lines(value) -> list:
-    """Mətn blokunu və ya siyahını mənbə sətirlərinə çevirir."""
+    """Mətn blokunu və ya siyahını BOŞ OLMAYAN sətirlərə çevirir.
+
+    Sahib 2026-11-03: forma tələbi yoxdur — bir sətirdə vergüllə yazılmış siyahı da, nömrəsiz
+    mətn də bir dolu sətir sayılır; sətrin uzunluğu yoxlanılmır."""
     if isinstance(value, (list, tuple)):
         raw = [_text(item) for item in value]
     else:
         raw = [_text(line) for line in _text(value).split("\n")]
-    return [line for line in raw if len(line) > MIN_SOURCE_CHARS]
+    return [line for line in raw if line]
 
 
 def _check_info(data, issues) -> bool:

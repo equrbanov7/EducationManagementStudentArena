@@ -112,7 +112,9 @@ class Lesson(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     offering = models.ForeignKey(CourseOffering, on_delete=models.CASCADE, related_name="lessons")
     date = models.DateField(help_text="Dərsin keçirildiyi tarix.")
     kind = models.CharField(max_length=16, choices=LessonKind.choices, default=LessonKind.LECTURE)
-    topic = models.CharField(max_length=255, blank=True, help_text="Mövzu (opsional).")
+    #: Sahib 2026-11-03: «mövzu adında uzunluq məsələsi olmasın» — TextField (əvvəl CharField(255));
+    #: sillabusun uzun həftə mövzusu jurnala kəsilmədən düşür. Sağlamlıq həddi: ``gradebook_lessons``.
+    topic = models.TextField(blank=True, help_text="Mövzu (opsional).")
     #: Açılışın TƏSDİQLƏNMİŞ sillabusunun həftəlik planındakı SƏTİR nömrəsi (1-dən, ``week.rows``
     #: sırası ilə; boş mövzulu sətirlər də sayılır). ``topic`` boşdursa jurnal mövzunu bu sətirdən
     #: göstərir; sillabusun «keçilib / keçilməyib» statusu da buna söykənir (sahib 2026-10-25).
