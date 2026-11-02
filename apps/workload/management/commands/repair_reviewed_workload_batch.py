@@ -39,6 +39,7 @@ class Command(BaseCommand):
             manifest = read_manifest(options["manifest"], options["manifest_sha256"])
             from ...services import (
                 civil_source_partition,
+                reviewed_elshen_vacancy_repair,
                 reviewed_history636_repair,
                 reviewed_history636_spec,
                 reviewed_kamile_load,
@@ -48,6 +49,7 @@ class Command(BaseCommand):
 
             special = {
                 civil_source_partition.FORMAT: civil_source_partition.run,
+                reviewed_elshen_vacancy_repair.FORMAT: reviewed_elshen_vacancy_repair.run,
                 reviewed_history636_spec.FORMAT: reviewed_history636_repair.run,
                 reviewed_kamile_load.FORMAT: reviewed_kamile_load.run,
                 reviewed_language_level_load.FORMAT: reviewed_language_level_load.run,
