@@ -134,7 +134,7 @@ def structure_block(target, organization, *, today: date | None = None) -> dict:
 
 
 def teaching_block(target, actor, organization, *, request=None) -> dict:
-    from apps.registrar.models import CourseOffering
+    from .teaching_offerings import scoped_owned_offerings
 
     empty = {
         "years": [],
@@ -147,8 +147,7 @@ def teaching_block(target, actor, organization, *, request=None) -> dict:
         empty["restricted"] = True
         return empty
     offerings = list(
-        CourseOffering.objects.filter(organization=organization, instructor=target, is_active=True)
-        .filter(scope.unit_subtree_q(path_field="group__path", id_field="group_id"))
+        scoped_owned_offerings(target, actor, request=request)
         .select_related("subject", "group", "period")
         .order_by("-period__start_date", "subject__name", "group__name")
     )

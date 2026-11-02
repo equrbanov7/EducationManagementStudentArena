@@ -25,14 +25,13 @@ MAX_DETAIL_ROWS = 60
 
 
 def _teaching_rows(user, actor, *, request=None, limit=MAX_DETAIL_ROWS):
-    from apps.registrar.models import CourseOffering
+    from .teaching_offerings import scoped_owned_offerings
 
     scope = actor.scope_for(PERM_VIEW_TEACHERS, request=request)
     if not scope.has_structure_access:
         return []
     offerings = (
-        CourseOffering.objects.filter(organization=actor.organization, instructor=user, is_active=True)
-        .filter(scope.unit_subtree_q(path_field="group__path", id_field="group_id"))
+        scoped_owned_offerings(user, actor, request=request)
         .select_related("subject", "group", "period")
         .order_by("-period__academic_year", "period__name", "subject__name")[:limit]
     )
