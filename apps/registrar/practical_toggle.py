@@ -30,7 +30,9 @@ _CTX = "registrar.practical"
 
 def can_toggle(user, offering) -> bool:
     """Mərkəzi ``workload.distribute`` icazəsi və açılışın kafedra əhatəsi."""
-    if offering is None or not getattr(user, "is_authenticated", False):
+    from .design_practical_scope import is_design_offering
+
+    if offering is None or not getattr(user, "is_authenticated", False) or not is_design_offering(offering):
         return False
     from .journal_scope import permission_scope_for
     from .models import CourseOffering

@@ -10,7 +10,7 @@ Bayraq AÇILIŞDADIR (``CourseOffering.seminar_is_practical``), fənndə yox:
   semestrdə həm praktiki, həm adi seminar jurnalı ilə keçib; fənn kartı isə ixtisaslar arasında ortaqdır;
 * növ etiketi onsuz da açılışın dərs / slot sətrindən oxunur — əlavə JOIN yoxdur.
 
-Bayraq ``True`` olan açılışda insana göstərilən hər «Seminar» etiketi «Praktiki məşğələ» olur: jurnal sütun başlığı,
+Yalnız fənnin açıq şəkildə Dizayn kafedrasına aid olduğu və bayraq ``True`` olan açılışda insana göstərilən hər «Seminar» etiketi «Praktiki məşğələ» olur: jurnal sütun başlığı,
 tip pillələri və dərs modalının növ seçicisi, cədvəl hüceyrəsi, «Keçilmiş dərslər», tələbənin jurnal / davamiyyət
 tarixçəsi. ``Lesson.get_kind_display`` / ``ScheduleSlot.get_kind_display`` buradakı :func:`kind_display`-i çağırır —
 şablonlar dəyişmir. Açılış obyektdə keşlənibsə (``select_related`` / ``offering.lessons``) sorğu yoxdur; deyilsə
@@ -41,7 +41,9 @@ def kind_label(kind, *, practical: bool = False, labels: dict | None = None) -> 
 
 
 def offering_is_practical(offering) -> bool:
-    return bool(getattr(offering, "seminar_is_practical", False))
+    from .design_practical_scope import is_design_offering
+
+    return bool(getattr(offering, "seminar_is_practical", False)) and is_design_offering(offering)
 
 
 def kind_choices(offering=None, labels: dict | None = None) -> list:
@@ -63,9 +65,10 @@ def row_is_practical(row) -> bool:
     if memo is None and not row.offering_id:
         return False
     if memo is None:
+        from .design_practical_scope import scope_q
         from .models import CourseOffering
 
-        memo = CourseOffering.objects.filter(pk=row.offering_id, seminar_is_practical=True).exists()
+        memo = CourseOffering.objects.filter(scope_q(), pk=row.offering_id, seminar_is_practical=True).exists()
         row.__dict__[_MEMO] = memo
     return memo
 

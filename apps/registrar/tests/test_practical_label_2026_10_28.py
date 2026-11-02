@@ -54,6 +54,10 @@ class PracticalBase(SubgroupFixture, TestCase):
         with bypass_rls():
             cls.owner.is_superuser = True
             cls.owner.save(update_fields=["is_superuser"])
+            cls.chair.name = "Dizayn kafedrası"
+            cls.chair.save(update_fields=["name"])
+            cls.history.chair_unit = cls.chair
+            cls.history.save(update_fields=["chair_unit"])
             cls.offering = cls.history_g1
             cls.offering.instructor = cls.teacher
             cls.offering.save(update_fields=["instructor"])
@@ -91,7 +95,7 @@ class LabelTest(PracticalBase):
     def test_cached_offering_needs_no_query(self):
         self.flag()
         with bypass_rls():
-            offering = CourseOffering.objects.get(pk=self.offering.pk)
+            offering = CourseOffering.objects.select_related("subject__chair_unit").get(pk=self.offering.pk)
             lessons = list(offering.lessons.all())
             marks = list(LessonMark.objects.select_related("lesson__offering").filter(lesson__offering=offering))
             with CaptureQueriesContext(connection) as ctx:
@@ -298,3 +302,40 @@ class MembershipSanityTest(PracticalBase):
             self.assertTrue(
                 Membership.objects.filter(user=self.chair_head, role__name="chair_head", scope_unit=self.chair).exists()
             )
+
+
+class DesignOnlyPracticalLabelTest(PracticalBase):
+    def test_non_design_subject_legacy_flag_is_ignored_without_data_mutation(self):
+        self.flag()
+        with bypass_rls(), translation.override("az"):
+            self.history.chair_unit = self.far_faculty
+            self.history.save(update_fields=["chair_unit"])
+            lesson = Lesson.objects.get(pk=self.seminar.pk)
+            self.assertEqual(lesson.get_kind_display(), "Seminar")
+            self.assertEqual(lesson.kind, "seminar")
+            offering = CourseOffering.objects.get(pk=self.offering.pk)
+            self.assertTrue(offering.seminar_is_practical)
+            self.assertEqual(dict(practical_label.kind_choices(offering))["seminar"], "Seminar")
+            self.assertFalse(practical_toggle.can_toggle(self.owner, offering))
+            self.assertIsNone(practical_toggle.context(self.owner, offering))
+
+    def test_design_student_group_does_not_reclassify_general_subject(self):
+        self.flag()
+        with bypass_rls(), translation.override("az"):
+            self.history.chair_unit = None
+            self.history.save(update_fields=["chair_unit"])
+            offering = CourseOffering.objects.select_related("subject__chair_unit").get(pk=self.offering.pk)
+            with self.assertNumQueries(0):
+                self.assertFalse(practical_label.offering_is_practical(offering))
+            self.assertEqual(Lesson.objects.get(pk=self.seminar.pk).get_kind_display(), "Seminar")
+
+    def test_cached_and_uncached_design_paths_agree_and_preserve_hours(self):
+        self.flag()
+        with bypass_rls(), translation.override("az"):
+            uncached = Lesson.objects.get(pk=self.seminar.pk)
+            cached = Lesson.objects.select_related("offering__subject__chair_unit").get(pk=self.seminar.pk)
+            with self.assertNumQueries(0):
+                self.assertEqual(cached.get_kind_display(), "Praktiki məşğələ")
+            self.assertEqual(uncached.get_kind_display(), cached.get_kind_display())
+            self.assertEqual(uncached.hours, cached.hours)
+            self.assertEqual(uncached.kind, "seminar")
