@@ -31,7 +31,21 @@ def host_module(name):
     return host
 
 
-def native_summary(name):
+def native_summary(name, digest):
+    if name == "reviewed_solmaz_catalog":
+        return dict(
+            status="dry_run",
+            baseline="a" * 64,
+            after_baseline="a" * 64,
+            receipt="none",
+            applied=0,
+            new_source_versions=0,
+            new_shares=0,
+            teacher_hours=180,
+            source_sha256=digest,
+            protected_models=13,
+            protected_rows=512,
+        )
     if name == "own_base_syllabus_bank":
         return dict(
             status="dry_run",
@@ -111,13 +125,25 @@ def wire_host(monkeypatch, tmp_path, name, namespace):
                 assert payload not in str(args).encode()
             return result
         assert args[:5] == ["docker", "exec", host.CONTAINER, "python", "manage.py"]
-        expected = "recover_own_base_syllabi" if name == "own_base_syllabus_bank" else "recover_reviewed_pervin_syllabi"
+        expected = {
+            "own_base_syllabus_bank": "recover_own_base_syllabi",
+            "reviewed_pervin_syllabi": "recover_reviewed_pervin_syllabi",
+            "reviewed_solmaz_catalog": "repair_reviewed_solmaz_catalog",
+        }[name]
         assert args[5] == expected and "--apply" not in args
         assert events == [("writer", 0)]
         assert (remote / "source.json").read_bytes() == payload
         assert stat.S_IMODE((remote / "source.json").stat().st_mode) == 0o600
         events.append(("native", expected))
-        return SimpleNamespace(returncode=0, stdout=json.dumps(native_summary(name)), stderr="")
+        return SimpleNamespace(
+            returncode=0,
+            stdout=(
+                "reviewed_solmaz_catalog: " + " ".join(f"{k}={v}" for k, v in native_summary(name, digest).items())
+                if name == "reviewed_solmaz_catalog"
+                else json.dumps(native_summary(name, digest))
+            ),
+            stderr="",
+        )
 
     monkeypatch.setattr(host, "SOURCE_SHA", digest)
     monkeypatch.setattr(host, "source", source)
@@ -129,7 +155,12 @@ def wire_host(monkeypatch, tmp_path, name, namespace):
 
 
 @pytest.mark.parametrize(
-    "name,namespace", [("own_base_syllabus_bank", "reviewed-ownbase"), ("reviewed_pervin_syllabi", "reviewed-pervin")]
+    "name,namespace",
+    [
+        ("own_base_syllabus_bank", "reviewed-ownbase"),
+        ("reviewed_pervin_syllabi", "reviewed-pervin"),
+        ("reviewed_solmaz_catalog", "reviewed-solmaz"),
+    ],
 )
 def test_real_embedded_writer_completes_before_native(monkeypatch, tmp_path, name, namespace):
     host, env, events, remote = wire_host(monkeypatch, tmp_path, name, namespace)
@@ -140,7 +171,12 @@ def test_real_embedded_writer_completes_before_native(monkeypatch, tmp_path, nam
 
 
 @pytest.mark.parametrize(
-    "name,namespace", [("own_base_syllabus_bank", "reviewed-ownbase"), ("reviewed_pervin_syllabi", "reviewed-pervin")]
+    "name,namespace",
+    [
+        ("own_base_syllabus_bank", "reviewed-ownbase"),
+        ("reviewed_pervin_syllabi", "reviewed-pervin"),
+        ("reviewed_solmaz_catalog", "reviewed-solmaz"),
+    ],
 )
 def test_embedded_writer_refusal_prevents_native_and_cleans(monkeypatch, tmp_path, name, namespace):
     host, env, events, remote = wire_host(monkeypatch, tmp_path, name, namespace)
@@ -152,7 +188,7 @@ def test_embedded_writer_refusal_prevents_native_and_cleans(monkeypatch, tmp_pat
     assert not remote.exists()
 
 
-@pytest.mark.parametrize("namespace", ["reviewed-ownbase", "reviewed-pervin"])
+@pytest.mark.parametrize("namespace", ["reviewed-ownbase", "reviewed-pervin", "reviewed-solmaz"])
 def test_only_exact_numeric_namespace_paths_allowed(namespace):
     assert re.fullmatch(transport.PATH_PATTERN, f"/tmp/wcu-{namespace}-123-1/source.json")
     for path in (
