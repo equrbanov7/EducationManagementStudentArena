@@ -260,8 +260,8 @@ def _assert_not_student(organization, target) -> None:
 def assign_teacher_unit(actor, target, *, unit_id, reason: str = "", request=None) -> dict:
     """Müəllimi kafedraya TƏYİN ET / kafedrasını DƏYİŞ (``Membership.scope_unit``).
 
-    Yeni üzvlük yaradılmır: aktorun scope-undakı aktiv müəllim üzvlükləri seçilmiş
-    kafedraya köçürülür (sətir silinmir — tarixi jurnal/qiymət izi qalır). Kafedra
+    Seçilmiş kafedrada müəllim üzvlüyü yaradılır/aktivləşdirilir. Əvvəlki
+    üzvlüklər və əsas iş yeri saxlanılır; təkrar təyinat idempotentdir. Kafedra
     aktorun görünüş sahəsində olmalıdır (`_resolve_grant_unit`). Səbəb opsionaldır,
     verilibsə auditə düşür.
     """
@@ -299,15 +299,19 @@ def assign_teacher_unit(actor, target, *, unit_id, reason: str = "", request=Non
             status=409,
         )
     previous = sorted({str(getattr(row.scope_unit, "name", "") or "") for row in rows})
-    changed = 0
-    for membership in rows:
-        if membership.scope_unit_id == unit.pk:
-            continue
-        membership.scope_unit = unit
-        membership.save(update_fields=["scope_unit", "updated_at"])
-        changed += 1
-    if not changed:
-        raise RimAccessError("unit_unchanged", "Müəllim onsuz da bu kafedradadır.", status=409)
+    # Never move every affiliation onto one unique key, nor copy an elevated
+    # teaching role (e.g. chair head) to the new unit.
+    membership, created = Membership.objects.get_or_create(
+        organization=organization,
+        user=target,
+        role=_teacher_role(organization),
+        scope_unit=unit,
+        defaults={"is_active": True, "is_primary": False, "assigned_by": actor.user},
+    )
+    changed = int(created or not membership.is_active)
+    if not membership.is_active:
+        membership.is_active = True
+        membership.save(update_fields=["is_active", "updated_at"])
 
     log_action(
         AuditAction.UPDATE,

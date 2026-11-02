@@ -14,7 +14,7 @@ from django.urls import reverse
 
 from apps.accounts.services import people
 from apps.audit.models import AuditLog
-from apps.organizations.models import Membership, OrgUnit
+from apps.organizations.models import Membership, Organization, OrgUnit
 from core.constants import OrgUnitType
 from core.rls import bypass_rls
 
@@ -81,7 +81,7 @@ class GrantTeacherToStudentTest(_Base):
 
 
 class AssignUnitTest(_Base):
-    def test_moves_membership_and_audits(self):
+    def test_adds_affiliation_preserving_existing_membership_and_audits(self):
         self._login(self.fx.dean_a)
         response = self._post(
             {
@@ -96,20 +96,53 @@ class AssignUnitTest(_Base):
         self.assertTrue(body["ok"])
         self.assertEqual(body["result"]["unit_name"], "Kafedra A2")
         self.assertEqual(body["result"]["memberships_changed"], 1)
-        membership = Membership.objects.get(organization=self.fx.org, user=self.fx.teacher_a, role=self.fx.role_teacher)
-        self.assertEqual(membership.scope_unit_id, self.kafedra_a2.pk)
+        membership = Membership.objects.get(
+            organization=self.fx.org, user=self.fx.teacher_a, role=self.fx.role_teacher, scope_unit=self.kafedra_a2
+        )
+        self.assertTrue(
+            Membership.objects.filter(
+                organization=self.fx.org,
+                user=self.fx.teacher_a,
+                role=self.fx.role_teacher,
+                scope_unit=self.fx.kafedra_a1,
+                is_active=True,
+            ).exists()
+        )
+        self.assertFalse(membership.is_primary)
         self.assertTrue(membership.is_active)
         self.assertTrue(
             AuditLog.objects.filter(organization=self.fx.org, changes__action="people.teacher_unit_assigned").exists()
         )
 
-    def test_same_unit_is_409(self):
+    def test_same_unit_is_idempotent(self):
         self._login(self.fx.dean_a)
         response = self._post(
             {"action": "assign_unit", "user_id": self.fx.teacher_a.pk, "unit_id": str(self.fx.kafedra_a1.pk)}
         )
-        self.assertEqual(response.status_code, 409, response.content)
-        self.assertEqual(response.json()["error"], "unit_unchanged")
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(response.json()["result"]["memberships_changed"], 0)
+
+    def test_existing_secondary_affiliation_does_not_collide_or_move_primary(self):
+        Membership.objects.create(
+            organization=self.fx.org,
+            user=self.fx.teacher_a,
+            role=self.fx.role_teacher,
+            scope_unit=self.kafedra_a2,
+            is_active=False,
+        )
+        self._login(self.fx.dean_a)
+        payload = {"action": "assign_unit", "user_id": self.fx.teacher_a.pk, "unit_id": str(self.kafedra_a2.pk)}
+        self.assertEqual(self._post(payload).status_code, 200)
+        self.assertEqual(self._post(payload).json()["result"]["memberships_changed"], 0)
+        self.assertEqual(
+            Membership.objects.filter(
+                organization=self.fx.org,
+                user=self.fx.teacher_a,
+                role=self.fx.role_teacher,
+                is_active=True,
+            ).count(),
+            2,
+        )
 
     def test_unit_outside_scope_is_404(self):
         self._login(self.fx.dean_a)
@@ -117,6 +150,24 @@ class AssignUnitTest(_Base):
             {"action": "assign_unit", "user_id": self.fx.teacher_a.pk, "unit_id": str(self.fx.kafedra_b1.pk)}
         )
         self.assertEqual(response.status_code, 404, response.content)
+
+    def test_foreign_organization_unit_is_denied_without_membership_changes(self):
+        with bypass_rls():
+            foreign = Organization.objects.create(name="Foreign", slug="foreign-placement", owner=self.fx.owner)
+            unit = OrgUnit.objects.create(
+                organization=foreign, name="Other chair", slug="other", unit_type=OrgUnitType.CHAIR
+            )
+            before = list(
+                Membership.objects.filter(user=self.fx.teacher_a).values_list("pk", "scope_unit_id", "is_active")
+            )
+        self._login(self.fx.rector)
+        response = self._post({"action": "assign_unit", "user_id": self.fx.teacher_a.pk, "unit_id": str(unit.pk)})
+        self.assertEqual(response.status_code, 404)
+        with bypass_rls():
+            self.assertEqual(
+                before,
+                list(Membership.objects.filter(user=self.fx.teacher_a).values_list("pk", "scope_unit_id", "is_active")),
+            )
 
     def test_requires_unit(self):
         self._login(self.fx.dean_a)

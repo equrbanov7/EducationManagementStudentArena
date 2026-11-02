@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
-from django.db.models import Exists, OuterRef, Subquery, UUIDField
+from django.db.models import Exists, OuterRef, Q, Subquery, UUIDField
 
 from apps.organizations.public import scope_memberships_by_unit
 from core.staff_position import resolve_position_label
@@ -87,8 +87,12 @@ def visible_teachers_qs(actor, *, request=None, filters=None):
     correlated = memberships.filter(user=OuterRef("pk"))
     picked = correlated.order_by(*MEMBERSHIP_PICK_ORDER)
 
+    from .teaching_scope import teaching_user_ids
+
+    organization_teacher = teacher_memberships_qs(actor.organization).filter(user=OuterRef("pk"))
     queryset = (
-        User.objects.filter(Exists(correlated))
+        User.objects.filter(Exists(organization_teacher))
+        .filter(Q(Exists(correlated)) | Q(pk__in=teaching_user_ids(actor, request=request, filters=filters)))
         .exclude(is_superuser=True)
         .select_related("profile")
         .annotate(
