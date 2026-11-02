@@ -111705,7 +111705,7 @@ msgstr ""
 
 msgctxt "workload.history_restore"
 msgid "Geri"
-msgstr "Geri"
+msgstr "Geri dön"
 
 msgctxt "workload.history_restore"
 msgid "Kafedra"
