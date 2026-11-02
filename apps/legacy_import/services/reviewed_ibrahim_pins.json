@@ -1,0 +1,448 @@
+{
+  "bridge": [
+    {
+      "entity_type": "lesson_subject",
+      "id": "0bfd2b94-f1eb-4263-a3c8-b44c00b42bd2",
+      "legacy_pk": "847",
+      "source_row_hash": "520fe57a65b27512f46c27c5ead84817cb86eced2be0da7031f0b99660553bc9",
+      "source_system": "myedu_mariadb",
+      "state": "migrated",
+      "target_model_label": "registrar.subject",
+      "target_pk": "4520b019-ef4a-49c3-8b2e-c4c736aa3237"
+    },
+    {
+      "entity_type": "worker",
+      "id": "5d7933eb-b304-470f-8ee2-27e04e5e0b08",
+      "legacy_pk": "872",
+      "source_row_hash": "54e2b25bd5f00b8894faae08b446d2aaedc1e514715392bf46dedaca21d8732e",
+      "source_system": "myedu_mariadb",
+      "state": "migrated",
+      "target_model_label": "auth.user",
+      "target_pk": "8311"
+    },
+    {
+      "entity_type": "group_unit",
+      "id": "7c466397-6230-43a9-8508-5b8d0f970bc5",
+      "legacy_pk": "676",
+      "source_row_hash": "27cd5d8a0f4071f22bd508d4e2970cbe1dc88bcf71d7f939addf78387b702235",
+      "source_system": "myedu_mariadb",
+      "state": "migrated",
+      "target_model_label": "organizations.orgunit",
+      "target_pk": "390c5966-36d1-4032-bb97-7e1de0acc397"
+    },
+    {
+      "entity_type": "group_unit",
+      "id": "ec1334d1-f0bd-45a3-b0ae-e9ab03a2e4ff",
+      "legacy_pk": "671",
+      "source_row_hash": "4647ccdc3ba7380017fc63e0475943420893ada33bf5cceaae3bd434425c030c",
+      "source_system": "myedu_mariadb",
+      "state": "migrated",
+      "target_model_label": "organizations.orgunit",
+      "target_pk": "cd3fe4ff-c3dc-44be-a5a1-7d43dc37325c"
+    },
+    {
+      "entity_type": "group_unit",
+      "id": "f8c42d4a-338a-4280-955d-72ef897cad75",
+      "legacy_pk": "615",
+      "source_row_hash": "f363a3d3a119e67ff155f2b09604f0f419c009316251435b7f0d0d3551dacc96",
+      "source_system": "myedu_mariadb",
+      "state": "migrated",
+      "target_model_label": "organizations.orgunit",
+      "target_pk": "19cdd142-b576-42cb-83c0-015bc166ef2e"
+    }
+  ],
+  "identity_inventory_sha256": "df0a7d4ab3e4e1cdc61760064c19b622f20c380a6951dfea3d252c382cac036b",
+  "lesson_fields": [
+    "created_at",
+    "created_by_id",
+    "date",
+    "end_time",
+    "hours",
+    "id",
+    "instructor_id",
+    "is_legacy_synthesised",
+    "kind",
+    "offering_id",
+    "organization_id",
+    "room_id",
+    "start_time",
+    "syllabus_week",
+    "topic",
+    "updated_at"
+  ],
+  "lessons": {
+    "1a7d68af-67be-4d4a-8119-f685a14509f2": {
+      "fields": {
+        "created_by_id": null,
+        "date": "2026-09-15",
+        "end_time": null,
+        "hours": 2,
+        "id": "1a7d68af-67be-4d4a-8119-f685a14509f2",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "2ec94cce-70ca-456d-816f-9710aef201a3",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 293,
+        "start_time": "10:10:00",
+        "syllabus_week": 1,
+        "topic": "Biznesə giriş"
+      }
+    },
+    "1f168dd3-ce4f-4b4c-ae15-6e2989e3bb7e": {
+      "fields": {
+        "created_by_id": null,
+        "date": "2026-09-15",
+        "end_time": null,
+        "hours": 2,
+        "id": "1f168dd3-ce4f-4b4c-ae15-6e2989e3bb7e",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "a881c501-4fe2-486e-bf29-12960a781dfb",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 293,
+        "start_time": "10:10:00",
+        "syllabus_week": 1,
+        "topic": "Biznesə giriş"
+      }
+    },
+    "269cd797-8799-427d-989f-21f006d5ddac": {
+      "fields": {
+        "created_by_id": null,
+        "date": "2026-09-29",
+        "end_time": null,
+        "hours": 2,
+        "id": "269cd797-8799-427d-989f-21f006d5ddac",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "2ec94cce-70ca-456d-816f-9710aef201a3",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 293,
+        "start_time": "10:10:00",
+        "syllabus_week": 2,
+        "topic": "Biznes və İqtisadiyyat"
+      }
+    },
+    "28508e69-977f-4fba-8e95-0bcb299ef750": {
+      "fields": {
+        "created_by_id": null,
+        "date": "2026-09-22",
+        "end_time": null,
+        "hours": 2,
+        "id": "28508e69-977f-4fba-8e95-0bcb299ef750",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "2ec94cce-70ca-456d-816f-9710aef201a3",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 294,
+        "start_time": "10:10:00",
+        "syllabus_week": 1,
+        "topic": "Biznesə giriş"
+      }
+    },
+    "31106294-1c73-40fc-9a74-d93e66436fc9": {
+      "fields": {
+        "created_by_id": null,
+        "date": "2026-09-22",
+        "end_time": null,
+        "hours": 2,
+        "id": "31106294-1c73-40fc-9a74-d93e66436fc9",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "a395803a-f4af-4743-823c-1abdf1d21f4e",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 294,
+        "start_time": "10:10:00",
+        "syllabus_week": 1,
+        "topic": "Biznesə giriş"
+      }
+    },
+    "36a31eb8-65ee-4f24-925c-f74fa1529394": {
+      "fields": {
+        "created_by_id": null,
+        "date": "2026-10-20",
+        "end_time": null,
+        "hours": 2,
+        "id": "36a31eb8-65ee-4f24-925c-f74fa1529394",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "a881c501-4fe2-486e-bf29-12960a781dfb",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 306,
+        "start_time": "10:10:00",
+        "syllabus_week": 3,
+        "topic": "Qlobal bazarda biznes fəaliyyəti"
+      }
+    },
+    "3f6b6c6b-3abd-4506-b395-79e7d6199426": {
+      "fields": {
+        "created_by_id": null,
+        "date": "2026-10-13",
+        "end_time": null,
+        "hours": 2,
+        "id": "3f6b6c6b-3abd-4506-b395-79e7d6199426",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "a395803a-f4af-4743-823c-1abdf1d21f4e",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 306,
+        "start_time": "10:10:00",
+        "syllabus_week": 3,
+        "topic": "Qlobal bazarda biznes fəaliyyəti"
+      }
+    },
+    "47b9f5b9-7001-4406-b2d7-eb445aba74ec": {
+      "fields": {
+        "created_by_id": null,
+        "date": "2026-10-20",
+        "end_time": null,
+        "hours": 2,
+        "id": "47b9f5b9-7001-4406-b2d7-eb445aba74ec",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "a395803a-f4af-4743-823c-1abdf1d21f4e",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 306,
+        "start_time": "10:10:00",
+        "syllabus_week": 3,
+        "topic": "Qlobal bazarda biznes fəaliyyəti"
+      }
+    },
+    "53e5a89e-c4cb-480c-9fad-95680a3d73c4": {
+      "fields": {
+        "created_by_id": null,
+        "date": "2026-10-13",
+        "end_time": null,
+        "hours": 2,
+        "id": "53e5a89e-c4cb-480c-9fad-95680a3d73c4",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "2ec94cce-70ca-456d-816f-9710aef201a3",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 306,
+        "start_time": "10:10:00",
+        "syllabus_week": 3,
+        "topic": "Qlobal bazarda biznes fəaliyyəti"
+      }
+    },
+    "5daab47a-7ad1-44b0-8ab8-198cb71d2b70": {
+      "fields": {
+        "created_by_id": null,
+        "date": "2026-09-29",
+        "end_time": null,
+        "hours": 2,
+        "id": "5daab47a-7ad1-44b0-8ab8-198cb71d2b70",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "a881c501-4fe2-486e-bf29-12960a781dfb",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 293,
+        "start_time": "10:10:00",
+        "syllabus_week": 2,
+        "topic": "Biznes və İqtisadiyyat"
+      }
+    },
+    "9ac8045f-90fd-485a-ab31-6a65d468dbcf": {
+      "fields": {
+        "created_by_id": null,
+        "date": "2026-09-29",
+        "end_time": null,
+        "hours": 2,
+        "id": "9ac8045f-90fd-485a-ab31-6a65d468dbcf",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "a395803a-f4af-4743-823c-1abdf1d21f4e",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 293,
+        "start_time": "10:10:00",
+        "syllabus_week": 2,
+        "topic": "Biznes və İqtisadiyyat"
+      }
+    },
+    "9ae682ed-46be-4a14-969b-2381de7917e2": {
+      "fields": {
+        "created_by_id": null,
+        "date": "2026-10-06",
+        "end_time": null,
+        "hours": 2,
+        "id": "9ae682ed-46be-4a14-969b-2381de7917e2",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "a395803a-f4af-4743-823c-1abdf1d21f4e",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 306,
+        "start_time": "10:10:00",
+        "syllabus_week": 2,
+        "topic": "Biznes və İqtisadiyyat"
+      }
+    },
+    "d256b126-089b-4e2a-86e4-95fdb94a0493": {
+      "fields": {
+        "created_by_id": null,
+        "date": "2026-09-22",
+        "end_time": null,
+        "hours": 2,
+        "id": "d256b126-089b-4e2a-86e4-95fdb94a0493",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "a881c501-4fe2-486e-bf29-12960a781dfb",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 294,
+        "start_time": "10:10:00",
+        "syllabus_week": 1,
+        "topic": "Biznesə giriş"
+      }
+    },
+    "e4055e44-ce05-4013-be16-721b903d2277": {
+      "fields": {
+        "created_by_id": null,
+        "date": "2026-10-06",
+        "end_time": null,
+        "hours": 2,
+        "id": "e4055e44-ce05-4013-be16-721b903d2277",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "2ec94cce-70ca-456d-816f-9710aef201a3",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 306,
+        "start_time": "10:10:00",
+        "syllabus_week": 2,
+        "topic": "Biznes və İqtisadiyyat"
+      }
+    },
+    "eac2e34e-acf2-4dc0-8f8c-2c8cc149ae3f": {
+      "fields": {
+        "created_by_id": null,
+        "date": "2026-09-15",
+        "end_time": null,
+        "hours": 2,
+        "id": "eac2e34e-acf2-4dc0-8f8c-2c8cc149ae3f",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "a395803a-f4af-4743-823c-1abdf1d21f4e",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 293,
+        "start_time": "10:10:00",
+        "syllabus_week": 1,
+        "topic": "Biznesə giriş"
+      }
+    },
+    "ebab6c16-c555-4c82-ad85-eac58565e9fc": {
+      "fields": {
+        "created_by_id": null,
+        "date": "2026-10-20",
+        "end_time": null,
+        "hours": 2,
+        "id": "ebab6c16-c555-4c82-ad85-eac58565e9fc",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "2ec94cce-70ca-456d-816f-9710aef201a3",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 306,
+        "start_time": "10:10:00",
+        "syllabus_week": 3,
+        "topic": "Qlobal bazarda biznes fəaliyyəti"
+      }
+    },
+    "ee9be857-6285-42b7-9d5c-27db743084d8": {
+      "fields": {
+        "created_by_id": null,
+        "date": "2026-10-13",
+        "end_time": null,
+        "hours": 2,
+        "id": "ee9be857-6285-42b7-9d5c-27db743084d8",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "a881c501-4fe2-486e-bf29-12960a781dfb",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 306,
+        "start_time": "10:10:00",
+        "syllabus_week": 3,
+        "topic": "Qlobal bazarda biznes fəaliyyəti"
+      }
+    },
+    "fcf5809c-fc1d-45a7-863b-9a3c02616955": {
+      "fields": {
+        "created_by_id": null,
+        "date": "2026-10-06",
+        "end_time": null,
+        "hours": 2,
+        "id": "fcf5809c-fc1d-45a7-863b-9a3c02616955",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "a881c501-4fe2-486e-bf29-12960a781dfb",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 306,
+        "start_time": "10:10:00",
+        "syllabus_week": 2,
+        "topic": "Biznes və İqtisadiyyat"
+      }
+    }
+  },
+  "lessons_sha256": "cc9cfae7af0f8fe8ee983631cb995b49e4205711ca6480ceb2db7488d811db63",
+  "mark_fields": [
+    "created_at",
+    "enrollment_id",
+    "entered_by_id",
+    "id",
+    "lesson_id",
+    "organization_id",
+    "score",
+    "status",
+    "updated_at"
+  ],
+  "marks_count": 243,
+  "marks_sha256": "10bc61b3d503f1781c2b133d179295f72680b77647a5dfb36afaf45e174265bd",
+  "offerings": {
+    "2ec94cce-70ca-456d-816f-9710aef201a3": {
+      "group_id": "19cdd142-b576-42cb-83c0-015bc166ef2e",
+      "lesson_hours": 30,
+      "subject_id": "4520b019-ef4a-49c3-8b2e-c4c736aa3237"
+    },
+    "a395803a-f4af-4743-823c-1abdf1d21f4e": {
+      "group_id": "390c5966-36d1-4032-bb97-7e1de0acc397",
+      "lesson_hours": 30,
+      "subject_id": "4520b019-ef4a-49c3-8b2e-c4c736aa3237"
+    },
+    "a881c501-4fe2-486e-bf29-12960a781dfb": {
+      "group_id": "cd3fe4ff-c3dc-44be-a5a1-7d43dc37325c",
+      "lesson_hours": 30,
+      "subject_id": "4520b019-ef4a-49c3-8b2e-c4c736aa3237"
+    }
+  },
+  "safe_guards": [
+    "ibrahim_active_tenant_required",
+    "ibrahim_actor_inactive",
+    "ibrahim_actor_scope_required",
+    "ibrahim_actor_tenant_required",
+    "ibrahim_corrected_without_matching_receipt",
+    "ibrahim_exact_receipt_required",
+    "ibrahim_exact_undo_failed",
+    "ibrahim_exact_write_count_required",
+    "ibrahim_fixed_offering_changed",
+    "ibrahim_fixed_offerings_required",
+    "ibrahim_fresh_baseline_required",
+    "ibrahim_full_graph_preservation_failed",
+    "ibrahim_graph_budget",
+    "ibrahim_graph_tenant_changed",
+    "ibrahim_handover_requires_review",
+    "ibrahim_other_lesson_instructor",
+    "ibrahim_other_mark_author",
+    "ibrahim_other_positive_teacher_assignment",
+    "ibrahim_other_teacher_share",
+    "ibrahim_partial_authorship_requires_review",
+    "ibrahim_postgresql_required",
+    "ibrahim_prior_receipt_requires_review",
+    "ibrahim_reviewed_cells_changed",
+    "ibrahim_reviewed_identity_changed",
+    "ibrahim_reviewed_lesson_inventory_changed",
+    "ibrahim_reviewed_raw_lessons_changed",
+    "ibrahim_reviewed_source_lesson_changed",
+    "ibrahim_row_budget",
+    "ibrahim_source_group_bridge_changed",
+    "ibrahim_teacher_inactive",
+    "ibrahim_teacher_profile_inactive",
+    "ibrahim_undo_state_changed",
+    "ibrahim_teacher_grade_permission_required"
+  ],
+  "source_graph_sha256": "0a0662851d96c740d332d00b093cd0a652f9edccf7e229f5b6c02c232fcb9bd3"
+}
