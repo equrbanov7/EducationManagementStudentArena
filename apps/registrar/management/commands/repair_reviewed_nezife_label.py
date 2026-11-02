@@ -11,6 +11,7 @@ from core.rls import apply_rls_request_context, reset_rls_context
 from core.rls_pooling import rls_worker_atomic
 
 from ... import reviewed_nezife_label as repair
+from ...reviewed_nezife_diagnostic import native_failure
 
 
 class Command(BaseCommand):
@@ -33,8 +34,8 @@ class Command(BaseCommand):
                 user=user,
                 **{k: options[k] for k in ("apply", "expected_baseline", "undo")},
             )
-        except Exception:
-            raise CommandError("nezife_label_refused") from None
+        except Exception as exc:
+            raise CommandError(native_failure(exc)) from None
         finally:
             reset_rls_context(local=True)
         self.stdout.write("reviewed_nezife_label: " + json.dumps(result, sort_keys=True))

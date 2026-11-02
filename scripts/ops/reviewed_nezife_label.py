@@ -12,6 +12,43 @@ from reviewed_followup import CONTAINER, verify_head
 
 PREFIX = "reviewed_nezife_label: "
 
+# Exact current native guards; arbitrary exception text never reaches job logs.
+SAFE_GUARDS = frozenset(
+    (
+        "nezife_academic_graph_changed",
+        "nezife_actor_scope",
+        "nezife_actor_tenant",
+        "nezife_course_changed",
+        "nezife_exact_receipt",
+        "nezife_exact_undo_failed",
+        "nezife_exact_write_count",
+        "nezife_explicit_mode",
+        "nezife_fresh_baseline",
+        "nezife_lesson_changed",
+        "nezife_mark_inventory_changed",
+        "nezife_prior_receipt_review",
+        "nezife_room_changed",
+        "nezife_schedule_changed",
+        "nezife_scope_changed",
+        "nezife_teacher_changed",
+        "nezife_undo_changed",
+        "nezife_unreceipted_clear",
+        "nezife_label_refused",
+    )
+)
+
+
+class Refused(ValueError):
+    pass
+
+
+def safe_failure(stderr):
+    if isinstance(stderr, str) and len(stderr.encode("utf-8")) <= 256:
+        match = re.fullmatch(r"CommandError: (nezife_[a-z0-9_]+)\n?", stderr)
+        if match and match[1] in SAFE_GUARDS:
+            return match[1]
+    return "reviewed_nezife_label_refused"
+
 
 def summary(raw, *, apply, undo, baseline=""):
     if not isinstance(raw, str) or len(raw) > 2048 or len(raw.splitlines()) != 1 or not raw.startswith(PREFIX):
@@ -66,7 +103,11 @@ def execute(value, env):
         text=True,
         timeout=180,
     )
-    if result.returncode or result.stderr or len(result.stdout) > 4096:
+    if len(result.stdout) + len(result.stderr) > 65536:
+        raise ValueError("nezife_native_refused")
+    if result.returncode:
+        raise Refused(safe_failure(result.stderr) if not result.stdout else "reviewed_nezife_label_refused")
+    if result.stderr or len(result.stdout) > 4096:
         raise ValueError("nezife_native_refused")
     line = summary(result.stdout, apply=apply, undo=undo, baseline=value.get("baseline", ""))
     print(line)
@@ -76,6 +117,9 @@ def execute(value, env):
 def main():
     try:
         execute(json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_bytes()).get("inputs"), os.environ)
+    except Refused as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
     except Exception:
         print("reviewed_nezife_label_refused", file=sys.stderr)
         return 2
