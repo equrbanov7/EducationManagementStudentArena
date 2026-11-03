@@ -12,7 +12,9 @@ mühazirə + seminar jurnalları bir ailədir) belə bağlanır:
    tələbədə üst-üstə düşür (payız vərəqi yaz jurnalı açıldıqdan SONRA çap olunanda eyni adlı yaz fənni ilə
    qarışmasın deyə); «əvvəl yaradılıb» sərt süzgəc DEYİL, açarın bir hissəsidir — ``added_date`` köhnə sistemdə
    jurnal yenidən qurulanda yenilənib (qrupu uyğun ~6 800 cədvəl yalnız buna görə düşürdü); bərabərlikdə ən son semestr;
-3. açarı EYNİ, semestri fərqli ikinci ailə qalırsa — cədvəl «ambiqü» sayılır, paketə düşmür.
+3. açarı EYNİ, semestri fərqli ikinci ailə qalırsa — cədvəl «ambiqü» sayılır;
+4. sonra HƏR TƏLƏBƏ SƏTRİ ayrıca öz ailəsinə bağlanır (:meth:`JournalIndex.choose_row`) — fənni təkrar keçən
+   tələbənin vərəqi köhnə cəhdə yox, həmin kursa düşsün; cədvəlin ailəsi yalnız bərabərlik kəsicisidir.
 
 Hər ``(ailə, tələbə)`` üçün ƏN SON export-un sətri saxlanılır — Yekun dolu sətir varsa onların ən sonu.
 Paketə yalnız ``--official-entry`` semestrlərinə düşən ailələr yazılır; tutuşdurma isə BÜTÜN semestrlərlə
@@ -123,6 +125,36 @@ class JournalIndex:
             return None, "ambiguous"
         return best, "matched" if grouped else "matched_by_students"
 
+    def choose_row(self, table, row, table_root, exported: str) -> tuple[int | None, str]:
+        """Bir TƏLƏBƏ sətrinin ailəsi — tələbənin ÖZ jurnalı (``students_id``) arasından.
+
+        Cədvəl səviyyəli seçim qrupa görədir; fənni TƏKRAR keçən tələbədə qrupun köhnə jurnalı yeni kursun vərəqini
+        özünə çəkirdi (2025/26 «39+26=65» vərəqi 2022/23 «31+4=35» yazılışına). Açar: ``(bu sətrin imtahanı ailənin
+        im/im2-si ilə üst-üstə düşür, export-dan əvvəl başlayıb, semestr, cədvəlin ailəsidir)`` — imtahan uyğunluğu
+        köhnə semestrin sonradan çap olunan vərəqini, «ən son başlamış kurs» isə imtahandan əvvəlki vərəqi düz yerə
+        aparır. Tələbə heç bir ailənin siyahısında deyilsə cədvəlin ailəsi qalır.
+        """
+
+        roots = [r for r in self.by_subject.get(subject_key(table.subject), ()) if row.student_id in self.students[r]]
+        if not roots:
+            return (table_root, "row.table_family") if table_root is not None else (None, "row.no_family")
+        stored = self.finals
+
+        def key(root):
+            exam = int(
+                any(
+                    v is not None and _point(v) in stored.get((root, row.student_id), ()) for v in (row.exam, row.resit)
+                )
+            )
+            started = int(bool(self.started[root]) and self.started[root][:10] <= exported[:10])
+            return (exam, started, self.semester[root], int(root == table_root))
+
+        ranked = sorted(roots, key=lambda root: (key(root), root), reverse=True)
+        best = ranked[0]
+        if len(ranked) > 1 and key(ranked[1]) == key(best):
+            return None, "row.ambiguous"
+        return best, "row.own_family" if best == table_root else "row.moved_family"
+
 
 def _point(value) -> str:
     """Vərəq rəqəmini xana mətni ilə müqayisə formasına salır (``17`` ↔ ``"17"``, ``27.0`` ↔ ``"27"``)."""
@@ -147,11 +179,13 @@ def collect_rows(cursor, source: str, index: JournalIndex, semesters, stats: Cou
             exported = str(exported)
             for table in parse_export(data):
                 stats["tables"] += 1
-                root, outcome = index.choose(table, exported)
+                table_root, outcome = index.choose(table, exported)
                 stats[f"tables.{outcome}"] += 1
-                if root is None or index.semester[root] not in semesters:
-                    continue
                 for row in table.rows:
+                    root, row_outcome = index.choose_row(table, row, table_root, exported)
+                    stats[row_outcome] += 1
+                    if root is None or index.semester[root] not in semesters:
+                        continue
                     rank = (row.total is not None, exported, int(export_id))
                     current = best.get((root, row.student_id))
                     if current is None or rank > current[0]:

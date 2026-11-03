@@ -18,7 +18,14 @@ from apps.registrar import analytics, finals, transcript
 from apps.registrar.models import Enrollment, ResitReason, ResitRecord, ResitStatus
 from core.rls import bypass_rls
 
-from .test_exam_eligibility_frozen import _lock_journal, _seed_org, _seed_period, _seed_student, _stamp_migrated
+from .test_exam_eligibility_frozen import (
+    _lock_journal,
+    _make_absences,
+    _seed_org,
+    _seed_period,
+    _seed_student,
+    _stamp_migrated,
+)
 
 D = Decimal
 
@@ -136,3 +143,38 @@ class LiveResitStillReplaces(TestCase):
     def test_not_frozen_resit_replaces_exam(self):
         fresh = Enrollment.objects.select_related("offering", "offering__subject").get(pk=self.enr.pk)
         self.assertEqual(finals.compute_final_result(enrollment=fresh)["effective_exam"], D(6))
+
+
+class FrozenLanguageLevelStatus(TestCase):
+    """Köçürülmüş xarici dil səviyyə kursu imtahansızdırsa «Davam edir» deyil, «köhnə sistemdə nəticə yoxdur».
+
+    11 q/b qaydası (``language_level_grading.eligibility``) tarixi semestrdə də qərar verir — qadağa qalır.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.ctx = _seed_org("lvl")
+        with bypass_rls():
+            cls.ctx["subject"].name = "Xarici dildə işgüzar və akademik kommunikasiya-1(elementary)"
+            cls.ctx["subject"].save(update_fields=["name"])
+        period = _seed_period(cls.ctx, name="2024/2025 Payız", year="2024/2025", start="2024-09-15", end="2025-01-31")
+        cls.quiet, _r, cls.quiet_enr = _seed_student(cls.ctx, "lvl_quiet", period)
+        cls.absent, _r, cls.absent_enr = _seed_student(cls.ctx, "lvl_absent", period)
+        _make_absences(cls.ctx, cls.absent_enr.offering, cls.absent_enr, count=12, base_day=datetime.date(2024, 10, 1))
+        _stamp_migrated(cls.ctx, cls.quiet_enr.offering)
+        _lock_journal(cls.quiet_enr.offering)
+
+    def _result(self, enrollment):
+        fresh = Enrollment.objects.select_related("offering", "offering__subject").get(pk=enrollment.pk)
+        return finals.compute_final_result(enrollment=fresh)
+
+    def test_no_exam_reads_as_no_legacy_result(self):
+        from apps.registrar import exam_eligibility
+
+        result = self._result(self.quiet_enr)
+        self.assertFalse(result["barred"])
+        self.assertEqual(result["status_code"], exam_eligibility.STATUS_LEGACY_NO_RESULT)
+
+    def test_eleven_absence_rule_still_bars(self):
+        result = self._result(self.absent_enr)
+        self.assertTrue(result["barred"])

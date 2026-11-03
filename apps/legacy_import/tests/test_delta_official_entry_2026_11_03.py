@@ -151,6 +151,30 @@ class JournalMatchingTests(SimpleTestCase):
         index = JournalIndex(journals, self.lessons, self.workers, [])
         self.assertEqual(index.choose(_table(), "2026-07-06 12:00:00"), (None, "ambiguous"))
 
+    def test_retake_sheet_goes_to_the_retake_course_not_the_old_attempt(self):
+        journals = [
+            _journal(1, "old", semestr=4, added="2023-02-01"),
+            _journal(2, "retake", semestr=12, group=700, added="2026-02-03"),
+        ]
+        finals = [{"journal_uniqid": "retake", "student_id": 7131, "point": "26"}]
+        index = JournalIndex(journals, self.lessons, self.workers, finals)
+        table = _table(exam=D(26))
+        table_root, _outcome = index.choose(table, "2026-07-06 12:00:00")
+        self.assertEqual(table_root, 1)  # qrup köhnə jurnalı göstərir
+        self.assertEqual(
+            index.choose_row(table, table.rows[0], table_root, "2026-07-06 12:00:00"), (2, "row.moved_family")
+        )
+
+    def test_old_sheet_reprinted_later_stays_with_its_exam(self):
+        journals = [
+            _journal(1, "old", semestr=4, added="2023-02-01"),
+            _journal(2, "retake", semestr=12, group=700, added="2026-02-03"),
+        ]
+        finals = [{"journal_uniqid": "old", "student_id": 7131, "point": "17"}]
+        index = JournalIndex(journals, self.lessons, self.workers, finals)
+        table = _table()
+        self.assertEqual(index.choose_row(table, table.rows[0], 1, "2026-07-06 12:00:00"), (1, "row.own_family"))
+
     def test_unknown_subject_has_no_candidate(self):
         index = JournalIndex(
             [_journal(1, "j", semestr=12, lesson=2)], self.lessons + [{"id": 2, "name": "Kimya"}], [], []
