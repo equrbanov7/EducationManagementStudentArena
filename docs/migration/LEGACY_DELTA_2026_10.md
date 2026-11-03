@@ -640,12 +640,27 @@ iki fərqli hədəfli və ya iki yazılışa açılan sətirlər. Hər açılı�
 (köhnə → yeni, səbəb «SYS-1 … <tag>») — geri qaytarma həmin sətirlərdən. Stdout: `official_entry.sem<N>.*`
 (written, same, raised/lowered, skip_*, fail_to_pass / pass_to_fail); adlar yalnız `--names-out`-a.
 
+**Bağlama, ikinci dalğa (2026-11-03 gecə, sahib: «2023/2024 və əvvəlki — hamısını düzəlt; tələbəyə mənasız yerə
+«kəsildi 25 %» göstərməsin»):**
+
+* Paket artıq bütün semestrləri əhatə edir (`--official-entry 1-13`) — 2022/23 Yaz-da 6 211, 2023/24 Payızda 17 589
+  vərəq sətri var; 2022/23 Payız `yekun` cədvəli ilə üst-üstə düşmür (vərəq yalnız onun boşluqlarını doldurur).
+* Hər TƏLƏBƏ SƏTRİ öz ailəsinə bağlanır (`JournalIndex.choose_row`): imtahan uyğunluğu → export-dan əvvəl başlamış ən
+  son kurs → cədvəlin qrup ailəsi. Fənni təkrar keçənin vərəqi köhnə cəhdə düşürdü (28 880 sətir köçdü). Ailədə tələbənin
+  FƏRQLİ imtahan balı varsa sətir bağlanmır; tələbənin im/im2-si olan ailə `students_id`-də olmasa da onunkudur.
+* Yeni sistemdə imtahan / 25 % balı BOŞDURSA rəsmi vərəqdən doldurulur (yalnız boş, `registrar.grade.final` /
+  `.resit` audit) — «nəticə yoxdur» / «İmtahandan kəsilib — 25 %» rəsmi keçən tələbədə görünməsin.
+* Köçürülmüş (donmuş) semestrdə yekuna imtahanla 25 %-dən YAXŞISI girir (`finals.effective_exam_score`; analitika
+  güzgüləri də) — köhnə vərəqlərdə aşağı təkrar imtahan 375-dən 364 halda, `T.imtahan = 0` 402-dən 390 halda sayılmayıb.
+* Donmuş xarici dil səviyyə kursu imtahansızdırsa «köhnə sistemdə nəticə yoxdur» (əvvəl «Davam edir»); 11 q/b qaydası
+  qalır. Eyni fənnin eyni semestrdə imtahansız boş dublikatı akademik qeyddə göstərilmir (`registrar.record_duplicates`).
+
 ### 15.1 Prod addımları (sahibin «hə»sı ilə; imtahanlar bitəndən sonra)
 
 ```bash
-# 1) LOKAL paket (köhnə sistemin MariaDB nüsxəsi) — semestrlər sahibin qərarı ilə (7-13 və ya 6-13)
-python manage.py legacy_delta_extract --port 50330 --password-file <fayl> --source myedu_new --official-entry 7-13 \
-  --out ~/EMSArena-backups/sys1-20261103/official-entry-7-13.json.gz
+# 1) LOKAL paket (köhnə sistemin MariaDB nüsxəsi) — bütün semestrlər (sahib 2026-11-03)
+python manage.py legacy_delta_extract --port 50330 --password-file <fayl> --source myedu_new --official-entry 1-13 \
+  --out ~/EMSArena-backups/sys1-20261103/official-entry-1-13.json.gz
 # 2) prod NÜSXƏSİNDƏ dry-run, sonra şifrələ → draft release legacy-delta-sys1-<tarix> (asset delta.json.gz.enc), §12.1 kimi
 ```
 
