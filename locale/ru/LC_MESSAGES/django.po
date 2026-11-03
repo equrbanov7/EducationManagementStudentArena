@@ -112780,6 +112780,16 @@ msgctxt "workload.history_teacher_restore"
 msgid "(istəyə bağlı — sonradan heç kim yazmayıb)"
 msgstr "(необязательно — с тех пор никто не вносил записей)"
 
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(period)s · %(group)s: ləğv olunmuş BOŞ əkiz jurnal silinir (tam snapshot audit-də, geri qaytarmada eyni id ilə bərpa olunur); bağlı imtahanlar saxlanılan jurnala keçir."
+msgstr "%(period)s · %(group)s: отменённый ПУСТОЙ журнал-двойник удаляется (полный снимок в аудите, при отмене восстанавливается с тем же id); связанные экзамены переходят в сохраняемый журнал."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(student)s · %(period)s: hər iki fənn üzrə qeydiyyat var — qiymətsiz təkrar qeydiyyat bağlanır (dropped), qiymətli qeydiyyat qalır."
+msgstr "%(student)s · %(period)s: есть запись по обеим дисциплинам — запись без оценок закрывается (dropped), запись с оценками остаётся."
+
 msgctxt "accounts.syllabus"
 msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
 msgstr "Нужно заполнить оба поля — основную и дополнительную литературу. Источники можно записывать в любой форме: каждый с новой строки, через запятую или в одну строку."

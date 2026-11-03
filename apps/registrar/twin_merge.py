@@ -5,7 +5,12 @@ sistemin jurnalı (dərs, xana, sillabus) eyni qrup + dövrdə BAŞQA fənnin ka
 rəsmi açılışı (T — cədvəl slotları, dərs yükü) isə boşdur. Unikal açar (fənn, dövr, qrup) W-nin fənnini dəyişməyə imkan
 vermir (``subject_collisions`` fazası əkizə qəsdən toxunmur) — ona görə data T-yə KÖÇÜRÜLÜR, W ləğv olunur.
 
-Plan (lokal, YALNIZ id-lər): ``{"format": "twin-merge/1", "pairs": [{"source": W uuid, "target": T uuid}]}``.
+Plan (lokal, YALNIZ id-lər): ``{"format": "twin-merge/1", "pairs": [{"source": W uuid, "target": T uuid}]}``
+(K1 üçün cütdə istəyə görə ``"move_shares": true``).
+
+**W BOŞDURSA** (sahib 2026-11-04, K1 — :func:`.twin_inert.offering_blockers`: 0 dərs, datasız qeydiyyatlar …)
+birləşmə :mod:`.twin_merge_empty` ilə gedir: T-də xana OLA BİLƏR, köçən qiymət yoxdur; qeydiyyat/slot/pay/imtahan
+bağı ayrıca qaydalarla. Aşağıdakı qaydalar DATALI W üçündür.
 
 Qaydalar (hər cüt öz savepoint-ində; hər şey kilid altında yenidən yoxlanılır):
 
@@ -37,6 +42,8 @@ from django.utils import timezone
 from core.audit import log_action
 from core.constants import AuditAction
 
+from .twin_inert import is_empty_twin
+from .twin_merge_empty import EmptyTwinMerge
 from .twin_relocate import closed, copy_mark, corrected_lesson_ids, corrected_mark_ids, has_scores, recompute_absences
 
 FORMAT = "twin-merge/1"
@@ -91,8 +98,8 @@ class Merger:
                 self.counts["pair_integrity_error"] += 1
 
     # ── yoxlamalar ────────────────────────────────────────────────────────
-    def _blocked(self, source, target) -> str:
-        Lesson, LessonMark, Enrollment = _model("Lesson"), _model("LessonMark"), _model("Enrollment")
+    @staticmethod
+    def _pair_blocked(source, target) -> str:
         if (
             source.pk == target.pk
             or source.period_id != target.period_id
@@ -104,6 +111,10 @@ class Merger:
             return "already_merged"
         if not target.is_active or closed([source.pk, target.pk]):
             return "closed_or_inactive"
+        return ""
+
+    def _blocked(self, source, target) -> str:
+        Lesson, LessonMark, Enrollment = _model("Lesson"), _model("LessonMark"), _model("Enrollment")
         if LessonMark.objects.filter(lesson__offering=target).exists():
             return "both_have_marks"
         lesson_ids = list(Lesson.objects.filter(offering=source).values_list("pk", flat=True))
@@ -127,6 +138,15 @@ class Merger:
         source, target = offerings.get(str(pair.get("source"))), offerings.get(str(pair.get("target")))
         if source is None or target is None:
             self.counts["pair_missing"] += 1
+            return
+        blocked = self._pair_blocked(source, target)
+        if blocked:
+            self.counts[blocked] += 1
+            return
+        if is_empty_twin(source):  # K1: boş əkiz → datalı (və ya boş) saxlanılan jurnal
+            EmptyTwinMerge(organization=self.organization, actor=self.actor, counts=self.counts).merge(
+                source, target, pair
+            )
             return
         blocked = self._blocked(source, target)
         if blocked:

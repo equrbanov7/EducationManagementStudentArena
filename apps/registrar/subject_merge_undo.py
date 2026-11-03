@@ -10,7 +10,8 @@ TƏHLÜKƏSİZLİK ŞƏRTLƏRİ (biri pozulsa heç nə yazılmır, səbəblər s
 * mənbə kartları hələ də «Birləşdirildi → …» səbəbi ilə arxivdədir;
 * köçən hər sətir hələ mövcuddur və HƏDƏF fənnə baxır (başqa yerə köçürülməyib/silinməyib);
 * plandan çıxarılan sətrin planı hələ qaralama/qaytarılmış statusdadır və həmin yer boşdur;
-* JSON prioritetləri birləşmədən sonra dəyişməyib.
+* JSON prioritetləri birləşmədən sonra dəyişməyib;
+* silinmiş boş əkiz jurnalın id-si boşdur və bağlanmış təkrar qeydiyyatlar hələ ``dropped``-dır (K2/K3).
 Sonra bütün yazı bir tranzaksiyada aparılır; dry-run eyni yazını edib GERİ QAYTARIR (DB
 unikallıq qaydaları da real yoxlanır).
 
@@ -39,6 +40,7 @@ from .subject_merge_apply import (
 )
 from .subject_merge_conflicts import EDITABLE_PLAN_STATUSES
 from .subject_merge_inventory import M2M, RELATIONS, relation
+from .subject_merge_twins import check_twins, restore_twins
 
 
 class _DryRun(Exception):
@@ -140,6 +142,7 @@ def inspect(entry) -> list:
     _check_moved(changes, issues)
     _check_plan_rows(changes, issues)
     _check_json(changes, issues)
+    check_twins(changes, issues)
     return issues
 
 
@@ -187,6 +190,7 @@ def _write(entry, actor, reason) -> None:
             archived_by_id=card.get("archived_by_id"),
             updated_at=now,
         )
+    restore_twins(changes)  # K2/K3: silinmiş boş əkiz jurnallar (eyni id) + bağlanmış qeydiyyatların statusu
     target = Subject.objects.get(pk=target_id)
     log_action(
         action=AuditAction.UPDATE,

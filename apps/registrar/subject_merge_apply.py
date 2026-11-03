@@ -3,7 +3,8 @@
 Ardıcıllıq (hamısı BİR ``transaction.atomic`` daxilində; istənilən uyğunsuzluq → tam geri):
 1. hədəf + mənbə kartları ``SELECT … FOR UPDATE`` ilə kilidlənir, plan YENİDƏN toplanır;
 2. iz (digest) önizləmədəki ilə eyni deyilsə → 409 ``drift``; bloklayan toqquşma → 409 ``conflicts``;
-3. qaralama planda toqquşan mənbə sətirləri çıxarılır (tam snapshot audit-də);
+3. qaralama planda toqquşan mənbə sətirləri çıxarılır (tam snapshot audit-də); ləğv olunmuş BOŞ əkiz açılışlar
+   silinir və qiymətsiz təkrar qeydiyyatlar bağlanır (K2/K3 — :mod:`.subject_merge_twins`, snapshot audit-də);
 4. hər ``repoint`` cədvəli YALNIZ qeydə alınmış id-lərlə köçürülür (say tutmalıdır);
    açılış üçün ``app.registrar_subject_merge_*`` icazəsi qurulur (``audit.0004``) və dərhal silinir;
 5. imtahan qrupu əlaqələri + JSON prioritet açarları;
@@ -38,6 +39,7 @@ from .subject_merge import (
     resolve_subjects,
 )
 from .subject_merge_inventory import M2M, RELATIONS, REPOINT, relation
+from .subject_merge_twins import delete_twins, drop_enrollments
 
 _CTX = "registrar.subject_merge"
 
@@ -203,7 +205,7 @@ def _archive_sources(sources, target, actor, now) -> None:
         )
 
 
-def _audit(*, organization, actor, request, target, sources, plan, snapshots, reason, digest):
+def _audit(*, organization, actor, request, target, sources, plan, snapshots, reason, digest, twins=None):
     target_card = plan["target"]
     changes = {
         "kind": "subject_merge",
@@ -218,6 +220,8 @@ def _audit(*, organization, actor, request, target, sources, plan, snapshots, re
         "m2m": plan["m2m"],
         "json_refs": plan["json_refs"],
         "deleted_plan_rows": snapshots,
+        "deleted_offerings": (twins or {}).get("offerings", []),
+        "dropped_enrollments": (twins or {}).get("enrollments", []),
         "locked_plans": plan["locked_plans"],
         "archive_reason": archive_reason_for(target),
         "digest": digest,
@@ -259,7 +263,18 @@ def _audit(*, organization, actor, request, target, sources, plan, snapshots, re
     return entry
 
 
-def apply(*, organization, actor, target_ref, source_refs, reason, expected_digest, request=None, by_code=False):
+def apply(
+    *,
+    organization,
+    actor,
+    target_ref,
+    source_refs,
+    reason,
+    expected_digest,
+    request=None,
+    by_code=False,
+    drop_attendance_only=False,
+):
     """Önizlənmiş birləşdirməni yazır. Qaytarır: ``{"audit_id", "counts", ...}``."""
     reason = clean_reason(reason)
     expected = str(expected_digest or "").strip()
@@ -277,7 +292,7 @@ def apply(*, organization, actor, target_ref, source_refs, reason, expected_dige
             raise _drift()
         target, sources = resolve_subjects(organization, target_ref, source_refs, by_code=by_code)
         lock_offerings([target.pk, *(source.pk for source in sources)])
-        plan = collect(organization, target, sources)
+        plan = collect(organization, target, sources, drop_attendance_only=drop_attendance_only)
         digest = plan_digest(plan)
         if digest != expected:
             raise _drift()
@@ -290,6 +305,9 @@ def apply(*, organization, actor, target_ref, source_refs, reason, expected_dige
             )
         now = timezone.now()
         snapshots = _drop_plan_rows(plan)
+        # K2/K3: boş əkiz açılışlar (snapshot-la) silinir, qiymətsiz təkrar qeydiyyatlar bağlanır — köçürmədən ƏVVƏL
+        # (``uniq_offering_subject_period_group`` köçürmədə toqquşmasın).
+        twins = {"offerings": delete_twins(plan, _drift), "enrollments": drop_enrollments(plan, _drift)}
         _repoint_all(plan, target, sources, now)
         _apply_m2m(plan)
         _apply_json(plan)
@@ -317,6 +335,7 @@ def apply(*, organization, actor, target_ref, source_refs, reason, expected_dige
             snapshots=snapshots,
             reason=reason,
             digest=digest,
+            twins=twins,
         )
     return {
         "audit_id": str(entry.pk),
