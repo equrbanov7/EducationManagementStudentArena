@@ -10,7 +10,7 @@ from decimal import Decimal
 
 from django.test import TestCase
 
-from apps.organizations.models import OrgUnit
+from apps.organizations.models import AcademicPeriod, OrgUnit
 from apps.registrar import finals, transcript
 from apps.registrar.models import CourseOffering, Enrollment
 from core.constants import OrgUnitType
@@ -43,7 +43,23 @@ class EmptyDuplicateIsHidden(TestCase):
     def _count(self):
         return transcript.count_student_record_rows(student=self.student, organization=self.ctx["org"])
 
-    def test_both_empty_both_shown(self):
+    def test_both_empty_in_an_ended_semester_shows_one(self):
+        """Bitmiş semestrdə eyni fənn iki dəfə «nəticə yoxdur» göstərilmir — daha çox komponenti olan qalır."""
+        from apps.registrar.models import AssessmentComponent, ComponentScore
+
+        with bypass_rls():
+            component = AssessmentComponent.objects.create(
+                organization=self.ctx["org"], offering=self.guest.offering, name="Kollokvium 1", kind="kollokvium"
+            )
+            ComponentScore.objects.create(
+                organization=self.ctx["org"], component=component, enrollment=self.guest, score=Decimal("7")
+            )
+        self.assertEqual([row["enrollment_id"] for row in self._rows()], [self.guest.pk])
+        self.assertEqual(self._count(), 1)
+
+    def test_both_empty_in_the_current_semester_both_shown(self):
+        with bypass_rls():
+            AcademicPeriod.objects.filter(pk=self.period.pk).update(end_date="2099-06-30")
         self.assertEqual(len(self._rows()), 2)
         self.assertEqual(self._count(), 2)
 

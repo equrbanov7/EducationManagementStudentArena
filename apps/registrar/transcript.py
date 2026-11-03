@@ -179,11 +179,13 @@ def count_student_record_rows(*, student, organization) -> int:
     """
     if organization is None or student is None:
         return 0
-    rows = list(
-        student_record_enrollments(student=student, organization=organization).values_list(
-            "pk", "offering__subject_id", "offering__period_id"
-        )
-    )
+    today = timezone.localdate()
+    rows = [
+        (pk, subject_id, period_id, bool(end and end < today))
+        for pk, subject_id, period_id, end in student_record_enrollments(
+            student=student, organization=organization
+        ).values_list("pk", "offering__subject_id", "offering__period_id", "offering__period__end_date")
+    ]
     # Boş dublikat sətir siyahısında olmadığı kimi sayğacda da yoxdur (``record_duplicates``, SYS-1).
     hidden = record_duplicates.empty_duplicate_ids(rows)
     recognitions = credit_recognition_read.active_for_student(organization, getattr(student, "pk", None))
@@ -191,7 +193,7 @@ def count_student_record_rows(*, student, organization) -> int:
         return len(rows) - len(hidden)
     # Tanınma jurnal sətrini əvəz edir (``build_student_transcript``) — əvəzlənən sətir sayılmır.
     overridden = credit_recognition_read.override_keys(recognitions)
-    kept = [(subject_id, period_id) for pk, subject_id, period_id in rows if pk not in hidden]
+    kept = [(subject_id, period_id) for pk, subject_id, period_id, _ended in rows if pk not in hidden]
     return sum(1 for pair in kept if pair not in overridden) + len(recognitions)
 
 
@@ -225,8 +227,12 @@ def build_student_transcript(
     # ƏVƏZ edir — sətir tanınmış balla aşağıda əlavə olunur, ÜOMG / kredit ondan hesablanır.
     # Eyni fənnin eyni semestrdə imtahansız BOŞ dublikatı göstərilmir (``record_duplicates``, SYS-1) — dublikat
     # yoxdursa sorğu da yoxdur.
+    ended_before = timezone.localdate()
     hidden = record_duplicates.empty_duplicate_ids(
-        [(e.pk, e.offering.subject_id, e.offering.period_id) for e in enrollments]
+        [
+            (e.pk, e.offering.subject_id, e.offering.period_id, bool(e.offering.period.end_date < ended_before))
+            for e in enrollments
+        ]
     )
     recognitions = credit_recognition_read.active_for_student(organization, getattr(student, "pk", None))
     overridden = credit_recognition_read.override_keys(recognitions)
@@ -374,8 +380,12 @@ def student_credit_totals(*, student, organization, today=None) -> dict:
     # Tanınmış xarici nəticə (2026-10-25) — kredit TOPLANMIŞDIR; əvəz etdiyi jurnal sətri sayılmır.
     # Eyni fənnin eyni semestrdə imtahansız BOŞ dublikatı göstərilmir (``record_duplicates``, SYS-1) — dublikat
     # yoxdursa sorğu da yoxdur.
+    ended_before = timezone.localdate()
     hidden = record_duplicates.empty_duplicate_ids(
-        [(e.pk, e.offering.subject_id, e.offering.period_id) for e in enrollments]
+        [
+            (e.pk, e.offering.subject_id, e.offering.period_id, bool(e.offering.period.end_date < ended_before))
+            for e in enrollments
+        ]
     )
     recognitions = credit_recognition_read.active_for_student(organization, getattr(student, "pk", None))
     overridden = credit_recognition_read.override_keys(recognitions)
