@@ -20,7 +20,12 @@ def history_teacher_restore(request, offering_id):
         return no_org()
     payload = json_body(request)
     try:
-        result = restore_for_teacher(request=request, offering_id=offering_id, reason=payload.get("reason"))
+        result = restore_for_teacher(
+            request=request,
+            offering_id=offering_id,
+            reason=payload.get("reason"),
+            teacher_id=payload.get("teacher"),
+        )
     except Denied as exc:
         return denied(exc, status=exc.status)
     except WorkloadDenied as exc:

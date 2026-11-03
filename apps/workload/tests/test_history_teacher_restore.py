@@ -26,7 +26,7 @@ from .factories import TEACHER_PERMS, activate_member, make_org, make_row, make_
 REASON = "Seminar jurnalı müəllimin özünə qaytarılır."
 
 
-class HistoryTeacherRestoreTest(TestCase):
+class RestoreFixture(TestCase):
     @classmethod
     def setUpTestData(cls):
         with bypass_rls():
@@ -95,6 +95,8 @@ class HistoryTeacherRestoreTest(TestCase):
         url = reverse("workload:history_teacher_restore", args=[self.offering.pk])
         return self.client.post(url, data=json.dumps({"reason": reason}), content_type="application/json")
 
+
+class HistoryTeacherRestoreTest(RestoreFixture):
     def test_view_as_list_shows_button_and_restore_moves_the_seminar_load_to_this_teacher(self):
         with bypass_rls():
             row = self.seminar_row(self.lecturer)
@@ -223,3 +225,90 @@ class HistoryTeacherRestoreTest(TestCase):
             self.assertEqual(stale.exception.code, "workload.history_teacher_restore_not_current")
             self.assertEqual(TeacherAssignment.objects.get(row=row).teacher_id, self.lecturer.pk)
             self.assertEqual(CourseOffering.objects.get(pk=self.offering.pk).instructor_id, self.lecturer.pk)
+
+
+class AdminListTeacherFilterRestoreTest(RestoreFixture):
+    """Owner 2026-11-04: the ADMIN list (MÜƏLLİM filter) restores the filtered teacher's journals directly."""
+
+    def setUp(self):
+        with bypass_rls():
+            from apps.registrar.models import JournalShare, JournalShareSource
+
+            # Her legacy share is what puts the row into the admin «MÜƏLLİM» filter (as on prod).
+            JournalShare.objects.create(
+                organization=self.org,
+                offering=self.offering,
+                teacher=self.teacher,
+                kinds=["seminar"],
+                source=JournalShareSource.LEGACY,
+            )
+
+    def admin_list(self, teacher=True):
+        self.client.force_login(self.admin)
+        session = self.client.session
+        session["active_organization"] = self.org.slug
+        session.save()
+        query = "?teacher=" + str(self.teacher.pk) if teacher else ""
+        page = self.client.get(reverse("registrar:journal_list") + query)
+        self.assertEqual(page.status_code, 200)
+        self.assertTrue(page.context["journal_is_broad"])
+        return page
+
+    def admin_post(self, reason=""):
+        url = reverse("workload:history_teacher_restore", args=[self.offering.pk])
+        body = {"reason": reason, "teacher": self.teacher.pk}
+        return self.client.post(url, data=json.dumps(body), content_type="application/json")
+
+    def test_filtered_admin_list_shows_one_click_restore_when_nobody_wrote_since(self):
+        with bypass_rls():
+            row = self.seminar_row(self.lecturer)
+        page = self.admin_list()
+        self.assertContains(page, "data-jl-hrestore-open")
+        self.assertContains(page, 'data-teacher-id="%s"' % self.teacher.pk)
+        self.assertContains(page, 'data-written-since="0"')
+        self.assertContains(page, "Vahab Mühazirəçi → Çiçək Seminarçı (30 saat)")
+        response = self.admin_post(reason="")
+        self.assertEqual(response.status_code, 200, response.content)
+        with bypass_rls():
+            self.assertEqual(TeacherAssignment.objects.get(row=row).teacher_id, self.teacher.pk)
+            self.assertTrue(self.course().journal_is_current_load)
+            audit = AuditLog.objects.get(resource_type="workload.HistoryTeacherRestore")
+            self.assertEqual(audit.reason, service.DEFAULT_REASON)
+        self.assertNotContains(self.admin_list(), "data-jl-hrestore-open")  # now current for her
+
+    def test_holder_wrote_since_warns_requires_reason_and_keeps_his_records(self):
+        with bypass_rls():
+            row = self.seminar_row(self.lecturer)
+            later = Lesson.objects.create(
+                organization=self.org,
+                offering=self.offering,
+                date=timezone.localdate(),
+                kind="seminar",
+                hours=2,
+                instructor=self.lecturer,
+                created_by=self.lecturer,
+            )
+        page = self.admin_list()
+        self.assertContains(page, 'data-written-since="1"')
+        self.assertContains(page, "bu jurnalda 1 dərs və 0 qeyd yazıb.")
+        self.assertContains(page, "data-jl-hrestore-warnbox")
+        response = self.admin_post(reason="")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["error"], "workload.history_teacher_restore_reason")
+        with bypass_rls():
+            self.assertEqual(TeacherAssignment.objects.get(row=row).teacher_id, self.lecturer.pk)
+        response = self.admin_post(reason=REASON)
+        self.assertEqual(response.status_code, 200, response.content)
+        with bypass_rls():
+            later.refresh_from_db()
+            self.assertEqual((later.instructor_id, later.created_by_id), (self.lecturer.pk, self.lecturer.pk))
+            self.assertTrue(self.course().journal_is_current_load)
+            audit = AuditLog.objects.get(resource_type="workload.HistoryTeacherRestore")
+            self.assertIn("1 dərs", audit.old_values["written_since"][0])
+
+    def test_no_button_without_teacher_filter(self):
+        with bypass_rls():
+            self.seminar_row(self.lecturer)
+        page = self.admin_list(teacher=False)
+        self.assertNotContains(page, "data-jl-hrestore-open")
+        self.assertNotContains(page, "jl-hrestore__why")

@@ -112753,3 +112753,29 @@ msgstr "«%(kind)s» разделено между несколькими пре
 msgctxt "workload.history_teacher_restore"
 msgid "Əməliyyat alınmadı — yenidən cəhd edin."
 msgstr "Действие не удалось — попробуйте ещё раз."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "%(name)s %(since)s tarixindən bəri bu jurnalda %(lessons)s dərs və %(marks)s qeyd yazıb."
+msgstr "С %(since)s %(name)s внёс(ла) в этот журнал %(lessons)s занятий и %(marks)s записей."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "%(name)s bu jurnalda %(lessons)s dərs və %(marks)s qeyd yazıb."
+msgstr "%(name)s внёс(ла) в этот журнал %(lessons)s занятий и %(marks)s записей."
+
+msgctxt "workload.history_teacher_restore"
+msgid "İndiki sahib sonradan qeyd yazıb"
+msgstr "Текущий владелец с тех пор вносил записи"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Diqqət: jurnal müəllimdən alınandan sonra indiki sahib qeyd yazıb."
+msgstr "Внимание: после того как журнал забрали у преподавателя, текущий владелец вносил записи."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu qeydlər silinmir və köçürülmür — yalnız jurnalın sahibliyi və dərs yükü keçir. Səbəb məcburidir."
+msgstr "Эти записи не удаляются и не переносятся — меняются только владелец журнала и нагрузка. Причина обязательна."
+
+msgctxt "workload.history_teacher_restore"
+msgid "(istəyə bağlı — sonradan heç kim yazmayıb)"
+msgstr "(необязательно — с тех пор никто не вносил записей)"

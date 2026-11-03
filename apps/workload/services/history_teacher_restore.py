@@ -31,8 +31,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from django.apps import apps
+from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.registrar.public import handover, handover_actions, teacher_journal_list
@@ -44,6 +46,7 @@ from ..models import TeacherAssignment, TeachingTaskRow
 from .history_restore import KINDS, actor_for_restore, available_chairs, restore, shared_rows
 from .history_restore_actions import automatic_plan
 from .history_restore_zero_plan import zero_placeholder_plan
+from .history_teacher_restore_since import written_since
 from .row_edit import assign_amended, distributable_chair_ids, distribution_edit_url
 from .scoping import WorkloadDenied, resolve_actor
 
@@ -53,6 +56,8 @@ MIN_REASON, MAX_REASON = 10, 2000
 #: Bölgü bu statuslarda dəyişir (``distributed`` — rəsmi düzəliş açılır, ``amended``-ə keçir).
 OPEN_TASK_STATUSES = frozenset(ASSIGNABLE_STATUSES | {TaskStatus.DISTRIBUTED})
 DENIED_PREFIX = "workload.history_teacher_restore_"
+#: Heç kim sonradan yazmayıbsa (təhlükəsiz hal) səbəb boş qala bilər — audit/təhvil üçün bu mətn yazılır.
+DEFAULT_REASON = "Tarixçə jurnalı müəllimə bərpa edildi: sonradan heç kim qeyd yazmayıb."
 
 
 def _name(user) -> str:
@@ -116,6 +121,22 @@ def step_text(step) -> str:
     }
 
 
+def warning_text(warning) -> list:
+    """Modal xəbərdarlığı: kim, nə qədər, nə vaxtdan yazıb (qeydlər yerində qalır)."""
+    lines = []
+    for user, lessons, marks in warning["people"]:
+        params = {"name": _name(user), "lessons": lessons, "marks": marks}
+        if warning["since"] is not None:
+            params["since"] = timezone.localtime(warning["since"]).strftime("%d.%m.%Y %H:%M")
+            text = pgettext(
+                CTX, "%(name)s %(since)s tarixindən bəri bu jurnalda %(lessons)s dərs və %(marks)s qeyd yazıb."
+            )
+        else:
+            text = pgettext(CTX, "%(name)s bu jurnalda %(lessons)s dərs və %(marks)s qeyd yazıb.")
+        lines.append(text % params)
+    return lines
+
+
 class Denied(WorkloadDenied):
     def __init__(self, code: str, status: int = 409, **params):
         super().__init__(DENIED_PREFIX + code, message(code, **params))
@@ -129,12 +150,16 @@ class Decision:
     params: dict = field(default_factory=dict)
     steps: list = field(default_factory=list)
     link: str = ""
+    #: :func:`.history_teacher_restore_since.written_since` — indiki sahib sonradan yazıbsa (səbəb məcburi).
+    warning: dict | None = None
 
-    def as_row(self, course) -> dict:
+    def as_row(self, course, teacher) -> dict:
         data = {"state": self.state, "link": self.link}
         if self.state == READY:
             data["url"] = reverse("workload:history_teacher_restore", args=[course.pk])
             data["steps"] = [step_text(step) for step in self.steps]
+            data["warnings"] = warning_text(self.warning) if self.warning else []
+            data["teacher_id"], data["teacher_name"] = teacher.pk, _name(teacher)
         elif self.state == BLOCKED:
             data["reason"] = message(self.code, **self.params)
         return data
@@ -210,7 +235,11 @@ class _Context:
 
     def owner_step(self, course):
         record = self.handovers.get(course.pk)
-        names = {"source_name": _name(course.instructor), "target_name": _name(self.teacher)}
+        names = {
+            "source_id": course.instructor_id,
+            "source_name": _name(course.instructor),
+            "target_name": _name(self.teacher),
+        }
         if record is not None:
             return {"op": "revert", "handover_id": record.pk, **names}
         return {"op": "reassign", **names}
@@ -232,7 +261,23 @@ def _gates(ctx, course):
 
 
 def evaluate(ctx, course) -> Decision:
-    """Bir tarixçə sətri üçün qərar (yazı yoxdur)."""
+    """Bir tarixçə sətri üçün qərar + «sonradan yazılıb?» xəbərdarlığı (yazı yoxdur)."""
+    decision = _decide(ctx, course)
+    if decision.state == READY:
+        users = {course.instructor_id: course.instructor}
+        users.update({a.teacher_id: a.teacher for row in ctx.rows.get(course.pk, []) for a in row.assignments.all()})
+        holders = [users.get(step.get("source_id")) for step in decision.steps]
+        decision.warning = written_since(
+            organization=ctx.organization,
+            course=course,
+            teacher=ctx.teacher,
+            holders=holders,
+            handover=ctx.handovers.get(course.pk),
+        )
+    return decision
+
+
+def _decide(ctx, course) -> Decision:
     gate = _gates(ctx, course)
     if gate is not None:
         return gate
@@ -303,6 +348,7 @@ def evaluate(ctx, course) -> Decision:
                 "kind": kind,
                 "assignment_id": getattr(prior, "pk", None),
                 "hours": hours,
+                "source_id": getattr(prior, "teacher_id", None),
                 "source_name": _name(getattr(prior, "teacher", None)),
                 "target_name": _name(teacher),
             }
@@ -336,23 +382,49 @@ def _privileged(actor) -> bool:
     return actor.has(PERM_DISTRIBUTE) or handover.can_reassign(actor.user, actor.organization)
 
 
-def attach(request, offerings):
-    """Jurnal siyahısı (müəllimin öz «Əvvəlki jurnal qeydlərim» görünüşü): sətrə ``history_teacher_restore``."""
+def _teacher(teacher_id):
+    try:
+        pk = int(teacher_id)
+    except (TypeError, ValueError):
+        return None
+    return get_user_model().objects.filter(pk=pk, is_active=True).first()
+
+
+def attach(request, offerings, *, teacher_id=None):
+    """Jurnal siyahısı: tarixçə sətrinə ``history_teacher_restore``.
+
+    * müəllimin öz «Əvvəlki jurnal qeydlərim» görünüşü (view-as daxil) — müəllim ``request.user``-dir;
+    * geniş (admin) siyahı + MÜƏLLİM süzgəci (``teacher_id``, sahib 2026-11-04) — sətirlər süzgəcdəki müəllimin
+      gözü ilə yenidən annotasiya olunur; onun üçün artıq cari olan sətrə heç nə düşmür.
+    """
     if request is None or getattr(request, "organization", None) is None:
         return
-    candidates = [
-        course
-        for course in offerings
-        if getattr(course, "journal_is_current_load", None) is False and course.period.is_current
-    ]
-    if not candidates:
+    teacher = request.user
+    if teacher_id:
+        teacher = _teacher(teacher_id)
+        if teacher is None:
+            return
+    current = [course for course in offerings if course.period.is_current]
+    if not current:
         return
     actor, view_as_blocked = _list_actor(request)
     if actor is None or not _privileged(actor):
         return
-    ctx = _Context(actor, request.user, candidates, view_as_blocked=view_as_blocked)
-    for course in candidates:
-        course.history_teacher_restore = evaluate(ctx, course).as_row(course)
+    if teacher_id:
+        model = apps.get_model("registrar.CourseOffering")
+        queryset = model.objects.filter(
+            organization=actor.organization, pk__in=[course.pk for course in current]
+        ).select_related("period", "subject", "group", "instructor")
+        seen = {row.pk: row for row in teacher_journal_list.own_visible_queryset(queryset, teacher, actor.organization)}
+        pairs = [(course, seen[course.pk]) for course in current if course.pk in seen]
+    else:
+        pairs = [(course, course) for course in current]
+    pairs = [(row, view) for row, view in pairs if getattr(view, "journal_is_current_load", None) is False]
+    if not pairs:
+        return
+    ctx = _Context(actor, teacher, [view for _row, view in pairs], view_as_blocked=view_as_blocked)
+    for row, view in pairs:
+        row.history_teacher_restore = evaluate(ctx, view).as_row(view, teacher)
 
 
 def _current(teacher, organization, offering_id):
@@ -424,14 +496,21 @@ def _assign(step, *, actor, teacher, reason, request):
 
 
 @transaction.atomic
-def restore_for_teacher(*, request, offering_id, reason):
-    """Tarixçə jurnalını siyahının sahibi olan müəllimin CARİ jurnalına qaytarır (hamısı və ya heç nə)."""
+def restore_for_teacher(*, request, offering_id, reason, teacher_id=None):
+    """Tarixçə jurnalını müəllimin CARİ jurnalına qaytarır (hamısı və ya heç nə).
+
+    Müəllim — ``teacher_id`` (admin siyahısının süzgəci) və ya siyahının sahibi ``request.user`` (view-as).
+    Səbəb: indiki sahib sonradan yazıbsa MƏCBURİ (≥10); heç kim yazmayıbsa boş qala bilər (standart mətn).
+    """
     actor = actor_for_restore(request)
     if not _privileged(actor):
         raise Denied("scope_workload", status=403)
-    teacher, organization = request.user, actor.organization
+    organization = actor.organization
+    teacher = _teacher(teacher_id) if teacher_id not in (None, "") else request.user
+    if teacher is None:
+        raise Denied("not_found", status=404)
     reason = str(reason or "").strip()
-    if not MIN_REASON <= len(reason) <= MAX_REASON:
+    if reason and not MIN_REASON <= len(reason) <= MAX_REASON:
         raise Denied("reason", status=400)
     model = apps.get_model("registrar.CourseOffering")
     locked = model.objects.select_for_update(of=("self",)).filter(organization=organization, pk=offering_id)
@@ -445,6 +524,10 @@ def restore_for_teacher(*, request, offering_id, reason):
     decision = evaluate(_Context(actor, teacher, [course]), course)
     if decision.state != READY:
         raise Denied(decision.code or "changed", **decision.params)
+    if not reason:
+        if decision.warning:
+            raise Denied("reason", status=400)
+        reason = DEFAULT_REASON
     done = []
     for step in decision.steps:
         if step.get("conditional"):
@@ -476,7 +559,11 @@ def restore_for_teacher(*, request, offering_id, reason):
         resource_type="workload.HistoryTeacherRestore",
         resource_id=str(course.pk),
         reason=reason,
-        old_values={"journal_is_current_load": False, "teacher_id": teacher.pk},
+        old_values={
+            "journal_is_current_load": False,
+            "teacher_id": teacher.pk,
+            "written_since": warning_text(decision.warning) if decision.warning else [],
+        },
         new_values={"journal_is_current_load": True, "teacher_id": teacher.pk, "steps": done},
         request=request,
     )

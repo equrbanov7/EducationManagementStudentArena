@@ -4,10 +4,14 @@ Qərar: apps/workload/services/history_teacher_restore.py. JS: registrar/js/jour
 <div class="jl-hrestore jl-hrestore--{{ restore.state }}">
   {% if restore.state == "ready" %}
   <button type="button" class="jl-restore-btn" data-jl-hrestore-open data-url="{{ restore.url }}"
-          data-subject="{{ offering.subject.name }}" data-group="{{ offering.journal_group_name|default:offering.group.name }}">
+          data-teacher-id="{{ restore.teacher_id }}" data-teacher="{{ restore.teacher_name }}"
+          data-subject="{{ offering.subject.name }}" data-group="{{ offering.journal_group_name|default:offering.group.name }}"
+          data-written-since="{% if restore.warnings %}1{% else %}0{% endif %}">
     <i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Bu müəllimə bərpa et" context "workload.history_teacher_restore" %}
   </button>
+  {% if restore.warnings %}<span class="jl-hrestore__why jl-hrestore__why--warn"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> {% trans "İndiki sahib sonradan qeyd yazıb" context "workload.history_teacher_restore" %}</span>{% endif %}
   <ul class="jl-hrestore__steps" data-jl-hrestore-steps hidden>{% for step in restore.steps %}<li>{{ step }}</li>{% endfor %}</ul>
+  <ul class="jl-hrestore__steps" data-jl-hrestore-warnings hidden>{% for line in restore.warnings %}<li>{{ line }}</li>{% endfor %}</ul>
   {% elif restore.state == "form" %}
   <a class="jl-restore-btn" href="{{ restore.link }}"><i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Bu müəllimə bərpa et" context "workload.history_teacher_restore" %}</a>
   <span class="jl-hrestore__why">{% trans "Dərs növlərinin saatını formada göstərin." context "workload.history_teacher_restore" %}</span>

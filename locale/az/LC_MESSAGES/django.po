@@ -112042,3 +112042,29 @@ msgstr "«%(kind)s» bir neçə müəllim arasında bölünüb — «Yük bölg�
 msgctxt "workload.history_teacher_restore"
 msgid "Əməliyyat alınmadı — yenidən cəhd edin."
 msgstr "Əməliyyat alınmadı — yenidən cəhd edin."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "%(name)s %(since)s tarixindən bəri bu jurnalda %(lessons)s dərs və %(marks)s qeyd yazıb."
+msgstr "%(name)s %(since)s tarixindən bəri bu jurnalda %(lessons)s dərs və %(marks)s qeyd yazıb."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "%(name)s bu jurnalda %(lessons)s dərs və %(marks)s qeyd yazıb."
+msgstr "%(name)s bu jurnalda %(lessons)s dərs və %(marks)s qeyd yazıb."
+
+msgctxt "workload.history_teacher_restore"
+msgid "İndiki sahib sonradan qeyd yazıb"
+msgstr "İndiki sahib sonradan qeyd yazıb"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Diqqət: jurnal müəllimdən alınandan sonra indiki sahib qeyd yazıb."
+msgstr "Diqqət: jurnal müəllimdən alınandan sonra indiki sahib qeyd yazıb."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu qeydlər silinmir və köçürülmür — yalnız jurnalın sahibliyi və dərs yükü keçir. Səbəb məcburidir."
+msgstr "Bu qeydlər silinmir və köçürülmür — yalnız jurnalın sahibliyi və dərs yükü keçir. Səbəb məcburidir."
+
+msgctxt "workload.history_teacher_restore"
+msgid "(istəyə bağlı — sonradan heç kim yazmayıb)"
+msgstr "(istəyə bağlı — sonradan heç kim yazmayıb)"

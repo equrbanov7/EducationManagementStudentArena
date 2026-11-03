@@ -112559,3 +112559,29 @@ msgstr "“%(kind)s” is split between several teachers — change it in “Loa
 msgctxt "workload.history_teacher_restore"
 msgid "Əməliyyat alınmadı — yenidən cəhd edin."
 msgstr "The action failed — please try again."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "%(name)s %(since)s tarixindən bəri bu jurnalda %(lessons)s dərs və %(marks)s qeyd yazıb."
+msgstr "Since %(since)s, %(name)s has written %(lessons)s lessons and %(marks)s entries in this journal."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "%(name)s bu jurnalda %(lessons)s dərs və %(marks)s qeyd yazıb."
+msgstr "%(name)s has written %(lessons)s lessons and %(marks)s entries in this journal."
+
+msgctxt "workload.history_teacher_restore"
+msgid "İndiki sahib sonradan qeyd yazıb"
+msgstr "The current holder has written entries since"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Diqqət: jurnal müəllimdən alınandan sonra indiki sahib qeyd yazıb."
+msgstr "Warning: the current holder has written entries since the journal was taken from this teacher."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu qeydlər silinmir və köçürülmür — yalnız jurnalın sahibliyi və dərs yükü keçir. Səbəb məcburidir."
+msgstr "These records are neither deleted nor moved — only journal ownership and the teaching load change. A reason is required."
+
+msgctxt "workload.history_teacher_restore"
+msgid "(istəyə bağlı — sonradan heç kim yazmayıb)"
+msgstr "(optional — nobody has written since)"
