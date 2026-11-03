@@ -609,3 +609,67 @@ qrupa öz yerində» + «müəllimin köhnə illərdəki sillabusları görünm�
 
 Geri qaytarma: audit sətri (`legacy_import.delta_batch`, tag) `created.syllabus_shares` = bağlanan açılışların id-ləri
 → həmin açılışların `SyllabusShare` sətirləri silinir (və ya müəllim redaktorda «Ayır»).
+
+## 15. Tarixi giriş balı köhnə rəsmi bal vərəqinə görə — `official_entry` fazası (SYS-1, 2026-11-03)
+
+**Problem.** J5b (`rehearsal_journal_entry_scores_*`) tarixi giriş balını DƏQİQ yalnız köhnə `yekun` cədvəlindən
+götürür — o cədvəl isə yalnız 2022/2023 Payızı əhatə edir. 2023/24 Payız – 2025/26 Yay semestrlərində arxiv
+komponentinə (`Davamiyyət və sərbəst iş (arxiv)`) düsturla BƏRPA olunmuş qalıq yazılıb
+(`10 − 0.5×qayıb + si`), köhnə sistem isə davamiyyəti `10×(N−qayıb)/N`, seminarı ortalama ilə hesablayırdı. Bəzi
+tələbələrdə giriş 1–8 bal fərqlidir; 51 həddi ətrafında «keçib» → «kəsr» olur (MR-000041: 34+17=51 → 33+17=50).
+Bölünmüş (mühazirə + seminar, `parent_id`) jurnallarda seminar hissəsinin itməsi də buradan düzəlir — hədəf rəsmi
+yekun dəyərdir.
+
+**Mənbə.** Köhnə sistemin çap etdiyi rəsmi vərəqlər `balvereqi_logs.data` (HTML; qrup başına cədvəl, sətir
+`user_<legacy tələbə>`). Vərəqdə jurnal id-si/semestr yoxdur — cədvəl jurnal AİLƏSİNƏ fənn + qrup (yoxdursa
+tələbələr) + export-dakı imtahan ballarının `im`/`im2` xanaları ilə uyğunluğu + müəllim + saat ilə bağlanır
+(`delta/official_entry_extract.py`). Hər (ailə, tələbə) üçün ən son vərəq, Yekun dolu olan üstündür.
+
+**Hədəf** (`delta/official_entry_sheets.target_entry`): `Yekun − sayılan imtahan` (T.imtahan > 0 yekunu izah
+edirsə o, yoxsa İmtahan), bu dəyər `{Giriş, Giriş−1}`-dirsə; yoxsa çap olunmuş Giriş. Səbəb: vərəqlərin ~2 %-ində çap
+olunmuş Giriş yuvarlaqlaşdırma ilə 1 yuxarıdır (9.46+8+29 → «47», Yekun 71 = 46.46+25) — keçid qərarı Yekun-dan
+verilib, yeni sistemdə isə yekun = giriş + imtahan.
+
+**Yazı** (`delta/official_entry.py` → `registrar.public.align_archive_entries`, `apps/registrar/legacy_entry_alignment.py`):
+YALNIZ arxiv xanası — `yeni = köhnə + (hədəf − cari kanonik giriş)`, yazıdan əvvəl `finals.compute_final_result` ilə
+yaddaşda yoxlanılır. Hədəf rəsmi Yekun-dan çıxıbsa, yeni yekun da rəsmi Yekun-a bərabər olmalıdır — deyilsə (yeni
+sistemdə 25 % imtahanı yoxdur / imtahan balı fərqlidir) yazılmır, `skip_total_mismatch` + adlı siyahı
+(`official_entry_total_mismatch`): yarım düzəliş tələbəni rəsmi nəticənin əksinə «kəsr»ə sala bilərdi. Toxunulmur: müəllim/düzəliş xanası (`entered_by`),
+kollokvium/sərbəst iş/gündəlik xanalar, imtahan balları, dil səviyyə və Midterm açılışları, arxivsiz açılışlar,
+iki fərqli hədəfli və ya iki yazılışa açılan sətirlər. Hər açılışa bir `registrar.grade.component` audit sətri
+(köhnə → yeni, səbəb «SYS-1 … <tag>») — geri qaytarma həmin sətirlərdən. Stdout: `official_entry.sem<N>.*`
+(written, same, raised/lowered, skip_*, fail_to_pass / pass_to_fail); adlar yalnız `--names-out`-a.
+
+**Bağlama, ikinci dalğa (2026-11-03 gecə, sahib: «2023/2024 və əvvəlki — hamısını düzəlt; tələbəyə mənasız yerə
+«kəsildi 25 %» göstərməsin»):**
+
+* Paket artıq bütün semestrləri əhatə edir (`--official-entry 1-13`) — 2022/23 Yaz-da 6 211, 2023/24 Payızda 17 589
+  vərəq sətri var; 2022/23 Payız `yekun` cədvəli ilə üst-üstə düşmür (vərəq yalnız onun boşluqlarını doldurur).
+* Hər TƏLƏBƏ SƏTRİ öz ailəsinə bağlanır (`JournalIndex.choose_row`): imtahan uyğunluğu → export-dan əvvəl başlamış ən
+  son kurs → cədvəlin qrup ailəsi. Fənni təkrar keçənin vərəqi köhnə cəhdə düşürdü (28 880 sətir köçdü). Ailədə tələbənin
+  FƏRQLİ imtahan balı varsa sətir bağlanmır; tələbənin im/im2-si olan ailə `students_id`-də olmasa da onunkudur.
+* Yeni sistemdə imtahan / 25 % balı BOŞDURSA rəsmi vərəqdən doldurulur (yalnız boş, `registrar.grade.final` /
+  `.resit` audit) — «nəticə yoxdur» / «İmtahandan kəsilib — 25 %» rəsmi keçən tələbədə görünməsin.
+* Köçürülmüş (donmuş) semestrdə yekuna imtahanla 25 %-dən YAXŞISI girir (`finals.effective_exam_score`; analitika
+  güzgüləri də) — köhnə vərəqlərdə aşağı təkrar imtahan 375-dən 364 halda, `T.imtahan = 0` 402-dən 390 halda sayılmayıb.
+* Donmuş xarici dil səviyyə kursu imtahansızdırsa «köhnə sistemdə nəticə yoxdur» (əvvəl «Davam edir»); 11 q/b qaydası
+  qalır. Eyni fənnin eyni semestrdə imtahansız boş dublikatı akademik qeyddə göstərilmir (`registrar.record_duplicates`).
+
+**Köhnə q/b qərarı (sahib 2026-11-04):** `Enrollment.legacy_qb_fail` (registrar 0113) — rəsmi vərəqdə «Davamiyyət …
+(Kəsr)» olan, imtahansız sətir (~7 160). Donmuş açılışda imtahan yoxdursa nəticə «Kəsildi», səbəb «Q/b-dan kəsilib»
+(`finals.legacy_attendance_fail`, analitika güzgüləri də); işarəni `official_entry` fazası qoyur (yalnız imtahan / 25 %
+balı yoxdursa). Dublikat fənn kartı: `prod-data-ops` → `merge_subjects` (`teacher` = saxlanılan kod, `batch` =
+birləşdirilən kodlar; apply-siz önizləmə).
+
+### 15.1 Prod addımları (sahibin «hə»sı ilə; imtahanlar bitəndən sonra)
+
+```bash
+# 1) LOKAL paket (köhnə sistemin MariaDB nüsxəsi) — bütün semestrlər (sahib 2026-11-03)
+python manage.py legacy_delta_extract --port 50330 --password-file <fayl> --source myedu_new --official-entry 1-13 \
+  --out ~/EMSArena-backups/sys1-20261103/official-entry-1-13.json.gz
+# 2) prod NÜSXƏSİNDƏ dry-run, sonra şifrələ → draft release legacy-delta-sys1-<tarix> (asset delta.json.gz.enc), §12.1 kimi
+```
+
+3. `prod-data-ops` → `command=legacy_delta_apply`, `roster_tag=legacy-delta-sys1-<tarix>`, `batch=<sha256>`,
+   `apply` işarəsiz → dry-run; `official_entry.*` sayları lokal dry-run ilə eyni olmalıdır.
+4. «Hə»dan sonra `apply=true`, `confirm=APPLY` (addım backup alır). Yoxlama: təkrar dry-run → `written` 0.
