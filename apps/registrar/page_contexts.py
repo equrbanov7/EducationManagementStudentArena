@@ -256,7 +256,7 @@ def journal_list_context(user, request=None) -> dict:
         teacher_journal_list.attach(user, page_offerings, selected_kind=selected_kind)
     from .journal_assignment_sources import attach_history_restore_actions
 
-    attach_history_restore_actions(request, page_offerings)
+    attach_history_restore_actions(request, page_offerings, teacher_id=selected_teacher if is_broad else None)
     attach_labels(page_offerings, within=base_qs)
     jls.attach(page_offerings, occurrences)
     joint_journal_list.attach(page_offerings, user=user)

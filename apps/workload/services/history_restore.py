@@ -2,8 +2,7 @@
 
 from django.apps import apps
 from django.db import transaction
-from django.db.models import F, Sum
-from django.urls import reverse
+from django.db.models import Sum
 
 from apps.registrar.public import offering_chairs
 from apps.syllabus.public import approved_restore_sources, bind_approved_restore_source
@@ -346,58 +345,6 @@ def restore(*, request, offering_id, chair_id, hours, reason, syllabus_id=""):
         "row_id": str(row.pk),
         "syllabus_status": syllabus["status"],
     }
-
-
-def attach_actions(request, offerings):
-    if request is None:
-        return
-    candidates = [
-        o
-        for o in offerings
-        if getattr(o, "journal_is_current_load", None) is False
-        and o.instructor_id == request.user.pk
-        and o.period.is_current
-        and o.period.is_active
-        and not o.is_intensive
-    ]
-    if not candidates:
-        return
-    try:
-        actor = actor_for_restore(request)
-        if not actor.has("workload.manage") or not actor.has("workload.distribute"):
-            return
-        ids = set(
-            apps.get_model("registrar.Lesson")
-            .objects.filter(
-                organization=actor.organization,
-                offering_id__in=[o.pk for o in candidates],
-                instructor_id=F("offering__instructor_id"),
-            )
-            .values_list("offering_id", flat=True)
-        )
-        chairs = _actor_chairs(actor)
-        mapping = offering_chairs.official_offering_chairs(
-            candidates[0].__class__.objects.filter(pk__in=[o.pk for o in candidates], organization=actor.organization),
-            actor.organization.pk,
-        )
-        for course in candidates:
-            known = mapping.get(course.pk, frozenset())
-            if (
-                course.pk in ids
-                and (known or _unknown_chair_allowed(actor))
-                and any(not known or str(c.pk) in known for c in chairs)
-            ):
-                course.history_load_restore_url = reverse("workload:history_restore", args=[course.pk])
-        restorable = [course for course in candidates if getattr(course, "history_load_restore_url", None)]
-        for pk, shared in shared_rows(actor.organization, restorable).items():
-            course = next(c for c in restorable if c.pk == pk)
-            course.history_load_restore_url = None
-            course.history_load_restore_shared = shared
-        from .history_restore_actions import attach_automatic_plans
-
-        attach_automatic_plans(actor.organization, candidates)
-    except WorkloadDenied:
-        return
 
 
 def previous_plan(course):

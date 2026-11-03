@@ -49,6 +49,7 @@ def register_history_restore_actions(provider):
     _restore_provider = provider
 
 
-def attach_history_restore_actions(request, offerings):
+def attach_history_restore_actions(request, offerings, *, teacher_id=None):
+    """``teacher_id`` — geniş (admin) siyahıda MÜƏLLİM süzgəci; yoxdursa siyahının sahibi (``request.user``)."""
     if _restore_provider is not None:
-        _restore_provider(request, offerings)
+        _restore_provider(request, offerings, teacher_id=teacher_id)
