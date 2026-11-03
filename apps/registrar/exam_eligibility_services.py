@@ -45,6 +45,7 @@ def get_exam_eligibility(
             lesson_hours=exam_eligibility.lesson_hours_for(enrollment.offering, hours_map=hours_map),
             exempt=exempt,
             resit_done=resit_done,
+            frozen=exam_eligibility.is_frozen(enrollment.offering) if frozen is None else frozen,
         )
     return exam_eligibility.resolve(
         absence_hours=enrollment.absence_hours,

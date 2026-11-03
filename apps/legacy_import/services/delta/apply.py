@@ -30,6 +30,8 @@ from .graduation import sync_graduation
 from .history import HISTORY_PHASES, HistoryPhaseMismatch, apply_history, apply_history_topics
 from .journals import build_enrollments, build_offerings
 from .lessons import build_lessons_and_marks
+from .official_entry import apply_official_entry
+from .official_entry import check_phases as check_official_entry_phases
 from .people import StudentMapper, TeacherMapper, student_gender
 from .registry_sync import sync_registry
 from .resolve import Catalog, lesson_date, text
@@ -74,13 +76,16 @@ PHASES = (
     "subject_collisions",
     "syllabi_backfill",
     "syllabi_share",
+    "official_entry",
 )
 #: Yalnız AÇIQ seçiləndə (``--phase`` və ya paketin ``snapshot.phases``-i) işləyən fazalar — reyestr əmrləri yazır
 #: (``registry_sync``, ``graduation``); ``history*`` tarixi (bağlı) jurnallara əlavə edir (``delta/history.py``);
 #: ``subject_collisions`` yanlış fənn kartına düşmüş açılışları düzgün karta keçirir (``delta/collisions.py``);
 #: ``syllabi_backfill`` cari semestr jurnalı olan müəllimə köhnə sillabusunu baza dosye kimi gətirir
 #: (``delta/syllabi_backfill.py``, paket ``legacy_delta_extract --teacher-syllabi``); ``syllabi_share`` köhnə sistemdə
-#: bir neçə jurnalın işlətdiyi BİR sillabusu sillabussuz qalan jurnallara paylaşır (``delta/syllabi_share.py``).
+#: bir neçə jurnalın işlətdiyi BİR sillabusu sillabussuz qalan jurnallara paylaşır (``delta/syllabi_share.py``);
+#: ``official_entry`` (SYS-1) tarixi giriş balının arxiv xanasını köhnə rəsmi bal vərəqinə bərabərləşdirir
+#: (``delta/official_entry.py``, paket ``legacy_delta_extract --official-entry``).
 OPT_IN_PHASES = (
     "registry_sync",
     "graduation",
@@ -89,6 +94,7 @@ OPT_IN_PHASES = (
     "subject_collisions",
     "syllabi_backfill",
     "syllabi_share",
+    "official_entry",
 )
 DEFAULT_PHASES = tuple(phase for phase in PHASES if phase not in OPT_IN_PHASES)
 
@@ -230,6 +236,8 @@ class DeltaRun:
         if "syllabi_backfill" in phases or "syllabi_share" in phases:
             # Sahib 2026-10-27: köhnə sistemdə bir neçə jurnalın işlətdiyi BİR sillabus — bir sillabus olaraq qalır.
             share_legacy_syllabi(self)
+        if "official_entry" in phases:
+            apply_official_entry(self)
         for _legacy_id, user_pk in self.teachers.created:
             self.created("teachers", user_pk)
         for _legacy_id, user_pk in self.students.created:
@@ -322,6 +330,7 @@ def execute(
         # Tarixi paketin tələbə bölməsi boşluq tələbələridir — adi fazalar onlar üçün hesab YARADARDI.
         raise HistoryPhaseMismatch("legacy_delta_history_bundle_phase_mismatch")
     check_phases(bundle, phases)
+    check_official_entry_phases(bundle, phases)
     with transaction.atomic():
         apply_rls_request_context(user_id=actor.pk, org_id=organization.pk)
         disable_parallel_query(local=True)

@@ -178,13 +178,18 @@ def eligibility(
     result = exam_eligibility.resolve(absence_hours=absent, lesson_hours=hours, exempt=True, frozen=False)
     over_limit = absence_count > ABSENCE_LIMIT
     barred = over_limit and not exempt and not resit_done
+    # 11 q/b qaydası tarixi semestrdə də qərar verir (yuxarıda). Qadağa YOXDURSA isə donmuş (köçürülmüş) dilimin
+    # statusu adi fənlərlə eynidir: imtahan yoxdursa «köhnə sistemdə nəticə yoxdur», «Davam edir» DEYİL (SYS-1).
+    legacy = bool(frozen) and not barred
     result.update(
         barred=barred,
         over_limit=over_limit,
         attendance_score=None if barred else result["attendance_score"],
         exempt=bool(exempt),
         resit_done=bool(resit_done),
-        frozen=False,
+        frozen=legacy,
+        source=exam_eligibility.SOURCE_LEGACY if legacy else result["source"],
+        frozen_badge=exam_eligibility.FROZEN_BADGE if legacy else None,
         allowed_hours=Decimal(ABSENCE_LIMIT),
         hours_known=True,
         limit_percent=None,
