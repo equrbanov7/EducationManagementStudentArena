@@ -179,8 +179,9 @@ Yazı, hadisə və bildiriş eyni müraciətin tenantına bağlı qalır.
 | `apps/registrar/management/commands/infer_timetable_from_lessons.py` | 1 | C — idarə əmrləri |
 | `apps/registrar/management/commands/link_lesson_syllabus_weeks.py` | 1 | C — idarə əmrləri |
 | `apps/registrar/management/commands/merge_level_journals.py` | 1 | C — idarə əmrləri |
-| `apps/registrar/management/commands/merge_subjects.py` | 1 | C — idarə əmrləri |
+| `apps/registrar/management/commands/merge_subjects.py` | 3 | C — idarə əmrləri (2026-11-04: `--plan` — cüt başına kontekst `_pair_scope`; `subject_merge_plan.py` bypass etmir) |
 | `apps/registrar/management/commands/place_parent_group_students.py` | 1 | C — idarə əmrləri |
+| `apps/registrar/management/commands/recode_site_subjects.py` | 1 | C — idarə əmrləri (2026-11-04: SAYT → QKU-N) |
 | `apps/registrar/management/commands/relocate_superseded_marks.py` | 1 | C — idarə əmrləri |
 | `apps/registrar/management/commands/relocate_twin_enrollment.py` | 1 | C — idarə əmrləri |
 | `apps/registrar/management/commands/report_duplicate_subjects.py` | 1 | C — idarə əmrləri |

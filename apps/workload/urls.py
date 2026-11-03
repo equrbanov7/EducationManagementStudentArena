@@ -10,11 +10,13 @@ from . import views
 from .actions import workload_action
 from .load_actions import load_template
 from .views.history_restore import history_restore
+from .views.history_teacher_restore import history_teacher_restore
 
 app_name = "workload"
 
 urlpatterns = [
     path("tarixce/<uuid:offering_id>/berpa/", history_restore, name="history_restore"),
+    path("tarixce/<uuid:offering_id>/muellime-berpa/", history_teacher_restore, name="history_teacher_restore"),
     # Oxu
     path("setirler/", views.rows, name="rows"),
     # WP9a (2026-10-10): `kafedralar/` silindi — kafedra siyahısı bölmə konteksti ilə gəlir (public.py).

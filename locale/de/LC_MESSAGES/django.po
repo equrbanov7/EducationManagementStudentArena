@@ -113422,3 +113422,236 @@ msgstr "In der Lastverteilung öffnen"
 msgctxt "workload.history_restore"
 msgid "Patok sətri"
 msgstr "Stromzeile"
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "%(kind)s yükü: %(source)s → %(target)s (%(hours)s saat)"
+msgstr "%(kind)s-Deputat: %(source)s → %(target)s (%(hours)s Std.)"
+
+msgctxt "workload.history_teacher_restore"
+msgid "(ən azı 10 simvol)"
+msgstr "(mindestens 10 Zeichen)"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bağla"
+msgstr "Schließen"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu baxış rejimində bərpa edilmir (yalnız tam baxış)."
+msgstr "In diesem Ansichtsmodus nicht wiederherstellbar (nur Vollansicht)."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu jurnal müəllimin tarixçə siyahısında deyil."
+msgstr "Dieses Journal steht nicht in der Verlaufsliste der Lehrkraft."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu jurnalın kafedrası üzrə yük bölgüsü səlahiyyətiniz yoxdur."
+msgstr "Sie dürfen das Deputat des Lehrstuhls dieses Journals nicht verteilen."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu müəllimin bu jurnalda öz dərs qeydi yoxdur."
+msgstr "Diese Lehrkraft hat in diesem Journal keine eigenen Unterrichtseinträge."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu müəllimə bərpa et"
+msgstr "Dieser Lehrkraft zurückgeben"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu əməliyyat üçün səlahiyyətiniz yoxdur."
+msgstr "Sie sind für diese Aktion nicht berechtigt."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bərpa et"
+msgstr "Wiederherstellen"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bərpa mümkün olmadı."
+msgstr "Wiederherstellung war nicht möglich."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Dərs açılışı aktiv deyil."
+msgstr "Das Lehrangebot ist nicht aktiv."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Dərs növlərinin saatını formada göstərin."
+msgstr "Geben Sie die Stunden je Unterrichtsart im Formular an."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Dəyişikliklərdən sonra da jurnal cari yükə düşmədi — heç nə dəyişdirilmədi. «Yük bölgüsü»ndə yoxlayın."
+msgstr "Auch nach den Änderungen wurde das Journal kein aktuelles Deputat — nichts wurde geändert. Prüfen Sie es in der „Deputatsverteilung“."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Fənn təhvili geri qaytarılır: jurnal yenidən %(target)s adına"
+msgstr "Die Fachübergabe wird rückgängig gemacht: das Journal gehört wieder %(target)s"
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnal %(owner)s adınadır və onun bu sətirdə yükü var — «Fənn təhvili» ilə həll edin."
+msgstr "Das Journal gehört %(owner)s, der in dieser Zeile Deputat hat — über die „Fachübergabe“ klären."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnal artıq bu müəllimin cari dərs yükündədir."
+msgstr "Das Journal ist bereits im aktuellen Deputat dieser Lehrkraft."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnal bağlanıb — əvvəlcə jurnalı açın."
+msgstr "Das Journal ist geschlossen — öffnen Sie es zuerst."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnal bu müəllimin «Cari dərs yüküm» siyahısına qaytarılacaq. Dəyişəcək:"
+msgstr "Das Journal kehrt in die Liste „Mein aktuelles Deputat“ dieser Lehrkraft zurück. Es ändert sich:"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnal müəllimin cari dərs yükünə bərpa edildi."
+msgstr "Das Journal wurde in das aktuelle Deputat der Lehrkraft zurückgeholt."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnal qeydləri (dərslər, ballar, davamiyyət) dəyişmir. Nəticə alınmasa heç nə yazılmır."
+msgstr "Journaleinträge (Stunden, Punkte, Anwesenheit) ändern sich nicht. Gelingt es nicht, wird nichts gespeichert."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnalın sahibi dəyişdirilə bilmir: %(detail)s"
+msgstr "Der Journalinhaber kann nicht geändert werden: %(detail)s"
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnalın sahibi: %(source)s → %(target)s"
+msgstr "Journalinhaber: %(source)s → %(target)s"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnalın sahibini dəyişmək üçün «Fənn təhvili» səlahiyyətiniz yoxdur."
+msgstr "Ihnen fehlt die Berechtigung „Fachübergabe“, um den Journalinhaber zu ändern."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnalın vəziyyəti dəyişib — səhifəni yeniləyib yenidən baxın."
+msgstr "Das Journal hat sich geändert — laden Sie die Seite neu und prüfen Sie erneut."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Kafedranın yük sənədi bölgü mərhələsində deyil."
+msgstr "Das Deputatsdokument des Lehrstuhls ist nicht in der Verteilungsphase."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Ləğv et"
+msgstr "Abbrechen"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Səbəb"
+msgstr "Grund"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Səbəb ən azı 10 simvol olmalıdır."
+msgstr "Der Grund muss mindestens 10 Zeichen lang sein."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Vakant"
+msgstr "Unbesetzt"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Yalnız aktiv cari semestrin açıq jurnalı bərpa olunur."
+msgstr "Nur ein offenes Journal des aktiven laufenden Semesters kann wiederhergestellt werden."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Yalnız fiziki qrupu olan adi jurnal bərpa olunur."
+msgstr "Nur ein reguläres Journal mit einer physischen Gruppe kann wiederhergestellt werden."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Yük bu müəllimdədir, amma jurnala bağlanmayıb — «Yük bölgüsü»ndə yoxlayın."
+msgstr "Das Deputat liegt bei dieser Lehrkraft, ist aber nicht mit dem Journal verknüpft — prüfen Sie es in der „Deputatsverteilung“."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Yük bölgüsündə aç"
+msgstr "In der Deputatsverteilung öffnen"
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Yük sətrində «%(kind)s» üçün saat yoxdur."
+msgstr "Die Deputatszeile hat keine Stunden für „%(kind)s“."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Yük sətrinin planı bu müəllimə təyin olunur (%(hours)s saat)"
+msgstr "Der Plan der Deputatszeile wird dieser Lehrkraft zugewiesen (%(hours)s Std.)"
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Yük çoxqruplu (patok) sətirdədir: %(groups)s — müəllim «Yük bölgüsü»ndə təyin edilir."
+msgstr "Das Deputat liegt in einer Mehrgruppen-Zeile (Zug): %(groups)s — die Lehrkraft wird in der „Deputatsverteilung“ zugewiesen."
+
+msgctxt "workload.history_teacher_restore"
+msgid "dərs açılışı aktiv deyil"
+msgstr "das Lehrangebot ist nicht aktiv"
+
+msgctxt "workload.history_teacher_restore"
+msgid "fənn təhvildən sonra yenidən başqasına verilib"
+msgstr "das Fach wurde nach der Übergabe erneut weitergegeben"
+
+msgctxt "workload.history_teacher_restore"
+msgid "jurnal bağlanıb"
+msgstr "das Journal ist geschlossen"
+
+msgctxt "workload.history_teacher_restore"
+msgid "jurnal payları təhvildən sonra dəyişib"
+msgstr "die Journalfreigaben haben sich nach der Übergabe geändert"
+
+msgctxt "workload.history_teacher_restore"
+msgid "jurnal səlahiyyət sahənizə düşmür"
+msgstr "das Journal liegt außerhalb Ihres Zuständigkeitsbereichs"
+
+msgctxt "workload.history_teacher_restore"
+msgid "jurnalın müəllimi az öncə dəyişdirilib"
+msgstr "die Lehrkraft des Journals wurde soeben geändert"
+
+msgctxt "workload.history_teacher_restore"
+msgid "müəllimin bal yazma səlahiyyəti yoxdur"
+msgstr "die Lehrkraft darf keine Noten eintragen"
+
+msgctxt "workload.history_teacher_restore"
+msgid "semestr başa çatıb"
+msgstr "das Semester ist beendet"
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "«%(kind)s» bir neçə müəllim arasında bölünüb — «Yük bölgüsü»ndə dəyişin."
+msgstr "„%(kind)s“ ist auf mehrere Lehrkräfte aufgeteilt — ändern Sie es in der „Deputatsverteilung“."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Əməliyyat alınmadı — yenidən cəhd edin."
+msgstr "Die Aktion ist fehlgeschlagen — bitte erneut versuchen."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "%(name)s %(since)s tarixindən bəri bu jurnalda %(lessons)s dərs və %(marks)s qeyd yazıb."
+msgstr "Seit %(since)s hat %(name)s in diesem Journal %(lessons)s Stunden und %(marks)s Einträge erfasst."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "%(name)s bu jurnalda %(lessons)s dərs və %(marks)s qeyd yazıb."
+msgstr "%(name)s hat in diesem Journal %(lessons)s Stunden und %(marks)s Einträge erfasst."
+
+msgctxt "workload.history_teacher_restore"
+msgid "İndiki sahib sonradan qeyd yazıb"
+msgstr "Der aktuelle Inhaber hat seitdem Einträge erfasst"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Diqqət: jurnal müəllimdən alınandan sonra indiki sahib qeyd yazıb."
+msgstr "Achtung: Seit das Journal dieser Lehrkraft entzogen wurde, hat der aktuelle Inhaber Einträge erfasst."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu qeydlər silinmir və köçürülmür — yalnız jurnalın sahibliyi və dərs yükü keçir. Səbəb məcburidir."
+msgstr "Diese Einträge werden weder gelöscht noch verschoben — nur Journalinhaber und Deputat wechseln. Ein Grund ist erforderlich."
+
+msgctxt "workload.history_teacher_restore"
+msgid "(istəyə bağlı — sonradan heç kim yazmayıb)"
+msgstr "(optional — seitdem hat niemand etwas erfasst)"
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(period)s · %(group)s: ləğv olunmuş BOŞ əkiz jurnal silinir (tam snapshot audit-də, geri qaytarmada eyni id ilə bərpa olunur); bağlı imtahanlar saxlanılan jurnala keçir."
+msgstr "%(period)s · %(group)s: Das stornierte LEERE Zwillingsjournal wird gelöscht (vollständiger Snapshot im Audit, beim Rückgängigmachen mit derselben ID wiederhergestellt); verknüpfte Prüfungen wechseln ins beibehaltene Journal."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(student)s · %(period)s: hər iki fənn üzrə qeydiyyat var — qiymətsiz təkrar qeydiyyat bağlanır (dropped), qiymətli qeydiyyat qalır."
+msgstr "%(student)s · %(period)s: Einschreibung unter beiden Fächern — die unbewertete doppelte Einschreibung wird geschlossen (dropped), die bewertete bleibt."

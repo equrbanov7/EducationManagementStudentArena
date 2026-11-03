@@ -97,6 +97,18 @@
 #   merge_subjects — dublikat fənn kartının birləşdirilməsi (sahib 2026-11-04: SYS-1 yoxlamasında tapılan QKU-452 /
 #       QKU-2436): `teacher` = saxlanılan fənnin kodu (QKU-N), `batch` = birləşdirilən kod(lar) (vergüllə). apply-siz
 #       önizləmə (toqquşma varsa heç nə yazılmır); apply = backup + `--apply --reason`. Geri: undo_subject_merge.
+#       K2/K3 (sahib 2026-11-04): ləğv olunmuş BOŞ əkiz jurnal snapshot-la silinir, qiymətsiz təkrar qeydiyyat bağlanır
+#       («Həll olunur» sətirləri). `create_missing=true` → `--drop-attendance-only` («yalnız davamiyyət» qeydiyyatını da
+#       bağla — qalan qeydiyyatın yekun qiyməti varsa; xanalar silinmir). Açıq qərardır, defolt YOX.
+#   undo_subject_merge — merge_subjects-in geri qaytarılması (sahib 2026-11-04, K4): `batch` = birləşmənin audit id-si
+#       (merge_subjects apply çıxışındakı «Audit id: <uuid>»). apply-siz yoxlama + geri alınan sınaq yazısı; apply =
+#       backup + `--apply --reason`. Silinmiş boş əkiz jurnallar eyni id ilə, bağlanmış qeydiyyatların statusu bərpa olunur.
+#   merge_subjects PLAN rejimi (sahib 2026-11-04, ~95 dublikat kart): `teacher` boş, `batch` = «QKU-K:MƏNBƏ[,MƏNBƏ];QKU-K2:…»
+#       (saxlanılan YALNIZ QKU-N, mənbə QKU-N/SAYT-N, ≤150 cüt, ≤6000 simvol). BİR backup; hər cüt öz tranzaksiyası —
+#       toqquşan cüt ATLANIR, qalanlar keçir; apply hər cütün `audit=<id>`-ni çap edir (undo_subject_merge üçün).
+#   recode_site_subjects — qalan SAYT-#### fənn kartlarını növbəti boş QKU-N-ə keçirir (sahib 2026-11-04: «SAYT … kodlar QKU
+#       olmalıdı»); kart id-si dəyişmir. QKU dublikatı olan SAYT kartına toxunmur (əvvəl merge_subjects). `batch` boş = hamısı,
+#       `SAYT-N[,…]` = istisna, `sitecode-…` = geri qaytarma. Çıxış: köhnə → yeni kod siyahısı + `site_recode:` sayları.
 #   purge_exam_attempt — bir tələbənin SƏHV imtahan cəhdi (sahib 2026-10-25: «Şirməmməd üçün olan son imtahan nəticəsini
 #       sil, o səhvən olub»): `teacher` = tələbənin istifadəçi adı (DƏQİQ), `batch` = cəhdin id-si (boş = tələbənin ƏN SON
 #       cəhdi), `task_chair` = imtahanın slug-ı (apply üçün MƏCBURİ, BƏRABƏR olmalıdır — təhlükəsizlik). Cəhd + cavablar,
@@ -350,6 +362,8 @@ on:
           - purge_trial_exam
           - purge_exam_attempt
           - merge_subjects
+          - undo_subject_merge
+          - recode_site_subjects
           - legacy_delta_apply
           - recover_mr27_journal
           - recover_mr46_syllabus
@@ -455,11 +469,11 @@ on:
         required: false
         default: ""
       batch:
-        description: "recover_workload_syllabi (Bilal legacy8430; workload-syllabi-…) · recover_mr46_syllabus: plaintext SHA256 və ya mr46-… undo paketi · repair_repeated_sections_workload / repair_owner_activity_batch / repair_balanced_workload_pairs / repair_sbio235_workload: baselineSHA, undoID(dry) və ya undoID:baselineSHA(apply) · reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…) / apply_journal_shares (shares-…) / relocate_superseded_marks (supmarks-…) / merge_duplicate_student (stmerge-…) / merge_level_journals (lvlmerge-…): geri qaytarılacaq paket id-si (undo) · merge_duplicate_staff: mənbə:hədəf istifadəçi id-ləri (8388:7730) · recover_mr27_journal: fayl üçün məcburi plaintext sha256 və ya undo üçün mr27-YYYYMMDD-HHMMSS-xxxx · legacy_delta_apply / share_legacy_syllabi: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd) · fix_offering_subject: jurnalın UUID-i · clear_stale_off_schedule_flags: yalnız bu jurnal (UUID, boş = hamısı)"
+        description: "recover_workload_syllabi (Bilal legacy8430; workload-syllabi-…) · recover_mr46_syllabus: plaintext SHA256 və ya mr46-… undo paketi · repair_repeated_sections_workload / repair_owner_activity_batch / repair_balanced_workload_pairs / repair_sbio235_workload: baselineSHA, undoID(dry) və ya undoID:baselineSHA(apply) · reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…) / apply_journal_shares (shares-…) / relocate_superseded_marks (supmarks-…) / merge_duplicate_student (stmerge-…) / merge_level_journals (lvlmerge-…): geri qaytarılacaq paket id-si (undo) · recover_mr27_journal: fayl üçün məcburi plaintext sha256 və ya undo üçün mr27-YYYYMMDD-HHMMSS-xxxx · legacy_delta_apply / share_legacy_syllabi: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd) · undo_subject_merge: birləşmənin audit id-si (UUID) · merge_subjects: mənbə kod(lar)ı və ya PLAN «QKU-K:SAYT-N;…» · recode_site_subjects: boş / SAYT-N,… (istisna) / sitecode-… (undo) · fix_offering_subject: jurnalın UUID-i · clear_stale_off_schedule_flags: yalnız bu jurnal (UUID, boş = hamısı) · merge_duplicate_staff: mənbə:hədəf istifadəçi id-ləri (8388:7730)"
         required: false
         default: ""
       create_missing:
-        description: "recover_mr27_journal: müəllimin 22Oct 10/10/9 bəyanatını ayrıca daxil et (--include-teacher-assertion) · reconcile_teacher_roster: «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı yarat · audit_staff_placement (apply ilə): aktiv olmayanları blokla (--block-inactive) · blocked_accounts_report (apply ilə): yükü olan bloklanmış müəllimlərin blokunu aç · assign_task_rows_from_timetable: dərs yükündə olmayan dərsə yeni tapşırıq sətri (--create-missing-rows) · fix_syllabus_plan_hours: plan saatı BOŞ olan təsdiqlənmiş versiyaları da doldur (--fill-empty) · fill_vacant_from_journals: bildiriş GÖNDƏRMƏ (--no-notify) · unblock_legacy_journal_teachers: boş köhnə jurnalı olanı da aç (--include-empty) · fix_legacy_lesson_kinds: plan HƏM seminar, HƏM lab daşıyan açılışlarda da (--include-mixed) · dedupe_notifications: «Bildiriş göndər» (system) təkrarını yumşaq SİL (--type system --delete, pəncərə 600 dəq) · merge_duplicate_staff: ad/soyad/ata adı fərqlidir, sahib eyni şəxs olduğunu təsdiqləyib (--force-name-mismatch)"
+        description: "recover_mr27_journal: müəllimin 22Oct 10/10/9 bəyanatını ayrıca daxil et (--include-teacher-assertion) · reconcile_teacher_roster: «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı yarat · audit_staff_placement (apply ilə): aktiv olmayanları blokla (--block-inactive) · blocked_accounts_report (apply ilə): yükü olan bloklanmış müəllimlərin blokunu aç · assign_task_rows_from_timetable: dərs yükündə olmayan dərsə yeni tapşırıq sətri (--create-missing-rows) · fix_syllabus_plan_hours: plan saatı BOŞ olan təsdiqlənmiş versiyaları da doldur (--fill-empty) · fill_vacant_from_journals: bildiriş GÖNDƏRMƏ (--no-notify) · unblock_legacy_journal_teachers: boş köhnə jurnalı olanı da aç (--include-empty) · fix_legacy_lesson_kinds: plan HƏM seminar, HƏM lab daşıyan açılışlarda da (--include-mixed) · merge_subjects: «yalnız davamiyyət» təkrar qeydiyyatını da bağla (--drop-attendance-only) · dedupe_notifications: «Bildiriş göndər» (system) təkrarını yumşaq SİL (--type system --delete, pəncərə 600 dəq) · merge_duplicate_staff: ad/soyad/ata adı fərqlidir, sahib eyni şəxs olduğunu təsdiqləyib (--force-name-mismatch)"
         required: false
         type: boolean
         default: false
@@ -1092,11 +1106,54 @@ jobs:
               ;;
             merge_subjects)
               # Sahib 2026-11-04: dublikat fənn kartı. `teacher` = saxlanılan kod, `batch` = birləşdirilən kod(lar).
-              match "$TEACHER" '^QKU-[0-9]{1,6}$' || { echo "teacher (saxlanılan fənnin kodu) formatı: QKU-N" >&2; exit 2; }
-              match "$BATCH" '^QKU-[0-9]{1,6}(,QKU-[0-9]{1,6}){0,4}$' || { echo "batch (birləşdirilən kodlar) formatı: QKU-N[,QKU-M]" >&2; exit 2; }
-              args=(--org "$ORG" "--target=$TEACHER" "--source=$BATCH")
+              # Saxlanılan YALNIZ QKU-N (sahib 2026-11-04: SAYT kartı həmişə mənbədir), mənbələr QKU-N / SAYT-N.
+              # PLAN rejimi: `batch` = «QKU-K:MƏNBƏ1,MƏNBƏ2;QKU-K2:MƏNBƏ3» (teacher boş) — BİR backup, hər cüt öz tranzaksiyası.
+              case "$BATCH" in
+                (*:*)
+                  test -z "$TEACHER" || { echo "plan rejimində teacher boş olmalıdır" >&2; exit 2; }
+                  { [ "${#BATCH}" -le 6000 ] && match "$BATCH" '^QKU-[0-9]{1,6}:(QKU|SAYT)-[0-9]{1,6}(,(QKU|SAYT)-[0-9]{1,6}){0,9}(;QKU-[0-9]{1,6}:(QKU|SAYT)-[0-9]{1,6}(,(QKU|SAYT)-[0-9]{1,6}){0,9}){0,149}$'; } \
+                    || { echo "batch (plan) formatı: QKU-K:QKU-N|SAYT-N[,…][;QKU-K2:…] (≤150 cüt)" >&2; exit 2; }
+                  args=(--org "$ORG" "--plan=$BATCH")
+                  ;;
+                (*)
+                  match "$TEACHER" '^QKU-[0-9]{1,6}$' || { echo "teacher (saxlanılan fənnin kodu) formatı: QKU-N" >&2; exit 2; }
+                  match "$BATCH" '^(QKU|SAYT)-[0-9]{1,6}(,(QKU|SAYT)-[0-9]{1,6}){0,4}$' || { echo "batch (birləşdirilən kodlar) formatı: QKU-N|SAYT-N[,…]" >&2; exit 2; }
+                  args=(--org "$ORG" "--target=$TEACHER" "--source=$BATCH")
+                  ;;
+              esac
+              if [ "$CREATE_MISSING" = "true" ]; then
+                args+=(--drop-attendance-only)
+              fi
               if [ "$APPLY" = "true" ]; then
                 args+=(--apply --reason "Dublikat fənn kartı — sahibin 2026-11-04 təsdiqi (SYS-1 yoxlaması)")
+              fi
+              custom_apply=1
+              ;;
+            undo_subject_merge)
+              # Sahib 2026-11-04 (K4): fənn birləşməsinin geri qaytarılması. `batch` = birləşmənin audit id-si (UUID).
+              match "$BATCH" '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' \
+                || { echo "batch (birləşmənin audit id-si) formatı: UUID" >&2; exit 2; }
+              args=("--audit-id=$BATCH")
+              if [ "$APPLY" = "true" ]; then
+                args+=(--apply --reason "Fənn birləşməsinin geri qaytarılması — sahibin 2026-11-04 təsdiqi (K4)")
+              fi
+              custom_apply=1
+              ;;
+            recode_site_subjects)
+              # Sahib 2026-11-04: qalan SAYT-#### kartları → növbəti boş QKU-N (kart id-si dəyişmir). İş sırası: əvvəl
+              # merge_subjects (plan), sonra bu. `batch` boş = hamısı · `SAYT-N[,…]` = bunlara toxunma · `sitecode-…` = geri qaytar.
+              args=(--org "$ORG")
+              if [ -n "$BATCH" ]; then
+                if match "$BATCH" '^sitecode-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$'; then
+                  args+=("--undo=$BATCH")
+                elif match "$BATCH" '^SAYT-[0-9]{1,6}(,SAYT-[0-9]{1,6}){0,199}$'; then
+                  args+=("--exclude=$BATCH")
+                else
+                  echo "batch formatı: boş · SAYT-N[,SAYT-M] (istisna) · sitecode-YYYYMMDD-HHMMSS-xxxx (geri qaytarma)" >&2; exit 2
+                fi
+              fi
+              if [ "$APPLY" = "true" ]; then
+                args+=(--apply)
               fi
               custom_apply=1
               ;;

@@ -111845,3 +111845,236 @@ msgstr "Yük bölgüsündə aç"
 msgctxt "workload.history_restore"
 msgid "Patok sətri"
 msgstr "Patok sətri"
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "%(kind)s yükü: %(source)s → %(target)s (%(hours)s saat)"
+msgstr "%(kind)s yükü: %(source)s → %(target)s (%(hours)s saat)"
+
+msgctxt "workload.history_teacher_restore"
+msgid "(ən azı 10 simvol)"
+msgstr "(ən azı 10 simvol)"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu baxış rejimində bərpa edilmir (yalnız tam baxış)."
+msgstr "Bu baxış rejimində bərpa edilmir (yalnız tam baxış)."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu jurnal müəllimin tarixçə siyahısında deyil."
+msgstr "Bu jurnal müəllimin tarixçə siyahısında deyil."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu jurnalın kafedrası üzrə yük bölgüsü səlahiyyətiniz yoxdur."
+msgstr "Bu jurnalın kafedrası üzrə yük bölgüsü səlahiyyətiniz yoxdur."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu müəllimin bu jurnalda öz dərs qeydi yoxdur."
+msgstr "Bu müəllimin bu jurnalda öz dərs qeydi yoxdur."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu müəllimə bərpa et"
+msgstr "Bu müəllimə bərpa et"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu əməliyyat üçün səlahiyyətiniz yoxdur."
+msgstr "Bu əməliyyat üçün səlahiyyətiniz yoxdur."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bərpa et"
+msgstr "Bərpa et"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bərpa mümkün olmadı."
+msgstr "Bərpa mümkün olmadı."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Dərs açılışı aktiv deyil."
+msgstr "Dərs açılışı aktiv deyil."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Dərs növlərinin saatını formada göstərin."
+msgstr "Dərs növlərinin saatını formada göstərin."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Dəyişikliklərdən sonra da jurnal cari yükə düşmədi — heç nə dəyişdirilmədi. «Yük bölgüsü»ndə yoxlayın."
+msgstr "Dəyişikliklərdən sonra da jurnal cari yükə düşmədi — heç nə dəyişdirilmədi. «Yük bölgüsü»ndə yoxlayın."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Fənn təhvili geri qaytarılır: jurnal yenidən %(target)s adına"
+msgstr "Fənn təhvili geri qaytarılır: jurnal yenidən %(target)s adına"
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnal %(owner)s adınadır və onun bu sətirdə yükü var — «Fənn təhvili» ilə həll edin."
+msgstr "Jurnal %(owner)s adınadır və onun bu sətirdə yükü var — «Fənn təhvili» ilə həll edin."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnal artıq bu müəllimin cari dərs yükündədir."
+msgstr "Jurnal artıq bu müəllimin cari dərs yükündədir."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnal bağlanıb — əvvəlcə jurnalı açın."
+msgstr "Jurnal bağlanıb — əvvəlcə jurnalı açın."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnal bu müəllimin «Cari dərs yüküm» siyahısına qaytarılacaq. Dəyişəcək:"
+msgstr "Jurnal bu müəllimin «Cari dərs yüküm» siyahısına qaytarılacaq. Dəyişəcək:"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnal müəllimin cari dərs yükünə bərpa edildi."
+msgstr "Jurnal müəllimin cari dərs yükünə bərpa edildi."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnal qeydləri (dərslər, ballar, davamiyyət) dəyişmir. Nəticə alınmasa heç nə yazılmır."
+msgstr "Jurnal qeydləri (dərslər, ballar, davamiyyət) dəyişmir. Nəticə alınmasa heç nə yazılmır."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnalın sahibi dəyişdirilə bilmir: %(detail)s"
+msgstr "Jurnalın sahibi dəyişdirilə bilmir: %(detail)s"
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnalın sahibi: %(source)s → %(target)s"
+msgstr "Jurnalın sahibi: %(source)s → %(target)s"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnalın sahibini dəyişmək üçün «Fənn təhvili» səlahiyyətiniz yoxdur."
+msgstr "Jurnalın sahibini dəyişmək üçün «Fənn təhvili» səlahiyyətiniz yoxdur."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnalın vəziyyəti dəyişib — səhifəni yeniləyib yenidən baxın."
+msgstr "Jurnalın vəziyyəti dəyişib — səhifəni yeniləyib yenidən baxın."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Kafedranın yük sənədi bölgü mərhələsində deyil."
+msgstr "Kafedranın yük sənədi bölgü mərhələsində deyil."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Səbəb"
+msgstr "Səbəb"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Səbəb ən azı 10 simvol olmalıdır."
+msgstr "Səbəb ən azı 10 simvol olmalıdır."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Vakant"
+msgstr "Vakant"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Yalnız aktiv cari semestrin açıq jurnalı bərpa olunur."
+msgstr "Yalnız aktiv cari semestrin açıq jurnalı bərpa olunur."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Yalnız fiziki qrupu olan adi jurnal bərpa olunur."
+msgstr "Yalnız fiziki qrupu olan adi jurnal bərpa olunur."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Yük bu müəllimdədir, amma jurnala bağlanmayıb — «Yük bölgüsü»ndə yoxlayın."
+msgstr "Yük bu müəllimdədir, amma jurnala bağlanmayıb — «Yük bölgüsü»ndə yoxlayın."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Yük bölgüsündə aç"
+msgstr "Yük bölgüsündə aç"
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Yük sətrində «%(kind)s» üçün saat yoxdur."
+msgstr "Yük sətrində «%(kind)s» üçün saat yoxdur."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Yük sətrinin planı bu müəllimə təyin olunur (%(hours)s saat)"
+msgstr "Yük sətrinin planı bu müəllimə təyin olunur (%(hours)s saat)"
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Yük çoxqruplu (patok) sətirdədir: %(groups)s — müəllim «Yük bölgüsü»ndə təyin edilir."
+msgstr "Yük çoxqruplu (patok) sətirdədir: %(groups)s — müəllim «Yük bölgüsü»ndə təyin edilir."
+
+msgctxt "workload.history_teacher_restore"
+msgid "dərs açılışı aktiv deyil"
+msgstr "dərs açılışı aktiv deyil"
+
+msgctxt "workload.history_teacher_restore"
+msgid "fənn təhvildən sonra yenidən başqasına verilib"
+msgstr "fənn təhvildən sonra yenidən başqasına verilib"
+
+msgctxt "workload.history_teacher_restore"
+msgid "jurnal bağlanıb"
+msgstr "jurnal bağlanıb"
+
+msgctxt "workload.history_teacher_restore"
+msgid "jurnal payları təhvildən sonra dəyişib"
+msgstr "jurnal payları təhvildən sonra dəyişib"
+
+msgctxt "workload.history_teacher_restore"
+msgid "jurnal səlahiyyət sahənizə düşmür"
+msgstr "jurnal səlahiyyət sahənizə düşmür"
+
+msgctxt "workload.history_teacher_restore"
+msgid "jurnalın müəllimi az öncə dəyişdirilib"
+msgstr "jurnalın müəllimi az öncə dəyişdirilib"
+
+msgctxt "workload.history_teacher_restore"
+msgid "müəllimin bal yazma səlahiyyəti yoxdur"
+msgstr "müəllimin bal yazma səlahiyyəti yoxdur"
+
+msgctxt "workload.history_teacher_restore"
+msgid "semestr başa çatıb"
+msgstr "semestr başa çatıb"
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "«%(kind)s» bir neçə müəllim arasında bölünüb — «Yük bölgüsü»ndə dəyişin."
+msgstr "«%(kind)s» bir neçə müəllim arasında bölünüb — «Yük bölgüsü»ndə dəyişin."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Əməliyyat alınmadı — yenidən cəhd edin."
+msgstr "Əməliyyat alınmadı — yenidən cəhd edin."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "%(name)s %(since)s tarixindən bəri bu jurnalda %(lessons)s dərs və %(marks)s qeyd yazıb."
+msgstr "%(name)s %(since)s tarixindən bəri bu jurnalda %(lessons)s dərs və %(marks)s qeyd yazıb."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "%(name)s bu jurnalda %(lessons)s dərs və %(marks)s qeyd yazıb."
+msgstr "%(name)s bu jurnalda %(lessons)s dərs və %(marks)s qeyd yazıb."
+
+msgctxt "workload.history_teacher_restore"
+msgid "İndiki sahib sonradan qeyd yazıb"
+msgstr "İndiki sahib sonradan qeyd yazıb"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Diqqət: jurnal müəllimdən alınandan sonra indiki sahib qeyd yazıb."
+msgstr "Diqqət: jurnal müəllimdən alınandan sonra indiki sahib qeyd yazıb."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu qeydlər silinmir və köçürülmür — yalnız jurnalın sahibliyi və dərs yükü keçir. Səbəb məcburidir."
+msgstr "Bu qeydlər silinmir və köçürülmür — yalnız jurnalın sahibliyi və dərs yükü keçir. Səbəb məcburidir."
+
+msgctxt "workload.history_teacher_restore"
+msgid "(istəyə bağlı — sonradan heç kim yazmayıb)"
+msgstr "(istəyə bağlı — sonradan heç kim yazmayıb)"
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(period)s · %(group)s: ləğv olunmuş BOŞ əkiz jurnal silinir (tam snapshot audit-də, geri qaytarmada eyni id ilə bərpa olunur); bağlı imtahanlar saxlanılan jurnala keçir."
+msgstr "%(period)s · %(group)s: ləğv olunmuş BOŞ əkiz jurnal silinir (tam snapshot audit-də, geri qaytarmada eyni id ilə bərpa olunur); bağlı imtahanlar saxlanılan jurnala keçir."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(student)s · %(period)s: hər iki fənn üzrə qeydiyyat var — qiymətsiz təkrar qeydiyyat bağlanır (dropped), qiymətli qeydiyyat qalır."
+msgstr "%(student)s · %(period)s: hər iki fənn üzrə qeydiyyat var — qiymətsiz təkrar qeydiyyat bağlanır (dropped), qiymətli qeydiyyat qalır."

@@ -112556,3 +112556,236 @@ msgstr "Открыть в распределении нагрузки"
 msgctxt "workload.history_restore"
 msgid "Patok sətri"
 msgstr "Поточная строка"
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "%(kind)s yükü: %(source)s → %(target)s (%(hours)s saat)"
+msgstr "Нагрузка «%(kind)s»: %(source)s → %(target)s (%(hours)s ч.)"
+
+msgctxt "workload.history_teacher_restore"
+msgid "(ən azı 10 simvol)"
+msgstr "(не менее 10 символов)"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu baxış rejimində bərpa edilmir (yalnız tam baxış)."
+msgstr "В этом режиме просмотра восстановление недоступно (только полный режим)."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu jurnal müəllimin tarixçə siyahısında deyil."
+msgstr "Этого журнала нет в списке истории преподавателя."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu jurnalın kafedrası üzrə yük bölgüsü səlahiyyətiniz yoxdur."
+msgstr "У вас нет права распределять нагрузку кафедры этого журнала."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu müəllimin bu jurnalda öz dərs qeydi yoxdur."
+msgstr "У этого преподавателя нет собственных записей занятий в этом журнале."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu müəllimə bərpa et"
+msgstr "Вернуть этому преподавателю"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu əməliyyat üçün səlahiyyətiniz yoxdur."
+msgstr "У вас нет прав на это действие."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bərpa et"
+msgstr "Восстановить"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bərpa mümkün olmadı."
+msgstr "Восстановление невозможно."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Dərs açılışı aktiv deyil."
+msgstr "Учебный курс не активен."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Dərs növlərinin saatını formada göstərin."
+msgstr "Укажите часы по видам занятий в форме."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Dəyişikliklərdən sonra da jurnal cari yükə düşmədi — heç nə dəyişdirilmədi. «Yük bölgüsü»ndə yoxlayın."
+msgstr "Даже после изменений журнал не попал в текущую нагрузку — ничего не изменено. Проверьте в «Распределении нагрузки»."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Fənn təhvili geri qaytarılır: jurnal yenidən %(target)s adına"
+msgstr "Передача дисциплины отменяется: журнал снова на имя %(target)s"
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnal %(owner)s adınadır və onun bu sətirdə yükü var — «Fənn təhvili» ilə həll edin."
+msgstr "Журнал на имя %(owner)s, у которого есть нагрузка в этой строке — решите через «Передачу дисциплины»."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnal artıq bu müəllimin cari dərs yükündədir."
+msgstr "Журнал уже в текущей нагрузке этого преподавателя."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnal bağlanıb — əvvəlcə jurnalı açın."
+msgstr "Журнал закрыт — сначала откройте его."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnal bu müəllimin «Cari dərs yüküm» siyahısına qaytarılacaq. Dəyişəcək:"
+msgstr "Журнал вернётся в список «Моя текущая нагрузка» этого преподавателя. Изменится:"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnal müəllimin cari dərs yükünə bərpa edildi."
+msgstr "Журнал возвращён в текущую нагрузку преподавателя."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnal qeydləri (dərslər, ballar, davamiyyət) dəyişmir. Nəticə alınmasa heç nə yazılmır."
+msgstr "Записи журнала (занятия, баллы, посещаемость) не меняются. Если не получится, ничего не сохраняется."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnalın sahibi dəyişdirilə bilmir: %(detail)s"
+msgstr "Владельца журнала нельзя изменить: %(detail)s"
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnalın sahibi: %(source)s → %(target)s"
+msgstr "Владелец журнала: %(source)s → %(target)s"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnalın sahibini dəyişmək üçün «Fənn təhvili» səlahiyyətiniz yoxdur."
+msgstr "У вас нет права «Передача дисциплины», чтобы сменить владельца журнала."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Jurnalın vəziyyəti dəyişib — səhifəni yeniləyib yenidən baxın."
+msgstr "Состояние журнала изменилось — обновите страницу и проверьте снова."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Kafedranın yük sənədi bölgü mərhələsində deyil."
+msgstr "Документ нагрузки кафедры не на этапе распределения."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Ləğv et"
+msgstr "Отмена"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Səbəb"
+msgstr "Причина"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Səbəb ən azı 10 simvol olmalıdır."
+msgstr "Причина должна быть не короче 10 символов."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Vakant"
+msgstr "Вакансия"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Yalnız aktiv cari semestrin açıq jurnalı bərpa olunur."
+msgstr "Восстановить можно только открытый журнал активного текущего семестра."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Yalnız fiziki qrupu olan adi jurnal bərpa olunur."
+msgstr "Восстановить можно только обычный журнал с физической группой."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Yük bu müəllimdədir, amma jurnala bağlanmayıb — «Yük bölgüsü»ndə yoxlayın."
+msgstr "Нагрузка у этого преподавателя, но не привязана к журналу — проверьте в «Распределении нагрузки»."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Yük bölgüsündə aç"
+msgstr "Открыть в распределении нагрузки"
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Yük sətrində «%(kind)s» üçün saat yoxdur."
+msgstr "В строке нагрузки нет часов для «%(kind)s»."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Yük sətrinin planı bu müəllimə təyin olunur (%(hours)s saat)"
+msgstr "План строки нагрузки назначается этому преподавателю (%(hours)s ч.)"
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "Yük çoxqruplu (patok) sətirdədir: %(groups)s — müəllim «Yük bölgüsü»ndə təyin edilir."
+msgstr "Нагрузка в многогрупповой (поточной) строке: %(groups)s — преподаватель назначается в «Распределении нагрузки»."
+
+msgctxt "workload.history_teacher_restore"
+msgid "dərs açılışı aktiv deyil"
+msgstr "учебный курс не активен"
+
+msgctxt "workload.history_teacher_restore"
+msgid "fənn təhvildən sonra yenidən başqasına verilib"
+msgstr "после передачи дисциплина снова передана другому"
+
+msgctxt "workload.history_teacher_restore"
+msgid "jurnal bağlanıb"
+msgstr "журнал закрыт"
+
+msgctxt "workload.history_teacher_restore"
+msgid "jurnal payları təhvildən sonra dəyişib"
+msgstr "доли журнала изменились после передачи"
+
+msgctxt "workload.history_teacher_restore"
+msgid "jurnal səlahiyyət sahənizə düşmür"
+msgstr "журнал вне вашей зоны полномочий"
+
+msgctxt "workload.history_teacher_restore"
+msgid "jurnalın müəllimi az öncə dəyişdirilib"
+msgstr "преподаватель журнала только что изменён"
+
+msgctxt "workload.history_teacher_restore"
+msgid "müəllimin bal yazma səlahiyyəti yoxdur"
+msgstr "у преподавателя нет права выставлять баллы"
+
+msgctxt "workload.history_teacher_restore"
+msgid "semestr başa çatıb"
+msgstr "семестр завершён"
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "«%(kind)s» bir neçə müəllim arasında bölünüb — «Yük bölgüsü»ndə dəyişin."
+msgstr "«%(kind)s» разделено между несколькими преподавателями — измените в «Распределении нагрузки»."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Əməliyyat alınmadı — yenidən cəhd edin."
+msgstr "Действие не удалось — попробуйте ещё раз."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "%(name)s %(since)s tarixindən bəri bu jurnalda %(lessons)s dərs və %(marks)s qeyd yazıb."
+msgstr "С %(since)s %(name)s внёс(ла) в этот журнал %(lessons)s занятий и %(marks)s записей."
+
+#, python-format
+msgctxt "workload.history_teacher_restore"
+msgid "%(name)s bu jurnalda %(lessons)s dərs və %(marks)s qeyd yazıb."
+msgstr "%(name)s внёс(ла) в этот журнал %(lessons)s занятий и %(marks)s записей."
+
+msgctxt "workload.history_teacher_restore"
+msgid "İndiki sahib sonradan qeyd yazıb"
+msgstr "Текущий владелец с тех пор вносил записи"
+
+msgctxt "workload.history_teacher_restore"
+msgid "Diqqət: jurnal müəllimdən alınandan sonra indiki sahib qeyd yazıb."
+msgstr "Внимание: после того как журнал забрали у преподавателя, текущий владелец вносил записи."
+
+msgctxt "workload.history_teacher_restore"
+msgid "Bu qeydlər silinmir və köçürülmür — yalnız jurnalın sahibliyi və dərs yükü keçir. Səbəb məcburidir."
+msgstr "Эти записи не удаляются и не переносятся — меняются только владелец журнала и нагрузка. Причина обязательна."
+
+msgctxt "workload.history_teacher_restore"
+msgid "(istəyə bağlı — sonradan heç kim yazmayıb)"
+msgstr "(необязательно — с тех пор никто не вносил записей)"
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(period)s · %(group)s: ləğv olunmuş BOŞ əkiz jurnal silinir (tam snapshot audit-də, geri qaytarmada eyni id ilə bərpa olunur); bağlı imtahanlar saxlanılan jurnala keçir."
+msgstr "%(period)s · %(group)s: отменённый ПУСТОЙ журнал-двойник удаляется (полный снимок в аудите, при отмене восстанавливается с тем же id); связанные экзамены переходят в сохраняемый журнал."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(student)s · %(period)s: hər iki fənn üzrə qeydiyyat var — qiymətsiz təkrar qeydiyyat bağlanır (dropped), qiymətli qeydiyyat qalır."
+msgstr "%(student)s · %(period)s: есть запись по обеим дисциплинам — запись без оценок закрывается (dropped), запись с оценками остаётся."
