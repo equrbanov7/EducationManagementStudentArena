@@ -90,6 +90,8 @@ class JournalIndex:
             value = number(str(row["point"] or ""))
             if root is not None and value is not None:
                 self.finals[(root, int(row["student_id"]))].add(_point(value))
+                # Köhnə sistem təkrar keçilən fənnin imtahanını tələbəni ``students_id``-ə yazmadan da saxlayıb.
+                self.students[root].add(int(row["student_id"]))
 
     def uniqids(self, root: int) -> list[str]:
         return sorted(r["uniqid"] for r in self.members[root])
@@ -132,7 +134,8 @@ class JournalIndex:
         özünə çəkirdi (2025/26 «39+26=65» vərəqi 2022/23 «31+4=35» yazılışına). Açar: ``(bu sətrin imtahanı ailənin
         im/im2-si ilə üst-üstə düşür, export-dan əvvəl başlayıb, semestr, cədvəlin ailəsidir)`` — imtahan uyğunluğu
         köhnə semestrin sonradan çap olunan vərəqini, «ən son başlamış kurs» isə imtahandan əvvəlki vərəqi düz yerə
-        aparır. Tələbə heç bir ailənin siyahısında deyilsə cədvəlin ailəsi qalır.
+        aparır. Tələbə heç bir ailənin siyahısında deyilsə cədvəlin ailəsi qalır. Seçilən ailədə tələbənin FƏRQLİ
+        imtahan balı varsa sətir heç yerə bağlanmır (``row.exam_conflict``) — başqa cəhdin vərəqidir.
         """
 
         roots = [r for r in self.by_subject.get(subject_key(table.subject), ()) if row.student_id in self.students[r]]
@@ -153,6 +156,10 @@ class JournalIndex:
         best = ranked[0]
         if len(ranked) > 1 and key(ranked[1]) == key(best):
             return None, "row.ambiguous"
+        own = stored.get((best, row.student_id))
+        if own and not key(best)[0] and any(v is not None for v in (row.exam, row.resit)):
+            # Seçilən ailədə bu tələbənin BAŞQA imtahan balı var — vərəq ona aid deyil (başqa cəhdindir).
+            return None, "row.exam_conflict"
         return best, "row.own_family" if best == table_root else "row.moved_family"
 
 

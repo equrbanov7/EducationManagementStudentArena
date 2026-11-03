@@ -175,6 +175,26 @@ class JournalMatchingTests(SimpleTestCase):
         table = _table()
         self.assertEqual(index.choose_row(table, table.rows[0], 1, "2026-07-06 12:00:00"), (1, "row.own_family"))
 
+    def test_family_holding_the_students_exam_counts_as_own(self):
+        journals = [
+            _journal(1, "old", semestr=6, added="2023-09-15"),
+            _journal(2, "retake", semestr=9, group=700, added="2025-02-03", students="[]"),
+        ]
+        finals = [
+            {"journal_uniqid": "old", "student_id": 7131, "point": "11"},
+            {"journal_uniqid": "retake", "student_id": 7131, "point": "21"},
+        ]
+        index = JournalIndex(journals, self.lessons, self.workers, finals)
+        table = _table(exam=D(21))
+        self.assertEqual(index.choose_row(table, table.rows[0], 1, "2025-10-17 12:00:00"), (2, "row.moved_family"))
+
+    def test_sheet_with_a_different_exam_is_not_attached(self):
+        journals = [_journal(1, "old", semestr=6, added="2023-09-15")]
+        finals = [{"journal_uniqid": "old", "student_id": 7131, "point": "11"}]
+        index = JournalIndex(journals, self.lessons, self.workers, finals)
+        table = _table(exam=D(21))
+        self.assertEqual(index.choose_row(table, table.rows[0], 1, "2025-10-17 12:00:00"), (None, "row.exam_conflict"))
+
     def test_unknown_subject_has_no_candidate(self):
         index = JournalIndex(
             [_journal(1, "j", semestr=12, lesson=2)], self.lessons + [{"id": 2, "name": "Kimya"}], [], []
