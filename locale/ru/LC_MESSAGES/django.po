@@ -112371,10 +112371,6 @@ msgctxt "accounts.syllabus"
 msgid "Dərs deyən müəllim"
 msgstr "Преподаватель"
 
-msgctxt "accounts.syllabus"
-msgid "Yeni qaralama saxlanılır"
-msgstr "Новый черновик сохранён"
-
 #: apps/accounts/templates/accounts/profile/sidebar/items/_language_cohorts.html
 msgctxt "profile.sidebar"
 msgid "Xarici dil səviyyə qrupları"
@@ -112789,3 +112785,11 @@ msgstr "%(period)s · %(group)s: отменённый ПУСТОЙ журнал-
 msgctxt "registrar.subject_merge"
 msgid "%(student)s · %(period)s: hər iki fənn üzrə qeydiyyat var — qiymətsiz təkrar qeydiyyat bağlanır (dropped), qiymətli qeydiyyat qalır."
 msgstr "%(student)s · %(period)s: есть запись по обеим дисциплинам — запись без оценок закрывается (dropped), запись с оценками остаётся."
+
+msgctxt "accounts.workload"
+msgid "Bütün kafedralar"
+msgstr "Все кафедры"
+
+msgctxt "accounts.workload"
+msgid "Bütün kafedralar: siyahı yalnız baxış üçündür. Sətri dəyişmək üçün «Kafedrada redaktə et» düyməsi ilə onun kafedrasına keçin."
+msgstr "Все кафедры: список только для просмотра. Чтобы изменить строку, перейдите на её кафедру кнопкой «Редактировать на кафедре»."

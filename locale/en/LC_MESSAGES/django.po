@@ -112176,10 +112176,6 @@ msgctxt "accounts.syllabus"
 msgid "Dərs deyən müəllim"
 msgstr "Teaching instructor"
 
-msgctxt "accounts.syllabus"
-msgid "Yeni qaralama saxlanılır"
-msgstr "New draft is retained"
-
 #: apps/accounts/templates/accounts/profile/sidebar/items/_language_cohorts.html
 msgctxt "profile.sidebar"
 msgid "Xarici dil səviyyə qrupları"
@@ -112595,3 +112591,11 @@ msgstr "%(period)s · %(group)s: the cancelled EMPTY twin journal is deleted (fu
 msgctxt "registrar.subject_merge"
 msgid "%(student)s · %(period)s: hər iki fənn üzrə qeydiyyat var — qiymətsiz təkrar qeydiyyat bağlanır (dropped), qiymətli qeydiyyat qalır."
 msgstr "%(student)s · %(period)s: enrolled under both subjects — the ungraded duplicate enrollment is closed (dropped), the graded one stays."
+
+msgctxt "accounts.workload"
+msgid "Bütün kafedralar"
+msgstr "All departments"
+
+msgctxt "accounts.workload"
+msgid "Bütün kafedralar: siyahı yalnız baxış üçündür. Sətri dəyişmək üçün «Kafedrada redaktə et» düyməsi ilə onun kafedrasına keçin."
+msgstr "All departments: the list is read-only. To change a row, open its department with «Edit in department»."

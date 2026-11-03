@@ -3205,3 +3205,9 @@ msgstr "There is no suitable confirmed department task within your access scope.
 
 msgid "Yük sətri köçürüldü."
 msgstr "The teaching load row was transferred."
+
+msgid "Kafedrada redaktə et"
+msgstr "Edit in department"
+
+msgid "Yalnız baxış"
+msgstr "View only"

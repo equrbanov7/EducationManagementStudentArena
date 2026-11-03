@@ -3190,3 +3190,9 @@ msgstr "Səlahiyyətiniz daxilində uyğun təsdiqlənmiş kafedra tapşırığ�
 
 msgid "Yük sətri köçürüldü."
 msgstr "Yük sətri köçürüldü."
+
+msgid "Kafedrada redaktə et"
+msgstr "Kafedrada redaktə et"
+
+msgid "Yalnız baxış"
+msgstr "Yalnız baxış"

@@ -111562,10 +111562,6 @@ msgctxt "accounts.syllabus"
 msgid "Dərs deyən müəllim"
 msgstr "Dersi veren öğretim elemanı"
 
-msgctxt "accounts.syllabus"
-msgid "Yeni qaralama saxlanılır"
-msgstr "Yeni taslak korunur"
-
 #: apps/accounts/templates/accounts/profile/sidebar/items/_language_cohorts.html
 msgctxt "profile.sidebar"
 msgid "Xarici dil səviyyə qrupları"
@@ -111979,3 +111975,11 @@ msgstr "%(period)s · %(group)s: iptal edilmiş BOŞ ikiz yoklama defteri silini
 msgctxt "registrar.subject_merge"
 msgid "%(student)s · %(period)s: hər iki fənn üzrə qeydiyyat var — qiymətsiz təkrar qeydiyyat bağlanır (dropped), qiymətli qeydiyyat qalır."
 msgstr "%(student)s · %(period)s: her iki ders için kayıt var — notsuz yinelenen kayıt kapatılır (dropped), notlu kayıt kalır."
+
+msgctxt "accounts.workload"
+msgid "Bütün kafedralar"
+msgstr "Tüm bölümler"
+
+msgctxt "accounts.workload"
+msgid "Bütün kafedralar: siyahı yalnız baxış üçündür. Sətri dəyişmək üçün «Kafedrada redaktə et» düyməsi ilə onun kafedrasına keçin."
+msgstr "Tüm bölümler: liste yalnızca görüntüleme içindir. Bir satırı değiştirmek için «Bölümde düzenle» düğmesiyle kendi bölümüne geçin."

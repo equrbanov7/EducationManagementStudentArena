@@ -3258,3 +3258,9 @@ msgstr "In Ihrem Berechtigungsbereich gibt es keinen geeigneten bestätigten Fac
 
 msgid "Yük sətri köçürüldü."
 msgstr "Die Lehrlastzeile wurde übertragen."
+
+msgid "Kafedrada redaktə et"
+msgstr "Im Lehrstuhl bearbeiten"
+
+msgid "Yalnız baxış"
+msgstr "Nur Ansicht"

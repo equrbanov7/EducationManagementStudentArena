@@ -138,7 +138,64 @@
         );
     }
 
+    /**
+     * «Bütün kafedralar» (2026-11-04): YALNIZ OXU kartı — kafedra adı, saat zolaqları, bölgü çipləri; heç bir
+     * yazı düyməsi yoxdur. Redaktə sətrin öz kafedrasında: `row.edit_url` (server `can_edit` verəndə) həmin
+     * kafedranı + ili + sətir fokusunu açır; əhatədən kənar kafedrada «Yalnız baxış» nişanı.
+     */
+    function readonlyRow(row, labels, teacher) {
+        var acts = Object.keys(row.activities || {})
+            .map(function (key) {
+                var info = row.activities[key];
+                return (
+                    '<div class="wl-act' + (info.is_complete ? " is-complete" : "") + '">' +
+                    '<span class="wl-act__label">' + esc(labels[key] || key) + "</span>" +
+                    '<span class="wl-act__bar"><span class="wl-act__fill" style="--wl-fill:' +
+                    percent(info.assigned, info.total) + '%"></span></span>' +
+                    '<span class="wl-act__numbers">' + info.assigned + " / " + info.total + "</span>" +
+                    "</div>"
+                );
+            })
+            .join("");
+        var chips = (row.assignments || [])
+            .map(function (item) {
+                return (
+                    '<li class="wl-assign-chip' + (item.is_vacant ? " is-vacant" : "") +
+                    (isMatch(item, teacher) ? " is-match" : "") + '">' +
+                    esc(item.teacher_name) + " · " + esc(item.activity_label) + " · " + item.hours + "s</li>"
+                );
+            })
+            .join("");
+        var action = row.edit_url
+            ? '<a class="wl-btn wl-btn--ghost" href="' + esc(row.edit_url) + '">' +
+              '<i class="fas fa-pen" aria-hidden="true"></i> ' + esc(gettext("Kafedrada redaktə et")) + "</a>"
+            : '<span class="wl-row__readonly"><i class="fas fa-eye" aria-hidden="true"></i>' +
+              esc(gettext("Yalnız baxış")) + "</span>";
+        return (
+            '<article class="wl-row wl-row--readonly' + (row.teaching_complete ? " is-complete" : "") +
+            '" role="listitem" data-wl-row data-row-id="' + esc(row.id) + '">' +
+            '<div class="wl-row__head"><div><h3 class="wl-row__subject">' + esc(row.subject) +
+            (row.intensive ? ' <span class="wl-intensive-badge">' + esc(gettext("İntensiv")) + "</span>" : "") +
+            "</h3>" +
+            '<p class="wl-row__chair"><span class="wl-row__chair-name">' + esc(row.chair_name) + "</span>" +
+            (row.faculty_name ? "<span>" + esc(row.faculty_name) + "</span>" : "") +
+            (row.task_status_label ? "<span>· " + esc(row.task_status_label) + "</span>" : "") +
+            "</p></div>" +
+            '<div class="wl-row__actions">' + action + "</div></div>" +
+            '<div class="wl-row__meta"><span>' + esc(row.season_label) + "</span>" +
+            (row.specialty ? "<span>" + esc(row.specialty) + "</span>" : "") +
+            (row.groups_text ? "<span>" + esc(row.groups_text) + "</span>" : "") +
+            "<span>" + row.total_hours + " " + esc(gettext("saat")) + "</span>" +
+            (row.credits ? "<span>" + esc(row.credits) + " kredit</span>" : "") +
+            "</div>" +
+            acts +
+            (chips ? '<ul class="wl-assign-list">' + chips + "</ul>" : "") +
+            "</article>"
+        );
+    }
+
     function rowHtml(row, labels, teacher) {
+        if (row.chair_name !== undefined) return readonlyRow(row, labels, teacher); // «Bütün kafedralar»
         if (row.intensive) return intensiveRow(row);
         return (
             '<article class="wl-row' +
