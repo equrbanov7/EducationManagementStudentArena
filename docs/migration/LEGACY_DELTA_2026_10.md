@@ -655,6 +655,12 @@ iki fərqli hədəfli və ya iki yazılışa açılan sətirlər. Hər açılı�
 * Donmuş xarici dil səviyyə kursu imtahansızdırsa «köhnə sistemdə nəticə yoxdur» (əvvəl «Davam edir»); 11 q/b qaydası
   qalır. Eyni fənnin eyni semestrdə imtahansız boş dublikatı akademik qeyddə göstərilmir (`registrar.record_duplicates`).
 
+**Köhnə q/b qərarı (sahib 2026-11-04):** `Enrollment.legacy_qb_fail` (registrar 0113) — rəsmi vərəqdə «Davamiyyət …
+(Kəsr)» olan, imtahansız sətir (~7 160). Donmuş açılışda imtahan yoxdursa nəticə «Kəsildi», səbəb «Q/b-dan kəsilib»
+(`finals.legacy_attendance_fail`, analitika güzgüləri də); işarəni `official_entry` fazası qoyur (yalnız imtahan / 25 %
+balı yoxdursa). Dublikat fənn kartı: `prod-data-ops` → `merge_subjects` (`teacher` = saxlanılan kod, `batch` =
+birləşdirilən kodlar; apply-siz önizləmə).
+
 ### 15.1 Prod addımları (sahibin «hə»sı ilə; imtahanlar bitəndən sonra)
 
 ```bash
