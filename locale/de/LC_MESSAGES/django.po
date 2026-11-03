@@ -113645,3 +113645,13 @@ msgstr "Diese Einträge werden weder gelöscht noch verschoben — nur Journalin
 msgctxt "workload.history_teacher_restore"
 msgid "(istəyə bağlı — sonradan heç kim yazmayıb)"
 msgstr "(optional — seitdem hat niemand etwas erfasst)"
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(period)s · %(group)s: ləğv olunmuş BOŞ əkiz jurnal silinir (tam snapshot audit-də, geri qaytarmada eyni id ilə bərpa olunur); bağlı imtahanlar saxlanılan jurnala keçir."
+msgstr "%(period)s · %(group)s: Das stornierte LEERE Zwillingsjournal wird gelöscht (vollständiger Snapshot im Audit, beim Rückgängigmachen mit derselben ID wiederhergestellt); verknüpfte Prüfungen wechseln ins beibehaltene Journal."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(student)s · %(period)s: hər iki fənn üzrə qeydiyyat var — qiymətsiz təkrar qeydiyyat bağlanır (dropped), qiymətli qeydiyyat qalır."
+msgstr "%(student)s · %(period)s: Einschreibung unter beiden Fächern — die unbewertete doppelte Einschreibung wird geschlossen (dropped), die bewertete bleibt."

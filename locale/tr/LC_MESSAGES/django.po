@@ -111969,3 +111969,13 @@ msgstr "Bu kayıtlar silinmez ve taşınmaz — yalnızca defterin sahipliği ve
 msgctxt "workload.history_teacher_restore"
 msgid "(istəyə bağlı — sonradan heç kim yazmayıb)"
 msgstr "(isteğe bağlı — sonradan kimse yazmadı)"
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(period)s · %(group)s: ləğv olunmuş BOŞ əkiz jurnal silinir (tam snapshot audit-də, geri qaytarmada eyni id ilə bərpa olunur); bağlı imtahanlar saxlanılan jurnala keçir."
+msgstr "%(period)s · %(group)s: iptal edilmiş BOŞ ikiz yoklama defteri silinir (tam anlık görüntü denetimde, geri almada aynı id ile geri yüklenir); bağlı sınavlar korunan deftere geçer."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(student)s · %(period)s: hər iki fənn üzrə qeydiyyat var — qiymətsiz təkrar qeydiyyat bağlanır (dropped), qiymətli qeydiyyat qalır."
+msgstr "%(student)s · %(period)s: her iki ders için kayıt var — notsuz yinelenen kayıt kapatılır (dropped), notlu kayıt kalır."

@@ -268,9 +268,21 @@ class CreateSubjectsSafetyTest(TestCase):
         self._absorb(self._rows(), catalogue, dry_run=False)
         with bypass_rls():
             subject = Subject.objects.get(organization=self.org, name="Ekoloji monitorinq")
-        self.assertTrue(subject.code.startswith(f"{SITE_CODE_PREFIX}-"))
+        # Sahib 2026-11-04: sayt planından gələn kart da növbəti boş QKU-N alır (SAYT-#### YOX).
+        self.assertEqual(SITE_CODE_PREFIX, "QKU")
+        self.assertRegex(subject.code, r"^QKU-\d+$")
         self.assertEqual(subject.ects, 6)
         self.assertIn("Sınaq", subject.description)
+
+    def test_new_code_follows_the_highest_qku_number(self):
+        with bypass_rls():
+            Subject.objects.create(organization=self.org, code="QKU-2719", name="Mövcud")
+            Subject.objects.create(organization=self.org, code="SAYT-0099", name="Köhnə sayt kartı")
+        catalogue = {}
+        self._absorb(self._rows(), catalogue, dry_run=False)
+        with bypass_rls():
+            subject = Subject.objects.get(organization=self.org, name="Ekoloji monitorinq")
+        self.assertEqual(subject.code, "QKU-2720")
 
     def test_absurd_credit_falls_back_to_the_model_default(self):
         """Kredit sütunu bəzən sürüşür — 240 kreditli «fənn» kataloqu korlayar."""

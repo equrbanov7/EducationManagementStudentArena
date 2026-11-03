@@ -112585,3 +112585,13 @@ msgstr "These records are neither deleted nor moved — only journal ownership a
 msgctxt "workload.history_teacher_restore"
 msgid "(istəyə bağlı — sonradan heç kim yazmayıb)"
 msgstr "(optional — nobody has written since)"
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(period)s · %(group)s: ləğv olunmuş BOŞ əkiz jurnal silinir (tam snapshot audit-də, geri qaytarmada eyni id ilə bərpa olunur); bağlı imtahanlar saxlanılan jurnala keçir."
+msgstr "%(period)s · %(group)s: the cancelled EMPTY twin journal is deleted (full snapshot in the audit, restored with the same id on undo); linked exams move to the kept journal."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(student)s · %(period)s: hər iki fənn üzrə qeydiyyat var — qiymətsiz təkrar qeydiyyat bağlanır (dropped), qiymətli qeydiyyat qalır."
+msgstr "%(student)s · %(period)s: enrolled under both subjects — the ungraded duplicate enrollment is closed (dropped), the graded one stays."

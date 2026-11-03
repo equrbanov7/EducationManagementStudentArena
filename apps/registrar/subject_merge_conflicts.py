@@ -14,8 +14,14 @@ BLOKLAYAN (``blocking``) — yazı YOXDUR, siyahı linklərlə göstərilir:
 * təkrar imtahan: ``registrar_retake_one_active_per_subject`` (aktiv müraciətlər);
 * tədris tapşırığı: ``workload.services.tasks._duplicate_row_exists`` (tapşırıq + mövsüm + ixtisas + qruplar).
 
-HƏLL OLUNAN (``resolvable``) — qaralama/qaytarılmış planda eyni semestr: HƏDƏF sətri saxlanılır,
-mənbə sətri plandan çıxarılır (tam snapshot audit-ə yazılır, geri qaytarmada bərpa olunur).
+HƏLL OLUNAN (``resolvable``) — hər birinin tam snapshot-u audit-ə yazılır, geri qaytarmada bərpa olunur:
+* ``curriculum_row`` — qaralama/qaytarılmış planda eyni semestr: HƏDƏF sətri saxlanılır, mənbə sətri çıxarılır;
+* ``offering_twin`` (K2, sahib 2026-11-04) — (dövr, qrup) qutusunda biri LƏĞV OLUNMUŞ (``is_active=False``) BOŞ
+  əkizdirsə (:func:`.twin_inert.offering_blockers`) o SİLİNİR (eyni id ilə bərpa olunur), bağlı imtahanları
+  saxlanılan jurnala keçir. İki aktiv açılış və ya datalı ləğv olunmuş açılış → yenə BLOK;
+* ``enrollment_ungraded`` (K3) — tələbənin eyni dövrdə hər iki fənn üzrə qeydiyyatından YALNIZ biri datalıdırsa,
+  datasızlar ``dropped`` olur. «Yalnız davamiyyət» (balsız xanalar) DATADIR — yalnız ``drop_attendance_only``
+  bayrağı ilə və qalan qeydiyyatın yekun qiyməti varsa bağlanır (xanalar silinmir, tarixçədə qalır).
 
 DB toqquşması YOXDUR (məlumat): ``GroupElectiveChoice`` (açarı fənnsizdir), sorğu cavabları,
 imtahan/sual bankı; imtahan qrupunun təkrar əlaqəsi avtomatik çıxarılır.
@@ -34,8 +40,14 @@ from django.utils.translation import pgettext
 from .models import CourseOffering, CurriculumSubject, Enrollment, RetakeApplication
 from .models.curriculum_meta import PlanStatus
 from .models.retake import ACTIVE_STATUSES
+from .twin_inert import attendance_only, enrollment_data, is_empty_twin
 
 _CTX = "registrar.subject_merge"
+
+#: Həll olunan toqquşma kodları (``resolvable[*].code``).
+CURRICULUM_ROW = "curriculum_row"
+OFFERING_TWIN = "offering_twin"
+ENROLLMENT_UNGRADED = "enrollment_ungraded"
 
 #: Planın sətri çıxarıla bilən statusları (təsdiq zəncirindən kənar).
 EDITABLE_PLAN_STATUSES = (PlanStatus.DRAFT, PlanStatus.RETURNED)
@@ -89,7 +101,19 @@ def _buckets(rows, key):
 # ── Qaydalar ────────────────────────────────────────────────────────────────
 
 
-def _offerings(organization, subject_ids, blocking, warnings):
+def _inert_twins(items, target_id):
+    """K2: (dövr, qrup) qutusunda silinə bilən LƏĞV OLUNMUŞ BOŞ əkizlər + saxlanılan açılış (yoxdursa ``None``)."""
+    inert = [row for row in items if not row.is_active and is_empty_twin(row)]
+    others = [row for row in items if row not in inert]
+    if not inert or len(others) > 1:
+        return None, []
+    if not others:  # hamısı boş və ləğv olunub — biri (hədəf fənnin) qalır
+        inert.sort(key=lambda row: (row.subject_id != target_id, str(row.pk)))
+        others = [inert.pop(0)]
+    return others[0], inert
+
+
+def _offerings(organization, subject_ids, target_id, blocking, resolvable, warnings):
     rows = list(
         CourseOffering._base_manager.filter(organization=organization, subject_id__in=subject_ids)
         .select_related("subject", "period", "group")
@@ -101,6 +125,23 @@ def _offerings(organization, subject_ids, blocking, warnings):
             warnings.append(
                 pgettext(_CTX, "%(period)s: hər iki fənn üzrə qrupsuz açılış var — birləşmədən sonra ikisi qalır.")
                 % {"period": period_label(first.period)}
+            )
+            continue
+        keep, drop = _inert_twins(items, target_id)
+        if keep is not None:
+            resolvable.append(
+                {
+                    "code": OFFERING_TWIN,
+                    "message": pgettext(
+                        _CTX,
+                        "%(period)s · %(group)s: ləğv olunmuş BOŞ əkiz jurnal silinir (tam snapshot audit-də, geri "
+                        "qaytarmada eyni id ilə bərpa olunur); bağlı imtahanlar saxlanılan jurnala keçir.",
+                    )
+                    % {"period": period_label(first.period), "group": group_label(first.group)},
+                    "keep": str(keep.pk),
+                    "drop": [str(row.pk) for row in drop],
+                    "links": [_journal_link(row) for row in items],
+                }
             )
             continue
         blocking.append(
@@ -130,7 +171,7 @@ def _curriculum(organization, target_id, subject_ids, source_order, blocking, re
             keep, drop = ranked[0], ranked[1:]
             resolvable.append(
                 {
-                    "code": "curriculum_row",
+                    "code": CURRICULUM_ROW,
                     "message": pgettext(
                         _CTX,
                         "Plan «%(plan)s» (%(status)s) · %(semester)s-ci semestr: hər iki fənn sətri var — "
@@ -171,12 +212,31 @@ def _curriculum(organization, target_id, subject_ids, source_order, blocking, re
             )
 
 
-def _enrollments(organization, subject_ids, blocking):
+def _droppable(items, data, final_ids, attendance_ok):
+    """K3: qiymətsiz təkrar qeydiyyatlar (bağlanır) — yalnız qalan BİR qeydiyyat datalıdırsa.
+
+    Datasız = heç bir istinad yoxdur (:func:`.twin_inert.enrollment_data`). «Yalnız davamiyyət» (balsız xanalar) DATADIR;
+    ``attendance_ok`` (açıq bayraq) ilə o da bağlanır, AMMA qalan qeydiyyatın yekun qiyməti olmalıdır.
+    """
+    keep = [row for row in items if data.get(str(row.pk))]
+    if len(keep) == 1 and len(items) > 1:
+        return [row for row in items if row not in keep]
+    if not attendance_ok:
+        return []
+    soft = attendance_only([str(row.pk) for row in keep], data)
+    strong = [row for row in keep if str(row.pk) not in soft]
+    if len(strong) == 1 and strong[0].pk in final_ids:
+        return [row for row in items if row not in strong]
+    return []
+
+
+def _enrollments(organization, subject_ids, blocking, resolvable, *, excluded_offerings=(), attendance_ok=False):
     rows = list(
         Enrollment.objects.filter(
             organization=organization, offering__subject_id__in=subject_ids, superseded_by__isnull=True
         )
         .exclude(status=Enrollment.Status.DROPPED)
+        .exclude(offering_id__in=list(excluded_offerings))
         .select_related("student", "offering__period", "offering__subject", "offering__group")
         .order_by("student__last_name", "student__first_name", "offering__period__start_date")
     )
@@ -185,11 +245,32 @@ def _enrollments(organization, subject_ids, blocking):
         .objects.filter(enrollment_id__in=[row.pk for row in rows])
         .values_list("enrollment_id", flat=True)
     )
+    buckets = {
+        key: items
+        for key, items in _buckets(rows, lambda row: (row.student_id, row.offering.period_id)).items()
+        if len({row.offering.subject_id for row in items}) >= 2  # eyni fənn daxilində ikiqat — bu işin deyil
+    }
+    data = enrollment_data([row.pk for items in buckets.values() for row in items])
     found = []
-    for _key, items in _buckets(rows, lambda row: (row.student_id, row.offering.period_id)).items():
-        if len({row.offering.subject_id for row in items}) < 2:
-            continue  # eyni fənn daxilində köhnə ikiqat qeydiyyat bu əməliyyatın işi deyil
+    for _key, items in buckets.items():
         first = items[0]
+        drop = _droppable(items, data, graded, attendance_ok)
+        if drop:
+            resolvable.append(
+                {
+                    "code": ENROLLMENT_UNGRADED,
+                    "message": pgettext(
+                        _CTX,
+                        "%(student)s · %(period)s: hər iki fənn üzrə qeydiyyat var — qiymətsiz təkrar qeydiyyat "
+                        "bağlanır (dropped), qiymətli qeydiyyat qalır.",
+                    )
+                    % {"student": person_label(first.student), "period": period_label(first.offering.period)},
+                    "keep": [str(row.pk) for row in items if row not in drop],
+                    "drop": [str(row.pk) for row in drop],
+                    "links": [_journal_link(row.offering) for row in items],
+                }
+            )
+            continue
         message = pgettext(
             _CTX,
             "%(student)s · %(period)s: eyni dövrdə hər iki fənn üzrə aktiv qeydiyyat var — əvvəlcə birini bağlayın.",
@@ -360,15 +441,28 @@ def _credits(organization, target, sources, blocking):
         )
 
 
-def detect(organization, target, sources) -> dict:
-    """Toqquşmalar: ``blocking`` (yazı yoxdur), ``resolvable`` (plan sətri), ``warnings`` (məlumat)."""
+def resolved_ids(resolvable, code) -> list:
+    """Bir həll növü üzrə çıxarılan / silinən / bağlanan sətir id-ləri (sabit sıra)."""
+    return sorted({pk for item in resolvable if item["code"] == code for pk in item["drop"]})
+
+
+def detect(organization, target, sources, *, drop_attendance_only=False) -> dict:
+    """Toqquşmalar: ``blocking`` (yazı yoxdur), ``resolvable`` (plan sətri, boş əkiz, qiymətsiz qeydiyyat),
+    ``warnings`` (məlumat)."""
     subject_ids = [target.pk] + [source.pk for source in sources]
     source_order = {source.pk: index for index, source in enumerate(sources)}
     blocking, resolvable, warnings = [], [], []
     _credits(organization, target, sources, blocking)
-    _offerings(organization, subject_ids, blocking, warnings)
+    _offerings(organization, subject_ids, target.pk, blocking, resolvable, warnings)
     _curriculum(organization, target.pk, subject_ids, source_order, blocking, resolvable, warnings)
-    _enrollments(organization, subject_ids, blocking)
+    _enrollments(
+        organization,
+        subject_ids,
+        blocking,
+        resolvable,
+        excluded_offerings=resolved_ids(resolvable, OFFERING_TWIN),
+        attendance_ok=drop_attendance_only,
+    )
     _syllabi(organization, subject_ids, blocking)
     _folders(organization, subject_ids, blocking)
     _retakes(organization, subject_ids, blocking)
@@ -376,4 +470,15 @@ def detect(organization, target, sources) -> dict:
     return {"blocking": blocking, "resolvable": resolvable, "warnings": warnings}
 
 
-__all__ = ["EDITABLE_PLAN_STATUSES", "LIST_LIMIT", "detect", "group_label", "period_label", "person_label"]
+__all__ = [
+    "CURRICULUM_ROW",
+    "EDITABLE_PLAN_STATUSES",
+    "ENROLLMENT_UNGRADED",
+    "LIST_LIMIT",
+    "OFFERING_TWIN",
+    "detect",
+    "group_label",
+    "period_label",
+    "person_label",
+    "resolved_ids",
+]
