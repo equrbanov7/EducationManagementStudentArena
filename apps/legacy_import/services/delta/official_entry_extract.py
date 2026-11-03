@@ -62,6 +62,7 @@ class JournalIndex:
         self.members: dict[int, list[dict]] = defaultdict(list)
         self.by_group_subject: dict[tuple, set[int]] = defaultdict(set)
         self.by_subject: dict[str, set[int]] = defaultdict(set)
+        self.subject_of: dict[int, str] = {}
         self.students: dict[int, set[int]] = defaultdict(set)
         names = {row["id"]: subject_key(row.get("name")) for row in lessons}
         people = {
@@ -76,6 +77,7 @@ class JournalIndex:
             self.members[root].append(row)
             subject = names.get(row["lesson_id"], "")
             self.by_subject[subject].add(root)
+            self.subject_of[root] = subject
             self.students[root].update(parse_id_list(row.get("students_id")))
             for group_id in parse_id_list(row.get("groups_id")):
                 self.by_group_subject[(group_id, subject)].add(root)
@@ -198,6 +200,7 @@ def collect_rows(cursor, source: str, index: JournalIndex, semesters, stats: Cou
                     if current is None or rank > current[0]:
                         best[(root, row.student_id)] = (rank, export_id, exported, row)
     stream.close()
+    _drop_copied_results(best, index, stats)
     out = []
     for (root, student_id), (_rank, export_id, exported, row) in sorted(best.items()):
         out.append(
@@ -221,6 +224,28 @@ def collect_rows(cursor, source: str, index: JournalIndex, semesters, stats: Cou
     return out
 
 
+def _drop_copied_results(best: dict, index: JournalIndex, stats: Counter) -> None:
+    """Eyni tələbənin eyni fənninin İKİ cəhdinə EYNİ rəsmi nəticə düşübsə — köhnə sistem təkrar keçilən jurnalın
+    vərəqində əvvəlki cəhdin nəticəsini çap edib. İmtahanı həmin ailədə saxlanan cəhd qalır; belə ailə tək deyilsə
+    (və ya heç yoxdursa) ikisi də atılır — şübhəli nəticə heç kimə yazılmır."""
+
+    seen: dict = defaultdict(list)
+    for (root, student_id), (_rank, _export, _exported, row) in best.items():
+        if row.total is None:
+            continue
+        subject = index.subject_of.get(root, "")
+        seen[(student_id, subject, row.entry, row.exam, row.resit, row.total)].append(root)
+    for (student_id, *_rest), roots in seen.items():
+        if len(roots) < 2:
+            continue
+        holders = [root for root in roots if index.finals.get((root, student_id))]
+        keep = holders[0] if len(holders) == 1 else None
+        for root in roots:
+            if root != keep:
+                best.pop((root, student_id), None)
+                stats["rows.copied_result_dropped"] += 1
+
+
 def _text(value):
     return None if value is None else format(value.normalize(), "f")
 
@@ -240,6 +265,11 @@ def build_official_entry_bundle(extractor: DeltaExtractor, *, snapshot: dict, se
     finals = x._rows(
         "SELECT journal_uniqid, student_id, point FROM "
         f"{x.src}.journals_dates_points WHERE month_id IN ('im', 'im2')"
+    )
+    # 2022/2023 Payızın imtahanı jurnal xanasında deyil, ``yekun`` cədvəlindədir — o da sübutdur.
+    finals += x._rows(
+        "SELECT j.uniqid AS journal_uniqid, y.student_id, y.imtahanda AS point "
+        f"FROM {x.src}.yekun y JOIN {x.src}.journals j ON j.id = y.journal_id WHERE y.imtahanda IS NOT NULL"
     )
     index = JournalIndex(journals, lessons, workers, finals)
     stats: Counter = Counter()

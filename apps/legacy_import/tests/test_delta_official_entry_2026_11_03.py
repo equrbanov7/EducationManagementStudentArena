@@ -195,6 +195,28 @@ class JournalMatchingTests(SimpleTestCase):
         table = _table(exam=D(21))
         self.assertEqual(index.choose_row(table, table.rows[0], 1, "2025-10-17 12:00:00"), (None, "row.exam_conflict"))
 
+    def test_result_copied_onto_a_retake_sheet_stays_with_the_attempt_holding_the_exam(self):
+        from collections import Counter
+
+        from apps.legacy_import.services.delta.official_entry_extract import _drop_copied_results
+
+        journals = [
+            _journal(1, "old", semestr=3, added="2022-09-15"),
+            _journal(2, "retake", semestr=12, group=700, added="2026-02-03"),
+        ]
+        index = JournalIndex(
+            journals, self.lessons, self.workers, [{"journal_uniqid": "old", "student_id": 7131, "point": "13"}]
+        )
+        row = _table(exam=D(13)).rows[0]
+        best = {
+            (1, 7131): ((True, "2025-09-05", 1), 1, "2025-09-05", row),
+            (2, 7131): ((True, "2026-07-01", 2), 2, "2026-07-01", row),
+        }
+        stats = Counter()
+        _drop_copied_results(best, index, stats)
+        self.assertEqual(list(best), [(1, 7131)])
+        self.assertEqual(stats["rows.copied_result_dropped"], 1)
+
     def test_unknown_subject_has_no_candidate(self):
         index = JournalIndex(
             [_journal(1, "j", semestr=12, lesson=2)], self.lessons + [{"id": 2, "name": "Kimya"}], [], []
