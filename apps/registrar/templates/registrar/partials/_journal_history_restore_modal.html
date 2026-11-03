@@ -1,0 +1,29 @@
+{% load static i18n %}{% comment %}«Bu müəllimə bərpa et» təsdiq modalı — siyahının tarixçə görünüşündə BİR dəfə.
+Partial AJAX ilə yenilənə bildiyi üçün CSS/JS burada (CLAUDE.md: partial öz asset-ini yükləyir).{% endcomment %}
+<link rel="stylesheet" href="{% static 'registrar/css/journal_history_restore.css' %}?v=20261103">
+<div class="jl-hr-modal" data-jl-hrestore-modal hidden
+     data-generic-error="{% trans 'Əməliyyat alınmadı — yenidən cəhd edin.' context 'workload.history_teacher_restore' %}">
+  <div class="jl-hr-modal__backdrop" data-jl-hrestore-close></div>
+  <div class="jl-hr-modal__card" role="dialog" aria-modal="true" aria-labelledby="jl-hr-title">
+    <div class="jl-hr-modal__head">
+      <h3 id="jl-hr-title">{% trans "Bu müəllimə bərpa et" context "workload.history_teacher_restore" %}</h3>
+      <button type="button" class="jl-hr-modal__x" data-jl-hrestore-close aria-label="{% trans 'Bağla' context 'workload.history_teacher_restore' %}">✕</button>
+    </div>
+    <div class="jl-hr-modal__body">
+      <p class="jl-hr-modal__ctx"><i class="fas fa-user-tie" aria-hidden="true"></i> <b>{{ teacher_label }}</b> · <span data-jl-hrestore-subject></span> · <span data-jl-hrestore-group></span></p>
+      <p>{% trans "Jurnal bu müəllimin «Cari dərs yüküm» siyahısına qaytarılacaq. Dəyişəcək:" context "workload.history_teacher_restore" %}</p>
+      <ul class="jl-hr-modal__steps" data-jl-hrestore-plan></ul>
+      <p class="jl-hr-modal__note">{% trans "Jurnal qeydləri (dərslər, ballar, davamiyyət) dəyişmir. Nəticə alınmasa heç nə yazılmır." context "workload.history_teacher_restore" %}</p>
+      <label class="jl-hr-modal__field">
+        <span>{% trans "Səbəb" context "workload.history_teacher_restore" %} <small>{% trans "(ən azı 10 simvol)" context "workload.history_teacher_restore" %}</small></span>
+        <textarea rows="2" maxlength="2000" data-jl-hrestore-reason></textarea>
+      </label>
+      <p class="jl-hr-modal__error" data-jl-hrestore-error hidden role="alert"></p>
+    </div>
+    <div class="jl-hr-modal__foot">
+      <button type="button" class="jl-hr-modal__cancel" data-jl-hrestore-close>{% trans "Ləğv et" context "workload.history_teacher_restore" %}</button>
+      <button type="button" class="jl-hr-modal__submit" data-jl-hrestore-submit><i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Bərpa et" context "workload.history_teacher_restore" %}</button>
+    </div>
+  </div>
+</div>
+<script src="{% static 'registrar/js/journal_history_restore.js' %}?v=20261103"></script>

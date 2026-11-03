@@ -16,6 +16,7 @@ from core.rls import bypass_rls
 from ..constants import TaskStatus
 from ..models import TeacherAssignment, TeachingTaskRow
 from ..services import history_restore as service
+from ..services import history_teacher_restore as teacher_restore
 from ..services.scoping import WorkloadDenied
 from .factories import TEACHER_PERMS, activate_member, make_org, make_row, make_structure, make_task
 
@@ -75,6 +76,18 @@ class HistoryRestoreTest(TestCase):
 
     def graph(self):
         return digest(graph({"registrar.CourseOffering": [self.offering.pk]}, organization_id=self.org.pk))
+
+    def listed(self, request=None):
+        """The teacher's own history-list row, as the journal list annotates and decorates it."""
+        from apps.registrar.teacher_journal_list import own_visible_queryset
+
+        queryset = CourseOffering.objects.filter(pk=self.offering.pk).select_related(
+            "period", "subject", "group", "instructor"
+        )
+        course = own_visible_queryset(queryset, self.teacher, self.org).get()
+        self.assertFalse(course.journal_is_current_load)
+        teacher_restore.attach(request or self.request(self.teacher, real=self.admin, mode="full"), [course])
+        return course
 
     def test_new_row_actual_allocations_current_visibility_and_exact_graph_preserved(self):
         from apps.registrar.teacher_journal_list import own_visible_queryset
@@ -409,28 +422,26 @@ class HistoryRestoreTest(TestCase):
     def test_one_click_exact_row_reuses_previous_plan_and_preserves_graph(self):
         with bypass_rls():
             make_row(self.task, self.stack, lecture_total=45, seminar_total=30)
-            self.offering.journal_is_current_load = False
-            request = self.request(self.teacher, real=self.admin, mode="full")
-            service.attach_actions(request, [self.offering])
-            self.assertEqual(self.offering.history_load_restore_plan["lecture"], 45)
-            self.assertEqual(self.offering.history_load_restore_plan["seminar"], 30)
+            listed = self.listed().history_teacher_restore
+            self.assertEqual(listed["state"], teacher_restore.READY)
+            self.assertEqual(len(listed["steps"]), 1)
+            self.assertIn("75", listed["steps"][0])
             before = self.graph()
-        self.client.force_login(self.admin)
-        session = self.client.session
-        session["active_organization_id"] = str(self.org.pk)
-        session.save()
-        response = self.client.post(self.offering.history_load_restore_url, self.offering.history_load_restore_plan)
-        self.assertEqual(response.status_code, 302)
-        with bypass_rls():
+            result = teacher_restore.restore_for_teacher(
+                request=self.request(self.teacher, real=self.admin, mode="full"),
+                offering_id=self.offering.pk,
+                reason="Tarixi jurnalın əvvəlki təsdiqlənmiş yükü bərpa olunur.",
+            )
+            self.assertEqual(result["status"], "restored")
             self.assertEqual(self.graph(), before)
             self.assertEqual(TeacherAssignment.objects.count(), 2)
 
     def test_one_click_never_splits_a_patok_or_invents_plan_from_taught_hours(self):
         with bypass_rls():
-            self.offering.journal_is_current_load = False
-            request = self.request(self.teacher, real=self.admin, mode="full")
-            service.attach_actions(request, [self.offering])
-            self.assertFalse(hasattr(self.offering, "history_load_restore_plan"))
+            # No load row: hours are the operator's call — the explicit form, never a one-click guess.
+            listed = self.listed().history_teacher_restore
+            self.assertEqual(listed["state"], teacher_restore.FORM)
+            self.assertEqual(listed["link"], reverse("workload:history_restore", args=[self.offering.pk]))
             row = make_row(self.task, self.stack, lecture_total=45, seminar_total=30)
             other = self.stack["group"].__class__.objects.create(
                 organization=self.org,
@@ -440,8 +451,9 @@ class HistoryRestoreTest(TestCase):
                 parent=self.stack["specialty"],
             )
             row.groups.add(other)
-            service.attach_actions(request, [self.offering])
-            self.assertFalse(hasattr(self.offering, "history_load_restore_plan"))
+            listed = self.listed().history_teacher_restore
+            self.assertEqual(listed["state"], teacher_restore.BLOCKED)
+            self.assertIn("Second patok group", listed["reason"])
             self.assertEqual(TeachingTaskRow.objects.count(), 1)
 
     def test_vacant_patok_row_shows_distribution_link_instead_of_a_failing_restore(self):
@@ -455,17 +467,17 @@ class HistoryRestoreTest(TestCase):
                 parent=self.stack["specialty"],
             )
             row.groups.add(other)
-            self.offering.journal_is_current_load = False
-            service.attach_actions(self.request(self.teacher, real=self.admin, mode="full"), [self.offering])
-            self.assertIsNone(self.offering.history_load_restore_url)
-            shared = self.offering.history_load_restore_shared
-            self.assertIn("Shared lecture group", shared["groups"])
-            self.assertIn(self.stack["group"].name, shared["groups"])
-            self.assertIn("section=workload-distribution", shared["url"])
-            self.assertIn("row=" + str(row.pk), shared["url"])
-            listed = render_to_string("registrar/partials/_journal_history_restore.html", {"offering": self.offering})
-            self.assertIn("jl-restore-note", listed)
-            self.assertNotIn("jl-restore-btn", listed)
+            course = self.listed()
+            shared = course.history_teacher_restore
+            self.assertEqual(shared["state"], teacher_restore.BLOCKED)
+            self.assertIn("Shared lecture group", shared["reason"])
+            self.assertIn(self.stack["group"].name, shared["reason"])
+            self.assertIn("section=workload-distribution", shared["link"])
+            self.assertIn("row=" + str(row.pk), shared["link"])
+            listed = render_to_string("registrar/partials/_journal_history_restore.html", {"offering": course})
+            self.assertIn("jl-hrestore__why", listed)
+            self.assertIn("disabled", listed)
+            self.assertNotIn("data-jl-hrestore-open", listed)
         self.client.force_login(self.admin)
         session = self.client.session
         session["active_organization_id"] = str(self.org.pk)
@@ -481,11 +493,10 @@ class HistoryRestoreTest(TestCase):
     def test_single_group_restore_keeps_secondary_list_button(self):
         with bypass_rls():
             make_row(self.task, self.stack, lecture_total=45, seminar_total=30)
-            self.offering.journal_is_current_load = False
-            service.attach_actions(self.request(self.teacher, real=self.admin, mode="full"), [self.offering])
-            self.assertFalse(hasattr(self.offering, "history_load_restore_shared"))
-            listed = render_to_string("registrar/partials/_journal_history_restore.html", {"offering": self.offering})
-            self.assertIn('class="jl-restore-btn"', listed)
+            course = self.listed()
+            self.assertEqual(course.history_teacher_restore["state"], teacher_restore.READY)
+            listed = render_to_string("registrar/partials/_journal_history_restore.html", {"offering": course})
+            self.assertIn('class="jl-restore-btn" data-jl-hrestore-open', listed)
             self.assertNotIn("jl-open-btn", listed)
 
     def test_actual_full_view_as_middleware_post_restores_and_attributes_real_actor(self):
@@ -546,9 +557,9 @@ class HistoryRestoreTest(TestCase):
             row = self.zero_placeholder()
             before = self.graph()
             self.assertEqual(service.previous_plan(self.offering)[0], self.hours)
-            self.offering.journal_is_current_load = False
-            service.attach_actions(self.request(self.teacher, real=self.admin, mode="full"), [self.offering])
-            self.assertEqual(self.offering.history_load_restore_plan["lecture"], 45)
+            listed = self.listed().history_teacher_restore
+            self.assertEqual(listed["state"], teacher_restore.READY)
+            self.assertIn("75", listed["steps"][0])
             result = self.restore()
             row.refresh_from_db()
             self.assertEqual(result["row_id"], str(row.pk))

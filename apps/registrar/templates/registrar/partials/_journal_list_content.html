@@ -207,6 +207,8 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
         </table>
     </div>
     <p class="jd2-list-hint">{% trans "Qrupun sətrinə klikləməklə həmin qrupun elektron jurnalı açılır." context "registrar.journal" %}</p>
+    {% comment %}«Bu müəllimə bərpa et» modalı — yalnız hazır düyməsi olan səhifədə, bir dəfə.{% endcomment %}
+    {% for offering in offerings %}{% if offering.history_teacher_restore.state == "ready" %}{% ifchanged "modal" %}{% include "registrar/partials/_journal_history_restore_modal.html" %}{% endifchanged %}{% endif %}{% endfor %}
     {% if is_paginated %}
     <div class="jd2-pager-count">{% blocktrans context "registrar.journal" with total=page_obj.paginator.num_pages count_all=page_obj.paginator.count %}{{ count_all }} jurnal · {{ total }} səhifə{% endblocktrans %}</div>
     {% endif %}
