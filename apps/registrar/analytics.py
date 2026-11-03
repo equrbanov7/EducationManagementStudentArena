@@ -231,7 +231,8 @@ def _evaluate(enrollment, maps):
     exam, bonus = maps["exams"].get(enrollment.id, (None, Decimal("0")))
     resit = maps["resits"].get(enrollment.id)
     resit_done = resit is not None
-    effective = resit if resit_done else exam
+    frozen = offering.id in maps.get("frozen_offerings", frozenset())
+    effective = finals.effective_exam_score(exam, resit, legacy=frozen)
     # TƏK MƏNBƏ: buraxılış qərarı burada TƏKRARLANMIR (2026-08-31 auditi —
     # eyni müqayisə doqquz yerdə dublikat idi). Tarixi/köçürülmüş semestrdə
     # ``barred`` heç vaxt qalxmır, köhnə sistemin faktiki nəticəsi (aşağıdakı
@@ -249,9 +250,9 @@ def _evaluate(enrollment, maps):
         # eyni cür alır. Əlavə sorğu yaranmır: ``records`` map onsuz da yüklüdür.
         exempt=bool(record and record.national_athlete_exemption),
         resit_done=resit_done,
-        frozen=offering.id in maps.get("frozen_offerings", frozenset()),
+        frozen=frozen,
     )
-    barred = eligibility["barred"]
+    barred = eligibility["barred"] or finals.legacy_attendance_fail(enrollment, frozen=frozen, effective_exam=effective)
 
     graded = effective is not None
     total = entry + (effective or Decimal("0")) + (bonus or Decimal("0"))

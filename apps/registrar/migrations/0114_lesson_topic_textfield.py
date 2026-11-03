@@ -9,7 +9,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    dependencies = [("registrar", "0112_correction_reversal_reason")]
+    dependencies = [("registrar", "0113_enrollment_legacy_qb_fail")]
 
     operations = [
         migrations.AlterField(

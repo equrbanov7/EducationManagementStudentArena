@@ -36,6 +36,7 @@ from apps.registrar import (
     finals,
     finals_batch,
     legacy_grade_read,
+    record_duplicates,
     retake_queries,
 )
 from apps.registrar.models import Enrollment, StudentAcademicRecord
@@ -178,14 +179,22 @@ def count_student_record_rows(*, student, organization) -> int:
     """
     if organization is None or student is None:
         return 0
-    enrollments = student_record_enrollments(student=student, organization=organization)
+    today = timezone.localdate()
+    rows = [
+        (pk, subject_id, period_id, bool(end and end < today))
+        for pk, subject_id, period_id, end in student_record_enrollments(
+            student=student, organization=organization
+        ).values_list("pk", "offering__subject_id", "offering__period_id", "offering__period__end_date")
+    ]
+    # Boş dublikat sətir siyahısında olmadığı kimi sayğacda da yoxdur (``record_duplicates``, SYS-1).
+    hidden = record_duplicates.empty_duplicate_ids(rows)
     recognitions = credit_recognition_read.active_for_student(organization, getattr(student, "pk", None))
     if not recognitions:
-        return enrollments.count()
+        return len(rows) - len(hidden)
     # Tanınma jurnal sətrini əvəz edir (``build_student_transcript``) — əvəzlənən sətir sayılmır.
     overridden = credit_recognition_read.override_keys(recognitions)
-    pairs = enrollments.values_list("offering__subject_id", "offering__period_id")
-    return sum(1 for pair in pairs if pair not in overridden) + len(recognitions)
+    kept = [(subject_id, period_id) for pk, subject_id, period_id, _ended in rows if pk not in hidden]
+    return sum(1 for pair in kept if pair not in overridden) + len(recognitions)
 
 
 def _period_started(period, today) -> bool:
@@ -216,9 +225,20 @@ def build_student_transcript(
     )
     # «Xarici nəticə tanınıb» (2026-10-25): qüvvədə olan tanınma (fənn + semestr) həmin cütün jurnal sətrini
     # ƏVƏZ edir — sətir tanınmış balla aşağıda əlavə olunur, ÜOMG / kredit ondan hesablanır.
+    # Eyni fənnin eyni semestrdə imtahansız BOŞ dublikatı göstərilmir (``record_duplicates``, SYS-1) — dublikat
+    # yoxdursa sorğu da yoxdur.
+    ended_before = timezone.localdate()
+    hidden = record_duplicates.empty_duplicate_ids(
+        [
+            (e.pk, e.offering.subject_id, e.offering.period_id, bool(e.offering.period.end_date < ended_before))
+            for e in enrollments
+        ]
+    )
     recognitions = credit_recognition_read.active_for_student(organization, getattr(student, "pk", None))
     overridden = credit_recognition_read.override_keys(recognitions)
-    enrollments = [e for e in enrollments if (e.offering.subject_id, e.offering.period_id) not in overridden]
+    enrollments = [
+        e for e in enrollments if e.pk not in hidden and (e.offering.subject_id, e.offering.period_id) not in overridden
+    ]
     if started_only:
         # Sahib 2026-10-26: rəsmi transkriptdə hələ BAŞLAMAMIŞ semestr (məs. payızda «Yaz 2026/2027») göstərilmir.
         today = today or timezone.localdate()
@@ -358,9 +378,20 @@ def student_credit_totals(*, student, organization, today=None) -> dict:
         .select_related("offering", "offering__subject", "offering__period")
     )
     # Tanınmış xarici nəticə (2026-10-25) — kredit TOPLANMIŞDIR; əvəz etdiyi jurnal sətri sayılmır.
+    # Eyni fənnin eyni semestrdə imtahansız BOŞ dublikatı göstərilmir (``record_duplicates``, SYS-1) — dublikat
+    # yoxdursa sorğu da yoxdur.
+    ended_before = timezone.localdate()
+    hidden = record_duplicates.empty_duplicate_ids(
+        [
+            (e.pk, e.offering.subject_id, e.offering.period_id, bool(e.offering.period.end_date < ended_before))
+            for e in enrollments
+        ]
+    )
     recognitions = credit_recognition_read.active_for_student(organization, getattr(student, "pk", None))
     overridden = credit_recognition_read.override_keys(recognitions)
-    enrollments = [e for e in enrollments if (e.offering.subject_id, e.offering.period_id) not in overridden]
+    enrollments = [
+        e for e in enrollments if e.pk not in hidden and (e.offering.subject_id, e.offering.period_id) not in overridden
+    ]
     recognized = sum(int(item.credit or 0) for item in recognitions)
     if not enrollments:
         return {"earned": recognized, "in_progress": 0}

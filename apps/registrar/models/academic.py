@@ -343,6 +343,11 @@ class Enrollment(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     absence_hours = models.PositiveSmallIntegerField(
         default=0, help_text="Bu fənn üzrə toplanmış üzrsüz qayıb saatı (qayıb limiti üçün)."
     )
+    # SYS-1 (sahib 2026-11-04): köhnə sistemin rəsmi bal vərəqində «Davamiyyət … (Kəsr)» — tarixi (donmuş) semestrdə
+    # buraxılış yenidən hesablanmır, bu işarə köhnə qərarı daşıyır: imtahansız sətir «Q/b-dan kəsilib» göstərilir.
+    legacy_qb_fail = models.BooleanField(
+        default=False, help_text="Köhnə sistemdə davamiyyətdən (q/b) kəsilib — rəsmi bal vərəqinə görə."
+    )
     # ── «Alt qrupdan əlavə olunub» (guest) provenansı ────────────────────────
     # Tələbənin ÖZ qrupu açılışın qrupu DEYİLSƏ, koordinator/dekanlıq onu bu
     # jurnala ƏLAVƏ qeydiyyatla salır. Yeni model YARADILMIR: jurnal onsuz da

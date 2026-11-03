@@ -90,6 +90,9 @@ def _period_sort_datetime(period):
 
 def _outcome_code(result) -> str:
     if result.get("barred"):
+        # Köhnə sistemin q/b qərarı (tarixi semestr) — bitmiş nəticədir: «Kəsildi» + səbəb «Q/b-dan kəsilib».
+        if result.get("status_code") == exam_eligibility.STATUS_LEGACY:
+            return "fail"
         return "barred"
     if result.get("passed"):
         return "pass"

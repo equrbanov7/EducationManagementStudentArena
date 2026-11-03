@@ -359,6 +359,7 @@ def get_offering_journal(
                 absence_hours=absence_hours,
                 lesson_hours=total_hours,
                 exempt=enrollment.student_id in exempt_ids,
+                frozen=frozen,
             )
         barred = eligibility["barred"]
         # Xəbərdarlıq zolağı da donmuş dilimdə susur: «həddə yaxınlaşır» xəbəri
@@ -515,6 +516,7 @@ def get_student_journal_summary(
                 absence_hours=absence_hours,
                 lesson_hours=total_hours,
                 exempt=bool(record and record.national_athlete_exemption),
+                frozen=offering.id in frozen_ids,
             )
         barred = eligibility["barred"]
         subjects.append(

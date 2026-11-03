@@ -346,6 +346,11 @@ def update_lesson(
             recompute_absence_hours_many([mark.enrollment for mark in marks])
         if audit:
             _audit_lesson_update(offering, lesson, before, by_user)
+        if lesson.off_schedule_reason:
+            # 2026-11-03: «cədvəldən kənar» işarəsi yaradılanda qoyulur — dərs indi cədvələ uyğundursa təmizlənir.
+            from .off_schedule_flags import reevaluate_lesson
+
+            reevaluate_lesson(lesson, by_user=by_user)
     return True
 
 
