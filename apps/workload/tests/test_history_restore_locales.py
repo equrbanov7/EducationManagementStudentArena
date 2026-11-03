@@ -17,6 +17,7 @@ def test_restore_template_strings_have_compiled_translations(lang):
     for relative in (
         "apps/workload/templates/workload/history_restore.html",
         "apps/registrar/templates/registrar/partials/_journal_history_restore.html",
+        "apps/registrar/templates/registrar/partials/_journal_history_restore_modal.html",
     ):
         path = ROOT / relative
         keys.update(template_msgids(path.read_text(), origin=relative))

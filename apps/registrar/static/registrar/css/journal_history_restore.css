@@ -1,0 +1,66 @@
+/*
+ * «Bu müəllimə bərpa et» — jurnal siyahısının tarixçə sətri + təsdiq modalı (sahib 2026-11-03).
+ * Source: registrar/partials/_journal_history_restore.html, _journal_history_restore_modal.html
+ * Düymə üslubu journal_list.css-dəki .jl-restore-btn-dir; burada yalnız vəziyyətlər və modal.
+ */
+.jl-page .jl-hrestore { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 6px; }
+.jl-page .jl-hrestore .jl-restore-btn { margin-top: 0; }
+.jl-page .jl-hrestore .jl-restore-btn[disabled] {
+    cursor: not-allowed; opacity: 1;
+    background: var(--ems-neutral-100); border-color: var(--ems-neutral-200); color: var(--ems-neutral-500);
+}
+.jl-page .jl-hrestore .jl-restore-btn[disabled]:hover {
+    background: var(--ems-neutral-100); border-color: var(--ems-neutral-200); color: var(--ems-neutral-500);
+}
+.jl-page .jl-hrestore__why { color: var(--ems-neutral-700); font-size: var(--ems-fs-sm); font-weight: 600; }
+.jl-page .jl-hrestore__why i { color: var(--ems-neutral-500); font-size: var(--ems-fs-2xs); }
+.jl-page .jl-hrestore__link {
+    color: var(--ems-primary-700); font-size: var(--ems-fs-sm); font-weight: 700;
+    text-decoration: underline; text-underline-offset: 2px;
+}
+
+.jl-hr-modal { position: fixed; inset: 0; z-index: 1080; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.jl-hr-modal[hidden] { display: none; }
+.jl-hr-modal__backdrop { position: absolute; inset: 0; background: rgba(15, 42, 92, 0.45); }
+.jl-hr-modal__card {
+    position: relative; width: min(560px, 100%); max-height: min(92vh, 720px); overflow-y: auto;
+    background: var(--ems-neutral-0); border-radius: var(--ems-r-xl); box-shadow: 0 20px 50px rgba(15, 23, 42, 0.25);
+}
+.jl-hr-modal__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px 12px; border-bottom: 1px solid var(--ems-neutral-100); }
+.jl-hr-modal__head h3 { margin: 0; font-size: var(--ems-fs-lg); font-weight: 800; color: var(--ems-neutral-900); }
+.jl-hr-modal__x { border: 0; background: transparent; color: var(--ems-neutral-500); font-size: var(--ems-fs-lg); min-width: 44px; min-height: 44px; cursor: pointer; }
+.jl-hr-modal__body { padding: 14px 20px; color: var(--ems-neutral-700); font-size: var(--ems-fs-sm); }
+.jl-hr-modal__body p { margin: 0 0 10px; }
+.jl-hr-modal__ctx { color: var(--ems-neutral-900); }
+.jl-hr-modal__steps { margin: 0 0 10px; padding: 10px 12px 10px 28px; border-radius: var(--ems-r-lg); background: var(--ems-warning-50); border: 1px solid var(--ems-warning-bd); color: var(--ems-warning-800); font-weight: 600; }
+.jl-hr-modal__steps li + li { margin-top: 4px; }
+.jl-hr-modal__note { color: var(--ems-neutral-500); }
+.jl-hr-modal__warn {
+    margin: 0 0 10px; padding: 10px 12px; border-radius: var(--ems-r-lg);
+    background: var(--ems-danger-bg); border: 1px solid var(--ems-danger-bd); color: var(--ems-danger-700);
+}
+.jl-hr-modal__warn[hidden] { display: none; }
+.jl-hr-modal__warn p { margin: 0 0 6px; }
+.jl-hr-modal__warn ul { margin: 0 0 6px; padding-left: 18px; font-weight: 600; }
+.jl-page .jl-hrestore__why--warn, .jl-page .jl-hrestore__why--warn i { color: var(--ems-danger-700); }
+.jl-hr-modal__field { display: flex; flex-direction: column; gap: 6px; font-weight: 700; color: var(--ems-neutral-900); }
+.jl-hr-modal__field small { color: var(--ems-neutral-500); font-weight: 500; }
+.jl-hr-modal__field textarea {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--ems-neutral-200); border-radius: var(--ems-r-md);
+    font: inherit; font-weight: 400; color: var(--ems-neutral-900); resize: vertical;
+}
+.jl-hr-modal__field textarea:focus-visible { outline: 2px solid var(--ems-primary-600); outline-offset: 1px; border-color: var(--ems-primary-600); }
+.jl-hr-modal__error { margin-top: 10px; color: var(--ems-danger-700); font-weight: 600; }
+.jl-hr-modal__foot { display: flex; justify-content: flex-end; gap: 10px; padding: 12px 20px 16px; border-top: 1px solid var(--ems-neutral-100); }
+.jl-hr-modal__cancel, .jl-hr-modal__submit {
+    min-height: 40px; padding: 0 16px; border-radius: var(--ems-r-pill); font-weight: 700; font-size: var(--ems-fs-sm); cursor: pointer;
+}
+.jl-hr-modal__cancel { border: 1px solid var(--ems-neutral-200); background: var(--ems-neutral-0); color: var(--ems-neutral-700); }
+.jl-hr-modal__submit { border: 1px solid var(--ems-primary-600); background: var(--ems-primary-600); color: var(--ems-neutral-0); }
+.jl-hr-modal__submit[disabled] { opacity: 0.6; cursor: progress; }
+
+@media (max-width: 640px) {
+    .jl-page .jl-hrestore { flex-direction: column; align-items: stretch; }
+    .jl-hr-modal__foot { flex-direction: column-reverse; }
+    .jl-hr-modal__cancel, .jl-hr-modal__submit { width: 100%; min-height: 44px; }
+}

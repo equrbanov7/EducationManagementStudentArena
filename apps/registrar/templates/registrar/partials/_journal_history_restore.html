@@ -1,16 +1,26 @@
-{% load i18n %}{% if offering.history_load_restore_url %}
-{% if offering.history_load_restore_plan %}
-<form class="jl-restore" method="post" action="{{ offering.history_load_restore_url }}">{% csrf_token %}
-  {% for key, value in offering.history_load_restore_plan.items %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}
-  <button class="jl-restore-btn" type="submit"><i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Cari yükə bərpa et" context "workload.history_restore" %}</button>
-</form>
-{% else %}
-<a class="jl-restore-btn" href="{{ offering.history_load_restore_url }}"><i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Cari yükə bərpa et" context "workload.history_restore" %}</a>
-{% endif %}
-{% elif offering.history_load_restore_shared %}
-<div class="jl-restore-note">
-  <i class="fas fa-users" aria-hidden="true"></i>
-  <span>{% trans "Patok sətri" context "workload.history_restore" %}: {{ offering.history_load_restore_shared.groups }}</span>
-  <a href="{{ offering.history_load_restore_shared.url }}">{% trans "Yük bölgüsündə aç" context "workload.history_restore" %}</a>
+{% load i18n %}{% comment %}«Bu müəllimə bərpa et» (sahib 2026-11-03) — tarixçə sətrinin vəziyyəti HƏMİŞƏ görünür
+(səlahiyyətliyə): hazırdır → modal; saat bölgüsü lazımdır → forma; olmur → söndürülmüş düymə + səbəb.
+Qərar: apps/workload/services/history_teacher_restore.py. JS: registrar/js/journal_history_restore.js.{% endcomment %}{% with restore=offering.history_teacher_restore %}{% if restore %}
+<div class="jl-hrestore jl-hrestore--{{ restore.state }}">
+  {% if restore.state == "ready" %}
+  <button type="button" class="jl-restore-btn" data-jl-hrestore-open data-url="{{ restore.url }}"
+          data-teacher-id="{{ restore.teacher_id }}" data-teacher="{{ restore.teacher_name }}"
+          data-subject="{{ offering.subject.name }}" data-group="{{ offering.journal_group_name|default:offering.group.name }}"
+          data-written-since="{% if restore.warnings %}1{% else %}0{% endif %}">
+    <i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Bu müəllimə bərpa et" context "workload.history_teacher_restore" %}
+  </button>
+  {% if restore.warnings %}<span class="jl-hrestore__why jl-hrestore__why--warn"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> {% trans "İndiki sahib sonradan qeyd yazıb" context "workload.history_teacher_restore" %}</span>{% endif %}
+  <ul class="jl-hrestore__steps" data-jl-hrestore-steps hidden>{% for step in restore.steps %}<li>{{ step }}</li>{% endfor %}</ul>
+  <ul class="jl-hrestore__steps" data-jl-hrestore-warnings hidden>{% for line in restore.warnings %}<li>{{ line }}</li>{% endfor %}</ul>
+  {% elif restore.state == "form" %}
+  <a class="jl-restore-btn" href="{{ restore.link }}"><i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Bu müəllimə bərpa et" context "workload.history_teacher_restore" %}</a>
+  <span class="jl-hrestore__why">{% trans "Dərs növlərinin saatını formada göstərin." context "workload.history_teacher_restore" %}</span>
+  {% else %}
+  <button type="button" class="jl-restore-btn" disabled aria-disabled="true" aria-describedby="jl-hrestore-why-{{ offering.pk }}">
+    <i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Bu müəllimə bərpa et" context "workload.history_teacher_restore" %}
+  </button>
+  <span class="jl-hrestore__why" id="jl-hrestore-why-{{ offering.pk }}"><i class="fas fa-circle-info" aria-hidden="true"></i> {{ restore.reason }}</span>
+  {% if restore.link %}<a class="jl-hrestore__link" href="{{ restore.link }}">{% trans "Yük bölgüsündə aç" context "workload.history_teacher_restore" %}</a>{% endif %}
+  {% endif %}
 </div>
-{% endif %}
+{% endif %}{% endwith %}
