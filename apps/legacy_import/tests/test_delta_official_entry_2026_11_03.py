@@ -464,6 +464,30 @@ class OfficialEntryPhaseTests(TestCase):
         self.assertEqual(self._archive(7131), D("15"))
         self.assertEqual(run.counters["official_entry.sem12.same"], 1)
 
+    def test_previous_attempt_result_printed_on_a_retake_sheet_is_not_copied(self):
+        """Köhnə vərəq təkrar keçilən jurnalda əvvəlki cəhdin nəticəsini çap edib — yeni cəhdə köçürülmür."""
+        with bypass_rls():
+            old_period = AcademicPeriod.objects.create(
+                organization=self.org,
+                name="Payız",
+                academic_year="2022/2023",
+                period_type=AcademicPeriodType.SEMESTER,
+                start_date=dt.date(2022, 9, 15),
+                end_date=dt.date(2023, 1, 31),
+            )
+            old_offering = CourseOffering.objects.create(
+                organization=self.org, subject=self.offering.subject, period=old_period
+            )
+            old = Enrollment.objects.create(
+                organization=self.org, student=self.students[7137].student, offering=old_offering
+            )
+            FinalGrade.objects.create(organization=self.org, enrollment=old, exam_score=D(17))
+        run = self._run(apply=True, bundle=_bundle([_row("ZMRpRj5xOW", 7137, entry="34", exam="17", total="51")]))
+        self.assertEqual(run.counters["official_entry.sem12.skip_copied_attempt"], 1)
+        with bypass_rls():
+            self.assertFalse(FinalGrade.objects.filter(enrollment=self.students[7137]).exists())
+        self.assertEqual(self._archive(7137), D("14"))
+
     def test_bundle_rejects_other_phases(self):
         with self.assertRaises(OfficialEntryPhaseMismatch):
             self._run(apply=False, phases=("official_entry", "lessons"))

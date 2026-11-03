@@ -94,10 +94,80 @@ def resolve_targets(run, rows) -> dict:
     return wanted
 
 
+def copied_attempts(organization, wanted) -> set:
+    """Başqa cəhdin nəticəsi çap olunmuş vərəqlər → toxunulmayacaq yazılışların pk-ları.
+
+    Köhnə sistem fənni təkrar keçən tələbənin yeni jurnal vərəqində ƏVVƏLKİ cəhdin nəticəsini çap edirdi
+    (34 / 2 / 17 / 51 hər iki semestrdə). Yeni sistemdə həmin tələbənin eyni fənnə (eyni kart və ya eyni ad) BAŞQA
+    yazılışında vərəqdəki imtahan (və 25 % balı) artıq varsa, bu yazılışın özündə isə imtahan YOXDURSA — vərəq o
+    cəhdindir: bu yazılışa nə imtahan doldurulur, nə giriş balı dəyişir.
+    """
+
+    from django.apps import apps as django_apps
+
+    from .resolve import subject_key
+
+    Enrollment = django_apps.get_model("registrar", "Enrollment")
+    FinalGrade = django_apps.get_model("registrar", "FinalGrade")
+    ResitRecord = django_apps.get_model("registrar", "ResitRecord")
+    sheet = {}
+    for pk, (_enrollment, _value, source, _semester, _export, _total, row) in wanted.items():
+        exam, resit = official_finals(row) if source == "total" else (None, None)
+        if exam is not None or resit is not None:
+            sheet[pk] = (exam, resit)
+    if not sheet:
+        return set()
+    targets = {
+        e.pk: e
+        for e in Enrollment.objects.filter(organization=organization, pk__in=list(sheet)).select_related(
+            "offering__subject"
+        )
+    }
+    students = {e.student_id for e in targets.values()}
+    others = list(
+        Enrollment.objects.filter(organization=organization, student_id__in=students)
+        .exclude(status="dropped")
+        .select_related("offering__subject")
+        .only("pk", "student_id", "offering__period_id", "offering__subject_id", "offering__subject__name")
+    )
+    ids = [e.pk for e in others]
+    exams = dict(
+        FinalGrade.objects.filter(enrollment_id__in=ids, exam_score__isnull=False).values_list(
+            "enrollment_id", "exam_score"
+        )
+    )
+    resits = dict(
+        ResitRecord.objects.filter(enrollment_id__in=ids, resit_score__isnull=False).values_list(
+            "enrollment_id", "resit_score"
+        )
+    )
+    attempts: dict = {}
+    for e in others:
+        for key in (("id", e.offering.subject_id), ("name", subject_key(e.offering.subject.name))):
+            attempts.setdefault((e.student_id, key), []).append(e)
+    skipped = set()
+    for pk, (exam, resit) in sheet.items():
+        target = targets.get(pk)
+        if target is None:
+            continue
+        if exams.get(target.pk) is not None:
+            continue  # öz imtahanı var — yekun yoxlaması (``skip_total_mismatch``) onsuz da qoruyur
+        keys = (("id", target.offering.subject_id), ("name", subject_key(target.offering.subject.name)))
+        for key in keys:
+            for other in attempts.get((target.student_id, key), ()):
+                if other.pk == target.pk or other.offering.period_id == target.offering.period_id:
+                    continue
+                if (exam is None or exams.get(other.pk) == exam) and (resit is None or resits.get(other.pk) == resit):
+                    skipped.add(pk)
+    return skipped
+
+
 def apply_official_entry(run) -> None:
     from apps.registrar.public import EntryTarget, align_archive_entries
 
     wanted = resolve_targets(run, run.bundle.get("official_entries") or [])
+    for pk in copied_attempts(run.organization, wanted):
+        run.count(f"official_entry.sem{wanted.pop(pk)[3]}.skip_copied_attempt")
     targets = {}
     for pk, (_enrollment, value, source, _semester, _export, total, row) in wanted.items():
         exam, resit = official_finals(row) if source == "total" else (None, None)
