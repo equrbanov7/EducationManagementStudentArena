@@ -188,11 +188,19 @@ def _subject_card(subject) -> dict:
     }
 
 
-def collect(organization, target, sources) -> dict:
+def collect(organization, target, sources, *, drop_attendance_only=False) -> dict:
     """Birləşmənin tam planı — həm önizləmə, həm tətbiq, həm də iz bundan qurulur."""
     source_ids = [source.pk for source in sources]
-    found = conflicts_service.detect(organization, target, sources)
-    dropped_rows = {pk for item in found["resolvable"] for pk in item["drop"]}
+    found = conflicts_service.detect(organization, target, sources, drop_attendance_only=drop_attendance_only)
+    resolvable = found["resolvable"]
+    dropped_rows = set(conflicts_service.resolved_ids(resolvable, conflicts_service.CURRICULUM_ROW))
+    deleted_offerings = conflicts_service.resolved_ids(resolvable, conflicts_service.OFFERING_TWIN)
+    twin_keep = {
+        pk: item["keep"]
+        for item in resolvable
+        if item["code"] == conflicts_service.OFFERING_TWIN
+        for pk in item["drop"]
+    }
     moved, kept = {}, {}
     m2m = {"move": [], "drop": []}
     for relation in RELATIONS:
@@ -200,8 +208,9 @@ def collect(organization, target, sources) -> dict:
             m2m = _m2m_plan(relation, target.pk, source_ids)
             continue
         rows = _rows_by_source(relation, source_ids)
-        if relation.key == CURRICULUM_KEY:
-            rows = {sid: [pk for pk in ids if pk not in dropped_rows] for sid, ids in rows.items()}
+        gone = dropped_rows if relation.key == CURRICULUM_KEY else set(deleted_offerings)
+        if relation.key in (CURRICULUM_KEY, OFFERING_KEY):
+            rows = {sid: [pk for pk in ids if pk not in gone] for sid, ids in rows.items()}
             rows = {sid: ids for sid, ids in rows.items() if ids}
         if relation.strategy == KEEP:
             kept[relation.key] = rows
@@ -231,6 +240,9 @@ def collect(organization, target, sources) -> dict:
         "m2m": m2m,
         "json_refs": _json_refs(target.pk, source_ids),
         "dropped_plan_rows": sorted(dropped_rows),
+        "deleted_offerings": deleted_offerings,
+        "twin_keep": twin_keep,
+        "dropped_enrollments": conflicts_service.resolved_ids(resolvable, conflicts_service.ENROLLMENT_UNGRADED),
         "locked_plans": locked_plans,
         "evidence_offerings": evidence_offerings,
         "conflicts": found,
@@ -247,6 +259,8 @@ def plan_digest(plan) -> str:
         "m2m": plan["m2m"],
         "json_refs": plan["json_refs"],
         "dropped": plan["dropped_plan_rows"],
+        "deleted_offerings": plan["twin_keep"],
+        "dropped_enrollments": plan["dropped_enrollments"],
         "blocking": [(item["code"], sorted(item["ids"])) for item in plan["conflicts"]["blocking"]],
     }
     text = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False, default=str)
@@ -260,6 +274,8 @@ def counts(plan) -> dict:
     result["exams.StudentGroup.subjects:dropped"] = len(plan["m2m"]["drop"])
     result["registrar.CurriculumSubject.subject:dropped"] = len(plan["dropped_plan_rows"])
     result["soft_json"] = len(plan["json_refs"])
+    result["registrar.CourseOffering:deleted_empty_twins"] = len(plan.get("deleted_offerings", []))
+    result["registrar.Enrollment:dropped_ungraded"] = len(plan.get("dropped_enrollments", []))
     return result
 
 
@@ -366,10 +382,10 @@ def _limited(items) -> list:
     return items[: conflicts_service.LIST_LIMIT]
 
 
-def preview(organization, target_ref, source_refs, *, by_code=False) -> dict:
-    """Dry-run: heç nə yazmır."""
+def preview(organization, target_ref, source_refs, *, by_code=False, drop_attendance_only=False) -> dict:
+    """Dry-run: heç nə yazmır. ``drop_attendance_only`` — K3 bayrağı (:mod:`.subject_merge_conflicts`)."""
     target, sources = resolve_subjects(organization, target_ref, source_refs, by_code=by_code)
-    plan = collect(organization, target, sources)
+    plan = collect(organization, target, sources, drop_attendance_only=drop_attendance_only)
     found = plan["conflicts"]
     tables = _tables(plan)
     return {

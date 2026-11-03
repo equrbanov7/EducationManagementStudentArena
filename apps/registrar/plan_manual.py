@@ -38,17 +38,17 @@ from pathlib import Path
 
 from apps.registrar.models import Subject
 from apps.registrar.plan_import import normalize
+from apps.registrar.subject_codes import QKU_PREFIX, next_qku_number, qku_code
 from core.rls_pooling import rls_worker_atomic
 
 #: Əl ilə köçürülmüş planlar (skan PDF-lər).
 MANUAL_PLANS = Path(__file__).resolve().parent / "data" / "ixtisas" / "manual_plans.json"
 
-#: Saytdan gələn yeni fənlərin kod prefiksi.
-#: ⚠️ `Subject.code` təşkilat daxilində UNİKALDIR (`uniq_subject_code_per_org`).
-#: Mövcud kataloqun 2501 kodunun HAMISI `MYEDU-…` prefiksindədir, ona görə
-#: `SAYT-…` fəzası boşdur; həm də ayrı prefiks yeni fənnin haradan gəldiyini
-#: koda baxan adama dərhal göstərir.
-SITE_CODE_PREFIX = "SAYT"
+#: Saytdan gələn yeni fənlərin kod prefiksi — kataloqun qalanı kimi ``QKU`` (sahib 2026-11-04: «SAYT deyə başına
+#: yazılan kodlar QKU olmalıdı»). Əvvəllər ayrıca ``SAYT-####`` fəzası idi və eyni fənnin ikinci kartını açırdı;
+#: köhnə ``SAYT-`` kartları ``recode_site_subjects`` ilə ``QKU-N``-ə keçirilir. Mənşə ``description``-da qalır.
+#: ⚠️ `Subject.code` təşkilat daxilində UNİKALDIR (`uniq_subject_code_per_org`) — nömrə növbəti boş ``QKU-N``-dir.
+SITE_CODE_PREFIX = QKU_PREFIX
 
 #: Bir fənn üçün ağlabatan yuxarı kredit həddi. Sənəddəki kredit sütunu bəzən
 #: sürüşür (saat sütunu oxunur) — 240 kreditli «fənn» kataloqu sükutla korlayar,
@@ -113,18 +113,11 @@ class SubjectCreator:
         self._number = self._first_free_number()
 
     def _first_free_number(self) -> int:
-        """Növbəti boş `SAYT-####` nömrəsi — mövcud kodla toqquşmasın."""
-        prefix = f"{SITE_CODE_PREFIX}-"
-        highest = 0
-        codes = Subject.objects.filter(organization=self.organization, code__startswith=prefix)
-        for code in codes.values_list("code", flat=True):
-            tail = (code or "")[len(prefix) :]
-            if tail.isdigit():
-                highest = max(highest, int(tail))
-        return highest + 1
+        """Növbəti boş `QKU-N` nömrəsi — mövcud kodla toqquşmasın (:mod:`.subject_codes`)."""
+        return next_qku_number(self.organization)
 
     def _next_code(self) -> str:
-        code = f"{SITE_CODE_PREFIX}-{self._number:04d}"
+        code = qku_code(self._number)
         self._number += 1
         return code
 

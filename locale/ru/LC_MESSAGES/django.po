@@ -112556,3 +112556,13 @@ msgstr "Открыть в распределении нагрузки"
 msgctxt "workload.history_restore"
 msgid "Patok sətri"
 msgstr "Поточная строка"
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(period)s · %(group)s: ləğv olunmuş BOŞ əkiz jurnal silinir (tam snapshot audit-də, geri qaytarmada eyni id ilə bərpa olunur); bağlı imtahanlar saxlanılan jurnala keçir."
+msgstr "%(period)s · %(group)s: отменённый ПУСТОЙ журнал-двойник удаляется (полный снимок в аудите, при отмене восстанавливается с тем же id); связанные экзамены переходят в сохраняемый журнал."
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(student)s · %(period)s: hər iki fənn üzrə qeydiyyat var — qiymətsiz təkrar qeydiyyat bağlanır (dropped), qiymətli qeydiyyat qalır."
+msgstr "%(student)s · %(period)s: есть запись по обеим дисциплинам — запись без оценок закрывается (dropped), запись с оценками остаётся."
