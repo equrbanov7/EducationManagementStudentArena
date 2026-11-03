@@ -236,6 +236,16 @@
 #       Loga YALNIZ saylar (hesabı olmayan ATİS sətirləri forma / şifr üzrə sayılır).
 #   fix_slot_week_parity — çıxarılmış (infer_timetable_from_lessons) üst/alt həftə slotu ≥2 cüt ardıcıl həftədə dərs
 #       varsa hər həftəyə (`period`); toqquşma yaradarsa qalır. Loga YALNIZ saylar.
+#   clear_stale_off_schedule_flags — «cədvəldən kənar» işarəsi yapışıb qalmasın (2026-11-03): işarə dərs yaradılanda
+#       yazılır; cədvəl SONRA düzəlibsə (dərsin tarixində açılışın duran slotu dərsin saatındadır) işarə təmizlənir
+#       (jurnalın tarixçəsinə köhnə səbəblə sətir + yekun audit). `period` (məcburi), `batch` = yalnız bu jurnalın UUID-i
+#       (boş = semestrin hamısı). Yalnız təmizləyir; dərs/xana toxunulmur. Loga YALNIZ saylar. İdempotent.
+#   fix_offering_subject — səhv fənnə bağlı jurnalın fənni YERİNDƏ (2026-11-03): `batch` = jurnalın UUID-i, `row_subject` =
+#       düzgün fənnin UUID-i, `row_group` = fənni dəyişəcək yük sətrinin UUID-i (boş = yük sətri yoxdur), `choices` =
+#       `detach=<sillabus UUID>,attach=<sillabus UUID>` (hər ikisi istəyə bağlı). Jurnalın dərsləri/xanaları/tələbələri
+#       toxunulmur; səhv sillabus bağı ayrılır, düzgün sillabus PAYLAŞMA ilə bağlanır, sətrin fənni düzəliş axını ilə
+#       dəyişir — sinxron YENİ jurnal yaratmır. Toqquşma (hədəf fənndə eyni qrup + dövr jurnalı, köhnə fənndə başqa
+#       sətir, axın sətri, bağlı imtahan) → heç nə yazılmır. Loga YALNIZ saylar. İdempotent.
 #   restore_archived_students — səhvən «məzun» (arxiv) sayılmış CARİ tələbənin girişi (sahib 2026-10-27, 131 T): `teacher`
 #       = istifadəçi adları (vergüllə), `batch` = boş və ya yer-tutucu 1950 qəbul ilinin düzəlişi. Yalnız aktiv `enrolled`
 #       qeydi olan, «Xaric …» qrupunda olmayan arxiv hesab; auditli `restore_archived_account`. Loga YALNIZ saylar.
@@ -399,6 +409,8 @@ on:
           - fix_legacy_lesson_kinds
           - set_practical_offerings
           - fix_slot_week_parity
+          - clear_stale_off_schedule_flags
+          - fix_offering_subject
           - restore_archived_students
           - assign_first_year_student_codes
           - fill_first_year_atis_data
@@ -436,7 +448,7 @@ on:
         required: false
         default: ""
       batch:
-        description: "recover_workload_syllabi (Bilal legacy8430; workload-syllabi-…) · recover_mr46_syllabus: plaintext SHA256 və ya mr46-… undo paketi · repair_repeated_sections_workload / repair_owner_activity_batch / repair_balanced_workload_pairs / repair_sbio235_workload: baselineSHA, undoID(dry) və ya undoID:baselineSHA(apply) · reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…) / apply_journal_shares (shares-…) / relocate_superseded_marks (supmarks-…) / merge_duplicate_student (stmerge-…) / merge_level_journals (lvlmerge-…): geri qaytarılacaq paket id-si (undo) · recover_mr27_journal: fayl üçün məcburi plaintext sha256 və ya undo üçün mr27-YYYYMMDD-HHMMSS-xxxx · legacy_delta_apply / share_legacy_syllabi: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd)"
+        description: "recover_workload_syllabi (Bilal legacy8430; workload-syllabi-…) · recover_mr46_syllabus: plaintext SHA256 və ya mr46-… undo paketi · repair_repeated_sections_workload / repair_owner_activity_batch / repair_balanced_workload_pairs / repair_sbio235_workload: baselineSHA, undoID(dry) və ya undoID:baselineSHA(apply) · reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…) / apply_journal_shares (shares-…) / relocate_superseded_marks (supmarks-…) / merge_duplicate_student (stmerge-…) / merge_level_journals (lvlmerge-…): geri qaytarılacaq paket id-si (undo) · recover_mr27_journal: fayl üçün məcburi plaintext sha256 və ya undo üçün mr27-YYYYMMDD-HHMMSS-xxxx · legacy_delta_apply / share_legacy_syllabi: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd) · fix_offering_subject: jurnalın UUID-i · clear_stale_off_schedule_flags: yalnız bu jurnal (UUID, boş = hamısı)"
         required: false
         default: ""
       create_missing:
@@ -453,11 +465,11 @@ on:
         required: false
         default: ""
       row_group:
-        description: "repair_reviewed_workload_batch: explicit source line IDs CSV · repair_repeated_sections_workload: boş=iki sabit sətir, yaxud row UUID-ləri · fix_task_row_hours: qrup işarə(lər)i, vergüllə (məs. 631/5K,631/5K ing)"
+        description: "repair_reviewed_workload_batch: explicit source line IDs CSV · repair_repeated_sections_workload: boş=iki sabit sətir, yaxud row UUID-ləri · fix_task_row_hours: qrup işarə(lər)i, vergüllə (məs. 631/5K,631/5K ing) · fix_offering_subject: yük sətrinin UUID-i (boş = yox)"
         required: false
         default: ""
       row_subject:
-        description: "repair_reviewed_workload_batch: fresh baseline SHA / undoID:baselineSHA · recover_workload_syllabi: boş/bilal=8430, robotics=7715 · fix_task_row_hours: fənn adı"
+        description: "repair_reviewed_workload_batch: fresh baseline SHA / undoID:baselineSHA · recover_workload_syllabi: boş/bilal=8430, robotics=7715 · fix_task_row_hours: fənn adı · fix_offering_subject: düzgün fənnin UUID-i"
         required: false
         default: ""
       row_activity:
@@ -485,7 +497,7 @@ on:
         type: boolean
         default: false
       choices:
-        description: "import_teaching_*: işarəsiz seçmə bloku — SƏTİR=BƏND, vergüllə (məs. 144=1,145=1)"
+        description: "import_teaching_*: işarəsiz seçmə bloku — SƏTİR=BƏND, vergüllə (məs. 144=1,145=1) · fix_offering_subject: detach=<sillabus UUID>,attach=<sillabus UUID>"
         required: false
         default: ""
       teacher_map:
@@ -498,7 +510,7 @@ on:
         type: boolean
         default: false
       period:
-        description: "import_timetable_docx / assign_task_rows_from_timetable / backfill_teacher_lessons / infer_timetable_from_lessons / fix_slot_week_parity: semestr (məs. Payız 2026/2027)"
+        description: "import_timetable_docx / assign_task_rows_from_timetable / backfill_teacher_lessons / infer_timetable_from_lessons / fix_slot_week_parity / clear_stale_off_schedule_flags: semestr (məs. Payız 2026/2027)"
         required: false
         default: "Payız 2026/2027"
       replace_group_slots:
@@ -1508,6 +1520,43 @@ jobs:
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor" --period "$PERIOD")
               ;;
+            clear_stale_off_schedule_flags)
+              # 2026-11-03: cədvələ uyğun dərslərin köhnəlmiş «cədvəldən kənar» işarəsi; `batch` = yalnız bu jurnal (UUID).
+              match "$PERIOD" '^(Payız|Yaz|Yay) 20[0-9]{2}/20[0-9]{2}$' || { echo "period formatı: «Payız 2026/2027»" >&2; exit 2; }
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor" "--period=$PERIOD")
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' \
+                  || { echo "batch = boş və ya jurnalın (açılışın) UUID-i" >&2; exit 2; }
+                args+=("--offering=$BATCH")
+              fi
+              ;;
+            fix_offering_subject)
+              # 2026-11-03: jurnalın fənni yerində — batch = jurnal, row_subject = düzgün fənn, row_group = yük sətri,
+              # choices = detach=<sillabus>,attach=<sillabus>. Hamısı UUID; toqquşmada əmr heç nə yazmır.
+              uuid_re='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+              match "$BATCH" "^${uuid_re}$" || { echo "batch = jurnalın (açılışın) UUID-i" >&2; exit 2; }
+              match "$ROW_SUBJECT" "^${uuid_re}$" || { echo "row_subject = düzgün fənnin UUID-i" >&2; exit 2; }
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor" "--offering=$BATCH" "--subject=$ROW_SUBJECT")
+              if [ -n "$ROW_GROUP" ]; then
+                match "$ROW_GROUP" "^${uuid_re}$" || { echo "row_group = boş və ya yük sətrinin UUID-i" >&2; exit 2; }
+                args+=("--row=$ROW_GROUP")
+              fi
+              if [ -n "$CHOICES" ]; then
+                match "$CHOICES" "^(detach|attach)=${uuid_re}(,(detach|attach)=${uuid_re})?$" \
+                  || { echo "choices = detach=<UUID>,attach=<UUID> (hər biri istəyə bağlı)" >&2; exit 2; }
+                IFS=',' read -r -a syllabus_parts <<< "$CHOICES"
+                for part in "${syllabus_parts[@]}"; do
+                  case "$part" in
+                    (detach=*) args+=("--detach-syllabus=${part#detach=}") ;;
+                    (attach=*) args+=("--attach-syllabus=${part#attach=}") ;;
+                  esac
+                done
+              fi
+              ;;
             restore_archived_students)
               # Sahib 2026-10-27: səhvən «məzun» (arxiv) sayılmış CARİ tələbə — `teacher` = istifadəçi adları (vergüllə,
               # ≤ 50), `batch` = boş və ya yer-tutucu (1950) qəbul ilinin düzəlişi (məs. 2021). Loga YALNIZ saylar.
@@ -1962,10 +2011,11 @@ jobs:
               exit "$status"
             fi
             rm -f "$RUNNER_TEMP/out.log"
-          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ]; then
-            # Loga YALNIZ «twin_relocate: / twin_merge: / lesson_kinds: / slot_parity: / practical_flag: açar=say …» sətirləri və rədd kodu.
+          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "fix_offering_subject" ]; then
+            # Loga YALNIZ «twin_relocate: / twin_merge: / lesson_kinds: / slot_parity: / practical_flag: / off_schedule_flags: /
+            # offering_subject_fix: açar=say …» sətirləri və rədd kodu.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
-            grep -E '^(twin_relocate|twin_merge|lesson_kinds|slot_parity|practical_flag): [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            grep -E '^(twin_relocate|twin_merge|lesson_kinds|slot_parity|practical_flag|off_schedule_flags|offering_subject_fix): [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true

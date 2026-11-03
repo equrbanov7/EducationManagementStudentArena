@@ -11,6 +11,17 @@ class RegistrarConfig(AppConfig):
 
         register_student_transfer(_transfer_student_group)
         _register_retake_media()
+        _register_off_schedule_reevaluation()
+
+
+def _register_off_schedule_reevaluation():
+    """Slot yarananda / düzələndə həmin açılışın «cədvəldən kənar» işarələri yenidən yoxlanır (2026-11-03)."""
+    from django.db.models.signals import post_save
+
+    from .models import ScheduleSlot
+    from .off_schedule_flags import slot_saved
+
+    post_save.connect(slot_saved, sender=ScheduleSlot, dispatch_uid="registrar_off_schedule_slot_saved")
 
 
 def _register_retake_media():

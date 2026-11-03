@@ -49,6 +49,9 @@ class NezifeExactScheduleLabelTests(TestCase):
             week_type="all",
             room="53",
         )
+        # 2026-11-03: slot yazılanda uyğun dərsin işarəsi artıq avtomatik təmizlənir (off_schedule_flags); bu təmir
+        # köhnə (siqnaldan əvvəlki) datanı yoxlayır — işarə slotla birgə mövcud olan vəziyyət bərpa olunur.
+        Lesson.objects.filter(pk=self.lesson.pk).update(off_schedule_reason=op.REASON)
         for i in range(21):
             student = get_user_model().objects.create_user("nezife-label-student" + str(i))
             Membership.objects.create(organization=self.org, user=student, role=self.org.roles.get(name="student"))

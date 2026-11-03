@@ -297,6 +297,10 @@ def publish_slots(
                 for row in rows
             ]
         )
+        # ``bulk_create`` post_save göndərmir — cədvələ uyğun gələn «cədvəldən kənar» dərslərin işarəsi (2026-11-03).
+        from .off_schedule_flags import reevaluate_offerings
+
+        reevaluate_offerings(ids, by_user=actor if getattr(actor, "pk", None) else None)
         summary = {
             "source": source,
             "period_id": str(getattr(period, "pk", "")),
