@@ -159,6 +159,21 @@ def target_entry(row: dict) -> tuple[Decimal | None, str]:
     return value, source
 
 
+def official_finals(row: dict) -> tuple[Decimal | None, Decimal | None]:
+    """Yekunu izah edən rəsmi ``(imtahan, 25 % balı)`` — yeni sistemdə boşdursa doldurmaq üçün.
+
+    Yalnız vərəq öz-özünə uyğundursa (``counted_exam`` tapılır): 25 % balı yalnız yekunu MƏHZ o izah edirsə
+    qaytarılır (``T.imtahan = 0`` / yekuna girməyən dəyər «təkrar imtahan yoxdur» deməkdir).
+    """
+
+    entry, exam, total, resit = (_decimal(row.get(key)) for key in ("entry", "exam", "total", "resit"))
+    counted = counted_exam(entry=entry, exam=exam, total=total, resit=resit)
+    if counted is None:
+        return None, None
+    used_resit = bool(resit) and counted == resit and resit != exam
+    return exam, (resit if used_resit else None)
+
+
 def _decimal(value) -> Decimal | None:
     if value is None or value == "":
         return None
@@ -174,6 +189,7 @@ __all__ = [
     "SheetTable",
     "counted_exam",
     "number",
+    "official_finals",
     "parse_export",
     "target_entry",
 ]

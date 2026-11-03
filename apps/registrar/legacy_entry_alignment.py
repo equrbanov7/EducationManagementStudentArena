@@ -12,6 +12,10 @@ audit.
   (``skip_total_mismatch``): yarım düzəliş tələbəni rəsmi nəticənin əksinə «kəsr»ə sala bilərdi.
 * Müəllimin / düzəliş alətinin xanası (``entered_by`` doludur), dil səviyyə və Midterm açılışları, arxivsiz
   açılışlar — toxunulmur.
+* Rəsmi vərəqdəki imtahan / 25 % təkrar imtahan balı yeni sistemdə BOŞDURSA (``FinalGrade.exam_score`` yoxdur,
+  ``ResitRecord`` yoxdur) — əvvəlcə o doldurulur (yalnız boş; mövcud bal heç vaxt dəyişmir). Səbəb (2026-11-03):
+  ~1 500 tarixi sətirdə imtahan, ~80-də 25 % balı köçməyib — tələbə rəsmi vərəqdə keçdiyi fənni «nəticə yoxdur» və
+  ya «İmtahandan kəsilib — 25 %» kimi görürdü.
 * PG trigger-i (köhnə xananın UPDATE-i) ``journal_unlock`` ilə keçilir; hər açılışa bir
   ``registrar.grade.component`` audit sətri (köhnə → yeni, ``reason``) — fail-closed.
 """
@@ -19,6 +23,7 @@ audit.
 from __future__ import annotations
 
 import copy
+import dataclasses
 from collections import defaultdict
 from dataclasses import dataclass
 from decimal import Decimal
@@ -28,9 +33,19 @@ from django.utils import timezone
 from core.rls import journal_unlock
 
 from . import finals, finals_batch, grade_audit, language_level_grading
-from .models import ComponentScore, Enrollment
+from .models import ComponentScore, Enrollment, FinalGrade, ResitReason, ResitRecord, ResitStatus
 
 CHUNK = 1000
+
+
+@dataclass(frozen=True)
+class EntryTarget:
+    """Rəsmi dəyərlər: giriş balı (məcburi), yekun, imtahan və 25 % balı (boşdursa doldurmaq üçün)."""
+
+    entry: Decimal
+    total: Decimal | None = None
+    exam: Decimal | None = None
+    resit: Decimal | None = None
 
 
 @dataclass(frozen=True)
@@ -45,6 +60,7 @@ class EntryAlignment:
     total_after: Decimal | None = None
     result_before: str = ""
     result_after: str = ""
+    filled: tuple = ()
     student: str = ""
     subject: str = ""
     period: str = ""
@@ -59,12 +75,13 @@ def _result(row) -> str:
 
 
 def align_archive_entries(*, organization, actor, targets, archive_name, reason, archive_kind="generic"):
-    """``targets`` = ``{enrollment pk: (hədəf giriş balı, rəsmi yekun və ya None)}`` → ``[EntryAlignment]``.
+    """``targets`` = ``{enrollment pk: EntryTarget}`` → ``[EntryAlignment]``.
 
     Yazılar çağıranın tranzaksiyasındadır (dry-run onu geri qaytarır)."""
 
     out = []
     changes_by_offering: dict = defaultdict(list)
+    finals_changes: dict = defaultdict(list)
     offerings: dict = {}
     pks = sorted(targets, key=str)
     for start in range(0, len(pks), CHUNK):
@@ -74,10 +91,26 @@ def align_archive_entries(*, organization, actor, targets, archive_name, reason,
             )
         )
         batch = finals_batch.build(chunk, organization=organization)
+        # «Əvvəl» = tələbənin İNDİ gördüyü nəticə — doldurmadan əvvəl (hesabatdakı keçid/kəsr dəyişikliyi).
+        original = {
+            e.pk: finals.compute_final_result(enrollment=e, organization=organization, batch=batch)
+            for e in chunk
+            if _eligible(e, batch)
+        }
+        filled = _fill_missing_finals(chunk, targets, batch, organization, finals_changes, offerings)
+        if filled:
+            batch = finals_batch.build(chunk, organization=organization)
         writes = []
         for enrollment in chunk:
-            target, total = targets[enrollment.pk]
-            row, write = _align_one(enrollment, Decimal(target), total, batch, organization, archive_name, archive_kind)
+            target = targets[enrollment.pk]
+            row, write = _align_one(
+                enrollment, Decimal(target.entry), target.total, batch, organization, archive_name, archive_kind
+            )
+            if enrollment.pk in filled:
+                row = dataclasses.replace(row, filled=tuple(filled[enrollment.pk]))
+            if enrollment.pk in original and row.result_before:
+                before = original[enrollment.pk]
+                row = dataclasses.replace(row, total_before=before["total"], result_before=_result(before))
             out.append(row)
             if write is None:
                 continue
@@ -101,16 +134,56 @@ def align_archive_entries(*, organization, actor, targets, archive_name, reason,
                     ComponentScore.objects.create(
                         organization=organization, component=archive, enrollment=enrollment, score=new
                     )
-    for offering_id, changes in changes_by_offering.items():
+    audit_rows = [("component", oid, changes) for oid, changes in changes_by_offering.items()]
+    audit_rows += [(kind, oid, changes) for (kind, oid), changes in finals_changes.items()]
+    for kind, offering_id, changes in audit_rows:
         grade_audit.log_grade_changes(
-            offering=offerings[offering_id],
-            by_user=actor,
-            kind="component",
-            changes=changes,
-            fail_closed=True,
-            reason=reason,
+            offering=offerings[offering_id], by_user=actor, kind=kind, changes=changes, fail_closed=True, reason=reason
         )
     return out
+
+
+def _eligible(enrollment, batch) -> bool:
+    return not language_level_grading.is_level(enrollment.offering) and not batch.rule_for(enrollment).midterm
+
+
+def _fill_missing_finals(chunk, targets, batch, organization, finals_changes, offerings) -> dict:
+    """Boş imtahan / 25 % balını rəsmi dəyərlə doldur → ``{enrollment pk: ["exam", "resit"]}``."""
+
+    filled: dict = defaultdict(list)
+    for enrollment in chunk:
+        target = targets[enrollment.pk]
+        if (target.exam is None and target.resit is None) or not _eligible(enrollment, batch):
+            continue
+        grade = batch.final_grade_for(enrollment)
+        if target.exam is not None and (grade is None or grade.exam_score is None):
+            FinalGrade.objects.update_or_create(
+                organization=organization, enrollment=enrollment, defaults={"exam_score": target.exam}
+            )
+            filled[enrollment.pk].append("exam")
+        resit = batch.resit_for(enrollment)
+        if target.resit is not None and (resit is None or resit.resit_score is None):
+            ResitRecord.objects.update_or_create(
+                organization=organization,
+                enrollment=enrollment,
+                defaults={
+                    "reason": ResitReason.TOTAL,
+                    "status": ResitStatus.COMPLETED,
+                    "resit_score": target.resit,
+                },
+            )
+            filled[enrollment.pk].append("resit")
+        for kind in filled.get(enrollment.pk, ()):
+            offerings[enrollment.offering_id] = enrollment.offering
+            finals_changes[("final" if kind == "exam" else "resit", enrollment.offering_id)].append(
+                {
+                    "student": grade_audit.student_label(enrollment),
+                    "item": "İmtahan" if kind == "exam" else "25 % təkrar imtahan",
+                    "old": "—",
+                    "new": grade_audit.score_repr(target.exam if kind == "exam" else target.resit),
+                }
+            )
+    return filled
 
 
 def _align_one(enrollment, target, official_total, batch, organization, archive_name, archive_kind):
@@ -140,7 +213,8 @@ def _align_one(enrollment, target, official_total, batch, organization, archive_
     current = Decimal(before["entry_score"])
     known = {"entry_before": current, "total_before": before["total"], "result_before": _result(before)}
     if current == target:
-        return EntryAlignment(outcome="same", **base, **known), None
+        unchanged = {"entry_after": current, "total_after": before["total"], "result_after": _result(before)}
+        return EntryAlignment(outcome="same", **base, **known, **unchanged), None
     scores = batch.scores_by_enrollment[enrollment.id]
     cell = next((cs for cs in scores if cs.component_id == archive.id), None)
     if cell is not None and cell.entered_by_id is not None:
@@ -171,4 +245,4 @@ def _align_one(enrollment, target, official_total, batch, organization, archive_
     return row, (cell, archive, enrollment, new)
 
 
-__all__ = ["EntryAlignment", "align_archive_entries"]
+__all__ = ["EntryAlignment", "EntryTarget", "align_archive_entries"]

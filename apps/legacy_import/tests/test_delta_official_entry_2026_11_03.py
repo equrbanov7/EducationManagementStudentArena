@@ -25,6 +25,7 @@ from apps.registrar.models import (
     CourseOffering,
     Enrollment,
     FinalGrade,
+    ResitRecord,
     Subject,
 )
 from core.constants import AcademicPeriodType, OrganizationType
@@ -237,6 +238,9 @@ class OfficialEntryPhaseTests(TestCase):
                 (7132, "20", (5, 5, 5), "30"),  # artıq rəsmi dəyərdədir (35)
                 (7133, "10", (5, 5, 5), "20"),  # xananı müəllim yazıb → toxunulmur
                 (7135, "14", (6, 7, 6), "17"),  # rəsmi yekun 25 % ilə (34+20=54), yeni sistemdə 25 % yoxdur
+                (7136, "14", (6, 7, 6), "10"),  # yeni sistemdə imtahan FƏRQLİDİR (10 ≠ 17) → toxunulmur
+                (7137, "14", (6, 7, 6), None),  # yeni sistemdə imtahan balı YOXDUR → rəsmi 17 doldurulur
+                (7138, "15", (6, 7, 6), "17"),  # giriş düzdür (34), yalnız 25 % balı yoxdur: 34+17 → 34+20
             ):
                 user = User.objects.create_user(
                     f"s{sid}", f"s{sid}@example.test", "x", first_name="T", last_name=str(sid)
@@ -260,7 +264,8 @@ class OfficialEntryPhaseTests(TestCase):
                     ComponentScore.objects.create(
                         organization=cls.org, component=component, enrollment=enrollment, score=score
                     )
-                FinalGrade.objects.create(organization=cls.org, enrollment=enrollment, exam_score=D(exam))
+                if exam is not None:
+                    FinalGrade.objects.create(organization=cls.org, enrollment=enrollment, exam_score=D(exam))
                 cls.students[sid] = enrollment
 
     def _rows(self):
@@ -269,6 +274,9 @@ class OfficialEntryPhaseTests(TestCase):
             _row("ZMRpRj5xOW", 7132, entry="35", exam="30", total="65"),
             _row("ZMRpRj5xOW", 7133, entry="30", exam="20", total="50"),
             _row("ZMRpRj5xOW", 7135, entry="34", exam="17", total="54", resit="20"),
+            _row("ZMRpRj5xOW", 7136, entry="34", exam="17", total="51"),
+            _row("ZMRpRj5xOW", 7137, entry="34", exam="17", total="51"),
+            _row("ZMRpRj5xOW", 7138, entry="34", exam="17", total="54", resit="20"),
             _row("ZMRpRj5xOW", 9999, entry="30", exam="20", total="50"),  # ledger-də yoxdur
             _row("ZMRpRj5xOW", 7134, entry="-2", exam=None, total=None),
         ]
@@ -298,26 +306,25 @@ class OfficialEntryPhaseTests(TestCase):
 
     def test_dry_run_counts_but_writes_nothing(self):
         run = self._run(apply=False)
-        self.assertEqual(run.counters["official_entry.sem12.written"], 1)
-        self.assertEqual(run.counters["official_entry.fail_to_pass"], 1)
+        self.assertEqual(run.counters["official_entry.sem12.written"], 3)
+        # 7131 (giriş 33→34) və 7135 (25 % balı doldurulur) kəsr → keçib; 7137 «nəticə yoxdur» → keçib.
+        self.assertEqual(run.counters["official_entry.fail_to_pass"], 2)
+        self.assertEqual(run.counters["official_entry.open_to_pass"], 1)
         self.assertEqual(self._archive(7131), D("14"))
+        with bypass_rls():
+            self.assertFalse(ResitRecord.objects.filter(enrollment=self.students[7135]).exists())
+            self.assertFalse(FinalGrade.objects.filter(enrollment=self.students[7137]).exists())
 
     def test_apply_raises_only_the_archive_cell_and_reports(self):
         run = self._run(apply=True)
         counters = run.counters
-        self.assertEqual(counters["official_entry.sem12.written"], 1)
-        self.assertEqual(counters["official_entry.sem12.written_from_total"], 1)
-        self.assertEqual(counters["official_entry.sem12.fail_to_pass"], 1)
-        self.assertEqual(counters["official_entry.sem12.same"], 1)
+        self.assertEqual(counters["official_entry.sem12.written"], 3)
+        self.assertEqual(counters["official_entry.sem12.written_from_total"], 3)
+        self.assertEqual(counters["official_entry.sem12.fail_to_pass"], 2)
+        self.assertEqual(counters["official_entry.sem12.same"], 2)
         self.assertEqual(counters["official_entry.sem12.skip_edited_kept"], 1)
         self.assertEqual(counters["official_entry.sem12.skip_enrollment_unresolved"], 1)
         self.assertEqual(counters["official_entry.sem12.skip_out_of_range"], 1)
-        # Yarım düzəliş (giriş düz, 25 % yoxdur) nəticəni rəsmi yekundan uzaqlaşdırardı → yazılmır, siyahıya düşür.
-        self.assertEqual(counters["official_entry.sem12.skip_total_mismatch"], 1)
-        self.assertEqual(self._archive(7135), D("14"))
-        mismatch = [row for row in run.name_rows if row[0] == "official_entry_total_mismatch"]
-        self.assertEqual(len(mismatch), 1)
-        self.assertIn("rəsmi 54", mismatch[0][2])
         self.assertEqual(self._archive(7131), D("15"))
         self.assertEqual(self._archive(7132), D("20"))
         self.assertEqual(self._archive(7133), D("10"))
@@ -325,28 +332,71 @@ class OfficialEntryPhaseTests(TestCase):
             kollokvium = ComponentScore.objects.filter(enrollment=self.students[7131], component__kind="kollokvium")
             self.assertEqual(sorted(cs.score for cs in kollokvium), [D(6), D(6), D(7)])
             audit = AuditLog.objects.get(resource_type="registrar.grade.component", resource_id=str(self.offering.pk))
-        self.assertEqual(audit.changes[0]["old"], "14")
-        self.assertEqual(audit.changes[0]["new"], "15")
+        self.assertEqual(len(audit.changes), 3)
+        self.assertEqual({(c["old"], c["new"]) for c in audit.changes}, {("14", "15")})
         self.assertIn("SYS-1", audit.new_values["reason"])
-        flips = [row for row in run.name_rows if row[0] == "official_entry_fail_to_pass"]
-        self.assertEqual(len(flips), 1)
-        self.assertIn("giriş 33→34", flips[0][2])
-        self.assertIn("yekun 50→51", flips[0][2])
+        flips = sorted(row[2] for row in run.name_rows if row[0] == "official_entry_fail_to_pass")
+        self.assertEqual(len(flips), 2)
+        self.assertIn("giriş 33→34 · yekun 50→51", flips[0])
+        self.assertIn("giriş 33→34 · yekun 50→54", flips[1])
+
+    def test_missing_resit_and_exam_are_filled_from_the_sheet(self):
+        """«Kəsildi — 25 %» / «nəticə yoxdur» rəsmi vərəqdə keçən tələbədə görünməsin (sahib 2026-11-03)."""
+        run = self._run(apply=True)
+        self.assertEqual(run.counters["official_entry.sem12.filled_resit"], 2)
+        self.assertEqual(run.counters["official_entry.sem12.filled_exam"], 1)
+        with bypass_rls():
+            resit = ResitRecord.objects.get(enrollment=self.students[7135])
+            grade = FinalGrade.objects.get(enrollment=self.students[7137])
+            self.assertEqual((resit.resit_score, resit.status, resit.reason), (D(20), "completed", "total"))
+            self.assertEqual(grade.exam_score, D(17))
+            self.assertTrue(AuditLog.objects.filter(resource_type="registrar.grade.resit").exists())
+            self.assertTrue(AuditLog.objects.filter(resource_type="registrar.grade.final").exists())
+        self.assertEqual(self._archive(7135), D("15"))
+        self.assertEqual(self._archive(7137), D("15"))
+        # Yalnız doldurma: giriş yerində qalır, nəticə yenə də hesabata/adlı siyahıya düşür.
+        self.assertEqual(self._archive(7138), D("15"))
+        only_fill = [row for row in run.name_rows if "doldurulub: resit" in row[2] and "giriş 34→34" in row[2]]
+        self.assertEqual(len(only_fill), 1)
+        self.assertEqual(only_fill[0][0], "official_entry_changed")
+
+    def test_different_existing_exam_is_kept_and_listed(self):
+        run = self._run(apply=True)
+        self.assertEqual(run.counters["official_entry.sem12.skip_total_mismatch"], 1)
+        self.assertEqual(self._archive(7136), D("14"))
+        with bypass_rls():
+            self.assertEqual(FinalGrade.objects.get(enrollment=self.students[7136]).exam_score, D(10))
+        mismatch = [row for row in run.name_rows if row[0] == "official_entry_total_mismatch"]
+        self.assertEqual(len(mismatch), 1)
+        self.assertIn("rəsmi 51", mismatch[0][2])
 
     def test_second_run_writes_nothing(self):
         self._run(apply=True)
         run = self._run(apply=True)
         self.assertEqual(run.counters["official_entry.sem12.written"], 0)
-        self.assertEqual(run.counters["official_entry.sem12.same"], 2)
+        self.assertEqual(run.counters["official_entry.sem12.same"], 5)
+        self.assertEqual(run.counters["official_entry.sem12.filled_exam"], 0)
 
     def test_conflicting_targets_for_one_enrollment_are_skipped(self):
         rows = [
             _row("ZMRpRj5xOW", 7131, entry="34", exam="17", total="51"),
-            _row("ZMRpRj5xOW", 7131, entry="36", exam=None, total=None),
+            _row("ZMRpRj5xOW", 7131, entry="36", exam="17", total="53"),
         ]
         run = self._run(apply=True, bundle=_bundle(rows))
         self.assertEqual(run.counters["official_entry.sem12.skip_target_conflict"], 1)
         self.assertEqual(self._archive(7131), D("14"))
+
+    def test_sheet_with_total_wins_over_entry_only_sheet(self):
+        rows = [
+            _row("ZMRpRj5xOW", 7131, entry="8", exam=None, total=None),
+            _row("ZMRpRj5xOW", 7131, entry="34", exam="17", total="51"),
+            _row("ZMRpRj5xOW", 7132, entry="35", exam="30", total="65"),
+            _row("ZMRpRj5xOW", 7132, entry="12", exam=None, total=None),
+        ]
+        run = self._run(apply=True, bundle=_bundle(rows))
+        self.assertEqual(run.counters["official_entry.sem12.skip_target_conflict"], 0)
+        self.assertEqual(self._archive(7131), D("15"))
+        self.assertEqual(run.counters["official_entry.sem12.same"], 1)
 
     def test_bundle_rejects_other_phases(self):
         with self.assertRaises(OfficialEntryPhaseMismatch):

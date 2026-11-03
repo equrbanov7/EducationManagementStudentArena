@@ -71,6 +71,7 @@ from apps.registrar import (
     language_level_grading,
     selfwork_points,
 )
+from apps.registrar.finals import effective_exam_score
 from apps.registrar.models import (
     AssessmentComponent,
     AssessmentScheme,
@@ -452,7 +453,7 @@ def build_period_analytics(*, organization, period, scope_q=None) -> dict:
         exam, bonus = exams.get(enrollment_key, (None, _ZERO))
         resit = resits.get(enrollment_key)
         resit_done = resit is not None
-        effective = resit if resit_done else exam
+        effective = effective_exam_score(exam, resit, legacy=bool(frozen))
         graded = effective is not None
 
         total = entry

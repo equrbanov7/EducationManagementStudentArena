@@ -29,11 +29,11 @@ from decimal import Decimal
 
 from .history import HistoryPhaseMismatch
 from .official_entry_extract import PHASE
-from .official_entry_sheets import target_entry
+from .official_entry_sheets import official_finals, target_entry
 
 ARCHIVE_COMPONENT_NAME = "Davamiyyət və sərbəst iş (arxiv)"  # J5b ``ARCHIVE_COMPONENT_NAME`` güzgüsü
 ARCHIVE_COMPONENT_KIND = "generic"
-FLIPS = ("fail_to_pass", "pass_to_fail")
+FLIPS = ("fail_to_pass", "pass_to_fail", "open_to_pass", "open_to_fail")
 
 
 class OfficialEntryPhaseMismatch(HistoryPhaseMismatch):
@@ -54,9 +54,11 @@ def _outcome(result) -> str:
 
 
 def resolve_targets(run, rows) -> dict:
-    """Paket sətirləri → ``{pk: (enrollment, hədəf, mənbə, semestr, vərəq id, rəsmi yekun)}``; imtinalar sayılır.
+    """Paket sətirləri → ``{pk: (enrollment, hədəf, mənbə, semestr, vərəq id, rəsmi yekun, sətir)}``; imtinalar sayılır.
 
     Rəsmi yekun yalnız hədəf yekundan çıxarılıbsa (``source == "total"``) ötürülür — yeni yekun ona bərabər olmalıdır.
+    Bir yazılışa iki vərəq düşürsə (məs. bölünmüş jurnalın mühazirə hissəsinin imtahandan əvvəlki vərəqi + yekunlu
+    vərəq) Yekun-u olan qalib gəlir; ikisi də yekunludursa və fərqlidirsə — ziddiyyət, heç biri yazılmır.
     """
 
     keys = {(uniqid, int(row["student_id"])) for row in rows for uniqid in row.get("journals") or ()}
@@ -79,32 +81,41 @@ def resolve_targets(run, rows) -> dict:
             run.count(f"{prefix}.skip_enrollment_{'unresolved' if not found else 'ambiguous'}")
             continue
         ((pk, enrollment),) = found.items()
+        total = _official_total(row) if source == "total" else None
         previous = wanted.get(pk)
         if previous is not None and previous[1] != value:
-            clashing.add(pk)
-        total = _official_total(row) if source == "total" else None
-        wanted[pk] = (enrollment, value, source, semester, row.get("export_id"), total)
+            if previous[5] is not None and total is None:
+                continue  # yekunlu vərəq artıq seçilib
+            if not (previous[5] is None and total is not None):
+                clashing.add(pk)
+        wanted[pk] = (enrollment, value, source, semester, row.get("export_id"), total, row)
     for pk in clashing:
         run.count(f"official_entry.sem{wanted.pop(pk)[3]}.skip_target_conflict")
     return wanted
 
 
 def apply_official_entry(run) -> None:
-    from apps.registrar.public import align_archive_entries
+    from apps.registrar.public import EntryTarget, align_archive_entries
 
     wanted = resolve_targets(run, run.bundle.get("official_entries") or [])
+    targets = {}
+    for pk, (_enrollment, value, source, _semester, _export, total, row) in wanted.items():
+        exam, resit = official_finals(row) if source == "total" else (None, None)
+        targets[pk] = EntryTarget(entry=value, total=total, exam=exam, resit=resit)
     rows = align_archive_entries(
         organization=run.organization,
         actor=run.actor,
-        targets={pk: (value, total) for pk, (_enrollment, value, _source, _semester, _export, total) in wanted.items()},
+        targets=targets,
         archive_name=ARCHIVE_COMPONENT_NAME,
         archive_kind=ARCHIVE_COMPONENT_KIND,
         reason=f"SYS-1: köhnə sistemin rəsmi bal vərəqinə görə giriş balı ({run.tag})",
     )
     for row in rows:
-        _enrollment, target, source, semester, export_id, _total = wanted[row.enrollment_id]
+        _enrollment, target, source, semester, export_id, _total, _row = wanted[row.enrollment_id]
         prefix = f"official_entry.sem{semester}"
         run.count(f"{prefix}.{row.outcome}")
+        for kind in row.filled:
+            run.count(f"{prefix}.filled_{kind}")
         if row.outcome == "skip_total_mismatch":
             run.names(
                 "official_entry_total_mismatch",
@@ -112,10 +123,13 @@ def apply_official_entry(run) -> None:
                 f"{row.subject} · {row.period} · giriş {_n(row.entry_before)}→{_n(row.entry_after)} · yeni yekun "
                 f"{_n(row.total_after)} ≠ rəsmi {_n(_total)} (imtahan/25 % fərqi) · vərəq #{export_id}",
             )
-        if row.outcome != "written":
+        if row.outcome == "same" and row.filled:
+            pass  # giriş artıq düzdür, yalnız imtahan / 25 % doldurulub — nəticə dəyişə bilər
+        elif row.outcome != "written":
             continue
-        run.count(f"{prefix}.written_from_{source}")
-        run.count(f"{prefix}.{'raised' if target > row.entry_before else 'lowered'}")
+        else:
+            run.count(f"{prefix}.written_from_{source}")
+            run.count(f"{prefix}.{'raised' if target > row.entry_before else 'lowered'}")
         flip = f"{row.result_before}_to_{row.result_after}"
         if flip in FLIPS:
             run.count(f"{prefix}.{flip}")
@@ -125,6 +139,7 @@ def apply_official_entry(run) -> None:
             row.student,
             f"{row.subject} · {row.period} · giriş {_n(row.entry_before)}→{_n(row.entry_after)} · "
             f"yekun {_n(row.total_before)}→{_n(row.total_after)} ({row.result_before}→{row.result_after}) · "
+            f"{'doldurulub: ' + '+'.join(row.filled) + ' · ' if row.filled else ''}"
             f"vərəq #{export_id}",
         )
 

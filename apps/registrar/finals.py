@@ -108,6 +108,22 @@ def athlete_exemption(enrollment) -> bool:
     )
 
 
+def effective_exam_score(exam, resit, *, legacy=False):
+    """Yekuna girən imtahan balı — TƏK tərif (``analytics`` / ``analytics_fast`` güzgüləri bunu çağırır).
+
+    Yeni sistemdə tamamlanmış 25 % təkrar imtahanı əsas imtahanı ƏVƏZ edir. Köçürülmüş (donmuş, tarixi) semestrdə
+    isə köhnə sistemin qaydası qüvvədədir — İKİSİNDƏN YAXŞISI: rəsmi bal vərəqlərində təkrar imtahan əsasdan
+    aşağı olanda yekun 375 haldan 364-də əsas imtahanla, ``T.imtahan = 0`` olanda 402-dən 390-da əsasla
+    hesablanıb (SYS-1, 2026-11-03). Əks halda köçürmənin yazdığı ``0`` / aşağı ``im2`` tələbəni səbəbsiz
+    «İmtahandan kəsilib — 25 %» göstərirdi (məs. 40+13=53 keçib → 41+6=47 kəsr).
+    """
+    if resit is None:
+        return exam
+    if legacy and exam is not None and exam > resit:
+        return exam
+    return resit
+
+
 def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=None, hours_map=None, batch=None):
     """Full result for one enrollment: entry + exam → total → letter → pass/fail.
 
@@ -182,7 +198,11 @@ def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=N
             hours_map = batch.hours_map
     exam_score = final_grade.exam_score if (final_grade and final_grade.exam_score is not None) else None
     resit_done = bool(resit and resit.resit_score is not None)
-    effective_exam = resit.resit_score if resit_done else exam_score
+    legacy = False
+    if resit_done and exam_score is not None and exam_score > resit.resit_score:
+        # Donma yalnız lazım olanda soruşulur (toplu dəstdə onsuz da var, tək sətirdə memolu sorğu).
+        legacy = frozen if frozen is not None else exam_eligibility.is_frozen(enrollment.offering)
+    effective_exam = effective_exam_score(exam_score, resit.resit_score if resit_done else None, legacy=bool(legacy))
     if effective_exam is not None and language_level_grading.is_level(enrollment.offering):
         effective_exam = min(Decimal(language_level_grading.EXAM_MAX), max(Decimal(0), effective_exam))
 
