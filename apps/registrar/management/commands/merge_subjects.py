@@ -20,6 +20,7 @@ K2/K3 (sahib 2026-11-04): ləğv olunmuş BOŞ əkiz jurnal snapshot-la silinir,
 from __future__ import annotations
 
 import json
+from contextlib import contextmanager
 
 from django.core.management.base import BaseCommand, CommandError
 
@@ -29,6 +30,13 @@ from core.rls_pooling import rls_worker_atomic
 from ...subject_merge import MergeError, preview
 from ...subject_merge_apply import apply
 from ...subject_merge_plan import parse_plan, run_plan
+
+
+@contextmanager
+def _pair_scope():
+    """Plan rejimində HƏR cütün öz DB konteksti (öz tranzaksiyası; RLS bypass yalnız idarə əmrində)."""
+    with rls_worker_atomic(), bypass_rls():
+        yield
 
 
 def _organization(value):
@@ -71,6 +79,7 @@ class Command(BaseCommand):
             self,
             organization,
             pairs,
+            scope=_pair_scope,
             do_apply=options["apply"],
             reason=options["reason"],
             drop_attendance_only=options["drop_attendance_only"],

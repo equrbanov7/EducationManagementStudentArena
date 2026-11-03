@@ -18,9 +18,6 @@ from __future__ import annotations
 from django.core.management.base import CommandError
 from django.db import DatabaseError
 
-from core.rls import bypass_rls
-from core.rls_pooling import rls_worker_atomic
-
 from .subject_codes import KEEPER_CODE_RE, SOURCE_CODE_RE
 from .subject_merge import MAX_SOURCES, MergeError, preview
 from .subject_merge_apply import apply
@@ -62,15 +59,19 @@ def _moved(payload) -> str:
     return " ".join(parts) or "—"
 
 
-def run_plan(command, organization, pairs, *, do_apply, reason, drop_attendance_only) -> dict:
-    """Hər cüt üçün önizləmə (+ apply). Qaytarır: ``{"ok", "conflict", "error"}`` sayları."""
+def run_plan(command, organization, pairs, *, scope, do_apply, reason, drop_attendance_only) -> dict:
+    """Hər cüt üçün önizləmə (+ apply). Qaytarır: ``{"ok", "conflict", "error"}`` sayları.
+
+    ``scope`` — cüt başına DB konteksti (``rls_worker_atomic`` + ``bypass_rls``): onu İDARƏ ƏMRİ verir ki, RLS
+    bypass yalnız təsnif olunmuş yerdə (``apps/registrar/management/``, RLS_BYPASS_AUDIT C) qalsın.
+    """
 
     totals = {"ok": 0, "conflict": 0, "error": 0}
     write = command.stdout.write
     for index, (keeper, sources) in enumerate(pairs, 1):
         label = f"[{index}/{len(pairs)}] {keeper} ← {','.join(sources)}"
         try:
-            with rls_worker_atomic(), bypass_rls():
+            with scope():
                 payload = preview(
                     organization, keeper, sources, by_code=True, drop_attendance_only=drop_attendance_only
                 )
