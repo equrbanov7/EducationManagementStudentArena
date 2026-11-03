@@ -94,6 +94,9 @@
 #       imtahandan avtomatik yazılmış jurnal «Midterm» xanaları, bildirişlər silinir; imtahan yumşaq silinir; audit
 #       tarixçəsi qalır (+1 sətir). Final / append-only ledger (bal hadisəsi, 25% izi) / bağlı jurnal → RƏDD (heç nə
 #       yazılmır). Səbəb sabitdir. Loga YALNIZ bir sayların sətri düşür. İdempotent.
+#   merge_subjects — dublikat fənn kartının birləşdirilməsi (sahib 2026-11-04: SYS-1 yoxlamasında tapılan QKU-452 /
+#       QKU-2436): `teacher` = saxlanılan fənnin kodu (QKU-N), `batch` = birləşdirilən kod(lar) (vergüllə). apply-siz
+#       önizləmə (toqquşma varsa heç nə yazılmır); apply = backup + `--apply --reason`. Geri: undo_subject_merge.
 #   purge_exam_attempt — bir tələbənin SƏHV imtahan cəhdi (sahib 2026-10-25: «Şirməmməd üçün olan son imtahan nəticəsini
 #       sil, o səhvən olub»): `teacher` = tələbənin istifadəçi adı (DƏQİQ), `batch` = cəhdin id-si (boş = tələbənin ƏN SON
 #       cəhdi), `task_chair` = imtahanın slug-ı (apply üçün MƏCBURİ, BƏRABƏR olmalıdır — təhlükəsizlik). Cəhd + cavablar,
@@ -330,6 +333,7 @@ on:
           - issue_staff_credentials
           - purge_trial_exam
           - purge_exam_attempt
+          - merge_subjects
           - legacy_delta_apply
           - recover_mr27_journal
           - recover_mr46_syllabus
@@ -1064,6 +1068,16 @@ jobs:
               args=(--org "$ORG" "--slug=$TEACHER" "--expect-title=$TASK_CHAIR")
               if [ "$APPLY" = "true" ]; then
                 args+=(--apply --reason "Sınaq midterm-in silinməsi — sahibin 2026-10-21 tapşırığı" --i-know-this-is-production)
+              fi
+              custom_apply=1
+              ;;
+            merge_subjects)
+              # Sahib 2026-11-04: dublikat fənn kartı. `teacher` = saxlanılan kod, `batch` = birləşdirilən kod(lar).
+              match "$TEACHER" '^QKU-[0-9]{1,6}$' || { echo "teacher (saxlanılan fənnin kodu) formatı: QKU-N" >&2; exit 2; }
+              match "$BATCH" '^QKU-[0-9]{1,6}(,QKU-[0-9]{1,6}){0,4}$' || { echo "batch (birləşdirilən kodlar) formatı: QKU-N[,QKU-M]" >&2; exit 2; }
+              args=(--org "$ORG" "--target=$TEACHER" "--source=$BATCH")
+              if [ "$APPLY" = "true" ]; then
+                args+=(--apply --reason "Dublikat fənn kartı — sahibin 2026-11-04 təsdiqi (SYS-1 yoxlaması)")
               fi
               custom_apply=1
               ;;

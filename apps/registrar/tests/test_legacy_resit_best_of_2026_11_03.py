@@ -178,3 +178,55 @@ class FrozenLanguageLevelStatus(TestCase):
     def test_eleven_absence_rule_still_bars(self):
         result = self._result(self.absent_enr)
         self.assertTrue(result["barred"])
+
+
+class LegacyAttendanceFail(TestCase):
+    """Köhnə sistemin q/b qərarı (``Enrollment.legacy_qb_fail``): imtahansız donmuş sətir «Q/b-dan kəsilib» (SYS-1)."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.ctx = _seed_org("lqb")
+        period = _seed_period(cls.ctx, name="2024/2025 Yaz", year="2024/2025", start="2025-02-01", end="2025-06-30")
+        cls.qb, _r, cls.qb_enr = _seed_student(cls.ctx, "lqb_fail", period)
+        cls.plain, _r, cls.plain_enr = _seed_student(cls.ctx, "lqb_plain", period)
+        with bypass_rls():
+            Enrollment.objects.filter(pk=cls.qb_enr.pk).update(legacy_qb_fail=True)
+        _stamp_migrated(cls.ctx, cls.qb_enr.offering)
+        _lock_journal(cls.qb_enr.offering)
+
+    def _result(self, enrollment):
+        fresh = Enrollment.objects.select_related("offering", "offering__subject").get(pk=enrollment.pk)
+        return finals.compute_final_result(enrollment=fresh)
+
+    def test_flag_reads_as_qb_fail(self):
+        from apps.registrar import exam_eligibility
+
+        result = self._result(self.qb_enr)
+        self.assertTrue(result["barred"])
+        self.assertTrue(result["failed"])
+        self.assertEqual(result["status_code"], exam_eligibility.STATUS_LEGACY)
+        self.assertEqual(transcript._fail_reason_code(result), "qb")
+
+    def test_without_flag_still_no_legacy_result(self):
+        from apps.registrar import exam_eligibility
+
+        result = self._result(self.plain_enr)
+        self.assertFalse(result["failed"])
+        self.assertEqual(result["status_code"], exam_eligibility.STATUS_LEGACY_NO_RESULT)
+
+    def test_analytics_mirror_agrees(self):
+        enrollments = list(
+            Enrollment.objects.select_related("offering", "offering__subject").filter(
+                pk__in=[self.qb_enr.pk, self.plain_enr.pk]
+            )
+        )
+        maps = analytics.build_evaluation_maps(self.ctx["org"], enrollments)
+        for enrollment in enrollments:
+            mirror = analytics.evaluate_enrollment(enrollment, maps)
+            self.assertEqual(mirror["failed"], finals.compute_final_result(enrollment=enrollment)["failed"])
+
+    def test_rule_needs_frozen_and_no_exam(self):
+        enrollment = Enrollment(legacy_qb_fail=True)
+        self.assertTrue(finals.legacy_attendance_fail(enrollment, frozen=True, effective_exam=None))
+        self.assertFalse(finals.legacy_attendance_fail(enrollment, frozen=False, effective_exam=None))
+        self.assertFalse(finals.legacy_attendance_fail(enrollment, frozen=True, effective_exam=D(20)))

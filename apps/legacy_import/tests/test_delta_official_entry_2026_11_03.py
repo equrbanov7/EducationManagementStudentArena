@@ -307,6 +307,7 @@ class OfficialEntryPhaseTests(TestCase):
                 (7136, "14", (6, 7, 6), "10"),  # yeni sistemdə imtahan FƏRQLİDİR (10 ≠ 17) → toxunulmur
                 (7137, "14", (6, 7, 6), None),  # yeni sistemdə imtahan balı YOXDUR → rəsmi 17 doldurulur
                 (7138, "15", (6, 7, 6), "17"),  # giriş düzdür (34), yalnız 25 % balı yoxdur: 34+17 → 34+20
+                (7139, "5", (2, 2, 2), None),  # köhnə vərəqdə q/b kəsri, imtahan yoxdur (giriş mənfi çap olunub)
             ):
                 user = User.objects.create_user(
                     f"s{sid}", f"s{sid}@example.test", "x", first_name="T", last_name=str(sid)
@@ -487,6 +488,15 @@ class OfficialEntryPhaseTests(TestCase):
         with bypass_rls():
             self.assertFalse(FinalGrade.objects.filter(enrollment=self.students[7137]).exists())
         self.assertEqual(self._archive(7137), D("14"))
+
+    def test_legacy_attendance_fail_is_recorded(self):
+        row = _row("ZMRpRj5xOW", 7139, entry="-2", exam=None, total=None)
+        row["attendance_fail"] = True
+        run = self._run(apply=True, bundle=_bundle([row]))
+        self.assertEqual(run.counters["official_entry.sem12.filled_qb"], 1)
+        with bypass_rls():
+            self.assertTrue(Enrollment.objects.get(pk=self.students[7139].pk).legacy_qb_fail)
+        self.assertEqual(self._archive(7139), D("5"))  # giriş hədəfi yoxdur — arxiv toxunulmur
 
     def test_bundle_rejects_other_phases(self):
         with self.assertRaises(OfficialEntryPhaseMismatch):

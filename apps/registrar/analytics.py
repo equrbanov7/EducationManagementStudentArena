@@ -252,7 +252,7 @@ def _evaluate(enrollment, maps):
         resit_done=resit_done,
         frozen=frozen,
     )
-    barred = eligibility["barred"]
+    barred = eligibility["barred"] or finals.legacy_attendance_fail(enrollment, frozen=frozen, effective_exam=effective)
 
     graded = effective is not None
     total = entry + (effective or Decimal("0")) + (bonus or Decimal("0"))

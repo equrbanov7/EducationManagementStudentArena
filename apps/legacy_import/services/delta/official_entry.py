@@ -69,7 +69,7 @@ def resolve_targets(run, rows) -> dict:
         semester = int(row.get("semestr") or 0)
         prefix = f"official_entry.sem{semester}"
         value, source = target_entry(row)
-        if value is None:
+        if value is None and not _qb_fail(row):
             run.count(f"{prefix}.skip_{source}")
             continue
         found = {}
@@ -171,7 +171,7 @@ def apply_official_entry(run) -> None:
     targets = {}
     for pk, (_enrollment, value, source, _semester, _export, total, row) in wanted.items():
         exam, resit = official_finals(row) if source == "total" else (None, None)
-        targets[pk] = EntryTarget(entry=value, total=total, exam=exam, resit=resit)
+        targets[pk] = EntryTarget(entry=value, total=total, exam=exam, resit=resit, qb_fail=_qb_fail(row))
     rows = align_archive_entries(
         organization=run.organization,
         actor=run.actor,
@@ -193,8 +193,8 @@ def apply_official_entry(run) -> None:
                 f"{row.subject} · {row.period} · giriş {_n(row.entry_before)}→{_n(row.entry_after)} · yeni yekun "
                 f"{_n(row.total_after)} ≠ rəsmi {_n(_total)} (imtahan/25 % fərqi) · vərəq #{export_id}",
             )
-        if row.outcome == "same" and row.filled:
-            pass  # giriş artıq düzdür, yalnız imtahan / 25 % doldurulub — nəticə dəyişə bilər
+        if row.outcome in ("same", "no_entry") and row.filled:
+            pass  # giriş dəyişmir, yalnız imtahan / 25 % / köhnə q/b doldurulub — nəticə dəyişə bilər
         elif row.outcome != "written":
             continue
         else:
@@ -212,6 +212,12 @@ def apply_official_entry(run) -> None:
             f"{'doldurulub: ' + '+'.join(row.filled) + ' · ' if row.filled else ''}"
             f"vərəq #{export_id}",
         )
+
+
+def _qb_fail(row) -> bool:
+    """Rəsmi vərəqdə davamiyyətdən kəsilib (``(Kəsr)``) və imtahan yoxdur — köhnə q/b qərarı."""
+
+    return bool(row.get("attendance_fail")) and row.get("exam") in (None, "") and row.get("resit") in (None, "", "0")
 
 
 def _official_total(row):

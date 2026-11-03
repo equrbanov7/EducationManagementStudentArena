@@ -42,10 +42,11 @@ CHUNK = 1000
 class EntryTarget:
     """Rəsmi dəyərlər: giriş balı (məcburi), yekun, imtahan və 25 % balı (boşdursa doldurmaq üçün)."""
 
-    entry: Decimal
+    entry: Decimal | None
     total: Decimal | None = None
     exam: Decimal | None = None
     resit: Decimal | None = None
+    qb_fail: bool = False  # rəsmi vərəqdə «Davamiyyət … (Kəsr)», imtahansız → ``Enrollment.legacy_qb_fail``
 
 
 @dataclass(frozen=True)
@@ -103,6 +104,9 @@ def align_archive_entries(*, organization, actor, targets, archive_name, reason,
         writes = []
         for enrollment in chunk:
             target = targets[enrollment.pk]
+            if target.entry is None:
+                out.append(_no_entry_row(enrollment, batch, organization, original, filled))
+                continue
             row, write = _align_one(
                 enrollment, Decimal(target.entry), target.total, batch, organization, archive_name, archive_kind
             )
@@ -153,15 +157,20 @@ def _fill_missing_finals(chunk, targets, batch, organization, finals_changes, of
     filled: dict = defaultdict(list)
     for enrollment in chunk:
         target = targets[enrollment.pk]
-        if (target.exam is None and target.resit is None) or not _eligible(enrollment, batch):
+        if (target.exam is None and target.resit is None and not target.qb_fail) or not _eligible(enrollment, batch):
             continue
         grade = batch.final_grade_for(enrollment)
+        resit = batch.resit_for(enrollment)
+        no_scores = (grade is None or grade.exam_score is None) and (resit is None or resit.resit_score is None)
+        if target.qb_fail and no_scores and not enrollment.legacy_qb_fail:
+            Enrollment.objects.filter(pk=enrollment.pk).update(legacy_qb_fail=True)
+            enrollment.legacy_qb_fail = True
+            filled[enrollment.pk].append("qb")
         if target.exam is not None and (grade is None or grade.exam_score is None):
             FinalGrade.objects.update_or_create(
                 organization=organization, enrollment=enrollment, defaults={"exam_score": target.exam}
             )
             filled[enrollment.pk].append("exam")
-        resit = batch.resit_for(enrollment)
         if target.resit is not None and (resit is None or resit.resit_score is None):
             ResitRecord.objects.update_or_create(
                 organization=organization,
@@ -173,17 +182,46 @@ def _fill_missing_finals(chunk, targets, batch, organization, finals_changes, of
                 },
             )
             filled[enrollment.pk].append("resit")
+        labels = {
+            "exam": ("final", "İmtahan", grade_audit.score_repr(target.exam)),
+            "resit": ("resit", "25 % təkrar imtahan", grade_audit.score_repr(target.resit)),
+            "qb": ("final", "Köhnə sistemin q/b qərarı", "q/b"),
+        }
         for kind in filled.get(enrollment.pk, ()):
             offerings[enrollment.offering_id] = enrollment.offering
-            finals_changes[("final" if kind == "exam" else "resit", enrollment.offering_id)].append(
-                {
-                    "student": grade_audit.student_label(enrollment),
-                    "item": "İmtahan" if kind == "exam" else "25 % təkrar imtahan",
-                    "old": "—",
-                    "new": grade_audit.score_repr(target.exam if kind == "exam" else target.resit),
-                }
+            audit_kind, item, new = labels[kind]
+            finals_changes[(audit_kind, enrollment.offering_id)].append(
+                {"student": grade_audit.student_label(enrollment), "item": item, "old": "—", "new": new}
             )
     return filled
+
+
+def _no_entry_row(enrollment, batch, organization, original, filled):
+    """Giriş hədəfi yoxdur (mənfi / boş giriş) — yalnız doldurma (məs. köhnə q/b qərarı) ola bilər."""
+
+    offering = enrollment.offering
+    student = enrollment.student
+    base = {
+        "enrollment_id": enrollment.pk,
+        "student": (student.get_full_name() or student.username) if student else "",
+        "subject": offering.subject.name,
+        "period": f"{offering.period.academic_year} {offering.period.name}",
+        "filled": tuple(filled.get(enrollment.pk, ())),
+    }
+    before = original.get(enrollment.pk)
+    if before is None:
+        return EntryAlignment(outcome="no_entry", **base)
+    after = finals.compute_final_result(enrollment=enrollment, organization=organization, batch=batch)
+    return EntryAlignment(
+        outcome="no_entry",
+        entry_before=Decimal(before["entry_score"]),
+        entry_after=Decimal(after["entry_score"]),
+        total_before=before["total"],
+        total_after=after["total"],
+        result_before=_result(before),
+        result_after=_result(after),
+        **base,
+    )
 
 
 def _align_one(enrollment, target, official_total, batch, organization, archive_name, archive_kind):

@@ -392,9 +392,9 @@ def build_period_analytics(*, organization, period, scope_q=None) -> dict:
         enrollment_text=_text("id"),
         student_text=_text("student_id"),
         offering_text=_text("offering_id"),
-    ).values_list("enrollment_text", "student_text", "offering_text", "absence_hours")
+    ).values_list("enrollment_text", "student_text", "offering_text", "absence_hours", "legacy_qb_fail")
 
-    for enrollment_key, student_key, offering_key, absence_hours in rows.iterator(chunk_size=5000):
+    for enrollment_key, student_key, offering_key, absence_hours, legacy_qb in rows.iterator(chunk_size=5000):
         # ``offering`` FK NOT NULL-dur və ``info`` məhz bu queryset-in
         # açılışlarından qurulub — açar həmişə var (``.get`` ilə səssizcə
         # ötürmək sətri rəqəmlərdən ITIRƏRDİ).
@@ -470,8 +470,9 @@ def build_period_analytics(*, organization, period, scope_q=None) -> dict:
         # ── Buraxılış (exam_eligibility.resolve güzgüsü) ──────────────────────
         if frozen:
             # Donmuş dilimdə buraxılış qərarı HEÇ verilmir (köhnə sistemin
-            # faktiki nəticəsi göstərilir) — ``resolve(frozen=True)`` güzgüsü.
-            barred = False
+            # faktiki nəticəsi göstərilir) — ``resolve(frozen=True)`` güzgüsü; köhnə q/b qərarı istisnadır
+            # (``finals.legacy_attendance_fail`` güzgüsü, SYS-1).
+            barred = bool(legacy_qb) and effective is None
         else:
             if limit is None:
                 limit = exam_eligibility.DEFAULT_LIMIT_PERCENT
