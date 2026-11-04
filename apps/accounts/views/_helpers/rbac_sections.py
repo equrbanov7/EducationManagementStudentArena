@@ -337,6 +337,8 @@ def apply_permission_section_gates(
         (_teaching_appeals_visible(user, organization), "teaching-appeals"),
         # «Alt qrupa tələbə əlavə et» (sahib 2026-10-18) — `retake.manage`; əhatə hər endpoint-də registrar-da.
         (privileged or has_permission(permissions, "retake.manage"), "subgroup-placement"),
+        # «Alt qrup tələbələri» (sahib 2026-11-05) — reyestr + statistika; EYNİ açar, əhatə bölmənin öz qapısında.
+        (privileged or has_permission(permissions, "retake.manage"), "subgroup-students"),
         (can_view_syllabus, "syllabus-list"),
         # «Kafedra materialları» (sahib 2026-10-27) — `subject_folder.view_unit` (tyutor / laborant, yalnız-oxu);
         # əhatə və dərc qaydası `apps/subject_folder/services/unit_view.py`-da (panel + endirmə fail-closed).

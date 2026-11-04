@@ -1,0 +1,73 @@
+{% load i18n static subgroup_students_tags %}
+{% comment %}
+«Alt qrup tələbələri» (sahib 2026-11-05) — alt qrupdan jurnala əlavə olunmuş tələbələrin reyestri.
+Menyu qapısı: rbac_sections.py (`retake.manage` / RİM rəhbəri / superadmin); data qapısı və struktur əhatəsi
+`{% subgroup_students_panel %}` tag-ında render vaxtı yenidən yoxlanır.
+
+Panel server-render olunur: süzgəclər `_filter_bar` (avto rejim), sıralama başlıqları, səhifə linkləri bölməni
+yerində yeniləyir (AJAX-safe). Excel ixracı ayrıca GET. «+ Alt qrupa tələbə əlavə et» modalı jurnal modalının
+RƏSMİ endpoint-lərinə gedir (yeni yazı yolu yoxdur) — JS xarici fayldadır, URL-lər data-atributdadır.
+CSS / JS panelin İÇİNDƏDİR.
+{% endcomment %}
+{% if 'subgroup-students' in allowed_sections %}
+<section class="profile-section-panel profile-section--subgroup-students {% if active_section == 'subgroup-students' %}is-active{% endif %}"
+         data-profile-section-panel="subgroup-students"
+         data-source-url="{{ profile_base_url }}?section=subgroup-students">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/subgroup_students.css' %}?v=20261105-1">
+{% subgroup_students_panel as ss %}
+{% if not ss.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=ss.access_denied_message %}
+{% else %}
+<div class="sst" data-sst-root>
+    {% trans "Başqa (alt) qrupdan jurnala əlavə olunmuş hər tələbə: öz qrupu, alt qrup olduğu jurnal, fənn, müəllim, kredit, səbəb və əlavə olunarkən təqdim edilən sənəd. Süzgəclərlə daraldın, başlığa klikləyib sıralayın." context "accounts.subgroup_students" as ss_sub %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=ss_sub %}
+
+    {% if ss.scope_limited %}
+    <p class="sst-scope"><i class="fas fa-circle-info" aria-hidden="true"></i> {% trans "Yalnız sizin struktur əhatənizdəki qrupların tələbələri və jurnalları göstərilir." context "accounts.subgroup_students" %}</p>
+    {% endif %}
+
+    {% include "accounts/profile/sections/subgroup_students/_stats.html" %}
+
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="subgroup-students" filter_prefix="ss_" filter_fields=ss.filter_fields filter_count_label=ss.filter_count_label filter_auto=True filter_bootstrap=True %}
+
+    <div class="sst-toolbar">
+        <span class="sst-toolbar__range">{% if ss.total %}{{ ss.first_index }}–{{ ss.last_index }} / {{ ss.total }}{% endif %}</span>
+        <span class="sst-toolbar__actions">
+            {% if ss.add.can_add %}
+            <button type="button" class="ems-btn ems-btn--primary ems-btn--sm" data-ems-overlay-open="sst-add-dialog" data-sst-add-open>
+                <i class="fas fa-user-plus" aria-hidden="true"></i> {% trans "Alt qrupa tələbə əlavə et" context "accounts.subgroup_students" %}
+            </button>
+            {% endif %}
+            {% if ss.export_url and ss.total %}
+            <a class="ems-btn ems-btn--sm" href="{{ ss.export_url }}" download>
+                <i class="fas fa-file-excel" aria-hidden="true"></i> {% trans "Excel-ə ixrac" context "accounts.subgroup_students" %}
+            </a>
+            {% endif %}
+        </span>
+    </div>
+
+    <div data-ems-filter-target>
+    {% if ss.rows %}
+        {% include "accounts/profile/sections/subgroup_students/_table.html" %}
+    {% elif ss.is_filtered %}
+        {% trans "Süzgəcə uyğun tələbə yoxdur" context "accounts.subgroup_students" as st_title %}
+        {% trans "Süzgəcləri dəyişin və ya «Sıfırla» basın." context "accounts.subgroup_students" as st_body %}
+        {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-magnifying-glass" %}
+    {% else %}
+        {% trans "Hələ alt qrupdan əlavə olunmuş tələbə yoxdur" context "accounts.subgroup_students" as st_title %}
+        {% trans "Jurnalda və ya «Alt qrupa tələbə əlavə et» bölməsində əlavə ediləndə tələbə burada görünəcək." context "accounts.subgroup_students" as st_body %}
+        {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-users" %}
+    {% endif %}
+    </div>
+
+    {% if ss.add.can_add %}
+        {% trans "Alt qrupa tələbə əlavə et" context "accounts.subgroup_students" as dlg_title %}
+        {% trans "Yazı jurnal modalının rəsmi yolu ilə gedir: kredit həddi, jurnal tutumu və siyahı qapısı eynidir." context "accounts.subgroup_students" as dlg_sub %}
+        {% trans "Əlavə et" context "accounts.subgroup_students" as dlg_submit %}
+        {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="sst-add-dialog" form_dialog_title=dlg_title form_dialog_subtitle=dlg_sub form_dialog_body_include="accounts/profile/sections/subgroup_students/_add_fields.html" form_dialog_data=ss.add.form_data form_dialog_submit_label=dlg_submit form_dialog_wide=True %}
+        <script src="{% static 'accounts/js/profile/subgroup_students_add.js' %}?v=20261105-1" defer></script>
+    {% endif %}
+</div>
+{% endif %}
+</section>
+{% endif %}

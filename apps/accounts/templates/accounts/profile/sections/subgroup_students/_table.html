@@ -1,0 +1,84 @@
+{% load i18n %}
+{% comment %}«Alt qrup tələbələri» cədvəli — SERVER sıralaması (başlıq linkləri `ss_sort`, ikinci klik istiqaməti çevirir)
+və server səhifələməsi; linklər bölməni yerində yeniləyir. Sənəd linki qorunan media route-udur (oxu siyasəti
+`core.media_policies.check_guest_roster_document_access`). Kontekst: `ss`.{% endcomment %}
+<div class="ems-tablewrap">
+    <div class="ems-tablescroll">
+        <table class="ems-table ems-table--zebra sst-table">
+            <caption class="sst-sr">{% trans "Alt qrupdan əlavə olunmuş tələbələr" context "accounts.subgroup_students" %}</caption>
+            <thead>
+                <tr>
+                    {% include "accounts/profile/sections/subgroup_students/_th.html" with col=ss.columns.student %}
+                    {% include "accounts/profile/sections/subgroup_students/_th.html" with col=ss.columns.home %}
+                    {% include "accounts/profile/sections/subgroup_students/_th.html" with col=ss.columns.target %}
+                    {% include "accounts/profile/sections/subgroup_students/_th.html" with col=ss.columns.subject %}
+                    {% include "accounts/profile/sections/subgroup_students/_th.html" with col=ss.columns.teacher %}
+                    {% include "accounts/profile/sections/subgroup_students/_th.html" with col=ss.columns.period %}
+                    {% include "accounts/profile/sections/subgroup_students/_th.html" with col=ss.columns.status %}
+                    {% include "accounts/profile/sections/subgroup_students/_th.html" with col=ss.columns.credits num=True %}
+                    <th scope="col">{% trans "Səbəb / qeyd" context "accounts.subgroup_students" %}</th>
+                    <th scope="col">{% trans "Sənəd" context "accounts.subgroup_students" %}</th>
+                    {% include "accounts/profile/sections/subgroup_students/_th.html" with col=ss.columns.actor %}
+                    {% include "accounts/profile/sections/subgroup_students/_th.html" with col=ss.columns.added %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in ss.rows %}
+                <tr>
+                    <th scope="row">
+                        <span class="sst-strong">{{ row.student }}</span>
+                        <span class="sst-muted">{{ row.student_username }}</span>
+                    </th>
+                    <td>
+                        <span class="sst-strong">{{ row.home_group|default:"—" }}</span>
+                        {% if row.moved_since %}<span class="sst-muted">{% blocktrans trimmed with group=row.current_group context "accounts.subgroup_students" %}indi: {{ group }}{% endblocktrans %}</span>{% endif %}
+                    </td>
+                    <td>
+                        <a class="sst-strong" href="{% url 'registrar:journal_detail' row.offering_id %}">{{ row.target_group|default:"—" }}</a>
+                        <span class="sst-chip sst-chip--{{ row.kind }}">{{ row.kind_label }}</span>
+                    </td>
+                    <td>
+                        <span class="sst-strong">{{ row.subject_name }}</span>
+                        <span class="sst-muted">{{ row.subject_code }}</span>
+                    </td>
+                    <td>{{ row.teacher|default:"—" }}</td>
+                    <td class="ems-table__nowrap">{{ row.period|default:"—" }}</td>
+                    <td>
+                        <span class="sst-status sst-status--{{ row.status }}">{{ row.status_label }}</span>
+                        {% if row.released %}<span class="sst-muted">{% trans "öz jurnalından azad edilib" context "accounts.subgroup_students" %}</span>{% endif %}
+                    </td>
+                    <td class="ems-table__num">{{ row.credits }}</td>
+                    <td class="sst-note">{{ row.reason|default:"—" }}</td>
+                    <td class="sst-doc">
+                        {% with doc=row.document %}
+                        {% if doc.state == "file" %}
+                            <a class="sst-doc__link" href="{{ doc.url }}" target="_blank" rel="noopener">
+                                <i class="fas fa-file-pdf" aria-hidden="true"></i> {% trans "Sənədə bax" context "accounts.subgroup_students" %}
+                            </a>
+                            {% if doc.count > 1 %}<span class="sst-muted">{% blocktrans trimmed with n=doc.count context "accounts.subgroup_students" %}cəmi {{ n }} sənəd{% endblocktrans %}</span>{% endif %}
+                            {% if doc.uploaded_by %}<span class="sst-muted">{{ doc.uploaded_by }}{% if doc.uploaded_at %} · {{ doc.uploaded_at|date:"d.m.Y" }}{% endif %}</span>{% endif %}
+                        {% elif doc.state == "order" %}
+                            <span class="sst-doc__order">{% blocktrans trimmed with number=doc.order_number context "accounts.subgroup_students" %}Sərəncam № {{ number }}{% endblocktrans %}</span>
+                            {% if doc.order_date %}<span class="sst-muted">{{ doc.order_date|date:"d.m.Y" }}</span>{% endif %}
+                        {% elif doc.state == "waived" %}
+                            <span class="sst-doc__waived">{% trans "sənədsiz — superadmin/RİM rəhbəri düzəlişi" context "accounts.subgroup_students" %}</span>
+                        {% else %}
+                            <span class="sst-doc__none">{% trans "Sənəd yoxdur" context "accounts.subgroup_students" %}</span>
+                        {% endif %}
+                        {% endwith %}
+                    </td>
+                    <td>{{ row.actor|default:"—" }}</td>
+                    <td class="ems-table__nowrap">{{ row.added_on|date:"d.m.Y H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% if ss.has_prev or ss.has_next %}
+<nav class="sst-pager" aria-label="{% trans 'Səhifələr' context 'accounts.subgroup_students' %}">
+    {% if ss.has_prev %}<a class="ems-btn ems-btn--sm" href="{{ ss.prev_url }}" data-section="subgroup-students"><i class="fas fa-chevron-left" aria-hidden="true"></i> {% trans "Əvvəlki" context "accounts.subgroup_students" %}</a>{% endif %}
+    <span class="sst-pager__info">{% blocktrans trimmed with page=ss.page last=ss.last_page context "accounts.subgroup_students" %}Səhifə {{ page }} / {{ last }}{% endblocktrans %}</span>
+    {% if ss.has_next %}<a class="ems-btn ems-btn--sm" href="{{ ss.next_url }}" data-section="subgroup-students">{% trans "Növbəti" context "accounts.subgroup_students" %} <i class="fas fa-chevron-right" aria-hidden="true"></i></a>{% endif %}
+</nav>
+{% endif %}
