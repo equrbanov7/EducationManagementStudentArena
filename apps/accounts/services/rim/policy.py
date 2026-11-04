@@ -198,6 +198,14 @@ def _is_soft_deleted(user) -> bool:
     return bool(profile is not None and getattr(profile, "is_deleted", False))
 
 
+def _counts_inactive_memberships(user) -> bool:
+    """Silinmiş VƏ «işdən ayrılıb» arxivindəki hesab üzvlüklərini deaktiv saxlayır — hər ikisində tenant bağı və
+    iyerarxiya DEAKTİV üzvlüklərlə də hesablanır (bax ``retired.py``)."""
+    from .retired import is_staff_archived
+
+    return _is_soft_deleted(user) or is_staff_archived(user)
+
+
 def target_level(target_user, organization) -> int:
     """Hədəfin təşkilatdakı maksimum rol səviyyəsi.
 
@@ -212,7 +220,7 @@ def target_level(target_user, organization) -> int:
     from apps.organizations.models import Membership
 
     memberships = Membership.objects.filter(user=target_user, organization=organization)
-    if not _is_soft_deleted(target_user):
+    if not _counts_inactive_memberships(target_user):
         memberships = memberships.filter(is_active=True, role__is_active=True)
 
     aggregate = memberships.aggregate(top=Max("role__level"))
@@ -264,7 +272,7 @@ def assert_can_manage(actor: RimActor, target_user) -> None:
     from apps.organizations.models import Membership
 
     membership_filter = Membership.objects.filter(user=target_user, organization=organization)
-    if not _is_soft_deleted(target_user):
+    if not _counts_inactive_memberships(target_user):
         membership_filter = membership_filter.filter(is_active=True)
     is_member = membership_filter.exists()
     if not is_member and getattr(organization, "owner_id", None) != getattr(target_user, "pk", None):
@@ -355,10 +363,13 @@ def manageable_users_queryset(actor: RimActor):
     if organization is None:
         return User.objects.none()
 
-    # Aktiv üzv VƏ YA bu təşkilatda üzvlük izi olan silinmiş hesab (bərpa üçün).
+    # Aktiv üzv VƏ YA bu təşkilatda üzvlük izi olan silinmiş / «işdən ayrılıb» arxivindəki hesab (bərpa üçün).
+    from .retired import staff_archived_q
+
+    retired = Q(profile__is_deleted=True) | staff_archived_q()
     queryset = queryset.filter(
         Q(memberships__organization=organization, memberships__is_active=True)
-        | Q(memberships__organization=organization, profile__is_deleted=True)
+        | (Q(memberships__organization=organization) & retired)
     )
 
     owner_id = getattr(organization, "owner_id", None)
@@ -377,10 +388,11 @@ def manageable_users_queryset(actor: RimActor):
             filter=Q(memberships__organization=organization),
         ),
     ).filter(
-        Q(profile__is_deleted=True, _rim_any_level__lt=actor.level)
-        | Q(profile__is_deleted=True, _rim_any_level__isnull=True)
-        | Q(_rim_active_level__lt=actor.level)
-        | Q(_rim_active_level__isnull=True, profile__is_deleted=False)
+        (retired & Q(_rim_any_level__lt=actor.level))
+        | (retired & Q(_rim_any_level__isnull=True))
+        | (~staff_archived_q() & Q(_rim_active_level__lt=actor.level))
+        # Arxiv hesabın aktiv üzvlüyü yoxdur — onun səviyyəsi YALNIZ yuxarıdakı «bütün üzvlüklər» budağındadır.
+        | (Q(_rim_active_level__isnull=True, profile__is_deleted=False) & ~staff_archived_q())
     )
     if not can_see_student_accounts(actor):
         queryset = queryset.exclude(student_only_q(organization))
