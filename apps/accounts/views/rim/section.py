@@ -27,6 +27,7 @@ from apps.accounts.services.rim.activation import activation_counts
 from apps.accounts.services.rim.archive import archive_restore_dialog_context
 from apps.accounts.services.rim.create import MAX_NOTE_LENGTH, creatable_kinds
 from apps.accounts.services.rim.create_unit import admin_unit_type_choices, can_create_unit
+from apps.accounts.services.rim.create_units import unit_picker_options
 from apps.accounts.services.rim.lifecycle import MAX_REASON_LENGTH, MIN_REASON_LENGTH
 from apps.accounts.services.rim.profile_edit import FIELD_LABELS
 from apps.accounts.services.rim.search import normalize_query
@@ -61,6 +62,8 @@ def _create_context(actor) -> dict:
         "can_create_student": "student" in kinds,
         "can_create_teacher": "teacher" in kinds,
         "can_create_staff": "staff" in kinds,
+        # Sahib 2026-11-04: «Kafedra / bölmə» — axtarışlı seçici (variant hansı növdə görünür: `kinds`).
+        "unit_options": unit_picker_options(actor, kinds),
         "create_url": reverse("accounts:rim_create_account"),
         "create_catalog_url": reverse("accounts:rim_create_catalog"),
         "intake_template_url": reverse("accounts:student_intake_template"),

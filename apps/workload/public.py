@@ -14,6 +14,7 @@ DÖRD yerdə eyni olmalıdır: ``sections_api.SECTION_PARTIALS``,
     "can_manage": bool, "can_distribute": bool,
     "access_denied_message": str,
     "chairs": [{"id", "name"}],  # aktorun əhatəsindəki kafedralar
+    "can_search_all": bool, "all_chairs_value": "all",  # «Bütün kafedralar» (2026-11-04, yalnız oxu)
     "chair_id": str, "chair_name": str,
     "academic_year": str, "years": [str],
     "task": {"id", "status", "status_label", "revision"} | None,
@@ -88,6 +89,7 @@ from .services import (
     teacher_workload_summary,
     teacher_years,
 )
+from .services.all_chairs import ALL_CHAIRS, can_search_all_chairs, searchable_chairs
 from .services.my_workload_lines import group_workload_lines
 from .services.norms import norm_rule_note
 from .services.offering_teachers import teachers_for_offering, teachers_for_offerings
@@ -189,6 +191,13 @@ def build_distribution_context(
     if chair is not None:
         base["chair_id"] = str(chair.pk)
         base["chair_name"] = chair.name
+    # Sahib 2026-11-04: «Bütün kafedralar» — baxış əhatəsində 2+ kafedra varsa (tək kafedralı müdirdə dəyişmir).
+    base["all_chairs_value"] = ALL_CHAIRS
+    base["can_search_all"] = bool(can_search_all_chairs(actor) and searchable_chairs(actor)[:2].count() > 1)
+    if chair_id == ALL_CHAIRS and base["can_search_all"]:
+        chair = None
+        base["chair_id"] = ALL_CHAIRS
+        base["chair_name"] = ""
 
     # UX-08 (2026-09-05): «Tədris ili» əvvəllər sərbəst mətn idi, çünki
     # `list_years` yalnız ARTIQ TeachingTask yaradılmış illəri qaytarırdı —

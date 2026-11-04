@@ -3194,3 +3194,9 @@ msgstr "Yetki alanınızda uygun, onaylanmış bir bölüm görevlendirmesi yok.
 
 msgid "Yük sətri köçürüldü."
 msgstr "Ders yükü satırı aktarıldı."
+
+msgid "Kafedrada redaktə et"
+msgstr "Bölümde düzenle"
+
+msgid "Yalnız baxış"
+msgstr "Yalnızca görüntüleme"

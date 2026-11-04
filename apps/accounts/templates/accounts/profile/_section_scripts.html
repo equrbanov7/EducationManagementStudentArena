@@ -101,11 +101,11 @@ xülasə və çekmecə məntiqi qalır. Göndəriş ortaq `teaching_office.js`-d
 {% comment %}Saf render alt modulu əsas moduldan ƏVVƏL yüklənir; əsas modul onu
 `window.EMSWorkloadRender` üzərindən null-safe oxuyur (sıra pozulsa səhifə
 çökmür — sadəcə bölmə init olunmur).{% endcomment %}
-<script src="{% static 'accounts/js/profile/workload_distribution_render.js' %}?v=20261025-lazy"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution_render.js' %}?v=20261104-allchairs"></script>
 {# 2026-10-25: tənbəl yükləmə + müəllimə görə süzgəc — əsas moduldan ƏVVƏL (o, `EMSWorkloadList`-i null-safe oxuyur). #}
-<script src="{% static 'accounts/js/profile/workload_distribution_list.js' %}?v=20261025-filters"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution_list.js' %}?v=20261104-allchairs"></script>
 <script src="{% static 'accounts/js/profile/workload_distribution_forms.js' %}?v=20261030-transfer"></script>
-<script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20261025-lazy"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20261104-allchairs"></script>
 <script src="{% static 'accounts/js/profile/workload_row_transfer.js' %}?v=20261030-transfer"></script>
 {% comment %}2026-10-15: təsdiqlənmiş bölgünün redaktəsi (düzəliş dialoqu + təkrar sorğu), fəaliyyətin
 çıxarılması, bölgünün redaktəsi, «Redaktə et» keçidinin sətir fokusu — əsas moduldan SONRA.{% endcomment %}
@@ -199,7 +199,7 @@ istifadəçidə forma JS-siz qalırdı (asset auditi 2026-10-21).{% endcomment %
 <script src="{% static 'accounts/js/rim_center/entry.js' %}?v=20261027-arx"></script>
     {# «Yeni hesab» axini — combo seciciden SONRA form, sonra toplu idxal #}
 <script src="{% static 'accounts/js/rim_center/create_combo.js' %}?v=20261014-searchux"></script>
-<script src="{% static 'accounts/js/rim_center/create.js' %}?v=20261023-finopt"></script>
+<script src="{% static 'accounts/js/rim_center/create.js' %}?v=20261104-unitselect"></script>
 <script src="{% static 'accounts/js/rim_center/create_bulk.js' %}?v=20260906-1"></script>
     {# Inzibati bolme (sobe/merkez) — mevcud struktur agaci endpoint-ine gedir #}
 <script src="{% static 'accounts/js/rim_center/create_unit.js' %}?v=20260906-2"></script>

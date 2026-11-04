@@ -336,16 +336,25 @@ Django şablon mühərrikindən keçmir).
               </div>
 
               {% include "accounts/profile/sections/partials/_rim_create_staff_role.html" %}
-              <div class="ems-field rimc-combo" data-rimc-only="teacher staff" data-rimc-combo="unit" data-rimc-staff-catalog="staff_unit">
+              {% comment %}Sahib 2026-11-04: kafedra adları SİYAHI kimi gəlsin, axtarmaq da olsun — layihənin axtarışlı
+              seçicisi (native select deyil). Variantın `data-rimc-unit-for`-u onun hansı hesab növündə göstərildiyini
+              deyir (müəllim — kafedralar, əməkdaş — kafedra/bölmələr); `create.js` növ dəyişəndə uyğun olmayanları
+              gizlədir. Server seçimi yenidən yoxlayır (`services/rim/create_units.py`).{% endcomment %}
+              <div class="ems-field" data-rimc-only="teacher staff">
                 <label class="ems-field__label" for="rimc-unit">{% trans "Kafedra / bölmə" context "profile.rim" %}</label>
-                <input class="ems-input" id="rimc-unit" type="text" role="combobox" autocomplete="off"
-                       aria-expanded="false" aria-autocomplete="list" aria-controls="rimc-unit-list"
-                       placeholder="{% trans 'Kafedranın adını yazın' context 'profile.rim' %}"
-                       data-rimc-combo-input aria-describedby="rimc-unit-hint">
-                <input type="hidden" name="unit" data-rimc-field="unit" data-rimc-combo-value>
-                <ul class="rimc-combo__list" id="rimc-unit-list" role="listbox"
-                    aria-label="{% trans 'Kafedra nəticələri' context 'profile.rim' %}" hidden data-rimc-combo-list></ul>
-                <p class="ems-field__hint" id="rimc-unit-hint" data-rimc-combo-hint>{% trans "Boş qala bilər — kafedra sonradan da təyin edilə bilər." context "profile.rim" %}</p>
+                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                  <select class="ems-select bootstrap-single-select__native" data-bootstrap-select id="rimc-unit" name="unit"
+                          data-rimc-field="unit" data-rimc-unit-select aria-describedby="rimc-unit-hint"
+                          data-live-search="true"
+                          data-live-search-placeholder="{% trans 'Kafedra və ya fakültə adı ilə axtar…' context 'accounts.workload_load' %}"
+                          data-live-search-empty="{% trans 'Uyğun kafedra tapılmadı' context 'accounts.workload_load' %}">
+                    <option value="">{% trans "Təyin edilməyib" context "profile.rim" %}</option>
+                    {% for unit in rim_center_section.unit_options %}
+                    <option value="{{ unit.id }}" data-rimc-unit-for="{{ unit.kinds }}"{% if unit.parent %} data-subtext="{{ unit.parent }}"{% endif %} data-search="{{ unit.code }} {{ unit.parent }}">{{ unit.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <p class="ems-field__hint" id="rimc-unit-hint">{% trans "Boş qala bilər — kafedra sonradan da təyin edilə bilər." context "profile.rim" %}</p>
                 <p class="ems-msg ems-msg--error" data-rimc-error="unit" role="alert" hidden></p>
               </div>
               <div class="ems-field" data-rimc-only="teacher">
