@@ -42,7 +42,7 @@ from ..services import (
     teacher_pool,
     unassign_amended,
 )
-from ..services.tasks import TOTAL_BELOW_ASSIGNED
+from ..services.tasks import ROW_HAS_OBJECTIONS, TOTAL_BELOW_ASSIGNED
 from ._base import active_organization, actor_for, denied, error, json_body, no_org
 
 # Backend auditi 2026-09-13, F-01: gövdədən gələn qeyri-UUID ``row_id`` /
@@ -52,7 +52,7 @@ from ._base import active_organization, actor_for, denied, error, json_body, no_
 
 #: Vəziyyət toqquşması (409) kodları: bölünmüş saatdan az cəm (W2) və təsdiqlənmiş sənəddə səbəbsiz yazı
 #: (2026-10-15 — UI düzəliş dialoqunu açıb sorğunu ``amend_reason`` / ``amend_note`` ilə təkrarlayır).
-_CONFLICT_CODES = frozenset({TOTAL_BELOW_ASSIGNED, AMENDMENT_REQUIRED, "workload.hours_exceeded"})
+_CONFLICT_CODES = frozenset({TOTAL_BELOW_ASSIGNED, AMENDMENT_REQUIRED, ROW_HAS_OBJECTIONS, "workload.hours_exceeded"})
 #: QA-2 F-09 (2026-10-17): məzmun xətası icazə xətası deyil — 403 yox, 400 (səhv səbəb / say / qeyd).
 _INPUT_CODES = frozenset(
     {
