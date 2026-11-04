@@ -23,6 +23,7 @@ _MODULES = (
     "core.runtime_settings_exam_scores",  # «exam» qrupuna kağız bal 15 dəq / tələbəyə 24 saat açarları (2026-10-25)
     "core.runtime_settings_session",  # «session»/«journal»: brauzer bağlananda çıxış, jurnal bağlanması (2026-10-27)
     "core.runtime_settings_journal_full_edit",  # «journal»: müəllimin keçmiş tarixli tam redaktəsi (2026-10-27)
+    "core.runtime_settings_journal_backdate",  # «journal»: müəyyən tarixdən bu günə dərs əlavə etmək (2026-11-04)
 )
 
 

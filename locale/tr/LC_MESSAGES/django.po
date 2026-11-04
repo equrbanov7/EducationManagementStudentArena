@@ -112478,3 +112478,39 @@ msgstr "Bilgiler güncellendi."
 msgctxt "accounts.rim.modal"
 msgid "Dəyişiklik yoxdur."
 msgstr "Değişiklik yok."
+
+msgctxt "core.runtime_settings"
+msgid "Müəllimlər müəyyən tarixdən bu günə keçmiş tarixli dərs əlavə edə bilər"
+msgstr "Öğretmenler belirli bir tarihten bugüne geçmiş tarihli ders ekleyebilir"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılanda müəllim aşağıdakı başlanğıc tarixindən bu günədək istənilən tarixə dərs aça və həmin dərslərin boş xanalarına q/b, i/e və bal yaza bilər — adi «gecikmiş yazı müddəti» həddindən köhnə olsa da. Gələcək tarixə dərs açılmır; semestr sərhədi, yazılmış xananın kilidi və bağlı jurnal qaydası dəyişmir. Söndürüləndə adi yazma müddəti qayıdır."
+msgstr "Açıkken öğretmen aşağıdaki başlangıç tarihinden bugüne kadar herhangi bir tarihe ders açabilir ve bu derslerin boş hücrelerine devamsızlık, katılım ve puan yazabilir — tarih olağan geç yazma süresinden eski olsa bile. Gelecek tarihe ders açılmaz; dönem sınırı, yazılmış hücrenin kilidi ve kapalı defter kuralı değişmez. Kapatıldığında olağan yazma süresi geri gelir."
+
+msgctxt "core.runtime_settings"
+msgid "Keçmiş tarixli dərsin başlanğıc tarixi"
+msgstr "Geçmiş tarihli derslerin başlangıç tarihi"
+
+msgctxt "core.runtime_settings"
+msgid "Yuxarıdakı bayraq yandırılıbsa müəllim bu tarixdən (daxil) bu günədək dərs əlavə edə bilər. Bayraq söndürülüdürsə bu tarix tətbiq olunmur."
+msgstr "Yukarıdaki anahtar açıksa öğretmen bu tarihten (dahil) bugüne kadar ders ekleyebilir. Anahtar kapalıysa bu tarih uygulanmaz."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Dərs tarixi %(date)s tarixindən əvvəl ola bilməz. Daha köhnə tarix üçün RİM-ə müraciət edin."
+msgstr "Ders tarihi %(date)s tarihinden önce olamaz. Daha eski bir tarih için Kayıt Ofisine başvurun."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "%(date)s tarixli dərsə yeni qeyd yazmaq olmaz — keçmiş dərslərə yazı %(since)s tarixindən açıqdır."
+msgstr "%(date)s tarihli derse yeni kayıt yazılamaz — geçmiş derslere yazma %(since)s tarihinden itibaren açıktır."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Keçmiş tarixə dərs %(date)s tarixindən bu günədək açmaq olar."
+msgstr "Geçmiş tarihe ders %(date)s tarihinden bugüne kadar açılabilir."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Davamiyyət %(date)s tarixindən bu günədək keçirilmiş dərslərə qeyd edilə bilər · yazılmış qeyd %(w)s sonra kilidlənir — düzəliş üçün RİM-ə (sənədli düzəliş) müraciət edilir."
+msgstr "Devam, %(date)s tarihinden bugüne kadar yapılmış dersler için kaydedilebilir · yazılan kayıt %(w)s sonra kilitlenir — düzeltme için RİM'e (belgeli düzeltme) başvurulur."

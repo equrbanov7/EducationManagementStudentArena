@@ -113288,3 +113288,39 @@ msgstr "Данные обновлены."
 msgctxt "accounts.rim.modal"
 msgid "Dəyişiklik yoxdur."
 msgstr "Без изменений."
+
+msgctxt "core.runtime_settings"
+msgid "Müəllimlər müəyyən tarixdən bu günə keçmiş tarixli dərs əlavə edə bilər"
+msgstr "Преподаватели могут добавлять занятия задним числом с заданной даты по сегодня"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılanda müəllim aşağıdakı başlanğıc tarixindən bu günədək istənilən tarixə dərs aça və həmin dərslərin boş xanalarına q/b, i/e və bal yaza bilər — adi «gecikmiş yazı müddəti» həddindən köhnə olsa da. Gələcək tarixə dərs açılmır; semestr sərhədi, yazılmış xananın kilidi və bağlı jurnal qaydası dəyişmir. Söndürüləndə adi yazma müddəti qayıdır."
+msgstr "Когда включено, преподаватель может открыть занятие на любую дату с указанной ниже начальной даты по сегодня и записать пропуски, посещаемость и баллы в пустые ячейки этих занятий — даже если дата старше обычного срока поздней записи. Занятие на будущую дату не открывается; граница семестра, блокировка записанной ячейки и правило закрытого журнала не меняются. При выключении возвращается обычный срок записи."
+
+msgctxt "core.runtime_settings"
+msgid "Keçmiş tarixli dərsin başlanğıc tarixi"
+msgstr "Начальная дата для занятий задним числом"
+
+msgctxt "core.runtime_settings"
+msgid "Yuxarıdakı bayraq yandırılıbsa müəllim bu tarixdən (daxil) bu günədək dərs əlavə edə bilər. Bayraq söndürülüdürsə bu tarix tətbiq olunmur."
+msgstr "Если переключатель выше включён, преподаватель может добавлять занятия с этой даты (включительно) по сегодня. Если переключатель выключен, дата не применяется."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Dərs tarixi %(date)s tarixindən əvvəl ola bilməz. Daha köhnə tarix üçün RİM-ə müraciət edin."
+msgstr "Дата занятия не может быть раньше %(date)s. Для более ранней даты обратитесь в регистратуру."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "%(date)s tarixli dərsə yeni qeyd yazmaq olmaz — keçmiş dərslərə yazı %(since)s tarixindən açıqdır."
+msgstr "Нельзя записать новую отметку на занятие %(date)s — запись на прошедшие занятия открыта с %(since)s."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Keçmiş tarixə dərs %(date)s tarixindən bu günədək açmaq olar."
+msgstr "Занятие можно открыть на прошедшую дату с %(date)s по сегодня."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Davamiyyət %(date)s tarixindən bu günədək keçirilmiş dərslərə qeyd edilə bilər · yazılmış qeyd %(w)s sonra kilidlənir — düzəliş üçün RİM-ə (sənədli düzəliş) müraciət edilir."
+msgstr "Посещаемость можно отмечать для занятий, проведённых с %(date)s по сегодня · записанная отметка блокируется через %(w)s — для исправления обращаются в RİM (документальное исправление)."

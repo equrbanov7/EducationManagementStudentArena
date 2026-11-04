@@ -113094,3 +113094,39 @@ msgstr "Details updated."
 msgctxt "accounts.rim.modal"
 msgid "Dəyişiklik yoxdur."
 msgstr "No changes."
+
+msgctxt "core.runtime_settings"
+msgid "Müəllimlər müəyyən tarixdən bu günə keçmiş tarixli dərs əlavə edə bilər"
+msgstr "Teachers may add past-dated lessons from a set date up to today"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılanda müəllim aşağıdakı başlanğıc tarixindən bu günədək istənilən tarixə dərs aça və həmin dərslərin boş xanalarına q/b, i/e və bal yaza bilər — adi «gecikmiş yazı müddəti» həddindən köhnə olsa da. Gələcək tarixə dərs açılmır; semestr sərhədi, yazılmış xananın kilidi və bağlı jurnal qaydası dəyişmir. Söndürüləndə adi yazma müddəti qayıdır."
+msgstr "When on, a teacher can open a lesson on any date from the start date below up to today and record absences, attendance and scores in the empty cells of those lessons — even if the date is older than the usual late entry period. Lessons cannot be opened for a future date; the semester boundary, the lock on recorded cells and the closed-journal rule do not change. When off, the usual entry period applies again."
+
+msgctxt "core.runtime_settings"
+msgid "Keçmiş tarixli dərsin başlanğıc tarixi"
+msgstr "Start date for past-dated lessons"
+
+msgctxt "core.runtime_settings"
+msgid "Yuxarıdakı bayraq yandırılıbsa müəllim bu tarixdən (daxil) bu günədək dərs əlavə edə bilər. Bayraq söndürülüdürsə bu tarix tətbiq olunmur."
+msgstr "If the switch above is on, a teacher can add lessons from this date (inclusive) up to today. If the switch is off, this date is not applied."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Dərs tarixi %(date)s tarixindən əvvəl ola bilməz. Daha köhnə tarix üçün RİM-ə müraciət edin."
+msgstr "The lesson date cannot be before %(date)s. For an older date, contact the Registrar's Office."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "%(date)s tarixli dərsə yeni qeyd yazmaq olmaz — keçmiş dərslərə yazı %(since)s tarixindən açıqdır."
+msgstr "A new record cannot be written for the lesson of %(date)s — entries for past lessons are open from %(since)s."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Keçmiş tarixə dərs %(date)s tarixindən bu günədək açmaq olar."
+msgstr "A lesson can be opened for any past date from %(date)s up to today."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Davamiyyət %(date)s tarixindən bu günədək keçirilmiş dərslərə qeyd edilə bilər · yazılmış qeyd %(w)s sonra kilidlənir — düzəliş üçün RİM-ə (sənədli düzəliş) müraciət edilir."
+msgstr "Attendance can be recorded for lessons held from %(date)s up to today · a recorded mark locks after %(w)s — for a correction, apply to the Digital Development Centre (RİM) for a documented correction."

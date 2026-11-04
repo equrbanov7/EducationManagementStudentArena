@@ -114154,3 +114154,39 @@ msgstr "Daten aktualisiert."
 msgctxt "accounts.rim.modal"
 msgid "Dəyişiklik yoxdur."
 msgstr "Keine Änderungen."
+
+msgctxt "core.runtime_settings"
+msgid "Müəllimlər müəyyən tarixdən bu günə keçmiş tarixli dərs əlavə edə bilər"
+msgstr "Lehrkräfte dürfen Stunden rückwirkend ab einem festen Datum bis heute anlegen"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılanda müəllim aşağıdakı başlanğıc tarixindən bu günədək istənilən tarixə dərs aça və həmin dərslərin boş xanalarına q/b, i/e və bal yaza bilər — adi «gecikmiş yazı müddəti» həddindən köhnə olsa da. Gələcək tarixə dərs açılmır; semestr sərhədi, yazılmış xananın kilidi və bağlı jurnal qaydası dəyişmir. Söndürüləndə adi yazma müddəti qayıdır."
+msgstr "Wenn aktiviert, kann eine Lehrkraft an jedem Datum vom unten angegebenen Startdatum bis heute eine Stunde anlegen und in den leeren Zellen dieser Stunden Fehlzeiten, Anwesenheit und Punkte erfassen — auch wenn das Datum älter als die übliche Nachtragsfrist ist. Für ein zukünftiges Datum wird keine Stunde angelegt; Semestergrenze, Sperre erfasster Zellen und die Regel des geschlossenen Journals ändern sich nicht. Wenn deaktiviert, gilt wieder die übliche Eintragungsfrist."
+
+msgctxt "core.runtime_settings"
+msgid "Keçmiş tarixli dərsin başlanğıc tarixi"
+msgstr "Startdatum für rückwirkende Stunden"
+
+msgctxt "core.runtime_settings"
+msgid "Yuxarıdakı bayraq yandırılıbsa müəllim bu tarixdən (daxil) bu günədək dərs əlavə edə bilər. Bayraq söndürülüdürsə bu tarix tətbiq olunmur."
+msgstr "Ist der Schalter oben aktiviert, kann eine Lehrkraft Stunden ab diesem Datum (einschließlich) bis heute anlegen. Ist er deaktiviert, wird dieses Datum nicht angewendet."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Dərs tarixi %(date)s tarixindən əvvəl ola bilməz. Daha köhnə tarix üçün RİM-ə müraciət edin."
+msgstr "Das Unterrichtsdatum darf nicht vor dem %(date)s liegen. Für ein älteres Datum wenden Sie sich an das Studienbüro."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "%(date)s tarixli dərsə yeni qeyd yazmaq olmaz — keçmiş dərslərə yazı %(since)s tarixindən açıqdır."
+msgstr "Für die Stunde vom %(date)s kann kein neuer Eintrag erfasst werden — Einträge für vergangene Stunden sind ab dem %(since)s möglich."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Keçmiş tarixə dərs %(date)s tarixindən bu günədək açmaq olar."
+msgstr "Eine Stunde kann für ein vergangenes Datum vom %(date)s bis heute angelegt werden."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Davamiyyət %(date)s tarixindən bu günədək keçirilmiş dərslərə qeyd edilə bilər · yazılmış qeyd %(w)s sonra kilidlənir — düzəliş üçün RİM-ə (sənədli düzəliş) müraciət edilir."
+msgstr "Die Anwesenheit kann für Stunden erfasst werden, die vom %(date)s bis heute stattgefunden haben · ein Eintrag wird nach %(w)s gesperrt — für eine Korrektur wenden Sie sich an das RİM (dokumentierte Korrektur)."
