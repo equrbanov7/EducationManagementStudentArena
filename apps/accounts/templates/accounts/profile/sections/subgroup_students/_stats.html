@@ -1,5 +1,5 @@
 {% load i18n ems_ui %}
-{% comment %}«Alt qrup tələbələri» — statistika (cari süzgəclərlə). Zolaqlar `ems-bar` + `ems_pct_style` (dinamik faiz CSS
+{% comment %}«Alt qrup tələbələri» — statistika (cari süzgəclərlə). Zolaqlar `ems-bar` + `style="--pct:NN%"` (dinamik faiz CSS
 dəyişəni ilə; statik inline stil yoxdur). Kontekst: `ss.stats` (apps.registrar.subgroup_students_stats.build).{% endcomment %}
 {% with totals=ss.stats.totals %}
 <div class="ems-kpis ems-kpis--5 sst-kpis">
@@ -50,7 +50,7 @@ dəyişəni ilə; statik inline stil yoxdur). Kontekst: `ss.stats` (apps.registr
             <ol class="sst-trend">
                 {% for item in ss.stats.weeks %}
                 <li class="sst-trend__item" title="{{ item.week|date:'d.m.Y' }}: {{ item.count }}">
-                    <span class="sst-trend__bar"><span class="sst-trend__fill" style="{% ems_pct_style item.pct %}"></span></span>
+                    <span class="sst-trend__bar"><span class="sst-trend__fill" style="--pct:{{ item.pct }}%"></span></span>
                     <span class="sst-trend__count">{{ item.count }}</span>
                     <span class="sst-trend__label">{{ item.week|date:"d.m" }}</span>
                 </li>

@@ -24,12 +24,13 @@
 .sst-top__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ems-neutral-800); }
 .sst-top__count { font-weight: 800; color: var(--ems-neutral-700); }
 .sst-top__bar { grid-column: 1 / -1; }
+.sst-top__bar .ems-bar__fill { width: var(--pct, 0%); }
 
 /* Həftəlik trend — sadə şaquli zolaqlar */
 .sst-trend { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 4px; align-items: end; }
 .sst-trend__item { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; }
 .sst-trend__bar { display: flex; align-items: flex-end; width: 100%; height: 72px; border-radius: 4px; background: var(--ems-neutral-100); }
-.sst-trend__fill { display: block; width: 100%; height: var(--ems-bar-pct, 0%); border-radius: 4px; background: var(--ems-primary-500); }
+.sst-trend__fill { display: block; width: 100%; height: var(--pct, 0%); border-radius: 4px; background: var(--ems-primary-500); }
 .sst-trend__count { font-size: 11px; font-weight: 800; color: var(--ems-neutral-700); }
 .sst-trend__label { font-size: 10px; color: var(--ems-neutral-500); white-space: nowrap; }
 
