@@ -1869,6 +1869,13 @@ ENTRIES["djangojs"][""] = {
     "Aç": {"en": "Open", "ru": "Открыть", "tr": "Görüntüle"},
 }
 
+# Sahib 2026-11-04 (VoİP midterm): bitmiş biletin yenidən cəhd üçün açılması.
+D.setdefault("exams.final_center.error", {})["Tələbənin davam edən cəhdi var."] = {
+    "en": "The student has an attempt in progress.",
+    "ru": "У студента есть незавершённая попытка.",
+    "tr": "Öğrencinin devam eden bir denemesi var.",
+}
+
 
 def po_path(lang, domain):
     return os.path.join(BASE, "locale", lang, "LC_MESSAGES", f"{domain}.po")
