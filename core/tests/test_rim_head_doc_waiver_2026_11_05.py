@@ -1,4 +1,4 @@
-"""Sahib 2026-11-05: «sənəd yükləmə yerini pass keç» — RİM rəhbəri superadmin kimi sənədsiz keçir.
+"""Sahib 2026-11-05: «sənəd yükləmə yerini pass keç» — RİM rəhbəri alt qrup yerləşdirməsində sənədsiz keçir.
 
 Qeyd mətni rolu göstərir («RİM rəhbəri düzəlişi — sənədsiz …»); RİM əməkdaşı və müəllim üçün heç nə dəyişmir.
 """
@@ -32,14 +32,22 @@ class RimHeadDocumentWaiverTests(TestCase):
         _assign_user_to_org(cls.teacher, cls.org, ProfileRole.TEACHER, "teacher")
 
     def test_rim_head_waives_with_own_note(self):
-        self.assertTrue(superadmin_waiver.waives(self.rim_head))
-        stamped = superadmin_waiver.stamp("Köhnə sistemdən alt qrup", self.rim_head)
+        scope = superadmin_waiver.SUBGROUP
+        self.assertTrue(superadmin_waiver.waives(self.rim_head, scope=scope))
+        stamped = superadmin_waiver.stamp("Köhnə sistemdən alt qrup", self.rim_head, scope=scope)
         self.assertIn(superadmin_waiver.RIM_NOTE_PREFIX, stamped)
         self.assertTrue(superadmin_waiver.is_waiver_text(stamped))
-        self.assertEqual(superadmin_waiver.stamp(stamped, self.rim_head), stamped)
+        self.assertEqual(superadmin_waiver.stamp(stamped, self.rim_head, scope=scope), stamped)
 
     def test_rim_staff_and_teacher_do_not_waive(self):
-        self.assertFalse(superadmin_waiver.waives(self.rim_staff))
-        self.assertFalse(superadmin_waiver.waives(self.teacher))
+        self.assertFalse(superadmin_waiver.waives(self.rim_staff, scope=superadmin_waiver.SUBGROUP))
+        self.assertFalse(superadmin_waiver.waives(self.teacher, scope=superadmin_waiver.SUBGROUP))
         self.assertEqual(superadmin_waiver.stamp("x", self.teacher), "x")
         self.assertIsNone(superadmin_waiver.document_or_waiver(None, self.teacher))
+
+    def test_rim_head_waiver_is_subgroup_only(self):
+        """Jurnal düzəlişi / imtahan balı / məzun əmri kimi digər sənədli qapılar RİM rəhbəri üçün dəyişmir."""
+        self.assertFalse(superadmin_waiver.waives(self.rim_head))
+        self.assertEqual(superadmin_waiver.stamp("x", self.rim_head), "x")
+        self.assertEqual(superadmin_waiver.fill_text("", self.rim_head, min_length=5), "")
+        self.assertIsNone(superadmin_waiver.document_or_waiver(None, self.rim_head))

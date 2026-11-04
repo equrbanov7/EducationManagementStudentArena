@@ -239,10 +239,14 @@ def guest_add(request, offering_id):
     # sərəncam yüklənməlidir və qeydiyyatla birlikdə tarixçədə qalır.
     # 2026-10-27 (sahib): superadmin sənədsiz keçir — səbəbə avtomatik «Superadmin düzəlişi — sənədsiz» qeydi.
     document = request.FILES.get("document")
-    waived = document is None and superadmin_waiver.waives(request.user)
+    waived = document is None and superadmin_waiver.waives(request.user, scope=superadmin_waiver.SUBGROUP)
     if document is None and not waived:
         return _error(pgettext(_CTX, "Sənəd (təqdimat / sərəncam) yüklənməlidir — alt qrupdan əlavə sənədsiz edilmir."))
-    reason = superadmin_waiver.stamp(_field(data, "reason"), request.user) if waived else _field(data, "reason")
+    reason = (
+        superadmin_waiver.stamp(_field(data, "reason"), request.user, scope=superadmin_waiver.SUBGROUP)
+        if waived
+        else _field(data, "reason")
+    )
     from django.db import transaction
 
     from .models import GuestRosterDocument
