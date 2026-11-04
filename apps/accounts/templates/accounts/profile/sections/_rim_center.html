@@ -190,7 +190,8 @@ UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
         </div>
         <div class="rim-modal__body">
           <p class="rim-confirm-text" data-rim-confirm-text></p>
-          <label class="rim-field-label" for="rim-confirm-reason">
+          <div class="rim-confirm-list" data-rim-confirm-list hidden></div>
+          <label class="rim-field-label" for="rim-confirm-reason" data-rim-confirm-reason-label>
             {% trans "Səbəb" context "profile.rim" %}
           </label>
           <textarea id="rim-confirm-reason" class="rim-textarea" data-rim-confirm-reason rows="3"
@@ -267,6 +268,9 @@ UI rahatlığıdır — FAKTİKİ qapı serverdədir (services/rim/policy.py).
         </div>
       </div>
     </div>
+
+    {% comment %}Sahib 2026-11-04: «Məzun et» dialoqu + detal kartının bölmə mətnləri.{% endcomment %}
+    {% include "accounts/profile/sections/partials/_rim_user_dialogs.html" %}
 
     {% comment %}Sahib 2026-10-27: «Arxivdən çıxar» — səhv arxivlənmiş cari tələbə (yalnız `member.edit`; düymə detal kartında).{% endcomment %}
     {% if rim_center_section.archive_restore %}

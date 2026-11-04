@@ -35,15 +35,19 @@
 
     /** Şablondakı JSON blokundan tərcümələr (xarici JS `{% trans %}` görmür). */
     ns.i18n = function i18n() {
-        var el = document.querySelector("[data-rim-i18n]");
-        if (!el) {
-            return {};
-        }
-        try {
-            return JSON.parse(el.textContent || "{}");
-        } catch (err) {
-            return {};
-        }
+        // 2026-11-04: detal kartının mətnləri ayrıca blokdadır (`_rim_user_dialogs.html`) — ikisi birləşdirilir.
+        var dict = {};
+        Array.prototype.forEach.call(document.querySelectorAll("[data-rim-i18n]"), function (el) {
+            try {
+                var part = JSON.parse(el.textContent || "{}");
+                Object.keys(part).forEach(function (key) {
+                    dict[key] = part[key];
+                });
+            } catch (err) {
+                /* pozuq blok — açarın özü göstərilir */
+            }
+        });
+        return dict;
     };
 
     /** Tərcümə açarı; tapılmasa açarın özü. */

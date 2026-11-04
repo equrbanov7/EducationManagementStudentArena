@@ -111983,3 +111983,498 @@ msgstr "Tüm bölümler"
 msgctxt "accounts.workload"
 msgid "Bütün kafedralar: siyahı yalnız baxış üçündür. Sətri dəyişmək üçün «Kafedrada redaktə et» düyməsi ilə onun kafedrasına keçin."
 msgstr "Tüm bölümler: liste yalnızca görüntüleme içindir. Bir satırı değiştirmek için «Bölümde düzenle» düğmesiyle kendi bölümüne geçin."
+
+msgctxt "accounts.rim.archive"
+msgid "Bunun üçün «Hesabı bloklamaq» (user.block) icazəsi lazımdır."
+msgstr "Bunun için «Hesabı engelle» (user.block) izni gerekir."
+
+msgctxt "accounts.rim.archive"
+msgid "İşdən ayrılıb / müqavilə bitib"
+msgstr "İşten ayrıldı / sözleşme sona erdi"
+
+msgctxt "accounts.rim.archive"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "Etkin kurum bağlamı yok."
+
+msgctxt "accounts.rim.archive"
+msgid "Bu hesab sizin idarə sahənizdə deyil."
+msgstr "Bu hesap yönetim alanınızın dışında."
+
+msgctxt "accounts.rim.archive"
+msgid "Hesab silinib — əvvəlcə bərpa edin."
+msgstr "Hesap silinmiş — önce geri yükleyin."
+
+msgctxt "accounts.rim.archive"
+msgid "Hesab artıq arxivdədir."
+msgstr "Hesap zaten arşivde."
+
+msgctxt "accounts.rim.archive"
+msgid "Tələbə arxivə «Məzun et» (və ya reyestrdəki xaric) əmri ilə keçir."
+msgstr "Öğrenci arşive «Mezun et» (veya kayıttaki ilişik kesme) emriyle geçer."
+
+msgctxt "accounts.rim.archive"
+msgid "Hesab arxivdə deyil."
+msgstr "Hesap arşivde değil."
+
+msgctxt "accounts.rim.archive"
+msgid "Arxivdə saxlanmış rol izi tapılmadı — rolları «Rol təyinatı»nda təyin edin."
+msgstr "Arşivlenmiş rol izi bulunamadı — rolleri «Rol atama»da atayın."
+
+msgctxt "accounts.rim.archive"
+msgid "Arxivdən çıxarmaq alınmadı."
+msgstr "Hesap arşivden çıkarılamadı."
+
+msgctxt "accounts.rim.archive"
+msgid "Arxivləmə alınmadı."
+msgstr "Arşivleme başarısız oldu."
+
+msgctxt "accounts.rim.archive"
+msgid "Bu hesab təşkilatın son aktiv administratorudur — əvvəlcə başqa admin təyin edin."
+msgstr "Bu, kurumun son etkin yöneticisi — önce başka bir yönetici atayın."
+
+msgctxt "accounts.rim.graduation"
+msgid "Oxuyur"
+msgstr "Okuyor"
+
+msgctxt "accounts.rim.graduation"
+msgid "Akademik məzuniyyətdə"
+msgstr "Akademik izinde"
+
+msgctxt "accounts.rim.graduation"
+msgid "Xaric olunub"
+msgstr "İlişiği kesildi"
+
+msgctxt "accounts.rim.graduation"
+msgid "Məzun olub"
+msgstr "Mezun oldu"
+
+msgctxt "accounts.rim.graduation"
+msgid "Məzun əmri üçün «Tələbə hərəkəti» (student.movement) və «Akademik qeyd» icazələri lazımdır."
+msgstr "Mezuniyet emri için «Öğrenci hareketi» (student.movement) ve «Akademik kayıt» izinleri gerekir."
+
+msgctxt "accounts.rim.graduation"
+msgid "Bu hesab sizin idarə sahənizdə deyil."
+msgstr "Bu hesap yönetim alanınızın dışında."
+
+msgctxt "accounts.rim.graduation"
+msgid "Tələbənin sizin əhatənizdə «Oxuyur» statuslu akademik qeydi yoxdur."
+msgstr "Öğrencinin kapsamınızda «Okuyor» durumunda akademik kaydı yok."
+
+msgctxt "accounts.rim.graduation"
+msgid "Tələbənin sizin əhatənizdə akademik qeydi yoxdur."
+msgstr "Öğrencinin kapsamınızda akademik kaydı yok."
+
+msgctxt "accounts.rim.graduation"
+msgid "Akademik qeyd tapılmadı."
+msgstr "Akademik kayıt bulunamadı."
+
+msgctxt "accounts.rim.graduation"
+msgid "Tələbənin bir neçə aktiv qeydi var — qeydi seçin."
+msgstr "Öğrencinin birden fazla etkin kaydı var — birini seçin."
+
+msgctxt "accounts.rim.graduation"
+msgid "Yalnız «Oxuyur» statuslu tələbə məzun edilə bilər."
+msgstr "Yalnızca «Okuyor» durumundaki öğrenci mezun edilebilir."
+
+msgctxt "accounts.rim.graduation"
+msgid "Məzun et"
+msgstr "Mezun et"
+
+msgctxt "accounts.rim.graduation"
+msgid "Akademik qeyd «Məzun» statusuna keçir, cari dövrün açıq qeydiyyatları dondurulur və hesabın girişi bağlanır. Qiymət, jurnal və imtahan tarixçəsi OLDUĞU KİMİ qalır; səhv olarsa «Tələbə reyestri»ndə bərpa əmri ilə geri qaytarılır."
+msgstr "Akademik kayıt «Mezun» durumuna geçer, mevcut dönemin açık kayıtları dondurulur ve giriş kapatılır. Not, yoklama defteri ve sınav geçmişi OLDUĞU GİBİ kalır; hata varsa «Öğrenci kaydı»ndaki geri alma emriyle geri döner."
+
+msgctxt "accounts.rim.graduation"
+msgid "Akademik qeyd"
+msgstr "Akademik kayıt"
+
+msgctxt "accounts.rim.graduation"
+msgid "Əmr nömrəsi"
+msgstr "Emir numarası"
+
+msgctxt "accounts.rim.graduation"
+msgid "Əmrin tarixi"
+msgstr "Emir tarihi"
+
+msgctxt "accounts.rim.graduation"
+msgid "Superadmin: əmr nömrəsi boş qalsa avtomatik «SA-…» əmri yazılır."
+msgstr "Süper yönetici: emir numarası boş bırakılırsa otomatik «SA-…» emri yazılır."
+
+msgctxt "accounts.rim.graduation"
+msgid "Səbəb (istəyə bağlı)"
+msgstr "Gerekçe (isteğe bağlı)"
+
+msgctxt "accounts.rim.graduation"
+msgid "Boş qalsa əmrdən yazılır: «Məzun etmə · Əmr № … · tarix»"
+msgstr "Boş kalırsa emirden yazılır: «Mezuniyet · Emir No … · tarih»"
+
+msgctxt "accounts.rim.placement"
+msgid "Təyinat və ya bölmə idarə sahənizdə deyil."
+msgstr "Atama veya birim yönetim alanınızın dışında."
+
+msgctxt "accounts.rim.placement"
+msgid "Bölmə təyini üçün «Rol təyinatı» səlahiyyəti (role.assign) lazımdır."
+msgstr "Birim ataması için «Rol atama» yetkisi (role.assign) gerekir."
+
+msgctxt "accounts.rim.placement"
+msgid "Bu vəzifənin bölməsi «Rol təyinatı» bölməsində dəyişdirilir."
+msgstr "Bu görevin birimi «Rol atama» bölümünde değiştirilir."
+
+msgctxt "accounts.rim.placement"
+msgid "Siyahıdan bölmə seçin."
+msgstr "Listeden bir birim seçin."
+
+msgctxt "accounts.rim.placement"
+msgid "Təyinat bu arada dəyişib. Kartı yenidən açın."
+msgstr "Atama bu arada değişti. Kartı yeniden açın."
+
+msgctxt "accounts.rim.placement"
+msgid "Cari bölmə sizin icazə əhatənizdən kənardadır."
+msgstr "Mevcut birim izin kapsamınızın dışında."
+
+msgctxt "accounts.rim.placement"
+msgid "Əhatənizdə seçilə bilən bölmə yoxdur."
+msgstr "Kapsamınızda seçilebilir birim yok."
+
+msgctxt "accounts.rim.position"
+msgid "Assistent"
+msgstr "Asistan"
+
+msgctxt "accounts.rim.position"
+msgid "Müəllim"
+msgstr "Öğretim görevlisi"
+
+msgctxt "accounts.rim.position"
+msgid "Baş müəllim"
+msgstr "Kıdemli öğretim görevlisi"
+
+msgctxt "accounts.rim.position"
+msgid "Dosent"
+msgstr "Doçent"
+
+msgctxt "accounts.rim.position"
+msgid "Professor"
+msgstr "Profesör"
+
+msgctxt "accounts.rim.position"
+msgid "Kafedra müdiri"
+msgstr "Bölüm başkanı"
+
+msgctxt "accounts.rim.position"
+msgid "Dekan"
+msgstr "Fakülte dekanı"
+
+msgctxt "accounts.rim.position"
+msgid "Dekan müavini"
+msgstr "Dekan yardımcısı"
+
+msgctxt "accounts.rim.position"
+msgid "Rektor"
+msgstr "Rektör"
+
+msgctxt "accounts.rim.position"
+msgid "Prorektor"
+msgstr "Rektör yardımcısı"
+
+msgctxt "accounts.rim.position"
+msgid "Tyutor"
+msgstr "Danışman (tutor)"
+
+msgctxt "accounts.rim.position"
+msgid "Metodist"
+msgstr "Eğitim metodoloğu"
+
+msgctxt "accounts.rim.position"
+msgid "Laborant"
+msgstr "Laboratuvar görevlisi"
+
+msgctxt "accounts.rim.position"
+msgid "Baş laborant"
+msgstr "Kıdemli laborant"
+
+msgctxt "accounts.rim.position"
+msgid "Şöbə müdiri"
+msgstr "Şube müdürü"
+
+msgctxt "accounts.rim.position"
+msgid "Şöbə müdirinin müavini"
+msgstr "Şube müdür yardımcısı"
+
+msgctxt "accounts.rim.position"
+msgid "Sektor müdiri"
+msgstr "Sektör müdürü"
+
+msgctxt "accounts.rim.position"
+msgid "Mərkəz direktoru"
+msgstr "Merkez müdürü"
+
+msgctxt "accounts.rim.position"
+msgid "Baş mütəxəssis"
+msgstr "Baş uzman"
+
+msgctxt "accounts.rim.position"
+msgid "Aparıcı mütəxəssis"
+msgstr "Kıdemli uzman"
+
+msgctxt "accounts.rim.position"
+msgid "Mütəxəssis"
+msgstr "Uzman"
+
+msgctxt "accounts.rim.position"
+msgid "Baş mühasib"
+msgstr "Baş muhasebeci"
+
+msgctxt "accounts.rim.position"
+msgid "Mühasib"
+msgstr "Muhasebeci"
+
+msgctxt "accounts.rim.position"
+msgid "Hüquqşünas"
+msgstr "Hukukçu"
+
+msgctxt "accounts.rim.position"
+msgid "Psixoloq"
+msgstr "Psikolog"
+
+msgctxt "accounts.rim.position"
+msgid "Kitabxanaçı"
+msgstr "Kütüphaneci"
+
+msgctxt "accounts.rim.position"
+msgid "Kargüzar"
+msgstr "Evrak memuru"
+
+msgctxt "accounts.rim.position"
+msgid "Katib"
+msgstr "Sekreter"
+
+msgctxt "accounts.rim.position"
+msgid "Operator"
+msgstr "Operatör"
+
+msgctxt "accounts.rim.position"
+msgid "Proqramçı"
+msgstr "Programcı"
+
+msgctxt "accounts.rim.position"
+msgid "Sistem inzibatçısı"
+msgstr "Sistem yöneticisi"
+
+msgctxt "accounts.rim.modal"
+msgid "Tələbə məzun edildi — hesab arxivə keçdi, tarixçə saxlanıldı."
+msgstr "Öğrenci mezun edildi — hesap arşive geçti, geçmiş korundu."
+
+#, python-format
+msgctxt "accounts.rim.modal"
+msgid "Hesab arxivdən çıxarıldı: giriş açıldı, %(count)d rol bərpa olundu."
+msgstr "Hesap arşivden çıkarıldı: giriş açıldı, %(count)d rol geri yüklendi."
+
+msgctxt "accounts.rim.modal"
+msgid "Dəyişiklik yoxdur — bu bölmə artıq təyin olunub."
+msgstr "Değişiklik yok — bu birim zaten atanmış."
+
+#, python-format
+msgctxt "accounts.rim.modal"
+msgid "Hesab arxivə göndərildi: giriş bağlandı, %(count)d rol deaktiv edildi. Tarixçə saxlanıldı."
+msgstr "Hesap arşive gönderildi: giriş kapatıldı, %(count)d rol devre dışı bırakıldı. Geçmiş korundu."
+
+#, python-format
+msgctxt "accounts.rim.modal"
+msgid "Bölmə təyin edildi: %(unit)s."
+msgstr "Birim atandı: %(unit)s."
+
+msgctxt "accounts.rim.modal"
+msgid "Əsas məlumatlar"
+msgstr "Temel bilgiler"
+
+msgctxt "accounts.rim.modal"
+msgid "Vəzifə və bölmə"
+msgstr "Görev ve birim"
+
+msgctxt "accounts.rim.modal"
+msgid "Akademik vəziyyət"
+msgstr "Akademik durum"
+
+msgctxt "accounts.rim.modal"
+msgid "Status və təhlükəsizlik"
+msgstr "Durum ve güvenlik"
+
+msgctxt "accounts.rim.modal"
+msgid "Yadda saxlanmamış dəyişiklik var"
+msgstr "Kaydedilmemiş değişiklikler var"
+
+msgctxt "accounts.rim.modal"
+msgid "Axtar…"
+msgstr "Ara…"
+
+msgctxt "accounts.rim.modal"
+msgid "Uyğun nəticə yoxdur"
+msgstr "Eşleşen sonuç yok"
+
+msgctxt "accounts.rim.modal"
+msgid "Təyin edilməyib"
+msgstr "Atanmadı"
+
+msgctxt "accounts.rim.modal"
+msgid "Digər (əl ilə yazın)"
+msgstr "Diğer (elle yazın)"
+
+msgctxt "accounts.rim.modal"
+msgid "Vəzifənin adını yazın"
+msgstr "Görev adını yazın"
+
+msgctxt "accounts.rim.modal"
+msgid "cari dəyər"
+msgstr "mevcut değer"
+
+msgctxt "accounts.rim.modal"
+msgid "Fakültə və kafedra"
+msgstr "Fakülte ve bölüm"
+
+msgctxt "accounts.rim.modal"
+msgid "Bu hesabın müəllim və ya əməkdaş rolu yoxdur — əvvəlcə «Rol təyinatı»nda rol verin."
+msgstr "Bu hesabın öğretim elemanı veya personel rolü yok — önce «Rol atama»da rol verin."
+
+msgctxt "accounts.rim.modal"
+msgid "Müəllim kafedraya bağlananda həmin kafedranın dərs yükü və müəllim siyahılarına düşür."
+msgstr "Bölüme bağlanan öğretim elemanı o bölümün ders yükü ve öğretim elemanı listelerine girer."
+
+msgctxt "accounts.rim.modal"
+msgid "Bölmə təyin edilməyib"
+msgstr "Birim atanmadı"
+
+msgctxt "accounts.rim.modal"
+msgid "Fakültə"
+msgstr "Fakülte"
+
+msgctxt "accounts.rim.modal"
+msgid "Bütün fakültələr"
+msgstr "Tüm fakülteler"
+
+msgctxt "accounts.rim.modal"
+msgid "Kafedra / bölmə"
+msgstr "Bölüm / birim"
+
+msgctxt "accounts.rim.modal"
+msgid "Kafedra və ya bölmə seçin"
+msgstr "Bölüm veya birim seçin"
+
+msgctxt "accounts.rim.modal"
+msgid "Bölməni saxla"
+msgstr "Birimi kaydet"
+
+msgctxt "accounts.rim.modal"
+msgid "Akademik qeyd"
+msgstr "Akademik kayıt"
+
+msgctxt "accounts.rim.modal"
+msgid "Akademik qeyd tapılmadı."
+msgstr "Akademik kayıt bulunamadı."
+
+msgctxt "accounts.rim.modal"
+msgid "Arxiv (işdən ayrılıb)"
+msgstr "Arşiv (işten ayrıldı)"
+
+msgctxt "accounts.rim.modal"
+msgid "Hesab arxivdədir (işdən ayrılıb): giriş bağlıdır, rolları deaktivdir — siyahılarda görünmür. Tarixçə saxlanılır."
+msgstr "Hesap arşivde (işten ayrıldı): giriş kapalı, roller devre dışı — listelerde görünmez. Geçmiş korunur."
+
+msgctxt "accounts.rim.modal"
+msgid "Arxivə göndər"
+msgstr "Arşive gönder"
+
+msgctxt "accounts.rim.modal"
+msgid "Arxivdən çıxar"
+msgstr "Arşivden çıkar"
+
+msgctxt "accounts.rim.modal"
+msgid "Birdəfəlik müvəqqəti parol yaradır; istifadəçi ilk girişdə öz parolunu qurur."
+msgstr "Tek kullanımlık geçici parola oluşturur; kullanıcı ilk girişte kendi parolasını belirler."
+
+msgctxt "accounts.rim.modal"
+msgid "Girişi müvəqqəti bağlayır. Məlumatlar və rollar saxlanılır."
+msgstr "Girişi geçici olarak kapatır. Veriler ve roller korunur."
+
+msgctxt "accounts.rim.modal"
+msgid "Girişi yenidən açır."
+msgstr "Girişi yeniden açar."
+
+msgctxt "accounts.rim.modal"
+msgid "Əmr nömrəsi və tarixi ilə: akademik qeyd «Məzun» olur, giriş bağlanır, tarixçə qalır."
+msgstr "Emir numarası ve tarihiyle: akademik kayıt «Mezun» olur, giriş kapanır, geçmiş kalır."
+
+msgctxt "accounts.rim.modal"
+msgid "İşdən ayrılıb: giriş bağlanır, rollar deaktiv olur — dərs yükü və müəllim siyahılarından çıxır. Tarixçə qalır."
+msgstr "İşten ayrıldı: giriş kapanır, roller devre dışı kalır — ders yükü ve öğretim elemanı listelerinden çıkar. Geçmiş kalır."
+
+msgctxt "accounts.rim.modal"
+msgid "Giriş açılır və arxivləmədə deaktiv edilmiş rollar geri qayıdır."
+msgstr "Giriş açılır ve arşivlemede devre dışı bırakılan roller geri gelir."
+
+msgctxt "accounts.rim.modal"
+msgid "Səhvən arxivlənmiş, hələ oxuyan tələbənin girişini açır."
+msgstr "Yanlışlıkla arşivlenmiş, hâlâ okuyan öğrencinin girişini açar."
+
+msgctxt "accounts.rim.modal"
+msgid "Hesabı siyahılardan çıxarır (yumşaq silmə). Qiymət və jurnal yazıları qalır, bərpa mümkündür."
+msgstr "Hesabı listelerden kaldırır (yumuşak silme). Notlar ve defter kayıtları kalır, geri yüklenebilir."
+
+msgctxt "accounts.rim.modal"
+msgid "Silinmiş hesabı və onun rollarını geri qaytarır."
+msgstr "Silinmiş hesabı ve rollerini geri getirir."
+
+msgctxt "accounts.rim.modal"
+msgid "Bu hesab üçün əlçatan əməliyyat yoxdur."
+msgstr "Bu hesap için kullanılabilir işlem yok."
+
+msgctxt "accounts.rim.modal"
+msgid "Hesab arxivə göndəriləcək: giriş bağlanacaq, bu təşkilatdakı rollar deaktiv olacaq və şəxs dərs yükü / müəllim siyahılarından çıxacaq. Jurnal, qiymət və yük tarixçəsi silinmir; «Arxivdən çıxar» hər şeyi geri qaytarır."
+msgstr "Hesap arşive gönderilecek: giriş kapanacak, bu kurumdaki roller devre dışı kalacak ve kişi ders yükü / öğretim elemanı listelerinden çıkacak. Defter, not ve yük geçmişi silinmez; «Arşivden çıkar» her şeyi geri getirir."
+
+msgctxt "accounts.rim.modal"
+msgid "Hesab arxivdən çıxarılacaq: giriş açılacaq və arxivləmədə deaktiv edilmiş rollar geri qayıdacaq."
+msgstr "Hesap arşivden çıkarılacak: giriş açılacak ve arşivlemede devre dışı bırakılan roller geri gelecek."
+
+msgctxt "accounts.rim.modal"
+msgid "Deaktiv ediləcək rollar:"
+msgstr "Devre dışı bırakılacak roller:"
+
+msgctxt "accounts.rim.modal"
+msgid "Bərpa olunacaq rollar:"
+msgstr "Geri yüklenecek roller:"
+
+msgctxt "accounts.rim.modal"
+msgid "Səbəb"
+msgstr "Gerekçe"
+
+msgctxt "accounts.rim.modal"
+msgid "Səbəb (istəyə bağlı)"
+msgstr "Gerekçe (isteğe bağlı)"
+
+msgctxt "accounts.rim.modal"
+msgid "İstifadəçi adı ən azı 3 simvol olmalı və boşluq olmamalıdır."
+msgstr "Kullanıcı adı en az 3 karakter olmalı ve boşluk içermemelidir."
+
+msgctxt "accounts.rim.modal"
+msgid "Email ünvanı düzgün deyil."
+msgstr "E-posta adresi geçersiz."
+
+msgctxt "accounts.rim.modal"
+msgid "FİN 7 simvol olmalıdır (yalnız hərf və rəqəm)."
+msgstr "FİN 7 karakter olmalıdır (yalnızca harf ve rakam)."
+
+msgctxt "accounts.rim.modal"
+msgid "Əmr nömrəsi və tarixi məcburidir."
+msgstr "Emir numarası ve tarihi zorunludur."
+
+msgctxt "accounts.rim.graduation"
+msgid "Tələbə artıq məzun olub. Səhvdirsə, «Tələbə reyestri»ndə bərpa əmri ilə geri qaytarılır."
+msgstr "Öğrenci zaten mezun oldu. Hata ise «Öğrenci kaydı»ndaki geri alma emriyle geri döner."
+
+msgctxt "accounts.rim.modal"
+msgid "Məlumatlar yeniləndi."
+msgstr "Bilgiler güncellendi."
+
+msgctxt "accounts.rim.modal"
+msgid "Dəyişiklik yoxdur."
+msgstr "Değişiklik yok."

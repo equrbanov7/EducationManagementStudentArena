@@ -1,8 +1,11 @@
-"""RİM staff card: fix one mistaken lab affiliation via role-assignment authority."""
+"""RİM: fix one mistaken lab affiliation via role-assignment authority (API ``move_staff_scope``).
+
+2026-11-04: the detail card no longer renders a lab-only block — «Vəzifə və bölmə» (``placement.py``) places every
+teacher / unit-scoped staff membership, lab assistants included. This endpoint stays for API compatibility.
+"""
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.utils.translation import pgettext
 
 from apps.audit.public import log_action
 from apps.organizations.models import Membership, OrgUnit
@@ -29,54 +32,6 @@ def units_for(actor):
     if not scope.has_structure_access:
         return units.none()
     return units if scope.is_org_wide else units.filter(scope.unit_subtree_q())
-
-
-def card(actor, target):
-    """Explicit membership IDs avoid changing a person's unrelated affiliations."""
-    if not actor.has(PERM_EDIT) or not (
-        actor.is_superadmin or actor.has("role.assign") or actor.has("org.manage_members")
-    ):
-        return None
-    try:
-        assert_can_manage(actor, target)
-    except RimAccessError:
-        return None
-    units = list(units_for(actor).order_by("name").values("id", "name"))
-    if not units:
-        return None
-    allowed_ids = {row["id"] for row in units}
-    memberships = Membership.objects.filter(
-        organization=actor.organization,
-        user=target,
-        is_active=True,
-        role__organization=actor.organization,
-        role__is_active=True,
-        role__name="lab_assistant",
-        scope_unit_id__in=allowed_ids,
-    ).select_related("scope_unit", "role")
-    rows = [
-        {
-            "id": str(m.pk),
-            "unit_id": str(m.scope_unit_id),
-            "unit_name": m.scope_unit.name,
-            "role_label": m.role.display_name,
-        }
-        for m in memberships
-    ]
-    if not rows:
-        return None
-    return {
-        "memberships": rows,
-        "labels": {
-            "title": pgettext("accounts.rim.staff_scope", "Laborantın kafedrası"),
-            "reason": pgettext("accounts.rim.staff_scope", "Dəyişiklik səbəbi"),
-            "save": pgettext("accounts.rim.staff_scope", "Kafedranı dəyiş"),
-            "help": pgettext(
-                "accounts.rim.staff_scope", "Yalnız seçilmiş laborant təyinatı köçürülür. Digər rollar saxlanılır."
-            ),
-        },
-        "units": [{"id": str(u["id"]), "name": u["name"]} for u in units],
-    }
 
 
 @transaction.atomic

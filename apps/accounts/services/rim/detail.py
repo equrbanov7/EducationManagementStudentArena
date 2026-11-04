@@ -24,6 +24,7 @@ from core import phone as phone_lib
 from core.staff_position import visible_role_label
 
 from .policy import RimActor, target_level
+from .retired import is_staff_archived
 from .search import account_status
 
 
@@ -100,6 +101,7 @@ def serialize_row(user, actor: RimActor):
     status = account_status(user)
     # Redaktə formasında telefon (ölkə, yerli nömrə) cütü kimi göstərilir (``core.phone``, sahib 2026-10-25).
     phone_parts = phone_lib.split_phone(getattr(profile, "phone", "") or "")
+    staff_archived = is_staff_archived(user)
     return {
         "id": user.pk,
         # Operator username-i BİLMİR — axtarışın bütün mənası onu tapmaqdır.
@@ -119,8 +121,10 @@ def serialize_row(user, actor: RimActor):
             "active": "Aktiv",
             "blocked": "Bloklanıb",
             "deleted": "Silinib",
-            "archived": "Arxiv (məzun/xaric)",
+            "archived": "Arxiv (işdən ayrılıb)" if staff_archived else "Arxiv (məzun/xaric)",
         }.get(status, "Naməlum"),
+        # Sahib 2026-11-04: arxivin iki növü — tələbə (məzun/xaric, `access_state`) və əməkdaş (işdən ayrılıb).
+        "archive_kind": ("staff" if staff_archived else "student") if status == "archived" else "",
         "organization": getattr(getattr(profile, "organization", None), "name", "") or "",
         "department": getattr(profile, "department", "") or "",
         "block_reason": getattr(profile, "block_reason", "") or "",
@@ -147,16 +151,19 @@ def serialize_detail(user, actor: RimActor):
 
     manageable = True
     block_reason_code = ""
+    not_manageable_message = ""
     try:
         assert_can_manage(actor, user)
     except RimAccessError as exc:
         manageable = False
         block_reason_code = exc.reason_code
+        not_manageable_message = exc.message
 
     status = row["status"]
     row["effective_level"] = target_level(user, actor.organization)
     row["manageable"] = manageable
     row["not_manageable_reason"] = block_reason_code
+    row["not_manageable_message"] = not_manageable_message
     row["actions"] = {
         "set_password": manageable and actor.has(PERM_CREDENTIALS) and status != "deleted",
         "block": manageable and actor.has(PERM_BLOCK) and status == "active",
@@ -167,17 +174,18 @@ def serialize_detail(user, actor: RimActor):
     }
     # Sahib 2026-10-27: səhv arxivlənmiş CARİ tələbə — «Arxivdən çıxar» (`member.edit`, services/archive_restore.py).
     row["archive_restore"] = None
-    if status == "archived":
+    if status == "archived" and not row["archive_kind"] == "staff":
         from .archive import archive_restore_card
 
         row["archive_restore"] = archive_restore_card(user, actor)
     row["actions"]["archive_restore"] = bool(
         manageable and row["archive_restore"] and row["archive_restore"]["can_restore"]
     )
-    # Rol təyinatı RİM-də TƏKRAR YARADILMIR — kanonik bölməyə dərin link.
-    from .staff_scope import card
+    # Sahib 2026-11-04: «Vəzifə və bölmə» (fakültə → kafedra), «Məzun et», «Arxivə göndər / Arxivdən çıxar».
+    from .detail_cards import attach_cards
 
-    row["staff_scope"] = card(actor, user) if manageable and status != "deleted" else None
+    attach_cards(row, user, actor, manageable=manageable)
+    # Rol təyinatı RİM-də TƏKRAR YARADILMIR — kanonik bölməyə dərin link.
     row["role_assignment_url"] = f"{reverse('accounts:profile')}?section=role-assignment"
     return row
 
