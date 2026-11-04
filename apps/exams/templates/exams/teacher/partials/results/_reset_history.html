@@ -1,0 +1,42 @@
+{% load i18n %}
+{% comment %}Sahib 2026-11-04: silinmiş nəticələrin (sıfırlanmış cəhdlərin) tarixçəsi — audit sətirlərindən
+(icraçı, səbəb, tələbə, cəhd id-si, əvvəlki nəticə). Yalnız can_reset_attempts olanlara göstərilir.{% endcomment %}
+<section class="ems-card etr-reset-history" aria-labelledby="etrResetHistoryTitle">
+    <div class="etr-results__head">
+        <h2 class="etr-results__title" id="etrResetHistoryTitle"><i class="fas fa-clock-rotate-left" aria-hidden="true"></i> {% trans "Silinmiş nəticələr (sıfırlanmış cəhdlər)" context "exams.attempt_reset" %}</h2>
+        <span class="ems-badge ems-badge--neutral etp-num">{{ reset_history|length }}</span>
+        {% if reset_audit_url %}<a class="ems-btn ems-btn--ghost" href="{{ reset_audit_url }}"><i class="fas fa-list-check" aria-hidden="true"></i>{% trans "Audit jurnalında bax" context "exams.attempt_reset" %}</a>{% endif %}
+    </div>
+    {% if reset_history %}
+    <div class="etp-tablescroll">
+        <table class="ems-table ems-table--stack etr-table">
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Vaxt" context "exams.attempt_reset" %}</th>
+                    <th scope="col">{% trans "Tələbə" context "exams.attempt_reset" %}</th>
+                    <th scope="col">{% trans "Cəhd" context "exams.attempt_reset" %}</th>
+                    <th scope="col">{% trans "Əvvəlki nəticə" context "exams.attempt_reset" %}</th>
+                    <th scope="col">{% trans "İcraçı" context "exams.attempt_reset" %}</th>
+                    <th scope="col">{% trans "Səbəb" context "exams.attempt_reset" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for row in reset_history %}
+                <tr>
+                    <td class="etp-num" data-label="{% trans 'Vaxt' context 'exams.attempt_reset' %}">{{ row.time|date:"d.m.Y H:i" }}</td>
+                    <th scope="row" data-label="{% trans 'Tələbə' context 'exams.attempt_reset' %}">{{ row.student }}</th>
+                    <td class="etp-num" data-label="{% trans 'Cəhd' context 'exams.attempt_reset' %}">#{{ row.attempt_id }}{% if row.tickets_reset %} <span class="etr-tag" title="{% trans 'Zal bileti yeni PIN ilə yenidən açıldı' context 'exams.attempt_reset' %}"><i class="fas fa-key" aria-hidden="true"></i></span>{% endif %}</td>
+                    <td class="etp-num" data-label="{% trans 'Əvvəlki nəticə' context 'exams.attempt_reset' %}">
+                        {% if row.scores.score %}{{ row.scores.score }}/{{ row.scores.max_score }} ({{ row.scores.percent }}%){% elif row.scores.teacher_score is not None and row.scores.teacher_score != "" %}{{ row.scores.teacher_score }}{% else %}<span class="etr-muted">—</span>{% endif %}
+                    </td>
+                    <td data-label="{% trans 'İcraçı' context 'exams.attempt_reset' %}">{{ row.actor }}</td>
+                    <td class="etr-reset-history__reason" data-label="{% trans 'Səbəb' context 'exams.attempt_reset' %}">{{ row.reason|default:"—" }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="etp-hint etr-reset-history__empty">{% trans "Bu imtahanda hələ heç bir nəticə silinməyib." context "exams.attempt_reset" %}</p>
+    {% endif %}
+</section>

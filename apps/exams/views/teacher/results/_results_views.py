@@ -46,6 +46,7 @@ from ._helpers import (
     _resolve_attempt_action_state,
     _resolve_profile_navigation,
 )
+from ._reset_views import reset_page_context
 from ._test_scores import attach_legacy_selected_options
 
 
@@ -332,6 +333,8 @@ def teacher_exam_results(request, slug):
             # Silinmiş imtahan yalnız-oxu göstərilir: qiymət/silmə/redaktə gizlədilir.
             "exam_is_deleted": exam.is_deleted,
             "can_delete_attempts": can_delete_attempts,
+            # Sahib 2026-11-04: «Nəticəni sil (cəhdi sıfırla)» — yalnız RİM / imtahan mərkəzi rəhbəri.
+            **reset_page_context(request, exam),
             "available_groups": group_index.options,
             "grant_groups": group_index.grant_options,
             # Midterm / final: birbaşa əlavə cəhd yoxdur — rəsmi səhifə (yalnız İmtahan Mərkəzi açır).

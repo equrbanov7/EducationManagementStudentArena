@@ -95,7 +95,7 @@ from .sessions import (
     start_room,
     validate_session_plan,
 )
-from .ticket_reopen import reopen_completed_ticket
+from .ticket_reopen import reopen_completed_ticket, reset_tickets_after_attempt_purge
 from .tickets import (
     TicketStateError,
     assign_students,
@@ -176,6 +176,7 @@ __all__ = [
     "presence_map",
     "readmit_student",
     "reopen_completed_ticket",
+    "reset_tickets_after_attempt_purge",
     "regenerate_pin",
     "remove_student",
     "resolve_ticket_language",

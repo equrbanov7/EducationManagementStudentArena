@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{% static 'css/ems_ui/table.css' %}?v=20261018-pkga">
     <link rel="stylesheet" href="{% static 'exams/css/teacher_page_shell.css' %}?v=20261010-wp3exams">
     <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results_page.css' %}?v=20261025-filters">
+    {% if can_reset_attempts %}<link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results_reset.css' %}?v=20261104-reset">{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -17,7 +18,7 @@
 filtrlər tək alət zolağında (cümlə registrli etiketlər, tarix gg.aa.iiii), Excel ixracı
 ikinci dərəcəli və nəticə yoxdursa söndürülü, boş vəziyyət izahlı. Form sahələri,
 sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endcomment %}
-<div class="etp-page etr-page" data-etr-root data-can-delete="{% if can_delete_attempts %}1{% endif %}">
+<div class="etp-page etr-page" data-etr-root data-can-delete="{% if can_delete_attempts %}1{% endif %}" data-can-reset="{% if can_reset_attempts %}1{% endif %}">
     {% blocktrans trimmed with teacher=teacher_display handle=teacher_username context "exams.template.teacher_exam_results" asvar head_subtitle %}İştirakçıların nəticələri · Müəllim: {{ teacher }} (@{{ handle }}){% endblocktrans %}
     {% include "exams/teacher/partials/_page_head.html" with head_title=exam.title head_back_url=profile_return_url head_back_label=source_back_label head_pills_include="exams/teacher/partials/results/_head_pills.html" head_actions_include="exams/teacher/partials/results/_head_actions.html" %}
 
@@ -189,6 +190,8 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
         </section>
         {% endif %}
 
+        {% if can_reset_attempts and available_groups %}{% include "exams/teacher/partials/results/_reset_group.html" %}{% endif %}
+
         <section class="ems-tablewrap etr-results" aria-labelledby="etrResultsTitle">
             <div class="etr-results__head">
                 <h2 class="etr-results__title" id="etrResultsTitle">{% trans "heading_participant_results" context "exams.template.teacher_exam_results" %}</h2>
@@ -199,6 +202,12 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
                     <button type="button" class="ems-btn" id="selectAllAttemptsBtn">{% trans "action_select_all" context "exams.template.teacher_exam_results" %}</button>
                     <button type="button" class="ems-btn ems-btn--ghost" id="clearAttemptsBtn">{% trans "action_clear_selection" context "exams.template.teacher_exam_results" %}</button>
                     <button type="button" class="ems-btn etp-btn--danger-soft" id="deleteSelectedAttemptsBtn"><i class="fas fa-trash" aria-hidden="true"></i>{% trans "action_delete_selected" context "exams.template.teacher_exam_results" %}</button>
+                </div>
+                {% endif %}
+                {% if can_reset_attempts %}
+                <div class="etr-bulk etr-bulk--reset" role="group" aria-label="{% trans 'Nəticəni sil (cəhdi sıfırla)' context 'exams.attempt_reset' %}">
+                    <span class="etr-bulk__count">{% trans "Sıfırlamaq üçün seçilib" context "exams.attempt_reset" %}: <strong data-reset-selected-count>0</strong></span>
+                    <button type="button" class="ems-btn etp-btn--danger-soft" data-reset-selected disabled><i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Seçilmişlərin nəticəsini sil" context "exams.attempt_reset" %}</button>
                 </div>
                 {% endif %}
             </div>
@@ -225,7 +234,7 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
                     <table class="ems-table ems-table--stack etr-table">
                         <thead>
                             <tr>
-                                {% if can_delete_attempts %}<th scope="col" class="etr-col-check"><span class="visually-hidden">{% trans "Seçim" context "exams.template.teacher_exam_results" %}</span></th>{% endif %}
+                                {% if can_delete_attempts or can_reset_attempts %}<th scope="col" class="etr-col-check"><span class="visually-hidden">{% trans "Seçim" context "exams.template.teacher_exam_results" %}</span></th>{% endif %}
                                 <th scope="col">#</th>
                                 {% include "exams/teacher/partials/results/_sort_th.html" with sort_key="user" sort_label=l_name sort_title="" %}
                                 {% include "exams/teacher/partials/results/_sort_th.html" with sort_key="group" sort_label=l_group sort_title="" %}
@@ -265,8 +274,12 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
             {% endif %}
             </div>
         </section>
+
+        {% if can_reset_attempts %}{% include "exams/teacher/partials/results/_reset_history.html" %}{% endif %}
     </div>
 </div>
+
+{% if can_reset_attempts %}{% include "exams/teacher/partials/results/_reset_modals.html" %}{% endif %}
 
 {% if can_delete_attempts %}
     <form id="deleteAttemptsForm" method="post" action="{% url 'exams:delete_exam_attempts' exam.slug %}" class="d-none">
@@ -304,4 +317,5 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
 <script src="{% static 'js/results_filter_ui.js' %}?v=20261014-searchux"></script>
 <script src="{% static 'js/results_bulk_actions.js' %}"></script>
 <script src="{% static 'exams/js/teacher_exam_results.js' %}?v=20261025-filters"></script>
+{% if can_reset_attempts %}<script src="{% static 'exams/js/teacher_exam_results_reset.js' %}?v=20261104-reset"></script>{% endif %}
 {% endblock %}

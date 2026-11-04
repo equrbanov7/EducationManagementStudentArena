@@ -1,0 +1,24 @@
+{% load i18n %}
+{% comment %}Sahib 2026-11-04: «Qrup cəhdlərini sıfırla» — yalnız RİM / imtahan mərkəzi rəhbəri (can_reset_attempts).
+Qrup seçilir → «Ön baxış» (JSON: cəhd / tələbə / bloklanan sayı) → modalda səbəb → POST. JS: teacher_exam_results_reset.js.{% endcomment %}
+<section class="ems-card etr-grant etr-reset-group" data-reset-group-card
+         data-preview-url="{% url 'exams:reset_group_preview' exam.slug %}">
+    <div class="etr-grant__form">
+        <div class="etr-grant__copy">
+            <h2 class="etr-grant__title"><i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Qrup cəhdlərini sıfırla" context "exams.attempt_reset" %}</h2>
+            <p class="etp-hint">{% trans "Seçilmiş qrupun bu imtahandakı bütün nəticələri silinir və cəhdlər sıfırlanır — tələbələr imtahanı yenidən verə bilər. Əvvəl ön baxış göstərilir." context "exams.attempt_reset" %}</p>
+        </div>
+        <div class="etr-grant__field">
+            <label class="visually-hidden" for="resultsResetGroupSelect">{% trans "Qrup" context "exams.attempt_reset" %}</label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+                <select id="resultsResetGroupSelect" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-reset-group-select>
+                    <option value="">{% trans "Qrup seçin…" context "exams.attempt_reset" %}</option>
+                    {% for grp in available_groups %}{% if not grp.is_none %}<option value="{{ grp.id }}">{{ grp.name }} ({{ grp.count }})</option>{% endif %}{% endfor %}
+                </select>
+            </div>
+        </div>
+        <button type="button" class="ems-btn etp-btn--danger-soft" data-reset-group-open disabled>
+            <i class="fas fa-magnifying-glass" aria-hidden="true"></i>{% trans "Ön baxış" context "exams.attempt_reset" %}
+        </button>
+    </div>
+</section>

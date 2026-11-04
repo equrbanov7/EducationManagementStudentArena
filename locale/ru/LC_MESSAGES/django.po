@@ -113345,3 +113345,182 @@ msgstr "В день можно отправить не более {limit} обр
 msgctxt "registrar.guest_roster"
 msgid "Alt qrup tələbələri"
 msgstr "Студенты подгруппы"
+
+msgctxt "exams.attempt_reset"
+msgid "%(count)s cəhd sıfırlandı (nəticə silindi) — imtahanı yenidən vermək olar."
+msgstr "Сброшено попыток: %(count)s (результат удалён) — экзамен можно сдать заново."
+
+msgctxt "exams.attempt_reset"
+msgid "%(count)s cəhd sıfırlanmadı: %(reason)s."
+msgstr "Не сброшено попыток: %(count)s — %(reason)s."
+
+msgctxt "exams.attempt_reset"
+msgid "%(count)s cəhd tapılmadı (artıq silinib)."
+msgstr "Не найдено попыток: %(count)s (уже удалены)."
+
+msgctxt "exams.attempt_reset"
+msgid "%(count)s zal bileti yeni PIN ilə yenidən açıldı — PIN imtahan mərkəzinin oturum səhifəsindədir."
+msgstr "Билетов в зал открыто заново с новым PIN: %(count)s — PIN на странице сессии экзаменационного центра."
+
+msgctxt "exams.attempt_reset"
+msgid "Audit jurnalında bax"
+msgstr "Открыть в журнале аудита"
+
+msgctxt "exams.attempt_reset"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "exams.attempt_reset"
+msgid "Bloklanıb"
+msgstr "Заблокировано"
+
+msgctxt "exams.attempt_reset"
+msgid "Bu imtahanda hələ heç bir nəticə silinməyib."
+msgstr "В этом экзамене ещё не удалено ни одного результата."
+
+msgctxt "exams.attempt_reset"
+msgid "Bu qrupda sıfırlanacaq cəhd yoxdur."
+msgstr "В этой группе нет попыток для сброса."
+
+msgctxt "exams.attempt_reset"
+msgid "Cəhd"
+msgstr "Попытка"
+
+msgctxt "exams.attempt_reset"
+msgid "Cəhd tapılmadı."
+msgstr "Попытка не найдена."
+
+msgctxt "exams.attempt_reset"
+msgid "Cəhd və cavabları, apellyasiyaları, bildirişləri silinir; jurnaldakı midterm / final balı əvvəlki rəsmi cəhdə qaytarılır və ya boşaldılır. Cəhd sıfırlanmış sayılır — imtahanı yenidən vermək olar. Zal imtahanında bilet yeni PIN ilə yenidən açılır. Əməliyyat geri qaytarılmır və audit jurnalına yazılır."
+msgstr "Попытка, её ответы, апелляции и уведомления удаляются; балл мидтерма / финала в журнале возвращается к предыдущей официальной попытке или очищается. Попытка считается сброшенной — экзамен можно сдать заново. Для экзамена в зале билет открывается заново с новым PIN. Действие необратимо и записывается в журнал аудита."
+
+msgctxt "exams.attempt_reset"
+msgid "Ləğv et"
+msgstr "Отмена"
+
+msgctxt "exams.attempt_reset"
+msgid "Nəticəni sil (cəhdi sıfırla)"
+msgstr "Удалить результат (сбросить попытку)"
+
+msgctxt "exams.attempt_reset"
+msgid "Nəticəni yalnız RİM rəhbəri və imtahan mərkəzi rəhbəri silə bilər."
+msgstr "Удалять результаты могут только руководитель RİM и руководитель экзаменационного центра."
+
+msgctxt "exams.attempt_reset"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "exams.attempt_reset"
+msgid "Qrup cəhdlərini sıfırla"
+msgstr "Сбросить попытки группы"
+
+msgctxt "exams.attempt_reset"
+msgid "Qrup seçin."
+msgstr "Выберите группу."
+
+msgctxt "exams.attempt_reset"
+msgid "Qrup seçin…"
+msgstr "Выберите группу…"
+
+msgctxt "exams.attempt_reset"
+msgid "Qrupu sıfırla"
+msgstr "Сбросить группу"
+
+msgctxt "exams.attempt_reset"
+msgid "Seçilmiş cəhd sayı"
+msgstr "Выбрано попыток"
+
+msgctxt "exams.attempt_reset"
+msgid "Seçilmiş qrupun bu imtahandakı bütün nəticələri silinir və cəhdlər sıfırlanır — tələbələr imtahanı yenidən verə bilər. Əvvəl ön baxış göstərilir."
+msgstr "Все результаты выбранной группы в этом экзамене удаляются, попытки сбрасываются — студенты смогут сдать экзамен заново. Сначала показывается предварительный просмотр."
+
+msgctxt "exams.attempt_reset"
+msgid "Seçilmişlərin nəticəsini sil"
+msgstr "Удалить выбранные результаты"
+
+msgctxt "exams.attempt_reset"
+msgid "Sil və sıfırla"
+msgstr "Удалить и сбросить"
+
+msgctxt "exams.attempt_reset"
+msgid "Silinmiş nəticələr (sıfırlanmış cəhdlər)"
+msgstr "Удалённые результаты (сброшенные попытки)"
+
+msgctxt "exams.attempt_reset"
+msgid "Sistem"
+msgstr "Система"
+
+msgctxt "exams.attempt_reset"
+msgid "Sıfırlamaq üçün cəhd seçin."
+msgstr "Выберите попытку для сброса."
+
+msgctxt "exams.attempt_reset"
+msgid "Sıfırlamaq üçün seçilib"
+msgstr "Выбрано для сброса"
+
+msgctxt "exams.attempt_reset"
+msgid "Sıfırlanacaq"
+msgstr "Будет сброшено"
+
+msgctxt "exams.attempt_reset"
+msgid "Səbəb"
+msgstr "Причина"
+
+msgctxt "exams.attempt_reset"
+msgid "Səbəb (məcburi)"
+msgstr "Причина (обязательно)"
+
+msgctxt "exams.attempt_reset"
+msgid "Səbəb mütləqdir."
+msgstr "Причина обязательна."
+
+msgctxt "exams.attempt_reset"
+msgid "Səbəb ən azı %(n)s simvol olmalıdır."
+msgstr "Причина должна содержать не менее %(n)s символов."
+
+msgctxt "exams.attempt_reset"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "exams.attempt_reset"
+msgid "Vaxt"
+msgstr "Время"
+
+msgctxt "exams.attempt_reset"
+msgid "Zal bileti yeni PIN ilə yenidən açıldı"
+msgstr "Билет в зал открыт заново с новым PIN"
+
+msgctxt "exams.attempt_reset"
+msgid "bu cəhdə 25% (yenidən imtahan) müraciəti bağlıdır"
+msgstr "к этой попытке привязано заявление на пересдачу (25%)"
+
+msgctxt "exams.attempt_reset"
+msgid "jurnal bağlanıb (təsdiqlənib / dərc olunub) — əvvəl jurnalı açın"
+msgstr "журнал закрыт (утверждён / опубликован) — сначала откройте журнал"
+
+msgctxt "exams.attempt_reset"
+msgid "Ön baxış"
+msgstr "Предпросмотр"
+
+msgctxt "exams.attempt_reset"
+msgid "Ön baxış hazırlanır…"
+msgstr "Готовим предпросмотр…"
+
+msgctxt "exams.attempt_reset"
+msgid "Ön baxışı yükləmək olmadı."
+msgstr "Не удалось загрузить предпросмотр."
+
+msgctxt "exams.attempt_reset"
+msgid "İcraçı"
+msgstr "Исполнитель"
+
+msgctxt "exams.attempt_reset"
+msgid "Ən azı %(n)s simvol."
+msgstr "Не менее %(n)s символов."
+
+msgctxt "exams.attempt_reset"
+msgid "Əvvəlki nəticə"
+msgstr "Прежний результат"
+
+msgid "Cəhd sıfırlandı — bilet yeni PIN ilə yenidən açıldı"
+msgstr "Попытка сброшена — билет открыт заново с новым PIN"

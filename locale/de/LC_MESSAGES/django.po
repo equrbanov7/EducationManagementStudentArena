@@ -114211,3 +114211,182 @@ msgstr "Pro Tag können höchstens {limit} Anträge eingereicht werden — das h
 msgctxt "registrar.guest_roster"
 msgid "Alt qrup tələbələri"
 msgstr "Studierende der Untergruppe"
+
+msgctxt "exams.attempt_reset"
+msgid "%(count)s cəhd sıfırlandı (nəticə silindi) — imtahanı yenidən vermək olar."
+msgstr "%(count)s Versuch(e) zurückgesetzt (Ergebnis gelöscht) — die Prüfung kann erneut abgelegt werden."
+
+msgctxt "exams.attempt_reset"
+msgid "%(count)s cəhd sıfırlanmadı: %(reason)s."
+msgstr "%(count)s Versuch(e) nicht zurückgesetzt: %(reason)s."
+
+msgctxt "exams.attempt_reset"
+msgid "%(count)s cəhd tapılmadı (artıq silinib)."
+msgstr "%(count)s Versuch(e) nicht gefunden (bereits gelöscht)."
+
+msgctxt "exams.attempt_reset"
+msgid "%(count)s zal bileti yeni PIN ilə yenidən açıldı — PIN imtahan mərkəzinin oturum səhifəsindədir."
+msgstr "%(count)s Saalticket(s) mit neuer PIN wieder geöffnet — die PIN steht auf der Sitzungsseite des Prüfungszentrums."
+
+msgctxt "exams.attempt_reset"
+msgid "Audit jurnalında bax"
+msgstr "Im Audit-Protokoll ansehen"
+
+msgctxt "exams.attempt_reset"
+msgid "Bağla"
+msgstr "Schließen"
+
+msgctxt "exams.attempt_reset"
+msgid "Bloklanıb"
+msgstr "Blockiert"
+
+msgctxt "exams.attempt_reset"
+msgid "Bu imtahanda hələ heç bir nəticə silinməyib."
+msgstr "Für diese Prüfung wurden noch keine Ergebnisse gelöscht."
+
+msgctxt "exams.attempt_reset"
+msgid "Bu qrupda sıfırlanacaq cəhd yoxdur."
+msgstr "Diese Gruppe hat keine zurückzusetzenden Versuche."
+
+msgctxt "exams.attempt_reset"
+msgid "Cəhd"
+msgstr "Versuch"
+
+msgctxt "exams.attempt_reset"
+msgid "Cəhd tapılmadı."
+msgstr "Versuch nicht gefunden."
+
+msgctxt "exams.attempt_reset"
+msgid "Cəhd və cavabları, apellyasiyaları, bildirişləri silinir; jurnaldakı midterm / final balı əvvəlki rəsmi cəhdə qaytarılır və ya boşaldılır. Cəhd sıfırlanmış sayılır — imtahanı yenidən vermək olar. Zal imtahanında bilet yeni PIN ilə yenidən açılır. Əməliyyat geri qaytarılmır və audit jurnalına yazılır."
+msgstr "Der Versuch samt Antworten, Einsprüchen und Benachrichtigungen wird gelöscht; die Midterm- / Final-Note im Journal wird auf den vorherigen offiziellen Versuch zurückgesetzt oder geleert. Der Versuch gilt als zurückgesetzt — die Prüfung kann erneut abgelegt werden. Bei Saalprüfungen wird das Ticket mit neuer PIN wieder geöffnet. Der Vorgang ist nicht umkehrbar und wird im Audit-Protokoll erfasst."
+
+msgctxt "exams.attempt_reset"
+msgid "Ləğv et"
+msgstr "Abbrechen"
+
+msgctxt "exams.attempt_reset"
+msgid "Nəticəni sil (cəhdi sıfırla)"
+msgstr "Ergebnis löschen (Versuch zurücksetzen)"
+
+msgctxt "exams.attempt_reset"
+msgid "Nəticəni yalnız RİM rəhbəri və imtahan mərkəzi rəhbəri silə bilər."
+msgstr "Nur die RİM-Leitung und die Leitung des Prüfungszentrums dürfen Ergebnisse löschen."
+
+msgctxt "exams.attempt_reset"
+msgid "Qrup"
+msgstr "Gruppe"
+
+msgctxt "exams.attempt_reset"
+msgid "Qrup cəhdlərini sıfırla"
+msgstr "Gruppenversuche zurücksetzen"
+
+msgctxt "exams.attempt_reset"
+msgid "Qrup seçin."
+msgstr "Wählen Sie eine Gruppe."
+
+msgctxt "exams.attempt_reset"
+msgid "Qrup seçin…"
+msgstr "Gruppe wählen…"
+
+msgctxt "exams.attempt_reset"
+msgid "Qrupu sıfırla"
+msgstr "Gruppe zurücksetzen"
+
+msgctxt "exams.attempt_reset"
+msgid "Seçilmiş cəhd sayı"
+msgstr "Ausgewählte Versuche"
+
+msgctxt "exams.attempt_reset"
+msgid "Seçilmiş qrupun bu imtahandakı bütün nəticələri silinir və cəhdlər sıfırlanır — tələbələr imtahanı yenidən verə bilər. Əvvəl ön baxış göstərilir."
+msgstr "Alle Ergebnisse der gewählten Gruppe in dieser Prüfung werden gelöscht und die Versuche zurückgesetzt — die Studierenden können die Prüfung erneut ablegen. Zuerst wird eine Vorschau angezeigt."
+
+msgctxt "exams.attempt_reset"
+msgid "Seçilmişlərin nəticəsini sil"
+msgstr "Ausgewählte Ergebnisse löschen"
+
+msgctxt "exams.attempt_reset"
+msgid "Sil və sıfırla"
+msgstr "Löschen und zurücksetzen"
+
+msgctxt "exams.attempt_reset"
+msgid "Silinmiş nəticələr (sıfırlanmış cəhdlər)"
+msgstr "Gelöschte Ergebnisse (zurückgesetzte Versuche)"
+
+msgctxt "exams.attempt_reset"
+msgid "Sistem"
+msgstr "System"
+
+msgctxt "exams.attempt_reset"
+msgid "Sıfırlamaq üçün cəhd seçin."
+msgstr "Wählen Sie einen Versuch zum Zurücksetzen."
+
+msgctxt "exams.attempt_reset"
+msgid "Sıfırlamaq üçün seçilib"
+msgstr "Zum Zurücksetzen ausgewählt"
+
+msgctxt "exams.attempt_reset"
+msgid "Sıfırlanacaq"
+msgstr "Wird zurückgesetzt"
+
+msgctxt "exams.attempt_reset"
+msgid "Səbəb"
+msgstr "Grund"
+
+msgctxt "exams.attempt_reset"
+msgid "Səbəb (məcburi)"
+msgstr "Grund (Pflichtfeld)"
+
+msgctxt "exams.attempt_reset"
+msgid "Səbəb mütləqdir."
+msgstr "Ein Grund ist erforderlich."
+
+msgctxt "exams.attempt_reset"
+msgid "Səbəb ən azı %(n)s simvol olmalıdır."
+msgstr "Der Grund muss mindestens %(n)s Zeichen lang sein."
+
+msgctxt "exams.attempt_reset"
+msgid "Tələbə"
+msgstr "Studierende(r)"
+
+msgctxt "exams.attempt_reset"
+msgid "Vaxt"
+msgstr "Zeit"
+
+msgctxt "exams.attempt_reset"
+msgid "Zal bileti yeni PIN ilə yenidən açıldı"
+msgstr "Saalticket mit neuer PIN wieder geöffnet"
+
+msgctxt "exams.attempt_reset"
+msgid "bu cəhdə 25% (yenidən imtahan) müraciəti bağlıdır"
+msgstr "mit diesem Versuch ist ein 25-%-Antrag (Wiederholungsprüfung) verknüpft"
+
+msgctxt "exams.attempt_reset"
+msgid "jurnal bağlanıb (təsdiqlənib / dərc olunub) — əvvəl jurnalı açın"
+msgstr "das Journal ist geschlossen (genehmigt / veröffentlicht) — öffnen Sie zuerst das Journal"
+
+msgctxt "exams.attempt_reset"
+msgid "Ön baxış"
+msgstr "Vorschau"
+
+msgctxt "exams.attempt_reset"
+msgid "Ön baxış hazırlanır…"
+msgstr "Vorschau wird vorbereitet…"
+
+msgctxt "exams.attempt_reset"
+msgid "Ön baxışı yükləmək olmadı."
+msgstr "Die Vorschau konnte nicht geladen werden."
+
+msgctxt "exams.attempt_reset"
+msgid "İcraçı"
+msgstr "Ausgeführt von"
+
+msgctxt "exams.attempt_reset"
+msgid "Ən azı %(n)s simvol."
+msgstr "Mindestens %(n)s Zeichen."
+
+msgctxt "exams.attempt_reset"
+msgid "Əvvəlki nəticə"
+msgstr "Vorheriges Ergebnis"
+
+msgid "Cəhd sıfırlandı — bilet yeni PIN ilə yenidən açıldı"
+msgstr "Versuch zurückgesetzt — Ticket mit neuer PIN wieder geöffnet"

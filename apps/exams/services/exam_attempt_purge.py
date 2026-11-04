@@ -375,8 +375,13 @@ def _audit_rows(attempt) -> int:
 
 
 # ── tətbiq ───────────────────────────────────────────────────────────────────
-def apply_purge(attempt, *, reason: str, allow_retake_links=False) -> AttemptPurgePlan | None:
-    """Bir tranzaksiyada sil (cəhd sətri kilid kökü). Rədd → ``PurgeRefused``; cəhd artıq yoxdursa ``None``."""
+def apply_purge(
+    attempt, *, reason: str, allow_retake_links=False, actor=None, request=None, audit_extra=None
+) -> AttemptPurgePlan | None:
+    """Bir tranzaksiyada sil (cəhd sətri kilid kökü). Rədd → ``PurgeRefused``; cəhd artıq yoxdursa ``None``.
+
+    ``actor`` / ``request`` / ``audit_extra`` — veb «cəhdi sıfırla» axını (``attempt_reset``, sahib 2026-11-04):
+    audit sətri icraçını, IP-ni və əlavə izləri (``verb``, əvvəlki ballar, bilet id-ləri) daşıyır."""
     from apps.exams.models import (
         CodingSubmission,
         ExamAttempt,
@@ -415,7 +420,7 @@ def apply_purge(attempt, *, reason: str, allow_retake_links=False) -> AttemptPur
         exam = locked.exam
         locked.delete()  # cavablar, fayl sətirləri — CASCADE; bilet — SET_NULL
         _restore_journal(locked, plan)
-        _audit(exam, locked, plan, reason)
+        _audit(exam, locked, plan, reason, actor=actor, request=request, extra=audit_extra)
         transaction.on_commit(lambda: trial._after_commit(exam.pk, plan.file_names))
     return plan
 
@@ -450,27 +455,30 @@ def _restore_journal(attempt, plan):
     plan.counts["journal_final_cleared"] = int(cleared)
 
 
-def _audit(exam, attempt, plan, reason):
+def _audit(exam, attempt, plan, reason, *, actor=None, request=None, extra=None):
     from core.audit import log_action
     from core.constants import AuditAction
 
+    changes = {
+        "verb": "purge_exam_attempt",
+        "student_id": attempt.user_id,
+        "exam_id": exam.pk,
+        "started_at": attempt.started_at.isoformat() if attempt.started_at else None,
+        "counts": {key: plan.counts.get(key, 0) for key in COUNT_KEYS},
+    }
+    changes.update(extra or {})
     log_action(
         action=AuditAction.DELETE,
-        user=None,
+        user=actor,
         organization=exam.organization,
         obj=exam,
         resource_type=AUDIT_RESOURCE_TYPE,
         resource_id=str(plan.info["attempt_id"]),
         resource_repr=f"{exam.slug}#{plan.info['attempt_id']}",
         old_values={"attempt_id": int(plan.info["attempt_id"]), "exam_slug": exam.slug, "status": attempt.status},
-        changes={
-            "verb": "purge_exam_attempt",
-            "student_id": attempt.user_id,
-            "exam_id": exam.pk,
-            "started_at": attempt.started_at.isoformat() if attempt.started_at else None,
-            "counts": {key: plan.counts.get(key, 0) for key in COUNT_KEYS},
-        },
+        changes=changes,
         reason=reason,
+        request=request,
     )
 
 
