@@ -152,8 +152,13 @@ class ChairTeachingMetadataTest(TestCase):
         response = self.client.get(reverse("registrar:journal_list_teachers"), {"q": self.roster[9].username})
         self.assertEqual(response.status_code, 200)
         self.assertEqual([r["id"] for r in response.json()["results"]], [str(self.roster[9].pk)])
-        page = self.client.get(reverse("registrar:journal_list"), {"teacher": self.roster[9].pk})
-        self.assertEqual([o.pk for o in page.context["offerings"]], [self.own.pk])
+        page = self.client.get(reverse("registrar:journal_list"), {"teacher": self.roster[9].pk, "year": ""})
+        # Owner 2026-11-04: the teacher filter mirrors roster[9]'s OWN list — an active share with no
+        # positive workload and no recorded lessons is neither current load nor history there.
+        self.assertTrue(page.context["journal_teacher_mirrored"])
+        self.assertEqual(list(page.context["offerings"]), [])
+        page = self.client.get(reverse("registrar:journal_list"), {"group": self.own.group_id, "year": ""})
+        self.assertIn(self.own.pk, [o.pk for o in page.context["offerings"]])
         with bypass_rls():
             self.own.refresh_from_db()
             self.assertEqual(self.own.instructor_id, self.roster[8].pk)
