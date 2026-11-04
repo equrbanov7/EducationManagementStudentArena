@@ -23,6 +23,12 @@ from apps.applications.tests.factories import kind_of, make_world
 pytestmark = pytest.mark.django_db
 
 
+@pytest.fixture(autouse=True)
+def _no_daily_cap(settings):
+    """Göndərən 12 müraciət yaradır — gündəlik limit (defolt 10, 2026-11-04) bu ölçməyə aid deyil."""
+    settings.APPLICATIONS_DAILY_LIMIT = 50
+
+
 def _submit(world, count):
     created = []
     for index in range(count):

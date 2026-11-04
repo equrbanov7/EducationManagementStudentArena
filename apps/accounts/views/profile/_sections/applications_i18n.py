@@ -49,7 +49,7 @@ def _detail() -> dict:
         # ── Modal (yazışma + cavab qutusu) ───────────────────────────────
         "msgLatest": pgettext(_CTX, "ən son"),
         "attachLabel": pgettext(_CTX, "Sənəd əlavə et"),
-        "attachHint": pgettext(_CTX, "PDF, şəkil, DOCX və ya ZIP · maks. {mb} MB · ən çox {n} fayl"),
+        "attachHint": pgettext(_CTX, "PDF, şəkil, Word, Excel və ya ZIP · maks. {mb} MB · ən çox {n} fayl"),
         "filesNotAllowed": pgettext(
             _CTX, "«{action}» əməli sənəd qəbul etmir — faylları silin və ya başqa əməl seçin."
         ),

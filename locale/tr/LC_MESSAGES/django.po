@@ -64897,19 +64897,16 @@ msgid "Nəticələr yüklənir…"
 msgstr "Sonuçlar yükleniyor…"
 
 msgctxt "applications"
-msgid ""
-"Fayl seç — PDF, şəkil, DOCX və ya ZIP · maks. %(mb)s MB · ən çox %(n)s fayl"
-msgstr ""
-"Dosya seç — PDF, görsel, DOCX veya ZIP · en fazla %(mb)s MB · en çok %(n)s "
-"dosya"
+msgid "Fayl seç — PDF, şəkil, Word, Excel və ya ZIP · maks. %(mb)s MB · ən çox %(n)s fayl"
+msgstr "Dosya seç — PDF, görsel, Word, Excel veya ZIP · en fazla %(mb)s MB · en çok %(n)s dosya"
 
 msgctxt "applications"
 msgid "ən son"
 msgstr "en son"
 
 msgctxt "applications"
-msgid "PDF, şəkil, DOCX və ya ZIP · maks. {mb} MB · ən çox {n} fayl"
-msgstr "PDF, görsel, DOCX veya ZIP · en fazla {mb} MB · en çok {n} dosya"
+msgid "PDF, şəkil, Word, Excel və ya ZIP · maks. {mb} MB · ən çox {n} fayl"
+msgstr "PDF, görsel, Word, Excel veya ZIP · en fazla {mb} MB · en çok {n} dosya"
 
 msgctxt "applications"
 msgid ""
@@ -112478,3 +112475,23 @@ msgstr "Bilgiler güncellendi."
 msgctxt "accounts.rim.modal"
 msgid "Dəyişiklik yoxdur."
 msgstr "Değişiklik yok."
+
+msgctxt "core.runtime_settings"
+msgid "Müraciətlər"
+msgstr "Başvurular"
+
+msgctxt "core.runtime_settings"
+msgid "Bir istifadəçinin gündə göndərə biləcəyi müraciət sayı"
+msgstr "Bir kullanıcının günde gönderebileceği başvuru sayısı"
+
+msgctxt "core.runtime_settings"
+msgid "Bir istifadəçi bir təqvim günü (Bakı vaxtı ilə 00:00–24:00) ərzində ən çox bu qədər yeni müraciət göndərə bilər. Limit dolanda yeni müraciət rədd olunur və istifadəçiyə sabah yenidən cəhd etməsi deyilir; artıq göndərilmiş müraciətlərə cavab yazmaq və sənəd əlavə etmək bu limitə düşmür."
+msgstr "Bir kullanıcı bir takvim günü içinde (Bakü saatiyle 00:00–24:00) en fazla bu kadar yeni başvuru gönderebilir. Sınır dolunca yeni başvuru reddedilir ve kullanıcıya yarın tekrar denemesi söylenir; gönderilmiş başvurulara yanıt yazmak ve belge eklemek bu sınıra sayılmaz."
+
+msgctxt "core.runtime_settings"
+msgid "müraciət"
+msgstr "başvuru"
+
+msgctxt "applications.transition"
+msgid "Bir gündə ən çox {limit} müraciət göndərmək olar — bugünkü limitiniz dolub. Yeni müraciəti sabah göndərin; artıq göndərdiyiniz müraciətlərə cavab yaza bilərsiniz."
+msgstr "Günde en fazla {limit} başvuru gönderilebilir — bugünkü sınırınız doldu. Yeni başvuruyu yarın gönderin; gönderdiğiniz başvurulara yanıt yazabilirsiniz."
