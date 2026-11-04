@@ -90,7 +90,8 @@ class JournalModalGateTest(_Base):
         self.assertIsNotNone(place.document_id)
 
         removed = self.client_for(self.coordinator).post(
-            reverse("registrar:journal_guest_remove", args=[self.physics_g1.id]), {"enrollment": enrollment_id}
+            reverse("registrar:journal_guest_remove", args=[self.physics_g1.id]),
+            {"enrollment": enrollment_id, "removal_reason": "group_transfer"},
         )
         self.assertEqual(removed.status_code, 200, removed.content)
         with bypass_rls():

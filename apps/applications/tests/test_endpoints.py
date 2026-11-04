@@ -84,9 +84,10 @@ def test_catalog_lists_only_the_kinds_open_to_the_sender(world):
         "min_subject_length": 5,
         "min_body_length": 20,
         "min_note_length": 10,
-        "max_files": 5,
-        "max_file_mb": 10,
-        "allowed_extensions": [".docx", ".jpeg", ".jpg", ".pdf", ".png", ".webp", ".zip"],
+        # 2026-11-04 (sahib): 5 fayl / 10 MB → 10 fayl / 25 MB, köhnə Word + Excel əlavə olundu.
+        "max_files": 10,
+        "max_file_mb": 25,
+        "allowed_extensions": [".doc", ".docx", ".jpeg", ".jpg", ".pdf", ".png", ".webp", ".xls", ".xlsx", ".zip"],
     }
 
 

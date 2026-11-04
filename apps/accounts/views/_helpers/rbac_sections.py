@@ -354,6 +354,8 @@ def apply_permission_section_gates(
         (bool(is_superadmin or is_rim_head), "system-settings"),
         # «Jurnal təmizliyi» — sahib 2026-10-10: eyni qapı; yazı servisdə `journal.correct` ilə yenidən yoxlanılır.
         (bool(is_superadmin or is_rim_head), "journal-hygiene"),
+        # «Jurnaldan çıxarılmalar» — sahib 2026-11-04: səbəbli çıxarılma qeydləri; eyni qapı (yalnız oxu + ixrac).
+        (bool(is_superadmin or is_rim_head), "journal-removals"),
         (can_manage_workload, "workload-distribution"),
         (show_my_workload, "my-workload"),  # B16: `workload.object` və ya faktiki bölgü sətri
         (can_manage_workload, "workload-center"),

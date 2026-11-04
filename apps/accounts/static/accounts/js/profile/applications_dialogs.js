@@ -110,8 +110,8 @@
         box.__files = box.__files || [];
         var rules = NS.rules || {};
         var extensions = rules.accept || [];
-        var maxFiles = rules.maxFiles || 5;
-        var maxMb = rules.maxMb || 10;
+        var maxFiles = rules.maxFiles || 10;
+        var maxMb = rules.maxMb || 25;
         var errors = [];
         Array.prototype.forEach.call(fileList, function (file) {
             var lower = file.name.toLowerCase();

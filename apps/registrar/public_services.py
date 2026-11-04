@@ -18,6 +18,7 @@ from . import journal_close  # noqa: F401
 from . import journal_hygiene  # noqa: F401
 from . import journal_hygiene_actions  # noqa: F401
 from . import journal_hygiene_rows  # noqa: F401
+from . import journal_removal_read  # noqa: F401 — «Jurnaldan çıxarılmalar» mərkəzi siyahısı (2026-11-04)
 from . import journal_scope  # noqa: F401
 from . import kollokvium_notifications  # noqa: F401
 from . import kollokvium_windows  # noqa: F401
@@ -151,6 +152,7 @@ __all__ = [
     "journal_hygiene",
     "journal_hygiene_actions",
     "journal_hygiene_rows",
+    "journal_removal_read",
     "journal_scope",
     "teacher_journal_list",
     "sync_workload_journal_shares",

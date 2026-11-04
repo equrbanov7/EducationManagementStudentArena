@@ -1811,6 +1811,41 @@ D["teacher_intake"] = {
     "Şablon": {"en": "Template", "ru": "Шаблон", "tr": "Dosya şablonu"},
 }
 
+# ── Dondurma (akademik məzuniyyət) səbəbinin kateqoriyası — sahib 2026-11-04 ──
+D["registrar.leave_reason"] = {
+    "Akademik məzuniyyət": {"en": "Academic leave", "ru": "Академический отпуск", "tr": "Akademik izin"},
+    "Analıq (doğuş) məzuniyyəti": {
+        "en": "Maternity leave",
+        "ru": "Отпуск по беременности и родам",
+        "tr": "Doğum izni",
+    },
+    "Uşağa qulluq məzuniyyəti": {
+        "en": "Childcare leave",
+        "ru": "Отпуск по уходу за ребёнком",
+        "tr": "Çocuk bakım izni",
+    },
+    "Səhhətlə bağlı (tibbi)": {"en": "Health (medical)", "ru": "По состоянию здоровья", "tr": "Sağlık (tıbbi)"},
+    "Hərbi xidmət": {"en": "Military service", "ru": "Военная служба", "tr": "Askerlik hizmeti"},
+    "Ailə vəziyyəti": {"en": "Family circumstances", "ru": "Семейные обстоятельства", "tr": "Aile durumu"},
+    "Maliyyə səbəbi": {"en": "Financial reasons", "ru": "Финансовые причины", "tr": "Maddi nedenler"},
+    "Digər": {"en": "Other", "ru": "Другое", "tr": "Diğer"},
+}
+
+D["accounts.leave_reason"] = {
+    "Dondurma səbəbi": {"en": "Leave reason", "ru": "Причина отпуска", "tr": "İzin nedeni"},
+    "Kateqoriya seçin": {"en": "Choose a category", "ru": "Выберите категорию", "tr": "Kategori seçin"},
+    "Kateqoriya əmr tarixçəsində və audit jurnalında saxlanılır.": {
+        "en": "The category is kept in the order history and the audit log.",
+        "ru": "Категория сохраняется в истории приказов и в журнале аудита.",
+        "tr": "Kategori emir geçmişinde ve denetim kaydında saklanır.",
+    },
+    "«Digər» seçildi — aşağıdakı səbəb sahəsində qısa izah yazın (məcburidir).": {
+        "en": "«Other» is selected — write a short explanation in the reason field below (required).",
+        "ru": "Выбрано «Другое» — кратко поясните в поле причины ниже (обязательно).",
+        "tr": "«Diğer» seçildi — aşağıdaki neden alanına kısa bir açıklama yazın (zorunlu).",
+    },
+}
+
 # ── djangojs (F7): dərs yükü paneli — workload_distribution*.js / workload_my.js ──
 # JS kataloqunda msgctxt yoxdur (layihə konvensiyası: `gettext("AZ mətn")`).
 ENTRIES["djangojs"][""] = {
@@ -1875,6 +1910,229 @@ D.setdefault("exams.final_center.error", {})["Tələbənin davam edən cəhdi va
     "ru": "У студента есть незавершённая попытка.",
     "tr": "Öğrencinin devam eden bir denemesi var.",
 }
+
+
+# Sahib 2026-11-04: «Nəticəni sil (cəhdi sıfırla)» + «Qrup cəhdlərini sıfırla» (RİM / imtahan mərkəzi rəhbəri).
+D.setdefault("exams.attempt_reset", {}).update(
+    {
+        "%(count)s cəhd sıfırlandı (nəticə silindi) — imtahanı yenidən vermək olar.": {
+            "en": "%(count)s attempt(s) reset (result deleted) — the exam can be taken again.",
+            "ru": "Сброшено попыток: %(count)s (результат удалён) — экзамен можно сдать заново.",
+            "tr": "%(count)s deneme sıfırlandı (sonuç silindi) — sınava yeniden girilebilir.",
+        },
+        "%(count)s cəhd sıfırlanmadı: %(reason)s.": {
+            "en": "%(count)s attempt(s) were not reset: %(reason)s.",
+            "ru": "Не сброшено попыток: %(count)s — %(reason)s.",
+            "tr": "%(count)s deneme sıfırlanmadı: %(reason)s.",
+        },
+        "%(count)s cəhd tapılmadı (artıq silinib).": {
+            "en": "%(count)s attempt(s) not found (already deleted).",
+            "ru": "Не найдено попыток: %(count)s (уже удалены).",
+            "tr": "%(count)s deneme bulunamadı (zaten silinmiş).",
+        },
+        "%(count)s zal bileti yeni PIN ilə yenidən açıldı — PIN imtahan mərkəzinin oturum səhifəsindədir.": {
+            "en": "%(count)s hall ticket(s) reopened with a new PIN — the PIN is on the exam centre session page.",
+            "ru": "Билетов в зал открыто заново с новым PIN: %(count)s — PIN на странице сессии экзаменационного центра.",
+            "tr": "%(count)s salon bileti yeni PIN ile yeniden açıldı — PIN sınav merkezinin oturum sayfasında.",
+        },
+        "Audit jurnalında bax": {
+            "en": "View in audit log",
+            "ru": "Открыть в журнале аудита",
+            "tr": "Denetim günlüğünde gör",
+        },
+        "Bağla": {"en": "Close", "ru": "Закрыть", "tr": "Kapat"},
+        "Bloklanıb": {"en": "Blocked", "ru": "Заблокировано", "tr": "Engellendi"},
+        "Bu imtahanda hələ heç bir nəticə silinməyib.": {
+            "en": "No results have been deleted for this exam yet.",
+            "ru": "В этом экзамене ещё не удалено ни одного результата.",
+            "tr": "Bu sınavda henüz hiçbir sonuç silinmedi.",
+        },
+        "Bu qrupda sıfırlanacaq cəhd yoxdur.": {
+            "en": "This group has no attempts to reset.",
+            "ru": "В этой группе нет попыток для сброса.",
+            "tr": "Bu grupta sıfırlanacak deneme yok.",
+        },
+        "Cəhd": {"en": "Attempt", "ru": "Попытка", "tr": "Deneme"},
+        "Cəhd tapılmadı.": {"en": "Attempt not found.", "ru": "Попытка не найдена.", "tr": "Deneme bulunamadı."},
+        "Cəhd və cavabları, apellyasiyaları, bildirişləri silinir; jurnaldakı midterm / final balı əvvəlki rəsmi cəhdə qaytarılır və ya boşaldılır. Cəhd sıfırlanmış sayılır — imtahanı yenidən vermək olar. Zal imtahanında bilet yeni PIN ilə yenidən açılır. Əməliyyat geri qaytarılmır və audit jurnalına yazılır.": {
+            "en": "The attempt and its answers, appeals and notifications are deleted; the midterm / final score in the journal is restored to the previous official attempt or cleared. The attempt counts as reset — the exam can be taken again. For hall exams the ticket is reopened with a new PIN. This cannot be undone and is written to the audit log.",
+            "ru": "Попытка, её ответы, апелляции и уведомления удаляются; балл мидтерма / финала в журнале возвращается к предыдущей официальной попытке или очищается. Попытка считается сброшенной — экзамен можно сдать заново. Для экзамена в зале билет открывается заново с новым PIN. Действие необратимо и записывается в журнал аудита.",
+            "tr": "Deneme ile cevapları, itirazları ve bildirimleri silinir; defterdeki ara sınav / final notu önceki resmî denemeye döndürülür veya boşaltılır. Deneme sıfırlanmış sayılır — sınava yeniden girilebilir. Salon sınavında bilet yeni PIN ile yeniden açılır. İşlem geri alınamaz ve denetim günlüğüne yazılır.",
+        },
+        "Ləğv et": {"en": "Cancel", "ru": "Отмена", "tr": "İptal"},
+        "Nəticəni sil (cəhdi sıfırla)": {
+            "en": "Delete result (reset attempt)",
+            "ru": "Удалить результат (сбросить попытку)",
+            "tr": "Sonucu sil (denemeyi sıfırla)",
+        },
+        "Nəticəni yalnız RİM rəhbəri və imtahan mərkəzi rəhbəri silə bilər.": {
+            "en": "Only the RIM head and the exam centre head can delete results.",
+            "ru": "Удалять результаты могут только руководитель RİM и руководитель экзаменационного центра.",
+            "tr": "Sonucu yalnızca RİM yöneticisi ve sınav merkezi yöneticisi silebilir.",
+        },
+        "Qrup": {"en": "Group", "ru": "Группа", "tr": "Grup"},
+        "Qrup cəhdlərini sıfırla": {
+            "en": "Reset group attempts",
+            "ru": "Сбросить попытки группы",
+            "tr": "Grup denemelerini sıfırla",
+        },
+        "Qrup seçin.": {"en": "Select a group.", "ru": "Выберите группу.", "tr": "Bir grup seçin."},
+        "Qrup seçin…": {"en": "Select a group…", "ru": "Выберите группу…", "tr": "Grup seçin…"},
+        "Qrupu sıfırla": {"en": "Reset group", "ru": "Сбросить группу", "tr": "Grubu sıfırla"},
+        "Seçilmiş cəhd sayı": {
+            "en": "Selected attempts",
+            "ru": "Выбрано попыток",
+            "tr": "Seçili deneme sayısı",
+        },
+        "Seçilmiş qrupun bu imtahandakı bütün nəticələri silinir və cəhdlər sıfırlanır — tələbələr imtahanı yenidən verə bilər. Əvvəl ön baxış göstərilir.": {
+            "en": "All results of the selected group in this exam are deleted and the attempts are reset — students can take the exam again. A preview is shown first.",
+            "ru": "Все результаты выбранной группы в этом экзамене удаляются, попытки сбрасываются — студенты смогут сдать экзамен заново. Сначала показывается предварительный просмотр.",
+            "tr": "Seçilen grubun bu sınavdaki tüm sonuçları silinir ve denemeler sıfırlanır — öğrenciler sınava yeniden girebilir. Önce ön izleme gösterilir.",
+        },
+        "Seçilmişlərin nəticəsini sil": {
+            "en": "Delete selected results",
+            "ru": "Удалить выбранные результаты",
+            "tr": "Seçilenlerin sonucunu sil",
+        },
+        "Sil və sıfırla": {"en": "Delete and reset", "ru": "Удалить и сбросить", "tr": "Sil ve sıfırla"},
+        "Silinmiş nəticələr (sıfırlanmış cəhdlər)": {
+            "en": "Deleted results (reset attempts)",
+            "ru": "Удалённые результаты (сброшенные попытки)",
+            "tr": "Silinen sonuçlar (sıfırlanan denemeler)",
+        },
+        "Sistem": {"en": "System", "ru": "Система", "tr": "Sistem (otomatik)"},
+        "Sıfırlamaq üçün cəhd seçin.": {
+            "en": "Select an attempt to reset.",
+            "ru": "Выберите попытку для сброса.",
+            "tr": "Sıfırlamak için deneme seçin.",
+        },
+        "Sıfırlamaq üçün seçilib": {
+            "en": "Selected for reset",
+            "ru": "Выбрано для сброса",
+            "tr": "Sıfırlama için seçildi",
+        },
+        "Sıfırlanacaq": {"en": "To reset", "ru": "Будет сброшено", "tr": "Sıfırlanacak"},
+        "Səbəb": {"en": "Reason", "ru": "Причина", "tr": "Gerekçe"},
+        "Səbəb (məcburi)": {"en": "Reason (required)", "ru": "Причина (обязательно)", "tr": "Gerekçe (zorunlu)"},
+        "Səbəb mütləqdir.": {"en": "A reason is required.", "ru": "Причина обязательна.", "tr": "Gerekçe zorunludur."},
+        "Səbəb ən azı %(n)s simvol olmalıdır.": {
+            "en": "The reason must be at least %(n)s characters long.",
+            "ru": "Причина должна содержать не менее %(n)s символов.",
+            "tr": "Gerekçe en az %(n)s karakter olmalıdır.",
+        },
+        "Tələbə": {"en": "Student", "ru": "Студент", "tr": "Öğrenci"},
+        "Vaxt": {"en": "Time", "ru": "Время", "tr": "Zaman"},
+        "Zal bileti yeni PIN ilə yenidən açıldı": {
+            "en": "Hall ticket reopened with a new PIN",
+            "ru": "Билет в зал открыт заново с новым PIN",
+            "tr": "Salon bileti yeni PIN ile yeniden açıldı",
+        },
+        "bu cəhdə 25% (yenidən imtahan) müraciəti bağlıdır": {
+            "en": "a 25% (re-exam) application is linked to this attempt",
+            "ru": "к этой попытке привязано заявление на пересдачу (25%)",
+            "tr": "bu denemeye %25 (yeniden sınav) başvurusu bağlı",
+        },
+        "jurnal bağlanıb (təsdiqlənib / dərc olunub) — əvvəl jurnalı açın": {
+            "en": "the journal is closed (approved / published) — reopen the journal first",
+            "ru": "журнал закрыт (утверждён / опубликован) — сначала откройте журнал",
+            "tr": "defter kapatıldı (onaylandı / yayımlandı) — önce defteri açın",
+        },
+        "Ön baxış": {"en": "Preview", "ru": "Предпросмотр", "tr": "Ön izleme"},
+        "Ön baxış hazırlanır…": {
+            "en": "Preparing preview…",
+            "ru": "Готовим предпросмотр…",
+            "tr": "Ön izleme hazırlanıyor…",
+        },
+        "Ön baxışı yükləmək olmadı.": {
+            "en": "Could not load the preview.",
+            "ru": "Не удалось загрузить предпросмотр.",
+            "tr": "Ön izleme yüklenemedi.",
+        },
+        "İcraçı": {"en": "Performed by", "ru": "Исполнитель", "tr": "İşlemi yapan"},
+        "Ən azı %(n)s simvol.": {
+            "en": "At least %(n)s characters.",
+            "ru": "Не менее %(n)s символов.",
+            "tr": "En az %(n)s karakter.",
+        },
+        "Əvvəlki nəticə": {"en": "Previous result", "ru": "Прежний результат", "tr": "Önceki sonuç"},
+    }
+)
+D.setdefault("", {})["Cəhd sıfırlandı — bilet yeni PIN ilə yenidən açıldı"] = {
+    "en": "Attempt reset — ticket reopened with a new PIN",
+    "ru": "Попытка сброшена — билет открыт заново с новым PIN",
+    "tr": "Deneme sıfırlandı — bilet yeni PIN ile yeniden açıldı",
+}
+
+
+# «de» (alman) — bu skriptin əsas döngüsü «de»-ni tanımır; qapı onu da yoxladığı üçün eyni girişlər
+# ``fill("de", "django")`` ilə yazılır (sahib 2026-11-04, cəhdi sıfırla).
+_DE_ATTEMPT_RESET = {
+    "%(count)s cəhd sıfırlandı (nəticə silindi) — imtahanı yenidən vermək olar.": (
+        "%(count)s Versuch(e) zurückgesetzt (Ergebnis gelöscht) — die Prüfung kann erneut abgelegt werden."
+    ),
+    "%(count)s cəhd sıfırlanmadı: %(reason)s.": "%(count)s Versuch(e) nicht zurückgesetzt: %(reason)s.",
+    "%(count)s cəhd tapılmadı (artıq silinib).": "%(count)s Versuch(e) nicht gefunden (bereits gelöscht).",
+    "%(count)s zal bileti yeni PIN ilə yenidən açıldı — PIN imtahan mərkəzinin oturum səhifəsindədir.": (
+        "%(count)s Saalticket(s) mit neuer PIN wieder geöffnet — die PIN steht auf der Sitzungsseite des Prüfungszentrums."
+    ),
+    "Audit jurnalında bax": "Im Audit-Protokoll ansehen",
+    "Bağla": "Schließen",
+    "Bloklanıb": "Blockiert",
+    "Bu imtahanda hələ heç bir nəticə silinməyib.": "Für diese Prüfung wurden noch keine Ergebnisse gelöscht.",
+    "Bu qrupda sıfırlanacaq cəhd yoxdur.": "Diese Gruppe hat keine zurückzusetzenden Versuche.",
+    "Cəhd": "Versuch",
+    "Cəhd tapılmadı.": "Versuch nicht gefunden.",
+    "Cəhd və cavabları, apellyasiyaları, bildirişləri silinir; jurnaldakı midterm / final balı əvvəlki rəsmi cəhdə qaytarılır və ya boşaldılır. Cəhd sıfırlanmış sayılır — imtahanı yenidən vermək olar. Zal imtahanında bilet yeni PIN ilə yenidən açılır. Əməliyyat geri qaytarılmır və audit jurnalına yazılır.": (
+        "Der Versuch samt Antworten, Einsprüchen und Benachrichtigungen wird gelöscht; die Midterm- / "
+        "Final-Note im Journal wird auf den vorherigen offiziellen Versuch zurückgesetzt oder geleert. Der "
+        "Versuch gilt als zurückgesetzt — die Prüfung kann erneut abgelegt werden. Bei Saalprüfungen wird das "
+        "Ticket mit neuer PIN wieder geöffnet. Der Vorgang ist nicht umkehrbar und wird im Audit-Protokoll erfasst."
+    ),
+    "Ləğv et": "Abbrechen",
+    "Nəticəni sil (cəhdi sıfırla)": "Ergebnis löschen (Versuch zurücksetzen)",
+    "Nəticəni yalnız RİM rəhbəri və imtahan mərkəzi rəhbəri silə bilər.": (
+        "Nur die RİM-Leitung und die Leitung des Prüfungszentrums dürfen Ergebnisse löschen."
+    ),
+    "Qrup": "Gruppe",
+    "Qrup cəhdlərini sıfırla": "Gruppenversuche zurücksetzen",
+    "Qrup seçin.": "Wählen Sie eine Gruppe.",
+    "Qrup seçin…": "Gruppe wählen…",
+    "Qrupu sıfırla": "Gruppe zurücksetzen",
+    "Seçilmiş cəhd sayı": "Ausgewählte Versuche",
+    "Seçilmiş qrupun bu imtahandakı bütün nəticələri silinir və cəhdlər sıfırlanır — tələbələr imtahanı yenidən verə bilər. Əvvəl ön baxış göstərilir.": (
+        "Alle Ergebnisse der gewählten Gruppe in dieser Prüfung werden gelöscht und die Versuche zurückgesetzt — "
+        "die Studierenden können die Prüfung erneut ablegen. Zuerst wird eine Vorschau angezeigt."
+    ),
+    "Seçilmişlərin nəticəsini sil": "Ausgewählte Ergebnisse löschen",
+    "Sil və sıfırla": "Löschen und zurücksetzen",
+    "Silinmiş nəticələr (sıfırlanmış cəhdlər)": "Gelöschte Ergebnisse (zurückgesetzte Versuche)",
+    "Sistem": "System",
+    "Sıfırlamaq üçün cəhd seçin.": "Wählen Sie einen Versuch zum Zurücksetzen.",
+    "Sıfırlamaq üçün seçilib": "Zum Zurücksetzen ausgewählt",
+    "Sıfırlanacaq": "Wird zurückgesetzt",
+    "Səbəb": "Grund",
+    "Səbəb (məcburi)": "Grund (Pflichtfeld)",
+    "Səbəb mütləqdir.": "Ein Grund ist erforderlich.",
+    "Səbəb ən azı %(n)s simvol olmalıdır.": "Der Grund muss mindestens %(n)s Zeichen lang sein.",
+    "Tələbə": "Studierende(r)",
+    "Vaxt": "Zeit",
+    "Zal bileti yeni PIN ilə yenidən açıldı": "Saalticket mit neuer PIN wieder geöffnet",
+    "bu cəhdə 25% (yenidən imtahan) müraciəti bağlıdır": "mit diesem Versuch ist ein 25-%-Antrag (Wiederholungsprüfung) verknüpft",
+    "jurnal bağlanıb (təsdiqlənib / dərc olunub) — əvvəl jurnalı açın": (
+        "das Journal ist geschlossen (genehmigt / veröffentlicht) — öffnen Sie zuerst das Journal"
+    ),
+    "Ön baxış": "Vorschau",
+    "Ön baxış hazırlanır…": "Vorschau wird vorbereitet…",
+    "Ön baxışı yükləmək olmadı.": "Die Vorschau konnte nicht geladen werden.",
+    "İcraçı": "Ausgeführt von",
+    "Ən azı %(n)s simvol.": "Mindestens %(n)s Zeichen.",
+    "Əvvəlki nəticə": "Vorheriges Ergebnis",
+}
+for _msgid, _de in _DE_ATTEMPT_RESET.items():
+    D["exams.attempt_reset"][_msgid]["de"] = _de
+D[""]["Cəhd sıfırlandı — bilet yeni PIN ilə yenidən açıldı"][
+    "de"
+] = "Versuch zurückgesetzt — Ticket mit neuer PIN wieder geöffnet"
 
 
 def po_path(lang, domain):

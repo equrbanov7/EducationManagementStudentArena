@@ -40,6 +40,15 @@ class WeekRowsShapeTest(SimpleTestCase):
             normalize_section_data("week", {"rows": [{"topic": "x"}] * (MAX_WEEK_ROWS + 1)})
         self.assertEqual(ctx.exception.code, "section.too_long")
 
+    def test_105_hour_plan_fits(self):
+        """MR-000145 / MR-000198: 105 saatlıq fənn (53 sətir) kəsilmir."""
+        from apps.syllabus.week_plan import rows_for_hours
+
+        rows = rows_for_hours(105)
+        self.assertLessEqual(rows, MAX_WEEK_ROWS)
+        data = normalize_section_data("week", {"rows": [{"topic": "Mövzu", "lecture": 2}] * rows})
+        self.assertEqual(len(data["rows"]), rows)
+
     def test_non_numeric_hours_rejected(self):
         with self.assertRaises(SectionShapeError):
             normalize_section_data("week", {"rows": [{"lecture": "iki"}]})

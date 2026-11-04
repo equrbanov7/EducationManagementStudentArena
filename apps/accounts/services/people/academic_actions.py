@@ -143,11 +143,15 @@ def _blocking_message(codes) -> str:
 # ── Akademik status ──────────────────────────────────────────────────────────
 
 
-def set_academic_status(actor, *, record_id, status, reason="", request=None) -> dict:
+def set_academic_status(actor, *, record_id, status, reason="", request=None, leave_reason="") -> dict:
     """Akademik statusu dəyişir (qeydiyyatlı / məzuniyyət / xaric / məzun).
 
     ``is_active`` statusla AVTOMATİK uyğunlaşdırılır (``status.is_active_for``) —
     konsol formasının etdiyi ilə eyni; iki yerdə fərqli qayda qalmasın.
+
+    Akademik məzuniyyətdə (dondurma) ``leave_reason`` kateqoriyası MƏCBURİDİR — əmr dialoqları ilə
+    EYNİ qayda (``registrar.movements.normalize_leave_reason``, sahib 2026-11-04); bu səth əmr sətri
+    yazmadığı üçün kateqoriya audit sətrində saxlanılır.
     """
     _require(actor)
     status = str(status or "").strip()
@@ -155,13 +159,20 @@ def set_academic_status(actor, *, record_id, status, reason="", request=None) ->
         raise RimAccessError("unknown_status", "Naməlum akademik status.", status=400)
 
     reason = _normalize_reason(reason, required=status in REASON_REQUIRED_STATUSES)
+
+    from apps.registrar.public import movements as registrar_movements
+    from apps.registrar.public import status as academic_status
+
     record = load_record(actor, record_id, request=request)
     previous = record.status
     if previous == status:
         raise RimAccessError("status_unchanged", "Tələbə onsuz da bu statusdadır.", status=409)
-
-    from apps.registrar.public import movements as registrar_movements
-    from apps.registrar.public import status as academic_status
+    leave_category = ""
+    if status == "academic_leave":
+        try:
+            leave_category = registrar_movements.normalize_leave_reason(leave_reason, note=reason)
+        except registrar_movements.MovementError as exc:
+            raise RimAccessError(exc.code, exc.message, status=exc.status) from exc
 
     with transaction.atomic():
         record.status = status
@@ -192,8 +203,13 @@ def set_academic_status(actor, *, record_id, status, reason="", request=None) ->
             resource_id=str(record.pk),
             resource_repr=(record.student.get_full_name() or record.student.username).strip(),
             old_values={"status": previous},
-            new_values={"status": status},
-            changes={"action": "people.academic_status_changed", "is_active": record.is_active},
+            new_values={"status": status, "leave_reason": leave_category},
+            changes={
+                "action": "people.academic_status_changed",
+                "is_active": record.is_active,
+                "leave_reason": leave_category,
+                "leave_reason_label": registrar_movements.leave_reason_label(leave_category),
+            },
         )
 
     return {
@@ -202,6 +218,7 @@ def set_academic_status(actor, *, record_id, status, reason="", request=None) ->
         "previous": previous,
         "is_active": record.is_active,
         "reason": reason,
+        "leave_reason": leave_category,
     }
 
 

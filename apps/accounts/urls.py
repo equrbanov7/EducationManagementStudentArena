@@ -18,6 +18,7 @@ from .views import exam_score_import as exam_score_import_views
 from .views import group_lead as group_lead_views
 from .views import hr_analytics as hr_analytics_views
 from .views import journal_hygiene as journal_hygiene_views
+from .views import journal_removals as journal_removals_views
 from .views import network_zone_page
 from .views import session_ping as session_ping_views
 from .views.profile import statistics_export_metrics as statistics_export_metrics_views
@@ -360,6 +361,12 @@ urlpatterns = [
     # 2026-10-10: «Jurnal təmizliyi» — siyahı (GET) + önizləmə/tətbiq/bərpa (tək JSON POST); RİM rəhbəri.
     path("journal-hygiene/rows/", journal_hygiene_views.journal_hygiene_rows, name="journal_hygiene_rows"),
     path("journal-hygiene/action/", journal_hygiene_views.journal_hygiene_action, name="journal_hygiene_action"),
+    # 2026-11-04: «Jurnaldan çıxarılmalar» — Excel ixracı (RİM rəhbəri / superadmin; audit olunur).
+    path(
+        "journal-removals/export/",
+        journal_removals_views.journal_removals_export,
+        name="journal_removals_export",
+    ),
     # «Alt qrupa tələbə əlavə et» (sahib 2026-10-18) — `retake.manage`; adlar `accounts:subgroup_placement_*`.
     path("alt-qrup-yerlesdirme/", include("apps.accounts.views.subgroup_placement.urls")),
     # 2026-10-11: «Kadr analitikası» — Excel ixracı (HR / rektor / RİM rəhbəri; audit olunur).

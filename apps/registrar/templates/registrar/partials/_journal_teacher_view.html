@@ -1,11 +1,13 @@
 {% load i18n %}
-{% if not journal_is_broad %}
+{% comment %}Müəllimin öz siyahısı (cari / tarixçə). Geniş görünüşdə müəllim seçiləndə də göstərilir —
+siyahı o müəllimin öz siyahısının eynisidir (sahib 2026-11-04), etiket isə «-m» şəxs şəkilçisizdir.{% endcomment %}
+{% if not journal_is_broad or journal_teacher_mirrored %}
 <label class="jl-f">
     <span class="jl-f__label">{% trans "GÖRÜNÜŞ" %}</span>
     <div class="bootstrap-single-select bootstrap-single-select--ems">
     <select name="teaching" class="ems-select bootstrap-single-select__native" data-jl-autosubmit data-bootstrap-select>
-        <option value="current" {% if journal_teaching_view == 'current' %}selected{% endif %}>{% trans "Cari dərs yüküm" %}</option>
-        <option value="history" {% if journal_teaching_view == 'history' %}selected{% endif %}>{% trans "Əvvəlki jurnal qeydlərim" %}</option>
+        <option value="current" {% if journal_teaching_view == 'current' %}selected{% endif %}>{% if journal_is_broad %}{% trans "Cari dərs yükü" %}{% else %}{% trans "Cari dərs yüküm" %}{% endif %}</option>
+        <option value="history" {% if journal_teaching_view == 'history' %}selected{% endif %}>{% if journal_is_broad %}{% trans "Əvvəlki jurnal qeydləri" %}{% else %}{% trans "Əvvəlki jurnal qeydlərim" %}{% endif %}</option>
     </select>
     </div>
 </label>

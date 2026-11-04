@@ -248,7 +248,8 @@ class AdminListTeacherFilterRestoreTest(RestoreFixture):
         session = self.client.session
         session["active_organization"] = self.org.slug
         session.save()
-        query = "?teacher=" + str(self.teacher.pk) if teacher else ""
+        # The teacher filter mirrors her own list (2026-11-04): this journal sits in her history tab.
+        query = "?teaching=history&teacher=" + str(self.teacher.pk) if teacher else ""
         page = self.client.get(reverse("registrar:journal_list") + query)
         self.assertEqual(page.status_code, 200)
         self.assertTrue(page.context["journal_is_broad"])

@@ -42,8 +42,8 @@ sonra da işləsin (docs/frontend/AJAX_SAFE_JS_PATTERN.md). Dinamik dəyərlər
      {% comment %}Yükləmə hədləri SERVER-dən gəlir (`payloads.rules_payload`) — fayl
      seçicisi `accept`/ölçü/say qaydasını TƏKRAR YAZMIR. Server siyahını dəyişəndə
      UI özündən dəyişir.{% endcomment %}
-     data-max-files="{{ applications_section.rules.max_files|default:5 }}"
-     data-max-file-mb="{{ applications_section.rules.max_file_mb|default:10 }}"
+     data-max-files="{{ applications_section.rules.max_files|default:10 }}"
+     data-max-file-mb="{{ applications_section.rules.max_file_mb|default:25 }}"
      data-accept="{{ applications_section.rules.allowed_extensions|join:',' }}"
      data-open-application="{{ request.GET.application|default:'' }}"
      {% comment %}«Yeni müraciət» dialoqunu ÖNCƏDƏN SEÇİLMİŞ növlə açır — kabinetin

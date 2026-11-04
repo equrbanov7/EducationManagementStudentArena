@@ -136,12 +136,21 @@ class JournalListTeacherSearchTest(TestCase):
         self.assertEqual(returned, listed)
 
     def test_selected_teacher_filters_the_list(self):
+        # Owner 2026-11-04: the filter mirrors the teacher's OWN list. These owners have no workload,
+        # so their journal is not current load; a lesson she taught puts it into her history tab.
+        from apps.registrar.models import CourseOffering, Lesson
+
+        aide = self.teachers["jlt_aide"]
+        with bypass_rls():
+            own = CourseOffering.objects.get(organization=self.org, instructor=aide)
+            Lesson.objects.create(organization=self.org, offering=own, date=timezone.localdate(), instructor=aide)
         teacher_id = self._search(self.corrector, "aida")["results"][0]["id"]
         response = self.client.get(reverse("registrar:journal_list"), {"teacher": teacher_id})
         self.assertEqual(response.status_code, 200)
-        offerings = response.context["offerings"]
-        self.assertTrue(offerings)
-        self.assertEqual({o.instructor_id for o in offerings}, {self.teachers["jlt_aide"].pk})
+        self.assertTrue(response.context["journal_teacher_mirrored"])
+        self.assertEqual(list(response.context["offerings"]), [])
+        response = self.client.get(reverse("registrar:journal_list"), {"teacher": teacher_id, "teaching": "history"})
+        self.assertEqual([o.pk for o in response.context["offerings"]], [own.pk])
 
     def test_page_points_the_picker_at_the_list_scoped_endpoint(self):
         self.client.force_login(self.corrector)
