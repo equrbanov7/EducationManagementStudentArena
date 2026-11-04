@@ -37,9 +37,24 @@ PDF_NAME = "superadmin-senedsiz.pdf"
 AUDIT_FLAG = "superadmin_document_waiver"
 
 
+#: Sahib 2026-11-05: «sənəd yükləmə yerini pass keç» — RİM rəhbəri (sahibin öz rolu) də superadmin kimi sənədsiz
+#: keçir; qeyd mətni rolu göstərir. RİM əməkdaşı (``rim_staff``) və digər rollar üçün heç nə dəyişmir.
+RIM_HEAD_ROLE = "ikt_rehber"
+RIM_NOTE_PREFIX = "RİM rəhbəri düzəlişi — sənədsiz"
+
+
+def _is_rim_head(user) -> bool:
+    from django.apps import apps as django_apps
+
+    membership = django_apps.get_model("organizations", "Membership")
+    return membership.objects.filter(user=user, is_active=True, role__is_active=True, role__name=RIM_HEAD_ROLE).exists()
+
+
 def waives(user) -> bool:
-    """Aktor sənəd tələbindən azaddırmı — yalnız autentifikasiyalı superadmin."""
-    return bool(user is not None and getattr(user, "is_authenticated", False) and is_superadmin_user(user))
+    """Aktor sənəd tələbindən azaddırmı — autentifikasiyalı superadmin və ya aktiv RİM rəhbəri."""
+    if user is None or not getattr(user, "is_authenticated", False):
+        return False
+    return bool(is_superadmin_user(user) or _is_rim_head(user))
 
 
 def actor_label(user) -> str:
@@ -54,9 +69,10 @@ def _now(when=None):
 
 
 def note(user, *, when=None) -> str:
-    """``Superadmin düzəlişi — sənədsiz (Ad Soyad, 27.10.2026 21:05)``."""
+    """``Superadmin düzəlişi — sənədsiz (Ad Soyad, 27.10.2026 21:05)`` (RİM rəhbəri üçün öz prefiksi ilə)."""
     moment = _now(when)
-    return f"{NOTE_PREFIX} ({actor_label(user)}, {moment:%d.%m.%Y %H:%M})"
+    prefix = NOTE_PREFIX if is_superadmin_user(user) else RIM_NOTE_PREFIX
+    return f"{prefix} ({actor_label(user)}, {moment:%d.%m.%Y %H:%M})"
 
 
 def order_number(*, when=None) -> str:
@@ -89,7 +105,8 @@ def stamp(value, user) -> str:
 
 
 def is_waiver_text(value) -> bool:
-    return str(value or "").startswith(NOTE_PREFIX) or f" · {NOTE_PREFIX}" in str(value or "")
+    text = str(value or "")
+    return any(text.startswith(prefix) or f" · {prefix}" in text for prefix in (NOTE_PREFIX, RIM_NOTE_PREFIX))
 
 
 def _font_path() -> str:
