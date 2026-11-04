@@ -526,7 +526,11 @@ def remove_student(ticket, by, *, action="removed", reason="", allow_reentry=Fal
 
 
 def readmit_student(ticket, by, *, request=None) -> bool:
-    """Çıxarılmış tələbənin yenidən buraxılması (yalnız imtahan mərkəzi)."""
+    """Çıxarılmış tələbənin yenidən buraxılması (yalnız imtahan mərkəzi).
+
+    Sahib 2026-11-04 (VoİP midterm): dil seçimi sıfırlanır — əvvəl köhnə dil giriş modalında
+    öncədən seçili gəlirdi və tələbə yenə səhv dili (AZ) seçirdi; indi dili yenidən özü seçir.
+    """
     ok = transition_ticket(
         ticket,
         TICKET_STATUS_ASSIGNED,
@@ -535,6 +539,7 @@ def readmit_student(ticket, by, *, request=None) -> bool:
             "removal_reason": "",
             "removed_at": None,
             "removed_by": None,
+            "language": "",
         },
     )
     if not ok:
