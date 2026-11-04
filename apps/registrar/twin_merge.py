@@ -16,6 +16,9 @@ Qaydalar (hər cüt öz savepoint-ində; hər şey kilid altında yenidən yoxla
 
 * W və T eyni dövr + qrup, fənləri fərqli, ikisi də aktiv, heç biri bağlı deyil;
 * T-də ARTIQ xana varsa (hər iki tərəfdə real data) — birləşdirilmir, sayılır (hesabat: ``both_have_marks``);
+  cütdə ``"target_marks": "keep"`` (sahib 2026-11-04) verilibsə birləşdirilir: eyni dərs + tələbə xanası T-də artıq
+  varsa T-ninki QALIR (``marks_conflict_kept``; dəyəri fərqli olanlar ``marks_conflict_differ``), eyni gün + növdə T-nin
+  TƏK dərsi varsa saatı fərqli olsa da ona qoşulur (``lessons_matched_by_day``) — ikinci dərs yaranmır;
 * W-də rəsmi düzəlişli xana / dərs, yekun qiymət və ya komponent balı varsa, ya da W-yə registrar/sillabus
   xaricindən istinad (imtahan, qovluq, sorğu …) varsa — toxunulmur, sayılır;
 * qeydiyyat: W-nin hər tələbəsi üçün T-də sətir (varsa o, yoxdursa yaradılır — W sətrinin növü/mənbə qrupu ilə);
@@ -113,9 +116,9 @@ class Merger:
             return "closed_or_inactive"
         return ""
 
-    def _blocked(self, source, target) -> str:
+    def _blocked(self, source, target, *, keep_target=False) -> str:
         Lesson, LessonMark, Enrollment = _model("Lesson"), _model("LessonMark"), _model("Enrollment")
-        if LessonMark.objects.filter(lesson__offering=target).exists():
+        if not keep_target and LessonMark.objects.filter(lesson__offering=target).exists():
             return "both_have_marks"
         lesson_ids = list(Lesson.objects.filter(offering=source).values_list("pk", flat=True))
         mark_ids = LessonMark.objects.filter(lesson__offering=source).values_list("pk", flat=True)
@@ -148,7 +151,8 @@ class Merger:
                 source, target, pair
             )
             return
-        blocked = self._blocked(source, target)
+        keep_target = pair.get("target_marks") == "keep"
+        blocked = self._blocked(source, target, keep_target=keep_target)
         if blocked:
             self.counts[blocked] += 1
             return
@@ -157,7 +161,7 @@ class Merger:
             self.counts["target_enrollment_blocked"] += 1
             transaction.set_rollback(True)
             return
-        lessons_new, lessons_reused, marks = self._lessons(source, target, enrollments)
+        lessons_new, lessons_reused, marks = self._lessons(source, target, enrollments, keep_target=keep_target)
         syllabus = self._syllabus(source, target)
         slots = self._slots(source, target)
         dropped = self._drop(source)
@@ -222,15 +226,21 @@ class Merger:
         self.counts["enrollments_created"] += created
         return out, created
 
-    def _lessons(self, source, target, enrollments) -> tuple[int, int, int]:
+    def _lessons(self, source, target, enrollments, *, keep_target=False) -> tuple[int, int, int]:
         Lesson = _model("Lesson")
-        by_slot = {}
+        by_slot, by_day = {}, {}
         for lesson in Lesson.objects.select_for_update().filter(offering=target).order_by("created_at"):
             by_slot.setdefault((lesson.date, lesson.start_time, lesson.kind), lesson)
+            by_day.setdefault((lesson.date, lesson.kind), []).append(lesson)
+        existing = self._target_marks(target) if keep_target else {}
         created = reused = moved = 0
         for lesson in Lesson.objects.select_for_update().filter(offering=source).order_by("date", "start_time"):
             key = (lesson.date, lesson.start_time, lesson.kind)
             twin = by_slot.get(key)
+            same_day = by_day.get((lesson.date, lesson.kind), [])
+            if twin is None and keep_target and len(same_day) == 1:
+                twin = same_day[0]
+                self.counts["lessons_matched_by_day"] += 1
             if twin is None:
                 twin = Lesson.objects.create(
                     organization=self.organization,
@@ -247,6 +257,12 @@ class Merger:
                 if enrollment is None:
                     self.counts["mark_without_target_enrollment"] += 1
                     continue
+                kept = existing.get((twin.pk, enrollment.pk))
+                if kept is not None:
+                    self.counts["marks_conflict_kept"] += 1
+                    if kept != (mark.status, mark.score):
+                        self.counts["marks_conflict_differ"] += 1
+                    continue
                 copy_mark(mark, lesson=twin, enrollment=enrollment)
                 moved += 1
             lesson.delete()  # qalan (hədəfsiz) xanalar kaskadla — sayılıb
@@ -254,6 +270,15 @@ class Merger:
         self.counts["lessons_reused"] += reused
         self.counts["marks_moved"] += moved
         return created, reused, moved
+
+    @staticmethod
+    def _target_marks(target) -> dict:
+        """``{(T dərsi, T qeydiyyatı): (status, bal)}`` — ``target_marks=keep`` rejimində T-nin xanası qalır."""
+        rows = _model("LessonMark").objects.filter(lesson__offering=target)
+        return {
+            (lesson, enrollment): (status, score)
+            for lesson, enrollment, status, score in rows.values_list("lesson_id", "enrollment_id", "status", "score")
+        }
 
     def _syllabus(self, source, target) -> str:
         Syllabus = _model("Syllabus", "syllabus")
