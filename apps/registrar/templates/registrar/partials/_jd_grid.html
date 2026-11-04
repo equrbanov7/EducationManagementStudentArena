@@ -141,6 +141,9 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                     {% spaceless %}
                     <tbody data-jgs-tbody>
                         {% for row in journal.rows %}
+                        {% if row.is_guest %}{% ifchanged row.is_guest %}{# Sahib 2026-11-04: alt qrup tələbələri ayrıca, ən aşağıda #}
+                        <tr class="jd2-guest-divider" data-jd-guest-divider><td class="jd2-guest-divider__cell" colspan="{{ journal.lesson_meta|length|add:2 }}"><i class="fas fa-people-arrows" aria-hidden="true"></i> {% trans "Alt qrup tələbələri" context "registrar.guest_roster" %}</td></tr>
+                        {% endifchanged %}{% endif %}
                         <tr class="jd2-row {% if row.barred %}is-barred{% elif row.warning %}is-warning{% endif %}{% if row.is_guest %} is-guest{% endif %}" data-jd-enrollment="{{ row.enrollment.id }}">
                             <td class="jd2-td-student">
                                 <div class="jd2-stu-inner">

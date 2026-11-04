@@ -400,6 +400,10 @@ def get_offering_journal(
             }
         )
 
+    # Sahib 2026-11-04: alt qrupdan əlavə olunmuş tələbələr siyahının SONUNDA, ayırıcı xəttdən sonra
+    # (``_jd_grid.html`` — «Alt qrup tələbələri»). Sıralama sabitdir: hər hissədə əvvəlki ad sırası qalır.
+    rows.sort(key=lambda row: bool(row["is_guest"]))
+
     return {
         "offering": offering,
         "scheme": scheme,

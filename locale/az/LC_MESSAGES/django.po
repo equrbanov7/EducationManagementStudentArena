@@ -112631,3 +112631,7 @@ msgstr "müraciət"
 msgctxt "applications.transition"
 msgid "Bir gündə ən çox {limit} müraciət göndərmək olar — bugünkü limitiniz dolub. Yeni müraciəti sabah göndərin; artıq göndərdiyiniz müraciətlərə cavab yaza bilərsiniz."
 msgstr "Bir gündə ən çox {limit} müraciət göndərmək olar — bugünkü limitiniz dolub. Yeni müraciəti sabah göndərin; artıq göndərdiyiniz müraciətlərə cavab yaza bilərsiniz."
+
+msgctxt "registrar.guest_roster"
+msgid "Alt qrup tələbələri"
+msgstr "Alt qrup tələbələri"
