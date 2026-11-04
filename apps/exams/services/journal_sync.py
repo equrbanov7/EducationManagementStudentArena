@@ -36,6 +36,8 @@ import logging
 
 from prometheus_client import Counter
 
+from apps.exams.services.absence_gate import absence_gate_applies
+
 logger = logging.getLogger(__name__)
 
 # Backend auditi 2026-09-13, F-08: bal tavanı / faiz hesabında istisna SƏSSİZ
@@ -341,8 +343,9 @@ def registrar_block_reason(request, exam):
     İmtahan jurnal fənninə bağlı deyilsə həmişə ``None`` (qapı tətbiq olunmur).
     """
     subject_id = getattr(exam, "subject_id", None)
-    if not subject_id:
+    if not subject_id or not absence_gate_applies(exam):
         # Perf 2026-10-06: fənnsiz imtahan üçün `exam.organization` yüklənmir.
+        # Sahib 2026-11-04: midterm qayıb limitinə görə kəsilmir (``absence_gate``).
         return None
     organization = getattr(exam, "organization", None)
     user = getattr(request, "user", None)
@@ -378,7 +381,7 @@ def registrar_block_reasons(request, exams):
     for exam in exams:
         subject_id = getattr(exam, "subject_id", None)
         organization = getattr(exam, "organization", None)
-        if not subject_id or organization is None:
+        if not subject_id or organization is None or not absence_gate_applies(exam):
             continue
         by_organization.setdefault(organization.pk, (organization, set()))[1].add(subject_id)
 
@@ -391,7 +394,7 @@ def registrar_block_reasons(request, exams):
             logger.exception("journal_sync: batch eligibility check failed for organization %s", organization.pk)
             continue
         for exam in exams:
-            if getattr(exam, "organization_id", None) != organization.pk:
+            if getattr(exam, "organization_id", None) != organization.pk or not absence_gate_applies(exam):
                 continue
             elig = eligibility.get(getattr(exam, "subject_id", None))
             if elig is None:
