@@ -87,6 +87,7 @@ _NAV_ICONS = {
     "retake-windows": "fa-calendar-check",
     "subgroup-placement": "fa-user-plus",
     "credit-recognition": "fa-earth-europe",
+    "journal-removals": "fa-user-minus",
     "teaching-appeals": "fa-scale-balanced",
     "unit-subject-folders": "fa-folder-open",
     "manage-appeals": "fa-scale-balanced",

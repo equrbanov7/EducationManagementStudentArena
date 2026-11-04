@@ -56,7 +56,7 @@ setup/boot (2026-09-21 bölgüsü, modul ölçü büdcəsi).{% endcomment %}
 Hər iki fayl `[data-psm-root]` yoxdursa heç nə etmir — icazəsi olmayan
 istifadəçidə markup onsuz da render olunmur.{% endcomment %}
 <script src="{% static 'accounts/js/profile/people_academic_preview.js' %}?v=20260831-1"></script>
-<script src="{% static 'accounts/js/profile/people_academic.js' %}?v=20260831-1"></script>
+<script src="{% static 'accounts/js/profile/people_academic.js' %}?v=20261104-leave"></script>
 {% endif %}
 {% if 'schedule-manage' in asset_sections %}
 {% comment %}Cədvəl idarəetməsi — panel server-render-lidir; JS yalnız seçici
@@ -88,7 +88,7 @@ null-safe oxuyur, ona görə sıra pozulsa da səhifə çökmür.{% endcomment %
 {% comment %}Tələbə reyestri — cədvəl server-render-lidir; JS yalnız çekmecəni
 (kart + hərəkət tarixçəsi) doldurur və hərəkət əmrini multipart göndərir
 (EMSDelegate, `[data-sr-root]` yoxdursa heç nə etmir).{% endcomment %}
-<script src="{% static 'accounts/js/profile/student_registry.js' %}?v=20261003-block"></script>
+<script src="{% static 'accounts/js/profile/student_registry.js' %}?v=20261104-leave"></script>
 <script src="{% static 'accounts/js/profile/student_registry_account.js' %}?v=20261011-wp13roster"></script>
 {% endif %}
 {% if 'teaching-handover' in asset_sections %}
@@ -276,13 +276,17 @@ dialoq seçiciləri; dialoq/POST yenə ortaq `teaching_office.js`-dədir.{% endc
 {% if 'audit-log' in asset_sections %}
 <script src="{% static 'audit/js/audit_log.js' %}?v=20260908-1"></script>
 {% endif %}
+{# 2026-11-04: «Dondur» səbəb kateqoriyası — «Digər» → səbəb mətni məcburi (reyestr + qrup çekmecəsi); tək qoşulma. #}
+{% if 'student-registry' in asset_sections or 'groups-registry' in asset_sections or 'semester-opening' in asset_sections or 'workload-approval' in asset_sections %}
+<script src="{% static 'accounts/js/profile/leave_reason_field.js' %}?v=20261104-leave"></script>
+{% endif %}
 {% comment %}Mərhələ 2 — yalnız SƏTİR SEÇİMİ (toplu əməllər) və seçilmiş sətirlərin
 gizli sahələrə yazılması; dialoq/POST ORTAQ `teaching_office.js`-dədir.{% endcomment %}
 {% if 'groups-registry' in asset_sections or 'semester-opening' in asset_sections or 'workload-approval' in asset_sections %}
 <script src="{% static 'accounts/js/profile/teaching_office_bulk.js' %}?v=20260903-2"></script>
 {% comment %}Ekran 06 — qrupun tələbə çekmecəsi (siyahı JSON-dan, hərəkət dialoqları
 `data-tof-open` ilə). Göndəriş yenə `teaching_office.js`-dədir.{% endcomment %}
-<script src="{% static 'accounts/js/profile/teaching_office_groups.js' %}?v=20261015-reinstate"></script>
+<script src="{% static 'accounts/js/profile/teaching_office_groups.js' %}?v=20261104-leave"></script>
 <script src="{% static 'accounts/js/profile/teaching_office_group_split.js' %}?v=20260920-split"></script>
 {% endif %}
 {% comment %}Mərhələ 4 — YALNIZ Excel idxalının multipart yüklənməsi (ortaq

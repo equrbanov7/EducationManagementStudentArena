@@ -35,7 +35,7 @@ panel fokuslanır (§7).{% endcomment %}
         <span class="apx-field__label">{% trans "Sənəd əlavə et" context "applications" %}</span>
         <button type="button" class="apx-drop" data-apx-pick-files>
           <i class="fas fa-arrow-up-from-bracket" aria-hidden="true"></i>
-          {% blocktrans context "applications" with mb=applications_section.rules.max_file_mb|default:10 n=applications_section.rules.max_files|default:5 %}Fayl seç — PDF, şəkil, DOCX və ya ZIP · maks. {{ mb }} MB · ən çox {{ n }} fayl{% endblocktrans %}
+          {% blocktrans context "applications" with mb=applications_section.rules.max_file_mb|default:25 n=applications_section.rules.max_files|default:10 %}Fayl seç — PDF, şəkil, Word, Excel və ya ZIP · maks. {{ mb }} MB · ən çox {{ n }} fayl{% endblocktrans %}
         </button>
         <input type="file" class="apx__sr" data-apx-files multiple
                accept="{{ applications_section.rules.allowed_extensions|join:',' }}">
@@ -105,7 +105,7 @@ panel fokuslanır (§7).{% endcomment %}
         <span class="apx-field__label">{% trans "Sənəd əlavə et" context "applications" %}</span>
         <button type="button" class="apx-drop" data-apx-pick-files>
           <i class="fas fa-arrow-up-from-bracket" aria-hidden="true"></i>
-          {% blocktrans context "applications" with mb=applications_section.rules.max_file_mb|default:10 n=applications_section.rules.max_files|default:5 %}Fayl seç — PDF, şəkil, DOCX və ya ZIP · maks. {{ mb }} MB · ən çox {{ n }} fayl{% endblocktrans %}
+          {% blocktrans context "applications" with mb=applications_section.rules.max_file_mb|default:25 n=applications_section.rules.max_files|default:10 %}Fayl seç — PDF, şəkil, Word, Excel və ya ZIP · maks. {{ mb }} MB · ən çox {{ n }} fayl{% endblocktrans %}
         </button>
         <input type="file" class="apx__sr" data-apx-files multiple
                accept="{{ applications_section.rules.allowed_extensions|join:',' }}">

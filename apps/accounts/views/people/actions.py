@@ -154,6 +154,7 @@ def _run_record_action(actor, action, payload, request):
         status=payload.get("status") or "",
         reason=reason,
         request=request,
+        leave_reason=str(payload.get("leave_reason") or "").strip(),
     )
 
 

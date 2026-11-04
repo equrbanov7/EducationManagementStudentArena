@@ -13,6 +13,11 @@ from ._helpers import (  # noqa: F401
     _attempt_effective_finish,
     _expire_overdue_attempts,
 )
+from ._reset_views import (  # noqa: F401
+    reset_exam_attempts,
+    reset_group_attempts,
+    reset_group_preview,
+)
 from ._results_views import (  # noqa: F401
     export_exam_results_xlsx,
     teacher_exam_results,
@@ -22,6 +27,9 @@ __all__ = [
     "ai_grade_answer",
     "delete_exam_attempts",
     "export_exam_results_xlsx",
+    "reset_exam_attempts",
+    "reset_group_attempts",
+    "reset_group_preview",
     "teacher_check_attempt",
     "teacher_exam_results",
     "teacher_view_attempt",

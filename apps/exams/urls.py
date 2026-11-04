@@ -436,6 +436,10 @@ urlpatterns = [
         views.delete_exam_attempts,
         name="delete_exam_attempts",
     ),
+    # Sahib 2026-11-04: «Nəticəni sil (cəhdi sıfırla)» — yalnız RİM / imtahan mərkəzi rəhbəri, səbəblə, audit.
+    path("<slug:slug>/results/reset-attempts/", views.reset_exam_attempts, name="reset_exam_attempts"),
+    path("<slug:slug>/results/reset-group/preview/", views.reset_group_preview, name="reset_group_preview"),
+    path("<slug:slug>/results/reset-group/", views.reset_group_attempts, name="reset_group_attempts"),
     path(
         "<slug:slug>/results/export.xlsx",
         views.export_exam_results_xlsx,

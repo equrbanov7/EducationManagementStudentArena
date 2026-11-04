@@ -430,13 +430,31 @@
                 button.disabled = isCurrent || !currentStatus;
                 button.classList.toggle("is-current", isCurrent);
             });
+            var leaveSelect = root.querySelector("[data-psm-leave-reason-select]");
+            if (leaveSelect) {
+                leaveSelect.value = "";
+                if (window.EMSBootstrapSelect) {
+                    window.EMSBootstrapSelect.sync(leaveSelect);
+                }
+            }
             syncStatusButton();
         }
 
+        // Dondurma səbəbi (sahib 2026-11-04): yalnız «Akademik məzuniyyət» seçiləndə görünür və məcburidir.
+        function leaveReason() {
+            var select = root.querySelector("[data-psm-leave-reason-select]");
+            return select ? select.value : "";
+        }
+
         function syncStatusButton() {
+            var status = selectedStatus();
+            var leaveBox = root.querySelector("[data-psm-leave-reason]");
+            if (leaveBox) {
+                leaveBox.hidden = status !== "academic_leave";
+            }
             var button = root.querySelector("[data-psm-status-save]");
             if (button) {
-                button.disabled = !selectedStatus();
+                button.disabled = !status || (status === "academic_leave" && !leaveReason());
             }
         }
 
@@ -448,7 +466,11 @@
             if (!row || !status) {
                 return;
             }
-            post({ action: "set_academic_status", record_id: row.id, status: status, reason: reason }, label("statusSaved"), button);
+            var payload = { action: "set_academic_status", record_id: row.id, status: status, reason: reason };
+            if (status === "academic_leave") {
+                payload.leave_reason = leaveReason();
+            }
+            post(payload, label("statusSaved"), button);
         }
 
         // ── Bağlamalar ───────────────────────────────────────────────────────
@@ -498,6 +520,12 @@
         root.addEventListener("input", function (event) {
             if (event.target.matches("[data-psm-transfer-reason]")) {
                 syncTransferButton();
+            }
+        });
+
+        root.addEventListener("change", function (event) {
+            if (event.target.matches("[data-psm-leave-reason-select]")) {
+                syncStatusButton();
             }
         });
 

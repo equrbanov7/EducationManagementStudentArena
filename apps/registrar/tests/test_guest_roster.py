@@ -209,6 +209,10 @@ class GuestModelDecisionTest(_GuestRosterBase):
         self.assertEqual(rows[self.guest.id]["source_group"].id, self.group2.id)
         self.assertFalse(rows[self.host.id]["is_guest"])
         self.assertEqual([row["student"].id for row in journal["guest_rows"]], [self.guest.id])
+        # Sahib 2026-11-04: alt qrup tələbələri siyahının sonundadır.
+        flags = [row["is_guest"] for row in journal["rows"]]
+        self.assertEqual(flags, sorted(flags))
+        self.assertTrue(flags[-1])
 
     def test_own_group_student_is_rejected(self):
         with bypass_rls(), self.assertRaises(ValidationError):
@@ -421,7 +425,7 @@ class GuestHttpFlowTest(_GuestRosterBase):
 
         removed = client.post(
             reverse("registrar:journal_guest_remove", args=[self.offering.id]),
-            {"enrollment": body["enrollment_id"]},
+            {"enrollment": body["enrollment_id"], "removal_reason": "added_by_mistake"},
         )
         self.assertEqual(removed.status_code, 200)
         self.assertTrue(removed.json()["ok"])

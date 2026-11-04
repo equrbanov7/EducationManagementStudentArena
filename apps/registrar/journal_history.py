@@ -103,7 +103,16 @@ def localize_lesson_item(text: str) -> str:
 
 
 #: Audit «kind» → UI qrupu (müştəri tərəfindəki növ çipləri bununla süzür).
-_GROUPS = {"mark": "mark", "component": "component", "final": "final", "resit": "final"}
+_GROUPS = {
+    "mark": "mark",
+    "component": "component",
+    "final": "final",
+    "resit": "final",
+    # Jurnaldan çıxarılma / geri qaytarılma (sahib 2026-11-04) — səbəb kateqoriyası ilə.
+    "roster-removal": "roster",
+    "roster-restore": "roster",
+}
+_ROSTER_KINDS = ("roster-removal", "roster-restore")
 
 _KIND_LABELS = {
     "mark": pgettext_lazy(_CTX, "Davamiyyət / bal"),
@@ -118,6 +127,8 @@ _KIND_LABELS = {
     "component-correction": pgettext_lazy(_CTX, "Sənədli düzəliş — komponent"),
     # «Data bərpası» rejimi (sahib 2026-10-27) — səbəb sətrin başlığında göstərilir (``_serialize_entry``).
     "full-edit": pgettext_lazy(_CTX, "Data bərpası (səbəb ilə)"),
+    "roster-removal": pgettext_lazy(_CTX, "Jurnaldan çıxarıldı"),
+    "roster-restore": pgettext_lazy(_CTX, "Jurnala qaytarıldı"),
 }
 _REVERT_LABEL = pgettext_lazy(_CTX, "Düzəlişin geri alınması")
 
@@ -220,7 +231,11 @@ def _serialize_entry(row, names, impersonation_key) -> dict:
             continue
         real_rows.append(change)
     rows = []
+    roster = kind in _ROSTER_KINDS
     for change in real_rows[:ROW_CAP]:
+        if roster:
+            rows.append(_roster_row(kind, change))
+            continue
         student = localize_lesson_item(str(change.get("student") or ""))
         item = localize_lesson_item(str(change.get("item") or ""))
         lesson_level = student in ("", "—") or bool(_DATE_RE.match(student))
@@ -245,12 +260,39 @@ def _serialize_entry(row, names, impersonation_key) -> dict:
         "user": _user_label(row.user),
         "kind": kind,
         "group": kind_group(kind),
-        "kind_label": _label_with_reason(kind, row),
+        "kind_label": _roster_label(kind, real_rows) if roster else _label_with_reason(kind, row),
         "count": len(real_rows),
         "rows_total": len(real_rows),
         "rows": rows,
         "impersonated_by": impersonated_by,
     }
+
+
+def _roster_row(kind, change) -> dict:
+    """Çıxarılma sətri: kodlar (əməl, səbəb) göstərmədə aktiv dilə çevrilir (saxlanan iz dəyişmir)."""
+    from . import journal_removal
+
+    reason = str(change.get("new") or "")
+    return {
+        "student": str(change.get("student") or ""),
+        "item": journal_removal.action_label(change.get("item")),
+        "old": "—",
+        "new": journal_removal.reason_label(reason) if reason else str(kind_label(kind)),
+        "date": "",
+        "lesson_level": False,
+    }
+
+
+def _roster_label(kind, changes) -> str:
+    """«Jurnaldan çıxarıldı — Fənn əvəzlənməsi (sənəd təqdim edib): qeyd»."""
+    from . import journal_removal
+
+    label = kind_label(kind)
+    first = changes[0] if changes else {}
+    reason = journal_removal.reason_label(first.get("new")) if first.get("new") else ""
+    note = str(first.get("note") or "")
+    detail = ": ".join(part for part in (reason, note) if part)
+    return f"{label} — {detail}" if detail else label
 
 
 def _label_with_reason(kind, row) -> str:

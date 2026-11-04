@@ -244,7 +244,8 @@
             group: rule ? rule.requires_group : false,
             program: rule ? rule.requires_program : false,
             form: rule ? rule.requires_form : false,
-            until: rule ? rule.requires_until : false
+            until: rule ? rule.requires_until : false,
+            leave_reason: rule ? rule.requires_leave_reason : false
         };
         Object.keys(needs).forEach(function (name) {
             var box = form.querySelector('[data-sr-need="' + name + '"]');
@@ -252,6 +253,18 @@
                 box.hidden = !needs[name];
             }
         });
+        // Dondurma səbəbi (sahib 2026-11-04): yalnız görünəndə məcburidir — gizli sahə təsdiqi bloklamasın.
+        var leaveSelect = form.querySelector("[data-leave-reason-select]");
+        if (leaveSelect) {
+            if (needs.leave_reason) {
+                leaveSelect.setAttribute("data-ems-required", "");
+            } else {
+                leaveSelect.removeAttribute("data-ems-required");
+            }
+            if (window.EMSLeaveReason) {
+                window.EMSLeaveReason.sync(leaveSelect);
+            }
+        }
     }
 
     function fillSelect(select, rows, placeholderText) {

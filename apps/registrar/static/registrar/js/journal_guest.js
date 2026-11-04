@@ -31,7 +31,6 @@
 
     var BUSY = "is-busy";
     var FOCUS = "is-focused";
-    var CONFIRM = "is-confirm";
     var FLASH = "jgs-flash";
     var FOCUSABLE =
         'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -136,22 +135,13 @@
         if (input) input.focus();
     }
 
-    /** İki addımlı təsdiq: birinci klik xəbərdarlıq edir, ikincisi silir. */
+    /** «Çıxar» səbəb paneli bağlanır (modal açılanda / bağlananda köhnə seçim qalmasın). */
     function resetConfirms(modal) {
-        Array.prototype.forEach.call(modal.querySelectorAll("[data-jgs-remove]"), function (button) {
-            if (button.dataset.jgsLabel) {
-                button.innerHTML = button.dataset.jgsLabel;
-                delete button.dataset.jgsLabel;
-            }
-            button.classList.remove(CONFIRM);
-        });
-    }
-
-    function armConfirm(modal, button) {
-        resetConfirms(modal);
-        button.dataset.jgsLabel = button.innerHTML;
-        button.textContent = attr(modal, "data-confirm-label") || "?";
-        button.classList.add(CONFIRM);
+        var panel = modal.querySelector("[data-jgs-remove-panel]");
+        if (panel) {
+            panel.hidden = true;
+            panel.removeAttribute("data-enrollment");
+        }
     }
 
     function closeModal() {
@@ -479,26 +469,14 @@
             });
     }
 
-    function submitRemove(modal, enrollmentId, trigger) {
-        if (!enrollmentId) return;
-        var item = modal.querySelector('[data-jgs-item="' + enrollmentId + '"]');
-        if (item) item.classList.add(BUSY);
-        if (trigger) trigger.disabled = true;
-        setError(modal, "");
-        window.EMSCore.fetchJSON(attr(modal, "data-remove-url"), {
-            method: "POST",
-            data: { enrollment: enrollmentId },
-        })
-            .then(function (payload) {
-                refreshInPlace(modal, null, (payload && payload.message) || attr(modal, "data-removed-message"));
-            })
-            .catch(function (err) {
-                if (item) item.classList.remove(BUSY);
-                if (trigger) trigger.disabled = false;
-                modal.hidden = false;
-                setError(modal, errorText(err));
-            });
-    }
+    /* «Çıxar» səbəb paneli + POST — journal_guest_remove.js (sahib 2026-11-04); o, buradakı yerində
+     * yeniləməni və xəta qutusunu `window.EMSJournalGuest` ilə işlədir. */
+    window.EMSJournalGuest = {
+        refreshInPlace: refreshInPlace,
+        setError: setError,
+        errorText: errorText,
+        attr: attr,
+    };
 
     /* ── Bağlanma ──────────────────────────────────────────────────────────── */
 
@@ -546,16 +524,6 @@
             if (target.closest("[data-jgs-submit]")) {
                 event.preventDefault();
                 if (pickers) submitAdd(modal, pickers);
-                return;
-            }
-            var remover = target.closest("[data-jgs-remove]");
-            if (remover) {
-                event.preventDefault();
-                if (!remover.classList.contains(CONFIRM)) {
-                    armConfirm(modal, remover);
-                    return;
-                }
-                submitRemove(modal, remover.getAttribute("data-jgs-remove"), remover);
             }
         });
 

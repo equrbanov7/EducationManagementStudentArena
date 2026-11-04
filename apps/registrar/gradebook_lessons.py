@@ -175,7 +175,8 @@ def create_lesson(
     if full_edit:
         _ensure_full_edit_date(offering, parsed)
     elif not allow_past:
-        # Yazma pəncərəsi (``journal.late_entry_days``, defolt 7 gün geriyə; gələcək tarix olmaz).
+        # Yazma pəncərəsi (``journal.late_entry_days``, defolt 7 gün geriyə; «Sistem tənzimləmələri»ndə keçmiş
+        # tarixli dərs başlanğıcı yandırılıbsa o tarixdən; gələcək tarix olmaz).
         error = journal_edit_windows.lesson_date_error(parsed)
         if error:
             raise LessonRuleError(error)

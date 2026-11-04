@@ -21,9 +21,9 @@ from django.views.decorators.http import require_GET, require_POST
 from core import superadmin_waiver
 from core.search_text import tolerant_q
 
-from . import guest_merge, guest_roster, subgroup_placement
+from . import guest_merge, guest_roster, journal_removal, subgroup_placement
 from .journal_access import offering_or_404
-from .models import AcademicStatus, Enrollment
+from .models import AcademicStatus, Enrollment, RemovalAction
 
 _CTX = "registrar.guest_roster"
 _PAGE_SIZE = 20
@@ -317,6 +317,16 @@ def guest_remove(request, offering_id):
     )
     if enrollment is None:
         return _error(pgettext(_CTX, "Qeydiyyat tapılmadı."), status=404)
+    # Sahib 2026-11-04: çıxarılma səbəbi siyahıdan MƏCBURİ seçilir («Digər» üçün qeyd də).
+    try:
+        removal = journal_removal.clean_payload(data)
+    except journal_removal.RemovalReasonError as exc:
+        return _error(exc.message)
+    reason = " · ".join(
+        part
+        for part in (journal_removal.reason_label(removal["reason"]), removal["note"] or _field(data, "reason"))
+        if part
+    )
     from django.db import transaction
 
     try:
@@ -325,10 +335,17 @@ def guest_remove(request, offering_id):
                 offering=offering,
                 enrollment=enrollment,
                 by_user=request.user,
-                reason=_field(data, "reason"),
+                reason=reason,
             )
             subgroup_placement.record_journal_removal(
-                enrollment=enrollment, actor=request.user, reason=_field(data, "reason"), request=request
+                enrollment=enrollment, actor=request.user, reason=reason, request=request
+            )
+            journal_removal.record(
+                enrollment=enrollment,
+                action=RemovalAction.GUEST_REMOVE,
+                cleaned=removal,
+                actor=request.user,
+                request=request,
             )
     except ValidationError as exc:
         return _error("; ".join(exc.messages))

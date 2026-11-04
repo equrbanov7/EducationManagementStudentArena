@@ -20,7 +20,7 @@ State maşını (handoff §5/09 + §6.2):
     enrolled ──group_transfer────> enrolled        (yeni qrup MƏCBURİ)
     enrolled ──program_transfer──> enrolled        (yeni ixtisas MƏCBURİ)
     enrolled ──form_change───────> enrolled        (yeni forma MƏCBURİ, fərqli)
-    enrolled ──academic_leave────> academic_leave  (müddət MƏCBURİ)
+    enrolled ──academic_leave────> academic_leave  (müddət + səbəb kateqoriyası MƏCBURİ, 2026-11-04)
     enrolled | academic_leave ──expulsion──> expelled
     enrolled ──graduation────────> graduated       (sahib 2026-10-25)
     academic_leave | expelled | graduated ──reinstatement──> enrolled  (qrup MƏCBURİ)
@@ -40,6 +40,7 @@ from django.db.models import Q
 from django.utils import timezone
 
 from apps.registrar.enrollment_suspension import has_other_active_record, sync_enrollments_for_status
+from apps.registrar.leave_reasons import NOTE_REQUIRED, LeaveReason, leave_reason_label, leave_reason_options
 from apps.registrar.models import (
     AcademicStatus,
     MovementKind,
@@ -81,6 +82,8 @@ class MovementRule:
     requires_program: bool = False
     requires_form: bool = False
     requires_until: bool = False
+    #: Dondurma səbəbinin kateqoriyası (sahib 2026-11-04) — :mod:`apps.registrar.leave_reasons`.
+    requires_leave_reason: bool = False
 
 
 RULES: dict[str, MovementRule] = {
@@ -107,6 +110,7 @@ RULES: dict[str, MovementRule] = {
         from_statuses=(AcademicStatus.ENROLLED,),
         to_status=AcademicStatus.ACADEMIC_LEAVE,
         requires_until=True,
+        requires_leave_reason=True,
     ),
     MovementKind.REINSTATEMENT: MovementRule(
         kind=MovementKind.REINSTATEMENT,
@@ -135,7 +139,23 @@ def rule_for(kind: str) -> MovementRule:
         raise MovementError("unknown_kind", "Naməlum hərəkət növü.") from exc
 
 
-def normalize_reason(reason, *, kind: str = "", order_number: str = "", order_date=None) -> str:
+def normalize_leave_reason(value, *, note="") -> str:
+    """Dondurma kateqoriyası MƏCBURİDİR; «Digər» seçiləndə sərbəst qeyd (``note``) də (sahib 2026-11-04).
+
+    Bütün insan səthləri (əmr dialoqları + «İnsanlar» status kartı) bu funksiyadan keçir — qayda
+    bir yerdədir. Qaytarır: təmizlənmiş açar (``LeaveReason`` dəyəri).
+    """
+    key = str(value or "").strip()
+    if not key:
+        raise MovementError("leave_reason_required", "Dondurma səbəbinin kateqoriyası seçilməlidir.")
+    if key not in LeaveReason.values:
+        raise MovementError("leave_reason_unknown", "Naməlum dondurma səbəbi.")
+    if key in NOTE_REQUIRED and not str(note or "").strip():
+        raise MovementError("leave_reason_note_required", "«Digər» seçiləndə səbəbin qısa izahı məcburidir.")
+    return key
+
+
+def normalize_reason(reason, *, kind: str = "", order_number: str = "", order_date=None, detail: str = "") -> str:
     """Səbəb İSTƏYƏ BAĞLIDIR — hərəkətin rəsmi əsası ƏMRDİR (sahib 2026-10-15).
 
     Əvvəl ≥20 simvol (``MOVEMENT_REASON_MIN_LENGTH``) məcburi idi; sahib: «əmr
@@ -147,7 +167,7 @@ def normalize_reason(reason, *, kind: str = "", order_number: str = "", order_da
     if not text:
         label = str(status_catalog.label("student_movement", kind)) if kind else ""
         when = order_date.strftime("%d.%m.%Y") if hasattr(order_date, "strftime") else str(order_date or "")
-        parts = [label, f"Əmr № {order_number}" if order_number else "", when]
+        parts = [label, detail, f"Əmr № {order_number}" if order_number else "", when]
         text = " · ".join(part for part in parts if part)
     return text[:REASON_MAX_LENGTH]
 
@@ -353,17 +373,20 @@ def create_movement(
     new_form: str = "",
     effective_until=None,
     document=None,
+    leave_reason=None,
 ) -> StudentMovement:
     """Hərəkəti tətbiq edir və ledger sətrini yazır (bir tranzaksiyada).
 
     ⚠️ Sətir ƏVVƏLCƏ deyil, SONRA yazılır: domen dəyişikliyi uğursuz olarsa
     tarixçədə «olmuş» kimi görünən əmr qalmamalıdır. İkisi eyni atomik blokdadır.
+
+    ``leave_reason`` — dondurma kateqoriyası. İnsan səthləri HƏMİŞƏ sətir ötürür (boş da olsa) və
+    qayda tətbiq olunur (:func:`normalize_leave_reason`); ``None`` yalnız sistem çağırışlarıdır
+    (köhnə idxal skriptləri) — sahə boş qalır, «göstərilməyib» deməkdir.
     """
     order_number = normalize_order_number(order_number)
     if order_date is None:
         raise MovementError("order_date_required", "Əmrin tarixi məcburidir.")
-    reason = normalize_reason(reason, kind=kind, order_number=order_number, order_date=order_date)
-
     record = (
         StudentAcademicRecord.objects.select_for_update(of=("self",))
         .select_related("organization", "student", "program", "group", "curriculum")
@@ -376,6 +399,17 @@ def create_movement(
         new_program=new_program,
         new_form=new_form,
         effective_until=effective_until,
+    )
+    # Kateqoriya keçidin qanuniliyindən SONRA yoxlanılır — qanunsuz keçid öz 409-unu versin.
+    leave_category = ""
+    if leave_reason is not None and rule.requires_leave_reason:
+        leave_category = normalize_leave_reason(leave_reason, note=reason)
+    reason = normalize_reason(
+        reason,
+        kind=kind,
+        order_number=order_number,
+        order_date=order_date,
+        detail=leave_reason_label(leave_category),
     )
 
     from_group = record.group
@@ -411,6 +445,8 @@ def create_movement(
         from_parts = [_status_label(from_status)]
         _apply_status(record, to_status=rule.to_status, actor=actor, reason=reason)
         to_parts = [_status_label(record.status)]
+        if leave_category:
+            to_parts.append(leave_reason_label(leave_category))
         if rule.kind == MovementKind.ACADEMIC_LEAVE and effective_until is not None:
             to_parts.append(str(effective_until))
 
@@ -432,6 +468,7 @@ def create_movement(
         from_label=" · ".join(part for part in from_parts if part)[:255],
         to_label=" · ".join(part for part in to_parts if part)[:255],
         effective_until=effective_until,
+        leave_reason=leave_category,
         actor=actor if getattr(actor, "pk", None) else None,
         actor_name=str(getattr(actor, "get_full_name", lambda: "")() or getattr(actor, "username", "") or "")[:200],
     )
@@ -455,10 +492,14 @@ __all__ = [
     "ORDER_NUMBER_MAX_LENGTH",
     "REASON_MAX_LENGTH",
     "RULES",
+    "LeaveReason",
     "MovementError",
     "MovementRule",
     "create_movement",
+    "leave_reason_label",
+    "leave_reason_options",
     "movements_for",
+    "normalize_leave_reason",
     "normalize_order_number",
     "normalize_reason",
     "rule_for",

@@ -80,6 +80,7 @@ from .journal_close_notice import (
     JournalCloseScope,
 )
 from .journal_hygiene import HYGIENE_REASON_MIN_LENGTH, HygieneCategory, JournalHygieneDecision
+from .journal_removal import REMOVAL_NOTE_MAX_LENGTH, JournalRemoval, RemovalAction, RemovalReason
 from .journal_share import JournalShare, JournalShareSource
 from .kollokvium_window import (
     KOLLOKVIUM_WINDOW_COUNT,
@@ -230,6 +231,10 @@ __all__ = [
     "HYGIENE_REASON_MIN_LENGTH",
     "HygieneCategory",
     "JournalHygieneDecision",
+    "JournalRemoval",
+    "REMOVAL_NOTE_MAX_LENGTH",
+    "RemovalAction",
+    "RemovalReason",
     "JournalShare",
     "JournalShareSource",
     "SlotKind",

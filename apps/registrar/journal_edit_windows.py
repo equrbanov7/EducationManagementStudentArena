@@ -23,6 +23,10 @@ sətrin UPDATE-i pəncərədən asılı deyil (yazma pəncərəsi isə yalnız s
   servis və DB qaydası üst-üstə düşür;
 * gecikmiş yazı — ``journal.late_entry_days`` (defolt 7; 0 = yalnız dərs günü): müəllim dərs tarixindən ən çox
   N gün sonra həmin tarixə dərs aça və YENİ qeyd yaza bilər (:class:`EntryRule`);
+* keçmiş tarixli dərsin başlanğıc tarixi (sahib 2026-11-04: «müəllimlər sentyabrın 15-dən indiyə dərs əlavə edə
+  bilsin») — ``journal.backdate_since_enabled`` yandırılıbsa və ``journal.backdate_since`` adi həddən köhnədirsə
+  yazma pəncərəsinin alt həddi o tarixdir (:func:`earliest_entry_date`; oxu — ``core.runtime_settings_journal_backdate``);
+  gələcək tarix, dövr sərhədi və xana kilidi dəyişmir;
 * aktivləşdirmə pəncərəsi — «Aktivləşdir» yanılıdırsa dərsə YENİ qeyd yalnız aktivləşdirmədən (dərsin
   yaranışından) sonrakı ``journal.activation_write_minutes`` dəqiqədə yazılır. Əvvəlcədən (dərs günündən
   əvvəl) açılmış dərsdə saat dərsin başlama vaxtından sayılır — yoxsa belə dərsə heç vaxt yazmaq olmazdı.
@@ -99,9 +103,30 @@ def activation_write_window() -> timedelta | None:
     return timedelta(minutes=runtime_settings.get_int("journal.activation_write_minutes"))
 
 
-def earliest_entry_date(today=None, *, days=None):
-    """Müəllimin dərs açıb yeni qeyd yaza biləcəyi ən erkən dərs tarixi (YAZMA PƏNCƏRƏSİNİN TƏK hesabı)."""
-    return (today or timezone.localdate()) - timedelta(days=late_entry_days() if days is None else days)
+_UNSET = object()
+
+
+def backdate_since():
+    """«Sistem tənzimləmələri»nin keçmiş tarixli dərs başlanğıcı (sahib 2026-11-04); söndürülüdə ``None``."""
+    from core.runtime_settings_journal_backdate import backdate_since as read
+
+    return read()
+
+
+def earliest_entry_date(today=None, *, days=None, since=_UNSET):
+    """Müəllimin dərs açıb yeni qeyd yaza biləcəyi ən erkən dərs tarixi (YAZMA PƏNCƏRƏSİNİN TƏK hesabı).
+
+    Adi hədd: bu gün − ``journal.late_entry_days``. Keçmiş tarixli dərs başlanğıcı (:func:`backdate_since`;
+    ``since`` ötürülməyibsə tənzimləmədən oxunur) ondan köhnədirsə hədd o tarixdir.
+    """
+    rolling = (today or timezone.localdate()) - timedelta(days=late_entry_days() if days is None else days)
+    since = backdate_since() if since is _UNSET else since
+    return since if since is not None and since < rolling else rolling
+
+
+def _since_applies(earliest, since) -> bool:
+    """Hədd keçmiş tarixli dərs başlanğıcından gəlir (mesaj «N gün geriyə» yox, tarixi desin)."""
+    return since is not None and earliest == since
 
 
 def duration_text(window: timedelta) -> str:
@@ -125,9 +150,14 @@ def lesson_date_error(parsed, *, today=None) -> str:
     if parsed > today:
         return pgettext(_CTX, "Gələcək tarixə dərs əlavə etmək olmaz.")
     days = late_entry_days()
-    earliest = earliest_entry_date(today, days=days)
+    since = backdate_since()
+    earliest = earliest_entry_date(today, days=days, since=since)
     if parsed >= earliest:
         return ""
+    if _since_applies(earliest, since):
+        return pgettext(
+            _CTX, "Dərs tarixi %(date)s tarixindən əvvəl ola bilməz. Daha köhnə tarix üçün RİM-ə müraciət edin."
+        ) % {"date": earliest.strftime("%d.%m.%Y")}
     if not days:
         return pgettext(_CTX, "Keçmiş tarixə dərs əlavə etmək olmaz.")
     return pgettext(
@@ -239,6 +269,8 @@ class EntryRule:
     today: _dt.date
     late_days: int
     activation_window: timedelta | None
+    #: Keçmiş tarixli dərs başlanğıcı (:func:`backdate_since`; ``None`` — söndürülü). Sorğu başına bir dəfə oxunur.
+    backdate_since: _dt.date | None = None
 
     @classmethod
     def current(cls, *, now=None) -> "EntryRule":
@@ -248,17 +280,24 @@ class EntryRule:
             today=timezone.localdate(now),
             late_days=late_entry_days(),
             activation_window=activation_write_window(),
+            backdate_since=backdate_since(),
         )
 
     @property
     def earliest_date(self):
-        return earliest_entry_date(self.today, days=self.late_days)
+        return earliest_entry_date(self.today, days=self.late_days, since=self.backdate_since)
 
     def block_reason(self, lesson) -> str:
         """Bu dərsə yeni qeyd yazmaq olmursa səbəb, olursa «»."""
         if lesson.date > self.today:
             return pgettext(_CTX, "Gələcək tarixli dərsə qeyd hələ yazıla bilməz.")
-        if lesson.date < self.earliest_date:
+        earliest = self.earliest_date
+        if lesson.date < earliest:
+            if _since_applies(earliest, self.backdate_since):
+                return pgettext(
+                    _CTX,
+                    "%(date)s tarixli dərsə yeni qeyd yazmaq olmaz — keçmiş dərslərə yazı %(since)s tarixindən açıqdır.",
+                ) % {"date": lesson.date.strftime("%d.%m.%Y"), "since": earliest.strftime("%d.%m.%Y")}
             if not self.late_days:
                 return pgettext(_CTX, "Yeni qeyd yalnız dərsin öz günündə yazılır — keçmiş dərsə yazmaq olmaz.")
             return pgettext(
@@ -280,13 +319,17 @@ def template_context(today=None) -> dict:
     """Jurnal şablonlarının mətnləri faktiki tənzimləməni göstərsin («2 saat» sabit yazılmasın)."""
     today = today or timezone.localdate()
     days = late_entry_days()
+    since = backdate_since()
+    earliest = earliest_entry_date(today, days=days, since=since)
     activation = activation_write_window()
     mark_window = mark_edit_window()
     return {
         "lesson_edit_window_label": duration_text(lesson_edit_window()),
         "mark_edit_window_label": duration_text(mark_window),
         "late_entry_days": days,
-        "lesson_date_min": earliest_entry_date(today, days=days),
+        "lesson_date_min": earliest,
+        # Hədd keçmiş tarixli dərs başlanğıcından gəlirsə tarix (modal/grid ipucu «N gün geriyə» yox, onu deyir).
+        "lesson_backdate_since": earliest if _since_applies(earliest, since) else None,
         "lesson_date_max": today,
         "activation_write_label": duration_text(activation) if activation is not None else "",
         # Kilidli xana dialoqu (journal_mark_lock.js) — mətnlər cədvəlin data-atributlarına bir dəfə yazılır.
@@ -315,6 +358,7 @@ __all__ = [
     "MARK_EDIT_WINDOW",
     "activation_start",
     "activation_write_window",
+    "backdate_since",
     "duration_text",
     "earliest_entry_date",
     "fix_request_url",

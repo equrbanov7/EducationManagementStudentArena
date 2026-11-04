@@ -16,7 +16,7 @@ def _load(name, expected):
 
 PINS = _load("reviewed_vefa_catalog_pins.json", "e49caa7b7c7dbbf4ec14ad8c1dae6e0b4fd5b134e4a82657aa00871875e1500b")
 SCHEMA = _load(
-    "reviewed_two_catalog_schema_pins.json", "35b3e65cf122d96e6249cffaf30cbe9a80404da66572c8295a53777bbf60bf0e"
+    "reviewed_two_catalog_schema_pins.json", "b856305a51ce529af6d06842d3eaadf275c899181bb2a1cc3bce808d9fe6dc0f"
 )
 ORG = PINS["organization_id"]
 PERIOD = PINS["period_id"]

@@ -162,11 +162,13 @@ def filter_kind(queryset, kind):
     )
 
 
-def attach(user, offerings, *, selected_kind=""):
+def attach(user, offerings, *, selected_kind="", links=True):
     """Distinct real lesson IDs, never marks×students or workload/patok multiplication.
 
     Teaching hours require explicit Lesson.instructor. created_by/entered_by also
     retain history but are described separately, never as paid/taught hours.
+    ``links=False`` — a broad viewer mirroring ``user``'s list: the own/master history
+    routes answer only ``request.user``, so rows keep the canonical journal link.
     """
     if not offerings:
         return
@@ -203,8 +205,9 @@ def attach(user, offerings, *, selected_kind=""):
         offering.journal_own_lessons = sum(taught.get((offering.pk, kind), {}).get("count", 0) for kind in count_kinds)
         offering.journal_own_hours = sum(taught.get((offering.pk, kind), {}).get("hours", 0) for kind in count_kinds)
         offering.journal_contributed_lessons = sum(contributions.get((offering.pk, kind), 0) for kind in count_kinds)
-        offering.journal_own_history_link = not current and bool(offering.journal_contributed_lessons)
-        attach_master_history(offering, kind=selected_kind)
+        offering.journal_own_history_link = links and not current and bool(offering.journal_contributed_lessons)
+        if links:
+            attach_master_history(offering, kind=selected_kind)
 
     from .journal_prior_history_badge import attach as attach_prior_history
 
