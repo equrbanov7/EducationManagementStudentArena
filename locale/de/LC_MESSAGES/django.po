@@ -113233,10 +113233,6 @@ msgctxt "accounts.syllabus"
 msgid "Dərs deyən müəllim"
 msgstr "Lehrperson"
 
-msgctxt "accounts.syllabus"
-msgid "Yeni qaralama saxlanılır"
-msgstr "Neuer Entwurf bleibt erhalten"
-
 #: apps/accounts/templates/accounts/profile/sidebar/items/_language_cohorts.html
 msgctxt "profile.sidebar"
 msgid "Xarici dil səviyyə qrupları"
@@ -113655,3 +113651,11 @@ msgstr "%(period)s · %(group)s: Das stornierte LEERE Zwillingsjournal wird gel�
 msgctxt "registrar.subject_merge"
 msgid "%(student)s · %(period)s: hər iki fənn üzrə qeydiyyat var — qiymətsiz təkrar qeydiyyat bağlanır (dropped), qiymətli qeydiyyat qalır."
 msgstr "%(student)s · %(period)s: Einschreibung unter beiden Fächern — die unbewertete doppelte Einschreibung wird geschlossen (dropped), die bewertete bleibt."
+
+msgctxt "accounts.workload"
+msgid "Bütün kafedralar"
+msgstr "Alle Lehrstühle"
+
+msgctxt "accounts.workload"
+msgid "Bütün kafedralar: siyahı yalnız baxış üçündür. Sətri dəyişmək üçün «Kafedrada redaktə et» düyməsi ilə onun kafedrasına keçin."
+msgstr "Alle Lehrstühle: Die Liste ist schreibgeschützt. Um eine Zeile zu ändern, öffnen Sie mit «Im Lehrstuhl bearbeiten» ihren Lehrstuhl."
