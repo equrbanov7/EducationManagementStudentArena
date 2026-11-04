@@ -1,0 +1,28 @@
+{% load i18n %}
+{% comment %}«Dondur» (akademik məzuniyyət) — SƏBƏB KATEQORİYASI seçicisi (sahib 2026-11-04).
+
+İki dialoq işlədir: qrup çekmecəsinin «Dondur»u (həmişə görünür, `lr_static_required`) və «Tələbə
+reyestri»nin hərəkət dialoqu (`lr_need` — yalnız «Akademik məzuniyyət» növündə görünür; məcburiyyəti
+`student_registry.js` açıb-bağlayır, gizli sahə təsdiqi bloklamasın).
+
+«Digər» seçiləndə dialoqun səbəb mətni də məcburi olur — `leave_reason_field.js` səbəb textarea-sına
+`data-ems-required` qoyur (təsdiq düyməsi `overlay.js`-in qaydası ilə bağlanır). Faktiki qayda
+serverdədir: `registrar.movements.normalize_leave_reason`.
+
+Variantlar: `lr_options` = `[{value, label}]` (`registrar.leave_reasons` enum-u — TƏK mənbə).
+{% endcomment %}
+<div class="ems-field"{% if lr_need %} data-sr-need="{{ lr_need }}" hidden{% endif %}>
+    <label class="ems-field__label" for="{{ lr_id }}">{% trans "Dondurma səbəbi" context "accounts.leave_reason" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" id="{{ lr_id }}" name="leave_reason"
+                data-bootstrap-select data-leave-reason-select{% if lr_static_required %} data-ems-required{% endif %}>
+            <option value="">{% trans "Kateqoriya seçin" context "accounts.leave_reason" %}</option>
+            {% for option in lr_options %}
+            <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <p class="ems-field__hint" data-leave-reason-hint
+       data-hint="{% trans 'Kateqoriya əmr tarixçəsində və audit jurnalında saxlanılır.' context 'accounts.leave_reason' %}"
+       data-hint-other="{% trans '«Digər» seçildi — aşağıdakı səbəb sahəsində qısa izah yazın (məcburidir).' context 'accounts.leave_reason' %}">{% trans "Kateqoriya əmr tarixçəsində və audit jurnalında saxlanılır." context "accounts.leave_reason" %}</p>
+</div>

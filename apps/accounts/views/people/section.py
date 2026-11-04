@@ -274,9 +274,17 @@ def build_people_section(request, kind: str) -> dict:
             "age_unknown_key": AGE_UNKNOWN,
             "age_unknown_label": _AGE_UNKNOWN_LABEL,
             "academic_status_options": [{"key": key, "label": label} for key, label in ACADEMIC_STATUS_LABELS.items()],
+            # «Akademik məzuniyyət» statusunda dondurma səbəbi (sahib 2026-11-04) — registrar enum-u.
+            "leave_reason_options": _leave_reason_options(),
             "columns": _columns_for(kind, actor),
         }
     }
+
+
+def _leave_reason_options() -> list:
+    from apps.accounts.services.people.movements import leave_reason_options
+
+    return leave_reason_options()
 
 
 def build_people_teachers_section(request) -> dict:

@@ -202,6 +202,24 @@ qapısı isə icazəsiz istifadəçiyə ölü markup göndərməməyə xidmət e
             {% endfor %}
           </div>
 
+          {% comment %}Dondurma səbəbi (sahib 2026-11-04) — yalnız «Akademik məzuniyyət» seçiləndə görünür və
+          MƏCBURİDİR (`people_academic.js`); «Digər» üçün aşağıdakı səbəb mətni izah olur. Server qaydası:
+          `registrar.movements.normalize_leave_reason`.{% endcomment %}
+          <div class="psm__field" data-psm-leave-reason hidden>
+            <label class="psm__label" for="psm-leave-reason">
+              {% trans "Dondurma səbəbi" context "accounts.leave_reason" %}
+            </label>
+            <div class="bootstrap-single-select bootstrap-single-select--ems">
+              <select class="ems-select bootstrap-single-select__native" id="psm-leave-reason"
+                      data-bootstrap-select data-psm-leave-reason-select>
+                <option value="">{% trans "Kateqoriya seçin" context "accounts.leave_reason" %}</option>
+                {% for option in people_section.leave_reason_options %}
+                  <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
           <div class="psm__field">
             <label class="psm__label" for="psm-status-reason">
               {% trans "Səbəb" context "accounts.people.academic" %}

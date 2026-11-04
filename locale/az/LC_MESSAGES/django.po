@@ -112814,3 +112814,51 @@ msgstr "Əvvəlki nəticə"
 
 msgid "Cəhd sıfırlandı — bilet yeni PIN ilə yenidən açıldı"
 msgstr "Cəhd sıfırlandı — bilet yeni PIN ilə yenidən açıldı"
+
+msgctxt "registrar.leave_reason"
+msgid "Akademik məzuniyyət"
+msgstr "Akademik məzuniyyət"
+
+msgctxt "registrar.leave_reason"
+msgid "Analıq (doğuş) məzuniyyəti"
+msgstr "Analıq (doğuş) məzuniyyəti"
+
+msgctxt "registrar.leave_reason"
+msgid "Uşağa qulluq məzuniyyəti"
+msgstr "Uşağa qulluq məzuniyyəti"
+
+msgctxt "registrar.leave_reason"
+msgid "Səhhətlə bağlı (tibbi)"
+msgstr "Səhhətlə bağlı (tibbi)"
+
+msgctxt "registrar.leave_reason"
+msgid "Hərbi xidmət"
+msgstr "Hərbi xidmət"
+
+msgctxt "registrar.leave_reason"
+msgid "Ailə vəziyyəti"
+msgstr "Ailə vəziyyəti"
+
+msgctxt "registrar.leave_reason"
+msgid "Maliyyə səbəbi"
+msgstr "Maliyyə səbəbi"
+
+msgctxt "registrar.leave_reason"
+msgid "Digər"
+msgstr "Digər"
+
+msgctxt "accounts.leave_reason"
+msgid "Dondurma səbəbi"
+msgstr "Dondurma səbəbi"
+
+msgctxt "accounts.leave_reason"
+msgid "Kateqoriya seçin"
+msgstr "Kateqoriya seçin"
+
+msgctxt "accounts.leave_reason"
+msgid "Kateqoriya əmr tarixçəsində və audit jurnalında saxlanılır."
+msgstr "Kateqoriya əmr tarixçəsində və audit jurnalında saxlanılır."
+
+msgctxt "accounts.leave_reason"
+msgid "«Digər» seçildi — aşağıdakı səbəb sahəsində qısa izah yazın (məcburidir)."
+msgstr "«Digər» seçildi — aşağıdakı səbəb sahəsində qısa izah yazın (məcburidir)."

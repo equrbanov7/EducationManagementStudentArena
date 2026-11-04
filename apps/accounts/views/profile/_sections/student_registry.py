@@ -137,6 +137,8 @@ def build_student_registry_section(request, section, *, active_organization, all
     section["can_arayis"] = can_transcript
     section["options"] = registry_service.registry_options(actor, request=request)
     section["movement_kinds"] = movement_service.movement_kinds()
+    # Dondurma səbəbinin kateqoriyası (sahib 2026-11-04) — «Akademik məzuniyyət» növündə məcburi.
+    section["leave_reason_options"] = movement_service.leave_reason_options()
 
     base_params = {
         "section": "student-registry",

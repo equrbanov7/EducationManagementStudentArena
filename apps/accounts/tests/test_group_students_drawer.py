@@ -273,10 +273,14 @@ class RemovedStudentsReinstateTest(_StudentsBase):
 
     def test_academic_leave_is_listed_with_until_date(self):
         record = self.students[1]
-        self._remove(record, kind="academic_leave", effective_until="2030-06-30")
+        self._remove(record, kind="academic_leave", effective_until="2030-06-30", leave_reason="maternity")
         body = self._client("teaching_office_head").get(self._students_url()).json()
         row = next(r for r in body["removed_rows"] if r["username"] == record.student.username)
         self.assertEqual((row["status"], row["until"]), ("academic_leave", "30.06.2030"))
+        # Dondurma səbəbinin kateqoriyası çekmecə sətrində görünür (sahib 2026-11-04).
+        from apps.registrar.leave_reasons import LeaveReason
+
+        self.assertEqual(row["leave_reason_label"], str(LeaveReason.MATERNITY.label))
 
     def test_reinstatement_returns_student_to_the_group(self):
         record = self.students[0]

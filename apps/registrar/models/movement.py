@@ -34,6 +34,7 @@ from django.utils.translation import pgettext_lazy
 from core.ui import status_catalog
 from core.upload_security import FileUploadValidator
 
+from ..leave_reasons import LEAVE_REASON_MAX_LENGTH, LeaveReason
 from .corrections import ImmutableCorrectionEvidence
 
 #: Əmr sənədinin ölçü limiti — jurnal düzəliş sənədləri ilə EYNİ (10 MB).
@@ -121,6 +122,11 @@ class StudentMovement(ImmutableCorrectionEvidence):
     to_label = models.CharField(max_length=255, blank=True, default="")
     #: Akademik məzuniyyətin bitmə tarixi (handoff: «müddət tələb olunur»).
     effective_until = models.DateField(null=True, blank=True)
+    #: Dondurma səbəbinin KATEQORİYASI (sahib 2026-11-04) — yalnız akademik məzuniyyət əmrində;
+    #: köhnə əmrlərdə və sistem idxallarında boşdur. Etiketlər: :mod:`apps.registrar.leave_reasons`.
+    leave_reason = models.CharField(
+        max_length=LEAVE_REASON_MAX_LENGTH, choices=LeaveReason.choices, blank=True, default=""
+    )
 
     # ── İcraçı ────────────────────────────────────────────────────────────
     actor = models.ForeignKey(
@@ -140,6 +146,13 @@ class StudentMovement(ImmutableCorrectionEvidence):
             models.Index(fields=["organization", "record"]),
             models.Index(fields=["organization", "kind"]),
         ]
+        constraints = [
+            # Kateqoriya YALNIZ akademik məzuniyyət əmrində ola bilər (köhnə sətirlər boşdur).
+            models.CheckConstraint(
+                condition=models.Q(leave_reason="") | models.Q(kind="academic_leave"),
+                name="registrar_movement_leave_reason_only_on_leave",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.kind}<{self.record_id}> {self.order_number}"
@@ -147,6 +160,12 @@ class StudentMovement(ImmutableCorrectionEvidence):
     @property
     def kind_label(self):
         return status_catalog.label("student_movement", self.kind)
+
+    @property
+    def leave_reason_label(self) -> str:
+        from ..leave_reasons import leave_reason_label
+
+        return leave_reason_label(self.leave_reason)
 
 
 __all__ = [
