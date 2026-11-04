@@ -42,8 +42,10 @@ from ..services import (
     teacher_pool,
     unassign_amended,
 )
+from ..services.all_chairs import ALL_CHAIRS
 from ..services.tasks import ROW_HAS_OBJECTIONS, TOTAL_BELOW_ASSIGNED
 from ._base import active_organization, actor_for, denied, error, json_body, no_org
+from .all_chairs_api import all_chairs_rows
 
 # Backend auditi 2026-09-13, F-01: gövdədən gələn qeyri-UUID ``row_id`` /
 # ``task_id`` / ``assignment_id`` ``filter(pk=...)``-də ValidationError → 500
@@ -124,6 +126,8 @@ def rows(request) -> JsonResponse:
         return no_org()
     actor = actor_for(request)
     chair_id = request.GET.get("chair") or ""
+    if chair_id == ALL_CHAIRS:  # 2026-11-04: «Bütün kafedralar» — yalnız oxu axtarışı
+        return all_chairs_rows(request, actor)
     year = request.GET.get("year") or ""
     task_id = request.GET.get("task") or None
     try:

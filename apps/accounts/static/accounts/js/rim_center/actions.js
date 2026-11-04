@@ -111,7 +111,10 @@
         block: "confirm_block",
         unblock: "confirm_unblock",
         soft_delete: "confirm_soft_delete",
-        restore: "confirm_restore"
+        restore: "confirm_restore",
+        // Sahib 2026-11-04: müəllim / əməkdaş arxivi (səbəb istəyə bağlı — «keep it light»).
+        archive_staff: "confirm_archive_staff",
+        unarchive_staff: "confirm_unarchive_staff"
     };
 
     var CONFIRM_TITLE_KEYS = {
@@ -119,8 +122,26 @@
         block: "block",
         unblock: "unblock",
         soft_delete: "soft_delete",
-        restore: "restore"
+        restore: "restore",
+        archive_staff: "archive_staff",
+        unarchive_staff: "unarchive_staff"
     };
+
+    /** Təsdiq pəncərəsində «nə dəyişəcək» siyahısı (arxivdə deaktiv / bərpa olunacaq rollar). */
+    function confirmList(action, user) {
+        var archive = user.staff_archive || {};
+        if ((action === "archive_staff" || action === "unarchive_staff") && archive.roles && archive.roles.length) {
+            return { title: ns.t(action === "archive_staff" ? "roles_to_archive" : "roles_to_restore"), items: archive.roles };
+        }
+        return null;
+    }
+
+    function toast(message, level) {
+        if (message && window.EMSToast && window.EMSToast.show) {
+            window.EMSToast.show(message, level || "success");
+        }
+    }
+    actions.toast = toast;
 
     actions.requestConfirm = function requestConfirm(action) {
         if (!ns.state.selectedUser) {
@@ -141,6 +162,35 @@
         }
         if (reasonEl) {
             reasonEl.value = "";
+        }
+        var reasonLabel = document.querySelector("[data-rim-confirm-reason-label]");
+        if (reasonLabel) {
+            reasonLabel.textContent = ns.t(REASON_REQUIRED[action] ? "reason" : "reason_optional");
+        }
+        var listEl = document.querySelector("[data-rim-confirm-list]");
+        if (listEl) {
+            var list = confirmList(action, ns.state.selectedUser);
+            listEl.textContent = "";
+            listEl.hidden = !list;
+            if (list) {
+                var head = document.createElement("p");
+                head.className = "rim-confirm-list__title";
+                head.textContent = list.title;
+                var ul = document.createElement("ul");
+                list.items.forEach(function (text) {
+                    var li = document.createElement("li");
+                    li.textContent = text;
+                    ul.appendChild(li);
+                });
+                listEl.appendChild(head);
+                listEl.appendChild(ul);
+            }
+        }
+        var submit = document.querySelector("[data-rim-confirm-submit]");
+        if (submit) {
+            var calm = action === "unblock" || action === "restore" || action === "unarchive_staff";
+            submit.classList.toggle("rim-btn--danger", !calm);
+            submit.classList.toggle("rim-btn--primary", calm);
         }
         if (errorEl) {
             errorEl.hidden = true;
@@ -189,9 +239,12 @@
                     // Parol YALNIZ BURADA görünür — heç yerdə saxlanılmır.
                     ns.modals.showPassword(payload.password);
                 }
-                if (action === "restore" && payload.restore_notices) {
+                if (payload.restore_notices && payload.restore_notices.length) {
                     // Bərpa natamam ola bilər — «sakit uğur» qadağandır.
                     ns.modals.showNotices(payload.restore_notices);
+                }
+                if (action !== "set_password") {
+                    toast(payload.message);
                 }
                 actions.search();
             })
@@ -210,6 +263,79 @@
 
     /* ── Şəxsi məlumat redaktəsi ────────────────────────────────────────── */
 
+    /** Server xəta kodu → sahə (inline xəta həmin sahənin altında görünür). */
+    var ERROR_FIELDS = {
+        invalid_email: "email",
+        email_taken: "email",
+        invalid_fin: "fin",
+        fin_taken: "fin",
+        invalid_username: "username",
+        username_taken: "username",
+        invalid_phone: "phone",
+        name_inappropriate: "first_name"
+    };
+
+    function fieldError(name, message) {
+        var box = document.querySelector('[data-rim-field-error="' + name + '"]');
+        var input = document.querySelector('[data-rim-edit-field="' + name + '"]');
+        if (box) {
+            box.textContent = message || "";
+            box.hidden = !message;
+        }
+        if (input) {
+            if (message) {
+                input.setAttribute("aria-invalid", "true");
+            } else {
+                input.removeAttribute("aria-invalid");
+            }
+        }
+    }
+
+    /** Klient yoxlaması (UX) — server eyni qaydaları təkrar yoxlayır. */
+    actions.validateField = function validateField(input) {
+        var name = input.dataset.rimEditField;
+        var value = (input.value || "").trim();
+        var message = "";
+        if (value === (input.getAttribute("data-initial") || "").trim()) {
+            fieldError(name, ""); // dəyişməyən (köhnə) dəyər yoxlanmır — server onu onsuz da toxunmur
+            return true;
+        }
+        if (name === "username") {
+            if (value.length < 3 || /\s/.test(value)) {
+                message = ns.t("err_username");
+            }
+        } else if (name === "email") {
+            if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                message = ns.t("err_email");
+            }
+        } else if (name === "fin") {
+            if (value && !/^[A-Za-z0-9]{7}$/.test(value)) {
+                message = ns.t("err_fin");
+            }
+        }
+        fieldError(name, message);
+        return !message;
+    };
+
+    /** Forma dəyişibmi — «Yadda saxla» yalnız dəyişiklik olanda aktivdir. */
+    actions.syncEditState = function syncEditState() {
+        var inputs = document.querySelectorAll("[data-rim-edit-form] [data-rim-edit-field]");
+        var dirty = false;
+        Array.prototype.forEach.call(inputs, function (input) {
+            if ((input.value || "") !== (input.getAttribute("data-initial") || "")) {
+                dirty = true;
+            }
+        });
+        var saveBtn = document.querySelector("[data-rim-edit-save]");
+        var hint = document.querySelector("[data-rim-edit-dirty]");
+        if (saveBtn) {
+            saveBtn.disabled = !dirty;
+        }
+        if (hint) {
+            hint.hidden = !dirty;
+        }
+    };
+
     actions.saveEdit = function saveEdit() {
         var cfg = ns.config();
         var fetchJSON = http();
@@ -219,16 +345,22 @@
         }
 
         var payload = { action: "edit", user_id: user.id, reason: "" };
-        var inputs = document.querySelectorAll("[data-rim-edit-field]");
+        var valid = true;
+        var inputs = document.querySelectorAll("[data-rim-edit-form] [data-rim-edit-field]");
         Array.prototype.forEach.call(inputs, function (input) {
             payload[input.dataset.rimEditField] = input.value;
+            if (!actions.validateField(input)) {
+                valid = false;
+            }
         });
-
         var errorEl = document.querySelector("[data-rim-edit-error]");
-        var saveBtn = document.querySelector("[data-rim-edit-save]");
         if (errorEl) {
             errorEl.hidden = true;
         }
+        if (!valid) {
+            return;
+        }
+        var saveBtn = document.querySelector("[data-rim-edit-save]");
         if (saveBtn) {
             saveBtn.disabled = true;
         }
@@ -237,20 +369,45 @@
             .then(function (response) {
                 ns.state.selectedUser = response.user;
                 ns.render.detail(response.user);
+                toast(response.message, response.changed_fields && response.changed_fields.length ? "success" : "info");
                 actions.search();
             })
             .catch(function (err) {
-                var freshError = document.querySelector("[data-rim-edit-error]");
-                if (freshError) {
-                    freshError.textContent = ns.errorMessage(err);
-                    freshError.hidden = false;
+                var code = err && err.payload && err.payload.error;
+                var field = ERROR_FIELDS[code];
+                if (field && document.querySelector('[data-rim-field-error="' + field + '"]')) {
+                    fieldError(field, ns.errorMessage(err));
+                } else {
+                    var freshError = document.querySelector("[data-rim-edit-error]");
+                    if (freshError) {
+                        freshError.textContent = ns.errorMessage(err);
+                        freshError.hidden = false;
+                    }
                 }
-            })
-            .then(function () {
-                var freshBtn = document.querySelector("[data-rim-edit-save]");
-                if (freshBtn) {
-                    freshBtn.disabled = false;
-                }
+                actions.syncEditState();
             });
+    };
+
+    /** Bir sahəlik / bir bloklu əməl (vəzifə, bölmə, məzun) — ortaq POST + kartın yenilənməsi + toast. */
+    actions.post = function post(data, opts) {
+        var cfg = ns.config();
+        var fetchJSON = http();
+        var user = ns.state.selectedUser;
+        if (!cfg || !fetchJSON || !user) {
+            return Promise.reject(new Error("rim_not_ready"));
+        }
+        data.user_id = user.id;
+        return fetchJSON(cfg.actionUrl, { method: "POST", data: data }).then(function (response) {
+            ns.state.selectedUser = response.user;
+            if (!(opts && opts.keepClosed)) {
+                ns.render.detail(response.user);
+            }
+            toast(response.message);
+            if (response.restore_notices && response.restore_notices.length) {
+                ns.modals.showNotices(response.restore_notices);
+            }
+            actions.search();
+            return response;
+        });
     };
 })(window, document);

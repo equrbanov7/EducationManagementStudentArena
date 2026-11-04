@@ -53,8 +53,9 @@ class RimStaffScopeTests(RimCenterTestBase):
         self.assertEqual(other, list(Membership.objects.filter(user=self.teacher).exclude(pk=self.source.pk).values()))
         self.teacher.refresh_from_db()
         self.assertEqual((self.teacher.password, self.teacher.email), (password, email))
-        rows = response.json()["user"]["staff_scope"]["memberships"]
-        self.assertEqual(rows[0]["unit_name"], "Fəlsəfə")
+        # 2026-11-04: lab-only card replaced by the general «Vəzifə və bölmə» placement card.
+        rows = {row["id"]: row for row in response.json()["user"]["placement"]["memberships"]}
+        self.assertEqual(rows[str(self.source.pk)]["unit_name"], "Fəlsəfə")
         self.assertTrue(AuditLog.objects.filter(changes__action="rim.staff_scope_corrected").exists())
 
     def test_personal_edit_permission_does_not_grant_staff_scope_permission(self):
@@ -139,4 +140,5 @@ class RimStaffScopeTests(RimCenterTestBase):
         self.teacher.profile.save(update_fields=["department"])
         response = self.client.get(reverse("accounts:rim_user_detail", args=[self.teacher.pk]))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["user"]["staff_scope"]["memberships"][0]["unit_name"], "Sosial iş")
+        rows = {row["id"]: row for row in response.json()["user"]["placement"]["memberships"]}
+        self.assertEqual(rows[str(self.source.pk)]["unit_name"], "Sosial iş")

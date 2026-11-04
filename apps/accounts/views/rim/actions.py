@@ -20,6 +20,7 @@ import logging
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
+from django.utils.translation import pgettext
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
@@ -40,6 +41,8 @@ from apps.accounts.services.rim.profile_edit import EDITABLE_FIELDS
 from core.logging_utils import safe_log_value
 from core.write_rate_limit import score_write_rate_limited
 
+from .modal_actions import MODAL_ACTIONS, run_modal_action
+
 logger = logging.getLogger(__name__)
 
 #: İcazə verilən əməliyyatlar — allow-list (naməlum `action` → 400).
@@ -52,6 +55,11 @@ ALLOWED_ACTIONS = frozenset(
         "restore",
         "edit",
         "move_staff_scope",
+        # Sahib 2026-11-04 — detal kartının yeni əməlləri (``modal_actions.py``).
+        "place_unit",
+        "graduate",
+        "archive_staff",
+        "unarchive_staff",
     }
 )
 
@@ -167,6 +175,9 @@ def rim_action(request):
             # «uğur» mesajı ilə aldadılmamalıdır (QA Y-1).
             extra["restore_notices"] = list(result.notices)
             message = " ".join(("Hesab bərpa edildi.", *result.notices))
+        elif action in MODAL_ACTIONS:
+            message, modal_extra = run_modal_action(action, actor, target, payload, request=request, reason=reason)
+            extra.update(modal_extra)
         elif action == "move_staff_scope":
             from apps.accounts.services.rim.staff_scope import move
 
@@ -185,7 +196,11 @@ def rim_action(request):
             fields = {name: payload[name] for name in (*EDITABLE_FIELDS, "phone_country") if name in payload}
             changes = update_user_fields(actor, target, data=fields, request=request, reason=reason)
             extra["changed_fields"] = sorted(changes)
-            message = "Məlumatlar yeniləndi." if changes else "Dəyişiklik yoxdur."
+            message = (
+                pgettext("accounts.rim.modal", "Məlumatlar yeniləndi.")
+                if changes
+                else pgettext("accounts.rim.modal", "Dəyişiklik yoxdur.")
+            )
     except RimAccessError as exc:
         logger.info(
             "RİM əməliyyatı rədd edildi: action=%s actor=%s target=%s reason_code=%s",

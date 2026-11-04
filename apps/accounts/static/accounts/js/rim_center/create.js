@@ -189,6 +189,29 @@
                 input.disabled = !visible;
             });
         });
+        filterUnitOptions(kind);
+    }
+
+    /* «Kafedra / bölmə» seçicisi (2026-11-04): variant yalnız öz hesab növündə görünür
+     * (`data-rimc-unit-for="teacher staff"`); gizlənən variant seçilibsə dəyər boşalır.
+     * Stilli seçici `hidden` atributunu MutationObserver ilə özü izləyir. */
+    function filterUnitOptions(kind) {
+        document.querySelectorAll("select[data-rimc-unit-select]").forEach(function (select) {
+            Array.prototype.forEach.call(select.options, function (option) {
+                var kinds = option.getAttribute("data-rimc-unit-for");
+                if (kinds === null) {
+                    return; // «Təyin edilməyib» — hər növdə
+                }
+                option.hidden = kinds.split(" ").indexOf(kind) === -1;
+            });
+            var current = select.options[select.selectedIndex];
+            if (current && current.hidden) {
+                select.value = "";
+            }
+            if (window.EMSBootstrapSelect && window.EMSBootstrapSelect.refresh) {
+                window.EMSBootstrapSelect.refresh(select);
+            }
+        });
     }
 
     function syncSelects(root) {
