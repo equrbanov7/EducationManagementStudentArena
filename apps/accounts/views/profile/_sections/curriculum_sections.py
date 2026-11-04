@@ -373,6 +373,10 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
     section["group_options"] = payload.get("group_options", [])
     section["movement_form_data"] = {"data-tof-form": "1", "data-tof-url": section["movement_action_url"]}
     section["movement_hidden"] = [{"name": "record_id"}, {"name": "kind"}]
+    # «Dondur» dialoqunun səbəb kateqoriyası (sahib 2026-11-04) — registrar enum-undan.
+    from apps.accounts.services.people.movements import leave_reason_options
+
+    section["leave_reason_options"] = leave_reason_options()
     # «Bərpa et» (2026-10-15): hədəf qrup = çekmecədə açıq qrup (JS prefill), əmr № + tarix məcburi.
     section["reinstate_hidden"] = [{"name": "record_id"}, {"name": "kind"}, {"name": "target_group"}]
     # Toplu əməlin formu AYRICA işarələnir: seçilmiş sətir id-ləri ora GÖNDƏRMƏ

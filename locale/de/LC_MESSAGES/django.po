@@ -114154,3 +114154,51 @@ msgstr "Daten aktualisiert."
 msgctxt "accounts.rim.modal"
 msgid "Dəyişiklik yoxdur."
 msgstr "Keine Änderungen."
+
+msgctxt "registrar.leave_reason"
+msgid "Akademik məzuniyyət"
+msgstr "Urlaubssemester"
+
+msgctxt "registrar.leave_reason"
+msgid "Analıq (doğuş) məzuniyyəti"
+msgstr "Mutterschutz"
+
+msgctxt "registrar.leave_reason"
+msgid "Uşağa qulluq məzuniyyəti"
+msgstr "Elternzeit"
+
+msgctxt "registrar.leave_reason"
+msgid "Səhhətlə bağlı (tibbi)"
+msgstr "Gesundheitliche Gründe"
+
+msgctxt "registrar.leave_reason"
+msgid "Hərbi xidmət"
+msgstr "Wehrdienst"
+
+msgctxt "registrar.leave_reason"
+msgid "Ailə vəziyyəti"
+msgstr "Familiäre Gründe"
+
+msgctxt "registrar.leave_reason"
+msgid "Maliyyə səbəbi"
+msgstr "Finanzielle Gründe"
+
+msgctxt "registrar.leave_reason"
+msgid "Digər"
+msgstr "Sonstiges"
+
+msgctxt "accounts.leave_reason"
+msgid "Dondurma səbəbi"
+msgstr "Beurlaubungsgrund"
+
+msgctxt "accounts.leave_reason"
+msgid "Kateqoriya seçin"
+msgstr "Kategorie wählen"
+
+msgctxt "accounts.leave_reason"
+msgid "Kateqoriya əmr tarixçəsində və audit jurnalında saxlanılır."
+msgstr "Die Kategorie wird im Erlassverlauf und im Audit-Protokoll gespeichert."
+
+msgctxt "accounts.leave_reason"
+msgid "«Digər» seçildi — aşağıdakı səbəb sahəsində qısa izah yazın (məcburidir)."
+msgstr "«Sonstiges» gewählt — bitte im Begründungsfeld unten kurz erläutern (Pflicht)."

@@ -450,7 +450,11 @@ class MovementStateMachineTest(StudentServicesBase):
         self.assertEqual(missing.json()["error"], "effective_until_required")
 
         response = self._post_movement(
-            kind="academic_leave", target_group="", effective_until="2027-09-01", order_number="R-141"
+            kind="academic_leave",
+            target_group="",
+            effective_until="2027-09-01",
+            order_number="R-141",
+            leave_reason="medical",
         )
         self.assertEqual(response.status_code, 200, response.content)
         self.record.refresh_from_db()
@@ -978,6 +982,7 @@ class MovementGuardsTest(StudentServicesBase):
             target_group="",
             order_number="R-160",
             effective_until="2027-06-30",
+            leave_reason="family",
         )
         self.assertEqual(leave.status_code, 200, leave.content)
         response = self._post_movement(kind="reinstatement", order_number="R-161", target_group=str(self.group_b.pk))

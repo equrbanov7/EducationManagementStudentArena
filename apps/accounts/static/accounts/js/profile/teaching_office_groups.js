@@ -96,6 +96,7 @@
         if (row.admission_year) { meta.push(t("admission") + " " + row.admission_year); }
         // Qrupdan çıxmış tələbə: onu çıxaran əmr (+ məzuniyyətin bitmə tarixi).
         if (row.order_number) { meta.push(t("order") + " " + row.order_number + (row.order_date ? " (" + row.order_date + ")" : "")); }
+        if (row.leave_reason_label) { meta.push(row.leave_reason_label); }
         if (row.until) { meta.push(t("until") + ": " + row.until); }
         return (
             '<li class="tof-students__row tof-students__row--' + esc(row.status) + '" data-tof-student-row data-status="' + esc(row.status) + '" data-search="' + esc((row.name + " " + row.username).toLowerCase()) + '">' +

@@ -113288,3 +113288,51 @@ msgstr "Данные обновлены."
 msgctxt "accounts.rim.modal"
 msgid "Dəyişiklik yoxdur."
 msgstr "Без изменений."
+
+msgctxt "registrar.leave_reason"
+msgid "Akademik məzuniyyət"
+msgstr "Академический отпуск"
+
+msgctxt "registrar.leave_reason"
+msgid "Analıq (doğuş) məzuniyyəti"
+msgstr "Отпуск по беременности и родам"
+
+msgctxt "registrar.leave_reason"
+msgid "Uşağa qulluq məzuniyyəti"
+msgstr "Отпуск по уходу за ребёнком"
+
+msgctxt "registrar.leave_reason"
+msgid "Səhhətlə bağlı (tibbi)"
+msgstr "По состоянию здоровья"
+
+msgctxt "registrar.leave_reason"
+msgid "Hərbi xidmət"
+msgstr "Военная служба"
+
+msgctxt "registrar.leave_reason"
+msgid "Ailə vəziyyəti"
+msgstr "Семейные обстоятельства"
+
+msgctxt "registrar.leave_reason"
+msgid "Maliyyə səbəbi"
+msgstr "Финансовые причины"
+
+msgctxt "registrar.leave_reason"
+msgid "Digər"
+msgstr "Другое"
+
+msgctxt "accounts.leave_reason"
+msgid "Dondurma səbəbi"
+msgstr "Причина отпуска"
+
+msgctxt "accounts.leave_reason"
+msgid "Kateqoriya seçin"
+msgstr "Выберите категорию"
+
+msgctxt "accounts.leave_reason"
+msgid "Kateqoriya əmr tarixçəsində və audit jurnalında saxlanılır."
+msgstr "Категория сохраняется в истории приказов и в журнале аудита."
+
+msgctxt "accounts.leave_reason"
+msgid "«Digər» seçildi — aşağıdakı səbəb sahəsində qısa izah yazın (məcburidir)."
+msgstr "Выбрано «Другое» — кратко поясните в поле причины ниже (обязательно)."

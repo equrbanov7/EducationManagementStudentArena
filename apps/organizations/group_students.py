@@ -170,7 +170,7 @@ def _removed_rows(organization, unit, record_model) -> list:
         movement_model.objects.filter(
             organization=organization, record_id__in=[r.pk for r in records], kind__in=_REMOVING_KINDS
         )
-        .only("record_id", "kind", "order_number", "order_date", "effective_until", "created_at")
+        .only("record_id", "kind", "order_number", "order_date", "effective_until", "leave_reason", "created_at")
         .order_by("-created_at")
     ):
         last.setdefault(movement.record_id, movement)
@@ -181,6 +181,8 @@ def _removed_rows(organization, unit, record_model) -> list:
         row["order_number"] = movement.order_number if movement else ""
         row["order_date"] = movement.order_date.strftime("%d.%m.%Y") if movement and movement.order_date else ""
         row["until"] = movement.effective_until.strftime("%d.%m.%Y") if movement and movement.effective_until else ""
+        # Dondurma səbəbinin kateqoriyası (sahib 2026-11-04); köhnə əmrlərdə boşdur.
+        row["leave_reason_label"] = movement.leave_reason_label if movement else ""
         rows.append(row)
     return rows
 

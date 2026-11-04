@@ -1811,6 +1811,41 @@ D["teacher_intake"] = {
     "Şablon": {"en": "Template", "ru": "Шаблон", "tr": "Dosya şablonu"},
 }
 
+# ── Dondurma (akademik məzuniyyət) səbəbinin kateqoriyası — sahib 2026-11-04 ──
+D["registrar.leave_reason"] = {
+    "Akademik məzuniyyət": {"en": "Academic leave", "ru": "Академический отпуск", "tr": "Akademik izin"},
+    "Analıq (doğuş) məzuniyyəti": {
+        "en": "Maternity leave",
+        "ru": "Отпуск по беременности и родам",
+        "tr": "Doğum izni",
+    },
+    "Uşağa qulluq məzuniyyəti": {
+        "en": "Childcare leave",
+        "ru": "Отпуск по уходу за ребёнком",
+        "tr": "Çocuk bakım izni",
+    },
+    "Səhhətlə bağlı (tibbi)": {"en": "Health (medical)", "ru": "По состоянию здоровья", "tr": "Sağlık (tıbbi)"},
+    "Hərbi xidmət": {"en": "Military service", "ru": "Военная служба", "tr": "Askerlik hizmeti"},
+    "Ailə vəziyyəti": {"en": "Family circumstances", "ru": "Семейные обстоятельства", "tr": "Aile durumu"},
+    "Maliyyə səbəbi": {"en": "Financial reasons", "ru": "Финансовые причины", "tr": "Maddi nedenler"},
+    "Digər": {"en": "Other", "ru": "Другое", "tr": "Diğer"},
+}
+
+D["accounts.leave_reason"] = {
+    "Dondurma səbəbi": {"en": "Leave reason", "ru": "Причина отпуска", "tr": "İzin nedeni"},
+    "Kateqoriya seçin": {"en": "Choose a category", "ru": "Выберите категорию", "tr": "Kategori seçin"},
+    "Kateqoriya əmr tarixçəsində və audit jurnalında saxlanılır.": {
+        "en": "The category is kept in the order history and the audit log.",
+        "ru": "Категория сохраняется в истории приказов и в журнале аудита.",
+        "tr": "Kategori emir geçmişinde ve denetim kaydında saklanır.",
+    },
+    "«Digər» seçildi — aşağıdakı səbəb sahəsində qısa izah yazın (məcburidir).": {
+        "en": "«Other» is selected — write a short explanation in the reason field below (required).",
+        "ru": "Выбрано «Другое» — кратко поясните в поле причины ниже (обязательно).",
+        "tr": "«Diğer» seçildi — aşağıdaki neden alanına kısa bir açıklama yazın (zorunlu).",
+    },
+}
+
 # ── djangojs (F7): dərs yükü paneli — workload_distribution*.js / workload_my.js ──
 # JS kataloqunda msgctxt yoxdur (layihə konvensiyası: `gettext("AZ mətn")`).
 ENTRIES["djangojs"][""] = {

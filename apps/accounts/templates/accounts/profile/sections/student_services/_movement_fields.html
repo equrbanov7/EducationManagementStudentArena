@@ -83,6 +83,8 @@ məcburiyyət serverdə (`registrar.movements.validate`) yoxlanılır.
     </div>
 </div>
 
+{% include "accounts/profile/sections/student_services/_leave_reason_field.html" with lr_id="srLeaveReason" lr_options=student_registry_section.leave_reason_options lr_need="leave_reason" %}
+
 <div class="ems-field" data-sr-need="until" hidden>
     <label class="ems-field__label" for="srEffectiveUntil">{% trans "Məzuniyyətin bitmə tarixi" context "accounts.student_registry" %}</label>
     <input class="ems-input" type="date" id="srEffectiveUntil" name="effective_until">

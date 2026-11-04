@@ -178,6 +178,7 @@ def student_registry_action(request):
             target_form=(request.POST.get("target_form") or "").strip(),
             effective_until=(request.POST.get("effective_until") or "").strip(),
             document=request.FILES.get("document"),
+            leave_reason=(request.POST.get("leave_reason") or "").strip(),
         )
     except RimAccessError as exc:
         return _error(exc)
