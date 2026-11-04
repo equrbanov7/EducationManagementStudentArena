@@ -36,7 +36,8 @@ def _top(queryset, fields, label) -> list:
     items = [{"label": label(row), "count": row["total"]} for row in rows]
     peak = max((item["count"] for item in items), default=0)
     for item in items:
-        item["pct"] = round(item["count"] * 100 / peak) if peak else 0  # tam ədəd: şablonda `--pct:NN%` (lokal vergül yox)
+        # Tam ədəd: şablonda `style="--pct:NN%"` (lokal onluq vergülü CSS-i pozmasın).
+        item["pct"] = round(item["count"] * 100 / peak) if peak else 0
     return items
 
 
@@ -100,7 +101,8 @@ def faculty_counts(organization, queryset) -> list:
     items.sort(key=lambda item: (-item["count"], item["label"]))
     peak = max((item["count"] for item in items), default=0)
     for item in items:
-        item["pct"] = round(item["count"] * 100 / peak) if peak else 0  # tam ədəd: şablonda `--pct:NN%` (lokal vergül yox)
+        # Tam ədəd: şablonda `style="--pct:NN%"` (lokal onluq vergülü CSS-i pozmasın).
+        item["pct"] = round(item["count"] * 100 / peak) if peak else 0
     return items
 
 
@@ -128,7 +130,8 @@ def weekly_trend(queryset, *, weeks=TREND_WEEKS) -> list:
         items.append({"week": monday, "count": counts.get(monday, 0)})
     peak = max((item["count"] for item in items), default=0)
     for item in items:
-        item["pct"] = round(item["count"] * 100 / peak) if peak else 0  # tam ədəd: şablonda `--pct:NN%` (lokal vergül yox)
+        # Tam ədəd: şablonda `style="--pct:NN%"` (lokal onluq vergülü CSS-i pozmasın).
+        item["pct"] = round(item["count"] * 100 / peak) if peak else 0
     return items
 
 
