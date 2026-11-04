@@ -195,7 +195,7 @@ def _columns(filters) -> dict:
 def _add_context(actor) -> dict:
     if not actor.can_add:
         return {"can_add": False}
-    optional = superadmin_waiver.waives(actor.user)
+    optional = superadmin_waiver.waives(actor.user, scope=superadmin_waiver.SUBGROUP)
     # Formanın data-atributları (CSP: inline JS yoxdur) — URL şablonlarında jurnal id-si yerinə sıfır UUID durur.
     form_data = {
         "data-sst-add-form": "1",
