@@ -22,7 +22,7 @@ from ..constants import (
     Season,
     TaskStatus,
 )
-from ..models import TeacherAssignment, TeachingTask, TeachingTaskRow, WorkloadAmendment
+from ..models import LoadObjection, TeacherAssignment, TeachingTask, TeachingTaskRow, WorkloadAmendment
 from .intensive import ensure_not_intensive
 from .people import resolve_chair
 from .plan_calendar import season_from_period as _season_from_period
@@ -450,6 +450,24 @@ def save_row(
     return row
 
 
+#: Sətirdə müəllim etirazı var — silinə bilməz (409). 2026-11-04: ``LoadObjection.row`` CASCADE-dir, amma
+#: ``workload_objection_append_only`` trigger-i etirazın DELETE-ini qadağan edir → ``row.delete()`` DB xətası
+#: verib 500 qaytarırdı. Bölgünün silinməsi isə təhlükəsizdir (``assignment`` FK-si SET NULL — trigger buna icazə
+#: verir), ona görə «sətri söndür» = saatları 0 et / fəaliyyəti çıxar yolu işləyir.
+ROW_HAS_OBJECTIONS = "workload.row_has_objections"
+
+
+def ensure_row_deletable(row: TeachingTaskRow) -> None:
+    """Etiraz tarixçəsi (append-only) olan sətri silməyə qoyma — DB trigger-inə çatmadan aydın 409."""
+    if LoadObjection.objects.filter(row_id=row.pk).exists():
+        raise WorkloadDenied(
+            ROW_HAS_OBJECTIONS,
+            "Bu sətirdə müəllimin yük etirazı tarixçəsi var — etiraz tarixçəsi silinmədiyi üçün sətir silinə "
+            "bilməz. Sətri silmək əvəzinə saatlarını 0 edin (fəaliyyətləri çıxarın); açıq etiraz varsa, onu "
+            "«Müəllim etirazları» panelində həll edin.",
+        )
+
+
 @transaction.atomic
 def delete_row(*, task: TeachingTask, row: TeachingTaskRow, actor, request=None) -> None:
     ensure_can_manage(actor, task.chair_id)
@@ -457,6 +475,7 @@ def delete_row(*, task: TeachingTask, row: TeachingTaskRow, actor, request=None)
     _ensure_editable(task, row)
     if row.task_id != task.pk:
         raise WorkloadDenied("workload.row_foreign", "Sətir bu tapşırığa aid deyil.")
+    ensure_row_deletable(row)
     label = row.subject_label
     row_id = str(row.pk)
     row.delete()
@@ -473,8 +492,10 @@ def delete_row(*, task: TeachingTask, row: TeachingTaskRow, actor, request=None)
 
 
 __all__ = [
+    "ROW_HAS_OBJECTIONS",
     "ROW_SCALAR_FIELDS",
     "delete_row",
+    "ensure_row_deletable",
     "find_task",
     "get_or_create_task",
     "list_years",
