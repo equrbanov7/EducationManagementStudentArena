@@ -150,7 +150,8 @@ class MovedLoadRestoreTest(TestCase):
 
     def test_owner_own_session_teacher_filter_lists_the_moved_journal_and_restores_it(self):
         self.login(self.admin)
-        page = self.client.get(reverse("registrar:journal_list") + "?teacher=" + str(self.teacher.pk))
+        # Müəllim filtri müəllimin öz siyahısını güzgüləyir (PR #199): köçürülmüş jurnal «Əvvəlki jurnal qeydləri»ndədir.
+        page = self.client.get(reverse("registrar:journal_list") + "?teaching=history&teacher=" + str(self.teacher.pk))
         self.assertTrue(page.context["journal_is_broad"])
         self.assertIn(self.offering.pk, [offering.pk for offering in page.context["offerings"]])
         self.assert_restore_ui(page)
