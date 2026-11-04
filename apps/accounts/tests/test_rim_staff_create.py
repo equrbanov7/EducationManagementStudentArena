@@ -140,7 +140,9 @@ class RimStaffCreateTests(RimCreateBase):
         response = self.client_for(self.rim).get(reverse("accounts:profile"), {"section": "rim-center"})
         self.assertContains(response, 'data-rimc-open="staff"')
         self.assertContains(response, 'data-rimc-catalog="staff_role"')
-        self.assertContains(response, 'data-rimc-staff-catalog="staff_unit"')
+        # 2026-11-04: «Kafedra / bölmə» axtarışlı seçicidir; əməkdaş variantları `data-rimc-unit-for`-da.
+        self.assertContains(response, "data-rimc-unit-select")
+        self.assertContains(response, 'data-rimc-unit-for="teacher staff"')
 
     def test_actor_catalog_level_uses_existing_effective_role_hierarchy(self):
         role = self.org.roles.get(name="chair_head")

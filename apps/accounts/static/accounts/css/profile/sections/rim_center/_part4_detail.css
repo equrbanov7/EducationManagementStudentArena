@@ -1,0 +1,348 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   RİM mərkəzi — 4: istifadəçi detal kartının bölmələri (sahib 2026-11-04).
+   Əsas məlumatlar · Vəzifə və bölmə (fakültə → kafedra) · Rollar · Status kartları + «Məzun et» dialoqu.
+   Markup: `rim_center/detail_view.js`. Modal çərçivəsi `_part2.css`-dədir.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+[data-rim-detail-modal] .rim-modal__box {
+    width: min(760px, 100%);
+}
+
+.rim-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+/* ── Bölmə kartı ───────────────────────────────────────────────────────── */
+
+.rim-sec {
+    padding: 14px 16px 16px;
+    margin-top: 12px;
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 12px;
+}
+
+.rim-sec__title {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 0 0 12px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ems-neutral-600);
+}
+
+.rim-sec__title i {
+    color: var(--ems-primary-600);
+}
+
+.rim-sec__subtitle {
+    margin: 16px 0 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--ems-neutral-700);
+}
+
+.rim-sec__foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 12px;
+}
+
+.rim-sec__hint {
+    margin: 6px 0 0;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: var(--ems-neutral-500);
+}
+
+.rim-sec__foot .rim-sec__hint {
+    margin: 0 auto 0 0;
+    color: var(--ems-warning-800);
+}
+
+.rim-sec .rim-detail-grid {
+    margin-bottom: 0;
+}
+
+/* ── Sahələr və inline xəta ────────────────────────────────────────────── */
+
+.rim-field {
+    min-width: 0;
+}
+
+.rim-field-error {
+    margin: 5px 0 0;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--ems-danger-strong);
+}
+
+.rim-input[aria-invalid="true"],
+.rim-field [data-phone-input][aria-invalid="true"] {
+    border-color: var(--ems-danger-500);
+}
+
+.rim-input[aria-invalid="true"]:focus {
+    box-shadow: 0 0 0 3px var(--ems-danger-100);
+}
+
+.rim-input--mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.rim-field-label--spaced {
+    margin-top: 12px;
+}
+
+/* ── Vəzifə ────────────────────────────────────────────────────────────── */
+
+.rim-position__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.rim-position__row .bootstrap-single-select {
+    flex: 1 1 240px;
+    min-width: 0;
+}
+
+.rim-position__row .rim-input {
+    flex: 1 1 200px;
+    width: auto;
+}
+
+/* ── Fakültə → kafedra yerləşdirilməsi ─────────────────────────────────── */
+
+.rim-place {
+    padding: 12px;
+    margin-top: 8px;
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 10px;
+}
+
+.rim-place__head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.rim-place__role {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+
+.rim-place__where {
+    font-size: 0.82rem;
+    color: var(--ems-neutral-600);
+}
+
+.rim-place__where i {
+    margin: 0 2px;
+    font-size: 0.7rem;
+    color: var(--ems-neutral-400);
+}
+
+.rim-place__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.rim-place__lock {
+    margin-top: 8px;
+}
+
+.rim-pill {
+    display: inline-flex;
+    gap: 5px;
+    align-items: center;
+    padding: 2px 9px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--ems-neutral-700);
+    background: var(--ems-neutral-100);
+    border-radius: 999px;
+}
+
+.rim-pill--warn {
+    color: var(--ems-warning-800);
+    background: var(--ems-warning-100);
+}
+
+.rim-pill--enrolled {
+    color: var(--ems-success-700);
+    background: var(--ems-success-100);
+}
+
+.rim-pill--graduated,
+.rim-pill--expelled {
+    color: var(--ems-primary-800);
+    background: var(--ems-primary-50);
+}
+
+.rim-detail-item .rim-pill {
+    margin-top: 6px;
+}
+
+/* ── Status kartları ───────────────────────────────────────────────────── */
+
+.rim-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 10px;
+}
+
+.rim-tile {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 12px;
+    background: var(--ems-neutral-0);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 10px;
+}
+
+.rim-tile__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    font-size: 0.95rem;
+    color: var(--ems-primary-700);
+    background: var(--ems-primary-50);
+    border-radius: 10px;
+}
+
+.rim-tile--warning .rim-tile__icon {
+    color: var(--ems-warning-800);
+    background: var(--ems-warning-100);
+}
+
+.rim-tile--danger .rim-tile__icon {
+    color: var(--ems-danger-strong);
+    background: var(--ems-danger-100);
+}
+
+.rim-tile__title {
+    margin: 0;
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+
+.rim-tile__desc {
+    margin: 2px 0 0;
+    font-size: 0.77rem;
+    line-height: 1.45;
+    color: var(--ems-neutral-500);
+}
+
+.rim-tile.is-disabled {
+    background: var(--ems-neutral-50);
+}
+
+.rim-tile.is-disabled .rim-tile__icon {
+    color: var(--ems-neutral-400);
+    background: var(--ems-neutral-100);
+}
+
+.rim-tile.is-disabled .rim-tile__desc {
+    color: var(--ems-neutral-600);
+}
+
+/* ── Təsdiq pəncərəsi: dəyişəcək rolların siyahısı ─────────────────────── */
+
+.rim-confirm-list {
+    padding: 10px 12px;
+    margin: 0 0 12px;
+    font-size: 0.82rem;
+    background: var(--ems-neutral-50);
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 10px;
+}
+
+.rim-confirm-list[hidden] {
+    display: none;
+}
+
+.rim-confirm-list__title {
+    margin: 0 0 4px;
+    font-weight: 700;
+    color: var(--ems-neutral-700);
+}
+
+.rim-confirm-list ul {
+    padding-left: 18px;
+    margin: 0;
+    list-style: disc outside;
+    color: var(--ems-neutral-700);
+}
+
+/* ── «Məzun et» dialoqu ────────────────────────────────────────────────── */
+
+.rim-fieldset {
+    padding: 0;
+    margin: 0 0 12px;
+    border: 0;
+}
+
+.rim-choices {
+    display: grid;
+    gap: 6px;
+}
+
+.rim-choice {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 10px;
+    font-size: 0.84rem;
+    color: var(--ems-neutral-800);
+    cursor: pointer;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 8px;
+}
+
+.rim-choice:has(input:checked) {
+    background: var(--ems-primary-50);
+    border-color: var(--ems-primary-300);
+}
+
+@media (max-width: 640px) {
+    .rim-tile {
+        grid-template-columns: auto 1fr;
+    }
+
+    .rim-tile__action {
+        grid-column: 1 / -1;
+    }
+
+    .rim-tile__action .rim-btn {
+        width: 100%;
+    }
+
+    .rim-sec {
+        padding: 12px;
+    }
+}

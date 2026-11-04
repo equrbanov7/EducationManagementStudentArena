@@ -90,7 +90,20 @@ def _validate(field_name: str, value: str) -> str:
         return value.lower()
     if field_name == "fin" and value and not _FIN_PATTERN.match(value):
         raise RimAccessError("invalid_fin", "FİN 7 simvol olmalıdır (yalnız hərf və rəqəm).", status=400)
+    if field_name == "fin":
+        # Kanonik forma böyük hərfdir (`core.validators.validate_fin`, 2026-11-04).
+        return value.upper()
     return value
+
+
+def _assert_fin_available(fin: str, profile) -> None:
+    """FİN NULL-unique-dir: başqa profildə olan FİN əvvəl IntegrityError (500) verirdi — indi 409 + aydın mətn."""
+    if not fin:
+        return
+    from apps.accounts.models import UserProfile
+
+    if UserProfile.objects.filter(fin__iexact=fin).exclude(pk=profile.pk).exists():
+        raise RimAccessError("fin_taken", "Bu FİN başqa hesabda qeydiyyatdadır.", status=409)
 
 
 def _validate_username(raw_value, target_user) -> str:
@@ -223,6 +236,8 @@ def update_user_fields(actor: RimActor, target_user, *, data, request=None, reas
         if field_name == "email":
             _assert_email_available(new_value, target_user)
             email_changed = True
+        if field_name == "fin":
+            _assert_fin_available(new_value, profile)
         # FİN NULL-unique-dir: boş dəyər `""` yox, `None` yazılmalıdır, əks
         # halda ikinci boş FİN unikallıq pozuntusu verir (core/validators).
         setattr(owner, field_name, (new_value or None) if field_name == "fin" else new_value)

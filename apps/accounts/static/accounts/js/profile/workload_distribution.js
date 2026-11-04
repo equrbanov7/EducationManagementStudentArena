@@ -57,6 +57,8 @@
         };
     }
 
+    var ALL_CHAIRS = "all"; // «Bütün kafedralar» (2026-11-04) — rejim `EMSWorkloadList.applyChairMode`-dadır
+
     function setBusy(busy) {
         STATE.loading = busy; // tənbəl yükləmə (`workload_distribution_list.js`) yüklənmə zamanı ikinci dilim istəmir
         var skeleton = q("[data-wl-skeleton]");
@@ -120,6 +122,7 @@
         if (!host || !List) return;
         var fresh = !!(arg && arg.fresh === true);
         var params = filters();
+        var allChairs = List.applyChairMode(params.chair === ALL_CHAIRS);
         if (!params.chair || !params.year) {
             STATE.rows = [];
             STATE.task = null;
@@ -141,6 +144,8 @@
                 if (mine !== STATE.rowsSeq) return;
                 STATE.rows = payload.rows || [];
                 STATE.task = payload.task || null;
+                STATE.allChairs = allChairs && !!payload.all_chairs;
+                if (STATE.allChairs) STATE.teachers = []; // kafedrasız rejimdə müəllim paneli yoxdur
                 if (payload.teachers) STATE.teachers = payload.teachers; // yalnız ilk dilimdə gəlir
                 var Render = window.EMSWorkloadRender;
                 if (Render) {
@@ -167,7 +172,7 @@
         var host = root();
         if (!host) return Promise.resolve();
         var params = filters();
-        if (!params.chair) return Promise.resolve();
+        if (!params.chair || params.chair === ALL_CHAIRS) return Promise.resolve();
         return window.EMSCore.fetchJSON(
             host.dataset.optionsUrl + "?chair=" + encodeURIComponent(params.chair)
         )

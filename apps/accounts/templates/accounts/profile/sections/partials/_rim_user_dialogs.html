@@ -1,0 +1,96 @@
+{% load i18n %}
+{% comment %}
+RİM detal kartının 2026-11-04 əlavələri (sahib: «məzun ya da arxiv olanda çıxara bilim … vəzifə select …
+kafedra, fakültə»): «Məzun et» dialoqu + kartın bölmə/əməl mətnləri (JSON — xarici JS `{% trans %}` görmür).
+Panel İÇİNDƏDİR (AJAX swap). Davranış: `rim_center/detail_view.js` + `detail_events.js`.
+{% endcomment %}
+<div class="rim-modal" data-rim-graduate-modal hidden>
+  <div class="rim-modal__backdrop" data-rim-graduate-close></div>
+  <div class="rim-modal__box rim-modal__box--sm" role="dialog" aria-modal="true" aria-labelledby="rim-graduate-title">
+    <div class="rim-modal__head">
+      <h3 id="rim-graduate-title">{% trans "Məzun et" context "accounts.rim.graduation" %}: <span data-rim-graduate-name></span></h3>
+      <button type="button" class="rim-modal__x" data-rim-graduate-close aria-label="{% trans 'Bağla' context 'profile.rim' %}">&times;</button>
+    </div>
+    <div class="rim-modal__body">
+      <p class="rim-warning">
+        <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+        {% trans "Akademik qeyd «Məzun» statusuna keçir, cari dövrün açıq qeydiyyatları dondurulur və hesabın girişi bağlanır. Qiymət, jurnal və imtahan tarixçəsi OLDUĞU KİMİ qalır; səhv olarsa «Tələbə reyestri»ndə bərpa əmri ilə geri qaytarılır." context "accounts.rim.graduation" %}
+      </p>
+      <fieldset class="rim-fieldset">
+        <legend class="rim-field-label">{% trans "Akademik qeyd" context "accounts.rim.graduation" %}</legend>
+        <div class="rim-choices" data-rim-graduate-records></div>
+      </fieldset>
+      <div class="rim-form-grid">
+        <div>
+          <label class="rim-field-label" for="rim-graduate-number">{% trans "Əmr nömrəsi" context "accounts.rim.graduation" %}</label>
+          <input type="text" class="rim-input" id="rim-graduate-number" maxlength="64" autocomplete="off" data-rim-graduate-number>
+        </div>
+        <div>
+          <label class="rim-field-label" for="rim-graduate-date">{% trans "Əmrin tarixi" context "accounts.rim.graduation" %}</label>
+          <input type="date" class="rim-input" id="rim-graduate-date" data-rim-graduate-date>
+        </div>
+      </div>
+      <p class="rim-note" data-rim-graduate-waiver hidden>{% trans "Superadmin: əmr nömrəsi boş qalsa avtomatik «SA-…» əmri yazılır." context "accounts.rim.graduation" %}</p>
+      <label class="rim-field-label rim-field-label--spaced" for="rim-graduate-reason">{% trans "Səbəb (istəyə bağlı)" context "accounts.rim.graduation" %}</label>
+      <textarea id="rim-graduate-reason" class="rim-textarea" rows="2" maxlength="2000" data-rim-graduate-reason
+                placeholder="{% trans 'Boş qalsa əmrdən yazılır: «Məzun etmə · Əmr № … · tarix»' context 'accounts.rim.graduation' %}"></textarea>
+      <p class="rim-error" data-rim-graduate-error role="alert" hidden></p>
+    </div>
+    <div class="rim-modal__foot">
+      <button type="button" class="rim-btn rim-btn--ghost" data-rim-graduate-close>{% trans "İmtina" context "profile.rim" %}</button>
+      <button type="button" class="rim-btn rim-btn--primary" data-rim-graduate-submit>
+        <i class="fas fa-graduation-cap" aria-hidden="true"></i> {% trans "Məzun et" context "accounts.rim.graduation" %}
+      </button>
+    </div>
+  </div>
+</div>
+
+<script type="application/json" data-rim-i18n>{
+  "sec_basics": "{% trans 'Əsas məlumatlar'|escapejs context 'accounts.rim.modal' %}",
+  "sec_position": "{% trans 'Vəzifə və bölmə'|escapejs context 'accounts.rim.modal' %}",
+  "sec_academic": "{% trans 'Akademik vəziyyət'|escapejs context 'accounts.rim.modal' %}",
+  "sec_status": "{% trans 'Status və təhlükəsizlik'|escapejs context 'accounts.rim.modal' %}",
+  "unsaved": "{% trans 'Yadda saxlanmamış dəyişiklik var'|escapejs context 'accounts.rim.modal' %}",
+  "search_placeholder": "{% trans 'Axtar…'|escapejs context 'accounts.rim.modal' %}",
+  "search_empty": "{% trans 'Uyğun nəticə yoxdur'|escapejs context 'accounts.rim.modal' %}",
+  "position_none": "{% trans 'Təyin edilməyib'|escapejs context 'accounts.rim.modal' %}",
+  "position_other": "{% trans 'Digər (əl ilə yazın)'|escapejs context 'accounts.rim.modal' %}",
+  "position_other_placeholder": "{% trans 'Vəzifənin adını yazın'|escapejs context 'accounts.rim.modal' %}",
+  "position_custom": "{% trans 'cari dəyər'|escapejs context 'accounts.rim.modal' %}",
+  "placement_title": "{% trans 'Fakültə və kafedra'|escapejs context 'accounts.rim.modal' %}",
+  "placement_empty": "{% trans 'Bu hesabın müəllim və ya əməkdaş rolu yoxdur — əvvəlcə «Rol təyinatı»nda rol verin.'|escapejs context 'accounts.rim.modal' %}",
+  "placement_hint_teacher": "{% trans 'Müəllim kafedraya bağlananda həmin kafedranın dərs yükü və müəllim siyahılarına düşür.'|escapejs context 'accounts.rim.modal' %}",
+  "unit_unassigned": "{% trans 'Bölmə təyin edilməyib'|escapejs context 'accounts.rim.modal' %}",
+  "faculty": "{% trans 'Fakültə'|escapejs context 'accounts.rim.modal' %}",
+  "all_faculties": "{% trans 'Bütün fakültələr'|escapejs context 'accounts.rim.modal' %}",
+  "unit": "{% trans 'Kafedra / bölmə'|escapejs context 'accounts.rim.modal' %}",
+  "unit_placeholder": "{% trans 'Kafedra və ya bölmə seçin'|escapejs context 'accounts.rim.modal' %}",
+  "save_unit": "{% trans 'Bölməni saxla'|escapejs context 'accounts.rim.modal' %}",
+  "academic_record": "{% trans 'Akademik qeyd'|escapejs context 'accounts.rim.modal' %}",
+  "no_academic_record": "{% trans 'Akademik qeyd tapılmadı.'|escapejs context 'accounts.rim.modal' %}",
+  "status_archived_staff": "{% trans 'Arxiv (işdən ayrılıb)'|escapejs context 'accounts.rim.modal' %}",
+  "archived_staff_note": "{% trans 'Hesab arxivdədir (işdən ayrılıb): giriş bağlıdır, rolları deaktivdir — siyahılarda görünmür. Tarixçə saxlanılır.'|escapejs context 'accounts.rim.modal' %}",
+  "graduate": "{% trans 'Məzun et'|escapejs context 'accounts.rim.graduation' %}",
+  "archive_staff": "{% trans 'Arxivə göndər'|escapejs context 'accounts.rim.modal' %}",
+  "unarchive_staff": "{% trans 'Arxivdən çıxar'|escapejs context 'accounts.rim.modal' %}",
+  "tile_password_desc": "{% trans 'Birdəfəlik müvəqqəti parol yaradır; istifadəçi ilk girişdə öz parolunu qurur.'|escapejs context 'accounts.rim.modal' %}",
+  "tile_block_desc": "{% trans 'Girişi müvəqqəti bağlayır. Məlumatlar və rollar saxlanılır.'|escapejs context 'accounts.rim.modal' %}",
+  "tile_unblock_desc": "{% trans 'Girişi yenidən açır.'|escapejs context 'accounts.rim.modal' %}",
+  "tile_graduate_desc": "{% trans 'Əmr nömrəsi və tarixi ilə: akademik qeyd «Məzun» olur, giriş bağlanır, tarixçə qalır.'|escapejs context 'accounts.rim.modal' %}",
+  "tile_archive_desc": "{% trans 'İşdən ayrılıb: giriş bağlanır, rollar deaktiv olur — dərs yükü və müəllim siyahılarından çıxır. Tarixçə qalır.'|escapejs context 'accounts.rim.modal' %}",
+  "tile_unarchive_desc": "{% trans 'Giriş açılır və arxivləmədə deaktiv edilmiş rollar geri qayıdır.'|escapejs context 'accounts.rim.modal' %}",
+  "tile_archive_restore_desc": "{% trans 'Səhvən arxivlənmiş, hələ oxuyan tələbənin girişini açır.'|escapejs context 'accounts.rim.modal' %}",
+  "tile_soft_delete_desc": "{% trans 'Hesabı siyahılardan çıxarır (yumşaq silmə). Qiymət və jurnal yazıları qalır, bərpa mümkündür.'|escapejs context 'accounts.rim.modal' %}",
+  "tile_restore_desc": "{% trans 'Silinmiş hesabı və onun rollarını geri qaytarır.'|escapejs context 'accounts.rim.modal' %}",
+  "no_actions": "{% trans 'Bu hesab üçün əlçatan əməliyyat yoxdur.'|escapejs context 'accounts.rim.modal' %}",
+  "confirm_archive_staff": "{% trans 'Hesab arxivə göndəriləcək: giriş bağlanacaq, bu təşkilatdakı rollar deaktiv olacaq və şəxs dərs yükü / müəllim siyahılarından çıxacaq. Jurnal, qiymət və yük tarixçəsi silinmir; «Arxivdən çıxar» hər şeyi geri qaytarır.'|escapejs context 'accounts.rim.modal' %}",
+  "confirm_unarchive_staff": "{% trans 'Hesab arxivdən çıxarılacaq: giriş açılacaq və arxivləmədə deaktiv edilmiş rollar geri qayıdacaq.'|escapejs context 'accounts.rim.modal' %}",
+  "roles_to_archive": "{% trans 'Deaktiv ediləcək rollar:'|escapejs context 'accounts.rim.modal' %}",
+  "roles_to_restore": "{% trans 'Bərpa olunacaq rollar:'|escapejs context 'accounts.rim.modal' %}",
+  "reason": "{% trans 'Səbəb'|escapejs context 'accounts.rim.modal' %}",
+  "reason_optional": "{% trans 'Səbəb (istəyə bağlı)'|escapejs context 'accounts.rim.modal' %}",
+  "err_username": "{% trans 'İstifadəçi adı ən azı 3 simvol olmalı və boşluq olmamalıdır.'|escapejs context 'accounts.rim.modal' %}",
+  "err_email": "{% trans 'Email ünvanı düzgün deyil.'|escapejs context 'accounts.rim.modal' %}",
+  "err_fin": "{% trans 'FİN 7 simvol olmalıdır (yalnız hərf və rəqəm).'|escapejs context 'accounts.rim.modal' %}",
+  "err_order_required": "{% trans 'Əmr nömrəsi və tarixi məcburidir.'|escapejs context 'accounts.rim.modal' %}"
+}</script>
