@@ -111,7 +111,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ("organizations", "0080_dean_subgroup_management"),
-        ("registrar", "0113_enrollment_legacy_qb_fail"),
+        ("registrar", "0114_student_movement_leave_reason"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
