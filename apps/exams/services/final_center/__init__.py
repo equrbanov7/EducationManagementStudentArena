@@ -95,6 +95,7 @@ from .sessions import (
     start_room,
     validate_session_plan,
 )
+from .ticket_reopen import reopen_completed_ticket
 from .tickets import (
     TicketStateError,
     assign_students,
@@ -103,7 +104,6 @@ from .tickets import (
     readmit_student,
     regenerate_pin,
     remove_student,
-    reopen_completed_ticket,
     resolve_ticket_language,
     set_ready,
     set_seat,
