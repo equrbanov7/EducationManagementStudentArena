@@ -1,0 +1,18 @@
+{% load i18n ems_ui %}
+{% comment %}Bir «ən çox» kartı: `card_title` + `items` ([{label, count, pct}]). Zolaq eni dinamik — `ems_pct_style`.{% endcomment %}
+<section class="sst-card" aria-label="{{ card_title }}">
+    <h3 class="sst-card__title">{{ card_title }}</h3>
+    {% if items %}
+    <ol class="sst-top">
+        {% for item in items %}
+        <li class="sst-top__item">
+            <span class="sst-top__label">{{ item.label }}</span>
+            <span class="sst-top__count">{{ item.count }}</span>
+            <span class="ems-bar sst-top__bar"><span class="ems-bar__fill" style="{% ems_pct_style item.pct %}"></span></span>
+        </li>
+        {% endfor %}
+    </ol>
+    {% else %}
+    <p class="sst-muted">{% trans "Məlumat yoxdur" context "accounts.subgroup_students" %}</p>
+    {% endif %}
+</section>

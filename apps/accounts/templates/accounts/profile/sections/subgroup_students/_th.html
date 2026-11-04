@@ -1,0 +1,1 @@
+<th scope="col"{% if num %} class="ems-table__num"{% endif %}{% if col.dir %} aria-sort="{{ col.dir }}"{% endif %}><a class="ems-sort" href="{{ col.url }}" data-section="subgroup-students">{{ col.label }}<span class="ems-sort__arrow" aria-hidden="true">{% if col.dir == "ascending" %}▲{% elif col.dir == "descending" %}▼{% else %}↕{% endif %}</span></a></th>

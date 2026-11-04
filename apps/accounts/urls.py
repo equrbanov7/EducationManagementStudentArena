@@ -21,6 +21,8 @@ from .views import journal_hygiene as journal_hygiene_views
 from .views import journal_removals as journal_removals_views
 from .views import network_zone_page
 from .views import session_ping as session_ping_views
+from .views import subgroup_students as subgroup_students_views
+from .views import subgroup_students_export as subgroup_students_export_views
 from .views.profile import statistics_export_metrics as statistics_export_metrics_views
 
 app_name = "accounts"
@@ -366,6 +368,17 @@ urlpatterns = [
         "journal-removals/export/",
         journal_removals_views.journal_removals_export,
         name="journal_removals_export",
+    ),
+    # 2026-11-05: «Alt qrup tələbələri» — Excel ixracı (audit olunur) + əlavə modalının hədəf jurnal axtarışı (GET).
+    path(
+        "subgroup-students/export/",
+        subgroup_students_export_views.subgroup_students_export,
+        name="subgroup_students_export",
+    ),
+    path(
+        "subgroup-students/journals/",
+        subgroup_students_views.subgroup_students_journals,
+        name="subgroup_students_journals",
     ),
     # «Alt qrupa tələbə əlavə et» (sahib 2026-10-18) — `retake.manage`; adlar `accounts:subgroup_placement_*`.
     path("alt-qrup-yerlesdirme/", include("apps.accounts.views.subgroup_placement.urls")),

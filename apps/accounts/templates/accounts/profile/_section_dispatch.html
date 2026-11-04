@@ -220,6 +220,8 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/_journal_hygiene.html" %}
             {% elif active_section == "journal-removals" and 'journal-removals' in allowed_sections %}
                 {% include "accounts/profile/sections/_journal_removals.html" %}
+            {% elif active_section == "subgroup-students" and 'subgroup-students' in allowed_sections %}
+                {% include "accounts/profile/sections/_subgroup_students.html" %}
             {% elif active_section == "hr-analytics" and 'hr-analytics' in allowed_sections %}
                 {% include "accounts/profile/sections/_hr_analytics.html" %}
             {% elif active_section == "accounting" and 'accounting' in allowed_sections %}
