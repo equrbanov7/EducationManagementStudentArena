@@ -4,7 +4,13 @@ JS qarmaqları: `tr[data-seconds-remaining] .timer-display` (geri sayım),
 `.js-attempt-checkbox` / `.js-single-delete-attempt` (results_bulk_actions.js).{% endcomment %}
 {% with att=item.attempt %}
 <tr data-seconds-remaining="{{ item.countdown_seconds|default:0 }}"{% if item.intervention and item.intervention.is_terminal %} class="etr-row--removed"{% endif %}>
-    {% if can_delete_attempts %}
+    {% if can_reset_attempts %}
+    <td class="etr-col-check">
+        {# Sahib 2026-11-04: rəhbər istənilən cəhdi seçə bilər; sınaq cəhdi eyni qutu ilə köhnə «Sil» toplusuna da düşür. #}
+        <input type="checkbox" class="etr-check js-reset-checkbox{% if can_delete_attempts and item.can_delete_attempt %} js-attempt-checkbox{% endif %}" value="{{ att.id }}"
+               aria-label="{% if item.can_view_name %}{{ item.real_name }}{% else %}{{ item.anonymous_name }}{% endif %} — {% trans 'Seç' context 'accounts.a11y' %}">
+    </td>
+    {% elif can_delete_attempts %}
     <td class="etr-col-check">
         {% if item.can_delete_attempt %}
             <input type="checkbox" class="etr-check js-attempt-checkbox" value="{{ att.id }}"
@@ -94,6 +100,12 @@ JS qarmaqları: `tr[data-seconds-remaining] .timer-display` (geri sayım),
             {% if can_delete_attempts and item.can_delete_attempt %}
                 <button type="button" class="ems-btn etp-btn--danger-soft js-single-delete-attempt" data-attempt-id="{{ att.id }}">
                     <i class="fas fa-trash" aria-hidden="true"></i>{% trans "action_delete" context "exams.template.teacher_exam_results" %}
+                </button>
+            {% endif %}
+            {% if can_reset_attempts %}
+                <button type="button" class="ems-btn etp-btn--danger-soft js-reset-attempt" data-attempt-id="{{ att.id }}"
+                        data-student="{% if item.can_view_name %}{{ item.real_name }}{% else %}{{ item.anonymous_name }}{% endif %} · #{{ att.id }}">
+                    <i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Nəticəni sil (cəhdi sıfırla)" context "exams.attempt_reset" %}
                 </button>
             {% endif %}
             {% if item.attempts_left is not None and formal_retake %}
