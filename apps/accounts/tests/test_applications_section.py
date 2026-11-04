@@ -72,9 +72,13 @@ class ApplicationsSectionTest(TestCase):
         # Köhnə yan sütun markup-ı qalmamalıdır — qalsaydı iki detal qabı olardı.
         self.assertNotIn('class="apx-detail"', html)
         # `accept` siyahısı `rules_payload`-dan gəlir: UI uzantıları özündən yazmır.
-        self.assertIn('data-accept=".docx,.jpeg,.jpg,.pdf,.png,.webp,.zip"', html)
-        self.assertIn('data-max-files="5"', html)
-        self.assertIn('data-max-file-mb="10"', html)
+        from apps.applications.constants import ATTACHMENT_ACCEPT
+
+        self.assertIn('data-accept="%s"' % ",".join(ATTACHMENT_ACCEPT), html)
+        from apps.applications.constants import MAX_ATTACHMENT_MB, MAX_ATTACHMENTS_PER_ACTION
+
+        self.assertIn('data-max-files="%s"' % MAX_ATTACHMENTS_PER_ACTION, html)
+        self.assertIn('data-max-file-mb="%s"' % MAX_ATTACHMENT_MB, html)
         self.assertIn("applications_thread.js", html)
 
     def test_profile_shell_links_the_modal_stylesheet(self):
