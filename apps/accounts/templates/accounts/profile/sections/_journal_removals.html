@@ -1,0 +1,110 @@
+{% load i18n static journal_removals_tags %}
+{% comment %}
+«Jurnaldan çıxarılmalar» (sahib 2026-11-04) — YALNIZ RİM rəhbəri / superadmin (menyu qapısı: rbac_sections.py,
+data qapısı `{% journal_removals_panel %}` tag-ında render vaxtı yenidən yoxlanır).
+
+Sahib: «Daha sonra mən harada isə onda baxa bilim o tip hadisələrə — nəyə görə olub.» Jurnaldan hər çıxarılma
+(«Fəndən azad et», alt qrupdan əlavənin «Çıxar»-ı, xarici nəticənin tanınması) səbəb + qeydlə burada görünür.
+Panel OXU-ONLY server-render olunur: süzgəclər `_filter_bar` (avto rejim) və səhifə / səbəb linkləri bölməni
+yerində yeniləyir (AJAX-safe, JS lazım deyil). Excel ixracı ayrıca GET-dir (`accounts:journal_removals_export`).
+CSS xarici fayldadır və panelin İÇİNDƏDİR.
+{% endcomment %}
+{% if 'journal-removals' in allowed_sections %}
+<section class="profile-section-panel profile-section--journal-removals {% if active_section == 'journal-removals' %}is-active{% endif %}"
+         data-profile-section-panel="journal-removals"
+         data-source-url="{{ profile_base_url }}?section=journal-removals">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/journal_removals.css' %}?v=20261104-1">
+{% journal_removals_panel as jr %}
+{% if not jr.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=jr.access_denied_message %}
+{% else %}
+<div class="jrm" data-jrm-root>
+    {% trans "Jurnaldan çıxarılan hər tələbə səbəb kateqoriyası və qeydlə burada qeyd olunur: fəndən azad etmə, alt qrupdan əlavənin geri götürülməsi və xarici nəticənin tanınması. Süzgəclərlə səbəbə, tarixə, fakültəyə, kafedraya, müəllimə və tələbəyə görə daraldın." context "accounts.journal_removals" as jr_sub %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=jr_sub %}
+
+    <nav class="jrm-reasons" aria-label="{% trans 'Səbəb üzrə say' context 'accounts.journal_removals' %}">
+        {% for item in jr.reason_counts %}
+        <a class="jrm-reason{% if item.active %} is-active{% endif %}{% if not item.count %} is-empty{% endif %}"
+           href="{{ item.url }}" data-section="journal-removals"{% if item.active %} aria-current="true"{% endif %}>
+            <span class="jrm-reason__label">{{ item.label }}</span>
+            <span class="jrm-reason__count">{{ item.count }}</span>
+        </a>
+        {% endfor %}
+    </nav>
+
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="journal-removals" filter_prefix="jr_" filter_fields=jr.filter_fields filter_count_label=jr.filter_count_label filter_auto=True filter_bootstrap=True %}
+
+    <div class="jrm-toolbar">
+        {% if jr.total %}
+        <span class="jrm-toolbar__range">{{ jr.first_index }}–{{ jr.last_index }} / {{ jr.total }}</span>
+        {% endif %}
+        {% if jr.export_url and jr.total %}
+        <a class="ems-btn ems-btn--sm" href="{{ jr.export_url }}" download>
+            <i class="fas fa-file-excel" aria-hidden="true"></i> {% trans "Excel-ə ixrac" context "accounts.journal_removals" %}
+        </a>
+        {% endif %}
+    </div>
+
+    <div data-ems-filter-target>
+    {% if jr.rows %}
+        <div class="ems-tablewrap">
+            <div class="ems-tablescroll">
+                <table class="ems-table ems-table--zebra jrm-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">{% trans "Tarix" context "accounts.journal_removals" %}</th>
+                            <th scope="col">{% trans "Tələbə" context "accounts.journal_removals" %}</th>
+                            <th scope="col">{% trans "Fənn / jurnal" context "accounts.journal_removals" %}</th>
+                            <th scope="col">{% trans "Müəllim" context "accounts.journal_removals" %}</th>
+                            <th scope="col">{% trans "Səbəb" context "accounts.journal_removals" %}</th>
+                            <th scope="col">{% trans "Qeyd" context "accounts.journal_removals" %}</th>
+                            <th scope="col">{% trans "Çıxaran" context "accounts.journal_removals" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in jr.rows %}
+                        <tr>
+                            <th scope="row" class="ems-table__nowrap">{{ row.created_at|date:"d.m.Y H:i" }}</th>
+                            <td>
+                                <span class="jrm-strong">{{ row.student }}</span>
+                                <span class="jrm-muted">{{ row.student_username }}</span>
+                            </td>
+                            <td>
+                                <a class="jrm-strong" href="{% url 'registrar:journal_detail' row.offering_id %}">{{ row.subject_name }}</a>
+                                <span class="jrm-muted">{{ row.subject_code }}{% if row.group %} · {{ row.group }}{% endif %}{% if row.period %} · {{ row.period }}{% endif %}</span>
+                            </td>
+                            <td>{{ row.teacher|default:"—" }}</td>
+                            <td>
+                                <span class="jrm-badge jrm-badge--{{ row.reason }}">{{ row.reason_label }}</span>
+                                <span class="jrm-muted">{{ row.action_label }}</span>
+                                {% if row.state == "restored" %}<span class="jrm-restored">{% trans "Bərpa olunub" context "accounts.journal_removals" %}</span>{% endif %}
+                            </td>
+                            <td class="jrm-note">{{ row.note|default:"—" }}</td>
+                            <td>{{ row.actor|default:"—" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% if jr.has_prev or jr.has_next %}
+        <nav class="jrm-pager" aria-label="{% trans 'Səhifələr' context 'accounts.journal_removals' %}">
+            {% if jr.has_prev %}<a class="ems-btn ems-btn--sm" href="{{ jr.prev_url }}" data-section="journal-removals"><i class="fas fa-chevron-left" aria-hidden="true"></i> {% trans "Əvvəlki" context "accounts.journal_removals" %}</a>{% endif %}
+            <span class="jrm-pager__info">{% blocktrans trimmed with page=jr.page last=jr.last_page context "accounts.journal_removals" %}Səhifə {{ page }} / {{ last }}{% endblocktrans %}</span>
+            {% if jr.has_next %}<a class="ems-btn ems-btn--sm" href="{{ jr.next_url }}" data-section="journal-removals">{% trans "Növbəti" context "accounts.journal_removals" %} <i class="fas fa-chevron-right" aria-hidden="true"></i></a>{% endif %}
+        </nav>
+        {% endif %}
+    {% elif jr.is_filtered %}
+        {% trans "Süzgəcə uyğun çıxarılma yoxdur" context "accounts.journal_removals" as st_title %}
+        {% trans "Süzgəcləri dəyişin və ya «Sıfırla» basın." context "accounts.journal_removals" as st_body %}
+        {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-magnifying-glass" %}
+    {% else %}
+        {% trans "Hələ jurnaldan çıxarılma qeydə alınmayıb" context "accounts.journal_removals" as st_title %}
+        {% trans "Jurnalda «Fəndən azad et» və ya alt qrup «Çıxar» səbəb seçilərək ediləndə qeyd burada görünəcək." context "accounts.journal_removals" as st_body %}
+        {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-user-slash" %}
+    {% endif %}
+    </div>
+</div>
+{% endif %}
+</section>
+{% endif %}

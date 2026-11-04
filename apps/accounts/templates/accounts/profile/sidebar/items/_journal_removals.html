@@ -1,0 +1,15 @@
+{% load i18n nav_icons %}
+{% comment %}2026-11-04 (sahib): «Jurnaldan çıxarılmalar» — səbəbli çıxarılma qeydləri; yalnız RİM rəhbəri / superadmin
+(qapı: rbac_sections.py).{% endcomment %}
+{% if 'journal-removals' in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=journal-removals"
+       data-section="journal-removals"
+       data-title="{% trans 'Jurnaldan çıxarılmalar' context 'profile.section' %}"
+       data-source-url="{{ profile_base_url }}?section=journal-removals"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'journal-removals' %}active{% endif %}">
+        {% nav_icon "user-minus" "sidebar-menu-icon" %}
+        <span class="sidebar-menu-text">{% trans "Jurnaldan çıxarılmalar" context "profile.section" %}</span>
+    </a>
+</li>
+{% endif %}

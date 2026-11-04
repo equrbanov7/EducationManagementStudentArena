@@ -1,0 +1,48 @@
+/* «Jurnaldan çıxarılmalar» — RİM kabinet bölməsi (sahib 2026-11-04).
+ * Şablon: accounts/profile/sections/_journal_removals.html */
+
+.jrm { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+
+/* Səbəb üzrə say — klikləyəndə həmin səbəbə süzülür */
+.jrm-reasons { display: flex; flex-wrap: wrap; gap: 8px; }
+.jrm-reason {
+    display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px;
+    border: 1px solid var(--ems-border); background: var(--ems-neutral-0); color: var(--ems-neutral-800);
+    font-size: 12.5px; font-weight: 600; text-decoration: none;
+}
+.jrm-reason:hover { border-color: var(--ems-primary-200); background: var(--ems-primary-50); }
+.jrm-reason:focus-visible { outline: none; box-shadow: var(--ems-sh-focus); }
+.jrm-reason.is-active { border-color: var(--ems-primary-500); background: var(--ems-primary-50); color: var(--ems-primary-700); }
+.jrm-reason.is-empty { color: var(--ems-neutral-500); }
+.jrm-reason__count {
+    min-width: 22px; height: 20px; padding: 0 6px; border-radius: 999px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--ems-neutral-100); color: var(--ems-neutral-700); font-size: 11px; font-weight: 800;
+}
+.jrm-reason.is-active .jrm-reason__count { background: var(--ems-primary-100); color: var(--ems-primary-700); }
+
+.jrm-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.jrm-toolbar__range { font-size: 12.5px; color: var(--ems-neutral-500); font-weight: 600; }
+
+.jrm-table td, .jrm-table th { vertical-align: top; }
+.jrm-strong { display: block; font-weight: 700; color: var(--ems-neutral-800); overflow-wrap: anywhere; }
+a.jrm-strong { color: var(--ems-primary-700); text-decoration: none; }
+a.jrm-strong:hover { text-decoration: underline; }
+.jrm-muted { display: block; font-size: 12px; color: var(--ems-neutral-500); overflow-wrap: anywhere; }
+.jrm-note { max-width: 320px; white-space: pre-line; overflow-wrap: anywhere; font-size: 12.5px; }
+
+.jrm-badge {
+    display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px;
+    font-size: 11.5px; font-weight: 700; border: 1px solid var(--ems-neutral-200);
+    background: var(--ems-neutral-100); color: var(--ems-neutral-700);
+}
+.jrm-badge--suspension { background: var(--ems-danger-bg); border-color: var(--ems-danger-200); color: var(--ems-danger-700); }
+.jrm-badge--subject_substitution { background: var(--ems-warning-bg); border-color: var(--ems-warning-bd); color: var(--ems-warning-800); }
+.jrm-badge--credit_recognition { background: var(--ems-primary-50); border-color: var(--ems-primary-200); color: var(--ems-primary-700); }
+.jrm-restored {
+    display: inline-block; margin-top: 4px; padding: 1px 7px; border-radius: 999px;
+    font-size: 11px; font-weight: 700; background: var(--ems-neutral-100); color: var(--ems-neutral-600);
+}
+
+.jrm-pager { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+.jrm-pager__info { font-size: 12.5px; color: var(--ems-neutral-600); font-weight: 600; }

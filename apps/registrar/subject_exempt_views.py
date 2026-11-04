@@ -3,7 +3,8 @@
 Zəncir (fail-closed): tenant (``offering_or_404``) → açar (``journal.correct`` org-wide və ya
 ``journal.roster``; heç biri yoxdursa **403**) → əhatə (açılışın qrupu aktorun alt-ağacında deyilsə **404**,
 mövcudluq sızmasın) → siyahı qapısı (bağlı jurnal / keçmiş dövr → **409** + səbəb) → servis.
-Domen məntiqi :mod:`apps.registrar.subject_exempt`-dədir.
+Domen məntiqi :mod:`apps.registrar.subject_exempt`-dədir; «Fəndən azad et» çıxarılma səbəbini (``removal_reason``,
+«Digər» üçün qeyd — ``reason``) məcburi tələb edir (**400**, :mod:`apps.registrar.journal_removal`).
 """
 
 from __future__ import annotations
@@ -17,7 +18,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
-from . import subject_exempt
+from . import journal_removal, subject_exempt
 from .journal_access import offering_or_404
 
 _CTX = "registrar.subject_exempt"
@@ -69,6 +70,12 @@ def subject_exempt_apply(request, offering_id):
     enrollment_id = _uuid(data.get("enrollment"))
     if enrollment_id is None:
         return _error("not_found", pgettext(_CTX, "Qeydiyyat tapılmadı."), status=404)
+    # Sahib 2026-11-04: səbəb siyahıdan MƏCBURİ seçilir («Digər» qeydsiz olmur); modaldakı «Qeyd» həm
+    # səbəb sətrinə, həm qərar mətninə düşür.
+    try:
+        removal = journal_removal.clean(data.get(journal_removal.REASON_FIELD), data.get("reason"))
+    except journal_removal.RemovalReasonError as exc:
+        return _error(exc.code, exc.message, status=400)
     try:
         result = subject_exempt.exempt_student(
             offering=offering,
@@ -78,6 +85,7 @@ def subject_exempt_apply(request, offering_id):
             doc_number=data.get("doc_number") or "",
             doc_date=data.get("doc_date") or "",
             request=request,
+            removal=removal,
         )
     except subject_exempt.HygieneError as exc:
         return _error(exc.code, exc.message, status=exc.status)

@@ -421,7 +421,7 @@ class GuestHttpFlowTest(_GuestRosterBase):
 
         removed = client.post(
             reverse("registrar:journal_guest_remove", args=[self.offering.id]),
-            {"enrollment": body["enrollment_id"]},
+            {"enrollment": body["enrollment_id"], "removal_reason": "added_by_mistake"},
         )
         self.assertEqual(removed.status_code, 200)
         self.assertTrue(removed.json()["ok"])
