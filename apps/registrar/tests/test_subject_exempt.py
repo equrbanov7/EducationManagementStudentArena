@@ -131,7 +131,8 @@ class _ExemptBase(TestCase):
         return self._post(
             user or self.coordinator,
             "registrar:journal_subject_exempt",
-            {"enrollment": str(self.enrollment.pk), **extra},
+            # 2026-11-04: çıxarılma səbəbi məcburidir (test_journal_removal_reasons).
+            {"enrollment": str(self.enrollment.pk), "removal_reason": "subject_substitution", **extra},
         )
 
     @staticmethod

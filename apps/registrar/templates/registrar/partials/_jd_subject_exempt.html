@@ -16,6 +16,7 @@ jurnalından çıxır. Siyahını jurnalı açan hər kəs görür; «Bərpa et�
         <li class="jse-item">
             <span class="jse-item__name">{{ item.student|journal_name }}</span>
             {% if item.recognized %}<span class="recognition-mark"><i class="fas fa-earth-europe" aria-hidden="true"></i> {% trans "Azad (xarici nəticə tanınıb)" context "registrar.recognition" %}</span>{% endif %}
+            {% if item.removal_label %}<span class="jse-item__cause" title="{{ item.removal_note }}">{{ item.removal_label }}</span>{% endif %}
             <span class="jse-item__meta">{{ item.reason }} · {{ item.decided_by|default:"—" }} · {{ item.decided_at|date:"d.m.Y H:i" }}</span>
             {% if can_exempt and not item.recognized %}
             <button type="button" class="jse-restore" data-jse-restore="{{ item.decision_id }}">
@@ -48,10 +49,7 @@ jurnalından çıxır. Siyahını jurnalı açan hər kəs görür; «Bərpa et�
                 <span class="jse-ctx-chip"><i class="fas fa-user" aria-hidden="true"></i> <b data-jse-student-name></b></span>
                 <span class="jse-ctx-chip jse-ctx-chip--muted"><i class="fas fa-book" aria-hidden="true"></i> {{ offering.subject.name }}</span>
             </div>
-            <label class="jd2-field jse-field">
-                <span class="jd2-field-label">{% trans "Səbəb" context "registrar.subject_exempt" %} <small>{% trans "(istəyə bağlı)" context "registrar.subject_exempt" %}</small></span>
-                <textarea name="reason" rows="2" maxlength="2000" data-jse-reason></textarea>
-            </label>
+            {% include "registrar/partials/_jd_removal_reason.html" with jrr_id="jse-removal" %}
             <div class="jse-doc">
                 <label class="jd2-field jse-field">
                     <span class="jd2-field-label">{% trans "Sənəd №" context "registrar.subject_exempt" %} <small>{% trans "(istəyə bağlı)" context "registrar.subject_exempt" %}</small></span>

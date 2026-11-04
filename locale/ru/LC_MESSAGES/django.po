@@ -113572,3 +113572,258 @@ msgstr "Категория сохраняется в истории приказ
 msgctxt "accounts.leave_reason"
 msgid "«Digər» seçildi — aşağıdakı səbəb sahəsində qısa izah yazın (məcburidir)."
 msgstr "Выбрано «Другое» — кратко поясните в поле причины ниже (обязательно)."
+
+msgctxt "registrar.journal_removal"
+msgid "Uzaqlaşdırma"
+msgstr "Отстранение"
+
+msgctxt "registrar.journal_removal"
+msgid "Fənn əvəzlənməsi (sənəd təqdim edib)"
+msgstr "Замена предмета (представлен документ)"
+
+msgctxt "registrar.journal_removal"
+msgid "Kredit tanınması / köçürmə"
+msgstr "Признание кредитов / перевод"
+
+msgctxt "registrar.journal_removal"
+msgid "Səhv əlavə olunub"
+msgstr "Добавлен по ошибке"
+
+msgctxt "registrar.journal_removal"
+msgid "Başqa qrupa / alt qrupa keçid"
+msgstr "Переход в другую группу / подгруппу"
+
+msgctxt "registrar.journal_removal"
+msgid "Digər"
+msgstr "Другое"
+
+msgctxt "registrar.journal_removal"
+msgid "Fəndən azad"
+msgstr "Освобождён от предмета"
+
+msgctxt "registrar.journal_removal"
+msgid "Alt qrupdan əlavə geri götürüldü"
+msgstr "Добавление из подгруппы отменено"
+
+msgctxt "registrar.journal_removal"
+msgid "Çıxarılma səbəbini seçin."
+msgstr "Выберите причину исключения."
+
+msgctxt "registrar.journal_removal"
+msgid "Çıxarılma səbəbi tanınmadı — siyahıdan seçin."
+msgstr "Причина исключения не распознана — выберите из списка."
+
+msgctxt "registrar.journal_removal"
+msgid "«Digər» seçiləndə qeyd yazılmalıdır."
+msgstr "При выборе «Другое» необходимо написать примечание."
+
+msgctxt "registrar.journal_removal"
+msgid "Sistem"
+msgstr "Система"
+
+msgctxt "registrar.journal_removal"
+msgid "Çıxarılma səbəbi"
+msgstr "Причина исключения"
+
+msgctxt "registrar.journal_removal"
+msgid "— Səbəbi seçin —"
+msgstr "— Выберите причину —"
+
+msgctxt "registrar.journal_removal"
+msgid "Qeyd"
+msgstr "Примечание"
+
+msgctxt "registrar.journal_removal"
+msgid "(istəyə bağlı)"
+msgstr "(необязательно)"
+
+msgctxt "registrar.journal_removal"
+msgid "(«Digər» üçün məcburi)"
+msgstr "(обязательно для «Другое»)"
+
+msgctxt "registrar.journal_removal"
+msgid "Məs.: sənəd №, əmr tarixi, hansı fənnlə əvəzlənib"
+msgstr "Напр.: № документа, дата приказа, каким предметом заменён"
+
+msgctxt "registrar.journal_removal"
+msgid "Jurnaldan çıxarılır:"
+msgstr "Исключается из журнала:"
+
+msgctxt "registrar.journal_history"
+msgid "Jurnaldan çıxarıldı"
+msgstr "Исключён из журнала"
+
+msgctxt "registrar.journal_history"
+msgid "Jurnala qaytarıldı"
+msgstr "Возвращён в журнал"
+
+msgctxt "registrar.journal_history"
+msgid "Siyahıdan çıxarılma"
+msgstr "Исключения из списка"
+
+msgctxt "profile.section"
+msgid "Jurnaldan çıxarılmalar"
+msgstr "Исключения из журналов"
+
+msgctxt "registrar.model.journal_removal.meta"
+msgid "journal removal"
+msgstr "запись об исключении из журнала"
+
+msgctxt "registrar.model.journal_removal.meta"
+msgid "journal removals"
+msgstr "записи об исключении из журнала"
+
+msgctxt "accounts.journal_removals"
+msgid "Ad, soyad və ya istifadəçi adı"
+msgstr "Имя, фамилия или имя пользователя"
+
+msgctxt "accounts.journal_removals"
+msgid "Bu bölmə yalnız RİM rəhbəri və superadmin üçündür."
+msgstr "Этот раздел доступен только руководителю РИМ и суперадмину."
+
+msgctxt "accounts.journal_removals"
+msgid "Bərpa olunub"
+msgstr "Восстановлен"
+
+msgctxt "accounts.journal_removals"
+msgid "Excel-ə ixrac"
+msgstr "Экспорт в Excel"
+
+msgctxt "accounts.journal_removals"
+msgid "Fakültə"
+msgstr "Факультет"
+
+#, python-format
+msgctxt "accounts.journal_removals"
+msgid "Fayl ilk %(n)s sətirlə məhdudlaşdırılıb — süzgəcləri daraldıb yenidən yükləyin."
+msgstr "Файл ограничен первыми %(n)s строками — сузьте фильтры и скачайте снова."
+
+msgctxt "accounts.journal_removals"
+msgid "Fənn"
+msgstr "Предмет"
+
+msgctxt "accounts.journal_removals"
+msgid "Fənn / jurnal"
+msgstr "Предмет / журнал"
+
+msgctxt "accounts.journal_removals"
+msgid "Fənn kodu"
+msgstr "Код предмета"
+
+msgctxt "accounts.journal_removals"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "accounts.journal_removals"
+msgid "Hələ jurnaldan çıxarılma qeydə alınmayıb"
+msgstr "Исключения из журналов ещё не зафиксированы"
+
+msgctxt "accounts.journal_removals"
+msgid "Jurnalda «Fəndən azad et» və ya alt qrup «Çıxar» səbəb seçilərək ediləndə qeyd burada görünəcək."
+msgstr "Когда в журнале выполняется «Освободить от предмета» или «Исключить» из подгруппы с указанием причины, запись появится здесь."
+
+msgctxt "accounts.journal_removals"
+msgid "Jurnaldan çıxarılan hər tələbə səbəb kateqoriyası və qeydlə burada qeyd olunur: fəndən azad etmə, alt qrupdan əlavənin geri götürülməsi və xarici nəticənin tanınması. Süzgəclərlə səbəbə, tarixə, fakültəyə, kafedraya, müəllimə və tələbəyə görə daraldın."
+msgstr "Каждый исключённый из журнала студент фиксируется здесь с категорией причины и примечанием: освобождение от предмета, отмена добавления из подгруппы и признание внешнего результата. Сужайте список фильтрами по причине, дате, факультету, кафедре, преподавателю и студенту."
+
+msgctxt "accounts.journal_removals"
+msgid "Jurnaldan çıxarılmaların ixracı"
+msgstr "Экспорт исключений из журналов"
+
+msgctxt "accounts.journal_removals"
+msgid "Kafedra"
+msgstr "Кафедра"
+
+msgctxt "accounts.journal_removals"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+msgctxt "accounts.journal_removals"
+msgid "Müəllimin adı"
+msgstr "Имя преподавателя"
+
+msgctxt "accounts.journal_removals"
+msgid "Növbəti"
+msgstr "Следующая"
+
+#, python-format
+msgctxt "accounts.journal_removals"
+msgid "Nəticə: %(n)s qeyd"
+msgstr "Результат: %(n)s записей"
+
+msgctxt "accounts.journal_removals"
+msgid "Qeyd"
+msgstr "Примечание"
+
+msgctxt "accounts.journal_removals"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "accounts.journal_removals"
+msgid "Qüvvədə"
+msgstr "Действует"
+
+msgctxt "accounts.journal_removals"
+msgid "Semestr"
+msgstr "Семестр"
+
+msgctxt "accounts.journal_removals"
+msgid "Süzgəcləri dəyişin və ya «Sıfırla» basın."
+msgstr "Измените фильтры или нажмите «Сбросить»."
+
+msgctxt "accounts.journal_removals"
+msgid "Süzgəcə uyğun çıxarılma yoxdur"
+msgstr "Нет исключений, соответствующих фильтрам"
+
+msgctxt "accounts.journal_removals"
+msgid "Səbəb"
+msgstr "Причина"
+
+msgctxt "accounts.journal_removals"
+msgid "Səbəb üzrə say"
+msgstr "Количество по причинам"
+
+#, python-format
+msgctxt "accounts.journal_removals"
+msgid "Səhifə %(page)s / %(last)s"
+msgstr "Страница %(page)s / %(last)s"
+
+msgctxt "accounts.journal_removals"
+msgid "Səhifələr"
+msgstr "Страницы"
+
+msgctxt "accounts.journal_removals"
+msgid "Tarix"
+msgstr "Дата"
+
+msgctxt "accounts.journal_removals"
+msgid "Tarixdən"
+msgstr "С даты"
+
+msgctxt "accounts.journal_removals"
+msgid "Tarixədək"
+msgstr "По дату"
+
+msgctxt "accounts.journal_removals"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "accounts.journal_removals"
+msgid "Vəziyyət"
+msgstr "Состояние"
+
+msgctxt "accounts.journal_removals"
+msgid "Çıxaran"
+msgstr "Кем исключён"
+
+msgctxt "accounts.journal_removals"
+msgid "İstifadəçi adı"
+msgstr "Имя пользователя"
+
+msgctxt "accounts.journal_removals"
+msgid "Əməl"
+msgstr "Действие"
+
+msgctxt "accounts.journal_removals"
+msgid "Əvvəlki"
+msgstr "Предыдущая"

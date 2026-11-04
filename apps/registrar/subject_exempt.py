@@ -37,7 +37,8 @@ from django.utils.translation import pgettext
 from . import guest_roster
 from . import journal_hygiene_actions as actions
 from . import journal_hygiene_rows as rows_service
-from .models import Enrollment, HygieneCategory, JournalHygieneDecision
+from . import journal_removal
+from .models import Enrollment, HygieneCategory, JournalHygieneDecision, RemovalAction, RemovalReason
 
 _CTX = "registrar.subject_exempt"
 EXEMPT = HygieneCategory.SUBJECT_EXEMPT.value
@@ -113,11 +114,18 @@ def exempt_student(
     request=None,
     reason_code=REASON_CODE,
     evidence_extra=None,
+    removal=None,
 ) -> dict:
     """Tələbəni BU açılışın jurnalından «Fəndən azad» edir (qərar jurnalı + audit, bir tranzaksiya).
 
     ``reason_code`` / ``evidence_extra`` — «Xarici nəticənin tanınması» (``credit_recognition``) eyni qərar
-    qatını ``external_recognition`` səbəb kodu və tanınma izi ilə işlədir (paralel mexanizm yoxdur)."""
+    qatını ``external_recognition`` səbəb kodu və tanınma izi ilə işlədir (paralel mexanizm yoxdur).
+
+    ``removal`` — :func:`journal_removal.clean` nəticəsi (modalın «Çıxarılma səbəbi»; sahib 2026-11-04). Tanınma
+    axınında verilmirsə səbəb avtomatik «Kredit tanınması / köçürmə» olur. Verilibsə səbəb sətri + jurnal
+    tarixçəsi EYNİ tranzaksiyada yazılır."""
+    if removal is None and reason_code == RECOGNITION_REASON_CODE:
+        removal = {"reason": RemovalReason.CREDIT_RECOGNITION.value, "note": clean_text(reason)}
     document = clean_document(doc_number, doc_date)
     text = decision_reason(clean_text(reason), document)
     with transaction.atomic():
@@ -150,6 +158,15 @@ def exempt_student(
             actor=actor,
             request=request,
         )
+        if removal is not None:
+            journal_removal.record(
+                enrollment=enrollment,
+                action=RemovalAction.SUBJECT_EXEMPT,
+                cleaned=removal,
+                actor=actor,
+                hygiene_decision_id=result["decision_ids"][0],
+                request=request,
+            )
     return {"decision_id": result["decision_ids"][0], "changed": result["changed"]}
 
 
@@ -206,6 +223,7 @@ def restore_student(*, offering, decision_id, actor, reason="", request=None, al
             actor=actor,
             request=request,
         )
+        journal_removal.record_restore(enrollment=enrollment, actor=actor, note=text, request=request)
     return {"reverted": result["reverted"]}
 
 
@@ -225,6 +243,8 @@ def exempt_rows(offering) -> list:
         .select_related("enrollment__student")
         .order_by("-created_at")
     )
+    decisions = list(decisions)
+    removals = journal_removal.latest_by_decision([item.pk for item in decisions])
     return [
         {
             "decision_id": str(item.pk),
@@ -233,6 +253,8 @@ def exempt_rows(offering) -> list:
             "decided_by": item.decided_by_name,
             "decided_at": item.created_at,
             "recognized": item.reason_code == RECOGNITION_REASON_CODE,
+            "removal_label": journal_removal.reason_label(removals[item.pk].reason) if item.pk in removals else "",
+            "removal_note": removals[item.pk].note if item.pk in removals else "",
         }
         for item in decisions
     ]

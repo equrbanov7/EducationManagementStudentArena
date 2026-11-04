@@ -1,0 +1,42 @@
+/* Jurnaldan çıxarılma SƏBƏBİ — «Fəndən azad et» modalı + alt qrup «Çıxar» paneli (sahib 2026-11-04).
+ * Partial: registrar/partials/_jd_removal_reason.html · JS: registrar/js/journal_removal_reason.js */
+
+.jrr { display: flex; flex-direction: column; gap: 10px; }
+.jrr-field { margin-bottom: 0; gap: 4px; }
+.jrr-field small { font-weight: 500; text-transform: none; letter-spacing: 0; }
+.jrr-field small[hidden] { display: none; }
+.jrr-required { color: var(--ems-danger-600); font-weight: 700; }
+.jrr-field textarea {
+    width: 100%; min-height: 64px; resize: vertical; box-sizing: border-box;
+    background: var(--ems-neutral-0); border: 1.5px solid var(--ems-border); border-radius: 10px;
+    padding: 9px 12px; font-family: inherit; font-size: 13px; color: var(--ems-neutral-800);
+}
+.jrr-field textarea:focus { outline: none; border-color: var(--ems-primary-200); box-shadow: var(--ems-sh-focus); }
+
+/* «Azad edilənlər» siyahısında səbəb nişanı */
+.jse-item__cause {
+    display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 999px;
+    background: var(--ems-warning-bg); color: var(--ems-warning-800); border: 1px solid var(--ems-warning-bd);
+    font-size: 11.5px; font-weight: 700; overflow-wrap: anywhere;
+}
+
+/* Alt qrup modalı: «Çıxar» səbəb paneli */
+.jgs-remove-panel {
+    margin-top: 12px; padding: 12px 14px; border-radius: 12px;
+    background: var(--ems-danger-bg); border: 1px solid var(--ems-danger-200);
+    display: flex; flex-direction: column; gap: 10px;
+}
+.jgs-remove-panel[hidden] { display: none; }
+.jgs-remove-panel__title {
+    margin: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    font-size: 13px; font-weight: 600; color: var(--ems-neutral-800); overflow-wrap: anywhere;
+}
+.jgs-remove-panel__title i { color: var(--ems-danger-600); }
+.jgs-remove-panel__actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+.jgs-remove-panel__actions .jd2-cancel-btn,
+.jgs-remove-panel__actions .jd2-apply-btn { flex: 0 1 auto; }
+.jgs-remove-confirm {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--ems-danger-600); box-shadow: none;
+}
+.jgs-remove-confirm[disabled] { opacity: 0.5; cursor: not-allowed; }

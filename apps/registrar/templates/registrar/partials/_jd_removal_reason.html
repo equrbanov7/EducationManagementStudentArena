@@ -1,0 +1,33 @@
+{% load i18n registrar_removal %}
+{% comment %}Jurnaldan çıxarılma SƏBƏBİ — «Fəndən azad et» modalı və alt qrup «Çıxar» paneli üçün ORTAQ sahələr
+(sahib 2026-11-04). Səbəb siyahıdan MƏCBURİ seçilir; «Digər» seçiləndə qeyd də məcburidir (server
+`journal_removal.clean` eyni qaydanı yoxlayır). Seçici layihənin Bootstrap select komponentidir.
+
+Kontekst: `jrr_id` — sahələrin id prefiksi (bir səhifədə iki nüsxə toqquşmasın). Dəyərləri JS oxuyur
+(`[data-jrr-reason]`, `[data-jrr-note]`) — məntiq registrar/js/journal_removal_reason.js-dədir.{% endcomment %}
+{% journal_removal_reasons as removal_reasons %}
+<div class="jrr" data-jrr
+     data-msg-reason="{% trans 'Çıxarılma səbəbini seçin.' context 'registrar.journal_removal' %}"
+     data-msg-note="{% trans '«Digər» seçiləndə qeyd yazılmalıdır.' context 'registrar.journal_removal' %}">
+    <div class="jd2-field jrr-field">
+        <label class="jd2-field-label" for="{{ jrr_id }}-reason">{% trans "Çıxarılma səbəbi" context "registrar.journal_removal" %} <small class="jrr-required">*</small></label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="{{ jrr_id }}-reason"
+                    data-bootstrap-select data-jrr-reason required aria-required="true">
+                <option value="">{% trans "— Səbəbi seçin —" context "registrar.journal_removal" %}</option>
+                {% for value, label in removal_reasons %}
+                <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="jd2-field jrr-field">
+        <label class="jd2-field-label" for="{{ jrr_id }}-note">
+            {% trans "Qeyd" context "registrar.journal_removal" %}
+            <small data-jrr-note-optional>{% trans "(istəyə bağlı)" context "registrar.journal_removal" %}</small>
+            <small class="jrr-required" data-jrr-note-required hidden>{% trans "(«Digər» üçün məcburi)" context "registrar.journal_removal" %}</small>
+        </label>
+        <textarea id="{{ jrr_id }}-note" rows="2" maxlength="1000" data-jrr-note
+                  placeholder="{% trans 'Məs.: sənəd №, əmr tarixi, hansı fənnlə əvəzlənib' context 'registrar.journal_removal' %}"></textarea>
+    </div>
+</div>

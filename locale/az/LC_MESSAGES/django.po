@@ -112862,3 +112862,258 @@ msgstr "Kateqoriya əmr tarixçəsində və audit jurnalında saxlanılır."
 msgctxt "accounts.leave_reason"
 msgid "«Digər» seçildi — aşağıdakı səbəb sahəsində qısa izah yazın (məcburidir)."
 msgstr "«Digər» seçildi — aşağıdakı səbəb sahəsində qısa izah yazın (məcburidir)."
+
+msgctxt "registrar.journal_removal"
+msgid "Uzaqlaşdırma"
+msgstr "Uzaqlaşdırma"
+
+msgctxt "registrar.journal_removal"
+msgid "Fənn əvəzlənməsi (sənəd təqdim edib)"
+msgstr "Fənn əvəzlənməsi (sənəd təqdim edib)"
+
+msgctxt "registrar.journal_removal"
+msgid "Kredit tanınması / köçürmə"
+msgstr "Kredit tanınması / köçürmə"
+
+msgctxt "registrar.journal_removal"
+msgid "Səhv əlavə olunub"
+msgstr "Səhv əlavə olunub"
+
+msgctxt "registrar.journal_removal"
+msgid "Başqa qrupa / alt qrupa keçid"
+msgstr "Başqa qrupa / alt qrupa keçid"
+
+msgctxt "registrar.journal_removal"
+msgid "Digər"
+msgstr "Digər"
+
+msgctxt "registrar.journal_removal"
+msgid "Fəndən azad"
+msgstr "Fəndən azad"
+
+msgctxt "registrar.journal_removal"
+msgid "Alt qrupdan əlavə geri götürüldü"
+msgstr "Alt qrupdan əlavə geri götürüldü"
+
+msgctxt "registrar.journal_removal"
+msgid "Çıxarılma səbəbini seçin."
+msgstr "Çıxarılma səbəbini seçin."
+
+msgctxt "registrar.journal_removal"
+msgid "Çıxarılma səbəbi tanınmadı — siyahıdan seçin."
+msgstr "Çıxarılma səbəbi tanınmadı — siyahıdan seçin."
+
+msgctxt "registrar.journal_removal"
+msgid "«Digər» seçiləndə qeyd yazılmalıdır."
+msgstr "«Digər» seçiləndə qeyd yazılmalıdır."
+
+msgctxt "registrar.journal_removal"
+msgid "Sistem"
+msgstr "Sistem"
+
+msgctxt "registrar.journal_removal"
+msgid "Çıxarılma səbəbi"
+msgstr "Çıxarılma səbəbi"
+
+msgctxt "registrar.journal_removal"
+msgid "— Səbəbi seçin —"
+msgstr "— Səbəbi seçin —"
+
+msgctxt "registrar.journal_removal"
+msgid "Qeyd"
+msgstr "Qeyd"
+
+msgctxt "registrar.journal_removal"
+msgid "(istəyə bağlı)"
+msgstr "(istəyə bağlı)"
+
+msgctxt "registrar.journal_removal"
+msgid "(«Digər» üçün məcburi)"
+msgstr "(«Digər» üçün məcburi)"
+
+msgctxt "registrar.journal_removal"
+msgid "Məs.: sənəd №, əmr tarixi, hansı fənnlə əvəzlənib"
+msgstr "Məs.: sənəd №, əmr tarixi, hansı fənnlə əvəzlənib"
+
+msgctxt "registrar.journal_removal"
+msgid "Jurnaldan çıxarılır:"
+msgstr "Jurnaldan çıxarılır:"
+
+msgctxt "registrar.journal_history"
+msgid "Jurnaldan çıxarıldı"
+msgstr "Jurnaldan çıxarıldı"
+
+msgctxt "registrar.journal_history"
+msgid "Jurnala qaytarıldı"
+msgstr "Jurnala qaytarıldı"
+
+msgctxt "registrar.journal_history"
+msgid "Siyahıdan çıxarılma"
+msgstr "Siyahıdan çıxarılma"
+
+msgctxt "profile.section"
+msgid "Jurnaldan çıxarılmalar"
+msgstr "Jurnaldan çıxarılmalar"
+
+msgctxt "registrar.model.journal_removal.meta"
+msgid "journal removal"
+msgstr "jurnaldan çıxarılma qeydi"
+
+msgctxt "registrar.model.journal_removal.meta"
+msgid "journal removals"
+msgstr "jurnaldan çıxarılma qeydləri"
+
+msgctxt "accounts.journal_removals"
+msgid "Ad, soyad və ya istifadəçi adı"
+msgstr "Ad, soyad və ya istifadəçi adı"
+
+msgctxt "accounts.journal_removals"
+msgid "Bu bölmə yalnız RİM rəhbəri və superadmin üçündür."
+msgstr "Bu bölmə yalnız RİM rəhbəri və superadmin üçündür."
+
+msgctxt "accounts.journal_removals"
+msgid "Bərpa olunub"
+msgstr "Bərpa olunub"
+
+msgctxt "accounts.journal_removals"
+msgid "Excel-ə ixrac"
+msgstr "Excel-ə ixrac"
+
+msgctxt "accounts.journal_removals"
+msgid "Fakültə"
+msgstr "Fakültə"
+
+#, python-format
+msgctxt "accounts.journal_removals"
+msgid "Fayl ilk %(n)s sətirlə məhdudlaşdırılıb — süzgəcləri daraldıb yenidən yükləyin."
+msgstr "Fayl ilk %(n)s sətirlə məhdudlaşdırılıb — süzgəcləri daraldıb yenidən yükləyin."
+
+msgctxt "accounts.journal_removals"
+msgid "Fənn"
+msgstr "Fənn"
+
+msgctxt "accounts.journal_removals"
+msgid "Fənn / jurnal"
+msgstr "Fənn / jurnal"
+
+msgctxt "accounts.journal_removals"
+msgid "Fənn kodu"
+msgstr "Fənn kodu"
+
+msgctxt "accounts.journal_removals"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "accounts.journal_removals"
+msgid "Hələ jurnaldan çıxarılma qeydə alınmayıb"
+msgstr "Hələ jurnaldan çıxarılma qeydə alınmayıb"
+
+msgctxt "accounts.journal_removals"
+msgid "Jurnalda «Fəndən azad et» və ya alt qrup «Çıxar» səbəb seçilərək ediləndə qeyd burada görünəcək."
+msgstr "Jurnalda «Fəndən azad et» və ya alt qrup «Çıxar» səbəb seçilərək ediləndə qeyd burada görünəcək."
+
+msgctxt "accounts.journal_removals"
+msgid "Jurnaldan çıxarılan hər tələbə səbəb kateqoriyası və qeydlə burada qeyd olunur: fəndən azad etmə, alt qrupdan əlavənin geri götürülməsi və xarici nəticənin tanınması. Süzgəclərlə səbəbə, tarixə, fakültəyə, kafedraya, müəllimə və tələbəyə görə daraldın."
+msgstr "Jurnaldan çıxarılan hər tələbə səbəb kateqoriyası və qeydlə burada qeyd olunur: fəndən azad etmə, alt qrupdan əlavənin geri götürülməsi və xarici nəticənin tanınması. Süzgəclərlə səbəbə, tarixə, fakültəyə, kafedraya, müəllimə və tələbəyə görə daraldın."
+
+msgctxt "accounts.journal_removals"
+msgid "Jurnaldan çıxarılmaların ixracı"
+msgstr "Jurnaldan çıxarılmaların ixracı"
+
+msgctxt "accounts.journal_removals"
+msgid "Kafedra"
+msgstr "Kafedra"
+
+msgctxt "accounts.journal_removals"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "accounts.journal_removals"
+msgid "Müəllimin adı"
+msgstr "Müəllimin adı"
+
+msgctxt "accounts.journal_removals"
+msgid "Növbəti"
+msgstr "Növbəti"
+
+#, python-format
+msgctxt "accounts.journal_removals"
+msgid "Nəticə: %(n)s qeyd"
+msgstr "Nəticə: %(n)s qeyd"
+
+msgctxt "accounts.journal_removals"
+msgid "Qeyd"
+msgstr "Qeyd"
+
+msgctxt "accounts.journal_removals"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "accounts.journal_removals"
+msgid "Qüvvədə"
+msgstr "Qüvvədə"
+
+msgctxt "accounts.journal_removals"
+msgid "Semestr"
+msgstr "Semestr"
+
+msgctxt "accounts.journal_removals"
+msgid "Süzgəcləri dəyişin və ya «Sıfırla» basın."
+msgstr "Süzgəcləri dəyişin və ya «Sıfırla» basın."
+
+msgctxt "accounts.journal_removals"
+msgid "Süzgəcə uyğun çıxarılma yoxdur"
+msgstr "Süzgəcə uyğun çıxarılma yoxdur"
+
+msgctxt "accounts.journal_removals"
+msgid "Səbəb"
+msgstr "Səbəb"
+
+msgctxt "accounts.journal_removals"
+msgid "Səbəb üzrə say"
+msgstr "Səbəb üzrə say"
+
+#, python-format
+msgctxt "accounts.journal_removals"
+msgid "Səhifə %(page)s / %(last)s"
+msgstr "Səhifə %(page)s / %(last)s"
+
+msgctxt "accounts.journal_removals"
+msgid "Səhifələr"
+msgstr "Səhifələr"
+
+msgctxt "accounts.journal_removals"
+msgid "Tarix"
+msgstr "Tarix"
+
+msgctxt "accounts.journal_removals"
+msgid "Tarixdən"
+msgstr "Tarixdən"
+
+msgctxt "accounts.journal_removals"
+msgid "Tarixədək"
+msgstr "Tarixədək"
+
+msgctxt "accounts.journal_removals"
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgctxt "accounts.journal_removals"
+msgid "Vəziyyət"
+msgstr "Vəziyyət"
+
+msgctxt "accounts.journal_removals"
+msgid "Çıxaran"
+msgstr "Çıxaran"
+
+msgctxt "accounts.journal_removals"
+msgid "İstifadəçi adı"
+msgstr "İstifadəçi adı"
+
+msgctxt "accounts.journal_removals"
+msgid "Əməl"
+msgstr "Əməl"
+
+msgctxt "accounts.journal_removals"
+msgid "Əvvəlki"
+msgstr "Əvvəlki"

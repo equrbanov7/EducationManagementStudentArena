@@ -2,7 +2,8 @@
  * «Fəndən azad et» / «Bərpa et» — jurnal səhifəsi (sahib 2026-10-15).
  *
  * Tələbə qrupda qalır, yalnız BU fənnin jurnalından çıxır. Sətirdəki düymə (`data-jse-open`)
- * modalı açır; səbəb və sənəd istəyə bağlıdır. «Azad edilənlər» siyahısındakı «Bərpa et»
+ * modalı açır; çıxarılma SƏBƏBİ siyahıdan məcburidir (sahib 2026-11-04, journal_removal_reason.js),
+ * qeyd («Digər» üçün məcburi) və sənəd istəyə bağlıdır. «Azad edilənlər» siyahısındakı «Bərpa et»
  * iki addımlıdır (birinci klik təsdiq istəyir). Uğurdan sonra səhifə yenilənir — cədvəl,
  * sayğaclar və siyahı server tərəfdə yenidən qurulur.
  *
@@ -43,13 +44,14 @@
         state.lastFocused = button;
         var name = field(modal, "data-jse-student-name");
         if (name) name.textContent = button.getAttribute("data-jse-student") || "";
-        ["data-jse-reason", "data-jse-doc-number", "data-jse-doc-date"].forEach(function (hook) {
+        ["data-jse-doc-number", "data-jse-doc-date"].forEach(function (hook) {
             var input = field(modal, hook);
             if (input) input.value = "";
         });
+        if (window.EMSJournalRemovalReason) window.EMSJournalRemovalReason.reset(modal);
         setError(modal, "");
         modal.hidden = false;
-        var reason = field(modal, "data-jse-reason");
+        var reason = field(modal, "data-jrr-reason");
         if (reason) reason.focus();
     }
 
@@ -74,12 +76,21 @@
             var input = field(modal, hook);
             return input ? input.value : "";
         };
+        // Səbəb MƏCBURİDİR (sahib 2026-11-04); «Digər» qeydsiz göndərilmir — server də yoxlayır.
+        var removal = window.EMSJournalRemovalReason
+            ? window.EMSJournalRemovalReason.read(modal)
+            : { reason: "", note: "", error: "" };
+        if (removal.error) {
+            setError(modal, removal.error);
+            return;
+        }
         state.busy = true;
         button.disabled = true;
         setError(modal, "");
         post(modal.getAttribute("data-apply-url"), {
             enrollment: state.enrollment,
-            reason: value("data-jse-reason"),
+            removal_reason: removal.reason,
+            reason: removal.note,
             doc_number: value("data-jse-doc-number"),
             doc_date: value("data-jse-doc-date"),
         })
