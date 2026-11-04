@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -12,6 +12,7 @@ from django.utils.translation import pgettext
 
 from apps.organizations.public import members_covering_unit
 from core.download_types import content_type_for_name
+from core.runtime_settings_applications import daily_limit
 from core.upload_security import validate_zip_archive
 
 from ..constants import (
@@ -105,6 +106,52 @@ def attach_files(application, files, *, event=None, uploaded_by=None):
 DUPLICATE_WINDOW = timedelta(minutes=2)
 
 
+def _exempt_from_daily_limit(user, organization) -> bool:
+    """Gündəlik limitdən azad olanlar — YALNIZ mövcud, aydın anlayışlar.
+
+    Superuser/superadmin və RİM şöbəsinin emalçısı (``access.is_universal_responder`` — təşkilatın hər
+    müraciətinə cavab verən; texniki problemləri özü də qeydə alır). Başqa heç bir rol azad deyil.
+    """
+    if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
+        return True
+    return access.is_universal_responder(user, organization)
+
+
+def submitted_today(organization, user) -> int:
+    """İstifadəçinin BU GÜN (``TIME_ZONE`` — Bakı — üzrə 00:00–24:00) göndərdiyi, silinməmiş müraciət sayı."""
+    today = timezone.localdate()
+    start = timezone.make_aware(datetime.combine(today, time.min))
+    end = timezone.make_aware(datetime.combine(today + timedelta(days=1), time.min))
+    return Application.objects.filter(
+        organization=organization,
+        created_by=user,
+        created_at__gte=start,
+        created_at__lt=end,
+        deleted_at__isnull=True,
+    ).count()
+
+
+def enforce_daily_limit(organization, user) -> None:
+    """Sahib 2026-11-04: bir istifadəçi gündə ən çox N müraciət (``applications.daily_limit``, defolt 10).
+
+    Çağıran sayğac sətrini (``next_number``) ARTIQ kilidləyib — eyni təşkilatın paralel göndərişləri
+    burada növbəyə düzülür, ona görə iki eyni anlı sorğu limiti birlikdə keçə bilmir.
+    """
+    if _exempt_from_daily_limit(user, organization):
+        return
+    limit = daily_limit()
+    if submitted_today(organization, user) >= limit:
+        raise TransitionDenied(
+            "limit.daily",
+            pgettext(
+                _CTX,
+                "Bir gündə ən çox {limit} müraciət göndərmək olar — bugünkü limitiniz dolub. "
+                "Yeni müraciəti sabah göndərin; artıq göndərdiyiniz müraciətlərə cavab yaza bilərsiniz.",
+            ).format(limit=limit),
+            {"limit": limit},
+        )
+
+
 @transaction.atomic
 def submit_application(
     *,
@@ -185,10 +232,14 @@ def submit_application(
         )
         scope_unit = None
         coverage_fallback = True
+    # Sayğac kilidi gündəlik limit yoxlamasından ƏVVƏL alınır (yarışa davamlı say); limit rədd edərsə
+    # tranzaksiya geri qayıdır və nömrə də sərf olunmur.
+    number = next_number(organization)
+    enforce_daily_limit(organization, user)
     now = timezone.now()
     application = Application.objects.create(
         organization=organization,
-        number=next_number(organization),
+        number=number,
         kind=kind,
         subject=subject.strip()[:255],
         body=body.strip(),
@@ -244,4 +295,11 @@ def submit_application(
     return application
 
 
-__all__ = ["attach_files", "next_number", "submit_application", "validate_text"]
+__all__ = [
+    "attach_files",
+    "enforce_daily_limit",
+    "next_number",
+    "submit_application",
+    "submitted_today",
+    "validate_text",
+]

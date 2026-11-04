@@ -396,12 +396,14 @@
             body: Number(root.dataset.minBody) || 20,
             note: Number(root.dataset.minNote) || 10,
             // Yükləmə hədləri də SERVER-dəndir (`payloads.rules_payload`).
-            maxFiles: Number(root.dataset.maxFiles) || 5,
-            maxMb: Number(root.dataset.maxFileMb) || 10,
+            maxFiles: Number(root.dataset.maxFiles) || 10,
+            maxMb: Number(root.dataset.maxFileMb) || 25,
             // Fraqment köhnə keşdən gəlib atribut boş qalsa siyahı BOŞ olmamalıdır —
             // boş siyahı hər faylı «dəstəklənmir» sayardı. Ehtiyat dəst serverin
             // `ALLOWED_ATTACHMENT_EXTENSIONS` default-u ilə eynidir.
-            accept: (root.dataset.accept || ".docx,.jpeg,.jpg,.pdf,.png,.webp,.zip").split(",").filter(Boolean),
+            accept: (root.dataset.accept || ".doc,.docx,.jpeg,.jpg,.pdf,.png,.webp,.xls,.xlsx,.zip")
+                .split(",")
+                .filter(Boolean),
         };
         NS.family = root.dataset.family || "";
         NS.canCreate = root.dataset.canCreate === "1";

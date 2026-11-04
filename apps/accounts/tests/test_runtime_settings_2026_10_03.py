@@ -168,6 +168,7 @@ class RuntimeSettingsTest(TestCase):
                 "monitoring",  # «Monitorinq» (2026-10-21)
                 "syllabus",  # «Sillabus» — kafedra təsdiqi tələb olunur (2026-10-25)
                 "notifications",  # «Bildirişlər» — telefona push (2026-10-25)
+                "applications",  # «Müraciətlər» — gündəlik müraciət limiti (2026-11-04)
             },
         )
 

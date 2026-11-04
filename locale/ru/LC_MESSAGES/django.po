@@ -65373,19 +65373,16 @@ msgid "Nəticələr yüklənir…"
 msgstr "Загрузка результатов…"
 
 msgctxt "applications"
-msgid ""
-"Fayl seç — PDF, şəkil, DOCX və ya ZIP · maks. %(mb)s MB · ən çox %(n)s fayl"
-msgstr ""
-"Выберите файл — PDF, изображение, DOCX или ZIP · макс. %(mb)s МБ · до %(n)s "
-"файлов"
+msgid "Fayl seç — PDF, şəkil, Word, Excel və ya ZIP · maks. %(mb)s MB · ən çox %(n)s fayl"
+msgstr "Выберите файл — PDF, изображение, Word, Excel или ZIP · макс. %(mb)s МБ · до %(n)s файлов"
 
 msgctxt "applications"
 msgid "ən son"
 msgstr "последнее"
 
 msgctxt "applications"
-msgid "PDF, şəkil, DOCX və ya ZIP · maks. {mb} MB · ən çox {n} fayl"
-msgstr "PDF, изображение, DOCX или ZIP · макс. {mb} МБ · до {n} файлов"
+msgid "PDF, şəkil, Word, Excel və ya ZIP · maks. {mb} MB · ən çox {n} fayl"
+msgstr "PDF, изображение, Word, Excel или ZIP · макс. {mb} МБ · до {n} файлов"
 
 msgctxt "applications"
 msgid ""
@@ -113324,3 +113321,23 @@ msgstr "Занятие можно открыть на прошедшую дат�
 msgctxt "registrar.journal"
 msgid "Davamiyyət %(date)s tarixindən bu günədək keçirilmiş dərslərə qeyd edilə bilər · yazılmış qeyd %(w)s sonra kilidlənir — düzəliş üçün RİM-ə (sənədli düzəliş) müraciət edilir."
 msgstr "Посещаемость можно отмечать для занятий, проведённых с %(date)s по сегодня · записанная отметка блокируется через %(w)s — для исправления обращаются в RİM (документальное исправление)."
+
+msgctxt "core.runtime_settings"
+msgid "Müraciətlər"
+msgstr "Обращения"
+
+msgctxt "core.runtime_settings"
+msgid "Bir istifadəçinin gündə göndərə biləcəyi müraciət sayı"
+msgstr "Сколько обращений один пользователь может отправить в день"
+
+msgctxt "core.runtime_settings"
+msgid "Bir istifadəçi bir təqvim günü (Bakı vaxtı ilə 00:00–24:00) ərzində ən çox bu qədər yeni müraciət göndərə bilər. Limit dolanda yeni müraciət rədd olunur və istifadəçiyə sabah yenidən cəhd etməsi deyilir; artıq göndərilmiş müraciətlərə cavab yazmaq və sənəd əlavə etmək bu limitə düşmür."
+msgstr "Пользователь может отправить не больше указанного числа новых обращений за календарный день (00:00–24:00 по бакинскому времени). Когда лимит исчерпан, новое обращение отклоняется и пользователю предлагается повторить завтра; ответы и документы к уже отправленным обращениям в лимит не входят."
+
+msgctxt "core.runtime_settings"
+msgid "müraciət"
+msgstr "обращений"
+
+msgctxt "applications.transition"
+msgid "Bir gündə ən çox {limit} müraciət göndərmək olar — bugünkü limitiniz dolub. Yeni müraciəti sabah göndərin; artıq göndərdiyiniz müraciətlərə cavab yaza bilərsiniz."
+msgstr "В день можно отправить не более {limit} обращений — сегодняшний лимит исчерпан. Отправьте новое обращение завтра; на уже отправленные обращения можно отвечать."

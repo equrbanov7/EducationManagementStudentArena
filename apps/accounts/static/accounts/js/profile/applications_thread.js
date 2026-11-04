@@ -277,7 +277,7 @@
             '<button type="button" class="apx-act__attach" data-apx-pick-files>' +
             '<i class="fas fa-paperclip" aria-hidden="true"></i>' + NS.esc(NS.t("attachLabel")) + "</button>" +
             '<span class="apx-act__filehint">' +
-            NS.esc(NS.t("attachHint", { mb: rules.maxMb || 10, n: rules.maxFiles || 5 })) + "</span>" +
+            NS.esc(NS.t("attachHint", { mb: rules.maxMb || 25, n: rules.maxFiles || 10 })) + "</span>" +
             '<input type="file" class="apx__sr" data-apx-files multiple accept="' +
             NS.esc((rules.accept || []).join(",")) + '"></div>' +
             '<div class="apx-picked" data-apx-picked></div>'

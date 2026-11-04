@@ -65328,19 +65328,16 @@ msgid "Nəticələr yüklənir…"
 msgstr "Ergebnisse werden geladen…"
 
 msgctxt "applications"
-msgid ""
-"Fayl seç — PDF, şəkil, DOCX və ya ZIP · maks. %(mb)s MB · ən çox %(n)s fayl"
-msgstr ""
-"Datei auswählen — PDF, Bild, DOCX oder ZIP · max. %(mb)s MB · bis zu %(n)s "
-"Dateien"
+msgid "Fayl seç — PDF, şəkil, Word, Excel və ya ZIP · maks. %(mb)s MB · ən çox %(n)s fayl"
+msgstr "Datei auswählen — PDF, Bild, Word, Excel oder ZIP · max. %(mb)s MB · bis zu %(n)s Dateien"
 
 msgctxt "applications"
 msgid "ən son"
 msgstr "neueste"
 
 msgctxt "applications"
-msgid "PDF, şəkil, DOCX və ya ZIP · maks. {mb} MB · ən çox {n} fayl"
-msgstr "PDF, Bild, DOCX oder ZIP · max. {mb} MB · bis zu {n} Dateien"
+msgid "PDF, şəkil, Word, Excel və ya ZIP · maks. {mb} MB · ən çox {n} fayl"
+msgstr "PDF, Bild, Word, Excel oder ZIP · max. {mb} MB · bis zu {n} Dateien"
 
 msgctxt "applications"
 msgid ""
@@ -114190,3 +114187,23 @@ msgstr "Eine Stunde kann für ein vergangenes Datum vom %(date)s bis heute angel
 msgctxt "registrar.journal"
 msgid "Davamiyyət %(date)s tarixindən bu günədək keçirilmiş dərslərə qeyd edilə bilər · yazılmış qeyd %(w)s sonra kilidlənir — düzəliş üçün RİM-ə (sənədli düzəliş) müraciət edilir."
 msgstr "Die Anwesenheit kann für Stunden erfasst werden, die vom %(date)s bis heute stattgefunden haben · ein Eintrag wird nach %(w)s gesperrt — für eine Korrektur wenden Sie sich an das RİM (dokumentierte Korrektur)."
+
+msgctxt "core.runtime_settings"
+msgid "Müraciətlər"
+msgstr "Anträge"
+
+msgctxt "core.runtime_settings"
+msgid "Bir istifadəçinin gündə göndərə biləcəyi müraciət sayı"
+msgstr "Anträge, die ein Benutzer pro Tag einreichen darf"
+
+msgctxt "core.runtime_settings"
+msgid "Bir istifadəçi bir təqvim günü (Bakı vaxtı ilə 00:00–24:00) ərzində ən çox bu qədər yeni müraciət göndərə bilər. Limit dolanda yeni müraciət rədd olunur və istifadəçiyə sabah yenidən cəhd etməsi deyilir; artıq göndərilmiş müraciətlərə cavab yazmaq və sənəd əlavə etmək bu limitə düşmür."
+msgstr "Ein Benutzer darf innerhalb eines Kalendertags (00:00–24:00 Uhr Bakuer Zeit) höchstens so viele neue Anträge einreichen. Ist das Limit erreicht, werden neue Anträge abgelehnt und der Benutzer wird gebeten, es morgen erneut zu versuchen; Antworten und Dokumente zu bereits eingereichten Anträgen zählen nicht."
+
+msgctxt "core.runtime_settings"
+msgid "müraciət"
+msgstr "Anträge"
+
+msgctxt "applications.transition"
+msgid "Bir gündə ən çox {limit} müraciət göndərmək olar — bugünkü limitiniz dolub. Yeni müraciəti sabah göndərin; artıq göndərdiyiniz müraciətlərə cavab yaza bilərsiniz."
+msgstr "Pro Tag können höchstens {limit} Anträge eingereicht werden — das heutige Limit ist erreicht. Reichen Sie den neuen Antrag morgen ein; auf bereits gesendete Anträge können Sie weiterhin antworten."

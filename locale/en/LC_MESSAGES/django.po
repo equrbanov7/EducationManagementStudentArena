@@ -65235,18 +65235,16 @@ msgid "Nəticələr yüklənir…"
 msgstr "Loading results…"
 
 msgctxt "applications"
-msgid ""
-"Fayl seç — PDF, şəkil, DOCX və ya ZIP · maks. %(mb)s MB · ən çox %(n)s fayl"
-msgstr ""
-"Choose a file — PDF, image, DOCX or ZIP · max. %(mb)s MB · up to %(n)s files"
+msgid "Fayl seç — PDF, şəkil, Word, Excel və ya ZIP · maks. %(mb)s MB · ən çox %(n)s fayl"
+msgstr "Choose a file — PDF, image, Word, Excel or ZIP · max. %(mb)s MB · up to %(n)s files"
 
 msgctxt "applications"
 msgid "ən son"
 msgstr "latest"
 
 msgctxt "applications"
-msgid "PDF, şəkil, DOCX və ya ZIP · maks. {mb} MB · ən çox {n} fayl"
-msgstr "PDF, image, DOCX or ZIP · max. {mb} MB · up to {n} files"
+msgid "PDF, şəkil, Word, Excel və ya ZIP · maks. {mb} MB · ən çox {n} fayl"
+msgstr "PDF, image, Word, Excel or ZIP · max. {mb} MB · up to {n} files"
 
 msgctxt "applications"
 msgid ""
@@ -113130,3 +113128,23 @@ msgstr "A lesson can be opened for any past date from %(date)s up to today."
 msgctxt "registrar.journal"
 msgid "Davamiyyət %(date)s tarixindən bu günədək keçirilmiş dərslərə qeyd edilə bilər · yazılmış qeyd %(w)s sonra kilidlənir — düzəliş üçün RİM-ə (sənədli düzəliş) müraciət edilir."
 msgstr "Attendance can be recorded for lessons held from %(date)s up to today · a recorded mark locks after %(w)s — for a correction, apply to the Digital Development Centre (RİM) for a documented correction."
+
+msgctxt "core.runtime_settings"
+msgid "Müraciətlər"
+msgstr "Applications"
+
+msgctxt "core.runtime_settings"
+msgid "Bir istifadəçinin gündə göndərə biləcəyi müraciət sayı"
+msgstr "Applications one user may submit per day"
+
+msgctxt "core.runtime_settings"
+msgid "Bir istifadəçi bir təqvim günü (Bakı vaxtı ilə 00:00–24:00) ərzində ən çox bu qədər yeni müraciət göndərə bilər. Limit dolanda yeni müraciət rədd olunur və istifadəçiyə sabah yenidən cəhd etməsi deyilir; artıq göndərilmiş müraciətlərə cavab yazmaq və sənəd əlavə etmək bu limitə düşmür."
+msgstr "A user may submit at most this many new applications within one calendar day (00:00–24:00 Baku time). Once the limit is reached, new applications are refused and the user is told to try again tomorrow; replying to and attaching documents to already submitted applications does not count."
+
+msgctxt "core.runtime_settings"
+msgid "müraciət"
+msgstr "applications"
+
+msgctxt "applications.transition"
+msgid "Bir gündə ən çox {limit} müraciət göndərmək olar — bugünkü limitiniz dolub. Yeni müraciəti sabah göndərin; artıq göndərdiyiniz müraciətlərə cavab yaza bilərsiniz."
+msgstr "You can submit at most {limit} applications per day — today's limit has been reached. Submit the new application tomorrow; you can still reply to the applications you have already sent."
