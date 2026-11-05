@@ -125,6 +125,64 @@ class StaleTeacherReadTest(SlotInstructorBase):
         self.assertEqual(slots, [])
 
 
+class OwnerFallbackTest(SlotInstructorBase):
+    """Sahib 2026-11-05 (Firəngiz): «müəllimin yükündə yoxdursa müəllim cədvəlində görməsin o fənni»."""
+
+    code = "stowner"
+
+    def _load(self, teacher, activity):
+        from apps.workload.models import TeacherAssignment, TeachingTaskRow
+
+        seed = self._seminar_load(teacher)
+        TeachingTaskRow.objects.filter(pk=seed.row_id).update(lecture_plan=30, lecture_total=30, total_hours=60)
+        if activity != "seminar":
+            TeacherAssignment.objects.filter(pk=seed.pk).update(activity=activity)
+        return seed
+
+    def _view(self, teacher):
+        return schedule.get_teacher_schedule(organization=self.org, teacher=teacher, period=self.period)
+
+    def test_owner_without_load_loses_the_slot_and_the_load_teacher_gets_it(self):
+        with bypass_rls():
+            lecture = self._slot(self.offering, weekday=1, kind=SlotKind.LECTURE)
+            seminar = self._slot(self.offering, weekday=3, kind=SlotKind.SEMINAR)
+            before = self._view(self.teacher_a)
+            self._load(self.teacher_c, "lecture")
+            owner = self._view(self.teacher_a)
+            new_teacher = self._view(self.teacher_c)
+            group = schedule.get_group_schedule(organization=self.org, group=self.groups[0], period=self.period)
+        self.assertEqual(sorted(_ids(before), key=str), sorted([lecture.pk, seminar.pk], key=str))  # yük yoxdur
+        self.assertEqual(_ids(owner), [seminar.pk])  # mühazirə C-nin yükündədir; seminarın yükü heç kimdə yoxdur
+        self.assertEqual(_ids(new_teacher), [lecture.pk])  # yalnız öz növü (mühazirə)
+        self.assertEqual(sorted(_ids(group), key=str), sorted([lecture.pk, seminar.pk], key=str))
+
+    def test_recorded_lesson_alone_does_not_keep_the_slot_but_own_load_does(self):
+        with bypass_rls():
+            slot = self._slot(self.offering, weekday=1, kind=SlotKind.LECTURE)
+            self._load(self.teacher_c, "lecture")
+            Lesson.objects.create(
+                organization=self.org,
+                offering=self.offering,
+                date=self.today,
+                kind="lecture",
+                instructor=self.teacher_a,
+            )
+            taught = self._view(self.teacher_a)
+            self._load(self.teacher_a, "lecture")
+            loaded = self._view(self.teacher_a)
+        self.assertEqual(taught, [])  # keçmiş dərs saxlamır — yük lazımdır
+        self.assertEqual(_ids(loaded), [slot.pk])
+
+    def test_vacant_load_does_not_take_the_slot_from_the_owner(self):
+        from apps.workload.models import TeacherAssignment
+
+        with bypass_rls():
+            slot = self._slot(self.offering, weekday=1, kind=SlotKind.SEMINAR)
+            TeacherAssignment.objects.filter(pk=self._seminar_load(self.teacher_c).pk).update(teacher=None)
+            owner = self._view(self.teacher_a)
+        self.assertEqual(_ids(owner), [slot.pk])
+
+
 class ReleaseTest(SlotInstructorBase):
     code = "strel"
 
@@ -152,7 +210,13 @@ class ReleaseTest(SlotInstructorBase):
         self.assertIsNotNone(audit)
         self.assertEqual(audit.old_values, {"instructor": str(self.teacher_c.pk)})
         self.assertEqual(audit.reason, schedule_stale_teachers.RELEASE_REASON)
-        self.assertEqual(sorted(_ids(owner), key=str), sorted([stale.pk, plain.pk], key=str))  # sahibə qayıtdı
+        seminar_teacher = schedule.get_teacher_schedule(
+            organization=self.org, teacher=self.teacher_b, period=self.period
+        )
+        # Seminar B-nin yükündədir — boşaldılan seminar slotu B-yə düşür, sahib A onu görmür (sahib 2026-11-05);
+        # mühazirənin yükü heç kimdə yoxdur — sahibdə qalır.
+        self.assertEqual(_ids(owner), [plain.pk])
+        self.assertEqual(sorted(_ids(seminar_teacher), key=str), sorted([stale.pk, current.pk], key=str))
 
     def test_inactive_journal_slots_are_left_as_repair_evidence(self):
         with bypass_rls():
