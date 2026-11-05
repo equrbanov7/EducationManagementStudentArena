@@ -14,6 +14,7 @@ import re
 import tempfile
 from io import StringIO
 from types import SimpleNamespace
+from unittest import mock
 
 from django.core.management import call_command
 from django.core.management.base import CommandError
@@ -325,8 +326,8 @@ class DesignOnlyPracticalLabelTest(PracticalBase):
             self.history.chair_unit = None
             self.history.save(update_fields=["chair_unit"])
             offering = CourseOffering.objects.select_related("subject__chair_unit").get(pk=self.offering.pk)
-            with self.assertNumQueries(0):
-                self.assertFalse(practical_label.offering_is_practical(offering))
+            # Kafedrasız fənn: yalnız rəsmi yük kafedrası yoxlanır (sahib 2026-11-05) — qrup heç vaxt.
+            self.assertFalse(practical_label.offering_is_practical(offering))
             self.assertEqual(Lesson.objects.get(pk=self.seminar.pk).get_kind_display(), "Seminar")
 
     def test_cached_and_uncached_design_paths_agree_and_preserve_hours(self):
@@ -355,3 +356,20 @@ class LanguageChairPracticalLabelTest(PracticalBase):
             lesson = Lesson.objects.get(pk=self.seminar.pk)
             self.assertEqual(lesson.get_kind_display(), "Praktiki məşğələ")
             self.assertEqual(lesson.kind, "seminar")
+
+    def test_chairless_language_subject_uses_official_workload_chair(self):
+        with bypass_rls():
+            self.chair.name = "Xarici dillər kafedrası"
+            self.chair.save(update_fields=["name"])
+            self.history.chair_unit = None
+            self.history.save(update_fields=["chair_unit"])
+        self.flag()
+        target = "apps.registrar.design_practical_scope._official_chair_ids"
+        with bypass_rls(), translation.override("az"):
+            with mock.patch(target, return_value=set()):
+                offering = CourseOffering.objects.get(pk=self.offering.pk)
+                self.assertFalse(practical_toggle.can_toggle(self.owner, offering))
+            with mock.patch(target, return_value={str(self.chair.pk)}):
+                offering = CourseOffering.objects.get(pk=self.offering.pk)
+                self.assertTrue(practical_toggle.can_toggle(self.owner, offering))
+                self.assertEqual(Lesson.objects.get(pk=self.seminar.pk).get_kind_display(), "Praktiki məşğələ")
