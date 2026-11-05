@@ -165,6 +165,20 @@ class LanguageCohortRebuildTest(_GuestRosterBase):
             )
             self.assertEqual(Enrollment.objects.get(pk=other.pk).status, "enrolled")
 
+    def test_lesson_without_teacher_in_a_shared_journal_belongs_to_the_class_teacher(self):
+        from apps.registrar.models import JournalShare
+
+        with bypass_rls():
+            CourseOffering.objects.filter(pk=self.other_offering.pk).update(instructor=self.colleague)
+            JournalShare.objects.create(
+                organization=self.org, offering=self.other_offering, teacher=self.teacher, kinds=["seminar"]
+            )
+        self._run()
+        with bypass_rls():
+            cohort = LanguageLevelCohort.objects.get(name="E-1", period=self.period)
+            scores = sorted(int(m.score) for m in LessonMark.objects.filter(lesson__offering=cohort.offering))
+        self.assertEqual(scores, [8, 9])
+
     def test_undo_restores_home_journals(self):
         self._run()
         counts = self._run(rebuild.undo)
