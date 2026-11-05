@@ -114075,3 +114075,11 @@ msgstr "Select a group first…"
 msgctxt "accounts.subgroup_students"
 msgid "Əvvəlki"
 msgstr "Previous"
+
+msgctxt "registrar.journal"
+msgid "Mənim jurnallarım"
+msgstr "My journals"
+
+msgctxt "registrar.journal"
+msgid "hamısını göstər"
+msgstr "show all"

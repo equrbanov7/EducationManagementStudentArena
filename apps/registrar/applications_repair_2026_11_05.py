@@ -25,8 +25,13 @@ from .twin_merge import Merger
 from .twin_relocate import recompute_absences
 
 PAIRS = (
-    # MR-190 · 235 KE ing «Web texnologiyalar» (QKU-2517) → «Veb texnologiyalar» (QKU-2689); T boşdur.
-    {"source": "d3997166-2418-4357-89bc-313c6b0bd69b", "target": "561c4324-49f0-4dd1-81be-7583ba676ab3"},
+    # MR-190 · 235 KE ing «Web texnologiyalar» (QKU-2517) → «Veb texnologiyalar» (QKU-2689); müəllim 11-03-dən sonra
+    # T-yə də yazıb (ilk qaçış ``both_have_marks``) → keep.
+    {
+        "source": "d3997166-2418-4357-89bc-313c6b0bd69b",
+        "target": "561c4324-49f0-4dd1-81be-7583ba676ab3",
+        "target_marks": "keep",
+    },
     # MR-190 · 234 İT ing «Verilənlərin bazası sistemləri» (QKU-267) → SAYT-0014; T-də müəllimin yeni dərsləri var.
     {
         "source": "7a2f6737-9363-4f62-96da-5b3a49f5e745",

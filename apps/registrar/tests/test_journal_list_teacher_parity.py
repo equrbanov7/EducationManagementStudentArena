@@ -198,3 +198,24 @@ class JournalListTeacherParityTests(TestCase):
             teachers_for(CourseOffering.objects.filter(organization=self.org)).values_list("pk", flat=True)
         )
         self.assertTrue({author.pk, self.teacher.pk, self.other.pk} <= candidates)
+
+    def test_my_journals_button_shows_own_list_to_broad_viewer(self):
+        """Sahib 2026-11-05: çox jurnal görən hər kəs «Mənim jurnallarım» ilə yalnız öz siyahısını görür."""
+        own = {tab: self.rows(self.context(self.teacher, year="", teaching=tab)) for tab in ("current", "history")}
+        User.objects.filter(pk=self.teacher.pk).update(is_superuser=True)
+        broad_user = User.objects.get(pk=self.teacher.pk)
+        data = self.context(broad_user, year="")
+        self.assertTrue(data["journal_is_broad"])
+        self.assertEqual(data["journal_my_teacher_id"], str(broad_user.pk))
+        self.assertEqual(data["journal_selected_teacher"], "")
+        request = RequestFactory().get("/jurnal/")
+        request.user = broad_user
+        html = render_to_string("registrar/partials/_journal_list_content.html", data, request=request)
+        self.assertIn(f"?teacher={broad_user.pk}", html)
+        for tab, rows in own.items():
+            mine = self.context(broad_user, teacher=broad_user.pk, year="", teaching=tab)
+            self.assertEqual(mine["journal_selected_teacher"], mine["journal_my_teacher_id"])
+            self.assertTrue(mine["journal_teacher_mirrored"])
+            self.assertEqual([pk for pk, _kind in self.rows(mine)], [pk for pk, _kind in rows])
+        # Öz jurnalı olmayan geniş aktor da düyməni görür (boş siyahı ilə).
+        self.assertEqual(self.context(self.admin, year="")["journal_my_teacher_id"], str(self.admin.pk))

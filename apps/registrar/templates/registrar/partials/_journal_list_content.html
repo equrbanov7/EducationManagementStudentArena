@@ -18,6 +18,19 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
             <div class="jd2-pagesub"><i class="far fa-calendar" aria-hidden="true"></i> {% if journal_selected_year or journal_selected_season %}{{ journal_selected_year }}{% if journal_selected_year and journal_selected_season %} · {% endif %}{{ journal_selected_season }}{% else %}{% trans "Bütün semestrlər" context "registrar.journal" %}{% endif %}</div>
         </div>
         <div class="jl-head-meta">
+            {% if journal_my_teacher_id %}
+            {% comment %}«Mənim jurnallarım» (sahib 2026-11-05): çox jurnal görən hər kəs üçün — `?teacher=<öz id>` mövcud «müəllimin öz siyahısı» (mirror) görünüşünü açır.{% endcomment %}
+            {% if journal_selected_teacher == journal_my_teacher_id %}
+            <a class="jl-mine is-active" href="{% url 'registrar:journal_list' %}" aria-pressed="true">
+                <i class="fas fa-user-check" aria-hidden="true"></i> {% trans "Mənim jurnallarım" context "registrar.journal" %}
+                <span class="jl-mine__hint">· {% trans "hamısını göstər" context "registrar.journal" %}</span>
+            </a>
+            {% else %}
+            <a class="jl-mine" href="{% url 'registrar:journal_list' %}?teacher={{ journal_my_teacher_id }}" aria-pressed="false">
+                <i class="fas fa-user" aria-hidden="true"></i> {% trans "Mənim jurnallarım" context "registrar.journal" %}
+            </a>
+            {% endif %}
+            {% endif %}
             <span class="jl-count">{% blocktrans context "registrar.journal" with count=page_obj.paginator.count %}<b>{{ count }}</b> jurnal{% endblocktrans %}</span>
         </div>
     </div>
