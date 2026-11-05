@@ -146,7 +146,7 @@
                 </div>
                 <p class="appeal-key-fix__meta">
                     {% blocktrans trimmed context "appeals.template" with credited=kc.credited_count affected=kc.affected_count %}
-                        Sualı cavablayan {{ affected }} tələbədən {{ credited }} nəfərə kredit verildi.
+                        {{ affected }} cəhd yoxlanıldı, {{ credited }} cəhd üçün düzəliş tətbiq edildi. Əvvəlki apellyasiya balı təkrar əlavə edilmir.
                     {% endblocktrans %}
                     · {{ kc.created_by.get_full_name|default:kc.created_by.username }} · {{ kc.created_at|date:"d.m.Y H:i" }}
                 </p>

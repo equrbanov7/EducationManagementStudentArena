@@ -136,7 +136,7 @@ def find_exam(*, organization, slug: str):
 
 
 # ── toplama (yazısız) ────────────────────────────────────────────────────────
-def build_plan(exam, *, allow_retake_links=False) -> PurgePlan:
+def build_plan(exam, *, allow_retake_links=False, lock_journal=False) -> PurgePlan:
     from apps.exams.models import (
         CodingSubmission,
         ExamAnswer,
@@ -186,7 +186,7 @@ def build_plan(exam, *, allow_retake_links=False) -> PurgePlan:
     plan.affected_user_ids |= set(pins.values_list("student_id", flat=True))
     plan.affected_user_ids |= set(grants.values_list("student_id", flat=True))
     c["live_sessions"] = _model("live_exam.LiveSession").objects.filter(exam=exam).count()
-    _collect_journal(plan, attempts)
+    _collect_journal(plan, attempts, lock_journal=lock_journal)
     _collect_registrar_links(plan, ids, allow_retake_links=allow_retake_links)
     _collect_notifications(plan)
     c["audit_rows_kept"] = _audit_rows(exam, ids)
@@ -224,7 +224,7 @@ def _journal_scores(exam, attempt_ids):
     return ComponentScore.objects.filter(exam_source__isnull=False).filter(match)
 
 
-def _collect_journal(plan, attempts):
+def _collect_journal(plan, attempts, *, lock_journal=False):
     from apps.exams.services.journal_sync import final_grade_skip_reason
 
     exam = plan.exam
@@ -235,6 +235,7 @@ def _collect_journal(plan, attempts):
             "component__name",
             "component__offering_id",
             "component__offering__subject_id",
+            "enrollment_id",
             "enrollment__student_id",
         )
     )
@@ -243,7 +244,10 @@ def _collect_journal(plan, attempts):
     c["journal_component_scores_from_exam"] = len(rows)
     offering_ids = {row["component__offering_id"] for row in rows}
     c["journal_prior_values"] = _prior_values(exam, attempts, offering_ids)
-    c["journal_restored_from_other_exam"] = len(_other_official_attempts(exam, rows))
+    sources = _other_official_attempts(exam, rows)
+    c["journal_restored_from_other_exam"] = len(sources)
+    if _midterm_manual_restore_required(exam, rows, sources, lock_journal=lock_journal):
+        plan.blockers.append("midterm_manual_restore_required")
     Scheme = _model("registrar.AssessmentScheme")
     locked = Scheme.objects.filter(offering_id__in=offering_ids).filter(
         Q(is_published=True) | Q(approval_status="approved")
@@ -260,19 +264,40 @@ def _collect_journal(plan, attempts):
     plan.journal_rows = rows
 
 
-def _other_official_attempts(exam, rows) -> list:
-    """Boşaldılacaq xananın sahibinin BAŞQA (silinməyən) imtahandan rəsmi test midterm cəhdi varsa — həmin cəhd.
+def _other_official_attempts(exam, rows, *, exclude_attempt_id=None) -> list:
+    """Yalnız boşaldılacaq qeydiyyat xanalarının başqa rəsmi midterm mənbələri.
 
-    Sınaq imtahanı onu «sonrakı cəhd» kimi əvəzləmişdi (``superseded``); silinmədən sonra jurnal onun balını
-    yenidən alır (``midterm_journal_sync`` — eyni qayda, eyni audit)."""
+    Tək cəhd silinirsə eyni imtahanın digər cəhdləri də qala bilər; bütöv
+    imtahan silinirsə yalnız başqa imtahanlardan bərpa olunur."""
     from apps.exams.models import ExamAttempt
+    from apps.exams.services.journal_sync_scope import target_identity
     from apps.exams.services.midterm_journal_sync import official_attempts
 
     found = []
+    targets = {("enrollment", row["enrollment_id"]) for row in rows}
     for user_id, subject_id in {(r["enrollment__student_id"], r["component__offering__subject_id"]) for r in rows}:
-        queryset = ExamAttempt.objects.filter(user_id=user_id, exam__subject_id=subject_id).exclude(exam=exam)
-        found.extend(official_attempts(queryset))
+        queryset = ExamAttempt.objects.filter(
+            user_id=user_id, exam__subject_id=subject_id, exam__organization_id=exam.organization_id
+        )
+        queryset = (
+            queryset.exclude(pk=exclude_attempt_id) if exclude_attempt_id is not None else queryset.exclude(exam=exam)
+        )
+        found.extend(attempt for attempt in official_attempts(queryset) if target_identity(attempt) in targets)
     return found
+
+
+def _midterm_manual_restore_required(exam, rows, sources, *, lock_journal=False):
+    from apps.exams.services.journal_sync_scope import target_identity
+    from apps.registrar.public import exam_result_trace
+
+    finished = {}
+    for source in sources:
+        target = target_identity(source)
+        if target is not None and target[0] == "enrollment":
+            finished[target[1]] = source.finished_at
+    return exam_result_trace.midterm_restore_required(
+        rows=rows, source_finished_at_by_enrollment=finished, organization=exam.organization, lock_journal=lock_journal
+    )
 
 
 def _prior_values(exam, attempts, offering_ids) -> int:
@@ -426,7 +451,7 @@ def apply_purge(exam, *, reason: str, allow_retake_links=False) -> PurgePlan:
     with transaction.atomic():
         locked = Exam.objects.select_for_update().select_related("organization").get(pk=exam.pk)
         list(ExamAttempt.objects.select_for_update().filter(exam=locked).order_by("pk").values_list("pk", flat=True))
-        plan = build_plan(locked, allow_retake_links=allow_retake_links)
+        plan = build_plan(locked, allow_retake_links=allow_retake_links, lock_journal=True)
         if plan.blockers:
             raise PurgeRefused(plan)
         if not plan.has_data and locked.is_deleted:

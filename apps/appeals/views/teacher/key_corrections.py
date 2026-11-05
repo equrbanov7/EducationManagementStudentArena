@@ -65,7 +65,8 @@ def key_correction_apply(request, item_id):
             "toast": str(
                 pgettext(
                     "appeals.view.message",
-                    "Cavab açarı düzəldildi: sualı cavablayan {affected} tələbədən {credited} nəfərin balı artırıldı.",
+                    "Cavab açarı düzəldildi: {affected} cəhd yoxlanıldı, {credited} cəhd üçün düzəliş tətbiq edildi. "
+                    "Əvvəlki apellyasiya balı təkrar əlavə edilmir.",
                 ).format(affected=correction.affected_count, credited=correction.credited_count)
             ),
         }
