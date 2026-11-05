@@ -24,6 +24,8 @@ PAIRS = (
     (11049, 9323, True),
     (11052, 9352, True),
 )
+#: Ad yazılışı fərqlidir (Sabina «Makhmudova» / ATİS «Mahmudova») — sahib eyni şəxs kimi təsdiqləyib (2026-11-06).
+ALLOW_NAME = frozenset({11371})
 
 
 class Command(BaseCommand):
@@ -38,7 +40,10 @@ class Command(BaseCommand):
         handle, path = tempfile.mkstemp(suffix=".json")
         try:
             with os.fdopen(handle, "w", encoding="utf-8") as stream:
-                rows = [{"duplicate": d, "keep": k, "allow_login": allow} for d, k, allow in PAIRS]
+                rows = [
+                    {"duplicate": d, "keep": k, "allow_login": allow, "allow_name": d in ALLOW_NAME}
+                    for d, k, allow in PAIRS
+                ]
                 json.dump({"format": "student-merge/1", "pairs": rows}, stream)
             extra = ["--apply"] if options["apply"] else []
             call_command(

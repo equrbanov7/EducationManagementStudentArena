@@ -267,7 +267,9 @@ def _freeze(organization, duplicate, keep, *, actor, manifest, counts) -> None:
         counts["accounts_blocked"] += 1
 
 
-def execute(organization, pairs, *, actor, batch: str, allow_login: frozenset = frozenset()) -> Counter:
+def execute(
+    organization, pairs, *, actor, batch: str, allow_login: frozenset = frozenset(), allow_name: frozenset = frozenset()
+) -> Counter:
     """Planın cütlərini tətbiq et (çağıranın tranzaksiyasında). Saylar qaytarılır."""
     from apps.registrar.public import gradebook
 
@@ -278,7 +280,12 @@ def execute(organization, pairs, *, actor, batch: str, allow_login: frozenset = 
     for duplicate_id, keep_id in pairs:
         duplicate, keep = people.get(duplicate_id), people.get(keep_id)
         verdict = plan_service.check_pair(
-            organization, duplicate, keep, created=created, allow_login=duplicate_id in allow_login
+            organization,
+            duplicate,
+            keep,
+            created=created,
+            allow_login=duplicate_id in allow_login,
+            allow_name=duplicate_id in allow_name,
         )
         if verdict:
             counts["pairs_skipped"] += 1

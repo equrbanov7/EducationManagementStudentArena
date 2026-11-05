@@ -57,6 +57,15 @@ def load(path: str) -> list:
     return pairs
 
 
+def load_allow_name(path: str) -> frozenset:
+    """Ad yazılışı fərqli (məs. «Makhmudova» / «Mahmudova»), amma sahibin eyni şəxs kimi təsdiqlədiyi cütlər."""
+    with open(path, encoding="utf-8") as handle:
+        data = json.load(handle)
+    return frozenset(
+        row["duplicate"] for row in data.get("pairs") or [] if isinstance(row, dict) and row.get("allow_name") is True
+    )
+
+
 def load_allow_login(path: str) -> frozenset:
     """Dublikatın girişi olsa da birləşdirilməsi SAHİBİN açıq təsdiqlədiyi cütlər (``"allow_login": true``).
 
@@ -93,7 +102,9 @@ def delta_created_ids(organization) -> set:
     return created
 
 
-def check_pair(organization, duplicate, keep, *, created: set, allow_login: bool = False) -> str:
+def check_pair(
+    organization, duplicate, keep, *, created: set, allow_login: bool = False, allow_name: bool = False
+) -> str:
     """``""`` — cüt keçdi; yoxsa səbəb kodu."""
     membership_model = django_apps.get_model("organizations", "Membership")
     if duplicate is None or keep is None:
@@ -111,7 +122,11 @@ def check_pair(organization, duplicate, keep, *, created: set, allow_login: bool
         return "not_students"
     if duplicate.pk not in created:
         return "duplicate_not_import_created"
-    if (_norm(duplicate.first_name), _norm(duplicate.last_name)) != (_norm(keep.first_name), _norm(keep.last_name)):
+    names_differ = (_norm(duplicate.first_name), _norm(duplicate.last_name)) != (
+        _norm(keep.first_name),
+        _norm(keep.last_name),
+    )
+    if names_differ and not allow_name:
         return "name_mismatch"
     if duplicate.last_login is not None and not allow_login:
         return "duplicate_has_login"

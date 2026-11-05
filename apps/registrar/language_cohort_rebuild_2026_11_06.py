@@ -60,6 +60,7 @@ class Rebuild:
     def __init__(self, *, organization, actor, counts, plan):
         self.organization, self.actor, self.counts, self.plan = organization, actor, counts, plan
         self.touched_sources: set = set()
+        self._shared: dict = {}
 
     # ── giriş ─────────────────────────────────────────────────────────────
     def run(self) -> None:
@@ -253,6 +254,24 @@ class Rebuild:
         Lesson = _model("Lesson")
         return {(row.date, row.start_time, row.kind): row for row in Lesson.objects.filter(offering=offering)}
 
+    def _teaches(self, teacher, offering_id, owner_id, instructor_id) -> bool:
+        """Dərs/slot sinfin müəllimininmi: müəllimi odur, və ya müəllimsizdir və o, jurnalın sahibi / pay sahibidir.
+
+        Köhnə sistemdən gələn dərslərdə müəllim yazılmayıb; bölünmüş jurnalda (pay) sinfin müəllimi həmin dərsləri
+        keçib — sahibə aid saymaq onun xanalarını tarixçədə gizlədirdi (dry-run: 2 133 xana)."""
+        if instructor_id:
+            return instructor_id == teacher.pk
+        if owner_id == teacher.pk:
+            return True
+        shared = self._shared.get(teacher.pk)
+        if shared is None:
+            shared = self._shared[teacher.pk] = set(
+                _model("JournalShare")
+                .objects.filter(teacher_id=teacher.pk, is_active=True)
+                .values_list("offering_id", flat=True)
+            )
+        return offering_id in shared
+
     def _copy_marks(self, source, target, teacher, lessons) -> None:
         Lesson, LessonMark = _model("Lesson"), _model("LessonMark")
         owner = source.offering.instructor_id
@@ -263,7 +282,7 @@ class Rebuild:
         )
         for mark in marks:
             lesson = mark.lesson
-            if (lesson.instructor_id or owner) != teacher.pk:
+            if not self._teaches(teacher, source.offering_id, owner, lesson.instructor_id):
                 self.counts["marks_other_teacher_kept"] += 1
                 continue
             key = (lesson.date, lesson.start_time, lesson.kind)
@@ -306,28 +325,37 @@ class Rebuild:
             (slot.weekday, slot.start_time, slot.week_type, slot.kind)
             for slot in Slot.objects.filter(offering=cohort.offering)
         }
-        candidates = (
-            Slot.objects.filter(offering_id__in={source.offering_id for source in sources}, is_parked=False)
+        candidates = [
+            slot
+            for slot in Slot.objects.filter(offering_id__in={source.offering_id for source in sources}, is_parked=False)
             .select_related("offering")
             .order_by("weekday", "start_time")
-        )
-        for slot in candidates:
-            if (slot.instructor_id or slot.offering.instructor_id) != teacher.pk:
-                continue
-            if starts and slot.start_time not in starts:
-                continue
-            key = (slot.weekday, slot.start_time, slot.week_type, slot.kind)
+            if self._teaches(teacher, slot.offering_id, slot.offering.instructor_id, slot.instructor_id)
+        ]
+        at_start = [slot for slot in candidates if not starts or slot.start_time in starts]
+        if at_start:
+            plan = [(s.weekday, s.start_time, s.end_time, s.week_type, s.kind, s.room) for s in at_start]
+        elif candidates and starts:
+            # Müəllimin slotları başqa saatdadır — günlər qalır, saat rəsmi siyahıdandır (cüt dərs = 90 dəq).
+            start = min(starts)
+            end = (dt.datetime.combine(dt.date(2000, 1, 1), start) + dt.timedelta(minutes=90)).time()
+            plan = sorted({(s.weekday, start, end, s.week_type, s.kind, s.room) for s in candidates})
+            self.counts["cohorts_slots_moved_to_list_time"] += 1
+        else:
+            plan = []
+        for weekday, start, end, week_type, kind, room in plan:
+            key = (weekday, start, week_type, kind)
             if key in existing:
                 continue
             Slot.objects.create(
                 organization=self.organization,
                 offering=cohort.offering,
-                weekday=slot.weekday,
-                start_time=slot.start_time,
-                end_time=slot.end_time,
-                week_type=slot.week_type,
-                kind=slot.kind,
-                room=row.get("room") or slot.room,
+                weekday=weekday,
+                start_time=start,
+                end_time=end,
+                week_type=week_type,
+                kind=kind,
+                room=row.get("room") or room,
                 created_by=self.actor,
             )
             existing.add(key)
