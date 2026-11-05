@@ -103,6 +103,7 @@ INTENTIONAL_EXEMPTIONS = {
     # 2026-11-05 RİM müraciətləri (MR-190/161/110): sabit cütlər, eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/repair_applications_20261105.py",
     "apps/registrar/management/commands/repair_applications_20261105c.py",
+    "apps/registrar/management/commands/fix_ydk236_subject_20261106.py",
     "apps/registrar/management/commands/rebuild_language_cohorts_20261106.py",
     # rehearse öz RLS kontekstini (set_rls_tenant, session-scoped, bypass-sız)
     # və öz transaction sərhədlərini (ledger advisory-lock atomic-ləri, batch
