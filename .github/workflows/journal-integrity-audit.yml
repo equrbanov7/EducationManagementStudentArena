@@ -16,7 +16,7 @@ jobs:
       APP_CONTAINER: educationmanagementstudentarena-app-1
       AUDIT_OUTPUT: /tmp/journal-integrity-${{ github.run_id }}-${{ github.run_attempt }}.enc.json
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
       - name: Capture fixed tenant in a database read-only transaction
@@ -32,7 +32,7 @@ jobs:
             < scripts/prod_ops/journal_integrity_snapshot.py
           docker cp "$APP_CONTAINER:$AUDIT_OUTPUT" "$RUNNER_TEMP/journal-integrity/snapshot.enc.json"
           sha256sum "$RUNNER_TEMP/journal-integrity/snapshot.enc.json"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: journal-integrity-${{ github.run_id }}
           path: ${{ runner.temp }}/journal-integrity/

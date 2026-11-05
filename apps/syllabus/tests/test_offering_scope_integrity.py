@@ -8,6 +8,7 @@ from apps.registrar.semester_readiness import approved_syllabus_offering_ids
 from apps.syllabus import services
 from apps.syllabus.models import Syllabus
 from apps.syllabus.services import sharing
+from apps.syllabus.services.offering_scope import validate_offering_scope
 from apps.syllabus.services.week_rows import approved_week_rows_for_offerings
 from apps.syllabus.state_machine import TransitionDenied
 from apps.syllabus.tests.reuse_fixtures import actor, approved_syllabus, build_world
@@ -108,3 +109,40 @@ def test_stale_editor_cannot_create_dossier_after_course_reassignment(world, fie
             chair_unit=world["chair"],
         )
     assert not Syllabus.objects.filter(offering=offering).exists()
+
+
+@pytest.mark.parametrize("field", ["org", "subject", "period"])
+@pytest.mark.parametrize("representation", [str, lambda value: value.hex.upper()])
+def test_scope_accepts_saved_uuid_as_string(world, field, representation):
+    world[field].pk = representation(world[field].pk)
+    validate_offering_scope(
+        organization=world["org"],
+        subject=world["subject"],
+        period=world["period"],
+        offering=world["offerings"]["o2"],
+    )
+
+
+def test_draft_accepts_saved_period_with_string_uuid(world):
+    world["period"].pk = str(world["period"].pk)
+    syllabus, version = services.create_draft(
+        organization=world["org"],
+        subject=world["subject"],
+        period=world["period"],
+        offering=world["offerings"]["o2"],
+        actor=actor(world),
+        chair_unit=world["chair"],
+    )
+    syllabus.refresh_from_db()
+    assert str(syllabus.period_id) == world["period"].pk
+    assert version.syllabus_id == syllabus.pk
+
+
+@pytest.mark.parametrize("field", ["subject", "period", "offering"])
+def test_scope_rejects_foreign_tenant_even_with_string_uuid(world, field):
+    foreign = build_world("foreign-syllabus-scope")
+    values = {"subject": world["subject"], "period": world["period"], "offering": world["offerings"]["o2"]}
+    values[field] = foreign["offerings"]["o2"] if field == "offering" else foreign[field]
+    world["org"].pk = str(world["org"].pk)
+    with pytest.raises(TransitionDenied, match="reuse.not_sibling"):
+        validate_offering_scope(organization=world["org"], **values)

@@ -19,9 +19,13 @@ from . import key_corrections as keys
 from .scoring import delivered_question_points
 
 
-@transaction.atomic
+@transaction.atomic(savepoint=False)
 def apply_active_key_corrections(attempt):
-    """Rəsmi bitmiş test cəhdi üçün yeni kredit sayı; təkrar çağırış təhlükəsizdir."""
+    """Rəsmi bitmiş test cəhdi üçün yeni kredit sayı; təkrar çağırış təhlükəsizdir.
+
+    ``mark_finished`` tranzaksiyası hook xətasını da geri qaytarır; ayrıca
+    savepoint lazım deyil. Müstəqil çağırış yenə öz tranzaksiyasını açır.
+    """
     exam = attempt.exam
     if attempt.is_trial or attempt.status not in ATTEMPT_FINISHED_STATUSES or exam.exam_type != "test":
         return 0

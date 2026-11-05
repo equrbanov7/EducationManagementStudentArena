@@ -18,8 +18,10 @@ bu qeyd və aşağıdakı xüsusi siyahı ilə davam üçün saxlamaq tapşırı
   `2ba4e94c0` (qiymət, apellyasiya və purge qoruması), `97e17dddd` (Solmaz host
   diaqnostikası), `c77f1f6d0` (final zalının bağlanmasında deadlock). Deploy hələ edilməyib.
 - Draft PR: <https://github.com/equrbanov7/EducationManagementStudentArena/pull/204>.
-  İlkin CI-də lint, Docker, secret/security scan və prod-smoke keçib; son commit
-  üçün bütün tələb olunan yoxlamalar ayrıca tamamlanmalıdır.
+  `43dc7af39` üçün CI `41956998936` uğursuz oldu: 48 testdə UUID/mətn müqayisəsi,
+  bir tərcümə kataloqu yoxlaması, bir artıq SQL savepoint cütü və bir workflow
+  versiya şərhi. Digər CI qapıları və CodeQL keçib. Bu dörd səbəb ayrıca düzəldilib;
+  yeni commit üçün bütün tələb olunan yoxlamalar tamamlanmalıdır.
 
 ## Hazırlanan proqram düzəlişləri
 
@@ -59,6 +61,12 @@ bu qeyd və aşağıdakı xüsusi siyahı ilə davam üçün saxlamaq tapşırı
   düzəlişdən sonra final-center/completion/yeni yarış üzrə 107 test keçib.
 - Solmaz host diaqnostikası və private transport: 61 test keçib.
 - Əlavə resit/QB/fast summary uyğunluğu: 22 test; Excel ixracı və tələbə kartı: 26 test keçib.
+- CI-də tapılan UUID/fixture və workflow regressiyaları düzəldildikdən sonra 507 test,
+  tərcümə kataloqu üzrə 17 test keçib. Artıq savepoint çıxarıldıqdan sonra 29 test
+  keçib: 28 SQL sorğu həddi dəyişməyib, rollback və real paralel yarışlar qorunur.
+- Şifrəli çıxış/sxem üzrə 3 test real PostgreSQL read-only yazı rəddini, müvəqqəti
+  test açarı ilə açılan payload/hash-i, ciphertext bütövlüyünü, 0600 fayl icazəsini,
+  mətnin loga sızmamasını və mövcud çıxışın əzilməməsini yoxlayır.
 - Bu dəstlərin bəziləri kəsişir; saylar unikal test cəmi kimi toplanmamalıdır.
 - Modul ölçüsü, modul/public API sərhədləri, bütün repo black/isort/flake8,
   `manage.py check` və `makemigrations --check --dry-run` keçib. Son əlavə dəyişikliklərdən
@@ -95,24 +103,30 @@ avtomatik düzəldiyini sübut etmir.
   onlardan 30-da tək məzmun ailəsi var. Fəaliyyət saatı, kafedra, dil, təsdiq, müəllim
   və hədəfin boşluğu təzə məlumatla yenidən təsdiqlənmədən bağlama edilməməlidir.
 - Başqa müəllifin 136 mənbəsi öz sillabusunun paylaşılması qaydasına avtomatik daxil edilmir.
-- Təzə metadata yalnız 4 hədəfdə müşahidə edilən müəllim/fənn/dövr/sektor/plan
-  uyğunluğunu saxlayır. Onların 8 sabit content batch-i read-only yenidən çıxarılır;
-  təzə body/chair/approval/program yoxlanmadan share edilməməlidir.
+- Dörd hədəfin səkkiz sabit content batch-i yenidən çıxarılıb: hədəflər hələ boşdur,
+  altı mənbənin məzmunu dəyişməyib. Üç hədəf müşahidə edilən texniki uyğunluğu keçir,
+  amma rəsmi proqram/effektiv kafedra və müəllim paylaşımının əsası açıqdır.
+  Riyazi məntiq mənbəsində plan 30 mühazirə + 15 seminar, həftəlik mövzular isə
+  0 mühazirə + 45 seminardır; bu mənbə düzəlmədən paylaşılmamalıdır.
 - Aida-nın köhnə planındakı boş sayılan jurnalda indi 11 dərs/241 qiymət var;
   köhnə planın qoruma şərtləri pozulur. Yeni akademik tarixçəni qoruyan plan lazımdır.
 - Solmaz dry-run `41954695528` `solmaz_host_refused` ilə rədd olundu. Şifrəli
-  faylın lokal hash-i düzgündür; runner mərhələsi üçün məhdud təhlükəsiz diaqnostika
-  hazırdır. Deploy-dan sonra native dry-run təkrarlanmalıdır. Mənbə, head, actor
-  və baseline qapıları zəiflədilməməlidir.
+  faylın lokal hash-i düzgündür. GitHub repository və production environment
+  secret siyahılarında `STAFF_PLAN_KEY` yoxdur. Mövcud yerli açar həmin sabit
+  ciphertext-ni gözlənilən plaintext hash ilə açır. Yalnız production environment
+  secret kimi bərpası üçün istifadəçidən ayrıca təsdiq gözlənilir; hələ dəyişiklik
+  edilməyib. Native dry-run təkrarlanmalıdır; mənbə/head/actor/baseline qapıları
+  zəiflədilməməlidir. Açarın məzmunu Git və hesabatlara daxil edilmir.
 - Yanlış fənn adları, boş şablon mövzuları və həqiqi sillabussuz fənlər üçün rəsmi
   fənn/yük/sillabus mənbəsi lazımdır; məzmun uydurulmamalıdır.
 - Paralel qeydiyyat, 9/10 ziddiyyəti və təkrar QB namizədlərində düzgün saxlanacaq
   jurnal və real davamiyyət mənbəyi təsdiqlənməlidir. Maksimum bal seçmək, QB-ni
   silmək və ya artırmaq şübhədən avtomatik nəticə çıxarmaq deyil.
-- İki inactive jurnalın absence cache-i üçün əlavə read-only capture aparılır.
+- İki inactive jurnal üçün təzə read-only capture tamamlanıb: cache 10/12,
+  cari raw xanalardan hesab 0/0-dır; gələn/gedən supersession qeydi yoxdur.
   Birinci qeyd 2 noyabrda 5 real absent xana/10 saat ilə uyğun idi, sonra dərslər
-  silinib. Cari raw=0 olması tarixi qayıbın səhv olduğunu sübut etmir; silinmə və
-  köçürmə qərarının authority izi tapılmadan counter avtomatik sıfırlanmamalıdır.
+  silinib. Cari raw=0 tarixi qayıbın səhv olduğunu sübut etmir; silinmə/köçürmə
+  qərarının izi və ikinci sayğacın ilkin mənbəyi tapılmadan sıfırlanmamalıdır.
 - Günel/233KE/Optimallaşdırma və Claude-un MR-159/165/167/203, MR-171/110, MR-183
   işləri təkrar tətbiq edilmir; Claude bitirdikdən sonra nəticə yenidən yoxlanır.
 
@@ -129,6 +143,9 @@ avtomatik düzəldiyini sübut etmir.
 - `metadata-refresh-delta.*`: 02:08:55Z metadata müqayisəsi; raw hüceyrə auditi deyil.
 - `lineage-*-dispatch.json`: canlı dry-run/apply/post-check qəbzləri.
 - `four-target-syllabus-export-queue.json`: 4 hədəf üçün 8 dəqiq content batch girişi.
+- `four-target-fresh-revalidation.json` və `two-qb-fresh-revalidation.json`:
+  10/10 təzə ixrac, 57 hash yoxlaması, 0 yoxlama xətası; mənbə qərarını əvəz etmir.
+- `checkpoint-current.json`: ən yeni commit, CI, açıq suallar və istifadəçi hesabatı.
 - `../question-3600-review/global-correction-readiness.*`: tətbiq və geri alma proseduru.
 
 Son UI yoxlamasında Mac kilidli idi; Claude-un hazırkı idle vəziyyəti görünmədi.
