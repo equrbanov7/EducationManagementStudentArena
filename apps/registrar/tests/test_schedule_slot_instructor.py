@@ -475,8 +475,10 @@ class SchedulePageBudgetTest(SlotInstructorBase):
         with CaptureQueriesContext(connection) as overridden:
             response = client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(plain, "Verilənlər bazası")
-        self.assertContains(response, "Verilənlər bazası")  # A-nın fənninin seminarı indi B-nin cədvəlində
+        # Seminar B-nin dərs yükündədir: müəllimi boş seminar slotu da B-nin cədvəlinə düşür (sahib 2026-11-05 —
+        # «yükündə yoxdursa görməsin»; sahib A-nın seminar yükü yoxdur), slota yazılandan sonra da.
+        self.assertContains(plain, "Verilənlər bazası")
+        self.assertContains(response, "Verilənlər bazası")
         # «Jurnalı aç» yalnız B-nin öz jurnalına — A-nın jurnalı B üçün açılmır.
         self.assertContains(response, reverse("registrar:journal_detail", args=[self.offering_b.pk]))
         self.assertNotContains(response, reverse("registrar:journal_detail", args=[self.offering.pk]))
