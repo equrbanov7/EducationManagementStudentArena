@@ -9,6 +9,8 @@
   «İnformasiya texnologiyaları (ixtisas üzrə)» jurnallarına birləşir (``Merger``, keep) — mühazirə 233 K / 233 İT ilə
   eyni fənndə axın olur. Müəllimin xahişi ilə 29.10 seminarları (233 K, 233 İT — həmin gün aralıq imtahanı) silinir;
   hər silinən dərsin xanaları auditdə saxlanır.
+* **MR-225** (Kəmalə Dadaşova): köhnə 14721 / 14261 jurnallarının dərsləri köçürmədə eyni qrup + dövrün, amma başqa adlı
+  (yükdə olmayan) fənn jurnallarına düşüb; ``Merger`` (keep) ilə yükdəki cari jurnallara birləşir.
 
 İdempotentdir: ikinci qaçışda heç nə yazılmır (``*_already``/``*_missing`` sayılır). Şəxsi məlumat yoxdur — YALNIZ id-lər.
 """
@@ -91,6 +93,21 @@ MR218_DELETE_LESSONS = (
     ("4a94df3a-72ac-49f1-9517-7c256beb8676", "6b1419bd-c247-4137-98e0-13f2c653bc61"),
 )
 MR218_LESSON_DATE = "2026-10-29"
+
+MR225_PAIRS = (
+    # «Qarabağ regionunda kənd turizmi …» (köhnə 14721-in dərsləri) → «Qarabağ regionunda turizminin inkişaf perspektivləri».
+    {
+        "source": "3faed019-e67c-4efb-9552-25b8eb5788be",
+        "target": "3757d42a-165d-4301-996c-53f8c5cdb543",
+        "target_marks": "keep",
+    },
+    # «Beynəlxalq turizm sferasında risklər və sığortalanma» (köhnə 14261) → «Beynəlxalq turizm sferasında risklər».
+    {
+        "source": "8683b730-002b-4d4a-99c9-be6aa0770924",
+        "target": "4dbac766-8f26-455e-b8c3-646eca67b002",
+        "target_marks": "keep",
+    },
+)
 MR218_REASON = "MR-000218: müəllimin xahişi — 29.10 aralıq imtahanı günü, seminar dərsi yazılmamalı idi"
 
 
@@ -206,3 +223,4 @@ def fix_mr218(*, organization, actor, counts) -> None:
 def run(*, organization, actor, counts) -> None:
     fix_mr209(organization=organization, actor=actor, counts=counts)
     fix_mr218(organization=organization, actor=actor, counts=counts)
+    Merger(organization=organization, actor=actor, counts=counts).run([dict(pair) for pair in MR225_PAIRS])

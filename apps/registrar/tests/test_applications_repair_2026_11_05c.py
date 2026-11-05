@@ -60,6 +60,7 @@ class ApplicationsRepairCTest(SubgroupFixture, TestCase):
             mock.patch.object(repair, "MR209_ING_OFFERING", str(self.physics_g1.pk)),
             mock.patch.object(repair, "MR209_DROP", ((str(self.old.pk), (str(self.wrong.pk),)),)),
             mock.patch.object(repair, "MR218_PAIRS", ()),
+            mock.patch.object(repair, "MR225_PAIRS", ()),
             mock.patch.object(repair, "MR218_DELETE_LESSONS", ((str(self.drop_lesson.pk), str(self.history_g1.pk)),)),
         ]
         for patch in patches:
