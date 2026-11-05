@@ -16,6 +16,8 @@ Hər sinif üçün (sinif başına atomik, idempotent — ``name`` = sinif kodu,
 * yekun qiyməti / imtahan balı / bağlı jurnalı olan tələbəyə toxunulmur (sayılır — RİM ayrıca baxır);
 * kohortun cədvəli: müəllimin mənbə jurnallarındakı sinfin başlama saatlı slotları (gün, saat, həftə, növ);
   siyahıda otaq varsa o yazılır;
+* siyahıda olmayan «qalan» tələbələr — :mod:`.language_cohort_leftovers_2026_11_06` (başqa fəndə iştirakı varsa
+  «Fəndən azad», yoxdursa dondurma);
 * sonda AKTİV tələbəsi qalmayan köhnə səviyyə jurnalları deaktiv olunur (dərsləri və xanaları silinmir).
 
 ``undo`` — :func:`undo`: kohortlar deaktiv, köhnə qeydiyyatlar bərpa, deaktiv olunan jurnallar yenidən aktiv.
@@ -70,6 +72,9 @@ class Rebuild:
         for row in self.plan["classes"]:
             with transaction.atomic():
                 self._class(row)
+        from .language_cohort_leftovers_2026_11_06 import settle
+
+        settle(self)
         with transaction.atomic():
             self._deactivate_empty_sources()
 
