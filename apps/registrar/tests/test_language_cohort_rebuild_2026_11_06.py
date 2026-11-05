@@ -179,6 +179,17 @@ class LanguageCohortRebuildTest(_GuestRosterBase):
             scores = sorted(int(m.score) for m in LessonMark.objects.filter(lesson__offering=cohort.offering))
         self.assertEqual(scores, [8, 9])
 
+    def test_listed_student_of_a_class_without_teacher_is_not_a_leftover(self):
+        from apps.registrar.models import StudentAcademicRecord
+
+        self.plan["classes"].append(
+            dict(self.plan["classes"][0], code="E-2", teacher=None, students=[self.far_student.pk])
+        )
+        counts = self._run()
+        self.assertEqual((counts["leftover_listed_waiting_kept"], counts["leftover_students_frozen"]), (1, 0))
+        with bypass_rls():
+            self.assertEqual(StudentAcademicRecord.objects.get(student=self.far_student).status, "enrolled")
+
     def test_undo_restores_home_journals(self):
         self._run()
         counts = self._run(rebuild.undo)
