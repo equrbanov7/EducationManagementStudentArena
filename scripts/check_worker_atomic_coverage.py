@@ -100,6 +100,7 @@ INTENTIONAL_EXEMPTIONS = {
     "apps/registrar/management/commands/set_practical_offerings.py",
     # 2026-11-05 Psixologiya dublikatları: DB işi `merge_duplicate_student`-dədir (call_command; rls_worker_atomic orada).
     "apps/accounts/management/commands/merge_psychology_duplicates_20261105.py",
+    "apps/accounts/management/commands/merge_psychology_duplicates_20261106.py",
     # 2026-11-05 RİM müraciətləri (MR-190/161/110): sabit cütlər, eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/repair_applications_20261105.py",
     "apps/registrar/management/commands/repair_applications_20261105c.py",

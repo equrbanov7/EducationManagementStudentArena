@@ -306,6 +306,8 @@
 #       (conflict_kept). `roster_tag` = `superseded-marks-…` → plan.json.enc (lokal qurulmuş, YALNIZ id-lər; boş =
 #       canlı hesablama), `batch` = `supmarks-…` + apply → geri qaytarma. Sonra `legacy_repair_empty_lessons`
 #       (`date_from=2026-09-15`) boşalan sütunları silir. Loga YALNIZ saylar.
+#   merge_psychology_duplicates_20261106 — Psixologiya 1-ci kurs (sahib 2026-11-06): 11-05-də qalan 4 cüt (3-ü
+#       `allow_login` — tələbə indi ATİS hesabı ilə girir). Eyni merge_duplicate_student yolu. Defolt dry-run.
 #   merge_psychology_duplicates_20261105 — Psixologiya 1-ci kurs (sahib 2026-11-05): 49 delta→ATİS dublikat cütü koddadır,
 #       iş merge_duplicate_student-dədir (eyni qapılar, stmerge-… paketi, undo). Defolt dry-run. Loga YALNIZ saylar.
 #   merge_duplicate_student — köhnə sistem deltasının yaratdığı ikinci TƏLƏBƏ hesabı → əsas hesab (RİM 2026-10-27,
@@ -432,6 +434,7 @@ on:
           - relocate_superseded_marks
           - merge_duplicate_student
           - merge_psychology_duplicates_20261105
+          - merge_psychology_duplicates_20261106
           - relocate_twin_enrollment
           - merge_twin_offerings
           - repair_applications_20261105
@@ -1514,7 +1517,7 @@ jobs:
                 args+=(--file "/tmp/superseded_marks_${GITHUB_RUN_ID}.json")
               fi
               ;;
-            merge_psychology_duplicates_20261105)
+            merge_psychology_duplicates_20261105|merge_psychology_duplicates_20261106)
               # Sahib 2026-11-05: Psixologiya 1-ci kurs dublikat hesabları — sabit cütlər koddadır (plan faylı/secret yoxdur).
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
@@ -2203,7 +2206,7 @@ jobs:
               exit "$status"
             fi
             rm -f "$RUNNER_TEMP/out.log"
-          elif [ "$COMMAND" = "relocate_superseded_marks" ] || [ "$COMMAND" = "merge_duplicate_student" ] || [ "$COMMAND" = "merge_psychology_duplicates_20261105" ]; then
+          elif [ "$COMMAND" = "relocate_superseded_marks" ] || [ "$COMMAND" = "merge_duplicate_student" ] || [ "$COMMAND" = "merge_psychology_duplicates_20261105" ] || [ "$COMMAND" = "merge_psychology_duplicates_20261106" ]; then
             # Loga YALNIZ «superseded_marks: / student_merge: açar=say …» sətirləri və rədd kodu (əmrlər ad çap etmir).
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^(superseded_marks|student_merge): [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true

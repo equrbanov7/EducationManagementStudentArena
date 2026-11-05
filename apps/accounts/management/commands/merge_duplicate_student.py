@@ -56,12 +56,13 @@ class Command(BaseCommand):
         undo = (options["undo"] or "").strip()
         if undo and not BATCH_RE.match(undo):
             raise CommandError("bad_batch")
-        pairs = []
+        pairs, allow_login = [], frozenset()
         if not undo:
             if not options["file"]:
                 raise CommandError("file_required")
             try:
                 pairs = merge_plan.load(options["file"])
+                allow_login = merge_plan.load_allow_login(options["file"])
             except merge_plan.MergePlanError as exc:
                 raise CommandError(str(exc)) from None
         mode = "apply" if options["apply"] else "dry_run"
@@ -73,7 +74,7 @@ class Command(BaseCommand):
                 if undo:
                     counts = merge_apply.undo(organization, undo, actor=actor)
                 else:
-                    counts = merge_apply.execute(organization, pairs, actor=actor, batch=batch)
+                    counts = merge_apply.execute(organization, pairs, actor=actor, batch=batch, allow_login=allow_login)
                 if not options["apply"]:
                     raise _DryRunRollback()
         except _DryRunRollback:
