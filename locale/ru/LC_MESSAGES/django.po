@@ -114268,3 +114268,11 @@ msgstr "Сначала выберите группу…"
 msgctxt "accounts.subgroup_students"
 msgid "Əvvəlki"
 msgstr "Предыдущая"
+
+msgctxt "registrar.journal"
+msgid "Mənim jurnallarım"
+msgstr "Мои журналы"
+
+msgctxt "registrar.journal"
+msgid "hamısını göstər"
+msgstr "показать все"

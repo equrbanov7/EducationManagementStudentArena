@@ -285,6 +285,7 @@ def journal_list_context(user, request=None) -> dict:
         "journal_is_broad": is_broad,
         "journal_teaching_view": teaching_view,
         "journal_teacher_mirrored": mirrored is not None,
+        "journal_my_teacher_id": str(user.pk) if is_broad else "",  # «Mənim jurnallarım» (sahib 2026-11-05)
         "journal_teachers": teacher_choices,
         "journal_selected_teacher": selected_teacher,
         "journal_groups": group_choices,
