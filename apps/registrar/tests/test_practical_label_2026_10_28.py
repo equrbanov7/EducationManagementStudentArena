@@ -339,3 +339,19 @@ class DesignOnlyPracticalLabelTest(PracticalBase):
             self.assertEqual(uncached.get_kind_display(), cached.get_kind_display())
             self.assertEqual(uncached.hours, cached.hours)
             self.assertEqual(uncached.kind, "seminar")
+
+
+class LanguageChairPracticalLabelTest(PracticalBase):
+    """Sahib 2026-11-05 (MR-198): dil kafedralarının fənlərində də «Praktiki məşğələ» düyməsi aktivdir."""
+
+    def test_language_chair_subject_gets_toggle_and_label(self):
+        with bypass_rls(), translation.override("az"):
+            self.chair.name = "Xarici dillər kafedrası"
+            self.chair.save(update_fields=["name"])
+            offering = CourseOffering.objects.get(pk=self.offering.pk)
+            self.assertTrue(practical_toggle.can_toggle(self.owner, offering))
+        self.flag()
+        with bypass_rls(), translation.override("az"):
+            lesson = Lesson.objects.get(pk=self.seminar.pk)
+            self.assertEqual(lesson.get_kind_display(), "Praktiki məşğələ")
+            self.assertEqual(lesson.kind, "seminar")
