@@ -32,14 +32,16 @@ def can_toggle(user, offering) -> bool:
     """Mərkəzi ``workload.distribute`` icazəsi və açılışın kafedra əhatəsi."""
     from .design_practical_scope import is_design_offering
 
-    if offering is None or not getattr(user, "is_authenticated", False) or not is_design_offering(offering):
+    if offering is None or not getattr(user, "is_authenticated", False):
         return False
     from .journal_scope import permission_scope_for
     from .models import CourseOffering
     from .offering_chairs import offering_chairs
 
+    # İcazə ƏVVƏL: kafedra yoxlaması (kafedrasız dil fənnində rəsmi yük kafedrası — əlavə sorğular) yalnız
+    # düyməni görə biləcək aktor üçün işləsin; adi müəllimin jurnal səhifəsinə sorğu əlavə olunmasın.
     scope = permission_scope_for(user, offering.organization, "workload.distribute")
-    if not scope.has_structure_access:
+    if not scope.has_structure_access or not is_design_offering(offering):
         return False
     if scope.is_org_wide:
         return True
