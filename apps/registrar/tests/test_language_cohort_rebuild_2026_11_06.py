@@ -138,6 +138,33 @@ class LanguageCohortRebuildTest(_GuestRosterBase):
         self.assertEqual((again["cohorts_existing"], again["students_already_placed"]), (1, 2))
         self.assertEqual(again["students_placed"], 0)
 
+    def test_unlisted_student_is_frozen_without_attendance_and_released_with_it(self):
+        from apps.registrar.models import StudentAcademicRecord
+
+        counts = self._run()
+        self.assertEqual(counts["leftover_students_frozen"], 1)
+        with bypass_rls():
+            record = StudentAcademicRecord.objects.get(student=self.far_student)
+            self.assertEqual((record.status, record.is_active), ("academic_leave", False))
+
+    def test_unlisted_student_who_attends_other_subjects_is_released_from_the_level_only(self):
+        from apps.registrar.models import StudentAcademicRecord
+
+        with bypass_rls():
+            other = Enrollment.objects.filter(student=self.far_student).exclude(offering__subject=self.history).first()
+            lesson = Lesson.objects.create(organization=self.org, offering=other.offering, date=DAY, kind="seminar")
+            LessonMark.objects.create(organization=self.org, lesson=lesson, enrollment=other, status="present")
+        counts = self._run()
+        self.assertEqual((counts["leftover_students_released"], counts["leftover_students_frozen"]), (1, 0))
+        with bypass_rls():
+            self.assertEqual(StudentAcademicRecord.objects.get(student=self.far_student).status, "enrolled")
+            self.assertFalse(
+                Enrollment.objects.filter(
+                    student=self.far_student, offering__subject=self.history, status="enrolled"
+                ).exists()
+            )
+            self.assertEqual(Enrollment.objects.get(pk=other.pk).status, "enrolled")
+
     def test_undo_restores_home_journals(self):
         self._run()
         counts = self._run(rebuild.undo)
