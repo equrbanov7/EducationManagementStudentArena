@@ -31,6 +31,7 @@ class DashboardJournalLinkTest(SlotInstructorBase):
         today = self.today.isoweekday()
         with bypass_rls():
             self._seminar_load(self.teacher_b)  # bölgüsü var — slot onun cədvəlindədir (2026-11-05)
+            self._lecture_load(self.teacher_b, self.offering_b)  # öz jurnalının mühazirəsi də yükündədir
             self._slot(self.offering, weekday=today, kind=SlotKind.SEMINAR, instructor=self.teacher_b)
             self._slot(self.offering_b, weekday=today, start="13:35", end="15:05")
             slots = schedule.get_teacher_schedule(organization=self.org, teacher=self.teacher_b, period=self.period)

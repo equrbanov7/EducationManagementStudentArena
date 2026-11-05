@@ -18,6 +18,7 @@ from apps.exams.models import ExamRoom
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import gradebook, journal_activation, schedule, services
 from apps.registrar.models import Enrollment, Lesson, LessonKind, ScheduleSlot, SlotKind, Subject, WeekType
+from apps.registrar.tests.journal_load_fixtures import seed_current_journal_load
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
 
@@ -341,6 +342,8 @@ class JournalActivationTest(TestCase):
         from apps.accounts.views.profile._sections import dashboard_lessons
 
         with bypass_rls():
+            # Müəllim slotu yalnız həmin növdə yükü olanda görür (sahib 2026-11-05).
+            seed_current_journal_load(self.offering, kinds=("lecture", "seminar"))
             slots = schedule.get_teacher_schedule(organization=self.org, teacher=self.teacher, period=self.period)
         teacher_card = dashboard_lessons.build(
             slots, period=self.period, today=self.today, now=None, with_group=True, journal_links=True

@@ -8,6 +8,7 @@ from django.test import TestCase
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import schedule, services
 from apps.registrar.models import ScheduleSlot, SlotKind, Subject, WeekType
+from apps.registrar.tests.journal_load_fixtures import seed_current_journal_load
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
 
@@ -163,6 +164,7 @@ class ScheduleServiceTest(TestCase):
 
     def test_group_and_teacher_schedule_and_grid(self):
         with bypass_rls():
+            seed_current_journal_load(self.off1)  # müəllim slotu yalnız mühazirə yükü ilə görür (sahib 2026-11-05)
             schedule.create_slot(offering=self.off1, weekday=1, start_time=T9, end_time=T1030)
             schedule.create_slot(offering=self.off1, weekday=3, start_time=T9, end_time=T1030)
             group_slots = schedule.get_group_schedule(organization=self.org, group=self.group, period=self.period)
