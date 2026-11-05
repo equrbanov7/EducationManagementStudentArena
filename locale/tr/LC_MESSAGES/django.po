@@ -113467,6 +113467,10 @@ msgctxt "registrar.journal"
 msgid "hamısını göstər"
 msgstr "tümünü göster"
 
+msgctxt "exams.view.question_bank.warning"
+msgid "multiple_correct"
+msgstr "Birden fazla doğru cevap işaretlenmiş ({labels}) — ara sınav ve final sınavında sorunun yalnızca bir doğru cevabı olmalıdır."
+
 msgctxt "accounts.syllabus"
 msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
 msgstr "Ana ve ek kaynakça alanlarının her ikisi doldurulmalıdır. Kaynakları istediğiniz biçimde yazabilirsiniz — alt alta, virgülle ya da tek satırda."

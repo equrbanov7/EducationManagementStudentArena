@@ -23,6 +23,7 @@ from apps.exams.services.bulk_workbench import (
     exam_question_fp_map,
     parse_points_payload,
     parse_selected_indices,
+    requires_single_answer,
 )
 from apps.exams.services.import_media import bind_import_manifest, clear_stash
 from apps.exams.services.language_variants import (
@@ -151,7 +152,9 @@ def exam_language_manager(request, slug):
                     )
 
             analysis = analyze_mcq_bulk(
-                raw_text, existing_fp_map=exam_question_fp_map(exam, language=selected_language)
+                raw_text,
+                existing_fp_map=exam_question_fp_map(exam, language=selected_language),
+                single_answer=requires_single_answer(exam),
             )
             parsed = analysis["parsed"]
 

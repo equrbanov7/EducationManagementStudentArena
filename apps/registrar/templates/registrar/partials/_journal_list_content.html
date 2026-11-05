@@ -202,7 +202,9 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
                         <div class="jl-subject-sub">
                             <span class="jl-code">{{ offering.subject.code }}</span>
                             {% if journal_is_broad %}<span aria-hidden="true">·</span>
-                            <span class="jl-teacher">{% if offering.instructor %}{{ offering.instructor.get_full_name|default:offering.instructor.username }}{% else %}{% trans "Vakant" context "registrar.journal" %}{% endif %}</span>{% endif %}
+                            {% comment %}Cari bölgü (sahib 2026-11-05): müəllimin öz görünüşü ilə eyni mənbə — «müəllim (növ)».{% endcomment %}
+                            {% if offering.load_teachers %}{% for t in offering.load_teachers %}<span class="jl-teacher">{{ t.name }}{% if t.kinds and offering.load_teachers|length > 1 %} <span class="jl-teacher__kinds">({{ t.kinds }})</span>{% endif %}</span>{% if not forloop.last %}<span aria-hidden="true">·</span>{% endif %}{% endfor %}
+                            {% else %}<span class="jl-teacher">{% if offering.instructor %}{{ offering.instructor.get_full_name|default:offering.instructor.username }}{% else %}{% trans "Vakant" context "registrar.journal" %}{% endif %}</span>{% endif %}{% endif %}
                             {% if offering.is_evening %}<span aria-hidden="true">·</span> <span>{% trans "axşam (21:30-dək)" context "registrar.journal" %}</span>{% endif %}
                         </div>
                         {% include "registrar/partials/_journal_teacher_record.html" %}

@@ -113567,6 +113567,10 @@ msgctxt "registrar.journal"
 msgid "hamısını göstər"
 msgstr "hamısını göstər"
 
+msgctxt "exams.view.question_bank.warning"
+msgid "multiple_correct"
+msgstr "Birdən çox düzgün cavab işarələnib ({labels}) — midterm və final imtahanında sualın yalnız bir düzgün cavabı olmalıdır."
+
 msgctxt "accounts.syllabus"
 msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
 msgstr "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."

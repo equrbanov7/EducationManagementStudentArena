@@ -114277,6 +114277,10 @@ msgctxt "registrar.journal"
 msgid "hamısını göstər"
 msgstr "показать все"
 
+msgctxt "exams.view.question_bank.warning"
+msgid "multiple_correct"
+msgstr "Отмечено несколько правильных ответов ({labels}) — в мидтерме и финальном экзамене у вопроса должен быть ровно один правильный ответ."
+
 msgctxt "accounts.syllabus"
 msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
 msgstr "Нужно заполнить оба поля — основную и дополнительную литературу. Источники можно записывать в любой форме: каждый с новой строки, через запятую или в одну строку."

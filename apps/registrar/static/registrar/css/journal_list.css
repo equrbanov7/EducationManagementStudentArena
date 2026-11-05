@@ -41,6 +41,7 @@
 .jl-mine:hover { border-color: var(--ems-primary-600); color: var(--ems-primary-700); text-decoration: none; }
 .jl-mine.is-active { background: var(--ems-primary-600); border-color: var(--ems-primary-600); color: var(--ems-neutral-0); }
 .jl-mine__hint { font-weight: 600; opacity: .85; }
+.jl-teacher__kinds { color: var(--ems-text-muted); font-weight: 600; }
 
 /* Stepper — daha yüngül (kölgəsiz, tokenli) */
 .jl-page .jd2-stepper { border-radius: var(--ems-r-2xl); box-shadow: var(--ems-sh-card); border-color: var(--ems-border); padding: 12px 16px; }

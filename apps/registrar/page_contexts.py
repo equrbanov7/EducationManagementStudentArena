@@ -25,15 +25,11 @@ def _profile_section_prefix(section: str) -> str:
     return f"{reverse('accounts:profile')}?section={section}&"
 
 
-def attach_kind_labels(offerings, selected_kind: str = "") -> None:
-    """Açılışlara dərs tipi etiketi + axşam bayrağı bağlayır (toplu sorğular).
+def attach_kind_labels(offerings, selected_kind: str = "", *, load_teachers=False) -> None:
+    """Açılışlara dərs tipi etiketi + axşam bayrağı (+ geniş siyahıda cari bölgü) bağlayır; yalnız səhifə dilimi.
 
-    Yalnız səhifə dilimi üçün çağırılır (QA 2026-09-05 P2-18).
-
-    ``selected_kind`` verilibsə etiket YALNIZ həmin tipi göstərir (sahib tələbi
-    2026-09-06): «Seminar» pilləsi seçiləndə sətirdə «Mühazirə · Seminar»
-    yazılırdı, yəni süzgəcin nə etdiyi görünmürdü. ``slot_kinds`` isə TAM qalır —
-    jurnalın içindəki tip seçicisi bütün mövcud tipləri göstərməlidir.
+    ``selected_kind`` → etiket YALNIZ həmin tip (sahib 2026-09-06: süzgəcin nə etdiyi görünsün); ``slot_kinds``
+    isə TAM qalır — jurnalın içindəki tip seçicisi bütün mövcud tipləri göstərməlidir.
     """
     from apps.registrar.journal_planned_kinds import planned_kinds_by_offering
     from apps.registrar.models import Lesson, ScheduleSlot, SlotKind
@@ -63,9 +59,13 @@ def attach_kind_labels(offerings, selected_kind: str = "") -> None:
         kinds = sorted(kinds_by_offering.get(offering.id, ()), key=lambda k: kind_order.get(k, len(kind_order)))
         offering.slot_kinds = kinds
         shown = [k for k in kinds if k == selected_kind] if selected_kind else kinds
-        labels = dict(kind_choices(offering, kind_labels))  # «praktiki» açılış: seminar → «Praktiki məşğələ»
+        labels = offering.kind_labels_map = dict(kind_choices(offering, kind_labels))  # praktiki: seminar → etiket
         offering.kind_label = " · ".join(str(labels[k]) for k in shown) if shown else ""
         offering.is_evening = offering.id in evening_offerings
+    if load_teachers:  # «müəllim — dərs növü» cari paylardan (sahib 2026-11-05; journal_list_load_teachers)
+        from apps.registrar.journal_list_load_teachers import attach as attach_load_teachers
+
+        attach_load_teachers(offerings, only_teacher_id=None if load_teachers is True else load_teachers)
 
 
 def journal_list_context(user, request=None) -> dict:
@@ -252,7 +252,7 @@ def journal_list_context(user, request=None) -> dict:
     for offering in page_offerings:
         offering.student_count = counts_map.get(offering.pk, 0)
     # Dərs tipi etiketləri YALNIZ görünən səhifə üçün (`kind` süzgəci yuxarıda DB tərəfdədir).
-    attach_kind_labels(page_offerings, selected_kind)
+    attach_kind_labels(page_offerings, selected_kind, load_teachers=is_broad and (getattr(mirrored, "pk", 0) or True))
     if not is_broad or mirrored is not None:
         teacher_journal_list.attach(mirrored or user, page_offerings, selected_kind=selected_kind, links=not is_broad)
     from .journal_assignment_sources import attach_history_restore_actions

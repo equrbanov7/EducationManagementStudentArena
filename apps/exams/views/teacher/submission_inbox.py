@@ -306,6 +306,7 @@ def question_submission_detail(request, submission_id):
             organization,
             raw_text=submission.raw_text,
             math_token=submission.import_token,
+            exam_kind=submission.exam_kind,
         )
         context.update(
             _detail_workbench_context(request, organization, sources, submission, context["form_state"], state)

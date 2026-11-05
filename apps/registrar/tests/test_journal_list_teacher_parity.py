@@ -219,3 +219,22 @@ class JournalListTeacherParityTests(TestCase):
             self.assertEqual([pk for pk, _kind in self.rows(mine)], [pk for pk, _kind in rows])
         # Öz jurnalı olmayan geniş aktor da düyməni görür (boş siyahı ilə).
         self.assertEqual(self.context(self.admin, year="")["journal_my_teacher_id"], str(self.admin.pk))
+
+    def test_broad_row_shows_current_split_like_teacher_sees_it(self):
+        """Sahib 2026-11-05: geniş siyahıda bölünmüş jurnal sahibin adı ilə deyil, cari bölgü ilə görünür."""
+        data = self.context(self.admin, year="", q=self.shared.subject.name)
+        row = next(o for o in data["offerings"] if o.pk == self.shared.pk)
+        teachers = {t["name"]: t["kinds"] for t in row.load_teachers}
+        self.assertIn("Seminar", teachers[self.teacher.get_full_name()])
+        owner = teachers[self.other.get_full_name() or self.other.username]
+        self.assertNotIn("Seminar", owner)
+        request = RequestFactory().get("/jurnal/")
+        request.user = self.admin
+        html = render_to_string("registrar/partials/_journal_list_content.html", data, request=request)
+        self.assertIn(self.teacher.get_full_name(), html)
+        # «Mənim jurnallarım» / müəllimin öz siyahısı: sətirdə YALNIZ siyahının sahibi (mühazirəçinin adı yox).
+        mirrored = self.context(self.admin, teacher=self.teacher.pk, year="")
+        own_row = next(o for o in mirrored["offerings"] if o.pk == self.shared.pk)
+        self.assertEqual([t["name"] for t in own_row.load_teachers], [self.teacher.get_full_name()])
+        html = render_to_string("registrar/partials/_journal_list_content.html", mirrored, request=request)
+        self.assertNotIn(self.other.get_full_name() or self.other.username, html)

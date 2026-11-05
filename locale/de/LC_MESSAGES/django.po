@@ -115143,6 +115143,10 @@ msgctxt "registrar.journal"
 msgid "hamısını göstər"
 msgstr "alle anzeigen"
 
+msgctxt "exams.view.question_bank.warning"
+msgid "multiple_correct"
+msgstr "Mehr als eine richtige Antwort markiert ({labels}) — eine Midterm- oder Finalfrage muss genau eine richtige Antwort haben."
+
 msgctxt "accounts.syllabus"
 msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
 msgstr "Sowohl das Feld für Grundlagenliteratur als auch das für weiterführende Literatur muss ausgefüllt werden. Die Quellen können in beliebiger Form angegeben werden — untereinander, durch Kommas getrennt oder in einer Zeile."
