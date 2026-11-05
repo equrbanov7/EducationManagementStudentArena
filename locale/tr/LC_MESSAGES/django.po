@@ -113459,6 +113459,14 @@ msgctxt "accounts.subgroup_students"
 msgid "Əvvəlki"
 msgstr "Önceki"
 
+msgctxt "registrar.journal"
+msgid "Mənim jurnallarım"
+msgstr "Defterlerim"
+
+msgctxt "registrar.journal"
+msgid "hamısını göstər"
+msgstr "tümünü göster"
+
 msgctxt "accounts.syllabus"
 msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
 msgstr "Ana ve ek kaynakça alanlarının her ikisi doldurulmalıdır. Kaynakları istediğiniz biçimde yazabilirsiniz — alt alta, virgülle ya da tek satırda."

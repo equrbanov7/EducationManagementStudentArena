@@ -1,5 +1,6 @@
 """2026-11-03: prod-data-ops dispatches both repairs with validated UUID inputs and count-only output."""
 
+import re
 from pathlib import Path
 
 import yaml
@@ -45,7 +46,9 @@ def test_fix_offering_subject_case_validates_every_uuid():
 
 def test_output_is_count_lines_only():
     text = PATH.read_text()
-    branch = text.split('[ "$COMMAND" = "fix_offering_subject" ]; then', 1)[1].split("          elif", 1)[0]
-    assert "off_schedule_flags|offering_subject_fix" in branch
+    # `elif` sətrinə başqa əmrlər də əlavə oluna bilər (məs. repair_applications_20261105) — sətrin sonundan kəs.
+    head = re.search(r'\[ "\$COMMAND" = "fix_offering_subject" \]( \|\| \[ "\$COMMAND" = "[a-z_0-9]+" \])*; then', text)
+    branch = text[head.end() :].split("          elif", 1)[0]
+    assert "|off_schedule_flags|" in branch and "|offering_subject_fix)" in branch
     assert 'cat "$RUNNER_TEMP/summary.log"' in branch
     assert 'cat "$RUNNER_TEMP/out.log"' not in branch

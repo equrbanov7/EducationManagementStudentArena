@@ -114269,6 +114269,14 @@ msgctxt "accounts.subgroup_students"
 msgid "Əvvəlki"
 msgstr "Предыдущая"
 
+msgctxt "registrar.journal"
+msgid "Mənim jurnallarım"
+msgstr "Мои журналы"
+
+msgctxt "registrar.journal"
+msgid "hamısını göstər"
+msgstr "показать все"
+
 msgctxt "accounts.syllabus"
 msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
 msgstr "Нужно заполнить оба поля — основную и дополнительную литературу. Источники можно записывать в любой форме: каждый с новой строки, через запятую или в одну строку."

@@ -115135,6 +115135,14 @@ msgctxt "accounts.subgroup_students"
 msgid "Əvvəlki"
 msgstr "Zurück"
 
+msgctxt "registrar.journal"
+msgid "Mənim jurnallarım"
+msgstr "Meine Journale"
+
+msgctxt "registrar.journal"
+msgid "hamısını göstər"
+msgstr "alle anzeigen"
+
 msgctxt "accounts.syllabus"
 msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
 msgstr "Sowohl das Feld für Grundlagenliteratur als auch das für weiterführende Literatur muss ausgefüllt werden. Die Quellen können in beliebiger Form angegeben werden — untereinander, durch Kommas getrennt oder in einer Zeile."

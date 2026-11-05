@@ -65,10 +65,14 @@ def row_is_practical(row) -> bool:
     if memo is None and not row.offering_id:
         return False
     if memo is None:
-        from .design_practical_scope import scope_q
         from .models import CourseOffering
 
-        memo = CourseOffering.objects.filter(scope_q(), pk=row.offering_id, seminar_is_practical=True).exists()
+        offering = (
+            CourseOffering.objects.select_related("subject__chair_unit")
+            .filter(pk=row.offering_id, seminar_is_practical=True)
+            .first()
+        )
+        memo = offering is not None and offering_is_practical(offering)
         row.__dict__[_MEMO] = memo
     return memo
 

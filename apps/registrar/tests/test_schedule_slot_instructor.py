@@ -129,6 +129,35 @@ class SlotInstructorBase(TestCase):
             **kw,
         )
 
+    def _seminar_load(self, teacher, offering=None, *, activity="seminar", status="draft"):
+        """``teacher``-ə açılışın (fənn + semestr + qrup) dərs yükü bölgüsü — slot müəllimi «cari» olsun (2026-11-05).
+
+        Bölgüsü, payı və dərsi olmayan slot müəllimi köhnəlmiş sayılır (``schedule_stale_teachers``)."""
+        from apps.workload.models import TeacherAssignment, TeachingTask, TeachingTaskRow
+
+        offering = offering or self.offering
+        chair, _created = OrgUnit.objects.get_or_create(
+            organization=self.org,
+            slug=f"{self.code}-load-{status}",
+            defaults={"parent": self.faculty, "name": f"Kafedra ({status})", "unit_type": OrgUnitType.CHAIR},
+        )
+        task, _created = TeachingTask.objects.get_or_create(
+            organization=self.org, chair=chair, academic_year="2026/2027", defaults={"status": status}
+        )
+        row = TeachingTaskRow.objects.create(
+            organization=self.org,
+            task=task,
+            period=offering.period,
+            subject=offering.subject,
+            seminar_plan=30,
+            seminar_total=30,
+            total_hours=30,
+        )
+        row.groups.set([offering.group])
+        return TeacherAssignment.objects.create(
+            organization=self.org, row=row, teacher=teacher, activity=activity, hours=30
+        )
+
     def _client(self, user):
         client = Client()
         client.force_login(user)
@@ -184,6 +213,7 @@ class TeacherScheduleTest(SlotInstructorBase):
 
     def test_assistant_sees_the_seminar_and_the_owner_does_not(self):
         with bypass_rls():
+            self._seminar_load(self.teacher_b)
             lecture = self._slot(self.offering, weekday=1, start="08:30", end="10:00")
             seminar = self._slot(self.offering, weekday=2, kind=SlotKind.SEMINAR, instructor=self.teacher_b)
             own_b = self._slot(self.offering_b, weekday=3)
@@ -198,6 +228,7 @@ class TeacherScheduleTest(SlotInstructorBase):
 
     def test_teacher_schedule_is_one_query_with_labels(self):
         with bypass_rls():
+            self._seminar_load(self.teacher_b)
             self._slot(self.offering, weekday=1, start="08:30", end="10:00", instructor=self.teacher_b)
             self._slot(self.offering_b, weekday=3)
             with self.assertNumQueries(1):
@@ -431,6 +462,7 @@ class SchedulePageBudgetTest(SlotInstructorBase):
 
     def test_teacher_schedule_page_queries_are_unchanged(self):
         with bypass_rls():
+            self._seminar_load(self.teacher_b)
             self._slot(self.offering_b, weekday=3)
             seminars = [self._slot(self.offering, weekday=day, kind=SlotKind.SEMINAR) for day in (1, 2)]
         client = self._client(self.teacher_b)
