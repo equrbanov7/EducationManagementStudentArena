@@ -182,7 +182,8 @@ def test_embedded_writer_refusal_prevents_native_and_cleans(monkeypatch, tmp_pat
     host, env, events, remote = wire_host(monkeypatch, tmp_path, name, namespace)
     # Deliberately reproduce the missing embedded allowlist while outer validator remains correct.
     monkeypatch.setattr(transport, "WRITER", transport.WRITER.replace("|" + namespace, ""))
-    with pytest.raises(ValueError, match="private_source_write_failed"):
+    error = "solmaz_host_transfer_refused" if name == "reviewed_solmaz_catalog" else "private_source_write_failed"
+    with pytest.raises(ValueError, match=error):
         host.execute({"actor": "fixture-admin", "apply": False}, env)
     assert events == [("writer", 2)]
     assert not remote.exists()
