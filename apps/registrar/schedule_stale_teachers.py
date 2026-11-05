@@ -51,7 +51,7 @@ from django.utils import timezone
 from core.audit import log_actions
 from core.constants import AuditAction
 
-from .models import JournalShare, ScheduleSlot, TeachingHandover
+from .models import JournalShare, LanguageLevelCohort, ScheduleSlot, TeachingHandover
 from .schedule_slot_teachers import _CANCELLED_TASK, _TEACHING_ACTIVITIES
 
 #: Audit səbəbi (qarşısının alınması və təmizləmə əmri eyni mətni yazır).
@@ -75,10 +75,14 @@ def _load(**filters):
 
 
 def owner_current_q() -> Q:
-    """Müəllimi BOŞ slotun jurnal sahibi hələ də bu dərsi aparırmı (modul şərhi — «jurnal sahibinə düşən slot»)."""
+    """Müəllimi BOŞ slotun jurnal sahibi hələ də bu dərsi aparırmı (modul şərhi — «jurnal sahibinə düşən slot»).
+
+    Səviyyə qrupunun (``LanguageLevelCohort``) jurnalı dərs yükü sətrinə bağlı deyil — müəllimi kafedra açıq təyin
+    edir (sahib 2026-11-06), ona görə sahibi həmişə cari sayılır."""
     owner = OuterRef("offering__instructor_id")
     return (
-        Exists(_load(teacher_id=owner, activity=OuterRef("kind")))
+        Exists(LanguageLevelCohort.objects.filter(offering_id=OuterRef("offering_id")))
+        | Exists(_load(teacher_id=owner, activity=OuterRef("kind")))
         | Exists(JournalShare.objects.filter(offering_id=OuterRef("offering_id"), teacher_id=owner, is_active=True))
         | Exists(
             TeachingHandover.objects.filter(
