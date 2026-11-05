@@ -229,6 +229,9 @@
 #       Loga YALNIZ saylar.
 #   repair_applications_20261105 — RİM 2026-11-05: MR-190/MR-161 əkiz birləşmələri + MR-110 xanası; sabit id-lər koddadır
 #       (plan faylı/secret yoxdur), merge_twin_offerings qaydaları. Defolt dry-run. Loga YALNIZ saylar.
+#   repair_twins_20261105b — əkiz jurnallar 2026-11-05 (ikinci dəst): MR-190 235 İ ing (imtahan 83 bağı + Midterm balları
+#       rəsmi jurnala, sonra keep-birləşmə) və MR-161 234 M rus (boş əkiz manifestlə bərpa, data düzgün fənnin jurnalına,
+#       yük sətri). Sabit id-lər koddadır (plan faylı/secret yoxdur). Defolt dry-run. Loga YALNIZ saylar.
 #   relocate_twin_enrollment / merge_twin_offerings / fix_legacy_lesson_kinds — RİM müraciətləri (2026-10-27): ŞİFRƏLİ
 #       release asset (`roster_tag` = `rim-fix-…` → relocate.json.enc / merge.json.enc / lessonkinds.json.enc; lokal
 #       `build_twin_repair_plans` — köhnə sistem + prod nüsxəsi, YALNIZ id-lər). relocate: əkiz jurnalın «fantom dərs»
@@ -427,6 +430,7 @@ on:
           - relocate_twin_enrollment
           - merge_twin_offerings
           - repair_applications_20261105
+          - repair_twins_20261105b
           - fix_legacy_lesson_kinds
           - set_practical_offerings
           - fix_slot_week_parity
@@ -1534,6 +1538,12 @@ jobs:
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor")
               ;;
+            repair_twins_20261105b)
+              # 2026-11-05 (ikinci dəst): MR-190 235 İ ing + MR-161 234 M rus əkizləri — sabit id-lər koddadır, plan faylı yoxdur.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              ;;
             relocate_twin_enrollment|merge_twin_offerings|fix_legacy_lesson_kinds)
               # RİM 2026-10-27: plan faylı (yalnız id-lər). Loga yalnız saylar.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
@@ -2092,7 +2102,7 @@ jobs:
               exit "$status"
             fi
             rm -f "$RUNNER_TEMP/out.log"
-          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "release_stale_slot_teachers" ] || [ "$COMMAND" = "fix_offering_subject" ] || [ "$COMMAND" = "repair_applications_20261105" ]; then
+          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "release_stale_slot_teachers" ] || [ "$COMMAND" = "fix_offering_subject" ] || [ "$COMMAND" = "repair_twins_20261105b" ] || [ "$COMMAND" = "repair_applications_20261105" ]; then
             # Loga YALNIZ «twin_relocate: / twin_merge: / lesson_kinds: / slot_parity: / practical_flag: / off_schedule_flags: / slot_teachers: /
             # offering_subject_fix: açar=say …» sətirləri və rədd kodu.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?

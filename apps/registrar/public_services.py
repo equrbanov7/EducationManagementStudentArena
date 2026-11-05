@@ -61,6 +61,7 @@ from . import subject_merge_apply  # noqa: F401 — açılışın fənn düzəli
 from . import teacher_journal_list  # noqa: F401
 from . import transcript  # noqa: F401
 from . import transfer  # noqa: F401
+from . import twins_repair_2026_11_05b  # noqa: F401 — əkiz jurnallar MR-190/MR-161 (2026-11-05, workload əmri)
 from . import exam_eligibility as eligibility_rules  # noqa: F401
 from .absence_credit_read import credit_hours_map, effective_hours  # noqa: F401
 from .absence_evidence import absence_counter_preview  # noqa: F401
@@ -220,6 +221,7 @@ __all__ = [
     "transcript",
     "transcript_policy",
     "transfer",
+    "twins_repair_2026_11_05b",
 ]
 
 from .practical_label import offering_is_practical  # noqa: E402,F401
