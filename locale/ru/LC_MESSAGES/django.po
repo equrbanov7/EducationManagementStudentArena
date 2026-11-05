@@ -113828,6 +113828,447 @@ msgctxt "accounts.journal_removals"
 msgid "Əvvəlki"
 msgstr "Предыдущая"
 
+msgctxt "profile.section"
+msgid "Alt qrup tələbələri"
+msgstr "Студенты подгрупп"
+
+msgctxt "registrar.subgroup_students"
+msgid "Aktiv"
+msgstr "Активен"
+
+msgctxt "registrar.subgroup_students"
+msgid "Tamamlanıb"
+msgstr "Завершён"
+
+msgctxt "registrar.subgroup_students"
+msgid "Dondurulub"
+msgstr "Приостановлен"
+
+msgctxt "registrar.subgroup_students"
+msgid "Jurnaldan çıxarılıb"
+msgstr "Исключён из журнала"
+
+msgctxt "registrar.subgroup_students"
+msgid "Köçürmə ilə əvəzlənib"
+msgstr "Заменён переводом"
+
+msgctxt "registrar.subgroup_students"
+msgid "Öz jurnalından azad edilib"
+msgstr "Освобождён из своего журнала"
+
+msgctxt "registrar.subgroup_students"
+msgid "Alt qrup"
+msgstr "Подгруппа"
+
+msgctxt "registrar.subgroup_students"
+msgid "İntensiv kurs"
+msgstr "Интенсивный курс"
+
+msgctxt "registrar.subgroup_students"
+msgid "Təkrar tədris"
+msgstr "Повторное обучение"
+
+msgctxt "registrar.subgroup_students"
+msgid "Sənəd var (fayl və ya sərəncam)"
+msgstr "Документ есть (файл или приказ)"
+
+msgctxt "registrar.subgroup_students"
+msgid "Fayl yüklənib"
+msgstr "Файл загружен"
+
+msgctxt "registrar.subgroup_students"
+msgid "Sərəncam nömrəsi"
+msgstr "Номер приказа"
+
+msgctxt "registrar.subgroup_students"
+msgid "Sənədsiz — superadmin / RİM rəhbəri düzəlişi"
+msgstr "Без документа — исправление суперадмина / руководителя ЦЦР"
+
+msgctxt "registrar.subgroup_students"
+msgid "Sənəd yoxdur"
+msgstr "Нет документа"
+
+msgctxt "registrar.subgroup_students"
+msgid "Müəllim təyin olunmayıb"
+msgstr "Преподаватель не назначен"
+
+#, python-format
+msgctxt "accounts.subgroup_students"
+msgid "%(n)s hazırda aktiv"
+msgstr "%(n)s активны сейчас"
+
+msgctxt "accounts.subgroup_students"
+msgid "Ad, soyad və ya istifadəçi adı"
+msgstr "Имя, фамилия или имя пользователя"
+
+msgctxt "accounts.subgroup_students"
+msgid "Alt qrup olduğu jurnal"
+msgstr "Журнал (как подгруппа)"
+
+msgctxt "accounts.subgroup_students"
+msgid "Alt qrup olduğu qrup"
+msgstr "Группа (как подгруппа)"
+
+msgctxt "accounts.subgroup_students"
+msgid "Alt qrup tələbələrinin ixracı"
+msgstr "Экспорт студентов подгрупп"
+
+msgctxt "accounts.subgroup_students"
+msgid "Alt qrupa tələbə əlavə et"
+msgstr "Добавить студента в подгруппу"
+
+msgctxt "accounts.subgroup_students"
+msgid "Alt qrupdan əlavə olunmuş tələbələr"
+msgstr "Студенты, добавленные из других групп"
+
+msgctxt "accounts.subgroup_students"
+msgid "Başqa (alt) qrupdan jurnala əlavə olunmuş hər tələbə: öz qrupu, alt qrup olduğu jurnal, fənn, müəllim, kredit, səbəb və əlavə olunarkən təqdim edilən sənəd. Süzgəclərlə daraldın, başlığa klikləyib sıralayın."
+msgstr "Каждый студент, добавленный в журнал из другой (под)группы: своя группа, журнал, предмет, преподаватель, кредиты, причина и представленный документ. Сужайте фильтрами, сортируйте по заголовку."
+
+msgctxt "accounts.subgroup_students"
+msgid "Bu bölmə RİM rəhbəri, superadmin və alt qrup yerləşdirmə səlahiyyəti olan rollar üçündür."
+msgstr "Этот раздел для руководителя ЦЦР, суперадмина и ролей с правом размещения в подгруппы."
+
+msgctxt "accounts.subgroup_students"
+msgid "Bu jurnalda artıq olan tələbələr göstərilir, amma seçilə bilmir."
+msgstr "Студенты, уже находящиеся в журнале, показаны, но не могут быть выбраны."
+
+msgctxt "accounts.subgroup_students"
+msgid "Bu qrupda uyğun tələbə tapılmadı."
+msgstr "В этой группе подходящий студент не найден."
+
+msgctxt "accounts.subgroup_students"
+msgid "Cari qrupu"
+msgstr "Текущая группа"
+
+msgctxt "accounts.subgroup_students"
+msgid "Excel-ə ixrac"
+msgstr "Экспорт в Excel"
+
+msgctxt "accounts.subgroup_students"
+msgid "Fakültə"
+msgstr "Факультет"
+
+msgctxt "accounts.subgroup_students"
+msgid "Fakültə üzrə (tələbənin öz fakültəsi)"
+msgstr "По факультетам (факультет студента)"
+
+#, python-format
+msgctxt "accounts.subgroup_students"
+msgid "Fayl ilk %(n)s sətirlə məhdudlaşdırılıb — süzgəcləri daraldıb yenidən yükləyin."
+msgstr "Файл ограничен первыми %(n)s строками — сузьте фильтры и скачайте снова."
+
+msgctxt "accounts.subgroup_students"
+msgid "Fənn"
+msgstr "Предмет"
+
+msgctxt "accounts.subgroup_students"
+msgid "Fənn kodu"
+msgstr "Код предмета"
+
+msgctxt "accounts.subgroup_students"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "accounts.subgroup_students"
+msgid "Hədəf jurnal (alt qrup olacağı jurnal)"
+msgstr "Целевой журнал (куда студент добавляется как подгруппа)"
+
+msgctxt "accounts.subgroup_students"
+msgid "Hədəf jurnalı seçin."
+msgstr "Выберите целевой журнал."
+
+msgctxt "accounts.subgroup_students"
+msgid "Həftəlik trend"
+msgstr "Недельная динамика"
+
+msgctxt "accounts.subgroup_students"
+msgid "Həftəlik trend (son 12 həftə)"
+msgstr "Недельная динамика (последние 12 недель)"
+
+msgctxt "accounts.subgroup_students"
+msgid "Hələ alt qrupdan əlavə olunmuş tələbə yoxdur"
+msgstr "Студентов, добавленных из других групп, пока нет"
+
+msgctxt "accounts.subgroup_students"
+msgid "Jurnalda və ya «Alt qrupa tələbə əlavə et» bölməsində əlavə ediləndə tələbə burada görünəcək."
+msgstr "Студент появится здесь после добавления в журнале или в разделе «Добавить студента в подгруппу»."
+
+msgctxt "accounts.subgroup_students"
+msgid "Kafedra"
+msgstr "Кафедра"
+
+msgctxt "accounts.subgroup_students"
+msgid "Kredit"
+msgstr "Кредиты"
+
+msgctxt "accounts.subgroup_students"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+msgctxt "accounts.subgroup_students"
+msgid "Müəllimin adı"
+msgstr "Имя преподавателя"
+
+msgctxt "accounts.subgroup_students"
+msgid "Məlumat yoxdur"
+msgstr "Нет данных"
+
+msgctxt "accounts.subgroup_students"
+msgid "Mənbə qrup (tələbənin öz qrupu)"
+msgstr "Исходная группа (своя группа студента)"
+
+msgctxt "accounts.subgroup_students"
+msgid "Mənbə qrupu və tələbəni seçin."
+msgstr "Выберите исходную группу и студента."
+
+msgctxt "accounts.subgroup_students"
+msgid "Məs.: dekanlığın təqdimatı №…, akademik borc"
+msgstr "Напр.: представление деканата №…, академическая задолженность"
+
+msgctxt "accounts.subgroup_students"
+msgid "Növ"
+msgstr "Тип"
+
+msgctxt "accounts.subgroup_students"
+msgid "Növbəti"
+msgstr "Следующая"
+
+#, python-format
+msgctxt "accounts.subgroup_students"
+msgid "Nəticə: %(n)s qeyd"
+msgstr "Результат: %(n)s записей"
+
+msgctxt "accounts.subgroup_students"
+msgid "Qrup axtarın…"
+msgstr "Найдите группу…"
+
+msgctxt "accounts.subgroup_students"
+msgid "Qrup, fənn və ya müəllim axtarın…"
+msgstr "Найдите группу, предмет или преподавателя…"
+
+msgctxt "accounts.subgroup_students"
+msgid "Semestr"
+msgstr "Семестр"
+
+msgctxt "accounts.subgroup_students"
+msgid "Sizin üçün könüllüdür — sənədsiz əlavədə səbəbə avtomatik «sənədsiz düzəliş» qeydi yazılır."
+msgstr "Для вас необязательно — без документа к причине автоматически добавляется отметка «исправление без документа»."
+
+msgctxt "accounts.subgroup_students"
+msgid "Statistika"
+msgstr "Статистика"
+
+msgctxt "accounts.subgroup_students"
+msgid "Süzgəcləri dəyişin və ya «Sıfırla» basın."
+msgstr "Измените фильтры или нажмите «Сбросить»."
+
+msgctxt "accounts.subgroup_students"
+msgid "Süzgəcə uyğun tələbə yoxdur"
+msgstr "Нет студентов, соответствующих фильтрам"
+
+msgctxt "accounts.subgroup_students"
+msgid "Səbəb"
+msgstr "Причина"
+
+msgctxt "accounts.subgroup_students"
+msgid "Səbəb / qeyd"
+msgstr "Причина / примечание"
+
+msgctxt "accounts.subgroup_students"
+msgid "Səbəb yazılmalıdır."
+msgstr "Необходимо указать причину."
+
+#, python-format
+msgctxt "accounts.subgroup_students"
+msgid "Səhifə %(page)s / %(last)s"
+msgstr "Страница %(page)s / %(last)s"
+
+msgctxt "accounts.subgroup_students"
+msgid "Səhifələr"
+msgstr "Страницы"
+
+msgctxt "accounts.subgroup_students"
+msgid "Sənəd"
+msgstr "Документ"
+
+msgctxt "accounts.subgroup_students"
+msgid "Sənəd (təqdimat / sərəncam — PDF, JPG, PNG)"
+msgstr "Документ (представление / приказ — PDF, JPG, PNG)"
+
+msgctxt "accounts.subgroup_students"
+msgid "Sənəd (təqdimat / sərəncam) yüklənməlidir."
+msgstr "Необходимо загрузить документ (представление / приказ)."
+
+msgctxt "accounts.subgroup_students"
+msgid "Sənəd linki / sərəncam"
+msgstr "Ссылка на документ / приказ"
+
+msgctxt "accounts.subgroup_students"
+msgid "Sənəd yoxdur"
+msgstr "Нет документа"
+
+msgctxt "accounts.subgroup_students"
+msgid "Sənədli"
+msgstr "С документом"
+
+msgctxt "accounts.subgroup_students"
+msgid "Sənədsiz düzəliş"
+msgstr "Исправление без документа"
+
+msgctxt "accounts.subgroup_students"
+msgid "Sənədə bax"
+msgstr "Открыть документ"
+
+#, python-format
+msgctxt "accounts.subgroup_students"
+msgid "Sərəncam № %(number)s"
+msgstr "Приказ № %(number)s"
+
+msgctxt "accounts.subgroup_students"
+msgid "Tarix"
+msgstr "Дата"
+
+msgctxt "accounts.subgroup_students"
+msgid "Tarixdən"
+msgstr "С даты"
+
+msgctxt "accounts.subgroup_students"
+msgid "Tarixədək"
+msgstr "По дату"
+
+msgctxt "accounts.subgroup_students"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "accounts.subgroup_students"
+msgid "Tələbə axtarın…"
+msgstr "Найдите студента…"
+
+msgctxt "accounts.subgroup_students"
+msgid "Tələbə bu fənn üzrə öz qrupunun jurnalında aktivdirsə: əvvəlki qeydiyyat tarixçəyə keçir, bal və davamiyyət saxlanılır."
+msgstr "Если студент активен по этому предмету в журнале своей группы: прежняя запись уходит в историю, оценки и посещаемость сохраняются."
+
+msgctxt "accounts.subgroup_students"
+msgid "Tələbə jurnala əlavə olundu."
+msgstr "Студент добавлен в журнал."
+
+msgctxt "accounts.subgroup_students"
+msgid "Uyğun jurnal tapılmadı."
+msgstr "Подходящий журнал не найден."
+
+msgctxt "accounts.subgroup_students"
+msgid "Uyğun qrup tapılmadı."
+msgstr "Подходящая группа не найдена."
+
+msgctxt "accounts.subgroup_students"
+msgid "Vəziyyət"
+msgstr "Состояние"
+
+msgctxt "accounts.subgroup_students"
+msgid "Yalnız cari semestrin açıq jurnalları və sizin əhatənizdəki qruplar."
+msgstr "Только открытые журналы текущего семестра и группы в вашей зоне ответственности."
+
+msgctxt "accounts.subgroup_students"
+msgid "Yalnız sizin struktur əhatənizdəki qrupların tələbələri və jurnalları göstərilir."
+msgstr "Показаны только студенты и журналы групп в вашей структурной зоне."
+
+msgctxt "accounts.subgroup_students"
+msgid "Yazı jurnal modalının rəsmi yolu ilə gedir: kredit həddi, jurnal tutumu və siyahı qapısı eynidir."
+msgstr "Запись идёт через официальный путь журнала: те же лимит кредитов, вместимость журнала и проверки списка."
+
+#, python-format
+msgctxt "accounts.subgroup_students"
+msgid "birləşmə: %(n)s · intensiv: %(m)s"
+msgstr "объединение: %(n)s · интенсив: %(m)s"
+
+#, python-format
+msgctxt "accounts.subgroup_students"
+msgid "cəmi %(n)s kredit"
+msgstr "всего %(n)s кредитов"
+
+#, python-format
+msgctxt "accounts.subgroup_students"
+msgid "cəmi %(n)s sənəd"
+msgstr "всего %(n)s документов"
+
+msgctxt "accounts.subgroup_students"
+msgid "fayl və ya sərəncam"
+msgstr "файл или приказ"
+
+#, python-format
+msgctxt "accounts.subgroup_students"
+msgid "indi: %(group)s"
+msgstr "сейчас: %(group)s"
+
+msgctxt "accounts.subgroup_students"
+msgid "superadmin / RİM rəhbəri"
+msgstr "суперадмин / руководитель ЦЦР"
+
+msgctxt "accounts.subgroup_students"
+msgid "sənədsiz — superadmin/RİM rəhbəri düzəlişi"
+msgstr "без документа — исправление суперадмина/руководителя ЦЦР"
+
+msgctxt "accounts.subgroup_students"
+msgid "Öz jurnalından azad et (alt qrup birləşməsi)"
+msgstr "Освободить из своего журнала (объединение подгруппы)"
+
+msgctxt "accounts.subgroup_students"
+msgid "Öz qrupu"
+msgstr "Своя группа"
+
+msgctxt "accounts.subgroup_students"
+msgid "öz jurnalından azad edilib"
+msgstr "освобождён из своего журнала"
+
+msgctxt "accounts.subgroup_students"
+msgid "İstifadəçi adı"
+msgstr "Имя пользователя"
+
+msgctxt "accounts.subgroup_students"
+msgid "Əlavə"
+msgstr "Добавления"
+
+msgctxt "accounts.subgroup_students"
+msgid "Əlavə edən"
+msgstr "Кем добавлен"
+
+msgctxt "accounts.subgroup_students"
+msgid "Əlavə et"
+msgstr "Добавить"
+
+msgctxt "accounts.subgroup_students"
+msgid "Əməliyyat alınmadı — yenidən cəhd edin."
+msgstr "Операция не удалась — попробуйте снова."
+
+msgctxt "accounts.subgroup_students"
+msgid "Ən çox alt qrup olduğu qrup (haraya)"
+msgstr "Чаще всего — группа назначения (куда)"
+
+msgctxt "accounts.subgroup_students"
+msgid "Ən çox fənn"
+msgstr "Чаще всего — предметы"
+
+msgctxt "accounts.subgroup_students"
+msgid "Ən çox müəllim"
+msgstr "Чаще всего — преподаватели"
+
+msgctxt "accounts.subgroup_students"
+msgid "Ən çox öz qrupu (haradan)"
+msgstr "Чаще всего — своя группа (откуда)"
+
+msgctxt "accounts.subgroup_students"
+msgid "Əvvəlcə jurnal seçin…"
+msgstr "Сначала выберите журнал…"
+
+msgctxt "accounts.subgroup_students"
+msgid "Əvvəlcə qrup seçin…"
+msgstr "Сначала выберите группу…"
+
+msgctxt "accounts.subgroup_students"
+msgid "Əvvəlki"
+msgstr "Предыдущая"
+
 msgctxt "accounts.syllabus"
 msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
 msgstr "Нужно заполнить оба поля — основную и дополнительную литературу. Источники можно записывать в любой форме: каждый с новой строки, через запятую или в одну строку."

@@ -34,6 +34,13 @@ JOURNAL_REMOVALS_SECTION_PARTIALS: dict[str, str] = {
     "journal-removals": "accounts/profile/sections/_journal_removals.html",
 }
 
+#: «Alt qrup tələbələri» (sahib 2026-11-05) — alt qrupdan əlavə olunmuş tələbələrin reyestri + statistikası (data
+#: ``{% subgroup_students_panel %}`` tag-ı ilə, qapı render vaxtı yenidən yoxlanır); süzgəc / sıralama / səhifə linkləri
+#: yerində, ixrac ayrıca GET, əlavə jurnal modalının rəsmi POST-una gedir.
+SUBGROUP_STUDENTS_SECTION_PARTIALS: dict[str, str] = {
+    "subgroup-students": "accounts/profile/sections/_subgroup_students.html",
+}
+
 #: ``sections_api``-a birləşən əlavə bölmələr (Əmək müqavilələri + Xarici nəticələrin tanınması).
 EXTRA_SECTION_PARTIALS: dict[str, str] = (
     HR_CONTRACT_SECTION_PARTIALS
@@ -41,6 +48,7 @@ EXTRA_SECTION_PARTIALS: dict[str, str] = (
     | TEACHING_APPEALS_SECTION_PARTIALS
     | UNIT_MATERIALS_SECTION_PARTIALS
     | JOURNAL_REMOVALS_SECTION_PARTIALS
+    | SUBGROUP_STUDENTS_SECTION_PARTIALS
 )
 EXTRA_AJAX_SECTIONS: frozenset[str] = (
     HR_CONTRACT_AJAX_SECTIONS
@@ -48,6 +56,7 @@ EXTRA_AJAX_SECTIONS: frozenset[str] = (
     | frozenset(TEACHING_APPEALS_SECTION_PARTIALS)
     | frozenset(UNIT_MATERIALS_SECTION_PARTIALS)
     | frozenset(JOURNAL_REMOVALS_SECTION_PARTIALS)
+    | frozenset(SUBGROUP_STUDENTS_SECTION_PARTIALS)
 )
 
 __all__ = [
@@ -56,6 +65,7 @@ __all__ = [
     "JOURNAL_REMOVALS_SECTION_PARTIALS",
     "RECOGNITION_AJAX_SECTIONS",
     "RECOGNITION_SECTION_PARTIALS",
+    "SUBGROUP_STUDENTS_SECTION_PARTIALS",
     "TEACHING_APPEALS_SECTION_PARTIALS",
     "UNIT_MATERIALS_SECTION_PARTIALS",
 ]

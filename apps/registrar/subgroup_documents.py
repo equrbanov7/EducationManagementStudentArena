@@ -114,7 +114,7 @@ def apply_waiver(document: PlacementDocument, actor) -> PlacementDocument:
     """
     from core import superadmin_waiver
 
-    if document.has_file or document.has_order or not superadmin_waiver.waives(actor):
+    if document.has_file or document.has_order or not superadmin_waiver.waives(actor, scope=superadmin_waiver.SUBGROUP):
         return document
     return PlacementDocument(
         file=None,

@@ -13,7 +13,7 @@
  *  * Əvvəlki REDAKTƏNİN dəyərləri sıfırlanır (əvvəl «Yeni dərs» son redaktə olunmuş dərsin tarixi /
  *    tipi / mövzusu / saatı / müəllimi ilə açılırdı).
  *  * Mövzu seçimləri dərs tipinə görə süzülür (`data-kinds`; boşdursa — LMS mənbəyi — hər tipdə; seçilmiş
- *    mövzu gizlədilmir). Redaktədə də.
+ *    mövzu gizlədilmir; planda bu tipə saat verilmiş mövzu YOXDURSA süzgəc yoxdur — MR-197). Redaktədə də.
  *  * Müəllim tipi dəyişəndə mövzu / akademik saat / müəllim həmin tipin dəyərlərinə keçir — sahəni özü
  *    dəyişməyibsə (son avtomatik dəyərlə müqayisə olunur).
  *  * Gizli `slot_id` yalnız tarix + dərs saatı + tip slotla EYNİ olduqca göndərilir; dəyişən kimi boşalır
@@ -137,9 +137,19 @@
         return (option.getAttribute("data-kinds") || "").split(/\s+/).filter(Boolean);
     }
 
-    /** Mövzu bu tipdə keçirilə bilərmi (`data-kinds` boşdursa — bəli). */
+    /** Planda bu tipə saat verilmiş heç bir mövzu varmı. Yoxdursa (məs. bölünmüş jurnalın sillabusunu seminar
+     *  müəllimi yazıb, mühazirə saatı 0 — MR-197) süzgəc tətbiq olunmur: mühazirəçi bütün plan mövzularını görür. */
+    function planHasKind(select, kind) {
+        for (var i = 0; i < select.options.length; i++) {
+            if (optionKinds(select.options[i]).indexOf(kind) !== -1) return true;
+        }
+        return false;
+    }
+
+    /** Mövzu bu tipdə keçirilə bilərmi (`data-kinds` boşdursa və ya plan bu tipi heç tanımırsa — bəli). */
     function topicAllowed(select, value, kind) {
         if (!select || select.tagName !== "SELECT" || !value || !kind) return true;
+        if (!planHasKind(select, kind)) return true;
         for (var i = 0; i < select.options.length; i++) {
             if (select.options[i].value === value) {
                 var kinds = optionKinds(select.options[i]);
@@ -154,6 +164,7 @@
         if (!select || select.tagName !== "SELECT") return;
         var current = select.value;
         var changed = false;
+        if (kind && !planHasKind(select, kind)) kind = "";
         Array.prototype.forEach.call(select.options, function (opt) {
             var kinds = optionKinds(opt);
             var hide = Boolean(kind && opt.value && kinds.length && kinds.indexOf(kind) === -1 && opt.value !== current);

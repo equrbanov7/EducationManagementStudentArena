@@ -53,6 +53,9 @@ from . import services  # noqa: F401
 from . import status  # noqa: F401
 from . import student_group_names  # noqa: F401 — tələbənin cari reyestr qrupunun adı (süzgəclər, 2026-10-25)
 from . import subgroup_rollup  # noqa: F401
+from . import subgroup_students_journals  # noqa: F401 — «Alt qrup tələbələri» hədəf jurnal axtarışı (2026-11-05)
+from . import subgroup_students_read  # noqa: F401 — «Alt qrup tələbələri» reyestri (2026-11-05)
+from . import subgroup_students_stats  # noqa: F401 — «Alt qrup tələbələri» statistikası (2026-11-05)
 from . import subject_merge_apply  # noqa: F401 — açılışın fənn düzəlişi icazəsi (legacy kod toqquşması, 2026-10-26)
 from . import teacher_journal_list  # noqa: F401
 from . import transcript  # noqa: F401
@@ -154,6 +157,9 @@ __all__ = [
     "journal_hygiene_rows",
     "journal_removal_read",
     "journal_scope",
+    "subgroup_students_journals",
+    "subgroup_students_read",
+    "subgroup_students_stats",
     "teacher_journal_list",
     "sync_workload_journal_shares",
     "append_reviewed_onomastics_roster",

@@ -1,0 +1,86 @@
+/* «Alt qrup tələbələri» — kabinet bölməsi (sahib 2026-11-05).
+ * Şablon: accounts/profile/sections/_subgroup_students.html (+ subgroup_students/_*.html) */
+
+.sst { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.sst-scope { margin: 0; font-size: 12.5px; color: var(--ems-neutral-600); }
+.sst-kpis { margin-bottom: 0; }
+
+/* Statistika kartları */
+.sst-stats { border: 1px solid var(--ems-border); border-radius: var(--ems-r-2xl); background: var(--ems-bg); }
+.sst-stats__summary {
+    padding: 10px 16px; cursor: pointer; font-weight: 800; font-size: 13px; color: var(--ems-neutral-700);
+}
+.sst-stats__summary:focus-visible { outline: none; box-shadow: var(--ems-sh-focus); border-radius: var(--ems-r-2xl); }
+.sst-stats__grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; padding: 0 14px 14px;
+}
+.sst-card {
+    min-width: 0; padding: 12px 14px; border: 1px solid var(--ems-neutral-200); border-radius: 12px;
+    background: var(--ems-neutral-0);
+}
+.sst-card__title { margin: 0 0 8px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ems-neutral-500); }
+.sst-top { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 7px; }
+.sst-top__item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; font-size: 12.5px; }
+.sst-top__label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ems-neutral-800); }
+.sst-top__count { font-weight: 800; color: var(--ems-neutral-700); }
+.sst-top__bar { grid-column: 1 / -1; }
+.sst-top__bar .ems-bar__fill { width: var(--pct, 0%); }
+
+/* Həftəlik trend — sadə şaquli zolaqlar */
+.sst-trend { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 4px; align-items: end; }
+.sst-trend__item { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; }
+.sst-trend__bar { display: flex; align-items: flex-end; width: 100%; height: 72px; border-radius: 4px; background: var(--ems-neutral-100); }
+.sst-trend__fill { display: block; width: 100%; height: var(--pct, 0%); border-radius: 4px; background: var(--ems-primary-500); }
+.sst-trend__count { font-size: 11px; font-weight: 800; color: var(--ems-neutral-700); }
+.sst-trend__label { font-size: 10px; color: var(--ems-neutral-500); white-space: nowrap; }
+
+.sst-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.sst-toolbar__range { font-size: 12.5px; color: var(--ems-neutral-500); font-weight: 600; }
+.sst-toolbar__actions { display: inline-flex; gap: 8px; flex-wrap: wrap; }
+
+/* Cədvəl */
+.sst-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.sst-table td, .sst-table th { vertical-align: top; }
+.sst-strong { display: block; font-weight: 700; color: var(--ems-neutral-800); overflow-wrap: anywhere; }
+a.sst-strong { color: var(--ems-primary-700); text-decoration: none; }
+a.sst-strong:hover { text-decoration: underline; }
+.sst-muted { display: block; font-size: 12px; color: var(--ems-neutral-500); overflow-wrap: anywhere; }
+.sst-note { max-width: 300px; white-space: pre-line; overflow-wrap: anywhere; font-size: 12.5px; }
+
+.sst-chip, .sst-status {
+    display: inline-flex; align-items: center; margin-top: 3px; padding: 1px 8px; border-radius: 999px;
+    font-size: 11px; font-weight: 700; border: 1px solid var(--ems-neutral-200);
+    background: var(--ems-neutral-100); color: var(--ems-neutral-700); white-space: nowrap;
+}
+.sst-chip--intensive { background: var(--ems-primary-50); border-color: var(--ems-primary-200); color: var(--ems-primary-700); }
+.sst-chip--retake { background: var(--ems-warning-bg); border-color: var(--ems-warning-bd); color: var(--ems-warning-800); }
+.sst-status { margin-top: 0; }
+.sst-status--active { background: var(--ems-success-bg); border-color: var(--ems-success-bd); color: var(--ems-success-700); }
+.sst-status--removed { background: var(--ems-danger-bg); border-color: var(--ems-danger-200); color: var(--ems-danger-700); }
+.sst-status--superseded, .sst-status--suspended { background: var(--ems-warning-bg); border-color: var(--ems-warning-bd); color: var(--ems-warning-800); }
+
+.sst-doc { min-width: 150px; font-size: 12.5px; }
+.sst-doc__link { display: inline-flex; align-items: center; gap: 5px; font-weight: 700; color: var(--ems-primary-700); text-decoration: none; }
+.sst-doc__link:hover { text-decoration: underline; }
+.sst-doc__link:focus-visible { outline: none; box-shadow: var(--ems-sh-focus); border-radius: 4px; }
+.sst-doc__order { font-weight: 700; color: var(--ems-neutral-800); }
+.sst-doc__waived { display: inline-block; padding: 2px 8px; border-radius: 8px; background: var(--ems-warning-bg); color: var(--ems-warning-800); font-weight: 700; font-size: 11.5px; }
+.sst-doc__none { display: inline-block; padding: 2px 8px; border-radius: 8px; background: var(--ems-danger-bg); color: var(--ems-danger-700); font-weight: 700; font-size: 11.5px; }
+
+.sst-pager { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+.sst-pager__info { font-size: 12.5px; color: var(--ems-neutral-600); font-weight: 600; }
+.sst-muted:empty { display: none; }
+
+/* Əlavə modalı */
+.sst-add { display: flex; flex-direction: column; gap: 14px; }
+.sst-add__step.is-disabled { opacity: 0.55; }
+.sst-add__check { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 13px; color: var(--ems-neutral-800); }
+.sst-add__check input { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--ems-primary-600); }
+.sst-add__check small { display: block; margin-top: 2px; }
+.sst-add__file { padding: 6px; }
+.sst-req { color: var(--ems-danger-600); }
+
+@media (max-width: 640px) {
+    .sst-trend__bar { height: 48px; }
+    .sst-trend__label { display: none; }
+}

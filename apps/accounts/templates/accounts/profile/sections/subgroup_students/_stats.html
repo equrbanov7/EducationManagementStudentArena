@@ -1,0 +1,62 @@
+{% load i18n ems_ui %}
+{% comment %}«Alt qrup tələbələri» — statistika (cari süzgəclərlə). Zolaqlar `ems-bar` + `style="--pct:NN%"` (dinamik faiz CSS
+dəyişəni ilə; statik inline stil yoxdur). Kontekst: `ss.stats` (apps.registrar.subgroup_students_stats.build).{% endcomment %}
+{% with totals=ss.stats.totals %}
+<div class="ems-kpis ems-kpis--5 sst-kpis">
+    <div class="ems-kpi ems-kpi--accent-primary">
+        <div class="ems-kpi__label">{% trans "Əlavə" context "accounts.subgroup_students" %}</div>
+        <div class="ems-kpi__value">{{ totals.total }}</div>
+        <div class="ems-kpi__note">{% blocktrans trimmed with n=totals.active context "accounts.subgroup_students" %}{{ n }} hazırda aktiv{% endblocktrans %}</div>
+    </div>
+    <div class="ems-kpi">
+        <div class="ems-kpi__label">{% trans "Tələbə" context "accounts.subgroup_students" %}</div>
+        <div class="ems-kpi__value">{{ totals.students }}</div>
+        <div class="ems-kpi__note">{% blocktrans trimmed with n=totals.credits context "accounts.subgroup_students" %}cəmi {{ n }} kredit{% endblocktrans %}</div>
+    </div>
+    <div class="ems-kpi ems-kpi--accent-success">
+        <div class="ems-kpi__label">{% trans "Sənədli" context "accounts.subgroup_students" %}</div>
+        <div class="ems-kpi__value">{{ totals.with_document }}</div>
+        <div class="ems-kpi__note">{% trans "fayl və ya sərəncam" context "accounts.subgroup_students" %}</div>
+    </div>
+    <div class="ems-kpi ems-kpi--accent-warning">
+        <div class="ems-kpi__label">{% trans "Sənədsiz düzəliş" context "accounts.subgroup_students" %}</div>
+        <div class="ems-kpi__value">{{ totals.waived }}</div>
+        <div class="ems-kpi__note">{% trans "superadmin / RİM rəhbəri" context "accounts.subgroup_students" %}</div>
+    </div>
+    <div class="ems-kpi ems-kpi--accent-danger">
+        <div class="ems-kpi__label">{% trans "Sənəd yoxdur" context "accounts.subgroup_students" %}</div>
+        <div class="ems-kpi__value">{{ totals.without_document }}</div>
+        <div class="ems-kpi__note">{% blocktrans trimmed with n=totals.released m=totals.intensive context "accounts.subgroup_students" %}birləşmə: {{ n }} · intensiv: {{ m }}{% endblocktrans %}</div>
+    </div>
+</div>
+{% endwith %}
+
+{% if ss.stats.totals.total %}
+<details class="sst-stats" open>
+    <summary class="sst-stats__summary">{% trans "Statistika" context "accounts.subgroup_students" %}</summary>
+    <div class="sst-stats__grid">
+        {% trans "Ən çox fənn" context "accounts.subgroup_students" as card_title %}
+        {% include "accounts/profile/sections/subgroup_students/_stat_list.html" with items=ss.stats.subjects card_title=card_title %}
+        {% trans "Ən çox öz qrupu (haradan)" context "accounts.subgroup_students" as card_title %}
+        {% include "accounts/profile/sections/subgroup_students/_stat_list.html" with items=ss.stats.home_groups card_title=card_title %}
+        {% trans "Ən çox alt qrup olduğu qrup (haraya)" context "accounts.subgroup_students" as card_title %}
+        {% include "accounts/profile/sections/subgroup_students/_stat_list.html" with items=ss.stats.target_groups card_title=card_title %}
+        {% trans "Ən çox müəllim" context "accounts.subgroup_students" as card_title %}
+        {% include "accounts/profile/sections/subgroup_students/_stat_list.html" with items=ss.stats.teachers card_title=card_title %}
+        {% trans "Fakültə üzrə (tələbənin öz fakültəsi)" context "accounts.subgroup_students" as card_title %}
+        {% include "accounts/profile/sections/subgroup_students/_stat_list.html" with items=ss.stats.faculties card_title=card_title %}
+        <section class="sst-card" aria-label="{% trans 'Həftəlik trend' context 'accounts.subgroup_students' %}">
+            <h3 class="sst-card__title">{% trans "Həftəlik trend (son 12 həftə)" context "accounts.subgroup_students" %}</h3>
+            <ol class="sst-trend">
+                {% for item in ss.stats.weeks %}
+                <li class="sst-trend__item" title="{{ item.week|date:'d.m.Y' }}: {{ item.count }}">
+                    <span class="sst-trend__bar"><span class="sst-trend__fill" style="--pct:{{ item.pct }}%"></span></span>
+                    <span class="sst-trend__count">{{ item.count }}</span>
+                    <span class="sst-trend__label">{{ item.week|date:"d.m" }}</span>
+                </li>
+                {% endfor %}
+            </ol>
+        </section>
+    </div>
+</details>
+{% endif %}

@@ -340,3 +340,18 @@ test("last-lesson prefill shows its own hint and never binds a slot", async () =
     // Otaq doldurmada yoxdur → yaddaş (mühazirə üçün yoxdur) → korpus defoltu boş.
     assert.equal($("[data-jd-lesson-room]").value, "");
 });
+
+test("MR-197: plan with no hours for the kind (seminar-only syllabus of a split journal) does not hide topics", async () => {
+    const { window, $ } = page(PREFILL);
+    Array.from($("[data-jd-lesson-topic]").options).forEach((opt) => {
+        if (opt.value) opt.setAttribute("data-kinds", "seminar");
+    });
+    $("#add").click();
+    await tick(window);
+    choose(window, $("[data-jd-lesson-kind]"), "lecture");
+    await tick(window);
+    assert.deepEqual(visibleTopics($), ["Giriş", "SQL", "İndekslər"]);
+    choose(window, $("[data-jd-lesson-topic]"), "SQL");
+    choose(window, $("[data-jd-lesson-kind]"), "lab");
+    assert.equal(state($).topic, "SQL"); // plan laboratoriyanı da tanımır — seçim qalır
+});
