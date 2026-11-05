@@ -227,6 +227,8 @@
 #       `master-students-…` → plan.json.enc; yalnız id-lər). Bakalavr qeydi məzun/qeyri-aktiv (hərəkətsiz), magistr
 #       qrupunda yeni qeyd, arxiv hesabın girişi rəsmi bərpa səthi ilə; səhv qrupdakı magistr qeydi rəsmi köçürmə ilə.
 #       Loga YALNIZ saylar.
+#   repair_applications_20261105 — RİM 2026-11-05: MR-190/MR-161 əkiz birləşmələri + MR-110 xanası; sabit id-lər koddadır
+#       (plan faylı/secret yoxdur), merge_twin_offerings qaydaları. Defolt dry-run. Loga YALNIZ saylar.
 #   relocate_twin_enrollment / merge_twin_offerings / fix_legacy_lesson_kinds — RİM müraciətləri (2026-10-27): ŞİFRƏLİ
 #       release asset (`roster_tag` = `rim-fix-…` → relocate.json.enc / merge.json.enc / lessonkinds.json.enc; lokal
 #       `build_twin_repair_plans` — köhnə sistem + prod nüsxəsi, YALNIZ id-lər). relocate: əkiz jurnalın «fantom dərs»
@@ -420,6 +422,7 @@ on:
           - merge_duplicate_student
           - relocate_twin_enrollment
           - merge_twin_offerings
+          - repair_applications_20261105
           - fix_legacy_lesson_kinds
           - set_practical_offerings
           - fix_slot_week_parity
@@ -1520,6 +1523,12 @@ jobs:
                 args=(--org "$ORG" --actor "$actor" --file "/tmp/level_merge_${GITHUB_RUN_ID}.json")
               fi
               ;;
+            repair_applications_20261105)
+              # RİM 2026-11-05: MR-190/MR-161 əkiz birləşmələri + MR-110 xanası — sabit id-lər koddadır, plan faylı yoxdur.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              ;;
             relocate_twin_enrollment|merge_twin_offerings|fix_legacy_lesson_kinds)
               # RİM 2026-10-27: plan faylı (yalnız id-lər). Loga yalnız saylar.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
@@ -2068,7 +2077,7 @@ jobs:
               exit "$status"
             fi
             rm -f "$RUNNER_TEMP/out.log"
-          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "fix_offering_subject" ]; then
+          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "fix_offering_subject" ] || [ "$COMMAND" = "repair_applications_20261105" ]; then
             # Loga YALNIZ «twin_relocate: / twin_merge: / lesson_kinds: / slot_parity: / practical_flag: / off_schedule_flags: /
             # offering_subject_fix: açar=say …» sətirləri və rədd kodu.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
