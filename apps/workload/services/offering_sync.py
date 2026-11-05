@@ -94,6 +94,8 @@ COUNTER_KEYS = (
     "guest_failed",
     # Audit 2026-09-28 W4: müəllim dəyişikliyinin yaratdığı cədvəl toqquşmaları.
     "schedule_conflicts",
+    # 2026-11-05: jurnalı/yükü qalmayan slot müəllimi boşaldıldı (registrar ``schedule_stale_teachers``).
+    "slot_teachers_released",
 )
 
 _ENROLL_KEYS = {
@@ -423,6 +425,12 @@ class _Sync(ElectiveFlow):
             by_user=self.actor_user,
             request=self.request,
             counters=self.counters,
+        )
+        # Bölgüdən çıxan müəllimin slotu onun cədvəlində qalmasın — paylar sinxronlandıqdan SONRA yoxlanır.
+        from apps.registrar.public import schedule_stale_teachers
+
+        self.counters["slot_teachers_released"] += schedule_stale_teachers.release(
+            offering_ids=self.offering_ids, by_user=self.actor_user, request=self.request
         )
 
     def _own(self, offering, kind) -> None:

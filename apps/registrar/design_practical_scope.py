@@ -1,15 +1,26 @@
-"""Design subject ownership limits a legacy practical label; never infer from student group."""
+"""Chair ownership limits the practical label (design + language chairs); never infer from student group.
+
+Sahib 2026-11-05 (MR-198): «Praktiki məşğələ» düyməsi dil kafedralarının fənlərində də aktivdir.
+"""
 
 from django.db.models import F, Q
 
 # Structural unit names, not role names or user-controlled subject-title substrings.
 DESIGN_CHAIR_NAMES = ("Dizayn kafedrası", "Design department", "Department of Design")
+LANGUAGE_CHAIR_NAMES = (
+    "Xarici dillər kafedrası",
+    "İngilis dili mərkəzi (Kafedra)",
+    "İngilis dili və tərcümə, ingilis dili və ədəbiyyatı kafedrası",
+    "İngilis dilçiliyi və ədəbiyyatı",
+    "Azərbaycan dili və ədəbiyyatı kafedrası",
+)
+PRACTICAL_CHAIR_NAMES = DESIGN_CHAIR_NAMES + LANGUAGE_CHAIR_NAMES
 MEMO = "_design_practical_label_memo"
 
 
 def scope_q():
     names = Q()
-    for name in DESIGN_CHAIR_NAMES:
+    for name in PRACTICAL_CHAIR_NAMES:
         names |= Q(subject__chair_unit__name__iexact=name)
     return names & Q(
         subject__chair_unit__organization_id=F("organization_id"),
@@ -31,7 +42,7 @@ def is_design_offering(offering):
             chair
             and chair.organization_id == offering.organization_id == subject.organization_id
             and chair.unit_type == "chair"
-            and chair.name.casefold() in {name.casefold() for name in DESIGN_CHAIR_NAMES}
+            and chair.name.casefold() in {name.casefold() for name in PRACTICAL_CHAIR_NAMES}
         )
     else:
         value = CourseOffering.objects.filter(
