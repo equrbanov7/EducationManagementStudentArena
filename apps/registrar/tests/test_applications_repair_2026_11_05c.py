@@ -61,6 +61,7 @@ class ApplicationsRepairCTest(SubgroupFixture, TestCase):
             mock.patch.object(repair, "MR209_DROP", ((str(self.old.pk), (str(self.wrong.pk),)),)),
             mock.patch.object(repair, "MR218_PAIRS", ()),
             mock.patch.object(repair, "MR225_PAIRS", ()),
+            mock.patch.object(repair, "MR225_MOVE_KEYS", ()),
             mock.patch.object(repair, "MR218_DELETE_LESSONS", ((str(self.drop_lesson.pk), str(self.history_g1.pk)),)),
         ]
         for patch in patches:
@@ -92,6 +93,25 @@ class ApplicationsRepairCTest(SubgroupFixture, TestCase):
             (again["mr_marks_already"], again["wrong_absences_already"], again["lessons_already_deleted"]),
             ("1", "1", "1"),
         )
+
+    def test_mr225_moves_lesson_with_marks_to_the_same_students_enrollment(self):
+        with bypass_rls():
+            wrong = Lesson.objects.create(
+                organization=self.org, offering=self.physics_g1, date=datetime.date(2026, 9, 15), kind="lecture"
+            )
+            LessonMark.objects.create(organization=self.org, lesson=wrong, enrollment=self.old, status="present")
+        with (
+            mock.patch.object(repair, "MR225_MOVE_SOURCE", str(self.physics_g1.pk)),
+            mock.patch.object(repair, "MR225_MOVE_TARGET", str(self.history_g1.pk)),
+            mock.patch.object(repair, "MR225_MOVE_KEYS", (("2026-09-15", "lecture"),)),
+        ):
+            self.assertEqual(self._call()["moved_lessons"], "1")
+            self._call("--apply")
+            with bypass_rls():
+                self.assertFalse(Lesson.objects.filter(pk=wrong.pk).exists())
+                moved = Lesson.objects.get(offering=self.history_g1, date=datetime.date(2026, 9, 15), kind="lecture")
+                self.assertEqual(LessonMark.objects.get(lesson=moved).enrollment_id, self.az.pk)
+            self.assertEqual(self._call("--apply")["moved_lessons_missing"], "1")
 
 
 class ApplicationsRepairCWorkflowTest(TestCase):

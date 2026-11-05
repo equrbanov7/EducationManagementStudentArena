@@ -10,7 +10,9 @@
   eyni fənndə axın olur. Müəllimin xahişi ilə 29.10 seminarları (233 K, 233 İT — həmin gün aralıq imtahanı) silinir;
   hər silinən dərsin xanaları auditdə saxlanır.
 * **MR-225** (Kəmalə Dadaşova): köhnə 14721 / 14261 jurnallarının dərsləri köçürmədə eyni qrup + dövrün, amma başqa adlı
-  (yükdə olmayan) fənn jurnallarına düşüb; ``Merger`` (keep) ilə yükdəki cari jurnallara birləşir.
+  (yükdə olmayan) fənn jurnallarına düşüb; ``Merger`` (keep) ilə yükdəki cari jurnallara birləşir. «Risklər»in 8 dərsi
+  isə daha əvvəl səhvən «Beynəlxalq kurortlar …» jurnalına birləşmişdi — (tarix, növ) üzrə «risklər»ə köçürülür
+  (xanaları ilə; eyni tələbənin hədəf qeydiyyatına).
 
 İdempotentdir: ikinci qaçışda heç nə yazılmır (``*_already``/``*_missing`` sayılır). Şəxsi məlumat yoxdur — YALNIZ id-lər.
 """
@@ -24,8 +26,8 @@ from django.apps import apps as django_apps
 from core.audit import log_action
 from core.constants import AuditAction
 
-from .twin_merge import Merger
-from .twin_relocate import recompute_absences
+from .twin_merge import _LESSON_FIELDS, Merger
+from .twin_relocate import copy_mark, corrected_lesson_ids, recompute_absences
 
 MR209_LESSON = "3ccd42ac-ab03-4c2f-b476-d55a49e5c17c"
 MR209_OFFERING = "cd28c966-3150-45e7-9c98-b5d1f74752f6"
@@ -109,6 +111,21 @@ MR225_PAIRS = (
     },
 )
 MR218_REASON = "MR-000218: müəllimin xahişi — 29.10 aralıq imtahanı günü, seminar dərsi yazılmamalı idi"
+#: «Kurortlar» (c2c20745) jurnalındakı «risklər» dərsləri → «Beynəlxalq turizm sferasında risklər» (4dbac766).
+MR225_MOVE_SOURCE = "c2c20745-0e1b-4bb6-8187-144f5634d2e4"
+MR225_MOVE_TARGET = "4dbac766-8f26-455e-b8c3-646eca67b002"
+#: Köhnə 14261-in tarixləri (kurortlar 14678-in heç bir (tarix, növ) cütü ilə üst-üstə düşmür).
+MR225_MOVE_KEYS = (
+    ("2026-09-15", "lecture"),
+    ("2026-09-22", "lecture"),
+    ("2026-09-24", "seminar"),
+    ("2026-10-06", "seminar"),
+    ("2026-10-06", "lecture"),
+    ("2026-10-13", "lecture"),
+    ("2026-10-20", "lecture"),
+    ("2026-10-20", "seminar"),
+)
+MR225_REASON = "MR-000225: köhnə 14261 «risklər» dərsləri səhvən «kurortlar» jurnalına birləşmişdi — geri köçürülür"
 
 
 def _model(name):
@@ -220,7 +237,52 @@ def fix_mr218(*, organization, actor, counts) -> None:
         recompute_absences(list(Enrollment.objects.filter(offering_id=offering_id)))
 
 
+def move_mr225_lessons(*, organization, actor, counts) -> None:
+    Lesson, Enrollment = _model("Lesson"), _model("Enrollment")
+    target_rows = {row.student_id: row for row in Enrollment.objects.filter(offering_id=MR225_MOVE_TARGET)}
+    touched = []
+    for date, kind in MR225_MOVE_KEYS:
+        lessons = list(
+            Lesson.objects.filter(organization=organization, offering_id=MR225_MOVE_SOURCE, date=date, kind=kind)
+        )
+        if len(lessons) != 1:
+            counts["moved_lessons_missing" if not lessons else "moved_lessons_ambiguous"] += 1
+            continue
+        lesson = lessons[0]
+        if corrected_lesson_ids([lesson.pk]):
+            counts["moved_lessons_corrected_kept"] += 1
+            continue
+        marks = list(lesson.marks.select_related("enrollment").order_by("created_at"))
+        if any(mark.enrollment.student_id not in target_rows for mark in marks):
+            counts["moved_lessons_enrollment_missing"] += 1
+            continue
+        twin = Lesson.objects.create(
+            organization=organization,
+            offering_id=MR225_MOVE_TARGET,
+            **{name: getattr(lesson, name) for name in _LESSON_FIELDS},
+        )
+        Lesson.objects.filter(pk=twin.pk).update(created_at=lesson.created_at)
+        for mark in marks:
+            copy_mark(mark, lesson=twin, enrollment=target_rows[mark.enrollment.student_id])
+            touched.append(mark.enrollment)
+        _audit(
+            organization=organization,
+            actor=actor,
+            obj=twin,
+            old={"lesson": str(lesson.pk), "offering": MR225_MOVE_SOURCE, "date": date, "kind": kind},
+            new={"offering": MR225_MOVE_TARGET, "marks": len(marks)},
+            reason=MR225_REASON,
+            resource_type="registrar.Lesson",
+        )
+        lesson.delete()
+        counts["moved_lessons"] += 1
+        counts["moved_marks"] += len(marks)
+    if touched:
+        recompute_absences(list({row.pk: row for row in touched}.values()) + list(target_rows.values()))
+
+
 def run(*, organization, actor, counts) -> None:
     fix_mr209(organization=organization, actor=actor, counts=counts)
     fix_mr218(organization=organization, actor=actor, counts=counts)
     Merger(organization=organization, actor=actor, counts=counts).run([dict(pair) for pair in MR225_PAIRS])
+    move_mr225_lessons(organization=organization, actor=actor, counts=counts)
