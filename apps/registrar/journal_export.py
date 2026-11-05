@@ -221,7 +221,7 @@ def build_journal_workbook(*, offering, journal, finals) -> bytes:
                 result["letter"] if result["graded"] else "",
                 float(result["bonus"]) if result["bonus"] else "",
                 str(outcome),
-                float(resit.resit_score) if resit is not None and resit.resit_score is not None else "",
+                float(resit.resit_score) if result["resit_done"] else "",
                 result.get("comment", ""),
             ],
         )

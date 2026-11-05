@@ -81,6 +81,7 @@ from apps.registrar.models import (
     FinalGrade,
     LessonMark,
     ResitRecord,
+    ResitStatus,
     StudentAcademicRecord,
 )
 from core.program_codes import program_display_code
@@ -192,7 +193,9 @@ def _exam_map(enrollment_ids) -> dict:
 
 def _resit_map(enrollment_ids) -> dict:
     rows = (
-        ResitRecord.objects.filter(enrollment_id__in=enrollment_ids, resit_score__isnull=False)
+        ResitRecord.objects.filter(
+            enrollment_id__in=enrollment_ids, status=ResitStatus.COMPLETED, resit_score__isnull=False
+        )
         .annotate(key_text=_text("enrollment_id"))
         .values_list("key_text", "resit_score")
     )

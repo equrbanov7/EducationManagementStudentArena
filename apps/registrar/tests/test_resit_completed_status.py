@@ -2,10 +2,12 @@
 
 from decimal import Decimal
 
-from apps.registrar import analytics, finals, finals_batch, gradebook
+from apps.accounts import academic_records, academic_summary
+from apps.registrar import absence_evidence, analytics, analytics_fast, finals, finals_batch, gradebook
 from apps.registrar.models import Enrollment, ResitReason, ResitRecord, ResitStatus
 from core.rls import bypass_rls
 
+from .test_analytics_fast_path import _legacy_period_analytics
 from .test_corrections_bridge import _BaseJournalSetup
 from .test_exam_eligibility_frozen import _lock_journal, _stamp_migrated
 
@@ -35,6 +37,20 @@ class CompletedResitGateTests(_BaseJournalSetup):
         self.assertEqual(batched["resit_done"], canonical["resit_done"])
         self.assertEqual(mirror["total"], canonical["total"])
         self.assertEqual(mirror["barred"], canonical["barred"])
+        with bypass_rls():
+            preview = absence_evidence.absence_counter_preview(
+                organization_id=self.org.pk, added_hours_by_enrollment={enrollment.pk: 0}
+            )[0]
+            fast_period = analytics_fast.build_period_analytics(organization=self.org, period=self.period)
+            expected_period = _legacy_period_analytics(self.org, self.period)
+            fast_summary = academic_records._new_acc()
+            academic_summary.accumulate_summary(self.org, Enrollment.objects.filter(pk=enrollment.pk), fast_summary)
+        for phase in ("before", "after"):
+            self.assertEqual(preview[f"eligibility_{phase}"]["barred"], canonical["barred"])
+        self.assertEqual(fast_period, expected_period)
+        expected_summary = academic_records._new_acc()
+        academic_records._accumulate(expected_summary, mirror)
+        self.assertEqual(fast_summary, expected_summary)
         return canonical
 
     def test_eligible_resit_score_is_not_an_authorized_result(self):
@@ -58,6 +74,18 @@ class CompletedResitGateTests(_BaseJournalSetup):
         result = self._results()
         self.assertFalse(result["resit_done"])
         self.assertEqual(result["effective_exam"], Decimal("20"))
+
+    def test_preview_added_hours_cannot_use_pending_score_to_lift_bar(self):
+        self._absent_lesson(1, hours=8)
+        self._resit(ResitStatus.ELIGIBLE, 45)
+        with bypass_rls():
+            preview = absence_evidence.absence_counter_preview(
+                organization_id=self.org.pk, added_hours_by_enrollment={self.enrollment.pk: 8}
+            )[0]
+        self.assertFalse(preview["eligibility_before"]["barred"])
+        self.assertTrue(preview["eligibility_after"]["barred"])
+        self.enrollment.refresh_from_db()
+        self.assertEqual(self.enrollment.absence_hours, 0)
 
     def test_completed_resit_with_score_still_lifts_the_absence_bar(self):
         for day in (1, 2, 3):

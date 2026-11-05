@@ -17,6 +17,9 @@ bu qeyd və aşağıdakı xüsusi siyahı ilə davam üçün saxlamaq tapşırı
 - Yoxlanmış commitlər: `4cc1f6788` (sillabus scope), `428c3c06b` (şifrəli audit),
   `2ba4e94c0` (qiymət, apellyasiya və purge qoruması), `97e17dddd` (Solmaz host
   diaqnostikası), `c77f1f6d0` (final zalının bağlanmasında deadlock). Deploy hələ edilməyib.
+- Draft PR: <https://github.com/equrbanov7/EducationManagementStudentArena/pull/204>.
+  İlkin CI-də lint, Docker, secret/security scan və prod-smoke keçib; son commit
+  üçün bütün tələb olunan yoxlamalar ayrıca tamamlanmalıdır.
 
 ## Hazırlanan proqram düzəlişləri
 
@@ -40,6 +43,9 @@ bu qeyd və aşağıdakı xüsusi siyahı ilə davam üçün saxlamaq tapşırı
    rəqəmsal apellyasiyanın mənbə sübutu append-only auditdə saxlanır. Arada daha
    üstün sənədli bal varsa nəticəni boşaltmaq əvəzinə purge bloklanır.
 9. Kağız Midterm və sənədli final nəticəsi köhnə rəqəmsal cəhd replay-i ilə əzilmir.
+10. Tamamlanmamış resit QB önizləməsində, fast analitikada, tələbə xülasəsində və
+    Excel ixracında rəsmi nəticə sayılmır. Tələbə xülasəsi də donmuş tarixi dövrdə
+    əsas/təkrar imtahanın maksimumu üzrə canonical qaydanı istifadə edir.
 
 ## Yoxlamalar
 
@@ -52,6 +58,7 @@ bu qeyd və aşağıdakı xüsusi siyahı ilə davam üçün saxlamaq tapşırı
   `end_room` xarici lock sırasındakı deadlock-u real PostgreSQL ilə təkrar yaratdı;
   düzəlişdən sonra final-center/completion/yeni yarış üzrə 107 test keçib.
 - Solmaz host diaqnostikası və private transport: 61 test keçib.
+- Əlavə resit/QB/fast summary uyğunluğu: 22 test; Excel ixracı və tələbə kartı: 26 test keçib.
 - Bu dəstlərin bəziləri kəsişir; saylar unikal test cəmi kimi toplanmamalıdır.
 - Modul ölçüsü, modul/public API sərhədləri, bütün repo black/isort/flake8,
   `manage.py check` və `makemigrations --check --dry-run` keçib. Son əlavə dəyişikliklərdən
@@ -102,6 +109,10 @@ avtomatik düzəldiyini sübut etmir.
 - Paralel qeydiyyat, 9/10 ziddiyyəti və təkrar QB namizədlərində düzgün saxlanacaq
   jurnal və real davamiyyət mənbəyi təsdiqlənməlidir. Maksimum bal seçmək, QB-ni
   silmək və ya artırmaq şübhədən avtomatik nəticə çıxarmaq deyil.
+- İki inactive jurnalın absence cache-i üçün əlavə read-only capture aparılır.
+  Birinci qeyd 2 noyabrda 5 real absent xana/10 saat ilə uyğun idi, sonra dərslər
+  silinib. Cari raw=0 olması tarixi qayıbın səhv olduğunu sübut etmir; silinmə və
+  köçürmə qərarının authority izi tapılmadan counter avtomatik sıfırlanmamalıdır.
 - Günel/233KE/Optimallaşdırma və Claude-un MR-159/165/167/203, MR-171/110, MR-183
   işləri təkrar tətbiq edilmir; Claude bitirdikdən sonra nəticə yenidən yoxlanır.
 

@@ -9,7 +9,7 @@ from .absence_limit import limit_percent_map_for_students
 from .exam_eligibility import exempt_student_ids, frozen_offering_ids, lesson_hours_map
 from .exam_eligibility_services import get_exam_eligibility
 from .guest_merge import carry_over_map
-from .models import Enrollment, ResitRecord
+from .models import Enrollment, ResitRecord, ResitStatus
 
 
 def absence_counter_preview(*, organization_id, added_hours_by_enrollment):
@@ -48,9 +48,9 @@ def absence_counter_preview(*, organization_id, added_hours_by_enrollment):
     offerings = {row.offering_id for row in rows}
     frozen, denominators = frozen_offering_ids(offerings), lesson_hours_map(offerings)
     resit = set(
-        ResitRecord._base_manager.filter(enrollment_id__in=keys, resit_score__isnull=False).values_list(
-            "enrollment_id", flat=True
-        )
+        ResitRecord._base_manager.filter(
+            enrollment_id__in=keys, status=ResitStatus.COMPLETED, resit_score__isnull=False
+        ).values_list("enrollment_id", flat=True)
     )
     output = []
     for enrollment in rows:
