@@ -154,6 +154,24 @@ class JournalExportTest(TestCase):
             cells = [str(c.value) for row in ws.iter_rows() for c in row if c.value]
             self.assertIn("Vəliyev Əli Həsən", cells, ws.title)
 
+    def test_export_only_shows_completed_resit_score(self):
+        from openpyxl import load_workbook
+
+        from apps.registrar.models import ResitRecord, ResitStatus
+
+        for status, expected in ((ResitStatus.ELIGIBLE, None), (ResitStatus.COMPLETED, 49)):
+            with self.subTest(status=status), bypass_rls():
+                ResitRecord.objects.update_or_create(
+                    organization=self.org,
+                    enrollment=self.enrollment,
+                    defaults={"reason": "exam", "status": status, "resit_score": 49},
+                )
+            response = self._client(self.teacher).get(self._url())
+            self.assertEqual(response.status_code, 200)
+            sheet = load_workbook(BytesIO(response.content)).worksheets[1]
+            row = next(row for row in sheet.iter_rows() if row[0].value == "Vəliyev Əli")
+            self.assertEqual(row[7].value, expected)
+
     def test_student_cannot_export(self):
         resp = self._client(self.student).get(self._url())
         self.assertEqual(resp.status_code, 404)

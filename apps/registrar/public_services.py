@@ -72,6 +72,7 @@ from .correction_reversals import revert_last_lesson_correction  # noqa: F401
 from .corrections import CORRECT_PERMISSION  # noqa: F401
 from .corrections import apply_correction, apply_lesson_correction  # noqa: F401
 from .curriculum_registry import build_curriculum_editor  # noqa: F401
+from .finals import effective_exam_score  # noqa: F401
 from .gradebook import recompute_absence_hours  # noqa: F401
 from .grading_scale import bands_text  # noqa: F401
 from .grading_scale import is_custom  # noqa: F401
@@ -113,6 +114,7 @@ __all__ = [
     "absence_counter_preview",
     "credit_hours_map",
     "effective_hours",
+    "effective_exam_score",
     "carry_over_map",
     "validate_active_student_member",
     "create_reviewed_subject",

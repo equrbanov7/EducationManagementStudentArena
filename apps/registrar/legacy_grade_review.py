@@ -14,15 +14,15 @@ KATEQORİYA NECƏ DOĞULUR
    ``linked``-dən başqa hər üzvü avtomatik bir kateqoriyaya çevrilir
    (:func:`category_specs` enum üzərində dövr edir). Enum-a yeni üzv əlavə
    olunsa, kateqoriya BU MODULA TOXUNMADAN siyahıda peyda olur.
-2. **Faktın öz xam dəyərlərindən** — diapazon, canlı balla fərq, kəsilmə halında
-   imtahan balının mövcudluğu. Bunlar enum dəyəri deyil, ona görə predikat kimi
+2. **Faktın öz xam dəyərlərindən** — diapazon, canlı balla fərq, naməlum tarixi
+   bal şkalası. Bunlar enum dəyəri deyil, ona görə predikat kimi
    yazılıb; hər biri YALNIZ faktın öz sütunlarına və canlı ``FinalGrade``-ə baxır.
 
 ⚠️ «Bal cəmi / 100 bal bölgüsü» mövzusuna QƏSDƏN toxunulmur: burada heç bir
 kateqoriya ``yekun = giriş + imtahan`` kimi arifmetika QURMUR. «İmtahan balı
 yekunla uyğun deyil» halı da düstur yolu ilə deyil, **canlı sistemdəki
-``FinalGrade.exam_score`` ilə müqayisə** yolu ilə tapılır — yəni köçürmənin
-özünün dəqiqliyi ölçülür, universitetin qiymətləndirmə qaydası yox.
+``FinalGrade.exam_score`` ilə müqayisə** yolu ilə tapılır. Fərq rəsmi nəticə ilə
+uzlaşdırılmalıdır; sonrakı apellyasiya və ya ayrı cəhd səbəbi də ola bilər.
 
 ⚠️ Sübut qatı APPEND-ONLY qalır: bu modul heç nə yazmır. Yazı
 ``legacy_grade_review_actions``-dadır və o da yalnız YENİ sətir yaradır.
@@ -40,6 +40,14 @@ from django.utils.translation import pgettext_lazy
 from core.search_text import tolerant_q
 
 from .grading_scale import bands_for
+from .legacy_grade_review_rules import (
+    LEGACY_ENTRY_MAX,
+    LEGACY_EXAM_MAX,
+    LEGACY_FINAL_MAX,
+    LEGACY_RESIT_MAX,
+)
+from .legacy_grade_review_rules import out_of_range_condition as _out_of_range_condition
+from .legacy_grade_review_rules import unknown_scale_condition
 from .models import (
     LegacyGradeFact,
     LegacyGradeMappingStatus,
@@ -52,23 +60,7 @@ from .models.legacy_grade import LEGACY_GRADE_REVIEW_PERMISSION
 # ``pgettext``-in kontekst arqumentini yalnız hərfi sətir olanda oxuya bilir —
 # dəyişən verilsə sətri SƏSSİZCƏ atır və mətn heç bir dilə çıxmır.
 
-# ── Köhnə mənbənin öz bal hədləri ────────────────────────────────────────────
-#
-# Bu hədlər cari sistemin qiymətləndirmə sxemi DEYİL — köçürməni aparan
-# ``apps/legacy_import/services/rehearsal_legacy_grade_facts_source.py``-dakı
-# ``_score_range_rules`` funksiyasının işlətdiyi MƏNBƏ hədləridir. Ora birbaşa
-# import etmirik: ``registrar → legacy_import`` yeni modul-sərhəd tili (və dövr)
-# açardı. Əvəzində dəyərlərin eyni qalması testlə kilidlənir
-# (``test_legacy_grade_review.py::test_source_bounds_match_importer``) — yəni
-# həqiqət mənbəyi yenə importerdir, sadəcə qapı testdən keçir.
-#
-# Təkrar-imtahan da mənbənin imtahan xanası ilə eyni 0..50 şkalasındadır.
-# İmporter bunu ayrıca ``resit`` arqumenti ilə yoxlayır; aşağıdakı güzgü
-# dəyərlərin eyni qalmasını test kilidləyir.
-LEGACY_ENTRY_MAX = Decimal("50")
-LEGACY_EXAM_MAX = Decimal("50")
-LEGACY_RESIT_MAX = Decimal("50")
-LEGACY_FINAL_MAX = Decimal("100")
+# Range review uses source-aware predicates, not the importer's blanket 50 cap.
 
 
 class Severity:
@@ -121,6 +113,7 @@ _STATUS_HINTS = {
 CATEGORY_LIVE_MISMATCH = "live_exam_mismatch"
 CATEGORY_OUT_OF_RANGE = "out_of_range"
 CATEGORY_FAILED_WITH_EXAM = "failed_with_exam_score"
+CATEGORY_SCALE_UNKNOWN = "scale_unknown"
 
 
 class CategorySpec(NamedTuple):
@@ -137,26 +130,12 @@ class CategorySpec(NamedTuple):
 def pass_threshold(organization) -> Decimal:
     """Təşkilatın öz hərf şkalasından «kəsilmə» həddi (sabit 51 DEYİL).
 
-    Şkala tenant-konfiqurasiyalıdır (``grading_scale.bands_for``); ən aşağı
-    keçid bantının həddini götürürük, yəni universitet şkalanı dəyişsə bu
-    kateqoriya da onunla birlikdə sürüşür.
+    Uyğunluq üçün saxlanmış accessor: ən aşağı keçid bantının həddini götürür.
+    Keçid həddindən aşağı nəticə təkbaşına məlumat səhvi kateqoriyası yaratmır.
     """
     bands = bands_for(organization)
     # Sonuncu bant həmişə 0-dır (kəsilmə bantı); ondan bir yuxarısı ən aşağı keçid.
     return Decimal(bands[-2][0]) if len(bands) >= 2 else Decimal("51")
-
-
-def _out_of_range_condition() -> Q:
-    """Xam dəyər mənbənin öz hədlərindən kənardadırmı (NULL sahə iştirak etmir)."""
-    condition = Q(pk__in=())
-    for field, ceiling in (
-        ("entry_score", LEGACY_ENTRY_MAX),
-        ("exam_score", LEGACY_EXAM_MAX),
-        ("resit_score", LEGACY_RESIT_MAX),
-        ("final_score", LEGACY_FINAL_MAX),
-    ):
-        condition |= Q(**{f"{field}__lt": Decimal("0")}) | Q(**{f"{field}__gt": ceiling})
-    return condition
 
 
 # ── Qərardan sonra da növbədə qalmaq («yapışqan» kateqoriya) ─────────────────
@@ -230,8 +209,8 @@ def category_specs(organization) -> tuple[CategorySpec, ...]:
             label=pgettext_lazy("registrar.legacy_grade_review", "İmtahan balı canlı sistemlə uyğun deyil"),
             hint=pgettext_lazy(
                 "registrar.legacy_grade_review",
-                "Köhnə sistemin imtahan xanası ilə cari sistemdəki imtahan balı fərqlidir — "
-                "köçürmə bu sətirdə dəyəri dəyişib.",
+                "Tarixi mənbə balı ilə cari imtahan balı fərqlidir. Son rəsmi nəticə, cəhd və "
+                "apellyasiya qərarı ilə uzlaşdırılmalıdır; fərq təkbaşına bal itkisini sübut etmir.",
             ),
             severity=Severity.CRITICAL,
             source="raw_value",
@@ -256,21 +235,28 @@ def category_specs(organization) -> tuple[CategorySpec, ...]:
             condition=_out_of_range_condition(),
         ),
         CategorySpec(
+            code=CATEGORY_SCALE_UNKNOWN,
+            label=pgettext_lazy("registrar.legacy_grade_review", "Tarixi bal şkalası dəqiqləşdirilməlidir"),
+            hint=pgettext_lazy(
+                "registrar.legacy_grade_review",
+                "Xam bal 50-dən yüksəkdir, lakin bu mənbəyə 50-ballıq həddin aid olduğu təsdiqlənməyib. "
+                "Mənbənin şkalası yoxlanılmalıdır; bal avtomatik səhv sayılmır.",
+            ),
+            severity=Severity.WATCH,
+            source="raw_value",
+            condition=unknown_scale_condition(),
+        ),
+        CategorySpec(
             code=CATEGORY_FAILED_WITH_EXAM,
             label=pgettext_lazy("registrar.legacy_grade_review", "Kəsilib, amma imtahan balı var"),
             hint=pgettext_lazy(
                 "registrar.legacy_grade_review",
-                "Köhnə yekun kəsilmə həddindən aşağıdır, buna baxmayaraq imtahan xanasında "
-                "bal yazılıb — birinin səhv olduğu aydındır.",
+                "Müsbət imtahan balı ilə yekundan kəsilmək mümkündür. Bu hal təkbaşına məlumat səhvi deyil.",
             ),
             severity=Severity.WARN,
             source="raw_value",
-            condition=Q(
-                final_score__isnull=False,
-                final_score__lt=pass_threshold(organization),
-                exam_score__isnull=False,
-                exam_score__gt=Decimal("0"),
-            ),
+            # Retain the filter code, but do not queue legitimate failed results.
+            condition=Q(pk__in=()),
         ),
     ]
     # Uyğunlaşdırma statusundan AVTOMATİK doğulanlar — siyahı enum-dan gəlir.
@@ -370,8 +356,8 @@ def unit_subtree_ids(organization, unit_id):
 def annotated_facts(*, organization, user=None):
     """Təşkilatın bütün faktları + canlı bal güzgüsü.
 
-    ``live_exam_score`` cari ``FinalGrade.exam_score``-dur: köçürmənin dəqiqliyi
-    məhz onunla müqayisədə ölçülür.
+    ``live_exam_score`` cari ``FinalGrade.exam_score``-dur: tarixi mənbə ilə
+    fərq görünür, lakin hansı dəyərin son rəsmi nəticə olduğunu özü sübut etmir.
 
     NİYƏ JOIN, NİYƏ SUBQUERY YOX
     ----------------------------
@@ -567,6 +553,7 @@ __all__ = [
     "CATEGORY_FAILED_WITH_EXAM",
     "CATEGORY_LIVE_MISMATCH",
     "CATEGORY_OUT_OF_RANGE",
+    "CATEGORY_SCALE_UNKNOWN",
     "CategorySpec",
     "LEGACY_ENTRY_MAX",
     "LEGACY_EXAM_MAX",

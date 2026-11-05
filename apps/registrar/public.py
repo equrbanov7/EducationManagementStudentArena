@@ -21,6 +21,7 @@ from apps.registrar.exam_bridge import (
     exam_result_summary,
     record_exam_result,
     record_final_result,
+    resolve_exam_result_target,
 )
 from apps.registrar.gradebook_marks import recompute_absence_hours_many
 from apps.registrar.integrity import eligible_instructor_user_ids
@@ -34,8 +35,7 @@ from apps.registrar.teaching_hours import recorded_teaching_hours
 from . import student_display_policy as student_policy
 from .student_display_policy import absence_usage  # noqa: F401 — query-free dashboard public contract
 
-# İmtahan mərkəzi ↔ jurnal körpüsü — exams tərəfindən bu fasad üzərindən çağırılır
-# (apps/registrar/exam_bridge.py). Re-eksport, boundary-safe.
+# İmtahan mərkəzi ↔ jurnal körpüsü — exams bu fasad üzərindən çağırır (exam_bridge.py).
 __all__ = [
     "recorded_teaching_hours",
     "eligible_instructor_user_ids",
@@ -56,6 +56,7 @@ __all__ = [
     "exam_result_summary",
     "record_exam_result",
     "record_final_result",
+    "resolve_exam_result_target",
     "record_midterm_result",
     "student_group_changed",
 ]

@@ -5,7 +5,8 @@ iki variant var:
 
 1. **Yalnız bu tələbə** — mövcud qərar (``decisions.accept_appeal_item``): sabit +1 bal;
 2. **Açar səhvdir → hamı üçün** — bu modul: düzgün variant(lar) seçilir, səbəb yazılır və
-   həmin imtahanın bu sualını cavablayan hər bitmiş (sınaq olmayan) cəhd yoxlanılır. Yeni
+   həmin imtahanın bu sualını cavablayan hər bitmiş (sınaq olmayan) cəhd yoxlanılır;
+   aktiv düzəliş sonradan bitən cəhdlərə də completion hook-u ilə tətbiq olunur. Yeni
    açara UYĞUN cavab verib köhnə açarla səhv sayılan tələbəyə sualın TAM (çatdırılma anındakı) balı
    verilir — sahib 2026-10-14: «tam bal verilsin» (əvvəl sabit +1 idi).
 
@@ -239,6 +240,8 @@ def apply_key_correction(item, *, reviewer, corrected_option_ids, reason, reques
     if getattr(exam, "exam_type", None) != "test":
         raise _error("Açar düzəlişi yalnız test (variantlı) suallar üçündür.")
     question = item.question
+    if question.exam_id != exam.pk or item.appeal.organization_id != exam.organization_id:
+        raise _error("Sual və apellyasiya eyni imtahana və təşkilata aid olmalıdır.")
     # Eyni sual üçün paralel iki düzəlişi ardıcıllaşdır (sual sətri kilidi).
     type(question).objects.select_for_update().filter(pk=question.pk).first()
     if active_correction_for(question.pk) is not None:

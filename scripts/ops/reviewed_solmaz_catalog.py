@@ -8,6 +8,7 @@ import re
 import shutil
 import subprocess
 import sys
+from contextlib import contextmanager
 from pathlib import Path
 
 from fixed_release_asset import download
@@ -28,6 +29,34 @@ MAX_SOURCE = 2 * 1024 * 1024
 
 class Refused(ValueError):
     pass
+
+
+PHASE_CODES = {
+    "deployed_head": "solmaz_host_deployed_head_refused",
+    "download": "solmaz_host_download_refused",
+    "key_missing": "solmaz_host_key_missing",
+    "decrypt": "solmaz_host_decrypt_refused",
+    "transfer": "solmaz_host_transfer_refused",
+    "command": "solmaz_host_command_refused",
+    "summary": "solmaz_host_summary_refused",
+}
+
+
+class HostPhaseRefused(ValueError):
+    def __init__(self, phase):
+        self.code = PHASE_CODES.get(phase, "solmaz_host_refused")
+        super().__init__(self.code)
+
+
+@contextmanager
+def phase(name):
+    """Only a closed stage code crosses the host boundary; never exception text."""
+    try:
+        yield
+    except (HostPhaseRefused, Refused):
+        raise
+    except Exception:
+        raise HostPhaseRefused(name) from None
 
 
 def summary(raw, *, apply, undo, baseline=""):
@@ -125,23 +154,30 @@ def safe_failure(stderr):
 
 
 def source(folder, env):
-    cipher = download(
-        repo=REPO,
-        tag=TAG,
-        asset=ASSET,
-        target=folder / ASSET,
-        sha256=CIPHER_SHA,
-        max_bytes=MAX_SOURCE,
-        token=env.get("GH_TOKEN"),
-    )
-    if (
-        cipher.is_symlink()
-        or not cipher.is_file()
-        or not 0 < cipher.stat().st_size <= MAX_SOURCE
-        or hashlib.sha256(cipher.read_bytes()).hexdigest() != CIPHER_SHA
-        or not env.get("STAFF_PLAN_KEY")
-    ):
-        raise ValueError("solmaz_fixed_cipher_and_key_required")
+    with phase("download"):
+        cipher = download(
+            repo=REPO,
+            tag=TAG,
+            asset=ASSET,
+            target=folder / ASSET,
+            sha256=CIPHER_SHA,
+            max_bytes=MAX_SOURCE,
+            token=env.get("GH_TOKEN"),
+        )
+        if (
+            cipher.is_symlink()
+            or not cipher.is_file()
+            or not 0 < cipher.stat().st_size <= MAX_SOURCE
+            or hashlib.sha256(cipher.read_bytes()).hexdigest() != CIPHER_SHA
+        ):
+            raise ValueError("solmaz_fixed_cipher_required")
+    if not env.get("STAFF_PLAN_KEY"):
+        raise HostPhaseRefused("key_missing")
+    with phase("decrypt"):
+        return _decrypt(folder, cipher, env)
+
+
+def _decrypt(folder, cipher, env):
     target = folder / "source.json"
     result = subprocess.run(
         [
@@ -179,47 +215,57 @@ def execute(value, env):
     if not all(isinstance(v, str) and re.fullmatch(r"[1-9][0-9]*", v) for v in (run, attempt)):
         raise ValueError("solmaz_workflow_identity_required")
     print("::add-mask::" + actor, flush=True)
-    verify_head(env.get("GITHUB_SHA", ""))
-    folder = Path(env["RUNNER_TEMP"]) / f"reviewed-solmaz-{run}-{attempt}"
-    folder.mkdir(mode=0o700)
+    with phase("deployed_head"):
+        verify_head(env.get("GITHUB_SHA", ""))
+    with phase("download"):
+        folder = Path(env["RUNNER_TEMP"]) / f"reviewed-solmaz-{run}-{attempt}"
+        folder.mkdir(mode=0o700)
     remote = f"/tmp/wcu-reviewed-solmaz-{run}-{attempt}"
     try:
         target = source(folder, env)
-        command(["docker", "exec", CONTAINER, "mkdir", "-m", "700", remote])
-        write_private_source(target, remote + "/source.json", SOURCE_SHA, container=CONTAINER)
-        result = subprocess.run(
-            [
-                "docker",
-                "exec",
-                CONTAINER,
-                "python",
-                "manage.py",
-                "repair_reviewed_solmaz_catalog",
-                *args,
-                "--manifest",
-                remote + "/source.json",
-                "--manifest-sha256",
-                SOURCE_SHA,
-            ],
-            capture_output=True,
-            text=True,
-            timeout=540,
-        )
-        if len(result.stdout) + len(result.stderr) > 65536:
-            raise ValueError("solmaz_output_budget")
-        if result.returncode:
-            raise Refused(safe_failure(result.stderr))
-        if result.stderr:
-            raise ValueError("solmaz_unexpected_stderr")
-        parsed = summary(result.stdout, apply=apply, undo=undo, baseline=value.get("baseline", ""))
+        with phase("transfer"):
+            command(["docker", "exec", CONTAINER, "mkdir", "-m", "700", remote])
+            write_private_source(target, remote + "/source.json", SOURCE_SHA, container=CONTAINER)
+        with phase("command"):
+            result = subprocess.run(
+                [
+                    "docker",
+                    "exec",
+                    CONTAINER,
+                    "python",
+                    "manage.py",
+                    "repair_reviewed_solmaz_catalog",
+                    *args,
+                    "--manifest",
+                    remote + "/source.json",
+                    "--manifest-sha256",
+                    SOURCE_SHA,
+                ],
+                capture_output=True,
+                text=True,
+                timeout=540,
+            )
+            if len(result.stdout) + len(result.stderr) > 65536:
+                raise ValueError("solmaz_output_budget")
+            if result.returncode:
+                raise Refused(safe_failure(result.stderr))
+            if result.stderr:
+                raise ValueError("solmaz_unexpected_stderr")
+        with phase("summary"):
+            parsed = summary(result.stdout, apply=apply, undo=undo, baseline=value.get("baseline", ""))
         print(result.stdout.strip())
         return parsed
     finally:
+        failing = sys.exc_info()[0] is not None
         try:
             command(["docker", "exec", CONTAINER, "rm", "-rf", "--", remote])
         except Exception:
             pass
-        shutil.rmtree(folder)
+        try:
+            shutil.rmtree(folder)
+        except Exception:
+            if not failing:
+                raise HostPhaseRefused("transfer") from None
 
 
 def main():
@@ -227,8 +273,15 @@ def main():
     try:
         event = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_bytes())
         execute(event.get("inputs"), os.environ)
+    except HostPhaseRefused as exc:
+        print(exc.code, file=sys.stderr)
+        return 2
     except Refused as exc:
-        print(str(exc), file=sys.stderr)
+        try:
+            code = safe_failure("CommandError: " + str(exc))
+        except Exception:
+            code = "solmaz_command_refused"
+        print(code, file=sys.stderr)
         return 2
     except Exception:
         print("solmaz_host_refused", file=sys.stderr)

@@ -136,7 +136,8 @@ def test_copy_failure_cleans_both_locations_without_management(tmp_path, monkeyp
         host, "write_private_source", lambda *a, **k: (_ for _ in ()).throw(ValueError("private_source_write_failed"))
     )
     with patch.object(host.subprocess, "run") as run:
-        with pytest.raises(ValueError, match="private_source_write_failed"):
+        error = "solmaz_host_transfer_refused" if name == "reviewed_solmaz_catalog" else "private_source_write_failed"
+        with pytest.raises(ValueError, match=error):
             host.execute(
                 {"actor": "fixture.admin"},
                 dict(GITHUB_RUN_ID="1", GITHUB_RUN_ATTEMPT="1", GITHUB_SHA="a" * 40, RUNNER_TEMP=str(tmp_path)),

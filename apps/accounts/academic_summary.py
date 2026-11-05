@@ -54,9 +54,10 @@ from apps.registrar.models import (
     FinalGrade,
     LessonMark,
     ResitRecord,
+    ResitStatus,
     StudentAcademicRecord,
 )
-from apps.registrar.public import analytics, credit_source
+from apps.registrar.public import analytics, credit_source, effective_exam_score
 from apps.registrar.public import eligibility_rules as exam_eligibility
 from apps.registrar.public import entry_standard, selfwork_points
 
@@ -178,7 +179,9 @@ def _exam_map(enrollment_ids) -> dict:
 
 def _resit_map(enrollment_ids) -> dict:
     rows = (
-        ResitRecord.objects.filter(enrollment_id__in=enrollment_ids, resit_score__isnull=False)
+        ResitRecord.objects.filter(
+            enrollment_id__in=enrollment_ids, status=ResitStatus.COMPLETED, resit_score__isnull=False
+        )
         .annotate(key_text=_text("enrollment_id"))
         .values_list("key_text", "resit_score")
     )
@@ -390,7 +393,7 @@ def accumulate_summary(organization, enrollment_qs, acc) -> None:
         exam, bonus = exams.get(enrollment_key, (None, _ZERO))
         resit = resits.get(enrollment_key)
         resit_done = resit is not None
-        effective = resit if resit_done else exam
+        effective = effective_exam_score(exam, resit, legacy=bool(frozen))
         graded = effective is not None
 
         total = entry

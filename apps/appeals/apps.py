@@ -51,6 +51,10 @@ class AppealsConfig(AppConfig):
         score_adjustments.register("is_applicable", appeal_applicable)
         score_adjustments.register("deadline", appeal_deadline)
 
+        from .services.key_correction_completion import apply_active_key_corrections
+
+        score_adjustments.register("finish_corrections", apply_active_key_corrections)
+
         from .services.summary import appeal_status_by_attempt
 
         score_adjustments.register("status_by_attempt", appeal_status_by_attempt)

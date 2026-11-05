@@ -93,12 +93,13 @@ class _ReviewSetup(_BaseJournalSetup):
 
 
 class CategoryDerivationTests(_ReviewSetup):
-    def test_source_bounds_match_the_importer_rule(self):
-        """Hədlər köçürmə qaydası ilə EYNİ olmalıdır — dublikat testlə kilidlənir.
+    def test_ordinary_source_bounds_match_the_importer_defaults(self):
+        """Adi mənbə hədləri importer-in ilkin 50/100 sərhədləri ilə eynidir.
 
         ``registrar`` modul-sərhəd qaydasına görə ``legacy_import``-u import edə
         bilmir, ona görə dəyərlər orada yazılıb burada yoxlanılır. Bu test yeganə
-        yerdir ki, hər iki tərəfi eyni anda görür (testlər sərhəd gate-indən azaddır).
+        yerdir ki, hər iki tərəfi eyni anda görür. Review qatı tarixi şkala
+        istisnalarını ayrıca tətbiq edir; append-only import faktına toxunmur.
         """
         from apps.legacy_import.services import rehearsal_legacy_grade_facts_source as importer
 
@@ -168,18 +169,20 @@ class CategoryDerivationTests(_ReviewSetup):
             0,
         )
 
-    def test_failed_with_exam_score_follows_the_tenant_letter_scale(self):
-        """Kəsilmə həddi SABİT 51 deyil — universitetin öz şkalasından gəlir."""
+    def test_positive_exam_score_does_not_make_a_failed_result_inconsistent(self):
+        """20 giriş + 10 imtahan = 30: həqiqi kəsrdir, korlanmış məlumat deyil."""
         self._fact(
-            final_score_text="40",
-            final_score=Decimal("40"),
-            exam_score_text="20",
-            exam_score=Decimal("20"),
+            entry_score=Decimal("20"),
+            final_score_text="30",
+            final_score=Decimal("30"),
+            exam_score_text="10",
+            exam_score=Decimal("10"),
         )
         code = review_read.CATEGORY_FAILED_WITH_EXAM
-        self.assertEqual(review_read.review_queue(organization=self.org, categories=[code]).count(), 1)
+        self.assertEqual(review_read.review_queue(organization=self.org, categories=[code]).count(), 0)
+        self.assertEqual(review_read.review_queue(organization=self.org).count(), 0)
 
-        # Şkalanı elə dəyiş ki, 40 artıq keçid sayılsın → kateqoriya SÖNSÜN.
+        # Tenant şkalasının dəyişməsi özü də həmin xam faktı səhv etmir.
         with bypass_rls():
             grading_scale.set_bands(self.org, [[31, "E", "2.00"], [0, "F", "0.00"]])
             self.org.refresh_from_db()
@@ -629,6 +632,8 @@ class QueueSanityTests(_ReviewSetup):
         self._fact(
             mapping_status=LegacyGradeMappingStatus.CONFLICT,
             mapping_issue_code="legacy_grade_fact_conflict",
+            source_system="myedu_mariadb",
+            legacy_level=0,
             exam_score_text="70",
             exam_score=Decimal("70"),
         )

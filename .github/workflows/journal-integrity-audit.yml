@@ -1,0 +1,46 @@
+name: Journal syllabus and QB audit (encrypted read-only)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  audit:
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 20
+    env:
+      APP_CONTAINER: educationmanagementstudentarena-app-1
+      AUDIT_OUTPUT: /tmp/journal-integrity-${{ github.run_id }}-${{ github.run_attempt }}.enc.json
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Capture fixed tenant in a database read-only transaction
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -p "$RUNNER_TEMP/journal-integrity"
+          PYTHONPATH=scripts/ops python3 -c 'import os; from reviewed_followup import verify_head; verify_head(os.environ["GITHUB_SHA"])'
+          public_key=$(base64 -w0 scripts/data/journal_audit_20261104_public.pem)
+          docker inspect --format '{{.Image}}' "$APP_CONTAINER" > "$RUNNER_TEMP/journal-integrity/image.txt"
+          docker exec -i -e AUDIT_OUTPUT="$AUDIT_OUTPUT" -e AUDIT_PUBLIC_KEY_B64="$public_key" \
+            "$APP_CONTAINER" python manage.py shell -c 'exec(__import__("sys").stdin.read(), {"__name__": "__main__"})' \
+            < scripts/prod_ops/journal_integrity_snapshot.py
+          docker cp "$APP_CONTAINER:$AUDIT_OUTPUT" "$RUNNER_TEMP/journal-integrity/snapshot.enc.json"
+          sha256sum "$RUNNER_TEMP/journal-integrity/snapshot.enc.json"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: journal-integrity-${{ github.run_id }}
+          path: ${{ runner.temp }}/journal-integrity/
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+      - name: Remove encrypted temporary copy
+        if: always()
+        run: |
+          docker exec "$APP_CONTAINER" rm -f -- "$AUDIT_OUTPUT" || true
+          rm -rf -- "$RUNNER_TEMP/journal-integrity"
