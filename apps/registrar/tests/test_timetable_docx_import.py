@@ -27,6 +27,7 @@ from apps.registrar.models import (
     AcademicStatus,
     Curriculum,
     Enrollment,
+    Lesson,
     Program,
     ScheduleSlot,
     SlotKind,
@@ -42,6 +43,7 @@ from apps.registrar.schedule_docx_parse import (
     parse_subject_text,
     parse_tables,
 )
+from apps.registrar.tests.journal_load_fixtures import seed_current_journal_load
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
 
@@ -357,12 +359,29 @@ class TimetableImportTests(TestCase):
     def test_slots_reach_teacher_and_student_schedules(self):
         self._run(apply=True)
         with bypass_rls():
+            seed_current_journal_load(self.i_sb, kinds=("lecture", "seminar"))  # öz jurnalı — yükündədir
             teacher_slots = schedule.get_teacher_schedule(
                 organization=self.org, teacher=self.hasanov, period=self.period
             )
             student_slots = schedule.get_student_schedule(self.org, self.student, self.groups["902 KE-1"], self.period)
-        self.assertIn(self.k_sb.pk, {slot.offering_id for slot in teacher_slots})
+        # 2026-11-05 (sahib): cədvəldə adı olan, amma həmin növdə dərs yükü (pay/təhvil) olmayan müəllimə
+        # dərs onun cədvəlində göstərilmir (``schedule_stale_teachers``) — qrupun cədvəlində qalır.
+        self.assertNotIn(self.k_sb.pk, {slot.offering_id for slot in teacher_slots})
         self.assertIn(self.i_sb.pk, {slot.offering_id for slot in teacher_slots})
+        with bypass_rls():
+            group_slots = schedule.get_group_schedule(
+                organization=self.org, group=self.groups["901 K az"], period=self.period
+            )
+            Lesson.objects.create(
+                organization=self.org, offering=self.k_sb, date=self.period.start_date, instructor=self.hasanov
+            )
+            taught = schedule.get_teacher_schedule(organization=self.org, teacher=self.hasanov, period=self.period)
+            seed_current_journal_load(self.k_sb, teacher=self.hasanov)
+            loaded = schedule.get_teacher_schedule(organization=self.org, teacher=self.hasanov, period=self.period)
+        self.assertIn(self.k_sb.pk, {slot.offering_id for slot in group_slots})
+        # Sahib 2026-11-05: «əgər müəllimdə o yük verilməyibsə, dərs cədvəlində göstərmə» — keçmiş dərs kifayət deyil.
+        self.assertNotIn(self.k_sb.pk, {slot.offering_id for slot in taught})
+        self.assertIn(self.k_sb.pk, {slot.offering_id for slot in loaded})  # mühazirə yükü verildi — cari
         # öz alt qrupunun dərsi + birləşik qrupun «alt qrupdan əlavə» Fizikası
         self.assertEqual({slot.offering_id for slot in student_slots}, {self.ke1_pr.pk, self.ke_fz.pk})
 

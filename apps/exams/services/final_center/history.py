@@ -27,6 +27,12 @@ _TICKET_EVENTS = {
     "final_student_suspended": (_l("Tələbə müvəqqəti dayandırıldı"), "fa-pause", "danger"),
     "final_student_removed": (_l("Tələbə imtahandan çıxarıldı"), "fa-user-slash", "danger"),
     "final_student_readmitted": (_l("Tələbə yenidən buraxıldı"), "fa-user-check", "success"),
+    # Sahib 2026-11-04: «Nəticəni sil (cəhdi sıfırla)» — cəhd silindi, bilet yeni PIN ilə yenidən açıldı.
+    "final_ticket_reset_after_attempt_purge": (
+        _l("Cəhd sıfırlandı — bilet yeni PIN ilə yenidən açıldı"),
+        "fa-rotate-left",
+        "warn",
+    ),
 }
 _SESSION_EVENTS = {
     "final_session_created": (_l("Oturum yaradıldı"), "fa-calendar-plus", "info"),

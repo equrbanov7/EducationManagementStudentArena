@@ -70,9 +70,11 @@ def test_default_location_read_timeout_is_120s_and_long_paths_have_their_own():
     assert "proxy_read_timeout    900s;" in ws
     assert "proxy_set_header Upgrade $http_upgrade;" in ws
     regexes = re.findall(r"location ~ (\S+) \{", conf)
-    assert len(regexes) == 2
+    # 2026-11-04: müraciət yükləmələri (10 × 25 MB) üçün ayrıca `client_max_body_size` bloku.
+    assert len(regexes) == 3
     assert any("exams/import/" in rx for rx in regexes)
     assert any("api/ai-assistant/chat/" in rx for rx in regexes)
+    assert any("muracietler/api/" in rx for rx in regexes)
 
 
 def test_long_locations_keep_proxy_headers_and_rate_limit_of_the_default_location():

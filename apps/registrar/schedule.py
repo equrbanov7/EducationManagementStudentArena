@@ -244,11 +244,12 @@ def is_joint_lecture(*, kind, subject_id, teacher_id, room, slot) -> bool:
 
 
 def _slots_for(queryset):
-    """Cədvəldə DURAN slotlar — parklanmışlar (yenidən yerləşdirilməli) xaric.
+    """Cədvəldə DURAN slotlar — parklanmışlar (yenidən yerləşdirilməli) və qeyri-aktiv jurnalın slotları xaric.
 
-    ``instructor`` (slotun öz müəllimi) LEFT JOIN ilə gəlir — etiket əlavə sorğu etmir."""
+    2026-11-05: deaktiv edilmiş açılış (əkiz birləşməsi, təmir) artıq jurnal deyil — onun slotu heç bir
+    cədvəldə görünmür. ``instructor`` (slotun öz müəllimi) LEFT JOIN ilə gəlir — etiket əlavə sorğu etmir."""
     return list(
-        queryset.filter(is_parked=False)
+        queryset.filter(is_parked=False, offering__is_active=True)
         .select_related("offering", "offering__subject", "offering__group", "offering__instructor", "instructor")
         .order_by("weekday", "start_time")
     )
@@ -310,9 +311,16 @@ def get_teacher_schedule(*, organization, teacher, period):
     """All slots the teacher teaches in a period (teacher view).
 
     EFFEKTİV müəllimə görə (2026-09-25): öz açılışlarının override-sız slotları + başqa
-    açılışların ona təyin olunmuş slotları; öz açılışının BAŞQASINA verilmiş slotu isə yox."""
+    açılışların ona təyin olunmuş slotları; öz açılışının BAŞQASINA verilmiş slotu isə yox.
+    2026-11-05: ona təyin olunmuş, amma jurnalı (sahib/pay/dərs) və dərs yükü olmayan slot göstərilmir
+    (:mod:`apps.registrar.schedule_stale_teachers`). Müəllimi boş slotda jurnal sahibi yükdə yoxdursa (yük başqasına
+    verilib) dərs sahibin yox, həmin növdə yükü olan müəllimin cədvəlinə düşür."""
+    from .schedule_stale_teachers import current_q, load_inherited_q
+
     return _slots_for(
-        ScheduleSlot.objects.filter(organization=organization, offering__period=period).filter(taught_by_q(teacher))
+        ScheduleSlot.objects.filter(organization=organization, offering__period=period).filter(
+            (taught_by_q(teacher) & current_q()) | load_inherited_q(teacher)
+        )
     )
 
 

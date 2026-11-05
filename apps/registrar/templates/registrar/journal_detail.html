@@ -16,9 +16,10 @@
     <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260831-excuse">
     {% if selfwork_active %}<link rel="stylesheet" href="{% static 'registrar/css/selfwork_archive.css' %}?v=20260827-1">{% endif %}
     <link rel="stylesheet" href="{% static 'registrar/css/syllabus_view.css' %}?v=20261025-weeks">
-    <link rel="stylesheet" href="{% static 'registrar/css/journal_guest.css' %}?v=20260926-close">
-    <link rel="stylesheet" href="{% static 'registrar/css/journal_subject_exempt.css' %}?v=20261015-exempt">
-    <link rel="stylesheet" href="{% static 'registrar/css/journal_history.css' %}?v=20261019-mob">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_guest.css' %}?v=20261104-divider">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_subject_exempt.css' %}?v=20261104-reason">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_removal_reason.css' %}?v=20261104-reason">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_history.css' %}?v=20261104-roster">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_history_card.css' %}?v=20261029-card">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_activation.css' %}?v=20261017-room">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_cell_hint.css' %}?v=20261014-notip">
@@ -335,7 +336,7 @@
     {# journal_grid 2 hissədə, SIRA VACİBDİR: çiplər/qaralama/təsdiq → dərs modalı (2026-09-21 bölgüsü). #}
     <script src="{% static 'registrar/js/journal_grid.js' %}?v=20261014-auto"></script>
     <script src="{% static 'registrar/js/journal_grid_lesson_modal.js' %}?v=20260921-split"></script>
-    <script src="{% static 'registrar/js/journal_lesson_prefill.js' %}?v=20261010-wp4lesson"></script>{# «Yeni dərs» dolu açılır (sahib 2026-10-10) #}
+    <script src="{% static 'registrar/js/journal_lesson_prefill.js' %}?v=20261105-mr197"></script>{# «Yeni dərs» dolu açılır (sahib 2026-10-10) #}
     <script src="{% static 'registrar/js/journal_lesson_topic.js' %}?v=20261025-topic"></script>{# plan seçimi ↔ sərbəst mövzu (2026-10-25) #}
     {# Sağdakı «N q/b» sayğacı davamiyyət dəyişəndə canlı yenilənir (UX2 2026-10-05). #}
     <script src="{% static 'registrar/js/journal_grid_absence.js' %}?v=20261005-live2"></script>
@@ -354,11 +355,16 @@
     <script src="{% static 'registrar/js/journal_history.js' %}?v=20260926-search"></script>
     {# «Aktivləşdir» ikiqat göndəriş qapısı + modalda «cədvəldən kənar dərs — səbəb» sahəsi (UNEC P1-1). #}
     <script src="{% static 'registrar/js/journal_activation.js' %}?v=20260925-act"></script>
+    {% if can_manage_roster or can_exempt %}
+    {# Çıxarılma səbəbi — «Fəndən azad et» və alt qrup «Çıxar» üçün ortaq köməkçi (sahib 2026-11-04). #}
+    <script src="{% static 'registrar/js/journal_removal_reason.js' %}?v=20261104-reason"></script>
+    {% endif %}
     {% if can_manage_roster %}
-    <script src="{% static 'registrar/js/journal_guest.js' %}?v=20260831-guest2"></script>
+    <script src="{% static 'registrar/js/journal_guest.js' %}?v=20261104-reason"></script>
+    <script src="{% static 'registrar/js/journal_guest_remove.js' %}?v=20261104-reason"></script>
     {% endif %}
     {% if can_exempt %}
-    <script src="{% static 'registrar/js/journal_subject_exempt.js' %}?v=20261015-exempt"></script>
+    <script src="{% static 'registrar/js/journal_subject_exempt.js' %}?v=20261104-reason"></script>
     {% endif %}
     {% if correction_mode %}
     <script src="{% static 'registrar/js/correction.js' %}?v=CORR5-midterm" nonce="{{ request.csp_nonce }}"></script>

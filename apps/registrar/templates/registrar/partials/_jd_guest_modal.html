@@ -179,6 +179,23 @@ render olunmur. Bütün URL-lər data-atributla ötürülür (CSP: inline JS yox
                     {% endfor %}
                 </ul>
             </div>
+
+            {% comment %}«Çıxar» — səbəb MƏCBURİ seçilir (sahib 2026-11-04). Panel `[data-jgs-current]`-dən KƏNARDADIR:
+            yerində yeniləmə (refreshInPlace) siyahını əvəz edəndə seçim itməsin.{% endcomment %}
+            <div class="jgs-remove-panel" data-jgs-remove-panel hidden role="group" aria-labelledby="jgs-remove-title">
+                <p class="jgs-remove-panel__title" id="jgs-remove-title">
+                    <i class="fas fa-user-minus" aria-hidden="true"></i>
+                    {% trans "Jurnaldan çıxarılır:" context "registrar.journal_removal" %} <b data-jgs-remove-name></b>
+                </p>
+                {% include "registrar/partials/_jd_removal_reason.html" with jrr_id="jgs-removal" %}
+                <div class="jgs-remove-panel__actions">
+                    <button type="button" class="jd2-cancel-btn" data-jgs-remove-cancel>{% trans "Ləğv et" context "registrar.guest_roster" %}</button>
+                    <button type="button" class="jd2-apply-btn jgs-remove-confirm" data-jgs-remove-confirm>
+                        <i class="fas fa-user-minus" aria-hidden="true"></i>
+                        {% trans "Jurnaldan çıxar" context "registrar.guest_roster" %}
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div class="jd-modal-foot jgs-foot">

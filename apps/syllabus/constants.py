@@ -129,7 +129,9 @@ RULE_SECTIONS = (
 #: Yuxarı hədlər (QA 2026-09-05 SYLLABUS-03): mətn sahəsi, siyahı elementi, həftə sətri.
 MAX_TEXT_CHARS = 20000
 MAX_LIST_ITEMS = 60
-MAX_WEEK_ROWS = 40
+#: MR-000145 / MR-000198 (2026-11-04): 40 sətir × 2 s = 80 s — 105 saatlıq fənnin planı 80 saatda kəsilirdi.
+#: 80 sətir = 160 s (ən böyük plan saatı ilə ehtiyat).
+MAX_WEEK_ROWS = 80
 MIN_DESCRIPTION_CHARS = 120
 MIN_GOAL_CHARS = 60
 MIN_OUTCOME_CHARS = 15

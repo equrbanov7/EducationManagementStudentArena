@@ -113,6 +113,7 @@ body.jhist-open { overflow: hidden; }
 .jhist-entry--component { border-left-color: var(--ems-sky-500); }
 .jhist-entry--final { border-left-color: var(--ems-violet-600); }
 .jhist-entry--correction { border-left-color: var(--ems-warning-500); }
+.jhist-entry--roster { border-left-color: var(--ems-danger-500); }
 .jhist-entry__head {
     display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--ems-border);
 }
@@ -135,6 +136,7 @@ body.jhist-open { overflow: hidden; }
 .jhist-entry--component .jhist-entry__kind { background: var(--ems-sky-100); color: var(--ems-sky-900); }
 .jhist-entry--final .jhist-entry__kind { background: var(--ems-violet-100); color: var(--ems-violet-800); }
 .jhist-entry--correction .jhist-entry__kind { background: var(--ems-warning-bg); color: var(--ems-warning-800); }
+.jhist-entry--roster .jhist-entry__kind { background: var(--ems-danger-bg); color: var(--ems-danger-700); }
 .jhist-entry__count { background: var(--ems-neutral-100); color: var(--ems-neutral-700); }
 .jhist-entry__time {
     flex: 0 0 auto; font-family: var(--ems-ff-mono, ui-monospace, monospace); font-size: 0.76rem;

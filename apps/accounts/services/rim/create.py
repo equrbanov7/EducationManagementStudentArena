@@ -46,6 +46,7 @@ from ..intake import create as intake_create
 from ..intake.policy import PERM_IMPORT, PERM_IMPORT_STAFF, can_import
 from .create_form import build_draft
 from .create_staff import can_assign_staff, validate_staff_assignment
+from .create_units import teacher_unit_allowed
 from .policy import RimAccessError, RimActor
 
 logger = logging.getLogger(__name__)
@@ -200,6 +201,10 @@ def create_account(actor: RimActor, *, kind: str, data: dict, request=None, note
 
     draft = build_draft(organization, kind, data)
     staff_role = validate_staff_assignment(actor, data, draft) if kind == intake_create.KIND_STAFF else None
+    # 2026-11-04: müəllim kafedrası da yaradıcının `user.import_staff` əhatəsində olmalıdır (əməkdaşla eyni qayda).
+    if kind == intake_create.KIND_TEACHER and draft.scope_unit is not None:
+        if not teacher_unit_allowed(actor, draft.scope_unit):
+            draft.errors["unit"] = pgettext(_CTX, "Bölmə tapılmadı və ya icazə əhatənizdən kənardadır.")
     if not draft.ok:
         raise field_error(pgettext(_CTX, "Formda düzəliş tələb olunan sahələr var."), draft.errors)
     _screen_draft_names(request, draft, organization, user=actor.user)

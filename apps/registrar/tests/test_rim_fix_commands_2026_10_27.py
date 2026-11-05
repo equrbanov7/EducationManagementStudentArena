@@ -226,6 +226,29 @@ class MergeTwinOfferingsTest(RimFixBase):
         with bypass_rls():
             self.assertTrue(CourseOffering.objects.get(pk=self.physics_g1.pk).is_active)
 
+    def test_keep_target_merges_when_both_sides_have_marks(self):
+        """Sahib 2026-11-04: ``target_marks=keep`` — T-nin xanası qalır, eyni gün + növ başqa saatda ikinci dərs yaratmır."""
+        with bypass_rls():
+            enrollment = Enrollment.objects.create(organization=self.org, student=self.host, offering=self.target)
+            same_day = self._lesson(self.target, D(2025, 10, 7), start=T(8, 30))
+            self._mark(same_day, enrollment, score=5)
+            self._mark(self._lesson(self.target, D(2025, 10, 9)), enrollment, score=7)
+            extra = self._lesson(self.physics_g1, D(2025, 10, 14))
+            source = Enrollment.objects.get(student=self.host, offering=self.physics_g1)
+            self._mark(extra, source, score=9)
+        plan = {"format": "twin-merge/1", "pairs": [dict(self.plan["pairs"][0], target_marks="keep")]}
+        counts = _counts(self._call("merge_twin_offerings", plan, "--apply"), "twin_merge:")
+        self.assertEqual(counts["pairs_merged"], "1")
+        self.assertEqual(counts["lessons_matched_by_day"], "1")
+        self.assertEqual(counts["marks_conflict_kept"], "1")
+        self.assertEqual(counts["marks_conflict_differ"], "1")
+        with bypass_rls():
+            self.assertFalse(CourseOffering.objects.get(pk=self.physics_g1.pk).is_active)
+            self.assertEqual(Lesson.objects.filter(offering=self.target, date=D(2025, 10, 7)).count(), 1)
+            self.assertEqual(LessonMark.objects.get(lesson=same_day).score, 5, "T-nin dəyəri qalır")
+            moved = LessonMark.objects.get(lesson__offering=self.target, lesson__date=D(2025, 10, 14))
+            self.assertEqual(moved.score, 9)
+
 
 class FixLegacyLessonKindsTest(RimFixBase):
     def _approved(self, plan_hours):

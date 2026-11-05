@@ -13,11 +13,14 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
+from apps.exams.domain.final_center import TICKET_STATUS_COMPLETED
 from apps.exams.models import ExamRoomSession
 from apps.exams.services.final_center import (
+    TicketStateError,
     can_view_final_history,
     ensure_can_view_final_history,
     readmit_student,
+    reopen_completed_ticket,
     session_history,
     set_seat,
 )
@@ -111,7 +114,17 @@ def exam_center_ticket_seat(request, session_id, ticket_id):
 def exam_center_ticket_readmit(request, session_id, ticket_id):
     _organization, session = get_center_session_or_404(request, session_id)
     ticket = get_session_ticket_or_404(session, ticket_id)
-    if readmit_student(ticket, request.user, request=request):
+    try:
+        # Bitmiş bilet: cəhd haqqı qalıbsa yenidən cəhd (sahib 2026-11-04); çıxarılmış: adi yenidən buraxma.
+        done = (
+            reopen_completed_ticket(ticket, request.user, request=request)
+            if ticket.status == TICKET_STATUS_COMPLETED
+            else readmit_student(ticket, request.user, request=request)
+        )
+    except TicketStateError as exc:
+        messages.error(request, str(exc))
+        return redirect("exams:exam_center_session_detail", session_id=session.pk)
+    if done:
         messages.success(
             request, pgettext("exams.final_center.message", "Tələbə yenidən buraxıldı və yeni PIN yaradıldı.")
         )

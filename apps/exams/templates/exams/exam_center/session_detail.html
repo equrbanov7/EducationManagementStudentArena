@@ -86,6 +86,14 @@
                   <i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Yenidən burax" %}
                 </button>
               </form>
+              {% elif t.status == "completed" %}
+              {# Sahib 2026-11-04: bitmiş bilet — cəhd haqqı qalıbsa yenidən cəhd (server yoxlayır). #}
+              <form method="post" action="{% url 'exams:exam_center_ticket_readmit' session_id=session.pk ticket_id=t.pk %}" class="fxc-inline-form">
+                {% csrf_token %}
+                <button type="submit" class="fxc-btn fxc-btn-sm fxc-btn-ghost">
+                  <i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Yenidən cəhd ver" %}
+                </button>
+              </form>
               {% endif %}
             </td>
             {% endif %}

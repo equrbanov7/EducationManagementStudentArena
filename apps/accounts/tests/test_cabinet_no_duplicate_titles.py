@@ -54,6 +54,9 @@ _ALLOWED_STYLE = re.compile(r'style="--pct:(?:\{\{[^}]*\}\}|\{%\s*widthratio [^%
 #: _my_subjects: kredit tərəqqisi + giriş balı + qayıb zolağı; _semester_opening: kafedra hazırlıq faizi.
 ALLOWED_PCT_STYLES = {
     "_semester_opening.html": 1,
+    # Alt qrup tələbələri statistikası (2026-11-05): ən çox siyahılarının zolağı + 12 həftəlik trend sütunu.
+    "subgroup_students/_stat_list.html": 1,
+    "subgroup_students/_stats.html": 1,
 }
 
 

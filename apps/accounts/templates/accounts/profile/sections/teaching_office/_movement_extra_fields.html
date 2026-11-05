@@ -4,7 +4,8 @@ UZAQLAŞDIR = xaric / BƏRPA ET) — səbəb dialoqunun ƏLAVƏ sahələri (`rea
 
 Qayda `apps.accounts.services.people.movements.create_movement` ilə eynidir:
 əmr nömrəsi + əmr tarixi MƏCBURİDİR (`data-ems-required` — boş olanda təsdiq
-düyməsi disabled), akademik məzuniyyətdə bitmə tarixi də (`effective_until`).
+düyməsi disabled), akademik məzuniyyətdə bitmə tarixi və səbəb kateqoriyası da
+(`effective_until`, `leave_reason`; «Digər» → səbəb mətni məcburi, sahib 2026-11-04).
 Səbəb İSTƏYƏ BAĞLIDIR (sahib 2026-10-15; dialoq `reason_optional=True`) — boş
 qalsa ledger/audit sətrinə əmrdən qurulan mətn yazılır. Kim və nə vaxt etdiyi
 audit + `StudentMovement` sətrində qalır (silinmir).{% endcomment %}
@@ -38,6 +39,7 @@ audit + `StudentMovement` sətrində qalır (silinmir).{% endcomment %}
 </div>
 {% endif %}
 {% if movement_until %}
+{% include "accounts/profile/sections/student_services/_leave_reason_field.html" with lr_id=reason_id|add:"-leave-reason" lr_options=groups_registry_section.leave_reason_options lr_static_required=True %}
 <div class="ems-field">
     <label class="ems-field__label" for="{{ reason_id }}-until">{% trans "Məzuniyyətin bitmə tarixi" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
     <input type="date" class="ems-input" id="{{ reason_id }}-until" name="effective_until" data-ems-required>

@@ -13,6 +13,10 @@
             deleted: "status_deleted",
             archived: "status_archived"
         }[user.status] || "status_active";
+        // Sahib 2026-11-04: əməkdaş arxivi («işdən ayrılıb») tələbə arxivindən (məzun/xaric) ayrı yazılır.
+        if (user.status === "archived" && user.archive_kind === "staff") {
+            labelKey = "status_archived_staff";
+        }
         return (
             '<span class="rim-badge rim-badge--' +
             esc(user.status) +
@@ -195,18 +199,8 @@
             "</button>";
     };
 
-    function detailItem(labelKey, value) {
-        return (
-            '<div class="rim-detail-item"><span class="rim-detail-key">' +
-            esc(ns.t(labelKey)) +
-            '</span><span class="rim-detail-value">' +
-            esc(value || "—") +
-            "</span></div>"
-        );
-    }
-
     // Redaktə formasında telefon: server şablonu (`{% phone_field %}`) klonlanır, ölkə + yerli nömrə təyin olunur.
-    function mountPhone(bodyEl, user) {
+    render.mountPhone = function mountPhone(bodyEl, user) {
         var slot = bodyEl.querySelector("[data-rim-phone-slot]");
         var tpl = document.querySelector("template[data-rim-phone-template]");
         if (!slot || !tpl) {
@@ -223,172 +217,17 @@
         if (window.EMSPhoneField) {
             window.EMSPhoneField.set(box, user.phone_country, user.phone_national != null ? user.phone_national : user.phone);
         }
-    }
+    };
 
-    function editForm(user) {
-        var fields = [
-            // Sahib 2026-10-26: istifadəçi adı da buradan dəyişir (parol / OTP toxunulmur).
-            ["username", user.username],
-            ["first_name", user.first_name],
-            ["last_name", user.last_name],
-            ["patronymic", user.patronymic],
-            ["email", user.email],
-            ["phone", user.phone],
-            ["fin", user.fin],
-            // Sahib 2026-10-11: profil kartındakı «Vəzifə» (sərbəst mətn) buradan dəyişir.
-            ["staff_position", user.staff_position]
-        ];
-        return (
-            '<p class="rim-section-title">' +
-            esc(ns.t("edit")) +
-            "</p>" +
-            '<div class="rim-form-grid" data-rim-edit-form>' +
-            fields
-                .map(function (pair) {
-                    var name = pair[0];
-                    if (name === "phone") {
-                        // Telefon: ölkə seçicisi + yerli nömrə — xana detal çəkildikdən sonra mountPhone ilə qurulur.
-                        return (
-                            '<div><label class="rim-field-label" for="rim-edit-phone">' +
-                            esc(ns.t(name)) +
-                            '</label><div data-rim-phone-slot></div></div>'
-                        );
-                    }
-                    return (
-                        '<div><label class="rim-field-label" for="rim-edit-' +
-                        esc(name) +
-                        '">' +
-                        esc(ns.t(name)) +
-                        '</label><input type="text" class="rim-input" id="rim-edit-' +
-                        esc(name) +
-                        '" data-rim-edit-field="' +
-                        esc(name) +
-                        '" value="' +
-                        esc(pair[1] || "") +
-                        '"></div>'
-                    );
-                })
-                .join("") +
-            "</div>" +
-            '<p class="rim-error" data-rim-edit-error hidden></p>' +
-            '<div class="rim-actions-row"><button type="button" class="rim-btn rim-btn--primary" data-rim-edit-save>' +
-            esc(ns.t("save")) +
-            "</button></div>"
-        );
-    }
+    /* Detal kartı (2026-11-04) bölmələrlə `detail_view.js`-də qurulur; köməkçilər ora açılır. */
+    render.statusBadge = statusBadge;
+    render.roleChips = roleChips;
+    render.flags = flags;
 
-    function actionButtons(user) {
-        var actions = user.actions || {};
-        var buttons = [];
-        if (actions.set_password) {
-            buttons.push(
-                '<button type="button" class="rim-btn rim-btn--primary" data-rim-act="set_password">' +
-                    '<i class="fas fa-key"></i> ' +
-                    esc(ns.t("set_password")) +
-                    "</button>"
-            );
-        }
-        if (actions.block) {
-            buttons.push(
-                '<button type="button" class="rim-btn rim-btn--warning" data-rim-act="block">' +
-                    '<i class="fas fa-ban"></i> ' +
-                    esc(ns.t("block")) +
-                    "</button>"
-            );
-        }
-        if (actions.unblock) {
-            buttons.push(
-                '<button type="button" class="rim-btn rim-btn--ghost" data-rim-act="unblock">' +
-                    '<i class="fas fa-unlock"></i> ' +
-                    esc(ns.t("unblock")) +
-                    "</button>"
-            );
-        }
-        if (actions.soft_delete) {
-            buttons.push(
-                '<button type="button" class="rim-btn rim-btn--danger" data-rim-act="soft_delete">' +
-                    '<i class="fas fa-user-slash"></i> ' +
-                    esc(ns.t("soft_delete")) +
-                    "</button>"
-            );
-        }
-        if (actions.restore) {
-            buttons.push(
-                '<button type="button" class="rim-btn rim-btn--primary" data-rim-act="restore">' +
-                    '<i class="fas fa-rotate-left"></i> ' +
-                    esc(ns.t("restore")) +
-                    "</button>"
-            );
-        }
-        // Sahib 2026-10-27: səhv arxivlənmiş cari tələbə — «Arxivdən çıxar» (dialoq: archive_restore.js).
-        if (actions.archive_restore && document.querySelector("[data-rim-root] [data-archive-restore]")) {
-            var archive = user.archive_restore || {};
-            buttons.push(
-                '<button type="button" class="rim-btn rim-btn--primary" data-archive-restore-open data-source="rim"' +
-                    ' data-user-id="' + esc(user.id) + '" data-name="' + esc(user.full_name || "") +
-                    '" data-username="' + esc(user.username) + '" data-needs-year="' +
-                    (archive.needs_admission_year ? "1" : "0") + '">' +
-                    '<i class="fas fa-box-open"></i> ' +
-                    esc(ns.t("archive_restore")) +
-                    "</button>"
-            );
-        }
-        return '<div class="rim-actions-row">' + buttons.join("") + "</div>";
-    }
-
-    /** Arxiv hesabın izahı — səhv arxivdirsə (tələbə oxuyur) və ya arxiv düzgündürsə səbəb (serverdən). */
-    function archiveNote(user) {
-        var archive = user.archive_restore;
-        if (!archive || !archive.note) {
-            return "";
-        }
-        return (
-            '<p class="' + (archive.eligible ? "rim-warning" : "rim-note") + '" data-rim-archive-note>' +
-            '<i class="fas fa-box-archive"></i> ' +
-            esc(archive.note) +
-            "</p>"
-        );
-    }
-
-    /** Detal modalının məzmunu. */
+    /** Detal modalının məzmunu — `detail_view.js` (Əsas məlumatlar · Vəzifə və bölmə · Rollar · Status). */
     render.detail = function detail(user) {
-        var titleEl = document.querySelector("[data-rim-detail-title]");
-        var bodyEl = document.querySelector("[data-rim-detail-body]");
-        if (!titleEl || !bodyEl) {
-            return;
+        if (ns.detailView) {
+            ns.detailView.render(user);
         }
-        titleEl.textContent = user.full_name || user.username;
-
-        var cfg = ns.config() || {};
-        var html =
-            '<div class="rim-detail-grid">' +
-            detailItem("username", user.username) +
-            detailItem("full_name", user.full_name) +
-            detailItem("email", user.email) +
-            detailItem("fin", user.fin) +
-            detailItem("phone", user.phone) +
-            detailItem("staff_position", user.staff_position) +
-            "</div>" +
-            '<p class="rim-section-title">' +
-            esc(ns.t("roles")) +
-            "</p>" +
-            '<div class="rim-card-roles">' +
-            roleChips(user) +
-            "</div>" +
-            '<div class="rim-actions-row"><a class="rim-btn rim-btn--ghost rim-btn--sm" href="' +
-            esc(user.role_assignment_url || cfg.roleAssignmentUrl || "#") +
-            '">' +
-            esc(ns.t("manage_roles")) +
-            "</a></div>" +
-            archiveNote(user) +
-            actionButtons(user);
-
-        if (user.actions && user.actions.edit) {
-            html += editForm(user);
-        }
-        if (ns.staffScope) { html += ns.staffScope.render(user); }
-        bodyEl.innerHTML = html;
-        if (window.EMSBootstrapSelect) { window.EMSBootstrapSelect.init(bodyEl); }
-        mountPhone(bodyEl, user);
     };
 })(window, document);

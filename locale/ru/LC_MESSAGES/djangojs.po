@@ -3205,3 +3205,9 @@ msgstr "В пределах ваших полномочий нет подход�
 
 msgid "Yük sətri köçürüldü."
 msgstr "Строка учебной нагрузки перенесена."
+
+msgid "Kafedrada redaktə et"
+msgstr "Редактировать на кафедре"
+
+msgid "Yalnız baxış"
+msgstr "Только просмотр"

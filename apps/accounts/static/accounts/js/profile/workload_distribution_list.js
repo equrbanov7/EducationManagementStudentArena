@@ -216,7 +216,7 @@
         if (!host || !host.dataset.teachersUrl) return;
         var params = d.filters();
         var key = params.chair + "|" + params.year;
-        if (!params.chair || pool.key === key) return;
+        if (!params.chair || params.chair === "all" || pool.key === key) return; // «Bütün kafedralar» — hovuz yoxdur
         pool = { key: key, items: [] };
         window.EMSCore.fetchJSON(
             host.dataset.teachersUrl + "?chair=" + encodeURIComponent(params.chair) + "&year=" + encodeURIComponent(params.year)
@@ -326,10 +326,12 @@
         var params = d.filters();
         var filtered = anyFilter();
         var none = state.rows.length === 0;
+        // «Bütün kafedralar» (2026-11-04): tək tapşırıq yoxdur, amma siyahı «tapşırıq yoxdur» deyil — süzgəc halıdır.
+        var scoped = !!state.task || !!state.allChairs;
         var empty = q("[data-wl-empty]");
         var nomatch = q("[data-wl-nomatch]");
-        if (empty) empty.hidden = !(none && (!state.task || !filtered));
-        if (nomatch) nomatch.hidden = !(none && !!state.task && filtered);
+        if (empty) empty.hidden = !(none && (!scoped || !filtered));
+        if (nomatch) nomatch.hidden = !(none && scoped && filtered);
         renderCount(state);
         renderMore(state, false);
     }
@@ -391,8 +393,20 @@
         });
     }
 
+    /* «Bütün kafedralar» (2026-11-04): kafedra seçicisinin `all` dəyəri — yalnız oxu axtarışı. Kafedraya bağlı
+       idarələr (`[data-wl-chair-only]`) CSS ilə gizlənir (`workload_all_chairs.css`), izah zolağı görünür. */
+    function applyChairMode(all) {
+        var d = dist();
+        var host = d ? d.root() : null;
+        if (host) host.classList.toggle("is-all-chairs", !!all);
+        var note = q("[data-wl-all-note]");
+        if (note) note.hidden = !all;
+        return !!all;
+    }
+
     window.EMSWorkloadList = {
         PAGE: PAGE,
+        applyChairMode: applyChairMode,
         url: url,
         loadReadiness: loadReadiness,
         afterLoad: afterLoad,

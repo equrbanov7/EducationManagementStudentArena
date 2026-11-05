@@ -132,10 +132,18 @@ def movement_kinds() -> list:
                 "requires_program": rule.requires_program,
                 "requires_form": rule.requires_form,
                 "requires_until": rule.requires_until,
+                "requires_leave_reason": rule.requires_leave_reason,
                 "from_statuses": list(rule.from_statuses),
             }
         )
     return rows
+
+
+def leave_reason_options() -> list:
+    """Dondurma səbəbi seçicisinin variantları (sahib 2026-11-04) — registrar enum-undan (TƏK mənbə)."""
+    from apps.registrar.public import movements as domain
+
+    return domain.leave_reason_options()
 
 
 def _target_group(actor, group_id, *, request):
@@ -318,8 +326,13 @@ def create_movement(
     target_form="",
     effective_until="",
     document=None,
+    leave_reason="",
 ) -> dict:
-    """Hərəkət əmrini yazır və nəticəni UI müqaviləsində qaytarır."""
+    """Hərəkət əmrini yazır və nəticəni UI müqaviləsində qaytarır.
+
+    Dondurma (akademik məzuniyyət) əmrində ``leave_reason`` kateqoriyası MƏCBURİDİR, «Digər» üçün
+    səbəb mətni də (sahib 2026-11-04) — superadmin istisnası bu qaydaya şamil olunmur.
+    """
     from apps.registrar.public import movements as domain
 
     _require(actor)
@@ -360,6 +373,8 @@ def create_movement(
             new_form=str(target_form or "").strip(),
             effective_until=until,
             document=document,
+            # İnsan səthi: həmişə sətir (boş da olsa) — domen qaydanı tətbiq edir.
+            leave_reason=str(leave_reason or "").strip() if rule.requires_leave_reason else None,
         )
     except domain.MovementError as exc:
         raise RimAccessError(exc.code, exc.message, status=exc.status) from exc
@@ -378,7 +393,11 @@ def create_movement(
         resource_id=str(record.pk),
         resource_repr=(record.student.get_full_name() or record.student.username).strip(),
         old_values={"status": previous_status, "group": previous_group},
-        new_values={"status": record.status, "group": str(getattr(record.group, "name", "") or "")},
+        new_values={
+            "status": record.status,
+            "group": str(getattr(record.group, "name", "") or ""),
+            "leave_reason": movement.leave_reason,
+        },
         changes={
             "action": "people.student_movement",
             "kind": movement.kind,
@@ -388,6 +407,8 @@ def create_movement(
             "kind_label": str(movement.kind_label),
             "order_number": movement.order_number,
             "order_date": str(movement.order_date),
+            "leave_reason": movement.leave_reason,
+            "leave_reason_label": movement.leave_reason_label,
             superadmin_waiver.AUDIT_FLAG: waived,
         },
     )
@@ -422,6 +443,8 @@ def movement_row(movement) -> dict:
         "order_number": movement.order_number,
         "order_date": movement.order_date.isoformat() if movement.order_date else "",
         "effective_until": movement.effective_until.isoformat() if movement.effective_until else "",
+        "leave_reason": movement.leave_reason,
+        "leave_reason_label": movement.leave_reason_label,
         "actor_name": movement.actor_name,
         "has_document": bool(movement.document),
         "created_at": movement.created_at.isoformat() if movement.created_at else "",
@@ -445,6 +468,7 @@ __all__ = [
     "PERM_MOVEMENT",
     "PERM_REGISTRY_VIEW",
     "create_movement",
+    "leave_reason_options",
     "load_registry_record",
     "movement_kinds",
     "movement_row",

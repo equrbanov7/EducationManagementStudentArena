@@ -18,6 +18,7 @@ from . import journal_close  # noqa: F401
 from . import journal_hygiene  # noqa: F401
 from . import journal_hygiene_actions  # noqa: F401
 from . import journal_hygiene_rows  # noqa: F401
+from . import journal_removal_read  # noqa: F401 — «Jurnaldan çıxarılmalar» mərkəzi siyahısı (2026-11-04)
 from . import journal_scope  # noqa: F401
 from . import kollokvium_notifications  # noqa: F401
 from . import kollokvium_windows  # noqa: F401
@@ -46,16 +47,21 @@ from . import schedule_manage  # noqa: F401
 from . import schedule_manage_actions  # noqa: F401
 from . import schedule_publish  # noqa: F401
 from . import schedule_rooms  # noqa: F401 — dialoqun «Korpus → Otaq» kataloqu (2026-10-17)
+from . import schedule_stale_teachers  # noqa: F401 — jurnalı/yükü qalmayan slot müəllimi (2026-11-05)
 from . import schedule_suggest  # noqa: F401 — «Uyğun vaxtlar» + otaq tövsiyəsi (2026-10-17)
 from . import selfwork_points  # noqa: F401
 from . import services  # noqa: F401
 from . import status  # noqa: F401
 from . import student_group_names  # noqa: F401 — tələbənin cari reyestr qrupunun adı (süzgəclər, 2026-10-25)
 from . import subgroup_rollup  # noqa: F401
+from . import subgroup_students_journals  # noqa: F401 — «Alt qrup tələbələri» hədəf jurnal axtarışı (2026-11-05)
+from . import subgroup_students_read  # noqa: F401 — «Alt qrup tələbələri» reyestri (2026-11-05)
+from . import subgroup_students_stats  # noqa: F401 — «Alt qrup tələbələri» statistikası (2026-11-05)
 from . import subject_merge_apply  # noqa: F401 — açılışın fənn düzəlişi icazəsi (legacy kod toqquşması, 2026-10-26)
 from . import teacher_journal_list  # noqa: F401
 from . import transcript  # noqa: F401
 from . import transfer  # noqa: F401
+from . import twins_repair_2026_11_05b  # noqa: F401 — əkiz jurnallar MR-190/MR-161 (2026-11-05, workload əmri)
 from . import exam_eligibility as eligibility_rules  # noqa: F401
 from .absence_credit_read import credit_hours_map, effective_hours  # noqa: F401
 from .absence_evidence import absence_counter_preview  # noqa: F401
@@ -151,7 +157,11 @@ __all__ = [
     "journal_hygiene",
     "journal_hygiene_actions",
     "journal_hygiene_rows",
+    "journal_removal_read",
     "journal_scope",
+    "subgroup_students_journals",
+    "subgroup_students_read",
+    "subgroup_students_stats",
     "teacher_journal_list",
     "sync_workload_journal_shares",
     "append_reviewed_onomastics_roster",
@@ -199,6 +209,7 @@ __all__ = [
     "schedule_manage_actions",
     "schedule_publish",
     "schedule_rooms",
+    "schedule_stale_teachers",
     "schedule_suggest",
     "season_label",
     "selfwork_points",
@@ -210,6 +221,7 @@ __all__ = [
     "transcript",
     "transcript_policy",
     "transfer",
+    "twins_repair_2026_11_05b",
 ]
 
 from .practical_label import offering_is_practical  # noqa: E402,F401

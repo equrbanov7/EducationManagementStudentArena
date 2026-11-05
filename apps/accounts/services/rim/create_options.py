@@ -87,14 +87,17 @@ def _base_queryset(actor, catalog: str, request=None):
         # Valideyn siyahısı serverin görünürlük qapısından keçir — bax
         # `create_unit.parent_units_queryset` (tip filtri orada `exclude`-dur).
         return parent_units_queryset(actor, request=request)
+    if catalog == CATALOG_UNIT:
+        # 2026-11-04: kafedra siyahısı yaradıcının `user.import_staff` əhatəsi ilə (bax `create_units`).
+        from .create_units import teacher_units
+
+        return teacher_units(actor)
 
     from apps.organizations.models import OrgUnit
-    from apps.organizations.public import kafedra_unit_types
 
-    unit_types = kafedra_unit_types(actor.organization) if catalog == CATALOG_UNIT else _UNIT_TYPES[catalog]
     return OrgUnit.objects.filter(
         organization=actor.organization,
-        unit_type__in=unit_types,
+        unit_type__in=_UNIT_TYPES[catalog],
         is_active=True,
     )
 

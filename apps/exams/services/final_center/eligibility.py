@@ -18,6 +18,8 @@ import logging
 
 from django.utils.translation import pgettext
 
+from apps.exams.services.absence_gate import absence_gate_applies
+
 logger = logging.getLogger("exams.final_center")
 
 
@@ -42,7 +44,7 @@ def admission_block_reason(student, exam):
     Registrar yoxlaması sınarsa → səbəb mətni (fail-closed)."""
     subject_id = getattr(exam, "subject_id", None)
     organization = getattr(exam, "organization", None)
-    if not subject_id or organization is None or student is None:
+    if not subject_id or organization is None or student is None or not absence_gate_applies(exam):
         return None
     try:
         if exam._user_has_active_attempt(student):

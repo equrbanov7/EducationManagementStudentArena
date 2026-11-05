@@ -74,7 +74,8 @@ def block_user(actor: RimActor, target_user, *, reason, request=None, reason_cod
     status = account_status(target_user)
     if status == STATUS_DELETED:
         raise RimAccessError("already_deleted", "Hesab artıq silinib.", status=409)
-    if status == STATUS_BLOCKED:
+    if status == STATUS_BLOCKED or not target_user.is_active:
+        # «İşdən ayrılıb» arxivi də giriş blokudur (``retired.py``) — üstünə ikinci blok yazılmır.
         raise RimAccessError("already_blocked", "Hesab artıq bloklanıb.", status=409)
 
     try:
@@ -110,7 +111,7 @@ def unblock_user(actor: RimActor, target_user, *, reason, request=None):
         )
     if status == STATUS_ACTIVE:
         raise RimAccessError("already_active", "Hesab onsuz da aktivdir.", status=409)
-    if status == STATUS_ARCHIVED:
+    if status == STATUS_ARCHIVED and target_user.is_active:
         # Arxiv hesab `is_active=True`-dur, amma girişi `access_state` bağlayır —
         # blokdan çıxarma onu AÇMIR; səhv gözləntini burada kəsirik.
         raise RimAccessError(
@@ -118,6 +119,18 @@ def unblock_user(actor: RimActor, target_user, *, reason, request=None):
             "Arxiv (məzun/xaric) hesab bu yolla açıla bilməz — giriş qəsdən bağlıdır.",
             status=409,
         )
+
+    if status == STATUS_ARCHIVED:
+        # «İşdən ayrılıb» arxivi (``retired.py``): üzvlüklər də deaktiv edilibsə SADƏ blokdan çıxarma onları
+        # qaytarmazdı — hesab rolsuz qalıb RİM siyahısından itərdi. Bərpa «Arxivdən çıxar»dan keçir.
+        from .staff_archive import archive_trace
+
+        if archive_trace(target_user, actor.organization).exists():
+            raise RimAccessError(
+                "use_unarchive",
+                "Hesab arxivdədir (işdən ayrılıb) — rolları ilə birlikdə qaytarmaq üçün «Arxivdən çıxar» seçin.",
+                status=409,
+            )
 
     unblock_account(target_user, request=request, actor=actor.user, reason=reason)
     return reason

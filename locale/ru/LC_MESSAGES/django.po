@@ -65373,19 +65373,16 @@ msgid "Nəticələr yüklənir…"
 msgstr "Загрузка результатов…"
 
 msgctxt "applications"
-msgid ""
-"Fayl seç — PDF, şəkil, DOCX və ya ZIP · maks. %(mb)s MB · ən çox %(n)s fayl"
-msgstr ""
-"Выберите файл — PDF, изображение, DOCX или ZIP · макс. %(mb)s МБ · до %(n)s "
-"файлов"
+msgid "Fayl seç — PDF, şəkil, Word, Excel və ya ZIP · maks. %(mb)s MB · ən çox %(n)s fayl"
+msgstr "Выберите файл — PDF, изображение, Word, Excel или ZIP · макс. %(mb)s МБ · до %(n)s файлов"
 
 msgctxt "applications"
 msgid "ən son"
 msgstr "последнее"
 
 msgctxt "applications"
-msgid "PDF, şəkil, DOCX və ya ZIP · maks. {mb} MB · ən çox {n} fayl"
-msgstr "PDF, изображение, DOCX или ZIP · макс. {mb} МБ · до {n} файлов"
+msgid "PDF, şəkil, Word, Excel və ya ZIP · maks. {mb} MB · ən çox {n} fayl"
+msgstr "PDF, изображение, Word, Excel или ZIP · макс. {mb} МБ · до {n} файлов"
 
 msgctxt "applications"
 msgid ""
@@ -112371,10 +112368,6 @@ msgctxt "accounts.syllabus"
 msgid "Dərs deyən müəllim"
 msgstr "Преподаватель"
 
-msgctxt "accounts.syllabus"
-msgid "Yeni qaralama saxlanılır"
-msgstr "Новый черновик сохранён"
-
 #: apps/accounts/templates/accounts/profile/sidebar/items/_language_cohorts.html
 msgctxt "profile.sidebar"
 msgid "Xarici dil səviyyə qrupları"
@@ -112789,3 +112782,1501 @@ msgstr "%(period)s · %(group)s: отменённый ПУСТОЙ журнал-
 msgctxt "registrar.subject_merge"
 msgid "%(student)s · %(period)s: hər iki fənn üzrə qeydiyyat var — qiymətsiz təkrar qeydiyyat bağlanır (dropped), qiymətli qeydiyyat qalır."
 msgstr "%(student)s · %(period)s: есть запись по обеим дисциплинам — запись без оценок закрывается (dropped), запись с оценками остаётся."
+
+msgctxt "accounts.workload"
+msgid "Bütün kafedralar"
+msgstr "Все кафедры"
+
+msgctxt "accounts.workload"
+msgid "Bütün kafedralar: siyahı yalnız baxış üçündür. Sətri dəyişmək üçün «Kafedrada redaktə et» düyməsi ilə onun kafedrasına keçin."
+msgstr "Все кафедры: список только для просмотра. Чтобы изменить строку, перейдите на её кафедру кнопкой «Редактировать на кафедре»."
+
+msgctxt "accounts.rim.archive"
+msgid "Bunun üçün «Hesabı bloklamaq» (user.block) icazəsi lazımdır."
+msgstr "Для этого нужно разрешение «Блокировка учётной записи» (user.block)."
+
+msgctxt "accounts.rim.archive"
+msgid "İşdən ayrılıb / müqavilə bitib"
+msgstr "Уволен(а) / договор истёк"
+
+msgctxt "accounts.rim.archive"
+msgid "Aktiv təşkilat konteksti yoxdur."
+msgstr "Нет контекста активной организации."
+
+msgctxt "accounts.rim.archive"
+msgid "Bu hesab sizin idarə sahənizdə deyil."
+msgstr "Эта учётная запись вне вашей зоны управления."
+
+msgctxt "accounts.rim.archive"
+msgid "Hesab silinib — əvvəlcə bərpa edin."
+msgstr "Учётная запись удалена — сначала восстановите её."
+
+msgctxt "accounts.rim.archive"
+msgid "Hesab artıq arxivdədir."
+msgstr "Учётная запись уже в архиве."
+
+msgctxt "accounts.rim.archive"
+msgid "Tələbə arxivə «Məzun et» (və ya reyestrdəki xaric) əmri ilə keçir."
+msgstr "Студент переводится в архив через «Выпустить» (или приказ об отчислении в реестре)."
+
+msgctxt "accounts.rim.archive"
+msgid "Hesab arxivdə deyil."
+msgstr "Учётная запись не в архиве."
+
+msgctxt "accounts.rim.archive"
+msgid "Arxivdə saxlanmış rol izi tapılmadı — rolları «Rol təyinatı»nda təyin edin."
+msgstr "След архивированных ролей не найден — назначьте роли в «Назначении ролей»."
+
+msgctxt "accounts.rim.archive"
+msgid "Arxivdən çıxarmaq alınmadı."
+msgstr "Не удалось вывести учётную запись из архива."
+
+msgctxt "accounts.rim.archive"
+msgid "Arxivləmə alınmadı."
+msgstr "Не удалось архивировать."
+
+msgctxt "accounts.rim.archive"
+msgid "Bu hesab təşkilatın son aktiv administratorudur — əvvəlcə başqa admin təyin edin."
+msgstr "Это последний активный администратор организации — сначала назначьте другого."
+
+msgctxt "accounts.rim.graduation"
+msgid "Oxuyur"
+msgstr "Обучается"
+
+msgctxt "accounts.rim.graduation"
+msgid "Akademik məzuniyyətdə"
+msgstr "В академическом отпуске"
+
+msgctxt "accounts.rim.graduation"
+msgid "Xaric olunub"
+msgstr "Отчислен(а)"
+
+msgctxt "accounts.rim.graduation"
+msgid "Məzun olub"
+msgstr "Выпускник"
+
+msgctxt "accounts.rim.graduation"
+msgid "Məzun əmri üçün «Tələbə hərəkəti» (student.movement) və «Akademik qeyd» icazələri lazımdır."
+msgstr "Для приказа о выпуске нужны разрешения «Движение студентов» (student.movement) и «Академическая запись»."
+
+msgctxt "accounts.rim.graduation"
+msgid "Bu hesab sizin idarə sahənizdə deyil."
+msgstr "Эта учётная запись вне вашей зоны управления."
+
+msgctxt "accounts.rim.graduation"
+msgid "Tələbənin sizin əhatənizdə «Oxuyur» statuslu akademik qeydi yoxdur."
+msgstr "У студента нет академической записи со статусом «Обучается» в вашей зоне."
+
+msgctxt "accounts.rim.graduation"
+msgid "Tələbənin sizin əhatənizdə akademik qeydi yoxdur."
+msgstr "У студента нет академической записи в вашей зоне."
+
+msgctxt "accounts.rim.graduation"
+msgid "Akademik qeyd tapılmadı."
+msgstr "Академическая запись не найдена."
+
+msgctxt "accounts.rim.graduation"
+msgid "Tələbənin bir neçə aktiv qeydi var — qeydi seçin."
+msgstr "У студента несколько активных записей — выберите одну."
+
+msgctxt "accounts.rim.graduation"
+msgid "Yalnız «Oxuyur» statuslu tələbə məzun edilə bilər."
+msgstr "Выпустить можно только студента со статусом «Обучается»."
+
+msgctxt "accounts.rim.graduation"
+msgid "Məzun et"
+msgstr "Выпустить"
+
+msgctxt "accounts.rim.graduation"
+msgid "Akademik qeyd «Məzun» statusuna keçir, cari dövrün açıq qeydiyyatları dondurulur və hesabın girişi bağlanır. Qiymət, jurnal və imtahan tarixçəsi OLDUĞU KİMİ qalır; səhv olarsa «Tələbə reyestri»ndə bərpa əmri ilə geri qaytarılır."
+msgstr "Академическая запись переходит в статус «Выпускник», открытые записи текущего периода замораживаются, вход закрывается. Оценки, журнал и история экзаменов остаются КАК ЕСТЬ; при ошибке приказ о восстановлении в «Реестре студентов» всё вернёт."
+
+msgctxt "accounts.rim.graduation"
+msgid "Akademik qeyd"
+msgstr "Академическая запись"
+
+msgctxt "accounts.rim.graduation"
+msgid "Əmr nömrəsi"
+msgstr "Номер приказа"
+
+msgctxt "accounts.rim.graduation"
+msgid "Əmrin tarixi"
+msgstr "Дата приказа"
+
+msgctxt "accounts.rim.graduation"
+msgid "Superadmin: əmr nömrəsi boş qalsa avtomatik «SA-…» əmri yazılır."
+msgstr "Суперадмин: если номер приказа пуст, записывается автоматический приказ «SA-…»."
+
+msgctxt "accounts.rim.graduation"
+msgid "Səbəb (istəyə bağlı)"
+msgstr "Причина (необязательно)"
+
+msgctxt "accounts.rim.graduation"
+msgid "Boş qalsa əmrdən yazılır: «Məzun etmə · Əmr № … · tarix»"
+msgstr "Если пусто, берётся из приказа: «Выпуск · Приказ № … · дата»"
+
+msgctxt "accounts.rim.placement"
+msgid "Təyinat və ya bölmə idarə sahənizdə deyil."
+msgstr "Назначение или подразделение вне вашей зоны управления."
+
+msgctxt "accounts.rim.placement"
+msgid "Bölmə təyini üçün «Rol təyinatı» səlahiyyəti (role.assign) lazımdır."
+msgstr "Для назначения подразделения нужно полномочие «Назначение ролей» (role.assign)."
+
+msgctxt "accounts.rim.placement"
+msgid "Bu vəzifənin bölməsi «Rol təyinatı» bölməsində dəyişdirilir."
+msgstr "Подразделение этой должности меняется в разделе «Назначение ролей»."
+
+msgctxt "accounts.rim.placement"
+msgid "Siyahıdan bölmə seçin."
+msgstr "Выберите подразделение из списка."
+
+msgctxt "accounts.rim.placement"
+msgid "Təyinat bu arada dəyişib. Kartı yenidən açın."
+msgstr "Назначение тем временем изменилось. Откройте карточку заново."
+
+msgctxt "accounts.rim.placement"
+msgid "Cari bölmə sizin icazə əhatənizdən kənardadır."
+msgstr "Текущее подразделение вне вашей зоны полномочий."
+
+msgctxt "accounts.rim.placement"
+msgid "Əhatənizdə seçilə bilən bölmə yoxdur."
+msgstr "В вашей зоне нет доступных подразделений."
+
+msgctxt "accounts.rim.position"
+msgid "Assistent"
+msgstr "Ассистент"
+
+msgctxt "accounts.rim.position"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+msgctxt "accounts.rim.position"
+msgid "Baş müəllim"
+msgstr "Старший преподаватель"
+
+msgctxt "accounts.rim.position"
+msgid "Dosent"
+msgstr "Доцент"
+
+msgctxt "accounts.rim.position"
+msgid "Professor"
+msgstr "Профессор"
+
+msgctxt "accounts.rim.position"
+msgid "Kafedra müdiri"
+msgstr "Заведующий кафедрой"
+
+msgctxt "accounts.rim.position"
+msgid "Dekan"
+msgstr "Декан"
+
+msgctxt "accounts.rim.position"
+msgid "Dekan müavini"
+msgstr "Заместитель декана"
+
+msgctxt "accounts.rim.position"
+msgid "Rektor"
+msgstr "Ректор"
+
+msgctxt "accounts.rim.position"
+msgid "Prorektor"
+msgstr "Проректор"
+
+msgctxt "accounts.rim.position"
+msgid "Tyutor"
+msgstr "Тьютор"
+
+msgctxt "accounts.rim.position"
+msgid "Metodist"
+msgstr "Методист"
+
+msgctxt "accounts.rim.position"
+msgid "Laborant"
+msgstr "Лаборант"
+
+msgctxt "accounts.rim.position"
+msgid "Baş laborant"
+msgstr "Старший лаборант"
+
+msgctxt "accounts.rim.position"
+msgid "Şöbə müdiri"
+msgstr "Начальник отдела"
+
+msgctxt "accounts.rim.position"
+msgid "Şöbə müdirinin müavini"
+msgstr "Заместитель начальника отдела"
+
+msgctxt "accounts.rim.position"
+msgid "Sektor müdiri"
+msgstr "Заведующий сектором"
+
+msgctxt "accounts.rim.position"
+msgid "Mərkəz direktoru"
+msgstr "Директор центра"
+
+msgctxt "accounts.rim.position"
+msgid "Baş mütəxəssis"
+msgstr "Главный специалист"
+
+msgctxt "accounts.rim.position"
+msgid "Aparıcı mütəxəssis"
+msgstr "Ведущий специалист"
+
+msgctxt "accounts.rim.position"
+msgid "Mütəxəssis"
+msgstr "Специалист"
+
+msgctxt "accounts.rim.position"
+msgid "Baş mühasib"
+msgstr "Главный бухгалтер"
+
+msgctxt "accounts.rim.position"
+msgid "Mühasib"
+msgstr "Бухгалтер"
+
+msgctxt "accounts.rim.position"
+msgid "Hüquqşünas"
+msgstr "Юрист"
+
+msgctxt "accounts.rim.position"
+msgid "Psixoloq"
+msgstr "Психолог"
+
+msgctxt "accounts.rim.position"
+msgid "Kitabxanaçı"
+msgstr "Библиотекарь"
+
+msgctxt "accounts.rim.position"
+msgid "Kargüzar"
+msgstr "Делопроизводитель"
+
+msgctxt "accounts.rim.position"
+msgid "Katib"
+msgstr "Секретарь"
+
+msgctxt "accounts.rim.position"
+msgid "Operator"
+msgstr "Оператор"
+
+msgctxt "accounts.rim.position"
+msgid "Proqramçı"
+msgstr "Программист"
+
+msgctxt "accounts.rim.position"
+msgid "Sistem inzibatçısı"
+msgstr "Системный администратор"
+
+msgctxt "accounts.rim.modal"
+msgid "Tələbə məzun edildi — hesab arxivə keçdi, tarixçə saxlanıldı."
+msgstr "Студент выпущен — учётная запись в архиве, история сохранена."
+
+#, python-format
+msgctxt "accounts.rim.modal"
+msgid "Hesab arxivdən çıxarıldı: giriş açıldı, %(count)d rol bərpa olundu."
+msgstr "Учётная запись выведена из архива: вход открыт, восстановлено ролей: %(count)d."
+
+msgctxt "accounts.rim.modal"
+msgid "Dəyişiklik yoxdur — bu bölmə artıq təyin olunub."
+msgstr "Без изменений — это подразделение уже назначено."
+
+#, python-format
+msgctxt "accounts.rim.modal"
+msgid "Hesab arxivə göndərildi: giriş bağlandı, %(count)d rol deaktiv edildi. Tarixçə saxlanıldı."
+msgstr "Учётная запись отправлена в архив: вход закрыт, деактивировано ролей: %(count)d. История сохранена."
+
+#, python-format
+msgctxt "accounts.rim.modal"
+msgid "Bölmə təyin edildi: %(unit)s."
+msgstr "Подразделение назначено: %(unit)s."
+
+msgctxt "accounts.rim.modal"
+msgid "Əsas məlumatlar"
+msgstr "Основные данные"
+
+msgctxt "accounts.rim.modal"
+msgid "Vəzifə və bölmə"
+msgstr "Должность и подразделение"
+
+msgctxt "accounts.rim.modal"
+msgid "Akademik vəziyyət"
+msgstr "Академический статус"
+
+msgctxt "accounts.rim.modal"
+msgid "Status və təhlükəsizlik"
+msgstr "Статус и безопасность"
+
+msgctxt "accounts.rim.modal"
+msgid "Yadda saxlanmamış dəyişiklik var"
+msgstr "Есть несохранённые изменения"
+
+msgctxt "accounts.rim.modal"
+msgid "Axtar…"
+msgstr "Поиск…"
+
+msgctxt "accounts.rim.modal"
+msgid "Uyğun nəticə yoxdur"
+msgstr "Нет подходящих результатов"
+
+msgctxt "accounts.rim.modal"
+msgid "Təyin edilməyib"
+msgstr "Не назначено"
+
+msgctxt "accounts.rim.modal"
+msgid "Digər (əl ilə yazın)"
+msgstr "Другое (ввести вручную)"
+
+msgctxt "accounts.rim.modal"
+msgid "Vəzifənin adını yazın"
+msgstr "Введите название должности"
+
+msgctxt "accounts.rim.modal"
+msgid "cari dəyər"
+msgstr "текущее значение"
+
+msgctxt "accounts.rim.modal"
+msgid "Fakültə və kafedra"
+msgstr "Факультет и кафедра"
+
+msgctxt "accounts.rim.modal"
+msgid "Bu hesabın müəllim və ya əməkdaş rolu yoxdur — əvvəlcə «Rol təyinatı»nda rol verin."
+msgstr "У этой учётной записи нет роли преподавателя или сотрудника — сначала назначьте её в «Назначении ролей»."
+
+msgctxt "accounts.rim.modal"
+msgid "Müəllim kafedraya bağlananda həmin kafedranın dərs yükü və müəllim siyahılarına düşür."
+msgstr "После привязки к кафедре преподаватель попадает в её списки нагрузки и преподавателей."
+
+msgctxt "accounts.rim.modal"
+msgid "Bölmə təyin edilməyib"
+msgstr "Подразделение не назначено"
+
+msgctxt "accounts.rim.modal"
+msgid "Fakültə"
+msgstr "Факультет"
+
+msgctxt "accounts.rim.modal"
+msgid "Bütün fakültələr"
+msgstr "Все факультеты"
+
+msgctxt "accounts.rim.modal"
+msgid "Kafedra / bölmə"
+msgstr "Кафедра / подразделение"
+
+msgctxt "accounts.rim.modal"
+msgid "Kafedra və ya bölmə seçin"
+msgstr "Выберите кафедру или подразделение"
+
+msgctxt "accounts.rim.modal"
+msgid "Bölməni saxla"
+msgstr "Сохранить подразделение"
+
+msgctxt "accounts.rim.modal"
+msgid "Akademik qeyd"
+msgstr "Академическая запись"
+
+msgctxt "accounts.rim.modal"
+msgid "Akademik qeyd tapılmadı."
+msgstr "Академическая запись не найдена."
+
+msgctxt "accounts.rim.modal"
+msgid "Arxiv (işdən ayrılıb)"
+msgstr "Архив (уволен)"
+
+msgctxt "accounts.rim.modal"
+msgid "Hesab arxivdədir (işdən ayrılıb): giriş bağlıdır, rolları deaktivdir — siyahılarda görünmür. Tarixçə saxlanılır."
+msgstr "Учётная запись в архиве (уволен): вход закрыт, роли неактивны — в списках не отображается. История сохранена."
+
+msgctxt "accounts.rim.modal"
+msgid "Arxivə göndər"
+msgstr "Отправить в архив"
+
+msgctxt "accounts.rim.modal"
+msgid "Arxivdən çıxar"
+msgstr "Вывести из архива"
+
+msgctxt "accounts.rim.modal"
+msgid "Birdəfəlik müvəqqəti parol yaradır; istifadəçi ilk girişdə öz parolunu qurur."
+msgstr "Создаёт одноразовый временный пароль; пользователь задаёт свой при первом входе."
+
+msgctxt "accounts.rim.modal"
+msgid "Girişi müvəqqəti bağlayır. Məlumatlar və rollar saxlanılır."
+msgstr "Временно закрывает вход. Данные и роли сохраняются."
+
+msgctxt "accounts.rim.modal"
+msgid "Girişi yenidən açır."
+msgstr "Снова открывает вход."
+
+msgctxt "accounts.rim.modal"
+msgid "Əmr nömrəsi və tarixi ilə: akademik qeyd «Məzun» olur, giriş bağlanır, tarixçə qalır."
+msgstr "С номером и датой приказа: академическая запись становится «Выпускник», вход закрывается, история остаётся."
+
+msgctxt "accounts.rim.modal"
+msgid "İşdən ayrılıb: giriş bağlanır, rollar deaktiv olur — dərs yükü və müəllim siyahılarından çıxır. Tarixçə qalır."
+msgstr "Уволен(а): вход закрывается, роли деактивируются — исчезает из списков нагрузки и преподавателей. История остаётся."
+
+msgctxt "accounts.rim.modal"
+msgid "Giriş açılır və arxivləmədə deaktiv edilmiş rollar geri qayıdır."
+msgstr "Вход открывается, роли, деактивированные при архивировании, возвращаются."
+
+msgctxt "accounts.rim.modal"
+msgid "Səhvən arxivlənmiş, hələ oxuyan tələbənin girişini açır."
+msgstr "Открывает вход ошибочно архивированному, но ещё обучающемуся студенту."
+
+msgctxt "accounts.rim.modal"
+msgid "Hesabı siyahılardan çıxarır (yumşaq silmə). Qiymət və jurnal yazıları qalır, bərpa mümkündür."
+msgstr "Убирает учётную запись из списков (мягкое удаление). Оценки и записи журнала остаются, восстановление возможно."
+
+msgctxt "accounts.rim.modal"
+msgid "Silinmiş hesabı və onun rollarını geri qaytarır."
+msgstr "Возвращает удалённую учётную запись и её роли."
+
+msgctxt "accounts.rim.modal"
+msgid "Bu hesab üçün əlçatan əməliyyat yoxdur."
+msgstr "Для этой учётной записи нет доступных действий."
+
+msgctxt "accounts.rim.modal"
+msgid "Hesab arxivə göndəriləcək: giriş bağlanacaq, bu təşkilatdakı rollar deaktiv olacaq və şəxs dərs yükü / müəllim siyahılarından çıxacaq. Jurnal, qiymət və yük tarixçəsi silinmir; «Arxivdən çıxar» hər şeyi geri qaytarır."
+msgstr "Учётная запись будет отправлена в архив: вход закроется, роли в этой организации будут деактивированы, человек исчезнет из списков нагрузки / преподавателей. История журнала, оценок и нагрузки не удаляется; «Вывести из архива» всё вернёт."
+
+msgctxt "accounts.rim.modal"
+msgid "Hesab arxivdən çıxarılacaq: giriş açılacaq və arxivləmədə deaktiv edilmiş rollar geri qayıdacaq."
+msgstr "Учётная запись будет выведена из архива: вход откроется, роли, деактивированные при архивировании, вернутся."
+
+msgctxt "accounts.rim.modal"
+msgid "Deaktiv ediləcək rollar:"
+msgstr "Роли, которые будут деактивированы:"
+
+msgctxt "accounts.rim.modal"
+msgid "Bərpa olunacaq rollar:"
+msgstr "Роли, которые будут восстановлены:"
+
+msgctxt "accounts.rim.modal"
+msgid "Səbəb"
+msgstr "Причина"
+
+msgctxt "accounts.rim.modal"
+msgid "Səbəb (istəyə bağlı)"
+msgstr "Причина (необязательно)"
+
+msgctxt "accounts.rim.modal"
+msgid "İstifadəçi adı ən azı 3 simvol olmalı və boşluq olmamalıdır."
+msgstr "Имя пользователя — не менее 3 символов и без пробелов."
+
+msgctxt "accounts.rim.modal"
+msgid "Email ünvanı düzgün deyil."
+msgstr "Неверный адрес эл. почты."
+
+msgctxt "accounts.rim.modal"
+msgid "FİN 7 simvol olmalıdır (yalnız hərf və rəqəm)."
+msgstr "ФИН должен состоять из 7 символов (только буквы и цифры)."
+
+msgctxt "accounts.rim.modal"
+msgid "Əmr nömrəsi və tarixi məcburidir."
+msgstr "Номер и дата приказа обязательны."
+
+msgctxt "accounts.rim.graduation"
+msgid "Tələbə artıq məzun olub. Səhvdirsə, «Tələbə reyestri»ndə bərpa əmri ilə geri qaytarılır."
+msgstr "Студент уже выпущен. Если это ошибка, приказ о восстановлении в «Реестре студентов» всё вернёт."
+
+msgctxt "accounts.rim.modal"
+msgid "Məlumatlar yeniləndi."
+msgstr "Данные обновлены."
+
+msgctxt "accounts.rim.modal"
+msgid "Dəyişiklik yoxdur."
+msgstr "Без изменений."
+
+msgctxt "core.runtime_settings"
+msgid "Müəllimlər müəyyən tarixdən bu günə keçmiş tarixli dərs əlavə edə bilər"
+msgstr "Преподаватели могут добавлять занятия задним числом с заданной даты по сегодня"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılanda müəllim aşağıdakı başlanğıc tarixindən bu günədək istənilən tarixə dərs aça və həmin dərslərin boş xanalarına q/b, i/e və bal yaza bilər — adi «gecikmiş yazı müddəti» həddindən köhnə olsa da. Gələcək tarixə dərs açılmır; semestr sərhədi, yazılmış xananın kilidi və bağlı jurnal qaydası dəyişmir. Söndürüləndə adi yazma müddəti qayıdır."
+msgstr "Когда включено, преподаватель может открыть занятие на любую дату с указанной ниже начальной даты по сегодня и записать пропуски, посещаемость и баллы в пустые ячейки этих занятий — даже если дата старше обычного срока поздней записи. Занятие на будущую дату не открывается; граница семестра, блокировка записанной ячейки и правило закрытого журнала не меняются. При выключении возвращается обычный срок записи."
+
+msgctxt "core.runtime_settings"
+msgid "Keçmiş tarixli dərsin başlanğıc tarixi"
+msgstr "Начальная дата для занятий задним числом"
+
+msgctxt "core.runtime_settings"
+msgid "Yuxarıdakı bayraq yandırılıbsa müəllim bu tarixdən (daxil) bu günədək dərs əlavə edə bilər. Bayraq söndürülüdürsə bu tarix tətbiq olunmur."
+msgstr "Если переключатель выше включён, преподаватель может добавлять занятия с этой даты (включительно) по сегодня. Если переключатель выключен, дата не применяется."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "Dərs tarixi %(date)s tarixindən əvvəl ola bilməz. Daha köhnə tarix üçün RİM-ə müraciət edin."
+msgstr "Дата занятия не может быть раньше %(date)s. Для более ранней даты обратитесь в регистратуру."
+
+#, python-format
+msgctxt "registrar.journal_timing"
+msgid "%(date)s tarixli dərsə yeni qeyd yazmaq olmaz — keçmiş dərslərə yazı %(since)s tarixindən açıqdır."
+msgstr "Нельзя записать новую отметку на занятие %(date)s — запись на прошедшие занятия открыта с %(since)s."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Keçmiş tarixə dərs %(date)s tarixindən bu günədək açmaq olar."
+msgstr "Занятие можно открыть на прошедшую дату с %(date)s по сегодня."
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Davamiyyət %(date)s tarixindən bu günədək keçirilmiş dərslərə qeyd edilə bilər · yazılmış qeyd %(w)s sonra kilidlənir — düzəliş üçün RİM-ə (sənədli düzəliş) müraciət edilir."
+msgstr "Посещаемость можно отмечать для занятий, проведённых с %(date)s по сегодня · записанная отметка блокируется через %(w)s — для исправления обращаются в RİM (документальное исправление)."
+
+msgctxt "core.runtime_settings"
+msgid "Müraciətlər"
+msgstr "Обращения"
+
+msgctxt "core.runtime_settings"
+msgid "Bir istifadəçinin gündə göndərə biləcəyi müraciət sayı"
+msgstr "Сколько обращений один пользователь может отправить в день"
+
+msgctxt "core.runtime_settings"
+msgid "Bir istifadəçi bir təqvim günü (Bakı vaxtı ilə 00:00–24:00) ərzində ən çox bu qədər yeni müraciət göndərə bilər. Limit dolanda yeni müraciət rədd olunur və istifadəçiyə sabah yenidən cəhd etməsi deyilir; artıq göndərilmiş müraciətlərə cavab yazmaq və sənəd əlavə etmək bu limitə düşmür."
+msgstr "Пользователь может отправить не больше указанного числа новых обращений за календарный день (00:00–24:00 по бакинскому времени). Когда лимит исчерпан, новое обращение отклоняется и пользователю предлагается повторить завтра; ответы и документы к уже отправленным обращениям в лимит не входят."
+
+msgctxt "core.runtime_settings"
+msgid "müraciət"
+msgstr "обращений"
+
+msgctxt "applications.transition"
+msgid "Bir gündə ən çox {limit} müraciət göndərmək olar — bugünkü limitiniz dolub. Yeni müraciəti sabah göndərin; artıq göndərdiyiniz müraciətlərə cavab yaza bilərsiniz."
+msgstr "В день можно отправить не более {limit} обращений — сегодняшний лимит исчерпан. Отправьте новое обращение завтра; на уже отправленные обращения можно отвечать."
+
+msgctxt "registrar.guest_roster"
+msgid "Alt qrup tələbələri"
+msgstr "Студенты подгруппы"
+
+msgctxt "exams.attempt_reset"
+msgid "%(count)s cəhd sıfırlandı (nəticə silindi) — imtahanı yenidən vermək olar."
+msgstr "Сброшено попыток: %(count)s (результат удалён) — экзамен можно сдать заново."
+
+msgctxt "exams.attempt_reset"
+msgid "%(count)s cəhd sıfırlanmadı: %(reason)s."
+msgstr "Не сброшено попыток: %(count)s — %(reason)s."
+
+msgctxt "exams.attempt_reset"
+msgid "%(count)s cəhd tapılmadı (artıq silinib)."
+msgstr "Не найдено попыток: %(count)s (уже удалены)."
+
+msgctxt "exams.attempt_reset"
+msgid "%(count)s zal bileti yeni PIN ilə yenidən açıldı — PIN imtahan mərkəzinin oturum səhifəsindədir."
+msgstr "Билетов в зал открыто заново с новым PIN: %(count)s — PIN на странице сессии экзаменационного центра."
+
+msgctxt "exams.attempt_reset"
+msgid "Audit jurnalında bax"
+msgstr "Открыть в журнале аудита"
+
+msgctxt "exams.attempt_reset"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "exams.attempt_reset"
+msgid "Bloklanıb"
+msgstr "Заблокировано"
+
+msgctxt "exams.attempt_reset"
+msgid "Bu imtahanda hələ heç bir nəticə silinməyib."
+msgstr "В этом экзамене ещё не удалено ни одного результата."
+
+msgctxt "exams.attempt_reset"
+msgid "Bu qrupda sıfırlanacaq cəhd yoxdur."
+msgstr "В этой группе нет попыток для сброса."
+
+msgctxt "exams.attempt_reset"
+msgid "Cəhd"
+msgstr "Попытка"
+
+msgctxt "exams.attempt_reset"
+msgid "Cəhd tapılmadı."
+msgstr "Попытка не найдена."
+
+msgctxt "exams.attempt_reset"
+msgid "Cəhd və cavabları, apellyasiyaları, bildirişləri silinir; jurnaldakı midterm / final balı əvvəlki rəsmi cəhdə qaytarılır və ya boşaldılır. Cəhd sıfırlanmış sayılır — imtahanı yenidən vermək olar. Zal imtahanında bilet yeni PIN ilə yenidən açılır. Əməliyyat geri qaytarılmır və audit jurnalına yazılır."
+msgstr "Попытка, её ответы, апелляции и уведомления удаляются; балл мидтерма / финала в журнале возвращается к предыдущей официальной попытке или очищается. Попытка считается сброшенной — экзамен можно сдать заново. Для экзамена в зале билет открывается заново с новым PIN. Действие необратимо и записывается в журнал аудита."
+
+msgctxt "exams.attempt_reset"
+msgid "Ləğv et"
+msgstr "Отмена"
+
+msgctxt "exams.attempt_reset"
+msgid "Nəticəni sil (cəhdi sıfırla)"
+msgstr "Удалить результат (сбросить попытку)"
+
+msgctxt "exams.attempt_reset"
+msgid "Nəticəni yalnız RİM rəhbəri və imtahan mərkəzi rəhbəri silə bilər."
+msgstr "Удалять результаты могут только руководитель RİM и руководитель экзаменационного центра."
+
+msgctxt "exams.attempt_reset"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "exams.attempt_reset"
+msgid "Qrup cəhdlərini sıfırla"
+msgstr "Сбросить попытки группы"
+
+msgctxt "exams.attempt_reset"
+msgid "Qrup seçin."
+msgstr "Выберите группу."
+
+msgctxt "exams.attempt_reset"
+msgid "Qrup seçin…"
+msgstr "Выберите группу…"
+
+msgctxt "exams.attempt_reset"
+msgid "Qrupu sıfırla"
+msgstr "Сбросить группу"
+
+msgctxt "exams.attempt_reset"
+msgid "Seçilmiş cəhd sayı"
+msgstr "Выбрано попыток"
+
+msgctxt "exams.attempt_reset"
+msgid "Seçilmiş qrupun bu imtahandakı bütün nəticələri silinir və cəhdlər sıfırlanır — tələbələr imtahanı yenidən verə bilər. Əvvəl ön baxış göstərilir."
+msgstr "Все результаты выбранной группы в этом экзамене удаляются, попытки сбрасываются — студенты смогут сдать экзамен заново. Сначала показывается предварительный просмотр."
+
+msgctxt "exams.attempt_reset"
+msgid "Seçilmişlərin nəticəsini sil"
+msgstr "Удалить выбранные результаты"
+
+msgctxt "exams.attempt_reset"
+msgid "Sil və sıfırla"
+msgstr "Удалить и сбросить"
+
+msgctxt "exams.attempt_reset"
+msgid "Silinmiş nəticələr (sıfırlanmış cəhdlər)"
+msgstr "Удалённые результаты (сброшенные попытки)"
+
+msgctxt "exams.attempt_reset"
+msgid "Sistem"
+msgstr "Система"
+
+msgctxt "exams.attempt_reset"
+msgid "Sıfırlamaq üçün cəhd seçin."
+msgstr "Выберите попытку для сброса."
+
+msgctxt "exams.attempt_reset"
+msgid "Sıfırlamaq üçün seçilib"
+msgstr "Выбрано для сброса"
+
+msgctxt "exams.attempt_reset"
+msgid "Sıfırlanacaq"
+msgstr "Будет сброшено"
+
+msgctxt "exams.attempt_reset"
+msgid "Səbəb"
+msgstr "Причина"
+
+msgctxt "exams.attempt_reset"
+msgid "Səbəb (məcburi)"
+msgstr "Причина (обязательно)"
+
+msgctxt "exams.attempt_reset"
+msgid "Səbəb mütləqdir."
+msgstr "Причина обязательна."
+
+msgctxt "exams.attempt_reset"
+msgid "Səbəb ən azı %(n)s simvol olmalıdır."
+msgstr "Причина должна содержать не менее %(n)s символов."
+
+msgctxt "exams.attempt_reset"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "exams.attempt_reset"
+msgid "Vaxt"
+msgstr "Время"
+
+msgctxt "exams.attempt_reset"
+msgid "Zal bileti yeni PIN ilə yenidən açıldı"
+msgstr "Билет в зал открыт заново с новым PIN"
+
+msgctxt "exams.attempt_reset"
+msgid "bu cəhdə 25% (yenidən imtahan) müraciəti bağlıdır"
+msgstr "к этой попытке привязано заявление на пересдачу (25%)"
+
+msgctxt "exams.attempt_reset"
+msgid "jurnal bağlanıb (təsdiqlənib / dərc olunub) — əvvəl jurnalı açın"
+msgstr "журнал закрыт (утверждён / опубликован) — сначала откройте журнал"
+
+msgctxt "exams.attempt_reset"
+msgid "Ön baxış"
+msgstr "Предпросмотр"
+
+msgctxt "exams.attempt_reset"
+msgid "Ön baxış hazırlanır…"
+msgstr "Готовим предпросмотр…"
+
+msgctxt "exams.attempt_reset"
+msgid "Ön baxışı yükləmək olmadı."
+msgstr "Не удалось загрузить предпросмотр."
+
+msgctxt "exams.attempt_reset"
+msgid "İcraçı"
+msgstr "Исполнитель"
+
+msgctxt "exams.attempt_reset"
+msgid "Ən azı %(n)s simvol."
+msgstr "Не менее %(n)s символов."
+
+msgctxt "exams.attempt_reset"
+msgid "Əvvəlki nəticə"
+msgstr "Прежний результат"
+
+msgid "Cəhd sıfırlandı — bilet yeni PIN ilə yenidən açıldı"
+msgstr "Попытка сброшена — билет открыт заново с новым PIN"
+
+msgctxt "registrar.leave_reason"
+msgid "Akademik məzuniyyət"
+msgstr "Академический отпуск"
+
+msgctxt "registrar.leave_reason"
+msgid "Analıq (doğuş) məzuniyyəti"
+msgstr "Отпуск по беременности и родам"
+
+msgctxt "registrar.leave_reason"
+msgid "Uşağa qulluq məzuniyyəti"
+msgstr "Отпуск по уходу за ребёнком"
+
+msgctxt "registrar.leave_reason"
+msgid "Səhhətlə bağlı (tibbi)"
+msgstr "По состоянию здоровья"
+
+msgctxt "registrar.leave_reason"
+msgid "Hərbi xidmət"
+msgstr "Военная служба"
+
+msgctxt "registrar.leave_reason"
+msgid "Ailə vəziyyəti"
+msgstr "Семейные обстоятельства"
+
+msgctxt "registrar.leave_reason"
+msgid "Maliyyə səbəbi"
+msgstr "Финансовые причины"
+
+msgctxt "registrar.leave_reason"
+msgid "Digər"
+msgstr "Другое"
+
+msgctxt "accounts.leave_reason"
+msgid "Dondurma səbəbi"
+msgstr "Причина отпуска"
+
+msgctxt "accounts.leave_reason"
+msgid "Kateqoriya seçin"
+msgstr "Выберите категорию"
+
+msgctxt "accounts.leave_reason"
+msgid "Kateqoriya əmr tarixçəsində və audit jurnalında saxlanılır."
+msgstr "Категория сохраняется в истории приказов и в журнале аудита."
+
+msgctxt "accounts.leave_reason"
+msgid "«Digər» seçildi — aşağıdakı səbəb sahəsində qısa izah yazın (məcburidir)."
+msgstr "Выбрано «Другое» — кратко поясните в поле причины ниже (обязательно)."
+
+msgctxt "registrar.journal_removal"
+msgid "Uzaqlaşdırma"
+msgstr "Отстранение"
+
+msgctxt "registrar.journal_removal"
+msgid "Fənn əvəzlənməsi (sənəd təqdim edib)"
+msgstr "Замена предмета (представлен документ)"
+
+msgctxt "registrar.journal_removal"
+msgid "Kredit tanınması / köçürmə"
+msgstr "Признание кредитов / перевод"
+
+msgctxt "registrar.journal_removal"
+msgid "Səhv əlavə olunub"
+msgstr "Добавлен по ошибке"
+
+msgctxt "registrar.journal_removal"
+msgid "Başqa qrupa / alt qrupa keçid"
+msgstr "Переход в другую группу / подгруппу"
+
+msgctxt "registrar.journal_removal"
+msgid "Digər"
+msgstr "Другое"
+
+msgctxt "registrar.journal_removal"
+msgid "Fəndən azad"
+msgstr "Освобождён от предмета"
+
+msgctxt "registrar.journal_removal"
+msgid "Alt qrupdan əlavə geri götürüldü"
+msgstr "Добавление из подгруппы отменено"
+
+msgctxt "registrar.journal_removal"
+msgid "Çıxarılma səbəbini seçin."
+msgstr "Выберите причину исключения."
+
+msgctxt "registrar.journal_removal"
+msgid "Çıxarılma səbəbi tanınmadı — siyahıdan seçin."
+msgstr "Причина исключения не распознана — выберите из списка."
+
+msgctxt "registrar.journal_removal"
+msgid "«Digər» seçiləndə qeyd yazılmalıdır."
+msgstr "При выборе «Другое» необходимо написать примечание."
+
+msgctxt "registrar.journal_removal"
+msgid "Sistem"
+msgstr "Система"
+
+msgctxt "registrar.journal_removal"
+msgid "Çıxarılma səbəbi"
+msgstr "Причина исключения"
+
+msgctxt "registrar.journal_removal"
+msgid "— Səbəbi seçin —"
+msgstr "— Выберите причину —"
+
+msgctxt "registrar.journal_removal"
+msgid "Qeyd"
+msgstr "Примечание"
+
+msgctxt "registrar.journal_removal"
+msgid "(istəyə bağlı)"
+msgstr "(необязательно)"
+
+msgctxt "registrar.journal_removal"
+msgid "(«Digər» üçün məcburi)"
+msgstr "(обязательно для «Другое»)"
+
+msgctxt "registrar.journal_removal"
+msgid "Məs.: sənəd №, əmr tarixi, hansı fənnlə əvəzlənib"
+msgstr "Напр.: № документа, дата приказа, каким предметом заменён"
+
+msgctxt "registrar.journal_removal"
+msgid "Jurnaldan çıxarılır:"
+msgstr "Исключается из журнала:"
+
+msgctxt "registrar.journal_history"
+msgid "Jurnaldan çıxarıldı"
+msgstr "Исключён из журнала"
+
+msgctxt "registrar.journal_history"
+msgid "Jurnala qaytarıldı"
+msgstr "Возвращён в журнал"
+
+msgctxt "registrar.journal_history"
+msgid "Siyahıdan çıxarılma"
+msgstr "Исключения из списка"
+
+msgctxt "profile.section"
+msgid "Jurnaldan çıxarılmalar"
+msgstr "Исключения из журналов"
+
+msgctxt "registrar.model.journal_removal.meta"
+msgid "journal removal"
+msgstr "запись об исключении из журнала"
+
+msgctxt "registrar.model.journal_removal.meta"
+msgid "journal removals"
+msgstr "записи об исключении из журнала"
+
+msgctxt "accounts.journal_removals"
+msgid "Ad, soyad və ya istifadəçi adı"
+msgstr "Имя, фамилия или имя пользователя"
+
+msgctxt "accounts.journal_removals"
+msgid "Bu bölmə yalnız RİM rəhbəri və superadmin üçündür."
+msgstr "Этот раздел доступен только руководителю РИМ и суперадмину."
+
+msgctxt "accounts.journal_removals"
+msgid "Bərpa olunub"
+msgstr "Восстановлен"
+
+msgctxt "accounts.journal_removals"
+msgid "Excel-ə ixrac"
+msgstr "Экспорт в Excel"
+
+msgctxt "accounts.journal_removals"
+msgid "Fakültə"
+msgstr "Факультет"
+
+#, python-format
+msgctxt "accounts.journal_removals"
+msgid "Fayl ilk %(n)s sətirlə məhdudlaşdırılıb — süzgəcləri daraldıb yenidən yükləyin."
+msgstr "Файл ограничен первыми %(n)s строками — сузьте фильтры и скачайте снова."
+
+msgctxt "accounts.journal_removals"
+msgid "Fənn"
+msgstr "Предмет"
+
+msgctxt "accounts.journal_removals"
+msgid "Fənn / jurnal"
+msgstr "Предмет / журнал"
+
+msgctxt "accounts.journal_removals"
+msgid "Fənn kodu"
+msgstr "Код предмета"
+
+msgctxt "accounts.journal_removals"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "accounts.journal_removals"
+msgid "Hələ jurnaldan çıxarılma qeydə alınmayıb"
+msgstr "Исключения из журналов ещё не зафиксированы"
+
+msgctxt "accounts.journal_removals"
+msgid "Jurnalda «Fəndən azad et» və ya alt qrup «Çıxar» səbəb seçilərək ediləndə qeyd burada görünəcək."
+msgstr "Когда в журнале выполняется «Освободить от предмета» или «Исключить» из подгруппы с указанием причины, запись появится здесь."
+
+msgctxt "accounts.journal_removals"
+msgid "Jurnaldan çıxarılan hər tələbə səbəb kateqoriyası və qeydlə burada qeyd olunur: fəndən azad etmə, alt qrupdan əlavənin geri götürülməsi və xarici nəticənin tanınması. Süzgəclərlə səbəbə, tarixə, fakültəyə, kafedraya, müəllimə və tələbəyə görə daraldın."
+msgstr "Каждый исключённый из журнала студент фиксируется здесь с категорией причины и примечанием: освобождение от предмета, отмена добавления из подгруппы и признание внешнего результата. Сужайте список фильтрами по причине, дате, факультету, кафедре, преподавателю и студенту."
+
+msgctxt "accounts.journal_removals"
+msgid "Jurnaldan çıxarılmaların ixracı"
+msgstr "Экспорт исключений из журналов"
+
+msgctxt "accounts.journal_removals"
+msgid "Kafedra"
+msgstr "Кафедра"
+
+msgctxt "accounts.journal_removals"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+msgctxt "accounts.journal_removals"
+msgid "Müəllimin adı"
+msgstr "Имя преподавателя"
+
+msgctxt "accounts.journal_removals"
+msgid "Növbəti"
+msgstr "Следующая"
+
+#, python-format
+msgctxt "accounts.journal_removals"
+msgid "Nəticə: %(n)s qeyd"
+msgstr "Результат: %(n)s записей"
+
+msgctxt "accounts.journal_removals"
+msgid "Qeyd"
+msgstr "Примечание"
+
+msgctxt "accounts.journal_removals"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "accounts.journal_removals"
+msgid "Qüvvədə"
+msgstr "Действует"
+
+msgctxt "accounts.journal_removals"
+msgid "Semestr"
+msgstr "Семестр"
+
+msgctxt "accounts.journal_removals"
+msgid "Süzgəcləri dəyişin və ya «Sıfırla» basın."
+msgstr "Измените фильтры или нажмите «Сбросить»."
+
+msgctxt "accounts.journal_removals"
+msgid "Süzgəcə uyğun çıxarılma yoxdur"
+msgstr "Нет исключений, соответствующих фильтрам"
+
+msgctxt "accounts.journal_removals"
+msgid "Səbəb"
+msgstr "Причина"
+
+msgctxt "accounts.journal_removals"
+msgid "Səbəb üzrə say"
+msgstr "Количество по причинам"
+
+#, python-format
+msgctxt "accounts.journal_removals"
+msgid "Səhifə %(page)s / %(last)s"
+msgstr "Страница %(page)s / %(last)s"
+
+msgctxt "accounts.journal_removals"
+msgid "Səhifələr"
+msgstr "Страницы"
+
+msgctxt "accounts.journal_removals"
+msgid "Tarix"
+msgstr "Дата"
+
+msgctxt "accounts.journal_removals"
+msgid "Tarixdən"
+msgstr "С даты"
+
+msgctxt "accounts.journal_removals"
+msgid "Tarixədək"
+msgstr "По дату"
+
+msgctxt "accounts.journal_removals"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "accounts.journal_removals"
+msgid "Vəziyyət"
+msgstr "Состояние"
+
+msgctxt "accounts.journal_removals"
+msgid "Çıxaran"
+msgstr "Кем исключён"
+
+msgctxt "accounts.journal_removals"
+msgid "İstifadəçi adı"
+msgstr "Имя пользователя"
+
+msgctxt "accounts.journal_removals"
+msgid "Əməl"
+msgstr "Действие"
+
+msgctxt "accounts.journal_removals"
+msgid "Əvvəlki"
+msgstr "Предыдущая"
+
+msgctxt "profile.section"
+msgid "Alt qrup tələbələri"
+msgstr "Студенты подгрупп"
+
+msgctxt "registrar.subgroup_students"
+msgid "Aktiv"
+msgstr "Активен"
+
+msgctxt "registrar.subgroup_students"
+msgid "Tamamlanıb"
+msgstr "Завершён"
+
+msgctxt "registrar.subgroup_students"
+msgid "Dondurulub"
+msgstr "Приостановлен"
+
+msgctxt "registrar.subgroup_students"
+msgid "Jurnaldan çıxarılıb"
+msgstr "Исключён из журнала"
+
+msgctxt "registrar.subgroup_students"
+msgid "Köçürmə ilə əvəzlənib"
+msgstr "Заменён переводом"
+
+msgctxt "registrar.subgroup_students"
+msgid "Öz jurnalından azad edilib"
+msgstr "Освобождён из своего журнала"
+
+msgctxt "registrar.subgroup_students"
+msgid "Alt qrup"
+msgstr "Подгруппа"
+
+msgctxt "registrar.subgroup_students"
+msgid "İntensiv kurs"
+msgstr "Интенсивный курс"
+
+msgctxt "registrar.subgroup_students"
+msgid "Təkrar tədris"
+msgstr "Повторное обучение"
+
+msgctxt "registrar.subgroup_students"
+msgid "Sənəd var (fayl və ya sərəncam)"
+msgstr "Документ есть (файл или приказ)"
+
+msgctxt "registrar.subgroup_students"
+msgid "Fayl yüklənib"
+msgstr "Файл загружен"
+
+msgctxt "registrar.subgroup_students"
+msgid "Sərəncam nömrəsi"
+msgstr "Номер приказа"
+
+msgctxt "registrar.subgroup_students"
+msgid "Sənədsiz — superadmin / RİM rəhbəri düzəlişi"
+msgstr "Без документа — исправление суперадмина / руководителя ЦЦР"
+
+msgctxt "registrar.subgroup_students"
+msgid "Sənəd yoxdur"
+msgstr "Нет документа"
+
+msgctxt "registrar.subgroup_students"
+msgid "Müəllim təyin olunmayıb"
+msgstr "Преподаватель не назначен"
+
+#, python-format
+msgctxt "accounts.subgroup_students"
+msgid "%(n)s hazırda aktiv"
+msgstr "%(n)s активны сейчас"
+
+msgctxt "accounts.subgroup_students"
+msgid "Ad, soyad və ya istifadəçi adı"
+msgstr "Имя, фамилия или имя пользователя"
+
+msgctxt "accounts.subgroup_students"
+msgid "Alt qrup olduğu jurnal"
+msgstr "Журнал (как подгруппа)"
+
+msgctxt "accounts.subgroup_students"
+msgid "Alt qrup olduğu qrup"
+msgstr "Группа (как подгруппа)"
+
+msgctxt "accounts.subgroup_students"
+msgid "Alt qrup tələbələrinin ixracı"
+msgstr "Экспорт студентов подгрупп"
+
+msgctxt "accounts.subgroup_students"
+msgid "Alt qrupa tələbə əlavə et"
+msgstr "Добавить студента в подгруппу"
+
+msgctxt "accounts.subgroup_students"
+msgid "Alt qrupdan əlavə olunmuş tələbələr"
+msgstr "Студенты, добавленные из других групп"
+
+msgctxt "accounts.subgroup_students"
+msgid "Başqa (alt) qrupdan jurnala əlavə olunmuş hər tələbə: öz qrupu, alt qrup olduğu jurnal, fənn, müəllim, kredit, səbəb və əlavə olunarkən təqdim edilən sənəd. Süzgəclərlə daraldın, başlığa klikləyib sıralayın."
+msgstr "Каждый студент, добавленный в журнал из другой (под)группы: своя группа, журнал, предмет, преподаватель, кредиты, причина и представленный документ. Сужайте фильтрами, сортируйте по заголовку."
+
+msgctxt "accounts.subgroup_students"
+msgid "Bu bölmə RİM rəhbəri, superadmin və alt qrup yerləşdirmə səlahiyyəti olan rollar üçündür."
+msgstr "Этот раздел для руководителя ЦЦР, суперадмина и ролей с правом размещения в подгруппы."
+
+msgctxt "accounts.subgroup_students"
+msgid "Bu jurnalda artıq olan tələbələr göstərilir, amma seçilə bilmir."
+msgstr "Студенты, уже находящиеся в журнале, показаны, но не могут быть выбраны."
+
+msgctxt "accounts.subgroup_students"
+msgid "Bu qrupda uyğun tələbə tapılmadı."
+msgstr "В этой группе подходящий студент не найден."
+
+msgctxt "accounts.subgroup_students"
+msgid "Cari qrupu"
+msgstr "Текущая группа"
+
+msgctxt "accounts.subgroup_students"
+msgid "Excel-ə ixrac"
+msgstr "Экспорт в Excel"
+
+msgctxt "accounts.subgroup_students"
+msgid "Fakültə"
+msgstr "Факультет"
+
+msgctxt "accounts.subgroup_students"
+msgid "Fakültə üzrə (tələbənin öz fakültəsi)"
+msgstr "По факультетам (факультет студента)"
+
+#, python-format
+msgctxt "accounts.subgroup_students"
+msgid "Fayl ilk %(n)s sətirlə məhdudlaşdırılıb — süzgəcləri daraldıb yenidən yükləyin."
+msgstr "Файл ограничен первыми %(n)s строками — сузьте фильтры и скачайте снова."
+
+msgctxt "accounts.subgroup_students"
+msgid "Fənn"
+msgstr "Предмет"
+
+msgctxt "accounts.subgroup_students"
+msgid "Fənn kodu"
+msgstr "Код предмета"
+
+msgctxt "accounts.subgroup_students"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "accounts.subgroup_students"
+msgid "Hədəf jurnal (alt qrup olacağı jurnal)"
+msgstr "Целевой журнал (куда студент добавляется как подгруппа)"
+
+msgctxt "accounts.subgroup_students"
+msgid "Hədəf jurnalı seçin."
+msgstr "Выберите целевой журнал."
+
+msgctxt "accounts.subgroup_students"
+msgid "Həftəlik trend"
+msgstr "Недельная динамика"
+
+msgctxt "accounts.subgroup_students"
+msgid "Həftəlik trend (son 12 həftə)"
+msgstr "Недельная динамика (последние 12 недель)"
+
+msgctxt "accounts.subgroup_students"
+msgid "Hələ alt qrupdan əlavə olunmuş tələbə yoxdur"
+msgstr "Студентов, добавленных из других групп, пока нет"
+
+msgctxt "accounts.subgroup_students"
+msgid "Jurnalda və ya «Alt qrupa tələbə əlavə et» bölməsində əlavə ediləndə tələbə burada görünəcək."
+msgstr "Студент появится здесь после добавления в журнале или в разделе «Добавить студента в подгруппу»."
+
+msgctxt "accounts.subgroup_students"
+msgid "Kafedra"
+msgstr "Кафедра"
+
+msgctxt "accounts.subgroup_students"
+msgid "Kredit"
+msgstr "Кредиты"
+
+msgctxt "accounts.subgroup_students"
+msgid "Müəllim"
+msgstr "Преподаватель"
+
+msgctxt "accounts.subgroup_students"
+msgid "Müəllimin adı"
+msgstr "Имя преподавателя"
+
+msgctxt "accounts.subgroup_students"
+msgid "Məlumat yoxdur"
+msgstr "Нет данных"
+
+msgctxt "accounts.subgroup_students"
+msgid "Mənbə qrup (tələbənin öz qrupu)"
+msgstr "Исходная группа (своя группа студента)"
+
+msgctxt "accounts.subgroup_students"
+msgid "Mənbə qrupu və tələbəni seçin."
+msgstr "Выберите исходную группу и студента."
+
+msgctxt "accounts.subgroup_students"
+msgid "Məs.: dekanlığın təqdimatı №…, akademik borc"
+msgstr "Напр.: представление деканата №…, академическая задолженность"
+
+msgctxt "accounts.subgroup_students"
+msgid "Növ"
+msgstr "Тип"
+
+msgctxt "accounts.subgroup_students"
+msgid "Növbəti"
+msgstr "Следующая"
+
+#, python-format
+msgctxt "accounts.subgroup_students"
+msgid "Nəticə: %(n)s qeyd"
+msgstr "Результат: %(n)s записей"
+
+msgctxt "accounts.subgroup_students"
+msgid "Qrup axtarın…"
+msgstr "Найдите группу…"
+
+msgctxt "accounts.subgroup_students"
+msgid "Qrup, fənn və ya müəllim axtarın…"
+msgstr "Найдите группу, предмет или преподавателя…"
+
+msgctxt "accounts.subgroup_students"
+msgid "Semestr"
+msgstr "Семестр"
+
+msgctxt "accounts.subgroup_students"
+msgid "Sizin üçün könüllüdür — sənədsiz əlavədə səbəbə avtomatik «sənədsiz düzəliş» qeydi yazılır."
+msgstr "Для вас необязательно — без документа к причине автоматически добавляется отметка «исправление без документа»."
+
+msgctxt "accounts.subgroup_students"
+msgid "Statistika"
+msgstr "Статистика"
+
+msgctxt "accounts.subgroup_students"
+msgid "Süzgəcləri dəyişin və ya «Sıfırla» basın."
+msgstr "Измените фильтры или нажмите «Сбросить»."
+
+msgctxt "accounts.subgroup_students"
+msgid "Süzgəcə uyğun tələbə yoxdur"
+msgstr "Нет студентов, соответствующих фильтрам"
+
+msgctxt "accounts.subgroup_students"
+msgid "Səbəb"
+msgstr "Причина"
+
+msgctxt "accounts.subgroup_students"
+msgid "Səbəb / qeyd"
+msgstr "Причина / примечание"
+
+msgctxt "accounts.subgroup_students"
+msgid "Səbəb yazılmalıdır."
+msgstr "Необходимо указать причину."
+
+#, python-format
+msgctxt "accounts.subgroup_students"
+msgid "Səhifə %(page)s / %(last)s"
+msgstr "Страница %(page)s / %(last)s"
+
+msgctxt "accounts.subgroup_students"
+msgid "Səhifələr"
+msgstr "Страницы"
+
+msgctxt "accounts.subgroup_students"
+msgid "Sənəd"
+msgstr "Документ"
+
+msgctxt "accounts.subgroup_students"
+msgid "Sənəd (təqdimat / sərəncam — PDF, JPG, PNG)"
+msgstr "Документ (представление / приказ — PDF, JPG, PNG)"
+
+msgctxt "accounts.subgroup_students"
+msgid "Sənəd (təqdimat / sərəncam) yüklənməlidir."
+msgstr "Необходимо загрузить документ (представление / приказ)."
+
+msgctxt "accounts.subgroup_students"
+msgid "Sənəd linki / sərəncam"
+msgstr "Ссылка на документ / приказ"
+
+msgctxt "accounts.subgroup_students"
+msgid "Sənəd yoxdur"
+msgstr "Нет документа"
+
+msgctxt "accounts.subgroup_students"
+msgid "Sənədli"
+msgstr "С документом"
+
+msgctxt "accounts.subgroup_students"
+msgid "Sənədsiz düzəliş"
+msgstr "Исправление без документа"
+
+msgctxt "accounts.subgroup_students"
+msgid "Sənədə bax"
+msgstr "Открыть документ"
+
+#, python-format
+msgctxt "accounts.subgroup_students"
+msgid "Sərəncam № %(number)s"
+msgstr "Приказ № %(number)s"
+
+msgctxt "accounts.subgroup_students"
+msgid "Tarix"
+msgstr "Дата"
+
+msgctxt "accounts.subgroup_students"
+msgid "Tarixdən"
+msgstr "С даты"
+
+msgctxt "accounts.subgroup_students"
+msgid "Tarixədək"
+msgstr "По дату"
+
+msgctxt "accounts.subgroup_students"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "accounts.subgroup_students"
+msgid "Tələbə axtarın…"
+msgstr "Найдите студента…"
+
+msgctxt "accounts.subgroup_students"
+msgid "Tələbə bu fənn üzrə öz qrupunun jurnalında aktivdirsə: əvvəlki qeydiyyat tarixçəyə keçir, bal və davamiyyət saxlanılır."
+msgstr "Если студент активен по этому предмету в журнале своей группы: прежняя запись уходит в историю, оценки и посещаемость сохраняются."
+
+msgctxt "accounts.subgroup_students"
+msgid "Tələbə jurnala əlavə olundu."
+msgstr "Студент добавлен в журнал."
+
+msgctxt "accounts.subgroup_students"
+msgid "Uyğun jurnal tapılmadı."
+msgstr "Подходящий журнал не найден."
+
+msgctxt "accounts.subgroup_students"
+msgid "Uyğun qrup tapılmadı."
+msgstr "Подходящая группа не найдена."
+
+msgctxt "accounts.subgroup_students"
+msgid "Vəziyyət"
+msgstr "Состояние"
+
+msgctxt "accounts.subgroup_students"
+msgid "Yalnız cari semestrin açıq jurnalları və sizin əhatənizdəki qruplar."
+msgstr "Только открытые журналы текущего семестра и группы в вашей зоне ответственности."
+
+msgctxt "accounts.subgroup_students"
+msgid "Yalnız sizin struktur əhatənizdəki qrupların tələbələri və jurnalları göstərilir."
+msgstr "Показаны только студенты и журналы групп в вашей структурной зоне."
+
+msgctxt "accounts.subgroup_students"
+msgid "Yazı jurnal modalının rəsmi yolu ilə gedir: kredit həddi, jurnal tutumu və siyahı qapısı eynidir."
+msgstr "Запись идёт через официальный путь журнала: те же лимит кредитов, вместимость журнала и проверки списка."
+
+#, python-format
+msgctxt "accounts.subgroup_students"
+msgid "birləşmə: %(n)s · intensiv: %(m)s"
+msgstr "объединение: %(n)s · интенсив: %(m)s"
+
+#, python-format
+msgctxt "accounts.subgroup_students"
+msgid "cəmi %(n)s kredit"
+msgstr "всего %(n)s кредитов"
+
+#, python-format
+msgctxt "accounts.subgroup_students"
+msgid "cəmi %(n)s sənəd"
+msgstr "всего %(n)s документов"
+
+msgctxt "accounts.subgroup_students"
+msgid "fayl və ya sərəncam"
+msgstr "файл или приказ"
+
+#, python-format
+msgctxt "accounts.subgroup_students"
+msgid "indi: %(group)s"
+msgstr "сейчас: %(group)s"
+
+msgctxt "accounts.subgroup_students"
+msgid "superadmin / RİM rəhbəri"
+msgstr "суперадмин / руководитель ЦЦР"
+
+msgctxt "accounts.subgroup_students"
+msgid "sənədsiz — superadmin/RİM rəhbəri düzəlişi"
+msgstr "без документа — исправление суперадмина/руководителя ЦЦР"
+
+msgctxt "accounts.subgroup_students"
+msgid "Öz jurnalından azad et (alt qrup birləşməsi)"
+msgstr "Освободить из своего журнала (объединение подгруппы)"
+
+msgctxt "accounts.subgroup_students"
+msgid "Öz qrupu"
+msgstr "Своя группа"
+
+msgctxt "accounts.subgroup_students"
+msgid "öz jurnalından azad edilib"
+msgstr "освобождён из своего журнала"
+
+msgctxt "accounts.subgroup_students"
+msgid "İstifadəçi adı"
+msgstr "Имя пользователя"
+
+msgctxt "accounts.subgroup_students"
+msgid "Əlavə"
+msgstr "Добавления"
+
+msgctxt "accounts.subgroup_students"
+msgid "Əlavə edən"
+msgstr "Кем добавлен"
+
+msgctxt "accounts.subgroup_students"
+msgid "Əlavə et"
+msgstr "Добавить"
+
+msgctxt "accounts.subgroup_students"
+msgid "Əməliyyat alınmadı — yenidən cəhd edin."
+msgstr "Операция не удалась — попробуйте снова."
+
+msgctxt "accounts.subgroup_students"
+msgid "Ən çox alt qrup olduğu qrup (haraya)"
+msgstr "Чаще всего — группа назначения (куда)"
+
+msgctxt "accounts.subgroup_students"
+msgid "Ən çox fənn"
+msgstr "Чаще всего — предметы"
+
+msgctxt "accounts.subgroup_students"
+msgid "Ən çox müəllim"
+msgstr "Чаще всего — преподаватели"
+
+msgctxt "accounts.subgroup_students"
+msgid "Ən çox öz qrupu (haradan)"
+msgstr "Чаще всего — своя группа (откуда)"
+
+msgctxt "accounts.subgroup_students"
+msgid "Əvvəlcə jurnal seçin…"
+msgstr "Сначала выберите журнал…"
+
+msgctxt "accounts.subgroup_students"
+msgid "Əvvəlcə qrup seçin…"
+msgstr "Сначала выберите группу…"
+
+msgctxt "accounts.subgroup_students"
+msgid "Əvvəlki"
+msgstr "Предыдущая"
+
+msgctxt "registrar.journal"
+msgid "Mənim jurnallarım"
+msgstr "Мои журналы"
+
+msgctxt "registrar.journal"
+msgid "hamısını göstər"
+msgstr "показать все"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "multiple_correct"
+msgstr "Отмечено несколько правильных ответов ({labels}) — в мидтерме и финальном экзамене у вопроса должен быть ровно один правильный ответ."

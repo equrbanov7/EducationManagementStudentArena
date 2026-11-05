@@ -155,12 +155,21 @@ STATUS_PALETTE = {
 
 # ── Yükləmə qaydaları ───────────────────────────────────────────────────────
 #: ``.zip`` QƏSDƏN buradadır: bir müraciətə çox sənəd lazım olanda (məs. bir
-#: neçə skan + arayış) 5 fayl limiti azlıq edir — arxiv bir fayl kimi gedir.
+#: neçə skan + arayış) fayl sayı limiti azlıq edir — arxiv bir fayl kimi gedir.
 #: Arxivin İÇİ ``services.submit.attach_files``-də zip-bomba yoxlamasından
 #: keçir (``core.upload_security.validate_zip_archive``).
-ALLOWED_ATTACHMENT_EXTENSIONS = frozenset({".pdf", ".jpg", ".jpeg", ".png", ".webp", ".docx", ".zip"})
-MAX_ATTACHMENT_MB = 10
-MAX_ATTACHMENTS_PER_ACTION = 5
+#:
+#: 2026-11-04 (sahib: «word, pdf, şəkil və s. sənəd göndərmə limitini artır»): köhnə Word (``.doc``) və
+#: Excel (``.xls``/``.xlsx``) əlavə olundu — üçü də ``core.upload_security``-nin MƏZMUN İMZASI cədvəlindədir
+#: (OLE / ZIP başlığı yoxlanır), endirmədə ağ siyahılı passiv tiplə verilir (``core.download_types``).
+#: ``.heic`` və ``.txt`` QƏSDƏN YOXDUR: validator onların məzmununu yoxlamır (imza cədvəlində deyil),
+#: yəni istənilən bayt «şəkil»/«mətn» adı ilə keçərdi. Limitlər 10 MB / 5 fayl → 25 MB / 10 fayl;
+#: nginx-də bu iki endpoint üçün gövdə tavanı ayrıca qaldırılıb (``docker/nginx/nginx.conf``).
+ALLOWED_ATTACHMENT_EXTENSIONS = frozenset(
+    {".pdf", ".jpg", ".jpeg", ".png", ".webp", ".doc", ".docx", ".xls", ".xlsx", ".zip"}
+)
+MAX_ATTACHMENT_MB = 25
+MAX_ATTACHMENTS_PER_ACTION = 10
 #: Fayl seçicisinin `accept` atributu + UI mətni üçün sabit sıra (frozenset
 #: sırasız olduğu üçün payload hər dəfə eyni görünsün deyə çeşidlənir).
 ATTACHMENT_ACCEPT = tuple(sorted(ALLOWED_ATTACHMENT_EXTENSIONS))

@@ -22,6 +22,7 @@ from core.search_text import MAX_TOKENS, tolerant_q
 from ...models import UserProfile
 from ..people.constants import TEACHER_ROLE_NAMES
 from .policy import PERM_SEARCH, RimActor, manageable_users_queryset, require_permission
+from .retired import EMPLOYMENT_ENDED, staff_archived_q
 
 _ARCHIVED_ACCESS_STATE = UserProfile.AccessState.ARCHIVED
 
@@ -113,11 +114,14 @@ def apply_status_filter(queryset, status: str):
             .exclude(profile__access_state=_ARCHIVED_ACCESS_STATE)
         )
     if status == STATUS_BLOCKED:
-        return queryset.filter(is_active=False).exclude(profile__is_deleted=True)
+        # «İşdən ayrılıb» bloku arxivdir (sahib 2026-11-04, ``retired.py``) — «Bloklanmış»da deyil, «Arxiv»dədir.
+        return queryset.filter(is_active=False).exclude(profile__is_deleted=True).exclude(staff_archived_q())
     if status == STATUS_DELETED:
         return queryset.filter(profile__is_deleted=True)
     if status == STATUS_ARCHIVED:
-        return queryset.filter(profile__access_state=_ARCHIVED_ACCESS_STATE).exclude(profile__is_deleted=True)
+        return queryset.filter(Q(profile__access_state=_ARCHIVED_ACCESS_STATE) | staff_archived_q()).exclude(
+            profile__is_deleted=True
+        )
     return queryset
 
 
@@ -174,13 +178,14 @@ def _incomplete(queryset):
 
 def status_counts(queryset) -> dict:
     """Status tabları üçün saylar — TƏK aqreqat sorğu (cari axtarış + növ + bayraq filtrlərinə görə)."""
-    archived = Q(profile__access_state=_ARCHIVED_ACCESS_STATE)
+    staff_archived = staff_archived_q()
+    archived = Q(profile__access_state=_ARCHIVED_ACCESS_STATE) | staff_archived
     deleted = Q(profile__is_deleted=True)
     base = queryset.model.objects.filter(pk__in=queryset.order_by().values("pk"))
     counts = base.aggregate(
         all=Count("pk"),
         active=Count("pk", filter=Q(is_active=True) & ~deleted & ~archived),
-        blocked=Count("pk", filter=Q(is_active=False) & ~deleted),
+        blocked=Count("pk", filter=Q(is_active=False) & ~deleted & ~staff_archived),
         archived=Count("pk", filter=archived & ~deleted),
         deleted=Count("pk", filter=deleted),
     )
@@ -257,6 +262,9 @@ def account_status(user) -> str:
     if profile is not None and getattr(profile, "is_deleted", False):
         return STATUS_DELETED
     if not getattr(user, "is_active", False):
+        # «İşdən ayrılıb» (müəllim / əməkdaş arxivi, ``retired.py``) — blok yox, ARXİVdir.
+        if profile is not None and getattr(profile, "block_reason_code", "") == EMPLOYMENT_ENDED:
+            return STATUS_ARCHIVED
         return STATUS_BLOCKED
     if profile is not None and getattr(profile, "access_state", "") == _ARCHIVED_ACCESS_STATE:
         return STATUS_ARCHIVED

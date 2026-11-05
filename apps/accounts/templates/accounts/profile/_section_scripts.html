@@ -56,7 +56,7 @@ setup/boot (2026-09-21 bölgüsü, modul ölçü büdcəsi).{% endcomment %}
 Hər iki fayl `[data-psm-root]` yoxdursa heç nə etmir — icazəsi olmayan
 istifadəçidə markup onsuz da render olunmur.{% endcomment %}
 <script src="{% static 'accounts/js/profile/people_academic_preview.js' %}?v=20260831-1"></script>
-<script src="{% static 'accounts/js/profile/people_academic.js' %}?v=20260831-1"></script>
+<script src="{% static 'accounts/js/profile/people_academic.js' %}?v=20261104-leave"></script>
 {% endif %}
 {% if 'schedule-manage' in asset_sections %}
 {% comment %}Cədvəl idarəetməsi — panel server-render-lidir; JS yalnız seçici
@@ -88,7 +88,7 @@ null-safe oxuyur, ona görə sıra pozulsa da səhifə çökmür.{% endcomment %
 {% comment %}Tələbə reyestri — cədvəl server-render-lidir; JS yalnız çekmecəni
 (kart + hərəkət tarixçəsi) doldurur və hərəkət əmrini multipart göndərir
 (EMSDelegate, `[data-sr-root]` yoxdursa heç nə etmir).{% endcomment %}
-<script src="{% static 'accounts/js/profile/student_registry.js' %}?v=20261003-block"></script>
+<script src="{% static 'accounts/js/profile/student_registry.js' %}?v=20261104-leave"></script>
 <script src="{% static 'accounts/js/profile/student_registry_account.js' %}?v=20261011-wp13roster"></script>
 {% endif %}
 {% if 'teaching-handover' in asset_sections %}
@@ -101,11 +101,11 @@ xülasə və çekmecə məntiqi qalır. Göndəriş ortaq `teaching_office.js`-d
 {% comment %}Saf render alt modulu əsas moduldan ƏVVƏL yüklənir; əsas modul onu
 `window.EMSWorkloadRender` üzərindən null-safe oxuyur (sıra pozulsa səhifə
 çökmür — sadəcə bölmə init olunmur).{% endcomment %}
-<script src="{% static 'accounts/js/profile/workload_distribution_render.js' %}?v=20261025-lazy"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution_render.js' %}?v=20261104-allchairs"></script>
 {# 2026-10-25: tənbəl yükləmə + müəllimə görə süzgəc — əsas moduldan ƏVVƏL (o, `EMSWorkloadList`-i null-safe oxuyur). #}
-<script src="{% static 'accounts/js/profile/workload_distribution_list.js' %}?v=20261025-filters"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution_list.js' %}?v=20261104-allchairs"></script>
 <script src="{% static 'accounts/js/profile/workload_distribution_forms.js' %}?v=20261030-transfer"></script>
-<script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20261025-lazy"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20261104-allchairs"></script>
 <script src="{% static 'accounts/js/profile/workload_row_transfer.js' %}?v=20261030-transfer"></script>
 {% comment %}2026-10-15: təsdiqlənmiş bölgünün redaktəsi (düzəliş dialoqu + təkrar sorğu), fəaliyyətin
 çıxarılması, bölgünün redaktəsi, «Redaktə et» keçidinin sətir fokusu — əsas moduldan SONRA.{% endcomment %}
@@ -192,14 +192,16 @@ istifadəçidə forma JS-siz qalırdı (asset auditi 2026-10-21).{% endcomment %
 {% endif %}
 {% if 'rim-center' in asset_sections or 'people-teachers' in asset_sections or 'people-students' in asset_sections or 'teacher-intake' in asset_sections or 'student-intake' in asset_sections or 'student-admission' in asset_sections %}
     {# RIM merkezi — hesab idareetmesi paneli (AJAX-safe, EMSReady/EMSDelegate); «Yeni hesab» axını kataloqlarda da işlənir (2026-09-08) #}
-<script src="{% static 'accounts/js/rim_center/namespace.js' %}?v=20261011-rimlist"></script><script src="{% static 'accounts/js/rim_center/staff_scope.js' %}?v=20261102-1"></script>
-<script src="{% static 'accounts/js/rim_center/modals.js' %}?v=20260826-1"></script>
-<script src="{% static 'accounts/js/rim_center/render.js' %}?v=20261027-arx"></script>
-<script src="{% static 'accounts/js/rim_center/actions.js' %}?v=20261014-searchux"></script>
+<script src="{% static 'accounts/js/rim_center/namespace.js' %}?v=20261104-modal"></script>
+<script src="{% static 'accounts/js/rim_center/modals.js' %}?v=20261104-modal"></script>
+<script src="{% static 'accounts/js/rim_center/render.js' %}?v=20261104-modal"></script>
+<script src="{% static 'accounts/js/rim_center/detail_view.js' %}?v=20261104-modal"></script>
+<script src="{% static 'accounts/js/rim_center/actions.js' %}?v=20261104-modal"></script>
+<script src="{% static 'accounts/js/rim_center/detail_events.js' %}?v=20261104-modal"></script>
 <script src="{% static 'accounts/js/rim_center/entry.js' %}?v=20261027-arx"></script>
     {# «Yeni hesab» axini — combo seciciden SONRA form, sonra toplu idxal #}
 <script src="{% static 'accounts/js/rim_center/create_combo.js' %}?v=20261014-searchux"></script>
-<script src="{% static 'accounts/js/rim_center/create.js' %}?v=20261023-finopt"></script>
+<script src="{% static 'accounts/js/rim_center/create.js' %}?v=20261104-unitselect"></script>
 <script src="{% static 'accounts/js/rim_center/create_bulk.js' %}?v=20260906-1"></script>
     {# Inzibati bolme (sobe/merkez) — mevcud struktur agaci endpoint-ine gedir #}
 <script src="{% static 'accounts/js/rim_center/create_unit.js' %}?v=20260906-2"></script>
@@ -274,13 +276,17 @@ dialoq seçiciləri; dialoq/POST yenə ortaq `teaching_office.js`-dədir.{% endc
 {% if 'audit-log' in asset_sections %}
 <script src="{% static 'audit/js/audit_log.js' %}?v=20260908-1"></script>
 {% endif %}
+{# 2026-11-04: «Dondur» səbəb kateqoriyası — «Digər» → səbəb mətni məcburi (reyestr + qrup çekmecəsi); tək qoşulma. #}
+{% if 'student-registry' in asset_sections or 'groups-registry' in asset_sections or 'semester-opening' in asset_sections or 'workload-approval' in asset_sections %}
+<script src="{% static 'accounts/js/profile/leave_reason_field.js' %}?v=20261104-leave"></script>
+{% endif %}
 {% comment %}Mərhələ 2 — yalnız SƏTİR SEÇİMİ (toplu əməllər) və seçilmiş sətirlərin
 gizli sahələrə yazılması; dialoq/POST ORTAQ `teaching_office.js`-dədir.{% endcomment %}
 {% if 'groups-registry' in asset_sections or 'semester-opening' in asset_sections or 'workload-approval' in asset_sections %}
 <script src="{% static 'accounts/js/profile/teaching_office_bulk.js' %}?v=20260903-2"></script>
 {% comment %}Ekran 06 — qrupun tələbə çekmecəsi (siyahı JSON-dan, hərəkət dialoqları
 `data-tof-open` ilə). Göndəriş yenə `teaching_office.js`-dədir.{% endcomment %}
-<script src="{% static 'accounts/js/profile/teaching_office_groups.js' %}?v=20261015-reinstate"></script>
+<script src="{% static 'accounts/js/profile/teaching_office_groups.js' %}?v=20261104-leave"></script>
 <script src="{% static 'accounts/js/profile/teaching_office_group_split.js' %}?v=20260920-split"></script>
 {% endif %}
 {% comment %}Mərhələ 4 — YALNIZ Excel idxalının multipart yüklənməsi (ortaq

@@ -51,6 +51,7 @@ GROUP_ICONS = {
     "site": "monitor",
     "monitoring": "activity",
     "syllabus": "file-check",
+    "applications": "inbox",
 }
 DEFAULT_ICON = "sliders-horizontal"
 OVERVIEW_ICON = "layout-dashboard"

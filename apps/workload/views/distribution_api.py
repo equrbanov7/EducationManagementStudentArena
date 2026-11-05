@@ -42,8 +42,10 @@ from ..services import (
     teacher_pool,
     unassign_amended,
 )
-from ..services.tasks import TOTAL_BELOW_ASSIGNED
+from ..services.all_chairs import ALL_CHAIRS
+from ..services.tasks import ROW_HAS_OBJECTIONS, TOTAL_BELOW_ASSIGNED
 from ._base import active_organization, actor_for, denied, error, json_body, no_org
+from .all_chairs_api import all_chairs_rows
 
 # Backend auditi 2026-09-13, F-01: gövdədən gələn qeyri-UUID ``row_id`` /
 # ``task_id`` / ``assignment_id`` ``filter(pk=...)``-də ValidationError → 500
@@ -52,7 +54,7 @@ from ._base import active_organization, actor_for, denied, error, json_body, no_
 
 #: Vəziyyət toqquşması (409) kodları: bölünmüş saatdan az cəm (W2) və təsdiqlənmiş sənəddə səbəbsiz yazı
 #: (2026-10-15 — UI düzəliş dialoqunu açıb sorğunu ``amend_reason`` / ``amend_note`` ilə təkrarlayır).
-_CONFLICT_CODES = frozenset({TOTAL_BELOW_ASSIGNED, AMENDMENT_REQUIRED, "workload.hours_exceeded"})
+_CONFLICT_CODES = frozenset({TOTAL_BELOW_ASSIGNED, AMENDMENT_REQUIRED, ROW_HAS_OBJECTIONS, "workload.hours_exceeded"})
 #: QA-2 F-09 (2026-10-17): məzmun xətası icazə xətası deyil — 403 yox, 400 (səhv səbəb / say / qeyd).
 _INPUT_CODES = frozenset(
     {
@@ -124,6 +126,8 @@ def rows(request) -> JsonResponse:
         return no_org()
     actor = actor_for(request)
     chair_id = request.GET.get("chair") or ""
+    if chair_id == ALL_CHAIRS:  # 2026-11-04: «Bütün kafedralar» — yalnız oxu axtarışı
+        return all_chairs_rows(request, actor)
     year = request.GET.get("year") or ""
     task_id = request.GET.get("task") or None
     try:

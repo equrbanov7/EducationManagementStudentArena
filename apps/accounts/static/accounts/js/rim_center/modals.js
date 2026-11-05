@@ -21,7 +21,8 @@
 
     modals.closeAll = function closeAll() {
         var all = document.querySelectorAll(
-            "[data-rim-detail-modal], [data-rim-confirm-modal], [data-rim-password-modal], [data-rim-notice-modal]"
+            "[data-rim-detail-modal], [data-rim-confirm-modal], [data-rim-password-modal], [data-rim-notice-modal], " +
+                "[data-rim-graduate-modal]"
         );
         Array.prototype.forEach.call(all, function (el) {
             el.hidden = true;

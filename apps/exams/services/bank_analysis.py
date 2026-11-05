@@ -30,6 +30,7 @@ _STRUCTURE_TYPES = {
     "option_count_recommend_5",
     "option_count_too_low",
     "empty_option_text",
+    "multiple_correct",
 }
 _BALANCE_TYPES = {"correct_too_long", "correct_too_short"}
 _DUPLICATE_TYPES = {DUPLICATE_IN_BANK, "duplicate_in_import", "already_in_exam"}
@@ -155,7 +156,7 @@ def build_question_meta(warnings: list) -> dict:
     }
 
 
-def _run_analysis(questions) -> QuestionBankAnalysis:
+def _run_analysis(questions, *, single_answer: bool = False) -> QuestionBankAnalysis:
     """Verilmiş sual obyektləri siyahısını analiz edir (ExamQuestion və ya BankQuestion).
 
     Dublikat (dil, fingerprint) cütünə görə qruplaşır — fərqli dillərdə eyni mətnli
@@ -190,6 +191,22 @@ def _run_analysis(questions) -> QuestionBankAnalysis:
 
     # 2) Per-sual validasiya (parsing servisini təkrar istifadə)
     _validate_questions(parsed)
+    # Midterm / final: saxlanmış sualda birdən çox düzgün cavab — «Variant problemi» xətası (sahib 2026-11-05;
+    # yükləmədəki ``bulk_workbench`` yoxlaması ilə eyni açar — əvvəl yüklənmiş suallar da görünsün).
+    if single_answer:
+        from django.utils.translation import pgettext
+
+        from apps.exams.services.bulk_workbench import _WARN_CTX, MULTIPLE_CORRECT
+
+        for question in parsed:
+            if len(question["correct"]) > 1:
+                question["warnings"].append(
+                    {
+                        "type": MULTIPLE_CORRECT,
+                        "severity": "error",
+                        "msg": pgettext(_WARN_CTX, MULTIPLE_CORRECT).format(labels=", ".join(question["correct"])),
+                    }
+                )
 
     # 3) Bank daxili dublikat aşkarlanması (eyni mətn + variant fingerprint)
     for indices in fp_groups.values():
@@ -365,15 +382,18 @@ def analyze_question_bank(exam, *, language=None) -> QuestionBankAnalysis:
     """
     if getattr(exam, "exam_type", None) != "test":
         return _empty_analysis()
+    from apps.exams.services.bulk_workbench import requires_single_answer
+
+    single_answer = requires_single_answer(exam)
 
     def _compute():
         queryset = exam.questions.prefetch_related("options")
         if language:
             queryset = queryset.filter(language=language)
-        return _run_analysis(list(queryset.order_by("order", "id")))
+        return _run_analysis(list(queryset.order_by("order", "id")), single_answer=single_answer)
 
     return _cached_analysis(
-        f"exam:{exam.pk}",
+        f"exam:{exam.pk}:{'single' if single_answer else 'any'}",
         language=language,
         fingerprint=_exam_analysis_fingerprint(exam, language),
         compute=_compute,

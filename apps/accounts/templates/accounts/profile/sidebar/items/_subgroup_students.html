@@ -1,0 +1,15 @@
+{% load i18n nav_icons %}
+{% comment %}2026-11-05 (sahib): «Alt qrup tələbələri» — alt qrupdan əlavə olunmuş tələbələrin reyestri + statistikası;
+açar `retake.manage` və ya RİM rəhbəri / superadmin (qapı: rbac_sections.py; əhatə bölmənin öz qapısında).{% endcomment %}
+{% if 'subgroup-students' in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=subgroup-students"
+       data-section="subgroup-students"
+       data-title="{% trans 'Alt qrup tələbələri' context 'profile.section' %}"
+       data-source-url="{{ profile_base_url }}?section=subgroup-students"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'subgroup-students' %}active{% endif %}">
+        {% nav_icon "user-search" "sidebar-menu-icon" %}
+        <span class="sidebar-menu-text">{% trans "Alt qrup tələbələri" context "profile.section" %}</span>
+    </a>
+</li>
+{% endif %}

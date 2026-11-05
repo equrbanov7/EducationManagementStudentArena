@@ -25,6 +25,15 @@ from apps.exams.services.parsing.media_markers import extract_media_refs
 from apps.exams.services.utils import _norm
 
 _WARN_CTX = "exams.view.question_bank.warning"
+#: Midterm / final sualında birdən çox düzgün cavab — struktur («Variant problemi») xətası.
+MULTIPLE_CORRECT = "multiple_correct"
+SINGLE_ANSWER_EXAM_TYPES = frozenset({"midterm", "final"})
+
+
+def requires_single_answer(exam) -> bool:
+    """Midterm / final imtahanında hər sualın TƏK düzgün cavabı olmalıdır (sahib 2026-11-05)."""
+    return getattr(exam, "exam_type_extended", "") in SINGLE_ANSWER_EXAM_TYPES
+
 
 _OPTION_LABELS = ("A", "B", "C", "D", "E")
 
@@ -190,7 +199,7 @@ def exam_written_text_map(exam, *, language=None):
 # ---------------------------------------------------------------------------
 # MCQ (test) analiz mühərriki
 # ---------------------------------------------------------------------------
-def analyze_mcq_bulk(raw_text, *, existing_fp_map=None, already_msg_key="already_in_exam"):
+def analyze_mcq_bulk(raw_text, *, existing_fp_map=None, already_msg_key="already_in_exam", single_answer=False):
     """
     Toplu MCQ mətnini parse edib tam preview kontekstini qaytarır.
 
@@ -200,6 +209,8 @@ def analyze_mcq_bulk(raw_text, *, existing_fp_map=None, already_msg_key="already
             (artıq saxlanmış) sualların xəritəsi. Dublikat yoxlanışı bununla edilir.
         already_msg_key: "artıq mövcuddur" mesajının pgettext açarı
             ("already_in_exam" — mövcud tərcümələr təkrar istifadə olunur).
+        single_answer: Midterm / final imtahanı (sahib 2026-11-05) — sualda birdən çox düzgün cavab
+            işarələnibsə «Variant problemi» kateqoriyasında XƏTA (``multiple_correct``).
 
     Returns:
         dict(parsed, category_counts, warning_count, duplicate_count,
@@ -264,6 +275,19 @@ def analyze_mcq_bulk(raw_text, *, existing_fp_map=None, already_msg_key="already
                     "ref_db_order": matched["order"],
                 }
             )
+
+    # ---- Midterm / final: hər sualın TƏK düzgün cavabı olmalıdır (sahib 2026-11-05) ----
+    if single_answer:
+        for question in parsed:
+            correct = [label for label in question.get("correct") or [] if label]
+            if len(correct) > 1:
+                question["warnings"].append(
+                    {
+                        "type": MULTIPLE_CORRECT,
+                        "severity": "error",
+                        "msg": pgettext(_WARN_CTX, MULTIPLE_CORRECT).format(labels=", ".join(correct)),
+                    }
+                )
 
     # ---- Test miqyasında "yalnız doğru cavab uzun/qısa" pattern-i ----
     test_level_warnings = _detect_length_bias(parsed)

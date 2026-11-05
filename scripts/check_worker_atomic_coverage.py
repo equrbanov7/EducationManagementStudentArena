@@ -98,6 +98,10 @@ INTENTIONAL_EXEMPTIONS = {
     "apps/registrar/management/commands/merge_twin_offerings.py",
     # 2026-10-28 «Praktiki məşğələ» bayrağı: eyni `relocate_twin_enrollment.run_plan` gövdəsi (plan faylı → runner).
     "apps/registrar/management/commands/set_practical_offerings.py",
+    # 2026-11-05 Psixologiya dublikatları: DB işi `merge_duplicate_student`-dədir (call_command; rls_worker_atomic orada).
+    "apps/accounts/management/commands/merge_psychology_duplicates_20261105.py",
+    # 2026-11-05 RİM müraciətləri (MR-190/161/110): sabit cütlər, eyni `relocate_twin_enrollment.run_plan` gövdəsi.
+    "apps/registrar/management/commands/repair_applications_20261105.py",
     # rehearse öz RLS kontekstini (set_rls_tenant, session-scoped, bypass-sız)
     # və öz transaction sərhədlərini (ledger advisory-lock atomic-ləri, batch
     # checkpoint/resume) idarə edir — tək böyük rls_worker_atomic() sarğısı

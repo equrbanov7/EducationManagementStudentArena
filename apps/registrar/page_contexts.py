@@ -25,15 +25,11 @@ def _profile_section_prefix(section: str) -> str:
     return f"{reverse('accounts:profile')}?section={section}&"
 
 
-def attach_kind_labels(offerings, selected_kind: str = "") -> None:
-    """Açılışlara dərs tipi etiketi + axşam bayrağı bağlayır (toplu sorğular).
+def attach_kind_labels(offerings, selected_kind: str = "", *, load_teachers=False) -> None:
+    """Açılışlara dərs tipi etiketi + axşam bayrağı (+ geniş siyahıda cari bölgü) bağlayır; yalnız səhifə dilimi.
 
-    Yalnız səhifə dilimi üçün çağırılır (QA 2026-09-05 P2-18).
-
-    ``selected_kind`` verilibsə etiket YALNIZ həmin tipi göstərir (sahib tələbi
-    2026-09-06): «Seminar» pilləsi seçiləndə sətirdə «Mühazirə · Seminar»
-    yazılırdı, yəni süzgəcin nə etdiyi görünmürdü. ``slot_kinds`` isə TAM qalır —
-    jurnalın içindəki tip seçicisi bütün mövcud tipləri göstərməlidir.
+    ``selected_kind`` → etiket YALNIZ həmin tip (sahib 2026-09-06: süzgəcin nə etdiyi görünsün); ``slot_kinds``
+    isə TAM qalır — jurnalın içindəki tip seçicisi bütün mövcud tipləri göstərməlidir.
     """
     from apps.registrar.journal_planned_kinds import planned_kinds_by_offering
     from apps.registrar.models import Lesson, ScheduleSlot, SlotKind
@@ -63,9 +59,13 @@ def attach_kind_labels(offerings, selected_kind: str = "") -> None:
         kinds = sorted(kinds_by_offering.get(offering.id, ()), key=lambda k: kind_order.get(k, len(kind_order)))
         offering.slot_kinds = kinds
         shown = [k for k in kinds if k == selected_kind] if selected_kind else kinds
-        labels = dict(kind_choices(offering, kind_labels))  # «praktiki» açılış: seminar → «Praktiki məşğələ»
+        labels = offering.kind_labels_map = dict(kind_choices(offering, kind_labels))  # praktiki: seminar → etiket
         offering.kind_label = " · ".join(str(labels[k]) for k in shown) if shown else ""
         offering.is_evening = offering.id in evening_offerings
+    if load_teachers:  # «müəllim — dərs növü» cari paylardan (sahib 2026-11-05; journal_list_load_teachers)
+        from apps.registrar.journal_list_load_teachers import attach as attach_load_teachers
+
+        attach_load_teachers(offerings, only_teacher_id=None if load_teachers is True else load_teachers)
 
 
 def journal_list_context(user, request=None) -> dict:
@@ -92,12 +92,16 @@ def journal_list_context(user, request=None) -> dict:
     # `group__parent*` zənciri artıq lazım DEYİL — fakültə/kafedra ata-axtarışı
     # `journal_list_query.faculty_department_choices_for`-da ``path``-dan gedir.
     base_qs = base_qs.select_related("subject", "period", "group", "instructor")
+    # Geniş görünüşdə seçilmiş müəllim = həmin müəllimin ÖZ siyahısı (view-as ilə eyni; sahib 2026-11-04).
+    from .journal_teacher_filters import filter_teacher, mirror
+
+    mirrored, list_qs = mirror(base_qs, request.GET.get("teacher"), organization) if is_broad else (None, base_qs)
 
     # Dövr (il/fəsil) dropdown-u — TAM əhatədən (süzgəclərdən ƏVVƏL), amma yalnız
     # TƏKRARSIZ dövrlər üçün yüngül sorğu (bax P2-18: əvvəllər 11 124 model
     # instansiyasından `{o.period for o in offerings}` ilə çıxarılırdı).
     AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
-    period_ids = base_qs.order_by().values_list("period_id", flat=True).distinct()
+    period_ids = list_qs.order_by().values_list("period_id", flat=True).distinct()
     periods = sorted(AcademicPeriod.objects.filter(pk__in=period_ids), key=lambda p: p.start_date, reverse=True)
     for p in periods:
         p.year_label = p.year_display  # "2025/2026" formatı (AcademicPeriod.format_year)
@@ -158,9 +162,8 @@ def journal_list_context(user, request=None) -> dict:
             query = (request.GET.get("q") or "").strip()
 
     # ── Süzgəclər ORM səviyyəsində (P2-18) — eyni nəticə, DB tərəfdə. ─────────
-    qs = base_qs
-    teaching_view = ""
-    if not is_broad:
+    qs, teaching_view = list_qs, ""
+    if not is_broad or mirrored is not None:
         qs, teaching_view = teacher_journal_list.select_view(qs, request)
     if selected_year:
         qs = qs.filter(period__academic_year=selected_year)
@@ -171,13 +174,11 @@ def journal_list_context(user, request=None) -> dict:
     if selected_kind:
         qs = (
             jlq.apply_kind_filter(qs, selected_kind)
-            if is_broad
+            if is_broad and mirrored is None
             else teacher_journal_list.filter_kind(qs, selected_kind)
         )
-    if selected_teacher:
+    if selected_teacher and mirrored is None:
         teacher_pk = jlq.int_or_none(selected_teacher)
-        from .journal_teacher_filters import filter_teacher
-
         qs = filter_teacher(qs, teacher_pk) if teacher_pk is not None else qs.none()
     if selected_group:
         group_pk = jlq.uuid_or_none(selected_group)
@@ -230,7 +231,7 @@ def journal_list_context(user, request=None) -> dict:
 
     if not is_broad and teaching_view == "current":
         qs = joint_journal_list.project(qs, organization=organization, user=user, selected_kind=selected_kind)
-    elif is_broad and selected_teacher:
+    elif is_broad and selected_teacher and teaching_view != "history":
         from .joint_journal_observation import project as project_observed
 
         qs = project_observed(
@@ -245,15 +246,15 @@ def journal_list_context(user, request=None) -> dict:
     page_obj = paginator.get_page(request.GET.get("page") if request is not None else None)
     row_offset = page_obj.start_index() - 1 if page_obj else 0
     page_offerings = page_obj.object_list = list(page_obj.object_list)  # F-14: say yalnız səhifə üçün
-    counts_map = journal_shares.scoped_student_counts(user, page_offerings, _offering_student_counts(page_offerings))
+    counts_map = journal_shares.scoped_student_counts(
+        mirrored or user, page_offerings, _offering_student_counts(page_offerings)
+    )
     for offering in page_offerings:
         offering.student_count = counts_map.get(offering.pk, 0)
-    # Dərs tipi etiketləri (kind_label/is_evening) YALNIZ görünən səhifə üçün —
-    # `kind` süzgəci artıq yuxarıda DB tərəfdə tətbiq olunur, tam dəst üçün
-    # daha lazım deyil (əvvəlki 0.39 s-lik DISTINCT sorğusu tamamilə itdi).
-    attach_kind_labels(page_offerings, selected_kind)
-    if not is_broad:
-        teacher_journal_list.attach(user, page_offerings, selected_kind=selected_kind)
+    # Dərs tipi etiketləri YALNIZ görünən səhifə üçün (`kind` süzgəci yuxarıda DB tərəfdədir).
+    attach_kind_labels(page_offerings, selected_kind, load_teachers=is_broad and (getattr(mirrored, "pk", 0) or True))
+    if not is_broad or mirrored is not None:
+        teacher_journal_list.attach(mirrored or user, page_offerings, selected_kind=selected_kind, links=not is_broad)
     from .journal_assignment_sources import attach_history_restore_actions
 
     attach_history_restore_actions(request, page_offerings, teacher_id=selected_teacher if is_broad else None)
@@ -283,6 +284,8 @@ def journal_list_context(user, request=None) -> dict:
         # Korrektor (İKT rəhbəri/admin) geniş görünüşü + əlavə filtrlər.
         "journal_is_broad": is_broad,
         "journal_teaching_view": teaching_view,
+        "journal_teacher_mirrored": mirrored is not None,
+        "journal_my_teacher_id": str(user.pk) if is_broad else "",  # «Mənim jurnallarım» (sahib 2026-11-05)
         "journal_teachers": teacher_choices,
         "journal_selected_teacher": selected_teacher,
         "journal_groups": group_choices,

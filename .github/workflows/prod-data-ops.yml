@@ -227,6 +227,11 @@
 #       `master-students-…` → plan.json.enc; yalnız id-lər). Bakalavr qeydi məzun/qeyri-aktiv (hərəkətsiz), magistr
 #       qrupunda yeni qeyd, arxiv hesabın girişi rəsmi bərpa səthi ilə; səhv qrupdakı magistr qeydi rəsmi köçürmə ilə.
 #       Loga YALNIZ saylar.
+#   repair_applications_20261105 — RİM 2026-11-05: MR-190/MR-161 əkiz birləşmələri + MR-110 xanası; sabit id-lər koddadır
+#       (plan faylı/secret yoxdur), merge_twin_offerings qaydaları. Defolt dry-run. Loga YALNIZ saylar.
+#   repair_twins_20261105b — əkiz jurnallar 2026-11-05 (ikinci dəst): MR-190 235 İ ing (imtahan 83 bağı + Midterm balları
+#       rəsmi jurnala, sonra keep-birləşmə) və MR-161 234 M rus (boş əkiz manifestlə bərpa, data düzgün fənnin jurnalına,
+#       yük sətri). Sabit id-lər koddadır (plan faylı/secret yoxdur). Defolt dry-run. Loga YALNIZ saylar.
 #   relocate_twin_enrollment / merge_twin_offerings / fix_legacy_lesson_kinds — RİM müraciətləri (2026-10-27): ŞİFRƏLİ
 #       release asset (`roster_tag` = `rim-fix-…` → relocate.json.enc / merge.json.enc / lessonkinds.json.enc; lokal
 #       `build_twin_repair_plans` — köhnə sistem + prod nüsxəsi, YALNIZ id-lər). relocate: əkiz jurnalın «fantom dərs»
@@ -252,6 +257,10 @@
 #       yazılır; cədvəl SONRA düzəlibsə (dərsin tarixində açılışın duran slotu dərsin saatındadır) işarə təmizlənir
 #       (jurnalın tarixçəsinə köhnə səbəblə sətir + yekun audit). `period` (məcburi), `batch` = yalnız bu jurnalın UUID-i
 #       (boş = semestrin hamısı). Yalnız təmizləyir; dərs/xana toxunulmur. Loga YALNIZ saylar. İdempotent.
+#   release_stale_slot_teachers — jurnalı və dərs yükü olmayan müəllimin cədvəlində qalan dərs (2026-11-05): slota yazılmış
+#       müəllim sahib/pay sahibi deyil, jurnalda dərs aparmayıb və fənn+semestr+qrup üzrə yükü yoxdursa slotun müəllimi
+#       boşaldılır (jurnal sahibini izləyir); deaktiv jurnalın cədvəldə qalan slotu parklanır. `period` (boş = hamısı).
+#       Slot silinmir; hər dəyişiklik auditdə. Loga YALNIZ saylar. İdempotent.
 #   fix_offering_subject — səhv fənnə bağlı jurnalın fənni YERİNDƏ (2026-11-03): `batch` = jurnalın UUID-i, `row_subject` =
 #       düzgün fənnin UUID-i, `row_group` = fənni dəyişəcək yük sətrinin UUID-i (boş = yük sətri yoxdur), `choices` =
 #       `detach=<sillabus UUID>,attach=<sillabus UUID>` (hər ikisi istəyə bağlı). Jurnalın dərsləri/xanaları/tələbələri
@@ -295,6 +304,8 @@
 #       (conflict_kept). `roster_tag` = `superseded-marks-…` → plan.json.enc (lokal qurulmuş, YALNIZ id-lər; boş =
 #       canlı hesablama), `batch` = `supmarks-…` + apply → geri qaytarma. Sonra `legacy_repair_empty_lessons`
 #       (`date_from=2026-09-15`) boşalan sütunları silir. Loga YALNIZ saylar.
+#   merge_psychology_duplicates_20261105 — Psixologiya 1-ci kurs (sahib 2026-11-05): 49 delta→ATİS dublikat cütü koddadır,
+#       iş merge_duplicate_student-dədir (eyni qapılar, stmerge-… paketi, undo). Defolt dry-run. Loga YALNIZ saylar.
 #   merge_duplicate_student — köhnə sistem deltasının yaratdığı ikinci TƏLƏBƏ hesabı → əsas hesab (RİM 2026-10-27,
 #       MR-000030.2): YALNIZ sahibin təsdiqlədiyi cütlər — ŞİFRƏLİ asset (`roster_tag` = `student-merge-…` →
 #       plan.json.enc, `{"duplicate", "keep"}` id-ləri). Xana/komponent balı yalnız BOŞ hədəfə, qeydiyyat/cəhd köçür,
@@ -425,12 +436,16 @@ on:
           - relocate_superseded_marks
           - merge_duplicate_student
           - merge_duplicate_staff
+          - merge_psychology_duplicates_20261105
           - relocate_twin_enrollment
           - merge_twin_offerings
+          - repair_applications_20261105
+          - repair_twins_20261105b
           - fix_legacy_lesson_kinds
           - set_practical_offerings
           - fix_slot_week_parity
           - clear_stale_off_schedule_flags
+          - release_stale_slot_teachers
           - fix_offering_subject
           - restore_archived_students
           - assign_first_year_student_codes
@@ -531,7 +546,7 @@ on:
         type: boolean
         default: false
       period:
-        description: "import_timetable_docx / assign_task_rows_from_timetable / backfill_teacher_lessons / infer_timetable_from_lessons / fix_slot_week_parity / clear_stale_off_schedule_flags: semestr (məs. Payız 2026/2027)"
+        description: "import_timetable_docx / assign_task_rows_from_timetable / backfill_teacher_lessons / infer_timetable_from_lessons / fix_slot_week_parity / clear_stale_off_schedule_flags / release_stale_slot_teachers: semestr (məs. Payız 2026/2027; release_stale_slot_teachers: boş = hamısı)"
         required: false
         default: "Payız 2026/2027"
       replace_group_slots:
@@ -1503,6 +1518,12 @@ jobs:
                 args+=(--file "/tmp/superseded_marks_${GITHUB_RUN_ID}.json")
               fi
               ;;
+            merge_psychology_duplicates_20261105)
+              # Sahib 2026-11-05: Psixologiya 1-ci kurs dublikat hesabları — sabit cütlər koddadır (plan faylı/secret yoxdur).
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              ;;
             merge_duplicate_student)
               # RİM 2026-10-27: sahibin təsdiqlədiyi tələbə dublikatı cütləri (plan faylı). Loga yalnız saylar.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
@@ -1538,6 +1559,18 @@ jobs:
               else
                 args=(--org "$ORG" --actor "$actor" --file "/tmp/level_merge_${GITHUB_RUN_ID}.json")
               fi
+              ;;
+            repair_applications_20261105)
+              # RİM 2026-11-05: MR-190/MR-161 əkiz birləşmələri + MR-110 xanası — sabit id-lər koddadır, plan faylı yoxdur.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              ;;
+            repair_twins_20261105b)
+              # 2026-11-05 (ikinci dəst): MR-190 235 İ ing + MR-161 234 M rus əkizləri — sabit id-lər koddadır, plan faylı yoxdur.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
               ;;
             relocate_twin_enrollment|merge_twin_offerings|fix_legacy_lesson_kinds)
               # RİM 2026-10-27: plan faylı (yalnız id-lər). Loga yalnız saylar.
@@ -1606,6 +1639,16 @@ jobs:
                 match "$BATCH" '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' \
                   || { echo "batch = boş və ya jurnalın (açılışın) UUID-i" >&2; exit 2; }
                 args+=("--offering=$BATCH")
+              fi
+              ;;
+            release_stale_slot_teachers)
+              # 2026-11-05: jurnalı/yükü qalmayan slot müəllimi → boşalt; deaktiv jurnalın duran slotu → park.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [ -n "$PERIOD" ]; then
+                match "$PERIOD" '^(Payız|Yaz|Yay) 20[0-9]{2}/20[0-9]{2}$' || { echo "period formatı: «Payız 2026/2027»" >&2; exit 2; }
+                args+=("--period=$PERIOD")
               fi
               ;;
             fix_offering_subject)
@@ -2087,11 +2130,11 @@ jobs:
               exit "$status"
             fi
             rm -f "$RUNNER_TEMP/out.log"
-          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "fix_offering_subject" ]; then
-            # Loga YALNIZ «twin_relocate: / twin_merge: / lesson_kinds: / slot_parity: / practical_flag: / off_schedule_flags: /
+          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "release_stale_slot_teachers" ] || [ "$COMMAND" = "fix_offering_subject" ] || [ "$COMMAND" = "repair_twins_20261105b" ] || [ "$COMMAND" = "repair_applications_20261105" ]; then
+            # Loga YALNIZ «twin_relocate: / twin_merge: / lesson_kinds: / slot_parity: / practical_flag: / off_schedule_flags: / slot_teachers: /
             # offering_subject_fix: açar=say …» sətirləri və rədd kodu.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
-            grep -E '^(twin_relocate|twin_merge|lesson_kinds|slot_parity|practical_flag|off_schedule_flags|offering_subject_fix): [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            grep -E '^(twin_relocate|twin_merge|lesson_kinds|slot_parity|practical_flag|off_schedule_flags|slot_teachers|offering_subject_fix): [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
@@ -2176,7 +2219,7 @@ jobs:
               exit "$status"
             fi
             rm -f "$RUNNER_TEMP/out.log"
-          elif [ "$COMMAND" = "relocate_superseded_marks" ] || [ "$COMMAND" = "merge_duplicate_student" ]; then
+          elif [ "$COMMAND" = "relocate_superseded_marks" ] || [ "$COMMAND" = "merge_duplicate_student" ] || [ "$COMMAND" = "merge_psychology_duplicates_20261105" ]; then
             # Loga YALNIZ «superseded_marks: / student_merge: açar=say …» sətirləri və rədd kodu (əmrlər ad çap etmir).
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^(superseded_marks|student_merge): [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true

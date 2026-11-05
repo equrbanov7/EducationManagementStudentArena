@@ -15,7 +15,13 @@ from apps.exams.services.parsing.math_text import math_summary
 
 # Hansı warning tipləri hansı kateqoriyaya düşür (filter çipləri üçün)
 DUP_TYPES = {"duplicate_in_import", "already_in_exam"}
-STRUCTURE_TYPES = {"missing_option", "option_count_recommend_5", "option_count_too_low", "empty_option_text"}
+STRUCTURE_TYPES = {
+    "missing_option",
+    "option_count_recommend_5",
+    "option_count_too_low",
+    "empty_option_text",
+    "multiple_correct",  # midterm / final: birdən çox düzgün cavab (sahib 2026-11-05)
+}
 BALANCE_TYPES = {"correct_too_long", "correct_too_short"}
 FORMULA_ISSUE_TYPES = {"formula_too_long", "formula_denied", "formula_fallback"}
 MEDIA_ISSUE_TYPES = {"image_ref_unknown"}

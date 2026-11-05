@@ -67,8 +67,18 @@ def task_rows(task, *, season: str = "", search: str = "", teacher: str = "", st
         queryset = queryset.filter(pk__in=_teacher_row_ids(task, teacher))
     # 2026-10-25: bölgü vəziyyəti (vakantlı / tam / qismən …) və fəaliyyət növü — `row_filters` (server tərəfi).
     queryset = apply_row_filters(queryset, task, status=status, activity=activity)
-    # Sahib 2026-10-23: «müəllimə görə də axtarmaq lazımdır» — fənn / qrup / müəllim (ad, soyad, istifadəçi adı).
-    search_q = tolerant_q(
+    search_q = row_search_q(search)
+    if search_q is not None:
+        queryset = queryset.filter(search_q).distinct()
+    return queryset
+
+
+def row_search_q(search: str):
+    """Sahib 2026-10-23: «müəllimə görə də axtarmaq lazımdır» — fənn / qrup / müəllim (ad, soyad, istifadəçi adı).
+
+    ``None`` — axtarış yoxdur. Müəllim JOIN-u sətri çoxalda bilər → çağıran ``.distinct()`` edir.
+    """
+    return tolerant_q(
         search,
         (
             "subject__name",
@@ -79,9 +89,6 @@ def task_rows(task, *, season: str = "", search: str = "", teacher: str = "", st
         ),
         compact_fields=("subject__code", "groups_text"),
     )
-    if search_q is not None:
-        queryset = queryset.filter(search_q).distinct()
-    return queryset
 
 
 #: Sətir redaktə modalının saat sahələri (2026-10-15: modal əvvəl bunları DOLDURMURDU — «Redaktə»
@@ -166,13 +173,15 @@ def rows_page(
     return {"rows": payload, "total": total, "next_offset": next_offset, "has_more": next_offset < total}
 
 
-def _serialize(task, rows: list) -> tuple[list[dict], list, dict]:
+def _serialize(task, rows: list, *, amend_targets=None) -> tuple[list[dict], list, dict]:
+    """``amend_targets`` verilsə (bir neçə tapşırığın sətirləri — «Bütün kafedralar») ``task`` oxunmur."""
     from .group_aliases import verified_aliases
     from .tasks import _amendment_target_row_ids
 
     balance = balance_for_rows(rows)
     aliases = verified_aliases(group for row in rows for group in row.groups.all())
-    amend_targets = _amendment_target_row_ids(task) if task.status == TaskStatus.AMENDED else set()
+    if amend_targets is None:
+        amend_targets = _amendment_target_row_ids(task) if task.status == TaskStatus.AMENDED else set()
     payload = []
     for row in rows:
         info = balance.get(str(row.pk), {})
@@ -500,6 +509,7 @@ __all__ = [
     "MAX_PAGE_LIMIT",
     "VACANT_FILTER",
     "chair_tasks",
+    "row_search_q",
     "rows_page",
     "serialize_rows",
     "serialize_rows_state",

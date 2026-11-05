@@ -36,7 +36,14 @@ from ..models import TeacherAssignment
 from .amendments import open_amendment
 from .assignments import assign_teacher, unassign
 from .scoping import WorkloadDenied, ensure_can_distribute, ensure_can_manage, manageable_chairs
-from .tasks import ROW_SCALAR_FIELDS, _amendment_target_row_ids, _coerce, delete_row, save_row
+from .tasks import (
+    ROW_SCALAR_FIELDS,
+    _amendment_target_row_ids,
+    _coerce,
+    delete_row,
+    ensure_row_deletable,
+    save_row,
+)
 
 #: UI bu kodu görəndə düzəliş dialoqunu açır və sorğunu ``amend_reason`` / ``amend_note`` ilə təkrarlayır.
 AMENDMENT_REQUIRED = "workload.amendment_required"
@@ -192,8 +199,9 @@ def delete_row_amended(*, task, row, actor, amend=None, request=None) -> None:
     """Sətri sil; təsdiqlənmiş sənəddə əvvəlcə onun üçün düzəliş (köhnə dəyərlər snapshot-u qalır)."""
     if row.task_id != task.pk:
         raise WorkloadDenied("workload.row_foreign", "Sətir bu tapşırığa aid deyil.")
+    ensure_can_manage(actor, task.chair_id)
+    ensure_row_deletable(row)  # düzəliş açılmadan əvvəl — etirazlı sətir heç vaxt silinmir
     if amendment_needed(task, row):
-        ensure_can_manage(actor, task.chair_id)
         ensure_can_distribute(actor, task.chair_id)
         _open_for_row(task, actor, row, amend, "row_deleted", {"subject": row.subject_label}, request)
     delete_row(task=task, row=row, actor=actor, request=request)

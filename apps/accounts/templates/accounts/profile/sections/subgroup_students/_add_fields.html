@@ -1,0 +1,47 @@
+{% load i18n %}
+{% comment %}«+ Alt qrupa tələbə əlavə et» modalının sahələri (sahib 2026-11-05). Seçicilər VAHİD komponentdir
+(`_searchable_picker.html` + static/js/searchable_select.js, server axtarışlı). Axın: hədəf jurnal (aktorun
+`journal.roster` əhatəsi, cari semestr) → mənbə qrup → tələbə → (istəyə görə) «öz jurnalından azad et» → səbəb →
+sənəd. Göndəriş jurnal modalının rəsmi POST-una gedir (`registrar:journal_guest_add`) — subgroup_students_add.js.
+Sənəd superadmin / RİM rəhbəri üçün könüllüdür (`core.superadmin_waiver.waives`), qalanları üçün məcburidir.{% endcomment %}
+<div class="sst-add">
+    <div class="ems-field">
+        <span class="ems-field__label">{% trans "Hədəf jurnal (alt qrup olacağı jurnal)" context "accounts.subgroup_students" %}</span>
+        {% trans "Qrup, fənn və ya müəllim axtarın…" context "accounts.subgroup_students" as ph_journal %}
+        {% include "accounts/profile/sections/_searchable_picker.html" with prefix="sst" hook="sst-journal" placeholder=ph_journal %}
+        <small class="ems-field__hint">{% trans "Yalnız cari semestrin açıq jurnalları və sizin əhatənizdəki qruplar." context "accounts.subgroup_students" %}</small>
+    </div>
+    <div class="ems-field sst-add__step" data-sst-step="group">
+        <span class="ems-field__label">{% trans "Mənbə qrup (tələbənin öz qrupu)" context "accounts.subgroup_students" %}</span>
+        {% trans "Əvvəlcə jurnal seçin…" context "accounts.subgroup_students" as ph_group %}
+        {% include "accounts/profile/sections/_searchable_picker.html" with prefix="sst" hook="sst-group" placeholder=ph_group %}
+    </div>
+    <div class="ems-field sst-add__step" data-sst-step="student">
+        <span class="ems-field__label">{% trans "Tələbə" context "accounts.subgroup_students" %}</span>
+        {% trans "Əvvəlcə qrup seçin…" context "accounts.subgroup_students" as ph_student %}
+        {% include "accounts/profile/sections/_searchable_picker.html" with prefix="sst" hook="sst-student" placeholder=ph_student %}
+        <small class="ems-field__hint">{% trans "Bu jurnalda artıq olan tələbələr göstərilir, amma seçilə bilmir." context "accounts.subgroup_students" %}</small>
+    </div>
+    <label class="sst-add__check">
+        <input type="checkbox" name="release_source" value="1" data-sst-release>
+        <span>
+            <b>{% trans "Öz jurnalından azad et (alt qrup birləşməsi)" context "accounts.subgroup_students" %}</b>
+            <small class="ems-field__hint">{% trans "Tələbə bu fənn üzrə öz qrupunun jurnalında aktivdirsə: əvvəlki qeydiyyat tarixçəyə keçir, bal və davamiyyət saxlanılır." context "accounts.subgroup_students" %}</small>
+        </span>
+    </label>
+    <div class="ems-field">
+        <label class="ems-field__label" for="sst-add-reason">{% trans "Səbəb" context "accounts.subgroup_students" %} <span class="sst-req" aria-hidden="true">*</span></label>
+        <textarea class="ems-textarea" id="sst-add-reason" name="reason" rows="3" maxlength="500" required
+                  placeholder="{% trans 'Məs.: dekanlığın təqdimatı №…, akademik borc' context 'accounts.subgroup_students' %}"></textarea>
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="sst-add-document">
+            {% trans "Sənəd (təqdimat / sərəncam — PDF, JPG, PNG)" context "accounts.subgroup_students" %}
+            {% if not ss.add.document_optional %}<span class="sst-req" aria-hidden="true">*</span>{% endif %}
+        </label>
+        <input class="ems-input sst-add__file" type="file" id="sst-add-document" name="document" accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif"{% if not ss.add.document_optional %} required{% endif %}>
+        {% if ss.add.document_optional %}
+        <small class="ems-field__hint">{% trans "Sizin üçün könüllüdür — sənədsiz əlavədə səbəbə avtomatik «sənədsiz düzəliş» qeydi yazılır." context "accounts.subgroup_students" %}</small>
+        {% endif %}
+    </div>
+</div>

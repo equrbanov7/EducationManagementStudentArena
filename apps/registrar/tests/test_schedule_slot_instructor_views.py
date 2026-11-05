@@ -30,6 +30,8 @@ class DashboardJournalLinkTest(SlotInstructorBase):
     def test_assistant_gets_no_link_to_the_owners_journal(self):
         today = self.today.isoweekday()
         with bypass_rls():
+            self._seminar_load(self.teacher_b)  # bölgüsü var — slot onun cədvəlindədir (2026-11-05)
+            self._lecture_load(self.teacher_b, self.offering_b)  # öz jurnalının mühazirəsi də yükündədir
             self._slot(self.offering, weekday=today, kind=SlotKind.SEMINAR, instructor=self.teacher_b)
             self._slot(self.offering_b, weekday=today, start="13:35", end="15:05")
             slots = schedule.get_teacher_schedule(organization=self.org, teacher=self.teacher_b, period=self.period)
@@ -66,6 +68,7 @@ class TeacherModalStudentCountTest(SlotInstructorBase):
                 is_active=True,
             )
             Enrollment.objects.create(organization=self.org, student=student, offering=self.offering)
+            self._seminar_load(self.teacher_b)
             seminar = self._slot(self.offering, weekday=2, kind=SlotKind.SEMINAR, instructor=self.teacher_b)
             request = RequestFactory().get("/")
             request.user = self.teacher_b

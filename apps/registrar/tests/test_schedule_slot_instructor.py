@@ -129,6 +129,39 @@ class SlotInstructorBase(TestCase):
             **kw,
         )
 
+    def _seminar_load(self, teacher, offering=None, *, activity="seminar", status="draft"):
+        """``teacher``-ə açılışın (fənn + semestr + qrup) dərs yükü bölgüsü — slot müəllimi «cari» olsun (2026-11-05).
+
+        Sahib 2026-11-05: müəllim slotu yalnız HƏMİN NÖVDƏ (``activity`` = slotun ``kind``-i) bölgüsü olanda görür
+        (``schedule_stale_teachers``). Sətrin həmin növ cəmi bölgünü örtür (``workload_hour_balance_exceeded``)."""
+        from apps.workload.models import TeacherAssignment, TeachingTask, TeachingTaskRow
+
+        offering = offering or self.offering
+        chair, _created = OrgUnit.objects.get_or_create(
+            organization=self.org,
+            slug=f"{self.code}-load-{status}",
+            defaults={"parent": self.faculty, "name": f"Kafedra ({status})", "unit_type": OrgUnitType.CHAIR},
+        )
+        task, _created = TeachingTask.objects.get_or_create(
+            organization=self.org, chair=chair, academic_year="2026/2027", defaults={"status": status}
+        )
+        row = TeachingTaskRow.objects.create(
+            organization=self.org,
+            task=task,
+            period=offering.period,
+            subject=offering.subject,
+            **{f"{activity}_plan": 30, f"{activity}_total": 30},
+            total_hours=30,
+        )
+        row.groups.set([offering.group])
+        return TeacherAssignment.objects.create(
+            organization=self.org, row=row, teacher=teacher, activity=activity, hours=30
+        )
+
+    def _lecture_load(self, teacher, offering=None, **kw):
+        """Mühazirə bölgüsü — müəllimi boş mühazirə slotu sahibin cədvəlində qalsın (sahib 2026-11-05)."""
+        return self._seminar_load(teacher, offering, activity="lecture", **kw)
+
     def _client(self, user):
         client = Client()
         client.force_login(user)
@@ -148,6 +181,7 @@ class DefaultBehaviourTest(SlotInstructorBase):
 
     def test_slot_without_override_is_taught_by_the_journal_owner(self):
         with bypass_rls():
+            self._lecture_load(self.teacher_a)  # sahib mühazirəni yükündə aparır (sahib 2026-11-05)
             slot = self._slot(self.offering)
             slot = ScheduleSlot.objects.select_related("offering").get(pk=slot.pk)
             annotated = (
@@ -184,6 +218,9 @@ class TeacherScheduleTest(SlotInstructorBase):
 
     def test_assistant_sees_the_seminar_and_the_owner_does_not(self):
         with bypass_rls():
+            self._seminar_load(self.teacher_b)
+            self._lecture_load(self.teacher_a)
+            self._lecture_load(self.teacher_b, self.offering_b)
             lecture = self._slot(self.offering, weekday=1, start="08:30", end="10:00")
             seminar = self._slot(self.offering, weekday=2, kind=SlotKind.SEMINAR, instructor=self.teacher_b)
             own_b = self._slot(self.offering_b, weekday=3)
@@ -198,6 +235,8 @@ class TeacherScheduleTest(SlotInstructorBase):
 
     def test_teacher_schedule_is_one_query_with_labels(self):
         with bypass_rls():
+            self._lecture_load(self.teacher_b)  # B-yə yazılmış mühazirə — B-nin mühazirə bölgüsü var
+            self._lecture_load(self.teacher_b, self.offering_b)
             self._slot(self.offering, weekday=1, start="08:30", end="10:00", instructor=self.teacher_b)
             self._slot(self.offering_b, weekday=3)
             with self.assertNumQueries(1):
@@ -431,6 +470,8 @@ class SchedulePageBudgetTest(SlotInstructorBase):
 
     def test_teacher_schedule_page_queries_are_unchanged(self):
         with bypass_rls():
+            self._seminar_load(self.teacher_b)
+            self._lecture_load(self.teacher_b, self.offering_b)
             self._slot(self.offering_b, weekday=3)
             seminars = [self._slot(self.offering, weekday=day, kind=SlotKind.SEMINAR) for day in (1, 2)]
         client = self._client(self.teacher_b)
@@ -443,8 +484,10 @@ class SchedulePageBudgetTest(SlotInstructorBase):
         with CaptureQueriesContext(connection) as overridden:
             response = client.get(url)
         self.assertEqual(response.status_code, 200)
-        self.assertNotContains(plain, "Verilənlər bazası")
-        self.assertContains(response, "Verilənlər bazası")  # A-nın fənninin seminarı indi B-nin cədvəlində
+        # Seminar B-nin dərs yükündədir: müəllimi boş seminar slotu da B-nin cədvəlinə düşür (sahib 2026-11-05 —
+        # «yükündə yoxdursa görməsin»; sahib A-nın seminar yükü yoxdur), slota yazılandan sonra da.
+        self.assertContains(plain, "Verilənlər bazası")
+        self.assertContains(response, "Verilənlər bazası")
         # «Jurnalı aç» yalnız B-nin öz jurnalına — A-nın jurnalı B üçün açılmır.
         self.assertContains(response, reverse("registrar:journal_detail", args=[self.offering_b.pk]))
         self.assertNotContains(response, reverse("registrar:journal_detail", args=[self.offering.pk]))

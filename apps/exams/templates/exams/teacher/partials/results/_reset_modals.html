@@ -1,0 +1,71 @@
+{% load i18n %}
+{% comment %}Sahib 2026-11-04: «Nəticəni sil (cəhdi sıfırla)» modalları — tək / seçilmiş cəhdlər və qrup.
+Səbəb MƏCBURİDİR (min uzunluq server-də də yoxlanılır). JS: teacher_exam_results_reset.js (EMSDelegate).{% endcomment %}
+{% trans "Cəhd və cavabları, apellyasiyaları, bildirişləri silinir; jurnaldakı midterm / final balı əvvəlki rəsmi cəhdə qaytarılır və ya boşaldılır. Cəhd sıfırlanmış sayılır — imtahanı yenidən vermək olar. Zal imtahanında bilet yeni PIN ilə yenidən açılır. Əməliyyat geri qaytarılmır və audit jurnalına yazılır." context "exams.attempt_reset" as reset_warning %}
+<div class="modal fade etp-modal" id="resetAttemptsModal" tabindex="-1" aria-hidden="true" aria-labelledby="resetAttemptsTitle">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" method="post" action="{% url 'exams:reset_exam_attempts' exam.slug %}" data-reset-form>
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <div data-reset-inputs></div>
+            <div class="modal-header">
+                <h2 class="modal-title etp-modal__title" id="resetAttemptsTitle">
+                    <i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Nəticəni sil (cəhdi sıfırla)" context "exams.attempt_reset" %}
+                </h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'exams.attempt_reset' %}"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2" data-reset-one>{% trans "Tələbə" context "exams.attempt_reset" %}: <strong data-reset-name></strong></p>
+                <p class="mb-2" data-reset-many hidden>{% trans "Seçilmiş cəhd sayı" context "exams.attempt_reset" %}: <strong data-reset-count></strong></p>
+                <p class="etp-hint">{{ reset_warning }}</p>
+                <label class="etp-label" for="resetAttemptsReason">{% trans "Səbəb (məcburi)" context "exams.attempt_reset" %}</label>
+                <textarea id="resetAttemptsReason" name="reason" class="ems-input etr-reset-reason" rows="3" required
+                          minlength="{{ reset_reason_min }}" maxlength="{{ reset_reason_max }}" aria-describedby="resetAttemptsReasonHint"></textarea>
+                <p class="etp-hint mb-0" id="resetAttemptsReasonHint">{% blocktrans trimmed context "exams.attempt_reset" with n=reset_reason_min %}Ən azı {{ n }} simvol.{% endblocktrans %}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="ems-btn" data-bs-dismiss="modal">{% trans "Ləğv et" context "exams.attempt_reset" %}</button>
+                <button type="submit" class="ems-btn ems-btn--danger"><i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Sil və sıfırla" context "exams.attempt_reset" %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade etp-modal" id="resetGroupModal" tabindex="-1" aria-hidden="true" aria-labelledby="resetGroupTitle">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" method="post" action="{% url 'exams:reset_group_attempts' exam.slug %}" data-reset-group-form>
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <input type="hidden" name="group" value="" data-reset-group-value>
+            <div class="modal-header">
+                <h2 class="modal-title etp-modal__title" id="resetGroupTitle">
+                    <i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Qrup cəhdlərini sıfırla" context "exams.attempt_reset" %}
+                </h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'exams.attempt_reset' %}"></button>
+            </div>
+            <div class="modal-body">
+                <div aria-live="polite">
+                    <p class="etp-hint" data-reset-group-loading>{% trans "Ön baxış hazırlanır…" context "exams.attempt_reset" %}</p>
+                    <p class="etr-reset-error" data-reset-group-error hidden>{% trans "Ön baxışı yükləmək olmadı." context "exams.attempt_reset" %}</p>
+                    <dl class="etr-reset-summary" data-reset-group-summary hidden>
+                        <div><dt>{% trans "Qrup" context "exams.attempt_reset" %}</dt><dd data-field="group"></dd></div>
+                        <div><dt>{% trans "Cəhd" context "exams.attempt_reset" %}</dt><dd class="etp-num" data-field="attempts"></dd></div>
+                        <div><dt>{% trans "Tələbə" context "exams.attempt_reset" %}</dt><dd class="etp-num" data-field="students"></dd></div>
+                        <div><dt>{% trans "Sıfırlanacaq" context "exams.attempt_reset" %}</dt><dd class="etp-num" data-field="resettable"></dd></div>
+                        <div><dt>{% trans "Bloklanıb" context "exams.attempt_reset" %}</dt><dd class="etp-num" data-field="blocked"></dd></div>
+                    </dl>
+                    <ul class="etr-reset-blockers" data-reset-group-blockers hidden></ul>
+                </div>
+                <p class="etp-hint">{{ reset_warning }}</p>
+                <label class="etp-label" for="resetGroupReason">{% trans "Səbəb (məcburi)" context "exams.attempt_reset" %}</label>
+                <textarea id="resetGroupReason" name="reason" class="ems-input etr-reset-reason" rows="3" required
+                          minlength="{{ reset_reason_min }}" maxlength="{{ reset_reason_max }}" aria-describedby="resetGroupReasonHint"></textarea>
+                <p class="etp-hint mb-0" id="resetGroupReasonHint">{% blocktrans trimmed context "exams.attempt_reset" with n=reset_reason_min %}Ən azı {{ n }} simvol.{% endblocktrans %}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="ems-btn" data-bs-dismiss="modal">{% trans "Ləğv et" context "exams.attempt_reset" %}</button>
+                <button type="submit" class="ems-btn ems-btn--danger" data-reset-group-submit disabled><i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Qrupu sıfırla" context "exams.attempt_reset" %}</button>
+            </div>
+        </form>
+    </div>
+</div>

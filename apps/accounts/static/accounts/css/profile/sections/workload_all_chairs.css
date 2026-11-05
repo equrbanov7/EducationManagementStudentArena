@@ -1,0 +1,75 @@
+/* «Yük bölgüsü» — «Bütün kafedralar» rejimi (sahib 2026-11-04).
+   Kafedra seçicisində `all` seçiləndə kök `.wl`-ə `is-all-chairs` sinfi düşür (`workload_distribution.js`):
+   kafedraya bağlı idarələr (müəllim paneli, müəllim/vəziyyət süzgəci, tapşırıq/sətir/təsdiq düymələri) gizlənir,
+   sətir kartı yalnız oxudur və kafedra adını daşıyır. `workload_base.css`-dən SONRA yüklənir. */
+
+.wl.is-all-chairs [data-wl-chair-only] {
+  display: none;
+}
+
+/* Sağ panel yoxdur — sətirlər bütün eni tutur. */
+.wl.is-all-chairs .wl__layout {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.wl-all-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 0 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--ems-primary-100, #d5e3fb);
+  border-radius: 10px;
+  background: var(--ems-primary-50, #eef4ff);
+  color: var(--ems-neutral-700, #3b4a5a);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.wl-all-note[hidden] {
+  display: none;
+}
+
+.wl-all-note i {
+  margin-top: 2px;
+  color: var(--ems-primary-600, #2559b8);
+}
+
+/* Kafedra nişanı — sətrin başlığında, fənn adının altında. */
+.wl-row__chair {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  color: var(--ems-neutral-600, #5b6b7c);
+}
+
+.wl-row__chair-name {
+  font-weight: 600;
+  color: var(--ems-primary-700, #1b4fa0);
+}
+
+/* Yalnız oxu kartında «Bölüşdür» / «×» düymələri yoxdur — zolaq üç sütundur. */
+.wl-row--readonly .wl-act {
+  grid-template-columns: 130px minmax(80px, 1fr) auto;
+}
+
+@media (max-width: 640px) {
+  .wl-row--readonly .wl-act {
+    grid-template-columns: 1fr;
+  }
+}
+
+.wl-row__readonly {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--ems-neutral-100, #eef2f7);
+  color: var(--ems-neutral-600, #5b6b7c);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
