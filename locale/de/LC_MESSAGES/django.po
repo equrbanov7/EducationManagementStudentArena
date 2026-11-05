@@ -115142,3 +115142,7 @@ msgstr "Meine Journale"
 msgctxt "registrar.journal"
 msgid "hamısını göstər"
 msgstr "alle anzeigen"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "multiple_correct"
+msgstr "Mehr als eine richtige Antwort markiert ({labels}) — eine Midterm- oder Finalfrage muss genau eine richtige Antwort haben."

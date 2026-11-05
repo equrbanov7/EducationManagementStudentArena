@@ -232,6 +232,9 @@ class JournalListTeacherParityTests(TestCase):
         request.user = self.admin
         html = render_to_string("registrar/partials/_journal_list_content.html", data, request=request)
         self.assertIn(self.teacher.get_full_name(), html)
-        # Müəllimin öz (mirror) görünüşündə bu sahə hesablanmır — orada sətir müəllimin öz növlərini göstərir.
+        # «Mənim jurnallarım» / müəllimin öz siyahısı: sətirdə YALNIZ siyahının sahibi (mühazirəçinin adı yox).
         mirrored = self.context(self.admin, teacher=self.teacher.pk, year="")
-        self.assertFalse(any(getattr(o, "load_teachers", None) for o in mirrored["offerings"]))
+        own_row = next(o for o in mirrored["offerings"] if o.pk == self.shared.pk)
+        self.assertEqual([t["name"] for t in own_row.load_teachers], [self.teacher.get_full_name()])
+        html = render_to_string("registrar/partials/_journal_list_content.html", mirrored, request=request)
+        self.assertNotIn(self.other.get_full_name() or self.other.username, html)

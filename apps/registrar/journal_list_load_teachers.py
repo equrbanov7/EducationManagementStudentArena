@@ -7,6 +7,9 @@ sinxronundan gəlir — :mod:`.journal_workload_shares`) görünmürdü, sahib i
 İndi müəllimin ÖZ görünüşü ilə eyni mənbə: aktiv :class:`JournalShare` payları (növlər; boş = hamısı) + sahib —
 sahibə yalnız BÜTÜN siyahını örtən başqa payların götürmədiyi növlər qalır (``journal_shares.journal_scope``
 qaydası). Səhifə dilimi üçün İKİ sorğu (paylar + sətir bağları), N+1 yoxdur.
+
+«Mənim jurnallarım» / seçilmiş müəllimin öz siyahısında (``only_teacher_id``) sətir YALNIZ həmin müəllimi göstərir —
+seminarçının siyahısında mühazirəçinin (jurnal sahibinin) adı çıxmır (sahib 2026-11-05).
 """
 
 from __future__ import annotations
@@ -22,7 +25,7 @@ def _name(user) -> str:
     return (user.get_full_name() or user.username).strip() if user is not None else ""
 
 
-def attach(offerings) -> None:
+def attach(offerings, *, only_teacher_id=None) -> None:
     """Hər açılışa ``load_teachers = [{"name", "kinds"}]`` (növ etiketləri ``kind_label`` ilə eyni dildə)."""
     if not offerings:
         return
@@ -55,6 +58,8 @@ def attach(offerings) -> None:
             if owner_kinds or offering.instructor_id in rows or not rows:
                 entry = rows.setdefault(offering.instructor_id, {"name": _name(offering.instructor), "kinds": []})
                 entry["kinds"] = [k for k in kinds if k in owner_kinds or k in entry["kinds"]]
+        if only_teacher_id is not None and only_teacher_id in rows:
+            rows = {only_teacher_id: rows[only_teacher_id]}
         offering.load_teachers = [
             {"name": entry["name"], "kinds": " · ".join(str(labels.get(k, k)) for k in entry["kinds"])}
             for entry in rows.values()

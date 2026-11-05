@@ -113566,3 +113566,7 @@ msgstr "Mənim jurnallarım"
 msgctxt "registrar.journal"
 msgid "hamısını göstər"
 msgstr "hamısını göstər"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "multiple_correct"
+msgstr "Birdən çox düzgün cavab işarələnib ({labels}) — midterm və final imtahanında sualın yalnız bir düzgün cavabı olmalıdır."

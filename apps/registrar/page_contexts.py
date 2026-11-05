@@ -65,7 +65,7 @@ def attach_kind_labels(offerings, selected_kind: str = "", *, load_teachers=Fals
     if load_teachers:  # «müəllim — dərs növü» cari paylardan (sahib 2026-11-05; journal_list_load_teachers)
         from apps.registrar.journal_list_load_teachers import attach as attach_load_teachers
 
-        attach_load_teachers(offerings)
+        attach_load_teachers(offerings, only_teacher_id=None if load_teachers is True else load_teachers)
 
 
 def journal_list_context(user, request=None) -> dict:
@@ -252,7 +252,7 @@ def journal_list_context(user, request=None) -> dict:
     for offering in page_offerings:
         offering.student_count = counts_map.get(offering.pk, 0)
     # Dərs tipi etiketləri YALNIZ görünən səhifə üçün (`kind` süzgəci yuxarıda DB tərəfdədir).
-    attach_kind_labels(page_offerings, selected_kind, load_teachers=is_broad and mirrored is None)
+    attach_kind_labels(page_offerings, selected_kind, load_teachers=is_broad and (getattr(mirrored, "pk", 0) or True))
     if not is_broad or mirrored is not None:
         teacher_journal_list.attach(mirrored or user, page_offerings, selected_kind=selected_kind, links=not is_broad)
     from .journal_assignment_sources import attach_history_restore_actions

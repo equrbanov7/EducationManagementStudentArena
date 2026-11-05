@@ -14,6 +14,7 @@ from django.utils.translation import pgettext
 from apps.exams.constants import EXAM_LANGUAGE_CHOICES, QUESTION_EXAM_KIND_CHOICES
 from apps.exams.services.bulk_confidence import finalize_analysis
 from apps.exams.services.bulk_workbench import (
+    SINGLE_ANSWER_EXAM_TYPES,
     analyze_mcq_bulk,
     parse_points_payload,
     parse_selected_indices,
@@ -61,7 +62,8 @@ def process_workbench_post(request, organization, form_state):
         raw_text, _marked = mark_default_correct_a(raw_text)
         form_state["raw_text"] = raw_text
 
-    analysis = analyze_mcq_bulk(raw_text)
+    # Midterm / final göndərişi: birdən çox düzgün cavab — «Variant problemi» xətası (sahib 2026-11-05).
+    analysis = analyze_mcq_bulk(raw_text, single_answer=form_state.get("exam_kind") in SINGLE_ANSWER_EXAM_TYPES)
     parsed = analysis["parsed"]
     if math_token:
         from apps.exams.services.import_media import bind_import_manifest
@@ -106,14 +108,14 @@ def process_workbench_post(request, organization, form_state):
     }
 
 
-def initial_workbench_state(request, organization, *, raw_text, math_token):
+def initial_workbench_state(request, organization, *, raw_text, math_token, exam_kind=""):
     """GET (detal redaktəsi) üçün mövcud mətnin analizi.
 
     Vizual göndərişdə manifest yenidən bağlanır ki, kartlarda şəkil preview-ları
     görünsün; bağlana bilmirsə (stash silinib/uyğunsuzdur) vizuallar səssizcə
     söndürülür — mətn redaktəsi yenə işləyir.
     """
-    analysis = analyze_mcq_bulk(raw_text)
+    analysis = analyze_mcq_bulk(raw_text, single_answer=exam_kind in SINGLE_ANSWER_EXAM_TYPES)
     parsed = analysis["parsed"]
     if math_token:
         from apps.exams.services.import_media import bind_import_manifest

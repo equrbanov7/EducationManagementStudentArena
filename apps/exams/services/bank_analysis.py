@@ -30,6 +30,7 @@ _STRUCTURE_TYPES = {
     "option_count_recommend_5",
     "option_count_too_low",
     "empty_option_text",
+    "multiple_correct",
 }
 _BALANCE_TYPES = {"correct_too_long", "correct_too_short"}
 _DUPLICATE_TYPES = {DUPLICATE_IN_BANK, "duplicate_in_import", "already_in_exam"}
