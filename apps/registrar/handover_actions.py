@@ -20,7 +20,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.registrar import handover as handover_read
-from apps.registrar.models import CourseOffering, TeachingHandover
+from apps.registrar.models import CourseOffering, ScheduleSlot, TeachingHandover
 from core.audit import log_action
 from core.constants import AuditAction
 
@@ -143,6 +143,13 @@ def _apply_one(*, offering, target, actor, organization, reason, request, closed
             status=409,
         )
     offering.instructor = target
+    # 2026-11-05 (sahib: «jurnalında və dərs yükündə o fənn olmasa da dərs cədvəlində qalıb»): köhnə sahibə
+    # YAZILMIŞ slot (o, sahib olmamışdan əvvəl təyin edilib) jurnal sahibinin slotudur — tam təhvildə yeni
+    # sahibi izləsin (NULL). Geri qaytarmada slot NULL qalır və yenə köhnə sahibə düşür (simmetrik).
+    if expected_id is not None:
+        ScheduleSlot.objects.filter(offering_id=offering.pk, instructor_id=expected_id).update(
+            instructor=None, updated_at=timezone.now()
+        )
 
     from .handover_shares import deactivate_for_handover
 
