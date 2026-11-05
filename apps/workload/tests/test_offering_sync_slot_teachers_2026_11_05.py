@@ -1,8 +1,8 @@
 """Bölgüdən çıxan müəllimin dərsi onun cədvəlində qalmır (sahib 2026-11-05).
 
 Dərs yükü sinxronu (``offering_sync._Sync``) paylardan SONRA registrar-ın ``schedule_stale_teachers.release``-ini
-çağırır: seminarı başqasına verilmiş müəllimin slotu boşaldılır (jurnal sahibini izləyir), jurnalda dərs aparmış
-və ya hələ bölgüsü olan müəllimin slotu toxunulmur.
+çağırır: seminarı başqasına verilmiş müəllimin slotu boşaldılır (jurnal sahibini izləyir) — jurnalda dərs aparmış
+olsa belə; hələ bölgüsü olan müəllimin slotu toxunulmur.
 """
 
 import datetime
@@ -71,7 +71,8 @@ class OfferingSyncSlotTeachersTest(TestCase):
         self.assertEqual(report["slot_teachers_released"], 1)
         self.assertIsNone(slot.instructor_id)  # jurnal sahibini izləyir; redaktor yeni müəllimi təyin edə bilər
 
-    def test_assistant_who_taught_in_the_journal_keeps_the_slot(self):
+    def test_assistant_who_taught_in_the_journal_still_loses_the_slot_with_the_load(self):
+        # Sahib 2026-11-05: «əgər müəllimdə o yük verilməyibsə, dərs cədvəlində göstərmə» — keçmiş dərs saxlamır.
         offering = self._offering()
         slot = self._seminar_slot(offering)
         Lesson.objects.create(
@@ -85,5 +86,5 @@ class OfferingSyncSlotTeachersTest(TestCase):
         TeacherAssignment.objects.filter(pk=self.seminar.pk).update(teacher=self.teachers["successor"])
         report = sync_task_offerings(self.task)
         slot.refresh_from_db()
-        self.assertEqual(report["slot_teachers_released"], 0)
-        self.assertEqual(slot.instructor_id, self.teachers["assistant"].pk)
+        self.assertEqual(report["slot_teachers_released"], 1)
+        self.assertIsNone(slot.instructor_id)

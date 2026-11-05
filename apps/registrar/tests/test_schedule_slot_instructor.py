@@ -132,7 +132,8 @@ class SlotInstructorBase(TestCase):
     def _seminar_load(self, teacher, offering=None, *, activity="seminar", status="draft"):
         """``teacher``-ə açılışın (fənn + semestr + qrup) dərs yükü bölgüsü — slot müəllimi «cari» olsun (2026-11-05).
 
-        Bölgüsü, payı və dərsi olmayan slot müəllimi köhnəlmiş sayılır (``schedule_stale_teachers``)."""
+        Sahib 2026-11-05: müəllim slotu yalnız HƏMİN NÖVDƏ (``activity`` = slotun ``kind``-i) bölgüsü olanda görür
+        (``schedule_stale_teachers``). Sətrin həmin növ cəmi bölgünü örtür (``workload_hour_balance_exceeded``)."""
         from apps.workload.models import TeacherAssignment, TeachingTask, TeachingTaskRow
 
         offering = offering or self.offering
@@ -149,14 +150,17 @@ class SlotInstructorBase(TestCase):
             task=task,
             period=offering.period,
             subject=offering.subject,
-            seminar_plan=30,
-            seminar_total=30,
+            **{f"{activity}_plan": 30, f"{activity}_total": 30},
             total_hours=30,
         )
         row.groups.set([offering.group])
         return TeacherAssignment.objects.create(
             organization=self.org, row=row, teacher=teacher, activity=activity, hours=30
         )
+
+    def _lecture_load(self, teacher, offering=None, **kw):
+        """Mühazirə bölgüsü — müəllimi boş mühazirə slotu sahibin cədvəlində qalsın (sahib 2026-11-05)."""
+        return self._seminar_load(teacher, offering, activity="lecture", **kw)
 
     def _client(self, user):
         client = Client()
@@ -177,6 +181,7 @@ class DefaultBehaviourTest(SlotInstructorBase):
 
     def test_slot_without_override_is_taught_by_the_journal_owner(self):
         with bypass_rls():
+            self._lecture_load(self.teacher_a)  # sahib mühazirəni yükündə aparır (sahib 2026-11-05)
             slot = self._slot(self.offering)
             slot = ScheduleSlot.objects.select_related("offering").get(pk=slot.pk)
             annotated = (
@@ -214,6 +219,8 @@ class TeacherScheduleTest(SlotInstructorBase):
     def test_assistant_sees_the_seminar_and_the_owner_does_not(self):
         with bypass_rls():
             self._seminar_load(self.teacher_b)
+            self._lecture_load(self.teacher_a)
+            self._lecture_load(self.teacher_b, self.offering_b)
             lecture = self._slot(self.offering, weekday=1, start="08:30", end="10:00")
             seminar = self._slot(self.offering, weekday=2, kind=SlotKind.SEMINAR, instructor=self.teacher_b)
             own_b = self._slot(self.offering_b, weekday=3)
@@ -228,7 +235,8 @@ class TeacherScheduleTest(SlotInstructorBase):
 
     def test_teacher_schedule_is_one_query_with_labels(self):
         with bypass_rls():
-            self._seminar_load(self.teacher_b)
+            self._lecture_load(self.teacher_b)  # B-yə yazılmış mühazirə — B-nin mühazirə bölgüsü var
+            self._lecture_load(self.teacher_b, self.offering_b)
             self._slot(self.offering, weekday=1, start="08:30", end="10:00", instructor=self.teacher_b)
             self._slot(self.offering_b, weekday=3)
             with self.assertNumQueries(1):
@@ -463,6 +471,7 @@ class SchedulePageBudgetTest(SlotInstructorBase):
     def test_teacher_schedule_page_queries_are_unchanged(self):
         with bypass_rls():
             self._seminar_load(self.teacher_b)
+            self._lecture_load(self.teacher_b, self.offering_b)
             self._slot(self.offering_b, weekday=3)
             seminars = [self._slot(self.offering, weekday=day, kind=SlotKind.SEMINAR) for day in (1, 2)]
         client = self._client(self.teacher_b)

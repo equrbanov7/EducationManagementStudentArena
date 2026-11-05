@@ -32,6 +32,7 @@ from apps.registrar.models import (
     StudentAcademicRecord,
     Subject,
 )
+from apps.registrar.tests.journal_load_fixtures import seed_current_journal_load
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
 
@@ -161,6 +162,11 @@ class ScheduleEditorUIBase(TestCase):
         session["active_organization"] = self.org.slug
         session.save()
         return client
+
+    def _teacher_load(self, offering=None, kinds=("lecture",)):
+        """Jurnal sahibinə həmin növlərdə dərs yükü — müəllim slotu yalnız yükündə olanda görür (sahib 2026-11-05)."""
+        with bypass_rls():
+            return seed_current_journal_load(offering or self.offering, kinds=kinds)
 
     def _section(self, user, section="schedule-manage", **params):
         query = "&".join("%s=%s" % (key, value) for key, value in params.items())
@@ -362,6 +368,7 @@ class ReadOnlyScheduleTest(ScheduleEditorUIBase):
         return self._act(self.coordinator, self._cell()).json()["slot"]
 
     def test_teacher_sees_the_new_slot_on_my_schedule(self):
+        self._teacher_load()
         self._create()
         response = self._section(self.teacher, section="my-schedule")
         self.assertEqual(response.status_code, 200)
