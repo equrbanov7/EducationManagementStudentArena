@@ -58,7 +58,12 @@ def settle(rebuild) -> None:
     by_student = defaultdict(list)
     for row in rows:
         by_student[row.student_id].append(row)
+    # Siyahıdakı tələbə «qalan» deyil — sinfi hələ qurulmayıbsa da (məs. müəllimin hesabı yoxdur) toxunulmur.
+    listed = {student for row in rebuild.plan["classes"] for student in row["students"]}
     for student_id, enrollments in by_student.items():
+        if student_id in listed and student_id not in placed:
+            rebuild.counts["leftover_listed_waiting_kept"] += 1
+            continue
         with transaction.atomic():
             _student(rebuild, student_id, enrollments, subjects, placed)
 
