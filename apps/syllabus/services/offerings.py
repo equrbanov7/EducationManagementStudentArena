@@ -19,6 +19,7 @@ açılmır (``scripts/module_deps.py``).
 
 from __future__ import annotations
 
+from django.apps import apps
 from django.db.models import Case, IntegerField, Q, Subquery, Value, When
 
 from ..constants import OPEN_STATUSES, SyllabusStatus
@@ -65,6 +66,15 @@ def _share_applies(syllabus, offering_id, instructor_id) -> bool:
     """Paylaşım pilləsindən gəlibsə, tətbiq qapısı (``sharing`` qayda 4) — açılışın müəllimi dosyenin sahibidir."""
     if syllabus.offering_id is None or syllabus.offering_id == offering_id:
         return True  # öz / fənn+semestr / baza pilləsi — paylaşım deyil
+    source = syllabus.offering
+    if (
+        (syllabus.reused_from_id is not None and getattr(syllabus, "_lc_period", None) is None)
+        or syllabus.period_id is None
+        or source.organization_id != syllabus.organization_id
+        or source.subject_id != syllabus.subject_id
+        or source.period_id != syllabus.period_id
+    ):
+        return False
     owner_ids = {syllabus.author_id, getattr(syllabus.offering, "instructor_id", None)}
     return instructor_id is not None and instructor_id in owner_ids
 
@@ -99,14 +109,23 @@ def syllabus_for_offering(
     cohort_rules = None
     tiers = []
     if offering_id is not None:
-        tiers.append(Q(offering_id=offering_id))
+        target = apps.get_model("registrar", "CourseOffering").objects.filter(organization=organization, pk=offering_id)
+        target_subject = Subquery(target.values("subject_id")[:1])
+        target_period = Subquery(target.values("period_id")[:1])
+        bound = Q(offering_id=offering_id, subject_id=target_subject)
+        bound &= Q(period__isnull=True) | Q(period_id=target_period)
+        tiers.append(bound)
         from .language_cohort_source import rules
 
         cohort_rules = rules(organization=organization, offering_id=offering_id)
         tiers.append(cohort_rules[2])
         if _with_share:
-            shared = SyllabusShare.objects.filter(offering_id=offering_id).order_by().values("syllabus_id")
-            tiers.append(Q(pk__in=Subquery(shared)))
+            shared = (
+                SyllabusShare.objects.filter(organization=organization, offering_id=offering_id)
+                .order_by()
+                .values("syllabus_id")
+            )
+            tiers.append(Q(pk__in=Subquery(shared), subject_id=target_subject, period_id=target_period))
     if subject_id is not None and period_id is not None:
         tiers.append(Q(subject_id=subject_id, period_id=period_id, offering__isnull=True))
     if subject_id is not None and instructor_id is not None:

@@ -54,7 +54,7 @@ def approved_syllabus_offering_ids(organization, period, offerings) -> set:
         approved = approved_id is not None
         by_pk[pk] = approved
         if offering_id is not None:
-            by_offering.setdefault(offering_id, approved)
+            by_offering.setdefault((offering_id, subject_id, period_id), approved)
         elif period_id is not None:
             if period_id == period.pk:
                 by_period.setdefault(subject_id, approved)
@@ -63,8 +63,10 @@ def approved_syllabus_offering_ids(organization, period, offerings) -> set:
 
     approved_ids = set()
     for row in offerings:
-        if row["id"] in by_offering:
-            ok = by_offering[row["id"]]
+        bound = (row["id"], row["subject_id"], period.pk)
+        legacy_bound = (row["id"], row["subject_id"], None)
+        if bound in by_offering or legacy_bound in by_offering:
+            ok = by_offering.get(bound, by_offering.get(legacy_bound, False))
         elif shared.get(row["id"]) in by_pk:
             ok = by_pk[shared[row["id"]]]
         elif row["subject_id"] in by_period:

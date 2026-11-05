@@ -33,13 +33,15 @@ def _pick(offering, candidates, shared=None) -> int | None:
     for row in candidates:
         if row["organization_id"] != offering.organization_id:
             continue
+        if row["subject_id"] != offering.subject_id:
+            continue
         if row["offering_id"] is not None:
+            if row["period_id"] not in (None, offering.period_id):
+                continue
             if row["offering_id"] == offering.id:
                 tiers[0].append(row)
             elif shared is not None and row["id"] == shared:
                 tiers[1].append(row)
-            continue
-        if row["subject_id"] != offering.subject_id:
             continue
         if offering.period_id is not None and row["period_id"] == offering.period_id:
             tiers[2].append(row)
