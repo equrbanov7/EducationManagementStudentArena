@@ -12,7 +12,7 @@ from django.utils.translation import pgettext
 from apps.exams.models import ExamQuestion, ExamQuestionOption, QuestionBlock
 from apps.exams.services.access_policy import _ensure_teacher, ensure_can_manage_exam_questions
 from apps.exams.services.bulk_confidence import finalize_analysis
-from apps.exams.services.bulk_workbench import analyze_mcq_bulk, exam_question_fp_map
+from apps.exams.services.bulk_workbench import analyze_mcq_bulk, exam_question_fp_map, requires_single_answer
 from apps.exams.services.import_media import (
     attach_import_media_batch,
     bind_import_manifest,
@@ -221,7 +221,11 @@ def test_question_bank(request, slug):
     if action in ("preview", "save", "download_report"):
         # Dublikat yoxlanışı yalnız EYNİ dildəki mövcud suallara qarşı aparılır —
         # eyni sual başqa dildə təkrar deyil.
-        analysis = analyze_mcq_bulk(raw_text, existing_fp_map=exam_question_fp_map(exam, language=selected_language))
+        analysis = analyze_mcq_bulk(
+            raw_text,
+            existing_fp_map=exam_question_fp_map(exam, language=selected_language),
+            single_answer=requires_single_answer(exam),
+        )
         parsed = analysis["parsed"]
         category_counts = analysis["category_counts"]
         warning_count = analysis["warning_count"]

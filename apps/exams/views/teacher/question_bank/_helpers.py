@@ -305,6 +305,7 @@ _WARNING_TYPE_LABELS = {
     "option_count_recommend_5": "Variant sayı",
     "option_count_too_low": "Variant sayı",
     "empty_option_text": "Boş variant",
+    "multiple_correct": "Birdən çox düzgün cavab",
     "correct_missing": "Düz cavab uyğunsuzluğu",
     "correct_too_long": "Uzunluq balansı",
     "correct_too_short": "Uzunluq balansı",
@@ -331,6 +332,7 @@ _WARNING_FEEDBACK = {
     "option_count_recommend_5": "Mümkünsə E variantını əlavə edin ki, sual 5 variantlı standartla uyğun olsun.",
     "option_count_too_low": "Variant sayını ən azı 4-ə çatdırın.",
     "empty_option_text": "Boş variant mətnini doldurun və ya həmin variantı silib strukturu düzəldin.",
+    "multiple_correct": "Midterm və final imtahanında hər sualın yalnız bir düzgün cavabı olmalıdır — artıq işarəni silin.",
     "correct_missing": "Cavab sətrində göstərilən düzgün variant sualın variantları arasında olmalıdır.",
     "correct_too_long": (
         "Düzgün cavab digər variantlardan çox uzun görünür. Variantların uzunluğunu və "

@@ -113466,3 +113466,7 @@ msgstr "Defterlerim"
 msgctxt "registrar.journal"
 msgid "hamısını göstər"
 msgstr "tümünü göster"
+
+msgctxt "exams.view.question_bank.warning"
+msgid "multiple_correct"
+msgstr "Birden fazla doğru cevap işaretlenmiş ({labels}) — ara sınav ve final sınavında sorunun yalnızca bir doğru cevabı olmalıdır."
