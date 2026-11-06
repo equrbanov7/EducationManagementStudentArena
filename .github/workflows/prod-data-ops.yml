@@ -230,6 +230,8 @@
 #   rebuild_language_cohorts_20261106 — sahib 2026-11-06: xarici dil səviyyə qrupları rəsmi siyahı üzrə (77 sinif, plan
 #       repoda — yalnız id-lər): kohort jurnalı + müəllimin xanaları + cədvəl, köhnə səviyyə qeydiyyatları dropped.
 #       Defolt dry-run; `batch=undo` (apply) geri qaytarır. Loga YALNIZ saylar.
+#   sync_student_group_journals — RİM 2026-11-06: tələbəni öz qrupunun cari jurnallarına sal (yalnız əlavə; bərpa /
+#       sinxronla qrupa düşüb jurnalda olmayan). `batch` = vergüllə tələbə hesab id-ləri. Defolt dry-run, YALNIZ saylar.
 #   repair_applications_20261106 — RİM 2026-11-06: MR-236 (136 Si-2 «Çapaqədər» jurnalı → «Psixologiya», Merger keep);
 #       sabit id-lər, defolt dry-run, loga YALNIZ saylar.
 #   fix_ydk236_subject_20261106 — sahib 2026-11-06: QKU-2693 kartı → «Ümumi xarici dil» (236 YDK), səhvən həmin karta
@@ -449,6 +451,7 @@ on:
           - repair_applications_20261105
           - repair_applications_20261105c
           - fix_ydk236_subject_20261106
+          - sync_student_group_journals
           - repair_applications_20261106
           - apply_lab_groups_20261106
           - rebuild_language_cohorts_20261106
@@ -1566,6 +1569,13 @@ jobs:
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor")
               ;;
+            sync_student_group_journals)
+              # RİM 2026-11-06: tələbəni öz qrupunun cari jurnallarına sal — batch = vergüllə tələbə hesab id-ləri.
+              match "$BATCH" '^[0-9]{1,7}(,[0-9]{1,7}){0,49}$' || { echo "batch = vergüllə tələbə id-ləri" >&2; exit 2; }
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor" "--students=$BATCH")
+              ;;
             rebuild_language_cohorts_20261106)
               # Sahib 2026-11-06: səviyyə qrupları rəsmi siyahı üzrə — plan repodadır (yalnız id-lər). batch=undo geri qaytarır.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
@@ -2142,7 +2152,7 @@ jobs:
               exit "$status"
             fi
             rm -f "$RUNNER_TEMP/out.log"
-          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "release_stale_slot_teachers" ] || [ "$COMMAND" = "fix_offering_subject" ] || [ "$COMMAND" = "repair_twins_20261105b" ] || [ "$COMMAND" = "repair_applications_20261105" ] || [ "$COMMAND" = "repair_applications_20261105c" ] || [ "$COMMAND" = "fix_ydk236_subject_20261106" ] || [ "$COMMAND" = "repair_applications_20261106" ] || [ "$COMMAND" = "rebuild_language_cohorts_20261106" ] || [ "$COMMAND" = "apply_lab_groups_20261106" ]; then
+          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "release_stale_slot_teachers" ] || [ "$COMMAND" = "fix_offering_subject" ] || [ "$COMMAND" = "repair_twins_20261105b" ] || [ "$COMMAND" = "repair_applications_20261105" ] || [ "$COMMAND" = "repair_applications_20261105c" ] || [ "$COMMAND" = "fix_ydk236_subject_20261106" ] || [ "$COMMAND" = "sync_student_group_journals" ] || [ "$COMMAND" = "rebuild_language_cohorts_20261106" ] || [ "$COMMAND" = "apply_lab_groups_20261106" ] || [ "$COMMAND" = "repair_applications_20261106" ]; then
             # Loga YALNIZ «twin_relocate: / twin_merge: / lesson_kinds: / slot_parity: / practical_flag: / off_schedule_flags: / slot_teachers: /
             # offering_subject_fix: açar=say …» sətirləri və rədd kodu.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
