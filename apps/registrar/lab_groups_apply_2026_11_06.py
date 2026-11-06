@@ -27,6 +27,8 @@ from core.constants import AuditAction
 
 REASON = "Sahib 2026-11-06 (Ekologiya kafedrası): lab qrupları köhnə sistemin Lab-1 / Lab-2 siyahıları ilə"
 RESOURCE = "registrar.lab_groups"
+#: Say açarlarında rəqəm olmur (prod-data-ops süzgəci ``[a-z_]+=``): Lab-1 → ``first``, Lab-2 → ``second``.
+_WORD = {1: "first", 2: "second"}
 
 # fmt: off
 #: Fizika 236 SBİO, köhnə 15365 / 15366 (biologiya üçün də — sahib).
@@ -104,7 +106,7 @@ def _place_students(plan, offering, counts) -> dict:
         else:
             row.lab_group = group
             changed.append(row)
-            counts[f"{key}_lab{group}"] += 1
+            counts[f"{key}_lab_{_WORD.get(group, 'other')}"] += 1
     if changed:
         Enrollment.objects.bulk_update(changed, ["lab_group"])
     counts[f"{key}_ungrouped"] += sum(1 for student_id, row in rows.items() if row.lab_group is None)
@@ -128,7 +130,7 @@ def _group_lessons(plan, offering, group_of, counts) -> None:
         elif len(marked) == 1 and None not in marked:
             lesson.lab_group = marked.pop()
             lesson.save(update_fields=["lab_group", "updated_at"])
-            counts[f"{key}_lesson_lab{lesson.lab_group}"] += 1
+            counts[f"{key}_lesson_lab_{_WORD.get(lesson.lab_group, 'other')}"] += 1
         else:
             counts[f"{key}_lesson_mixed"] += 1
 

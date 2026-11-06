@@ -262,7 +262,8 @@ def lesson_action(request, offering_id, lesson_id):
 
             try:
                 lab_group = lab_groups.parse(request.POST.get("lesson_lab_group"))
-                lab_groups.require_for_new(offering, kind=kind or lesson.kind, lab_group=lab_group)
+                # Redaktədə qrup MƏCBURİ deyil: köhnə (bütün qruplu) lab dərsi qrupsuz qala bilər.
+                lab_groups.validate(offering, kind=kind or lesson.kind, lab_group=lab_group)
             except lab_groups.LabGroupError as exc:
                 messages.error(request, str(exc))
                 return _back(offering)

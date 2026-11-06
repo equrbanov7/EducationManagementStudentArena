@@ -228,6 +228,24 @@ class LabGroupJournalTest(_LabWorld, TestCase):
         self._post_lesson(lesson_lab_group="2")
         self.assertEqual(Lesson.objects.get(offering=self.offering).lab_group, 2)
 
+    def test_edit_keeps_an_old_whole_group_lab_lesson_without_a_group(self):
+        lesson = self._lesson()
+        url = reverse("registrar:journal_lesson_action", args=[self.offering.id, lesson.id])
+        self._client(self.teacher).post(
+            url,
+            {
+                "action": "update_lesson",
+                "lesson_date": self.today.isoformat(),
+                "lesson_kind": LessonKind.LAB,
+                "lesson_hours": "2",
+                "lesson_time": "08:30|10:00",
+                "lesson_topic": "Titrləmə",
+                "lesson_lab_group": "",
+            },
+        )
+        lesson.refresh_from_db()
+        self.assertEqual((lesson.topic, lesson.lab_group), ("Titrləmə", None))
+
     def test_group_only_on_lab_lessons(self):
         with self.assertRaises(gradebook.LessonRuleError), bypass_rls():
             gradebook.create_lesson(
@@ -290,7 +308,7 @@ class ApplyLabGroupsCommandTest(_LabWorld, TestCase):
         text = out.getvalue()
         counts = {}
         for line in text.splitlines():
-            self.assertTrue(line.startswith("lab_groups: "), line)
+            self.assertRegex(line, r"^lab_groups: [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$")
             if "mode=" not in line:
                 counts.update(pair.split("=", 1) for pair in line[len("lab_groups: ") :].split())
         return counts
@@ -307,11 +325,11 @@ class ApplyLabGroupsCommandTest(_LabWorld, TestCase):
             )
         dry = self._call()
         self.assertEqual(
-            {key: dry.get(key) for key in ("chem_lab1", "chem_lab2", "chem_not_enrolled", "chem_ungrouped")},
-            {"chem_lab1": "1", "chem_lab2": "1", "chem_not_enrolled": "1", "chem_ungrouped": "1"},
+            {key: dry.get(key) for key in ("chem_lab_first", "chem_lab_second", "chem_not_enrolled", "chem_ungrouped")},
+            {"chem_lab_first": "1", "chem_lab_second": "1", "chem_not_enrolled": "1", "chem_ungrouped": "1"},
         )
         self.assertEqual(
-            (dry["chem_lesson_lab2"], dry["chem_lesson_mixed"], dry["chem_share_lab_added"]), ("1", "1", "1")
+            (dry["chem_lesson_lab_second"], dry["chem_lesson_mixed"], dry["chem_share_lab_added"]), ("1", "1", "1")
         )
         with bypass_rls():
             self.assertFalse(Enrollment.objects.filter(offering=self.offering, lab_group__isnull=False).exists())
@@ -327,7 +345,7 @@ class ApplyLabGroupsCommandTest(_LabWorld, TestCase):
         self.assertEqual(
             (again["chem_already"], again["chem_lesson_already"], again["chem_share_already"]), ("2", "1", "1")
         )
-        self.assertNotIn("chem_lab1", again)
+        self.assertNotIn("chem_lab_first", again)
 
     def test_never_overwrites_another_group(self):
         with bypass_rls():
@@ -341,7 +359,7 @@ class ApplyLabGroupsCommandTest(_LabWorld, TestCase):
         text = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("          - apply_lab_groups_20261106\n", text)
         self.assertIn('[ "$COMMAND" = "apply_lab_groups_20261106" ]', text)
-        self.assertIn("|lab_groups): ", text)
+        self.assertIn("|lab_groups): [a-z_]+=", text)
 
 
 class ApplyLabGroupsPlanTest(SimpleTestCase):

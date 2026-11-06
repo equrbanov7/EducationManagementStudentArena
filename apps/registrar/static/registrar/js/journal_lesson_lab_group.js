@@ -1,7 +1,7 @@
 /* Dərs modalı — laboratoriya qrupu seçimi (sahib 2026-11-06).
 
    Jurnal Lab-1 / Lab-2 siyahılarına bölünübsə (`[data-jd-lab-group-field]` render olunur) sahə yalnız dərs tipi
-   «laboratoriya» olanda görünür və məcburidir; başqa tipdə boşaldılır (server də yoxlayır — lab_groups.py).
+   «laboratoriya» olanda görünür və yeni dərsdə məcburidir; başqa tipdə boşaldılır (server də yoxlayır — lab_groups.py).
    Redaktədə dərsin öz qrupu `jd:lesson-modal-open` hadisəsinin `detail.labGroup` dəyərindən gəlir
    (journal_grid_lesson_modal.js), yeni dərsdə boş başlayır. AJAX-safe: yalnız EMSDelegate. */
 (function () {
@@ -27,7 +27,8 @@
         var isLab = kindOf(modal) === LAB;
         wrap.hidden = !isLab;
         if (select) {
-            select.required = isLab;
+            // Yeni dərsdə məcburi; redaktədə köhnə (bütün qruplu) lab dərsi qrupsuz qala bilər.
+            select.required = isLab && modal.getAttribute("data-jd-lab-editing") !== "1";
             if (!isLab) setValue(select, "");
         }
     }
@@ -41,6 +42,7 @@
     window.EMSDelegate.on("jd:lesson-modal-open", ".jd-modal[data-jd-lesson-modal]", function (event, modal) {
         var select = modal.querySelector("[data-jd-lesson-lab-group]");
         if (!select) return;
+        modal.setAttribute("data-jd-lab-editing", event.detail ? "1" : "");
         setValue(select, (event.detail && event.detail.labGroup) || "");
         sync(modal);
     });
