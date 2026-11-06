@@ -507,7 +507,8 @@ class RegistrarMigrationTargetGuardTests(TestCase):
         # + syllabus.0008 bir sillabus — bir neçə jurnal: 2 FK (`syllabus_syllabusshare.offering_id` / `.syllabus_id`),
         #   2026-10-27.
         # + 0115 jurnaldan çıxarılma qeydi: 2 FK (`registrar_journalremoval`), 2026-11-04.
-        self.assertEqual(same_org_trigger_count, 66)
+        # + 0117 jurnalın laboratoriya qrupu: 1 FK (`registrar_labgroup.offering_id`), 2026-11-06.
+        self.assertEqual(same_org_trigger_count, 67)
 
     def test_precheck_stops_instead_of_rewriting_existing_violation(self):
         with self.assertRaises(IntegrityError):

@@ -114620,3 +114620,211 @@ msgstr "Выберите группу…"
 msgctxt "registrar.lab_groups"
 msgid "Dərs yalnız bu qrupun tələbələrinə yazılır; mühazirə və seminar bütün qrupladır."
 msgstr "Занятие записывается только студентам этой группы; лекции и семинары — для всей группы."
+
+msgctxt "registrar.lab_groups"
+msgid "%(n)s tələbə yerləşdirildi: %(group)s."
+msgstr "Распределено студентов: %(n)s — %(group)s."
+
+msgctxt "registrar.lab_groups"
+msgid "%(n)s tələbənin öz qrupunun dərslərində qeydi var — onlar köçürülmədi (qeydlər itməsin deyə)."
+msgstr "У %(n)s студентов есть отметки на занятиях их группы — они не перемещены (чтобы отметки не потерялись)."
+
+msgctxt "registrar.lab_groups"
+msgid "Ad (istəyə bağlı)"
+msgstr "Название (необязательно)"
+
+msgctxt "registrar.lab_groups"
+msgid "Ad dəyişmədi."
+msgstr "Название не изменилось."
+
+msgctxt "registrar.lab_groups"
+msgid "Adı saxla"
+msgstr "Сохранить название"
+
+msgctxt "registrar.lab_groups"
+msgid "Bağlı dərs"
+msgstr "Привязанных занятий"
+
+msgctxt "registrar.lab_groups"
+msgid "Bu adda laboratoriya qrupu artıq var."
+msgstr "Лабораторная группа с таким названием уже есть."
+
+msgctxt "registrar.lab_groups"
+msgid "Bu jurnal hələ laboratoriya qruplarına bölünməyib. «Qrup əlavə et» ilə Lab-1, Lab-2 … yaradın, sonra tələbələri yerləşdirin."
+msgstr "Этот журнал ещё не разделён на лабораторные группы. Создайте Лаб-1, Лаб-2 … кнопкой «Добавить группу», затем распределите студентов."
+
+msgctxt "registrar.lab_groups"
+msgid "Bu qrupa %(n)s dərs bağlıdır — əvvəlcə həmin dərslərin qrupunu dəyişin və ya dərsləri silin."
+msgstr "К этой группе привязано занятий: %(n)s — сначала измените группу этих занятий или удалите их."
+
+msgctxt "registrar.lab_groups"
+msgid "Bütün tələbələr qrupa yerləşdirilib."
+msgstr "Все студенты распределены по группам."
+
+msgctxt "registrar.lab_groups"
+msgid "Bəli, qrupu silirəm"
+msgstr "Да, удалить группу"
+
+msgctxt "registrar.lab_groups"
+msgid "Hamısını seç"
+msgstr "Выбрать всех"
+
+msgctxt "registrar.lab_groups"
+msgid "Hansı qrupa"
+msgstr "В какую группу"
+
+msgctxt "registrar.lab_groups"
+msgid "Hansı qrupa köçürüləcəyini seçin."
+msgstr "Выберите, в какую группу перенести."
+
+msgctxt "registrar.lab_groups"
+msgid "Jurnala qayıt"
+msgstr "Вернуться к журналу"
+
+msgctxt "registrar.lab_groups"
+msgid "Jurnalda ən çox %(max)s laboratoriya qrupu ola bilər."
+msgstr "В журнале может быть не более %(max)s лабораторных групп."
+
+msgctxt "registrar.lab_groups"
+msgid "Köçür"
+msgstr "Перенести"
+
+msgctxt "registrar.lab_groups"
+msgid "Lab qrupları"
+msgstr "Лаб. группы"
+
+msgctxt "registrar.lab_groups"
+msgid "Laboratoriya qruplarını yarat, adlandır və tələbələri yerləşdir"
+msgstr "Создать и назвать лабораторные группы, распределить студентов"
+
+msgctxt "registrar.lab_groups"
+msgid "Mühazirə və seminar bütün qrupladır. Qrupu seçilmiş laboratoriya dərsi yalnız həmin qrupun tələbələrinə yazılır."
+msgstr "Лекции и семинары проходят со всей группой. Лабораторное занятие с выбранной группой записывается только её студентам."
+
+msgctxt "registrar.lab_groups"
+msgid "Naməlum əməl."
+msgstr "Неизвестное действие."
+
+msgctxt "registrar.lab_groups"
+msgid "Qrup əlavə et"
+msgstr "Добавить группу"
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupa dərs bağlıdır — silmək olmaz. Əvvəlcə həmin dərslərin qrupunu dəyişin."
+msgstr "К группе привязаны занятия — удалить нельзя. Сначала измените группу этих занятий."
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupda hələ tələbə yoxdur."
+msgstr "В группе пока нет студентов."
+
+msgctxt "registrar.lab_groups"
+msgid "Qruplar"
+msgstr "Группы"
+
+msgctxt "registrar.lab_groups"
+msgid "Qruplu laboratoriya dərsləri bu tələbələrə aid deyil — onları qrupa yerləşdirin."
+msgstr "Групповые лабораторные занятия к этим студентам не относятся — распределите их по группам."
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupsuz"
+msgstr "Без группы"
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupsuz et"
+msgstr "Убрать из группы"
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupsuz tələbələr"
+msgstr "Студенты без группы"
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupu sil"
+msgstr "Удалить группу"
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupun adı"
+msgstr "Название группы"
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupun adı yeniləndi: %(label)s."
+msgstr "Название группы обновлено: %(label)s."
+
+msgctxt "registrar.lab_groups"
+msgid "Seçilib"
+msgstr "Выбрано"
+
+msgctxt "registrar.lab_groups"
+msgid "Seçilən tələbələr artıq bu qrupdadır."
+msgstr "Выбранные студенты уже в этой группе."
+
+msgctxt "registrar.lab_groups"
+msgid "Seçilən tələbələrdən biri bu jurnalda deyil."
+msgstr "Один из выбранных студентов не состоит в этом журнале."
+
+msgctxt "registrar.lab_groups"
+msgid "Sil"
+msgstr "Удалить"
+
+msgctxt "registrar.lab_groups"
+msgid "Silməni təsdiqləyin."
+msgstr "Подтвердите удаление."
+
+msgctxt "registrar.lab_groups"
+msgid "Tələbə"
+msgstr "Студентов"
+
+msgctxt "registrar.lab_groups"
+msgid "Tələbə axtar"
+msgstr "Поиск студента"
+
+msgctxt "registrar.lab_groups"
+msgid "Tələbə axtar…"
+msgstr "Поиск студента…"
+
+msgctxt "registrar.lab_groups"
+msgid "Tələbə heç bir laboratoriya qrupuna yerləşdirilməyib — qruplu lab dərsləri ona aid deyil. Jurnalın «Lab qrupları» bölməsində yerləşdirin."
+msgstr "Студент не распределён ни в одну лабораторную группу — групповые лабораторные занятия к нему не относятся. Распределите в разделе журнала «Лаб. группы»."
+
+msgctxt "registrar.lab_groups"
+msgid "Tələbə seçilməyib."
+msgstr "Студент не выбран."
+
+msgctxt "registrar.lab_groups"
+msgid "Tələbələr"
+msgstr "Студенты"
+
+msgctxt "registrar.lab_groups"
+msgid "Tələbənin öz qrupunun dərslərində qeydi var — köçürmək olmaz (qeydlər itməsin deyə)."
+msgstr "У студента есть отметки на занятиях его группы — перенести нельзя (чтобы отметки не потерялись)."
+
+msgctxt "registrar.lab_groups"
+msgid "Yeni qrupun adı (istəyə bağlı)"
+msgstr "Название новой группы (необязательно)"
+
+msgctxt "registrar.lab_groups"
+msgid "qeyd var"
+msgstr "есть отметки"
+
+msgctxt "registrar.lab_groups"
+msgid "tələbə"
+msgstr "студентов"
+
+msgctxt "registrar.lab_groups"
+msgid "«%(label)s» qrupu silindi — %(n)s tələbə qrupsuz qaldı."
+msgstr "Группа «%(label)s» удалена — без группы осталось студентов: %(n)s."
+
+msgctxt "registrar.lab_groups"
+msgid "«%(label)s» qrupu yaradıldı — tələbələri aşağıda yerləşdirin."
+msgstr "Группа «%(label)s» создана — распределите студентов ниже."
+
+msgctxt "registrar.lab_groups"
+msgid "«%(label)s» silinəcək; qrupsuz qalacaq tələbə: %(n)s."
+msgstr "«%(label)s» будет удалена; студентов без группы останется: %(n)s."
+
+msgctxt "registrar.model.lab_group.meta"
+msgid "laboratoriya qrupu"
+msgstr "лабораторная группа"
+
+msgctxt "registrar.model.lab_group.meta"
+msgid "laboratoriya qrupları"
+msgstr "лабораторные группы"

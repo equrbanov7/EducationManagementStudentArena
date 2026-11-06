@@ -25,3 +25,32 @@
     background: repeating-linear-gradient(135deg, #f8fafc, #f8fafc 5px, #f1f5f9 5px, #f1f5f9 10px);
 }
 .jd2-ro--offgroup { color: #cbd5e1; }
+/* Adlı qrupun nişanı (≤ 40 simvol) sütunu genişləndirməsin — tam ad `title`-dadır. */
+.jd2-th-labgroup,
+.jd2-labchip {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+.jd2-labchip { display: inline-block; }
+/* «Lab qrupları» keçidi (jurnal başlığı, sahib 2026-11-06) — «Praktiki məşğələ» açarı ilə eyni ölçü. */
+.jd2-labgroups-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: var(--ems-h-chip, 24px);
+    padding: 0 10px;
+    border: 1px solid #ddd6fe;
+    border-radius: 999px;
+    background: #f5f3ff;
+    color: #6d28d9;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.4;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.jd2-labgroups-link:hover { border-color: #a78bfa; color: #5b21b6; }
+.jd2-labgroups-link:focus-visible { outline: 2px solid #7c3aed; outline-offset: 2px; }
