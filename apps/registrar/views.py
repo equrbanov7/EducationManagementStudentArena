@@ -317,6 +317,9 @@ def journal_detail(request, offering_id):
     from .excused_management import page_context as excused_context
 
     context.update(excused_context(request, offering, context))
+    from .lab_groups_views import link_context as lab_groups_link  # «Lab qrupları» ekranı (sahib 2026-11-06)
+
+    context.update(lab_groups_link(request.user, offering))
     return render(request, "registrar/journal_detail.html", context)
 
 
