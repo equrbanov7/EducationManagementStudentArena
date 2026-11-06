@@ -125,7 +125,9 @@ class SubmissionPagesQueryBudgetTests(_Base):
 
     # 2026-10-27: «Fənnimə aid apellyasiyalar» menyu qaydası müəllim rolu olmayan heyət üçün +1 sorğu edir
     # (dərs deyirmi yoxlaması — vəzifəli müəllim də bölməni görsün, sahib 2026-10-27) → chair 27 → 28, center 23 → 24.
-    BUDGET = {"detail_edit": 27, "detail_view": 23, "chair": 28, "center": 24}
+    # 2026-11-07: «Lab qrupları» menyu qaydası `grade.input` daşıyan müəllim üçün +1 sorğu edir (lab saatlı öz jurnalı
+    # varmı — TƏK EXISTS) → detail_edit 27 → 28, detail_view 23 → 24.
+    BUDGET = {"detail_edit": 28, "detail_view": 24, "chair": 28, "center": 24}
 
     def _pair(self, make, client, url_name):
         small, large = make(3), make(30)

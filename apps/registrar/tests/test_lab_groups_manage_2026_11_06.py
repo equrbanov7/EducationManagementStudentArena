@@ -120,8 +120,12 @@ class PermissionTest(LabManageBase):
             self.assertFalse(service.can_manage(user, offering), user.username)
 
     def test_rim_and_chair_head_over_http(self):
+        # 2026-11-07: köhnə ünvan kabinetin «Lab qrupları» bölməsinə yönləndirir (jurnal öncədən seçilmiş).
         for user in (self.rim, self.chair_head):
-            self.assertEqual(self.client_for(user).get(self.url).status_code, 200, user.username)
+            response = self.client_for(user).get(self.url)
+            self.assertEqual(response.status_code, 302, user.username)
+            self.assertIn("section=lab-groups", response["Location"])
+            self.assertIn(f"lg_offering={self.offering.pk}", response["Location"])
         self.post(self.rim, action="create")
         self.assertEqual(self.numbers(), [1])
 
@@ -144,10 +148,11 @@ class PermissionTest(LabManageBase):
 
     def test_journal_header_link_only_for_managers(self):
         detail = reverse("registrar:journal_detail", args=[self.offering.pk])
-        self.assertContains(self.client_for(self.teacher).get(detail), self.url)
+        link = f"lg_offering={self.offering.pk}"
+        self.assertContains(self.client_for(self.teacher).get(detail), link)
         observer_page = self.client_for(self.observer).get(detail)
         self.assertEqual(observer_page.status_code, 200)
-        self.assertNotContains(observer_page, self.url)
+        self.assertNotContains(observer_page, link)
 
     def test_inactive_offering_is_read_only(self):
         with bypass_rls():
@@ -157,9 +162,7 @@ class PermissionTest(LabManageBase):
 
 class CreateRenameTest(LabManageBase):
     def test_split_a_journal_never_split_before(self):
-        response = self.client_for(self.teacher).get(self.url)
-        self.assertContains(response, "data-lgm")
-        self.assertEqual(len(response.context["panel"]["ungrouped"]), 4)
+        self.assertEqual(len(service.panel(self.fresh())["ungrouped"]), 4)
         self.post(action="create")
         self.post(action="create", name="  Axşam   qrupu ")
         self.assertEqual(self.numbers(), [1, 2])
@@ -225,7 +228,7 @@ class AssignDeleteTest(LabManageBase):
         self.assertEqual(self.groups_of()[self.e2.pk], 2)
         self.assign("none", self.e1)
         self.assertIsNone(self.groups_of()[self.e1.pk])
-        panel = self.client_for(self.teacher).get(self.url).context["panel"]
+        panel = service.panel(self.fresh())
         self.assertEqual({row["enrollment"].pk for row in panel["ungrouped"]}, {self.e1.pk, self.e3.pk, self.e_host.pk})
         self.assertEqual([len(group["members"]) for group in panel["groups"]], [0, 1])
         with bypass_rls():
@@ -250,11 +253,13 @@ class AssignDeleteTest(LabManageBase):
             LessonMark.objects.create(organization=self.org, lesson=bound, enrollment=self.e1, status="present")
             LessonMark.objects.create(organization=self.org, lesson=whole, enrollment=self.e2, status="present")
         self.post(action="create")
+        action = reverse("registrar:journal_lab_groups_action", args=[self.offering.pk])
         response = self.client_for(self.teacher).post(
-            self.url, {"action": "assign", "target": "2", "enrollment": [str(self.e1.pk), str(self.e2.pk)]}, follow=True
+            action, {"action": "assign", "target": "2", "enrollment": [str(self.e1.pk), str(self.e2.pk)]}
         )
         self.assertEqual((self.groups_of()[self.e1.pk], self.groups_of()[self.e2.pk]), (1, 2))
-        self.assertContains(response, "qeydi var")
+        levels = [item["level"] for item in response.json()["messages"]]
+        self.assertEqual(levels, ["success", "warning"])
 
     def test_delete_rules(self):
         self.set_groups({self.e1: 1, self.e2: 2, self.e3: 2})
@@ -278,10 +283,10 @@ class AssignDeleteTest(LabManageBase):
     def test_closed_period_changes_nothing(self):
         with bypass_rls():
             AcademicPeriod.objects.filter(pk=self.period.pk).update(is_current=False)
-        response = self.client_for(self.teacher).get(self.url)
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.context["blocked_reason"])
-        self.assertNotContains(response, 'value="create"')
+        self.assertTrue(service.block_reason(self.fresh()))
+        action = reverse("registrar:journal_lab_groups_action", args=[self.offering.pk])
+        response = self.client_for(self.teacher).post(action, {"action": "create"})
+        self.assertEqual((response.status_code, response.json()["error"]), (409, "blocked"))
         self.post(action="create")
         self.assertEqual(self.numbers(), [])
 
@@ -312,13 +317,3 @@ class GridAndModalNamesTest(LabManageBase):
             )
         self.assertEqual(journal["lesson_meta"][0]["lab_group_label"], "Səhər qrupu")
         self.assertEqual((result["written"], result["rejected"]), (1, 1))
-
-    def test_panel_page_lists_ungrouped_and_named_groups(self):
-        self.set_groups({self.e1: 1})
-        self.post(action="rename", group="1", name="Səhər")
-        response = self.client_for(self.teacher).get(self.url, HTTP_ACCEPT_LANGUAGE="az")
-        self.assertContains(response, "lgm-bucket--ungrouped")
-        self.assertContains(response, "registrar/js/journal_lab_groups_manage.js")
-        self.assertContains(response, "registrar/css/journal_lab_groups_manage.css")
-        self.assertContains(response, "data-bootstrap-select")
-        self.assertContains(response, "Səhər")

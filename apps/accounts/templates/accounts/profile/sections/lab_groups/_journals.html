@@ -1,0 +1,50 @@
+{% load i18n %}
+{% comment %}«Lab qrupları» — jurnal siyahısı (kartlar). Hər kart bölməni YERİNDƏ yeniləyən keçiddir
+(`?section=lab-groups&lg_offering=…`, süzgəclər saxlanır). Bölünmə vəziyyəti: qrup sayı + yerləşdirmə zolağı.{% endcomment %}
+<div class="lgx-journals__head">
+    <span class="lgx-journals__title">{% trans "Jurnallar" context "accounts.lab_groups" %}</span>
+    {% if lg.total %}<span class="lgx-journals__range">{{ lg.first_index }}–{{ lg.last_index }} / {{ lg.total }}</span>{% endif %}
+</div>
+{% if lg.rows %}
+<ul class="lgx-jlist">
+    {% for row in lg.rows %}
+    <li>
+        <a class="lgx-jcard{% if row.is_selected %} is-selected{% endif %}" href="{{ row.url }}" data-section="lab-groups"{% if row.is_selected %} aria-current="true"{% endif %}>
+            <span class="lgx-jcard__top">
+                <span class="lgx-jcard__subject">{{ row.subject }}</span>
+                {% if row.groups %}
+                <span class="lgx-tag lgx-tag--ok">{% blocktrans with n=row.groups context "accounts.lab_groups" %}{{ n }} qrup{% endblocktrans %}</span>
+                {% else %}
+                <span class="lgx-tag lgx-tag--todo">{% trans "Bölünməyib" context "accounts.lab_groups" %}</span>
+                {% endif %}
+            </span>
+            <span class="lgx-jcard__meta">
+                {% if row.group %}<span><i class="fas fa-users" aria-hidden="true"></i> {{ row.group }}</span>{% endif %}
+                {% if row.code %}<span class="ems-mono">{{ row.code }}</span>{% endif %}
+            </span>
+            {% if row.teacher and not lg.scope_personal %}<span class="lgx-jcard__teacher"><i class="fas fa-chalkboard-user" aria-hidden="true"></i> {{ row.teacher }}</span>{% endif %}
+            <span class="lgx-jcard__foot">
+                <span class="ems-bar lgx-jcard__bar"><span class="ems-bar__fill{% if row.groups and not row.ungrouped %} ems-bar__fill--success{% endif %}" style="--pct:{{ row.pct }}%"></span></span>
+                <span class="lgx-jcard__count">{% if row.groups %}{{ row.grouped }}/{{ row.students }}{% else %}{{ row.students }} {% trans "tələbə" context "accounts.lab_groups" %}{% endif %}</span>
+            </span>
+            {% if row.ungrouped %}<span class="lgx-jcard__warn"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> {% blocktrans with n=row.ungrouped context "accounts.lab_groups" %}{{ n }} qrupsuz tələbə{% endblocktrans %}</span>{% endif %}
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+{% if lg.has_prev or lg.has_next %}
+<nav class="lgx-pager" aria-label="{% trans 'Səhifələr' context 'accounts.lab_groups' %}">
+    {% if lg.has_prev %}<a class="ems-btn ems-btn--sm" href="{{ lg.prev_url }}" data-section="lab-groups"><i class="fas fa-chevron-left" aria-hidden="true"></i> {% trans "Əvvəlki" context "accounts.lab_groups" %}</a>{% endif %}
+    <span class="lgx-pager__page">{{ lg.page }}</span>
+    {% if lg.has_next %}<a class="ems-btn ems-btn--sm" href="{{ lg.next_url }}" data-section="lab-groups">{% trans "Növbəti" context "accounts.lab_groups" %} <i class="fas fa-chevron-right" aria-hidden="true"></i></a>{% endif %}
+</nav>
+{% endif %}
+{% elif lg.is_filtered %}
+    {% trans "Süzgəcə uyğun jurnal yoxdur" context "accounts.lab_groups" as st_title %}
+    {% trans "Süzgəcləri dəyişin və ya «Sıfırla» basın." context "accounts.lab_groups" as st_body %}
+    {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-magnifying-glass" %}
+{% else %}
+    {% trans "Bu semestrdə laboratoriya saatı olan jurnal yoxdur" context "accounts.lab_groups" as st_title %}
+    {% trans "Laboratoriya saatı tədris planında, dərs yükündə və ya cədvəldə göstərilən jurnallar burada görünür. Başqa semestri seçə bilərsiniz." context "accounts.lab_groups" as st_body %}
+    {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-flask" %}
+{% endif %}

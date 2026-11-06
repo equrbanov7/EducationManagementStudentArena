@@ -35,22 +35,21 @@
     vertical-align: middle;
 }
 .jd2-labchip { display: inline-block; }
-/* «Lab qrupları» keçidi (jurnal başlığı, sahib 2026-11-06) — «Praktiki məşğələ» açarı ilə eyni ölçü. */
+/* «Lab qrupları» keçidi (jurnal başlığı) — 2026-11-07: kiçik, sakit keçid; idarəetmə kabinet bölməsindədir. */
 .jd2-labgroups-link {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     min-height: var(--ems-h-chip, 24px);
-    padding: 0 10px;
-    border: 1px solid #ddd6fe;
-    border-radius: 999px;
-    background: #f5f3ff;
-    color: #6d28d9;
+    padding: 0 6px;
+    border-radius: 6px;
+    color: #64748b;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.4;
     text-decoration: none;
     white-space: nowrap;
 }
-.jd2-labgroups-link:hover { border-color: #a78bfa; color: #5b21b6; }
+.jd2-labgroups-link__ext { font-size: 9px; opacity: 0.7; }
+.jd2-labgroups-link:hover { background: #f5f3ff; color: #6d28d9; }
 .jd2-labgroups-link:focus-visible { outline: 2px solid #7c3aed; outline-offset: 2px; }

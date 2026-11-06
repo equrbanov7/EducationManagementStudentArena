@@ -57,6 +57,9 @@ ALLOWED_PCT_STYLES = {
     # Alt qrup tələbələri statistikası (2026-11-05): ən çox siyahılarının zolağı + 12 həftəlik trend sütunu.
     "subgroup_students/_stat_list.html": 1,
     "subgroup_students/_stats.html": 1,
+    # Lab qrupları (2026-11-07): jurnal kartının və iş sahəsinin «yerləşdirilib» zolağı.
+    "lab_groups/_journals.html": 1,
+    "lab_groups/_workspace.html": 1,
 }
 
 
