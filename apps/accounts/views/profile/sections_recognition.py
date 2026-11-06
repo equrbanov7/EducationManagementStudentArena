@@ -41,6 +41,12 @@ SUBGROUP_STUDENTS_SECTION_PARTIALS: dict[str, str] = {
     "subgroup-students": "accounts/profile/sections/_subgroup_students.html",
 }
 
+#: «Lab qrupları» (sahib 2026-11-07) — jurnalın laboratoriya qrupları (data ``{% lab_groups_panel %}`` tag-ı ilə, qapı
+#: render vaxtı yenidən yoxlanır); jurnal seçimi / süzgəc / səhifə linkləri yerində, yazı JSON endpoint-inə gedir.
+LAB_GROUPS_SECTION_PARTIALS: dict[str, str] = {
+    "lab-groups": "accounts/profile/sections/_lab_groups.html",
+}
+
 #: ``sections_api``-a birləşən əlavə bölmələr (Əmək müqavilələri + Xarici nəticələrin tanınması).
 EXTRA_SECTION_PARTIALS: dict[str, str] = (
     HR_CONTRACT_SECTION_PARTIALS
@@ -49,6 +55,7 @@ EXTRA_SECTION_PARTIALS: dict[str, str] = (
     | UNIT_MATERIALS_SECTION_PARTIALS
     | JOURNAL_REMOVALS_SECTION_PARTIALS
     | SUBGROUP_STUDENTS_SECTION_PARTIALS
+    | LAB_GROUPS_SECTION_PARTIALS
 )
 EXTRA_AJAX_SECTIONS: frozenset[str] = (
     HR_CONTRACT_AJAX_SECTIONS
@@ -57,12 +64,14 @@ EXTRA_AJAX_SECTIONS: frozenset[str] = (
     | frozenset(UNIT_MATERIALS_SECTION_PARTIALS)
     | frozenset(JOURNAL_REMOVALS_SECTION_PARTIALS)
     | frozenset(SUBGROUP_STUDENTS_SECTION_PARTIALS)
+    | frozenset(LAB_GROUPS_SECTION_PARTIALS)
 )
 
 __all__ = [
     "EXTRA_AJAX_SECTIONS",
     "EXTRA_SECTION_PARTIALS",
     "JOURNAL_REMOVALS_SECTION_PARTIALS",
+    "LAB_GROUPS_SECTION_PARTIALS",
     "RECOGNITION_AJAX_SECTIONS",
     "RECOGNITION_SECTION_PARTIALS",
     "SUBGROUP_STUDENTS_SECTION_PARTIALS",

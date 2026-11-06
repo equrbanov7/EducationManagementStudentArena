@@ -150,7 +150,9 @@ urlpatterns = [
         name="journal_subject_exempt_restore",
     ),
     # «Lab qrupları» — jurnalda laboratoriya qruplarını yaratmaq / adlandırmaq / tələbə yerləşdirmək (sahib 2026-11-06).
+    # 2026-11-07: ekran kabinetin «Lab qrupları» bölməsinə köçdü — köhnə ünvan oraya yönləndirir, yazı JSON-dadır.
     path("<uuid:offering_id>/lab-qruplari/", lab_groups_views.manage, name="journal_lab_groups"),
+    path("<uuid:offering_id>/lab-qruplari/emel/", lab_groups_views.action, name="journal_lab_groups_action"),
     # Dərs modalının axtarışlı/lazy seçiciləri (QA 2026-09-05 P3-13) — uuid
     # catch-all-dan ƏVVƏL.
     path(
