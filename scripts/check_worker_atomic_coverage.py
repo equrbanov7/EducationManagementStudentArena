@@ -106,6 +106,7 @@ INTENTIONAL_EXEMPTIONS = {
     "apps/registrar/management/commands/repair_applications_20261105c.py",
     "apps/registrar/management/commands/fix_ydk236_subject_20261106.py",
     "apps/registrar/management/commands/sync_student_group_journals.py",
+    "apps/registrar/management/commands/repair_applications_20261106.py",
     "apps/registrar/management/commands/rebuild_language_cohorts_20261106.py",
     # 2026-11-06 lab qrupları (Ekologiya kafedrası): eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/apply_lab_groups_20261106.py",
