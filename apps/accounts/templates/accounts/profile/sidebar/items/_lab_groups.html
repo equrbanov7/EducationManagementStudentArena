@@ -1,0 +1,16 @@
+{% load i18n nav_icons %}
+{% comment %}2026-11-07 (sahib): «Lab qrupları» — jurnalın laboratoriya qruplarını yaratmaq / adlandırmaq / tələbə yerləşdirmək.
+Heyətdə «Qruplar»ın yanında (Tədris şöbəsi), müəllimin düz menyusunda «Elektron jurnal»ın altında. Qapı: rbac_sections.py
+(`lab_groups_section.visible` — müəllim / lab payı, kafedra müdiri, RİM); əhatə bölmənin öz qapısında.{% endcomment %}
+{% if 'lab-groups' in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=lab-groups"
+       data-section="lab-groups"
+       data-title="{% trans 'Lab qrupları' context 'profile.section' %}"
+       data-source-url="{{ profile_base_url }}?section=lab-groups"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'lab-groups' %}active{% endif %}">
+        {% nav_icon "flask-conical" "sidebar-menu-icon" %}
+        <span class="sidebar-menu-text">{% trans "Lab qrupları" context "profile.section" %}</span>
+    </a>
+</li>
+{% endif %}

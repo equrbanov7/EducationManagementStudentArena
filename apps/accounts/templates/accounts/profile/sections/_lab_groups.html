@@ -1,0 +1,51 @@
+{% load i18n static lab_groups_tags %}
+{% comment %}
+«Lab qrupları» (sahib 2026-11-07: «sidebarda qruplar olan yerdə yerləşsin … modern UX/UI») — jurnalın laboratoriya
+qruplarını yaratmaq, adlandırmaq, tələbələri yerləşdirmək. Əvvəlki ayrıca səhifə (/jurnal/<id>/lab-qruplari/) bura
+yönləndirir. Menyu qapısı: rbac_sections.py (`lab_groups_section.visible`); data qapısı, əhatə və seçilmiş jurnalın
+`can_manage` yoxlaması `{% lab_groups_panel %}` tag-ında render vaxtı yenidən aparılır.
+
+Düzüm: süzgəclər (`_filter_bar`, avto rejim) → solda jurnal siyahısı, sağda seçilmiş jurnalın iş sahəsi (telefonda
+yalnız biri görünür). Bütün keçidlər bölməni yerində yeniləyir (AJAX-safe). Yazı JSON endpoint-inədir
+(`registrar:journal_lab_groups_action`, URL data-atributda) — JS xarici fayldadır. CSS / JS panelin İÇİNDƏDİR.
+{% endcomment %}
+{% if 'lab-groups' in allowed_sections %}
+<section class="profile-section-panel profile-section--lab-groups {% if active_section == 'lab-groups' %}is-active{% endif %}"
+         data-profile-section-panel="lab-groups"
+         data-source-url="{{ profile_base_url }}?section=lab-groups">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/lab_groups.css' %}?v=20261107-1">
+{% lab_groups_panel as lg %}
+{% if not lg.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=lg.access_denied_message %}
+{% else %}
+<div class="lgx" data-lgx-root>
+    {% trans "Laboratoriya dərsləri yarım qruplarla keçirsə, jurnalı burada Lab-1, Lab-2 … qruplarına bölün: jurnalı seçin, qrup yaradın, tələbələri seçib köçürün və ya sürüşdürüb qrupun üzərinə atın. Mühazirə və seminar bütün qrupla qalır." context "accounts.lab_groups" as lg_sub %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=lg_sub %}
+
+    {% include "partials/ems_ui/_kpi_row.html" with kpi_tiles=lg.kpi_tiles %}
+
+    {% include "partials/ems_ui/_filter_bar.html" with filter_section="lab-groups" filter_prefix="lg_" filter_fields=lg.filter_fields filter_count_label=lg.filter_count_label filter_auto=True filter_bootstrap=True %}
+
+    <div class="lgx-layout{% if lg.workspace %} lgx-layout--open{% endif %}">
+        <aside class="lgx-journals" data-ems-filter-target aria-label="{% trans 'Jurnallar' context 'accounts.lab_groups' %}">
+            {% include "accounts/profile/sections/lab_groups/_journals.html" %}
+        </aside>
+        <div class="lgx-main">
+            {% if lg.workspace.error %}
+                {% include "partials/ems_ui/_empty.html" with state_kind="error" state_icon="fa-lock" state_title=lg.workspace.error %}
+            {% elif lg.workspace %}
+                {% include "accounts/profile/sections/lab_groups/_workspace.html" with ws=lg.workspace %}
+            {% else %}
+                <div class="lgx-pick">
+                    <span class="lgx-pick__icon" aria-hidden="true"><i class="fas fa-flask"></i></span>
+                    <p class="lgx-pick__title">{% trans "Jurnal seçin" context "accounts.lab_groups" %}</p>
+                    <p class="lgx-pick__body">{% trans "Soldakı siyahıdan jurnalı seçin — onun laboratoriya qrupları, qrupsuz tələbələri və köçürmə alətləri burada açılacaq." context "accounts.lab_groups" %}</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<script src="{% static 'accounts/js/profile/lab_groups.js' %}?v=20261107-1" defer></script>
+{% endif %}
+</section>
+{% endif %}

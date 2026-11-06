@@ -1,0 +1,61 @@
+{% load i18n %}
+{% comment %}Lövhənin bir sütunu: `col_key` («none» və ya qrup nömrəsi), `col_title`, `col_members`, `col_ungrouped`,
+`group` (panel qrupu — ad, defolt ad, bağlı dərs sayı, silinə bilərmi). Sütun sürüşdürülən tələbənin hədəfidir.{% endcomment %}
+<section class="lgx-col{% if col_ungrouped %} lgx-col--none{% endif %}" data-lgx-col="{{ col_key }}" aria-labelledby="lgx-col-{{ col_key }}">
+    <header class="lgx-col__head">
+        {% if ws.can_edit and col_members %}
+        <input type="checkbox" class="lgx-check" data-lgx-col-all aria-label="{% trans 'Sütundakı hamısını seç' context 'accounts.lab_groups' %}: {{ col_title }}">
+        {% endif %}
+        <div class="lgx-col__titles">
+            <h3 class="lgx-col__title" id="lgx-col-{{ col_key }}">{% if col_ungrouped %}<i class="fas fa-user-clock" aria-hidden="true"></i> {% endif %}{{ col_title }}</h3>
+            {% if group and group.name %}<span class="lgx-col__badge">{{ group.default_label }}</span>{% endif %}
+        </div>
+        <span class="lgx-col__count" title="{% trans 'Tələbə sayı' context 'accounts.lab_groups' %}">{{ col_members|length }}</span>
+        {% if group and ws.can_edit %}
+        <span class="lgx-col__tools">
+            <button type="button" class="ems-iconbtn" data-lgx-rename-toggle
+                    title="{% trans 'Adını dəyiş' context 'accounts.lab_groups' %}" aria-label="{% trans 'Adını dəyiş' context 'accounts.lab_groups' %}: {{ col_title }}">
+                <i class="fas fa-pen" aria-hidden="true"></i>
+            </button>
+            {% if group.can_delete %}
+            <button type="button" class="ems-iconbtn ems-iconbtn--danger" data-lgx-delete data-group="{{ group.number }}" data-label="{{ col_title }}" data-members="{{ col_members|length }}"
+                    title="{% trans 'Qrupu sil' context 'accounts.lab_groups' %}" aria-label="{% trans 'Qrupu sil' context 'accounts.lab_groups' %}: {{ col_title }}">
+                <i class="fas fa-trash-can" aria-hidden="true"></i>
+            </button>
+            {% endif %}
+        </span>
+        {% endif %}
+    </header>
+    {% if group %}
+    <p class="lgx-col__sub">
+        {% if group.lessons %}
+        <span title="{% trans 'Qrupa dərs bağlıdır — silmək olmaz. Əvvəlcə həmin dərslərin qrupunu dəyişin.' context 'accounts.lab_groups' %}"><i class="fas fa-link" aria-hidden="true"></i> {% blocktrans with n=group.lessons context "accounts.lab_groups" %}{{ n }} dərs bağlıdır{% endblocktrans %}</span>
+        {% else %}
+        <span>{% trans "Hələ dərs bağlanmayıb" context "accounts.lab_groups" %}</span>
+        {% endif %}
+    </p>
+    {% if ws.can_edit %}
+    <form class="lgx-rename" data-lgx-rename-form hidden novalidate>
+        <input type="hidden" name="group" value="{{ group.number }}">
+        <input type="text" name="name" class="ems-input" value="{{ group.name }}" maxlength="{{ ws.panel.name_max_length }}"
+               placeholder="{{ group.default_label }}" aria-label="{% trans 'Qrupun adı' context 'accounts.lab_groups' %}: {{ group.default_label }}">
+        <span class="lgx-rename__actions">
+            <button type="submit" class="ems-btn ems-btn--primary ems-btn--sm">{% trans "Saxla" context "accounts.lab_groups" %}</button>
+            <button type="button" class="ems-btn ems-btn--ghost ems-btn--sm" data-lgx-rename-cancel>{% trans "Ləğv et" context "accounts.lab_groups" %}</button>
+        </span>
+    </form>
+    {% endif %}
+    {% elif col_members and ws.panel.groups %}
+    <p class="lgx-col__sub lgx-col__sub--warn">{% trans "Qruplu laboratoriya dərsləri bu tələbələrə aid deyil — onları qrupa yerləşdirin." context "accounts.lab_groups" %}</p>
+    {% endif %}
+    <ul class="lgx-list">
+        {% for row in col_members %}{% include "accounts/profile/sections/lab_groups/_student.html" %}{% endfor %}
+    </ul>
+    {% if not col_members %}
+    <p class="lgx-col__empty">
+        {% if col_ungrouped %}<i class="fas fa-circle-check" aria-hidden="true"></i> {% trans "Bütün tələbələr qrupa yerləşdirilib." context "accounts.lab_groups" %}
+        {% elif ws.can_edit %}<i class="fas fa-arrow-down" aria-hidden="true"></i> {% trans "Tələbələri buraya sürüşdürün" context "accounts.lab_groups" %}
+        {% else %}{% trans "Qrupda hələ tələbə yoxdur." context "accounts.lab_groups" %}{% endif %}
+    </p>
+    {% endif %}
+</section>

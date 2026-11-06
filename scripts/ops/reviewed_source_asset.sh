@@ -17,6 +17,8 @@ case "$COMMAND" in
     tag_prefix=applied-math-source; asset=applied-math-source.json.enc; target="/tmp/applied_math_source_${GITHUB_RUN_ID}.json" ;;
   recover_named_workload_syllabi)
     tag_prefix=named-workload-syllabi; asset=named-workload-syllabi.json.enc; target="/tmp/named_workload_syllabi_${GITHUB_RUN_ID}.json" ;;
+  recover_govher_syllabi)
+    tag_prefix=govher-syllabi; asset=govher-syllabi.json.enc; target="/tmp/govher_syllabi_${GITHUB_RUN_ID}.json" ;;
   recover_genetics_workload_syllabus)
     tag_prefix=genetics-workload-syllabus; asset=genetics-workload-syllabus.json.enc; target="/tmp/genetics_workload_syllabus_${GITHUB_RUN_ID}.json" ;;
   recover_empty_workload_syllabi)

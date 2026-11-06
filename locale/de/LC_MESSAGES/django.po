@@ -115695,6 +115695,315 @@ msgctxt "registrar.model.lab_group.meta"
 msgid "laboratoriya qrupları"
 msgstr "Laborgruppen"
 
+msgctxt "profile.section"
+msgid "Lab qrupları"
+msgstr "Laborgruppen"
+
+msgctxt "registrar.lab_groups"
+msgid "Bu jurnalın laboratoriya qruplarını idarə etmək səlahiyyətiniz yoxdur."
+msgstr "Sie dürfen die Laborgruppen dieses Journals nicht verwalten."
+
+msgctxt "registrar.lab_groups"
+msgid "Bölünməyib"
+msgstr "Nicht aufgeteilt"
+
+msgctxt "registrar.lab_groups"
+msgid "Qruplara bölünüb"
+msgstr "In Gruppen aufgeteilt"
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupsuz tələbəsi var"
+msgstr "Hat Studierende ohne Gruppe"
+
+msgctxt "registrar.lab_groups"
+msgid "Laboratoriya qrupları kabinetin «Lab qrupları» bölməsində idarə olunur"
+msgstr "Laborgruppen werden im Bereich „Laborgruppen“ des Kabinetts verwaltet"
+
+msgctxt "accounts.lab_groups"
+msgid "%(n)s dərs bağlıdır"
+msgstr "%(n)s Stunden zugeordnet"
+
+msgctxt "accounts.lab_groups"
+msgid "%(n)s jurnal hələ bölünməyib"
+msgstr "%(n)s Journale noch nicht aufgeteilt"
+
+msgctxt "accounts.lab_groups"
+msgid "%(n)s jurnalda"
+msgstr "in %(n)s Journalen"
+
+msgctxt "accounts.lab_groups"
+msgid "%(n)s qrup"
+msgstr "%(n)s Gruppen"
+
+msgctxt "accounts.lab_groups"
+msgid "%(n)s qrupsuz tələbə"
+msgstr "%(n)s Studierende ohne Gruppe"
+
+msgctxt "accounts.lab_groups"
+msgid "Ad (istəyə bağlı) — boş qalsa Lab-N"
+msgstr "Name (optional) — leer bedeutet Lab-N"
+
+msgctxt "accounts.lab_groups"
+msgid "Adını dəyiş"
+msgstr "Umbenennen"
+
+msgctxt "accounts.lab_groups"
+msgid "Aktiv tələbə"
+msgstr "Aktive Studierende"
+
+msgctxt "accounts.lab_groups"
+msgid "Axtarış"
+msgstr "Suche"
+
+msgctxt "accounts.lab_groups"
+msgid "Bu bölmə jurnalın müəllimi, kafedra müdiri və RİM rəhbəri üçündür."
+msgstr "Dieser Bereich ist für die Lehrkraft des Journals, die Lehrstuhlleitung und die RİM-Leitung."
+
+msgctxt "accounts.lab_groups"
+msgid "Bu jurnal hələ laboratoriya qruplarına bölünməyib. «Qrup yarat» ilə Lab-1, Lab-2 … yaradın, sonra tələbələri yerləşdirin."
+msgstr "Dieses Journal ist noch nicht in Laborgruppen aufgeteilt. Legen Sie mit „Gruppe anlegen“ Lab-1, Lab-2 … an und ordnen Sie dann die Studierenden zu."
+
+msgctxt "accounts.lab_groups"
+msgid "Bu semestrdə laboratoriya saatı olan jurnal yoxdur"
+msgstr "In diesem Semester gibt es keine Journale mit Laborstunden"
+
+msgctxt "accounts.lab_groups"
+msgid "Bölünməyib"
+msgstr "Nicht aufgeteilt"
+
+msgctxt "accounts.lab_groups"
+msgid "Bütün tələbələr qrupa yerləşdirilib."
+msgstr "Alle Studierenden sind einer Gruppe zugeordnet."
+
+msgctxt "accounts.lab_groups"
+msgid "Fakültə"
+msgstr "Fakultät"
+
+msgctxt "accounts.lab_groups"
+msgid "Fənn, kod, qrup və ya müəllim"
+msgstr "Fach, Code, Gruppe oder Lehrkraft"
+
+msgctxt "accounts.lab_groups"
+msgid "Hamısı"
+msgstr "Alle"
+
+msgctxt "accounts.lab_groups"
+msgid "Hansı qrupa köçürülsün"
+msgstr "In welche Gruppe verschieben"
+
+msgctxt "accounts.lab_groups"
+msgid "Hansı qrupa köçürüləcəyini seçin."
+msgstr "Wählen Sie die Zielgruppe."
+
+msgctxt "accounts.lab_groups"
+msgid "Hansı qrupa…"
+msgstr "In welche Gruppe…"
+
+msgctxt "accounts.lab_groups"
+msgid "Hələ dərs bağlanmayıb"
+msgstr "Noch keine Stunden zugeordnet"
+
+msgctxt "accounts.lab_groups"
+msgid "Jurnal seçin"
+msgstr "Journal auswählen"
+
+msgctxt "accounts.lab_groups"
+msgid "Jurnallar"
+msgstr "Journale"
+
+msgctxt "accounts.lab_groups"
+msgid "Jurnalı aç"
+msgstr "Journal öffnen"
+
+msgctxt "accounts.lab_groups"
+msgid "Kafedra"
+msgstr "Lehrstuhl"
+
+msgctxt "accounts.lab_groups"
+msgid "Köçür"
+msgstr "Verschieben"
+
+msgctxt "accounts.lab_groups"
+msgid "Lab qrupu"
+msgstr "Laborgruppen"
+
+msgctxt "accounts.lab_groups"
+msgid "Lab saatlı jurnal"
+msgstr "Journale mit Laborstunden"
+
+msgctxt "accounts.lab_groups"
+msgid "Laboratoriya dərsləri yarım qruplarla keçirsə, jurnalı burada Lab-1, Lab-2 … qruplarına bölün: jurnalı seçin, qrup yaradın, tələbələri seçib köçürün və ya sürüşdürüb qrupun üzərinə atın. Mühazirə və seminar bütün qrupla qalır."
+msgstr "Finden Laborstunden in Halbgruppen statt, teilen Sie das Journal hier in Lab-1, Lab-2 … auf: Journal wählen, Gruppen anlegen, Studierende auswählen und verschieben oder auf eine Gruppe ziehen. Vorlesung und Seminar bleiben bei der ganzen Gruppe."
+
+msgctxt "accounts.lab_groups"
+msgid "Laboratoriya saatı tədris planında, dərs yükündə və ya cədvəldə göstərilən jurnallar burada görünür. Başqa semestri seçə bilərsiniz."
+msgstr "Hier erscheinen Journale, deren Laborstunden im Lehrplan, im Lehrdeputat oder im Stundenplan stehen. Sie können ein anderes Semester wählen."
+
+msgctxt "accounts.lab_groups"
+msgid "Ləğv et"
+msgstr "Abbrechen"
+
+msgctxt "accounts.lab_groups"
+msgid "Müəllim"
+msgstr "Lehrkraft"
+
+msgctxt "accounts.lab_groups"
+msgid "Növbəti"
+msgstr "Weiter"
+
+msgctxt "accounts.lab_groups"
+msgid "Nəticə: %(n)s jurnal"
+msgstr "Ergebnis: %(n)s Journale"
+
+msgctxt "accounts.lab_groups"
+msgid "Qrup"
+msgstr "Gruppe"
+
+msgctxt "accounts.lab_groups"
+msgid "Qrup yarat"
+msgstr "Gruppe anlegen"
+
+msgctxt "accounts.lab_groups"
+msgid "Qrupa dərs bağlıdır — silmək olmaz. Əvvəlcə həmin dərslərin qrupunu dəyişin."
+msgstr "Der Gruppe sind Stunden zugeordnet — Löschen nicht möglich. Ändern Sie zuerst die Gruppe dieser Stunden."
+
+msgctxt "accounts.lab_groups"
+msgid "Qrupda hələ tələbə yoxdur."
+msgstr "Noch keine Studierenden in der Gruppe."
+
+msgctxt "accounts.lab_groups"
+msgid "Qruplara bölünüb"
+msgstr "In Gruppen aufgeteilt"
+
+msgctxt "accounts.lab_groups"
+msgid "Qruplu laboratoriya dərsləri bu tələbələrə aid deyil — onları qrupa yerləşdirin."
+msgstr "Gruppen-Laborstunden gelten nicht für diese Studierenden — ordnen Sie sie einer Gruppe zu."
+
+msgctxt "accounts.lab_groups"
+msgid "Qrupsuz"
+msgstr "Ohne Gruppe"
+
+msgctxt "accounts.lab_groups"
+msgid "Qrupsuz et"
+msgstr "Aus Gruppe entfernen"
+
+msgctxt "accounts.lab_groups"
+msgid "Qrupsuz tələbə"
+msgstr "Studierende ohne Gruppe"
+
+msgctxt "accounts.lab_groups"
+msgid "Qrupu sil"
+msgstr "Gruppe löschen"
+
+msgctxt "accounts.lab_groups"
+msgid "Qrupu silmək"
+msgstr "Gruppe löschen"
+
+msgctxt "accounts.lab_groups"
+msgid "Qrupun adı"
+msgstr "Gruppenname"
+
+msgctxt "accounts.lab_groups"
+msgid "Saxla"
+msgstr "Speichern"
+
+msgctxt "accounts.lab_groups"
+msgid "Semestr"
+msgstr "Semester"
+
+msgctxt "accounts.lab_groups"
+msgid "Seçilib"
+msgstr "Ausgewählt"
+
+msgctxt "accounts.lab_groups"
+msgid "Seçimi təmizlə"
+msgstr "Auswahl aufheben"
+
+
+msgctxt "accounts.lab_groups"
+msgid "Soldakı siyahıdan jurnalı seçin — onun laboratoriya qrupları, qrupsuz tələbələri və köçürmə alətləri burada açılacaq."
+msgstr "Wählen Sie links ein Journal — hier öffnen sich seine Laborgruppen, Studierende ohne Gruppe und die Verschiebewerkzeuge."
+
+msgctxt "accounts.lab_groups"
+msgid "Sütundakı hamısını seç"
+msgstr "Alle in der Spalte auswählen"
+
+msgctxt "accounts.lab_groups"
+msgid "Süzgəcləri dəyişin və ya «Sıfırla» basın."
+msgstr "Ändern Sie die Filter oder klicken Sie auf „Zurücksetzen“."
+
+msgctxt "accounts.lab_groups"
+msgid "Süzgəcə uyğun jurnal yoxdur"
+msgstr "Keine Journale passen zu den Filtern"
+
+msgctxt "accounts.lab_groups"
+msgid "Səhifələr"
+msgstr "Seiten"
+
+msgctxt "accounts.lab_groups"
+msgid "Tələbə axtar"
+msgstr "Studierende suchen"
+
+msgctxt "accounts.lab_groups"
+msgid "Tələbə axtar…"
+msgstr "Studierende suchen…"
+
+msgctxt "accounts.lab_groups"
+msgid "Tələbə sayı"
+msgstr "Anzahl Studierende"
+
+msgctxt "accounts.lab_groups"
+msgid "Tələbələri buraya sürüşdürün"
+msgstr "Studierende hierher ziehen"
+
+msgctxt "accounts.lab_groups"
+msgid "Tələbəni sürüşdürüb qrupun üzərinə atın və ya bir neçəsini seçib «Köçür» basın."
+msgstr "Ziehen Sie Studierende auf eine Gruppe oder wählen Sie mehrere und klicken Sie auf „Verschieben“."
+
+msgctxt "accounts.lab_groups"
+msgid "Tələbənin öz qrupunun dərslərində qeydi var — köçürmək olmaz (qeydlər itməsin deyə)."
+msgstr "Die Person hat Einträge in Stunden ihrer Gruppe — Verschieben nicht möglich (damit die Einträge erhalten bleiben)."
+
+msgctxt "accounts.lab_groups"
+msgid "Vəziyyət"
+msgstr "Status"
+
+msgctxt "accounts.lab_groups"
+msgid "Yeni laboratoriya qrupu"
+msgstr "Neue Laborgruppe"
+
+msgctxt "accounts.lab_groups"
+msgid "Yerləşdirilib: %(done)s / %(total)s"
+msgstr "Zugeordnet: %(done)s / %(total)s"
+
+msgctxt "accounts.lab_groups"
+msgid "qeyd var"
+msgstr "hat Einträge"
+
+msgctxt "accounts.lab_groups"
+msgid "tələbə"
+msgstr "Studierende"
+
+msgctxt "accounts.lab_groups"
+msgid "«%(label)s» silinəcək; onun %(n)s tələbəsi qrupsuz qalacaq. Davam edilsin?"
+msgstr "„%(label)s“ wird gelöscht; ihre %(n)s Studierenden bleiben ohne Gruppe. Fortfahren?"
+
+msgctxt "accounts.lab_groups"
+msgid "«Başqasının adından» rejimində qruplar yalnız göstərilir — dəyişiklik edilmir."
+msgstr "Im Modus „Ansicht als“ werden die Gruppen nur angezeigt — Änderungen sind nicht möglich."
+
+msgctxt "accounts.lab_groups"
+msgid "Əməliyyat alınmadı — yenidən cəhd edin."
+msgstr "Aktion fehlgeschlagen — bitte erneut versuchen."
+
+msgctxt "accounts.lab_groups"
+msgid "Əvvəlcə tələbələri seçin."
+msgstr "Wählen Sie zuerst Studierende aus."
+
+msgctxt "accounts.lab_groups"
+msgid "Əvvəlki"
+msgstr "Zurück"
+
 msgctxt "accounts.syllabus"
 msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
 msgstr "Sowohl das Feld für Grundlagenliteratur als auch das für weiterführende Literatur muss ausgefüllt werden. Die Quellen können in beliebiger Form angegeben werden — untereinander, durch Kommas getrennt oder in einer Zeile."

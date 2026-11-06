@@ -339,6 +339,8 @@ def apply_permission_section_gates(
         (privileged or has_permission(permissions, "retake.manage"), "subgroup-placement"),
         # «Alt qrup tələbələri» (sahib 2026-11-05) — reyestr + statistika; EYNİ açar, əhatə bölmənin öz qapısında.
         (privileged or has_permission(permissions, "retake.manage"), "subgroup-students"),
+        # «Lab qrupları» (sahib 2026-11-07) — jurnalın müəllimi / lab payı, kafedra müdiri, RİM; əhatə bölmədə.
+        (privileged or _lab_groups_visible(user, organization, permissions), "lab-groups"),
         (can_view_syllabus, "syllabus-list"),
         # «Kafedra materialları» (sahib 2026-10-27) — `subject_folder.view_unit` (tyutor / laborant, yalnız-oxu);
         # əhatə və dərc qaydası `apps/subject_folder/services/unit_view.py`-da (panel + endirmə fail-closed).
@@ -489,6 +491,22 @@ def _credit_recognition_visible(user, organization) -> bool:
     from apps.registrar.public import credit_recognition_read
 
     return credit_recognition_read.can_manage(user, organization)
+
+
+def _lab_groups_visible(user, organization, permissions) -> bool:
+    """`workload.distribute` (kafedra müdiri; əhatə bölmədə) — sorğusuz; `grade.input` + lab saatlı öz jurnalı —
+    TƏK ``EXISTS`` (kabinet qabığı sorğu büdcəlidir); tələbə / açarsız əməkdaş — sorğusuz «yox»."""
+    from core.permissions import has_permission
+
+    if organization is None:
+        return False
+    if has_permission(permissions, "workload.distribute"):
+        return True
+    if not has_permission(permissions, "grade.input"):
+        return False
+    from apps.registrar.public import lab_groups_section
+
+    return lab_groups_section.teaches_lab(user, organization)
 
 
 def _teaching_appeals_visible(user, organization) -> bool:
