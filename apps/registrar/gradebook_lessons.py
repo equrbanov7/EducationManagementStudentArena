@@ -148,6 +148,7 @@ def create_lesson(
     slot=None,
     off_schedule_reason="",
     full_edit=False,
+    lab_group=None,
 ):
     """Add a held session. ``instructor`` bu dərsin müəllimi (boşdursa açılışınkı);
     ``room`` dərsin otağı (opsional — köhnə dərslərdə yoxdur);
@@ -160,7 +161,9 @@ def create_lesson(
     sillabus qapısı, keçmiş tarix, dövr sərhədi, dublikat) dəyişmədən tətbiq olunur.
     ``off_schedule_reason`` — cədvəldən kənar dərsin səbəbi; yazılırsa audit izinə də düşür.
     ``full_edit`` — «Data bərpası» rejimi (``journal_full_edit``; çağıran səbəbi yoxlayıb auditə yazır): bağlı
-    jurnal və yazma pəncərəsi keçilir, tarix yalnız semestr aralığında və gələcəkdə olmayaraq yoxlanır."""
+    jurnal və yazma pəncərəsi keçilir, tarix yalnız semestr aralığında və gələcəkdə olmayaraq yoxlanır.
+    ``lab_group`` — yalnız lab dərsində: dərs bu laboratoriya qrupunundur (:mod:`apps.registrar.lab_groups`);
+    məcburiliyi «Yeni dərs» qatı yoxlayır, burada yalnız düzgünlüyü."""
     if journal_is_locked(offering) and not full_edit:
         raise LessonRuleError("Jurnal kilidlidir — dərs əlavə etmək olmaz.")
     # README §8/2 — «jurnal təsdiqlənmiş sillabus olmadan bloklanır».  Qayda
@@ -209,6 +212,7 @@ def create_lesson(
     from .language_cohort_journal import validate_lesson
 
     validate_lesson(offering=offering, kind=kind, hours=new_hours)
+    _validate_lab_group(offering, kind=kind, lab_group=lab_group)
     ensure_assessment_scheme(offering=offering)
     topic = clean_topic(topic)
     lesson = Lesson.objects.create(
@@ -226,6 +230,7 @@ def create_lesson(
         instructor=instructor or offering.instructor,
         room=room,
         off_schedule_reason=(off_schedule_reason or "").strip()[:255],
+        lab_group=lab_group,
     )
     if lesson.off_schedule_reason:
         # «Dəyişiklik tarixçəsi» panelində və audit hesabatlarında görünsün (kim, nə vaxt, niyə).
@@ -262,6 +267,7 @@ def update_lesson(
     by_user=None,
     audit=True,
     full_edit=False,
+    lab_group=UNSET,
 ) -> bool:
     """Səhv açılmış dərsi düzəlt (``lesson_edit_window`` içində, defolt 120 dəqiqə). ``allow_locked``/``allow_past``
     pəncərəni + keçmiş-tarixi keçir (İKT/superuser); yayımlanmış jurnal yenə kilidli.
@@ -321,6 +327,12 @@ def update_lesson(
     if room is not UNSET:
         lesson.room = room
         fields.append("room")
+    if lab_group is not UNSET:
+        lesson.lab_group = lab_group
+        fields.append("lab_group")
+    if lesson.lab_group is not None and lesson.kind != LessonKind.LAB and "kind" in fields:
+        lesson.lab_group = None  # növ lab-dan dəyişibsə qrup bağı düşür (qrup yalnız lab dərsinə aiddir)
+        fields.append("lab_group")
     if lesson.start_time and ({"date", "start_time", "instructor", "kind"} & set(fields)):
         from .lesson_share_scope import has_slot_collision
 
@@ -338,7 +350,9 @@ def update_lesson(
         from .language_cohort_journal import validate_lesson
 
         validate_lesson(offering=offering, kind=lesson.kind, hours=lesson.hours, exclude_id=lesson.pk)
-        lesson.save(update_fields=fields)
+        if "lab_group" in fields:
+            _validate_lab_group(offering, kind=lesson.kind, lab_group=lesson.lab_group, lesson=lesson)
+        lesson.save(update_fields=sorted(set(fields)))
         if "hours" in fields and before["hours"] != lesson.hours:
             # Saat dəyişibsə qayıb saatı (25 % buraxılış həddi) bu dərsin işarələri üzrə yenidən hesablanır.
             from .gradebook_marks import recompute_absence_hours_many
@@ -355,6 +369,25 @@ def update_lesson(
     return True
 
 
+def _validate_lab_group(offering, *, kind, lab_group, lesson=None) -> None:
+    """Lab qrupu düzgündür; mövcud dərsin qrupu dəyişirsə başqa qrupun tələbəsinə yazılmış xana olmamalıdır."""
+    from . import lab_groups
+
+    try:
+        lab_groups.validate(offering, kind=kind, lab_group=lab_group)
+    except lab_groups.LabGroupError as exc:
+        raise LessonRuleError(str(exc)) from exc
+    if lesson is not None and lab_group is not None:
+        foreign = LessonMark.objects.filter(lesson=lesson).exclude(enrollment__lab_group=lab_group)
+        if foreign.exists():
+            raise LessonRuleError(
+                pgettext(
+                    "registrar.lab_groups",
+                    "Bu dərsdə başqa laboratoriya qrupunun tələbələrinə qeyd yazılıb — qrupu dəyişmək olmaz.",
+                )
+            )
+
+
 def _validated_hours(offering, lesson, hours) -> int:
     """J-02: dərs saatı 1..``MAX_SLOT_HOURS`` tam ədəddir və fənnin saat həddini keçmir."""
     from apps.registrar.journal_activation import MAX_SLOT_HOURS, hours_cap_error
@@ -369,7 +402,7 @@ def _validated_hours(offering, lesson, hours) -> int:
         raise LessonRuleError(pgettext(_CTX, "Dərs saatı 1 ilə %(max)s arasında olmalıdır.") % {"max": MAX_SLOT_HOURS})
     extra = value - int(lesson.hours or 0)
     if extra > 0:
-        error = hours_cap_error(offering, extra)
+        error = hours_cap_error(offering, extra, lab_group=lesson.lab_group)
         if error:
             raise LessonRuleError(error)
     return value

@@ -2,8 +2,9 @@
 
 Nəyi qoruyur
 ------------
-* oxu: slota yazılmış müəllim sahib/pay sahibi deyil, jurnalda dərs aparmayıb və yükü yoxdursa həmin dərs onun
-  cədvəlində GÖRÜNMÜR; pay / dərs / ləğv olunmamış bölgü onu saxlayır; qrupun cədvəli dəyişmir;
+* oxu: slota yazılmış müəllimin həmin növdə yükü, aktiv payı və ya təhvili yoxdursa həmin dərs onun cədvəlində
+  GÖRÜNMÜR; pay / ləğv olunmamış bölgü onu saxlayır, keçmiş dərs saxlamır (sahib 2026-11-05); qrupun cədvəli
+  dəyişmir;
 * oxu: deaktiv jurnalın slotu heç bir cədvəldə görünmür; müəllim cədvəli yenə TƏK sorğudur;
 * qarşısının alınması: ``release`` köhnəlmiş müəllimi boşaldır (audit ilə), carini saxlayır; tam təhvil köhnə
   sahibə yazılmış slotu yeni sahibə ötürür, geri qaytarma simmetrikdir;
@@ -22,6 +23,7 @@ from django.core.management import call_command
 from apps.audit.models import AuditLog
 from apps.registrar import handover_actions, schedule, schedule_stale_teachers
 from apps.registrar.models import CourseOffering, JournalShare, Lesson, ScheduleSlot, SlotKind
+from apps.registrar.tests.journal_load_fixtures import seed_current_journal_load
 from apps.registrar.tests.test_schedule_slot_instructor import SlotInstructorBase
 from apps.registrar.tests.test_teaching_handover import HandoverBase
 from core.rls import bypass_rls
@@ -62,7 +64,8 @@ class StaleTeacherReadTest(SlotInstructorBase):
         self.assertEqual(_ids(shared), [slot.pk])
         self.assertEqual(revoked, [])
 
-    def test_recorded_lesson_keeps_the_slot(self):
+    def test_recorded_lesson_alone_does_not_keep_the_slot(self):
+        # Sahib 2026-11-05: «əgər müəllimdə o yük verilməyibsə, dərs cədvəlində göstərmə» — keçmiş dərs kifayət deyil.
         with bypass_rls():
             slot = self._slot(self.offering, weekday=2, kind=SlotKind.SEMINAR, instructor=self.teacher_c)
             Lesson.objects.create(
@@ -73,7 +76,8 @@ class StaleTeacherReadTest(SlotInstructorBase):
                 instructor=self.teacher_c,
             )
             mine = self._teacher_c()
-        self.assertEqual(_ids(mine), [slot.pk])
+        self.assertEqual(mine, [])
+        self.assertEqual(ScheduleSlot.objects.filter(pk=slot.pk).count(), 1)  # slot silinmir
 
     def test_workload_keeps_the_slot_unless_the_task_is_cancelled(self):
         with bypass_rls():
@@ -92,7 +96,8 @@ class StaleTeacherReadTest(SlotInstructorBase):
             mine = self._teacher_c()
         self.assertEqual(mine, [])
 
-    def test_ownerless_journal_keeps_the_slot_only_with_a_recorded_lesson(self):
+    def test_ownerless_journal_keeps_the_slot_only_with_a_lecture_load(self):
+        # Sahib 2026-11-05: «əgər müəllimdə o yük verilməyibsə, dərs cədvəlində göstərmə» — keçmiş dərs kifayət deyil.
         with bypass_rls():
             CourseOffering.objects.filter(pk=self.offering.pk).update(instructor=None)
             slot = self._slot(self.offering, weekday=2, instructor=self.teacher_c)
@@ -105,8 +110,10 @@ class StaleTeacherReadTest(SlotInstructorBase):
                 instructor=self.teacher_c,
             )
             taught = self._teacher_c()
-        self.assertEqual(without, [])
-        self.assertEqual(_ids(taught), [slot.pk])
+            self._lecture_load(self.teacher_c)
+            loaded = self._teacher_c()
+        self.assertEqual((without, taught), ([], []))
+        self.assertEqual(_ids(loaded), [slot.pk])
 
     def test_inactive_journal_slot_is_hidden_everywhere(self):
         with bypass_rls():
@@ -125,6 +132,63 @@ class StaleTeacherReadTest(SlotInstructorBase):
         self.assertEqual(slots, [])
 
 
+class OwnerFallbackTest(SlotInstructorBase):
+    """Sahib 2026-11-05 (Firəngiz): «müəllimin yükündə yoxdursa müəllim cədvəlində görməsin o fənni»."""
+
+    code = "stowner"
+
+    def _load(self, teacher, activity):
+        return self._seminar_load(teacher, activity=activity)
+
+    def _view(self, teacher):
+        return schedule.get_teacher_schedule(organization=self.org, teacher=teacher, period=self.period)
+
+    def test_owner_without_load_loses_the_slot_and_the_load_teacher_gets_it(self):
+        with bypass_rls():
+            lecture = self._slot(self.offering, weekday=1, kind=SlotKind.LECTURE)
+            seminar = self._slot(self.offering, weekday=3, kind=SlotKind.SEMINAR)
+            before = self._view(self.teacher_a)
+            self._load(self.teacher_c, "lecture")
+            owner = self._view(self.teacher_a)
+            new_teacher = self._view(self.teacher_c)
+            group = schedule.get_group_schedule(organization=self.org, group=self.groups[0], period=self.period)
+        # Sahib 2026-11-05: «əgər müəllimdə o yük verilməyibsə, dərs cədvəlində göstərmə» — sahibliyi kifayət deyil.
+        self.assertEqual(before, [])  # sahibin heç bir yükü yoxdur
+        self.assertEqual(owner, [])  # mühazirə C-nin yükündədir; seminarın yükü heç kimdə yoxdur — sahibdə də qalmır
+        self.assertEqual(_ids(new_teacher), [lecture.pk])  # yalnız öz növü (mühazirə)
+        self.assertEqual(sorted(_ids(group), key=str), sorted([lecture.pk, seminar.pk], key=str))
+
+    def test_recorded_lesson_alone_does_not_keep_the_slot_but_own_load_does(self):
+        with bypass_rls():
+            slot = self._slot(self.offering, weekday=1, kind=SlotKind.LECTURE)
+            self._load(self.teacher_c, "lecture")
+            Lesson.objects.create(
+                organization=self.org,
+                offering=self.offering,
+                date=self.today,
+                kind="lecture",
+                instructor=self.teacher_a,
+            )
+            taught = self._view(self.teacher_a)
+            self._load(self.teacher_a, "lecture")
+            loaded = self._view(self.teacher_a)
+        self.assertEqual(taught, [])  # keçmiş dərs saxlamır — yük lazımdır
+        self.assertEqual(_ids(loaded), [slot.pk])
+
+    def test_vacant_load_gives_the_slot_to_nobody(self):
+        # Sahib 2026-11-05: «əgər müəllimdə o yük verilməyibsə, dərs cədvəlində göstərmə» — vakant bölgü sahibin deyil.
+        from apps.workload.models import TeacherAssignment
+
+        with bypass_rls():
+            slot = self._slot(self.offering, weekday=1, kind=SlotKind.SEMINAR)
+            TeacherAssignment.objects.filter(pk=self._seminar_load(self.teacher_c).pk).update(teacher=None)
+            owner = self._view(self.teacher_a)
+            former = self._view(self.teacher_c)
+            group = schedule.get_group_schedule(organization=self.org, group=self.groups[0], period=self.period)
+        self.assertEqual((owner, former), ([], []))
+        self.assertEqual(_ids(group), [slot.pk])  # dərs qrupun cədvəlində qalır
+
+
 class ReleaseTest(SlotInstructorBase):
     code = "strel"
 
@@ -134,6 +198,7 @@ class ReleaseTest(SlotInstructorBase):
             parked = self._slot(self.offering, weekday=5, instructor=self.teacher_c, is_parked=True)
             current = self._slot(self.offering, weekday=3, kind=SlotKind.SEMINAR, instructor=self.teacher_b)
             self._seminar_load(self.teacher_b)
+            self._lecture_load(self.teacher_a)
             plain = self._slot(self.offering, weekday=4)
             released = schedule_stale_teachers.release(offering_ids=[self.offering.pk], by_user=self.owner)
             again = schedule_stale_teachers.release(offering_ids=[self.offering.pk], by_user=self.owner)
@@ -152,7 +217,13 @@ class ReleaseTest(SlotInstructorBase):
         self.assertIsNotNone(audit)
         self.assertEqual(audit.old_values, {"instructor": str(self.teacher_c.pk)})
         self.assertEqual(audit.reason, schedule_stale_teachers.RELEASE_REASON)
-        self.assertEqual(sorted(_ids(owner), key=str), sorted([stale.pk, plain.pk], key=str))  # sahibə qayıtdı
+        seminar_teacher = schedule.get_teacher_schedule(
+            organization=self.org, teacher=self.teacher_b, period=self.period
+        )
+        # Seminar B-nin yükündədir — boşaldılan seminar slotu B-yə düşür, sahib A onu görmür (sahib 2026-11-05);
+        # mühazirə sahib A-nın yükündədir — boş mühazirə slotu ondadır.
+        self.assertEqual(_ids(owner), [plain.pk])
+        self.assertEqual(sorted(_ids(seminar_teacher), key=str), sorted([stale.pk, current.pk], key=str))
 
     def test_inactive_journal_slots_are_left_as_repair_evidence(self):
         with bypass_rls():
@@ -179,6 +250,8 @@ class HandoverSlotTest(HandoverBase):
 
     def test_full_handover_moves_the_previous_owners_slot_and_revert_is_symmetric(self):
         with bypass_rls():
+            # Köhnə sahibin mühazirə yükü var — geri qaytarılanda slot yenə onun cədvəlindədir (sahib 2026-11-05).
+            seed_current_journal_load(self.offering_a, teacher=self.old_teacher)
             owners = self._slot(instructor=self.old_teacher)  # sahib olmamışdan əvvəl yazılıb
             others = self._slot(instructor=self.other_teacher, weekday=2)
             record_id = self._reassign()["handover_ids"][0]

@@ -25,6 +25,7 @@ from django.urls import reverse
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
 from apps.registrar import schedule, services
 from apps.registrar.models import Curriculum, Program, ScheduleSlot, StudentAcademicRecord, Subject
+from apps.registrar.tests.journal_load_fixtures import seed_current_journal_load
 from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
 from core.rls import bypass_rls
 
@@ -84,6 +85,8 @@ class SchedulePeriodSelectionTest(TestCase):
             )
             cls.offering.instructor = cls.teacher
             cls.offering.save(update_fields=["instructor"])
+            # Müəllim cədvəli yalnız dərs yükündən gəlir (sahib 2026-11-05) — müəllimə mühazirə yükü.
+            seed_current_journal_load(cls.offering)
             program = Program.objects.create(organization=cls.org, code="SPX", name="Kompüter elmləri")
             curriculum = Curriculum.objects.create(organization=cls.org, program=program, admission_year=2024)
             StudentAcademicRecord.objects.create(

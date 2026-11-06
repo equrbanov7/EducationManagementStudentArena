@@ -313,13 +313,14 @@ def get_teacher_schedule(*, organization, teacher, period):
     EFFEKTİV müəllimə görə (2026-09-25): öz açılışlarının override-sız slotları + başqa
     açılışların ona təyin olunmuş slotları; öz açılışının BAŞQASINA verilmiş slotu isə yox.
     2026-11-05: ona təyin olunmuş, amma jurnalı (sahib/pay/dərs) və dərs yükü olmayan slot göstərilmir
-    (:mod:`apps.registrar.schedule_stale_teachers`)."""
-    from .schedule_stale_teachers import current_q
+    (:mod:`apps.registrar.schedule_stale_teachers`). Müəllimi boş slotda jurnal sahibi yükdə yoxdursa (yük başqasına
+    verilib) dərs sahibin yox, həmin növdə yükü olan müəllimin cədvəlinə düşür."""
+    from .schedule_stale_teachers import current_q, load_inherited_q
 
     return _slots_for(
-        ScheduleSlot.objects.filter(organization=organization, offering__period=period)
-        .filter(taught_by_q(teacher))
-        .filter(current_q())
+        ScheduleSlot.objects.filter(organization=organization, offering__period=period).filter(
+            (taught_by_q(teacher) & current_q()) | load_inherited_q(teacher)
+        )
     )
 
 

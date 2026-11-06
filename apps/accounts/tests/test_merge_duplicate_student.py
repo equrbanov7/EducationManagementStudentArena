@@ -127,6 +127,17 @@ class MergeDuplicateStudentTest(_ShareBase):
         counts = self._run("--file", self._plan([(self.dup.pk, self.student.pk)]))
         self.assertEqual(counts["skip_duplicate_has_login"], "1")
 
+    def test_owner_approved_pair_merges_despite_duplicate_login(self):
+        with bypass_rls():
+            User.objects.filter(pk=self.dup.pk).update(last_login=timezone.now())
+        handle, path = tempfile.mkstemp(suffix=".json")
+        with os.fdopen(handle, "w", encoding="utf-8") as stream:
+            row = {"duplicate": self.dup.pk, "keep": self.student.pk, "allow_login": True}
+            json.dump({"format": "student-merge/1", "pairs": [row]}, stream)
+        self.addCleanup(os.unlink, path)
+        counts = self._run("--file", path)
+        self.assertEqual((counts["pairs_merged"], counts.get("skip_duplicate_has_login", "0")), ("1", "0"))
+
     def test_bad_plan_fails_closed(self):
         handle, path = tempfile.mkstemp(suffix=".json")
         with os.fdopen(handle, "w") as stream:

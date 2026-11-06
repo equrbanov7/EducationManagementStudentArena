@@ -26,6 +26,17 @@ Slotun öz müəllimi ``T`` ``O`` açılışında HƏLƏ DƏ CARİDİR, əgər:
 və təmizləmə isə slotun müəllimini BOŞALDIR (NULL) — dərs qrupun cədvəlində qalır və jurnal sahibini izləyir
 (``stored_instructor_id`` konvensiyası). Slot silinmir. Hər boşaltma audit jurnalına köhnə müəllimlə düşür.
 
+JURNAL SAHİBİNƏ DÜŞƏN (müəllimi boş) SLOT (sahib 2026-11-05, Firəngiz Azadəliyeva — «Bioloji siqnalların ötürülməsi»):
+yük sinxronu yükdə heç olmamış köhnə sahibi qəsdən saxlayır (``offering_rules.decide_instructor`` →
+``preserved_foreign``), ona görə yük BAŞQA müəllimə verilsə də dərs köhnə sahibin cədvəlində qalırdı, onun «cari
+yük» jurnal siyahısında isə yox idi. Sahib: «müəllimin yükündə yoxdursa müəllim cədvəlində görməsin o fənni».
+Qayda DƏRS NÖVÜ üzrədir (slotun ``kind``-i = bölgünün ``activity``-si) və İSTİSNASIZDIR (sahib 2026-11-05: «əgər
+müəllimdə o yük verilməyibsə, dərs cədvəlində göstərmə … bu qədər sadədir»): müəllim slotu yalnız HƏMİN NÖVDƏ öz
+dərs yükü bölgüsü, aktiv payı (yükdən gəlir) və ya jurnalın ona rəsmi təhvili (``TeachingHandover``) olanda görür.
+Jurnal sahibi olmaq, keçmişdə dərs yazmaq, növün yükünün heç kimdə olmaması — HEÇ BİRİ kifayət deyil. Dərs
+qrupun cədvəlində qalır və köhnə sahib əvəzinə həmin növdə (mühazirə / məşğələ / laboratoriya) bölgüsü olan
+müəllimin cədvəlinə düşür (:func:`load_inherited_q`).
+
 Qayda TƏK SQL ifadəsidir (:func:`current_q`, ``EXISTS`` alt-sorğuları) — müəllim cədvəli yenə BİR sorğudur.
 
 Dərs yükü modeli ``get_model`` ilə oxunur — registrar → workload Python import kənarı yaranmır.
@@ -40,13 +51,55 @@ from django.utils import timezone
 from core.audit import log_actions
 from core.constants import AuditAction
 
-from .models import JournalShare, Lesson, ScheduleSlot
+from .models import JournalShare, LanguageLevelCohort, ScheduleSlot, TeachingHandover
 from .schedule_slot_teachers import _CANCELLED_TASK, _TEACHING_ACTIVITIES
 
 #: Audit səbəbi (qarşısının alınması və təmizləmə əmri eyni mətni yazır).
 RELEASE_REASON = (
     "Slotun müəllimi bu jurnalın sahibi/pay sahibi deyil və dərs yükündə yoxdur — slot jurnal sahibinə qaytarıldı"
 )
+
+
+def _load(**filters):
+    return (
+        django_apps.get_model("workload", "TeacherAssignment")
+        .objects.filter(
+            row__subject_id=OuterRef("offering__subject_id"),
+            row__period_id=OuterRef("offering__period_id"),
+            row__groups=OuterRef("offering__group_id"),
+            activity__in=_TEACHING_ACTIVITIES,
+            **filters,
+        )
+        .exclude(row__task__status=_CANCELLED_TASK)
+    )
+
+
+def owner_current_q() -> Q:
+    """Müəllimi BOŞ slotun jurnal sahibi hələ də bu dərsi aparırmı (modul şərhi — «jurnal sahibinə düşən slot»).
+
+    Səviyyə qrupunun (``LanguageLevelCohort``) jurnalı dərs yükü sətrinə bağlı deyil — müəllimi kafedra açıq təyin
+    edir (sahib 2026-11-06), ona görə sahibi həmişə cari sayılır."""
+    owner = OuterRef("offering__instructor_id")
+    return (
+        Exists(LanguageLevelCohort.objects.filter(offering_id=OuterRef("offering_id")))
+        | Exists(_load(teacher_id=owner, activity=OuterRef("kind")))
+        | Exists(JournalShare.objects.filter(offering_id=OuterRef("offering_id"), teacher_id=owner, is_active=True))
+        | Exists(
+            TeachingHandover.objects.filter(
+                offering_id=OuterRef("offering_id"), to_instructor_id=owner, reverted_at__isnull=True
+            )
+        )
+    )
+
+
+def load_inherited_q(teacher) -> Q:
+    """Müəllimi BOŞ, sahibi cari OLMAYAN slot — ``teacher``-in bu növdə dərs yükü bölgüsü varsa onun cədvəlinə düşür."""
+    teacher_id = getattr(teacher, "pk", teacher)
+    return (
+        Q(instructor__isnull=True, offering__instructor__isnull=False)
+        & ~owner_current_q()
+        & Exists(_load(teacher_id=teacher_id, activity=OuterRef("kind")))
+    )
 
 
 def current_q() -> Q:
@@ -56,24 +109,12 @@ def current_q() -> Q:
     """
     teacher = OuterRef("instructor_id")
     shared = JournalShare.objects.filter(offering_id=OuterRef("offering_id"), teacher_id=teacher, is_active=True)
-    taught = Lesson.objects.filter(offering_id=OuterRef("offering_id"), instructor_id=teacher)
-    load = (
-        django_apps.get_model("workload", "TeacherAssignment")
-        .objects.filter(
-            teacher_id=teacher,
-            row__subject_id=OuterRef("offering__subject_id"),
-            row__period_id=OuterRef("offering__period_id"),
-            row__groups=OuterRef("offering__group_id"),
-            activity__in=_TEACHING_ACTIVITIES,
-        )
-        .exclude(row__task__status=_CANCELLED_TASK)
+    handed = TeachingHandover.objects.filter(
+        offering_id=OuterRef("offering_id"), to_instructor_id=teacher, reverted_at__isnull=True
     )
-    return (
-        Q(instructor__isnull=True)
-        | Q(offering__instructor__isnull=False, instructor_id=F("offering__instructor_id"))
-        | Exists(shared)
-        | Exists(taught)
-        | Exists(load)
+    return (Q(instructor__isnull=True) & owner_current_q()) | (
+        Q(instructor__isnull=False)
+        & (Exists(_load(teacher_id=teacher, activity=OuterRef("kind"))) | Exists(shared) | Exists(handed))
     )
 
 
@@ -120,4 +161,4 @@ def release(*, offering_ids, by_user=None, request=None, reason=RELEASE_REASON) 
     return len(found)
 
 
-__all__ = ["RELEASE_REASON", "current_q", "release", "stale"]
+__all__ = ["RELEASE_REASON", "current_q", "load_inherited_q", "owner_current_q", "release", "stale"]

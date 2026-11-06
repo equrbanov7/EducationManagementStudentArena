@@ -90,6 +90,7 @@ class TeacherViewBase(ScheduleEditorUIBase):
 
 class TeacherViewEditableTest(TeacherViewBase):
     def test_manager_gets_an_editor_in_teacher_view(self):
+        self._teacher_load()
         own = self._lecture(self.offering)
         body = self._teacher_view(self.coordinator)
         self.assertNotIn("Müəllim görünüşü yalnız-oxudur", body)
@@ -103,6 +104,7 @@ class TeacherViewEditableTest(TeacherViewBase):
         self.assertIn("schedule_editor_move.js", body)
 
     def test_out_of_scope_lesson_is_a_details_card_not_an_editable_one(self):
+        self._teacher_load(self.outside_offering, kinds=("lab",))
         body = self._teacher_view(self.coordinator)
         self.assertIn("Gizli Fizika", body)
         self.assertNotIn('data-sedit-slot="%s"' % self.outside_slot.pk, body)
@@ -136,6 +138,7 @@ class TeacherViewEditableTest(TeacherViewBase):
         self.assertEqual(response.status_code, 404)  # QA-2 F-09 (FIX-H): əhatədən kənar → 404
 
     def test_my_schedule_card_still_opens_the_details_modal(self):
+        self._teacher_load()
         self._lecture(self.offering)
         body = self._section(self.teacher, section="my-schedule").content.decode()
         self.assertIn("data-sgx-slot", body)

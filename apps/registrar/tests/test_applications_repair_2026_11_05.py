@@ -108,7 +108,7 @@ class ApplicationsRepairWorkflowTest(TestCase):
     def test_workflow_whitelists_and_filters_counts(self):
         text = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("          - repair_applications_20261105\n", text)
-        self.assertIn("            repair_applications_20261105)\n", text)
-        self.assertIn('[ "$COMMAND" = "repair_applications_20261105" ]; then', text)
+        self.assertRegex(text, r"\n            [a-z0-9_|]*\brepair_applications_20261105[|)]")
+        self.assertRegex(text, r'\[ "\$COMMAND" = "repair_applications_20261105" \](; then| \|\|)')
         pattern = re.search(r"grep -E '(\^\(twin_relocate[^']+)'", text).group(1)
         self.assertRegex("twin_merge: already_merged=1 absence_fix_applied=1 pairs_merged=3", pattern)
