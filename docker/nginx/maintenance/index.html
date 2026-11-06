@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="az">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="robots" content="noindex">
+  <title>Sistemdə yeniləmə gedir · EMS Arena</title>
+  <!--
+    nginx-in öz texniki xidmət səhifəsi (docker/nginx/nginx.conf → error_page 502 503 504).
+    Django işləməyəndə verilir, ona görə /static/-dən deyil, /_ems_maintenance/-dən yüklənir.
+    CSP 'unsafe-inline' vermir: stil və skript yalnız xarici fayldır.
+  -->
+  <link rel="stylesheet" href="/_ems_maintenance/maintenance.css">
+  <script src="/_ems_maintenance/maintenance.js" defer></script>
+</head>
+<body>
+  <main class="card" role="main">
+    <div class="icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="40" height="40" focusable="false">
+        <path d="M14.7 6.3a4 4 0 0 0-5.2 5.2l-6 6a1.4 1.4 0 0 0 2 2l6-6a4 4 0 0 0 5.2-5.2l-2.4 2.4-2-2z"
+              fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <p class="org">Qərbi Kaspi Universiteti</p>
+    <h1>Sistemdə yeniləmə gedir</h1>
+    <p class="lead">Qısa texniki işlər aparılır. Bir neçə dəqiqəyə yenidən cəhd edin.</p>
+    <p class="status" id="ems-maint-status" aria-live="polite">Səhifə avtomatik yenilənəcək.</p>
+    <a class="retry" id="ems-maint-retry" href="">Yenidən yoxla</a>
+  </main>
+</body>
+</html>

@@ -1519,6 +1519,9 @@ services:
       - ./docker/nginx/nginx-main.conf:/etc/nginx/nginx.conf:ro
       - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./docker/nginx/certs:/etc/nginx/certs:ro
+      # 2026-11-06: app əlçatan olmayanda (deploy) xam «502 Bad Gateway» əvəzinə nginx-in öz texniki
+      # xidmət səhifəsi (error_page 502 503 504) — Django-dan asılı olmayan qovluq mount-u.
+      - ./docker/nginx/maintenance:/var/www/maintenance:ro
       # Let's Encrypt HTTP-01 webroot (prod-cert.yml issue-http/renew; APP_DIR-dən kənar — rsync silmir).
       - ${ACME_WEBROOT:-/home/wcu/letsencrypt/www}:/var/www/acme:ro
       - static_data:/var/www/staticfiles:ro
