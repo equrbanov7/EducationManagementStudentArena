@@ -53,7 +53,7 @@ def split_mr188(*, organization, actor, counts) -> None:
     Enrollment = django_apps.get_model("registrar", "Enrollment")
     offering = Offering.objects.filter(organization=organization, pk=MR188_OFFERING, is_active=True).first()
     if offering is None or offering.instructor_id != MR188_OWNER:
-        counts["mr188_offering_changed_skipped"] += 1
+        counts["split_offering_changed_skipped"] += 1
         return
     for teacher_id, students in MR188_SPLIT.items():
         share = (
@@ -62,7 +62,7 @@ def split_mr188(*, organization, actor, counts) -> None:
             .first()
         )
         if share is None:
-            counts["mr188_share_missing_skipped"] += 1
+            counts["split_share_missing_skipped"] += 1
             continue
         rows = list(
             Enrollment.objects.filter(offering=offering, student_id__in=students, status="enrolled").values_list(
@@ -70,11 +70,11 @@ def split_mr188(*, organization, actor, counts) -> None:
             )
         )
         if len(rows) != len(students):
-            counts["mr188_roster_changed_skipped"] += 1
+            counts["split_roster_changed_skipped"] += 1
             continue
         current = set(share.enrollments.values_list("pk", flat=True))
         if current == set(rows):
-            counts["mr188_share_already_split"] += 1
+            counts["split_share_already_split"] += 1
             continue
         share.enrollments.set(rows)
         log_action(
@@ -86,8 +86,8 @@ def split_mr188(*, organization, actor, counts) -> None:
             new_values={"enrollments": sorted(str(pk) for pk in rows)},
             reason=MR188_REASON,
         )
-        counts["mr188_shares_split"] += 1
-        counts["mr188_students_assigned"] += len(rows)
+        counts["split_shares_split"] += 1
+        counts["split_students_assigned"] += len(rows)
     forget(offering)
 
 
