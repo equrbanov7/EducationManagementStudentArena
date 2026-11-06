@@ -238,6 +238,8 @@
 #       bağlanmış 233 İ boş VoİP jurnalları QKU-2577-yə (Merger + fix_offering_subject). Defolt dry-run, YALNIZ saylar.
 #   apply_lab_groups_20261106 — sahib 2026-11-06 (Ekologiya kafedrası): 236 SBİO biologiya / kimya və 235 EM analitik
 #       kimya jurnallarında Lab-1 / Lab-2 (köhnə sistemin lab siyahıları; sabit id-lər koddadır). Defolt dry-run, YALNIZ saylar.
+#   repair_applications_20261107b — RİM 2026-11-07: MR-221 (QKU-845 əkiz jurnalları → QKU-1047, Merger keep), MR-188
+#       (434 R paylarına alt qrup tələbə siyahısı). Sabit id-lər, defolt dry-run. Loga YALNIZ saylar.
 #   repair_applications_20261107 — RİM 2026-11-07: MR-247 (034 «Psixologiya» uydurma jurnalı) və MR-253 (kollec «Meşə və
 #       park» flora/fauna + Ekologiya) passiv (dərs/xana qalır, qeydiyyat dropped), MR-245 209/6SP fənni → QKU-1936
 #       (fix_offering_subject). Sabit id-lər, defolt dry-run; `batch=undo` (apply) geri qaytarır. Loga YALNIZ saylar.
@@ -467,6 +469,7 @@ on:
           - repair_applications_20261105c
           - recover_mr230_lessons
           - repair_applications_20261107
+          - repair_applications_20261107b
           - fix_ydk236_subject_20261106
           - sync_student_group_journals
           - repair_applications_20261106
@@ -1594,7 +1597,7 @@ jobs:
                 args=(--org "$ORG" --actor "$actor" --file "/tmp/level_merge_${GITHUB_RUN_ID}.json")
               fi
               ;;
-            repair_applications_20261105|repair_applications_20261105c|fix_ydk236_subject_20261106|repair_applications_20261106|apply_lab_groups_20261106)
+            repair_applications_20261105|repair_applications_20261105c|fix_ydk236_subject_20261106|repair_applications_20261106|apply_lab_groups_20261106|repair_applications_20261107b)
               # RİM 2026-11-05: MR-190/MR-161 əkiz birləşmələri + MR-110 xanası — sabit id-lər koddadır, plan faylı yoxdur.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
@@ -2227,7 +2230,7 @@ jobs:
               exit "$status"
             fi
             rm -f "$RUNNER_TEMP/out.log"
-          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "release_stale_slot_teachers" ] || [ "$COMMAND" = "fix_offering_subject" ] || [ "$COMMAND" = "repair_twins_20261105b" ] || [ "$COMMAND" = "repair_applications_20261105" ] || [ "$COMMAND" = "repair_applications_20261105c" ] || [ "$COMMAND" = "fix_ydk236_subject_20261106" ] || [ "$COMMAND" = "sync_student_group_journals" ] || [ "$COMMAND" = "rebuild_language_cohorts_20261106" ] || [ "$COMMAND" = "apply_lab_groups_20261106" ] || [ "$COMMAND" = "repair_applications_20261106" ] || [ "$COMMAND" = "repair_applications_20261107" ] || [ "$COMMAND" = "recover_mr230_lessons" ]; then
+          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "release_stale_slot_teachers" ] || [ "$COMMAND" = "fix_offering_subject" ] || [ "$COMMAND" = "repair_twins_20261105b" ] || [ "$COMMAND" = "repair_applications_20261105" ] || [ "$COMMAND" = "repair_applications_20261105c" ] || [ "$COMMAND" = "fix_ydk236_subject_20261106" ] || [ "$COMMAND" = "sync_student_group_journals" ] || [ "$COMMAND" = "rebuild_language_cohorts_20261106" ] || [ "$COMMAND" = "apply_lab_groups_20261106" ] || [ "$COMMAND" = "repair_applications_20261106" ] || [ "$COMMAND" = "repair_applications_20261107" ] || [ "$COMMAND" = "repair_applications_20261107b" ] || [ "$COMMAND" = "recover_mr230_lessons" ]; then
             # Loga YALNIZ «twin_relocate: / twin_merge: / lesson_kinds: / slot_parity: / practical_flag: / off_schedule_flags: / slot_teachers: /
             # offering_subject_fix: açar=say …» sətirləri və rədd kodu.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
