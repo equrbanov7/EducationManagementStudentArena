@@ -53,7 +53,7 @@ BUDGETS = {
     "final_entry_anon": 5,
     "final_entry_gate": 17,
     "final_waiting": 16,  # 2026-10-21: +4 sərt zal qapısı (yuxarıya bax)
-    "start_confirm": 23,
+    "start_confirm": 24,  # 2026-11-06: +1 dil variantları (məcburi dil addımı, services/language_step.py)
     "take_exam": 21,
 }
 

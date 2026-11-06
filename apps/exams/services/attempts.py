@@ -457,23 +457,22 @@ def get_attempt_limit_result_redirect_url(request, exam: Exam, user, *, active_a
 
 
 def _new_attempt_language(request, exam: Exam, *, return_to):
-    """Çoxdilli imtahan: YENİ attempt üçün dil seçimi — ``(dil, yönləndirmə | None)``.
+    """Çoxdilli imtahan: YENİ attempt üçün dil seçimi — ``(dil, cavab | None)``.
 
-    Mövcud aktiv attempt varsa, dil onsuz da seçilib — çağıran bunu resume zamanı
-    çağırmır. Yalnız bir dil varsa avtomatik seçilir; birdən çox dil varsa və seçim
-    gəlməyibsə, attempt yaratmadan siyahıya qaytarılır (modal seçim göndərməlidir).
+    Resume zamanı çağırılmır (dil artıq seçilib). Tək dil avtomatik seçilir. Birdən çox dil varsa
+    və seçim gəlməyibsə cəhd yaradılmır — tələbə hansı girişdən gəlməsindən asılı olmayaraq məcburi
+    dil addımı olan start səhifəsini görür (sahib 2026-11-06, bax ``services/language_step.py``).
     """
     language_options = available_language_options(exam)
     if len(language_options) == 1:
         return language_options[0]["language"], None
     if len(language_options) > 1:
-        chosen_language = resolve_requested_language(exam, request.GET.get("language") or request.POST.get("language"))
+        chosen_language = resolve_requested_language(exam, request.POST.get("language") or request.GET.get("language"))
         if chosen_language is None:
-            messages.warning(
-                request,
-                pgettext("exams.service.attempt.message", "language_required_for_multilingual_exam"),
-            )
-            return None, redirect(_append_return_to(student_exams_home_url(request.user), return_to))
+            from apps.exams.services.language_step import language_choice_response
+
+            back_url = _append_return_to(student_exams_home_url(request.user), return_to)
+            return None, language_choice_response(request, exam, language_options, back_url=back_url)
         return chosen_language, None
     return None, None
 

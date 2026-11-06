@@ -1,0 +1,28 @@
+{% load i18n %}
+{% comment %}`supervision_room.js` etiketləri — JSON data bloku (icra olunmur, CSP-dən keçir).{% endcomment %}
+<script id="svr-i18n" type="application/json">{
+    "state_active": "{% filter escapejs %}{% trans 'İmtahanda' context 'exams.supervision_room' %}{% endfilter %}",
+    "state_warned": "{% filter escapejs %}{% trans 'Pozuntu var' context 'exams.supervision_room' %}{% endfilter %}",
+    "state_locked": "{% filter escapejs %}{% trans 'Kilidlənib' context 'exams.supervision_room' %}{% endfilter %}",
+    "state_completed": "{% filter escapejs %}{% trans 'Bitirib' context 'exams.supervision_room' %}{% endfilter %}",
+    "manual_lock": "{% filter escapejs %}{% trans 'Müəllim dayandırıb' context 'exams.supervision_room' %}{% endfilter %}",
+    "resume": "{% filter escapejs %}{% trans 'Bərpa et' context 'exams.supervision_room' %}{% endfilter %}",
+    "pause": "{% filter escapejs %}{% trans 'Dayandır' context 'exams.supervision_room' %}{% endfilter %}",
+    "details": "{% filter escapejs %}{% trans 'Bax' context 'exams.supervision_room' %}{% endfilter %}",
+    "hb_ok": "{% filter escapejs %}{% trans 'Onlayn' context 'exams.supervision_room' %}{% endfilter %}",
+    "hb_stale": "{% filter escapejs %}{% trans 'Siqnal kəsilib' context 'exams.supervision_room' %}{% endfilter %}",
+    "hb_none": "—",
+    "unlimited": "{% filter escapejs %}{% trans 'Limitsiz' context 'exams.supervision_room' %}{% endfilter %}",
+    "flagged": "{% filter escapejs %}{% trans 'Şübhəli' context 'exams.supervision_room' %}{% endfilter %}",
+    "live": "{% filter escapejs %}{% trans 'Canlı' context 'exams.supervision_room' %}{% endfilter %}",
+    "offline": "{% filter escapejs %}{% trans 'Bağlantı yoxdur — yenidən cəhd edilir…' context 'exams.supervision_room' %}{% endfilter %}",
+    "failed": "{% filter escapejs %}{% trans 'Əməliyyat mümkün olmadı.' context 'exams.supervision_room' %}{% endfilter %}",
+    "refusal_policy": "{% filter escapejs %}{% trans 'Siyasət bərpaya icazə vermir' context 'exams.supervision_room' %}{% endfilter %}",
+    "refusal_chance_used": "{% filter escapejs %}{% trans 'Əlavə şans istifadə olunub' context 'exams.supervision_room' %}{% endfilter %}",
+    "refusal_no_config": "{% filter escapejs %}{% trans 'Nəzarət sönülüdür' context 'exams.supervision_room' %}{% endfilter %}",
+    "fact_language": "{% filter escapejs %}{% trans 'Dil' context 'exams.supervision_room' %}{% endfilter %}",
+    "fact_started": "{% filter escapejs %}{% trans 'Başlayıb' context 'exams.supervision_room' %}{% endfilter %}",
+    "fact_answers": "{% filter escapejs %}{% trans 'Cavablar' context 'exams.supervision_room' %}{% endfilter %}",
+    "fact_violations": "{% filter escapejs %}{% trans 'Pozuntu' context 'exams.supervision_room' %}{% endfilter %}",
+    "fact_risk": "{% filter escapejs %}{% trans 'Risk xalı' context 'exams.supervision_room' %}{% endfilter %}"
+}</script>

@@ -172,5 +172,9 @@ def exam_code_check(request):
 
     response = _start_or_resume_attempt(request, exam)
     if _is_ajax_request(request):
+        # Sahib 2026-11-06: çoxdilli imtahanda dil gəlməyibsə servis artıq JSON xəta qaytarır
+        # (``language_required``) — onu «uğurlu yönləndirmə»yə çevirmə, modal dil addımını göstərsin.
+        if isinstance(response, JsonResponse):
+            return response
         return _json_redirect_response(response)
     return response

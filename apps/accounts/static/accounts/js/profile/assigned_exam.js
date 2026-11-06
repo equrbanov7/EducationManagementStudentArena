@@ -29,6 +29,119 @@
         var assignedExamCodeSubmitInFlight = false;
         var assignedExamTrigger = null;
         var previousBodyOverflow = "";
+        // Sahib 2026-11-06: çoxdilli imtahanda dil MƏCBURİ addımdır (seçilmədən başlamır).
+        var assignedExamLanguages = [];
+        var assignedExamLanguage = "";
+
+        function languageStepEl() {
+            return document.getElementById("assignedExamLanguageStep");
+        }
+
+        function setLanguageError(show) {
+            var step = languageStepEl();
+            if (!step) return;
+            var error = step.querySelector("[data-language-step-error]");
+            var text = step.querySelector("[data-language-step-error-text]");
+            step.classList.toggle("is-invalid", Boolean(show));
+            if (error) {
+                if (show && text && !text.textContent.trim()) {
+                    text.textContent = error.getAttribute("data-default-message") || "";
+                }
+                error.hidden = !show;
+            }
+        }
+
+        function setAssignedExamLanguage(code) {
+            assignedExamLanguage = code || "";
+            var codeInput = document.getElementById("assignedExamCodeLanguage");
+            if (codeInput) codeInput.value = assignedExamLanguage;
+        }
+
+        function readLanguageOptions(trigger) {
+            var id = trigger.getAttribute("data-language-options-id") || "";
+            var node = id ? document.getElementById(id) : null;
+            if (!node) return [];
+            try {
+                var parsed = JSON.parse(node.textContent || "[]");
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function configureLanguageStep(trigger, visible) {
+            var step = languageStepEl();
+            var grid = document.getElementById("assignedExamLanguageGrid");
+            var single = document.getElementById("assignedExamLanguageSingle");
+            var singleName = document.getElementById("assignedExamLanguageSingleName");
+            assignedExamLanguages = visible ? readLanguageOptions(trigger) : [];
+            setAssignedExamLanguage(assignedExamLanguages.length === 1 ? assignedExamLanguages[0].language : "");
+            setLanguageError(false);
+            if (grid) {
+                grid.replaceChildren();
+                if (assignedExamLanguages.length > 1) {
+                    assignedExamLanguages.forEach(function (option) {
+                        var label = document.createElement("label");
+                        label.className = "els__option";
+                        var input = document.createElement("input");
+                        input.type = "radio";
+                        input.name = "assigned_exam_language";
+                        input.value = option.language || "";
+                        var code = document.createElement("span");
+                        code.className = "els__code";
+                        code.setAttribute("aria-hidden", "true");
+                        code.textContent = String(option.language || "").toUpperCase();
+                        var text = document.createElement("span");
+                        text.className = "els__label";
+                        text.textContent = option.label || option.language || "";
+                        var check = document.createElement("i");
+                        check.className = "fas fa-circle-check els__check";
+                        check.setAttribute("aria-hidden", "true");
+                        label.appendChild(input);
+                        label.appendChild(code);
+                        label.appendChild(text);
+                        label.appendChild(check);
+                        grid.appendChild(label);
+                    });
+                }
+            }
+            if (step) step.hidden = assignedExamLanguages.length <= 1;
+            if (single) single.hidden = assignedExamLanguages.length !== 1;
+            if (singleName) {
+                singleName.textContent = assignedExamLanguages.length === 1
+                    ? assignedExamLanguages[0].label || assignedExamLanguages[0].language || ""
+                    : "";
+            }
+        }
+
+        function languageMissing() {
+            return assignedExamLanguages.length > 1 && !assignedExamLanguage;
+        }
+
+        function flagLanguageMissing() {
+            var step = languageStepEl();
+            if (!step) return;
+            setLanguageError(true);
+            step.classList.remove("is-shaking");
+            void step.offsetWidth;
+            step.classList.add("is-shaking");
+            if (typeof step.scrollIntoView === "function") {
+                step.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+            var first = step.querySelector("input[type=radio]");
+            if (first) first.focus({ preventScroll: true });
+        }
+
+        function startUrlWithLanguage(rawUrl) {
+            if (!rawUrl || !assignedExamLanguage) return rawUrl;
+            try {
+                var url = new URL(rawUrl, window.location.origin);
+                url.searchParams.set("language", assignedExamLanguage);
+                return url.pathname + url.search + url.hash;
+            } catch (error) {
+                return rawUrl + (rawUrl.indexOf("?") === -1 ? "?" : "&") + "language=" + encodeURIComponent(assignedExamLanguage);
+            }
+        }
 
         function setAssignedExamCodeError(message) {
             if (assignedExamAccessCodeInput) {
@@ -160,6 +273,7 @@
                 studentPinBlock.hidden = true;
             }
 
+            configureLanguageStep(trigger, !assignedExamModalIsFinal);
             if (assignedExamModalIsFinal) {
                 applyFinalExamModalState(trigger);
             } else {
@@ -205,6 +319,7 @@
                     if (assignedExamCodeForm) {
                         assignedExamCodeForm.classList.add("is-hidden");
                     }
+                    configureLanguageStep(trigger, false);
                 } else {
                     blockNotice.hidden = true;
                 }
@@ -263,6 +378,11 @@
                 return;
             }
 
+            if (languageMissing()) {
+                flagLanguageMissing();
+                return;
+            }
+            setAssignedExamLanguage(assignedExamLanguage);
             var codeValue = (assignedExamAccessCodeInput.value || "").trim();
             if (!codeValue) {
                 setAssignedExamCodeError(gettext("İmtahan kodu tələb olunur."));
@@ -291,7 +411,11 @@
                 if (contentType.indexOf("application/json") !== -1) {
                     var payload = await response.json();
                     if (response.ok && payload.success) {
-                        window.location.href = payload.redirect_url || assignedExamModalStartUrl || window.location.href;
+                        window.location.href = payload.redirect_url || startUrlWithLanguage(assignedExamModalStartUrl) || window.location.href;
+                        return;
+                    }
+                    if (payload.language_required) {
+                        flagLanguageMissing();
                         return;
                     }
                     setAssignedExamCodeError(payload.error || gettext("İmtahana başlamaq mümkün olmadı."));
@@ -344,6 +468,15 @@
             }
         });
 
+        document.addEventListener("change", function (event) {
+            var input = event.target;
+            if (!input || input.name !== "assigned_exam_language") return;
+            setAssignedExamLanguage(input.value);
+            setLanguageError(false);
+            var step = languageStepEl();
+            if (step) step.classList.remove("is-shaking");
+        });
+
         document.addEventListener("submit", function (event) {
             if (event.target && event.target.id === "assignedExamCodeForm") {
                 event.preventDefault();
@@ -366,8 +499,12 @@
                 submitAssignedExamCodeForm();
                 return;
             }
+            if (languageMissing()) {
+                flagLanguageMissing();
+                return;
+            }
             if (assignedExamModalStartUrl) {
-                window.location.href = assignedExamModalStartUrl;
+                window.location.href = startUrlWithLanguage(assignedExamModalStartUrl);
             }
         });
     });

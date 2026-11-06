@@ -36,6 +36,8 @@
 
     <footer class="ta-card__foot">
         {% if item.category == "exams" %}
+        {# Sahib 2026-11-06: çoxdilli imtahanın dilləri — modal MƏCBURİ dil addımını bundan qurur. #}
+        {% if item.language_options %}{{ item.language_options|json_script:item.language_options_id }}{% endif %}
         <button type="button"
                 class="ems-btn ems-btn--primary ta-card__cta js-open-assigned-exam-modal"
                 data-start-url="{{ item.detail_url }}"
@@ -56,7 +58,8 @@
                 data-final-entry-url="{{ item.final_entry_url|default:'' }}"
                 data-center-notice="{{ item.center_notice|default:'' }}"
                 data-student-pin="{{ item.student_pin|default:'' }}"
-                data-start-block-reason="{{ item.start_block_reason|default:'' }}">
+                data-start-block-reason="{{ item.start_block_reason|default:'' }}"
+                data-language-options-id="{% if item.language_options %}{{ item.language_options_id }}{% endif %}">
             <span>{% trans "open_task" context "profile.assigned_tasks" %}</span>
             <i class="fas fa-arrow-right" aria-hidden="true"></i>
         </button>

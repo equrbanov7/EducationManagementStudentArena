@@ -488,6 +488,29 @@ urlpatterns = [
         views.heartbeat_api,
         name="supervision_heartbeat",
     ),
+    # Sahib 2026-11-06: imtahan səviyyəli «Nəzarət otağı» — BÜTÜN növlər (quiz, yazılı, praktiki,
+    # midterm/final); biletdən asılı deyil. Bax views/teacher/supervision/room.py.
+    path("<slug:slug>/supervision/", views.exam_supervision_room, name="exam_supervision_room"),
+    path(
+        "<slug:slug>/supervision/snapshot/",
+        views.exam_supervision_room_snapshot,
+        name="exam_supervision_room_snapshot",
+    ),
+    path(
+        "<slug:slug>/supervision/attempts/<int:attempt_id>/",
+        views.exam_supervision_attempt_snapshot,
+        name="exam_supervision_attempt_snapshot",
+    ),
+    path(
+        "<slug:slug>/supervision/attempts/<int:attempt_id>/resume/",
+        views.exam_supervision_attempt_resume,
+        name="exam_supervision_attempt_resume",
+    ),
+    path(
+        "<slug:slug>/supervision/attempts/<int:attempt_id>/pause/",
+        views.exam_supervision_attempt_pause,
+        name="exam_supervision_attempt_pause",
+    ),
     path(
         "supervision/photo/<int:user_id>/",
         views.proctor_student_photo,

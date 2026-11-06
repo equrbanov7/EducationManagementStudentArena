@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load static i18n %}
+{% comment %}
+«Nəzarət otağı» (sahib 2026-11-06) — imtahan səviyyəli canlı nəzarət, BÜTÜN növlər üçün eyni
+(quiz, yazılı, praktiki, midterm/final). Cəhdlər biletdən asılı olmadan göstərilir; sətirlər
+`supervision_room.js` ilə hər `poll_seconds` saniyədə snapshot-dan yenilənir. Kilidli tələbə
+«Bərpa et» ilə qaytarılır, imtahandakı tələbə «Dayandır» ilə müvəqqəti kilidlənir.
+Dinamik dəyərlər data-atributlarda / JSON bloklarındadır (CSP: inline JS/CSS yoxdur).
+{% endcomment %}
+{% block title %}{{ exam.title }} — {% trans "Nəzarət otağı" context "exams.supervision_room" %}{% endblock %}
+
+{% block extraCss %}
+    {% include "partials/ems_ui/_assets.html" %}
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_page_shell.css' %}?v=20261010-wp3exams">
+    <link rel="stylesheet" href="{% static 'exams/css/supervision_room.css' %}?v=20261106-room">
+{% endblock %}
+
+{% block content %}
+<div class="etp-page svr-page" id="svr-root"
+     data-snapshot-url="{% url 'exams:exam_supervision_room_snapshot' exam.slug %}"
+     data-attempt-url-template="{% url 'exams:exam_supervision_attempt_snapshot' exam.slug 0 %}"
+     data-resume-url-template="{% url 'exams:exam_supervision_attempt_resume' exam.slug 0 %}"
+     data-pause-url-template="{% url 'exams:exam_supervision_attempt_pause' exam.slug 0 %}"
+     data-poll-seconds="{{ poll_seconds }}">
+    {% csrf_token %}
+    {% url 'exams:teacher_exam_detail' exam.slug as exam_detail_url %}
+    {% trans "Nəzarət otağı" context "exams.supervision_room" as room_title %}
+    {% trans "Tələbələrin imtahan gedişatı, qayda pozuntuları və kilidlənmələri canlı görünür. Kilidlənən tələbəni buradan bərpa edin." context "exams.supervision_room" as room_subtitle %}
+    {% trans "İmtahana qayıt" context "exams.supervision_room" as back_label %}
+    {% include "exams/teacher/partials/_page_head.html" with head_title=room_title head_subtitle=room_subtitle head_back_url=exam_detail_url head_back_label=back_label head_pills_include="exams/teacher/partials/supervision_room/_head_pills.html" %}
+
+    <div class="etp-stack">
+        {% if not supervision_feature_enabled %}
+        <div class="etp-note etp-note--warning" role="status">
+            <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
+            <span>{% trans "Nəzarət sistemi platformada söndürülüb — pozuntular qeydə alınmır, bərpa əməliyyatları işləmir." context "exams.supervision_room" %}</span>
+        </div>
+        {% elif not supervision_config %}
+        <div class="etp-note" role="status">
+            <i class="fas fa-circle-info" aria-hidden="true"></i>
+            <span>{% trans "Bu imtahanda nəzarət rejimi yandırılmayıb: cəhdlərin gedişatı görünür, amma tam ekran/tab pozuntuları izlənmir. Yandırmaq üçün imtahanı redaktə edin." context "exams.supervision_room" %}</span>
+        </div>
+        {% endif %}
+        {% if is_center_exam and can_manage_center %}
+        <div class="etp-note" role="note">
+            <i class="fas fa-tower-observation" aria-hidden="true"></i>
+            <span>{% trans "Bu imtahan imtahan mərkəzi zalında keçirilir — PIN, yenidən giriş və zal əməliyyatları zal monitorundadır." context "exams.supervision_room" %}
+                <a href="{% url 'exams:exam_center_room_list' %}">{% trans "Zal monitoru" context "exams.supervision_room" %}</a></span>
+        </div>
+        {% endif %}
+
+        <section class="etp-kpis svr-kpis" id="svr-kpis" aria-label="{% trans 'Xülasə' context 'exams.supervision_room' %}" aria-live="polite">
+            <div class="etp-kpi etp-kpi--primary">
+                <span class="etp-kpi__icon"><i class="fas fa-user-pen" aria-hidden="true"></i></span>
+                <span class="etp-kpi__body"><span class="etp-kpi__value" data-svr-count="in_exam">{{ snapshot.counts.in_exam }}</span><span class="etp-kpi__label">{% trans "İmtahanda" context "exams.supervision_room" %}</span></span>
+            </div>
+            <div class="etp-kpi etp-kpi--danger">
+                <span class="etp-kpi__icon"><i class="fas fa-lock" aria-hidden="true"></i></span>
+                <span class="etp-kpi__body"><span class="etp-kpi__value" data-svr-count="locked">{{ snapshot.counts.locked }}</span><span class="etp-kpi__label">{% trans "Kilidlənib" context "exams.supervision_room" %}</span></span>
+            </div>
+            <div class="etp-kpi etp-kpi--warning">
+                <span class="etp-kpi__icon"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i></span>
+                <span class="etp-kpi__body"><span class="etp-kpi__value" data-svr-count="warned">{{ snapshot.counts.warned }}</span><span class="etp-kpi__label">{% trans "Pozuntu var" context "exams.supervision_room" %}</span></span>
+            </div>
+            <div class="etp-kpi etp-kpi--success">
+                <span class="etp-kpi__icon"><i class="fas fa-circle-check" aria-hidden="true"></i></span>
+                <span class="etp-kpi__body"><span class="etp-kpi__value" data-svr-count="completed">{{ snapshot.counts.completed }}</span><span class="etp-kpi__label">{% trans "Bitirib" context "exams.supervision_room" %}</span></span>
+            </div>
+        </section>
+
+        <section class="ems-card svr-card" aria-labelledby="svr-table-title">
+            <div class="svr-card__head">
+                <h2 class="svr-card__title" id="svr-table-title">{% trans "Tələbələr" context "exams.supervision_room" %}</h2>
+                <span class="svr-conn" id="svr-conn" data-state="live" aria-live="polite">{% trans "Canlı" context "exams.supervision_room" %}</span>
+            </div>
+            <div class="etp-toolbar svr-toolbar" role="search">
+                <div class="etp-toolbar__field etp-toolbar__field--grow">
+                    <label class="etp-label" for="svr-filter">{% trans "Tələbə axtarışı" context "exams.supervision_room" %}</label>
+                    <div class="etp-search">
+                        <i class="fas fa-search" aria-hidden="true"></i>
+                        <input type="search" id="svr-filter" class="ems-input" autocomplete="off"
+                               placeholder="{% trans 'Ad və ya istifadəçi adı…' context 'exams.supervision_room' %}">
+                    </div>
+                </div>
+                <div class="etp-toolbar__field">
+                    <label class="etp-label" for="svr-state-filter">{% trans "Vəziyyət" context "exams.supervision_room" %}</label>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select id="svr-state-filter" class="ems-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select>
+                            <option value="">{% trans "Hamısı" context "exams.supervision_room" %}</option>
+                            <option value="locked">{% trans "Kilidlənib" context "exams.supervision_room" %}</option>
+                            <option value="warned">{% trans "Pozuntu var" context "exams.supervision_room" %}</option>
+                            <option value="active">{% trans "İmtahanda" context "exams.supervision_room" %}</option>
+                            <option value="completed">{% trans "Bitirib" context "exams.supervision_room" %}</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="ems-tablescroll svr-table-wrap">
+                <table class="ems-table svr-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">{% trans "Tələbə" context "exams.supervision_room" %}</th>
+                            <th scope="col">{% trans "Vəziyyət" context "exams.supervision_room" %}</th>
+                            <th scope="col" class="svr-num">{% trans "Pozuntu" context "exams.supervision_room" %}</th>
+                            <th scope="col" class="svr-num">{% trans "Cavablar" context "exams.supervision_room" %}</th>
+                            <th scope="col" class="svr-num">{% trans "Qalan vaxt" context "exams.supervision_room" %}</th>
+                            <th scope="col">{% trans "Bağlantı" context "exams.supervision_room" %}</th>
+                            <th scope="col" class="svr-actions-col"><span class="sr-only">{% trans "Əməllər" context "exams.supervision_room" %}</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="svr-rows" aria-live="polite"></tbody>
+                </table>
+            </div>
+            <div class="ems-state svr-empty" id="svr-empty" role="status" hidden>
+                <i class="fas fa-users-slash ems-state__icon" aria-hidden="true"></i>
+                <p class="ems-state__title">{% trans "Hələ heç kim imtahana başlamayıb" context "exams.supervision_room" %}</p>
+                <p class="ems-state__body">{% trans "Tələbə imtahana başlayan kimi burada görünəcək. Səhifə özü yenilənir." context "exams.supervision_room" %}</p>
+            </div>
+        </section>
+    </div>
+</div>
+
+{% include "exams/teacher/partials/supervision_room/_dialogs.html" %}
+
+{{ snapshot|json_script:"svr-initial-snapshot" }}
+{% include "exams/teacher/partials/supervision_room/_i18n.html" %}
+{% endblock %}
+
+{% block extraJs %}
+    <script src="{% static 'exams/js/supervision_room.js' %}?v=20261106-room" defer></script>
+{% endblock %}

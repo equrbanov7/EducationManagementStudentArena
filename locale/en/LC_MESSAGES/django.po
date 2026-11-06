@@ -114087,3 +114087,279 @@ msgstr "show all"
 msgctxt "exams.view.question_bank.warning"
 msgid "multiple_correct"
 msgstr "More than one correct answer is marked ({labels}) — a midterm or final question must have exactly one correct answer."
+
+msgctxt "exams.language_step"
+msgid "Suallar seçdiyiniz dildə veriləcək. İmtahan başladıqdan sonra dili dəyişmək mümkün deyil."
+msgstr "Questions will be shown in the language you choose. The language cannot be changed after the exam starts."
+
+msgctxt "exams.language_step"
+msgid "məcburi"
+msgstr "required"
+
+msgctxt "exams.language_step"
+msgid "İmtahan dili"
+msgstr "Exam language"
+
+msgctxt "exams.language_step"
+msgid "İmtahan dilini seçin"
+msgstr "Choose the exam language"
+
+msgctxt "exams.language_step"
+msgid "İmtahana başlamaq üçün əvvəlcə imtahan dilini seçin."
+msgstr "Choose the exam language before starting the exam."
+
+msgctxt "exams.supervision_room"
+msgid "Ad və ya istifadəçi adı…"
+msgstr "Name or username…"
+
+msgctxt "exams.supervision_room"
+msgid "Aktiv təşkilat seçilməyib."
+msgstr "No active organization selected."
+
+msgctxt "exams.supervision_room"
+msgid "Bax"
+msgstr "View"
+
+msgctxt "exams.supervision_room"
+msgid "Bağla"
+msgstr "Close"
+
+msgctxt "exams.supervision_room"
+msgid "Bağlantı"
+msgstr "Connection"
+
+msgctxt "exams.supervision_room"
+msgid "Bağlantı yoxdur — yenidən cəhd edilir…"
+msgstr "No connection — retrying…"
+
+msgctxt "exams.supervision_room"
+msgid "Başlayıb"
+msgstr "Started"
+
+msgctxt "exams.supervision_room"
+msgid "Bitirib"
+msgstr "Finished"
+
+msgctxt "exams.supervision_room"
+msgid "Bu imtahan imtahan mərkəzi zalında keçirilir — PIN, yenidən giriş və zal əməliyyatları zal monitorundadır."
+msgstr "This exam is held in an exam-centre hall — PINs, re-entry and hall actions are in the hall monitor."
+
+msgctxt "exams.supervision_room"
+msgid "Bu imtahanda nəzarət rejimi aktiv deyil."
+msgstr "Proctoring is not enabled for this exam."
+
+msgctxt "exams.supervision_room"
+msgid "Bu imtahanda nəzarət rejimi yandırılmayıb: cəhdlərin gedişatı görünür, amma tam ekran/tab pozuntuları izlənmir. Yandırmaq üçün imtahanı redaktə edin."
+msgstr "Proctoring is off for this exam: progress is visible, but full-screen/tab violations are not tracked. Edit the exam to turn it on."
+
+msgctxt "exams.supervision_room"
+msgid "Bərpa et"
+msgstr "Restore"
+
+msgctxt "exams.supervision_room"
+msgid "Canlı"
+msgstr "Live"
+
+msgctxt "exams.supervision_room"
+msgid "Canlı izləmə, pozuntular və kilidlənənlərin bərpası"
+msgstr "Live monitoring, violations and restoring locked students"
+
+msgctxt "exams.supervision_room"
+msgid "Cavablar"
+msgstr "Answers"
+
+msgctxt "exams.supervision_room"
+msgid "Cəhdi bərpa etmək mümkün olmadı."
+msgstr "The attempt could not be restored."
+
+msgctxt "exams.supervision_room"
+msgid "Cəhdi dayandırmaq mümkün olmadı."
+msgstr "The attempt could not be paused."
+
+msgctxt "exams.supervision_room"
+msgid "Dayandır"
+msgstr "Pause"
+
+msgctxt "exams.supervision_room"
+msgid "Dil"
+msgstr "Language"
+
+msgctxt "exams.supervision_room"
+msgid "Hamısı"
+msgstr "All"
+
+msgctxt "exams.supervision_room"
+msgid "Hələ heç kim imtahana başlamayıb"
+msgstr "Nobody has started the exam yet"
+
+msgctxt "exams.supervision_room"
+msgid "Kilidlənib"
+msgstr "Locked"
+
+msgctxt "exams.supervision_room"
+msgid "Limitsiz"
+msgstr "Unlimited"
+
+msgctxt "exams.supervision_room"
+msgid "Ləğv et"
+msgstr "Cancel"
+
+msgctxt "exams.supervision_room"
+msgid "Müəllim dayandırıb"
+msgstr "Paused by teacher"
+
+msgctxt "exams.supervision_room"
+msgid "Məsələn: telefondan istifadə"
+msgstr "For example: using a phone"
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət aktivdir"
+msgstr "Proctoring on"
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət otağı"
+msgstr "Supervision room"
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət sistemi platformada söndürülüb — pozuntular qeydə alınmır, bərpa əməliyyatları işləmir."
+msgstr "Proctoring is turned off platform-wide — violations are not recorded and restore actions do not work."
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət siyasəti bərpaya icazə vermir («İkinci şans yoxdur»)."
+msgstr "The proctoring policy does not allow restoring («No second chance»)."
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət sönülüdür"
+msgstr "Proctoring off"
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət xronologiyası"
+msgstr "Proctoring timeline"
+
+msgctxt "exams.supervision_room"
+msgid "Onlayn"
+msgstr "Online"
+
+msgctxt "exams.supervision_room"
+msgid "Pozuntu"
+msgstr "Violations"
+
+msgctxt "exams.supervision_room"
+msgid "Pozuntu limiti: %(limit)s"
+msgstr "Violation limit: %(limit)s"
+
+msgctxt "exams.supervision_room"
+msgid "Pozuntu var"
+msgstr "Has violations"
+
+msgctxt "exams.supervision_room"
+msgid "Qalan vaxt"
+msgstr "Time left"
+
+msgctxt "exams.supervision_room"
+msgid "Qeydə alınmış hadisə yoxdur."
+msgstr "No recorded events."
+
+msgctxt "exams.supervision_room"
+msgid "Risk xalı"
+msgstr "Risk score"
+
+msgctxt "exams.supervision_room"
+msgid "Siqnal kəsilib"
+msgstr "Signal lost"
+
+msgctxt "exams.supervision_room"
+msgid "Siyasət bərpaya icazə vermir"
+msgstr "Policy does not allow restoring"
+
+msgctxt "exams.supervision_room"
+msgid "Səbəb (tələbəyə göstərilir)"
+msgstr "Reason (shown to the student)"
+
+msgctxt "exams.supervision_room"
+msgid "Tələbə"
+msgstr "Student"
+
+msgctxt "exams.supervision_room"
+msgid "Tələbə axtarışı"
+msgstr "Student search"
+
+msgctxt "exams.supervision_room"
+msgid "Tələbə imtahana başlayan kimi burada görünəcək. Səhifə özü yenilənir."
+msgstr "Students appear here as soon as they start the exam. The page refreshes itself."
+
+msgctxt "exams.supervision_room"
+msgid "Tələbə kilidli deyil — bərpa lazım deyil."
+msgstr "The student is not locked — nothing to restore."
+
+msgctxt "exams.supervision_room"
+msgid "Tələbə əlavə şansından artıq istifadə edib."
+msgstr "The student has already used their extra chance."
+
+msgctxt "exams.supervision_room"
+msgid "Tələbələr"
+msgstr "Students"
+
+msgctxt "exams.supervision_room"
+msgid "Tələbələrin imtahan gedişatı, qayda pozuntuları və kilidlənmələri canlı görünür. Kilidlənən tələbəni buradan bərpa edin."
+msgstr "Students' progress, rule violations and locks are shown live. Restore a locked student from here."
+
+msgctxt "exams.supervision_room"
+msgid "Tələbəni bərpa et"
+msgstr "Restore student"
+
+msgctxt "exams.supervision_room"
+msgid "Tələbənin ekranı açılacaq və o, imtahana olduğu yerdən davam edəcək. Cavabları və vaxtı qorunur."
+msgstr "The student's screen will unlock and they will continue where they left off. Answers and time are kept."
+
+msgctxt "exams.supervision_room"
+msgid "Tələbənin ekranı kilidlənir, cəhd təhvil verilmir. «Bərpa et» ilə davam etdirə bilərsiniz."
+msgstr "The student's screen is locked; the attempt is not submitted. Use «Restore» to let them continue."
+
+msgctxt "exams.supervision_room"
+msgid "Vəziyyət"
+msgstr "Status"
+
+msgctxt "exams.supervision_room"
+msgid "Xülasə"
+msgstr "Summary"
+
+msgctxt "exams.supervision_room"
+msgid "Zal monitoru"
+msgstr "Hall monitor"
+
+msgctxt "exams.supervision_room"
+msgid "İmtahan artıq bitib."
+msgstr "The exam has already ended."
+
+msgctxt "exams.supervision_room"
+msgid "İmtahana qayıt"
+msgstr "Back to the exam"
+
+msgctxt "exams.supervision_room"
+msgid "İmtahanda"
+msgstr "In exam"
+
+msgctxt "exams.supervision_room"
+msgid "İmtahanı müvəqqəti dayandır"
+msgstr "Pause the exam temporarily"
+
+msgctxt "exams.supervision_room"
+msgid "Şübhəli"
+msgstr "Suspicious"
+
+msgctxt "exams.supervision_room"
+msgid "Əlavə şans istifadə olunub"
+msgstr "Extra chance already used"
+
+msgctxt "exams.supervision_room"
+msgid "Əlavə şans ver (pozuntu sayğacı bir vahid azalır)"
+msgstr "Grant an extra chance (violation counter decreases by one)"
+
+msgctxt "exams.supervision_room"
+msgid "Əməliyyat mümkün olmadı."
+msgstr "The action failed."
+
+msgctxt "exams.supervision_room"
+msgid "Əməllər"
+msgstr "Actions"
