@@ -69,12 +69,17 @@
             }
         }
 
-        function configureLanguageStep(trigger, visible) {
+        // `explicitOptions` — serverin `language_required` cavabındakı siyahı (kartda JSON olmasa da addım qurulsun).
+        function configureLanguageStep(trigger, visible, explicitOptions) {
             var step = languageStepEl();
             var grid = document.getElementById("assignedExamLanguageGrid");
             var single = document.getElementById("assignedExamLanguageSingle");
             var singleName = document.getElementById("assignedExamLanguageSingleName");
-            assignedExamLanguages = visible ? readLanguageOptions(trigger) : [];
+            if (Array.isArray(explicitOptions)) {
+                assignedExamLanguages = explicitOptions;
+            } else {
+                assignedExamLanguages = visible && trigger ? readLanguageOptions(trigger) : [];
+            }
             setAssignedExamLanguage(assignedExamLanguages.length === 1 ? assignedExamLanguages[0].language : "");
             setLanguageError(false);
             if (grid) {
@@ -415,6 +420,9 @@
                         return;
                     }
                     if (payload.language_required) {
+                        // Server dili tələb edir (kart köhnədir / JSON yoxdur) — addımı cavabdakı dillərdən
+                        // YENİDƏN qur və göstər, sonra xəta vəziyyəti (gizli addımı qırmızı etmək kifayət deyil).
+                        configureLanguageStep(assignedExamTrigger, true, payload.language_options || []);
                         flagLanguageMissing();
                         return;
                     }

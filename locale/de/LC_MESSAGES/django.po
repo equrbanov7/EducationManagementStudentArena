@@ -115422,3 +115422,11 @@ msgstr "Die Aktion ist fehlgeschlagen."
 msgctxt "exams.supervision_room"
 msgid "Əməllər"
 msgstr "Aktionen"
+
+msgctxt "exams.supervision_room"
+msgid "Bu tələbə imtahan zalındadır — dayandırma zal monitorundan, səbəb qeyd edilərək aparılır."
+msgstr "Diese/r Studierende ist im Prüfungssaal — Pausieren erfolgt im Saalmonitor mit Angabe eines Grundes."
+
+msgctxt "exams.supervision_room"
+msgid "Dayandırma — zal monitorunda"
+msgstr "Pausieren — im Saalmonitor"

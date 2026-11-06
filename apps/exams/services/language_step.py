@@ -11,7 +11,10 @@ xəbərdarlığı ilə qaytarırdı; tələbənin dil seçə biləcəyi heç bir
 İndi dil tələb olunub gəlməyibsə tələbə HARADAN gəlməsindən asılı olmayaraq start təsdiq səhifəsinə düşür
 və orada başlıqlı, nömrəli, məcburi dil addımı var (seçilməsə «Başla» keçmir, xəta vəziyyəti görünür).
 AJAX (kod/PIN modalı) üçün JSON xəta qaytarılır — modal öz dil addımını göstərir. Tək dilli imtahanda
-dil avtomatik seçilir və yalnız məlumat kimi göstərilir (``_new_attempt_language``).
+dil avtomatik seçilir və yalnız məlumat kimi göstərilir (:func:`new_attempt_language`).
+
+:func:`new_attempt_language` HEÇ NƏ render etmir — start kilidi / tutum qapısı altında çağırılır və seçim
+lazımdırsa :class:`LanguageChoiceRequired` qaldırır; səhifəni çağıran kilid buraxıldıqdan sonra qurur.
 """
 
 from __future__ import annotations
@@ -20,11 +23,42 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils.translation import pgettext
 
-from apps.exams.navigation import student_exams_home_url
+from apps.exams.navigation import append_return_to, student_exams_home_url
+from apps.exams.services.language_variants import available_language_options, resolve_requested_language
 
 _CTX = "exams.language_step"
 #: Kod/PIN yolu (``exam_code_check``) dil addımında yenidən göndərilən sahələr.
 _CODE_FORWARD_FIELDS = ("exam_slug", "access_code", "next", "from_section", "assigned_type")
+
+
+class LanguageChoiceRequired(Exception):
+    """Çoxdilli imtahanda YENİ cəhd üçün dil gəlməyib — cəhd yaradılmır, tələbə dil addımını görür."""
+
+    def __init__(self, language_options):
+        super().__init__("language choice required")
+        self.language_options = language_options
+
+
+def new_attempt_language(request, exam):
+    """YENİ cəhdin dili (və ya ``None`` — dil variantı yoxdur); seçim lazımdırsa ``LanguageChoiceRequired``.
+
+    Tək dil avtomatik seçilir. POST-dakı dil köhnə query dilindən üstündür (dil addımı formu start URL-inə
+    — əvvəlki ``?language=`` ilə birlikdə — göndərilir).
+    """
+    language_options = available_language_options(exam)
+    if len(language_options) == 1:
+        return language_options[0]["language"]
+    if len(language_options) > 1:
+        chosen = resolve_requested_language(exam, request.POST.get("language") or request.GET.get("language"))
+        if chosen is None:
+            raise LanguageChoiceRequired(language_options)
+        return chosen
+    return None
+
+
+def language_choice_for_start(request, exam, pending, *, return_to=""):
+    back_url = append_return_to(student_exams_home_url(request.user), return_to)
+    return language_choice_response(request, exam, pending.language_options, back_url=back_url)
 
 
 def language_required_message() -> str:
@@ -87,8 +121,11 @@ def language_choice_response(request, exam, language_options, *, back_url=""):
 
 
 __all__ = [
+    "LanguageChoiceRequired",
+    "language_choice_for_start",
     "language_choice_response",
     "language_required_message",
     "language_step_context",
     "language_step_options",
+    "new_attempt_language",
 ]

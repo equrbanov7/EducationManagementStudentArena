@@ -18,10 +18,13 @@ Kök səbəblər:
 from __future__ import annotations
 
 import json
+from contextlib import contextmanager
+from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
 from apps.exams.models import (
@@ -30,10 +33,14 @@ from apps.exams.models import (
     ExamLanguageVariant,
     ExamQuestion,
     ExamQuestionOption,
+    ExamRoom,
     ExamSupervisionConfig,
     SupervisionIncident,
 )
+from apps.exams.services import attempts as attempts_service
+from apps.exams.services import language_step
 from apps.exams.services.start_intent import start_intent_token
+from apps.exams.services.supervision import teacher_resume_attempt
 from apps.exams.services.supervision.identity import can_view_student_photo
 from apps.exams.tests.test_views import _assign_user_to_org, _login_with_org
 from apps.organizations.models import Organization
@@ -417,3 +424,112 @@ class UncategorisedExamSupervisionRoomTests(SupervisionRoomTests):
 
     exam_type = "test"
     category = None
+
+
+class ReviewFixesTests(_QuizBase):
+    """PR #225 review: kilid altında bərpa, dil səhifəsi start kilidinin xaricində."""
+
+    def test_double_restore_is_refused_and_logs_one_incident(self):
+        exam = self.make_exam()
+        attempt = self.locked_attempt(exam)
+        _login_with_org(self.client, self.teacher, self.org)
+        url = reverse("exams:exam_supervision_attempt_resume", args=[exam.slug, attempt.pk])
+
+        self.assertEqual(self.client.post(url).status_code, 200)
+        self.assertEqual(self.client.post(url).status_code, 409)
+
+        self.assertEqual(
+            SupervisionIncident.objects.filter(attempt=attempt, event_type__startswith="teacher_").count(), 1
+        )
+
+    def test_restore_refused_when_attempt_was_submitted_meanwhile(self):
+        exam = self.make_exam()
+        attempt = self.locked_attempt(exam)
+        _login_with_org(self.client, self.teacher, self.org)
+        # Sweep / tələbə otaq açılandan sonra cəhdi təhvil verib.
+        ExamAttempt.objects.filter(pk=attempt.pk).update(status="submitted", finished_at=timezone.now())
+
+        response = self.client.post(reverse("exams:exam_supervision_attempt_resume", args=[exam.slug, attempt.pk]))
+
+        self.assertEqual(response.status_code, 409)
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.status, "submitted")
+
+    def test_service_never_revives_a_stale_attempt_object(self):
+        """Yaddaşdakı köhnə (kilidli, in_progress) obyekt — baza artıq təhvil verilib: bərpa rədd olunur."""
+        exam = self.make_exam()
+        stale = self.locked_attempt(exam)
+        ExamAttempt.objects.filter(pk=stale.pk).update(status="submitted", finished_at=timezone.now())
+
+        with self.assertRaises(ValueError):
+            teacher_resume_attempt(stale, self.teacher)
+
+        fresh = ExamAttempt.objects.get(pk=stale.pk)
+        self.assertEqual(fresh.status, "submitted")
+        self.assertFalse(SupervisionIncident.objects.filter(attempt=stale, event_type="teacher_resumed").exists())
+
+    def test_language_page_is_rendered_outside_the_start_lock(self):
+        exam = self.make_exam(languages=("az", "ru"))
+        _login_with_org(self.client, self.student, self.org)
+        held = {"now": False, "at_render": None}
+        real_lock = attempts_service._exam_start_actor_lock
+        real_render = language_step.language_choice_response
+
+        @contextmanager
+        def tracking_lock(*args, **kwargs):
+            with real_lock(*args, **kwargs):
+                held["now"] = True
+                try:
+                    yield
+                finally:
+                    held["now"] = False
+
+        def tracking_render(*args, **kwargs):
+            held["at_render"] = held["now"]
+            return real_render(*args, **kwargs)
+
+        with (
+            mock.patch.object(attempts_service, "_exam_start_actor_lock", tracking_lock),
+            mock.patch.object(language_step, "language_choice_response", tracking_render),
+        ):
+            response = self.client.get(self.start_url(exam))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIs(held["at_render"], False)
+
+
+class CenterHallPauseTests(_QuizBase):
+    """Zaldakı final cəhdini otaqdakı «Dayandır» yan keçə bilməz — rəsmi yol zal monitorudur."""
+
+    category = "final"
+
+    def test_pause_of_hall_attempt_is_refused_with_hall_monitor_link(self):
+        exam = self.make_exam()
+        room = ExamRoom.objects.create(organization=self.org, name="Zal QP", code="ZQP", capacity=10)
+        attempt = ExamAttempt.objects.create(
+            user=self.student, exam=exam, status="in_progress", attempt_number=1, room=room
+        )
+        _login_with_org(self.client, self.teacher, self.org)
+
+        snapshot = self.client.get(reverse("exams:exam_supervision_room_snapshot", args=[exam.slug])).json()
+        self.assertFalse(snapshot["rows"][0]["can_pause"])
+        self.assertEqual(snapshot["rows"][0]["pause_refusal"], "hall")
+
+        response = self.client.post(
+            reverse("exams:exam_supervision_attempt_pause", args=[exam.slug, attempt.pk]), {"reason": "telefon"}
+        )
+
+        self.assertEqual(response.status_code, 409)
+        self.assertEqual(response.json()["hall_monitor_url"], reverse("exams:exam_center_room_list"))
+        attempt.refresh_from_db()
+        self.assertEqual(attempt.supervision_status, "active")
+        self.assertFalse(attempt.supervision_manual_lock)
+
+    def test_pause_of_final_attempt_outside_any_hall_still_works(self):
+        exam = self.make_exam()
+        attempt = ExamAttempt.objects.create(user=self.student, exam=exam, status="in_progress", attempt_number=1)
+        _login_with_org(self.client, self.teacher, self.org)
+
+        response = self.client.post(reverse("exams:exam_supervision_attempt_pause", args=[exam.slug, attempt.pk]))
+
+        self.assertEqual(response.status_code, 200, response.content)

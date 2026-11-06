@@ -117,7 +117,14 @@
         } else if (row.resume_refusal) {
             actions.appendChild(el("span", "svr-sub", t("refusal_" + row.resume_refusal)));
         }
-        if (row.can_pause) actions.appendChild(actionButton("pause", row, t("pause"), "", "fa-pause"));
+        if (row.can_pause) {
+            actions.appendChild(actionButton("pause", row, t("pause"), "", "fa-pause"));
+        } else if (row.pause_refusal === "hall") {
+            // Zaldakı midterm/final: dayandırma imtahan mərkəzinin zal monitorundadır (rəsmi yol).
+            var hall = el("a", "svr-sub svr-hall-link", t("refusal_hall"));
+            hall.href = state.root.getAttribute("data-hall-monitor-url") || "#";
+            actions.appendChild(hall);
+        }
         actions.appendChild(actionButton("details", row, t("details"), "ghost", "fa-eye"));
         tr.appendChild(actions);
         return tr;

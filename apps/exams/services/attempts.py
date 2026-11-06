@@ -19,12 +19,8 @@ from apps.exams.metrics import record_attempt_started
 from apps.exams.models import Exam, ExamAttempt
 from apps.exams.navigation import append_return_to as _append_return_to
 from apps.exams.navigation import current_return_to, student_exams_home_url
-from apps.exams.services.language_variants import (
-    available_language_options,
-    effective_needed_count_for_attempt,
-    get_active_variant,
-    resolve_requested_language,
-)
+from apps.exams.services.language_step import LanguageChoiceRequired, language_choice_for_start, new_attempt_language
+from apps.exams.services.language_variants import effective_needed_count_for_attempt, get_active_variant
 from apps.exams.services.official_start import OfficialStartBlocked, lock_and_check_official_start
 from apps.exams.services.randomizer import generate_random_questions_for_attempt
 from apps.exams.services.start_intent import exam_start_url
@@ -456,27 +452,6 @@ def get_attempt_limit_result_redirect_url(request, exam: Exam, user, *, active_a
     return _build_exam_result_url(exam, last_attempt, return_to)
 
 
-def _new_attempt_language(request, exam: Exam, *, return_to):
-    """Çoxdilli imtahan: YENİ attempt üçün dil seçimi — ``(dil, cavab | None)``.
-
-    Resume zamanı çağırılmır (dil artıq seçilib). Tək dil avtomatik seçilir. Birdən çox dil varsa
-    və seçim gəlməyibsə cəhd yaradılmır — tələbə hansı girişdən gəlməsindən asılı olmayaraq məcburi
-    dil addımı olan start səhifəsini görür (sahib 2026-11-06, bax ``services/language_step.py``).
-    """
-    language_options = available_language_options(exam)
-    if len(language_options) == 1:
-        return language_options[0]["language"], None
-    if len(language_options) > 1:
-        chosen_language = resolve_requested_language(exam, request.POST.get("language") or request.GET.get("language"))
-        if chosen_language is None:
-            from apps.exams.services.language_step import language_choice_response
-
-            back_url = _append_return_to(student_exams_home_url(request.user), return_to)
-            return None, language_choice_response(request, exam, language_options, back_url=back_url)
-        return chosen_language, None
-    return None, None
-
-
 def _start_or_resume_attempt(request, exam: Exam):
     """
     İstifadəçi üçün attempt yaradır və ya mövcud attempt-ə yönləndirir.
@@ -513,10 +488,9 @@ def _start_or_resume_attempt(request, exam: Exam):
                     )
                 )
 
-            chosen_language, language_redirect = _new_attempt_language(request, exam, return_to=return_to)
+            # Dil seçilməyibsə istisna — səhifə kilid/gate buraxıldıqdan SONRA render olunur (aşağıda).
+            chosen_language = new_attempt_language(request, exam)
             language_resolved = True
-            if language_redirect is not None:
-                return language_redirect
 
             # Sınaq cəhdi limitə sayılmır — limit yönləndirməsi ona aid deyil.
             attempt_limit_result_url = (
@@ -557,13 +531,16 @@ def _start_or_resume_attempt(request, exam: Exam):
 
             generate_random_questions_for_attempt(attempt)
             record_attempt_started(exam.exam_type)
+    except LanguageChoiceRequired as pending:
+        return language_choice_for_start(request, exam, pending, return_to=return_to)
     except ExamStartBusy:
-        # Kilid alınmadı — dil seçimi köhnə ardıcıllıqla (yalnız yeni cəhd üçün)
-        # həll olunur: çoxdilli imtahanda seçim yoxdursa xəbərdarlıq + siyahı.
+        # Kilid alınmadı — dil seçimi (yalnız yeni cəhd üçün) kilidsiz həll olunur:
+        # çoxdilli imtahanda seçim yoxdursa məcburi dil addımı.
         if not language_resolved and get_active_attempt_for_user(exam, user) is None:
-            chosen_language, language_redirect = _new_attempt_language(request, exam, return_to=return_to)
-            if language_redirect is not None:
-                return language_redirect
+            try:
+                chosen_language = new_attempt_language(request, exam)
+            except LanguageChoiceRequired as pending:
+                return language_choice_for_start(request, exam, pending, return_to=return_to)
         # Bir imtahana eyni-anlı start stampede-i: worker thread-i tutub çökmək
         # əvəzinə tələbəyə yüngül, ÖZÜ-YENİLƏNƏN səhifə qaytarırıq. Növbə dalğa-
         # dalğa boşalır; tələbə heç nə etmir, səhifə start URL-inə geri dönür.

@@ -39,13 +39,13 @@ function navCatcher() {
 
 const LANGS = JSON.stringify([{ language: "az", label: "Azərbaycan dili" }, { language: "ru", label: "Русский" }]);
 
-function cabinet({ requiresCode }) {
+function cabinet({ requiresCode, withLanguages = true, reply = null }) {
     const { navigations, virtualConsole } = navCatcher();
     const html = `<body>
       <script id="langs-7" type="application/json">${LANGS}</script>
       <button id="trigger" class="js-open-assigned-exam-modal" data-is-final="0"
               data-requires-code="${requiresCode ? "1" : "0"}" data-exam-slug="quiz-7"
-              data-start-url="/exams/quiz-7/start/?si=tok" data-language-options-id="langs-7"></button>
+              data-start-url="/exams/quiz-7/start/?si=tok" data-language-options-id="${withLanguages ? "langs-7" : ""}"></button>
       <div id="assignedExamInfoBackdrop" aria-hidden="true"><div class="assigned-exam-info-modal">
         <button id="assignedExamInfoClose"></button>
         <fieldset id="assignedExamLanguageStep" data-language-step hidden>
@@ -64,10 +64,11 @@ function cabinet({ requiresCode }) {
     const fetches = [];
     w.fetch = (url, opts) => {
         fetches.push({ url, body: opts && opts.body });
+        const body = reply || { success: true, redirect_url: "/exams/quiz-7/attempt/1/" };
         return Promise.resolve({
-            ok: true,
+            ok: Boolean(body.success),
             headers: { get: () => "application/json" },
-            json: () => Promise.resolve({ success: true, redirect_url: "/exams/quiz-7/attempt/1/" }),
+            json: () => Promise.resolve(body),
         });
     };
     w.HTMLElement.prototype.scrollIntoView = function () {};
@@ -117,6 +118,37 @@ test("cabinet modal: access-code exam sends the chosen language with the code", 
         assert.equal(fetches.length, 1);
         assert.equal(fetches[0].body.get("language"), "az");
         assert.equal(fetches[0].body.get("access_code"), "123456");
+    } finally { w.close(); }
+});
+
+test("cabinet modal: a language_required reply rebuilds and shows the step from the server's options", async () => {
+    const reply = {
+        success: false,
+        error: "Dil seçin",
+        language_required: true,
+        language_options: [{ language: "az", label: "Azərbaycan dili" }, { language: "en", label: "English" }],
+    };
+    const { w, doc, fetches } = cabinet({ requiresCode: true, withLanguages: false, reply });
+    try {
+        doc.getElementById("trigger").click();
+        const step = doc.getElementById("assignedExamLanguageStep");
+        assert.equal(step.hidden, true, "card had no language JSON (stale card)");
+        doc.getElementById("assignedExamAccessCodeInput").value = "123456";
+        doc.getElementById("assignedExamInfoStartBtn").click();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        assert.equal(fetches.length, 1);
+        assert.equal(step.hidden, false, "step is rebuilt and shown");
+        assert.deepEqual(Array.from(step.querySelectorAll("input[type=radio]"), (r) => r.value), ["az", "en"]);
+        assert.ok(step.classList.contains("is-invalid"));
+
+        const en = step.querySelector('input[value="en"]');
+        en.checked = true;
+        en.dispatchEvent(new w.Event("change", { bubbles: true }));
+        doc.getElementById("assignedExamInfoStartBtn").click();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        assert.equal(fetches.length, 2);
+        assert.equal(fetches[1].body.get("language"), "en");
     } finally { w.close(); }
 });
 

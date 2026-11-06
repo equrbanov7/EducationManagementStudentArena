@@ -13,8 +13,10 @@ CSRF-li POST-dur, audit-ə yazılır; xəta mətni brauzerə daxili detal vermir
 import logging
 
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.utils.translation import pgettext
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
@@ -55,13 +57,19 @@ def _no_org_response():
     return _json_error(pgettext(_CTX, "Aktiv təşkilat seçilməyib."), 403)
 
 
-def _room_attempt(exam, attempt_id):
-    return get_object_or_404(
-        ExamAttempt.objects.select_related("user", "exam", "exam__organization", "exam__supervision_config"),
-        pk=attempt_id,
-        exam=exam,
-        is_trial=False,
-    )
+def _room_attempt(exam, attempt_id, *, for_update=False):
+    queryset = ExamAttempt.objects.select_related("user", "exam", "exam__organization", "exam__supervision_config")
+    if for_update:
+        # Yalnız cəhd sətri kilidlənir (``exam__supervision_config`` LEFT JOIN-dir — FOR UPDATE ona tətbiq olunmur).
+        queryset = queryset.select_for_update(of=("self",))
+    return get_object_or_404(queryset, pk=attempt_id, exam=exam, is_trial=False)
+
+
+def _in_center_hall(exam, attempt) -> bool:
+    """Zal axınındakı (midterm/final) cəhd zalda verilirmi — onda dayandırma zal monitorunun işidir."""
+    from apps.exams.services.center_exams import attempt_has_center_ticket, is_center_exam
+
+    return is_center_exam(exam) and bool(attempt.room_id or attempt_has_center_ticket(attempt))
 
 
 @login_required
@@ -144,17 +152,20 @@ def exam_supervision_attempt_resume(request, slug, attempt_id):
     exam = _room_exam(request, slug)
     if exam is None:
         return _no_org_response()
-    attempt = _room_attempt(exam, attempt_id)
-    refusal = resume_refusal(attempt, get_supervision_config(exam))
-    if refusal:
-        return _json_error(_resume_refusal_message(refusal), 409)
     grant_extra_chance = request.POST.get("grant_extra_chance") == "1"
-    previous = attempt.supervision_status
-    try:
-        teacher_resume_attempt(attempt, request.user, grant_extra_chance=grant_extra_chance)
-    except ValueError:
-        logger.warning("exam_supervision_attempt_resume refused: attempt=%s", attempt.pk, exc_info=True)
-        return _json_error(pgettext(_CTX, "Cəhdi bərpa etmək mümkün olmadı."), 409)
+    # Qərar sətir kilidi altında, TƏZƏ vəziyyətlə verilir: arada sweep/tələbə cəhdi təhvil veribsə
+    # bitmiş cəhd geri açılmır; iki paralel «Bərpa et»dən ikincisi rədd olunur (bir incident).
+    with transaction.atomic():
+        attempt = _room_attempt(exam, attempt_id, for_update=True)
+        refusal = resume_refusal(attempt, get_supervision_config(exam))
+        if refusal:
+            return _json_error(_resume_refusal_message(refusal), 409)
+        previous = attempt.supervision_status
+        try:
+            teacher_resume_attempt(attempt, request.user, grant_extra_chance=grant_extra_chance)
+        except ValueError:
+            logger.warning("exam_supervision_attempt_resume refused: attempt=%s", attempt.pk, exc_info=True)
+            return _json_error(pgettext(_CTX, "Cəhdi bərpa etmək mümkün olmadı."), 409)
     _audit(
         request,
         exam,
@@ -172,16 +183,32 @@ def exam_supervision_attempt_pause(request, slug, attempt_id):
     exam = _room_exam(request, slug)
     if exam is None:
         return _no_org_response()
-    attempt = _room_attempt(exam, attempt_id)
     if get_supervision_config(exam) is None:
         return _json_error(pgettext(_CTX, "Bu imtahanda nəzarət rejimi aktiv deyil."), 409)
     reason = (request.POST.get("reason") or "").strip()
-    previous = attempt.supervision_status
-    try:
-        teacher_lock_attempt(attempt, request.user, reason=reason)
-    except ValueError:
-        logger.warning("exam_supervision_attempt_pause refused: attempt=%s", attempt.pk, exc_info=True)
-        return _json_error(pgettext(_CTX, "Cəhdi dayandırmaq mümkün olmadı."), 409)
+    with transaction.atomic():
+        attempt = _room_attempt(exam, attempt_id, for_update=True)
+        # Review 2026-11-06: zaldakı midterm/final cəhdinin dayandırılması imtahan mərkəzinin RƏSMİ yoludur
+        # (məcburi səbəb, bilet ``removal_action="suspended"``, heyətə yayım — final_center/tickets.py).
+        # Otaq onu yan keçmir: rədd + zal monitoruna keçid.
+        if _in_center_hall(exam, attempt):
+            return JsonResponse(
+                {
+                    "success": False,
+                    "error": pgettext(
+                        _CTX,
+                        "Bu tələbə imtahan zalındadır — dayandırma zal monitorundan, səbəb qeyd edilərək aparılır.",
+                    ),
+                    "hall_monitor_url": reverse("exams:exam_center_room_list"),
+                },
+                status=409,
+            )
+        previous = attempt.supervision_status
+        try:
+            teacher_lock_attempt(attempt, request.user, reason=reason)
+        except ValueError:
+            logger.warning("exam_supervision_attempt_pause refused: attempt=%s", attempt.pk, exc_info=True)
+            return _json_error(pgettext(_CTX, "Cəhdi dayandırmaq mümkün olmadı."), 409)
     _audit(
         request,
         exam,

@@ -95,7 +95,21 @@ def room_attempts_queryset(exam, *, now=None):
     )
 
 
-def _row(attempt, *, config, max_violations, now) -> dict:
+def hall_attempt_ids(exam, attempts) -> set:
+    """Zal axınındakı imtahanda zalda (otaq və ya bilet) verilən cəhdlər — onların dayandırılması zal
+    monitorunun rəsmi yoludur (məcburi səbəb + bilet statusu), otaq «Dayandır» təklif etmir. TƏK sorğu."""
+    from apps.exams.services.center_exams import is_center_exam
+
+    if not attempts or not is_center_exam(exam):
+        return set()
+    from apps.exams.models import FinalExamTicket
+
+    ids = {attempt.pk for attempt in attempts}
+    ticketed = set(FinalExamTicket.objects.filter(attempt_id__in=ids).values_list("attempt_id", flat=True))
+    return ticketed | {attempt.pk for attempt in attempts if attempt.room_id}
+
+
+def _row(attempt, *, config, max_violations, now, in_hall=False) -> dict:
     user = attempt.user
     refusal = resume_refusal(attempt, config)
     finished = attempt.is_finished
@@ -119,7 +133,10 @@ def _row(attempt, *, config, max_violations, now) -> dict:
         "remaining_seconds": _remaining_seconds(attempt, now),
         "can_resume": refusal == "",
         "resume_refusal": "" if refusal in ("finished", "not_locked") else refusal,
-        "can_pause": bool(config is not None and not finished and attempt.supervision_status not in _LOCK_STATUSES),
+        "can_pause": bool(
+            config is not None and not finished and not in_hall and attempt.supervision_status not in _LOCK_STATUSES
+        ),
+        "pause_refusal": "hall" if in_hall and not finished else "",
     }
 
 
@@ -144,7 +161,11 @@ def exam_room_snapshot(exam) -> dict:
     config = get_supervision_config(exam)
     max_violations = config.get_max_total_violations() if config is not None else 0
     attempts = list(room_attempts_queryset(exam, now=now)[:ROOM_ROW_LIMIT])
-    rows = [_row(attempt, config=config, max_violations=max_violations, now=now) for attempt in attempts]
+    in_hall = hall_attempt_ids(exam, attempts)
+    rows = [
+        _row(attempt, config=config, max_violations=max_violations, now=now, in_hall=attempt.pk in in_hall)
+        for attempt in attempts
+    ]
     rows = enrich_monitor_rows(rows, exam.organization, {attempt.user_id: attempt.user for attempt in attempts})
     # Kilidlilər yuxarıda — nəzarətçi əvvəl onları görsün; sonra imtahanda olanlar, sonda bitənlər.
     order = {STATE_LOCKED: 0, STATE_WARNED: 1, STATE_ACTIVE: 2, STATE_COMPLETED: 3}
@@ -166,6 +187,7 @@ __all__ = [
     "RECENT_FINISHED_WINDOW",
     "ROOM_ROW_LIMIT",
     "exam_room_snapshot",
+    "hall_attempt_ids",
     "resume_refusal",
     "room_attempts_queryset",
 ]

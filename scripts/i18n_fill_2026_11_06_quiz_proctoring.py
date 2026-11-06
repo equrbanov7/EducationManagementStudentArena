@@ -274,6 +274,19 @@ ENTRIES = {
         "Die Aktion ist fehlgeschlagen.",
     ),
     (SR, "Əməllər"): ("Actions", "Действия", "İşlemler", "Aktionen"),
+    # Review 2026-11-06: zaldakı midterm/final cəhdinin dayandırılması zal monitorundadır.
+    (SR, "Bu tələbə imtahan zalındadır — dayandırma zal monitorundan, səbəb qeyd edilərək aparılır."): (
+        "This student is in an exam hall — pause them from the hall monitor, with a reason.",
+        "Этот студент в экзаменационном зале — приостановка выполняется из монитора зала с указанием причины.",
+        "Bu öğrenci sınav salonunda — durdurma, neden belirtilerek salon monitöründen yapılır.",
+        "Diese/r Studierende ist im Prüfungssaal — Pausieren erfolgt im Saalmonitor mit Angabe eines Grundes.",
+    ),
+    (SR, "Dayandırma — zal monitorunda"): (
+        "Pause — in the hall monitor",
+        "Приостановка — в мониторе зала",
+        "Durdurma — salon monitöründe",
+        "Pausieren — im Saalmonitor",
+    ),
 }
 
 

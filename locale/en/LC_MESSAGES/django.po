@@ -114363,3 +114363,11 @@ msgstr "The action failed."
 msgctxt "exams.supervision_room"
 msgid "Əməllər"
 msgstr "Actions"
+
+msgctxt "exams.supervision_room"
+msgid "Bu tələbə imtahan zalındadır — dayandırma zal monitorundan, səbəb qeyd edilərək aparılır."
+msgstr "This student is in an exam hall — pause them from the hall monitor, with a reason."
+
+msgctxt "exams.supervision_room"
+msgid "Dayandırma — zal monitorunda"
+msgstr "Pause — in the hall monitor"

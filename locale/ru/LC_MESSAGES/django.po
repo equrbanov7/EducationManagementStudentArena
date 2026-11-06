@@ -114556,3 +114556,11 @@ msgstr "Операция не удалась."
 msgctxt "exams.supervision_room"
 msgid "Əməllər"
 msgstr "Действия"
+
+msgctxt "exams.supervision_room"
+msgid "Bu tələbə imtahan zalındadır — dayandırma zal monitorundan, səbəb qeyd edilərək aparılır."
+msgstr "Этот студент в экзаменационном зале — приостановка выполняется из монитора зала с указанием причины."
+
+msgctxt "exams.supervision_room"
+msgid "Dayandırma — zal monitorunda"
+msgstr "Приостановка — в мониторе зала"

@@ -113846,3 +113846,11 @@ msgstr "Əməliyyat mümkün olmadı."
 msgctxt "exams.supervision_room"
 msgid "Əməllər"
 msgstr "Əməllər"
+
+msgctxt "exams.supervision_room"
+msgid "Bu tələbə imtahan zalındadır — dayandırma zal monitorundan, səbəb qeyd edilərək aparılır."
+msgstr "Bu tələbə imtahan zalındadır — dayandırma zal monitorundan, səbəb qeyd edilərək aparılır."
+
+msgctxt "exams.supervision_room"
+msgid "Dayandırma — zal monitorunda"
+msgstr "Dayandırma — zal monitorunda"

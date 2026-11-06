@@ -21,6 +21,7 @@ Dinamik dəyərlər data-atributlarda / JSON bloklarındadır (CSP: inline JS/CS
      data-attempt-url-template="{% url 'exams:exam_supervision_attempt_snapshot' exam.slug 0 %}"
      data-resume-url-template="{% url 'exams:exam_supervision_attempt_resume' exam.slug 0 %}"
      data-pause-url-template="{% url 'exams:exam_supervision_attempt_pause' exam.slug 0 %}"
+     data-hall-monitor-url="{% url 'exams:exam_center_room_list' %}"
      data-poll-seconds="{{ poll_seconds }}">
     {% csrf_token %}
     {% url 'exams:teacher_exam_detail' exam.slug as exam_detail_url %}

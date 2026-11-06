@@ -113746,3 +113746,11 @@ msgstr "İşlem başarısız oldu."
 msgctxt "exams.supervision_room"
 msgid "Əməllər"
 msgstr "İşlemler"
+
+msgctxt "exams.supervision_room"
+msgid "Bu tələbə imtahan zalındadır — dayandırma zal monitorundan, səbəb qeyd edilərək aparılır."
+msgstr "Bu öğrenci sınav salonunda — durdurma, neden belirtilerek salon monitöründen yapılır."
+
+msgctxt "exams.supervision_room"
+msgid "Dayandırma — zal monitorunda"
+msgstr "Durdurma — salon monitöründe"
