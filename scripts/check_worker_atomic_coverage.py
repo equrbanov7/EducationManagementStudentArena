@@ -112,6 +112,8 @@ INTENTIONAL_EXEMPTIONS = {
     "apps/registrar/management/commands/apply_lab_groups_20261106.py",
     # 2026-11-06 RİM MR-000230 (236 İT dərs bərpası): eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/recover_mr230_lessons.py",
+    # 2026-11-07 RİM müraciətləri (MR-247/253/245): eyni `relocate_twin_enrollment.run_plan` gövdəsi.
+    "apps/registrar/management/commands/repair_applications_20261107.py",
     # rehearse öz RLS kontekstini (set_rls_tenant, session-scoped, bypass-sız)
     # və öz transaction sərhədlərini (ledger advisory-lock atomic-ləri, batch
     # checkpoint/resume) idarə edir — tək böyük rls_worker_atomic() sarğısı
