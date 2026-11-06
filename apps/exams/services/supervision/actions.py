@@ -2,6 +2,7 @@
 
 from datetime import timedelta
 
+from django.db import transaction
 from django.db.models import DateTimeField, ExpressionWrapper, F
 from django.utils import timezone
 
@@ -13,16 +14,58 @@ from ._shared import (
     get_supervision_config,
 )
 
+#: Bərpa/kilid qərarının oxuduğu sahələr — sətir kilidi altında TƏZƏDƏN oxunur.
+_LOCKED_STATE_FIELDS = (
+    "status",
+    "finished_at",
+    "started_at",
+    "supervision_status",
+    "supervision_manual_lock",
+    "supervision_extra_chances",
+    "supervision_violation_count",
+    "supervision_locked_at",
+    "supervision_resumed_at",
+)
+
+
+def _lock_fresh_state(attempt):
+    """Cəhd sətrini ``FOR UPDATE`` ilə kilidləyir və vəziyyət sahələrini bazadan təzələyir.
+
+    2026-11-06 (review): yaddaşdakı köhnə obyektlə qərar verilirdi — arada sweep/tələbə cəhdi təhvil
+    veribsə «Bərpa et» onu ``in_progress``-ə qaytara, iki paralel bərpa isə iki ``SupervisionIncident``
+    yarada bilərdi. Çağıran ``transaction.atomic()`` daxilindədir.
+    """
+    row = ExamAttempt.objects.select_for_update().filter(pk=attempt.pk).values(*_LOCKED_STATE_FIELDS).first()
+    if row is None:
+        raise ValueError("Attempt no longer exists.")
+    for field, value in row.items():
+        setattr(attempt, field, value)
+
 
 def teacher_resume_attempt(attempt, teacher, grant_extra_chance=False):
     """
     Teacher resumes a locked/removed attempt.
 
-    Returns True on success, raises ValueError on invalid state.
+    Returns True on success, raises ValueError on invalid state. The decision is taken on the row
+    re-read under ``SELECT … FOR UPDATE`` (a finished attempt is never revived, a double resume is
+    refused instead of logging a second incident).
     """
     if not exam_supervision_enabled():
         raise ValueError(supervision_disabled_message())
+    with transaction.atomic():
+        _lock_fresh_state(attempt)
+        result = _resume_locked(attempt, teacher, grant_extra_chance=grant_extra_chance)
+    # Vaxtı bitmiş cəhdin bağlanması (``expired``) tranzaksiya ilə BİRLİKDƏ yazılmalıdır — xəta atomic
+    # blokun içində qaldırılsaydı geri alınardı və cəhd «in_progress» qalardı.
+    if result is _TIME_EXPIRED:
+        raise ValueError("Attempt time limit has expired and cannot be resumed.")
+    return result
 
+
+_TIME_EXPIRED = object()
+
+
+def _resume_locked(attempt, teacher, *, grant_extra_chance):
     if attempt.supervision_status not in ("locked", "removed", "warned"):
         raise ValueError("Attempt is not in a locked/removed/warned state.")
 
@@ -40,7 +83,7 @@ def teacher_resume_attempt(attempt, teacher, grant_extra_chance=False):
         # Auto-lock path: the exam clock still governs, and the recovery policy
         # decides whether a violation-locked attempt may be resumed at all.
         if attempt.expire_if_time_limit_reached():
-            raise ValueError("Attempt time limit has expired and cannot be resumed.")
+            return _TIME_EXPIRED
 
         if config is None:
             raise ValueError("No active supervision config for this exam.")
@@ -132,7 +175,12 @@ def teacher_lock_attempt(attempt, teacher, reason=""):
     """
     if not exam_supervision_enabled():
         raise ValueError(supervision_disabled_message())
+    with transaction.atomic():
+        _lock_fresh_state(attempt)
+        return _pause_locked(attempt, teacher, reason=reason)
 
+
+def _pause_locked(attempt, teacher, *, reason):
     if attempt.is_finished:
         raise ValueError("Attempt is already finished.")
 

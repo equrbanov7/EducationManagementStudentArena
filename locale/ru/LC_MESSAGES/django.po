@@ -114281,6 +114281,290 @@ msgctxt "exams.view.question_bank.warning"
 msgid "multiple_correct"
 msgstr "Отмечено несколько правильных ответов ({labels}) — в мидтерме и финальном экзамене у вопроса должен быть ровно один правильный ответ."
 
+msgctxt "exams.language_step"
+msgid "Suallar seçdiyiniz dildə veriləcək. İmtahan başladıqdan sonra dili dəyişmək mümkün deyil."
+msgstr "Вопросы будут показаны на выбранном языке. После начала экзамена язык изменить нельзя."
+
+msgctxt "exams.language_step"
+msgid "məcburi"
+msgstr "обязательно"
+
+msgctxt "exams.language_step"
+msgid "İmtahan dili"
+msgstr "Язык экзамена"
+
+msgctxt "exams.language_step"
+msgid "İmtahan dilini seçin"
+msgstr "Выберите язык экзамена"
+
+msgctxt "exams.language_step"
+msgid "İmtahana başlamaq üçün əvvəlcə imtahan dilini seçin."
+msgstr "Чтобы начать экзамен, сначала выберите язык экзамена."
+
+msgctxt "exams.supervision_room"
+msgid "Ad və ya istifadəçi adı…"
+msgstr "Имя или логин…"
+
+msgctxt "exams.supervision_room"
+msgid "Aktiv təşkilat seçilməyib."
+msgstr "Активная организация не выбрана."
+
+msgctxt "exams.supervision_room"
+msgid "Bax"
+msgstr "Просмотр"
+
+msgctxt "exams.supervision_room"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "exams.supervision_room"
+msgid "Bağlantı"
+msgstr "Связь"
+
+msgctxt "exams.supervision_room"
+msgid "Bağlantı yoxdur — yenidən cəhd edilir…"
+msgstr "Нет связи — повторная попытка…"
+
+msgctxt "exams.supervision_room"
+msgid "Başlayıb"
+msgstr "Начал"
+
+msgctxt "exams.supervision_room"
+msgid "Bitirib"
+msgstr "Завершил"
+
+msgctxt "exams.supervision_room"
+msgid "Bu imtahan imtahan mərkəzi zalında keçirilir — PIN, yenidən giriş və zal əməliyyatları zal monitorundadır."
+msgstr "Этот экзамен проходит в зале экзаменационного центра — PIN, повторный вход и действия зала находятся в мониторе зала."
+
+msgctxt "exams.supervision_room"
+msgid "Bu imtahanda nəzarət rejimi aktiv deyil."
+msgstr "Режим наблюдения для этого экзамена не включён."
+
+msgctxt "exams.supervision_room"
+msgid "Bu imtahanda nəzarət rejimi yandırılmayıb: cəhdlərin gedişatı görünür, amma tam ekran/tab pozuntuları izlənmir. Yandırmaq üçün imtahanı redaktə edin."
+msgstr "Режим наблюдения для этого экзамена выключен: ход попыток виден, но нарушения полноэкранного режима/вкладок не отслеживаются. Чтобы включить, отредактируйте экзамен."
+
+msgctxt "exams.supervision_room"
+msgid "Bərpa et"
+msgstr "Восстановить"
+
+msgctxt "exams.supervision_room"
+msgid "Canlı"
+msgstr "В эфире"
+
+msgctxt "exams.supervision_room"
+msgid "Canlı izləmə, pozuntular və kilidlənənlərin bərpası"
+msgstr "Живое наблюдение, нарушения и восстановление заблокированных"
+
+msgctxt "exams.supervision_room"
+msgid "Cavablar"
+msgstr "Ответы"
+
+msgctxt "exams.supervision_room"
+msgid "Cəhdi bərpa etmək mümkün olmadı."
+msgstr "Не удалось восстановить попытку."
+
+msgctxt "exams.supervision_room"
+msgid "Cəhdi dayandırmaq mümkün olmadı."
+msgstr "Не удалось приостановить попытку."
+
+msgctxt "exams.supervision_room"
+msgid "Dayandır"
+msgstr "Приостановить"
+
+msgctxt "exams.supervision_room"
+msgid "Dil"
+msgstr "Язык"
+
+msgctxt "exams.supervision_room"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "exams.supervision_room"
+msgid "Hələ heç kim imtahana başlamayıb"
+msgstr "Пока никто не начал экзамен"
+
+msgctxt "exams.supervision_room"
+msgid "Kilidlənib"
+msgstr "Заблокирован"
+
+msgctxt "exams.supervision_room"
+msgid "Limitsiz"
+msgstr "Без ограничений"
+
+msgctxt "exams.supervision_room"
+msgid "Ləğv et"
+msgstr "Отмена"
+
+msgctxt "exams.supervision_room"
+msgid "Müəllim dayandırıb"
+msgstr "Приостановлено преподавателем"
+
+msgctxt "exams.supervision_room"
+msgid "Məsələn: telefondan istifadə"
+msgstr "Например: использование телефона"
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət aktivdir"
+msgstr "Наблюдение включено"
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət otağı"
+msgstr "Комната наблюдения"
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət sistemi platformada söndürülüb — pozuntular qeydə alınmır, bərpa əməliyyatları işləmir."
+msgstr "Система наблюдения отключена на платформе — нарушения не фиксируются, восстановление не работает."
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət siyasəti bərpaya icazə vermir («İkinci şans yoxdur»)."
+msgstr "Политика наблюдения не разрешает восстановление («Без второго шанса»)."
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət sönülüdür"
+msgstr "Наблюдение выключено"
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət xronologiyası"
+msgstr "Хронология наблюдения"
+
+msgctxt "exams.supervision_room"
+msgid "Onlayn"
+msgstr "Онлайн"
+
+msgctxt "exams.supervision_room"
+msgid "Pozuntu"
+msgstr "Нарушения"
+
+msgctxt "exams.supervision_room"
+msgid "Pozuntu limiti: %(limit)s"
+msgstr "Лимит нарушений: %(limit)s"
+
+msgctxt "exams.supervision_room"
+msgid "Pozuntu var"
+msgstr "Есть нарушения"
+
+msgctxt "exams.supervision_room"
+msgid "Qalan vaxt"
+msgstr "Осталось времени"
+
+msgctxt "exams.supervision_room"
+msgid "Qeydə alınmış hadisə yoxdur."
+msgstr "Зафиксированных событий нет."
+
+msgctxt "exams.supervision_room"
+msgid "Risk xalı"
+msgstr "Балл риска"
+
+msgctxt "exams.supervision_room"
+msgid "Siqnal kəsilib"
+msgstr "Сигнал пропал"
+
+msgctxt "exams.supervision_room"
+msgid "Siyasət bərpaya icazə vermir"
+msgstr "Политика не разрешает восстановление"
+
+msgctxt "exams.supervision_room"
+msgid "Səbəb (tələbəyə göstərilir)"
+msgstr "Причина (показывается студенту)"
+
+msgctxt "exams.supervision_room"
+msgid "Tələbə"
+msgstr "Студент"
+
+msgctxt "exams.supervision_room"
+msgid "Tələbə axtarışı"
+msgstr "Поиск студента"
+
+msgctxt "exams.supervision_room"
+msgid "Tələbə imtahana başlayan kimi burada görünəcək. Səhifə özü yenilənir."
+msgstr "Студент появится здесь, как только начнёт экзамен. Страница обновляется сама."
+
+msgctxt "exams.supervision_room"
+msgid "Tələbə kilidli deyil — bərpa lazım deyil."
+msgstr "Студент не заблокирован — восстанавливать нечего."
+
+msgctxt "exams.supervision_room"
+msgid "Tələbə əlavə şansından artıq istifadə edib."
+msgstr "Студент уже использовал дополнительный шанс."
+
+msgctxt "exams.supervision_room"
+msgid "Tələbələr"
+msgstr "Студенты"
+
+msgctxt "exams.supervision_room"
+msgid "Tələbələrin imtahan gedişatı, qayda pozuntuları və kilidlənmələri canlı görünür. Kilidlənən tələbəni buradan bərpa edin."
+msgstr "Ход экзамена, нарушения правил и блокировки студентов видны в реальном времени. Восстанавливайте заблокированного студента отсюда."
+
+msgctxt "exams.supervision_room"
+msgid "Tələbəni bərpa et"
+msgstr "Восстановить студента"
+
+msgctxt "exams.supervision_room"
+msgid "Tələbənin ekranı açılacaq və o, imtahana olduğu yerdən davam edəcək. Cavabları və vaxtı qorunur."
+msgstr "Экран студента разблокируется, и он продолжит с того же места. Ответы и время сохраняются."
+
+msgctxt "exams.supervision_room"
+msgid "Tələbənin ekranı kilidlənir, cəhd təhvil verilmir. «Bərpa et» ilə davam etdirə bilərsiniz."
+msgstr "Экран студента блокируется, попытка не сдаётся. Продолжить можно кнопкой «Восстановить»."
+
+msgctxt "exams.supervision_room"
+msgid "Vəziyyət"
+msgstr "Состояние"
+
+msgctxt "exams.supervision_room"
+msgid "Xülasə"
+msgstr "Сводка"
+
+msgctxt "exams.supervision_room"
+msgid "Zal monitoru"
+msgstr "Монитор зала"
+
+msgctxt "exams.supervision_room"
+msgid "İmtahan artıq bitib."
+msgstr "Экзамен уже завершён."
+
+msgctxt "exams.supervision_room"
+msgid "İmtahana qayıt"
+msgstr "Назад к экзамену"
+
+msgctxt "exams.supervision_room"
+msgid "İmtahanda"
+msgstr "На экзамене"
+
+msgctxt "exams.supervision_room"
+msgid "İmtahanı müvəqqəti dayandır"
+msgstr "Временно приостановить экзамен"
+
+msgctxt "exams.supervision_room"
+msgid "Şübhəli"
+msgstr "Подозрительно"
+
+msgctxt "exams.supervision_room"
+msgid "Əlavə şans istifadə olunub"
+msgstr "Дополнительный шанс использован"
+
+msgctxt "exams.supervision_room"
+msgid "Əlavə şans ver (pozuntu sayğacı bir vahid azalır)"
+msgstr "Дать дополнительный шанс (счётчик нарушений уменьшится на один)"
+
+msgctxt "exams.supervision_room"
+msgid "Əməliyyat mümkün olmadı."
+msgstr "Операция не удалась."
+
+msgctxt "exams.supervision_room"
+msgid "Əməllər"
+msgstr "Действия"
+
+msgctxt "exams.supervision_room"
+msgid "Bu tələbə imtahan zalındadır — dayandırma zal monitorundan, səbəb qeyd edilərək aparılır."
+msgstr "Этот студент в экзаменационном зале — приостановка выполняется из монитора зала с указанием причины."
+
+msgctxt "exams.supervision_room"
+msgid "Dayandırma — zal monitorunda"
+msgstr "Приостановка — в мониторе зала"
+
 msgctxt "registrar.lab_groups"
 msgid "Lab-%(n)s"
 msgstr "Лаб-%(n)s"

@@ -2,6 +2,12 @@
 {% comment %}İmtahanın bölmələrinə keçid zolağı (əvvəlki 6 plitəlik «əməl kartları» şəbəkəsi). Hər keçid
 naviqasiya parametrlərini (from_section/return_to) daşıyır ki, «Geri» düzgün qayıtsın.{% endcomment %}
 <nav class="ted-nav" aria-label="{% trans 'İmtahan bölmələri' context 'exams.teacher.exam_detail' %}">
+    {% comment %}Sahib 2026-11-06: «Nəzarət otağı» — midterm/final kimi BÜTÜN növlərdə (quiz, yazılı, praktiki):
+    canlı izləmə, kilidlənən tələbəni «Bərpa et», müvəqqəti dayandırma (views/teacher/supervision/room.py).{% endcomment %}
+    <a class="ted-nav__link" href="{% url 'exams:exam_supervision_room' exam.slug %}">
+        <span class="ted-nav__icon ted-nav__icon--warning"><i class="fas fa-shield-halved" aria-hidden="true"></i></span>
+        <span class="ted-nav__text"><span class="ted-nav__title">{% trans "Nəzarət otağı" context "exams.supervision_room" %}</span><span class="ted-nav__desc">{% trans "Canlı izləmə, pozuntular və kilidlənənlərin bərpası" context "exams.supervision_room" %}</span></span>
+    </a>
     <a class="ted-nav__link" href="{% url 'exams:teacher_exam_results' exam.slug %}?{{ exam_navigation_query }}">
         <span class="ted-nav__icon ted-nav__icon--primary"><i class="fas fa-square-poll-vertical" aria-hidden="true"></i></span>
         <span class="ted-nav__text"><span class="ted-nav__title">{% trans "action_view_results" context "exams.template.teacher_exam_detail" %}</span><span class="ted-nav__desc">{% trans "desc_view_results" context "exams.template.teacher_exam_detail" %}</span></span>

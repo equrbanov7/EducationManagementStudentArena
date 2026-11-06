@@ -64,8 +64,10 @@ from apps.exams.services.journal_sync import (  # noqa: F401
     schedule_journal_sync,
     sync_attempt_to_journal,
 )
+from apps.exams.services.language_step import language_step_options  # noqa: F401
 from apps.exams.services.language_variants import (  # noqa: F401
     available_language_options,
+    available_language_options_for_exams,
 )
 from apps.exams.services.open_attempts import user_has_open_exam_attempt  # noqa: F401
 from apps.exams.services.question_bank_attach import (  # noqa: F401
@@ -124,6 +126,8 @@ __all__ = [
     "EXAM_LANGUAGE_CHOICES",
     "accessible_banks",
     "available_language_options",
+    "available_language_options_for_exams",
+    "language_step_options",
     "attach_attempt_interventions",
     "build_teacher_exam_dashboard",
     "calculate_attempt_score",
