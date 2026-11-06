@@ -1,0 +1,2010 @@
+{
+ "format": "legacy-syllabi/1",
+ "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+ "period_id": "a4f88744-8d49-4772-84ef-c28a96c3b372",
+ "sources": {
+  "1191": {
+   "content_sha256": "9965698de530f6f3f7830c77ec2ca9aabd3800c7f4142c89489f8796d93c9d1c",
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "hours": {
+    "lecture": 15,
+    "seminar": 15
+   },
+   "legacy_lesson": 193,
+   "legacy_teacher": 85,
+   "sections": {
+    "assess": {
+     "exam_questions": [],
+     "midterm": 0,
+     "note": "1. İmtahandan əvvəl məsləhət saatları təşkil olunur.\n2. İmtahanlar və aralıq yoxlamalar (kollekviumlar) yazılı formada aparılır.\n3. Tələbələrin imtahana və aralıq yoxlamara buraxılması ilə bağlı məsələlər fakültə dekanı tərəfindən həll edilir. İmtahan və aralıq yoxlamalar Azərbaycan Respublikası Nazirlər Kabinetinin 24 dekabr 2013-cü il tarixli 348 nömrəli qərarı ilə təsdiq edilmiş “Ali təhsil müəssisələrinin bakalvriat və magistratura səviyyələrində kredit sistemi ilə təlimin təşkili Qaydaları”na əsasən aparılır.\n4. Semestr ərzində hər bir tələbə 10 müstəqil iş yerinə yetirməlidir. Müstəqil işlərin mövzuları keçilən mövzuları əhatə edir. Hər bir müstəqil iş 1 balla sistemlə qiymətləndirilir və nəticə kimi bütün müstəqil işlərin balları toplanılır.",
+     "project": 0
+    },
+    "desc": {
+     "description": "FƏNNİN TƏSVİRİ: Psixologiya kursu əsas psixologiya elminin mövzusu və vəzifələri, insan şəxsiyyəti, idrak prosesləri və onlarin tənzimi, insanin fərdi xüsusiyyətləri, insan insanlar arasinda bölmələrini əhatə edir, tələbələrə vacib anlayışları öyrətmək və baza biliyi üçün nəzərdə tutulur. Kurs nəzəri və seminar dərslərindən ibarətdir. Burada hər bir psixoloji anlayışların təsviri, psixikanin qanunauyğunluqlarların, mexanizmlərinin izahı və onların tətbiqi, klassik və müasir psixologiyanin bütün bölmələri əks olunur.\n\nFƏNNİN MƏQSƏDİ: İnsan psixologiyasi haqqinda elmi, yəni obyektiv və düzgün biliklər olmadan cəmiyyət inkişaf edə bilməz. İctimai praktikanın müxtəlif sahələrində insan haqqinda biliklərə olan elmi-praktik tələbat elmi psixologiyanın tədrisini labüd edir.",
+     "goal": ""
+    },
+    "info": {
+     "certificates": [],
+     "language": "az",
+     "lesson_hours": 30,
+     "office_hours": "",
+     "prerequisites": "",
+     "research_interests": [],
+     "teacher": "",
+     "welcome": ""
+    },
+    "lit": {
+     "additional": [],
+     "primary": [
+      "1. Bayramov Ə.S.Əlizadə Ə.Ə. Psixologiya. Bakı: 2012",
+      "2. Məmmədov А. İdrak prosesləri. Bakı: 2005",
+      "3. Həmzəyev М. Ə. Psixologiya. Bакı: 2007",
+      "4. Немов Р.С . Психология. М: 2001",
+      "5. Бодалев А.А. Психология о личности. М.,1998",
+      "6. Психология формирования и развития личности. М., 1981",
+      "7. Маклаков С.Я. Общая психология. М: 2006",
+      "8. Геппенрейтер Ю. Введение в психологии. М: 1996",
+      "9. Лурия А.А. Ощущение и восприятие.",
+      "10. Ковалев А.Г. Психология личности. М., 1970.",
+      "11. Левитов Н.Д. Психология характера. М., 1969.",
+      "12. Лейтес Н.С. Способности и одаренность в детские годы. М., 1984"
+     ]
+    },
+    "method": {
+     "methods": [
+      "1. mühazirə\n2. mövzunun müzakirəsi və diskussiya\n3. seminar və kollokviumlar"
+     ],
+     "note": ""
+    },
+    "out": {
+     "outcomes": [
+      "1. Psixologiya elminin məqsəd və vəzifələri, elmi-tədqiqat metodları, digər elmlərlə əlaqəsini izah edir.\n2. Psixi hadisələri fərqləndirir, mövzuya uyğun problemləri müəyyənləşdirir və ifadə edir.\n3. Psixi inkişafın vasitələrini şərh və izah edir.\n4. Psixologiya elminin prinsiplərini, təlim vəzifələrini şərh və izah edir.\n5. Psixologiya elminin məqsəd və vəzifələrini şərh edir.\n6. Psixologiya kursunun məzmun xətlərini fərqləndirir, qurulması xüsusiyyətlərini izah edir, hər bir bölmə üzrə formalaşdırılmalı standartları sadalayır."
+     ]
+    },
+    "prev": {},
+    "self": {
+     "archived": [],
+     "option": "",
+     "topics": [
+      {
+       "title": "1. Psixologiyanın bir elm kimi təşəkkülü. Psixologiya elminin əsas sahələri və onların təsnifatı"
+      },
+      {
+       "title": "2. Psixologiyanın tədqiqat metodlarının ümumi xarakteristikası və təsnifatı. Eksperiment metodu və onun xarakteristikası. Müşahidə metodu və onun xarakteristikası."
+      },
+      {
+       "title": "3. Duyğular, növləri və onların təsnifatı. Duyğuların psixofizioloji qanunauyğunluqları."
+      },
+      {
+       "title": "4. Diqqətin növləri və əsas xüsusiyyətləri.Diqqətin funksiyaları."
+      },
+      {
+       "title": "5. Təfəkkürün mahiyyəti və əsas xüsusiyyətləri. Təfəkkürün əsas formaları. Təfəkkür proseslərinin xarakteristikası."
+      },
+      {
+       "title": "6. Psixologiyada şəxsiyyət problemi. Şəxsiyyət və fəaliyyət. Şəxsiyyətin inkişafının təkanverici mexanizmləri."
+      },
+      {
+       "title": "7. Emosional halətlər, onların psixoloji xarakteristikası. Hisslərin səciyyəsi. Ali hisslər və onların növləri."
+      },
+      {
+       "title": "8. Ünsiyyətin psixoloji xarakteristikası. Ünsiyyətin növləri. İnsanların bir-birini qavraması və anlaması."
+      },
+      {
+       "title": "9. Temperamentin xassələri. Temperamentin təsnifatı və sinir sisteminin xassələri."
+      },
+      {
+       "title": "10. Qabiliyyət haqqında ümumi anlayış. Qabiliyyət və istedad. Qabiliyyətlərin formalaşması: təbii imkanlar və fəaliyyət."
+      }
+     ]
+    },
+    "send": {},
+    "week": {
+     "rows": [
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Psixologiya elminin predmeti. Psixologiyanın elmi-tədqiqat metodları"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Fəaliyyətin və ünsiyyətin psixologiyası."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Şəxsiyyət psixologiyası."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Qrupların psixologiyası."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Duyğu və qavrayış."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Diqqət və hafizə haqqında anlayış."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Təfəkkür və təxəyyül"
+      },
+      {
+       "lab": 0,
+       "lecture": 1,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Temperament və xarakter."
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Psixi hadisələrin təsnifatı."
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Müşahidə və eksperiment psixologiyanın əsas tədqiqat metodları kimi."
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Ünsiyyət insanlar arasında qarşılqlı təsir kimi."
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Qrupların təsnifatı."
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Duyğuların növləri."
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Diqqətin funksiyaları və növləri. Hafizənin növ və prosesləri"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Əsas təfəkkür formaları."
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 1,
+       "topic": "Temperamentin tipləri."
+      }
+     ]
+    }
+   },
+   "teacher": 7740
+  },
+  "1702": {
+   "content_sha256": "fff447c5d362ff5a6daab4b8c6a14b0874686c33390e07d86fbaf1e35fc9fb9c",
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "hours": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "legacy_lesson": 1936,
+   "legacy_teacher": 85,
+   "sections": {
+    "assess": {
+     "exam_questions": [],
+     "midterm": 0,
+     "note": "1. İmtahandan əvvəl məsləhət saatları təşkil olunur.\n2. İmtahanlar və aralıq yoxlamalar (kollekviumlar) yazılı formada aparılır.\n3. Tələbələrin imtahana və aralıq yoxlamalara buraxılması ilə bağlı məsələlər fakültə dekanı tərəfindən həll edilir. İmtahan və aralıq yoxlamalar Azərbaycan Respublikası Nazirlər Kabinetinin 24 dekabr 2013-cü il tarixli 348 nömrəli qərarı ilə təsdiq edilmiş “Ali təhsil müəssisələrinin bakalavr və magistratura səviyyələrində kredit sistemi ilə təlimin təşkili Qaydaları”na əsasən aparılır.\n4. Semestr ərzində hər bir tələbə 1 müstəqil iş yerinə yetirməlidir. Müstəqil işlərin mövzuları keçilən mövzuları əhatə edir. Hər bir müstəqil iş 10 ballıq sistemlə qiymətləndirilir.\n5. Sərbəst işin mövzusu tələbəyə müəllim tərəfindən hər semestrin 2-ci həftəsindən gec olmamaq şərti ilə təqdim edilir və ən gec müvafiq semestrin bitməsinə 2 həftə qalmış təhvil alınır.",
+     "project": 0
+    },
+    "desc": {
+     "description": "FƏNNİN TƏSVİRİ: Əlbəttə ki, fənnin proqramı tərtib olunarkən biz müasir həyatın qarşımıza qoyduğu ən aktual və günümüzlə səsləşən sualları əhatə etməyə çalışmışıq. Sоn illərdə respublikamızın həyatında gedən köklü dəyişikliklər, təhsil sistemində aparılan geniş islahatlar, xüsusilə alı təhsil sisteminin həm məzmun və həm də formaca yeniləşməsi təbii olaraq fənn proqramlarının, dərslik və dərs vəsaitlərinin də yeniləşməsini, təkmilləşməsini, fənlərin tədrisində yeni texnologiyalardan, fəal təlim metodlarından istifadə edilməsini tələb edir. Fənnin proqramının yeni tələblər əsasında işlənməsi həmçinin tələbələrin bu fənn üzrə “Sərbəst işlər”in mövzularının müəyyənləşdirilməsinə, işin yazılma qaydaları haqqında metodik göstərişlərə, habelə məşğələlərin yeni, interaktiv metodlarla təşkilinə və keçirilmə metodikasına ehtiyac yaratmışdır. Beləliklə proqramın işlənməsi məhz bu ehtiyacların ödənilməsi tələbindən irəli gəlmişdir.\n\nFƏNNİN MƏQSƏDİ: Fənnin mənimsənilməsinin məqsədləri – tələbələrdə kiçik qrupun tədqiqatının nəzəri-metodoloji əsasları, qrupun fəaliyyəti prosesində qrup dinamikasının qanunauyğunluqları və qrup proseslərinin idarəedilməsi, kütləvi psixi vəziyyətlər, kütləvi şüur, kütləvi əhvallar, kütləvi sosial-psixoloji hadisələr, kütləvi psixologiyanın mexanizmləri haqqında təsəvvürlərin formalaşdırılmasıdır.",
+     "goal": ""
+    },
+    "info": {
+     "certificates": [],
+     "language": "az",
+     "lesson_hours": 45,
+     "office_hours": "",
+     "prerequisites": "",
+     "research_interests": [],
+     "teacher": "",
+     "welcome": ""
+    },
+    "lit": {
+     "additional": [],
+     "primary": [
+      "Ə.S.Bayramov, Ə.Ə.Əlizadə. Sosial psixologiya. Dərslik. \"QAPP poliqraf\", 2003\n2. Ə.S.Bayramov.-Şəxsiyyətin təşəkkülünün aktual psixoloji problemləri /B.: Azərnəşr, 1981.- 188.\n3. Bayramov Ə.S.Əlizadə Ə.Ə. Psixologiya. Bakı: 2012\n4. Həmzəyev М. Ə. Psixologiya. Bакı: 2007\n5. Немов. Р.С . Психология. М: 2001\n6. Бодалев А.А. Психология личности. М., 1998\n7. Бобнева М.И. «Социальные нормы и регуляция поведения» - М.,1998.\n8. Маклаков С.Я. Общая психология. М: 2006\n9. Дэвид Майерс. Социальная психология: [пер. с англ.] СПб.: Питер, 2012\n10. Ядов В.А. Методы исследования в социологии: М.: Академический Проект, 2010\n11. Готлиб А.С. Введение в социологическое исследование: Качественный и количественный подходы. Методология. Исследовательские практики.: учебное пособие М.: Флинта; МПСИ, 2005\n12. Климов Е.А. «Введение в психологию труда» - М.,1998"
+     ]
+    },
+    "method": {
+     "methods": [
+      "1. mühazirə\n2. mövzunun müzakirəsi və diskussiya\n3. seminar və kollokviumlar"
+     ],
+     "note": ""
+    },
+    "out": {
+     "outcomes": [
+      "1. Sosial psixologiyada qrup problemi təliminin məqsəd və vəzifələri, elmi-tədqiqat metodları, digər elmlərlə əlaqəsini izah edir.\n2. qrupların növlərini fərqləndirir, mövzuya uyğun formanı müəyyənləşdirir və tətbiq edir.\n3. Böyük və kiçik qrupların formalaşması şərtlərini şərh və izah edir.\n4. Qrupların formalaşması prinsiplərini, təşəkkül metodlarını (texnologiyalarını) şərh və izah edir.\n5. Sosial psixologiyada qrup təliminin məqsəd və vəzifələrini şərh edir.\n6. Elmi istiqamətin məzmun xətlərini fərqləndirir, qurulması xüsusiyyətlərini izah edir, hər bir bölmə üzrə formalaşdırılmalı standartları sadalayır."
+     ]
+    },
+    "prev": {},
+    "self": {
+     "archived": [],
+     "option": "",
+     "topics": [
+      {
+       "title": "1. Sosial psixologiyada böyük kortəbii qruplar."
+      },
+      {
+       "title": "2. Sosial sirayət problemi"
+      },
+      {
+       "title": "3. Sosial psixologiyada kiçik qrupların tədqiqi tarixi."
+      },
+      {
+       "title": "4. Kütlənin təşəkkül mexanizmləri."
+      },
+      {
+       "title": "5. Qrup sosial-psixoloji fenomen kimi."
+      },
+      {
+       "title": "6. Kiçik qrupun yaranması və inkişafı."
+      },
+      {
+       "title": "7. Kiçik qrupun sosial-psixoloji xarakteristikası."
+      },
+      {
+       "title": "8. Qrup fəaliyyətinin effektivliyi problemi."
+      },
+      {
+       "title": "9. Konfliktlərin təbiəti və onların həlli yolları."
+      },
+      {
+       "title": "10. Qrup qərarının qəbulu prosesi."
+      }
+     ]
+    },
+    "send": {},
+    "week": {
+     "rows": [
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Qrup sosial-psixoloji fenomen kimi"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Sosial qrupların psixologiyasının tədqiqinin əsas prinsipləri"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Kiçik qrupun sosial-psixologiyası"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Kiçik qrupun genezisi (yaranması) və inkişafı"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Kiçik qrupun sosial-psixoloji xarakteristikası"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Qrupun sosial psixologiyada tədqiqi tarixi"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Kiçik qrupun tədqiqi metodları"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Kiçik qrupun struktur-dinamik xüsusiyyətləri"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Kiçik qrupda liderlik və rəhbərlik"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Qrup fəaliyyəti prosesi"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Qruplarda sosial təsir"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Böyük sosial qrupların psixoloji xüsusiyyətləri."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Sosial təşkilatların psixologiyası"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Sosial siniflərin psixologiyası"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Kütləvi kommunikasiya psixologiyası"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Sosial qrupların psixologiyasının tədqiqinin əsas prinsipləri"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Kollokvium"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Kiçik qrupun sosial-psixoloji xarakteristikası"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Qrupun sosial psixologiyada tədqiqi tarixi"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Kollokvium"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Kiçik qrupda liderlik və rəhbərlik"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Kollokvium"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 1,
+       "topic": "Böyük sosial qrupların psixoloji xüsusiyyətləri."
+      }
+     ]
+    }
+   },
+   "teacher": 7740
+  },
+  "6672": {
+   "content_sha256": "974fbaaf163195208a8a4e660c1183b988ef3d2ecc1c29646c37d5ef7577a9cc",
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "hours": {
+    "lecture": 15,
+    "seminar": 15
+   },
+   "legacy_lesson": 753,
+   "legacy_teacher": 85,
+   "sections": {
+    "assess": {
+     "exam_questions": [],
+     "midterm": 0,
+     "note": "Kollokviumlar akademik təqvimə uyğun olaraq hər semestrdə 3 dəfə təşkil olunur. Hər kollokvium 0 - 10 bal ilə qiymətləndirilir. Kollokviumun keçirilməsi məcburidir. Kollokviumda iştirak etməyən tələbəyə 0 bal yazılır",
+     "project": 0
+    },
+    "desc": {
+     "description": "Təhsilimiz bu gün irəliyə doğru addımlar atır. Lakin bu irəliləyişi təmin edən yeni metodoloji yanaşma olmadan istənilən nəticəyə nail olmaq cətin olar. Kitabda psixologiya elminin yeni nailiyyətlərindən istifadə sayəsində pedaqoji fəliyyətin psixoloji məsələləri, eləcədə təhsilimizdə meydana gələn bir sıra problemlərin həll yollarının şərh olunmsına çalışılmışdır. Bir sıra bölməldə irəli sürülmüş təklif və tövsiyyələr pedaqoji faliyyətdə müşahidə olunan həyatı faktlar əsasında formalaşdırılmıdır.\nTələbənin nəzərinə çatdırılan bu sillabus pedaqoji prosesin təşkili, bu prsesin iştrakçılarının psixologiyası, müəllim-şagird münasibətlərinin öyrənilməsinə həsr olunmuşdur. Burada son illərdə konseptual model kimi ortaya çıxan şəxsiyyətyönümlü təhsilə, onun paradiqmalarına geniş diqqət yetirilir, şagird və tələbələrin psixi sağlamlığı, onların təlimdə özünügerçəkləşdirməsinin müxtəlif problemləri, həmçinin təlimin effektivliyinin artırılması yolları, eləcədə sosial-psixoloji treniqlərdən istifadədən əks olunur.",
+     "goal": ""
+    },
+    "info": {
+     "certificates": [],
+     "language": "az",
+     "lesson_hours": 30,
+     "office_hours": "",
+     "prerequisites": "",
+     "research_interests": [],
+     "teacher": "",
+     "welcome": ""
+    },
+    "lit": {
+     "additional": [],
+     "primary": [
+      "1. B.Əliyev, R.Cabbarov. Təhsildə şəxsiyyət problemi. Bakı. 2014\n1. Bayramov Ə.S., Əlizadə Ə.Ə. Psixologiya. Bakı: 2003.\n2. Əlizadə Ə.Ə. Azərbaycan məktəbinin psixoloji problemləri. Bakı: 1998.\n3. Əliyev B.H. Şəxsiyyətə yeni baxış nəzəriyyəsi. Bakı, 1999.\n4. Əliyev B.H. Əqli keyfiyyətlərin formalaşmasında etnik-mədəni amillərin rolu. / Etnopsixologiya və etnopedaqogika. Respublika elmi konfransının tezisləri. Bakı, APU, 1992.\n5. Əliyev B.H. Sosial sifariş və özəl təhsilin bəzi məsələləri Özəl təhsilin problemləri. Bakı, 1996, s.\n6. Əliyev B.H. J.Piajenin nəzəriyyəsinin təlim fəaliyyəti üçün əhəmiyyəti haqqında. Bakı, 1996, s. 20-21.\n7. Əliyev B.H. Müəllim-tələbə münasibətlərinin təlim prosesinə təsiri . 1998.\n11. S.Əsgərov. Təhsilimiz dünən, bu gün, sabah. Bakı, 2003\n12. Xəlilov S. Təhsil, təlim, tərbiyə. Bakı: 2005\n13. Возрастная психология : феноменология развития: учебник для вузов, Мухина, В. С., 2009\n14. Дифференциальная психология : учеб. пособие для вузов, Нартова-Бочавер, С. К., 2002\n15. Когнитивная психология: история и современность : хрестоматия, , 2011\n16. Когнитивные стили : о природе индивид. ума: учеб. пособие для вузов, Холодная, М. А., 2004\n17. Психическое развитие в детских возрастах : избр. психол. труды, Эльконин, Д. Б., 2001\n18. Психология развития человека, Выготский, Л. С., 2003\n19. Психология развития, Крайг, Г., 2011\n20. Психология творческих способностей : учеб. пособие для вузов, Богоявленская, Д. Б., 2002\n21. Собрание сочинений. Т.5: Основы дефектологии, Выготский, Л. С., 1983"
+     ]
+    },
+    "method": {
+     "methods": [
+      "Yekun qiymət cari qiymətləndirməyə - seminar və kollokviumlar (0 - 30 bal), sərbəst iş (0 - 10 bal), davamiyyət (0 - 10 bal) və aralıq qiymətləndirməyə - semestr sonu imtahanlara (0 - 50 bal) görə verilən balların cəmidir. Eyni fəndən əlavə olaraq təcrübi və əməli dərslər nəzərdə tutulduğu halda bu dərslərin qiymətləndirilməsi üçün (0 – 10) bal ayrılır.\nYekun qiymət = cari qiymətləndirmə + aralıq qiymətləndirmə"
+     ],
+     "note": ""
+    },
+    "out": {
+     "outcomes": [
+      "- Təhsil psixologiyası elminin məqsəd və vəzifələri, elmi-tədqiqat metodları, digər elmlərlə əlaqəsi haqqında təsəvvürlərin formalaşdırılması;\n- Azərbaycanda və dünyada təhsil institutuna tarixi yanaşmalar haqqında təsəvvürlərin formalaşdırılması;\n- Təhsilə hazırlığın sosial-psixoloji əsasları;\n- Təhsilin funksiyaları, tipləri, quruluşu və aspektləri;\n- Təhsil münasibətlərdə sensor xüsusiyyətlərin nəzərə alınması;\n- Təhsildə münaqişələr və onların aradan qaldırılması yolları haqqında təsəvvürlərin formalaşdırılması."
+     ]
+    },
+    "prev": {},
+    "self": {
+     "archived": [],
+     "option": "",
+     "topics": [
+      {
+       "title": "1. Təhsil: tarixi-ictimai, institusional və şəxsiyyət aspektləri."
+      },
+      {
+       "title": "2. Təhsil təcrübəsi və onun psixoloji əsasları."
+      },
+      {
+       "title": "3.Təhsil və süni intellekt: təlimin rəqəmsal platformaları."
+      },
+      {
+       "title": "4. L.S.Vıqotskinin Pedaqoji psixologiya sahəsində konseptual ideyaları: təlim və inkişafın nisbəti."
+      },
+      {
+       "title": "5. J.Piaje və təhsil"
+      },
+      {
+       "title": "6. Motiv, təşəbbüskarlıq, məqsədyönlülük, inadkarlıq və təhsil."
+      },
+      {
+       "title": "7. Yaş psixologiyası və təhsil."
+      },
+      {
+       "title": "8. Təhsilin sosial psixologiyası: inkişafın sosial vəziyyətləri."
+      },
+      {
+       "title": "9. Fərdi fərqlərin psixologiyası"
+      },
+      {
+       "title": "10.Təhsilin fədiləşdirilməsi."
+      },
+      {
+       "title": "11.İnklyuziv təhsilin psixologiyası."
+      }
+     ]
+    },
+    "send": {},
+    "week": {
+     "rows": [
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Təhsilin məzmununun formalaşdı-rılmasının bəzi məsələləri"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Təlim situasiyaları və dərs"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Müasir dərs və şagirdlərin emosional vəziyyətinin psixoloji məqamları"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Müəllimin dərsə hazırlığının psixoloji məqamları"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Təlimdə qiymətləndirmənin psixoloji məsələləri"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Müəllim pedaqoji fəaliyyətin sub¬yekti kimi"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Şagird təlim fəaliyyətinin subyekti kimi"
+      },
+      {
+       "lab": 0,
+       "lecture": 1,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Təhsil və psixoloji sağlamlıq"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Təhsilin məzmununun aktuallığı"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Müasir təlim situasiyaları və şagirdlərin emosional vəziyyəti"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Qiymətləndirmə təlmin uğurunu təmin edən meyarlardan biri kimi"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Müəllim və şagird pedaqoji prosesin subyekti kimi"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Bəzi psixoloji effektlər təhsilin psixoloji problemi kimi"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Təhsilin təşkili zamanı şəxsiyyət amilinin aktuallığı"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Təhsil və psixoloji sağlamlıq məsələləri"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 1,
+       "topic": "Sosial-psixoloji treninqlərin əhəmiyyəti"
+      }
+     ]
+    }
+   },
+   "teacher": 7740
+  },
+  "7584": {
+   "content_sha256": "821cd3fd9dfaab3ced9aa8f9072b75996ec4b9dc13b406df3f9d0d1c1595f308",
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "hours": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "legacy_lesson": 1934,
+   "legacy_teacher": 85,
+   "sections": {
+    "assess": {
+     "exam_questions": [],
+     "midterm": 0,
+     "note": "Yekun qiymət cari qiymətləndirməyə - seminar və kollokviumlar (0 - 30 bal), sərbəst iş (0 - 10 bal), davamiyyət (0 - 10 bal) və aralıq qiymətləndirməyə - semestr sonu imtahanlara (0 - 50 bal) görə verilən balların cəmidir. Eyni fəndən əlavə olaraq təcrübi və əməli dərslər nəzərdə tutulduğu halda bu dərslərin qiymətləndirilməsi üçün (0 – 10) bal ayrılır.\nYekun qiymət = cari qiymətləndirmə + aralıq qiymətləndirmə",
+     "project": 0
+    },
+    "desc": {
+     "description": "Pedaqoji qanunlara və qanunauyğunluqlara aydınlıq gətirmək, onları dəqiq və konkret ifadə etmək kursun məqsədlərindən biridir. Kursun məqsədlərindən biri də tələbələrdə yaradıcı pedaqoji təfəkkürün inkişafına şərait yaratmaqdan ibarətdir.\nKurs pedaqoji proses anlayışı ilə başlayır. Sistemin mahiyyəti sxematik şəkildə belədir: pedaqoji elmin sahələri, mənbələri, metodları, pedaqoji proses (təhsil, təlim, tərbiyə, inkişaf və onların qarşılıqlı əlaqəsi, qanunauyğunluqlar), təhsil (mahiyyəti, məzmunu, növləri, sistemi, prinsipləri), təlim (mahiyyəti, vəzifələri, qanunauyğunluqlar, mərhələləri, formaları, metodları, vasitələri), tərbiyyə (məqsədi, vəzifələri, sahələri, prinsipləri, metodları, formaları), pedaqoji prosesin idarə olunması (idarə olunma və rəhbərlik metodik iş, məktəbin, ailənin, ictimaiyyətin və kollektivlərinin əlbir işi)",
+     "goal": ""
+    },
+    "info": {
+     "certificates": [],
+     "language": "az",
+     "lesson_hours": 45,
+     "office_hours": "",
+     "prerequisites": "",
+     "research_interests": [],
+     "teacher": "",
+     "welcome": ""
+    },
+    "lit": {
+     "additional": [],
+     "primary": [
+      "1.Nurəddin Kazımov. Ali məktəb pedaqogikası. Bakı. 2006.\n2.H.H. Əhmədov. Pedaqogika. Bakı. Mütərcim. 2015\n3.L. Qasımova, R. Mahmudova. Pedaqogika. Bakı, 2003\n1.Nurəddin Kazimov Tətbiqi pedaqogika. Bakı, Çaşıoğlu, 2010\n2.F.B.Sadıqov. Pedaqogika. Bakı, 2009\n3.Rzayev O.H, Məmmədov S.M, İsmayilov Ş.N Təhsilin idarə olunmasının əsasları (dərs vəsaiti ). Bakı, Mütərcim, 2010\n4. Л. П. Крившенко Педагогика: учебник для бакалавров / Л П. Крившенко [и др.]; под ред. — 2-е изд., перераб. и доп. — Москва : Проспект, 2013.\n5. И.Ф. Харламов. Педагогика. Москва, 2002\n6. Коджаспирова Г.М. Педагогика : учебник / Г.М. Коджаспирова. — М. : КНОРУС, 2010.\n7. А.А. Реан, Н.В. Бордовская, С.И. Розум. Психология и педагогика: учебник для вузов. М.,2002"
+     ]
+    },
+    "method": {
+     "methods": [
+      "Kollokviumlar akademik təqvimə uyğun olaraq hər semestrdə 3 dəfə təşkil olunur. Hər kollokvium 0 - 10 bal ilə qiymətləndirilir. Kollokviumun keçirilməsi məcburidir. Kollokviumda iştirak etməyən tələbəyə 0 bal yazılır."
+     ],
+     "note": ""
+    },
+    "out": {
+     "outcomes": [
+      "-Pedaqogika elminin məqsəd və vəzifələri, elmi-tədqiqat metodları, digər elmlərlə əlaqəsi haqqında təsəvvürlərin formalaşdırılması;\n-Təliminin təşkili formaları haqqında təsəvvürlərin formalaşdırılması;\n-Təliminin vasitələri haqqında təsəvvürlərin formalaşdırılması;\n-Pedaqoji prinsiplər, təlim metodları haqqında təsəvvürlərin formalaşdırılması;\n-Tələbələrdə təliminin məqsəd və vəzifələri haqqında təsəvvürlərin formalaşdırılması;\nTələbələrdə pedaqogoka kursunun məzmunu, qurulması xüsusiyyətləri haqqında təsəvvürlərin formalaşdırılması;"
+     ]
+    },
+    "prev": {},
+    "self": {
+     "archived": [],
+     "option": "",
+     "topics": [
+      {
+       "title": "1. Pedaqoji cərəyanlar."
+      },
+      {
+       "title": "2. Pedaqogikanın başqa elmlərlə əlaqəsi."
+      },
+      {
+       "title": "3. Şəxsiyyətin formalaşmasında mühitin rolu."
+      },
+      {
+       "title": "4. İdeya – siyasi tərbiyənin məqsədi, məzmunu və vəzifələri."
+      },
+      {
+       "title": "5. Əxlaq tərbiyəsinin mahiyyəti və məzmunu."
+      },
+      {
+       "title": "6. Estetik tərbiyənin əsas şərtləri."
+      },
+      {
+       "title": "7. Məktəbdə hüquq tərbiyəsinin məqsədi."
+      },
+      {
+       "title": "8. Dünya görüşü haqqında ümumi anlayış, elmi dünya görüşünün əsas əlamətləri."
+      },
+      {
+       "title": "9. Müasir dövrdə pedaqogika."
+      },
+      {
+       "title": "10. Tərbiyədə nəzarət, özünənəzarət və özünəqiymət."
+      }
+     ]
+    },
+    "send": {},
+    "week": {
+     "rows": [
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Pedaqogika elminin predmeti, anlayışları və elmi tədqiqat metodları."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Pedaqogika elminin və pedaqoji fikrin inkişaf tarixi."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Şəxsiyyətin inkişafı və tərbiyəsi.Uşaqların yaş dövrləri."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Pedaqoji proses, tərbiyənin məqsədləri."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Təhsil sistemi və onun prinsipləri"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Pedaqoji fəaliyyətin xüsusiyyətləri"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Didaktika təhsil və təlim nəzəriyyəsi kimi. i"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Təlimin qanunauyğunluqları və prinsipləri"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Təhsilin məzmunu Təlimin metodları"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Təlimin təşkili formaları"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Tərbiyə nəzəriyyəsi. Tərbiyə prosesinin mahiyyəti."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Tərbiyənin qanunauyğunluqları və prinsipləri"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Tərbiyənin metodları."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Şagirdlərin dünyagörüşünün formalaşdırılması. Onlarin əqli, vətəndaşlıq, əmək və əxlaq tərbiyəsi"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Pedaqogika elminin predmeti, anlayışları və elmi tədqiqat metodları."
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Pedaqogika elminin və pedaqoji fikrin inkişaf tarixi."
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Şəxsiyyətin inkişafı və tərbiyəsi. Uşaqların yaş dövrləri."
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Pedaqoji proses, tərbiyənin məqsədləri."
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Təhsil sistemi və onun prinsipləri"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Pedaqoji fəaliyyətin xüsusiyyətləri"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Didaktika təhsil və təlim nəzəriyyəsi kimi."
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Təlimin qanunauyğunluqları və prinsiplər"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 1,
+       "topic": "Tərbiyənin prinsipləri"
+      }
+     ]
+    }
+   },
+   "teacher": 7740
+  },
+  "8802": {
+   "content_sha256": "943ee1b458b967fefd2b121f608c838fdd8cb153c5edd9af014318a19acae254",
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "hours": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "legacy_lesson": 337,
+   "legacy_teacher": 166,
+   "sections": {
+    "assess": {
+     "exam_questions": [],
+     "midterm": 0,
+     "note": "1. İmtahandan əvvəl məsləhət saatları təşkil olunur.\n2. İmtahanlar və aralıq yoxlamalar (kollekviumlar) yazılı formada aparılır.\n3. Tələbələrin imtahana və aralıq yoxlamalara buraxılması ilə bağlı məsələlər fakültə dekanı tərəfindən həll edilir. İmtahan və aralıq yoxlamalar Azərbaycan Respublikası Nazirlər Kabinetinin 24 dekabr 2013-cü il tarixli 348 nömrəli qərarı ilə təsdiq edilmiş “Ali təhsil müəssisələrinin bakalavr və magistratura səviyyələrində kredit sistemi ilə təlimin təşkili Qaydaları”na əsasən aparılır.\n4. Semestr ərzində hər bir tələbə 1 müstəqil iş yerinə yetirməlidir. Müstəqil işlərin mövzuları\n\nkeçilən mövzuları əhatə edir. Hər bir müstəqil iş 10 ballıq sistemlə qiymətləndirilir.\n5. Sərbəst işin mövzusu tələbəyə müəllim tərəfindən hər semestrin 2-ci həftəsindən gec olmamaq şərti ilə təqdim edilir və ən gec müvafiq semestrin bitməsinə 2 həftə qalmış təhvil alınır.",
+     "project": 0
+    },
+    "desc": {
+     "description": "“Sağlamlıq və əməyin mühafizəsi” fənni iş və təhsil mühitində insan sağlamlığının qorunması, təhlükəsiz əmək şəraitinin yaradılması və bədbəxt hadisələrin qarşısının alınması ilə bağlı nəzəri və praktiki bilikləri əhatə edir.\nFənnin əsas məqsədi tələbələrdə əmək təhlükəsizliyi, əməyin mühafizəsi, peşə xəstəliklərinin profilaktikası, istehsalat risklərinin qiymətləndirilməsi və fövqəladə hallarda düzgün davranış üzrə bilik və bacarıqlar formalaşdırmaqdır.",
+     "goal": ""
+    },
+    "info": {
+     "certificates": [],
+     "language": "az",
+     "lesson_hours": 45,
+     "office_hours": "",
+     "prerequisites": "",
+     "research_interests": [],
+     "teacher": "",
+     "welcome": ""
+    },
+    "lit": {
+     "additional": [],
+     "primary": [
+      "1. Altunin A.T. Mülki Müdafiə dəstələri təbii fəlakətlərdə mühafizədə. Bakı. 1978.\n2. Михно Е.П. Ликвидация последствий аварий и стихийных бедствий. М., Автоиздат 1979\n3. Землетрясения в СССР (1985-1988 гг.) Сборник научных трудов ИФЗ РАН, Москва, 1989\n4. Maksimov M.T., Ocaqov H.O. radioaktiv çirklənmələr və onların 1. Altunin A.T. Mülki Müdafiə dəstələri təbii fəlakətlərdə mühafizədə. Bakı. 1978.\n2. Михно Е.П. Ликвидация последствий аварий и стихийных бедствий. М., Автоиздат 1979\n3. Землетрясения в СССР (1985-1988 гг.) Сборник научных трудов ИФЗ РАН, Москва, 1989\n4. Maksimov M.T., Ocaqov H.O. radioaktiv çirklənmələr və onların ölçülməsi. Bakı, 1989\n5. Ocaqov H.O. Radiasiya, kimyəvi və dozimetrik nəzarət cihazları. Bakı, 1997\n6. Ocaqov H.O. və başqaları. Zəhərli maddələr və onlardan mühafizə (dərs vəsaiti). Bakı, 1992\n7. Ocaqov H.O. və başqaları. Mülki müdafiə mühafizə qurğuları. 1993\n8. Ocaqov H.O. Mülki Müdafiə (dərs vəsaiti). Maarif, Bakı, 1997\n9. Ocaqov H.O., Nəzərov M.M. təbii fəlakətlər, qəzalar və onlardan mühafizə (dərs vəsaiti). Maarif, Bakı, 1998\n10. Ocaqov H.O. Fövqəladə hallarda həyat fəaliyyətinin təhlükəsizliyi (Ali məktəblər üçün dərslik). Çaşıoğlu, Bakı, 2002\n11. Ocaqov H.O. Gənclərin çağırışaqədərki hazırlığı. Aspoliqraf, Bakı, 2007\n12. Kərimov Z.S. Mülki Müdafiə. (dərs vəsaiti). Bakı, 2013\n13. Kərimov Z.S. Həyat fəaliyyətinin təhlükəsizliyi, əməyin mühafizəsi. Bakı, 2016"
+     ]
+    },
+    "method": {
+     "methods": [
+      "1. mühazirə\n2. mövzunun müzakirəsi və diskussiya\n3. seminar və kollokviumlar"
+     ],
+     "note": ""
+    },
+    "out": {
+     "outcomes": [
+      "-əməyin mühafizəsinin əsas prinsipləri və qanunvericilik əsasları;\n-istehsalatda təhlükəli və zərərli amillər;\n-iş yerlərində təhlükəsizlik qaydaları;\n-elektrik, yanğın və texniki təhlükəsizlik;\n-fərdi mühafizə vasitələrindən düzgün istifadə;\n-istehsalat xəsarətləri və peşə xəstəliklərinin qarşısının alınması;\n-sanitar-gigiyenik və sağlam əmək şəraitinin təşkili;\n-ilk tibbi yardımın əsasları;\n-fövqəladə hallar zamanı təhlükəsiz davranış qaydaları."
+     ]
+    },
+    "prev": {},
+    "self": {
+     "archived": [],
+     "option": "",
+     "topics": [
+      {
+       "title": "1.İş yerində təhlükəsizlik qaydaları ı"
+      },
+      {
+       "title": "2.İş yerlərində risklərin qiymətləndirilməsi"
+      },
+      {
+       "title": "3.İstehsalat qəzalarının səbəbləri və onların qarşısının alınmas"
+      },
+      {
+       "title": "4.İş şəraitinin insan sağlamlığına təsiri"
+      },
+      {
+       "title": "5.Peşə xəstəlikləri və onların profilaktikası"
+      },
+      {
+       "title": "6.İş yerində stress və onun sağlamlığa təsiri"
+      },
+      {
+       "title": "7.Uzunmüddətli oturaq işin insan sağlamlığına təsiri"
+      },
+      {
+       "title": "8.İş və istirahət rejiminin sağlamlıq üçün əhəmiyyəti"
+      },
+      {
+       "title": "9.İş yerində düzgün qidalanma və sağlam həyat tərzi"
+      },
+      {
+       "title": "10.Elektrik təhlükəsizliyi və qorunma üsulları"
+      },
+      {
+       "title": "11.Yanğın təhlükəsizliyi və yanğın zamanı davranış qaydaları"
+      },
+      {
+       "title": "12.Fərdi mühafizə vasitələri və onlardan düzgün istifadə"
+      },
+      {
+       "title": "13.Kimyəvi maddələrlə işləyərkən təhlükəsizlik qaydaları"
+      },
+      {
+       "title": "14.Səs-küyün və vibrasiyanın insan orqanizminə təsiri"
+      },
+      {
+       "title": "15.Tozlu iş mühitinin sağlamlığa təsiri"
+      },
+      {
+       "title": "16.Hündürlükdə iş zamanı təhlükəsizlik tədbirləri"
+      },
+      {
+       "title": "17.İlk tibbi yardımın əsas prinsipləri"
+      }
+     ]
+    },
+    "send": {},
+    "week": {
+     "rows": [
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Əməyin mühafizəsi və sağlamlığına giriş"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "İnsan sağlamlığında risk faktoru"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "İş yerlərində əməl ediləcək təhlükəsizlik tədbirləri"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Təhsil müəssisələrində əməyin təhlükəsizliyi üzrə işlərin təşkili"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "İstehsalat zədələnməsinin növləri və yaranma səbəbləri"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Alət və avadanlıqlarla iş zamanı əmək təhlükəsizliyi"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Əmək gigiyenası və istehsalat sanitariyası"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "İstehsalat səs-küylərinin və titrəyişlərin insan orqanizminə təsiri"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Atmosferdə radioaktivlik və əhalinin sağlamlığı"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Ətraf mühitin çirklənməsinin sağlamlığa təsiri"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Yanma.Yanğından mühafizə məsələləri"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "İstehsalat tozlanmsı.Tozlar və onlarla mübarizə üsulları"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "İnsanlarda psixifizioloji hal, psixifizioloji amillər və onların əməyin təhlükəsizliyinə təsiri"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Fərdi mühafizə vasitələri"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "İlk tibbi yardımın göstərilməsi"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Əməyin mühafizəsi və sağlamlığına giriş İnsan sağlamlığında risk faktoru"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "İş yerlərində əməl ediləcək təhlükəsizlik tədbirləri Təhsil müəssisələrində əməyin təhlükəsizliyi üzrə işlərin təşkili"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "İstehsalat zədələnməsinin növləri və yaranma səbəbləri Alət və avadanlıqlarla iş zamanı əmək təhlükəsizliyi"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Əmək gigiyenası və istehsalat sanitariyası İstehsalat səs-küylərinin və titrəyişlərin insan orqanizminə təsiri"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Atmosferdə radioaktivlik və əhalinin sağlamlığı Ətraf mühitin çirklənməsinin sağlamlığa təsiri"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Yanma.Yanğından mühafizə məsələləri İstehsalat tozlanmsı.Tozlar və onlarla mübarizə üsulları"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "İnsanlarda psixifizioloji hal, psixifizioloji amillər və onların əməyin təhlükəsizliyinə təsiri Fərdi mühafizə vasitələri"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 1,
+       "topic": "İlk tibbi yardımın göstərilməsi"
+      }
+     ]
+    }
+   },
+   "teacher": 7760
+  },
+  "8837": {
+   "content_sha256": "5c4c2e7c59baeb2f815379f3f14ee9c3b04f5caf61e394032811a0b8fbcc1f74",
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "hours": {
+    "lecture": 30,
+    "seminar": 30
+   },
+   "legacy_lesson": 452,
+   "legacy_teacher": 166,
+   "sections": {
+    "assess": {
+     "exam_questions": [],
+     "midterm": 0,
+     "note": "1. İmtahandan əvvəl məsləhət saatları təşkil olunur.\n2. İmtahanlar və aralıq yoxlamalar (kollekviumlar) yazılı formada aparılır.\n3. Tələbələrin imtahana və aralıq yoxlamalara buraxılması ilə bağlı məsələlər fakültə dekanı tərəfindən həll edilir. İmtahan və aralıq yoxlamalar Azərbaycan Respublikası Nazirlər Kabinetinin 24 dekabr 2013-cü il tarixli 348 nömrəli qərarı ilə təsdiq edilmiş “Ali təhsil müəssisələrinin bakalavr və magistratura səviyyələrində kredit sistemi ilə təlimin təşkili Qaydaları”na əsasən aparılır.\n4. Semestr ərzində hər bir tələbə 1 müstəqil iş yerinə yetirməlidir. Müstəqil işlərin mövzuları\n\nkeçilən mövzuları əhatə edir. Hər bir müstəqil iş 10 ballıq sistemlə qiymətləndirilir.\n5. Sərbəst işin mövzusu tələbəyə müəllim tərəfindən hər semestrin 2-ci həftəsindən gec olmamaq şərti ilə təqdim edilir və ən gec müvafiq semestrin bitməsinə 2 həftə qalmış təhvil alınır.",
+     "project": 0
+    },
+    "desc": {
+     "description": "“Ümumi coğrafi xəritələrin tərtibi və layihələndirilməsi” fənni ümumi coğrafi xəritələrin hazırlanmasının nəzəri və praktiki əsaslarını öyrənən fəndir. Fənnin tədrisi prosesində xəritələrin məzmununun müəyyənləşdirilməsi, kartoqrafik proyeksiyaların və miqyasın seçilməsi, xəritə elementlərinin layihələndirilməsi, kartoqrafik generalizasiya, coğrafi obyektlərin xəritədə təsviri və kartoqrafik dizayn prinsipləri nəzərdən keçirilir.Fənn çərçivəsində relyef, hidroqrafik şəbəkə, yaşayış məntəqələri, inzibati sərhədlər, nəqliyyat şəbəkəsi və digər ümumi coğrafi elementlərin xəritədə göstərilməsi üsulları öyrənilir.\n“Ümumi coğrafi xəritələrin tərtibi və layihələndirilməsi” fənninin məqsədi tələbələrə ümumi coğrafi xəritələrin tərtibi və layihələndirilməsinin nəzəri, metodoloji və praktiki əsaslarını öyrətmək, xəritə məzmununun düzgün seçilməsi və strukturlaşdırılması, kartoqrafik proyeksiyaların və miqyasın müəyyənləşdirilməsi, kartoqrafik generalizasiya, coğrafi obyektlərin müxtəlif üsullarla təsviri və xəritə dizaynının əsas prinsiplərini mənimsətməkdir.",
+     "goal": ""
+    },
+    "info": {
+     "certificates": [],
+     "language": "az",
+     "lesson_hours": 60,
+     "office_hours": "",
+     "prerequisites": "",
+     "research_interests": [],
+     "teacher": "",
+     "welcome": ""
+    },
+    "lit": {
+     "additional": [],
+     "primary": [
+      "1.Məmmədov, Q.Ş., Əhmədov, İ.H. Geodeziya və kartoqrafiyanın əsasları. Bakı: Nafta-Press, 2011, 646 s\n2.Məmmədov, Q.Ş., Əhmədov, İ.H. Geodeziya. Bakı, 2002, 520 s.\n3. Novruzova, Z.Ə. Kartoqrafiya 2. Bakı, 2013.\n4. Piriyev R.X. — “Kartoqrafiya”. Universitet tələbələri üçün dərslik. Bakı: Azərtədrisnəşr, 1964.\nKartoqrafiya materialları”. Azərbaycan Dövlət Pedaqoji İnstitutu. Bakı: AzXMQ nəşri, 1939."
+     ]
+    },
+    "method": {
+     "methods": [
+      "1. mühazirə\n2. mövzunun müzakirəsi və diskussiya\n3. seminar və kollokviumlar"
+     ],
+     "note": ""
+    },
+    "out": {
+     "outcomes": [
+      "1.Ümumi coğrafi xəritələrin mahiyyətini, məqsədini, funksiyalarını və əsas xüsusiyyətlərini izah edir.\n2.Ümumi coğrafi xəritələrin təsnifatını, məzmununu və tətbiq sahələrini fərqləndirir.\n3.Xəritənin məqsədinə, ərazi xüsusiyyətlərinə və miqyasına uyğun kartoqrafik proyeksiya və miqyas seçir.\n4.Ümumi coğrafi xəritənin tərtibinin əsas mərhələlərini və layihələndirmə prinsiplərini tətbiq edir.\n5.Xəritədə göstəriləcək coğrafi obyektləri seçir, sistemləşdirir və onların kartoqrafik generalizasiyasını həyata keçirir.\n6.Relyef, hidroqrafik şəbəkə, yaşayış məntəqələri, inzibati sərhədlər və nəqliyyat şəbəkəsini xəritədə müvafiq üsullarla təsvir edir."
+     ]
+    },
+    "prev": {},
+    "self": {
+     "archived": [],
+     "option": "",
+     "topics": [
+      {
+       "title": "1.Xəritələrdə rənglərin istifadəsi. ."
+      },
+      {
+       "title": "2.İlk xəritələr və onların müəllifləri"
+      },
+      {
+       "title": "3.GIS texnologiyalarının ümumi coğrafi xəritələrin hazırlanmasında rolu"
+      },
+      {
+       "title": "4.Rəqəmsal xəritələrin keyfiyət göstəriciləri"
+      },
+      {
+       "title": "5.Kartoqrafik proyeksiyalarda təhriflər"
+      },
+      {
+       "title": "6.Göllərin və su anbarlarının xəritədə təsviri"
+      },
+      {
+       "title": "7. Xəritələrin miqyasına görə təsnifatı"
+      },
+      {
+       "title": "8. Kartoqrafik proyeksiyaların təsnifatı"
+      },
+      {
+       "title": "9. Silindrik proyeksiyalar və onların tətbiqi"
+      },
+      {
+       "title": "10. Relyefin ümumi coğrafi xəritələrdə təsviri"
+      },
+      {
+       "title": "11. Horizontalların xəritədə istifadəsi"
+      },
+      {
+       "title": "12. Ümumi coğrafi və tematik xəritələrin müqayisəsi"
+      },
+      {
+       "title": "13. Relyefin ümumi coğrafi xəritələrdə təsviri"
+      },
+      {
+       "title": "14. Azimutal proyeksiyalar və onların tətbiqi"
+      },
+      {
+       "title": "15. Bərabərsahəli proyeksiyalar"
+      }
+     ]
+    },
+    "send": {},
+    "week": {
+     "rows": [
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Kartoqrafiya elmi və müasir kartoqrafiyanın inkişaf istiqamətləri"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Xəritələr və onların təsnifatı"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Xəritənin riyazi əsası"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Xəritənin miqyası"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Kartoqrafik proyeksiyalar və onların seçilməsi"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Koordinat sistemləri və kartoqrafik şəbəkə"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Kartoqrafik generalizasiya"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Relyefin ümumcoğrafi xəritələrdə təsviri"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Hidroqrafik obyektlərin xəritədə təsviri"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Yaşayış məntəqələri, yollar və digər obyektlərin təsviri"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Kartoqrafik şərti işarələr və xəritələrin legendası"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Xəritənin komponovkası və bədii tərtibatı"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Xüsusi xəritələr"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Coğrafiya xəritələrin tərtibi və nəşr edilməsi"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Rəqəmsal xəritələr və CİS"
+      }
+     ]
+    }
+   },
+   "teacher": 7760
+  }
+ },
+ "targets": [
+  {
+   "action": "restore",
+   "group_id": "de6fb053-b9e1-4488-80d2-0c4f76f5c933",
+   "key": "t01",
+   "lesson_hours": 45,
+   "offering_id": "d4dff429-14ba-49e4-bd96-6bec149128f9",
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "source": "1702",
+   "subject_ids": [
+    "b3ec33fd-9890-4c23-8b1b-a0e230494468"
+   ],
+   "teacher": 7740
+  },
+  {
+   "action": "restore",
+   "group_id": "ad456b2c-7b72-40fe-8235-4559dbd7a7d6",
+   "key": "t02",
+   "lesson_hours": 30,
+   "offering_id": "e2a4155d-8e96-41e8-bc92-d635eb306429",
+   "plan": {
+    "lecture": 15,
+    "seminar": 15
+   },
+   "source": "1191",
+   "subject_ids": [
+    "9455663e-edb0-48e1-980b-6d430d07575d"
+   ],
+   "teacher": 7740
+  },
+  {
+   "action": "restore",
+   "group_id": "c895b91a-d8c2-48ac-a971-10b8812a2692",
+   "key": "t03",
+   "lesson_hours": 30,
+   "offering_id": "21eefbe1-1e16-4bfe-98a6-398a05c651db",
+   "plan": {
+    "lecture": 15,
+    "seminar": 15
+   },
+   "source": "6672",
+   "subject_ids": [
+    "15acc923-4638-43e8-8de8-f6cdb25b6f51"
+   ],
+   "teacher": 7740
+  },
+  {
+   "action": "restore",
+   "group_id": "96aa5842-71f8-43a1-88d2-b3a0fd1dce79",
+   "key": "t04",
+   "lesson_hours": 30,
+   "offering_id": "ed824e94-ae19-4966-8c99-ae6369f1d2ef",
+   "plan": {
+    "lecture": 15,
+    "seminar": 15
+   },
+   "source": "6672",
+   "subject_ids": [
+    "15acc923-4638-43e8-8de8-f6cdb25b6f51"
+   ],
+   "teacher": 7740
+  },
+  {
+   "action": "restore",
+   "group_id": "20751748-91a6-4c9f-ae3e-1c16fe68b790",
+   "key": "t05",
+   "lesson_hours": 45,
+   "offering_id": null,
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "source": "7584",
+   "subject_ids": [
+    "805186d7-0ff7-470d-a4e8-ef150cf4d79f"
+   ],
+   "teacher": 7740
+  },
+  {
+   "action": "restore",
+   "group_id": "7ed5718e-471b-45d3-9a21-31c2ada78a58",
+   "key": "t06",
+   "lesson_hours": 45,
+   "offering_id": null,
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "source": "7584",
+   "subject_ids": [
+    "805186d7-0ff7-470d-a4e8-ef150cf4d79f"
+   ],
+   "teacher": 7740
+  },
+  {
+   "action": "restore",
+   "group_id": "de6fb053-b9e1-4488-80d2-0c4f76f5c933",
+   "key": "t07",
+   "lesson_hours": 45,
+   "offering_id": null,
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "source": "7584",
+   "subject_ids": [
+    "805186d7-0ff7-470d-a4e8-ef150cf4d79f"
+   ],
+   "teacher": 7740
+  },
+  {
+   "action": "plan_sync",
+   "group_id": "0101a2e8-71d6-48a1-b348-be6f0cffc6e2",
+   "key": "t08",
+   "lesson_hours": 45,
+   "offering_id": "321772aa-08b4-42e3-b257-432cda4195ea",
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "subject_ids": [
+    "805186d7-0ff7-470d-a4e8-ef150cf4d79f"
+   ],
+   "teacher": 7740
+  },
+  {
+   "action": "plan_sync",
+   "group_id": "fcf76668-416b-42ed-90a2-829a68719f43",
+   "key": "t09",
+   "lesson_hours": 45,
+   "offering_id": "058265ab-2074-4e60-8461-57a291ada6aa",
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "subject_ids": [
+    "805186d7-0ff7-470d-a4e8-ef150cf4d79f"
+   ],
+   "teacher": 7740
+  },
+  {
+   "action": "plan_sync",
+   "group_id": "2618b6dc-1ebf-49c0-8e26-337421d7550f",
+   "key": "t10",
+   "lesson_hours": 45,
+   "offering_id": "c987cd29-d304-453c-9c45-f49b546f802f",
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "subject_ids": [
+    "805186d7-0ff7-470d-a4e8-ef150cf4d79f"
+   ],
+   "teacher": 7740
+  },
+  {
+   "action": "plan_sync",
+   "group_id": "7285502e-a567-4c74-a266-68420310506d",
+   "key": "t11",
+   "lesson_hours": 45,
+   "offering_id": "331d624c-526d-4a00-9bbc-3d290b21f3f7",
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "subject_ids": [
+    "805186d7-0ff7-470d-a4e8-ef150cf4d79f"
+   ],
+   "teacher": 7740
+  },
+  {
+   "action": "plan_sync",
+   "group_id": "d9b5894f-e2cf-4505-b66d-b0c92502579e",
+   "key": "t12",
+   "lesson_hours": 45,
+   "offering_id": "c9042b99-88fa-4486-8b26-5f4cafb4c894",
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "subject_ids": [
+    "805186d7-0ff7-470d-a4e8-ef150cf4d79f"
+   ],
+   "teacher": 7740
+  },
+  {
+   "action": "plan_sync",
+   "group_id": "3031bbbc-3e0c-4a45-86a8-4f9cd087641f",
+   "key": "t13",
+   "lesson_hours": 45,
+   "offering_id": "ba230863-1347-490d-8db0-ccdbce3440cd",
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "subject_ids": [
+    "805186d7-0ff7-470d-a4e8-ef150cf4d79f"
+   ],
+   "teacher": 7740
+  },
+  {
+   "action": "plan_sync",
+   "group_id": "14afed62-6d55-4cdc-b58d-c1407a909859",
+   "key": "t14",
+   "lesson_hours": 90,
+   "offering_id": "3ef9c530-ddc2-48d2-9196-df9077692691",
+   "plan": {
+    "lecture": 45,
+    "seminar": 45
+   },
+   "subject_ids": [
+    "ad334c29-1250-4713-9b30-c90dc5ba9759"
+   ],
+   "teacher": 7740,
+   "week_gap_ok": true
+  },
+  {
+   "action": "plan_sync",
+   "group_id": "cc3dc2da-f694-4674-965f-2857c3fa7ac3",
+   "key": "t15",
+   "lesson_hours": 90,
+   "offering_id": "74804455-d717-418f-81b6-447232a7d8af",
+   "plan": {
+    "lecture": 45,
+    "seminar": 45
+   },
+   "subject_ids": [
+    "ad334c29-1250-4713-9b30-c90dc5ba9759"
+   ],
+   "teacher": 7740,
+   "week_gap_ok": true
+  },
+  {
+   "action": "plan_sync",
+   "group_id": "7d5faf21-dc73-4dd0-9bd5-dc75c649dbb3",
+   "key": "t16",
+   "lesson_hours": 60,
+   "offering_id": "8b80ae30-5d92-425c-b525-4fd93cb0f157",
+   "plan": {
+    "lecture": 30,
+    "seminar": 30
+   },
+   "subject_ids": [
+    "3f86c3cc-9d0f-43bb-ae95-47583efa7b9b"
+   ],
+   "teacher": 7740
+  },
+  {
+   "action": "plan_sync",
+   "group_id": "29ae0848-51ae-4500-b11d-41ddf47c9d5c",
+   "key": "t17",
+   "lesson_hours": 90,
+   "offering_id": "970ef15b-c3b3-4c0d-bdf9-1ad0a973844d",
+   "plan": {
+    "lecture": 45,
+    "seminar": 45
+   },
+   "subject_ids": [
+    "b4dbc6a9-827e-4a54-bdba-38fe9df68b13"
+   ],
+   "teacher": 7740
+  },
+  {
+   "action": "plan_sync",
+   "group_id": "0d82a980-c54e-44b2-9b0b-b899bff3fdfb",
+   "key": "t18",
+   "lesson_hours": 30,
+   "offering_id": "043c12a1-d0e4-47cb-b961-749f0d8d5778",
+   "plan": {
+    "lecture": 15,
+    "seminar": 15
+   },
+   "subject_ids": [
+    "9455663e-edb0-48e1-980b-6d430d07575d"
+   ],
+   "teacher": 7740
+  },
+  {
+   "action": "restore",
+   "group_id": "fdb60c85-bc02-49f7-a972-24d7df81bdda",
+   "key": "mr250",
+   "lesson_hours": 60,
+   "offering_id": "ce820e15-c14e-4cf8-97bf-7da94de50361",
+   "plan": {
+    "lecture": 30,
+    "seminar": 30
+   },
+   "retire_base": {
+    "content_digest": "9921611a93793c315d633ee5b2820544b0414ccb548a78284e768c4b9bccbd5b",
+    "syllabus_id": "434573c6-65c7-4750-bcce-245b72ce7314",
+    "version_id": "09176895-00fc-4249-9c0f-c4c12195ede9"
+   },
+   "skip_if_receipt": "legacy_import.govher_own_syllabi",
+   "source": "8837",
+   "subject_ids": [
+    "16f1431a-260a-4fd8-8c04-ebdb671f97f8",
+    "1602eef4-2d64-4540-a435-ea49bbeff201"
+   ],
+   "teacher": 7760
+  },
+  {
+   "action": "restore",
+   "group_id": "bb710525-2453-4ca0-85bc-71da98736988",
+   "key": "mr251",
+   "lesson_hours": 45,
+   "offering_id": "ceea77f8-48c9-4083-98a4-40c6099fcba2",
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "skip_if_receipt": "legacy_import.govher_own_syllabi",
+   "source": "8802",
+   "subject_ids": [
+    "f7ed2e30-6e45-40bd-881c-bc00474173c2"
+   ],
+   "teacher": 7760
+  }
+ ]
+}
