@@ -18,7 +18,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from . import campus, finals, gradebook, journal_edit_windows, legacy_excuse, lesson_rooms, practical_label
+from . import campus, finals, gradebook, journal_edit_windows, lab_groups, legacy_excuse, lesson_rooms, practical_label
 from . import practical_toggle as _practical_toggle
 from . import schedule
 from .models import CorrectionReason
@@ -249,6 +249,7 @@ def journal_detail(request, offering_id):
         # yuxarıda söndürülür) və panel kilid + CTA göstərir.
         "syllabus_gate": syllabus_gate,
         "lesson_kinds": practical_label.kind_choices(offering),  # «praktiki» açılışda seminar → «Praktiki məşğələ»
+        "lab_group_choices": lab_groups.choices(offering),  # Lab-1 / Lab-2 (sahib 2026-11-06); bölünməyibsə boş
         "practical_toggle": _practical_toggle.context(request.user, offering),
         "locked_lesson_kind": journal_extras.locked_lesson_kind(offering),
         "topic_choices": journal_extras.lesson_topic_choices(offering),

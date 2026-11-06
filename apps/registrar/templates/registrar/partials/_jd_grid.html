@@ -105,12 +105,14 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                                 {{ lm.lesson.date|date:"d.m" }}
                                 {% endif %}
                                 {% if lm.is_today %}<div class="jd2-th-today">{% trans "BU GÜN" context "registrar.journal" %}</div>{% endif %}
+                                {% if lm.lab_group_label %}<div class="jd2-th-labgroup" title="{% trans 'Bu laboratoriya dərsi yalnız bu qrupun tələbələrinindir' context 'registrar.lab_groups' %}">{{ lm.lab_group_label }}</div>{% endif %}
                                 {% if lm.lesson.off_schedule_reason %}<div class="jd2-th-offsched"><i class="fas fa-flag" aria-hidden="true"></i> {% trans "cədvəldən kənar" context "registrar.journal_activation" %}</div>{% endif %}
                                 {% if can_edit and lm.editable or correction_mode and can_override_lessons %}
                                 <button type="button" class="jd2-th-edit" data-jd-edit-lesson
                                         data-lesson-id="{{ lm.lesson.id }}"
                                         data-lesson-date="{{ lm.lesson.date|date:'Y-m-d' }}"
                                         data-lesson-kind="{{ lm.lesson.kind }}"
+                                        data-lesson-lab-group="{{ lm.lesson.lab_group|default:'' }}"
                                         data-lesson-topic="{{ lm.lesson.display_topic }}"
                                         data-lesson-hours="{{ lm.lesson.hours }}"
                                         data-lesson-locked="{% if not lm.editable %}1{% endif %}"
@@ -149,6 +151,7 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                                 <div class="jd2-stu-inner">
                                     <span class="jd2-stu-no">{{ forloop.counter }}</span>
                                     <span class="jd2-stu-name" data-jd-hint-name>{{ row.student|journal_name }}</span><small class="badge rounded-pill text-bg-light border" title="{% trans 'Əsas qrup' context 'registrar.language_cohort' %}">{{ row.home_group.name|default:"—" }}</small>
+                                    {% if row.lab_group_label %}<small class="jd2-labchip" title="{% trans 'Laboratoriya qrupu' context 'registrar.lab_groups' %}">{{ row.lab_group_label }}</small>{% elif row.lab_group_missing %}<small class="jd2-labchip jd2-labchip--missing" title="{% trans 'Tələbə heç bir laboratoriya qrupuna yerləşdirilməyib — qruplu lab dərsləri ona aid deyil. RİM-ə müraciət edin.' context 'registrar.lab_groups' %}">{% trans "Lab qrupu yoxdur" context "registrar.lab_groups" %}</small>{% endif %}
                                     {% if can_exempt %}{# «Fəndən azad et» — yalnız bu jurnaldan (sahib 2026-10-15) #}
                                     <button type="button" class="jse-row-btn" data-jse-open="{{ row.enrollment.id }}" data-jse-student="{{ row.student|journal_name }}"
                                             title="{% trans 'Fəndən azad et — tələbə qrupda qalır, yalnız bu jurnaldan çıxır' context 'registrar.subject_exempt' %}"
@@ -198,8 +201,11 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                                 </div>
                             </td>
                             {% for cell in row.cells %}
-                            <td class="jd2-cell {% if cell.lesson.date == journal.today %}is-today{% endif %}{% if cell.corrected %} corr-fixed{% endif %}{% if cell.legacy_excuse %} corr-excuse{% endif %}">
-                                {% if correction_mode %}
+                            <td class="jd2-cell {% if cell.lesson.date == journal.today %}is-today{% endif %}{% if cell.corrected %} corr-fixed{% endif %}{% if cell.legacy_excuse %} corr-excuse{% endif %}{% if cell.off_group %} jd2-cell--offgroup{% endif %}">
+                                {% if cell.off_group %}
+                                {# Başqa laboratoriya qrupunun dərsi (sahib 2026-11-06) — bu tələbənin xanası yoxdur. #}
+                                <span class="jd2-ro jd2-ro--offgroup" title="{% trans 'Başqa laboratoriya qrupunun dərsi' context 'registrar.lab_groups' %}">·</span>
+                                {% elif correction_mode %}
                                 {# Yerində audited düzəliş: HƏR xana (boş daxil) → modal (correction.js). #}
                                 <button type="button" class="corr-cell-btn{% if not cell.mark %} corr-cell-btn--empty{% endif %}" data-corr-cell
                                         {% if cell.mark %}data-mark-id="{{ cell.mark.id }}"{% endif %}

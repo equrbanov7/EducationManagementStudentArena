@@ -114280,3 +114280,59 @@ msgstr "показать все"
 msgctxt "exams.view.question_bank.warning"
 msgid "multiple_correct"
 msgstr "Отмечено несколько правильных ответов ({labels}) — в мидтерме и финальном экзамене у вопроса должен быть ровно один правильный ответ."
+
+msgctxt "registrar.lab_groups"
+msgid "Lab-%(n)s"
+msgstr "Лаб-%(n)s"
+
+msgctxt "registrar.lab_groups"
+msgid "Laboratoriya qrupu düzgün seçilməyib."
+msgstr "Лабораторная группа выбрана неверно."
+
+msgctxt "registrar.lab_groups"
+msgid "Laboratoriya qrupu yalnız laboratoriya dərsinə aiddir."
+msgstr "Лабораторная группа относится только к лабораторному занятию."
+
+msgctxt "registrar.lab_groups"
+msgid "Bu jurnalda belə laboratoriya qrupu yoxdur."
+msgstr "В этом журнале нет такой лабораторной группы."
+
+msgctxt "registrar.lab_groups"
+msgid "Bu jurnal laboratoriya qruplarına bölünüb — dərsin qrupunu seçin."
+msgstr "Этот журнал разделён на лабораторные группы — выберите группу занятия."
+
+msgctxt "registrar.lab_groups"
+msgid "Bu dərsdə başqa laboratoriya qrupunun tələbələrinə qeyd yazılıb — qrupu dəyişmək olmaz."
+msgstr "На этом занятии уже есть отметки студентов другой лабораторной группы — группу изменить нельзя."
+
+msgctxt "registrar.lab_groups"
+msgid "Bu laboratoriya dərsi yalnız bu qrupun tələbələrinindir"
+msgstr "Это лабораторное занятие только для студентов этой группы"
+
+msgctxt "registrar.lab_groups"
+msgid "Laboratoriya qrupu"
+msgstr "Лабораторная группа"
+
+msgctxt "registrar.lab_groups"
+msgid "Tələbə heç bir laboratoriya qrupuna yerləşdirilməyib — qruplu lab dərsləri ona aid deyil. RİM-ə müraciət edin."
+msgstr "Студент не распределён ни в одну лабораторную группу — групповые лабораторные занятия к нему не относятся. Обратитесь в РИМ."
+
+msgctxt "registrar.lab_groups"
+msgid "Lab qrupu yoxdur"
+msgstr "Нет лаб. группы"
+
+msgctxt "registrar.lab_groups"
+msgid "Başqa laboratoriya qrupunun dərsi"
+msgstr "Занятие другой лабораторной группы"
+
+msgctxt "registrar.lab_groups"
+msgid "LABORATORİYA QRUPU"
+msgstr "ЛАБОРАТОРНАЯ ГРУППА"
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupu seçin…"
+msgstr "Выберите группу…"
+
+msgctxt "registrar.lab_groups"
+msgid "Dərs yalnız bu qrupun tələbələrinə yazılır; mühazirə və seminar bütün qrupladır."
+msgstr "Занятие записывается только студентам этой группы; лекции и семинары — для всей группы."

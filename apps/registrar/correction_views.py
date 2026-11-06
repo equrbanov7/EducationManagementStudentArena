@@ -191,6 +191,10 @@ def _resolve_grade_mark(request, offering):
     existing = LessonMark.objects.filter(lesson=lesson, enrollment=enrollment).select_related("lesson").first()
     if existing is not None:
         return existing, False
+    from .lab_groups import applies
+
+    if not applies(lesson, enrollment):
+        raise Http404  # başqa laboratoriya qrupunun dərsi — bu tələbənin xanası yoxdur (sahib 2026-11-06)
     mark = LessonMark(
         organization=offering.organization, lesson=lesson, enrollment=enrollment, status=AttendanceStatus.PRESENT
     )

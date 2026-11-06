@@ -255,6 +255,18 @@ def lesson_action(request, offering_id, lesson_id):
             from apps.registrar.lesson_rooms import resolve_lesson_room
 
             room = resolve_lesson_room(offering.organization, request.POST.get("lesson_room"))
+        # Laboratoriya qrupu (sahib 2026-11-06) — yalnız sahə POST-da varsa (bölünmüş jurnalın modalı).
+        lab_group = gradebook.UNSET
+        if "lesson_lab_group" in request.POST:
+            from apps.registrar import lab_groups
+
+            try:
+                lab_group = lab_groups.parse(request.POST.get("lesson_lab_group"))
+                # Redaktədə qrup MƏCBURİ deyil: köhnə (bütün qruplu) lab dərsi qrupsuz qala bilər.
+                lab_groups.validate(offering, kind=kind or lesson.kind, lab_group=lab_group)
+            except lab_groups.LabGroupError as exc:
+                messages.error(request, str(exc))
+                return _back(offering)
 
         before = journal_full_edit.lesson_snapshot(lesson) if full_bypass else None
         try:
@@ -269,6 +281,7 @@ def lesson_action(request, offering_id, lesson_id):
                     end_time=end_time or "",
                     instructor=instructor,
                     room=room,
+                    lab_group=lab_group,
                     allow_past=override,
                     # Pəncərə açıqdır (yuxarıda yoxlanıb) — kilid keçidi lazım deyil; data bərpası öz yolu ilə.
                     allow_locked=False,

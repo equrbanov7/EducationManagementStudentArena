@@ -263,6 +263,8 @@ def _unlock_grid(journal, *, journal_locked) -> None:
     for row in journal.get("rows", []):
         for cell in row["cells"]:
             mark = cell["mark"]
+            if cell.get("off_group"):
+                continue  # başqa laboratoriya qrupunun dərsi — bərpa rejimində də bu tələbənin xanası deyil
             if cell["corrected"] or (mark is not None and mark.status == AttendanceStatus.EXCUSED):
                 continue
             cell.update(locked=False, lock_reason="", writable=True)

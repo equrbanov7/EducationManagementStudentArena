@@ -44,7 +44,7 @@ from django.db import transaction
 from django.db.models import Q, Sum
 from django.utils import timezone
 
-from apps.registrar import grade_audit, journal_edit_windows
+from apps.registrar import grade_audit, journal_edit_windows, lab_groups
 from apps.registrar.models import AttendanceStatus, Enrollment, Lesson, LessonMark
 from core.rls import journal_unlock
 
@@ -188,6 +188,9 @@ def save_marks(
         clearing = entry.get("status") == CLEAR
         if clearing and (mark is None or not full_edit):
             continue  # «təmizlə» yalnız data bərpası rejimində və yalnız mövcud xanada
+        if not clearing and not lab_groups.applies(lesson, enrollment):
+            rejected += 1  # başqa laboratoriya qrupunun dərsi — bu tələbəyə xana yazılmır (sahib 2026-11-06)
+            continue
         if (
             mark is not None
             and mark.score is not None
