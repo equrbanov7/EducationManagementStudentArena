@@ -1,0 +1,27 @@
+/* Laboratoriya qrupları bir jurnal daxilində (sahib 2026-11-06) — _jd_grid.html. */
+.jd2-th-labgroup {
+    display: inline-block;
+    margin-top: 2px;
+    padding: 1px 6px;
+    border-radius: 6px;
+    background: #ede9fe;
+    color: #6d28d9;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+.jd2-labchip {
+    margin-left: 4px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: #ede9fe;
+    color: #6d28d9;
+    font-size: 10.5px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+.jd2-labchip--missing { background: #fef3c7; color: #b45309; }
+.jd2-cell--offgroup {
+    background: repeating-linear-gradient(135deg, #f8fafc, #f8fafc 5px, #f1f5f9 5px, #f1f5f9 10px);
+}
+.jd2-ro--offgroup { color: #cbd5e1; }

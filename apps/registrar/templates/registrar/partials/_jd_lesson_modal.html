@@ -133,6 +133,21 @@ varsa dərs tipi kilidlidir.
                         </div>
                     </div>
                 </div>
+                {% if lab_group_choices %}
+                {% comment %}Laboratoriya qrupları (sahib 2026-11-06): jurnal Lab-1 / Lab-2 siyahılarına bölünübsə lab dərsi
+                yalnız seçilmiş qrupun tələbələrinindir; qrup məcburidir (server də yoxlayır). Sahə yalnız dərs tipi
+                «laboratoriya» olanda görünür — journal_lesson_lab_group.js.{% endcomment %}
+                <div class="jd2-field" data-jd-lab-group-field hidden>
+                    <span class="jd2-field-label">{% trans "LABORATORİYA QRUPU" context "registrar.lab_groups" %}</span>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select name="lesson_lab_group" class="ems-select bootstrap-single-select__native" data-jd-lesson-lab-group data-bootstrap-select>
+                            <option value="">{% trans "Qrupu seçin…" context "registrar.lab_groups" %}</option>
+                            {% for value, label in lab_group_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <small class="jd-field-hint">{% trans "Dərs yalnız bu qrupun tələbələrinə yazılır; mühazirə və seminar bütün qrupladır." context "registrar.lab_groups" %}</small>
+                </div>
+                {% endif %}
                 <div class="jd2-field">
                     <span class="jd2-field-label">{% trans "DƏRS SAATI" context "registrar.journal" %}</span>
                     <div class="bootstrap-single-select bootstrap-single-select--ems">

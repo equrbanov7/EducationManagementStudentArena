@@ -114087,3 +114087,59 @@ msgstr "show all"
 msgctxt "exams.view.question_bank.warning"
 msgid "multiple_correct"
 msgstr "More than one correct answer is marked ({labels}) — a midterm or final question must have exactly one correct answer."
+
+msgctxt "registrar.lab_groups"
+msgid "Lab-%(n)s"
+msgstr "Lab %(n)s"
+
+msgctxt "registrar.lab_groups"
+msgid "Laboratoriya qrupu düzgün seçilməyib."
+msgstr "The lab group is not selected correctly."
+
+msgctxt "registrar.lab_groups"
+msgid "Laboratoriya qrupu yalnız laboratoriya dərsinə aiddir."
+msgstr "A lab group applies only to a lab lesson."
+
+msgctxt "registrar.lab_groups"
+msgid "Bu jurnalda belə laboratoriya qrupu yoxdur."
+msgstr "This journal has no such lab group."
+
+msgctxt "registrar.lab_groups"
+msgid "Bu jurnal laboratoriya qruplarına bölünüb — dərsin qrupunu seçin."
+msgstr "This journal is split into lab groups — choose the lesson's group."
+
+msgctxt "registrar.lab_groups"
+msgid "Bu dərsdə başqa laboratoriya qrupunun tələbələrinə qeyd yazılıb — qrupu dəyişmək olmaz."
+msgstr "This lesson already has records for students of another lab group — the group cannot be changed."
+
+msgctxt "registrar.lab_groups"
+msgid "Bu laboratoriya dərsi yalnız bu qrupun tələbələrinindir"
+msgstr "This lab lesson belongs only to this group's students"
+
+msgctxt "registrar.lab_groups"
+msgid "Laboratoriya qrupu"
+msgstr "Lab group"
+
+msgctxt "registrar.lab_groups"
+msgid "Tələbə heç bir laboratoriya qrupuna yerləşdirilməyib — qruplu lab dərsləri ona aid deyil. RİM-ə müraciət edin."
+msgstr "The student is not placed in any lab group — group lab lessons do not apply to them. Contact the registrar's office."
+
+msgctxt "registrar.lab_groups"
+msgid "Lab qrupu yoxdur"
+msgstr "No lab group"
+
+msgctxt "registrar.lab_groups"
+msgid "Başqa laboratoriya qrupunun dərsi"
+msgstr "Another lab group's lesson"
+
+msgctxt "registrar.lab_groups"
+msgid "LABORATORİYA QRUPU"
+msgstr "LAB GROUP"
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupu seçin…"
+msgstr "Choose the group…"
+
+msgctxt "registrar.lab_groups"
+msgid "Dərs yalnız bu qrupun tələbələrinə yazılır; mühazirə və seminar bütün qrupladır."
+msgstr "The lesson is recorded only for this group's students; lectures and seminars are for the whole group."
