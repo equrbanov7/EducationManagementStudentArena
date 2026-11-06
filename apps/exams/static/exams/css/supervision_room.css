@@ -1,0 +1,252 @@
+/* «Nəzarət otağı» (sahib 2026-11-06) — imtahan səviyyəli canlı nəzarət. Ortaq qabıq:
+   teacher_page_shell.css (etp-*) + ems_ui (badge, table, overlay). Burada yalnız səhifəyə xas qat. */
+
+.svr-page .etp-note--warning {
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.svr-page .etp-note--warning > i {
+    color: var(--ems-warning-700);
+}
+
+.svr-page .etp-note a {
+    color: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.svr-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-5);
+    padding: var(--ems-pad-card);
+}
+
+.svr-card__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-4);
+}
+
+.svr-card__title {
+    margin: 0;
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+    color: var(--ems-text);
+}
+
+.svr-conn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-success-700);
+}
+
+.svr-conn::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ems-success);
+}
+
+.svr-conn[data-state="offline"] {
+    color: var(--ems-warning-800);
+}
+
+.svr-conn[data-state="offline"]::before {
+    background: var(--ems-warning-500);
+}
+
+.svr-table {
+    min-width: 760px;
+}
+
+.svr-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.svr-num--hot {
+    color: var(--ems-danger-700);
+    font-weight: 800;
+}
+
+.svr-row--locked {
+    background: var(--ems-danger-bg);
+}
+
+.svr-row--warned {
+    background: var(--ems-warning-50);
+}
+
+.svr-who {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.svr-who__name {
+    font-weight: 700;
+    color: var(--ems-text);
+}
+
+.svr-who__meta,
+.svr-sub,
+.svr-muted {
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-text-muted);
+}
+
+.svr-sub {
+    display: block;
+    margin-top: 2px;
+}
+
+.svr-flag {
+    align-self: flex-start;
+    margin-top: 2px;
+}
+
+.svr-hb {
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+}
+
+.svr-hb--ok {
+    color: var(--ems-success-700);
+}
+
+.svr-hb--stale {
+    color: var(--ems-danger-700);
+}
+
+.svr-actions-col {
+    width: 1%;
+}
+
+.svr-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--ems-sp-2);
+    white-space: nowrap;
+}
+
+.svr-dialog__text {
+    margin: 0 0 var(--ems-sp-5);
+    line-height: 1.55;
+    color: var(--ems-text);
+}
+
+.svr-dialog__error {
+    margin: var(--ems-sp-4) 0 0;
+    color: var(--ems-danger-700);
+    font-weight: 700;
+}
+
+.svr-check {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ems-sp-3);
+    cursor: pointer;
+}
+
+.svr-check[hidden] {
+    display: none;
+}
+
+.svr-check input {
+    margin-top: 3px;
+    accent-color: var(--ems-primary);
+}
+
+.svr-detail__facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: var(--ems-sp-4);
+    margin-bottom: var(--ems-sp-6);
+}
+
+.svr-fact {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg-subtle);
+}
+
+.svr-fact__label {
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-text-muted);
+}
+
+.svr-fact__value {
+    font-size: var(--ems-fs-md);
+    color: var(--ems-text);
+}
+
+.svr-detail__heading {
+    margin: 0 0 var(--ems-sp-3);
+    font-size: var(--ems-fs-md);
+    font-weight: 800;
+}
+
+.svr-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+    max-height: 320px;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.svr-timeline__item {
+    display: flex;
+    gap: var(--ems-sp-4);
+    padding: 8px 10px;
+    border-left: 3px solid var(--ems-neutral-300);
+    border-radius: var(--ems-r-sm);
+    background: var(--ems-bg-subtle);
+    font-size: var(--ems-fs-sm);
+}
+
+.svr-timeline__item--medium {
+    border-left-color: var(--ems-warning-500);
+}
+
+.svr-timeline__item--high,
+.svr-timeline__item--critical {
+    border-left-color: var(--ems-danger-500);
+}
+
+.svr-timeline__time {
+    flex: 0 0 auto;
+    font-variant-numeric: tabular-nums;
+    color: var(--ems-text-muted);
+}
+
+.svr-detail__empty {
+    margin: 0;
+    color: var(--ems-text-muted);
+}
+
+@media (max-width: 640px) {
+    .svr-card {
+        padding: var(--ems-sp-5);
+    }
+
+    .svr-actions {
+        justify-content: flex-start;
+    }
+}

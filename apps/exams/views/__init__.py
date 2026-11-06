@@ -166,6 +166,11 @@ from .teacher.submission_review import (
     question_submission_review,
 )
 from .teacher.supervision import (
+    exam_supervision_attempt_pause,
+    exam_supervision_attempt_resume,
+    exam_supervision_attempt_snapshot,
+    exam_supervision_room,
+    exam_supervision_room_snapshot,
     heartbeat_api,
     log_incident_api,
     log_signal_api,
@@ -270,6 +275,11 @@ __all__ = [
     "log_signal_api",
     "proctor_student_photo",
     "supervision_status_api",
+    "exam_supervision_attempt_pause",
+    "exam_supervision_attempt_resume",
+    "exam_supervision_attempt_snapshot",
+    "exam_supervision_room",
+    "exam_supervision_room_snapshot",
     # Student - Results
     "exam_result",
     "student_exam_history",

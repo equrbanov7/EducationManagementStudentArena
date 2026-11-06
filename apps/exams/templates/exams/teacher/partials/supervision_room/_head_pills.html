@@ -1,0 +1,11 @@
+{% load i18n %}
+{% comment %}«Nəzarət otağı» başlığının nişanları: imtahan adı + növ, nəzarət rejimi, pozuntu limiti.{% endcomment %}
+<span class="ems-badge ems-badge--neutral"><i class="fas fa-file-lines" aria-hidden="true"></i> {{ exam.title }}</span>
+{% if exam.exam_type_extended %}<span class="ems-badge ems-badge--info">{{ exam.get_exam_type_extended_display }}</span>{% endif %}
+<span class="ems-badge ems-badge--muted">{{ exam.get_exam_type_display }}</span>
+{% if supervision_config %}
+<span class="ems-badge ems-badge--success"><i class="fas fa-shield-halved" aria-hidden="true"></i> {% trans "Nəzarət aktivdir" context "exams.supervision_room" %}</span>
+<span class="ems-badge ems-badge--warning">{% blocktrans with limit=snapshot.max_violations context "exams.supervision_room" %}Pozuntu limiti: {{ limit }}{% endblocktrans %}</span>
+{% else %}
+<span class="ems-badge ems-badge--muted"><i class="fas fa-shield" aria-hidden="true"></i> {% trans "Nəzarət sönülüdür" context "exams.supervision_room" %}</span>
+{% endif %}

@@ -115147,6 +115147,290 @@ msgctxt "exams.view.question_bank.warning"
 msgid "multiple_correct"
 msgstr "Mehr als eine richtige Antwort markiert ({labels}) — eine Midterm- oder Finalfrage muss genau eine richtige Antwort haben."
 
+msgctxt "exams.language_step"
+msgid "Suallar seçdiyiniz dildə veriləcək. İmtahan başladıqdan sonra dili dəyişmək mümkün deyil."
+msgstr "Die Fragen werden in der gewählten Sprache angezeigt. Nach Prüfungsbeginn kann die Sprache nicht mehr geändert werden."
+
+msgctxt "exams.language_step"
+msgid "məcburi"
+msgstr "Pflicht"
+
+msgctxt "exams.language_step"
+msgid "İmtahan dili"
+msgstr "Prüfungssprache"
+
+msgctxt "exams.language_step"
+msgid "İmtahan dilini seçin"
+msgstr "Prüfungssprache wählen"
+
+msgctxt "exams.language_step"
+msgid "İmtahana başlamaq üçün əvvəlcə imtahan dilini seçin."
+msgstr "Wählen Sie vor dem Start zuerst die Prüfungssprache."
+
+msgctxt "exams.supervision_room"
+msgid "Ad və ya istifadəçi adı…"
+msgstr "Name oder Benutzername…"
+
+msgctxt "exams.supervision_room"
+msgid "Aktiv təşkilat seçilməyib."
+msgstr "Keine aktive Organisation ausgewählt."
+
+msgctxt "exams.supervision_room"
+msgid "Bax"
+msgstr "Ansehen"
+
+msgctxt "exams.supervision_room"
+msgid "Bağla"
+msgstr "Schließen"
+
+msgctxt "exams.supervision_room"
+msgid "Bağlantı"
+msgstr "Verbindung"
+
+msgctxt "exams.supervision_room"
+msgid "Bağlantı yoxdur — yenidən cəhd edilir…"
+msgstr "Keine Verbindung — neuer Versuch…"
+
+msgctxt "exams.supervision_room"
+msgid "Başlayıb"
+msgstr "Begonnen"
+
+msgctxt "exams.supervision_room"
+msgid "Bitirib"
+msgstr "Beendet"
+
+msgctxt "exams.supervision_room"
+msgid "Bu imtahan imtahan mərkəzi zalında keçirilir — PIN, yenidən giriş və zal əməliyyatları zal monitorundadır."
+msgstr "Diese Prüfung findet in einem Saal des Prüfungszentrums statt — PIN, Wiedereintritt und Saalaktionen sind im Saalmonitor."
+
+msgctxt "exams.supervision_room"
+msgid "Bu imtahanda nəzarət rejimi aktiv deyil."
+msgstr "Die Aufsicht ist für diese Prüfung nicht aktiviert."
+
+msgctxt "exams.supervision_room"
+msgid "Bu imtahanda nəzarət rejimi yandırılmayıb: cəhdlərin gedişatı görünür, amma tam ekran/tab pozuntuları izlənmir. Yandırmaq üçün imtahanı redaktə edin."
+msgstr "Die Aufsicht ist für diese Prüfung aus: Der Fortschritt ist sichtbar, Vollbild-/Tab-Verstöße werden aber nicht erfasst. Bearbeiten Sie die Prüfung, um sie einzuschalten."
+
+msgctxt "exams.supervision_room"
+msgid "Bərpa et"
+msgstr "Wiederherstellen"
+
+msgctxt "exams.supervision_room"
+msgid "Canlı"
+msgstr "Live"
+
+msgctxt "exams.supervision_room"
+msgid "Canlı izləmə, pozuntular və kilidlənənlərin bərpası"
+msgstr "Live-Überwachung, Verstöße und Freigabe gesperrter Studierender"
+
+msgctxt "exams.supervision_room"
+msgid "Cavablar"
+msgstr "Antworten"
+
+msgctxt "exams.supervision_room"
+msgid "Cəhdi bərpa etmək mümkün olmadı."
+msgstr "Der Versuch konnte nicht wiederhergestellt werden."
+
+msgctxt "exams.supervision_room"
+msgid "Cəhdi dayandırmaq mümkün olmadı."
+msgstr "Der Versuch konnte nicht pausiert werden."
+
+msgctxt "exams.supervision_room"
+msgid "Dayandır"
+msgstr "Pausieren"
+
+msgctxt "exams.supervision_room"
+msgid "Dil"
+msgstr "Sprache"
+
+msgctxt "exams.supervision_room"
+msgid "Hamısı"
+msgstr "Alle"
+
+msgctxt "exams.supervision_room"
+msgid "Hələ heç kim imtahana başlamayıb"
+msgstr "Noch niemand hat die Prüfung begonnen"
+
+msgctxt "exams.supervision_room"
+msgid "Kilidlənib"
+msgstr "Gesperrt"
+
+msgctxt "exams.supervision_room"
+msgid "Limitsiz"
+msgstr "Unbegrenzt"
+
+msgctxt "exams.supervision_room"
+msgid "Ləğv et"
+msgstr "Abbrechen"
+
+msgctxt "exams.supervision_room"
+msgid "Müəllim dayandırıb"
+msgstr "Von der Lehrkraft pausiert"
+
+msgctxt "exams.supervision_room"
+msgid "Məsələn: telefondan istifadə"
+msgstr "Zum Beispiel: Handynutzung"
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət aktivdir"
+msgstr "Aufsicht aktiv"
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət otağı"
+msgstr "Aufsichtsraum"
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət sistemi platformada söndürülüb — pozuntular qeydə alınmır, bərpa əməliyyatları işləmir."
+msgstr "Die Aufsicht ist plattformweit ausgeschaltet — Verstöße werden nicht erfasst, Freigaben funktionieren nicht."
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət siyasəti bərpaya icazə vermir («İkinci şans yoxdur»)."
+msgstr "Die Aufsichtsrichtlinie erlaubt keine Freigabe («Keine zweite Chance»)."
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət sönülüdür"
+msgstr "Aufsicht aus"
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət xronologiyası"
+msgstr "Aufsichtsverlauf"
+
+msgctxt "exams.supervision_room"
+msgid "Onlayn"
+msgstr "Online"
+
+msgctxt "exams.supervision_room"
+msgid "Pozuntu"
+msgstr "Verstöße"
+
+msgctxt "exams.supervision_room"
+msgid "Pozuntu limiti: %(limit)s"
+msgstr "Verstoßgrenze: %(limit)s"
+
+msgctxt "exams.supervision_room"
+msgid "Pozuntu var"
+msgstr "Mit Verstößen"
+
+msgctxt "exams.supervision_room"
+msgid "Qalan vaxt"
+msgstr "Verbleibende Zeit"
+
+msgctxt "exams.supervision_room"
+msgid "Qeydə alınmış hadisə yoxdur."
+msgstr "Keine erfassten Ereignisse."
+
+msgctxt "exams.supervision_room"
+msgid "Risk xalı"
+msgstr "Risikowert"
+
+msgctxt "exams.supervision_room"
+msgid "Siqnal kəsilib"
+msgstr "Signal verloren"
+
+msgctxt "exams.supervision_room"
+msgid "Siyasət bərpaya icazə vermir"
+msgstr "Richtlinie erlaubt keine Freigabe"
+
+msgctxt "exams.supervision_room"
+msgid "Səbəb (tələbəyə göstərilir)"
+msgstr "Grund (wird den Studierenden angezeigt)"
+
+msgctxt "exams.supervision_room"
+msgid "Tələbə"
+msgstr "Studierende/r"
+
+msgctxt "exams.supervision_room"
+msgid "Tələbə axtarışı"
+msgstr "Studierende suchen"
+
+msgctxt "exams.supervision_room"
+msgid "Tələbə imtahana başlayan kimi burada görünəcək. Səhifə özü yenilənir."
+msgstr "Studierende erscheinen hier, sobald sie die Prüfung beginnen. Die Seite aktualisiert sich selbst."
+
+msgctxt "exams.supervision_room"
+msgid "Tələbə kilidli deyil — bərpa lazım deyil."
+msgstr "Die/der Studierende ist nicht gesperrt — keine Freigabe nötig."
+
+msgctxt "exams.supervision_room"
+msgid "Tələbə əlavə şansından artıq istifadə edib."
+msgstr "Die zusätzliche Chance wurde bereits genutzt."
+
+msgctxt "exams.supervision_room"
+msgid "Tələbələr"
+msgstr "Studierende"
+
+msgctxt "exams.supervision_room"
+msgid "Tələbələrin imtahan gedişatı, qayda pozuntuları və kilidlənmələri canlı görünür. Kilidlənən tələbəni buradan bərpa edin."
+msgstr "Fortschritt, Regelverstöße und Sperren der Studierenden werden live angezeigt. Gesperrte Studierende hier freigeben."
+
+msgctxt "exams.supervision_room"
+msgid "Tələbəni bərpa et"
+msgstr "Studierende freigeben"
+
+msgctxt "exams.supervision_room"
+msgid "Tələbənin ekranı açılacaq və o, imtahana olduğu yerdən davam edəcək. Cavabları və vaxtı qorunur."
+msgstr "Der Bildschirm wird entsperrt und die Prüfung geht an derselben Stelle weiter. Antworten und Zeit bleiben erhalten."
+
+msgctxt "exams.supervision_room"
+msgid "Tələbənin ekranı kilidlənir, cəhd təhvil verilmir. «Bərpa et» ilə davam etdirə bilərsiniz."
+msgstr "Der Bildschirm wird gesperrt, der Versuch wird nicht abgegeben. Mit «Wiederherstellen» geht es weiter."
+
+msgctxt "exams.supervision_room"
+msgid "Vəziyyət"
+msgstr "Status"
+
+msgctxt "exams.supervision_room"
+msgid "Xülasə"
+msgstr "Übersicht"
+
+msgctxt "exams.supervision_room"
+msgid "Zal monitoru"
+msgstr "Saalmonitor"
+
+msgctxt "exams.supervision_room"
+msgid "İmtahan artıq bitib."
+msgstr "Die Prüfung ist bereits beendet."
+
+msgctxt "exams.supervision_room"
+msgid "İmtahana qayıt"
+msgstr "Zurück zur Prüfung"
+
+msgctxt "exams.supervision_room"
+msgid "İmtahanda"
+msgstr "In der Prüfung"
+
+msgctxt "exams.supervision_room"
+msgid "İmtahanı müvəqqəti dayandır"
+msgstr "Prüfung vorübergehend pausieren"
+
+msgctxt "exams.supervision_room"
+msgid "Şübhəli"
+msgstr "Verdächtig"
+
+msgctxt "exams.supervision_room"
+msgid "Əlavə şans istifadə olunub"
+msgstr "Zusätzliche Chance genutzt"
+
+msgctxt "exams.supervision_room"
+msgid "Əlavə şans ver (pozuntu sayğacı bir vahid azalır)"
+msgstr "Zusätzliche Chance gewähren (Verstoßzähler sinkt um eins)"
+
+msgctxt "exams.supervision_room"
+msgid "Əməliyyat mümkün olmadı."
+msgstr "Die Aktion ist fehlgeschlagen."
+
+msgctxt "exams.supervision_room"
+msgid "Əməllər"
+msgstr "Aktionen"
+
+msgctxt "exams.supervision_room"
+msgid "Bu tələbə imtahan zalındadır — dayandırma zal monitorundan, səbəb qeyd edilərək aparılır."
+msgstr "Diese/r Studierende ist im Prüfungssaal — Pausieren erfolgt im Saalmonitor mit Angabe eines Grundes."
+
+msgctxt "exams.supervision_room"
+msgid "Dayandırma — zal monitorunda"
+msgstr "Pausieren — im Saalmonitor"
+
 msgctxt "registrar.lab_groups"
 msgid "Lab-%(n)s"
 msgstr "Labor-%(n)s"

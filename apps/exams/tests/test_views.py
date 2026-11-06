@@ -3642,8 +3642,11 @@ class StudentExamVisibilityFilteringTest(TestCase):
         )
 
         missing_language_response = self.client.post(reverse("exams:start_exam", args=[multilingual_exam.slug]))
-        self.assertEqual(missing_language_response.status_code, 302)
-        self.assertEqual(missing_language_response.url, reverse("exams:student_exam_list"))
+        # Sahib 2026-11-06: dil gəlməyibsə tələbə siyahıya atılmır — məcburi dil addımı olan start səhifəsi
+        # (xəta vəziyyətində) göstərilir; cəhd yaradılmır.
+        self.assertEqual(missing_language_response.status_code, 200)
+        self.assertTemplateUsed(missing_language_response, "exams/student/exam_start_confirm.html")
+        self.assertContains(missing_language_response, "data-language-step")
         self.assertFalse(multilingual_exam.attempts.filter(user=self.student).exists())
 
         selected_language_response = self.client.post(

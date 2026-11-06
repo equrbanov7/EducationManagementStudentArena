@@ -1,0 +1,193 @@
+/* İmtahan dili — məcburi, gözə çarpan addım (sahib 2026-11-06). Şablon: exams/student/partials/_language_step.html;
+   kabinet modalında eyni siniflər JS ilə qurulur (accounts/js/profile/assigned_exam.js). */
+
+.els {
+    min-width: 0;
+    margin: 0 0 20px;
+    padding: 16px 16px 14px;
+    border: 2px solid var(--ems-primary-300);
+    border-radius: var(--ems-r-xl);
+    background: var(--ems-primary-50);
+    text-align: left;
+}
+
+.els[hidden] {
+    display: none;
+}
+
+.els__legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    float: left;
+    width: 100%;
+    margin: 0 0 6px;
+    padding: 0;
+    color: var(--ems-primary-800);
+    font-size: var(--ems-fs-lg);
+    font-weight: 800;
+}
+
+.els__legend + * {
+    clear: both;
+}
+
+.els__step {
+    display: inline-grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+    font-size: var(--ems-fs-sm);
+}
+
+.els__required {
+    padding: 2px 8px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-700);
+    font-size: var(--ems-fs-xs);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.els__hint {
+    display: flex;
+    gap: 8px;
+    margin: 0 0 12px;
+    color: var(--ems-primary-800);
+    font-size: var(--ems-fs-md);
+    line-height: 1.5;
+}
+
+.els__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+}
+
+.els__option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+    padding: 10px 12px;
+    border: 2px solid var(--ems-border);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-bg);
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.els__option:hover {
+    border-color: var(--ems-primary-400);
+}
+
+/* Radio vizual olaraq gizlənir, amma fokuslana və klaviatura ilə seçilə bilir. */
+.els__option input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+
+.els__code {
+    display: inline-grid;
+    place-items: center;
+    min-width: 36px;
+    height: 28px;
+    padding: 0 6px;
+    border-radius: var(--ems-r-sm);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+    font-size: var(--ems-fs-sm);
+    font-weight: 800;
+}
+
+.els__label {
+    flex: 1 1 auto;
+    color: var(--ems-text);
+    font-size: var(--ems-fs-md);
+    font-weight: 700;
+}
+
+.els__check {
+    color: var(--ems-primary-600);
+    opacity: 0;
+}
+
+.els__option:has(input:checked) {
+    border-color: var(--ems-primary-600);
+    box-shadow: var(--ems-sh-focus);
+}
+
+.els__option:has(input:checked) .els__code {
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+}
+
+.els__option:has(input:checked) .els__check {
+    opacity: 1;
+}
+
+.els__option:has(input:focus-visible) {
+    outline: 3px solid var(--ems-primary-300);
+    outline-offset: 2px;
+}
+
+.els__error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0 0;
+    color: var(--ems-danger-700);
+    font-weight: 800;
+}
+
+.els__error[hidden] {
+    display: none;
+}
+
+/* Xəta vəziyyəti: seçilmədən «Başla» basılıb — qırmızı çərçivə + diqqət animasiyası. */
+.els.is-invalid {
+    border-color: var(--ems-danger-500);
+    background: var(--ems-danger-bg);
+}
+
+.els.is-invalid .els__option {
+    border-color: var(--ems-danger-200);
+}
+
+.els.is-shaking {
+    animation: els-shake 0.4s ease;
+}
+
+@keyframes els-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .els.is-shaking {
+        animation: none;
+    }
+}
+
+.els-single {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0 0 16px;
+    padding: 10px 14px;
+    border: 1px solid var(--ems-primary-200);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}

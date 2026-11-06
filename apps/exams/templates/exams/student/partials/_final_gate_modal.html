@@ -2,10 +2,10 @@
 {% comment %}İmtahan-öncəsi məlumat + qaydalar modalı (final_entry.html, PIN yoxlamasından sonra).
 Redizayn 2026-10-21: panel üç hissədir — başlıq (sabit), məzmun (uzun olanda ÖZÜ sürüşür), alt zolaq
 (təsdiq qutusu + «Geri»/«Davam et» — həmişə görünür). Forma adları/dəyərləri dəyişməyib: action=back|confirm,
-language, accept_rules; «Geri» `formnovalidate`. Kənar-klik və Esc «Geri»ni basır (final_entry.js).{% endcomment %}
+language (ortaq _language_step.html), accept_rules; «Geri» `formnovalidate`. Kənar-klik və Esc «Geri»ni basır (final_entry.js).{% endcomment %}
 <div class="fexc-modal-backdrop" data-fexc-gate-backdrop>
   <div class="fexc-modal-panel fexc-gate" role="dialog" aria-modal="true" aria-labelledby="fexc-modal-title">
-    <form method="post" class="fexc-gate-form" action="{{ entry_url }}">
+    <form method="post" class="fexc-gate-form" action="{{ entry_url }}" data-language-step-form>
       {% csrf_token %}
       <header class="fexc-gate-head">
         <span class="fexc-kind{% if entry_is_midterm %} fexc-kind--midterm{% endif %}">
@@ -27,6 +27,10 @@ language, accept_rules; «Geri» `formnovalidate`. Kənar-klik və Esc «Geri»n
           <span>{{ modal_error }}</span>
         </div>
         {% endif %}
+
+        {% comment %}Sahib 2026-11-06: dil seçimi qaydalardan ƏVVƏL, ilk məcburi addımdır («görmədim» olmasın);
+        seçilməsə «Davam et» keçmir və xəta vəziyyəti görünür (exam_language_step.js).{% endcomment %}
+        {% include "exams/student/partials/_language_step.html" with language_selected=ticket.language %}
 
         <dl class="fexc-meta">
           {% comment %}EXAMQA R5 (2026-10-02): zal sessiyasının 6 saatlıq pəncərəsi (03:19–09:19) əvəzinə imtahanın ÖZ
@@ -82,27 +86,6 @@ language, accept_rules; «Geri» `formnovalidate`. Kənar-klik və Esc «Geri»n
           {% endif %}
         </section>
 
-        {% if language_options|length > 1 %}
-        <fieldset class="fexc-langs">
-          <legend>{% trans "İmtahan dilini seçin" context "exams.template.final_gate" %}</legend>
-          <div class="fexc-lang-grid" role="radiogroup">
-            {% for option in language_options %}
-            <label class="fexc-lang-option">
-              <input type="radio" name="language" value="{{ option.language }}" required
-                     {% if ticket.language == option.language %}checked{% endif %}>
-              <span>{{ option.label }}</span>
-            </label>
-            {% endfor %}
-          </div>
-          <p class="fexc-hint">{% trans "Dil seçimi imtahan başladıqdan sonra dəyişdirilə bilməz." context "exams.template.final_gate" %}</p>
-        </fieldset>
-        {% elif language_options %}
-        <input type="hidden" name="language" value="{{ language_options.0.language }}">
-        <p class="fexc-hint fexc-lang-single">
-          <i class="fas fa-language" aria-hidden="true"></i>
-          <span>{% trans "İmtahan dili" context "exams.template.final_gate" %}: <b>{{ language_options.0.label }}</b></span>
-        </p>
-        {% endif %}
       </div>
 
       <footer class="fexc-gate-foot">

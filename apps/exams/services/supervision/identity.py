@@ -118,6 +118,8 @@ def can_view_student_photo(user, organization, student_id: int) -> bool:
     * imtahan mərkəzi → yalnız aktiv təşkilatın üzvü olan tələbə;
     * zal/oturum nəzarətçisi → yalnız İNDİ aktiv növbəsinin zalında/oturumunda bu tələbənin
       CANLI (və ya son 12 saatda bitmiş) cəhdi/bileti varsa;
+    * imtahanın müəllifi → yalnız ÖZ imtahanında canlı / son 12 saatda bitmiş cəhdi olan tələbə
+      («Nəzarət otağı», 2026-11-06);
     * qalan hamı (digər tələbələr daxil) → xeyr.
     """
     if not getattr(user, "is_authenticated", False):
@@ -135,6 +137,21 @@ def can_view_student_photo(user, organization, student_id: int) -> bool:
         membership_model = django_apps.get_model("organizations", "Membership")
         return membership_model.objects.filter(user_id=student_id, organization=organization, is_active=True).exists()
 
+    attempt_model = django_apps.get_model("exams", "ExamAttempt")
+    since = timezone.now() - _FINISHED_PHOTO_WINDOW
+    live_or_recent = Q(status="in_progress") | Q(finished_at__gte=since)
+    # Sahib 2026-11-06 («Nəzarət otağı» bütün növlər üçün): imtahanın MÜƏLLİFİ öz imtahanında
+    # CANLI (və ya son 12 saatda bitmiş) cəhdi olan tələbənin şəklini görür — quiz/yazılı imtahanı
+    # zal nəzarətçisi olmadan özü izləyir. Başqa imtahanın tələbəsi bununla açılmır.
+    if (
+        attempt_model.objects.filter(
+            user_id=student_id, exam__organization=organization, exam__author_id=user.pk, is_trial=False
+        )
+        .filter(live_or_recent)
+        .exists()
+    ):
+        return True
+
     # 2026-10-13 (gecə): nəzarətçi əhatəsi vaxtla məhdud növbədən gəlir — növbə bitəndə
     # tələbə şəkilləri də bağlanır (əvvəl ``room__invigilators`` daimi idi).
     from apps.exams.services.final_center import supervision_scope
@@ -142,9 +159,6 @@ def can_view_student_photo(user, organization, student_id: int) -> bool:
     scope = supervision_scope(user, organization_id=organization.pk)
     if scope.is_empty:
         return False
-    attempt_model = django_apps.get_model("exams", "ExamAttempt")
-    since = timezone.now() - _FINISHED_PHOTO_WINDOW
-    live_or_recent = Q(status="in_progress") | Q(finished_at__gte=since)
     if scope.room_ids and (
         attempt_model.objects.filter(
             user_id=student_id, exam__organization=organization, room_id__in=list(scope.room_ids)
