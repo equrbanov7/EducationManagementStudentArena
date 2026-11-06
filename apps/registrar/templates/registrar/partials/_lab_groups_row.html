@@ -1,0 +1,9 @@
+{% load i18n journal_names %}{% with name=row.student|journal_name %}
+<li class="lgm-row{% if row.locked %} is-locked{% endif %}" data-lgm-row data-lgm-name="{{ name|lower }}">
+    <label class="lgm-row-label">
+        <input type="checkbox" name="enrollment" value="{{ row.enrollment.pk }}" data-lgm-pick{% if row.locked or blocked_reason %} disabled{% endif %}>
+        <span class="lgm-row-name">{{ name }}</span>
+    </label>
+    {% if row.locked %}<span class="lgm-lock" title="{% trans 'Tələbənin öz qrupunun dərslərində qeydi var — köçürmək olmaz (qeydlər itməsin deyə).' context 'registrar.lab_groups' %}"><i class="fas fa-lock" aria-hidden="true"></i> {% trans "qeyd var" context "registrar.lab_groups" %}</span>{% endif %}
+</li>
+{% endwith %}

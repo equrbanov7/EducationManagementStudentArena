@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="{% static 'registrar/css/journal_cell_hint.css' %}?v=20261014-notip">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_autosave.css' %}?v=20261014-auto">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_mark_lock.css' %}?v=20261025-lock">
-    <link rel="stylesheet" href="{% static 'registrar/css/journal_lab_groups.css' %}?v=20261106-lab">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_lab_groups.css' %}?v=20261106-lab2">
     {% if not correction_mode %}<link rel="stylesheet" href="{% static 'registrar/css/journal_idle_close.css' %}?v=20261027-2">{% endif %}
     {% comment %}Sakit düzüm qatı — HƏMİŞƏ SONUNCU yüklənir ki, yuxarıdakı
     fayllardakı düzüm fərqlərini üstələsin; rəng palitrasına toxunmur.{% endcomment %}
@@ -113,6 +113,7 @@
                 {% if journal_share_chip %}<span class="jd2-share-chip" data-share-kinds="{{ journal_share_chip.kinds|join:', ' }}" title="{{ journal_share_chip.kinds|join:', ' }}"><i class="fas fa-user-group" aria-hidden="true"></i> {{ journal_share_chip.text }}</span>{% endif %}
                 <span class="jd2-winsub">{{ offering.subject.name }} · {{ journal.rows|length }} {% trans "tələbə" context "registrar.journal" %}</span>
                 {% include "registrar/partials/_jd_practical_toggle.html" %}
+                {% include "registrar/partials/_jd_lab_groups_link.html" %}
                 {% if journal.scheme.is_published %}<span class="jd2-winlock"><i class="fas fa-lock"></i> {% trans "Yekunlaşdırılıb" context "registrar.journal" %}</span>{% endif %}
             </div>
             <div class="jd2-winhead-right">

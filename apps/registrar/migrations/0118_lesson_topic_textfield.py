@@ -9,7 +9,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    dependencies = [("registrar", "0116_lab_groups")]
+    dependencies = [("registrar", "0117_lab_group")]
 
     operations = [
         migrations.AlterField(

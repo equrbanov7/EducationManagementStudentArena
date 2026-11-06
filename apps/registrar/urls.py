@@ -25,6 +25,7 @@ from . import (
     journal_list_unit_lookup,
     journal_master_history,
     journal_reviewed_history,
+    lab_groups_views,
     language_cohort_history,
     language_cohort_views,
     lessons_log_views,
@@ -148,6 +149,8 @@ urlpatterns = [
         subject_exempt_views.subject_exempt_restore,
         name="journal_subject_exempt_restore",
     ),
+    # «Lab qrupları» — jurnalda laboratoriya qruplarını yaratmaq / adlandırmaq / tələbə yerləşdirmək (sahib 2026-11-06).
+    path("<uuid:offering_id>/lab-qruplari/", lab_groups_views.manage, name="journal_lab_groups"),
     # Dərs modalının axtarışlı/lazy seçiciləri (QA 2026-09-05 P3-13) — uuid
     # catch-all-dan ƏVVƏL.
     path(

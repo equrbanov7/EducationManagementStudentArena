@@ -13,50 +13,83 @@ Model (ən kiçik dəyişiklik): ``Enrollment.lab_group`` (tələbənin bu jurna
 * fənnin saat həddi tələbə başına yoxlanır (:func:`per_student_hours`): qrupsuz dərslər + ən çox saatlı lab
   qrupunun dərsləri — Lab-1 və Lab-2-nin saatları toplanmır;
 * jurnalın lab qrupları varsa («Yeni dərs»də) lab dərsi üçün qrup seçmək məcburidir (:func:`require_for_new`).
+
+Qrupların yaradılması / adı / tərkibi (jurnaldakı «Lab qrupları» ekranı, sahib 2026-11-06):
+:mod:`apps.registrar.lab_groups_manage`. Jurnalın qrupları = ``LabGroup`` sətirləri ∪ aktiv siyahının
+``lab_group`` dəyərləri — sətirsiz köhnə Lab-1 / Lab-2 də qrupdur və «Lab-N» adlanır (:func:`label`).
 """
 
 from __future__ import annotations
 
 from django.utils.translation import pgettext
 
-from .models import Enrollment, LessonKind
+from .models import Enrollment, LabGroup, LessonKind
 
 #: Qrup nömrəsinin tavanı (praktikada 2; 9 — yazı səhvinə qarşı sərhəd).
 MAX_LAB_GROUP = 9
 _MEMO_ATTR = "_lab_groups_memo"
+_NAMES_ATTR = "_lab_group_names_memo"
 
 
 class LabGroupError(ValueError):
     """Yanlış lab qrupu (növ lab deyil, qrup jurnalda yoxdur, qrup seçilməyib)."""
 
 
-def label(number) -> str:
+def default_label(number) -> str:
     return pgettext("registrar.lab_groups", "Lab-%(n)s") % {"n": number}
 
 
+def label(number, offering=None) -> str:
+    """Qrupun görünən adı: ``offering`` verilib və qrupun adı varsa ad, yoxsa «Lab-N»."""
+    name = names(offering).get(number, "") if offering is not None else ""
+    return name or default_label(number)
+
+
+def names(offering) -> dict:
+    """``{nömrə: ad}`` — yalnız adı olan qruplar; offering obyektində memo (bir sorğu)."""
+    memo = getattr(offering, _NAMES_ATTR, None)
+    if memo is None:
+        _load_rows(offering)
+        memo = getattr(offering, _NAMES_ATTR)
+    return memo
+
+
+def _load_rows(offering) -> set:
+    """``LabGroup`` sətirləri (nömrə dəsti) — adlar memo-ya yazılır."""
+    rows = list(LabGroup.objects.filter(offering_id=offering.pk).values_list("number", "name"))
+    setattr(offering, _NAMES_ATTR, {number: name for number, name in rows if name})
+    return {number for number, _name in rows}
+
+
 def offering_groups(offering) -> list:
-    """Jurnalın lab qrupları (artan sıra) — aktiv siyahıdan BİR sorğu, offering obyektində memo."""
+    """Jurnalın lab qrupları (artan sıra): ``LabGroup`` sətirləri ∪ aktiv siyahı — iki sorğu, offering-də memo."""
     memo = getattr(offering, _MEMO_ATTR, None)
     if memo is None:
-        memo = sorted(
-            set(
-                Enrollment.objects.filter(
-                    offering_id=offering.pk, status=Enrollment.Status.ENROLLED, lab_group__isnull=False
-                ).values_list("lab_group", flat=True)
-            )
-        )
+        roster = Enrollment.objects.filter(
+            offering_id=offering.pk, status=Enrollment.Status.ENROLLED, lab_group__isnull=False
+        ).values_list("lab_group", flat=True)
+        memo = sorted(_load_rows(offering) | set(roster))
         setattr(offering, _MEMO_ATTR, memo)
     return memo
 
 
 def prime(offering, enrollments) -> None:
-    """Hazır aktiv siyahıdan memo (jurnal qridi siyahını onsuz da oxuyur — əlavə sorğu yoxdur)."""
-    setattr(offering, _MEMO_ATTR, sorted({row.lab_group for row in enrollments if row.lab_group}))
+    """Hazır aktiv siyahıdan memo (jurnal qridi siyahını onsuz da oxuyur — yalnız ``LabGroup`` sorğusu)."""
+    setattr(
+        offering, _MEMO_ATTR, sorted(_load_rows(offering) | {row.lab_group for row in enrollments if row.lab_group})
+    )
+
+
+def forget(offering) -> None:
+    """Memo-nu at (qruplar dəyişəndən sonra eyni obyektlə yenidən oxumaq üçün)."""
+    for attr in (_MEMO_ATTR, _NAMES_ATTR):
+        if hasattr(offering, attr):
+            delattr(offering, attr)
 
 
 def choices(offering) -> list:
-    """Dərs modalının seçimi: ``[(nömrə, «Lab-N»), …]``; qrup yoxdursa boş."""
-    return [(number, label(number)) for number in offering_groups(offering)]
+    """Dərs modalının seçimi: ``[(nömrə, ad və ya «Lab-N»), …]``; qrup yoxdursa boş."""
+    return [(number, label(number, offering)) for number in offering_groups(offering)]
 
 
 def parse(raw):
@@ -117,7 +150,10 @@ __all__ = [
     "LabGroupError",
     "applies",
     "choices",
+    "default_label",
+    "forget",
     "label",
+    "names",
     "offering_groups",
     "parse",
     "per_student_hours",

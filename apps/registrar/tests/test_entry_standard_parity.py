@@ -22,6 +22,8 @@ BASELINE = json.loads(Path(__file__).with_name("entry_standard_baseline.json").r
 CREDIT_SOURCE_ALLOWANCE = 2
 #: 2026-10-25: xarici nəticənin tanınması transkriptə SABİT 1 sorğu əlavə edir (tələbənin tanınmaları, toplu).
 RECOGNITION_ALLOWANCE = 1
+#: 2026-11-06: adlı lab qrupları (``LabGroup``) jurnal qridinə SABİT 1 sorğu əlavə edir (``lab_groups.prime``).
+LAB_GROUP_ALLOWANCE = 1
 CREDIT_SURFACES = (
     "transcript/",
     "period_analytics/",
@@ -90,6 +92,8 @@ class _ParityChecks:
                     allowance = CREDIT_SOURCE_ALLOWANCE if surface.startswith(CREDIT_SURFACES) else 0
                     if surface.startswith("transcript/"):
                         allowance += RECOGNITION_ALLOWANCE
+                    if surface.startswith("journal_grid/"):
+                        allowance += LAB_GROUP_ALLOWANCE
                     self.assertLessEqual(count, BASELINE["queries"][surface] + allowance)
 
 

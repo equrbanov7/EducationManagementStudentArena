@@ -1,0 +1,8 @@
+{% load i18n %}
+{% comment %}«Lab qrupları» keçidi (sahib 2026-11-06) — YALNIZ qrupları idarə edə bilənə (`lab_groups_views.link_context`:
+jurnalın müəllimi / lab payı, kafedra müdiri, RİM). Adi keçid — JS yoxdur (CSS `journal_lab_groups.css`).{% endcomment %}
+{% if lab_groups_url %}
+<a class="jd2-labgroups-link" href="{{ lab_groups_url }}" title="{% trans 'Laboratoriya qruplarını yarat, adlandır və tələbələri yerləşdir' context 'registrar.lab_groups' %}">
+    <i class="fas fa-people-group" aria-hidden="true"></i> {% trans "Lab qrupları" context "registrar.lab_groups" %}
+</a>
+{% endif %}

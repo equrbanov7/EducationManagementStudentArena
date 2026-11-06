@@ -287,7 +287,7 @@ def get_offering_journal(
             "seq": (total_lessons - (window_offset + idx)) if newest_first else (window_offset + idx + 1),
             "parity": _lesson_parity(offering, lesson),  # Ü/A başlıq etiketi
             "summary": lesson_summary.get(lesson.id, {}),
-            "lab_group_label": lab_groups.label(lesson.lab_group) if lesson.lab_group else "",
+            "lab_group_label": lab_groups.label(lesson.lab_group, offering) if lesson.lab_group else "",
         }
         for idx, lesson in enumerate(lessons)
     ]
@@ -394,7 +394,7 @@ def get_offering_journal(
                 "student": enrollment.student,
                 "home_group": home_groups.get(enrollment.student_id),
                 "lab_group_label": (
-                    lab_groups.label(enrollment.lab_group) if has_lab_groups and enrollment.lab_group else ""
+                    lab_groups.label(enrollment.lab_group, offering) if has_lab_groups and enrollment.lab_group else ""
                 ),
                 "lab_group_missing": has_lab_groups and not enrollment.lab_group,
                 "cells": cells,
