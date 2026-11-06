@@ -359,7 +359,7 @@ class ApplyLabGroupsCommandTest(_LabWorld, TestCase):
         text = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("          - apply_lab_groups_20261106\n", text)
         self.assertIn('[ "$COMMAND" = "apply_lab_groups_20261106" ]', text)
-        self.assertIn("|lab_groups): [a-z_]+=", text)
+        self.assertIn("|lab_groups|offering_subject_fix): [a-z_]+=", text)
 
 
 class ApplyLabGroupsPlanTest(SimpleTestCase):
