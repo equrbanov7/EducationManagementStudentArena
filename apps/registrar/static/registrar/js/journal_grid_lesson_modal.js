@@ -200,6 +200,7 @@
                 actionUrl: editBtn.getAttribute("data-action-url"),
                 date: editBtn.getAttribute("data-lesson-date"),
                 kind: editBtn.getAttribute("data-lesson-kind"),
+                labGroup: editBtn.getAttribute("data-lesson-lab-group") || "",
                 topic: editBtn.getAttribute("data-lesson-topic"),
                 hours: editBtn.getAttribute("data-lesson-hours"),
                 start: editBtn.getAttribute("data-lesson-start"),

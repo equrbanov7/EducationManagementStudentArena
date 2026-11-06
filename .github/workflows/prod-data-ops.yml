@@ -232,6 +232,8 @@
 #       Defolt dry-run; `batch=undo` (apply) geri qaytarır. Loga YALNIZ saylar.
 #   fix_ydk236_subject_20261106 — sahib 2026-11-06: QKU-2693 kartı → «Ümumi xarici dil» (236 YDK), səhvən həmin karta
 #       bağlanmış 233 İ boş VoİP jurnalları QKU-2577-yə (Merger + fix_offering_subject). Defolt dry-run, YALNIZ saylar.
+#   apply_lab_groups_20261106 — sahib 2026-11-06 (Ekologiya kafedrası): 236 SBİO biologiya / kimya və 235 EM analitik
+#       kimya jurnallarında Lab-1 / Lab-2 (köhnə sistemin lab siyahıları; sabit id-lər koddadır). Defolt dry-run, YALNIZ saylar.
 #   repair_applications_20261105c — RİM 2026-11-05 axşam: MR-209 (7 xana + 14 səhv qayıb) və MR-218 (533 İT əkizləri,
 #       29.10 seminarları), MR-225 (köhnə jurnal əkizləri); sabit id-lər, defolt dry-run, loga YALNIZ saylar.
 #   repair_applications_20261105 — RİM 2026-11-05: MR-190/MR-161 əkiz birləşmələri + MR-110 xanası; sabit id-lər koddadır
@@ -445,6 +447,7 @@ on:
           - repair_applications_20261105
           - repair_applications_20261105c
           - fix_ydk236_subject_20261106
+          - apply_lab_groups_20261106
           - rebuild_language_cohorts_20261106
           - repair_twins_20261105b
           - fix_legacy_lesson_kinds
@@ -1554,7 +1557,7 @@ jobs:
                 args=(--org "$ORG" --actor "$actor" --file "/tmp/level_merge_${GITHUB_RUN_ID}.json")
               fi
               ;;
-            repair_applications_20261105|repair_applications_20261105c|fix_ydk236_subject_20261106)
+            repair_applications_20261105|repair_applications_20261105c|fix_ydk236_subject_20261106|apply_lab_groups_20261106)
               # RİM 2026-11-05: MR-190/MR-161 əkiz birləşmələri + MR-110 xanası — sabit id-lər koddadır, plan faylı yoxdur.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
@@ -2136,11 +2139,11 @@ jobs:
               exit "$status"
             fi
             rm -f "$RUNNER_TEMP/out.log"
-          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "release_stale_slot_teachers" ] || [ "$COMMAND" = "fix_offering_subject" ] || [ "$COMMAND" = "repair_twins_20261105b" ] || [ "$COMMAND" = "repair_applications_20261105" ] || [ "$COMMAND" = "repair_applications_20261105c" ] || [ "$COMMAND" = "fix_ydk236_subject_20261106" ] || [ "$COMMAND" = "rebuild_language_cohorts_20261106" ]; then
+          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "release_stale_slot_teachers" ] || [ "$COMMAND" = "fix_offering_subject" ] || [ "$COMMAND" = "repair_twins_20261105b" ] || [ "$COMMAND" = "repair_applications_20261105" ] || [ "$COMMAND" = "repair_applications_20261105c" ] || [ "$COMMAND" = "fix_ydk236_subject_20261106" ] || [ "$COMMAND" = "rebuild_language_cohorts_20261106" ] || [ "$COMMAND" = "apply_lab_groups_20261106" ]; then
             # Loga YALNIZ «twin_relocate: / twin_merge: / lesson_kinds: / slot_parity: / practical_flag: / off_schedule_flags: / slot_teachers: /
             # offering_subject_fix: açar=say …» sətirləri və rədd kodu.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
-            grep -E '^(twin_relocate|twin_merge|lesson_kinds|slot_parity|practical_flag|off_schedule_flags|slot_teachers|offering_subject_fix): [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            grep -E '^(twin_relocate|twin_merge|lesson_kinds|slot_parity|practical_flag|off_schedule_flags|slot_teachers|lab_groups|offering_subject_fix): [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true

@@ -181,6 +181,11 @@ class Lesson(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     off_schedule_reason = models.CharField(
         max_length=255, blank=True, default="", help_text="Cədvəldən kənar dərsin səbəbi (boş = cədvəl üzrə)."
     )
+    #: Yalnız LAB dərsində: bu dərs hansı laboratoriya qrupunundur (``Enrollment.lab_group``, sahib 2026-11-06).
+    #: Boş = bütün qrup (köhnə davranış). Bax :mod:`apps.registrar.lab_groups`.
+    lab_group = models.PositiveSmallIntegerField(
+        null=True, blank=True, help_text="Laboratoriya qrupu (yalnız lab dərsi); boş = bütün qrup."
+    )
 
     objects = models.Manager()
 

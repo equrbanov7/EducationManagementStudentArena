@@ -115430,3 +115430,59 @@ msgstr "Diese/r Studierende ist im Prüfungssaal — Pausieren erfolgt im Saalmo
 msgctxt "exams.supervision_room"
 msgid "Dayandırma — zal monitorunda"
 msgstr "Pausieren — im Saalmonitor"
+
+msgctxt "registrar.lab_groups"
+msgid "Lab-%(n)s"
+msgstr "Labor-%(n)s"
+
+msgctxt "registrar.lab_groups"
+msgid "Laboratoriya qrupu düzgün seçilməyib."
+msgstr "Die Laborgruppe ist nicht korrekt gewählt."
+
+msgctxt "registrar.lab_groups"
+msgid "Laboratoriya qrupu yalnız laboratoriya dərsinə aiddir."
+msgstr "Eine Laborgruppe gilt nur für eine Laborstunde."
+
+msgctxt "registrar.lab_groups"
+msgid "Bu jurnalda belə laboratoriya qrupu yoxdur."
+msgstr "Dieses Journal hat keine solche Laborgruppe."
+
+msgctxt "registrar.lab_groups"
+msgid "Bu jurnal laboratoriya qruplarına bölünüb — dərsin qrupunu seçin."
+msgstr "Dieses Journal ist in Laborgruppen geteilt — wählen Sie die Gruppe der Stunde."
+
+msgctxt "registrar.lab_groups"
+msgid "Bu dərsdə başqa laboratoriya qrupunun tələbələrinə qeyd yazılıb — qrupu dəyişmək olmaz."
+msgstr "Diese Stunde hat bereits Einträge für Studierende einer anderen Laborgruppe — die Gruppe kann nicht geändert werden."
+
+msgctxt "registrar.lab_groups"
+msgid "Bu laboratoriya dərsi yalnız bu qrupun tələbələrinindir"
+msgstr "Diese Laborstunde gehört nur den Studierenden dieser Gruppe"
+
+msgctxt "registrar.lab_groups"
+msgid "Laboratoriya qrupu"
+msgstr "Laborgruppe"
+
+msgctxt "registrar.lab_groups"
+msgid "Tələbə heç bir laboratoriya qrupuna yerləşdirilməyib — qruplu lab dərsləri ona aid deyil. RİM-ə müraciət edin."
+msgstr "Der/die Studierende ist keiner Laborgruppe zugeordnet — gruppierte Laborstunden gelten nicht. Wenden Sie sich an das Studienbüro."
+
+msgctxt "registrar.lab_groups"
+msgid "Lab qrupu yoxdur"
+msgstr "Keine Laborgruppe"
+
+msgctxt "registrar.lab_groups"
+msgid "Başqa laboratoriya qrupunun dərsi"
+msgstr "Stunde einer anderen Laborgruppe"
+
+msgctxt "registrar.lab_groups"
+msgid "LABORATORİYA QRUPU"
+msgstr "LABORGRUPPE"
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupu seçin…"
+msgstr "Gruppe wählen…"
+
+msgctxt "registrar.lab_groups"
+msgid "Dərs yalnız bu qrupun tələbələrinə yazılır; mühazirə və seminar bütün qrupladır."
+msgstr "Die Stunde wird nur für die Studierenden dieser Gruppe erfasst; Vorlesungen und Seminare sind für die ganze Gruppe."
