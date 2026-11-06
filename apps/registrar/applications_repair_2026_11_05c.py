@@ -126,6 +126,10 @@ MR225_MOVE_KEYS = (
     ("2026-10-20", "seminar"),
 )
 MR225_REASON = "MR-000225: köhnə 14261 «risklər» dərsləri səhvən «kurortlar» jurnalına birləşmişdi — geri köçürülür"
+#: «risklər və sığortalanma» təsdiqlənmiş sillabusu (köhnə sistem 8407) bağlanmış əkiz jurnalda (8683b730) qalmışdı —
+#: cari «risklər» jurnalı sillabussuz görünürdü, seminar qiymətləndirməsi bağlanırdı (sahib 2026-11-06).
+MR225_SYLLABUS = "9403b6ab-9a3c-43f5-8e65-e07a1ef52e2c"
+MR225_SYLLABUS_FROM = "8683b730-002b-4d4a-99c9-be6aa0770924"
 
 
 def _model(name):
@@ -281,8 +285,37 @@ def move_mr225_lessons(*, organization, actor, counts) -> None:
         recompute_absences(list({row.pk: row for row in touched}.values()) + list(target_rows.values()))
 
 
+def move_mr225_syllabus(*, organization, actor, counts) -> None:
+    Syllabus = django_apps.get_model("syllabus", "Syllabus")
+    Offering = _model("CourseOffering")
+    target = Offering.objects.filter(organization=organization, pk=MR225_MOVE_TARGET).first()
+    syllabus = Syllabus.objects.filter(organization=organization, pk=MR225_SYLLABUS).first()
+    if target is None or syllabus is None:
+        counts["syllabus_missing"] += 1
+        return
+    if str(syllabus.offering_id) == MR225_MOVE_TARGET:
+        counts["syllabus_already_moved"] += 1
+        return
+    if str(syllabus.offering_id) != MR225_SYLLABUS_FROM or Syllabus.objects.filter(offering=target).exists():
+        counts["syllabus_target_has_own_kept"] += 1
+        return
+    old = {"offering": str(syllabus.offering_id), "subject": str(syllabus.subject_id)}
+    Syllabus.objects.filter(pk=syllabus.pk).update(offering=target, subject_id=target.subject_id)
+    _audit(
+        organization=organization,
+        actor=actor,
+        obj=syllabus,
+        old=old,
+        new={"offering": MR225_MOVE_TARGET, "subject": str(target.subject_id)},
+        reason="MR-000225: təsdiqlənmiş sillabus bağlanmış əkiz jurnaldan cari «risklər» jurnalına köçürüldü",
+        resource_type="syllabus.Syllabus",
+    )
+    counts["syllabus_moved"] += 1
+
+
 def run(*, organization, actor, counts) -> None:
     fix_mr209(organization=organization, actor=actor, counts=counts)
     fix_mr218(organization=organization, actor=actor, counts=counts)
     Merger(organization=organization, actor=actor, counts=counts).run([dict(pair) for pair in MR225_PAIRS])
     move_mr225_lessons(organization=organization, actor=actor, counts=counts)
+    move_mr225_syllabus(organization=organization, actor=actor, counts=counts)
