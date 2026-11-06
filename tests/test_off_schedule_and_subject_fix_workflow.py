@@ -49,6 +49,6 @@ def test_output_is_count_lines_only():
     # `elif` sətrinə başqa əmrlər də əlavə oluna bilər (məs. repair_applications_20261105) — sətrin sonundan kəs.
     head = re.search(r'\[ "\$COMMAND" = "fix_offering_subject" \]( \|\| \[ "\$COMMAND" = "[a-z_0-9]+" \])*; then', text)
     branch = text[head.end() :].split("          elif", 1)[0]
-    assert "|off_schedule_flags|" in branch and "|offering_subject_fix)" in branch
+    assert "|off_schedule_flags|" in branch and re.search(r"\|offering_subject_fix[|)]", branch)
     assert 'cat "$RUNNER_TEMP/summary.log"' in branch
     assert 'cat "$RUNNER_TEMP/out.log"' not in branch
