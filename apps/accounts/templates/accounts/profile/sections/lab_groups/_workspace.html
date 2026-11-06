@@ -1,0 +1,88 @@
+{% load i18n %}
+{% comment %}«Lab qrupları» — seçilmiş jurnalın iş sahəsi (`ws`). Lövhə: «Qrupsuz» sütunu + hər lab qrupu bir sütun-kart +
+«Yeni qrup» kartı. Tələbələri seçib yuxarıdakı alətlə köçürmək və ya sətri sürüşdürüb sütunun üzərinə atmaq olur;
+öz qrupunun dərslərində qeydi olan tələbə kilidlidir (servis onu onsuz da köçürmür). Yazı JSON endpoint-inə gedir
+(URL və mətnlər data-atributlarda — `accounts/js/profile/lab_groups.js`); bağlı jurnalda / view-as-da yalnız oxu.{% endcomment %}
+<div class="lgx-ws"{% for key, value in ws.data.items %} {{ key }}="{{ value }}"{% endfor %}>
+    <header class="lgx-ws__head">
+        <a class="lgx-ws__back" href="{{ ws.close_url }}" data-section="lab-groups"><i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Jurnallar" context "accounts.lab_groups" %}</a>
+        <div class="lgx-ws__heading">
+            <h2 class="lgx-ws__title">{{ ws.offering.subject }}{% if ws.offering.code %} <span class="ems-mono">{{ ws.offering.code }}</span>{% endif %}</h2>
+            <p class="lgx-ws__meta">
+                {% if ws.offering.group %}<span><i class="fas fa-users" aria-hidden="true"></i> {{ ws.offering.group }}</span>{% endif %}
+                {% if ws.offering.period %}<span><i class="fas fa-calendar" aria-hidden="true"></i> {{ ws.offering.period }}</span>{% endif %}
+                {% if ws.offering.teacher %}<span><i class="fas fa-chalkboard-user" aria-hidden="true"></i> {{ ws.offering.teacher }}</span>{% endif %}
+            </p>
+        </div>
+        <a class="ems-btn ems-btn--sm lgx-ws__journal" href="{{ ws.journal_url }}" data-force-navigation="true">
+            <i class="fas fa-book-open" aria-hidden="true"></i> {% trans "Jurnalı aç" context "accounts.lab_groups" %}
+        </a>
+    </header>
+
+    {% if ws.blocked_reason %}
+    <div class="ems-banner ems-banner--warning lgx-ws__banner" role="status"><i class="fas fa-lock" aria-hidden="true"></i> <span class="ems-banner__body">{{ ws.blocked_reason }}</span></div>
+    {% elif ws.view_as %}
+    <div class="ems-banner ems-banner--info lgx-ws__banner" role="status"><i class="fas fa-eye" aria-hidden="true"></i> <span class="ems-banner__body">{% trans "«Başqasının adından» rejimində qruplar yalnız göstərilir — dəyişiklik edilmir." context "accounts.lab_groups" %}</span></div>
+    {% endif %}
+
+    <div class="lgx-stats">
+        <div class="lgx-stats__item"><span class="lgx-stats__value">{{ ws.panel.groups|length }}</span><span class="lgx-stats__label">{% trans "Lab qrupu" context "accounts.lab_groups" %}</span></div>
+        <div class="lgx-stats__item"><span class="lgx-stats__value">{{ ws.panel.total }}</span><span class="lgx-stats__label">{% trans "Aktiv tələbə" context "accounts.lab_groups" %}</span></div>
+        <div class="lgx-stats__item{% if ws.panel.groups and ws.panel.ungrouped %} lgx-stats__item--warn{% endif %}"><span class="lgx-stats__value">{{ ws.panel.ungrouped|length }}</span><span class="lgx-stats__label">{% trans "Qrupsuz" context "accounts.lab_groups" %}</span></div>
+        {% if ws.panel.groups %}
+        <div class="lgx-stats__progress">
+            <span class="lgx-stats__label">{% blocktrans with done=ws.grouped total=ws.panel.total context "accounts.lab_groups" %}Yerləşdirilib: {{ done }} / {{ total }}{% endblocktrans %}</span>
+            <span class="ems-bar"><span class="ems-bar__fill{% if not ws.panel.ungrouped %} ems-bar__fill--success{% endif %}" style="--pct:{{ ws.pct }}%"></span></span>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="lgx-toolbar">
+        <div class="ems-search lgx-toolbar__search">
+            <i class="fas fa-magnifying-glass ems-search__icon" aria-hidden="true"></i>
+            <input type="search" class="ems-input ems-search__input" data-lgx-search
+                   placeholder="{% trans 'Tələbə axtar…' context 'accounts.lab_groups' %}"
+                   aria-label="{% trans 'Tələbə axtar' context 'accounts.lab_groups' %}">
+        </div>
+        {% if ws.can_edit and ws.panel.groups %}
+        <div class="lgx-toolbar__move" data-lgx-movebar>
+            <span class="lgx-toolbar__count">{% trans "Seçilib" context "accounts.lab_groups" %}: <strong data-lgx-selected>0</strong></span>
+            <div class="bootstrap-single-select bootstrap-single-select--ems lgx-toolbar__target">
+                <select class="ems-select bootstrap-single-select__native" data-bootstrap-select data-lgx-target
+                        aria-label="{% trans 'Hansı qrupa köçürülsün' context 'accounts.lab_groups' %}">
+                    <option value="">{% trans "Hansı qrupa…" context "accounts.lab_groups" %}</option>
+                    {% for group in ws.panel.groups %}<option value="{{ group.number }}">{{ group.label }}</option>{% endfor %}
+                    <option value="{{ ws.unassign_value }}">{% trans "Qrupsuz et" context "accounts.lab_groups" %}</option>
+                </select>
+            </div>
+            <button type="button" class="ems-btn ems-btn--primary ems-btn--sm" data-lgx-move disabled>
+                <i class="fas fa-right-left" aria-hidden="true"></i> {% trans "Köçür" context "accounts.lab_groups" %}
+            </button>
+            <button type="button" class="ems-btn ems-btn--ghost ems-btn--sm" data-lgx-clear hidden>{% trans "Seçimi təmizlə" context "accounts.lab_groups" %}</button>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if not ws.panel.groups %}
+    <p class="lgx-ws__hint"><i class="fas fa-circle-info" aria-hidden="true"></i> {% trans "Bu jurnal hələ laboratoriya qruplarına bölünməyib. «Qrup yarat» ilə Lab-1, Lab-2 … yaradın, sonra tələbələri yerləşdirin." context "accounts.lab_groups" %}</p>
+    {% elif ws.can_edit %}
+    <p class="lgx-ws__hint lgx-ws__hint--quiet"><i class="fas fa-hand-pointer" aria-hidden="true"></i> {% trans "Tələbəni sürüşdürüb qrupun üzərinə atın və ya bir neçəsini seçib «Köçür» basın." context "accounts.lab_groups" %}</p>
+    {% endif %}
+
+    <div class="lgx-board">
+        {% trans "Qrupsuz" context "accounts.lab_groups" as none_title %}
+        {% include "accounts/profile/sections/lab_groups/_column.html" with col_key=ws.unassign_value col_title=none_title col_members=ws.panel.ungrouped col_ungrouped=True group=None %}
+        {% for group in ws.panel.groups %}
+            {% include "accounts/profile/sections/lab_groups/_column.html" with col_key=group.number col_title=group.label col_members=group.members col_ungrouped=False %}
+        {% endfor %}
+        {% if ws.can_edit and ws.panel.can_create %}
+        <form class="lgx-new" data-lgx-create-form novalidate>
+            <span class="lgx-new__icon" aria-hidden="true"><i class="fas fa-plus"></i></span>
+            <label class="lgx-new__label" for="lgx-new-name">{% trans "Yeni laboratoriya qrupu" context "accounts.lab_groups" %}</label>
+            <input type="text" id="lgx-new-name" name="name" class="ems-input" maxlength="{{ ws.panel.name_max_length }}"
+                   placeholder="{% trans 'Ad (istəyə bağlı) — boş qalsa Lab-N' context 'accounts.lab_groups' %}">
+            <button type="submit" class="ems-btn ems-btn--primary ems-btn--sm"><i class="fas fa-plus" aria-hidden="true"></i> {% trans "Qrup yarat" context "accounts.lab_groups" %}</button>
+        </form>
+        {% endif %}
+    </div>
+</div>

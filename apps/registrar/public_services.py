@@ -22,6 +22,8 @@ from . import journal_removal_read  # noqa: F401 — «Jurnaldan çıxarılmalar
 from . import journal_scope  # noqa: F401
 from . import kollokvium_notifications  # noqa: F401
 from . import kollokvium_windows  # noqa: F401
+from . import lab_groups_manage  # noqa: F401 — «Lab qrupları» bölməsi: qrup paneli + qapı (2026-11-07)
+from . import lab_groups_section  # noqa: F401 — «Lab qrupları» bölməsi: jurnal seçimi (2026-11-07)
 from . import language_levels  # noqa: F401 — xarici dil səviyyə fənləri (paylar / səviyyə birləşməsi, 2026-10-27)
 from . import legacy_grade_review  # noqa: F401
 from . import legacy_grade_review_actions  # noqa: F401
@@ -159,6 +161,8 @@ __all__ = [
     "journal_hygiene_rows",
     "journal_removal_read",
     "journal_scope",
+    "lab_groups_manage",
+    "lab_groups_section",
     "subgroup_students_journals",
     "subgroup_students_read",
     "subgroup_students_stats",

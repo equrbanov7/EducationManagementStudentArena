@@ -1,30 +1,52 @@
-"""«Lab qrupları» ekranı — HTTP səthi (sahib 2026-11-06).
+"""«Lab qrupları» — HTTP səthi (sahib 2026-11-06; 2026-11-07 kabinet bölməsinə köçdü).
+
+Sahib 2026-11-07: «sidebarda qruplar olan yerdə yerləşsin … belə yox» — idarəetmə artıq kabinetin «Lab qrupları»
+bölməsidir (``?section=lab-groups``; jurnal seçimi :mod:`apps.registrar.lab_groups_section`). Bu modul:
+
+* :func:`action` — bölmənin JSON yazı endpoint-i (``POST /jurnal/<id>/lab-qruplari/emel/``): yaratmaq, ad,
+  yerləşdirmək / köçürmək / qrupsuz etmək, silmək. ``/jurnal/`` altında qalır ki, şəbəkə zonası qaydası (jurnal
+  yalnız daxili şəbəkədən) köhnə ekranla EYNİ olsun;
+* :func:`manage` — köhnə ünvan: GET kabinet bölməsinə yönləndirir (jurnal öncədən seçilmiş), POST köhnə formalar
+  üçün işləyir və yenə bölməyə qayıdır.
 
 Zəncir (fail-closed): tenant (``offering_or_404`` → 404) → səlahiyyət (:func:`lab_groups_manage.can_manage`;
-yoxdursa **403**) → POST-da siyahı qapısı (bağlı jurnal / keçmiş dövr — mesaj, heç nə yazılmır) → servis.
-Adi HTML formları (POST → redirect + mesaj); JS yalnız rahatlıqdır (seçim sayğacı, axtarış) —
-``journal_lab_groups_manage.js``. Domen məntiqi :mod:`apps.registrar.lab_groups_manage`-dədir.
+yoxdursa **403**) → siyahı qapısı (bağlı jurnal / keçmiş dövr → 409, heç nə yazılmır) → servis. Domen məntiqi
+:mod:`apps.registrar.lab_groups_manage`-dədir.
 """
 
 from __future__ import annotations
 
 import uuid
+from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import redirect, render
+from django.http import JsonResponse
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.translation import pgettext
 from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_POST
 
 from . import lab_groups
 from . import lab_groups_manage as service
 from .journal_access import offering_or_404
 
 _CTX = "registrar.lab_groups"
+#: Kabinet bölməsinin açarı (``apps/accounts`` — ``?section=lab-groups``).
+SECTION = "lab-groups"
 #: «Qrupsuz et» seçiminin dəyəri (POST ``target``).
 UNASSIGN = "none"
+SUCCESS, INFO, WARNING = "success", "info", "warning"
+
+
+def section_url(offering=None) -> str:
+    """Kabinet bölməsinin ünvanı; ``offering`` verilibsə jurnal öncədən seçilir."""
+    params = {"section": SECTION}
+    if offering is not None:
+        params["lg_offering"] = str(offering.pk)
+    return f"{reverse('accounts:profile')}?{urlencode(params)}"
 
 
 def _uuids(values) -> list:
@@ -37,25 +59,24 @@ def _uuids(values) -> list:
     return found
 
 
-def _create(request, offering):
+def _create(request, offering) -> list:
     number = service.create_group(offering=offering, actor=request.user, name=request.POST.get("name"), request=request)
     message = pgettext(_CTX, "«%(label)s» qrupu yaradıldı — tələbələri aşağıda yerləşdirin.")
-    messages.success(request, message % {"label": lab_groups.label(number, offering)})
+    return [(SUCCESS, message % {"label": lab_groups.label(number, offering)})]
 
 
-def _rename(request, offering):
+def _rename(request, offering) -> list:
     number = service.parse_number(request.POST.get("group"))
     changed = service.rename_group(
         offering=offering, number=number, name=request.POST.get("name"), actor=request.user, request=request
     )
-    if changed:
-        message = pgettext(_CTX, "Qrupun adı yeniləndi: %(label)s.")
-        messages.success(request, message % {"label": lab_groups.label(number, offering)})
-    else:
-        messages.info(request, pgettext(_CTX, "Ad dəyişmədi."))
+    if not changed:
+        return [(INFO, pgettext(_CTX, "Ad dəyişmədi."))]
+    message = pgettext(_CTX, "Qrupun adı yeniləndi: %(label)s.")
+    return [(SUCCESS, message % {"label": lab_groups.label(number, offering)})]
 
 
-def _assign(request, offering):
+def _assign(request, offering) -> list:
     raw_target = (request.POST.get("target") or "").strip()
     if not raw_target:
         raise service.LabGroupManageError("no_target", pgettext(_CTX, "Hansı qrupa köçürüləcəyini seçin."))
@@ -67,21 +88,23 @@ def _assign(request, offering):
         actor=request.user,
         request=request,
     )
+    result = []
     if counts["moved"]:
         where = lab_groups.label(target, offering) if target else pgettext(_CTX, "Qrupsuz")
         message = pgettext(_CTX, "%(n)s tələbə yerləşdirildi: %(group)s.")
-        messages.success(request, message % {"n": counts["moved"], "group": where})
+        result.append((SUCCESS, message % {"n": counts["moved"], "group": where}))
     if counts["locked"]:
         message = pgettext(
             _CTX,
             "%(n)s tələbənin öz qrupunun dərslərində qeydi var — onlar köçürülmədi (qeydlər itməsin deyə).",
         )
-        messages.warning(request, message % {"n": counts["locked"]})
-    if not counts["moved"] and not counts["locked"]:
-        messages.info(request, pgettext(_CTX, "Seçilən tələbələr artıq bu qrupdadır."))
+        result.append((WARNING, message % {"n": counts["locked"]}))
+    if not result:
+        result.append((INFO, pgettext(_CTX, "Seçilən tələbələr artıq bu qrupdadır.")))
+    return result
 
 
-def _delete(request, offering):
+def _delete(request, offering) -> list:
     number = service.parse_number(request.POST.get("group"))
     label = lab_groups.label(number, offering)
     freed = service.delete_group(
@@ -92,48 +115,64 @@ def _delete(request, offering):
         request=request,
     )
     message = pgettext(_CTX, "«%(label)s» qrupu silindi — %(n)s tələbə qrupsuz qaldı.")
-    messages.success(request, message % {"label": label, "n": freed})
+    return [(SUCCESS, message % {"label": label, "n": freed})]
 
 
 _ACTIONS = {"create": _create, "rename": _rename, "assign": _assign, "delete": _delete}
 
 
-@never_cache
-@login_required
-def manage(request, offering_id):
+def _managed_offering(request, offering_id):
     offering = offering_or_404(request, offering_id)
     if not service.can_manage(request.user, offering):
         raise PermissionDenied
-    here = reverse("registrar:journal_lab_groups", args=[offering.pk])
+    return offering
+
+
+def _run(request, offering) -> tuple[int, dict]:
+    """Əməli icra et: ``(HTTP status, JSON gövdəsi)`` — həm JSON endpoint-i, həm köhnə forma işlədir."""
+    handler = _ACTIONS.get(request.POST.get("action") or "")
+    if handler is None:
+        return 400, {"ok": False, "error": "unknown_action", "message": pgettext(_CTX, "Naməlum əməl.")}
     blocked = service.block_reason(offering)
+    if blocked:
+        return 409, {"ok": False, "error": "blocked", "message": blocked}
+    try:
+        result = handler(request, offering)
+    except service.LabGroupManageError as exc:
+        return 400, {"ok": False, "error": exc.code, "message": exc.message}
+    return 200, {"ok": True, "messages": [{"level": level, "text": text} for level, text in result]}
+
+
+@never_cache
+@login_required
+@require_POST
+def action(request, offering_id):
+    """Kabinet bölməsinin yazı endpoint-i (JSON)."""
+    offering = _managed_offering(request, offering_id)
+    status, payload = _run(request, offering)
+    return JsonResponse(payload, status=status)
+
+
+@never_cache
+@login_required
+def manage(request, offering_id):
+    """Köhnə ünvan (/jurnal/<id>/lab-qruplari/): bölməyə yönləndirir; köhnə POST formaları da işləyir."""
+    offering = _managed_offering(request, offering_id)
     if request.method == "POST":
-        handler = _ACTIONS.get(request.POST.get("action") or "")
-        if handler is None:
-            messages.error(request, pgettext(_CTX, "Naməlum əməl."))
-        elif blocked:
-            messages.error(request, blocked)
+        _status, payload = _run(request, offering)
+        if payload["ok"]:
+            for item in payload["messages"]:
+                getattr(messages, item["level"])(request, item["text"])
         else:
-            try:
-                handler(request, offering)
-            except service.LabGroupManageError as exc:
-                messages.error(request, exc.message)
-        return redirect(here)
-    context = {
-        "offering": offering,
-        "panel": service.panel(offering),
-        "blocked_reason": blocked,
-        "unassign_value": UNASSIGN,
-        "journal_url": reverse("registrar:journal_detail", args=[offering.pk]),
-        "active_main_nav": "journal",
-    }
-    return render(request, "registrar/journal_lab_groups.html", context)
+            messages.error(request, payload["message"])
+    return redirect(section_url(offering))
 
 
 def link_context(user, offering) -> dict:
-    """Jurnal başlığındakı «Lab qrupları» keçidi (yalnız idarə edə bilənlərə)."""
+    """Jurnal başlığındakı kiçik «Lab qrupları» keçidi (yalnız idarə edə bilənlərə) — kabinet bölməsinə aparır."""
     if not service.can_manage(user, offering):
         return {}
-    return {"lab_groups_url": reverse("registrar:journal_lab_groups", args=[offering.pk])}
+    return {"lab_groups_url": section_url(offering)}
 
 
-__all__ = ["UNASSIGN", "link_context", "manage"]
+__all__ = ["SECTION", "UNASSIGN", "action", "link_context", "manage", "section_url"]
