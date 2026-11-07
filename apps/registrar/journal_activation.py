@@ -290,7 +290,7 @@ def slot_lesson_fields(offering, slot, day, *, last_instructor=None) -> dict:
 # --------------------------------------------------------------------------- #
 
 
-def hours_cap_error(offering, hours, *, lab_group=None) -> str:
+def hours_cap_error(offering, hours, *, lab_group=None, seminar_group=None) -> str:
     """#6 — fənnin tam saat həddi: planlaşdırılmış + yeni saat toplamı keçməsin (60→62 olmaz).
 
     Laboratoriya qrupu (sahib 2026-11-06): hədd TƏLƏBƏ başınadır — Lab-2 dərsi Lab-1-in saatına əlavə olunmur."""
@@ -302,11 +302,13 @@ def hours_cap_error(offering, hours, *, lab_group=None) -> str:
     summary = journal_extras.journal_teaching_summary(offering)
     new_hours = hours or DEFAULT_LESSON_HOURS
     after = summary["scheduled_total"] + new_hours
-    if lab_group is not None:
+    if lab_group is not None or seminar_group is not None:
         lessons = Lesson.objects.filter(organization_id=offering.organization_id, offering=offering).only(
-            "hours", "lab_group"
+            "hours", "lab_group", "seminar_group"
         )
-        after = per_student_hours(lessons, extra_hours=new_hours, extra_group=lab_group)
+        after = per_student_hours(
+            lessons, extra_hours=new_hours, extra_group=lab_group, extra_seminar_group=seminar_group
+        )
     if summary["total"] and after > summary["total"]:
         return gettext(
             "Fənnin dərs saatı həddi (%(t)s saat) keçilir — keçirilmiş %(h)s saat, qalan yalnız %(r)s saat."
@@ -314,13 +316,13 @@ def hours_cap_error(offering, hours, *, lab_group=None) -> str:
     return ""
 
 
-def check_manual_lesson(offering, *, date, start_time, hours, raw_reason, lab_group=None):
+def check_manual_lesson(offering, *, date, start_time, hours, raw_reason, lab_group=None, seminar_group=None):
     """Modal ilə açılan dərs üçün ``(səbəb, xəta)``; xəta boş deyilsə dərs AÇILMIR.
 
     Cədvəli olan açılışda seçilmiş tarix + saat heç bir slota uyğun gəlmirsə dərs
     «cədvəldən kənar»dır və səbəb məcburidir; uyğun gəlirsə (və ya cədvəl yoxdursa)
     göndərilmiş səbəb nəzərə alınmır."""
-    error = hours_cap_error(offering, hours, lab_group=lab_group)
+    error = hours_cap_error(offering, hours, lab_group=lab_group, seminar_group=seminar_group)
     if error:
         return "", error
     from .gradebook_lessons import _coerce_date

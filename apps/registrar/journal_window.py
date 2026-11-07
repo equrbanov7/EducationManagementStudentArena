@@ -57,14 +57,15 @@ def lesson_summaries(lessons, enrollments, mark_map, total_students: int) -> dic
     Yalnız GÖRÜNƏN dərslər üçün hesablanır: əvvəl 226 dərs × 555 tələbə = 125 min
     iterasiya hər səhifə yükündə gedirdi (QA 2026-09-05 P1-8).
     """
-    from apps.registrar.lab_groups import applies
+    from apps.registrar.lab_groups import applies, is_split
     from apps.registrar.models.grading_choices import AttendanceStatus
 
     summary: dict = {}
     for lesson in lessons:
         ie = qb = uq = scored = 0
-        # Qruplu lab dərsi (sahib 2026-11-06): məxrəc yalnız həmin laboratoriya qrupunun tələbələridir.
-        audience = [row for row in enrollments if applies(lesson, row)] if lesson.lab_group else enrollments
+        # Qruplu lab / seminar alt qrupu dərsi (sahib 2026-11-06/07): məxrəc yalnız həmin qrupun tələbələridir.
+        split = is_split(lesson)
+        audience = [row for row in enrollments if applies(lesson, row)] if split else enrollments
         for enrollment in audience:
             mark = mark_map.get((enrollment.id, lesson.id))
             if mark is None:
@@ -82,7 +83,7 @@ def lesson_summaries(lessons, enrollments, mark_map, total_students: int) -> dic
             "qb": qb,
             "uq": uq,
             "scored": scored,
-            "total": len(audience) if lesson.lab_group else total_students,
+            "total": len(audience) if split else total_students,
             "marked": ie + qb + uq,
         }
     return summary
