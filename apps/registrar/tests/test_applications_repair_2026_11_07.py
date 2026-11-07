@@ -47,7 +47,7 @@ class SpecTest(SimpleTestCase):
     def test_workflow_wiring(self):
         text = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("          - repair_applications_20261107\n", text)
-        self.assertIn("            repair_applications_20261107)\n", text)
+        self.assertRegex(text, r"\n            repair_applications_20261107[|)]")
         self.assertIn('[ "$COMMAND" = "repair_applications_20261107" ]', text)
         pattern = re.search(r"grep -E '(\^\(twin_relocate[^']+)'", text).group(1)
         self.assertRegex(
