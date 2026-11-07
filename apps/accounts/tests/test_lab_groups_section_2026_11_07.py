@@ -141,7 +141,7 @@ class ListTest(_SectionBase):
 
 
 class WorkspaceTest(_SectionBase):
-    def test_workspace_columns_lock_and_tools(self):
+    def test_workspace_columns_and_tools(self):
         self.set_groups({self.e1: 1, self.e2: 1})
         self.act(action="rename", group="1", name="Səhər")
         bound = self.lesson(lab_group=1)
@@ -153,8 +153,9 @@ class WorkspaceTest(_SectionBase):
         self.assertIn('data-lgx-col="none"', html)
         self.assertIn('data-lgx-col="1"', html)
         self.assertIn("Səhər", html)
-        self.assertIn("lgx-stu is-locked", html)  # e1 — öz qrupunun dərsində qeydi var
-        self.assertIn('draggable="true"', html)
+        # Qeydi olan tələbə də köçürülür (sahib 2026-11-07) — kilid yoxdur, hamı sürüşdürülür.
+        self.assertNotIn("is-locked", html)
+        self.assertEqual(html.count('draggable="true"'), html.count("data-lgx-row "))
         self.assertIn("data-lgx-create-form", html)
         self.assertIn("data-lgx-move", html)
         self.assertIn('data-readonly="0"', html)
