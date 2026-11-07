@@ -63,35 +63,3 @@
     color: var(--ems-info, #2563a8);
     border-color: var(--ems-info-border, #b8d0ec);
 }
-
-.jd2-sections {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin: 0 0 10px;
-}
-
-.jd2-sections__btn {
-    border: 1px solid var(--ems-neutral-300, #cbd5e1);
-    background: var(--ems-surface, #fff);
-    color: var(--ems-neutral-700, #3f5063);
-    border-radius: 999px;
-    padding: 4px 12px;
-    font-size: 0.82rem;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.jd2-sections__btn:hover {
-    border-color: var(--ems-primary, #1d4f91);
-}
-
-.jd2-sections__btn.is-active {
-    background: var(--ems-primary, #1d4f91);
-    border-color: var(--ems-primary, #1d4f91);
-    color: #fff;
-}
-
-.jd2-sec-hidden {
-    display: none;
-}

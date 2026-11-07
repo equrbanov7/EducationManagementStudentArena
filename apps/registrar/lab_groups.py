@@ -40,9 +40,15 @@ def default_label(number) -> str:
 
 
 def label(number, offering=None) -> str:
-    """Qrupun görünən adı: ``offering`` verilib və qrupun adı varsa ad, yoxsa «Lab-N»."""
+    """Qrupun görünən adı: öz adı varsa o; yoxsa jurnalın qrupu ilə «236 SBİO · Lab-1» (sahib 2026-11-08: «jurnalda
+    236 SBİO Lab 1 kimi yazsın»); qrupsuz jurnalda «Lab-N»."""
     name = names(offering).get(number, "") if offering is not None else ""
-    return name or default_label(number)
+    if name:
+        return name
+    group = getattr(offering, "group", None) if offering is not None and offering.group_id else None
+    if group is None:
+        return default_label(number)
+    return pgettext("registrar.lab_groups", "%(group)s · Lab-%(n)s") % {"group": group.name, "n": number}
 
 
 def names(offering) -> dict:

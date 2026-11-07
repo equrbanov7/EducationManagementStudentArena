@@ -176,10 +176,10 @@ class LabGroupJournalTest(_LabWorld, TestCase):
         self.assertTrue(rows[self.e1.pk]["cells"][0]["writable"])
         self.assertTrue(rows[self.e2.pk]["cells"][0]["off_group"])
         self.assertFalse(rows[self.e2.pk]["cells"][0]["writable"])
-        self.assertEqual(rows[self.e1.pk]["lab_group_label"], "Lab-1")
+        self.assertEqual(rows[self.e1.pk]["lab_group_label"], "LAB-G1 · Lab-1")
         self.assertTrue(rows[self.e0.pk]["lab_group_missing"])
         meta = journal["lesson_meta"][0]
-        self.assertEqual((meta["lab_group_label"], meta["summary"]["total"]), ("Lab-1", 1))
+        self.assertEqual((meta["lab_group_label"], meta["summary"]["total"]), ("LAB-G1 · Lab-1", 1))
         self.assertEqual(lab1.pk, meta["lesson"].pk)
 
     def test_data_recovery_mode_keeps_other_group_cells_closed(self):
