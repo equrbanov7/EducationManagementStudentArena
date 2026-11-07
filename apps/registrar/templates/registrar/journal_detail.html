@@ -112,7 +112,7 @@
                 {# Başlama tarixi plandır — erkən başlamaq olar (sahib 2026-11-07); nişanda yalnız son tarix, plan title-da. #}
                 {% if offering.is_intensive %}<span class="jd2-wincode jd2-intensive" title="{% trans 'Plan' context 'registrar.intensive' %}: {{ offering.starts_on|date:'d.m.Y' }}–{{ offering.ends_on|date:'d.m.Y' }}{% if offering.format_note %} · {{ offering.format_note }}{% endif %}">{% blocktrans with end=offering.ends_on|date:"d.m.Y" context "registrar.intensive" %}İntensiv · {{ end }}-dək{% endblocktrans %}</span>{% endif %}
                 {% if journal_share_chip %}<span class="jd2-share-chip" data-share-kinds="{{ journal_share_chip.kinds|join:', ' }}" title="{{ journal_share_chip.kinds|join:', ' }}"><i class="fas fa-user-group" aria-hidden="true"></i> {{ journal_share_chip.text }}</span>{% endif %}
-                <span class="jd2-winsub">{{ offering.subject.name }} · {{ journal.rows|length }} {% trans "tələbə" context "registrar.journal" %}</span>
+                <span class="jd2-winsub">{{ offering.subject.name }}{% if journal_lab_label %} · <b class="jd2-winsub__lab">{{ journal_lab_label }}</b>{% endif %} · {{ journal.rows|length }} {% trans "tələbə" context "registrar.journal" %}</span>
                 {% include "registrar/partials/_jd_practical_toggle.html" %}
                 {% include "registrar/partials/_jd_lab_groups_link.html" %}
                 {% if journal.scheme.is_published %}<span class="jd2-winlock"><i class="fas fa-lock"></i> {% trans "Yekunlaşdırılıb" context "registrar.journal" %}</span>{% endif %}
@@ -341,7 +341,7 @@
     <script src="{% static 'registrar/js/journal_grid_lesson_modal.js' %}?v=20261107-sem1"></script>
     <script src="{% static 'registrar/js/journal_lesson_prefill.js' %}?v=20261105-mr197"></script>{# «Yeni dərs» dolu açılır (sahib 2026-10-10) #}
     <script src="{% static 'registrar/js/journal_lesson_topic.js' %}?v=20261025-topic"></script>{# plan seçimi ↔ sərbəst mövzu (2026-10-25) #}
-    {% if lab_group_choices %}<script src="{% static 'registrar/js/journal_lesson_lab_group.js' %}?v=20261106-lab3"></script>{% endif %}{# Lab-1 / Lab-2 (sahib 2026-11-06) #}
+    {% if lab_group_choices %}<script src="{% static 'registrar/js/journal_lesson_lab_group.js' %}?v=20261108-lab4"></script>{% endif %}{# Lab-1 / Lab-2 (sahib 2026-11-06) #}
     {% if seminar_group_choices %}<script src="{% static 'registrar/js/journal_lesson_seminar_group.js' %}?v=20261107-sem1"></script>{% endif %}{# 234 K1 / 234 K2 (sahib 2026-11-07) #}
     {# Sağdakı «N q/b» sayğacı davamiyyət dəyişəndə canlı yenilənir (UX2 2026-10-05). #}
     <script src="{% static 'registrar/js/journal_grid_absence.js' %}?v=20261005-live2"></script>

@@ -152,7 +152,7 @@ varsa dərs tipi kilidlidir.
                 {% comment %}Laboratoriya qrupları (sahib 2026-11-06): jurnal Lab-1 / Lab-2 siyahılarına bölünübsə lab dərsi
                 yalnız seçilmiş qrupun tələbələrinindir; qrup məcburidir (server də yoxlayır). Sahə yalnız dərs tipi
                 «laboratoriya» olanda görünür — journal_lesson_lab_group.js.{% endcomment %}
-                <div class="jd2-field" data-jd-lab-group-field hidden>
+                <div class="jd2-field" data-jd-lab-group-field{% if journal_lab_view %} data-jd-default-lab-group="{{ journal_lab_view }}"{% endif %} hidden>
                     <span class="jd2-field-label">{% trans "LABORATORİYA QRUPU" context "registrar.lab_groups" %}</span>
                     <div class="bootstrap-single-select bootstrap-single-select--ems">
                         <select name="lesson_lab_group" class="ems-select bootstrap-single-select__native" data-jd-lesson-lab-group data-bootstrap-select>

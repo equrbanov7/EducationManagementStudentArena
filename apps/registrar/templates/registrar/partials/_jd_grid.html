@@ -41,20 +41,6 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
             sütunlar bir səhifəyə render olunurdu (41.5 MB HTML). İndi bir dəfəyə
             yalnız bir dilim göstərilir; rəqəmlər (q/b, giriş balı, buraxılış)
             HƏMİŞƏ bütün dərslər üzrədir.{% endcomment %}
-            {% if journal_kind_tabs %}
-            {% comment %}Dərs tipi süzgəci (sahib tələbi 2026-09-06): müəllim
-            «Seminar» seçəndə mühazirə sütunları qarışmır. Yalnız bu açılışda
-            MÖVCUD tiplər göstərilir; tək tip varsa pillələr ümumiyyətlə yoxdur.
-            Tip dəyişəndə pəncərə başlanğıcı (`lo`) sıfırlanır — sütun dəsti
-            tamam başqadır.{% endcomment %}
-            <nav class="jd2-kindnav" aria-label="{% trans 'Dərs tipi' context 'registrar.journal' %}">
-                {% for tab in journal_kind_tabs %}
-                <a class="jd2-kindnav__btn{% if tab.active %} is-active{% endif %}"
-                   href="?{{ journal_kind_query }}{% if journal_kind_query %}&amp;{% endif %}kind={{ tab.value }}"
-                   {% if tab.active %}aria-current="true"{% endif %}>{{ tab.label }}</a>
-                {% endfor %}
-            </nav>
-            {% endif %}
             {% if journal.lesson_window.enabled %}
             <nav class="jd2-lwnav" aria-label="{% trans 'Dərs sütunları' context 'registrar.journal' %}">
                 <a class="jd2-lwnav__btn {% if not journal.lesson_window.has_prev %}is-disabled{% endif %}"

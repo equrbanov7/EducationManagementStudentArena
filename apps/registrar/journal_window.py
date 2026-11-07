@@ -148,7 +148,9 @@ def grid_nav_context(request, offering, *, selected_kind: str, active_tab: str) 
     """
     return {
         "journal_kind": selected_kind,
-        "journal_kind_tabs": kind_tabs(offering, selected_kind) if active_tab == "grid" else [],
+        # Sahib 2026-11-08: jurnalın içində «Hamısı / Mühazirə / Seminar / Laboratoriya» düymələri YOXDUR — növ
+        # (və lab qrupu) siyahıdan seçilir, ``?kind=`` süzgəci işləməyə davam edir.
+        "journal_kind_tabs": [],
         "journal_nav_query": nav_query(request, drop=("lw", "lo", "page")),
         "journal_kind_query": nav_query(request, drop=("kind", "lo", "page")),
     }
