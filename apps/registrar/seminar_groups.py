@@ -68,12 +68,14 @@ def offering_groups(offering) -> list:
 
 
 def prime(offering, enrollments) -> None:
-    """Hazır aktiv siyahıdan memo (yalnız ``SeminarGroup`` sorğusu)."""
-    setattr(
-        offering,
-        _MEMO_ATTR,
-        sorted(_load_rows(offering) | {row.seminar_group for row in enrollments if row.seminar_group}),
-    )
+    """Hazır aktiv siyahıdan memo. Siyahıda alt qruplu tələbə yoxdursa ``SeminarGroup`` sorğusu da getmir — bölünməmiş
+    jurnalın qrid sorğu büdcəsi dəyişmir (tələbəsiz alt qrupun qriddə yeri yoxdur)."""
+    roster = {row.seminar_group for row in enrollments if row.seminar_group}
+    if not roster:
+        setattr(offering, _MEMO_ATTR, [])
+        setattr(offering, _NAMES_ATTR, {})
+        return
+    setattr(offering, _MEMO_ATTR, sorted(_load_rows(offering) | roster))
 
 
 def forget(offering) -> None:
