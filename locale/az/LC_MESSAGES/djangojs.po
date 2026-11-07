@@ -3196,3 +3196,10 @@ msgstr "Kafedrada redaktə et"
 
 msgid "Yalnız baxış"
 msgstr "Yalnız baxış"
+
+msgid "Patok"
+msgstr "Patok"
+
+#, javascript-format
+msgid "Patok · %(groups)s ilə birlikdə"
+msgstr "Patok · %(groups)s ilə birlikdə"

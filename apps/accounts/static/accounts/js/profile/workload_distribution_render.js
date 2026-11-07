@@ -28,13 +28,35 @@
         return Math.min(100, Math.round((assigned * 100) / total));
     }
 
+    /**
+     * Patokun ikinci/üçüncü qrupu (sahib 2026-11-07): mühazirə aparıcı sətirdə bölünür, burada YALNIZ görünür —
+     * saat qrupun saatıdır, müəllimin yükünə ikinci dəfə düşmür (redaktə/bölgü düyməsi yoxdur).
+     */
+    function patokLine(row, labels) {
+        var info = row.patok_lecture;
+        if (!info) return "";
+        var note = info.groups
+            ? interpolate(gettext("Patok · %(groups)s ilə birlikdə"), { groups: info.groups }, true)
+            : gettext("Patok");
+        if (info.teacher_name) note += " · " + info.teacher_name;
+        return (
+            '<div class="wl-act wl-act--patok is-complete">' +
+            '<span class="wl-act__label">' + esc(labels.lecture || "") + "</span>" +
+            '<span class="wl-act__bar"><span class="wl-act__fill" style="--wl-fill:100%"></span></span>' +
+            '<span class="wl-act__numbers">' + info.hours + " " + esc(gettext("saat")) + "</span>" +
+            '<span class="wl-act__patok">' + esc(note) + "</span>" +
+            "</div>"
+        );
+    }
+
     /** Bir sətrin fəaliyyət zolaqları. */
     function activityBlock(row, labels) {
         var keys = Object.keys(row.activities || {});
         if (!keys.length) {
-            return '<p class="wl-act__numbers">' + esc(gettext("Bu sətirdə bölünəcək saat yoxdur.")) + "</p>";
+            return patokLine(row, labels) ||
+                '<p class="wl-act__numbers">' + esc(gettext("Bu sətirdə bölünəcək saat yoxdur.")) + "</p>";
         }
-        return keys
+        return patokLine(row, labels) + keys
             .map(function (key) {
                 var info = row.activities[key];
                 var cls = info.is_complete ? " is-complete" : "";
@@ -188,6 +210,7 @@
             "<span>" + row.total_hours + " " + esc(gettext("saat")) + "</span>" +
             (row.credits ? "<span>" + esc(row.credits) + " kredit</span>" : "") +
             "</div>" +
+            patokLine(row, labels) +
             acts +
             (chips ? '<ul class="wl-assign-list">' + chips + "</ul>" : "") +
             "</article>"

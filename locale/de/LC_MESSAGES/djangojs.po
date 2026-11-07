@@ -3264,3 +3264,10 @@ msgstr "Im Lehrstuhl bearbeiten"
 
 msgid "Yalnız baxış"
 msgstr "Nur Ansicht"
+
+msgid "Patok"
+msgstr "Gemeinsame Vorlesung"
+
+#, javascript-format
+msgid "Patok · %(groups)s ilə birlikdə"
+msgstr "Gemeinsame Vorlesung · zusammen mit %(groups)s"

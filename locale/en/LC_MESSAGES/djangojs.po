@@ -3211,3 +3211,10 @@ msgstr "Edit in department"
 
 msgid "Yalnız baxış"
 msgstr "View only"
+
+msgid "Patok"
+msgstr "Joint lecture"
+
+#, javascript-format
+msgid "Patok · %(groups)s ilə birlikdə"
+msgstr "Joint lecture · together with %(groups)s"
