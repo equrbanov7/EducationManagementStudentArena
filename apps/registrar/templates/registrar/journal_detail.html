@@ -109,7 +109,8 @@
             <div class="jd2-winhead-left">
                 <span class="jd2-wintitle">{% trans "Jurnal" context "registrar.journal" %}</span>
                 {% if offering.group %}<span class="jd2-wincode">{{ offering.group.name }}</span>{% endif %}
-                {% if offering.is_intensive %}<span class="jd2-wincode jd2-intensive" title="{{ offering.format_note }}">{% trans "İntensiv" context "registrar.intensive" %} · {{ offering.starts_on|date:"d.m" }}–{{ offering.ends_on|date:"d.m.Y" }}</span>{% endif %}
+                {# Başlama tarixi plandır — erkən başlamaq olar (sahib 2026-11-07); nişanda yalnız son tarix, plan title-da. #}
+                {% if offering.is_intensive %}<span class="jd2-wincode jd2-intensive" title="{% trans 'Plan' context 'registrar.intensive' %}: {{ offering.starts_on|date:'d.m.Y' }}–{{ offering.ends_on|date:'d.m.Y' }}{% if offering.format_note %} · {{ offering.format_note }}{% endif %}">{% blocktrans with end=offering.ends_on|date:"d.m.Y" context "registrar.intensive" %}İntensiv · {{ end }}-dək{% endblocktrans %}</span>{% endif %}
                 {% if journal_share_chip %}<span class="jd2-share-chip" data-share-kinds="{{ journal_share_chip.kinds|join:', ' }}" title="{{ journal_share_chip.kinds|join:', ' }}"><i class="fas fa-user-group" aria-hidden="true"></i> {{ journal_share_chip.text }}</span>{% endif %}
                 <span class="jd2-winsub">{{ offering.subject.name }} · {{ journal.rows|length }} {% trans "tələbə" context "registrar.journal" %}</span>
                 {% include "registrar/partials/_jd_practical_toggle.html" %}

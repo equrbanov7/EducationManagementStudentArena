@@ -115137,3 +115137,16 @@ msgstr "Сначала выберите студентов."
 msgctxt "accounts.lab_groups"
 msgid "Əvvəlki"
 msgstr "Назад"
+
+msgctxt "registrar.intensive"
+msgid "Plan"
+msgstr "План"
+
+#, python-format
+msgctxt "registrar.intensive"
+msgid "İntensiv · %(end)s-dək"
+msgstr "Интенсив · до %(end)s"
+
+msgctxt "registrar.lab_groups"
+msgid "Əvvəlki laboratoriya qrupunun dərsi — qeyd saxlanılıb"
+msgstr "Занятие прежней лабораторной группы — запись сохранена"

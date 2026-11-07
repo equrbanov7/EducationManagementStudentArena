@@ -114944,3 +114944,16 @@ msgstr "Select students first."
 msgctxt "accounts.lab_groups"
 msgid "Əvvəlki"
 msgstr "Previous"
+
+msgctxt "registrar.intensive"
+msgid "Plan"
+msgstr "Planned"
+
+#, python-format
+msgctxt "registrar.intensive"
+msgid "İntensiv · %(end)s-dək"
+msgstr "Intensive · until %(end)s"
+
+msgctxt "registrar.lab_groups"
+msgid "Əvvəlki laboratoriya qrupunun dərsi — qeyd saxlanılıb"
+msgstr "Previous lab group's lesson — the record is kept"

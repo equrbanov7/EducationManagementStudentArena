@@ -220,6 +220,8 @@ class JournalPageTest(_IntensiveBase):
         detail = client.get(reverse("registrar:journal_detail", args=[offering.pk]))
         self.assertEqual(detail.status_code, 200)
         self.assertContains(detail, "jd2-intensive")
+        # Nişanda yalnız son tarix (başlama planı title-dadır) — erkən başlamaq olar (sahib 2026-11-07).
+        self.assertContains(detail, "10.10.2025-dək")
         listing = client.get(reverse("registrar:journal_list"))
         self.assertEqual(listing.status_code, 200)
         self.assertContains(listing, "jl-intensive")
