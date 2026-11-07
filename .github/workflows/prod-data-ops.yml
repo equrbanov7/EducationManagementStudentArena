@@ -240,6 +240,8 @@
 #       kimya jurnallarında Lab-1 / Lab-2 (köhnə sistemin lab siyahıları; sabit id-lər koddadır). Defolt dry-run, YALNIZ saylar.
 #   repair_applications_20261107b — RİM 2026-11-07: MR-221 (QKU-845 əkiz jurnalları → QKU-1047, Merger keep), MR-188
 #       (434 R paylarına alt qrup tələbə siyahısı). Sabit id-lər, defolt dry-run. Loga YALNIZ saylar.
+#   bind_lab_lessons_20261108 — sahib 2026-11-08: 236 EM 03.11 qrupsuz lab dərsi → Lab-1 (qeydlər silinmir). Sabit
+#       id-lər, defolt dry-run; `batch=undo` (apply) geri qaytarır. Loga YALNIZ saylar.
 #   apply_seminar_groups — sahib 2026-11-07: ana qrup jurnallarında seminar alt qrupları (234 K1 / 234 K2) reyestrin
 #       alt qruplarından; lab qruplarına «234 K1 · Lab-1» adı. Yalnız boş sahələr; defolt dry-run, YALNIZ saylar.
 #   restore_subgroup_parent_enrollments — sahib 2026-11-07: alt qrupa keçiddə ana qrupun dərsli jurnalından tarixçəyə
@@ -494,6 +496,7 @@ on:
           - apply_first_year_splits_20261107
           - restore_subgroup_parent_enrollments
           - apply_seminar_groups
+          - bind_lab_lessons_20261108
           - rebuild_language_cohorts_20261106
           - repair_twins_20261105b
           - fix_legacy_lesson_kinds
@@ -1630,7 +1633,7 @@ jobs:
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor" "--students=$BATCH")
               ;;
-            repair_applications_20261107)
+            repair_applications_20261107|bind_lab_lessons_20261108)
               # RİM 2026-11-07: MR-247/253 jurnallar passiv, MR-245 fənn — sabit id-lər koddadır. batch=undo geri qaytarır.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
@@ -2292,7 +2295,7 @@ jobs:
               exit "$status"
             fi
             rm -f "$RUNNER_TEMP/out.log"
-          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "release_stale_slot_teachers" ] || [ "$COMMAND" = "fix_offering_subject" ] || [ "$COMMAND" = "repair_twins_20261105b" ] || [ "$COMMAND" = "repair_applications_20261105" ] || [ "$COMMAND" = "repair_applications_20261105c" ] || [ "$COMMAND" = "fix_ydk236_subject_20261106" ] || [ "$COMMAND" = "sync_student_group_journals" ] || [ "$COMMAND" = "rebuild_language_cohorts_20261106" ] || [ "$COMMAND" = "apply_lab_groups_20261106" ] || [ "$COMMAND" = "apply_first_year_splits_20261107" ] || [ "$COMMAND" = "restore_subgroup_parent_enrollments" ] || [ "$COMMAND" = "apply_seminar_groups" ] || [ "$COMMAND" = "repair_applications_20261106" ] || [ "$COMMAND" = "repair_applications_20261107" ] || [ "$COMMAND" = "repair_applications_20261107b" ] || [ "$COMMAND" = "recover_mr230_lessons" ]; then
+          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "release_stale_slot_teachers" ] || [ "$COMMAND" = "fix_offering_subject" ] || [ "$COMMAND" = "repair_twins_20261105b" ] || [ "$COMMAND" = "repair_applications_20261105" ] || [ "$COMMAND" = "repair_applications_20261105c" ] || [ "$COMMAND" = "fix_ydk236_subject_20261106" ] || [ "$COMMAND" = "sync_student_group_journals" ] || [ "$COMMAND" = "rebuild_language_cohorts_20261106" ] || [ "$COMMAND" = "apply_lab_groups_20261106" ] || [ "$COMMAND" = "apply_first_year_splits_20261107" ] || [ "$COMMAND" = "restore_subgroup_parent_enrollments" ] || [ "$COMMAND" = "apply_seminar_groups" ] || [ "$COMMAND" = "bind_lab_lessons_20261108" ] || [ "$COMMAND" = "repair_applications_20261106" ] || [ "$COMMAND" = "repair_applications_20261107" ] || [ "$COMMAND" = "repair_applications_20261107b" ] || [ "$COMMAND" = "recover_mr230_lessons" ]; then
             # Loga YALNIZ «twin_relocate: / twin_merge: / lesson_kinds: / slot_parity: / practical_flag: / off_schedule_flags: / slot_teachers: /
             # offering_subject_fix: açar=say …» sətirləri və rədd kodu.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
