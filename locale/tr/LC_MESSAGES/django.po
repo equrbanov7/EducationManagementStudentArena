@@ -114340,3 +114340,72 @@ msgstr "Yoğun · %(end)s tarihine kadar"
 msgctxt "registrar.lab_groups"
 msgid "Əvvəlki laboratoriya qrupunun dərsi — qeyd saxlanılıb"
 msgstr "Önceki laboratuvar grubunun dersi — kayıt korunuyor"
+
+#, python-format
+msgctxt "registrar.seminar_groups"
+msgid "Seminar-%(n)s"
+msgstr "Seminer-%(n)s"
+
+msgctxt "registrar.seminar_groups"
+msgid "Seminar alt qrupu düzgün seçilməyib."
+msgstr "Seminer alt grubu geçerli değil."
+
+msgctxt "registrar.seminar_groups"
+msgid "Seminar alt qrupu yalnız seminar dərsinə aiddir."
+msgstr "Seminer alt grubu yalnızca seminer dersine uygulanır."
+
+msgctxt "registrar.seminar_groups"
+msgid "Bu jurnalda belə seminar alt qrupu yoxdur."
+msgstr "Bu yoklamada böyle bir seminer alt grubu yok."
+
+msgctxt "registrar.seminar_groups"
+msgid "Bu dərsdə başqa alt qrupun tələbələrinə qeyd yazılıb — alt qrupu dəyişmək olmaz."
+msgstr "Bu derste başka alt grubun öğrencilerine kayıt girilmiş — alt grup değiştirilemez."
+
+msgctxt "registrar.seminar_groups"
+msgid "Bu seminar dərsi yalnız bu alt qrupun tələbələrinindir"
+msgstr "Bu seminer dersi yalnızca bu alt grubun öğrencilerine aittir"
+
+msgctxt "registrar.seminar_groups"
+msgid "Seminar alt qrupu"
+msgstr "Seminer alt grubu"
+
+msgctxt "registrar.seminar_groups"
+msgid "Başqa seminar alt qrupunun dərsi"
+msgstr "Başka bir seminer alt grubunun dersi"
+
+msgctxt "registrar.seminar_groups"
+msgid "SEMİNAR ALT QRUPU"
+msgstr "SEMİNER ALT GRUBU"
+
+msgctxt "registrar.seminar_groups"
+msgid "Bütün qrup"
+msgstr "Tüm grup"
+
+msgctxt "registrar.seminar_groups"
+msgid "Alt qrup seçilsə dərs yalnız onun tələbələrinə yazılır; mühazirə bütün qrupladır."
+msgstr "Alt grup seçilirse ders yalnızca onun öğrencilerine yazılır; ders anlatımı tüm grupladır."
+
+msgctxt "registrar.model.seminar_group.meta"
+msgid "seminar alt qrupu"
+msgstr "seminer alt grubu"
+
+msgctxt "registrar.model.seminar_group.meta"
+msgid "seminar alt qrupları"
+msgstr "seminer alt grupları"
+
+msgctxt "registrar.journal_sections"
+msgid "Hamısı"
+msgstr "Tümü"
+
+msgctxt "registrar.journal_sections"
+msgid "Mühazirə"
+msgstr "Ders anlatımı"
+
+msgctxt "registrar.journal_sections"
+msgid "Seminar"
+msgstr "Seminer"
+
+msgctxt "registrar.journal_sections"
+msgid "Jurnal bölmələri"
+msgstr "Yoklama bölümleri"

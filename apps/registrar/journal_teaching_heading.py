@@ -33,6 +33,7 @@ def summarize(offering, *, personal_actor=None, scope=None):
             "hours",
             "date",
             "lab_group",
+            "seminar_group",
             "instructor__first_name",
             "instructor__last_name",
             "instructor__username",
@@ -75,7 +76,7 @@ def summarize(offering, *, personal_actor=None, scope=None):
 
 
 def _summary(offering, lessons, *, total, per_student=False):
-    from .lab_groups import per_student_hours
+    from .lab_groups import is_split, per_student_hours
 
     today = timezone.localdate()
     labels = dict(kind_choices(offering))
@@ -105,8 +106,8 @@ def _summary(offering, lessons, *, total, per_student=False):
     ]
     kinds.sort(key=lambda row: {"lecture": 0, "seminar": 1, "lab": 2}.get(row["kind"], 9))
     held_total = sum(row["held"] for row in kinds)
-    if per_student and any(lesson.lab_group for lesson in lessons):
-        # Laboratoriya qrupları (sahib 2026-11-06): tələbə yalnız öz qrupunun lab dərsindədir.
+    if per_student and any(is_split(lesson) for lesson in lessons):
+        # Lab qrupları / seminar alt qrupları (sahib 2026-11-06/07): tələbə yalnız öz qrupunun dərsindədir.
         held_lessons = [lesson for lesson in lessons if lesson.date is None or lesson.date <= today]
         scheduled_total = per_student_hours(lessons)
         held_total = per_student_hours(held_lessons)

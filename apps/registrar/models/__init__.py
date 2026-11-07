@@ -123,6 +123,7 @@ from .retake_log import (
     RetakeEventAction,
     RetakeReceipt,
 )
+from .seminar_group import SeminarGroup
 from .subgroup_placement import SubgroupPlacementEvent, SubgroupPlacementKind
 from .transfer_evidence import GroupTransferEvidence
 
@@ -240,6 +241,7 @@ __all__ = [
     "JournalShareSource",
     "LAB_GROUP_NAME_MAX_LENGTH",
     "LabGroup",
+    "SeminarGroup",
     "SlotKind",
     "StudentAcademicRecord",
     "StudentMovement",

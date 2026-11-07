@@ -115150,3 +115150,72 @@ msgstr "Интенсив · до %(end)s"
 msgctxt "registrar.lab_groups"
 msgid "Əvvəlki laboratoriya qrupunun dərsi — qeyd saxlanılıb"
 msgstr "Занятие прежней лабораторной группы — запись сохранена"
+
+#, python-format
+msgctxt "registrar.seminar_groups"
+msgid "Seminar-%(n)s"
+msgstr "Семинар-%(n)s"
+
+msgctxt "registrar.seminar_groups"
+msgid "Seminar alt qrupu düzgün seçilməyib."
+msgstr "Подгруппа семинара выбрана неверно."
+
+msgctxt "registrar.seminar_groups"
+msgid "Seminar alt qrupu yalnız seminar dərsinə aiddir."
+msgstr "Подгруппа семинара относится только к семинарскому занятию."
+
+msgctxt "registrar.seminar_groups"
+msgid "Bu jurnalda belə seminar alt qrupu yoxdur."
+msgstr "В этом журнале нет такой подгруппы семинара."
+
+msgctxt "registrar.seminar_groups"
+msgid "Bu dərsdə başqa alt qrupun tələbələrinə qeyd yazılıb — alt qrupu dəyişmək olmaz."
+msgstr "В этом занятии есть записи студентов другой подгруппы — подгруппу изменить нельзя."
+
+msgctxt "registrar.seminar_groups"
+msgid "Bu seminar dərsi yalnız bu alt qrupun tələbələrinindir"
+msgstr "Это семинарское занятие только для студентов этой подгруппы"
+
+msgctxt "registrar.seminar_groups"
+msgid "Seminar alt qrupu"
+msgstr "Подгруппа семинара"
+
+msgctxt "registrar.seminar_groups"
+msgid "Başqa seminar alt qrupunun dərsi"
+msgstr "Занятие другой подгруппы семинара"
+
+msgctxt "registrar.seminar_groups"
+msgid "SEMİNAR ALT QRUPU"
+msgstr "ПОДГРУППА СЕМИНАРА"
+
+msgctxt "registrar.seminar_groups"
+msgid "Bütün qrup"
+msgstr "Вся группа"
+
+msgctxt "registrar.seminar_groups"
+msgid "Alt qrup seçilsə dərs yalnız onun tələbələrinə yazılır; mühazirə bütün qrupladır."
+msgstr "Если выбрана подгруппа, занятие записывается только её студентам; лекция — для всей группы."
+
+msgctxt "registrar.model.seminar_group.meta"
+msgid "seminar alt qrupu"
+msgstr "подгруппа семинара"
+
+msgctxt "registrar.model.seminar_group.meta"
+msgid "seminar alt qrupları"
+msgstr "подгруппы семинара"
+
+msgctxt "registrar.journal_sections"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "registrar.journal_sections"
+msgid "Mühazirə"
+msgstr "Лекция"
+
+msgctxt "registrar.journal_sections"
+msgid "Seminar"
+msgstr "Семинар"
+
+msgctxt "registrar.journal_sections"
+msgid "Jurnal bölmələri"
+msgstr "Разделы журнала"

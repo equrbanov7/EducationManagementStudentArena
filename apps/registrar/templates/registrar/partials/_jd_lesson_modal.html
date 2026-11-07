@@ -9,7 +9,7 @@ varsa dərs tipi kilidlidir.
 (apps/registrar/journal_lesson_prefill.py) → journal_lesson_prefill.js — bu günün cədvəl dərsi
 (gizli `slot_id`; saat təşkilatın öz zəng saatı da ola bilər) və ya son dərsə görə defoltlar;
 əvvəlki redaktənin dəyərləri sıfırlanır, mövzular dərs tipinə görə süzülür.{% endcomment %}
-<div class="jd-modal" data-jd-lesson-modal data-period-start="{% if offering.period %}{{ offering.period.start_date|date:'Y-m-d' }}{% endif %}"
+<div class="jd-modal" data-jd-lesson-modal{% if seminar_group_choices %} data-jd-seminar-modal{% endif %} data-period-start="{% if offering.period %}{{ offering.period.start_date|date:'Y-m-d' }}{% endif %}"
      data-period-end="{% if offering.period %}{{ offering.period.end_date|date:'Y-m-d' }}{% endif %}"
      data-rooms-url="{% url 'registrar:journal_lesson_rooms' offering.id %}"
      data-default-building="{{ lesson_default_building }}"
@@ -133,6 +133,21 @@ varsa dərs tipi kilidlidir.
                         </div>
                     </div>
                 </div>
+                {% if seminar_group_choices %}
+                {% comment %}Seminar alt qrupları (sahib 2026-11-07): ana qrupun jurnalında seminar dərsi bir alt qrupa
+                («234 K1») bağlana bilər — yalnız onun tələbələrinindir. İstəyə bağlıdır: «Bütün qrup» = birgə seminar.
+                Sahə yalnız dərs tipi «seminar» olanda görünür — journal_lesson_seminar_group.js.{% endcomment %}
+                <div class="jd2-field" data-jd-seminar-group-field hidden>
+                    <span class="jd2-field-label">{% trans "SEMİNAR ALT QRUPU" context "registrar.seminar_groups" %}</span>
+                    <div class="bootstrap-single-select bootstrap-single-select--ems">
+                        <select name="lesson_seminar_group" class="ems-select bootstrap-single-select__native" data-jd-lesson-seminar-group data-bootstrap-select>
+                            <option value="">{% trans "Bütün qrup" context "registrar.seminar_groups" %}</option>
+                            {% for value, label in seminar_group_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <small class="jd-field-hint">{% trans "Alt qrup seçilsə dərs yalnız onun tələbələrinə yazılır; mühazirə bütün qrupladır." context "registrar.seminar_groups" %}</small>
+                </div>
+                {% endif %}
                 {% if lab_group_choices %}
                 {% comment %}Laboratoriya qrupları (sahib 2026-11-06): jurnal Lab-1 / Lab-2 siyahılarına bölünübsə lab dərsi
                 yalnız seçilmiş qrupun tələbələrinindir; qrup məcburidir (server də yoxlayır). Sahə yalnız dərs tipi

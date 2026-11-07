@@ -213,6 +213,9 @@ def get_offering_journal(
     from . import lab_groups  # laboratoriya qrupu (sahib 2026-11-06): qruplu lab dərsi yalnız öz qrupunun
 
     lab_groups.prime(offering, enrollments)
+    from . import journal_sections, seminar_groups  # seminar alt qrupu (sahib 2026-11-07)
+
+    seminar_groups.prime(offering, enrollments)
     # Giriş balının komponent/bal/sərbəst-iş oxumaları BİR dəfə (sətir-sətir
     # 4 sorğu idi; 555 tələbəli açılışda 2 220 — bax finals_batch).
     from apps.registrar import finals_batch
@@ -288,6 +291,7 @@ def get_offering_journal(
             "parity": _lesson_parity(offering, lesson),  # Ü/A başlıq etiketi
             "summary": lesson_summary.get(lesson.id, {}),
             "lab_group_label": lab_groups.label(lesson.lab_group, offering) if lesson.lab_group else "",
+            "seminar_group_label": seminar_groups.lesson_label(lesson, offering),
         }
         for idx, lesson in enumerate(lessons)
     ]
@@ -308,7 +312,7 @@ def get_offering_journal(
                 absence_count += 1
         for lesson in lessons:
             mark = mark_map.get((enrollment.id, lesson.id))
-            if not lab_groups.applies(lesson, enrollment):  # başqa lab qrupunun dərsi — xana yoxdur, yazılmır
+            if not lab_groups.applies(lesson, enrollment):  # başqa lab / seminar qrupunun dərsi — xana yoxdur
                 cells.append(
                     {
                         "lesson": lesson,
@@ -397,6 +401,7 @@ def get_offering_journal(
                     lab_groups.label(enrollment.lab_group, offering) if has_lab_groups and enrollment.lab_group else ""
                 ),
                 "lab_group_missing": has_lab_groups and not enrollment.lab_group,
+                "seminar_group_label": seminar_groups.lesson_label(enrollment, offering),
                 "cells": cells,
                 "absence_hours": absence_hours,
                 # q/b (qayıb) SAYı — UI saat əvəzinə bunu göstərir (barred saat-limitinə görə).
@@ -446,6 +451,7 @@ def get_offering_journal(
         ),
         "level_policy": level_policy,
         "has_lab_groups": has_lab_groups,
+        "journal_sections": journal_sections.for_offering(offering),  # Mühazirə / 234 K1 / Lab-1 (sahib 2026-11-07)
         "entry_score_max": scheme.entry_score_max,
         # Dərs pəncərəsi (P1-8) — şablondakı naviqasiya zolağı üçün.
         "lesson_window": journal_window.window_meta(
