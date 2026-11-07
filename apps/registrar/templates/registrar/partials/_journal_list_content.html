@@ -217,6 +217,16 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
                         </a>
                     </td>
                 </tr>
+                {% comment %}Lab qrupları ayrıca sətir kimi (sahib 2026-11-08): «236 SBİO · Lab-1» → yalnız o qrupun tələbələri.{% endcomment %}
+                {% for lab in offering.lab_sections %}
+                <tr class="jl-row jl-row--lab" data-jl-href="{% url 'registrar:journal_detail' offering.id %}?kind=lab&amp;lab={{ lab.number }}">
+                    <td class="jl-col-no"></td>
+                    <td><div class="jl-group-line"><span class="jl-group jl-group--lab">{{ lab.label }}</span><span class="jl-subject">{{ offering.subject.name }}</span></div></td>
+                    <td class="jl-col-kind" data-label="{% trans "DƏRS TİPİ" context "registrar.journal" %}"><span class="jl-kind">{% trans "Laboratoriya" context "registrar.schedule" %}</span></td>
+                    <td class="jl-col-count" data-label="{% trans "TƏLƏBƏ SAYI" context "registrar.journal" %}"><span class="jl-students"><i class="fas fa-user-group" aria-hidden="true"></i>{{ lab.count }}</span></td>
+                    <td class="jl-col-action"><a class="jl-open-btn" href="{% url 'registrar:journal_detail' offering.id %}?kind=lab&amp;lab={{ lab.number }}">{% trans "Jurnalı aç" context "registrar.journal" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a></td>
+                </tr>
+                {% endfor %}
                 {% endfor %}
             </tbody>
         </table>

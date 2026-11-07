@@ -26,6 +26,11 @@
         var select = wrap.querySelector("[data-jd-lesson-lab-group]");
         var isLab = kindOf(modal) === LAB;
         wrap.hidden = !isLab;
+        // Lab qrupunun ayrıca görünüşü (?lab=N, sahib 2026-11-08): yeni lab dərsində həmin qrup öncədən seçilir.
+        var preset = wrap.getAttribute("data-jd-default-lab-group") || "";
+        if (select && isLab && !select.value && preset && modal.getAttribute("data-jd-lab-editing") !== "1") {
+            setValue(select, preset);
+        }
         if (select) {
             // Yeni dərsdə məcburi; redaktədə köhnə (bütün qruplu) lab dərsi qrupsuz qala bilər.
             select.required = isLab && modal.getAttribute("data-jd-lab-editing") !== "1";
