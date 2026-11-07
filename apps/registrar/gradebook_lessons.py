@@ -326,7 +326,9 @@ def update_lesson(
     if room is not UNSET:
         lesson.room = room
         fields.append("room")
-    if lab_group is not UNSET:
+    if lab_group is not UNSET and lab_group != lesson.lab_group:
+        # Modal qrupu HƏR redaktədə göndərir; dəyişməyibsə yoxlanmır — tələbə başqa qrupa köçürülübsə köhnə
+        # dərsdəki qeydi «başqa qrupun qeydi» sayılıb mövzu redaktəsini bağlamasın (sahib 2026-11-07).
         lesson.lab_group = lab_group
         fields.append("lab_group")
     if lesson.lab_group is not None and lesson.kind != LessonKind.LAB and "kind" in fields:

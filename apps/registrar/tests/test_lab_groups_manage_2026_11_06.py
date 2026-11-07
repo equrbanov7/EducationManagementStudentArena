@@ -10,7 +10,7 @@ Nəyi qoruyur
 * ad: istəyə bağlı, dəyişdirilə bilir, boş = «Lab-N», təkrar ad rədd; qrid nişanı, sətir çipi, dərs modalı adı
   göstərir; adı dəyişən qrupun dərsləri bağlı qalır (nömrə dəyişmir);
 * yerləşdirmək / köçürmək / qrupsuz etmək: yalnız bu jurnalın aktiv tələbələri; öz qrupunun dərsində qeydi olan
-  tələbə köçürülmür; qrupsuz tələbələr ayrıca siyahıdadır;
+  tələbə də köçürülür, qeydi silinmir (sahib 2026-11-07); qrupsuz tələbələr ayrıca siyahıdadır;
 * silmək: dərs bağlıdırsa yox; təsdiqsiz yox; üzvlər qrupsuz qalır;
 * bağlı jurnal / keçmiş dövr — heç nə dəyişmir; hər dəyişiklik auditdədir.
 """
@@ -245,7 +245,7 @@ class AssignDeleteTest(LabManageBase):
         self.post(action="assign", target="1")
         self.assertIsNone(self.groups_of()[self.e2.pk])
 
-    def test_student_with_marks_in_own_group_lessons_is_not_moved(self):
+    def test_student_with_marks_in_own_group_lessons_is_moved_and_keeps_marks(self):
         self.set_groups({self.e1: 1, self.e2: 1})
         bound = self.lesson(lab_group=1)
         whole = self.lesson()
@@ -257,9 +257,11 @@ class AssignDeleteTest(LabManageBase):
         response = self.client_for(self.teacher).post(
             action, {"action": "assign", "target": "2", "enrollment": [str(self.e1.pk), str(self.e2.pk)]}
         )
-        self.assertEqual((self.groups_of()[self.e1.pk], self.groups_of()[self.e2.pk]), (1, 2))
+        self.assertEqual((self.groups_of()[self.e1.pk], self.groups_of()[self.e2.pk]), (2, 2))
         levels = [item["level"] for item in response.json()["messages"]]
-        self.assertEqual(levels, ["success", "warning"])
+        self.assertEqual(levels, ["success"])
+        with bypass_rls():
+            self.assertTrue(LessonMark.objects.filter(lesson=bound, enrollment=self.e1).exists())
 
     def test_delete_rules(self):
         self.set_groups({self.e1: 1, self.e2: 2, self.e3: 2})
