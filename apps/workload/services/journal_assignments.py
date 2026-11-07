@@ -10,6 +10,7 @@ from core.group_identity import canonical_aliases
 from ..constants import RowKind, TaskStatus
 from ..models import TeacherAssignment, TeachingTaskRow
 from .offering_shares import KINDS, _assignment_group
+from .patok import teacher_partner_rows
 
 
 def _registered_children(organization, groups):
@@ -64,7 +65,9 @@ def _assignment_map(*, organization, teacher_id, include_hours=False):
         .prefetch_related("groups", Prefetch("assignments", queryset=assignments, to_attr="journal_assignments"))
         .distinct()
     )
-    groups = [group for row in rows for group in row.groups.all()]
+    # Patokun ikinci/üçüncü qrupu: mühazirəsi bu müəllimin aparıcı sətrindədir (sahib 2026-11-07, :mod:`.patok`).
+    partners = teacher_partner_rows(organization=organization, teacher_id=teacher_id, released_q=released)
+    groups = [group for row in [*rows, *partners] for group in row.groups.all()]
     children = _registered_children(organization, groups) if groups else {}
     aliases = canonical_aliases(groups)
     result = defaultdict(lambda: defaultdict(int)) if include_hours else defaultdict(set)
@@ -109,6 +112,16 @@ def _assignment_map(*, organization, teacher_id, include_hours=False):
                             result[key][assignment.activity] += assignment.hours
                         else:
                             result[key].add(assignment.activity)
+    for row in partners:
+        for parent in row.groups.all():
+            if parent.organization_id != organization.pk:
+                continue
+            for group in (parent, *children.get(parent.pk, ())):
+                key = (row.subject_id, row.period_id, aliases.get(group.pk, group).pk)
+                if include_hours:
+                    result[key]["lecture"] = max(result[key]["lecture"], int(row.lecture_plan))
+                else:
+                    result[key].add("lecture")
     return dict(result)
 
 

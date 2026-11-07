@@ -3211,3 +3211,10 @@ msgstr "Редактировать на кафедре"
 
 msgid "Yalnız baxış"
 msgstr "Только просмотр"
+
+msgid "Patok"
+msgstr "Поток"
+
+#, javascript-format
+msgid "Patok · %(groups)s ilə birlikdə"
+msgstr "Поток · вместе с %(groups)s"

@@ -3200,3 +3200,10 @@ msgstr "Bölümde düzenle"
 
 msgid "Yalnız baxış"
 msgstr "Yalnızca görüntüleme"
+
+msgid "Patok"
+msgstr "Ortak ders"
+
+#, javascript-format
+msgid "Patok · %(groups)s ilə birlikdə"
+msgstr "Ortak ders · %(groups)s ile birlikte"
