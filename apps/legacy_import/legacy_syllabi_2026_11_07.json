@@ -561,6 +561,274 @@
    },
    "teacher": 7740
   },
+  "4454": {
+   "content_sha256": "5cfe18f3a0358c94dbe7e52aab4e38ca20bbd4fa3c9c2dd87a5dab6b7208c447",
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "hours": {
+    "lecture": 10,
+    "seminar": 5
+   },
+   "legacy_lesson": 2461,
+   "legacy_teacher": 625,
+   "sections": {
+    "assess": {
+     "exam_questions": [],
+     "midterm": 0,
+     "note": "İmtahan 5 sual yazılı, semestrin hər ayının sonunda yazılı şəkildə kollokvium keçirilir. İmtahandan əvvəl məsləhət saatları təşkil olunur.\n1. Tələbələrin imtahana buraxılması ilə bağlı məsələlər fakültə dekanı tərəfindən həll edilir. İmtahan və aralıq yoxlamalar Azərbaycan Respublikası Nazirlər Kabinetinin 24 dekabr 2013-cü il tarixli 348 nömrəli qərarı ilə təsdiq edilmiş “Ali təhsil müəssisələrinin bakalavriat və magistratura səviyyələrində kredit sistemi ilə təlimin təşkili Qaydaları”na əsasən aparılır.\n2. Aralıq yoxlamalar fənn müəllimi tərəfindən aparılır.\n3. Semestr ərzində hər bir tələbə 1 müstəqil iş yerinə yetirməlidir. Müstəqil işlərin mövzuları keçilən mövzuları əhatə edir. Müstəqil iş 10 ballıq sistemlə qiymətləndirilir.",
+     "project": 0
+    },
+    "desc": {
+     "description": "III. FƏNNİN TƏSVİRİ VƏ MƏQSƏDİ:\nFƏNNİN TƏSVİRİ: Bakalavr pilləsində təhsil alan tələbələr üçün nəzərdə tutulan “riyazi statistika” kursu diskret və kəsilməz təsadüfi kəmiyyətlər və təsadüfi kəmiyyətlərin riyazi gözləməsi, dispersiyası və orta kvadratik meyli, başlanğıc və mərkəzi momentlər, seçmənin statistik paylanması, tezlik və nisbi tezlik, baş və seçmə yığım, onların ədədi xarakteristikalarının qiymətləndirilməsi, etibarlıq intervalı və sairə kimi mövzuları əhatə edir.\n\nFƏNNİN MƏQSƏDİ: Kursun məqsədi gələcək məzunların riyazi təfəkkürünü inkişaf etdirmək, onlara müşahidə və nəticələrin riyazi təhlilini aparmaq və müvafiq proqnozlar hazırlamaq bacarığını aşılamaqdır.",
+     "goal": ""
+    },
+    "info": {
+     "certificates": [],
+     "language": "az",
+     "lesson_hours": 15,
+     "office_hours": "",
+     "prerequisites": "",
+     "research_interests": [],
+     "teacher": "",
+     "welcome": ""
+    },
+    "lit": {
+     "additional": [],
+     "primary": []
+    },
+    "method": {
+     "methods": [
+      "1. mühazirə\n2. mövzunun müzakirəsi və diskussiya\n3. nümunəvi misal həllərindən istifadə"
+     ],
+     "note": ""
+    },
+    "out": {
+     "outcomes": [
+      "ƏLDƏ OLUNACAQ TƏCRÜBƏ:\n1. Ehtimal nəzəriyyəsi və Riyazi statistika kursunun məqsəd və vəzifələri, tətbiqi metodları.\n2. Ehtimal nəzəriyyəsi və Riyazi statistika kursunun praktiki məsələlərə tətbiqi vərdişləri.\n3. Ehtimal nəzəriyyəsi və Riyazi statistika kursunun öyrədilməsi metodlarının (texnologiyalarının) şərh və izahı.\n4. Ehtimal nəzəriyyəsi və Riyazi statistika kursunun məqsəd və vəzifələrinin şərhi."
+     ]
+    },
+    "prev": {},
+    "self": {
+     "archived": [],
+     "option": "",
+     "topics": []
+    },
+    "send": {},
+    "week": {
+     "rows": [
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "htimal nəzəriyyəsinin əsas anlayışları. Təsadüfi hadisələr üzrində əməllər.Birləşmələr nəzəriyyəsi."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Diskret təsadüfi kəmiyyətlərin paylanma qanunu, paylanma funksiyaları. Kəsilməz təsadüfi kəmiyyətlər."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Təsadüfi kəmiyyətin ədədi xarakteristikaları və onların xassələri. Böyük ədədlər qanunu."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "İkiölçülü təsadüfi kəmiyyətlər. Riyazi statistikanın elementləri. Reqressiya tənlikləri."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 1,
+       "topic": "Funksional qarşılıqlı əlaqə. Korrelyasiya əmsalı və onun hesablanması. Reqressiya analizi."
+      }
+     ]
+    }
+   },
+   "teacher": 8114
+  },
+  "5439": {
+   "content_sha256": "7a852197c172dc2617c84d337df97508fbe345c6c5cb6b0981d1246cdac862b6",
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "hours": {
+    "lecture": 10,
+    "seminar": 5
+   },
+   "legacy_lesson": 1901,
+   "legacy_teacher": 625,
+   "sections": {
+    "assess": {
+     "exam_questions": [],
+     "midterm": 0,
+     "note": "İmtahan 5 sual yazılı, semestrin hər ayının sonunda yazılı şəkildə kollokvium keçirilir.\nİmtahandan əvvəl məsləhət saatları təşkil olunur.\n1. Tələbələrin imtahana buraxılması ilə bağlı məsələlər fakültə dekanı tərəfindən həll edilir. İmtahan və aralıq yoxlamalar Azərbaycan Respublikası Nazirlər Kabinetinin\n24 dekabr 2013-cü il tarixli 348 nömrəli qərarı ilə təsdiq edilmiş “Ali təhsil müəssisələrinin\nbakalavriat və magistratura səviyyələrində kredit sistemi ilə təlimin təşkili Qaydaları”na əsasən\naparılır.\n2. Kurs işlərinin mövzuları, müvafiq ədəbiyyat əvvəlcədən tələbələrə verilir. Kurs işlərinin müdafiəsi kafedrada yaradılmış komissiya tərəfindən qəbul edilir.\n3. Semestr ərzində hər bir tələbə 1 müstəqil iş yerinə yetirməlidir. Müstəqil işlərin mövzuları\nkeçilən mövzuları əhatə edir. Müstəqil iş 10 ballıq sistemlə qiymətləndirilir",
+     "project": 0
+    },
+    "desc": {
+     "description": "Bu fənnin tədrisi zamanı aşağıdakı məsələlərin həlli və tədrisi nəzərdə tutulur. Ölçü şkalaları: nominal, ardıcıl, interval və nisbət şkalaları. Dəyişənlər və onların ölçülməsi haqqında anlayış verilir. Tabulyasiya anlayışı Ranq ardıcıllığı tezliklərin paylanması qruplaşdırılmış tezliklərin paylanması və paylanma qaydası göstərilir.\nVerilənlərin qrafik təqdimi qrafiklərdən istifadənin üstünlükləri. Qrafiklərin növlərindən istifadə edilir. Moda və modadan istifadə barədə razılıqlardan istifadə edilir. Mediana və mediananın hesablanmasına aid çalışmalar həll edilir. Dispersiya və dispersiyanın hesablama düstürlarından istifadə edilir. Psixoloji tətqiqatlarda dəyişənlər arasında əlaqənin ölçülməsi problemi üzərində məsələlərə baxılır. Əlaqəli ranqlar problem və Ranq korrelyasiyasının (rs) Pirsonun korrelyasiya əmsalı (rxy) ilə əlaqəsinə aid çalışmalara baxılır. Meyarın təyinatı və Meyarın tədbiqində xüsusi hallara baxılır Psixologiyada Xi-kvadrat meyarının istifadə nümunələrinə aid çalışmalar həll edilir. Verilənlərin dispersion təhlilə hazırlanması haqıında məlumat verilir Kəmiyyət məlumatlarının təqdimatı və məlumat təqdim etmənin müxtəlif mərhələlərinə aid nümunələrə baxılır. Korrelyasiya təhlili anlayışı və Brave-Pearson metodu haqqında ümümi məlumat verilir. Statistik testlərin təsviri və tətbiqi. Tələbə t-testi, F-testi Fisher, Rosenbaum Q-tesi, Wilcoxon T-tesi üçün təcrübələr aparılır. İki ölçülü reqressiya təhlili. Variantin iki tərəfli təhlili və varinatların təhlili (Anova) haqqında məlumat verilir. Çox ölçulu ölçmə anlayışı. Metrik model qurmaq və Ortoqonal proyeksiya üsulu. Psixoloji məkanda subyektiv məsafənin və məkan modelinin qurulmasına aid çalışmalar aparılır. Statistikada məlumat növləri nəzərə alınır və tətbiq edilir.\n\nFənnin məqsədləri tələbələrin iş və peşə fəaliyyəti ilə əlaqədar biliklərin mənimsənilməsində və ayrı-ayrı bölmələrə aid nəzəri bilikləri praktik olaraq tətbiqini bacarmağı öyrətmək və formalaşdırmaq.\nMüasir dövrün əsas tələblərindən biri də texnoloji prosesləri sürətləndirmək və psixoloji məsələlərin həllində ən optimal üsullardan istifadə etməkdir. Bu mərhələlərdə riyazi biliklərin tətbiqində daha çox istifadə etmək.\nÖlçü şkalaları: nominal, ardıcıl, interval və nisbət şkalaları. Dəyişənlər və onların ölçülməsi mövzusu aktualdır Bu bölməyə diqqət etmək lazımdır\nTabulyasiya anlayışı Ranq ardıcıllığı tezliklərin paylanması qruplaşdırılmış tezliklərin paylanması və paylanma qaydasıda ən çox tətbiq olunan məsəllələrdəndir\nVerilənlərin qrafik təqdimi qrafiklərdən istifadənin üstünlükləri də tətbiq olunan məsəllərdəndir.Bu mövzuya xüsusi diqqət etmək lazımdır\nModa və modadan istifadə barədə razılıqlar mövzusundan da istifadə edilir. Mediana və mediananın hesablanmasına aid çalışmalara da diqqət etmək lazımdır.\nDispersiya və dispersiyanın hesablama düstürlarından da psixologiyada lazımı qədər ilə istifadə edilir.\nPsixoloji tətqiqatlarda dəyişənlər arasında əlaqənin ölçülməsi problemi üzərində məsələlər də aktualdır.",
+     "goal": ""
+    },
+    "info": {
+     "certificates": [],
+     "language": "az",
+     "lesson_hours": 15,
+     "office_hours": "",
+     "prerequisites": "",
+     "research_interests": [],
+     "teacher": "",
+     "welcome": ""
+    },
+    "lit": {
+     "additional": [],
+     "primary": [
+      "Əsas ədəbiyyat siyahısı 1. Ахмедли Дж., Рагимов А.А. Опыт применения количественных методов в конкретных социальных исследованиях. //Ученые записки АзИНХа им. Д.Буниатзаде, Баку, 1970, № 4\n2. Ахмедли, Дж., Рагимов А.А. Измерение и анализ данных в социологии. Баку, 2002\n3. Гласс Дж., Стэнли Дж. Статистические методы в педагогике и психологии. – М., 1976\n4. Захаров В.П. Применение математических методов в социально- психологических исследованиях. Учебное пособие. – Л., 1985\n5. Сидоренко Е.В. Методы математической обработки в психологии. – СПб, 1996\n6. Суходольский Г.В. Основы математической статистики для психологов. – Л., 1972"
+     ]
+    },
+    "method": {
+     "methods": [
+      "1. mühazirə\n2. mövzunun müzakirəsi və diskussiya\n3. video materiallardan və digər əyani vasitələrdən istifadə\n4. nümunəvi misal həllərindən istifadə"
+     ],
+     "note": ""
+    },
+    "out": {
+     "outcomes": [
+      "Psixoloji tədqiatlarda analitik metodlardan daha səmərəli istifadəni təmin etmək;\n-Riyazi metodlardan istifadə edərək psixoloji proseslərin modelləşdirilməsi;\n-Statistik metodlardan psixologiyada istifadə bacarığının formalaşdırlması;"
+     ]
+    },
+    "prev": {},
+    "self": {
+     "archived": [],
+     "option": "",
+     "topics": [
+      {
+       "title": "1. Ölçü, şkalalar və statistika"
+      },
+      {
+       "title": "2. Riyazi məlumatların işlənməsində istifadə olunan əsas anlayışlar"
+      },
+      {
+       "title": "3. Çox ölçülü miqyaslama"
+      },
+      {
+       "title": "4. Çoxdəyişənli məlumatların təhlili"
+      },
+      {
+       "title": "5. Statistik fərziyyələri yoxlamaq üsulları"
+      },
+      {
+       "title": "6. İşarələr arasındakı əlaqə ölçüləri"
+      },
+      {
+       "title": "7. Təsviri statistikanın metodları"
+      },
+      {
+       "title": "8. Dispersion təhlil"
+      },
+      {
+       "title": "9. Pirsonun Xi-kvadrat meyarı"
+      },
+      {
+       "title": "10. Spirmenin ranq korrelyasiyası"
+      },
+      {
+       "title": "11. Pirsonun korrelyasiya əmsalı"
+      },
+      {
+       "title": "12. Dəyişənlik ölçüləri"
+      },
+      {
+       "title": "13. Mərkəzyönümün ölçüləri"
+      },
+      {
+       "title": "14. Verilənlərin əyani təqdimi"
+      },
+      {
+       "title": "15. Verilənlərin tabulyasiyası"
+      }
+     ]
+    },
+    "send": {},
+    "week": {
+     "rows": [
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Psixodiqnostika metodlar və onların təsnifatı. Psixologiyada ölçmələr, şkalalar və statistika. Tədqiqat prosesində kəmiyətlərin ölçülməsi və qeydə alınması"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Tədqiqatın fərziyyəsi və onun formalaşdırılması. Əsas məcmu və seçmə anlayışları, tədqiqat prosesində onların formalaşdırılması. Tədqiqat prosesində alınan nəticələrin tabulyasiyası(cədəlləşdirilməsi)"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Tədqiqatın nəticələrinin emalı zamanı riyazi cədvəllərdən istifadə.Tədqiqat prosesində alınan məlumatların əyani təqdimatı. Sınanılanların nəticələrinin ranjirləşdirilməsi texnikası"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Məlumatların mərkəzyönümünün ölçülməsi. Məlumatların mərkəzyönümlü göstəricilərinin hesablanması. Mərkəzyönümlü meyllər göstəriciləri üzərində əməliyyatlar"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 1,
+       "topic": "Korrelyasiya əmsalı və aparılan tədqiqatların nəticələrin emalında onun əhəmiyyəti. Korrelyasiya əlaqələrinin müəyyənləşdirilməsində Spirmenin və Pirsonun əmsallarından istifadə"
+      }
+     ]
+    }
+   },
+   "teacher": 8114
+  },
   "6672": {
    "content_sha256": "974fbaaf163195208a8a4e660c1183b988ef3d2ecc1c29646c37d5ef7577a9cc",
    "excluded": [
@@ -805,6 +1073,116 @@
     }
    },
    "teacher": 7740
+  },
+  "7402": {
+   "content_sha256": "a426f5284cbfa014aebae3057b54024671290750489cee1ebc206ba9fe96f381",
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "hours": {
+    "lecture": 5,
+    "seminar": 5
+   },
+   "legacy_lesson": 828,
+   "legacy_teacher": 238,
+   "sections": {
+    "assess": {
+     "exam_questions": [],
+     "midterm": 0,
+     "note": "YOXLAMA FORMASI: (imtahan, yoxlama, kollokvium və ya kurs işi, müstəqil işlər necə aparılacaq) İmtahan 3 sual nəzəriyyədən və 2 sual nəzəriyyənin praktik tətbiqinə aid, semestrin hər ayının sonunda yazılı şəkildə kollokvium keçirilir. İmtahandan əvvəl məsləhət saatları təşkil olunur.\n1. Tələbələrin imtahana buraxılması ilə bağlı məsələlər fakültə dekanı tərəfindən həll edilir. İmtahan və aralıq yoxlamalar Azərbaycan Respublikası Nazirlər Kabinetinin 24 dekabr 2013-cü il tarixli 348 nömrəli qərarı ilə təsdiq edilmiş “Ali təhsil müəssisələrinin bakalavriat və magistratura səviyyələrində kredit sistemi ilə təlimin təşkili Qaydaları”na əsasən aparılır.\n2. Kurs işlərinin mövzuları, müvafiq ədəbiyyat əvvəlcədən tələbələrə verilir. Kurs işlərinin müdafiəsi kafedrada yaradılmış komisiya tərəfindən qəbul edilir.\n3. Semestr ərzində hər bir tələbə 10 müstəqil iş yerinə yetirməlidir. Müstəqil işlərin mövzuları keçilən mövzuları əhatə edir. Hər bir müstəqil iş 10 ballıq sistemlə qiymətləndirilir və nəticə kimi bütün müstəqil işlərin ədədi ortası götürülür.",
+     "project": 0
+    },
+    "desc": {
+     "description": "Fənn haqqında qısa məlumat, fənnin tədrisinin məqsədi, fənnin tədrisində tətbiq olunacaq metodlar yazılı şərh olunur. Bu fənni öyrənməklə tələbələrin nəyi biləcəkləri, nəyə nail olacaqları və hansı vərdişlərə yiyələnəcəkləri qeyd edilir.riyaziyyatın,ehtimal nəzəriyyəsinin elm, texnika və digər sahələrdə rolu və tətbiqi .\nTarixi tədqiqatlarda riyazi metodlar fənni Tarixi tədqiqatlarda riyazi statistika, riyazi modelləşdirmə, tarixi proses və hadisələrin rekonustruksiyası kimi sahələri əhatə edir. Tarixi tədqiqatlarda riyazi üsullardan istifadə edilməsi misal nümunələri ilə nümayişini nəzərdə tutur.\n\nFƏNNİN MƏQSƏDİ: Tələbələrdə tarixi proses və hadisələrin riyazi modeli əsasını müasir kompyuter texnologiyalarının tətbiqi ilə öyrənilməsi bacarığını formalaşdırmaqdır.",
+     "goal": ""
+    },
+    "info": {
+     "certificates": [],
+     "language": "az",
+     "lesson_hours": 10,
+     "office_hours": "",
+     "prerequisites": "",
+     "research_interests": [],
+     "teacher": "",
+     "welcome": ""
+    },
+    "lit": {
+     "additional": [],
+     "primary": [
+      "1. R. Məmmədov. “Riyazi metodlar”, III cild. Bakıı, 1984.\n2. Ə. M. Əliyev. “Ali Riyaziyyat”Azərbaycan Respublikası Təhsil Nazirliyi. Bakı—2005.\n3. Н. Ш. Кремер. «Теория вероятностей и математическая статистика», Москва, 2010.\n4. Н. Ш. Кремер. «Высшая математика для экономистов».Москва- 2012.\n5. Murray Spiege “Probability and Statstics”"
+     ]
+    },
+    "method": {
+     "methods": [
+      "DƏRSİN İŞLƏNMƏ FORMASI: (TƏDRİSİN FORMA VƏ METODLARI):\n1. Mühazirə\n2. Mövzunun müzakirəsi və diskussiya\n3. Kollektivlə iş.\n4. Fərdi iş\n\n(imtahan, yoxlama, kollokvium və ya kurs işi, müstəqil işlər necə aparılacaq) İmtahan 3 sual nəzəriyyədən və 2 sual nəzəriyyənin praktik tətbiqinə aid, semestrin hər ayının sonunda yazılı şəkildə kollokvium keçirilir. İmtahandan əvvəl məsləhət saatları təşkil olunur.\n1. Tələbələrin imtahana buraxılması ilə bağlı məsələlər fakültə dekanı tərəfindən həll edilir. İmtahan və aralıq yoxlamalar Azərbaycan Respublikası Nazirlər Kabinetinin 24 dekabr 2013-cü il tarixli 348 nömrəli qərarı ilə təsdiq edilmiş “Ali təhsil müəssisələrinin bakalavriat və magistratura səviyyələrində kredit sistemi ilə təlimin təşkili Qaydaları”na əsasən aparılır.\n2. Kurs işlərinin mövzuları, müvafiq ədəbiyyat əvvəlcədən tələbələrə verilir. Kurs işlərinin müdafiəsi kafedrada yaradılmış komisiya tərəfindən qəbul edilir.\n3. Semestr ərzində hər bir tələbə 10 müstəqil iş yerinə yetirməlidir. Müstəqil işlərin mövzuları keçilən mövzuları əhatə edir. Hər bir müstəqil iş 10 ballıq sistemlə qiymətləndirilir və nəticə kimi bütün müstəqil işlərin ədədi ortası götürülür."
+     ],
+     "note": ""
+    },
+    "out": {
+     "outcomes": [
+      "FƏNNİN TƏDRİSİNİN NƏTİCƏLƏRİ (HƏDƏFLƏRİ):\n- Gələcək tarixi tədqiqatlarda riyazi üsulların və müasir informasiya texnologiyalarının tətbiqi ilə daha dəqiq nəticələr əldə etmək və proqnozlar vermək bacarığı aşılamaqdır.\n\nƏLDƏ OLUNACAQ TƏCRÜBƏ:\nMüasir tarixçilərin fəaliyyətlərində tarixi faktların, hadisələrin və prosseslərin riyazi modellərinin qurulması və məlumatlarının kompyuter texnologiyalarının tətbiqi ilə işlənməsi təcrübəsinə yiyələndirməkdir."
+     ]
+    },
+    "prev": {},
+    "self": {
+     "archived": [],
+     "option": "",
+     "topics": [
+      {
+       "title": "Tarixi tədqiqatlarda riyazi metodların tətbiqi xüsusiyyətləri . Seçmə yığımı – Seçmə üsulu"
+      },
+      {
+       "title": "Amillərə görə təhlili korrelyasiya və reqressiya .Tarixi tədqiqatlarda riyazi modelləşdirmə: tətbiq edilən modellər."
+      },
+      {
+       "title": "Klassik və eksperimental arxeologiyada riyazi metodlar. Kliodinamika haqqında: keçmişin rekonstruksiyası və gələcəyin proqnozlaşdırılması"
+      },
+      {
+       "title": "Fraktal həndəsənin tətbiqi ilə modelləşdirmə . Eksponensial paylanma qanunu."
+      },
+      {
+       "title": "Eksponensial paylanma qanunu. Normal paylanma qanunu."
+      }
+     ]
+    },
+    "send": {},
+    "week": {
+     "rows": [
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Tarixi tədqiqatlarda riyazi metodların tətbiqi xüsusiyyətləri"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Tarixi tədqiqatlarda riyazi modelləşdirmə: tətbiq edilən modellər"
+      },
+      {
+       "lab": 0,
+       "lecture": 1,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 1,
+       "topic": "Klassik və eksperimental arxeologiyada riyazi metodlar"
+      }
+     ]
+    }
+   },
+   "teacher": 8170
   },
   "7584": {
    "content_sha256": "821cd3fd9dfaab3ced9aa8f9072b75996ec4b9dc13b406df3f9d0d1c1595f308",
@@ -2005,6 +2383,54 @@
     "f7ed2e30-6e45-40bd-881c-bc00474173c2"
    ],
    "teacher": 7760
+  },
+  {
+   "action": "restore",
+   "group_id": "88e4af26-badb-4f30-bea0-dde16e16e7e1",
+   "key": "mx2132t",
+   "lesson_hours": 10,
+   "offering_id": "949f7b36-7fb6-456a-9ab1-a04b6bae030d",
+   "plan": {
+    "lecture": 5,
+    "seminar": 5
+   },
+   "source": "7402",
+   "subject_ids": [
+    "f3ec1466-6269-412c-98b2-a93922613342"
+   ],
+   "teacher": 8170
+  },
+  {
+   "action": "restore",
+   "group_id": "ecd6b7f1-c47d-4830-b213-e4808239b06b",
+   "key": "mx2033",
+   "lesson_hours": 15,
+   "offering_id": "23660635-e8d6-4530-88a5-18caf0e3269b",
+   "plan": {
+    "lecture": 10,
+    "seminar": 5
+   },
+   "source": "5439",
+   "subject_ids": [
+    "9cf17905-26bc-4289-a59f-9cec5c3c0a30"
+   ],
+   "teacher": 8114
+  },
+  {
+   "action": "restore",
+   "group_id": "0baafcfd-5120-4ac1-a3d1-683219cf79bc",
+   "key": "mx2234i",
+   "lesson_hours": 15,
+   "offering_id": "149d6dc5-a43a-4434-b5f6-36c0883ef022",
+   "plan": {
+    "lecture": 10,
+    "seminar": 5
+   },
+   "source": "4454",
+   "subject_ids": [
+    "f2259a9a-7a7f-4869-93ef-41140232606e"
+   ],
+   "teacher": 8114
   }
  ]
 }

@@ -248,6 +248,9 @@
 #       jurnala bağlı TƏSDİQLİ versiya; yükü dəyişmiş təsdiqli dosyedə yalnız plan saatı. Səhv köçürülmüş versiya və
 #       boş qaralama ARXİVƏ keçir, müəllimin yazdığı qaralamaya toxunulmur. Defolt dry-run; `batch` = `lgsyl-…` +
 #       apply → geri qaytarma. Loga YALNIZ saylar + hədəf açarı/nəticə kodu.
+#   share_mexanika_syllabi_20261107 — sahib 2026-11-07 (Mexanika və riyaziyyat rəsmi yükü): sillabussuz jurnallar
+#       müəllimin ÖZ təsdiqli sillabusuna bağlanır (link_legacy, fill-only; 2232 K-da səhvən açılmış qaralama
+#       passivləşir). Sabit id-lər, defolt dry-run; `batch` = `mxsyl-…` + apply → geri qaytarma. Loga YALNIZ saylar.
 #   recover_mr230_lessons — RİM MR-000230: 236 İT «İnformasiya texnologiyalarının əsasları» — köhnə sistem 15209-un
 #       çatışmayan dərsləri + xanaları (yalnız boşluq; mövcud xana dəyişmir). Sabit id-lər koddadır. Defolt dry-run;
 #       `batch=undo` (apply) bu əmrin audit izinə görə geri qaytarır. Loga YALNIZ saylar.
@@ -474,6 +477,7 @@ on:
           - repair_applications_20261105c
           - recover_mr230_lessons
           - recover_legacy_syllabi_20261107
+          - share_mexanika_syllabi_20261107
           - repair_applications_20261107
           - repair_applications_20261107b
           - fix_ydk236_subject_20261106
@@ -1639,6 +1643,17 @@ jobs:
                 args+=(--undo "$BATCH")
               fi
               ;;
+            share_mexanika_syllabi_20261107)
+              # Sahib 2026-11-07: Mexanika sillabus bağlamaları (sabit id-lər). batch=mxsyl-… + apply geri qaytarır.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^mxsyl-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || { echo "batch formatı: mxsyl-YYYYMMDD-HHMMSS-xxxx" >&2; exit 2; }
+                test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }
+                args+=(--undo "$BATCH")
+              fi
+              ;;
             recover_mr230_lessons)
               # RİM MR-000230: 236 İT «İT əsasları» — köhnə 15209-un çatışmayan dərsləri/xanaları; sabit id-lər. batch=undo geri qaytarır.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
@@ -1972,6 +1987,16 @@ jobs:
           elif [ "$COMMAND" = "recover_legacy_syllabi_20261107" ]; then
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^legacy_syllabi: (mode=(dry_run|apply|undo)|batch=lgsyl-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}|entry=[a-z0-9_]+ result=[a-z_]+|[a-z_]+=[0-9]+)( [a-z_]+=[0-9]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "share_mexanika_syllabi_20261107" ]; then
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^mexanika_syllabi: (mode=(dry_run|apply|undo)|batch=mxsyl-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}|entry=[a-z0-9_]+ result=[a-z_]+|[a-z_]+=[0-9]+)( [a-z_]+=[0-9]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
