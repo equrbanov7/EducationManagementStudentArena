@@ -84,6 +84,7 @@ def project(queryset, user, organization, *, observed=()):
             "journal_is_owned_past_history",
             "journal_is_master_history",
             "journal_has_assessment_history",
+            "journal_is_empty_rolled_subgroup",
         }
         flags.update(f"journal_{prefix}_{kind}" for prefix in ("current", "recorded") for kind in KINDS)
         flags.update(f"journal_master_{kind}" for kind in KINDS)
@@ -133,13 +134,42 @@ def project(queryset, user, organization, *, observed=()):
     annotations["journal_is_current_load"] = Case(
         When(current, then=Value(True)), default=Value(False), output_field=BooleanField()
     )
-    return queryset.annotate(**annotations).filter(
-        Q(journal_is_current_load=True)
-        | Q(journal_has_records=True)
-        | Q(journal_has_assessment_history=True)
-        | Q(journal_is_owned_past_history=True)
-        | Q(journal_is_master_history=True)
-        | Q(pk__in=observed)
+    annotations["journal_is_empty_rolled_subgroup"] = _empty_rolled_subgroup()
+    return (
+        queryset.annotate(**annotations)
+        .filter(
+            Q(journal_is_current_load=True)
+            | Q(journal_has_records=True)
+            | Q(journal_has_assessment_history=True)
+            | Q(journal_is_owned_past_history=True)
+            | Q(journal_is_master_history=True)
+            | Q(pk__in=observed)
+        )
+        .exclude(journal_is_empty_rolled_subgroup=True)
+    )
+
+
+def _empty_rolled_subgroup():
+    """Alt qrupun BOŞ jurnalı, tələbələri ana qrupun jurnalında oxuyursa — siyahıda göstərilmir.
+
+    Sahib 2026-11-07: «234 K» ana qrupdur, 234 K-1 / K-2 alt qrupları; mühazirə və seminar ana qrupun jurnalında
+    keçirsə, alt qrupun jurnalını ayrıca göstərməyək. Yalnız heç nə itmirsə gizlənir: alt qrupun jurnalında dərs
+    YOXDUR, aktiv tələbə YOXDUR və həmin fənn + semestr üzrə BAŞQA aktiv jurnalda bu alt qrupdan gələn (``source_group``)
+    aktiv tələbə VAR. Dərs və ya tələbə düşən kimi (məs. seminar bölünəndə) jurnal yenə görünür."""
+    rolled = Enrollment.objects.filter(
+        organization_id=OuterRef("organization_id"),
+        offering__subject_id=OuterRef("subject_id"),
+        offering__period_id=OuterRef("period_id"),
+        offering__is_active=True,
+        source_group_id=OuterRef("group_id"),
+        status=Enrollment.Status.ENROLLED,
+    ).exclude(offering_id=OuterRef("pk"))
+    own_students = Enrollment.objects.filter(offering_id=OuterRef("pk"), status=Enrollment.Status.ENROLLED)
+    lessons = Lesson.objects.filter(offering_id=OuterRef("pk"))
+    return Case(
+        When(Exists(rolled) & ~Exists(own_students) & ~Exists(lessons), then=Value(True)),
+        default=Value(False),
+        output_field=BooleanField(),
     )
 
 

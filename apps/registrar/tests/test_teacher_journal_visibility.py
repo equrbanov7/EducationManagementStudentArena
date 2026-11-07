@@ -500,3 +500,64 @@ class TeacherJournalVisibilityTests(TestCase):
         )
         self.lesson(offering, instructor=self.other, hours=2)
         self.assertEqual(self.context()["offerings"], [])
+
+
+class EmptyRolledSubgroupJournalTests(TestCase):
+    """Sahib 2026-11-07: tələbələri ana qrupun jurnalında olan alt qrupun BOŞ jurnalı siyahıda göstərilmir."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.org = make_org("rolled-subgroup")
+        cls.stack = make_structure(cls.org, code="RS")
+        parent = cls.stack["group"]
+        cls.sub1 = OrgUnit.objects.create(
+            organization=cls.org, name="RS-236-1", slug="rs-236-1", unit_type=parent.unit_type, parent=parent.parent
+        )
+        cls.sub2 = OrgUnit.objects.create(
+            organization=cls.org, name="RS-236-2", slug="rs-236-2", unit_type=parent.unit_type, parent=parent.parent
+        )
+        cls.parent_journal = cls.journal(parent)
+        cls.student = cls.member("rolled-student")
+        Enrollment.objects.create(
+            organization=cls.org, offering=cls.parent_journal, student=cls.student, source_group=cls.sub1
+        )
+
+    @classmethod
+    def member(cls, username):
+        user = User.objects.create_user(username)
+        activate_member(cls.org, user, "student", permissions=["course.view"], level=10)
+        return user
+
+    @classmethod
+    def journal(cls, group):
+        return CourseOffering.objects.create(
+            organization=cls.org, subject=cls.stack["subject"], group=group, period=cls.stack["period"]
+        )
+
+    def flag(self, offering):
+        from apps.registrar.teacher_journal_list import _empty_rolled_subgroup
+
+        return (
+            CourseOffering.objects.filter(pk=offering.pk)
+            .annotate(flag=_empty_rolled_subgroup())
+            .values_list("flag", flat=True)
+            .get()
+        )
+
+    def test_only_an_empty_subgroup_journal_whose_students_sit_in_the_parent_journal_is_hidden(self):
+        empty = self.journal(self.sub1)
+        self.assertTrue(self.flag(empty))
+        self.assertFalse(self.flag(self.parent_journal))
+        # Tələbələri ana jurnala düşməyən alt qrup — göstərilir.
+        self.assertFalse(self.flag(self.journal(self.sub2)))
+
+    def test_a_lesson_or_an_own_student_keeps_the_subgroup_journal_visible(self):
+        journal = self.journal(self.sub1)
+        lesson = Lesson.objects.create(
+            organization=self.org, offering=journal, date=timezone.localdate(), kind="seminar"
+        )
+        self.assertFalse(self.flag(journal))
+        lesson.delete()
+        self.assertTrue(self.flag(journal))
+        Enrollment.objects.create(organization=self.org, offering=journal, student=self.member("rolled-guest"))
+        self.assertFalse(self.flag(journal))
