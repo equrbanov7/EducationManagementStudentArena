@@ -26,6 +26,14 @@ class ApplicationsRepair1107bTest(SimpleTestCase):
         self.assertEqual((len(yegane), len(gunay)), (10, 9))
         self.assertFalse(yegane & gunay)
 
+    def test_counter_keys_pass_the_workflow_log_filter(self):
+        import re
+
+        source = pathlib.Path(repair.__file__).read_text(encoding="utf-8")
+        keys = re.findall(r'counts\["([^"]+)"\]', source)
+        self.assertTrue(keys)
+        self.assertTrue(all(re.fullmatch(r"[a-z_]+", key) for key in keys), keys)
+
     def test_workflow_wiring(self):
         text = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("          - repair_applications_20261107b\n", text)
@@ -66,7 +74,7 @@ class MR188SplitTest(_GuestRosterBase):
         with patches[0], patches[1], patches[2], bypass_rls():
             counts = Counter()
             repair.split_mr188(organization=self.org, actor=self.coordinator, counts=counts)
-            self.assertEqual((counts["mr188_shares_split"], counts["mr188_students_assigned"]), (2, 2))
+            self.assertEqual((counts["split_shares_split"], counts["split_students_assigned"]), (2, 2))
             other = journal_scope(self.coordinator, CourseOffering.objects.get(pk=self.offering.pk))
             self.assertEqual(other.enrollment_ids, frozenset({str(rows[1].pk)}))
             owner = journal_scope(self.teacher, CourseOffering.objects.get(pk=self.offering.pk))
@@ -74,11 +82,11 @@ class MR188SplitTest(_GuestRosterBase):
             self.assertNotIn(str(rows[1].pk), owner.enrollment_ids)
             again = Counter()
             repair.split_mr188(organization=self.org, actor=self.coordinator, counts=again)
-            self.assertEqual(again["mr188_share_already_split"], 2)
+            self.assertEqual(again["split_share_already_split"], 2)
 
     def test_changed_owner_is_skipped(self):
         patches = self._patch(-1, {})
         with patches[0], patches[1], patches[2], bypass_rls():
             counts = Counter()
             repair.split_mr188(organization=self.org, actor=self.coordinator, counts=counts)
-        self.assertEqual(counts["mr188_offering_changed_skipped"], 1)
+        self.assertEqual(counts["split_offering_changed_skipped"], 1)

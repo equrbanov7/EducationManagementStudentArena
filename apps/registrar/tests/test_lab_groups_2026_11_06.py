@@ -262,6 +262,24 @@ class LabGroupJournalTest(_LabWorld, TestCase):
             self.assertTrue(gradebook.update_lesson(lesson=empty, lab_group=2))
             self.assertEqual(Lesson.objects.get(pk=empty.pk).lab_group, 2)
 
+    def test_moved_student_keeps_old_group_marks_read_only(self):
+        # Sahib 2026-11-07: qeydi olan tələbə də başqa lab qrupuna köçürülür — köhnə qeyd qalır, sayılır, oxunur.
+        lab1 = self._lesson(lab_group=1)
+        with bypass_rls():
+            gradebook.save_marks(
+                offering=self._fresh(),
+                entries=[{"lesson_id": str(lab1.pk), "enrollment_id": str(self.e1.pk), "status": "absent"}],
+                enforce_day=False,
+            )
+            Enrollment.objects.filter(pk=self.e1.pk).update(lab_group=2)
+            journal = gradebook.get_offering_journal(offering=self._fresh())
+            cell = {row["enrollment"].pk: row for row in journal["rows"]}[self.e1.pk]["cells"][0]
+            self.assertEqual((cell["off_group"], cell["writable"], cell["mark"].status), (True, False, "absent"))
+            self.assertEqual(Enrollment.objects.get(pk=self.e1.pk).absence_hours, 2)
+            # Köhnə dərsin mövzusu (qrup dəyişmədən) yenə redaktə olunur.
+            self.assertTrue(gradebook.update_lesson(lesson=lab1, topic="Titrləmə", lab_group=1))
+            self.assertEqual(Lesson.objects.get(pk=lab1.pk).topic, "Titrləmə")
+
     def test_kind_change_away_from_lab_drops_the_group(self):
         lesson = self._lesson(lab_group=1)
         with bypass_rls():

@@ -202,7 +202,14 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                             </td>
                             {% for cell in row.cells %}
                             <td class="jd2-cell {% if cell.lesson.date == journal.today %}is-today{% endif %}{% if cell.corrected %} corr-fixed{% endif %}{% if cell.legacy_excuse %} corr-excuse{% endif %}{% if cell.off_group %} jd2-cell--offgroup{% endif %}">
-                                {% if cell.off_group %}
+                                {% if cell.off_group and cell.mark %}
+                                {# Tələbə başqa lab qrupuna köçürülüb (sahib 2026-11-07) — əvvəlki qrupun dərsindəki qeyd qalır, oxunur. #}
+                                {% trans 'Əvvəlki laboratoriya qrupunun dərsi — qeyd saxlanılıb' context 'registrar.lab_groups' as prev_title %}
+                                {% if cell.mark.status == 'absent' %}<span class="jd2-ro jd2-ro--qb jd2-ro--prevgroup" title="{{ prev_title }}">q/b</span>
+                                {% elif cell.mark.status == 'excused' %}<span class="jd2-ro jd2-ro--uq jd2-ro--prevgroup" title="{{ prev_title }}">üq</span>
+                                {% elif cell.mark.score is not None %}<span class="jd2-ro jd2-ro--ie jd2-ro--prevgroup" title="{{ prev_title }}">{{ cell.mark.score|floatformat:'-2' }}</span>
+                                {% else %}<span class="jd2-ro jd2-ro--ie jd2-ro--prevgroup" title="{{ prev_title }}">i/e</span>{% endif %}
+                                {% elif cell.off_group %}
                                 {# Başqa laboratoriya qrupunun dərsi (sahib 2026-11-06) — bu tələbənin xanası yoxdur. #}
                                 <span class="jd2-ro jd2-ro--offgroup" title="{% trans 'Başqa laboratoriya qrupunun dərsi' context 'registrar.lab_groups' %}">·</span>
                                 {% elif correction_mode %}

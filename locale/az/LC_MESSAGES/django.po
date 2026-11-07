@@ -114428,6 +114428,19 @@ msgctxt "accounts.lab_groups"
 msgid "Əvvəlki"
 msgstr "Əvvəlki"
 
+msgctxt "registrar.intensive"
+msgid "Plan"
+msgstr "Plan"
+
+#, python-format
+msgctxt "registrar.intensive"
+msgid "İntensiv · %(end)s-dək"
+msgstr "İntensiv · %(end)s-dək"
+
+msgctxt "registrar.lab_groups"
+msgid "Əvvəlki laboratoriya qrupunun dərsi — qeyd saxlanılıb"
+msgstr "Əvvəlki laboratoriya qrupunun dərsi — qeyd saxlanılıb"
+
 msgctxt "accounts.syllabus"
 msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
 msgstr "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."

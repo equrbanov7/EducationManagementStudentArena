@@ -167,10 +167,10 @@ def _guarded_check(
 
     SİYASƏT (2026-10-14, sahibin «müəllimin dərsləri üst-üstə düşərsə xəbərdarlıq» tələbi):
     * toqquşma YOXDUR → yazılır;
-    * yalnız MÜƏLLİM və/və ya AUDİTORİYA toqquşması (redaktorun əhatəsində) → ``force=1`` +
-      səbəb (≥ ``MIN_REASON``) ilə təsdiq; toqquşan dərs SİLİNMİR, parklanır, audit səbəblə;
-    * QRUP toqquşması → HEÇ VAXT məcburi keçilmir (409 ``group_conflict``): qrup eyni anda iki
-      dərsdə otura bilməz — əvvəlcə həmin dərs köçürülməlidir;
+    * MÜƏLLİM, QRUP və/və ya AUDİTORİYA toqquşması (redaktorun əhatəsində) → ``force=1`` +
+      səbəb (≥ ``MIN_REASON``) ilə təsdiq; toqquşan dərs SİLİNMİR, parklanır, audit səbəblə.
+      Qrup toqquşması əvvəl heç vaxt keçilmirdi (409 ``group_conflict``); sahib 2026-11-07: «müəllim ya da
+      qrup tərəfdən … başqa xana dolu olsa da məcbur edərək, səbəb yazaraq keçid etmək olsun»;
     * ƏHATƏDƏN KƏNAR toqquşma (başqa fakültənin dərsi) → ``force`` 403: onu bu redaktor parklaya
       bilməz; cavab yalnız «fənn · qrup» açır (``schedule_conflicts`` modul başlığı).
     """
@@ -192,17 +192,6 @@ def _guarded_check(
     if not conflicts:
         return []
     extra = {"conflicts": conflicts, "suggestions": verdict["suggestions"]}
-    if any(row["kind"] == schedule_conflicts.KIND_GROUP for row in conflicts):
-        raise schedule_editor.CellError(
-            "group_conflict",
-            pgettext(
-                _CTX,
-                "Qrupun bu saatda artıq dərsi var — qrup eyni anda iki dərsdə ola bilməz. "
-                "Əvvəlcə həmin dərsi başqa xanaya köçürün və ya boş xana seçin.",
-            ),
-            status=409,
-            extra=extra,
-        )
     if not force:
         raise schedule_editor.CellError("conflict", conflicts[0]["message"], status=409, extra=extra)
     if not all(row.get("can_force") for row in conflicts):

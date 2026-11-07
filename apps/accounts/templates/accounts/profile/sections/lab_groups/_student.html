@@ -1,10 +1,9 @@
 {% load i18n journal_names %}{% with name=row.student|journal_name %}
-<li class="lgx-stu{% if row.locked %} is-locked{% endif %}" data-lgx-row data-lgx-name="{{ name|lower }}" data-enrollment="{{ row.enrollment.pk }}"{% if ws.can_edit and not row.locked %} draggable="true"{% endif %}>
+<li class="lgx-stu" data-lgx-row data-lgx-name="{{ name|lower }}" data-enrollment="{{ row.enrollment.pk }}"{% if ws.can_edit %} draggable="true"{% endif %}>
     <label class="lgx-stu__label">
-        {% if ws.can_edit %}<input type="checkbox" class="lgx-check" value="{{ row.enrollment.pk }}" data-lgx-pick{% if row.locked %} disabled{% endif %} aria-label="{{ name }}">{% endif %}
+        {% if ws.can_edit %}<input type="checkbox" class="lgx-check" value="{{ row.enrollment.pk }}" data-lgx-pick aria-label="{{ name }}">{% endif %}
         <span class="lgx-stu__avatar" aria-hidden="true">{{ name|slice:":1"|upper }}</span>
         <span class="lgx-stu__name">{{ name }}</span>
     </label>
-    {% if row.locked %}<span class="lgx-stu__lock" title="{% trans 'Tələbənin öz qrupunun dərslərində qeydi var — köçürmək olmaz (qeydlər itməsin deyə).' context 'accounts.lab_groups' %}"><i class="fas fa-lock" aria-hidden="true"></i><span class="lgx-sr">{% trans "qeyd var" context "accounts.lab_groups" %}</span></span>{% endif %}
 </li>
 {% endwith %}

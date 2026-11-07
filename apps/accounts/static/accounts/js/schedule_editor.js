@@ -184,7 +184,7 @@
         }
         var list = (result && result.conflicts) || [];
         return list.length > 0 && list.every(function (row) {
-            return row.can_force !== false && row.kind !== "group";
+            return row.can_force !== false;
         });
     }
 
