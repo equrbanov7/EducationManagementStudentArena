@@ -348,6 +348,12 @@
 #       MR-000030.2): YALNIZ sahibin təsdiqlədiyi cütlər — ŞİFRƏLİ asset (`roster_tag` = `student-merge-…` →
 #       plan.json.enc, `{"duplicate", "keep"}` id-ləri). Xana/komponent balı yalnız BOŞ hədəfə, qeydiyyat/cəhd köçür,
 #       dublikat «Hesabı dayandır» + üzvlüklər deaktiv. `batch` = `stmerge-…` + apply → geri qaytarma. Loga YALNIZ saylar.
+#   merge_duplicate_staff — eyni müəllimin dublikat İŞÇİ hesabı → əsas hesab (sahib 2026-11-03, Jalə Qəniyeva): plan
+#       YALNIZ id-lərdir — `batch` = «mənbə:hədəf» (məs. 8388:7730). Açılış/dərs müəllifi (Lesson.instructor →
+#       kabinetin «Adınıza keçirilmiş»), sillabus müəllifi + versiya sahələri, jurnal payı, yük təyinatı və s. köçür
+#       (inventar: apps/accounts/services/staff_merge/fields.py); bal/davamiyyət dəyərlərinə toxunulmur, mənbə bloklu
+#       qalır. Qapılar: eyni ad + soyad + ata adı (`create_missing` → --force-name-mismatch), mənbə bloklu və ya heç
+#       daxil olmayıb. Geri qaytarma əmri yoxdur (apply-dan əvvəl backup + audit id-ləri). Loga YALNIZ saylar.
 #   shrink_avatars — mövcud avatarlar ≤512 px WebP-yə (PERF-2 H5, 2026-10-17); orijinal fayllar SİLİNMİR,
 #       `updated_at` dəyişmir. Loga yalnız yekun saylar.
 #   sync_plan_offerings — təsdiqlənmiş tədris planından qruplara açılış + tələbə yazılışı
@@ -469,6 +475,7 @@ on:
           - fix_master_students
           - relocate_superseded_marks
           - merge_duplicate_student
+          - merge_duplicate_staff
           - merge_psychology_duplicates_20261105
           - merge_psychology_duplicates_20261106
           - relocate_twin_enrollment
@@ -529,11 +536,11 @@ on:
         required: false
         default: ""
       batch:
-        description: "recover_workload_syllabi (Bilal legacy8430; workload-syllabi-…) · recover_mr46_syllabus: plaintext SHA256 və ya mr46-… undo paketi · repair_repeated_sections_workload / repair_owner_activity_batch / repair_balanced_workload_pairs / repair_sbio235_workload: baselineSHA, undoID(dry) və ya undoID:baselineSHA(apply) · reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…) / apply_journal_shares (shares-…) / relocate_superseded_marks (supmarks-…) / merge_duplicate_student (stmerge-…) / merge_level_journals (lvlmerge-…): geri qaytarılacaq paket id-si (undo) · recover_mr27_journal: fayl üçün məcburi plaintext sha256 və ya undo üçün mr27-YYYYMMDD-HHMMSS-xxxx · legacy_delta_apply / share_legacy_syllabi: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd) · undo_subject_merge: birləşmənin audit id-si (UUID) · merge_subjects: mənbə kod(lar)ı və ya PLAN «QKU-K:SAYT-N;…» · recode_site_subjects: boş / SAYT-N,… (istisna) / sitecode-… (undo) · fix_offering_subject: jurnalın UUID-i · clear_stale_off_schedule_flags: yalnız bu jurnal (UUID, boş = hamısı)"
+        description: "recover_workload_syllabi (Bilal legacy8430; workload-syllabi-…) · recover_mr46_syllabus: plaintext SHA256 və ya mr46-… undo paketi · repair_repeated_sections_workload / repair_owner_activity_batch / repair_balanced_workload_pairs / repair_sbio235_workload: baselineSHA, undoID(dry) və ya undoID:baselineSHA(apply) · reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…) / apply_journal_shares (shares-…) / relocate_superseded_marks (supmarks-…) / merge_duplicate_student (stmerge-…) / merge_level_journals (lvlmerge-…): geri qaytarılacaq paket id-si (undo) · recover_mr27_journal: fayl üçün məcburi plaintext sha256 və ya undo üçün mr27-YYYYMMDD-HHMMSS-xxxx · legacy_delta_apply / share_legacy_syllabi: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd) · undo_subject_merge: birləşmənin audit id-si (UUID) · merge_subjects: mənbə kod(lar)ı və ya PLAN «QKU-K:SAYT-N;…» · recode_site_subjects: boş / SAYT-N,… (istisna) / sitecode-… (undo) · fix_offering_subject: jurnalın UUID-i · clear_stale_off_schedule_flags: yalnız bu jurnal (UUID, boş = hamısı) · merge_duplicate_staff: mənbə:hədəf istifadəçi id-ləri (8388:7730)"
         required: false
         default: ""
       create_missing:
-        description: "recover_mr27_journal: müəllimin 22Oct 10/10/9 bəyanatını ayrıca daxil et (--include-teacher-assertion) · reconcile_teacher_roster: «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı yarat · audit_staff_placement (apply ilə): aktiv olmayanları blokla (--block-inactive) · blocked_accounts_report (apply ilə): yükü olan bloklanmış müəllimlərin blokunu aç · assign_task_rows_from_timetable: dərs yükündə olmayan dərsə yeni tapşırıq sətri (--create-missing-rows) · fix_syllabus_plan_hours: plan saatı BOŞ olan təsdiqlənmiş versiyaları da doldur (--fill-empty) · fill_vacant_from_journals: bildiriş GÖNDƏRMƏ (--no-notify) · unblock_legacy_journal_teachers: boş köhnə jurnalı olanı da aç (--include-empty) · fix_legacy_lesson_kinds: plan HƏM seminar, HƏM lab daşıyan açılışlarda da (--include-mixed) · merge_subjects: «yalnız davamiyyət» təkrar qeydiyyatını da bağla (--drop-attendance-only) · dedupe_notifications: «Bildiriş göndər» (system) təkrarını yumşaq SİL (--type system --delete, pəncərə 600 dəq)"
+        description: "recover_mr27_journal: müəllimin 22Oct 10/10/9 bəyanatını ayrıca daxil et (--include-teacher-assertion) · reconcile_teacher_roster: «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı yarat · audit_staff_placement (apply ilə): aktiv olmayanları blokla (--block-inactive) · blocked_accounts_report (apply ilə): yükü olan bloklanmış müəllimlərin blokunu aç · assign_task_rows_from_timetable: dərs yükündə olmayan dərsə yeni tapşırıq sətri (--create-missing-rows) · fix_syllabus_plan_hours: plan saatı BOŞ olan təsdiqlənmiş versiyaları da doldur (--fill-empty) · fill_vacant_from_journals: bildiriş GÖNDƏRMƏ (--no-notify) · unblock_legacy_journal_teachers: boş köhnə jurnalı olanı da aç (--include-empty) · fix_legacy_lesson_kinds: plan HƏM seminar, HƏM lab daşıyan açılışlarda da (--include-mixed) · merge_subjects: «yalnız davamiyyət» təkrar qeydiyyatını da bağla (--drop-attendance-only) · dedupe_notifications: «Bildiriş göndər» (system) təkrarını yumşaq SİL (--type system --delete, pəncərə 600 dəq) · merge_duplicate_staff: ad/soyad/ata adı fərqlidir, sahib eyni şəxs olduğunu təsdiqləyib (--force-name-mismatch)"
         required: false
         type: boolean
         default: false
@@ -1595,6 +1602,18 @@ jobs:
                 args=(--org "$ORG" --actor "$actor" --file "/tmp/student_merge_${GITHUB_RUN_ID}.json")
               fi
               ;;
+            merge_duplicate_staff)
+              # Sahib 2026-11-03: eyni müəllimin dublikat İŞÇİ hesabı → əsas hesab (dərs/sillabus/yük müəllifliyi).
+              # Plan YALNIZ id-lərdir: `batch` = «mənbə:hədəf»; `create_missing` → --force-name-mismatch. Loga yalnız saylar.
+              match "$BATCH" '^[0-9]{1,12}:[0-9]{1,12}$' || { echo "batch formatı: mənbə_id:hədəf_id (məs. 8388:7730)" >&2; exit 2; }
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor" "--source-user=${BATCH%%:*}" "--target-user=${BATCH##*:}"
+                    --reason "Eyni müəllimin dublikat işçi hesabı əsas hesaba birləşdirilir — sahibin tapşırığı (RİM)")
+              if [ "$CREATE_MISSING" = "true" ]; then
+                args+=(--force-name-mismatch)
+              fi
+              ;;
             merge_level_journals)
               # Sahib 2026-10-27: bölünmüş səviyyə jurnalı → müəllimin ev jurnalı (plan faylı, yalnız id-lər). Loga yalnız saylar.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
@@ -2375,6 +2394,17 @@ jobs:
             # Loga YALNIZ «superseded_marks: / student_merge: açar=say …» sətirləri və rədd kodu (əmrlər ad çap etmir).
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^(superseded_marks|student_merge): [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "merge_duplicate_staff" ]; then
+            # Loga YALNIZ «staff_merge: / staff_merge_left: açar=say …» sətirləri və rədd kodu (əmr ad çap etmir).
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^staff_merge(_left)?: [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
