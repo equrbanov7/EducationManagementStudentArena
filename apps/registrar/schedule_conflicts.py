@@ -41,8 +41,8 @@ QAYDALAR
 * ƏHATƏDƏN KƏNAR toqquşma (2026-10-14): ``visible(slot)`` False qaytaran slot (redaktorun
   ``schedule.manage`` əhatəsindən kənar — başqa fakültə/kafedra) MİNİMAL açıqlama ilə qaytarılır:
   yalnız «fənn · qrup» (müəllim adı, otaq, slot id-si YOX) və ``can_force=False`` — onu parklamaq
-  olmaz. Qrup toqquşması heç vaxt məcburi keçilmir (``can_force=False``): əvvəlcə həmin dərs
-  köçürülməlidir.
+  olmaz. Qrup toqquşması da (əhatədə olarsa) səbəblə məcburi keçilir — toqquşan dərs parklanır (sahib
+  2026-11-07: «müəllim ya da qrup tərəfdən … başqa xana dolu olsa da məcbur edərək, səbəb yazaraq keçid olsun»).
 """
 
 from __future__ import annotations
@@ -143,7 +143,7 @@ def describe(slot, kind, *, in_scope=True) -> dict:
 
     ``in_scope=False`` — redaktorun əhatəsindən kənar slot: minimal açıqlama (bax modul başlığı)."""
     offering = slot.offering
-    can_force = bool(in_scope and kind != KIND_GROUP)
+    can_force = bool(in_scope)
     if not in_scope:
         return {
             "kind": kind,
