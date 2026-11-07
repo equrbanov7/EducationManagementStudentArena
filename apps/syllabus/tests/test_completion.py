@@ -43,7 +43,7 @@ def test_the_assessment_split_must_consume_the_whole_flexible_budget():
 def test_partially_filled_section_does_not_count_as_partially_complete():
     """«8 sahədən 5-i doldurulub» faizi YOXDUR — qayda ya ödənilir, ya yox."""
     data = complete_section_data()
-    data[SectionKey.LIT.value]["primary"] = ["Yalnız bir mənbə göstərilib 2020"]
+    data[SectionKey.LIT.value]["primary"] = []
     report = completion.evaluate(data, PLAN_HOURS)
     assert report.sections[SectionKey.LIT.value] is False
     assert report.percent == round(7 / 8 * 100)
@@ -115,3 +115,73 @@ def test_evaluation_does_not_mutate_input():
     snapshot = copy.deepcopy(data)
     completion.evaluate(data, PLAN_HOURS)
     assert data == snapshot
+
+
+# ── Sahib 2026-11-03: ədəbiyyat istənilən formada, mövzu adında uzunluq həddi yoxdur ──
+
+
+def test_literature_written_on_one_line_with_commas_is_complete():
+    """«Alt-alta yazılmasa da qəbul et»: əsas ədəbiyyat BİR sətirdə, vergüllə — bölmə tamamlanır."""
+    data = complete_section_data()
+    data[SectionKey.LIT.value] = {
+        "primary": ["Cormen, Introduction to Algorithms, 2022, Sedgewick, Algorithms, 2011"],
+        "additional": ["Knuth"],
+    }
+    report = completion.evaluate(data, PLAN_HOURS)
+    assert report.sections[SectionKey.LIT.value] is True, report.as_dict()["issues"]
+    assert report.percent == 100
+
+
+def test_literature_as_a_plain_text_block_without_numbering_is_complete():
+    """Mətn bloku (sətirlərə bölünməmiş, nömrəsiz, qısa) da qəbul olunur — forma tələbi yoxdur."""
+    data = complete_section_data()
+    data[SectionKey.LIT.value] = {"primary": "Kitab", "additional": "veb"}
+    report = completion.evaluate(data, PLAN_HOURS)
+    assert report.sections[SectionKey.LIT.value] is True, report.as_dict()["issues"]
+
+
+def test_empty_literature_fields_are_still_incomplete():
+    data = complete_section_data()
+    data[SectionKey.LIT.value] = {"primary": ["   ", ""], "additional": []}
+    report = completion.evaluate(data, PLAN_HOURS)
+    assert report.sections[SectionKey.LIT.value] is False
+    codes = {issue.code for issue in report.issues}
+    assert {"lit.primary_too_few", "lit.additional_too_few"} <= codes
+
+
+def test_long_week_topic_is_kept_and_does_not_block_completion():
+    """Uzun mövzu adı forma yoxlamasından olduğu kimi keçir və tamamlanmanı bloklamır."""
+    from apps.syllabus.services.section_shape import normalize_section_data
+
+    long_topic = "Alqoritmlərin mürəkkəbliyi və asimptotik təhlil: " + "ətraflı izah " * 80
+    assert len(long_topic) > 1000
+    data = complete_section_data()
+    week = copy.deepcopy(data[SectionKey.WEEK.value])
+    week["rows"][0]["topic"] = long_topic
+    week = normalize_section_data(SectionKey.WEEK.value, week)
+    assert week["rows"][0]["topic"] == long_topic
+    data[SectionKey.WEEK.value] = week
+    report = completion.evaluate(data, PLAN_HOURS)
+    assert report.sections[SectionKey.WEEK.value] is True, report.as_dict()["issues"]
+    assert report.percent == 100
+
+
+def test_short_week_topic_counts_as_filled():
+    """«SQL» kimi qısa mövzu da dolu sayılır (əvvəl 4 simvoldan qısa mövzu sayılmırdı)."""
+    data = complete_section_data()
+    for row in data[SectionKey.WEEK.value]["rows"]:
+        if row.get("topic"):
+            row["topic"] = "SQL"
+    report = completion.evaluate(data, PLAN_HOURS)
+    assert report.sections[SectionKey.WEEK.value] is True, report.as_dict()["issues"]
+
+
+def test_long_literature_list_with_blank_separators_is_accepted_by_the_shape_check():
+    """Mənbələr arası boş sətirlə yazılmış uzun siyahı ümumi 60 element həddinə düşmür."""
+    from apps.syllabus.services.section_shape import normalize_section_data
+
+    lines = []
+    for index in range(80):
+        lines += [f"Müəllif {index}, Kitab {index}, 2020", ""]
+    out = normalize_section_data(SectionKey.LIT.value, {"primary": lines, "additional": ["Veb resurs"]})
+    assert len(out["primary"]) == len(lines)

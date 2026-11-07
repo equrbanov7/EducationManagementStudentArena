@@ -49,10 +49,11 @@ def _coerce_date(value):
         return None
 
 
-#: `Lesson.topic` CharField(255) — ORM uzunluğu yoxlamır, uzun mövzu DB `DataError`
-#: (500) verirdi (QA 2026-09-05 JOURNAL-TEACHER-01). Həm yaratma, həm yeniləmə yolu
-#: buradan keçir.
-MAX_TOPIC_LENGTH = Lesson._meta.get_field("topic").max_length or 255
+#: Dərs mövzusunun SAĞLAMLIQ həddi (həm yaratma, həm yeniləmə yolu buradan keçir).
+#: Sahib 2026-11-03: «mövzu adında uzunluq məsələsi olmasın» — `Lesson.topic` artıq TextField-dir,
+#: hədd sillabus mətn sahəsinin həddi ilə eynidir (`apps.syllabus.constants.MAX_TEXT_CHARS`), yəni
+#: sillabusda yazıla bilən istənilən mövzu jurnalda da qəbul olunur. Əvvəl 255 idi (CharField).
+MAX_TOPIC_LENGTH = 20000
 
 
 def parse_lesson_score(raw):

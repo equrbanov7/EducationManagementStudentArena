@@ -49,7 +49,7 @@ def _week_entry(index, entry, *, practical=False) -> dict:
         for kind in SYLLABUS_HOUR_KINDS
         if _positive(entry.get(kind)) or kind == "seminar" and practical and _positive(entry.get("practical"))
     )
-    return {"week": index, "title": str(entry.get("topic") or "").strip()[:255], "kinds": kinds}
+    return {"week": index, "title": str(entry.get("topic") or "").strip(), "kinds": kinds}
 
 
 def syllabus_week_rows(offering, *, plan_rows=None) -> list:
@@ -143,7 +143,7 @@ def attach_syllabus_topics(lessons, *, offering=None):
         rows = plans.get(lesson.offering_id if offering is None else offering.pk) or []
         index = lesson.syllabus_week
         if 1 <= index <= len(rows):
-            lesson._syllabus_topic = str(rows[index - 1].get("topic") or "").strip()[:255]
+            lesson._syllabus_topic = str(rows[index - 1].get("topic") or "").strip()
     return lessons
 
 

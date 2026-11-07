@@ -122,7 +122,7 @@ paneli render olunmur — bölmənin datası DB-də qalır, tənzimləmə yandı
   <div class="syl-field">
     <label for="syl-lit1">{% trans "Əsas ədəbiyyat" context "accounts.syllabus" %} <span class="syl-req" aria-hidden="true">*</span></label>
     <textarea id="syl-lit1" rows="5" class="syl-textarea" data-field-lines="primary" {% if se.readonly %}disabled{% endif %}
-              placeholder="{% trans 'Hər sətirdə bir mənbə: müəllif, ad, nəşr ili.' context 'accounts.syllabus' %}">{% for line in p.data.primary %}{{ line }}
+              placeholder="{% trans 'Müəllif, ad, nəşr ili — alt-alta və ya bir sətirdə, vergüllə.' context 'accounts.syllabus' %}">{% for line in p.data.primary %}{{ line }}
 {% endfor %}</textarea>
   </div>
   <div class="syl-field">

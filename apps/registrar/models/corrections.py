@@ -180,8 +180,9 @@ class LessonCorrection(ImmutableCorrectionEvidence):
     new_hours = models.PositiveSmallIntegerField(null=True, blank=True)
     old_time = models.CharField(max_length=32, blank=True, default="")
     new_time = models.CharField(max_length=32, blank=True, default="")
-    old_topic = models.CharField(max_length=255, blank=True, default="")
-    new_topic = models.CharField(max_length=255, blank=True, default="")
+    #: ``Lesson.topic`` ilə eyni tip (TextField, sahib 2026-11-03) — uzun mövzunun düzəlişi də yazılsın.
+    old_topic = models.TextField(blank=True, default="")
+    new_topic = models.TextField(blank=True, default="")
     old_instructor = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )

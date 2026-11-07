@@ -6,7 +6,7 @@
         <div class="jd-modal-body">
             <div class="jd2-field"><label class="jd2-field-label" for="joint-date">{% trans "TARİX" context "registrar.journal" %}</label><input id="joint-date" type="date" name="date" value="{{ today|date:'Y-m-d' }}" max="{{ today|date:'Y-m-d' }}" required></div>
             <div class="jd2-field"><label class="jd2-field-label" for="joint-slot">Cədvəl dərsi</label><div class="bootstrap-single-select bootstrap-single-select--ems"><select id="joint-slot" name="slot_id" required class="bootstrap-single-select__native" data-bootstrap-select>{% for slot in slots %}<option value="{{ slot.pk }}">{{ slot.weekday_label }} · {{ slot.start_time|time:'H:i' }}–{{ slot.end_time|time:'H:i' }} · {{ slot.get_week_type_display }}{% if slot.room %} · {{ slot.room }}{% endif %}</option>{% endfor %}</select></div></div>
-            <div class="jd2-field"><label class="jd2-field-label" for="joint-topic">{% trans "Mövzu" context "registrar.journal" %}</label><input id="joint-topic" type="text" name="topic" maxlength="255" required></div>
+            <div class="jd2-field"><label class="jd2-field-label" for="joint-topic">{% trans "Mövzu" context "registrar.journal" %}</label><input id="joint-topic" type="text" name="topic" required></div>
         </div>
         <div class="jd-modal-foot joint-dialog-foot"><button type="button" class="jd2-export-btn" data-joint-close-lesson>{% trans "Bağla" context "registrar.journal" %}</button><button class="jd2-save-btn" type="submit">Bütün qruplara dərs əlavə et</button></div>
     </form>

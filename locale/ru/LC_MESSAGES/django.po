@@ -115219,3 +115219,11 @@ msgstr "Семинар"
 msgctxt "registrar.journal_sections"
 msgid "Jurnal bölmələri"
 msgstr "Разделы журнала"
+
+msgctxt "accounts.syllabus"
+msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
+msgstr "Нужно заполнить оба поля — основную и дополнительную литературу. Источники можно записывать в любой форме: каждый с новой строки, через запятую или в одну строку."
+
+msgctxt "accounts.syllabus"
+msgid "Müəllif, ad, nəşr ili — alt-alta və ya bir sətirdə, vergüllə."
+msgstr "Автор, название, год издания — с новой строки или в одну строку через запятую."
