@@ -10,7 +10,7 @@ from core.group_identity import canonical_aliases
 from ..constants import RowKind, TaskStatus
 from ..models import TeacherAssignment, TeachingTaskRow
 from .offering_shares import KINDS, _assignment_group
-from .patok import teacher_partner_rows
+from .patok import taught_partner_rows
 
 
 def _registered_children(organization, groups):
@@ -66,8 +66,8 @@ def _assignment_map(*, organization, teacher_id, include_hours=False):
         .distinct()
     )
     # Patokun ikinci/üçüncü qrupu: mühazirəsi bu müəllimin aparıcı sətrindədir (sahib 2026-11-07, :mod:`.patok`).
-    partners = teacher_partner_rows(organization=organization, teacher_id=teacher_id, released_q=released)
-    groups = [group for row in [*rows, *partners] for group in row.groups.all()]
+    partners = taught_partner_rows(rows, teacher_id)
+    groups = [group for row in rows for group in row.groups.all()]
     children = _registered_children(organization, groups) if groups else {}
     aliases = canonical_aliases(groups)
     result = defaultdict(lambda: defaultdict(int)) if include_hours else defaultdict(set)

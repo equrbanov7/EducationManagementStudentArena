@@ -75,19 +75,24 @@ def _teacher(partner, leads, assigned_ids):
     return None, None
 
 
-def partner_lectures(rows) -> dict:
+def partner_lectures(rows, *, assigned=None) -> dict:
     """``{sətir pk: {"hours", "teacher_id", "teacher_name", "groups"}}`` — verilmiş sətirlərdən tərəfdaş olanlar.
 
-    ``rows``-un ``assignments`` prefetch-i varsa əlavə sorğu yoxdur; aparıcılar üçün BİR sorğu.
+    ``assigned(row)`` — sətirdə bölgüsü olan müəllim id-ləri (defolt: ``row.assignments`` prefetch-i). Tərəfdaş
+    yoxdursa sorğu yoxdur; varsa aparıcılar üçün BİR sorğu.
     """
     partners = [row for row in rows if is_partner(row)]
     if not partners:
         return {}
+    if assigned is None:
+
+        def assigned(row):
+            return {a.teacher_id for a in row.assignments.all() if a.teacher_id}
+
     leads = _leads(partners)
     result = {}
     for row in partners:
-        assigned = {a.teacher_id for a in row.assignments.all() if a.teacher_id}
-        teacher, lead = _teacher(row, leads.get(_key(row), ()), assigned)
+        teacher, lead = _teacher(row, leads.get(_key(row), ()), assigned(row))
         result[row.pk] = {
             "hours": int(row.lecture_plan),
             "teacher_id": str(teacher.pk) if teacher is not None else "",
@@ -97,36 +102,14 @@ def partner_lectures(rows) -> dict:
     return result
 
 
-def teacher_partner_rows(*, organization, teacher_id, released_q) -> list:
-    """Müəllimin MÜHAZİRƏSİNİ apardığı patok tərəfdaşı sətirləri (onun öz bölgüsü olmasa da)."""
-    lead_keys = set(
-        TeachingTaskRow.objects.filter(
-            organization=organization,
-            row_kind=RowKind.TEACHING,
-            lecture_total__gt=0,
-            assignments__teacher_id=teacher_id,
-            assignments__activity=Activity.LECTURE,
-            assignments__hours__gt=0,
-        )
-        .filter(released_q)
-        .values_list("task_id", "subject_id", "season", "period_id")
-        .distinct()
-    )
-    if not lead_keys:
-        return []
-    candidates = list(
-        TeachingTaskRow.objects.filter(
-            partner_q(),
-            organization=organization,
-            task_id__in={key[0] for key in lead_keys},
-            subject_id__in={key[1] for key in lead_keys},
-        )
-        .filter(released_q)
-        .prefetch_related("groups", "assignments")
-    )
-    candidates = [row for row in candidates if _key(row) in lead_keys]
-    lectures = partner_lectures(candidates)
-    return [row for row in candidates if lectures.get(row.pk, {}).get("teacher_id") == str(teacher_id)]
+def taught_partner_rows(rows, teacher_id) -> list:
+    """``rows`` (müəllimin bölgüsü olan sətirlər) içində mühazirəsini BU müəllimin apardığı patok tərəfdaşları.
+
+    Tərəfdaş sətirdə bölgüsü olmayan mühazirəçi həmin jurnalın sahibi deyil — ona görə yalnız öz sətirləri
+    yoxlanılır (müəllim siyahısının sorğu büdcəsi: tərəfdaş yoxdursa əlavə sorğu yoxdur).
+    """
+    lectures = partner_lectures(rows, assigned=lambda row: {teacher_id})
+    return [row for row in rows if lectures.get(row.pk, {}).get("teacher_id") == str(teacher_id)]
 
 
-__all__ = ["is_partner", "partner_lectures", "partner_q", "teacher_partner_rows"]
+__all__ = ["is_partner", "partner_lectures", "partner_q", "taught_partner_rows"]

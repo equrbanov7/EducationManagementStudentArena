@@ -3,7 +3,8 @@
 * tərəfdaş sətir (``lecture_plan > 0``, ``lecture_total = 0``) «Mühazirə» süzgəcində çıxır və kartında aparıcı
   sətrin müəllimi + qrupları ilə mühazirə xətti var; bölgü / yük dəyişmir;
 * mühazirəçi: tərəfdaşda da bölgüsü olan aparıcı müəllim; yoxdursa tək aparıcı müəllim; ikisi də deyilsə boş;
-* müəllimin jurnal xəritəsində tərəfdaş qrupa «lecture» növü düşür (öz bölgüsü olmasa da).
+* müəllimin jurnal xəritəsində öz bölgüsü olan tərəfdaş qrupa «lecture» növü düşür (bölgüsü yoxdursa jurnal
+  onun deyil — düşmür).
 """
 
 from django.contrib.auth import get_user_model
@@ -98,7 +99,7 @@ class PatokLectureTests(TestCase):
         partner_group = self.partner.groups.get().pk
         third_group = self.third.groups.get().pk
         self.assertEqual(assignments[(subject, period, partner_group)], {"seminar", "lecture"})
-        self.assertEqual(assignments[(subject, period, third_group)], {"lecture"})
+        self.assertNotIn((subject, period, third_group), assignments)
         colleague = teacher_journal_assignments(organization=self.org, teacher_id=self.colleague.pk)
         self.assertEqual(colleague[(subject, period, third_group)], {"seminar"})
 
