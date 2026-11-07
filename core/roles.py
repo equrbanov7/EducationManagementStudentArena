@@ -128,7 +128,12 @@ class ProfileRole:
     # səlahiyyəti struktur ağacı + akademik kataloqdur (ekran 01–04). Alias
     # verilsəydi rol bütün tenant idarəetmə səthini — üzv, rol, təşkilat
     # ayarları, superadmin panelləri — səssizcə alardı.
+    #
+    # `department_head` (= `chair_head` / `section_head`, sahib 2026-11-07): «Təşkilat Admini deyil, Kafedra
+    # müdiridir» — kafedra müdiri öz kafedrasını rolunun açarları ilə idarə edir (sillabus/plan təsdiqi, dərs yükü,
+    # `journal.view` …); üzv/rol/təşkilat paneli ona aid deyil.
     ADMIN_ALIAS_EXEMPT_ROLE_NAMES = {
+        "department_head",
         "exam_center",
         "exam_center_head",
         "exam_center_staff",
