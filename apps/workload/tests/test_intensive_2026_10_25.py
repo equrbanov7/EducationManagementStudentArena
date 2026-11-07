@@ -157,16 +157,17 @@ class IntensiveWorkloadTests(_IntensiveBase):
                 created_by=self.teacher,
             )
         self.assertEqual(offering.lessons.count(), 3)
-        with self.assertRaises(gradebook.LessonRuleError):
-            gradebook.create_lesson(
-                offering=offering,
-                date=self.today - datetime.timedelta(days=3),
-                kind=LessonKind.SEMINAR,
-                hours=2,
-                start_time=datetime.time(9, 0),
-                end_time=datetime.time(10, 20),
-                created_by=self.teacher,
-            )
+        # Kursun başlama tarixindən ƏVVƏL də yazılır — erkən başlamaq olar (sahib 2026-11-07).
+        gradebook.create_lesson(
+            offering=offering,
+            date=self.today - datetime.timedelta(days=3),
+            kind=LessonKind.SEMINAR,
+            hours=2,
+            start_time=datetime.time(9, 0),
+            end_time=datetime.time(10, 20),
+            created_by=self.teacher,
+        )
+        self.assertEqual(offering.lessons.count(), 4)
 
     def test_cancel_removes_row_and_deactivates_journal(self):
         result = self._create()
