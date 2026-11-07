@@ -83,6 +83,10 @@ class LabManageBase(SubgroupFixture, TestCase):
     def post(self, user=None, **data):
         return self.client_for(user or self.teacher).post(self.url, data)
 
+    def lab(self, number):
+        """Adsız qrupun görünən adı — jurnalın qrupu ilə (sahib 2026-11-08: «236 SBİO · Lab-1»)."""
+        return f"{self.offering.group.name} · Lab-{number}"
+
     def fresh(self):
         with bypass_rls():
             return CourseOffering.objects.select_related("organization", "period", "subject").get(pk=self.offering.pk)
@@ -168,7 +172,7 @@ class CreateRenameTest(LabManageBase):
         self.assertEqual(self.numbers(), [1, 2])
         offering = self.fresh()
         with translation.override("az"):
-            self.assertEqual(lab_groups.choices(offering), [(1, "Lab-1"), (2, "Axşam qrupu")])
+            self.assertEqual(lab_groups.choices(offering), [(1, self.lab(1)), (2, "Axşam qrupu")])
         with bypass_rls():
             logs = AuditLog.objects.filter(resource_type=service.RESOURCE, action="create")
             self.assertEqual(logs.count(), 2)
@@ -180,7 +184,7 @@ class CreateRenameTest(LabManageBase):
         self.set_groups({self.e1: 1, self.e2: 2})
         offering = self.fresh()
         with translation.override("az"):
-            self.assertEqual(lab_groups.choices(offering), [(1, "Lab-1"), (2, "Lab-2")])
+            self.assertEqual(lab_groups.choices(offering), [(1, self.lab(1)), (2, self.lab(2))])
         self.post(action="create")
         self.assertEqual(self.numbers(), [1, 2, 3])
 
@@ -202,12 +206,12 @@ class CreateRenameTest(LabManageBase):
         with translation.override("az"):
             self.assertEqual(lab_groups.label(1, self.fresh()), "Səhər")
             self.post(action="rename", group="2", name="səhər")  # təkrar (registr fərqi sayılmır)
-            self.assertEqual(lab_groups.label(2, self.fresh()), "Lab-2")
+            self.assertEqual(lab_groups.label(2, self.fresh()), self.lab(2))
             self.post(action="rename", group="2", name="Lab-2")
             with bypass_rls():
                 self.assertFalse(LabGroup.objects.filter(offering=self.offering, number=2).exists())
             self.post(action="rename", group="1", name="")
-            self.assertEqual(lab_groups.label(1, self.fresh()), "Lab-1")
+            self.assertEqual(lab_groups.label(1, self.fresh()), self.lab(1))
         self.post(action="rename", group="7", name="Yox")
         with bypass_rls():
             self.assertFalse(LabGroup.objects.filter(offering=self.offering, number=7).exists())
@@ -301,7 +305,7 @@ class GridAndModalNamesTest(LabManageBase):
         detail = reverse("registrar:journal_detail", args=[self.offering.pk])
         response = self.client_for(self.teacher).get(detail, HTTP_ACCEPT_LANGUAGE="az")
         self.assertContains(response, '<option value="1">Səhər qrupu</option>', html=False)
-        self.assertContains(response, '<option value="2">Lab-2</option>', html=False)
+        self.assertContains(response, f'<option value="2">{self.lab(2)}</option>', html=False)
         self.assertContains(response, ">Səhər qrupu</div>")  # dərs sütununun nişanı
         self.assertContains(response, ">Səhər qrupu</small>")  # tələbə sətrinin çipi
         # Adı dəyişən qrupun dərsi bağlı qalır: nömrə eyni, Lab-2 tələbəsinin xanası yenə bağlıdır.

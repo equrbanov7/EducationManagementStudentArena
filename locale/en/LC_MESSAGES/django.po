@@ -115026,3 +115026,8 @@ msgstr "Seminars"
 msgctxt "registrar.journal_sections"
 msgid "Jurnal bölmələri"
 msgstr "Journal sections"
+
+#, python-format
+msgctxt "registrar.lab_groups"
+msgid "%(group)s · Lab-%(n)s"
+msgstr "%(group)s · Lab group %(n)s"

@@ -2,7 +2,7 @@
 
 * alt qruplu seminar dərsi yalnız öz alt qrupunun tələbələrinindir (yazı rədd, qrid «·», saat həddi tələbə başına);
   alt qrup seçimi İSTƏYƏ BAĞLIDIR (boş = bütün qrup, köhnə davranış); yalnız seminar dərsinə aiddir;
-* jurnal səhifəsi: alt qrup seçimi, bölmə düymələri («Mühazirə», «K1 · Seminar», «K1 · Lab-1»), bölünməmiş jurnalda yox;
+* jurnal səhifəsi: alt qrup seçimi (bölmə zolağı YOXDUR — sahib 2026-11-08), bölünməmiş jurnalda seçim yoxdur;
 * ``apply_seminar_groups``: reyestr ailəsindən (``parent_group``) alt qruplar, tələbə yerləşdirmə, lab adları;
   ikidən az alt qrup → atlanır; defolt dry-run, idempotent, mövcud dəyər üzərinə yazılmır; prod-data-ops-a qoşulub.
 """
@@ -98,17 +98,15 @@ class SeminarGroupJournalTest(_LabWorld, TestCase):
         self.assertTrue(rows[self.e2.pk]["cells"][0]["off_group"])
         self.assertEqual(journal["lesson_meta"][0]["seminar_group_label"], "LAB-G1 K1")
         self.assertEqual(rows[self.e2.pk]["seminar_group_label"], "LAB-G1 K2")
-        labels = [section["label"] for section in journal["journal_sections"]]
-        self.assertIn("LAB-G1 K1 · Seminar", labels)
-        self.assertIn("LAB-G1 · Mühazirə", labels)
+        self.assertNotIn("journal_sections", journal)  # bölmə zolağı yoxdur (sahib 2026-11-08: «lazım deyil»)
 
-    def test_journal_page_renders_picker_and_sections(self):
+    def test_journal_page_renders_picker_without_section_bar(self):
         self._sem(2)
         response = self._client(self.teacher).get(reverse("registrar:journal_detail", args=[self.offering.id]))
         self.assertContains(response, 'name="lesson_seminar_group"')
         self.assertContains(response, "registrar/js/journal_lesson_seminar_group.js")
-        self.assertContains(response, "registrar/js/journal_sections.js")
-        self.assertContains(response, "data-jd-section")
+        self.assertNotContains(response, "journal_sections.js")
+        self.assertNotContains(response, "data-jd-section")
         self.assertContains(response, 'data-lesson-seminar-group="2"')
 
     def test_unsplit_journal_has_no_seminar_picker_or_sections(self):
