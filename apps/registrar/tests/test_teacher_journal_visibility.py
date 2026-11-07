@@ -14,7 +14,15 @@ from apps.organizations.models import Membership, OrgUnit
 from apps.registrar.journal_access import can_edit_journal, is_direct_editor
 from apps.registrar.journal_list_scope import journal_list_base
 from apps.registrar.journal_own_history import detail, eligible
-from apps.registrar.models import CourseOffering, Enrollment, JournalShare, Lesson, LessonMark, TeachingHandover
+from apps.registrar.models import (
+    CourseOffering,
+    Enrollment,
+    JournalShare,
+    Lesson,
+    LessonMark,
+    StudentAcademicRecord,
+    TeachingHandover,
+)
 from apps.registrar.page_contexts import journal_list_context
 from apps.workload.constants import TaskStatus
 from apps.workload.models import TeacherAssignment
@@ -549,7 +557,23 @@ class EmptyRolledSubgroupJournalTests(TestCase):
         self.assertTrue(self.flag(empty))
         self.assertFalse(self.flag(self.parent_journal))
         # Tələbələri ana jurnala düşməyən alt qrup — göstərilir.
-        self.assertFalse(self.flag(self.journal(self.sub2)))
+        sub2 = self.journal(self.sub2)
+        self.assertFalse(self.flag(sub2))
+        # Adi qeydiyyat (qonaq deyil), amma tələbənin akademik qrupu indi alt qrupdur (prod «234 K az» halı).
+        from apps.registrar.models import Curriculum
+
+        curriculum = Curriculum.objects.create(
+            organization=self.org, program=self.stack["program"], admission_year=2025
+        )
+        StudentAcademicRecord.objects.create(
+            organization=self.org,
+            student=self.student,
+            program=self.stack["program"],
+            curriculum=curriculum,
+            group=self.sub2,
+            admission_year=2025,
+        )
+        self.assertTrue(self.flag(sub2))
 
     def test_a_lesson_or_an_own_student_keeps_the_subgroup_journal_visible(self):
         journal = self.journal(self.sub1)
