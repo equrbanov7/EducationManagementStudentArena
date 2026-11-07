@@ -298,6 +298,17 @@
   color: var(--ems-neutral-700, #3f5063);
 }
 
+/* Patokun ikinci/üçüncü qrupu — mühazirə aparıcı sətirdədir, burada yalnız görünür (sahib 2026-11-07). */
+.wl-act--patok .wl-act__fill {
+  background: var(--ems-info, #2563a8);
+}
+
+.wl-act__patok {
+  grid-column: 4 / -1;
+  color: var(--ems-neutral-600, #556476);
+  font-size: 0.78rem;
+}
+
 /* Bölgü siyahısı */
 .wl-assign-list {
   list-style: none;

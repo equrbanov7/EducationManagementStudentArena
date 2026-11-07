@@ -188,6 +188,11 @@ class Lesson(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     lab_group = models.PositiveSmallIntegerField(
         null=True, blank=True, help_text="Laboratoriya qrupu (yalnız lab dərsi); boş = bütün qrup."
     )
+    #: Yalnız SEMİNAR dərsində: bu dərs hansı seminar alt qrupunundur (``Enrollment.seminar_group``, sahib
+    #: 2026-11-07). Boş = bütün qrup (köhnə davranış). Bax :mod:`apps.registrar.seminar_groups`.
+    seminar_group = models.PositiveSmallIntegerField(
+        null=True, blank=True, help_text="Seminar alt qrupu (yalnız seminar dərsi); boş = bütün qrup."
+    )
 
     objects = models.Manager()
 

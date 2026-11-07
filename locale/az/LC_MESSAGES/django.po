@@ -114441,6 +114441,75 @@ msgctxt "registrar.lab_groups"
 msgid "Əvvəlki laboratoriya qrupunun dərsi — qeyd saxlanılıb"
 msgstr "Əvvəlki laboratoriya qrupunun dərsi — qeyd saxlanılıb"
 
+#, python-format
+msgctxt "registrar.seminar_groups"
+msgid "Seminar-%(n)s"
+msgstr "Seminar-%(n)s"
+
+msgctxt "registrar.seminar_groups"
+msgid "Seminar alt qrupu düzgün seçilməyib."
+msgstr "Seminar alt qrupu düzgün seçilməyib."
+
+msgctxt "registrar.seminar_groups"
+msgid "Seminar alt qrupu yalnız seminar dərsinə aiddir."
+msgstr "Seminar alt qrupu yalnız seminar dərsinə aiddir."
+
+msgctxt "registrar.seminar_groups"
+msgid "Bu jurnalda belə seminar alt qrupu yoxdur."
+msgstr "Bu jurnalda belə seminar alt qrupu yoxdur."
+
+msgctxt "registrar.seminar_groups"
+msgid "Bu dərsdə başqa alt qrupun tələbələrinə qeyd yazılıb — alt qrupu dəyişmək olmaz."
+msgstr "Bu dərsdə başqa alt qrupun tələbələrinə qeyd yazılıb — alt qrupu dəyişmək olmaz."
+
+msgctxt "registrar.seminar_groups"
+msgid "Bu seminar dərsi yalnız bu alt qrupun tələbələrinindir"
+msgstr "Bu seminar dərsi yalnız bu alt qrupun tələbələrinindir"
+
+msgctxt "registrar.seminar_groups"
+msgid "Seminar alt qrupu"
+msgstr "Seminar alt qrupu"
+
+msgctxt "registrar.seminar_groups"
+msgid "Başqa seminar alt qrupunun dərsi"
+msgstr "Başqa seminar alt qrupunun dərsi"
+
+msgctxt "registrar.seminar_groups"
+msgid "SEMİNAR ALT QRUPU"
+msgstr "SEMİNAR ALT QRUPU"
+
+msgctxt "registrar.seminar_groups"
+msgid "Bütün qrup"
+msgstr "Bütün qrup"
+
+msgctxt "registrar.seminar_groups"
+msgid "Alt qrup seçilsə dərs yalnız onun tələbələrinə yazılır; mühazirə bütün qrupladır."
+msgstr "Alt qrup seçilsə dərs yalnız onun tələbələrinə yazılır; mühazirə bütün qrupladır."
+
+msgctxt "registrar.model.seminar_group.meta"
+msgid "seminar alt qrupu"
+msgstr "seminar alt qrupu"
+
+msgctxt "registrar.model.seminar_group.meta"
+msgid "seminar alt qrupları"
+msgstr "seminar alt qrupları"
+
+msgctxt "registrar.journal_sections"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "registrar.journal_sections"
+msgid "Mühazirə"
+msgstr "Mühazirə"
+
+msgctxt "registrar.journal_sections"
+msgid "Seminar"
+msgstr "Seminar"
+
+msgctxt "registrar.journal_sections"
+msgid "Jurnal bölmələri"
+msgstr "Jurnal bölmələri"
+
 msgctxt "accounts.syllabus"
 msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
 msgstr "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."

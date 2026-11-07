@@ -122,27 +122,44 @@ def require_for_new(offering, *, kind, lab_group) -> None:
 
 
 def applies(lesson, enrollment) -> bool:
-    """Dərs bu tələbəyə aiddirmi: qrupsuz dərs hamınındır; qruplu lab dərsi yalnız öz qrupunun."""
+    """Dərs bu tələbəyə aiddirmi: qrupsuz dərs hamınındır; qruplu lab dərsi yalnız öz lab qrupunun, alt qruplu
+    seminar dərsi yalnız öz seminar alt qrupunun (:mod:`apps.registrar.seminar_groups`, sahib 2026-11-07)."""
     group = getattr(lesson, "lab_group", None)
-    return group is None or group == getattr(enrollment, "lab_group", None)
+    if group is not None and group != getattr(enrollment, "lab_group", None):
+        return False
+    seminar = getattr(lesson, "seminar_group", None)
+    return seminar is None or seminar == getattr(enrollment, "seminar_group", None)
 
 
-def per_student_hours(lessons, *, extra_hours=0, extra_group=None) -> int:
-    """Bir tələbənin saatı: qrupsuz dərslər + ən çox saatlı lab qrupu (``extra_*`` — yaradılmaqda olan dərs)."""
+def is_split(lesson) -> bool:
+    """Dərs qrupun yalnız bir hissəsinindir (lab qrupu və ya seminar alt qrupu)."""
+    return bool(getattr(lesson, "lab_group", None) or getattr(lesson, "seminar_group", None))
+
+
+def per_student_hours(lessons, *, extra_hours=0, extra_group=None, extra_seminar_group=None) -> int:
+    """Bir tələbənin saatı: qrupsuz dərslər + ən çox saatlı lab qrupu + ən çox saatlı seminar alt qrupu
+    (``extra_*`` — yaradılmaqda olan dərs)."""
     shared = 0
     by_group: dict = {}
+    by_seminar: dict = {}
     for lesson in lessons:
         hours = int(getattr(lesson, "hours", 0) or 0)
         group = getattr(lesson, "lab_group", None)
-        if group is None:
-            shared += hours
-        else:
+        seminar = getattr(lesson, "seminar_group", None)
+        if group is not None:
             by_group[group] = by_group.get(group, 0) + hours
-    if extra_group is None:
-        shared += int(extra_hours or 0)
+        elif seminar is not None:
+            by_seminar[seminar] = by_seminar.get(seminar, 0) + hours
+        else:
+            shared += hours
+    extra = int(extra_hours or 0)
+    if extra_group is not None:
+        by_group[extra_group] = by_group.get(extra_group, 0) + extra
+    elif extra_seminar_group is not None:
+        by_seminar[extra_seminar_group] = by_seminar.get(extra_seminar_group, 0) + extra
     else:
-        by_group[extra_group] = by_group.get(extra_group, 0) + int(extra_hours or 0)
-    return shared + max(by_group.values(), default=0)
+        shared += extra
+    return shared + max(by_group.values(), default=0) + max(by_seminar.values(), default=0)
 
 
 __all__ = [
@@ -152,6 +169,7 @@ __all__ = [
     "choices",
     "default_label",
     "forget",
+    "is_split",
     "label",
     "names",
     "offering_groups",

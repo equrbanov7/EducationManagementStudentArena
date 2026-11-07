@@ -176,9 +176,11 @@ def rows_page(
 def _serialize(task, rows: list, *, amend_targets=None) -> tuple[list[dict], list, dict]:
     """``amend_targets`` verilsə (bir neçə tapşırığın sətirləri — «Bütün kafedralar») ``task`` oxunmur."""
     from .group_aliases import verified_aliases
+    from .patok import partner_lectures
     from .tasks import _amendment_target_row_ids
 
     balance = balance_for_rows(rows)
+    patok = partner_lectures(rows)
     aliases = verified_aliases(group for row in rows for group in row.groups.all())
     if amend_targets is None:
         amend_targets = _amendment_target_row_ids(task) if task.status == TaskStatus.AMENDED else set()
@@ -215,6 +217,8 @@ def _serialize(task, rows: list, *, amend_targets=None) -> tuple[list[dict], lis
                 "row_kind": row.row_kind,
                 "intensive": _intensive_payload(row),
                 "activities": info.get("activities", {}),
+                # Patokun ikinci/üçüncü qrupu: mühazirə aparıcı sətirdədir, burada yalnız GÖSTƏRİLİR (yükə düşmür).
+                "patok_lecture": patok.get(row.pk),
                 "teaching_complete": info.get("teaching_complete", True),
                 "assignments": [
                     {

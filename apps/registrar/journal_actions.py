@@ -267,6 +267,17 @@ def lesson_action(request, offering_id, lesson_id):
             except lab_groups.LabGroupError as exc:
                 messages.error(request, str(exc))
                 return _back(offering)
+        # Seminar alt qrupu (sahib 2026-11-07) — yalnız sahə POST-da varsa (alt qruplu jurnalın modalı).
+        seminar_group = gradebook.UNSET
+        if "lesson_seminar_group" in request.POST:
+            from apps.registrar import seminar_groups
+
+            try:
+                seminar_group = seminar_groups.parse(request.POST.get("lesson_seminar_group"))
+                seminar_groups.validate(offering, kind=kind or lesson.kind, seminar_group=seminar_group)
+            except seminar_groups.SeminarGroupError as exc:
+                messages.error(request, str(exc))
+                return _back(offering)
 
         before = journal_full_edit.lesson_snapshot(lesson) if full_bypass else None
         try:
@@ -282,6 +293,7 @@ def lesson_action(request, offering_id, lesson_id):
                     instructor=instructor,
                     room=room,
                     lab_group=lab_group,
+                    seminar_group=seminar_group,
                     allow_past=override,
                     # Pəncərə açıqdır (yuxarıda yoxlanıb) — kilid keçidi lazım deyil; data bərpası öz yolu ilə.
                     allow_locked=False,

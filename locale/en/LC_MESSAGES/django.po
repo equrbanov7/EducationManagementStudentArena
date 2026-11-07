@@ -114958,6 +114958,75 @@ msgctxt "registrar.lab_groups"
 msgid "Əvvəlki laboratoriya qrupunun dərsi — qeyd saxlanılıb"
 msgstr "Previous lab group's lesson — the record is kept"
 
+#, python-format
+msgctxt "registrar.seminar_groups"
+msgid "Seminar-%(n)s"
+msgstr "Seminar group %(n)s"
+
+msgctxt "registrar.seminar_groups"
+msgid "Seminar alt qrupu düzgün seçilməyib."
+msgstr "The seminar subgroup is not valid."
+
+msgctxt "registrar.seminar_groups"
+msgid "Seminar alt qrupu yalnız seminar dərsinə aiddir."
+msgstr "A seminar subgroup applies only to a seminar lesson."
+
+msgctxt "registrar.seminar_groups"
+msgid "Bu jurnalda belə seminar alt qrupu yoxdur."
+msgstr "This journal has no such seminar subgroup."
+
+msgctxt "registrar.seminar_groups"
+msgid "Bu dərsdə başqa alt qrupun tələbələrinə qeyd yazılıb — alt qrupu dəyişmək olmaz."
+msgstr "This lesson has entries for another subgroup's students — the subgroup cannot be changed."
+
+msgctxt "registrar.seminar_groups"
+msgid "Bu seminar dərsi yalnız bu alt qrupun tələbələrinindir"
+msgstr "This seminar lesson belongs only to this subgroup's students"
+
+msgctxt "registrar.seminar_groups"
+msgid "Seminar alt qrupu"
+msgstr "Seminar subgroup"
+
+msgctxt "registrar.seminar_groups"
+msgid "Başqa seminar alt qrupunun dərsi"
+msgstr "Another seminar subgroup's lesson"
+
+msgctxt "registrar.seminar_groups"
+msgid "SEMİNAR ALT QRUPU"
+msgstr "SEMINAR SUBGROUP"
+
+msgctxt "registrar.seminar_groups"
+msgid "Bütün qrup"
+msgstr "Whole group"
+
+msgctxt "registrar.seminar_groups"
+msgid "Alt qrup seçilsə dərs yalnız onun tələbələrinə yazılır; mühazirə bütün qrupladır."
+msgstr "If a subgroup is chosen, the lesson is recorded only for its students; lectures are for the whole group."
+
+msgctxt "registrar.model.seminar_group.meta"
+msgid "seminar alt qrupu"
+msgstr "seminar subgroup"
+
+msgctxt "registrar.model.seminar_group.meta"
+msgid "seminar alt qrupları"
+msgstr "seminar subgroups"
+
+msgctxt "registrar.journal_sections"
+msgid "Hamısı"
+msgstr "All"
+
+msgctxt "registrar.journal_sections"
+msgid "Mühazirə"
+msgstr "Lecture"
+
+msgctxt "registrar.journal_sections"
+msgid "Seminar"
+msgstr "Seminars"
+
+msgctxt "registrar.journal_sections"
+msgid "Jurnal bölmələri"
+msgstr "Journal sections"
+
 msgctxt "accounts.syllabus"
 msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
 msgstr "Both the primary and the additional literature fields must be filled in. You can write the sources in any form — one per line, separated by commas or on a single line."
