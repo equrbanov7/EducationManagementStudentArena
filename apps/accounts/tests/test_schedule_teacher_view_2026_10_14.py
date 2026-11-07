@@ -9,8 +9,8 @@ Nəyi qoruyur
 * müəllim görünüşü `schedule.manage` daşıyana REDAKTORDUR (yalnız-oxu banneri yoxdur, dialoqda
   «Qrup» sahəsi var); müəllimin ƏHATƏDƏN KƏNAR dərsi detal kartıdır (`data-sgx-slot`);
 * `schedule.view` daşıyanda bölmə yalnız-oxudur, kart klikində detal modalı render olunur;
-* toqquşma siyasəti: müəllim/auditoriya → `force` + səbəb (parklanır, audit səbəblə); QRUP →
-  heç vaxt məcburi deyil (409 `group_conflict`); əhatədən KƏNAR toqquşma → minimal açıqlama
+* toqquşma siyasəti: müəllim/qrup/auditoriya → `force` + səbəb (parklanır, audit səbəblə; qrup toqquşması
+  sahib 2026-11-07-dən məcburi keçilir); əhatədən KƏNAR toqquşma → minimal açıqlama
   («fənn · qrup»), `force_allowed=False`, məcburi cəhd 403;
 * üst/alt həftə toqquşmur; EYNİ açılışın paralel laboratoriyası (fərqli müəllim) qrup toqquşması deyil;
 * sürüklə-buraxın quru yoxlaması (`check_move`) heç nə yazmır.
@@ -151,7 +151,8 @@ class ConflictPolicyTest(TeacherViewBase):
         payload.update(extra)
         return self._act(user or self.coordinator, payload)
 
-    def test_group_clash_is_refused_even_with_force(self):
+    def test_group_clash_is_forced_with_reason_and_parks_the_other_lesson(self):
+        # Sahib 2026-11-07: qrup tərəfdə də xana dolu olsa, səbəb yazaraq məcburi keçmək olar.
         with bypass_rls():
             other_subject = Subject.objects.create(organization=self.org, code="MAT1", name="Riyaziyyat")
             other = services.get_or_create_offering(
@@ -159,17 +160,20 @@ class ConflictPolicyTest(TeacherViewBase):
             )
         blocker = self._lecture(other, kind="seminar")
         mover = self._lecture(self.offering, weekday=2)
-        response = self._move(mover, force="1", reason="Dekanlığın sərəncamı ilə məcburi köçürmə")
-        self.assertEqual(response.status_code, 409)
-        body = response.json()
-        self.assertEqual(body["error"], "group_conflict")
+        refused = self._move(mover)
+        self.assertEqual(refused.status_code, 409)
+        body = refused.json()
+        self.assertEqual(body["error"], "conflict")
         self.assertEqual(body["conflicts"][0]["kind"], "group")
-        self.assertFalse(body["conflicts"][0]["can_force"])
+        self.assertTrue(body["conflicts"][0]["can_force"])
+        self.assertEqual(self._move(mover, force="1", reason="qısa").status_code, 400)
+        forced = self._move(mover, force="1", reason="Dekanlığın sərəncamı ilə məcburi köçürmə")
+        self.assertEqual(forced.status_code, 200, forced.content)
         with bypass_rls():
             blocker.refresh_from_db()
             mover.refresh_from_db()
-        self.assertFalse(blocker.is_parked)
-        self.assertEqual(mover.weekday, 2)
+        self.assertTrue(blocker.is_parked)
+        self.assertEqual(mover.weekday, 1)
 
     def test_teacher_clash_needs_confirmation_and_is_audited(self):
         blocker = self._lecture(self.offering_b, kind="seminar")
