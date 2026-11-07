@@ -213,7 +213,7 @@ def get_offering_journal(
     from . import lab_groups  # laboratoriya qrupu (sahib 2026-11-06): qruplu lab dərsi yalnız öz qrupunun
 
     lab_groups.prime(offering, enrollments)
-    from . import journal_sections, seminar_groups  # seminar alt qrupu (sahib 2026-11-07)
+    from . import seminar_groups  # seminar alt qrupu (sahib 2026-11-07)
 
     seminar_groups.prime(offering, enrollments)
     # Giriş balının komponent/bal/sərbəst-iş oxumaları BİR dəfə (sətir-sətir
@@ -451,7 +451,6 @@ def get_offering_journal(
         ),
         "level_policy": level_policy,
         "has_lab_groups": has_lab_groups,
-        "journal_sections": journal_sections.for_offering(offering),  # Mühazirə / 234 K1 / Lab-1 (sahib 2026-11-07)
         "entry_score_max": scheme.entry_score_max,
         # Dərs pəncərəsi (P1-8) — şablondakı naviqasiya zolağı üçün.
         "lesson_window": journal_window.window_meta(

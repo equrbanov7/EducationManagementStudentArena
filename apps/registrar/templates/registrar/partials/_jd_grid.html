@@ -80,12 +80,6 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                 <a class="jd2-lwnav__all" href="?{{ journal_nav_query }}{% if journal_nav_query %}&amp;{% endif %}lw=20">{% trans "Son 20 dərs" context "registrar.journal" %}</a>
             </nav>
             {% endif %}
-            {% if journal.journal_sections %}
-            {# Bölmələr (sahib 2026-11-07): «Mühazirə · 234 K», «234 K1 · Seminar», «234 K1 · Lab-1» — yalnız görünüş, journal_sections.js. #}
-            <div class="jd2-sections" role="group" aria-label="{% trans 'Jurnal bölmələri' context 'registrar.journal_sections' %}">
-                {% for sec in journal.journal_sections %}<button type="button" class="jd2-sections__btn{% if forloop.first %} is-active{% endif %}" data-jd-section data-kind="{{ sec.kind }}" data-group="{{ sec.group }}" aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}">{{ sec.label }}</button>{% endfor %}
-            </div>
-            {% endif %}
             <div class="journal-grid-wrap jd-grid-wrap jd2-grid-wrap" data-journal-grid>
                 <table class="jd2-table" data-jd-hint>
                     <thead>
@@ -94,7 +88,6 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                             {% for lm in journal.lesson_meta %}
                             <th class="jd2-th-lesson {% if lm.is_today %}is-today{% endif %}{% if not lm.editable %} jd2-th-lesson--locked{% endif %}{% if lm.lesson.off_schedule_reason %} is-offsched{% endif %}"
                                 id="jd-lesson-{{ lm.lesson.id }}"
-                                data-jd-col="{{ lm.lesson.id }}" data-jd-col-kind="{{ lm.lesson.kind }}" data-jd-col-sem="{{ lm.lesson.seminar_group|default:'' }}" data-jd-col-lab="{{ lm.lesson.lab_group|default:'' }}"
                                 data-jd-hint-col="{{ lm.lesson.date|date:'d.m.Y' }} · {{ lm.lesson.get_kind_display }}"
                                 title="{{ lm.lesson.get_kind_display }}{% if lm.lesson.display_topic %} — {{ lm.lesson.display_topic }}{% endif %}{% if lm.lesson.start_time %} · {{ lm.lesson.start_time|time:'H:i' }}{% endif %}{% if lm.lesson.off_schedule_reason %} · {% trans 'cədvəldən kənar' context 'registrar.journal_activation' %}: {{ lm.lesson.off_schedule_reason }}{% endif %}">
                                 {% if not lm.editable %}
@@ -155,7 +148,7 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                         {% if row.is_guest %}{% ifchanged row.is_guest %}{# Sahib 2026-11-04: alt qrup tələbələri ayrıca, ən aşağıda #}
                         <tr class="jd2-guest-divider" data-jd-guest-divider><td class="jd2-guest-divider__cell" colspan="{{ journal.lesson_meta|length|add:2 }}"><i class="fas fa-people-arrows" aria-hidden="true"></i> {% trans "Alt qrup tələbələri" context "registrar.guest_roster" %}</td></tr>
                         {% endifchanged %}{% endif %}
-                        <tr class="jd2-row {% if row.barred %}is-barred{% elif row.warning %}is-warning{% endif %}{% if row.is_guest %} is-guest{% endif %}" data-jd-enrollment="{{ row.enrollment.id }}" data-jd-row-sem="{{ row.enrollment.seminar_group|default:'' }}" data-jd-row-lab="{{ row.enrollment.lab_group|default:'' }}">
+                        <tr class="jd2-row {% if row.barred %}is-barred{% elif row.warning %}is-warning{% endif %}{% if row.is_guest %} is-guest{% endif %}" data-jd-enrollment="{{ row.enrollment.id }}">
                             <td class="jd2-td-student">
                                 <div class="jd2-stu-inner">
                                     <span class="jd2-stu-no">{{ forloop.counter }}</span>
@@ -211,7 +204,7 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                                 </div>
                             </td>
                             {% for cell in row.cells %}
-                            <td data-jd-col="{{ cell.lesson.id }}" class="jd2-cell {% if cell.lesson.date == journal.today %}is-today{% endif %}{% if cell.corrected %} corr-fixed{% endif %}{% if cell.legacy_excuse %} corr-excuse{% endif %}{% if cell.off_group %} jd2-cell--offgroup{% endif %}">
+                            <td class="jd2-cell {% if cell.lesson.date == journal.today %}is-today{% endif %}{% if cell.corrected %} corr-fixed{% endif %}{% if cell.legacy_excuse %} corr-excuse{% endif %}{% if cell.off_group %} jd2-cell--offgroup{% endif %}">
                                 {% if cell.off_group and cell.mark %}
                                 {# Tələbə başqa lab qrupuna köçürülüb (sahib 2026-11-07) — əvvəlki qrupun dərsindəki qeyd qalır, oxunur. #}
                                 {% trans 'Əvvəlki laboratoriya qrupunun dərsi — qeyd saxlanılıb' context 'registrar.lab_groups' as prev_title %}
