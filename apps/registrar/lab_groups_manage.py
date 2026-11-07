@@ -11,9 +11,10 @@ QAYDALAR:
 * **Yaratmaq** — ən kiçik boş nömrə (1..9; dərsə bağlı nömrə də «məşğul» sayılır ki, köhnə dərs təsadüfən yeni
   qrupa keçməsin); ad istəyə bağlıdır.
 * **Ad** — ≤ 40 simvol, boş = «Lab-N»; başqa qrupun adı ilə eyni ola bilməz (qridda iki eyni nişan olmasın).
-* **Yerləşdirmək / köçürmək / qrupsuz etmək** — yalnız jurnalın AKTİV tələbələri. Tələbənin ÖZ qrupunun dərslərində
-  (``Lesson.lab_group`` = tələbənin qrupu) qeydi varsa o tələbə köçürülmür: köhnə qeydlər başqa qrupun bağlı «·»
-  xanasına çevrilərdi, qayıb saatı isə yenə sayılardı (dərsin qrupu ilə eyni qayda — ``gradebook_lessons``).
+* **Yerləşdirmək / köçürmək / qrupsuz etmək** — yalnız jurnalın AKTİV tələbələri; qeydi olan tələbə də köçürülür
+  (sahib 2026-11-07: «tələbəni sürüşdürüb bir lab qrupundan digərinə keçirə bilim»). Köhnə qrupun dərslərindəki
+  qeydlər SİLİNMİR: qayıb saatı / bal onsuz da tələbənin öz xanalarından yığılır, jurnal həmin xanaları oxunan
+  (yazılmayan) «əvvəlki qrup» xanası kimi göstərir (``gradebook.get_journal``); yeni qrupun dərsləri yazılır.
 * **Silmək** — yalnız qrupa heç bir dərs bağlı deyilsə; üzvlər qrupsuz qalır; təsdiq (``confirm=1``) məcburidir.
 * Siyahı qapısı alt qrup əməli ilə EYNİDİR (:func:`guest_roster.roster_block_reason`): bağlı jurnalda və keçmiş
   dövrdə tərkib dəyişmir.
@@ -29,7 +30,7 @@ from __future__ import annotations
 import re
 
 from django.db import transaction
-from django.db.models import Count, F
+from django.db.models import Count
 from django.utils import timezone
 from django.utils.translation import pgettext
 
@@ -37,7 +38,7 @@ from core.audit import log_action, log_actions
 from core.constants import AuditAction
 
 from . import lab_groups
-from .models import LAB_GROUP_NAME_MAX_LENGTH, CourseOffering, Enrollment, LabGroup, Lesson, LessonKind, LessonMark
+from .models import LAB_GROUP_NAME_MAX_LENGTH, CourseOffering, Enrollment, LabGroup, Lesson, LessonKind
 
 _CTX = "registrar.lab_groups"
 RESOURCE = "registrar.lab_groups"
@@ -118,20 +119,6 @@ def _roster(offering) -> list:
     )
 
 
-def _locked_enrollment_ids(offering) -> set:
-    """Öz qrupunun dərslərində qeydi olan aktiv qeydiyyatlar (köçürülmür) — bir sorğu."""
-    return set(
-        LessonMark.objects.filter(
-            lesson__offering_id=offering.pk,
-            lesson__lab_group__isnull=False,
-            lesson__lab_group=F("enrollment__lab_group"),
-            enrollment__status=Enrollment.Status.ENROLLED,
-        )
-        .values_list("enrollment_id", flat=True)
-        .distinct()
-    )
-
-
 def panel(offering) -> dict:
     """Ekranın datası: qruplar (ad, üzvlər, bağlı dərs sayı) + qrupsuz tələbələr."""
     lab_groups.forget(offering)
@@ -144,8 +131,7 @@ def panel(offering) -> dict:
         .annotate(total=Count("id"))
         .values_list("lab_group", "total")
     )
-    locked = _locked_enrollment_ids(offering)
-    rows = [{"enrollment": row, "student": row.student, "locked": row.pk in locked} for row in _roster(offering)]
+    rows = [{"enrollment": row, "student": row.student} for row in _roster(offering)]
     groups = []
     for number in numbers:
         members = [row for row in rows if row["enrollment"].lab_group == number]
@@ -307,7 +293,7 @@ def rename_group(*, offering, number, name, actor, request=None) -> bool:
 
 
 def assign(*, offering, enrollment_ids, target, actor, request=None) -> dict:
-    """Tələbələri ``target`` qrupuna yerləşdir (``None`` = qrupsuz). Qaytarır: ``moved`` / ``locked`` / ``unchanged``."""
+    """Tələbələri ``target`` qrupuna yerləşdir (``None`` = qrupsuz). Qaytarır: ``moved`` / ``unchanged``."""
     ids = list(dict.fromkeys(enrollment_ids))
     if not ids:
         raise LabGroupManageError("empty", pgettext(_CTX, "Tələbə seçilməyib."))
@@ -327,14 +313,11 @@ def assign(*, offering, enrollment_ids, target, actor, request=None) -> dict:
         )
         if len(rows) != len(ids):
             raise LabGroupManageError("not_found", pgettext(_CTX, "Seçilən tələbələrdən biri bu jurnalda deyil."))
-        locked = _locked_enrollment_ids(offering)
         now = timezone.now()
-        changed, counts = [], {"moved": 0, "locked": 0, "unchanged": 0}
+        changed, counts = [], {"moved": 0, "unchanged": 0}
         for row in rows:
             if row.lab_group == target:
                 counts["unchanged"] += 1
-            elif row.pk in locked:
-                counts["locked"] += 1
             else:
                 changed.append((row, row.lab_group))
                 row.lab_group, row.updated_at = target, now

@@ -124,8 +124,11 @@ class JournalRulesTest(_IntensiveBase):
     def test_lesson_date_must_be_inside_course_range(self):
         self.assertEqual(intensive.lesson_date_error(self.offering, datetime.date(2025, 10, 5)), "")
         self.assertIn("aralığında", intensive.lesson_date_error(self.offering, datetime.date(2025, 10, 11)))
+        # Erkən başlamaq olar (sahib 2026-11-07): ``starts_on`` (01.10) plandır, alt hədd semestrin başlanğıcıdır.
+        self.assertEqual(intensive.lesson_date_error(self.offering, datetime.date(2025, 9, 30)), "")
+        gradebook_lessons.ensure_date_within_period(self.offering, datetime.date(2025, 9, 1))
         with self.assertRaises(gradebook_lessons.LessonRuleError):
-            gradebook_lessons.ensure_date_within_period(self.offering, datetime.date(2025, 9, 30))
+            gradebook_lessons.ensure_date_within_period(self.offering, datetime.date(2025, 8, 31))
         # Adi açılışa təsir yoxdur.
         self.assertEqual(intensive.lesson_date_error(self.other_offering, datetime.date(2025, 12, 1)), "")
 

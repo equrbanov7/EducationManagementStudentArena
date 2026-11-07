@@ -38,7 +38,7 @@ _CTX = "registrar.lab_groups"
 SECTION = "lab-groups"
 #: «Qrupsuz et» seçiminin dəyəri (POST ``target``).
 UNASSIGN = "none"
-SUCCESS, INFO, WARNING = "success", "info", "warning"
+SUCCESS, INFO = "success", "info"
 
 
 def section_url(offering=None) -> str:
@@ -93,12 +93,6 @@ def _assign(request, offering) -> list:
         where = lab_groups.label(target, offering) if target else pgettext(_CTX, "Qrupsuz")
         message = pgettext(_CTX, "%(n)s tələbə yerləşdirildi: %(group)s.")
         result.append((SUCCESS, message % {"n": counts["moved"], "group": where}))
-    if counts["locked"]:
-        message = pgettext(
-            _CTX,
-            "%(n)s tələbənin öz qrupunun dərslərində qeydi var — onlar köçürülmədi (qeydlər itməsin deyə).",
-        )
-        result.append((WARNING, message % {"n": counts["locked"]}))
     if not result:
         result.append((INFO, pgettext(_CTX, "Seçilən tələbələr artıq bu qrupdadır.")))
     return result
