@@ -3,10 +3,11 @@
 Sahib: «alt qrupa keçirmək heç bir jurnalda nəyisə gizlətməli deyil … heç bir tələbənin nəticəsi, jurnal qeydləri
 itməməlidir, müəllim jurnalını açanda nə yazıbsa onu da görsün». Köçürmə xidməti (:mod:`.transfer`) tələbə öz
 qrupunun alt qrupuna keçəndə ana qrupun jurnalındakı sətri ``dropped`` + ``superseded_by`` edirdi — dərsləri və
-qeydləri olan jurnal müəllimə «tələbəsiz» görünürdü (536 MU «Xətti cəbr»: 31 → 8). Kod düzəldi; bu modul əvvəlki
-keçidlərin izini geri qaytarır:
+qeydləri olan jurnal müəllimə «tələbəsiz» görünürdü (536 MU «Xətti cəbr»: 31 → 8). Köçürmə xidmətinin özü
+DƏYİŞMİR (köhnə TSPX / Si-135 / 536 bərpa alətləri həmin qaydaya bağlıdır — sahib: «qarışacaqsa etməyək»); bu modul
+YALNIZ 2026-11-07 tarixli 536 MU / 536 Bİ alt qrup keçidlərinin izini geri qaytarır:
 
-* namizəd — ``dropped`` sətir, varisi AKTİVDİR və varisin qrupu sətrin qrupunun qeydiyyatlı alt qrupudur
+* namizəd — ana qrup :data:`PARENT_GROUPS`-dadır, sətir :data:`SINCE`-dən sonra tarixçəyə düşüb, ``dropped`` sətir, varisi AKTİVDİR və varisin qrupu sətrin qrupunun qeydiyyatlı alt qrupudur
   (``settings.parent_group``), tələbənin cari qrupu varisin qrupudur, ana jurnalda dərs var;
 * sətir yenidən ``enrolled`` olur (qeydləri olduğu kimi); varisin qeydi yoxdursa o tarixçəyə keçir
   (``superseded_by`` = bərpa olunan sətir — köçürmənin tərsi ilə eyni forma), qeydi varsa ikisi də aktiv qalır
@@ -17,7 +18,7 @@ Silmə yoxdur. İdempotentdir (bərpa olunmuş sətir namizəd deyil). Geri qayt
 
 from __future__ import annotations
 
-from collections import Counter
+import datetime
 
 from django.apps import apps as django_apps
 
@@ -26,6 +27,9 @@ from core.constants import AuditAction
 
 REASON = "Sahib 2026-11-07: alt qrupa keçid ana jurnaldakı qeydləri gizlətməməlidir — sətir bərpası"
 RESOURCE = "registrar.subgroup_parent_restore"
+#: 536 MU, 536 Bİ (ana qruplar) — sahibin 2026-11-07 köçürmələri yalnız bunlardadır.
+PARENT_GROUPS = ("34c8a15b-a491-4374-94e7-e71f1116b82c", "b7bc07b8-c91f-47fb-bd38-f712ae99c1db")
+SINCE = datetime.date(2026, 11, 7)
 DATA_MODELS = ("LessonMark", "ComponentScore", "CriterionScore", "FinalGrade", "ResitRecord", "CourseWork")
 
 
@@ -52,7 +56,8 @@ def candidates(organization):
             status=Enrollment.Status.DROPPED,
             superseded_by__isnull=False,
             superseded_by__status=Enrollment.Status.ENROLLED,
-            offering__group__isnull=False,
+            offering__group_id__in=PARENT_GROUPS,
+            updated_at__date__gte=SINCE,
         )
         .select_related("offering__group", "superseded_by__offering__group")
     )
@@ -104,16 +109,6 @@ def restore_pair(row, successor, *, actor, organization, counts) -> None:
     )
 
 
-def keep_parent_journals(pairs, *, actor, organization) -> Counter:
-    """Köçürmə xidmətinin alt qrup keçidi: dərsli ana jurnal sətirləri dərhal geri aktivləşir."""
-    counts = Counter()
-    for row, successor in pairs:
-        if parent_journal_in_use(row):
-            row.refresh_from_db(fields=["status", "superseded_by"])
-            restore_pair(row, successor, actor=actor, organization=organization, counts=counts)
-    return counts
-
-
 def run(*, organization, actor, counts) -> None:
     pairs = list(candidates(organization))
     counts["candidates"] += len(pairs)  # boş qaçışda da say sətri çıxsın (prod-data-ops süzgəci)
@@ -121,4 +116,4 @@ def run(*, organization, actor, counts) -> None:
         restore_pair(row, successor, actor=actor, organization=organization, counts=counts)
 
 
-__all__ = ["REASON", "candidates", "keep_parent_journals", "parent_journal_in_use", "restore_pair", "run"]
+__all__ = ["REASON", "candidates", "parent_journal_in_use", "restore_pair", "run"]

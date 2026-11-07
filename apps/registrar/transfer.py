@@ -7,12 +7,6 @@ successors; their journal, final-grade and correction provenance remains
 queryable as history and is excluded from normal grade-write services.
 All-specialty offerings (``group=None``) are left untouched.  Audit is
 fail-closed inside the same database transaction.
-
-Alt qrupa keçid (sahib 2026-11-07: «ana qrup seçiləndə alt qrup seçilmiş olur … heç bir jurnal qeydi itməsin,
-müəllim jurnalını açanda nə yazıbsa onu da görsün»): tələbə öz qrupunun qeydiyyatlı alt qrupuna keçəndə ana qrupun
-İŞLƏNƏN jurnalındakı (dərsi olan) sətir AKTİV qalır. DB qapısı köçürmənin TAM siyahısını tələb etdiyi üçün sətir əvvəl
-adi qaydada köçür, sonra eyni tranzaksiyada geri aktivləşir və qeydsiz varis tarixçəyə keçir (son köçürmənin tərsi ilə
-eyni forma — :mod:`.subgroup_parent_restore_2026_11_07`). Dərssiz ana jurnal əvvəlki kimi alt qrupun jurnalına keçir.
 """
 
 from __future__ import annotations
@@ -259,10 +253,6 @@ def transfer_student_group(*, record, new_group, period, by_user=None, reason=""
     # 2026-09-14 (W5 `w5left`, tapşırıq 3): qrup yazısı DB funksiyası ilə gedir
     # (`post_save` yoxdur) → törəmə artefaktlar (imtahan PIN-ləri, `exams`)
     # bu siqnalla xəbər tutur; abunəçi `on_commit`-də işləyir.
-    if inherit_from_parent:
-        from .subgroup_parent_restore_2026_11_07 import keep_parent_journals
-
-        keep_parent_journals(zip(old_enrollments, successors), actor=by_user, organization=record.organization)
     student_group_changed.send(
         sender=StudentAcademicRecord,
         record=record,

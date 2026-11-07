@@ -1,7 +1,6 @@
 """Sahib 2026-11-07: alt qrupa keçid ana qrupun jurnalındakı heç nəyi gizlətməməlidir.
 
-* tələbə öz qrupunun qeydiyyatlı alt qrupuna keçəndə ana qrupun DƏRSLİ jurnalındakı sətri aktiv qalır (qeydləri ilə);
-  dərssiz ana jurnal əvvəlki kimi alt qrupun jurnalına keçir;
+* köçürmə xidməti DƏYİŞMİR (köhnə bərpa alətləri ona bağlıdır);
 * ``restore_subgroup_parent_enrollments``: köhnə qaydanın tarixçəyə atdığı sətir bərpa olunur (qeydləri olduğu kimi),
   qeydsiz varis tarixçəyə keçir, qeydli varis də aktiv qalır; defolt dry-run, idempotent, stdout-da yalnız saylar.
 """
@@ -13,6 +12,7 @@ from django.core.management import call_command
 from django.utils import timezone
 
 from apps.organizations.models import OrgUnit
+from apps.registrar import subgroup_parent_restore_2026_11_07 as restore
 from apps.registrar import transfer
 from apps.registrar.models import Enrollment, Lesson, LessonMark
 from apps.registrar.tests.test_audit_2026_09_28_b2_lifecycle import _LifecycleBase
@@ -48,39 +48,18 @@ class _SubgroupBase(_LifecycleBase):
             return Enrollment.objects.get(pk=enrollment.pk)
 
 
-class SubgroupTransferKeepsParentJournalTest(_SubgroupBase):
-    def test_parent_journal_with_lessons_keeps_the_student(self):
-        self._lesson_with_mark(self.current)
-        self._transfer()
-        row = self._get(self.current)
-        self.assertEqual((row.status, row.superseded_by_id), (Enrollment.Status.ENROLLED, None))
-        with bypass_rls():
-            self.assertTrue(LessonMark.objects.filter(enrollment=row).exists())
-            self.assertFalse(
-                Enrollment.objects.filter(
-                    student=self.student, offering__group=self.group2, status=Enrollment.Status.ENROLLED
-                ).exists()
-            )
-
-    def test_parent_journal_without_lessons_moves_as_before(self):
-        self._transfer()
-        row = self._get(self.current)
-        self.assertEqual(row.status, Enrollment.Status.DROPPED)
-        self.assertEqual(row.superseded_by.offering.group_id, self.group2.pk)
-
-    def test_plain_transfer_to_another_group_still_moves(self):
-        with bypass_rls():
-            OrgUnit.objects.filter(pk=self.group2.pk).update(settings={})
-            self.group2.refresh_from_db()
-        self._lesson_with_mark(self.current)
-        self._transfer()
-        self.assertEqual(self._get(self.current).status, Enrollment.Status.DROPPED)
-
-
 class RestoreSubgroupParentEnrollmentsTest(_SubgroupBase):
+    def setUp(self):
+        super().setUp()
+        patch = mock.patch.object(restore, "PARENT_GROUPS", (str(self.group1.pk),))
+        patch.start()
+        self.addCleanup(patch.stop)
+        patch_since = mock.patch.object(restore, "SINCE", timezone.localdate())
+        patch_since.start()
+        self.addCleanup(patch_since.stop)
+
     def _old_rule_transfer(self):
-        with mock.patch("apps.registrar.subgroup_parent_restore_2026_11_07.parent_journal_in_use", return_value=False):
-            self._transfer()
+        self._transfer()
         return self._get(self.current).superseded_by
 
     def _call(self, *extra):
@@ -125,6 +104,13 @@ class RestoreSubgroupParentEnrollmentsTest(_SubgroupBase):
     def test_parent_journal_without_lessons_is_not_restored(self):
         self._old_rule_transfer()
         self.assertEqual(self._call("--apply"), {"candidates": "0"})
+        self.assertEqual(self._get(self.current).status, Enrollment.Status.DROPPED)
+
+    def test_other_parent_groups_are_out_of_scope(self):
+        self._lesson_with_mark(self.current)
+        self._old_rule_transfer()
+        with mock.patch.object(restore, "PARENT_GROUPS", ("00000000-0000-0000-0000-000000000000",)):
+            self.assertEqual(self._call("--apply"), {"candidates": "0"})
         self.assertEqual(self._get(self.current).status, Enrollment.Status.DROPPED)
 
     def test_workflow_wiring(self):
