@@ -58,10 +58,20 @@ class LegacySyllabiWorkflowTests(SimpleTestCase):
 
     def test_repo_plan_is_pinned_and_has_no_personal_sections(self):
         plan = plan_module.load()
-        self.assertEqual(len(plan["targets"]), 24)
+        self.assertEqual(len(plan["targets"]), 25)
         for source in plan["sources"].values():
             info = source["sections"]["info"]
             self.assertEqual({k: info[k] for k in plan_module.PERSONAL_INFO}, plan_module.PERSONAL_INFO)
             self.assertEqual(source["sections"]["assess"]["exam_questions"], [])
         restores = [t for t in plan["targets"] if t["action"] == "restore"]
-        self.assertTrue(all(plan_module.plan_of(plan["sources"][t["source"]]["hours"]) == t["plan"] for t in restores))
+        for target in restores:
+            hours = plan_module.plan_of(plan["sources"][target["source"]]["hours"])
+            if target.get("week_gap_ok"):
+                # 235 EM Tətbiqi riyaziyyat (sahib 2026-11-09): köhnə S15 → rəsmi S30, mövzular mənbədən.
+                self.assertEqual(set(hours), set(target["plan"]))
+                self.assertTrue(all(hours[k] <= target["plan"][k] for k in hours))
+            else:
+                self.assertEqual(hours, target["plan"])
+        gap = next(t for t in restores if t["key"] == "em235tr")
+        self.assertEqual((gap["plan"], gap["lesson_hours"], gap["teacher"]), ({"lecture": 30, "seminar": 30}, 60, 8114))
+        self.assertEqual(plan["sources"]["3953"]["hours"], {"lecture": 30, "seminar": 15})

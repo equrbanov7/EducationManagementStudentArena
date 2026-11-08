@@ -115153,6 +115153,14 @@ msgctxt "organizations.self_conflict"
 msgid "Siz bu təşkilatda həm də tələbəsiniz: işçi rolu ilə özünüzə, öz qrupunuza və öz jurnallarınıza aid əməliyyat apara bilməzsiniz."
 msgstr "You are also a student in this organization: with a staff role you cannot act on yourself, your own group or your own journals."
 
+msgctxt "registrar.journal"
+msgid "Bu növ başqa müəllimin payıdır — yalnız məlumat üçün"
+msgstr "This lesson type belongs to another teacher's share — for information only"
+
+msgctxt "registrar.journal"
+msgid "müəllim təyin olunmayıb"
+msgstr "no teacher assigned"
+
 msgctxt "accounts.syllabus"
 msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
 msgstr "Both the primary and the additional literature fields must be filled in. You can write the sources in any form — one per line, separated by commas or on a single line."

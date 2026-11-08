@@ -285,7 +285,7 @@ class MexanikaLessonsFixTest(_LabWorld, TestCase):
         self.assertLessEqual(keys, allowed)
         self.assertEqual((len(data["kind_changes"]), len(data["moves"][0]["lessons"])), (5, 6))
         counts = self._call()
-        self.assertEqual((counts["missing"], counts["kind_offering_missing"]), ("6", "5"))
+        self.assertEqual((counts["missing"], counts["kind_offering_missing"]), ("7", "5"))
 
     def test_duplicate_lesson_removed_only_when_twin_has_same_cells_and_undo(self):
         with bypass_rls():
