@@ -118,6 +118,7 @@ INTENTIONAL_EXEMPTIONS = {
     # 2026-11-08 təsdiqlənmiş sillabusun daşınması: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/carry_approved_syllabi_20261108.py",
     "apps/registrar/management/commands/merge_subgroup_journals_20261108.py",
+    "apps/registrar/management/commands/resolve_subgroup_families_20261108.py",
     "apps/registrar/management/commands/fill_legacy_cells_20261108.py",
     "apps/registrar/management/commands/fix_mexanika_lessons_20261108.py",
     # 2026-11-06 RİM MR-000230 (236 İT dərs bərpası): eyni `relocate_twin_enrollment.run_plan` gövdəsi.
