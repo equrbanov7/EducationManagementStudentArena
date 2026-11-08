@@ -115341,3 +115341,7 @@ msgstr "Не удалось выполнить операцию."
 msgctxt "syllabus.model"
 msgid "Təsdiqlənmiş sillabus başqa qrupdan (avtomatik)"
 msgstr "Утверждённый силлабус из другой группы (автоматически)"
+
+msgctxt "organizations.self_conflict"
+msgid "Siz bu təşkilatda həm də tələbəsiniz: işçi rolu ilə özünüzə, öz qrupunuza və öz jurnallarınıza aid əməliyyat apara bilməzsiniz."
+msgstr "Вы также являетесь студентом этой организации: со служебной ролью нельзя выполнять действия в отношении себя, своей группы и своих журналов."

@@ -31,7 +31,7 @@ from django.db.models import Count, Exists, OuterRef
 from django.urls import reverse
 from django.utils.translation import pgettext_lazy
 
-from ..rim.policy import RimAccessError
+from ..rim.policy import RimAccessError, assert_no_self_conflict
 from .actions import assert_in_catalog_scope, load_target
 from .permissions import PERM_MANAGE_ACADEMIC
 from .rows import identity_row, resolve_unit_ancestors
@@ -96,7 +96,7 @@ def scoped_records_qs(actor, *, request=None):
         return StudentAcademicRecord.objects.none()
 
     records = StudentAcademicRecord.objects.filter(organization=organization)
-    if not scope.is_org_wide:
+    if not scope.is_org_wide or scope.excluded_unit_ids:
         records = records.filter(scope.unit_subtree_q(path_field="group__path", id_field="group_id"))
     return records
 
@@ -119,7 +119,7 @@ def scoped_groups_qs(actor, *, request=None):
         return OrgUnit.objects.none()
 
     groups = OrgUnit.objects.filter(organization=organization, is_active=True, unit_type=OrgUnitType.GROUP)
-    if not scope.is_org_wide:
+    if not scope.is_org_wide or scope.excluded_unit_ids:
         groups = groups.filter(scope.unit_subtree_q())
     return groups
 
@@ -138,6 +138,10 @@ def load_record(actor, record_id, *, request=None):
         raise RimAccessError("record_not_found", "Akademik qeyd tapılmadı.", status=404) from None
     if not record_id:
         raise RimAccessError("record_not_found", "Akademik qeyd tapılmadı.", status=404)
+    # Tələbə + heyət rolu (sahib 2026-11-08): öz / qrup yoldaşının qeydi — 403 + audit (sahədən gizli olsa da).
+    assert_no_self_conflict(
+        actor.user, actor.organization, action="people.academic_record", request=request, record_id=record_id
+    )
     record = (
         scoped_records_qs(actor, request=request)
         .select_related("student", "program", "curriculum", "group", "organization")

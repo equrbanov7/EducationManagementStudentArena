@@ -26,7 +26,7 @@ def teaching_user_ids(actor, *, request=None, filters=None):
     )
     if not scope.has_structure_access:
         return rows.none().values("teacher_id")
-    if not scope.is_org_wide:
+    if not scope.is_org_wide or scope.excluded_unit_ids:
         rows = rows.filter(scope.unit_subtree_q(path_field="row__task__chair__path", id_field="row__task__chair_id"))
     if filters is not None:
         rows = rows.filter(

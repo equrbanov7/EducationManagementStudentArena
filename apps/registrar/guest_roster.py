@@ -147,6 +147,10 @@ def can_manage_offering_roster(user, offering) -> bool:
     organization = offering.organization
     if not can_manage_roster(user, organization):
         return False
+    from .journal_scope import own_offering_conflict
+
+    if own_offering_conflict(user, organization, offering):
+        return False  # tələbə + heyət rolu — öz / öz qrupunun jurnalı (sahib 2026-11-08)
     return unit_in_scope(user, organization, offering.group_id)
 
 
@@ -155,7 +159,7 @@ def unit_in_scope(user, organization, unit_id) -> bool:
     if getattr(user, "is_superuser", False) or getattr(user, "is_superadmin", False):
         return True
     scope = _scope(user, organization)
-    if not scope.has_structure_access:
+    if not scope.has_structure_access or scope.excludes_unit(unit_id):
         return False
     if scope.is_org_wide:
         return True
@@ -183,7 +187,7 @@ def units_in_scope(user, organization, unit_ids):
     if not scope.has_structure_access:
         return set()
     if scope.is_org_wide:
-        return wanted
+        return {unit_id for unit_id in wanted if not scope.excludes_unit(unit_id)}
     from django.apps import apps as django_apps
 
     org_unit_model = django_apps.get_model("organizations", "OrgUnit")
@@ -203,6 +207,20 @@ def scoped_group_queryset(user, organization):
     if not scope.has_structure_access:
         return queryset.none()
     return queryset.filter(scope.unit_subtree_q())
+
+
+def _guard_own(by_user, offering, *, student_id):
+    """Tələbə + heyət rolu (sahib 2026-11-08): öz jurnalı / öz qrupu / özü və qrup yoldaşı — 403 + audit."""
+    from apps.organizations.public import guard_self_conflict
+
+    guard_self_conflict(
+        by_user,
+        offering.organization,
+        action="registrar.guest_roster",
+        offering_id=offering.pk,
+        group_id=offering.group_id,
+        student_id=student_id,
+    )
 
 
 # ── Namizəd tələbələr ────────────────────────────────────────────────────────
@@ -383,6 +401,7 @@ def add_guest_student(*, offering, student, by_user, source_group=None, reason="
 
     require_cohort_placement_surface(offering)
     assert_roster_open(offering)
+    _guard_own(by_user, offering, student_id=getattr(student, "pk", None))
     if release_source:
         reason = guest_merge.validate_reason(reason)
     record = _record_for(offering=offering, student=student, source_group=source_group, lock=True)
@@ -488,6 +507,7 @@ def remove_guest_student(*, offering, enrollment, by_user, reason=""):
         .select_related("student", "source_group")
         .get(pk=enrollment.pk, organization=offering.organization, offering=offering)
     )
+    _guard_own(by_user, offering, student_id=enrollment.student_id)
     if not row_is_guest(enrollment, offering=offering):
         raise ValidationError(
             pgettext(

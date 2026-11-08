@@ -136,7 +136,7 @@ def oversight_covers_student(user, organization, student_id):
         return False
     record_model = django_apps.get_model("registrar", "StudentAcademicRecord")
     records = record_model.objects.filter(organization=organization, student_id=student_id)
-    if not scope.is_org_wide:
+    if not scope.is_org_wide or scope.excluded_unit_ids:
         records = records.filter(scope.unit_subtree_q(path_field="group__path", id_field="group_id"))
     return records.exists()
 

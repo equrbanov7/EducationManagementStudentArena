@@ -116207,3 +116207,7 @@ msgstr "Der Vorgang konnte nicht ausgeführt werden."
 msgctxt "syllabus.model"
 msgid "Təsdiqlənmiş sillabus başqa qrupdan (avtomatik)"
 msgstr "Genehmigter Syllabus aus einer anderen Gruppe (automatisch)"
+
+msgctxt "organizations.self_conflict"
+msgid "Siz bu təşkilatda həm də tələbəsiniz: işçi rolu ilə özünüzə, öz qrupunuza və öz jurnallarınıza aid əməliyyat apara bilməzsiniz."
+msgstr "Sie sind in dieser Organisation auch Studierende(r): Mit einer Mitarbeiterrolle können Sie keine Aktionen an sich selbst, Ihrer eigenen Gruppe oder Ihren eigenen Journalen ausführen."

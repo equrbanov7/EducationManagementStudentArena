@@ -37,7 +37,7 @@ from django.views.decorators.http import require_GET
 
 from core.http_ids import parse_uuid
 
-from .journal_access import can_edit_journal, can_observe_journal, offering_or_404
+from .journal_access import can_correct_offering, can_edit_journal, can_observe_journal, offering_or_404
 
 _CTX = "registrar.journal_history"
 
@@ -149,14 +149,13 @@ def kind_label(kind: str) -> str:
 def _offering_for_history(request, offering_id):
     """Jurnal səhifəsi ilə EYNİ qapı + tələbə ailəsi üçün açıq qadağa (brif: «tələbə görmür»)."""
     offering = offering_or_404(request, offering_id)
-    from . import corrections as corrections_service
     from . import guest_roster, page_contexts
 
     if page_contexts.is_student_family_user(offering.organization, request.user):
         raise Http404
     allowed = (
         can_edit_journal(request.user, offering)
-        or corrections_service.can_correct_journal(request)
+        or can_correct_offering(request, offering)
         or guest_roster.can_manage_offering_roster(request.user, offering)
         or can_observe_journal(request.user, offering)
     )

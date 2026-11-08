@@ -124,7 +124,7 @@ def unit_options(organization, scope, unit_types, selected: str) -> list:
 
     org_unit = django_apps.get_model("organizations", "OrgUnit")
     queryset = org_unit.objects.filter(organization=organization, is_active=True, unit_type__in=unit_types)
-    if not scope.is_org_wide:
+    if not scope.is_org_wide or scope.excluded_unit_ids:
         queryset = queryset.filter(scope.unit_subtree_q())
     options = [_all_option()]
     options += [

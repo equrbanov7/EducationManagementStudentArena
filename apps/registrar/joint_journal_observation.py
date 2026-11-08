@@ -27,7 +27,11 @@ def allowed(joints, actor, *, request=None):
             if not (
                 journal_access.can_edit_journal(actor, offering)
                 or journal_access.can_observe_journal(actor, offering)
-                or (corrector and request_org == offering.organization_id)
+                or (
+                    corrector
+                    and request_org == offering.organization_id
+                    and not journal_access.staff_self_conflict(actor, offering)
+                )
                 or guest_roster.can_manage_offering_roster(actor, offering)
             ):
                 break

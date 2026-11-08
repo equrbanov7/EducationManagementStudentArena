@@ -51,6 +51,19 @@ from .scoping import scope_memberships_by_unit  # noqa: F401
 from .scoping import scope_org_units  # noqa: F401
 from .scoping import unit_in_scope  # noqa: F401
 from .scoping import user_scope_covers_unit  # noqa: F401
+from .self_conflict import EMPTY_OWN_SCOPE  # noqa: F401
+from .self_conflict import REASON_CODE  # noqa: F401
+from .self_conflict import OwnScope  # noqa: F401
+from .self_conflict import SelfConflictDenied  # noqa: F401
+from .self_conflict import build_own_scope  # noqa: F401
+from .self_conflict import deny_self_conflict  # noqa: F401
+from .self_conflict import guard_self_conflict  # noqa: F401
+from .self_conflict import is_mixed_student_staff  # noqa: F401
+from .self_conflict import is_self_conflict  # noqa: F401
+from .self_conflict import offering_self_conflict  # noqa: F401
+from .self_conflict import own_scope  # noqa: F401
+from .self_conflict import register_own_scope_resolver  # noqa: F401
+from .self_conflict import self_conflict_message  # noqa: F401
 from .services import get_active_memberships  # noqa: F401
 from .settings_store import REMOVE as REMOVE_SETTINGS_KEY  # noqa: F401
 from .settings_store import UNCHANGED as UNCHANGED_SETTINGS_KEY  # noqa: F401
@@ -84,7 +97,20 @@ __all__ = [
     "correct_membership_unit",
     "membership_assignment_scope",
     "CABINET_MODULES",
+    "EMPTY_OWN_SCOPE",
+    "REASON_CODE",
     "EMPTY_SCOPE",
+    "OwnScope",
+    "SelfConflictDenied",
+    "guard_self_conflict",
+    "build_own_scope",
+    "deny_self_conflict",
+    "is_mixed_student_staff",
+    "is_self_conflict",
+    "offering_self_conflict",
+    "own_scope",
+    "register_own_scope_resolver",
+    "self_conflict_message",
     "KAFEDRA_UNIT_TYPES",
     "ORG_WIDE_SCOPE",
     "REMOVE_SETTINGS_KEY",
