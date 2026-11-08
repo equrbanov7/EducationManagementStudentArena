@@ -62,6 +62,7 @@ def summarize(offering, *, personal_actor=None, scope=None):
         result["kinds"].sort(key=lambda row: ("lecture", "seminar", "lab").index(row["kind"]))
     if personal_actor is not None:
         result["history"] = _summary(offering, permitted, total=None)
+        result["others"] = _other_shares(offering, plan, lessons) if plan else []
     if personal_actor is not None and not result["held_total"]:
         from .journal_prior_history_badge import available
 
@@ -73,6 +74,48 @@ def summarize(offering, *, personal_actor=None, scope=None):
             enrollment_ids={offering.pk: getattr(scope, "enrollment_ids", None)},
         )
     return result
+
+
+def _other_shares(offering, plan, lessons):
+    """Sahib 2026-11-09: bölünmüş jurnalda mühazirəçi seminarın (və əksinə) KİMƏ təyin olunduğunu görsün.
+
+    Fənnin rəsmi (bir qrup) planında olub bu müəllimin payına düşməyən növlər — yalnız OXU üçün başlıq çipi:
+    növ, qrupun planlı saatı, keçirilmiş saat və pay sahibinin adı (``JournalShare``; pay yoxdursa dərsi
+    aparan müəllim). Cəmlərə (``total`` / ``held_total``) qatılmır — onlar müəllimin öz payıdır.
+    """
+    from .journal_shares import active_shares
+    from .plan_hours import plan_hours_for_offering
+
+    official = {kind: int(hours) for kind, hours in plan_hours_for_offering(offering).items() if int(hours or 0)}
+    missing = [kind for kind in ("lecture", "seminar", "lab") if kind in official and kind not in plan]
+    if not missing:
+        return []
+    today = timezone.localdate()
+    labels = dict(kind_choices(offering))
+    rows = []
+    for kind in missing:
+        names = {}
+        for share in active_shares(offering):
+            if kind in (share.kinds or []) and share.teacher_id and share.teacher:
+                names[share.teacher_id] = share.teacher.get_full_name().strip() or share.teacher.username
+        held = 0
+        for lesson in lessons:
+            if lesson.kind != kind:
+                continue
+            if lesson.date is None or lesson.date <= today:
+                held += int(lesson.hours or 0)
+            if not names and lesson.instructor is not None:
+                names[lesson.instructor_id] = lesson.instructor.get_full_name().strip() or lesson.instructor.username
+        rows.append(
+            {
+                "kind": kind,
+                "label": labels.get(kind, kind),
+                "planned": official[kind],
+                "held": held,
+                "teachers": list(names.values()),
+            }
+        )
+    return rows
 
 
 def _summary(offering, lessons, *, total, per_student=False):

@@ -316,6 +316,30 @@ class LegacySyllabiTests(TestCase):
             call_command("recover_legacy_syllabi_20261107", org="qku", actor="lgsyl_admin", apply=True)
         self.assertFalse(Syllabus.objects.filter(offering=self.offerings["create"]).exists())
 
+    def test_week_gap_restore_takes_official_plan_hours_and_source_topics(self):
+        # Sahib 2026-11-09 (235 EM Tətbiqi riyaziyyat): köhnə sillabus L30+S15, rəsmi plan L30+S30 — yalnız
+        # ``week_gap_ok`` ilə; mövzular artırılmır, plan saatı rəsmi yükdən.
+        plan = copy.deepcopy(self.plan)
+        target = next(t for t in plan["targets"] if t["key"] == "t01")
+        target.update(plan={"lecture": 30, "seminar": 30}, lesson_hours=60)
+        with self.assertRaisesMessage(CommandError, "target_source_mismatch"):
+            self.run_cmd(apply=True, plan=plan)
+        target["week_gap_ok"] = True
+        CourseOffering.objects.filter(pk=self.offerings["create"].pk).update(lesson_hours=60)
+        self.plans[UUIDS["o_create"]] = {"lecture": 30, "seminar": 30}
+        output = self.run_cmd(apply=True, plan=plan)
+        self.assertIn("entry=t01 result=created", output)
+        shown = self.shown("create")
+        self.assertEqual(shown.approved_version.plan_hours, {"lecture": 30, "seminar": 30})
+        self.assertEqual(
+            section_data_map(shown.approved_version)["week"], self.plan["sources"]["7584"]["sections"]["week"]
+        )
+        bad = copy.deepcopy(plan)
+        bad["targets"][0]["plan"] = {"lecture": 30, "seminar": 30, "lab": 5}
+        bad["targets"][0]["lesson_hours"] = 65
+        with self.assertRaisesMessage(CommandError, "target_source_mismatch"):
+            self.run_cmd(apply=True, plan=bad)
+
     def test_previous_receipt_and_changed_scope_skip(self):
         self.plan["targets"][0]["skip_if_receipt"] = "legacy_import.govher_own_syllabi"
         core.log_action(
