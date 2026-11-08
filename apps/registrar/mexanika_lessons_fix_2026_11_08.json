@@ -22,5 +22,9 @@
         {"date": "2026-10-12", "start_time": "15:15", "kind": "seminar"}
       ]
     }
+  ],
+  "duplicates": [
+    {"legacy_journal": 14155, "offering": "4c90e0fe-6abf-4df0-bd7a-e48a66e6f1d0", "twin_offering": "824f715c-3157-4013-9b61-b72ae22465f8", "date": "2026-09-18", "start_time": "13:35", "twin_start_time": "13:35", "kind": "lecture"},
+    {"legacy_journal": 14155, "offering": "4c90e0fe-6abf-4df0-bd7a-e48a66e6f1d0", "twin_offering": "824f715c-3157-4013-9b61-b72ae22465f8", "date": "2026-09-18", "start_time": "15:15", "twin_start_time": "15:15", "kind": "seminar"}
   ]
 }

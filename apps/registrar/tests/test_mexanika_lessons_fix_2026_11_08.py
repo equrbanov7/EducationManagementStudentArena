@@ -106,7 +106,7 @@ class MexanikaLessonsFixTest(_LabWorld, TestCase):
             )
         return lesson
 
-    def _plan(self, *, kinds=None, moves=None):
+    def _plan(self, *, kinds=None, moves=None, duplicates=None):
         kinds = kinds or [
             *(
                 {"offering": str(self.fiz.pk), "date": day, "start_time": "10:10", "from": "seminar", "to": "lab"}
@@ -146,7 +146,9 @@ class MexanikaLessonsFixTest(_LabWorld, TestCase):
             }
         ]
         with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as handle:
-            json.dump({"format": fix.FORMAT, "kind_changes": kinds, "moves": moves}, handle)
+            json.dump(
+                {"format": fix.FORMAT, "kind_changes": kinds, "moves": moves, "duplicates": duplicates or []}, handle
+            )
         return handle.name
 
     def _call(self, *extra):
@@ -268,8 +270,8 @@ class MexanikaLessonsFixTest(_LabWorld, TestCase):
     def test_repo_plan_is_ids_only_and_reports_missing(self):
         data = fix.load_plan(fix.__file__.replace(".py", ".json"))
         allowed = {"legacy_journal", "offering", "date", "start_time", "from", "to", "source", "target"}
-        allowed |= {"remove_source_instructor", "lessons", "kind"}
-        keys = {key for row in data["kind_changes"] for key in row}
+        allowed |= {"remove_source_instructor", "lessons", "kind", "twin_offering", "twin_start_time"}
+        keys = {key for row in data["kind_changes"] for key in row} | {k for row in data["duplicates"] for k in row}
         keys |= {key for row in data["moves"] for key in row} | {
             k for row in data["moves"] for r in row["lessons"] for k in r
         }
@@ -277,6 +279,34 @@ class MexanikaLessonsFixTest(_LabWorld, TestCase):
         self.assertEqual((len(data["kind_changes"]), len(data["moves"][0]["lessons"])), (5, 6))
         counts = self._call()
         self.assertEqual((counts["missing"], counts["kind_offering_missing"]), ("6", "5"))
+
+    def test_duplicate_lesson_removed_only_when_twin_has_same_cells_and_undo(self):
+        with bypass_rls():
+            dup = self._make(self.cih, "2026-09-18", T1335, LessonKind.LECTURE, [("present", None), ("absent", None)])
+            Lesson.objects.filter(pk=dup.pk).update(topic="Mövzu №1")
+            twin = self._make(self.rob, "2026-09-18", T1335, LessonKind.LECTURE, [("present", None), ("absent", None)])
+            differs = self._make(self.cih, "2026-09-18", T1515, LessonKind.SEMINAR, [("present", 5)])
+            self._make(self.rob, "2026-09-18", T1515, LessonKind.SEMINAR, [("present", 6)])
+        spec = {"offering": str(self.cih.pk), "twin_offering": str(self.rob.pk), "date": "2026-09-18"}
+        plan = self._plan(
+            kinds=[{"offering": str(self.riy.pk), "date": "2026-01-01", "start_time": "10:10", "from": "x", "to": "y"}],
+            moves=[{"source": str(self.cih.pk), "target": str(self.rob.pk), "lessons": []}],
+            duplicates=[
+                {**spec, "start_time": "13:35", "twin_start_time": "13:35", "kind": "lecture"},
+                {**spec, "start_time": "15:15", "twin_start_time": "15:15", "kind": "seminar"},
+            ],
+        )
+        counts = self._call("--file", plan, "--apply")
+        self.assertEqual((counts["dup_lessons_deleted"], counts["dup_marks_differ_kept"]), ("1", "1"))
+        with bypass_rls():
+            self.assertFalse(Lesson.objects.filter(pk=dup.pk).exists())
+            self.assertTrue(Lesson.objects.filter(pk=differs.pk).exists())
+            self.assertEqual(Lesson.objects.get(pk=twin.pk).topic, "Mövzu №1")
+        self.assertEqual(self._call("--apply", "--undo")["undo_duplicates_restored"], "1")
+        with bypass_rls():
+            back = Lesson.objects.get(offering=self.cih, date=_day("2026-09-18"), start_time=T1335)
+            self.assertEqual(sorted(back.marks.values_list("status", flat=True)), ["absent", "present"])
+            self.assertEqual(Lesson.objects.get(pk=twin.pk).topic, "")
 
     def test_workflow_wiring(self):
         text = WORKFLOW.read_text(encoding="utf-8")
