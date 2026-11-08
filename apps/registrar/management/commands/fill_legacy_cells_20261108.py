@@ -28,12 +28,18 @@ class Command(BaseCommand):
         parser.add_argument("--apply", action="store_true", help="Faktiki yaz (defolt: dry-run)")
 
     def handle(self, *args, **options):
-        cells = [] if options["undo"] else fill.load_plan(options["file"])
+        plan = {"lessons": [], "cells": []} if options["undo"] else fill.load_plan(options["file"])
 
         def runner(organization, actor, counts):
             if options["undo"]:
                 fill.undo(organization=organization, actor=actor, counts=counts)
             else:
-                fill.run(organization=organization, actor=actor, counts=counts, cells=cells)
+                fill.run(
+                    organization=organization,
+                    actor=actor,
+                    counts=counts,
+                    cells=plan["cells"],
+                    lessons_spec=plan["lessons"],
+                )
 
         run_plan(self, options=options, prefix=PREFIX, runner=runner)

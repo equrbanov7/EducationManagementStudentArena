@@ -234,6 +234,27 @@ class SubgroupJournalMergeTest(_LabWorld, TestCase):
         with bypass_rls():
             self.assertFalse(CourseOffering.objects.get(pk=self.o1.pk).is_active)
 
+    def test_subgroup_syllabus_is_shared_to_parent(self):
+        from apps.syllabus.models import Syllabus, SyllabusShare
+
+        with bypass_rls():
+            CourseOffering.objects.filter(pk__in=[self.o1.pk, self.o2.pk, self.offering.pk]).update(
+                instructor=self.teacher
+            )
+            Syllabus.objects.create(
+                organization=self.org,
+                subject=self.offering.subject,
+                period=self.period,
+                offering=self.o1,
+                author=self.teacher,
+            )
+        self.assertEqual(self._call("--apply")["syllabus_shared"], "1")
+        with bypass_rls():
+            self.assertTrue(SyllabusShare.objects.filter(offering=self.offering).exists())
+        self._call("--apply", "--undo")
+        with bypass_rls():
+            self.assertFalse(SyllabusShare.objects.filter(offering=self.offering).exists())
+
     def test_workflow_wiring(self):
         text = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("          - merge_subgroup_journals_20261108\n", text)
