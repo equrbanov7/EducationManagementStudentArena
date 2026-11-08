@@ -43,6 +43,7 @@ from ..services import (
     unassign_amended,
 )
 from ..services.all_chairs import ALL_CHAIRS
+from ..services.patok import LEAD_ERRORS
 from ..services.tasks import ROW_HAS_OBJECTIONS, TOTAL_BELOW_ASSIGNED
 from ._base import active_organization, actor_for, denied, error, json_body, no_org
 from .all_chairs_api import all_chairs_rows
@@ -63,6 +64,8 @@ _INPUT_CODES = frozenset(
         "workload.invalid_number",
         "workload.negative_number",
         "workload.note_required",
+        # Sahib 2026-11-08: patok aparıcı sətri bağının yoxlaması (``services.patok.LEAD_ERRORS``).
+        *LEAD_ERRORS,
     }
 )
 

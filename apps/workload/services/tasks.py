@@ -24,6 +24,7 @@ from ..constants import (
 )
 from ..models import LoadObjection, TeacherAssignment, TeachingTask, TeachingTaskRow, WorkloadAmendment
 from .intensive import ensure_not_intensive
+from .patok import apply_patok_lead
 from .people import resolve_chair
 from .plan_calendar import season_from_period as _season_from_period
 from .scoping import WorkloadDenied, ensure_can_manage
@@ -411,6 +412,8 @@ def save_row(
     manual_total = data.get("total_hours")
     row.total_hours = _coerce("total_hours", manual_total) if manual_total else row.computed_total_hours
     _ensure_totals_cover_assigned(row)
+    # Sahib 2026-11-08: patok tərəfdaşı → aparıcı sətir açıq bağı (``patok_lead_id``; boş — açılır).
+    apply_patok_lead(row, data)
     row.save()
 
     if "group_ids" in data:
@@ -440,7 +443,12 @@ def save_row(
         organization=task.organization,
         obj=row,
         old_values=old_values,
-        new_values={"total_hours": row.total_hours, "subject": row.subject_label, "offerings": offerings},
+        new_values={
+            "total_hours": row.total_hours,
+            "subject": row.subject_label,
+            "offerings": offerings,
+            "patok_lead": str(row.patok_lead_id or ""),
+        },
         reason="workload.row_saved",
         request=request,
         resource_type="workload.TeachingTaskRow",

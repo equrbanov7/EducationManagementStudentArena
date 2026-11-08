@@ -55,7 +55,7 @@ AMENDABLE_STATUSES = (TaskStatus.DISTRIBUTED, TaskStatus.AMENDED)
 PLAN_FIELD = {"lecture": "lecture_plan", "seminar": "seminar_plan", "lab": "lab_plan"}
 
 #: ``save_row``-un skalyar olmayan giriş sahələri (düzəliş qeydinin «hansı sahələr» siyahısı üçün).
-_RELATION_FIELDS = ("subject_id", "period_id", "specialty_id", "group_ids")
+_RELATION_FIELDS = ("subject_id", "period_id", "specialty_id", "group_ids", "patok_lead_id")
 
 
 def amendment_needed(task, row=None) -> bool:
