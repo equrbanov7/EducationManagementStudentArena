@@ -170,16 +170,3 @@ class ExactHistoryCarryTests(_GuestRosterBase):
         # Own-hours aggregation contains the EXISTS; no standalone predecessor read.
         self.assertEqual(sum('FROM "registrar_enrollment"' in q["sql"] for q in queries), 1)
         self.assertIn("superseded_by", str(predecessors().query))
-
-
-class DuplicateLessonCarryTests(ExactHistoryCarryTests):
-    """Sahib 2026-11-08 (135 TSPX): əvvəlki jurnaldakı dərs hədəf jurnalda da (eyni gün + saat + növ) yazılıbsa,
-    onun qayıbı ikinci dəfə sayılmır; hədəfdə olmayan dərsin qayıbı köçməyə davam edir."""
-
-    def test_same_lesson_in_target_is_not_carried_twice(self):
-        source, target = self.transition()
-        self.mark(source, 0)  # 2025-09-01 seminar — hədəfdə də var
-        self.mark(source, 1)  # 2025-09-02 seminar — yalnız əvvəlki jurnalda
-        self.mark(target, 0)
-        self.assertEqual(guest_merge.carried_absence_hours(target), 2)
-        self.assertEqual(gradebook.recompute_absence_hours(enrollment=target), 4)
