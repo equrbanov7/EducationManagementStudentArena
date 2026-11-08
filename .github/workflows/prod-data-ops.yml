@@ -1637,7 +1637,7 @@ jobs:
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor" "--students=$BATCH")
               ;;
-            repair_applications_20261107|bind_lab_lessons_20261108|freeze_inactive_students_20261108)
+            repair_applications_20261107|bind_lab_lessons_20261108)
               # RİM 2026-11-07: MR-247/253 jurnallar passiv, MR-245 fənn — sabit id-lər koddadır. batch=undo geri qaytarır.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
@@ -1647,6 +1647,20 @@ jobs:
                 args+=(--undo)
               elif [ -n "$BATCH" ]; then
                 echo "batch yalnız 'undo' ola bilər" >&2; exit 2
+              fi
+              ;;
+            freeze_inactive_students_20261108)
+              # Sahib 2026-11-08: aktivliyi olmayan tələbələr. batch=undo (apply) geri qaytarır; batch=skipped yalnız oxuyur.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [ "$BATCH" = "undo" ]; then
+                test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }
+                args+=(--undo)
+              elif [ "$BATCH" = "skipped" ]; then
+                args+=(--show-skipped)
+              elif [ -n "$BATCH" ]; then
+                echo "batch yalnız 'undo' və ya 'skipped' ola bilər" >&2; exit 2
               fi
               ;;
             recover_legacy_syllabi_20261107)

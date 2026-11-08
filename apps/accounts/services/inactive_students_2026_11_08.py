@@ -60,8 +60,11 @@ def _mark_activity_q() -> Q:
     return Q(status__in=("present", "excused")) | Q(score__isnull=False)
 
 
-def candidates(organization):
-    """``(tələbə id → [enrolled yazılış id-ləri], saylar)`` — dondurulacaq tələbələr (yazmır)."""
+def candidates(organization, skipped=None):
+    """``(tələbə id → [enrolled yazılış id-ləri], saylar)`` — dondurulacaq tələbələr (yazmır).
+
+    ``skipped`` (siyahı) verilərsə ``skipped_no_evidence`` tələbələrinin id-ləri ona əlavə olunur.
+    """
     Enrollment = _model("Enrollment")
     LessonMark = _model("LessonMark")
     ComponentScore = _model("ComponentScore")
@@ -99,9 +102,24 @@ def candidates(organization):
             counts["skipped_recent"] += 1
         elif not offerings_of[student_id] & written:
             counts["skipped_no_evidence"] += 1
+            if skipped is not None:
+                skipped.append(student_id)
         else:
             result[student_id] = sorted(ids)
     return result, counts
+
+
+def skipped_report(organization) -> list:
+    """``[(tələbə id, qrup id | None)]`` — jurnalına heç kimə yazılmamış (``skipped_no_evidence``) tələbələr."""
+    skipped: list = []
+    candidates(organization, skipped=skipped)
+    Record = _model("StudentAcademicRecord")
+    groups = dict(
+        Record.objects.filter(organization=organization, student_id__in=skipped, status="enrolled")
+        .order_by("student_id", "created_at")
+        .values_list("student_id", "group_id")
+    )
+    return [(student_id, groups.get(student_id)) for student_id in sorted(skipped)]
 
 
 def run(*, organization, actor, counts, undo=False, report=None) -> None:

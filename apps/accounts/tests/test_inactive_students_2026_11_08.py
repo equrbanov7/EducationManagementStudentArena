@@ -96,9 +96,27 @@ class FreezeInactiveStudentsTest(_LabWorld, TestCase):
         self.assertEqual(counts["skipped_recent"], "1")
         self.assertEqual(counts["students_frozen"], "1")
 
+    def test_show_skipped_lists_students_of_unwritten_journals_read_only(self):
+        counts = self._call("--show-skipped")
+        self.assertEqual(len([key for key in counts if key == "no_evidence"]), 1)  # dict: son sətir
+        out = io.StringIO()
+        call_command(
+            "freeze_inactive_students_20261108",
+            "--org",
+            self.org.slug,
+            "--actor",
+            self.owner.username,
+            "--show-skipped",
+            stdout=out,
+        )
+        lines = [line for line in out.getvalue().splitlines() if "no_evidence=" in line]
+        self.assertEqual(len(lines), 3)
+        self.assertEqual(self._state(self.e0), ("enrolled", True))
+
     def test_workflow_wiring(self):
         text = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("          - freeze_inactive_students_20261108\n", text)
         self.assertIn('[ "$COMMAND" = "freeze_inactive_students_20261108" ]', text)
-        self.assertRegex(text, r"\|freeze_inactive_students_20261108\)")
+        self.assertIn("\n            freeze_inactive_students_20261108)\n", text)
+        self.assertIn("args+=(--show-skipped)", text)
         self.assertIn("|inactive_students|lab_groups|", text)
