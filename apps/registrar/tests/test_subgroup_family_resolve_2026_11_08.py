@@ -9,12 +9,14 @@ import io
 from unittest import mock
 
 from django.core.management import call_command
+from django.utils import timezone
 
 from apps.organizations.models import OrgUnit
 from apps.registrar import subgroup_family_resolve_2026_11_08 as resolve
 from apps.registrar.models import CourseOffering, Enrollment, Lesson, LessonKind, LessonMark, StudentAcademicRecord
 from apps.registrar.tests import test_subgroup_journal_merge_2026_11_08 as merge_tests
 from apps.registrar.tests.test_lab_groups_2026_11_06 import User
+from core.constants import OrgUnitType
 from core.rls import bypass_rls
 
 T0830 = datetime.time(8, 30)
@@ -23,8 +25,14 @@ T0830 = datetime.time(8, 30)
 class SubgroupFamilyResolveTest(merge_tests.SubgroupJournalMergeTest):
     def setUp(self):
         super().setUp()
-        with bypass_rls():
-            OrgUnit.objects.filter(pk__in=[self.k1.pk, self.k2.pk]).update(parent=self.group)
+        with bypass_rls():  # reyestr modeli: ana və alt qruplar eyni ixtisas altında, alt qrupda parent_group izi
+            specialty = OrgUnit.objects.create(
+                organization=self.org, name="LAB-SPEC", slug="lab-spec", unit_type=OrgUnitType.SPECIALTY
+            )
+            OrgUnit.objects.filter(pk=self.group.pk).update(parent=specialty)
+            OrgUnit.objects.filter(pk__in=[self.k1.pk, self.k2.pk]).update(
+                parent=specialty, settings={"parent_group": str(self.group.pk)}
+            )
         patch = mock.patch.object(resolve, "PLAN", ())
         patch.start()
         self.addCleanup(patch.stop)
@@ -86,6 +94,11 @@ class SubgroupFamilyResolveTest(merge_tests.SubgroupJournalMergeTest):
                 LessonMark.objects.create(
                     organization=self.org, lesson=self.parent_lecture, enrollment=enrollment, status="present"
                 )
+            # köhnə xanalar (copy_mark created_at-ı saxlayır) — geri qaytarma bunu «sonradan dəyişib» saymamalıdır
+            LessonMark.objects.filter(lesson__offering=self.offering).update(
+                created_at=timezone.now() - datetime.timedelta(days=21)
+            )
+            self.parent_rows = (self.e1, self.e2, self.e0, *extra)
 
     def test_same_lessons_merge_into_parent(self):
         counts = self._resolve("--apply")
@@ -128,3 +141,42 @@ class SubgroupFamilyResolveTest(merge_tests.SubgroupJournalMergeTest):
         self.assertEqual(counts["parent_student_unplaced"], "1")
         with bypass_rls():
             self.assertTrue(CourseOffering.objects.get(pk=self.offering.pk).is_active)
+
+    def test_two_untimed_lessons_same_day_stay_two(self):
+        self._separate_classes()
+        with bypass_rls():
+            day = self.today - datetime.timedelta(days=2)
+            for _ in range(2):
+                lesson = Lesson.objects.create(
+                    organization=self.org, offering=self.offering, date=day, kind=LessonKind.LECTURE, hours=2
+                )
+                for enrollment in self.parent_rows:
+                    LessonMark.objects.create(
+                        organization=self.org, lesson=lesson, enrollment=enrollment, status="absent"
+                    )
+        counts = self._resolve("--apply")
+        self.assertEqual(counts["parents_retired"], "1", counts)
+        self.assertEqual(counts["lessons_created"], "6")  # 08:30 + iki vaxtsız mühazirə × iki alt qrup
+        self.assertEqual(counts["marks_copied"], "15")
+        with bypass_rls():
+            self.assertEqual(Lesson.objects.filter(offering=self.o1, date=day).count(), 2)
+
+    def test_suspended_parent_row_blocks_split(self):
+        self._separate_classes()
+        with bypass_rls():
+            Enrollment.objects.filter(pk=self.e0.pk).update(status="suspended")
+        counts = self._resolve("--apply")
+        self.assertEqual(counts["parent_has_suspended"], "1")
+        with bypass_rls():
+            self.assertTrue(CourseOffering.objects.get(pk=self.offering.pk).is_active)
+
+    def test_undo_blocked_after_teacher_writes_in_subgroup(self):
+        self._separate_classes()
+        self._resolve("--apply")
+        with bypass_rls():
+            Lesson.objects.create(
+                organization=self.org, offering=self.o1, date=self.today, kind=LessonKind.LECTURE, hours=2
+            )
+        self.assertEqual(self._resolve("--apply", "--undo"), {"undo_blocked_post_split_data": "1"})
+        with bypass_rls():
+            self.assertFalse(CourseOffering.objects.get(pk=self.offering.pk).is_active)

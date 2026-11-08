@@ -25,6 +25,34 @@ from .subgroup_journal_merge_2026_11_08 import _FINAL_MODELS, Blocked, _empty_ce
 from .twin_merge import _LESSON_FIELDS, linked_elsewhere
 from .twin_relocate import closed, copy_mark, corrected_lesson_ids, corrected_mark_ids, recompute_absences
 
+#: Ana jurnal qeydiyyatına bağlı olub köçürülməyən qeydlər — varsa ana jurnal yığışdırılmır.
+_LINKED = (
+    "self_work_marks",
+    "selfwork_corrections",
+    "coursework_corrections",
+    "component_corrections",
+    "absence_credits",
+    "exam_score_entries",
+    "retake_applications",
+    "level_departures",
+    "level_arrivals",
+    "legacy_grade_facts",
+    "subject_folder_submissions",
+)
+#: Geri qaytarmada yaradılmış alt qrup sətri yalnız bunlardan heç biri yoxdursa silinir (xana / bal ayrıca silinir).
+_ENROLLMENT_LINKS = _LINKED + (
+    "criterion_scores",
+    "course_work",
+    "final_grade",
+    "resit_records",
+    "superseded_enrollments",
+)
+
+
+def _linked(rows, names=_LINKED) -> bool:
+    return any(rows.filter(**{f"{name}__isnull": False}).exists() for name in names)
+
+
 REASON = "Sahib 2026-11-08: birləşmə xananı itirərdi — ana qrup jurnalı yığışdırıldı, alt qruplar görünür"
 RESOURCE = "registrar.subgroup_parent_retire"
 
@@ -35,14 +63,17 @@ class Splitter:
 
     def split(self, parent, children, name) -> None:
         self._check(parent, children)
-        empty_before = sum(_empty_cells(offering) for offering in [parent, *children])
+        children_before = sum(_empty_cells(child) for child in children)
+        parent_empty = _empty_cells(parent)  # ana jurnalda boş olan xanalar alt qrupda da boş qalır — yeni deyil
         manifest = defaultdict(list)
         placed = self._enrollments(parent, children, manifest)
         self._lessons(parent, children, placed, manifest)
         self._component_scores(parent, placed, manifest)
         self._retire(parent, manifest)
         recompute_absences(list({row.pk: row for row in placed.values()}.values()))
-        if sum(_empty_cells(child) for child in children) > empty_before:
+        if sum(_empty_cells(child) for child in children) > children_before + parent_empty or self._foreign_empty(
+            manifest, placed
+        ):
             raise Blocked("split_adds_empty_cells")
         self._syllabus(parent, children, manifest)
         self.counts["parents_retired"] += 1
@@ -78,6 +109,10 @@ class Splitter:
         enrollment_ids = list(Enrollment.objects.filter(offering=parent).values_list("pk", flat=True))
         if any(_model(name).objects.filter(enrollment_id__in=enrollment_ids).exists() for name in _FINAL_MODELS):
             raise Blocked("parent_has_final_results")
+        if Enrollment.objects.filter(offering=parent).exclude(status__in=("enrolled", "dropped")).exists():
+            raise Blocked("parent_has_suspended")  # məzuniyyətdən qayıdan tələbə passiv ana jurnala düşməsin
+        if _linked(Enrollment.objects.filter(pk__in=enrollment_ids)):
+            raise Blocked("parent_enrollment_linked")  # üzrlü saat, düzəliş, imtahan balı … ana sətirdə qalardı
         if linked_elsewhere(parent):
             raise Blocked("parent_linked_elsewhere")
 
@@ -131,42 +166,58 @@ class Splitter:
         return placed
 
     def _lessons(self, parent, children, placed, manifest) -> None:
-        """Ana jurnalın hər dərsi — tələbəsi olan hər alt qrup jurnalına (eyni tarix + saat + növ dərsi varsa ona)."""
+        """Ana jurnalın hər dərsi — XANASI olan yerləşdirilmiş tələbələrin alt qrup jurnallarına (xanasız dərs: bölünməmiş
+        isə bütün alt qruplara). Alt qrupda eyni tarix + saat + növ (və ya günün tək vaxtsız) dərsi varsa ona, hər alt
+        qrup dərsi yalnız BİR ana dərsə. Sonda hər yerləşdirilmiş xana ya kopyalanıb, ya alt qrupda dolu qalıb."""
         Lesson, LessonMark = _model("Lesson"), _model("LessonMark")
         numbers = {row.number: row.unit_id for row in _model("SeminarGroup").objects.filter(offering=parent)}
-        by_slot = {}
-        for lesson in Lesson.objects.filter(offering__in=children, seminar_group__isnull=True, lab_group=None).order_by(
-            "created_at"
-        ):
-            by_slot.setdefault((lesson.offering_id, lesson.date, lesson.start_time, lesson.kind), lesson)
+        by_slot, by_day, split_slots = {}, defaultdict(list), set()
+        for lesson in Lesson.objects.filter(offering__in=children).order_by("created_at"):
+            key = (lesson.offering_id, lesson.date, lesson.start_time, lesson.kind)
+            if lesson.seminar_group or lesson.lab_group:
+                split_slots.add(key)
+                continue
+            by_slot.setdefault(key, lesson)
+            by_day[(lesson.offering_id, lesson.date, lesson.kind)].append(lesson)
         filled = set(LessonMark.objects.filter(lesson__offering__in=children).values_list("lesson_id", "enrollment_id"))
-        audience = defaultdict(set)  # alt qrup → ana jurnaldan gələn tələbələri olan qeydiyyatlar
-        for row in placed.values():
-            audience[row.offering_id].add(row.pk)
-        for lesson in Lesson.objects.filter(offering=parent).order_by("date", "start_time", "created_at"):
-            unit = numbers.get(lesson.seminar_group) if lesson.seminar_group else None
-            marks = {mark.enrollment_id: mark for mark in lesson.marks.all()}
+        audience = {row.offering_id for row in placed.values()}
+        used, expected, done = set(), 0, 0
+        for lesson in Lesson.objects.filter(offering=parent).prefetch_related("marks").order_by("date", "start_time"):
+            marks = {mark.enrollment_id: mark for mark in lesson.marks.all() if mark.enrollment_id in placed}
+            expected += len(marks)
+            if marks:
+                targets = {placed[pk].offering_id for pk in marks}
+            elif lesson.seminar_group:
+                unit = numbers.get(lesson.seminar_group)
+                targets = {child.pk for child in children if child.group_id == unit and child.pk in audience}
+                if not targets:
+                    raise Blocked("split_unmapped_seminar_lesson")
+            else:
+                targets = set(audience)
             for child in children:
-                if not audience.get(child.pk) or (unit is not None and unit != child.group_id):
+                if child.pk not in targets:
                     continue
-                key = (child.pk, lesson.date, lesson.start_time, lesson.kind)
-                twin = by_slot.get(key)
+                twin = self._twin(child, lesson, by_slot, by_day, used)
                 if twin is None:
+                    if (child.pk, lesson.date, lesson.start_time, lesson.kind) in split_slots:
+                        raise Blocked("split_slot_conflict")
                     twin = Lesson.objects.create(
                         organization=self.organization,
                         offering=child,
                         **{name: getattr(lesson, name) for name in _LESSON_FIELDS},
                     )
                     Lesson.objects.filter(pk=twin.pk).update(created_at=lesson.created_at)
-                    by_slot[key] = twin
+                    by_day[(child.pk, lesson.date, lesson.kind)].append(twin)
                     manifest["lessons_created"].append(str(twin.pk))
                     self.counts["lessons_created"] += 1
                 else:
                     self.counts["lessons_matched"] += 1
-                for source_pk, target in placed.items():
-                    mark = marks.get(source_pk)
-                    if mark is None or target.offering_id != child.pk:
+                used.add(twin.pk)
+                for source_pk, mark in marks.items():
+                    target = placed[source_pk]
+                    if target.offering_id != child.pk:
                         continue
+                    done += 1
                     if (twin.pk, target.pk) in filled:
                         self.counts["marks_child_kept"] += 1
                         continue
@@ -174,6 +225,33 @@ class Splitter:
                     filled.add((twin.pk, target.pk))
                     manifest["marks_created"].append(str(created.pk))
                     self.counts["marks_copied"] += 1
+        if done != expected:
+            raise Blocked("split_mark_unmapped")
+
+    @staticmethod
+    def _twin(child, lesson, by_slot, by_day, used):
+        twin = by_slot.get((child.pk, lesson.date, lesson.start_time, lesson.kind))
+        if twin is None:
+            same_day = [row for row in by_day.get((child.pk, lesson.date, lesson.kind), []) if row.pk not in used]
+            untimed = lesson.start_time is None or (same_day and same_day[0].start_time is None)
+            twin = same_day[0] if untimed and len(same_day) == 1 else None
+        return None if twin is None or twin.pk in used else twin
+
+    @staticmethod
+    def _foreign_empty(manifest, placed) -> bool:
+        """Yeni yaradılan alt qrup dərsində ana jurnaldan GƏLMƏYƏN tələbənin boş xanası — yeni boşluqdur."""
+        lessons = manifest.get("lessons_created") or []
+        if not lessons:
+            return False
+        Enrollment, LessonMark = _model("Enrollment"), _model("LessonMark")
+        targets = {row.pk for row in placed.values()}
+        for lesson_id in lessons:
+            offering_id = _model("Lesson").objects.filter(pk=lesson_id).values_list("offering_id", flat=True).first()
+            filled = set(LessonMark.objects.filter(lesson_id=lesson_id).values_list("enrollment_id", flat=True))
+            others = Enrollment.objects.filter(offering_id=offering_id, status="enrolled").exclude(pk__in=targets)
+            if others.exclude(pk__in=filled).exists():
+                return True
+        return False
 
     def _component_scores(self, parent, placed, manifest) -> None:
         Component, Score = _model("AssessmentComponent"), _model("ComponentScore")
@@ -250,8 +328,30 @@ def _offerings(placed) -> set:
     return {row.offering_id for row in placed.values()}
 
 
+def _post_split_data(row, manifest) -> bool:
+    """Köçürmədən SONRA alt qrup jurnallarında yaranan / dəyişən data — geri qaytarma onu silə və ya gizlədə bilər."""
+    Lesson, LessonMark, Score = _model("Lesson"), _model("LessonMark"), _model("ComponentScore")
+    since = row.created_at
+    children = (row.new_values or {}).get("children") or []
+    copied = set(manifest.get("marks_created", []))
+    if Lesson.objects.filter(offering_id__in=children, created_at__gt=since).exists():
+        return True
+    later = LessonMark.objects.filter(lesson__offering_id__in=children, created_at__gt=since)
+    if any(str(pk) not in copied for pk in later.values_list("pk", flat=True)):
+        return True
+    if LessonMark.objects.filter(pk__in=copied, updated_at__gt=since).exists():
+        return True
+    if Score.objects.filter(pk__in=manifest.get("scores_created", []), updated_at__gt=since).exists():
+        return True
+    if LessonMark.objects.filter(lesson_id__in=manifest.get("lessons_created", [])).exclude(pk__in=copied).exists():
+        return True
+    created = _model("Enrollment").objects.filter(pk__in=manifest.get("enrollments_created", []))
+    return _linked(created, _ENROLLMENT_LINKS)
+
+
 def undo(*, organization, actor, counts) -> None:
-    """Manifestdəkini geri qaytarır; köçürmədən sonra alt qrupda yaranan dərs / dəyişən xana varsa — toxunulmur."""
+    """Manifestdəkini geri qaytarır; köçürmədən sonra alt qrupda data yaranıbsa və ya ana sətirlərin vəziyyəti
+    dəyişibsə — ailəyə toxunulmur (müəllimin yazdığı silinməsin, gizlənməsin)."""
     from django.db import transaction
 
     AuditLog = _model("AuditLog", "audit")
@@ -264,16 +364,15 @@ def undo(*, organization, actor, counts) -> None:
         if parent is None or parent.is_active:
             counts["undo_already"] += 1
             continue
-        marks = LessonMark.objects.filter(pk__in=manifest.get("marks_created", []))
-        later = LessonMark.objects.filter(lesson_id__in=manifest.get("lessons_created", [])).exclude(
-            pk__in=manifest.get("marks_created", [])
-        )
-        if later.exists() or any((mark.updated_at - mark.created_at).total_seconds() > 5 for mark in marks):
+        dropped = manifest.get("parent_enrollments_dropped", [])
+        restorable = Enrollment.objects.filter(pk__in=dropped, status="dropped", superseded_by__isnull=True)
+        if _post_split_data(row, manifest) or restorable.count() != len(dropped):
             counts["undo_blocked_post_split_data"] += 1
             continue
         with transaction.atomic():
             Score.objects.filter(pk__in=manifest.get("scores_created", [])).delete()
             Component.objects.filter(pk__in=manifest.get("components_created", []), scores__isnull=True).delete()
+            marks = LessonMark.objects.filter(pk__in=manifest.get("marks_created", []))
             touched = list(marks.values_list("enrollment_id", flat=True))
             marks.delete()
             Lesson.objects.filter(pk__in=manifest.get("lessons_created", []), marks__isnull=True).delete()
@@ -284,12 +383,10 @@ def undo(*, organization, actor, counts) -> None:
                 pk__in=manifest.get("enrollments_created", []), lesson_marks__isnull=True, component_scores__isnull=True
             ).delete()
             for pk, superseded in manifest.get("enrollments_reactivated", []):
-                Enrollment.objects.filter(pk=pk).update(
+                Enrollment.objects.filter(pk=pk, status="enrolled").update(
                     status="dropped", superseded_by_id=superseded or None, updated_at=timezone.now()
                 )
-            Enrollment.objects.filter(pk__in=manifest.get("parent_enrollments_dropped", [])).update(
-                status="enrolled", updated_at=timezone.now()
-            )
+            restorable.update(status="enrolled", updated_at=timezone.now())
             parent.is_active = True
             parent.save(update_fields=["is_active", "updated_at"])
             recompute_absences(list(Enrollment.objects.filter(pk__in=touched)))

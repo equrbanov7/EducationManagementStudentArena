@@ -23,8 +23,6 @@ from collections import defaultdict
 
 from django.db import IntegrityError, transaction
 
-from core.constants import OrgUnitType
-
 from .subgroup_journal_merge_2026_11_08 import PLAN, Blocked, Merger, _model
 from .subgroup_parent_retire_2026_11_08 import Splitter
 
@@ -40,45 +38,51 @@ def current_period(organization):
     )
 
 
-def discover(organization) -> list[dict]:
-    """Ailələr (sabit sıra): ``{"name", "target", "group", "sources"}`` — :class:`Merger` planı formasında."""
+def discover(organization) -> tuple[list[dict], int]:
+    """``(ailələr, birmənalı olmayan alt qrup jurnalları)`` — ailə :class:`Merger` planı formasındadır.
+
+    Alt qrup — reyestrin ``settings.parent_group`` izi və ya ad şablonu (:func:`subgroup_rollup.subgroup_map`, eyni
+    ixtisas altında). Tapılan ailədə ana qrupun bu fəndə jurnalı OLMALIDIR (yeni ana jurnal yalnız PLAN-dakı ailələr
+    üçün yaradılır); alt qrup jurnalı iki ana namizədə düşürsə və ya özü də ana qrupdursa — toxunulmur.
+    """
+    from .subgroup_rollup import subgroup_map
+
     period = current_period(organization)
     if period is None:
-        return []
-    OrgUnit, Offering = _model("OrgUnit", "organizations"), _model("CourseOffering")
-    parent_of = dict(
-        OrgUnit.objects.filter(
-            organization=organization,
-            unit_type=OrgUnitType.GROUP,
-            parent__unit_type=OrgUnitType.GROUP,
-            is_active=True,
-        ).values_list("pk", "parent_id")
-    )
-    groups = set(parent_of) | set(parent_of.values())
-    found = defaultdict(lambda: {"target": None, "sources": []})
-    offerings = (
-        Offering.objects.filter(organization=organization, period=period, is_active=True, group_id__in=groups)
+        return [], 0
+    offerings = list(
+        _model("CourseOffering")
+        .objects.filter(organization=organization, period=period, is_active=True, group__isnull=False)
         .select_related("group", "subject")
         .order_by("group__name", "subject__name", "pk")
     )
-    names = {}
-    for offering in offerings:
-        if offering.group_id in parent_of:
-            key = (parent_of[offering.group_id], offering.subject_id)
-            found[key]["sources"].append(str(offering.pk))
-        else:
-            key = (offering.group_id, offering.subject_id)
-            found[key]["target"] = str(offering.pk)
-        names.setdefault(key, offering.subject.name)
-    families = []
-    for (group_id, _subject), row in found.items():
-        if row["sources"] and (row["target"] or len(row["sources"]) > 1):
-            families.append({"name": names[(group_id, _subject)], "group": str(group_id), **row})
+    by_key = {(row.group_id, row.subject_id): row for row in offerings}
+    groups = list({row.group_id: row.group for row in offerings}.values())
+    parents_of = defaultdict(set)
+    tree = subgroup_map(organization, groups)
+    for parent_pk, units in tree.items():
+        for unit in units:
+            parents_of[unit.pk].add(parent_pk)
+    found, ambiguous = {}, 0
+    for row in offerings:
+        candidates = [pk for pk in parents_of.get(row.group_id, ()) if (pk, row.subject_id) in by_key]
+        if not candidates:
+            continue
+        if len(candidates) > 1 or row.group_id in tree:
+            ambiguous += 1
+            continue
+        target = by_key[(candidates[0], row.subject_id)]
+        family = found.setdefault(
+            target.pk,
+            {"name": row.subject.name, "target": str(target.pk), "group": str(target.group_id), "sources": []},
+        )
+        family["sources"].append(str(row.pk))
+    families = list(found.values())
     seen = {frozenset(row["sources"]) for row in families}
-    for family in PLAN:  # adla tapılmış ailələr (alt qrup ``parent``-ə bağlanmayıbsa)
+    for family in PLAN:  # adla tapılmış ailələr (reyestr izi olmayanlar)
         if frozenset(family["sources"]) not in seen:
             families.append(dict(family))
-    return families
+    return families, ambiguous
 
 
 def _parent(organization, family, live):

@@ -31,8 +31,10 @@ class Command(BaseCommand):
             if options["undo"]:
                 undo(organization=organization, actor=actor, counts=counts)
                 return
-            families = discover(organization)
+            families, ambiguous = discover(organization)
             counts["families_found"] = len(families)
+            if ambiguous:
+                counts["subgroup_journals_ambiguous"] = ambiguous
             resolver = Resolver(organization=organization, actor=actor, counts=counts)
             resolver.run(families)
             report.extend(resolver.report)
