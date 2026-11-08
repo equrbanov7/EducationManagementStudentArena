@@ -10,7 +10,9 @@ tarix + saat + növ, tələbə jurnalın öz siyahısında ad ilə) və YALNIZ i
      "cells": [{"lesson": uuid | "L1", "enrollment": uuid, "status": "present"|"absent"|"excused", "score": null|ədəd}]}
 
 Xanada ``enrollment`` əvəzinə ``fin`` ola bilər (şifrəli plan — ``roster_tag`` = ``legacy-cells-…``): tələbə
-dərsin açılışında ``enrolled`` sətri olan FİN sahibi kimi tapılır (tapılmasa ``cells_student_not_found``).
+dərsin açılışında ``enrolled`` sətri olan FİN sahibi kimi tapılır; köhnə sistemdə FİN-i olmayan tələbə üçün ``name``
+(«Soyad Ad») — açılışın siyahısında YEGANƏ uyğun gələn tələbə (iki eyni ad → yazılmır). Tapılmasa
+``cells_student_not_found``.
 
 ``lessons`` — köhnə sistemdə olub EMS-də OLMAYAN dərs: eyni açılışda eyni tarix + saat + növdə dərs varsa o işlədilir
 (ikinci dərs yaranmır), yoxdursa yaradılır (müəllim — açılışın müəllimi, köhnə sistemin dərsi kimi); açılış aktiv və
@@ -31,7 +33,9 @@ yenidən hesablanır. İdempotentdir: ikinci qaçışda xana artıq doludur → 
 from __future__ import annotations
 
 import datetime
+import html
 import json
+import unicodedata
 
 from django.apps import apps as django_apps
 from django.core.management.base import CommandError
@@ -131,6 +135,33 @@ def _fin_enrollments(organization, cells, lessons) -> dict:
     return {(offering_id, str(fin).strip().upper()): pk for offering_id, fin, pk in rows}
 
 
+def _norm(text) -> str:
+    """«Soyad Ad» müqayisəsi: HTML varlıqları, böyük/kiçik, İ/ı, diakritika və boşluq fərqi sayılmır."""
+    text = html.unescape(str(text or "")).replace("İ", "I").replace("ı", "i").casefold()
+    text = "".join(ch for ch in unicodedata.normalize("NFKD", text) if not unicodedata.combining(ch))
+    return " ".join(text.split()[:2])
+
+
+def _name_enrollments(organization, cells, lessons) -> dict:
+    """``{(açılış, «soyad ad») → qeydiyyat id}`` — yalnız açılışda YEGANƏ olan adlar."""
+    wanted = {str(c.get("lesson")) for c in cells if c.get("name") and str(c.get("lesson")) in lessons}
+    offerings = {lessons[key].offering_id for key in wanted}
+    if not offerings:
+        return {}
+    rows = (
+        _model("Enrollment")
+        .objects.filter(organization=organization, offering_id__in=offerings, status="enrolled")
+        .values_list("offering_id", "student__last_name", "student__first_name", "pk")
+    )
+    found, twice = {}, set()
+    for offering_id, last, first, pk in rows:
+        key = (offering_id, _norm(f"{last} {first}"))
+        if key in found:
+            twice.add(key)
+        found[key] = pk
+    return {key: pk for key, pk in found.items() if key not in twice}
+
+
 def run(*, organization, actor, counts, cells, lessons_spec=()) -> None:
     Lesson, Enrollment, LessonMark = _model("Lesson"), _model("Enrollment"), _model("LessonMark")
     manifest = {"lessons_created": []}
@@ -146,10 +177,13 @@ def run(*, organization, actor, counts, cells, lessons_spec=()) -> None:
         }
     )
     by_fin = _fin_enrollments(organization, cells, lessons)
+    by_name = _name_enrollments(organization, cells, lessons)
     for cell in cells:
-        if cell.get("fin") and not cell.get("enrollment"):
+        if (cell.get("fin") or cell.get("name")) and not cell.get("enrollment"):
             lesson = lessons.get(str(cell.get("lesson")))
-            found = by_fin.get((lesson.offering_id, str(cell["fin"]).strip().upper())) if lesson else None
+            found = by_fin.get((lesson.offering_id, str(cell.get("fin") or "").strip().upper())) if lesson else None
+            if found is None and lesson is not None and cell.get("name"):
+                found = by_name.get((lesson.offering_id, _norm(cell["name"])))
             cell["enrollment"] = str(found) if found else None
             if found is None:
                 counts["cells_student_not_found"] += 1

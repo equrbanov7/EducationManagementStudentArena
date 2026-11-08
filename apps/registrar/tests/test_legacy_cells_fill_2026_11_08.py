@@ -121,17 +121,22 @@ class LegacyCellsFillTest(_LabWorld, TestCase):
 
         with bypass_rls():
             Profile.objects.update_or_create(user_id=self.e0.student_id, defaults={"fin": "AB12CD3"})
+            student = self.e1.student
+            student.last_name, student.first_name = "Hüseynova", "İlahə"
+            student.save(update_fields=["last_name", "first_name"])
+        self.e1_name = "H&uuml;seynova İLAHƏ"
         plan = {
             "format": "legacy-cells/1",
             "cells": [
                 {"lesson": str(self.lecture.pk), "fin": "ab12cd3", "status": "absent", "score": None},
                 {"lesson": str(self.lecture.pk), "fin": "ZZZ9999", "status": "present", "score": None},
+                {"lesson": str(self.lecture.pk), "name": self.e1_name, "status": "present", "score": None},
             ],
         }
         with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as handle:
             json.dump(plan, handle)
         counts = self._call("--file", handle.name, "--apply")
-        self.assertEqual((counts["cells_filled"], counts["cells_student_not_found"]), ("1", "1"))
+        self.assertEqual((counts["cells_filled"], counts["cells_student_not_found"]), ("2", "1"))
         with bypass_rls():
             self.assertEqual(LessonMark.objects.get(lesson=self.lecture, enrollment=self.e0).status, "absent")
 
