@@ -5,7 +5,8 @@
 1. **Köhnə sistemin tələbə id-si** — legacy delta paketində (``ems-legacy-delta/1``: ``students`` +
    ``expelled_students``) tələbənin FİN-i ilə tapılan legacy ``students.id``. Delta bu tələbələri FİN ilə tutub,
    amma id-ni kod kimi yazmayıb. Yalnız heç bir hesabda kod olmayan VƏ cutover ledger-ində başqa hesaba bağlı
-   olmayan id verilir; eyni FİN-in iki legacy sətri varsa: azad edilməyən → legacy qrupu cari qrupla eyni adlı →
+   olmayan id verilir; legacy sətrin soyad + adı hesabınkı ilə eyni olmalıdır (sahib 2026-11-08: köhnə sistemdə
+   bəzi sətirlərə BAŞQA tələbənin FİN-i yazılıb — tutmursa ``legacy_fin_name_mismatch``, qrup nömrəsinə keçilir); eyni FİN-in iki legacy sətri varsa: azad edilməyən → legacy qrupu cari qrupla eyni adlı →
    ən kiçik id.
 2. **Qrup nömrəsi** (legacy id-si olmayanlar) — format ``<N><GG><SS>`` (yalnız rəqəmlər):
 
@@ -36,6 +37,7 @@ from django.utils import timezone
 
 from core.audit import log_action
 from core.constants import AuditAction
+from core.person_names import same_person_name
 
 from ...identity import canonical_identity
 from .scope import name_key
@@ -50,6 +52,7 @@ SHOWN = (
     "legacy_assigned",
     "legacy_multi_by_group",
     "legacy_multi_lowest",
+    "legacy_fin_name_mismatch",
     "group_assigned",
     "group_collision_bumped",
     "written",
@@ -145,12 +148,11 @@ class CodePlanner:
         target = self.ledger.get(legacy_id)
         return target is None or str(target) == str(user_pk)
 
-    def _pick(self, record, ids: list) -> str:
+    def _pick(self, record, ids: list, rows: dict) -> str:
         active = [legacy_id for legacy_id in ids if legacy_id not in self.legacy.expelled] or ids
         if len(active) == 1:
             return active[0]
         current = name_key(getattr(record.group, "name", ""))
-        rows = self.legacy.by_fin[(record.student.profile.fin or "").strip().upper()]
         same_group = [
             legacy_id
             for legacy_id in active
@@ -167,6 +169,17 @@ class CodePlanner:
         for record in targets:
             fin = (record.student.profile.fin or "").strip().upper()
             rows = self.legacy.by_fin.get(fin) if fin else None
+            if rows:
+                student = record.student
+                rows = {
+                    legacy_id: row
+                    for legacy_id, row in rows.items()
+                    if same_person_name(
+                        row.get("last_name"), row.get("first_name"), student.last_name, student.first_name
+                    )
+                }
+                if not rows:
+                    self.counts["legacy_fin_name_mismatch"] += 1
             if not rows:
                 rest.append(record)
                 continue
@@ -174,7 +187,7 @@ class CodePlanner:
             if not ids:
                 self.counts["skip_legacy_id_taken"] += 1
                 continue
-            legacy_id = ids[0] if len(ids) == 1 else self._pick(record, ids)
+            legacy_id = ids[0] if len(ids) == 1 else self._pick(record, ids, rows)
             self.used.add(canonical_identity(legacy_id))
             planned.append((record, legacy_id, "legacy"))
             self.counts["legacy_assigned"] += 1

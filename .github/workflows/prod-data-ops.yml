@@ -258,6 +258,10 @@
 #       236 EM Riyaziyyat-1 15.09 seminar → mühazirə) və «Sənaye cihazları»na düşmüş «Sənaye robotları» dərsləri
 #       xanaları ilə öz jurnalına. Plan repodadır (yalnız id/tarix/saat/növ); defolt dry-run; `batch=undo` (apply)
 #       geri qaytarır. Loga YALNIZ saylar.
+#   repair_legacy_identity_20261108 — sahib 2026-11-08: köhnə sistemdə başqasının FİN-i yazılmış 4 sətir — FİN
+#       sahibinə düşmüş köçmüş xanalar adamın BOŞ xanasına, sahibin dəyişməmiş köçmüş xanası öz dəyərinə / silinir,
+#       səhv alt qrup qeydiyyatı azad edilir (müəllimin işi varsa yox). Plan repodadır (yalnız id-lər). Defolt dry-run;
+#       `batch=undo` (apply) geri qaytarır. Loga YALNIZ saylar.
 #   merge_subgroup_journals_20261108 — sahib 2026-11-08: 536 MU / 536 Bİ alt qrup jurnalları (MU1, MU2, Bi 1, Bİ2)
 #       ana qrupun jurnalına seminar alt qrupu kimi kopyalanır; alt qrup jurnalı passiv, xanaları silinmir. Defolt
 #       dry-run; `batch=undo` (apply) geri qaytarır. Loga YALNIZ saylar.
@@ -531,6 +535,7 @@ on:
           - resolve_subgroup_families_20261108
           - fill_legacy_cells_20261108
           - fix_mexanika_lessons_20261108
+          - repair_legacy_identity_20261108
           - rebuild_language_cohorts_20261106
           - repair_twins_20261105b
           - fix_legacy_lesson_kinds
@@ -1683,7 +1688,7 @@ jobs:
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor" "--students=$BATCH")
               ;;
-            repair_applications_20261107|bind_lab_lessons_20261108|merge_subgroup_journals_20261108|fix_mexanika_lessons_20261108|resolve_subgroup_families_20261108)
+            repair_applications_20261107|bind_lab_lessons_20261108|merge_subgroup_journals_20261108|fix_mexanika_lessons_20261108|resolve_subgroup_families_20261108|repair_legacy_identity_20261108)
               # RİM 2026-11-07: MR-247/253 jurnallar passiv, MR-245 fənn — sabit id-lər koddadır. batch=undo geri qaytarır.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
@@ -2398,11 +2403,11 @@ jobs:
               exit "$status"
             fi
             rm -f "$RUNNER_TEMP/out.log"
-          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "release_stale_slot_teachers" ] || [ "$COMMAND" = "fix_offering_subject" ] || [ "$COMMAND" = "repair_twins_20261105b" ] || [ "$COMMAND" = "repair_applications_20261105" ] || [ "$COMMAND" = "repair_applications_20261105c" ] || [ "$COMMAND" = "fix_ydk236_subject_20261106" ] || [ "$COMMAND" = "sync_student_group_journals" ] || [ "$COMMAND" = "rebuild_language_cohorts_20261106" ] || [ "$COMMAND" = "apply_lab_groups_20261106" ] || [ "$COMMAND" = "apply_first_year_splits_20261107" ] || [ "$COMMAND" = "restore_subgroup_parent_enrollments" ] || [ "$COMMAND" = "apply_seminar_groups" ] || [ "$COMMAND" = "bind_lab_lessons_20261108" ] || [ "$COMMAND" = "merge_duplicate_teacher" ] || [ "$COMMAND" = "freeze_inactive_students_20261108" ] || [ "$COMMAND" = "merge_subgroup_journals_20261108" ] || [ "$COMMAND" = "fill_legacy_cells_20261108" ] || [ "$COMMAND" = "repair_applications_20261106" ] || [ "$COMMAND" = "repair_applications_20261107" ] || [ "$COMMAND" = "repair_applications_20261107b" ] || [ "$COMMAND" = "recover_mr230_lessons" ] || [ "$COMMAND" = "fix_mexanika_lessons_20261108" ] || [ "$COMMAND" = "carry_approved_syllabi_20261108" ] || [ "$COMMAND" = "resolve_subgroup_families_20261108" ] || [ "$COMMAND" = "link_patok_leads_20261108" ]; then
+          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "release_stale_slot_teachers" ] || [ "$COMMAND" = "fix_offering_subject" ] || [ "$COMMAND" = "repair_twins_20261105b" ] || [ "$COMMAND" = "repair_applications_20261105" ] || [ "$COMMAND" = "repair_applications_20261105c" ] || [ "$COMMAND" = "fix_ydk236_subject_20261106" ] || [ "$COMMAND" = "sync_student_group_journals" ] || [ "$COMMAND" = "rebuild_language_cohorts_20261106" ] || [ "$COMMAND" = "apply_lab_groups_20261106" ] || [ "$COMMAND" = "apply_first_year_splits_20261107" ] || [ "$COMMAND" = "restore_subgroup_parent_enrollments" ] || [ "$COMMAND" = "apply_seminar_groups" ] || [ "$COMMAND" = "bind_lab_lessons_20261108" ] || [ "$COMMAND" = "merge_duplicate_teacher" ] || [ "$COMMAND" = "freeze_inactive_students_20261108" ] || [ "$COMMAND" = "merge_subgroup_journals_20261108" ] || [ "$COMMAND" = "fill_legacy_cells_20261108" ] || [ "$COMMAND" = "repair_applications_20261106" ] || [ "$COMMAND" = "repair_applications_20261107" ] || [ "$COMMAND" = "repair_applications_20261107b" ] || [ "$COMMAND" = "recover_mr230_lessons" ] || [ "$COMMAND" = "fix_mexanika_lessons_20261108" ] || [ "$COMMAND" = "carry_approved_syllabi_20261108" ] || [ "$COMMAND" = "resolve_subgroup_families_20261108" ] || [ "$COMMAND" = "link_patok_leads_20261108" ] || [ "$COMMAND" = "repair_legacy_identity_20261108" ]; then
             # Loga YALNIZ «twin_relocate: / twin_merge: / lesson_kinds: / slot_parity: / practical_flag: / off_schedule_flags: / slot_teachers: /
             # offering_subject_fix: açar=say …» sətirləri və rədd kodu.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
-            grep -E '^(twin_relocate|twin_merge|lesson_kinds|slot_parity|practical_flag|off_schedule_flags|slot_teachers|subgroup_merge|legacy_cells|mexanika_lessons|inactive_students|lab_groups|teacher_merge|syllabus_carry|subgroup_resolve|patok_links|offering_subject_fix): [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            grep -E '^(twin_relocate|twin_merge|lesson_kinds|slot_parity|practical_flag|off_schedule_flags|slot_teachers|subgroup_merge|legacy_cells|mexanika_lessons|inactive_students|lab_groups|teacher_merge|syllabus_carry|subgroup_resolve|patok_links|legacy_identity|offering_subject_fix): [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true

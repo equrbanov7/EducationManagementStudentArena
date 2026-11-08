@@ -101,7 +101,7 @@ class RegistrySync:
         cutover ledger-i, ``institutional_identifier`` və ya FİN (ad tutuşdurması yoxdur). Əsas bölmədə sətri olan
         hesab (yenidən qəbul) buraya düşmür."""
 
-        from .resolve import ledger_map
+        from .resolve import fin_owner, fin_owners, ledger_map
 
         rows = sorted(self.run.bundle.get("expelled_students") or [], key=lambda item: item["id"])
         if not rows:
@@ -114,16 +114,16 @@ class RegistrySync:
                 "institutional_identifier", "user_id"
             )
         )
-        fins = sorted({_fin(row) for row in rows} - {""})
-        by_fin = {
-            fin.upper(): user_id
-            for fin, user_id in UserProfile.objects.filter(fin__in=fins).values_list("fin", "user_id")
-            if fin
-        }
+        owners = fin_owners(_fin(row) for row in rows)
         out: dict = defaultdict(list)
         for row in rows:
             key = str(row["id"])
-            user_id = int(ledger[key]) if key in ledger else by_inst.get(key) or by_fin.get(_fin(row))
+            user_id = int(ledger[key]) if key in ledger else by_inst.get(key)
+            if user_id is None:
+                # FİN yalnız soyad + ad da tutanda (sahib 2026-11-08: başqasının FİN-i yazılmış sətirlər).
+                user_id, mismatch = fin_owner(row, owners)
+                if mismatch:
+                    self.run.count("registry.expelled_fin_name_mismatch")
             if user_id is None:
                 self.run.count("registry.expelled_unlinked")
                 continue
