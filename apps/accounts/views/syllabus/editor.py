@@ -43,6 +43,7 @@ from apps.syllabus.public import (
     build_syllabus_editor_context,
     formula_rows,
     formula_text,
+    is_level_kinds,
     seed_week_hours,
     set_plan_hours,
 )
@@ -222,6 +223,9 @@ def _assessment(data, syllabus=None, rule=None, organization=None):
         "activity_label": activity_label(kinds, split=split),
         "activity_note": activity_note(kinds, split=split),
         "activity_kinds": list(kinds),
+        # Xarici dil səviyyə fənni (sahib 2026-11-08): 10 / 10 / 10 / 70 — izah mətni fənnin öz qaydasıdır.
+        "level": is_level_kinds(kinds),
+        "final": next((row["score"] for row in rows if row["key"] == "final"), 0),
         "formula": formula_text(kinds, organization, selfwork=selfwork, split=split),
         "note": (data.get("note") or "").strip(),
     }

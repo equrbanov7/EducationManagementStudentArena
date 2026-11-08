@@ -371,6 +371,17 @@ class Enrollment(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
         help_text="Alt qrupdan əlavəni edən aktor (koordinator/dekanlıq).",
     )
     added_at = models.DateTimeField(null=True, blank=True, help_text="Alt qrupdan əlavə vaxtı.")
+    #: Laboratoriya qrupu (Lab-1, Lab-2 …) — BU jurnalın daxilində (sahib 2026-11-06). Mühazirə və seminar bütün
+    #: qrupladır; ``Lesson.lab_group`` dolu olan lab dərsi yalnız həmin qrupun tələbələrinindir. Qaydalar:
+    #: :mod:`apps.registrar.lab_groups`.
+    lab_group = models.PositiveSmallIntegerField(
+        null=True, blank=True, help_text="Laboratoriya qrupu (1, 2 …) bu jurnal daxilində; boş = bölünməyib."
+    )
+    #: Seminar alt qrupu (234 K1, 234 K2 …) — BU jurnalın daxilində (sahib 2026-11-07). ``Lesson.seminar_group``
+    #: dolu olan seminar dərsi yalnız həmin alt qrupun tələbələrinindir. Qaydalar: :mod:`apps.registrar.seminar_groups`.
+    seminar_group = models.PositiveSmallIntegerField(
+        null=True, blank=True, help_text="Seminar alt qrupu (1, 2 …) bu jurnal daxilində; boş = bölünməyib."
+    )
 
     objects = models.Manager()
 

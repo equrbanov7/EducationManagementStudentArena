@@ -14,7 +14,8 @@ Vəziyyətlər (``status``):
 * ``intensive``  — «İntensiv kurs» sətri.
 
 ``activity`` (mühazirə / seminar / lab …) verilsə, balans vəziyyətləri YALNIZ həmin fəaliyyət üzrə hesablanır
-(«mühazirəsi vakant qalanlar»); vəziyyətsiz isə sətirdə həmin fəaliyyətin saatı olması kifayətdir.
+(«mühazirəsi vakant qalanlar»); vəziyyətsiz isə sətirdə həmin fəaliyyətin saatı olması kifayətdir. «Mühazirə»
+patokun ikinci/üçüncü qrupunun sətrini də göstərir (``lecture_total = 0``, plan var — :mod:`.patok`, sahib 2026-11-07).
 Naməlum dəyər (köhnəlmiş URL) süzgəc sayılmır.
 """
 
@@ -22,9 +23,10 @@ from __future__ import annotations
 
 from django.db.models import Q
 
-from ..constants import ACTIVITY_TOTAL_FIELD, TEACHING_ACTIVITIES, RowKind
+from ..constants import ACTIVITY_TOTAL_FIELD, TEACHING_ACTIVITIES, Activity, RowKind
 from ..models import TeacherAssignment, TeachingTaskRow
 from .assignments import balance_for_rows
+from .patok import partner_q
 
 STATUS_VACANT = "vacant"
 STATUS_FULL = "full"
@@ -93,7 +95,8 @@ def activity_q(activity: str) -> Q | None:
     if not activity:
         return None
     field = next(field for key, field in ACTIVITY_TOTAL_FIELD.items() if str(key) == activity)
-    return Q(**{f"{field}__gt": 0})
+    has_hours = Q(**{f"{field}__gt": 0})
+    return has_hours | partner_q() if activity == str(Activity.LECTURE) else has_hours
 
 
 def apply_row_filters(queryset, task, *, status: str = "", activity: str = ""):

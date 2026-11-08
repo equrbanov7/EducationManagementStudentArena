@@ -77,13 +77,38 @@ def handle_add_lesson(request, offering):
         messages.error(request, _("Dərs saatı seçilməlidir — standart dərs saatlarından birini seçin."))
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
+    # Laboratoriya qrupu (sahib 2026-11-06): jurnal Lab-1 / Lab-2-yə bölünübsə lab dərsinin qrupu məcburidir.
+    from apps.registrar import lab_groups
+
+    try:
+        lab_group = lab_groups.parse(request.POST.get("lesson_lab_group"))
+        lab_groups.require_for_new(offering, kind=kind, lab_group=lab_group)
+    except lab_groups.LabGroupError as exc:
+        messages.error(request, str(exc))
+        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
+    # Seminar alt qrupu (sahib 2026-11-07): istəyə bağlı — boş = bütün qrup.
+    from apps.registrar import seminar_groups
+
+    try:
+        seminar_group = seminar_groups.parse(request.POST.get("lesson_seminar_group"))
+        seminar_groups.validate(offering, kind=kind, seminar_group=seminar_group)
+    except seminar_groups.SeminarGroupError as exc:
+        messages.error(request, str(exc))
+        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
+
     # #6 saat həddi + cədvəldən kənar dərsin SƏBƏBİ (UNEC P1-1) — «Aktivləşdir» yolu ilə ORTAQ qayda.
     # Data bərpasında cədvəldən kənar keçmiş dərsin səbəbi ayrıca yazılmayıbsa bərpa səbəbi götürülür.
     raw_off_reason = request.POST.get("off_schedule_reason") or (
         journal_full_edit.posted_reason(request) if full_edit else ""
     )
     off_reason, rule_error = journal_activation.check_manual_lesson(
-        offering, date=date, start_time=start_time, hours=hours, raw_reason=raw_off_reason
+        offering,
+        date=date,
+        start_time=start_time,
+        hours=hours,
+        raw_reason=raw_off_reason,
+        lab_group=lab_group,
+        seminar_group=seminar_group,
     )
     if rule_error:
         messages.error(request, rule_error)
@@ -136,6 +161,8 @@ def handle_add_lesson(request, offering):
                 room=room,
                 slot=slot,
                 off_schedule_reason=off_reason,
+                lab_group=lab_group,
+                seminar_group=seminar_group,
             )
         messages.success(request, _("Dərs əlavə edildi."))
     except gradebook.LessonRuleError as exc:

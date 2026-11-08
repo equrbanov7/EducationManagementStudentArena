@@ -1,0 +1,9 @@
+{% load i18n journal_names %}{% with name=row.student|journal_name %}
+<li class="lgx-stu" data-lgx-row data-lgx-name="{{ name|lower }}" data-enrollment="{{ row.enrollment.pk }}"{% if ws.can_edit %} draggable="true"{% endif %}>
+    <label class="lgx-stu__label">
+        {% if ws.can_edit %}<input type="checkbox" class="lgx-check" value="{{ row.enrollment.pk }}" data-lgx-pick aria-label="{{ name }}">{% endif %}
+        <span class="lgx-stu__avatar" aria-hidden="true">{{ name|slice:":1"|upper }}</span>
+        <span class="lgx-stu__name">{{ name }}</span>
+    </label>
+</li>
+{% endwith %}

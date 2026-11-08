@@ -34,14 +34,34 @@ def _build_effective_user_roles(user, profile):
         role_names.append(fallback_role_name)
 
     role_names = [role_name for role_name in role_names if not is_placeholder_role_name(role_name)]
-    role_names.sort(key=lambda role_name: (ProfileRole.LEVELS.get(role_name, 0), role_name), reverse=True)
-    return [
-        {
-            "name": role_name,
-            "label": PROFILE_ROLE_LABELS.get(role_name, role_name.replace("_", " ").title()),
-        }
+    rows = [
+        (ProfileRole.LEVELS.get(role_name, 0), role_name, PROFILE_ROLE_LABELS.get(role_name, role_name))
         for role_name in role_names
     ]
+    rows += _unit_role_rows(user, set(role_names))
+    rows.sort(key=lambda row: (row[0], row[1]), reverse=True)
+    return [{"name": name, "label": label} for _level, name, label in rows]
+
+
+def _unit_role_rows(user, known):
+    """Sabit siyahıda olmayan REAL üzvlük rolları öz adı ilə («Kafedra müdiri», «Dekan» …).
+
+    Sahib 2026-11-07: kafedra müdiri əvvəl səviyyə aliası ilə «Təşkilat Admini» görünürdü; indi rolun özü yazılır.
+    Üzvlüklər ``get_all_roles``-un artıq yüklədiyi (memo) siyahıdandır — əlavə sorğu yoxdur.
+    """
+    from ....roles import _resolve_active_organization_context
+    from ....services.role_catalog import role_label
+
+    _organization, memberships = _resolve_active_organization_context(user)
+    rows, seen = [], set(known)
+    for membership in memberships:
+        role = membership.role
+        normalized = ProfileRole.normalize_membership_role_name(role.name)
+        if role.name in seen or normalized in PROFILE_ROLE_LABELS or is_placeholder_role_name(role.name):
+            continue
+        seen.add(role.name)
+        rows.append((int(role.level or 0), role.name, role_label(role)))
+    return rows
 
 
 def _build_primary_position_label(profile, user_roles):

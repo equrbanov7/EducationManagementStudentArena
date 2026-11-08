@@ -210,6 +210,12 @@ def get_offering_journal(
         lessons = lessons[window_offset : window_offset + window_size]
     # `source_group` — «alt qrupdan əlavə olunub» çipi üçün (bax guest_roster.py).
     enrollments = read_memo.enrolled_roster(offering)  # GET-də tablar arasında bir sorğu (PERF-1 F-06)
+    from . import lab_groups  # laboratoriya qrupu (sahib 2026-11-06): qruplu lab dərsi yalnız öz qrupunun
+
+    lab_groups.prime(offering, enrollments)
+    from . import seminar_groups  # seminar alt qrupu (sahib 2026-11-07)
+
+    seminar_groups.prime(offering, enrollments)
     # Giriş balının komponent/bal/sərbəst-iş oxumaları BİR dəfə (sətir-sətir
     # 4 sorğu idi; 555 tələbəli açılışda 2 220 — bax finals_batch).
     from apps.registrar import finals_batch
@@ -268,6 +274,7 @@ def get_offering_journal(
     # Per-lesson özət (sütun başlığındakı gün özəti) — `journal_window`-dadır.
     total_students = len(enrollments)
     lesson_summary = journal_window.lesson_summaries(lessons, enrollments, mark_map, total_students)
+    has_lab_groups = bool(lab_groups.offering_groups(offering))
 
     # Yeni işarə: dərs günü (+ gecikmiş yazı günləri) və aktivləşdirmə pəncərəsi — servis qaydası ilə EYNİ.
     entry_rule = EntryRule.current(now=now)
@@ -283,6 +290,8 @@ def get_offering_journal(
             "seq": (total_lessons - (window_offset + idx)) if newest_first else (window_offset + idx + 1),
             "parity": _lesson_parity(offering, lesson),  # Ü/A başlıq etiketi
             "summary": lesson_summary.get(lesson.id, {}),
+            "lab_group_label": lab_groups.label(lesson.lab_group, offering) if lesson.lab_group else "",
+            "seminar_group_label": seminar_groups.lesson_label(lesson, offering),
         }
         for idx, lesson in enumerate(lessons)
     ]
@@ -303,6 +312,20 @@ def get_offering_journal(
                 absence_count += 1
         for lesson in lessons:
             mark = mark_map.get((enrollment.id, lesson.id))
+            if not lab_groups.applies(lesson, enrollment):  # başqa lab / seminar qrupunun dərsi — xana yoxdur
+                cells.append(
+                    {
+                        "lesson": lesson,
+                        "mark": mark,
+                        "allows_score": False,
+                        "locked": True,
+                        "lock_reason": "",
+                        "corrected": False,
+                        "writable": False,
+                        "off_group": True,
+                    }
+                )
+                continue
             corrected = mark is not None and mark.id in corrected_mark_ids
             # Balsız i/e xanası pəncərədən sonra da dəyişir — dərsə yeni qeyd yazmaq olursa (sahib 2026-10-26).
             lock_reason = journal_edit_windows.mark_lock_reason(
@@ -374,6 +397,11 @@ def get_offering_journal(
                 "enrollment": enrollment,
                 "student": enrollment.student,
                 "home_group": home_groups.get(enrollment.student_id),
+                "lab_group_label": (
+                    lab_groups.label(enrollment.lab_group, offering) if has_lab_groups and enrollment.lab_group else ""
+                ),
+                "lab_group_missing": has_lab_groups and not enrollment.lab_group,
+                "seminar_group_label": seminar_groups.lesson_label(enrollment, offering),
                 "cells": cells,
                 "absence_hours": absence_hours,
                 # q/b (qayıb) SAYı — UI saat əvəzinə bunu göstərir (barred saat-limitinə görə).
@@ -422,6 +450,7 @@ def get_offering_journal(
             else (int(allowed_absence // DEFAULT_LESSON_HOURS) if allowed_absence else 0)
         ),
         "level_policy": level_policy,
+        "has_lab_groups": has_lab_groups,
         "entry_score_max": scheme.entry_score_max,
         # Dərs pəncərəsi (P1-8) — şablondakı naviqasiya zolağı üçün.
         "lesson_window": journal_window.window_meta(

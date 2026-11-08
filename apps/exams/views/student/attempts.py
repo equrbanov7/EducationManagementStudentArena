@@ -238,7 +238,17 @@ def start_exam(request, slug):
         and get_active_attempt_for_user(exam, request.user) is None
     ):
         back_url = resolve_author_failure_redirect(request, exam) if trial else resolve_exam_failure_redirect(request)
-        context = {"exam": exam, "back_url": back_url}
+        # Sahib 2026-11-06: çoxdilli imtahanda dil burada MƏCBURİ addımdır (bax services/language_step.py).
+        from apps.exams.services.language_step import language_step_context
+        from apps.exams.services.language_variants import available_language_options, resolve_requested_language
+
+        chosen = resolve_requested_language(exam, request.GET.get("language")) or ""
+        context = {
+            "exam": exam,
+            "back_url": back_url,
+            "form_action": request.get_full_path(),
+            **language_step_context(request, available_language_options(exam), chosen=chosen),
+        }
         return render(request, "exams/student/exam_start_confirm.html", context)
     return _start_or_resume_attempt(request, exam)
 

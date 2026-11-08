@@ -14,7 +14,7 @@ from .journal_assignment_sources import teacher_journal_assignments
 from .journal_master_history import attach as attach_master_history
 from .journal_master_history import historical_marks, identity_q
 from .journal_own_history import recorded_lessons
-from .models import Enrollment, JournalShare, Lesson, SlotKind
+from .models import Enrollment, JournalShare, Lesson, SlotKind, StudentAcademicRecord
 from .practical_label import kind_choices
 
 KINDS = ("lecture", "seminar", "lab")
@@ -84,6 +84,7 @@ def project(queryset, user, organization, *, observed=()):
             "journal_is_owned_past_history",
             "journal_is_master_history",
             "journal_has_assessment_history",
+            "journal_is_empty_rolled_subgroup",
         }
         flags.update(f"journal_{prefix}_{kind}" for prefix in ("current", "recorded") for kind in KINDS)
         flags.update(f"journal_master_{kind}" for kind in KINDS)
@@ -133,13 +134,53 @@ def project(queryset, user, organization, *, observed=()):
     annotations["journal_is_current_load"] = Case(
         When(current, then=Value(True)), default=Value(False), output_field=BooleanField()
     )
-    return queryset.annotate(**annotations).filter(
-        Q(journal_is_current_load=True)
-        | Q(journal_has_records=True)
-        | Q(journal_has_assessment_history=True)
-        | Q(journal_is_owned_past_history=True)
-        | Q(journal_is_master_history=True)
-        | Q(pk__in=observed)
+    annotations["journal_is_empty_rolled_subgroup"] = _empty_rolled_subgroup()
+    return (
+        queryset.annotate(**annotations)
+        .filter(
+            Q(journal_is_current_load=True)
+            | Q(journal_has_records=True)
+            | Q(journal_has_assessment_history=True)
+            | Q(journal_is_owned_past_history=True)
+            | Q(journal_is_master_history=True)
+            | Q(pk__in=observed)
+        )
+        .exclude(journal_is_empty_rolled_subgroup=True)
+    )
+
+
+def _empty_rolled_subgroup():
+    """Alt qrupun BOŞ jurnalı, tələbələri ana qrupun jurnalında oxuyursa — siyahıda göstərilmir.
+
+    Sahib 2026-11-07: «234 K» ana qrupdur, 234 K-1 / K-2 alt qrupları; mühazirə və seminar ana qrupun jurnalında
+    keçirsə, alt qrupun jurnalını ayrıca göstərməyək. Yalnız heç nə itmirsə gizlənir: alt qrupun jurnalında dərs
+    YOXDUR, aktiv tələbə YOXDUR və həmin fənn + semestr üzrə BAŞQA aktiv jurnalda bu alt qrupun aktiv tələbəsi VAR —
+    ya qonaq kimi (``source_group``), ya da adi qeydiyyatla, amma akademik qrupu indi bu alt qrupdur (prod: «234 K az»
+    jurnalında K-1 / K-2-nin tələbələri qonaq deyil, qrupa bölünmə sonradan olub). Dərs və ya tələbə düşən kimi (məs.
+    seminar bölünəndə) jurnal yenə görünür."""
+    member = StudentAcademicRecord.objects.filter(
+        organization_id=OuterRef("organization_id"),
+        student_id=OuterRef("student_id"),
+        group_id=OuterRef(OuterRef("group_id")),
+        is_active=True,
+    )
+    rolled = (
+        Enrollment.objects.filter(
+            organization_id=OuterRef("organization_id"),
+            offering__subject_id=OuterRef("subject_id"),
+            offering__period_id=OuterRef("period_id"),
+            offering__is_active=True,
+            status=Enrollment.Status.ENROLLED,
+        )
+        .exclude(offering_id=OuterRef("pk"))
+        .filter(Q(source_group_id=OuterRef("group_id")) | Exists(member))
+    )
+    own_students = Enrollment.objects.filter(offering_id=OuterRef("pk"), status=Enrollment.Status.ENROLLED)
+    lessons = Lesson.objects.filter(offering_id=OuterRef("pk"))
+    return Case(
+        When(Exists(rolled) & ~Exists(own_students) & ~Exists(lessons), then=Value(True)),
+        default=Value(False),
+        output_field=BooleanField(),
     )
 
 

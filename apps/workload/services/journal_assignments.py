@@ -7,9 +7,10 @@ from django.db.models import Prefetch, Q
 
 from core.group_identity import canonical_aliases
 
-from ..constants import RowKind, TaskStatus
+from ..constants import Activity, RowKind, TaskStatus
 from ..models import TeacherAssignment, TeachingTaskRow
 from .offering_shares import KINDS, _assignment_group
+from .patok import taught_partner_rows
 
 
 def _registered_children(organization, groups):
@@ -55,15 +56,19 @@ def _assignment_map(*, organization, teacher_id, include_hours=False):
     intensive = Q(row_kind=RowKind.INTENSIVE, intensive_offering__is_active=True) & ~Q(
         task__status=TaskStatus.CANCELLED
     )
+    # Sahib 2026-11-08: açıq bağlı patok tərəfdaşı (``patok_lead`` → bu müəllimin mühazirə apardığı sətir) — öz
+    # bölgüsü olmasa da mühazirəçinin jurnalıdır (alt sorğu; sorğu sayı dəyişmir).
+    lectured = assignments.filter(activity=Activity.LECTURE).values("row_id")
     rows = list(
-        TeachingTaskRow.objects.filter(
-            organization=organization, task__organization=organization, assignments__in=assignments
-        )
+        TeachingTaskRow.objects.filter(organization=organization, task__organization=organization)
+        .filter(Q(pk__in=assignments.values("row_id")) | Q(patok_lead_id__in=lectured))
         .filter(released | intensive)
         .select_related("task", "intensive_offering")
         .prefetch_related("groups", Prefetch("assignments", queryset=assignments, to_attr="journal_assignments"))
         .distinct()
     )
+    # Patokun ikinci/üçüncü qrupu: mühazirəsi bu müəllimin aparıcı sətrindədir (sahib 2026-11-07, :mod:`.patok`).
+    partners = taught_partner_rows(rows, teacher_id, owns=lambda row: bool(row.journal_assignments))
     groups = [group for row in rows for group in row.groups.all()]
     children = _registered_children(organization, groups) if groups else {}
     aliases = canonical_aliases(groups)
@@ -109,6 +114,16 @@ def _assignment_map(*, organization, teacher_id, include_hours=False):
                             result[key][assignment.activity] += assignment.hours
                         else:
                             result[key].add(assignment.activity)
+    for row in partners:
+        for parent in row.groups.all():
+            if parent.organization_id != organization.pk:
+                continue
+            for group in (parent, *children.get(parent.pk, ())):
+                key = (row.subject_id, row.period_id, aliases.get(group.pk, group).pk)
+                if include_hours:
+                    result[key]["lecture"] = max(result[key]["lecture"], int(row.lecture_plan))
+                else:
+                    result[key].add("lecture")
     return dict(result)
 
 

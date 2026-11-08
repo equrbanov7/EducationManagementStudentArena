@@ -14,11 +14,13 @@ from apps.courses.models import CourseMembership
 from apps.exams.models import ExamAttempt, StudentExamAttemptGrant
 from apps.exams.public import (
     ATTEMPT_FINISHED_STATUSES,
+    available_language_options_for_exams,
     cabinet_center_notice,
     center_entry_url_for_exam,
     exam_network_allowed,
     exam_network_denied_message,
     is_center_exam,
+    language_step_options,
     start_intent_token,
     student_final_exam_context,
 )
@@ -207,7 +209,10 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
         return ""
 
     if filter_type in {"all", "exams"}:
-        for exam in assigned_exams_qs:
+        assigned_exams = list(assigned_exams_qs)
+        # Sahib 2026-11-06: çoxdilli imtahanda kabinet modalı MƏCBURİ dil addımı göstərir (toplu, 2 sorğu).
+        exam_language_options = available_language_options_for_exams(assigned_exams)
+        for exam in assigned_exams:
             if not matches_search(
                 exam.title,
                 exam.description,
@@ -287,6 +292,11 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
                 # Cədvəl-blok səbəbi (boşdursa blok yoxdur) — modal "başla"
                 # əvəzinə səliqəli izah göstərsin.
                 "start_block_reason": _schedule_block_reason(exam),
+                # Zal axınında dil giriş modalında seçilir — kabinetdə yalnız adi (quiz/yazılı…) imtahan üçün.
+                "language_options": (
+                    [] if use_center_flow else language_step_options(exam_language_options.get(exam.id) or [])
+                ),
+                "language_options_id": f"assigned-exam-languages-{exam.id}",
             }
             if use_center_flow:
                 extra.update(

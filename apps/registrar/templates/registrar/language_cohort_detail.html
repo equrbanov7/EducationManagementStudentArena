@@ -44,7 +44,7 @@
     </form>
   </div>
 
-  <p class="lc-rule"><i class="fas fa-circle-info" aria-hidden="true"></i><span>{% trans "Səviyyə qaydası: davamiyyət 10, seminar 10, midterm 10, imtahan 70 bal. Qayıb limiti 10 q/b-dir; 11 q/b olduqda imtahana buraxılmır." context "registrar.language_cohort" %} {% trans "Əsas qrup dəyişmir. Səviyyə dəyişəndə əvvəlki qeydiyyat tarixçəyə keçir; qiymət və davamiyyət əvvəlki jurnalda qalır, yeni jurnala köçürülmür." context "registrar.language_cohort" %}</span></p>
+  <p class="lc-rule"><i class="fas fa-circle-info" aria-hidden="true"></i><span>{% trans "Səviyyə qaydası: davamiyyət 10, praktiki məşğələ 10, midterm 10, imtahan 70 bal. Qayıb limiti 10 q/b-dir; 11 q/b olduqda imtahana buraxılmır." context "registrar.language_cohort" %} {% trans "Əsas qrup dəyişmir. Səviyyə dəyişəndə əvvəlki qeydiyyat tarixçəyə keçir; qiymət və davamiyyət əvvəlki jurnalda qalır, yeni jurnala köçürülmür." context "registrar.language_cohort" %}</span></p>
   {% include "accounts/profile/_messages.html" %}
   {% if not roster_open %}<p class="lc-status" role="status"><i class="fas fa-lock" aria-hidden="true"></i><span>{% trans "Jurnal bağlıdır və ya semestr cari deyil. Siyahı yalnız oxunur." context "registrar.language_cohort" %}</span></p>{% endif %}
 

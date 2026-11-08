@@ -1,0 +1,26 @@
+{
+  "format": "mexanika-lessons/1",
+  "kind_changes": [
+    {"legacy_journal": 14865, "offering": "37d83258-d26b-42a9-8a49-a3ba6ad84134", "date": "2026-09-18", "start_time": "10:10", "from": "seminar", "to": "lab"},
+    {"legacy_journal": 14865, "offering": "37d83258-d26b-42a9-8a49-a3ba6ad84134", "date": "2026-09-25", "start_time": "10:10", "from": "seminar", "to": "lab"},
+    {"legacy_journal": 14865, "offering": "37d83258-d26b-42a9-8a49-a3ba6ad84134", "date": "2026-10-02", "start_time": "10:10", "from": "seminar", "to": "lab"},
+    {"legacy_journal": 14865, "offering": "37d83258-d26b-42a9-8a49-a3ba6ad84134", "date": "2026-10-09", "start_time": "10:10", "from": "seminar", "to": "lab"},
+    {"legacy_journal": 15061, "offering": "a43a61a1-e10e-4556-96b0-198ef5effc85", "date": "2026-09-15", "start_time": "10:10", "from": "seminar", "to": "lecture"}
+  ],
+  "moves": [
+    {
+      "legacy_journal": 14155,
+      "source": "4c90e0fe-6abf-4df0-bd7a-e48a66e6f1d0",
+      "target": "824f715c-3157-4013-9b61-b72ae22465f8",
+      "remove_source_instructor": true,
+      "lessons": [
+        {"date": "2026-09-25", "start_time": "13:35", "kind": "lecture"},
+        {"date": "2026-09-25", "start_time": "15:15", "kind": "seminar"},
+        {"date": "2026-10-02", "start_time": "13:35", "kind": "lecture"},
+        {"date": "2026-10-02", "start_time": "15:15", "kind": "seminar"},
+        {"date": "2026-10-09", "start_time": "13:35", "kind": "lecture"},
+        {"date": "2026-10-12", "start_time": "15:15", "kind": "seminar"}
+      ]
+    }
+  ]
+}

@@ -25,6 +25,7 @@ from . import (
     journal_list_unit_lookup,
     journal_master_history,
     journal_reviewed_history,
+    lab_groups_views,
     language_cohort_history,
     language_cohort_views,
     lessons_log_views,
@@ -34,6 +35,7 @@ from . import (
     semester_actions,
     subject_exempt_views,
     subject_merge_views,
+    syllabus_peers,
     syllabus_views,
     views,
 )
@@ -123,6 +125,12 @@ urlpatterns = [
         syllabus_views.offering_syllabus_pdf,
         name="offering_syllabus_pdf",
     ),
+    # Banner: bu fənnin mövcud sillabusları (qrup, müəllif, status) + «dəyişmədən tətbiq et» təklifi (sahib 2026-11-08).
+    path(
+        "<uuid:offering_id>/sillabus/movcud.json",
+        syllabus_peers.journal_syllabus_peers,
+        name="journal_syllabus_peers",
+    ),
     # «Alt qrupdan tələbə əlavə et» (koordinator/dekanlıq) — uuid catch-all-dan ƏVVƏL.
     path(
         "<uuid:offering_id>/alt-qrup/qruplar/",
@@ -148,6 +156,10 @@ urlpatterns = [
         subject_exempt_views.subject_exempt_restore,
         name="journal_subject_exempt_restore",
     ),
+    # «Lab qrupları» — jurnalda laboratoriya qruplarını yaratmaq / adlandırmaq / tələbə yerləşdirmək (sahib 2026-11-06).
+    # 2026-11-07: ekran kabinetin «Lab qrupları» bölməsinə köçdü — köhnə ünvan oraya yönləndirir, yazı JSON-dadır.
+    path("<uuid:offering_id>/lab-qruplari/", lab_groups_views.manage, name="journal_lab_groups"),
+    path("<uuid:offering_id>/lab-qruplari/emel/", lab_groups_views.action, name="journal_lab_groups_action"),
     # Dərs modalının axtarışlı/lazy seçiciləri (QA 2026-09-05 P3-13) — uuid
     # catch-all-dan ƏVVƏL.
     path(

@@ -24,6 +24,7 @@ Zolaqlar native `<progress>`-dir (dinamik en üçün inline style lazım deyil).
         <span class="ems-breakdown__label">{% trans "Aktivlik" context "registrar.journal" %}</span>
         <span class="ems-breakdown__value">{{ parts.activity|floatformat:"-2" }} <span class="ems-breakdown__max">/{{ parts.activity_max|floatformat:"-2" }}</span></span>
         <progress class="ems-progress" value="{{ parts.activity|unlocalize }}" max="{{ parts.activity_max|unlocalize }}" aria-hidden="true"></progress>
+        {% if parts.practical %}<span class="ems-breakdown__note">{% trans "praktiki məşğələ" context "registrar.journal" %}</span>{% endif %}
         {% with detail=parts.activity_detail %}{% if detail.split %}
         <span class="ems-breakdown__note">{% trans "seminar" context "registrar.journal" %} {{ detail.seminar_part|floatformat:"-2" }} + {% trans "lab" context "registrar.journal" %} {{ detail.lab_part|floatformat:"-2" }}</span>
         {% endif %}{% endwith %}

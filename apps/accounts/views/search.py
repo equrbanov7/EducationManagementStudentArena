@@ -89,6 +89,7 @@ _NAV_ICONS = {
     "credit-recognition": "fa-earth-europe",
     "journal-removals": "fa-user-minus",
     "subgroup-students": "fa-users-viewfinder",
+    "lab-groups": "fa-flask",
     "teaching-appeals": "fa-scale-balanced",
     "unit-subject-folders": "fa-folder-open",
     "manage-appeals": "fa-scale-balanced",

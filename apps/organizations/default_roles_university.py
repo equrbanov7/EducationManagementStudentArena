@@ -291,6 +291,9 @@ UNIVERSITY_ROLES = [
             # (Membership.scope_unit → apps.syllabus.services.scoping, fail-closed).
             # `syllabus.edit` QƏSDƏN yoxdur: müdir müəllimin mətnini özü yazmır,
             # düzəliş tələbi ilə geri qaytarır.
+            # Sahib 2026-11-07: öz kafedrasının müəllimlərinin jurnallarına BAXIŞ (UNIT əhatəsi → kafedra
+            # açılışları, `journal_scope.journal_view_q`). Miqrasiya 0081 mövcud tenantları yeniləyir.
+            "journal.view",
             "syllabus.view",
             "syllabus.review",
             "syllabus.approve",

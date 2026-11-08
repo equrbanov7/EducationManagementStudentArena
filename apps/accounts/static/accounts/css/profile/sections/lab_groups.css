@@ -1,0 +1,290 @@
+/* «Lab qrupları» — kabinet bölməsi (sahib 2026-11-07).
+ * Şablon: accounts/profile/sections/_lab_groups.html (+ lab_groups/_*.html); JS: accounts/js/profile/lab_groups.js.
+ * Düzüm: solda jurnal siyahısı, sağda iş sahəsi (lövhə: «Qrupsuz» + qrup sütunları + «Yeni qrup»).
+ * Telefonda (≤ 960px) yalnız biri görünür: jurnal seçiləndə siyahı gizlənir, «← Jurnallar» geri qaytarır. */
+
+.lgx { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.lgx .ems-kpis { margin-bottom: 0; }
+.lgx-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.lgx-layout {
+    display: grid;
+    grid-template-columns: minmax(240px, 290px) minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+}
+
+/* ── Jurnal siyahısı ─────────────────────────────────────────────────────── */
+.lgx-journals {
+    position: sticky;
+    top: calc(var(--ems-header-h, 64px) + 12px);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: calc(100vh - var(--ems-header-h, 64px) - 32px);
+    min-width: 0;
+    padding: 12px;
+    overflow: auto;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+}
+.lgx-journals__head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 0 2px 2px; }
+.lgx-journals__title {
+    font-size: 11.5px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ems-neutral-500);
+}
+.lgx-journals__range { font-size: 12px; font-weight: 600; color: var(--ems-neutral-500); }
+.lgx-journals .ems-state { padding: 24px 8px; }
+
+.lgx-jlist { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.lgx-jcard {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px 12px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 12px;
+    background: var(--ems-neutral-0);
+    color: var(--ems-neutral-800);
+    text-decoration: none;
+    transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+.lgx-jcard:hover { border-color: var(--ems-primary-300); background: var(--ems-primary-50); color: var(--ems-neutral-900); }
+.lgx-jcard:focus-visible { outline: none; box-shadow: var(--ems-sh-focus); }
+.lgx-jcard.is-selected {
+    border-color: var(--ems-primary-500);
+    background: var(--ems-primary-50);
+    box-shadow: inset 3px 0 0 var(--ems-primary-600);
+}
+.lgx-jcard__top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+.lgx-jcard__subject { font-size: 13.5px; font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
+.lgx-jcard__meta, .lgx-jcard__teacher {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 12px; color: var(--ems-neutral-500);
+}
+.lgx-jcard__meta i, .lgx-jcard__teacher i { margin-right: 3px; font-size: 11px; }
+.lgx-jcard__meta .ems-mono { font-size: 11px; }
+.lgx-jcard__foot { display: flex; align-items: center; gap: 8px; }
+.lgx-jcard__bar { flex: 1 1 auto; height: 5px; }
+/* Faiz DİNAMİKDİR → şablon `style="--pct:NN%"` verir (kabinetin yeganə icazəli inline forması). */
+.lgx .ems-bar__fill { width: var(--pct, 0%); }
+.lgx-jcard__count { font-size: 11.5px; font-weight: 700; color: var(--ems-neutral-600); white-space: nowrap; }
+.lgx-jcard__warn { font-size: 11.5px; font-weight: 700; color: var(--ems-warning-700); }
+
+.lgx-tag {
+    flex: 0 0 auto;
+    padding: 1px 8px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.lgx-tag--ok { border-color: var(--ems-violet-100); background: var(--ems-violet-50); color: var(--ems-violet-800); }
+.lgx-tag--todo { border-color: var(--ems-warning-bd); background: var(--ems-warning-bg); color: var(--ems-warning-800); }
+
+.lgx-pager { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 4px; }
+.lgx-pager__page { font-size: 12px; font-weight: 700; color: var(--ems-neutral-500); }
+
+/* ── «Jurnal seçin» boş vəziyyəti ────────────────────────────────────────── */
+.lgx-main { min-width: 0; }
+.lgx-pick {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 56px 24px;
+    border: 1px dashed var(--ems-neutral-300);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg-subtle);
+    text-align: center;
+}
+.lgx-pick__icon {
+    display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; margin-bottom: 6px;
+    border-radius: 16px; background: var(--ems-violet-50); color: var(--ems-violet-600); font-size: 22px;
+}
+.lgx-pick__title { margin: 0; font-size: 15px; font-weight: 800; color: var(--ems-neutral-800); }
+.lgx-pick__body { max-width: 420px; margin: 0; font-size: 13px; color: var(--ems-neutral-500); }
+
+/* ── İş sahəsi ───────────────────────────────────────────────────────────── */
+.lgx-ws {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg);
+    box-shadow: var(--ems-sh-card);
+}
+.lgx-ws.is-busy { opacity: 0.65; pointer-events: none; }
+.lgx-ws__head { display: flex; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.lgx-ws__back {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    flex-basis: 100%;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ems-primary-700);
+    text-decoration: none;
+}
+.lgx-ws__heading { flex: 1 1 260px; min-width: 0; }
+.lgx-ws__title { margin: 0; font-size: 18px; font-weight: 800; line-height: 1.3; color: var(--ems-neutral-900); overflow-wrap: anywhere; }
+.lgx-ws__title .ems-mono { font-size: 12px; vertical-align: middle; }
+.lgx-ws__meta {
+    display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 4px 0 0; font-size: 12.5px; color: var(--ems-neutral-500);
+}
+.lgx-ws__meta i { margin-right: 4px; font-size: 11px; }
+.lgx-ws__journal { flex: 0 0 auto; }
+.lgx-ws__banner { display: flex; align-items: center; gap: 8px; margin: 0; }
+.lgx-ws__hint {
+    display: flex; align-items: flex-start; gap: 8px; margin: 0; padding: 10px 12px;
+    border-radius: 10px; background: var(--ems-violet-50); color: var(--ems-violet-800); font-size: 13px;
+}
+.lgx-ws__hint--quiet { padding: 0; background: none; color: var(--ems-neutral-500); font-size: 12.5px; }
+
+.lgx-stats {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 10px;
+}
+.lgx-stats__item {
+    display: flex; flex-direction: column; min-width: 92px; padding: 8px 12px;
+    border: 1px solid var(--ems-neutral-200); border-radius: 12px; background: var(--ems-neutral-0);
+}
+.lgx-stats__item--warn { border-color: var(--ems-warning-bd); background: var(--ems-warning-bg); }
+.lgx-stats__value { font-size: 20px; font-weight: 800; line-height: 1.2; color: var(--ems-neutral-900); }
+.lgx-stats__label { font-size: 11.5px; font-weight: 700; color: var(--ems-neutral-500); }
+.lgx-stats__progress {
+    display: flex; flex: 1 1 200px; flex-direction: column; justify-content: center; gap: 6px; min-width: 180px;
+    padding: 8px 12px; border: 1px solid var(--ems-neutral-200); border-radius: 12px; background: var(--ems-neutral-0);
+}
+
+.lgx-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.lgx-toolbar__search { flex: 1 1 220px; max-width: 340px; }
+.lgx-toolbar__move { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; margin-left: auto; }
+.lgx-toolbar__count { font-size: 12.5px; color: var(--ems-neutral-600); white-space: nowrap; }
+.lgx-toolbar__target { flex: 0 0 200px; width: 200px; min-width: 0; }
+.lgx-toolbar__move .ems-btn { white-space: nowrap; }
+
+/* ── Lövhə və sütunlar ───────────────────────────────────────────────────── */
+.lgx-board {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 12px;
+    align-items: start;
+}
+.lgx-col {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 14px;
+    background: var(--ems-bg-subtle);
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+.lgx-col--none { background: var(--ems-warning-50); border-color: var(--ems-warning-bd); }
+.lgx-col.is-drop {
+    border-style: dashed;
+    border-color: var(--ems-primary-500);
+    background: var(--ems-primary-50);
+}
+.lgx-col__head { display: flex; align-items: center; gap: 8px; min-height: 28px; }
+.lgx-col__titles { display: flex; flex: 1 1 auto; align-items: center; gap: 6px; min-width: 0; }
+.lgx-col__titles { flex-wrap: wrap; }
+.lgx-col__title {
+    margin: 0; font-size: 14px; font-weight: 800; line-height: 1.3; color: var(--ems-neutral-800);
+    overflow-wrap: anywhere;
+}
+.lgx-col--none .lgx-col__title { color: var(--ems-warning-800); }
+.lgx-col__badge {
+    flex: 0 0 auto; padding: 0 6px; border-radius: 6px; background: var(--ems-violet-50);
+    color: var(--ems-violet-800); font-size: 10.5px; font-weight: 800;
+}
+.lgx-col__count {
+    flex: 0 0 auto; min-width: 24px; padding: 1px 8px; border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-0); border: 1px solid var(--ems-neutral-200);
+    color: var(--ems-neutral-700); font-size: 12px; font-weight: 800; text-align: center;
+}
+.lgx-col__tools { display: inline-flex; gap: 2px; }
+.lgx-col__sub { margin: 0; font-size: 11.5px; color: var(--ems-neutral-500); }
+.lgx-col__sub i { margin-right: 3px; }
+.lgx-col__sub--warn { color: var(--ems-warning-800); }
+.lgx-col__empty {
+    margin: 0; padding: 18px 8px; border: 1px dashed var(--ems-neutral-300); border-radius: 10px;
+    color: var(--ems-neutral-500); font-size: 12.5px; text-align: center;
+}
+.lgx-col--none .lgx-col__empty { border-color: var(--ems-success-bd); color: var(--ems-success-700); }
+
+.lgx-rename { display: flex; flex-direction: column; gap: 6px; }
+.lgx-rename[hidden] { display: none; }
+.lgx-rename__actions { display: flex; gap: 6px; }
+
+.lgx-check { width: 16px; height: 16px; margin: 0; flex: 0 0 auto; accent-color: var(--ems-primary-600); cursor: pointer; }
+.lgx-check:disabled { cursor: not-allowed; }
+
+.lgx-list { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.lgx-stu {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: 9px;
+    background: var(--ems-neutral-0);
+    transition: border-color 0.12s ease, background-color 0.12s ease, opacity 0.12s ease;
+}
+.lgx-stu[hidden] { display: none; }
+.lgx-stu[draggable="true"] { cursor: grab; }
+.lgx-stu[draggable="true"]:hover { border-color: var(--ems-primary-300); }
+.lgx-stu.is-picked { border-color: var(--ems-primary-500); background: var(--ems-primary-50); }
+.lgx-stu.is-dragging { opacity: 0.45; }
+.lgx-stu__label { display: flex; flex: 1 1 auto; align-items: center; gap: 8px; min-width: 0; margin: 0; cursor: inherit; }
+.lgx-stu__avatar {
+    display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; width: 24px; height: 24px;
+    border-radius: 50%; background: var(--ems-violet-50); color: var(--ems-violet-800); font-size: 11px; font-weight: 800;
+}
+.lgx-stu__name {
+    overflow: hidden; font-size: 13px; font-weight: 600; color: var(--ems-neutral-800);
+    text-overflow: ellipsis; white-space: nowrap;
+}
+
+.lgx-new {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 14px;
+    border: 1.5px dashed var(--ems-primary-300);
+    border-radius: 14px;
+    background: var(--ems-neutral-0);
+}
+.lgx-new__icon {
+    display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; width: 32px; height: 32px;
+    border-radius: 10px; background: var(--ems-primary-50); color: var(--ems-primary-700);
+}
+.lgx-new__label { font-size: 13.5px; font-weight: 800; color: var(--ems-neutral-800); }
+
+/* ── Telefon / dar ekran ─────────────────────────────────────────────────── */
+@media (max-width: 960px) {
+    .lgx-layout { grid-template-columns: minmax(0, 1fr); }
+    .lgx-journals { position: static; max-height: none; box-shadow: none; }
+    .lgx-layout:not(.lgx-layout--open) .lgx-main { display: none; }
+    .lgx-layout--open .lgx-journals { display: none; }
+    .lgx-ws__back { display: inline-flex; }
+}
+@media (max-width: 560px) {
+    .lgx-ws { padding: 12px; }
+    .lgx-toolbar__search { max-width: none; }
+    .lgx-toolbar__move { flex-wrap: wrap; margin-left: 0; width: 100%; }
+    .lgx-toolbar__target { flex: 1 1 160px; }
+    .lgx-board { grid-template-columns: minmax(0, 1fr); }
+    .lgx-ws__journal { width: 100%; justify-content: center; }
+}

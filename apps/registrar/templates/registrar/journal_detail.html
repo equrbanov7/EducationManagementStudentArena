@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260831-excuse">
     {% if selfwork_active %}<link rel="stylesheet" href="{% static 'registrar/css/selfwork_archive.css' %}?v=20260827-1">{% endif %}
     <link rel="stylesheet" href="{% static 'registrar/css/syllabus_view.css' %}?v=20261025-weeks">
+    {% if syllabus_notice.show_banner %}<link rel="stylesheet" href="{% static 'registrar/css/journal_syllabus_peers.css' %}?v=20261108-peers">{% endif %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal_guest.css' %}?v=20261104-divider">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_subject_exempt.css' %}?v=20261104-reason">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_removal_reason.css' %}?v=20261104-reason">
@@ -25,6 +26,7 @@
     <link rel="stylesheet" href="{% static 'registrar/css/journal_cell_hint.css' %}?v=20261014-notip">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_autosave.css' %}?v=20261014-auto">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_mark_lock.css' %}?v=20261025-lock">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_lab_groups.css' %}?v=20261107-sem1">
     {% if not correction_mode %}<link rel="stylesheet" href="{% static 'registrar/css/journal_idle_close.css' %}?v=20261027-2">{% endif %}
     {% comment %}Sakit düzüm qatı — HƏMİŞƏ SONUNCU yüklənir ki, yuxarıdakı
     fayllardakı düzüm fərqlərini üstələsin; rəng palitrasına toxunmur.{% endcomment %}
@@ -108,10 +110,12 @@
             <div class="jd2-winhead-left">
                 <span class="jd2-wintitle">{% trans "Jurnal" context "registrar.journal" %}</span>
                 {% if offering.group %}<span class="jd2-wincode">{{ offering.group.name }}</span>{% endif %}
-                {% if offering.is_intensive %}<span class="jd2-wincode jd2-intensive" title="{{ offering.format_note }}">{% trans "İntensiv" context "registrar.intensive" %} · {{ offering.starts_on|date:"d.m" }}–{{ offering.ends_on|date:"d.m.Y" }}</span>{% endif %}
+                {# Başlama tarixi plandır — erkən başlamaq olar (sahib 2026-11-07); nişanda yalnız son tarix, plan title-da. #}
+                {% if offering.is_intensive %}<span class="jd2-wincode jd2-intensive" title="{% trans 'Plan' context 'registrar.intensive' %}: {{ offering.starts_on|date:'d.m.Y' }}–{{ offering.ends_on|date:'d.m.Y' }}{% if offering.format_note %} · {{ offering.format_note }}{% endif %}">{% blocktrans with end=offering.ends_on|date:"d.m.Y" context "registrar.intensive" %}İntensiv · {{ end }}-dək{% endblocktrans %}</span>{% endif %}
                 {% if journal_share_chip %}<span class="jd2-share-chip" data-share-kinds="{{ journal_share_chip.kinds|join:', ' }}" title="{{ journal_share_chip.kinds|join:', ' }}"><i class="fas fa-user-group" aria-hidden="true"></i> {{ journal_share_chip.text }}</span>{% endif %}
-                <span class="jd2-winsub">{{ offering.subject.name }} · {{ journal.rows|length }} {% trans "tələbə" context "registrar.journal" %}</span>
+                <span class="jd2-winsub">{{ offering.subject.name }}{% if journal_lab_label %} · <b class="jd2-winsub__lab">{{ journal_lab_label }}</b>{% endif %} · {{ journal.rows|length }} {% trans "tələbə" context "registrar.journal" %}</span>
                 {% include "registrar/partials/_jd_practical_toggle.html" %}
+                {% include "registrar/partials/_jd_lab_groups_link.html" %}
                 {% if journal.scheme.is_published %}<span class="jd2-winlock"><i class="fas fa-lock"></i> {% trans "Yekunlaşdırılıb" context "registrar.journal" %}</span>{% endif %}
             </div>
             <div class="jd2-winhead-right">
@@ -328,6 +332,8 @@
     <script src="{% static 'registrar/js/journal_detail.js' %}?v=20260715-jbatch2"></script>
     {% if excused_management_url %}<script src="{% static 'registrar/js/excused_management.js' %}?v=20261101"></script>{% endif %}
     <script src="{% static 'registrar/js/syllabus_view.js' %}?v=20261025-weeks"></script>
+    {# Banner: bu fənnin mövcud sillabusları + «dəyişmədən tətbiq et» təklifi (sahib 2026-11-08). #}
+    {% if syllabus_notice.show_banner %}<script src="{% static 'registrar/js/journal_syllabus_peers.js' %}?v=20261108-peers"></script>{% endif %}
     {# Korpus → otaq kaskadı journal_grid.js-dən ƏVVƏL yüklənir (o, modulu boot-da oxuyur). #}
     {# Seçilmiş tarixin cədvəl slotu (otaq + saat, sahib 2026-10-17) — otaq kaskadı ondan oxuyur. #}
     <script src="{% static 'registrar/js/journal_lesson_schedule.js' %}?v=20261017-room"></script>
@@ -335,9 +341,11 @@
     <script src="{% static 'registrar/js/journal_lesson_modal_guard.js' %}?v=20260920-guard"></script>
     {# journal_grid 2 hissədə, SIRA VACİBDİR: çiplər/qaralama/təsdiq → dərs modalı (2026-09-21 bölgüsü). #}
     <script src="{% static 'registrar/js/journal_grid.js' %}?v=20261014-auto"></script>
-    <script src="{% static 'registrar/js/journal_grid_lesson_modal.js' %}?v=20260921-split"></script>
+    <script src="{% static 'registrar/js/journal_grid_lesson_modal.js' %}?v=20261107-sem1"></script>
     <script src="{% static 'registrar/js/journal_lesson_prefill.js' %}?v=20261105-mr197"></script>{# «Yeni dərs» dolu açılır (sahib 2026-10-10) #}
     <script src="{% static 'registrar/js/journal_lesson_topic.js' %}?v=20261025-topic"></script>{# plan seçimi ↔ sərbəst mövzu (2026-10-25) #}
+    {% if lab_group_choices %}<script src="{% static 'registrar/js/journal_lesson_lab_group.js' %}?v=20261108-lab4"></script>{% endif %}{# Lab-1 / Lab-2 (sahib 2026-11-06) #}
+    {% if seminar_group_choices %}<script src="{% static 'registrar/js/journal_lesson_seminar_group.js' %}?v=20261108-sem2"></script>{% endif %}{# 234 K1 / 234 K2 (sahib 2026-11-07) #}
     {# Sağdakı «N q/b» sayğacı davamiyyət dəyişəndə canlı yenilənir (UX2 2026-10-05). #}
     <script src="{% static 'registrar/js/journal_grid_absence.js' %}?v=20261005-live2"></script>
     <script src="{% static 'registrar/js/journal_cell_hint.js' %}?v=20261014-notip"></script>

@@ -28,14 +28,27 @@ def summarize(offering, *, personal_actor=None, scope=None):
     lessons = list(
         Lesson.objects.filter(organization_id=offering.organization_id, offering=offering)
         .select_related("instructor")
-        .only("kind", "hours", "date", "instructor__first_name", "instructor__last_name", "instructor__username")
+        .only(
+            "kind",
+            "hours",
+            "date",
+            "lab_group",
+            "seminar_group",
+            "instructor__first_name",
+            "instructor__last_name",
+            "instructor__username",
+        )
     )
     plan = current_plan(offering, personal_actor) if personal_actor is not None else None
     allowed = set(plan) if plan else (getattr(scope, "kinds", None) if personal_actor is not None else None)
     permitted = [lesson for lesson in lessons if scope is None or scope.allows_lesson(lesson)]
     visible = [lesson for lesson in permitted if allowed is None or lesson.kind in allowed]
     result = _summary(
-        offering, visible, total=sum(plan.values()) if plan else (None if personal_actor else offering.lesson_hours)
+        offering,
+        visible,
+        total=sum(plan.values()) if plan else (None if personal_actor else offering.lesson_hours),
+        # Fənnin (tələbə başına) saatı: Lab-1 və Lab-2 toplanmır; müəllimin şəxsi planı isə hər iki qrupu sayır.
+        per_student=personal_actor is None,
     )
     result["personal"] = personal_actor is not None
     if plan:
@@ -62,7 +75,9 @@ def summarize(offering, *, personal_actor=None, scope=None):
     return result
 
 
-def _summary(offering, lessons, *, total):
+def _summary(offering, lessons, *, total, per_student=False):
+    from .lab_groups import is_split, per_student_hours
+
     today = timezone.localdate()
     labels = dict(kind_choices(offering))
     by_kind, scheduled_total = {}, 0
@@ -91,6 +106,13 @@ def _summary(offering, lessons, *, total):
     ]
     kinds.sort(key=lambda row: {"lecture": 0, "seminar": 1, "lab": 2}.get(row["kind"], 9))
     held_total = sum(row["held"] for row in kinds)
+    if per_student and any(is_split(lesson) for lesson in lessons):
+        # Lab qrupları / seminar alt qrupları (sahib 2026-11-06/07): tələbə yalnız öz qrupunun dərsindədir.
+        held_lessons = [lesson for lesson in lessons if lesson.date is None or lesson.date <= today]
+        scheduled_total = per_student_hours(lessons)
+        held_total = per_student_hours(held_lessons)
+        for row in kinds:
+            row["held"] = per_student_hours([lesson for lesson in held_lessons if lesson.kind == row["kind"]])
     total = int(total or 0)
     return {
         "kinds": kinds,

@@ -2,7 +2,9 @@
 {% load i18n static %}
 {% comment %}EXAMQA R1 (2026-10-01): tokensiz start linki (məs. kənardan göndərilmiş link) cəhdi
 DƏRHAL yaratmır — tələbə burada «İmtahana başla» ilə təsdiq edir (POST + CSRF). Forma eyni URL-ə
-(query: next / trial / language saxlanılır) göndərilir. Bax apps/exams/services/start_intent.py.{% endcomment %}
+(query: next / trial / language saxlanılır) göndərilir. Bax apps/exams/services/start_intent.py.
+Sahib 2026-11-06: çoxdilli imtahanda dil seçimi burada MƏCBURİ, gözə çarpan ilk addımdır (_language_step.html);
+dil gəlməyibsə server də tələbəni bura qaytarır (kod/PIN yolu: `forward_fields` ilə exam_code_check-ə).{% endcomment %}
 {% block title %}{% trans "Start the exam?" context "exams.start_confirm" %} — {{ site_brand_name }}{% endblock %}
 
 {% block extraHead %}
@@ -11,6 +13,7 @@ DƏRHAL yaratmır — tələbə burada «İmtahana başla» ilə təsdiq edir (P
 
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'exams/css/exam_start_confirm.css' %}?v=20261017-pkgd">
+<link rel="stylesheet" href="{% static 'exams/css/exam_language_step.css' %}?v=20261106-lang">
 {% endblock %}
 
 {% block content %}
@@ -24,6 +27,10 @@ DƏRHAL yaratmır — tələbə burada «İmtahana başla» ilə təsdiq edir (P
   {% if exam.total_duration_minutes %}
   <p class="exam-start-confirm__meta"><i class="far fa-clock" aria-hidden="true"></i> {% blocktrans with minutes=exam.total_duration_minutes context "exams.start_confirm" %}Duration: {{ minutes }} min{% endblocktrans %}</p>
   {% endif %}
+  <form method="post" action="{{ form_action|default:request.get_full_path }}" class="exam-start-confirm__form" data-language-step-form>
+    {% csrf_token %}
+    {% for name, value in forward_fields %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+    {% include "exams/student/partials/_language_step.html" %}
   <p class="exam-start-confirm__text">
     {% trans "When you start, an attempt is created and the timer begins. Start only when you are ready." context "exams.start_confirm" %}
   </p>
@@ -32,8 +39,7 @@ DƏRHAL yaratmır — tələbə burada «İmtahana başla» ilə təsdiq edir (P
     <li><i class="fas fa-hourglass-half" aria-hidden="true"></i> {% trans "Vaxt serverdə hesablanır — səhifəni bağlasanız da dayanmır." context "exams.start_confirm" %}</li>
     <li><i class="fas fa-wifi" aria-hidden="true"></i> {% trans "Başlamazdan əvvəl internet bağlantınızı yoxlayın." context "exams.start_confirm" %}</li>
   </ul>
-  <form method="post" action="{{ request.get_full_path }}" class="exam-start-confirm__actions">
-    {% csrf_token %}
+    <div class="exam-start-confirm__actions">
     <button type="submit" class="exam-start-confirm__btn exam-start-confirm__btn--primary">
       <i class="fas fa-play" aria-hidden="true"></i>
       {% trans "Start the exam" context "exams.start_confirm" %}
@@ -42,7 +48,12 @@ DƏRHAL yaratmır — tələbə burada «İmtahana başla» ilə təsdiq edir (P
       <i class="fas fa-arrow-left" aria-hidden="true"></i>
       {% trans "Back" context "exams.start_confirm" %}
     </a>
+    </div>
   </form>
 </section>
 </div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'exams/js/exam_language_step.js' %}?v=20261106-lang" defer></script>
 {% endblock %}

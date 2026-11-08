@@ -6,6 +6,9 @@ Saxlanan dəyər dəyişmir — yalnız çıxışda atılır (jurnal adı, kadr/
 
 from __future__ import annotations
 
+import html
+import unicodedata
+
 _PUNCTUATION_ONLY = frozenset("-–—−_.?/*,;:'\"`~ ")
 _WORD_PLACEHOLDERS = frozenset({"n/a", "na", "none", "null", "yoxdur", "yox"})
 
@@ -35,4 +38,22 @@ def user_display_name_with_patronymic(user) -> str:
     return " ".join(part for part in parts if part) or getattr(user, "username", "") or ""
 
 
-__all__ = ["clean_name_part", "user_display_name_with_patronymic"]
+def name_key(value) -> str:
+    """Ad hissəsinin müqayisə açarı (PR #266 qaydası): HTML varlıqları («&Uuml;»), böyük/kiçik, İ/ı, diakritika və
+    boşluq fərqi sayılmır — «CƏFƏRLİ» = «Cəfərli», «G&Uuml;LÜSTAN» = «Gülüstan»."""
+    text = html.unescape(str(value or "")).replace("İ", "I").replace("ı", "i").casefold()
+    text = "".join(ch for ch in unicodedata.normalize("NFKD", text) if not unicodedata.combining(ch))
+    return " ".join(text.split())
+
+
+def same_person_name(last_name, first_name, other_last_name, other_first_name) -> bool:
+    """Soyad VƏ ad (:func:`name_key` ilə) eynidir; hər iki hissə dolu olmalıdır.
+
+    FİN tutuşdurmasının təsdiqi (sahib 2026-11-08): köhnə sistemdə bir neçə tələbə sətrinə BAŞQA tələbənin FİN-i
+    yazılıb — FİN eyni, ad başqadırsa bu FİN sahibi deyil (bir adamın bal və qeydiyyatları başqasına yazılırdı).
+    """
+    last, first = name_key(last_name), name_key(first_name)
+    return bool(last and first) and last == name_key(other_last_name) and first == name_key(other_first_name)
+
+
+__all__ = ["clean_name_part", "name_key", "same_person_name", "user_display_name_with_patronymic"]

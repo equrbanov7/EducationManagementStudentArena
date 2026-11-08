@@ -79,6 +79,7 @@ COMPACT_SIDEBAR_TREES = {
         {
             "dashboard",
             "my-journal",
+            "lab-groups",  # «Lab qrupları» — lab saatlı jurnalın müəllimi (2026-11-07)
             "my-schedule",
             "lessons-log",
             "subject-folders",

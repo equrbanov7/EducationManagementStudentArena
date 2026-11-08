@@ -1,7 +1,9 @@
-{% load i18n task_kinds %}
+{% load i18n static task_kinds %}
 {% task_kind_visibility as tkv %}
 {% if can_view_student_assignments %}
 <section class="profile-section-panel profile-section--assigned-exams {% if active_section == 'assigned-exams' %}is-active{% endif %}" data-profile-section-panel="assigned-exams" data-source-url="{% url 'accounts:assigned_exams' %}">
+    {# AJAX swap-da da gəlsin deyə dil addımının üslubu panelin İÇİNDƏ (sahib 2026-11-06). #}
+    <link rel="stylesheet" href="{% static 'exams/css/exam_language_step.css' %}?v=20261106-lang">
     <div class="ta">
         {% comment %}Redizayn 2026-10-18 (Paket A): server tərəfli `ems-tabs` (telefonda üfüqi sürüşür),
         `ems-input` axtarış (çəngəllər — `js-profile-debounce-search`, `assigned_search` — dəyişməyib),
@@ -77,6 +79,32 @@
         <h3 id="assignedExamInfoTitle" class="assigned-exam-info-title">{% trans 'İmtahan məlumatı' %}</h3>
         <p class="assigned-exam-info-subtitle" id="assignedExamInfoExamName"></p>
 
+        {% comment %}Sahib 2026-11-06: imtahan dili — çoxdilli imtahanda MƏCBURİ, gözə çarpan ilk addım («görmədim»
+        olmasın). Variantları `profile/assigned_exam.js` kartın JSON blokundan qurur; seçilmədən «İmtahana başla»
+        keçmir və xəta vəziyyəti görünür. Tək dil → yalnız məlumat. Görünüş: exams/css/exam_language_step.css.{% endcomment %}
+        <fieldset class="els" id="assignedExamLanguageStep" data-language-step hidden
+                  aria-describedby="assignedExamLanguageHint">
+            <legend class="els__legend">
+                <span class="els__step" aria-hidden="true">1</span>
+                <span class="els__title">{% trans "İmtahan dilini seçin" context "exams.language_step" %}</span>
+                <span class="els__required">{% trans "məcburi" context "exams.language_step" %}</span>
+            </legend>
+            <p class="els__hint" id="assignedExamLanguageHint">
+                <i class="fas fa-language" aria-hidden="true"></i>
+                {% trans "Suallar seçdiyiniz dildə veriləcək. İmtahan başladıqdan sonra dili dəyişmək mümkün deyil." context "exams.language_step" %}
+            </p>
+            <div class="els__grid" role="radiogroup" aria-required="true" id="assignedExamLanguageGrid"></div>
+            <p class="els__error" role="alert" data-language-step-error hidden
+               data-default-message="{% trans 'İmtahana başlamaq üçün əvvəlcə imtahan dilini seçin.' context 'exams.language_step' %}">
+                <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
+                <span data-language-step-error-text></span>
+            </p>
+        </fieldset>
+        <p class="els-single" id="assignedExamLanguageSingle" hidden>
+            <i class="fas fa-language" aria-hidden="true"></i>
+            <span>{% trans "İmtahan dili" context "exams.language_step" %}: <b id="assignedExamLanguageSingleName"></b></span>
+        </p>
+
         <div class="assigned-exam-info-grid">
             <div class="assigned-exam-info-row">
                 <span class="label">{% trans 'Növ' %}</span>
@@ -126,6 +154,7 @@
         <form method="post" action="{% url 'exams:exam_code_check' %}" id="assignedExamCodeForm" class="assigned-exam-code-form is-hidden">
             {% csrf_token %}
             <input type="hidden" name="exam_slug" id="assignedExamCodeSlug">
+            <input type="hidden" name="language" id="assignedExamCodeLanguage">
             <input type="hidden" name="from_section" value="assigned-exams">
             <input type="hidden" name="assigned_type" value="{{ assigned_tasks_active_filter }}">
             <label for="assignedExamAccessCodeInput" class="assigned-exam-code-label">{% trans 'Giriş kodu / PIN' %}</label>

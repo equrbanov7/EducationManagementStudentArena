@@ -57,6 +57,27 @@ def load(path: str) -> list:
     return pairs
 
 
+def load_allow_name(path: str) -> frozenset:
+    """Ad yazılışı fərqli (məs. «Makhmudova» / «Mahmudova»), amma sahibin eyni şəxs kimi təsdiqlədiyi cütlər."""
+    with open(path, encoding="utf-8") as handle:
+        data = json.load(handle)
+    return frozenset(
+        row["duplicate"] for row in data.get("pairs") or [] if isinstance(row, dict) and row.get("allow_name") is True
+    )
+
+
+def load_allow_login(path: str) -> frozenset:
+    """Dublikatın girişi olsa da birləşdirilməsi SAHİBİN açıq təsdiqlədiyi cütlər (``"allow_login": true``).
+
+    Sahib 2026-11-06 (Psixologiya 1-ci kurs): hər iki hesabla giriş olub, tələbə indi əsas (ATİS) hesabla girir —
+    dublikatın xanaları əsas hesaba köçməlidir. Defolt qapı (``duplicate_has_login``) başqa cütlər üçün qalır."""
+    with open(path, encoding="utf-8") as handle:
+        data = json.load(handle)
+    return frozenset(
+        row["duplicate"] for row in data.get("pairs") or [] if isinstance(row, dict) and row.get("allow_login") is True
+    )
+
+
 def _norm(value) -> str:
     text = unicodedata.normalize("NFKC", str(value or "")).strip().casefold().replace("i̇", "i").replace("ı", "i")
     return " ".join(text.split())
@@ -81,7 +102,9 @@ def delta_created_ids(organization) -> set:
     return created
 
 
-def check_pair(organization, duplicate, keep, *, created: set) -> str:
+def check_pair(
+    organization, duplicate, keep, *, created: set, allow_login: bool = False, allow_name: bool = False
+) -> str:
     """``""`` — cüt keçdi; yoxsa səbəb kodu."""
     membership_model = django_apps.get_model("organizations", "Membership")
     if duplicate is None or keep is None:
@@ -99,9 +122,13 @@ def check_pair(organization, duplicate, keep, *, created: set) -> str:
         return "not_students"
     if duplicate.pk not in created:
         return "duplicate_not_import_created"
-    if (_norm(duplicate.first_name), _norm(duplicate.last_name)) != (_norm(keep.first_name), _norm(keep.last_name)):
+    names_differ = (_norm(duplicate.first_name), _norm(duplicate.last_name)) != (
+        _norm(keep.first_name),
+        _norm(keep.last_name),
+    )
+    if names_differ and not allow_name:
         return "name_mismatch"
-    if duplicate.last_login is not None:
+    if duplicate.last_login is not None and not allow_login:
         return "duplicate_has_login"
     dup_profile, keep_profile = getattr(duplicate, "profile", None), getattr(keep, "profile", None)
     dup_fin, keep_fin = (getattr(dup_profile, "fin", "") or "").upper(), (
@@ -119,4 +146,13 @@ def users(ids) -> dict:
     return {user.pk: user for user in get_user_model().objects.select_related("profile").filter(pk__in=list(ids))}
 
 
-__all__ = ["FORMAT", "MergePlanError", "check_pair", "delta_created_ids", "fin_like", "load", "users"]
+__all__ = [
+    "FORMAT",
+    "MergePlanError",
+    "check_pair",
+    "delta_created_ids",
+    "fin_like",
+    "load",
+    "load_allow_login",
+    "users",
+]

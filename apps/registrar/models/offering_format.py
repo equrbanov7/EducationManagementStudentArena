@@ -9,7 +9,8 @@ YENİ MODEL YOXDUR — intensiv kurs adi :class:`CourseOffering`-dir, yalnız:
 * ``course_format = "intensive"``;
 * ``group`` BOŞDUR (tələbələr adla seçilir, qrupları fərqli ola bilər — hər qeydiyyat «alt qrupdan əlavə»
   provenansı ilə: ``Enrollment.source_group`` tələbənin öz qrupudur, bax ``apps.registrar.intensive``);
-* ``starts_on`` / ``ends_on`` — kursun öz tarix aralığı (semestrdən qısa); dərs tarixi bu aralıqda olmalıdır;
+* ``starts_on`` / ``ends_on`` — kursun öz tarix aralığı (semestrdən qısa); dərs ``ends_on``-dan sonra ola bilməz
+  (``starts_on`` plandır — erkən başlamaq olar, sahib 2026-11-07);
 * ``lesson_hours`` — kursun ümumi saatı (məs. 10): saat həddi (#6) və «Kurs tamamlandı» göstəricisi ondan;
 * ``format_note`` — açılışın səbəbi (sərbəst mətn: yenidən tədris, akademik fərq …).
 

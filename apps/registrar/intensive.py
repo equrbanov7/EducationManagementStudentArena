@@ -25,7 +25,8 @@ AZAD edilibsə tələbə yazılmır.
 JURNAL QAYDALARI (:func:`lesson_date_error`, ``gradebook_lessons.create_lesson``)
 ────────────────────────────────────────────────────────────────────────────────
 Cədvəl slotu yoxdur → «cədvəldən kənar səbəb» soruşulmur; bir gündə bir neçə dərs (fərqli saatlarda) olar;
-dərs tarixi kursun ``starts_on``–``ends_on`` aralığında olmalıdır; saat cəmi ``lesson_hours``-u keçə bilməz
+dərs tarixi semestrin başlanğıcı ilə kursun ``ends_on``-u arasında olmalıdır (``starts_on`` plan tarixidir — müəllim
+kursa ERKƏN başlaya bilər, sahib 2026-11-07); saat cəmi ``lesson_hours``-u keçə bilməz
 (mövcud #6 həddi) və çatanda jurnal başlığında «Kurs tamamlandı» görünür. Qiymətləndirmə adi fənnin qaydasıdır.
 """
 
@@ -350,10 +351,17 @@ def cancel_course(*, offering, by_user, reason="") -> dict:
 
 
 def lesson_date_error(offering, day) -> str:
-    """İntensiv kursda dərs tarixi kursun aralığından kənardırsa mətn; əks halda boş sətir."""
+    """İntensiv kursda dərs tarixi icazəli aralıqdan kənardırsa mətn; əks halda boş sətir.
+
+    Alt hədd semestrin başlanğıcıdır, kursun ``starts_on``-u DEYİL: «Rəngkarlıq -4» 09.11-də başlamalı idi, müəllim
+    07.11-də dərsə başladı və heç bir tarix qəbul olunmurdu (gələcək tarix də olmur). Sahib 2026-11-07: «erkən
+    başlamaq olar». Üst hədd kursun ``ends_on``-u olaraq qalır.
+    """
     if getattr(offering, "course_format", "") != CourseFormat.INTENSIVE or day is None:
         return ""
-    starts_on, ends_on = offering.starts_on, offering.ends_on
+    period = getattr(offering, "period", None)
+    starts_on = _coerce(getattr(period, "start_date", None)) if period is not None else None
+    ends_on = offering.ends_on
     if (starts_on and day < starts_on) or (ends_on and day > ends_on):
         return pgettext(_CTX, "İntensiv kursun dərsi %(lo)s – %(hi)s aralığında olmalıdır.") % {
             "lo": f"{starts_on:%d.%m.%Y}" if starts_on else "—",

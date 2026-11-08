@@ -87,6 +87,7 @@ from .kollokvium_window import (
     KollokviumExtraGrant,
     KollokviumWindow,
 )
+from .lab_group import LAB_GROUP_NAME_MAX_LENGTH, LabGroup
 from .language_cohort import LanguageLevelCohort, LanguageLevelPlacement
 from .legacy_excuse import (
     LEGACY_EXCUSE_EXTENSIONS,
@@ -122,6 +123,7 @@ from .retake_log import (
     RetakeEventAction,
     RetakeReceipt,
 )
+from .seminar_group import SeminarGroup
 from .subgroup_placement import SubgroupPlacementEvent, SubgroupPlacementKind
 from .transfer_evidence import GroupTransferEvidence
 
@@ -237,6 +239,9 @@ __all__ = [
     "RemovalReason",
     "JournalShare",
     "JournalShareSource",
+    "LAB_GROUP_NAME_MAX_LENGTH",
+    "LabGroup",
+    "SeminarGroup",
     "SlotKind",
     "StudentAcademicRecord",
     "StudentMovement",

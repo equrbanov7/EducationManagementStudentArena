@@ -1,0 +1,65 @@
+/* Laboratoriya qrupları bir jurnal daxilində (sahib 2026-11-06) — _jd_grid.html. */
+.jd2-th-labgroup {
+    display: inline-block;
+    margin-top: 2px;
+    padding: 1px 6px;
+    border-radius: 6px;
+    background: #ede9fe;
+    color: #6d28d9;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+.jd2-labchip {
+    margin-left: 4px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: #ede9fe;
+    color: #6d28d9;
+    font-size: 10.5px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+.jd2-labchip--missing { background: #fef3c7; color: #b45309; }
+.jd2-cell--offgroup {
+    background: repeating-linear-gradient(135deg, #f8fafc, #f8fafc 5px, #f1f5f9 5px, #f1f5f9 10px);
+}
+.jd2-ro--offgroup { color: #cbd5e1; }
+/* Köçürülmüş tələbənin əvvəlki qrupdakı qeydi — oxunur, yazılmır. */
+.jd2-ro--prevgroup { opacity: 0.7; font-style: italic; }
+/* Adlı qrupun nişanı (≤ 40 simvol) sütunu genişləndirməsin — tam ad `title`-dadır. */
+.jd2-th-labgroup,
+.jd2-labchip {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+.jd2-labchip { display: inline-block; }
+/* «Lab qrupları» keçidi (jurnal başlığı) — 2026-11-07: kiçik, sakit keçid; idarəetmə kabinet bölməsindədir. */
+.jd2-labgroups-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: var(--ems-h-chip, 24px);
+    padding: 0 6px;
+    border-radius: 6px;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.jd2-labgroups-link__ext { font-size: 9px; opacity: 0.7; }
+.jd2-labgroups-link:hover { background: #f5f3ff; color: #6d28d9; }
+.jd2-labgroups-link:focus-visible { outline: 2px solid #7c3aed; outline-offset: 2px; }
+
+/* Seminar alt qrupları + jurnal bölmələri (sahib 2026-11-07) */
+.jd2-th-labgroup--seminar,
+.jd2-labchip--seminar {
+    background: var(--ems-info-soft, #e6f0fb);
+    color: var(--ems-info, #2563a8);
+    border-color: var(--ems-info-border, #b8d0ec);
+}

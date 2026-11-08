@@ -249,6 +249,8 @@ def _build_item(row, *, period_label, sort_at) -> dict:
             "entry_score": result.get("entry_score"),
             "entry_parts": result.get("entry_parts"),
             "exit_score": result.get("effective_exam") if result.get("graded") else None,
+            # Final kartının tavanı fənnin öz şkalasıdır (xarici dil səviyyə fənni 70, qalanları 50 — sahib 2026-11-08).
+            "exit_max": result.get("exam_score_max") or 50,
             "total": result.get("total") if is_definite else None,
             "letter": result.get("letter") if row.get("in_gpa") else "",
             "outcome": outcome,

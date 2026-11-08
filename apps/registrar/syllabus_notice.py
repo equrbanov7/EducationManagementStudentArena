@@ -109,7 +109,7 @@ _ACTION_LABEL = {
 REASON_LABEL = pgettext_lazy(_CTX, "Kafedra müdirinin qeydi")
 
 
-def _profile_link(section: str, **params) -> str:
+def profile_link(section: str, **params) -> str:
     """Profil shell-i içindəki bölməyə keçid — sol sidebar QALIR (ayrı səhifə yox)."""
     query = "".join(f"&{key}={value}" for key, value in params.items() if value)
     return f"{reverse('accounts:profile')}?section={section}{query}"
@@ -136,9 +136,9 @@ def journal_syllabus_notice(offering, *, has_lessons: bool | None = None, journa
 
     if key == STATE_MISSING:
         # Dosye yoxdur — siyahı ekranı açılır (yaratma düyməsi oradadır).
-        link = _profile_link("syllabus-list")
+        link = profile_link("syllabus-list")
     else:
-        link = _profile_link("syllabus-editor", syllabus=syllabus.pk)
+        link = profile_link("syllabus-editor", syllabus=syllabus.pk)
 
     version = published or state["version"]
     return {
@@ -162,4 +162,4 @@ def journal_syllabus_notice(offering, *, has_lessons: bool | None = None, journa
     }
 
 
-__all__ = ["REASON_LABEL", "journal_syllabus_notice"]
+__all__ = ["REASON_LABEL", "journal_syllabus_notice", "profile_link"]

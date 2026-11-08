@@ -113570,3 +113570,1064 @@ msgstr "hamısını göstər"
 msgctxt "exams.view.question_bank.warning"
 msgid "multiple_correct"
 msgstr "Birdən çox düzgün cavab işarələnib ({labels}) — midterm və final imtahanında sualın yalnız bir düzgün cavabı olmalıdır."
+
+msgctxt "exams.language_step"
+msgid "Suallar seçdiyiniz dildə veriləcək. İmtahan başladıqdan sonra dili dəyişmək mümkün deyil."
+msgstr "Suallar seçdiyiniz dildə veriləcək. İmtahan başladıqdan sonra dili dəyişmək mümkün deyil."
+
+msgctxt "exams.language_step"
+msgid "məcburi"
+msgstr "məcburi"
+
+msgctxt "exams.language_step"
+msgid "İmtahan dili"
+msgstr "İmtahan dili"
+
+msgctxt "exams.language_step"
+msgid "İmtahan dilini seçin"
+msgstr "İmtahan dilini seçin"
+
+msgctxt "exams.language_step"
+msgid "İmtahana başlamaq üçün əvvəlcə imtahan dilini seçin."
+msgstr "İmtahana başlamaq üçün əvvəlcə imtahan dilini seçin."
+
+msgctxt "exams.supervision_room"
+msgid "Ad və ya istifadəçi adı…"
+msgstr "Ad və ya istifadəçi adı…"
+
+msgctxt "exams.supervision_room"
+msgid "Aktiv təşkilat seçilməyib."
+msgstr "Aktiv təşkilat seçilməyib."
+
+msgctxt "exams.supervision_room"
+msgid "Bax"
+msgstr "Bax"
+
+msgctxt "exams.supervision_room"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "exams.supervision_room"
+msgid "Bağlantı"
+msgstr "Bağlantı"
+
+msgctxt "exams.supervision_room"
+msgid "Bağlantı yoxdur — yenidən cəhd edilir…"
+msgstr "Bağlantı yoxdur — yenidən cəhd edilir…"
+
+msgctxt "exams.supervision_room"
+msgid "Başlayıb"
+msgstr "Başlayıb"
+
+msgctxt "exams.supervision_room"
+msgid "Bitirib"
+msgstr "Bitirib"
+
+msgctxt "exams.supervision_room"
+msgid "Bu imtahan imtahan mərkəzi zalında keçirilir — PIN, yenidən giriş və zal əməliyyatları zal monitorundadır."
+msgstr "Bu imtahan imtahan mərkəzi zalında keçirilir — PIN, yenidən giriş və zal əməliyyatları zal monitorundadır."
+
+msgctxt "exams.supervision_room"
+msgid "Bu imtahanda nəzarət rejimi aktiv deyil."
+msgstr "Bu imtahanda nəzarət rejimi aktiv deyil."
+
+msgctxt "exams.supervision_room"
+msgid "Bu imtahanda nəzarət rejimi yandırılmayıb: cəhdlərin gedişatı görünür, amma tam ekran/tab pozuntuları izlənmir. Yandırmaq üçün imtahanı redaktə edin."
+msgstr "Bu imtahanda nəzarət rejimi yandırılmayıb: cəhdlərin gedişatı görünür, amma tam ekran/tab pozuntuları izlənmir. Yandırmaq üçün imtahanı redaktə edin."
+
+msgctxt "exams.supervision_room"
+msgid "Bərpa et"
+msgstr "Bərpa et"
+
+msgctxt "exams.supervision_room"
+msgid "Canlı"
+msgstr "Canlı"
+
+msgctxt "exams.supervision_room"
+msgid "Canlı izləmə, pozuntular və kilidlənənlərin bərpası"
+msgstr "Canlı izləmə, pozuntular və kilidlənənlərin bərpası"
+
+msgctxt "exams.supervision_room"
+msgid "Cavablar"
+msgstr "Cavablar"
+
+msgctxt "exams.supervision_room"
+msgid "Cəhdi bərpa etmək mümkün olmadı."
+msgstr "Cəhdi bərpa etmək mümkün olmadı."
+
+msgctxt "exams.supervision_room"
+msgid "Cəhdi dayandırmaq mümkün olmadı."
+msgstr "Cəhdi dayandırmaq mümkün olmadı."
+
+msgctxt "exams.supervision_room"
+msgid "Dayandır"
+msgstr "Dayandır"
+
+msgctxt "exams.supervision_room"
+msgid "Dil"
+msgstr "Dil"
+
+msgctxt "exams.supervision_room"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "exams.supervision_room"
+msgid "Hələ heç kim imtahana başlamayıb"
+msgstr "Hələ heç kim imtahana başlamayıb"
+
+msgctxt "exams.supervision_room"
+msgid "Kilidlənib"
+msgstr "Kilidlənib"
+
+msgctxt "exams.supervision_room"
+msgid "Limitsiz"
+msgstr "Limitsiz"
+
+msgctxt "exams.supervision_room"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "exams.supervision_room"
+msgid "Müəllim dayandırıb"
+msgstr "Müəllim dayandırıb"
+
+msgctxt "exams.supervision_room"
+msgid "Məsələn: telefondan istifadə"
+msgstr "Məsələn: telefondan istifadə"
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət aktivdir"
+msgstr "Nəzarət aktivdir"
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət otağı"
+msgstr "Nəzarət otağı"
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət sistemi platformada söndürülüb — pozuntular qeydə alınmır, bərpa əməliyyatları işləmir."
+msgstr "Nəzarət sistemi platformada söndürülüb — pozuntular qeydə alınmır, bərpa əməliyyatları işləmir."
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət siyasəti bərpaya icazə vermir («İkinci şans yoxdur»)."
+msgstr "Nəzarət siyasəti bərpaya icazə vermir («İkinci şans yoxdur»)."
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət sönülüdür"
+msgstr "Nəzarət sönülüdür"
+
+msgctxt "exams.supervision_room"
+msgid "Nəzarət xronologiyası"
+msgstr "Nəzarət xronologiyası"
+
+msgctxt "exams.supervision_room"
+msgid "Onlayn"
+msgstr "Onlayn"
+
+msgctxt "exams.supervision_room"
+msgid "Pozuntu"
+msgstr "Pozuntu"
+
+msgctxt "exams.supervision_room"
+msgid "Pozuntu limiti: %(limit)s"
+msgstr "Pozuntu limiti: %(limit)s"
+
+msgctxt "exams.supervision_room"
+msgid "Pozuntu var"
+msgstr "Pozuntu var"
+
+msgctxt "exams.supervision_room"
+msgid "Qalan vaxt"
+msgstr "Qalan vaxt"
+
+msgctxt "exams.supervision_room"
+msgid "Qeydə alınmış hadisə yoxdur."
+msgstr "Qeydə alınmış hadisə yoxdur."
+
+msgctxt "exams.supervision_room"
+msgid "Risk xalı"
+msgstr "Risk xalı"
+
+msgctxt "exams.supervision_room"
+msgid "Siqnal kəsilib"
+msgstr "Siqnal kəsilib"
+
+msgctxt "exams.supervision_room"
+msgid "Siyasət bərpaya icazə vermir"
+msgstr "Siyasət bərpaya icazə vermir"
+
+msgctxt "exams.supervision_room"
+msgid "Səbəb (tələbəyə göstərilir)"
+msgstr "Səbəb (tələbəyə göstərilir)"
+
+msgctxt "exams.supervision_room"
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgctxt "exams.supervision_room"
+msgid "Tələbə axtarışı"
+msgstr "Tələbə axtarışı"
+
+msgctxt "exams.supervision_room"
+msgid "Tələbə imtahana başlayan kimi burada görünəcək. Səhifə özü yenilənir."
+msgstr "Tələbə imtahana başlayan kimi burada görünəcək. Səhifə özü yenilənir."
+
+msgctxt "exams.supervision_room"
+msgid "Tələbə kilidli deyil — bərpa lazım deyil."
+msgstr "Tələbə kilidli deyil — bərpa lazım deyil."
+
+msgctxt "exams.supervision_room"
+msgid "Tələbə əlavə şansından artıq istifadə edib."
+msgstr "Tələbə əlavə şansından artıq istifadə edib."
+
+msgctxt "exams.supervision_room"
+msgid "Tələbələr"
+msgstr "Tələbələr"
+
+msgctxt "exams.supervision_room"
+msgid "Tələbələrin imtahan gedişatı, qayda pozuntuları və kilidlənmələri canlı görünür. Kilidlənən tələbəni buradan bərpa edin."
+msgstr "Tələbələrin imtahan gedişatı, qayda pozuntuları və kilidlənmələri canlı görünür. Kilidlənən tələbəni buradan bərpa edin."
+
+msgctxt "exams.supervision_room"
+msgid "Tələbəni bərpa et"
+msgstr "Tələbəni bərpa et"
+
+msgctxt "exams.supervision_room"
+msgid "Tələbənin ekranı açılacaq və o, imtahana olduğu yerdən davam edəcək. Cavabları və vaxtı qorunur."
+msgstr "Tələbənin ekranı açılacaq və o, imtahana olduğu yerdən davam edəcək. Cavabları və vaxtı qorunur."
+
+msgctxt "exams.supervision_room"
+msgid "Tələbənin ekranı kilidlənir, cəhd təhvil verilmir. «Bərpa et» ilə davam etdirə bilərsiniz."
+msgstr "Tələbənin ekranı kilidlənir, cəhd təhvil verilmir. «Bərpa et» ilə davam etdirə bilərsiniz."
+
+msgctxt "exams.supervision_room"
+msgid "Vəziyyət"
+msgstr "Vəziyyət"
+
+msgctxt "exams.supervision_room"
+msgid "Xülasə"
+msgstr "Xülasə"
+
+msgctxt "exams.supervision_room"
+msgid "Zal monitoru"
+msgstr "Zal monitoru"
+
+msgctxt "exams.supervision_room"
+msgid "İmtahan artıq bitib."
+msgstr "İmtahan artıq bitib."
+
+msgctxt "exams.supervision_room"
+msgid "İmtahana qayıt"
+msgstr "İmtahana qayıt"
+
+msgctxt "exams.supervision_room"
+msgid "İmtahanda"
+msgstr "İmtahanda"
+
+msgctxt "exams.supervision_room"
+msgid "İmtahanı müvəqqəti dayandır"
+msgstr "İmtahanı müvəqqəti dayandır"
+
+msgctxt "exams.supervision_room"
+msgid "Şübhəli"
+msgstr "Şübhəli"
+
+msgctxt "exams.supervision_room"
+msgid "Əlavə şans istifadə olunub"
+msgstr "Əlavə şans istifadə olunub"
+
+msgctxt "exams.supervision_room"
+msgid "Əlavə şans ver (pozuntu sayğacı bir vahid azalır)"
+msgstr "Əlavə şans ver (pozuntu sayğacı bir vahid azalır)"
+
+msgctxt "exams.supervision_room"
+msgid "Əməliyyat mümkün olmadı."
+msgstr "Əməliyyat mümkün olmadı."
+
+msgctxt "exams.supervision_room"
+msgid "Əməllər"
+msgstr "Əməllər"
+
+msgctxt "exams.supervision_room"
+msgid "Bu tələbə imtahan zalındadır — dayandırma zal monitorundan, səbəb qeyd edilərək aparılır."
+msgstr "Bu tələbə imtahan zalındadır — dayandırma zal monitorundan, səbəb qeyd edilərək aparılır."
+
+msgctxt "exams.supervision_room"
+msgid "Dayandırma — zal monitorunda"
+msgstr "Dayandırma — zal monitorunda"
+
+msgctxt "registrar.lab_groups"
+msgid "Lab-%(n)s"
+msgstr "Lab-%(n)s"
+
+msgctxt "registrar.lab_groups"
+msgid "Laboratoriya qrupu düzgün seçilməyib."
+msgstr "Laboratoriya qrupu düzgün seçilməyib."
+
+msgctxt "registrar.lab_groups"
+msgid "Laboratoriya qrupu yalnız laboratoriya dərsinə aiddir."
+msgstr "Laboratoriya qrupu yalnız laboratoriya dərsinə aiddir."
+
+msgctxt "registrar.lab_groups"
+msgid "Bu jurnalda belə laboratoriya qrupu yoxdur."
+msgstr "Bu jurnalda belə laboratoriya qrupu yoxdur."
+
+msgctxt "registrar.lab_groups"
+msgid "Bu jurnal laboratoriya qruplarına bölünüb — dərsin qrupunu seçin."
+msgstr "Bu jurnal laboratoriya qruplarına bölünüb — dərsin qrupunu seçin."
+
+msgctxt "registrar.lab_groups"
+msgid "Bu dərsdə başqa laboratoriya qrupunun tələbələrinə qeyd yazılıb — qrupu dəyişmək olmaz."
+msgstr "Bu dərsdə başqa laboratoriya qrupunun tələbələrinə qeyd yazılıb — qrupu dəyişmək olmaz."
+
+msgctxt "registrar.lab_groups"
+msgid "Bu laboratoriya dərsi yalnız bu qrupun tələbələrinindir"
+msgstr "Bu laboratoriya dərsi yalnız bu qrupun tələbələrinindir"
+
+msgctxt "registrar.lab_groups"
+msgid "Laboratoriya qrupu"
+msgstr "Laboratoriya qrupu"
+
+msgctxt "registrar.lab_groups"
+msgid "Tələbə heç bir laboratoriya qrupuna yerləşdirilməyib — qruplu lab dərsləri ona aid deyil. RİM-ə müraciət edin."
+msgstr "Tələbə heç bir laboratoriya qrupuna yerləşdirilməyib — qruplu lab dərsləri ona aid deyil. RİM-ə müraciət edin."
+
+msgctxt "registrar.lab_groups"
+msgid "Lab qrupu yoxdur"
+msgstr "Lab qrupu yoxdur"
+
+msgctxt "registrar.lab_groups"
+msgid "Başqa laboratoriya qrupunun dərsi"
+msgstr "Başqa laboratoriya qrupunun dərsi"
+
+msgctxt "registrar.lab_groups"
+msgid "LABORATORİYA QRUPU"
+msgstr "LABORATORİYA QRUPU"
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupu seçin…"
+msgstr "Qrupu seçin…"
+
+msgctxt "registrar.lab_groups"
+msgid "Dərs yalnız bu qrupun tələbələrinə yazılır; mühazirə və seminar bütün qrupladır."
+msgstr "Dərs yalnız bu qrupun tələbələrinə yazılır; mühazirə və seminar bütün qrupladır."
+
+msgctxt "registrar.lab_groups"
+msgid "%(n)s tələbə yerləşdirildi: %(group)s."
+msgstr "%(n)s tələbə yerləşdirildi: %(group)s."
+
+msgctxt "registrar.lab_groups"
+msgid "%(n)s tələbənin öz qrupunun dərslərində qeydi var — onlar köçürülmədi (qeydlər itməsin deyə)."
+msgstr "%(n)s tələbənin öz qrupunun dərslərində qeydi var — onlar köçürülmədi (qeydlər itməsin deyə)."
+
+msgctxt "registrar.lab_groups"
+msgid "Ad (istəyə bağlı)"
+msgstr "Ad (istəyə bağlı)"
+
+msgctxt "registrar.lab_groups"
+msgid "Ad dəyişmədi."
+msgstr "Ad dəyişmədi."
+
+msgctxt "registrar.lab_groups"
+msgid "Adı saxla"
+msgstr "Adı saxla"
+
+msgctxt "registrar.lab_groups"
+msgid "Bağlı dərs"
+msgstr "Bağlı dərs"
+
+msgctxt "registrar.lab_groups"
+msgid "Bu adda laboratoriya qrupu artıq var."
+msgstr "Bu adda laboratoriya qrupu artıq var."
+
+msgctxt "registrar.lab_groups"
+msgid "Bu jurnal hələ laboratoriya qruplarına bölünməyib. «Qrup əlavə et» ilə Lab-1, Lab-2 … yaradın, sonra tələbələri yerləşdirin."
+msgstr "Bu jurnal hələ laboratoriya qruplarına bölünməyib. «Qrup əlavə et» ilə Lab-1, Lab-2 … yaradın, sonra tələbələri yerləşdirin."
+
+msgctxt "registrar.lab_groups"
+msgid "Bu qrupa %(n)s dərs bağlıdır — əvvəlcə həmin dərslərin qrupunu dəyişin və ya dərsləri silin."
+msgstr "Bu qrupa %(n)s dərs bağlıdır — əvvəlcə həmin dərslərin qrupunu dəyişin və ya dərsləri silin."
+
+msgctxt "registrar.lab_groups"
+msgid "Bütün tələbələr qrupa yerləşdirilib."
+msgstr "Bütün tələbələr qrupa yerləşdirilib."
+
+msgctxt "registrar.lab_groups"
+msgid "Bəli, qrupu silirəm"
+msgstr "Bəli, qrupu silirəm"
+
+msgctxt "registrar.lab_groups"
+msgid "Hamısını seç"
+msgstr "Hamısını seç"
+
+msgctxt "registrar.lab_groups"
+msgid "Hansı qrupa"
+msgstr "Hansı qrupa"
+
+msgctxt "registrar.lab_groups"
+msgid "Hansı qrupa köçürüləcəyini seçin."
+msgstr "Hansı qrupa köçürüləcəyini seçin."
+
+msgctxt "registrar.lab_groups"
+msgid "Jurnala qayıt"
+msgstr "Jurnala qayıt"
+
+msgctxt "registrar.lab_groups"
+msgid "Jurnalda ən çox %(max)s laboratoriya qrupu ola bilər."
+msgstr "Jurnalda ən çox %(max)s laboratoriya qrupu ola bilər."
+
+msgctxt "registrar.lab_groups"
+msgid "Köçür"
+msgstr "Köçür"
+
+msgctxt "registrar.lab_groups"
+msgid "Lab qrupları"
+msgstr "Lab qrupları"
+
+msgctxt "registrar.lab_groups"
+msgid "Laboratoriya qruplarını yarat, adlandır və tələbələri yerləşdir"
+msgstr "Laboratoriya qruplarını yarat, adlandır və tələbələri yerləşdir"
+
+msgctxt "registrar.lab_groups"
+msgid "Mühazirə və seminar bütün qrupladır. Qrupu seçilmiş laboratoriya dərsi yalnız həmin qrupun tələbələrinə yazılır."
+msgstr "Mühazirə və seminar bütün qrupladır. Qrupu seçilmiş laboratoriya dərsi yalnız həmin qrupun tələbələrinə yazılır."
+
+msgctxt "registrar.lab_groups"
+msgid "Naməlum əməl."
+msgstr "Naməlum əməl."
+
+msgctxt "registrar.lab_groups"
+msgid "Qrup əlavə et"
+msgstr "Qrup əlavə et"
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupa dərs bağlıdır — silmək olmaz. Əvvəlcə həmin dərslərin qrupunu dəyişin."
+msgstr "Qrupa dərs bağlıdır — silmək olmaz. Əvvəlcə həmin dərslərin qrupunu dəyişin."
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupda hələ tələbə yoxdur."
+msgstr "Qrupda hələ tələbə yoxdur."
+
+msgctxt "registrar.lab_groups"
+msgid "Qruplar"
+msgstr "Qruplar"
+
+msgctxt "registrar.lab_groups"
+msgid "Qruplu laboratoriya dərsləri bu tələbələrə aid deyil — onları qrupa yerləşdirin."
+msgstr "Qruplu laboratoriya dərsləri bu tələbələrə aid deyil — onları qrupa yerləşdirin."
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupsuz"
+msgstr "Qrupsuz"
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupsuz et"
+msgstr "Qrupsuz et"
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupsuz tələbələr"
+msgstr "Qrupsuz tələbələr"
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupu sil"
+msgstr "Qrupu sil"
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupun adı"
+msgstr "Qrupun adı"
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupun adı yeniləndi: %(label)s."
+msgstr "Qrupun adı yeniləndi: %(label)s."
+
+msgctxt "registrar.lab_groups"
+msgid "Seçilib"
+msgstr "Seçilib"
+
+msgctxt "registrar.lab_groups"
+msgid "Seçilən tələbələr artıq bu qrupdadır."
+msgstr "Seçilən tələbələr artıq bu qrupdadır."
+
+msgctxt "registrar.lab_groups"
+msgid "Seçilən tələbələrdən biri bu jurnalda deyil."
+msgstr "Seçilən tələbələrdən biri bu jurnalda deyil."
+
+msgctxt "registrar.lab_groups"
+msgid "Sil"
+msgstr "Sil"
+
+msgctxt "registrar.lab_groups"
+msgid "Silməni təsdiqləyin."
+msgstr "Silməni təsdiqləyin."
+
+msgctxt "registrar.lab_groups"
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgctxt "registrar.lab_groups"
+msgid "Tələbə axtar"
+msgstr "Tələbə axtar"
+
+msgctxt "registrar.lab_groups"
+msgid "Tələbə axtar…"
+msgstr "Tələbə axtar…"
+
+msgctxt "registrar.lab_groups"
+msgid "Tələbə heç bir laboratoriya qrupuna yerləşdirilməyib — qruplu lab dərsləri ona aid deyil. Jurnalın «Lab qrupları» bölməsində yerləşdirin."
+msgstr "Tələbə heç bir laboratoriya qrupuna yerləşdirilməyib — qruplu lab dərsləri ona aid deyil. Jurnalın «Lab qrupları» bölməsində yerləşdirin."
+
+msgctxt "registrar.lab_groups"
+msgid "Tələbə seçilməyib."
+msgstr "Tələbə seçilməyib."
+
+msgctxt "registrar.lab_groups"
+msgid "Tələbələr"
+msgstr "Tələbələr"
+
+msgctxt "registrar.lab_groups"
+msgid "Tələbənin öz qrupunun dərslərində qeydi var — köçürmək olmaz (qeydlər itməsin deyə)."
+msgstr "Tələbənin öz qrupunun dərslərində qeydi var — köçürmək olmaz (qeydlər itməsin deyə)."
+
+msgctxt "registrar.lab_groups"
+msgid "Yeni qrupun adı (istəyə bağlı)"
+msgstr "Yeni qrupun adı (istəyə bağlı)"
+
+msgctxt "registrar.lab_groups"
+msgid "qeyd var"
+msgstr "qeyd var"
+
+msgctxt "registrar.lab_groups"
+msgid "tələbə"
+msgstr "tələbə"
+
+msgctxt "registrar.lab_groups"
+msgid "«%(label)s» qrupu silindi — %(n)s tələbə qrupsuz qaldı."
+msgstr "«%(label)s» qrupu silindi — %(n)s tələbə qrupsuz qaldı."
+
+msgctxt "registrar.lab_groups"
+msgid "«%(label)s» qrupu yaradıldı — tələbələri aşağıda yerləşdirin."
+msgstr "«%(label)s» qrupu yaradıldı — tələbələri aşağıda yerləşdirin."
+
+msgctxt "registrar.lab_groups"
+msgid "«%(label)s» silinəcək; qrupsuz qalacaq tələbə: %(n)s."
+msgstr "«%(label)s» silinəcək; qrupsuz qalacaq tələbə: %(n)s."
+
+msgctxt "registrar.model.lab_group.meta"
+msgid "laboratoriya qrupu"
+msgstr "laboratoriya qrupu"
+
+msgctxt "registrar.model.lab_group.meta"
+msgid "laboratoriya qrupları"
+msgstr "laboratoriya qrupları"
+
+msgctxt "profile.section"
+msgid "Lab qrupları"
+msgstr "Lab qrupları"
+
+msgctxt "registrar.lab_groups"
+msgid "Bu jurnalın laboratoriya qruplarını idarə etmək səlahiyyətiniz yoxdur."
+msgstr "Bu jurnalın laboratoriya qruplarını idarə etmək səlahiyyətiniz yoxdur."
+
+msgctxt "registrar.lab_groups"
+msgid "Bölünməyib"
+msgstr "Bölünməyib"
+
+msgctxt "registrar.lab_groups"
+msgid "Qruplara bölünüb"
+msgstr "Qruplara bölünüb"
+
+msgctxt "registrar.lab_groups"
+msgid "Qrupsuz tələbəsi var"
+msgstr "Qrupsuz tələbəsi var"
+
+msgctxt "registrar.lab_groups"
+msgid "Laboratoriya qrupları kabinetin «Lab qrupları» bölməsində idarə olunur"
+msgstr "Laboratoriya qrupları kabinetin «Lab qrupları» bölməsində idarə olunur"
+
+msgctxt "accounts.lab_groups"
+msgid "%(n)s dərs bağlıdır"
+msgstr "%(n)s dərs bağlıdır"
+
+msgctxt "accounts.lab_groups"
+msgid "%(n)s jurnal hələ bölünməyib"
+msgstr "%(n)s jurnal hələ bölünməyib"
+
+msgctxt "accounts.lab_groups"
+msgid "%(n)s jurnalda"
+msgstr "%(n)s jurnalda"
+
+msgctxt "accounts.lab_groups"
+msgid "%(n)s qrup"
+msgstr "%(n)s qrup"
+
+msgctxt "accounts.lab_groups"
+msgid "%(n)s qrupsuz tələbə"
+msgstr "%(n)s qrupsuz tələbə"
+
+msgctxt "accounts.lab_groups"
+msgid "Ad (istəyə bağlı) — boş qalsa Lab-N"
+msgstr "Ad (istəyə bağlı) — boş qalsa Lab-N"
+
+msgctxt "accounts.lab_groups"
+msgid "Adını dəyiş"
+msgstr "Adını dəyiş"
+
+msgctxt "accounts.lab_groups"
+msgid "Aktiv tələbə"
+msgstr "Aktiv tələbə"
+
+msgctxt "accounts.lab_groups"
+msgid "Axtarış"
+msgstr "Axtarış"
+
+msgctxt "accounts.lab_groups"
+msgid "Bu bölmə jurnalın müəllimi, kafedra müdiri və RİM rəhbəri üçündür."
+msgstr "Bu bölmə jurnalın müəllimi, kafedra müdiri və RİM rəhbəri üçündür."
+
+msgctxt "accounts.lab_groups"
+msgid "Bu jurnal hələ laboratoriya qruplarına bölünməyib. «Qrup yarat» ilə Lab-1, Lab-2 … yaradın, sonra tələbələri yerləşdirin."
+msgstr "Bu jurnal hələ laboratoriya qruplarına bölünməyib. «Qrup yarat» ilə Lab-1, Lab-2 … yaradın, sonra tələbələri yerləşdirin."
+
+msgctxt "accounts.lab_groups"
+msgid "Bu semestrdə laboratoriya saatı olan jurnal yoxdur"
+msgstr "Bu semestrdə laboratoriya saatı olan jurnal yoxdur"
+
+msgctxt "accounts.lab_groups"
+msgid "Bölünməyib"
+msgstr "Bölünməyib"
+
+msgctxt "accounts.lab_groups"
+msgid "Bütün tələbələr qrupa yerləşdirilib."
+msgstr "Bütün tələbələr qrupa yerləşdirilib."
+
+msgctxt "accounts.lab_groups"
+msgid "Fakültə"
+msgstr "Fakültə"
+
+msgctxt "accounts.lab_groups"
+msgid "Fənn, kod, qrup və ya müəllim"
+msgstr "Fənn, kod, qrup və ya müəllim"
+
+msgctxt "accounts.lab_groups"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "accounts.lab_groups"
+msgid "Hansı qrupa köçürülsün"
+msgstr "Hansı qrupa köçürülsün"
+
+msgctxt "accounts.lab_groups"
+msgid "Hansı qrupa köçürüləcəyini seçin."
+msgstr "Hansı qrupa köçürüləcəyini seçin."
+
+msgctxt "accounts.lab_groups"
+msgid "Hansı qrupa…"
+msgstr "Hansı qrupa…"
+
+msgctxt "accounts.lab_groups"
+msgid "Hələ dərs bağlanmayıb"
+msgstr "Hələ dərs bağlanmayıb"
+
+msgctxt "accounts.lab_groups"
+msgid "Jurnal seçin"
+msgstr "Jurnal seçin"
+
+msgctxt "accounts.lab_groups"
+msgid "Jurnallar"
+msgstr "Jurnallar"
+
+msgctxt "accounts.lab_groups"
+msgid "Jurnalı aç"
+msgstr "Jurnalı aç"
+
+msgctxt "accounts.lab_groups"
+msgid "Kafedra"
+msgstr "Kafedra"
+
+msgctxt "accounts.lab_groups"
+msgid "Köçür"
+msgstr "Köçür"
+
+msgctxt "accounts.lab_groups"
+msgid "Lab qrupu"
+msgstr "Lab qrupu"
+
+msgctxt "accounts.lab_groups"
+msgid "Lab saatlı jurnal"
+msgstr "Lab saatlı jurnal"
+
+msgctxt "accounts.lab_groups"
+msgid "Laboratoriya dərsləri yarım qruplarla keçirsə, jurnalı burada Lab-1, Lab-2 … qruplarına bölün: jurnalı seçin, qrup yaradın, tələbələri seçib köçürün və ya sürüşdürüb qrupun üzərinə atın. Mühazirə və seminar bütün qrupla qalır."
+msgstr "Laboratoriya dərsləri yarım qruplarla keçirsə, jurnalı burada Lab-1, Lab-2 … qruplarına bölün: jurnalı seçin, qrup yaradın, tələbələri seçib köçürün və ya sürüşdürüb qrupun üzərinə atın. Mühazirə və seminar bütün qrupla qalır."
+
+msgctxt "accounts.lab_groups"
+msgid "Laboratoriya saatı tədris planında, dərs yükündə və ya cədvəldə göstərilən jurnallar burada görünür. Başqa semestri seçə bilərsiniz."
+msgstr "Laboratoriya saatı tədris planında, dərs yükündə və ya cədvəldə göstərilən jurnallar burada görünür. Başqa semestri seçə bilərsiniz."
+
+msgctxt "accounts.lab_groups"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "accounts.lab_groups"
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgctxt "accounts.lab_groups"
+msgid "Növbəti"
+msgstr "Növbəti"
+
+msgctxt "accounts.lab_groups"
+msgid "Nəticə: %(n)s jurnal"
+msgstr "Nəticə: %(n)s jurnal"
+
+msgctxt "accounts.lab_groups"
+msgid "Qrup"
+msgstr "Qrup"
+
+msgctxt "accounts.lab_groups"
+msgid "Qrup yarat"
+msgstr "Qrup yarat"
+
+msgctxt "accounts.lab_groups"
+msgid "Qrupa dərs bağlıdır — silmək olmaz. Əvvəlcə həmin dərslərin qrupunu dəyişin."
+msgstr "Qrupa dərs bağlıdır — silmək olmaz. Əvvəlcə həmin dərslərin qrupunu dəyişin."
+
+msgctxt "accounts.lab_groups"
+msgid "Qrupda hələ tələbə yoxdur."
+msgstr "Qrupda hələ tələbə yoxdur."
+
+msgctxt "accounts.lab_groups"
+msgid "Qruplara bölünüb"
+msgstr "Qruplara bölünüb"
+
+msgctxt "accounts.lab_groups"
+msgid "Qruplu laboratoriya dərsləri bu tələbələrə aid deyil — onları qrupa yerləşdirin."
+msgstr "Qruplu laboratoriya dərsləri bu tələbələrə aid deyil — onları qrupa yerləşdirin."
+
+msgctxt "accounts.lab_groups"
+msgid "Qrupsuz"
+msgstr "Qrupsuz"
+
+msgctxt "accounts.lab_groups"
+msgid "Qrupsuz et"
+msgstr "Qrupsuz et"
+
+msgctxt "accounts.lab_groups"
+msgid "Qrupsuz tələbə"
+msgstr "Qrupsuz tələbə"
+
+msgctxt "accounts.lab_groups"
+msgid "Qrupu sil"
+msgstr "Qrupu sil"
+
+msgctxt "accounts.lab_groups"
+msgid "Qrupu silmək"
+msgstr "Qrupu silmək"
+
+msgctxt "accounts.lab_groups"
+msgid "Qrupun adı"
+msgstr "Qrupun adı"
+
+msgctxt "accounts.lab_groups"
+msgid "Saxla"
+msgstr "Saxla"
+
+msgctxt "accounts.lab_groups"
+msgid "Semestr"
+msgstr "Semestr"
+
+msgctxt "accounts.lab_groups"
+msgid "Seçilib"
+msgstr "Seçilib"
+
+msgctxt "accounts.lab_groups"
+msgid "Seçimi təmizlə"
+msgstr "Seçimi təmizlə"
+
+
+msgctxt "accounts.lab_groups"
+msgid "Soldakı siyahıdan jurnalı seçin — onun laboratoriya qrupları, qrupsuz tələbələri və köçürmə alətləri burada açılacaq."
+msgstr "Soldakı siyahıdan jurnalı seçin — onun laboratoriya qrupları, qrupsuz tələbələri və köçürmə alətləri burada açılacaq."
+
+msgctxt "accounts.lab_groups"
+msgid "Sütundakı hamısını seç"
+msgstr "Sütundakı hamısını seç"
+
+msgctxt "accounts.lab_groups"
+msgid "Süzgəcləri dəyişin və ya «Sıfırla» basın."
+msgstr "Süzgəcləri dəyişin və ya «Sıfırla» basın."
+
+msgctxt "accounts.lab_groups"
+msgid "Süzgəcə uyğun jurnal yoxdur"
+msgstr "Süzgəcə uyğun jurnal yoxdur"
+
+msgctxt "accounts.lab_groups"
+msgid "Səhifələr"
+msgstr "Səhifələr"
+
+msgctxt "accounts.lab_groups"
+msgid "Tələbə axtar"
+msgstr "Tələbə axtar"
+
+msgctxt "accounts.lab_groups"
+msgid "Tələbə axtar…"
+msgstr "Tələbə axtar…"
+
+msgctxt "accounts.lab_groups"
+msgid "Tələbə sayı"
+msgstr "Tələbə sayı"
+
+msgctxt "accounts.lab_groups"
+msgid "Tələbələri buraya sürüşdürün"
+msgstr "Tələbələri buraya sürüşdürün"
+
+msgctxt "accounts.lab_groups"
+msgid "Tələbəni sürüşdürüb qrupun üzərinə atın və ya bir neçəsini seçib «Köçür» basın."
+msgstr "Tələbəni sürüşdürüb qrupun üzərinə atın və ya bir neçəsini seçib «Köçür» basın."
+
+msgctxt "accounts.lab_groups"
+msgid "Tələbənin öz qrupunun dərslərində qeydi var — köçürmək olmaz (qeydlər itməsin deyə)."
+msgstr "Tələbənin öz qrupunun dərslərində qeydi var — köçürmək olmaz (qeydlər itməsin deyə)."
+
+msgctxt "accounts.lab_groups"
+msgid "Vəziyyət"
+msgstr "Vəziyyət"
+
+msgctxt "accounts.lab_groups"
+msgid "Yeni laboratoriya qrupu"
+msgstr "Yeni laboratoriya qrupu"
+
+msgctxt "accounts.lab_groups"
+msgid "Yerləşdirilib: %(done)s / %(total)s"
+msgstr "Yerləşdirilib: %(done)s / %(total)s"
+
+msgctxt "accounts.lab_groups"
+msgid "qeyd var"
+msgstr "qeyd var"
+
+msgctxt "accounts.lab_groups"
+msgid "tələbə"
+msgstr "tələbə"
+
+msgctxt "accounts.lab_groups"
+msgid "«%(label)s» silinəcək; onun %(n)s tələbəsi qrupsuz qalacaq. Davam edilsin?"
+msgstr "«%(label)s» silinəcək; onun %(n)s tələbəsi qrupsuz qalacaq. Davam edilsin?"
+
+msgctxt "accounts.lab_groups"
+msgid "«Başqasının adından» rejimində qruplar yalnız göstərilir — dəyişiklik edilmir."
+msgstr "«Başqasının adından» rejimində qruplar yalnız göstərilir — dəyişiklik edilmir."
+
+msgctxt "accounts.lab_groups"
+msgid "Əməliyyat alınmadı — yenidən cəhd edin."
+msgstr "Əməliyyat alınmadı — yenidən cəhd edin."
+
+msgctxt "accounts.lab_groups"
+msgid "Əvvəlcə tələbələri seçin."
+msgstr "Əvvəlcə tələbələri seçin."
+
+msgctxt "accounts.lab_groups"
+msgid "Əvvəlki"
+msgstr "Əvvəlki"
+
+msgctxt "registrar.intensive"
+msgid "Plan"
+msgstr "Plan"
+
+#, python-format
+msgctxt "registrar.intensive"
+msgid "İntensiv · %(end)s-dək"
+msgstr "İntensiv · %(end)s-dək"
+
+msgctxt "registrar.lab_groups"
+msgid "Əvvəlki laboratoriya qrupunun dərsi — qeyd saxlanılıb"
+msgstr "Əvvəlki laboratoriya qrupunun dərsi — qeyd saxlanılıb"
+
+#, python-format
+msgctxt "registrar.seminar_groups"
+msgid "Seminar-%(n)s"
+msgstr "Seminar-%(n)s"
+
+msgctxt "registrar.seminar_groups"
+msgid "Seminar alt qrupu düzgün seçilməyib."
+msgstr "Seminar alt qrupu düzgün seçilməyib."
+
+msgctxt "registrar.seminar_groups"
+msgid "Seminar alt qrupu yalnız seminar dərsinə aiddir."
+msgstr "Seminar alt qrupu yalnız seminar dərsinə aiddir."
+
+msgctxt "registrar.seminar_groups"
+msgid "Bu jurnalda belə seminar alt qrupu yoxdur."
+msgstr "Bu jurnalda belə seminar alt qrupu yoxdur."
+
+msgctxt "registrar.seminar_groups"
+msgid "Bu dərsdə başqa alt qrupun tələbələrinə qeyd yazılıb — alt qrupu dəyişmək olmaz."
+msgstr "Bu dərsdə başqa alt qrupun tələbələrinə qeyd yazılıb — alt qrupu dəyişmək olmaz."
+
+msgctxt "registrar.seminar_groups"
+msgid "Bu seminar dərsi yalnız bu alt qrupun tələbələrinindir"
+msgstr "Bu seminar dərsi yalnız bu alt qrupun tələbələrinindir"
+
+msgctxt "registrar.seminar_groups"
+msgid "Seminar alt qrupu"
+msgstr "Seminar alt qrupu"
+
+msgctxt "registrar.seminar_groups"
+msgid "Başqa seminar alt qrupunun dərsi"
+msgstr "Başqa seminar alt qrupunun dərsi"
+
+msgctxt "registrar.seminar_groups"
+msgid "SEMİNAR ALT QRUPU"
+msgstr "SEMİNAR ALT QRUPU"
+
+msgctxt "registrar.seminar_groups"
+msgid "Bütün qrup"
+msgstr "Bütün qrup"
+
+msgctxt "registrar.seminar_groups"
+msgid "Alt qrup seçilsə dərs yalnız onun tələbələrinə yazılır; mühazirə bütün qrupladır."
+msgstr "Alt qrup seçilsə dərs yalnız onun tələbələrinə yazılır; mühazirə bütün qrupladır."
+
+msgctxt "registrar.model.seminar_group.meta"
+msgid "seminar alt qrupu"
+msgstr "seminar alt qrupu"
+
+msgctxt "registrar.model.seminar_group.meta"
+msgid "seminar alt qrupları"
+msgstr "seminar alt qrupları"
+
+msgctxt "registrar.journal_sections"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "registrar.journal_sections"
+msgid "Mühazirə"
+msgstr "Mühazirə"
+
+msgctxt "registrar.journal_sections"
+msgid "Seminar"
+msgstr "Seminar"
+
+msgctxt "registrar.journal_sections"
+msgid "Jurnal bölmələri"
+msgstr "Jurnal bölmələri"
+
+#, python-format
+msgctxt "registrar.lab_groups"
+msgid "%(group)s · Lab-%(n)s"
+msgstr "%(group)s · Lab-%(n)s"
+
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "registrar.journal"
+msgid "Praktiki məşğələ ballarının ədədi ortası; balsız dərslər sayılmır."
+msgstr "Praktiki məşğələ ballarının ədədi ortası; balsız dərslər sayılmır."
+
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "registrar.journal"
+msgid "praktiki məşğələ"
+msgstr "praktiki məşğələ"
+
+#: foreign-language level rule (owner 2026-11-08)
+#, python-format
+msgctxt "accounts.dashboard"
+msgid "Xarici dil səviyyə fənlərində midterm 0–%(max)s bal, yekun imtahan 0–%(exam)s bal."
+msgstr "Xarici dil səviyyə fənlərində midterm 0–%(max)s bal, yekun imtahan 0–%(exam)s bal."
+
+#: foreign-language level rule (owner 2026-11-08)
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Semestr balı %(semester)s (davamiyyət + midterm + praktiki məşğələ balları), yekun imtahan %(final)s — cəmi %(total)s bal. Xarici dil səviyyə fənninin qaydasıdır və dəyişdirilmir."
+msgstr "Semestr balı %(semester)s (davamiyyət + midterm + praktiki məşğələ balları), yekun imtahan %(final)s — cəmi %(total)s bal. Xarici dil səviyyə fənninin qaydasıdır və dəyişdirilmir."
+
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "profile.subjects"
+msgid "Aktivlik (praktiki məşğələ)"
+msgstr "Aktivlik (praktiki məşğələ)"
+
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "profile.subjects"
+msgid "Xarici dil səviyyə fənləri"
+msgstr "Xarici dil səviyyə fənləri"
+
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "registrar.language_cohort"
+msgid "Səviyyə qaydası: davamiyyət 10, praktiki məşğələ 10, midterm 10, imtahan 70 bal. Qayıb limiti 10 q/b-dir; 11 q/b olduqda imtahana buraxılmır."
+msgstr "Səviyyə qaydası: davamiyyət 10, praktiki məşğələ 10, midterm 10, imtahan 70 bal. Qayıb limiti 10 q/b-dir; 11 q/b olduqda imtahana buraxılmır."
+
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "syllabus.assessment"
+msgid "Praktiki məşğələ (ədədi orta)"
+msgstr "Praktiki məşğələ (ədədi orta)"
+
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "syllabus.assessment"
+msgid "Praktiki məşğələ balı: semestr ərzindəki bütün praktiki məşğələ qiymətlərinin ədədi ortası (maksimum 10)."
+msgstr "Praktiki məşğələ balı: semestr ərzindəki bütün praktiki məşğələ qiymətlərinin ədədi ortası (maksimum 10)."
+
+# Jurnal banneri: mövcud sillabuslar + «dəyişmədən tətbiq et» (sahib 2026-11-08)
+msgctxt "registrar.syllabus"
+msgid "Aç"
+msgstr "Aç"
+
+msgctxt "registrar.syllabus"
+msgid "Bu fənn üzrə mövcud sillabuslar"
+msgstr "Bu fənn üzrə mövcud sillabuslar"
+
+#, python-format
+msgctxt "registrar.syllabus"
+msgid "Bu fənn üçün %(group)s qrupuna hazırladığınız sillabus var — dəyişmədən bu jurnala da tətbiq edilsin?"
+msgstr "Bu fənn üçün %(group)s qrupuna hazırladığınız sillabus var — dəyişmədən bu jurnala da tətbiq edilsin?"
+
+msgctxt "registrar.syllabus"
+msgid "Bu fənn üçün hazırladığınız sillabus var"
+msgstr "Bu fənn üçün hazırladığınız sillabus var"
+
+msgctxt "registrar.syllabus"
+msgid "Bəli, dəyişmədən tətbiq et"
+msgstr "Bəli, dəyişmədən tətbiq et"
+
+msgctxt "registrar.syllabus"
+msgid "Hər sillabusun hansı qrup üçün və kim tərəfindən yaradıldığı göstərilir. Sətrə klikləyib sillabusa keçə bilərsiniz."
+msgstr "Hər sillabusun hansı qrup üçün və kim tərəfindən yaradıldığı göstərilir. Sətrə klikləyib sillabusa keçə bilərsiniz."
+
+msgctxt "registrar.syllabus"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "registrar.syllabus"
+msgid "Müəllif"
+msgstr "Müəllif"
+
+msgctxt "registrar.syllabus"
+msgid "Müəllif məlum deyil"
+msgstr "Müəllif məlum deyil"
+
+msgctxt "registrar.syllabus"
+msgid "Semestr dosyesi"
+msgstr "Semestr dosyesi"
+
+msgctxt "registrar.syllabus"
+msgid "Sillabusu bu jurnalın müəllimi yaradır."
+msgstr "Sillabusu bu jurnalın müəllimi yaradır."
+
+msgctxt "registrar.syllabus"
+msgid "Xeyr, yeni sillabus yarat"
+msgstr "Xeyr, yeni sillabus yarat"
+
+msgctxt "registrar.syllabus"
+msgid "Yeni sillabus yaradılmır və heç nə dəyişdirilmir — bu jurnal eyni sillabusu öz yerində istifadə edir. Təsdiq, dəyişikliklər və həftəlik plan bütün bağlı qruplar üçün ortaqdır."
+msgstr "Yeni sillabus yaradılmır və heç nə dəyişdirilmir — bu jurnal eyni sillabusu öz yerində istifadə edir. Təsdiq, dəyişikliklər və həftəlik plan bütün bağlı qruplar üçün ortaqdır."
+
+msgctxt "registrar.syllabus"
+msgid "bu jurnalın müəllimi"
+msgstr "bu jurnalın müəllimi"
+
+msgctxt "registrar.syllabus"
+msgid "təsdiqlənmiş versiya qüvvədədir"
+msgstr "təsdiqlənmiş versiya qüvvədədir"
+
+msgctxt "registrar.syllabus"
+msgid "Əməliyyat yerinə yetirilmədi."
+msgstr "Əməliyyat yerinə yetirilmədi."
+
+msgctxt "syllabus.model"
+msgid "Təsdiqlənmiş sillabus başqa qrupdan (avtomatik)"
+msgstr "Təsdiqlənmiş sillabus başqa qrupdan (avtomatik)"

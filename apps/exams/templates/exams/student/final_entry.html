@@ -14,7 +14,8 @@
 
 {% block extraCss %}
     <link rel="stylesheet" href="{% static 'exams/css/final_center/student.css' %}?v=20261021-redesign">
-    {% if show_gate_modal %}<link rel="stylesheet" href="{% static 'exams/css/final_center/student_gate.css' %}?v=20261021-redesign">{% endif %}
+    {% if show_gate_modal %}<link rel="stylesheet" href="{% static 'exams/css/final_center/student_gate.css' %}?v=20261021-redesign">
+    <link rel="stylesheet" href="{% static 'exams/css/exam_language_step.css' %}?v=20261106-lang">{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -92,4 +93,5 @@ Qabıq 100dvh-dır; qaydalar modalı açıq olanda arxa plan `inert`-dir (Tab mo
 
 {% block extraJs %}
     <script src="{% static 'exams/js/final_center/final_entry.js' %}?v=20261021-redesign" defer></script>
+    {% if show_gate_modal %}<script src="{% static 'exams/js/exam_language_step.js' %}?v=20261106-lang" defer></script>{% endif %}
 {% endblock %}

@@ -1,0 +1,79 @@
+{% load i18n %}
+{% comment %}«Nəzarət otağı» dialoqları — açma/bağlama + fokus tələsi `ems_ui/overlay.js`, məzmun və
+sorğular `supervision_room.js`. Tələbənin adı və detal JS ilə doldurulur.{% endcomment %}
+
+{# ── Bərpa et ─────────────────────────────────────────────────────── #}
+<div class="ems-overlay ems-overlay--dialog" id="svr-resume-dialog" hidden>
+    <div class="ems-dialog" role="dialog" aria-modal="true" aria-labelledby="svr-resume-dialog-title">
+        <div class="ems-dialog__head">
+            <div>
+                <h2 class="ems-dialog__title" id="svr-resume-dialog-title">{% trans "Tələbəni bərpa et" context "exams.supervision_room" %}</h2>
+                <p class="ems-dialog__sub" data-svr-dialog-student></p>
+            </div>
+            <button type="button" class="ems-dialog__x" data-ems-overlay-close aria-label="{% trans 'Bağla' context 'exams.supervision_room' %}">×</button>
+        </div>
+        <div class="ems-dialog__body">
+            <p class="svr-dialog__text">{% trans "Tələbənin ekranı açılacaq və o, imtahana olduğu yerdən davam edəcək. Cavabları və vaxtı qorunur." context "exams.supervision_room" %}</p>
+            <label class="svr-check" data-svr-extra-wrap>
+                <input type="checkbox" id="svr-resume-extra" value="1">
+                <span>{% trans "Əlavə şans ver (pozuntu sayğacı bir vahid azalır)" context "exams.supervision_room" %}</span>
+            </label>
+            <p class="svr-dialog__error" data-svr-dialog-error role="alert" hidden></p>
+        </div>
+        <div class="ems-dialog__foot">
+            <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Ləğv et" context "exams.supervision_room" %}</button>
+            <button type="button" class="ems-btn ems-btn--success" data-svr-confirm="resume">
+                <i class="fas fa-play" aria-hidden="true"></i> {% trans "Bərpa et" context "exams.supervision_room" %}
+            </button>
+        </div>
+    </div>
+</div>
+
+{# ── Dayandır (müvəqqəti kilid) ──────────────────────────────────── #}
+<div class="ems-overlay ems-overlay--dialog" id="svr-pause-dialog" hidden>
+    <div class="ems-dialog" role="dialog" aria-modal="true" aria-labelledby="svr-pause-dialog-title">
+        <div class="ems-dialog__head">
+            <div>
+                <h2 class="ems-dialog__title" id="svr-pause-dialog-title">{% trans "İmtahanı müvəqqəti dayandır" context "exams.supervision_room" %}</h2>
+                <p class="ems-dialog__sub" data-svr-dialog-student></p>
+            </div>
+            <button type="button" class="ems-dialog__x" data-ems-overlay-close aria-label="{% trans 'Bağla' context 'exams.supervision_room' %}">×</button>
+        </div>
+        <div class="ems-dialog__body">
+            <p class="svr-dialog__text">{% trans "Tələbənin ekranı kilidlənir, cəhd təhvil verilmir. «Bərpa et» ilə davam etdirə bilərsiniz." context "exams.supervision_room" %}</p>
+            <label class="ems-field__label" for="svr-pause-reason">{% trans "Səbəb (tələbəyə göstərilir)" context "exams.supervision_room" %}</label>
+            <textarea id="svr-pause-reason" class="ems-textarea" rows="3" maxlength="500"
+                      placeholder="{% trans 'Məsələn: telefondan istifadə' context 'exams.supervision_room' %}"></textarea>
+            <p class="svr-dialog__error" data-svr-dialog-error role="alert" hidden></p>
+        </div>
+        <div class="ems-dialog__foot">
+            <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Ləğv et" context "exams.supervision_room" %}</button>
+            <button type="button" class="ems-btn ems-btn--danger" data-svr-confirm="pause">
+                <i class="fas fa-pause" aria-hidden="true"></i> {% trans "Dayandır" context "exams.supervision_room" %}
+            </button>
+        </div>
+    </div>
+</div>
+
+{# ── Tələbə detalı (canlı görüntü + pozuntu xronologiyası) ───────── #}
+<div class="ems-overlay ems-overlay--dialog" id="svr-detail-dialog" hidden>
+    <div class="ems-dialog ems-dialog--wide" role="dialog" aria-modal="true" aria-labelledby="svr-detail-dialog-title">
+        <div class="ems-dialog__head">
+            <div>
+                <h2 class="ems-dialog__title" id="svr-detail-dialog-title" data-svr-detail-name>—</h2>
+                <p class="ems-dialog__sub" data-svr-detail-sub></p>
+            </div>
+            <button type="button" class="ems-dialog__x" data-ems-overlay-close aria-label="{% trans 'Bağla' context 'exams.supervision_room' %}">×</button>
+        </div>
+        <div class="ems-dialog__body">
+            <div class="svr-detail__facts" data-svr-detail-facts></div>
+            <h3 class="svr-detail__heading">{% trans "Nəzarət xronologiyası" context "exams.supervision_room" %}</h3>
+            <ol class="svr-timeline" data-svr-detail-timeline></ol>
+            <p class="svr-detail__empty" data-svr-detail-empty hidden>{% trans "Qeydə alınmış hadisə yoxdur." context "exams.supervision_room" %}</p>
+            <p class="svr-dialog__error" data-svr-dialog-error role="alert" hidden></p>
+        </div>
+        <div class="ems-dialog__foot">
+            <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Bağla" context "exams.supervision_room" %}</button>
+        </div>
+    </div>
+</div>

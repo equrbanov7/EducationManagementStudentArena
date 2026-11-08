@@ -1,0 +1,50 @@
+{% load i18n %}
+{% comment %}
+İmtahan dili — başlamazdan əvvəl MƏCBURİ, gözə çarpan addım (sahib 2026-11-06: «tələbə «görmədim» deməsin»).
+Start təsdiq səhifəsi və final/midterm giriş modalı ORTAQ istifadə edir. Böyük radio-kartlar (native select
+YOX — layihə qaydası), başlıq + nömrə + «məcburi» nişanı, seçilməsə forma göndərilmir və xəta vəziyyəti
+görünür (exams/js/exam_language_step.js; server də yoxlayır). Tək dil → yalnız məlumat + gizli sahə.
+
+KONTEKST
+  language_options   — [{"language", "label"}]
+  language_selected  — əvvəlcədən seçilmiş kod (opsional; yoxdursa heç biri seçilmir)
+  language_error     — server xətası (opsional)
+  language_step_no   — addım nömrəsi (default 1)
+{% endcomment %}
+{% if language_options|length > 1 %}
+<fieldset class="els{% if language_error %} is-invalid{% endif %}" data-language-step
+          aria-describedby="els-hint{% if language_error %} els-error{% endif %}">
+    <legend class="els__legend">
+        <span class="els__step" aria-hidden="true">{{ language_step_no|default:"1" }}</span>
+        <span class="els__title">{% trans "İmtahan dilini seçin" context "exams.language_step" %}</span>
+        <span class="els__required">{% trans "məcburi" context "exams.language_step" %}</span>
+    </legend>
+    <p class="els__hint" id="els-hint">
+        <i class="fas fa-language" aria-hidden="true"></i>
+        {% trans "Suallar seçdiyiniz dildə veriləcək. İmtahan başladıqdan sonra dili dəyişmək mümkün deyil." context "exams.language_step" %}
+    </p>
+    <div class="els__grid" role="radiogroup" aria-required="true">
+        {% for option in language_options %}
+        <label class="els__option">
+            <input type="radio" name="language" value="{{ option.language }}" required
+                   {% if language_selected == option.language %}checked{% endif %}>
+            <span class="els__code" aria-hidden="true">{{ option.language|upper }}</span>
+            <span class="els__label">{{ option.label }}</span>
+            <i class="fas fa-circle-check els__check" aria-hidden="true"></i>
+        </label>
+        {% endfor %}
+    </div>
+    <p class="els__error" id="els-error" role="alert" data-language-step-error
+       data-default-message="{% trans 'İmtahana başlamaq üçün əvvəlcə imtahan dilini seçin.' context 'exams.language_step' %}"
+       {% if not language_error %}hidden{% endif %}>
+        <i class="fas fa-circle-exclamation" aria-hidden="true"></i>
+        <span data-language-step-error-text>{{ language_error }}</span>
+    </p>
+</fieldset>
+{% elif language_options %}
+<input type="hidden" name="language" value="{{ language_options.0.language }}">
+<p class="els-single">
+    <i class="fas fa-language" aria-hidden="true"></i>
+    <span>{% trans "İmtahan dili" context "exams.language_step" %}: <b>{{ language_options.0.label }}</b></span>
+</p>
+{% endif %}

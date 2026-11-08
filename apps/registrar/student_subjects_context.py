@@ -46,6 +46,7 @@ from apps.registrar import (
 from apps.registrar.cabinet_policy import (
     approved_syllabus_offerings,
     assessment_weights_view,
+    level_assessment_weights_view,
     other_period_subject_rows,
 )
 from apps.registrar.models import AssessmentScheme, ComponentKind
@@ -365,6 +366,8 @@ def build_section(*, request, organization, record, period, semester_number) -> 
         # Qiymətləndirmə çəkiləri — universitet SİYASƏTİ ilə kilidli (README §8/4:
         # davamiyyət 10 · sərbəst iş 10 · cari 30 · yekun 50). Kodda hardcode YOX.
         "assessment_weights": assessment_weights_view(organization, period=period),
+        # Xarici dil səviyyə fənni varsa ikinci zolaq: 10 · 10 · 10 · 70 (sahib 2026-11-08).
+        "level_assessment_weights": level_assessment_weights_view(data["subjects"]),
         "kpis": kpis,
         "kpi_tiles": kpi_tiles(kpis) if data["subjects"] else [],
         "legend": LEGEND,

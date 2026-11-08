@@ -154,64 +154,7 @@
     color: var(--ems-neutral-700);
 }
 
-/* ── İmtahan dili ── */
-.fexc-langs {
-    margin: 0;
-    padding: 0;
-    border: none;
-}
-
-.fexc-langs legend {
-    margin-bottom: 10px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--ems-neutral-900);
-}
-
-.fexc-lang-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 10px;
-}
-
-.fexc-lang-option {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 11px 14px;
-    border: 1px solid var(--ems-neutral-300);
-    border-radius: 10px;
-    font-weight: 600;
-    color: var(--ems-neutral-700);
-    cursor: pointer;
-    transition: border-color 0.15s ease, background-color 0.15s ease;
-}
-
-.fexc-lang-option:hover {
-    border-color: var(--ems-primary-300);
-}
-
-.fexc-lang-option:has(input:checked) {
-    border-color: var(--ems-primary-600);
-    background: var(--ems-primary-50);
-    color: var(--ems-primary-800);
-}
-
-.fexc-lang-option:has(input:focus-visible) {
-    box-shadow: var(--ems-sh-focus);
-}
-
-.fexc-lang-option input {
-    accent-color: var(--ems-primary-600);
-}
-
-.fexc-lang-single {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0;
-    font-size: 0.88rem;
-}
+/* İmtahan dili — ortaq məcburi addım: exams/css/exam_language_step.css (sahib 2026-11-06). */
 
 /* ── Sabit alt zolaq: təsdiq + düymələr ── */
 .fexc-gate-foot {
@@ -276,5 +219,4 @@
 
 @media (prefers-reduced-motion: reduce) {
     .fexc-modal-panel { animation: none; }
-    .fexc-lang-option { transition: none; }
 }

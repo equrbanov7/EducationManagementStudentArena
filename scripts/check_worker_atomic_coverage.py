@@ -100,8 +100,33 @@ INTENTIONAL_EXEMPTIONS = {
     "apps/registrar/management/commands/set_practical_offerings.py",
     # 2026-11-05 Psixologiya dublikatları: DB işi `merge_duplicate_student`-dədir (call_command; rls_worker_atomic orada).
     "apps/accounts/management/commands/merge_psychology_duplicates_20261105.py",
+    "apps/accounts/management/commands/merge_psychology_duplicates_20261106.py",
     # 2026-11-05 RİM müraciətləri (MR-190/161/110): sabit cütlər, eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/repair_applications_20261105.py",
+    "apps/registrar/management/commands/repair_applications_20261105c.py",
+    "apps/registrar/management/commands/fix_ydk236_subject_20261106.py",
+    "apps/registrar/management/commands/sync_student_group_journals.py",
+    "apps/registrar/management/commands/repair_applications_20261106.py",
+    "apps/registrar/management/commands/rebuild_language_cohorts_20261106.py",
+    # 2026-11-06 lab qrupları (Ekologiya kafedrası): eyni `relocate_twin_enrollment.run_plan` gövdəsi.
+    "apps/registrar/management/commands/apply_lab_groups_20261106.py",
+    # 2026-11-07 1-ci kurslar (Fizika/kimya Lab-1/Lab-2 + ADİAK payları): eyni `relocate_twin_enrollment.run_plan` gövdəsi.
+    "apps/registrar/management/commands/apply_first_year_splits_20261107.py",
+    "apps/registrar/management/commands/restore_subgroup_parent_enrollments.py",
+    "apps/registrar/management/commands/apply_seminar_groups.py",
+    "apps/registrar/management/commands/bind_lab_lessons_20261108.py",
+    # 2026-11-08 təsdiqlənmiş sillabusun daşınması: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
+    "apps/registrar/management/commands/carry_approved_syllabi_20261108.py",
+    "apps/registrar/management/commands/merge_subgroup_journals_20261108.py",
+    "apps/registrar/management/commands/resolve_subgroup_families_20261108.py",
+    "apps/registrar/management/commands/fill_legacy_cells_20261108.py",
+    "apps/registrar/management/commands/fix_mexanika_lessons_20261108.py",
+    "apps/registrar/management/commands/repair_legacy_identity_20261108.py",
+    # 2026-11-06 RİM MR-000230 (236 İT dərs bərpası): eyni `relocate_twin_enrollment.run_plan` gövdəsi.
+    "apps/registrar/management/commands/recover_mr230_lessons.py",
+    # 2026-11-07 RİM müraciətləri (MR-247/253/245): eyni `relocate_twin_enrollment.run_plan` gövdəsi.
+    "apps/registrar/management/commands/repair_applications_20261107.py",
+    "apps/registrar/management/commands/repair_applications_20261107b.py",
     # rehearse öz RLS kontekstini (set_rls_tenant, session-scoped, bypass-sız)
     # və öz transaction sərhədlərini (ledger advisory-lock atomic-ləri, batch
     # checkpoint/resume) idarə edir — tək böyük rls_worker_atomic() sarğısı
