@@ -102,6 +102,9 @@ def _undo_family(organization, actor, counts, manifest, target_id) -> None:
     )
     CourseOffering = _model("CourseOffering")
     CourseOffering.objects.filter(pk__in=get("sources_retired", [])).update(is_active=True)
+    _model("JournalShare").objects.filter(pk__in=get("source_shares_retired", [])).update(
+        is_active=True, updated_at=timezone.now()
+    )
     CourseOffering.objects.filter(pk__in=get("target_created", []), enrollments__isnull=True).update(is_active=False)
     recompute_absences(
         list(Enrollment.objects.filter(pk__in=get("source_enrollments_dropped", [])))
