@@ -35,6 +35,7 @@ from . import (
     semester_actions,
     subject_exempt_views,
     subject_merge_views,
+    syllabus_peers,
     syllabus_views,
     views,
 )
@@ -123,6 +124,12 @@ urlpatterns = [
         "<uuid:offering_id>/sillabus.pdf",
         syllabus_views.offering_syllabus_pdf,
         name="offering_syllabus_pdf",
+    ),
+    # Banner: bu fənnin mövcud sillabusları (qrup, müəllif, status) + «dəyişmədən tətbiq et» təklifi (sahib 2026-11-08).
+    path(
+        "<uuid:offering_id>/sillabus/movcud.json",
+        syllabus_peers.journal_syllabus_peers,
+        name="journal_syllabus_peers",
     ),
     # «Alt qrupdan tələbə əlavə et» (koordinator/dekanlıq) — uuid catch-all-dan ƏVVƏL.
     path(

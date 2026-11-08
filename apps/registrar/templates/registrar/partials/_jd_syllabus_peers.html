@@ -1,0 +1,61 @@
+{% load i18n %}
+{% comment %}«Bu fənn üzrə mövcud sillabuslar» + «dəyişmədən bu jurnala tətbiq et» təklifi (sahib 2026-11-08).
+
+Yalnız «Sillabus yarat» / «Qaralamanı tamamla» bannerində (missing / draft) daxil edilir. Məlumat səhifə
+yüklənəndə gəlmir (jurnalın sorğu büdcəsi dəyişmir): `registrar:journal_syllabus_peers` JSON-u JS ilə oxunur.
+Siyahı sətri: qrup(lar) · müəllif · status · «Aç» (profil redaktoru; baxana oxu rejimi).
+Təklif dialoqu yalnız jurnalın müəllimi üçün qurulur; «Bəli» mövcud `accounts:syllabus_reuse_action`
+(`action=share`) ucuna gedir — yeni sillabus yaradılmır, eyni sillabus bu jurnalda öz yerində istifadə olunur.
+Davranış: registrar/js/journal_syllabus_peers.js · görünüş: registrar/css/journal_syllabus_peers.css
+{% endcomment %}
+<section class="jd2-sylpeers" data-jd-syl-peers hidden
+         data-url="{% url 'registrar:journal_syllabus_peers' offering.id %}">
+    <details class="jd2-sylpeers__box">
+        <summary class="jd2-sylpeers__summary">
+            <i class="fas fa-layer-group" aria-hidden="true"></i>
+            {% trans "Bu fənn üzrə mövcud sillabuslar" context "registrar.syllabus" %}
+            <span class="jd2-sylpeers__count" data-jd-syl-peers-count></span>
+        </summary>
+        <p class="jd2-sylpeers__lead">
+            {% trans "Hər sillabusun hansı qrup üçün və kim tərəfindən yaradıldığı göstərilir. Sətrə klikləyib sillabusa keçə bilərsiniz." context "registrar.syllabus" %}
+        </p>
+        <ul class="jd2-sylpeers__list" data-jd-syl-peers-list></ul>
+    </details>
+</section>
+
+{% if syllabus_notice.state == 'missing' and offering.instructor_id == request.user.pk %}
+<div class="corr-modal jd2-sylreuse" hidden data-jd-syl-reuse
+     data-action-url="{% url 'accounts:syllabus_reuse_action' %}" data-offering="{{ offering.id }}">
+    <div class="corr-modal-backdrop" data-jd-syl-reuse-close></div>
+    <div class="corr-modal-card jd2-sylreuse__card" role="dialog" aria-modal="true" tabindex="-1"
+         aria-label="{% trans 'Bu fənn üçün hazırladığınız sillabus var' context 'registrar.syllabus' %}">
+        <div class="corr-modal-head">
+            <h2>{% trans "Bu fənn üçün hazırladığınız sillabus var" context "registrar.syllabus" %}</h2>
+            <button type="button" class="corr-modal-x" data-jd-syl-reuse-close
+                    aria-label="{% trans 'Bağla' context 'registrar.syllabus' %}">&times;</button>
+        </div>
+        <div class="jd2-sylreuse__body">
+            <div class="jd2-sylreuse__sources" data-jd-syl-reuse-sources></div>
+            <p class="jd2-sylreuse__hint">
+                {% trans "Yeni sillabus yaradılmır və heç nə dəyişdirilmir — bu jurnal eyni sillabusu öz yerində istifadə edir. Təsdiq, dəyişikliklər və həftəlik plan bütün bağlı qruplar üçün ortaqdır." context "registrar.syllabus" %}
+            </p>
+            <p class="jd2-sylreuse__status" data-jd-syl-reuse-status role="status" aria-live="polite" hidden></p>
+        </div>
+        <div class="jd2-sylreuse__foot">
+            <a class="jd2-sylreuse__no" href="{{ syllabus_notice.action_url }}" data-jd-syl-reuse-no>
+                {% trans "Xeyr, yeni sillabus yarat" context "registrar.syllabus" %}
+            </a>
+            <button type="button" class="jd2-sylreuse__cancel" data-jd-syl-reuse-close>
+                {% trans "Ləğv et" context "registrar.syllabus" %}
+            </button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<span class="jd2-sylpeers__i18n" hidden data-jd-syl-peers-i18n
+      data-t-open="{% trans 'Aç' context 'registrar.syllabus' %}"
+      data-t-author="{% trans 'Müəllif' context 'registrar.syllabus' %}"
+      data-t-by-instructor="{% trans 'bu jurnalın müəllimi' context 'registrar.syllabus' %}"
+      data-t-yes="{% trans 'Bəli, dəyişmədən tətbiq et' context 'registrar.syllabus' %}"
+      data-t-error="{% trans 'Əməliyyat yerinə yetirilmədi.' context 'registrar.syllabus' %}"></span>

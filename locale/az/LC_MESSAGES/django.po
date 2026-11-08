@@ -114514,3 +114514,69 @@ msgstr "Jurnal bölmələri"
 msgctxt "registrar.lab_groups"
 msgid "%(group)s · Lab-%(n)s"
 msgstr "%(group)s · Lab-%(n)s"
+
+# Jurnal banneri: mövcud sillabuslar + «dəyişmədən tətbiq et» (sahib 2026-11-08)
+msgctxt "registrar.syllabus"
+msgid "Aç"
+msgstr "Aç"
+
+msgctxt "registrar.syllabus"
+msgid "Bu fənn üzrə mövcud sillabuslar"
+msgstr "Bu fənn üzrə mövcud sillabuslar"
+
+#, python-format
+msgctxt "registrar.syllabus"
+msgid "Bu fənn üçün %(group)s qrupuna hazırladığınız sillabus var — dəyişmədən bu jurnala da tətbiq edilsin?"
+msgstr "Bu fənn üçün %(group)s qrupuna hazırladığınız sillabus var — dəyişmədən bu jurnala da tətbiq edilsin?"
+
+msgctxt "registrar.syllabus"
+msgid "Bu fənn üçün hazırladığınız sillabus var"
+msgstr "Bu fənn üçün hazırladığınız sillabus var"
+
+msgctxt "registrar.syllabus"
+msgid "Bəli, dəyişmədən tətbiq et"
+msgstr "Bəli, dəyişmədən tətbiq et"
+
+msgctxt "registrar.syllabus"
+msgid "Hər sillabusun hansı qrup üçün və kim tərəfindən yaradıldığı göstərilir. Sətrə klikləyib sillabusa keçə bilərsiniz."
+msgstr "Hər sillabusun hansı qrup üçün və kim tərəfindən yaradıldığı göstərilir. Sətrə klikləyib sillabusa keçə bilərsiniz."
+
+msgctxt "registrar.syllabus"
+msgid "Ləğv et"
+msgstr "Ləğv et"
+
+msgctxt "registrar.syllabus"
+msgid "Müəllif"
+msgstr "Müəllif"
+
+msgctxt "registrar.syllabus"
+msgid "Müəllif məlum deyil"
+msgstr "Müəllif məlum deyil"
+
+msgctxt "registrar.syllabus"
+msgid "Semestr dosyesi"
+msgstr "Semestr dosyesi"
+
+msgctxt "registrar.syllabus"
+msgid "Sillabusu bu jurnalın müəllimi yaradır."
+msgstr "Sillabusu bu jurnalın müəllimi yaradır."
+
+msgctxt "registrar.syllabus"
+msgid "Xeyr, yeni sillabus yarat"
+msgstr "Xeyr, yeni sillabus yarat"
+
+msgctxt "registrar.syllabus"
+msgid "Yeni sillabus yaradılmır və heç nə dəyişdirilmir — bu jurnal eyni sillabusu öz yerində istifadə edir. Təsdiq, dəyişikliklər və həftəlik plan bütün bağlı qruplar üçün ortaqdır."
+msgstr "Yeni sillabus yaradılmır və heç nə dəyişdirilmir — bu jurnal eyni sillabusu öz yerində istifadə edir. Təsdiq, dəyişikliklər və həftəlik plan bütün bağlı qruplar üçün ortaqdır."
+
+msgctxt "registrar.syllabus"
+msgid "bu jurnalın müəllimi"
+msgstr "bu jurnalın müəllimi"
+
+msgctxt "registrar.syllabus"
+msgid "təsdiqlənmiş versiya qüvvədədir"
+msgstr "təsdiqlənmiş versiya qüvvədədir"
+
+msgctxt "registrar.syllabus"
+msgid "Əməliyyat yerinə yetirilmədi."
+msgstr "Əməliyyat yerinə yetirilmədi."
