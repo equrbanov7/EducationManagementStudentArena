@@ -162,7 +162,8 @@ class Merger:
             teachers.add(target.instructor_id)
         if len(teachers) > 1:
             raise Blocked("family_instructors_differ")
-        if _model("JournalShare").objects.filter(offering__in=live, is_active=True).exists():
+        shares = _model("JournalShare").objects.filter(offering__in=live, is_active=True)
+        if shares.exists() and not self._shares_covered(target, shares):
             raise Blocked("source_has_shares")
         lessons = Lesson.objects.filter(offering__in=live)
         if (
@@ -181,6 +182,7 @@ class Merger:
 
     # ── ailə ──────────────────────────────────────────────────────────────
     def _family(self, family) -> None:
+        self._family_options = family
         target, live = self._load(family)
         self._check_sources(target, live)
         empty_before = sum(_empty_cells(offering) for offering in [*live, *([target] if target else [])])
@@ -534,7 +536,23 @@ class Merger:
             manifest["load_rows_group_added"].append(str(row.pk))
             self.counts["load_rows_group_added"] += 1
 
+    def _shares_covered(self, target, shares) -> bool:
+        """Sahib 2026-11-08 (536 MU): ailədə ``retire_source_shares`` — alt qrup jurnalının payı passiv olur YALNIZ hər
+        pay müəlliminin ana jurnalda girişi (sahib və ya aktiv pay) varsa; yoxdursa ailə toxunulmur."""
+        if target is None or not getattr(self, "_family_options", {}).get("retire_source_shares"):
+            return False
+        on_target = set(
+            _model("JournalShare").objects.filter(offering=target, is_active=True).values_list("teacher_id", flat=True)
+        ) | ({target.instructor_id} if target.instructor_id else set())
+        return all(share.teacher_id in on_target for share in shares)
+
     def _retire(self, live, manifest) -> None:
+        JournalShare = _model("JournalShare")
+        shares = list(JournalShare.objects.filter(offering__in=live, is_active=True).values_list("pk", flat=True))
+        if shares:
+            JournalShare.objects.filter(pk__in=shares).update(is_active=False, updated_at=timezone.now())
+            manifest["source_shares_retired"].extend(str(pk) for pk in shares)
+            self.counts["source_shares_retired"] += len(shares)
         Enrollment = _model("Enrollment")
         ids = list(Enrollment.objects.filter(offering__in=live, status="enrolled").values_list("pk", flat=True))
         Enrollment.objects.filter(pk__in=ids).update(status="dropped", updated_at=timezone.now())

@@ -129,7 +129,11 @@ class BuildStudentTranscriptTest(TestCase):
         while remaining > 0:
             chunk = min(10, remaining)
             seminar = gradebook.create_lesson(
-                allow_past=True, offering=offering, date=datetime.date(2024, 10, day), kind=LessonKind.SEMINAR
+                allow_past=True,
+                offering=offering,
+                # Sahib 2026-11-08: dərs semestrin başlanğıcından əvvəl ola bilməz — dövrün içində.
+                date=datetime.date.fromisoformat(str(offering.period.start_date)) + datetime.timedelta(days=day),
+                kind=LessonKind.SEMINAR,
             )
             gradebook.save_marks(
                 enforce_day=False,

@@ -122,6 +122,14 @@ def ensure_date_within_period(offering, parsed) -> None:
         raise LessonRuleError("Dərs tarixi bir ildən artıq irəlidə ola bilməz.")
 
 
+def ensure_not_before_period(offering, parsed) -> None:
+    """Sahib 2026-11-08: «ayın 15-dən tez jurnala nə isə yazıla bilməz» — dərs tarixi dövrün başlanğıcından əvvəl
+    OLA BİLMƏZ; RİM / superuser override-i (``allow_past``) və tam redaktə rejimi də bu həddi keçmir."""
+    start = _coerce_date(getattr(getattr(offering, "period", None), "start_date", None))
+    if start and parsed < start:
+        raise LessonRuleError(f"Dərs tarixi semestrin başlanğıcından ({start:%d.%m.%Y}) əvvəl ola bilməz.")
+
+
 def _ensure_full_edit_date(offering, parsed) -> None:
     from apps.registrar.journal_full_edit import date_error
 
@@ -177,6 +185,7 @@ def create_lesson(
     parsed = _coerce_date(date)
     if parsed is None:
         raise LessonRuleError("Dərs tarixi düzgün deyil.")
+    ensure_not_before_period(offering, parsed)
     if full_edit:
         _ensure_full_edit_date(offering, parsed)
     elif not allow_past:
@@ -294,6 +303,7 @@ def update_lesson(
         parsed = _coerce_date(date)
         if parsed is None:
             raise LessonRuleError("Dərs tarixi düzgün deyil.")
+        ensure_not_before_period(lesson.offering, parsed)
         if full_edit:
             _ensure_full_edit_date(lesson.offering, parsed)
         elif not allow_past:
