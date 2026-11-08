@@ -155,8 +155,10 @@ def _shares(key, spec, offering, actor, counts) -> None:
     forget(offering)
 
 
-def run(*, organization, actor, counts) -> None:
+def run(*, organization, actor, counts, data=None) -> None:
+    """data — eyni formatda başqa plan (sahib 2026-11-08: Mexanika lab qrupları); yoxdursa repo planı."""
     CourseOffering = _model("CourseOffering")
+    data = data or plan()
 
     def offering_for(spec):
         return (
@@ -165,7 +167,7 @@ def run(*, organization, actor, counts) -> None:
             .first()
         )
 
-    for key, spec in plan()["lab"].items():
+    for key, spec in data["lab"].items():
         offering = offering_for(spec)
         if offering is None:
             counts[f"{key}_offering_missing"] += 1
@@ -173,7 +175,7 @@ def run(*, organization, actor, counts) -> None:
         new = _lab(key, spec, offering, counts)
         if new["lab_groups"]:
             _audit(actor, organization, offering, {}, new, str(offering.pk))
-    for key, spec in plan()["shares"].items():
+    for key, spec in data["shares"].items():
         offering = offering_for(spec)
         if offering is None:
             counts[f"{key}_offering_missing"] += 1

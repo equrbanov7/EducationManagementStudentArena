@@ -119,6 +119,8 @@ INTENTIONAL_EXEMPTIONS = {
     "apps/registrar/management/commands/carry_approved_syllabi_20261108.py",
     "apps/registrar/management/commands/merge_subgroup_journals_20261108.py",
     "apps/registrar/management/commands/resolve_subgroup_families_20261108.py",
+    "apps/registrar/management/commands/apply_lab_splits_20261108.py",
+    "apps/registrar/management/commands/recompute_carried_absences_20261108.py",
     "apps/registrar/management/commands/fill_legacy_cells_20261108.py",
     "apps/registrar/management/commands/fix_mexanika_lessons_20261108.py",
     "apps/registrar/management/commands/repair_legacy_identity_20261108.py",
