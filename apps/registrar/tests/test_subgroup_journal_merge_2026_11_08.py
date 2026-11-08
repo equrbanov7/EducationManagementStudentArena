@@ -110,6 +110,7 @@ class SubgroupJournalMergeTest(_LabWorld, TestCase):
             self.assertRegex(line, r"^subgroup_merge: [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$")
             if "mode=" not in line:
                 counts.update(pair.split("=", 1) for pair in line[len("subgroup_merge: ") :].split())
+        counts.pop("family", None)  # ailə başına sətir — cəmlə eyni saylar
         return counts
 
     def _parent_marks(self):
@@ -166,7 +167,21 @@ class SubgroupJournalMergeTest(_LabWorld, TestCase):
             self.assertEqual(Enrollment.objects.filter(offering=self.o2, status="enrolled").count(), 1)
             self.assertFalse(SeminarGroup.objects.filter(offering=self.offering).exists())
 
-    def test_scores_block_family(self):
+    def test_separate_lectures_block_family(self):
+        day = self.today - datetime.timedelta(days=3)
+        with bypass_rls():
+            o1_e3 = Enrollment.objects.get(offering=self.o1, student=self.s3)
+            o2_e4 = Enrollment.objects.get(offering=self.o2, student=self.s4)
+            own1 = self._lesson_at(self.o1, day, LessonKind.LECTURE, T1010)
+            own2 = self._lesson_at(self.o2, day, LessonKind.LECTURE, T1150)  # ayrı saat — patok deyil
+            for lesson, enrollment in ((own1, o1_e3), (own2, o2_e4)):
+                LessonMark.objects.create(organization=self.org, lesson=lesson, enrollment=enrollment, status="present")
+        self.assertEqual(self._call("--apply"), {"family_lectures_separate": "1"})
+        with bypass_rls():
+            self.assertTrue(CourseOffering.objects.get(pk=self.o1.pk).is_active)
+            self.assertFalse(SeminarGroup.objects.filter(offering=self.offering).exists())
+
+    def test_component_scores_copied_and_final_grade_blocks(self):
         from apps.registrar.models import AssessmentComponent, ComponentScore
 
         with bypass_rls():
@@ -177,9 +192,47 @@ class SubgroupJournalMergeTest(_LabWorld, TestCase):
                 organization=self.org,
                 component=component,
                 enrollment=Enrollment.objects.get(offering=self.o1, student=self.s3),
-                score=10,
+                score=17,
             )
-        self.assertEqual(self._call("--apply"), {"source_has_scores": "1"})
+        counts = self._call("--apply")
+        self.assertEqual((counts["scores_copied"], counts["components_created"]), ("1", "1"))
+        with bypass_rls():
+            copied = ComponentScore.objects.get(component__offering=self.offering)
+            self.assertEqual(
+                (copied.component.name, copied.score, copied.enrollment.student_id), ("Midterm", 17, self.s3.pk)
+            )
+        self.assertEqual(self._call("--apply", "--undo")["undo_scores_deleted"], "1")
+
+    def test_dropped_parent_row_is_reactivated_and_restored_on_undo(self):
+        with bypass_rls():
+            o1_e0 = Enrollment.objects.get(offering=self.o1, student=self.students[0])
+            Enrollment.objects.filter(pk=self.e1.pk).update(status="dropped", superseded_by=o1_e0)
+        counts = self._call("--apply")
+        self.assertEqual(counts["enrollments_reactivated"], "1")
+        with bypass_rls():
+            self.assertEqual(Enrollment.objects.get(pk=self.e1.pk).status, "enrolled")
+        self._call("--apply", "--undo")
+        with bypass_rls():
+            row = Enrollment.objects.get(pk=self.e1.pk)
+            self.assertEqual((row.status, row.superseded_by_id), ("dropped", o1_e0.pk))
+
+    def test_different_teachers_block_family(self):
+        with bypass_rls():
+            other = User.objects.create_user("sgm_t2", "sgm_t2@x.test", "pw")
+            self._member(other, "teacher", ["grade.input"])
+            CourseOffering.objects.filter(pk=self.o2.pk).update(instructor=other)
+            CourseOffering.objects.filter(pk=self.o1.pk).update(instructor=self.teacher)
+        self.assertEqual(self._call("--apply"), {"family_instructors_differ": "1"})
+
+    def test_undo_blocked_after_teacher_writes(self):
+        self._call("--apply")
+        with bypass_rls():
+            Lesson.objects.create(
+                organization=self.org, offering=self.offering, date=self.today, kind=LessonKind.LECTURE, hours=2
+            )
+        self.assertEqual(self._call("--apply", "--undo"), {"undo_blocked_post_merge_data": "1"})
+        with bypass_rls():
+            self.assertFalse(CourseOffering.objects.get(pk=self.o1.pk).is_active)
 
     def test_workflow_wiring(self):
         text = WORKFLOW.read_text(encoding="utf-8")

@@ -1,42 +1,58 @@
-"""Lab qrupunun ayrıca görünüşü — siyahıda «236 SBİO · Lab-1» sətri, jurnalda ``?lab=1`` (sahib 2026-11-08).
+"""Lab qrupunun və seminar alt qrupunun ayrıca görünüşü — siyahıda alt sətir, jurnalda ``?lab=N`` / ``?seminar=N``.
 
-Sahib: «236 SBİO Lab-1 vuranda oradakı uşaqlar, aşağıda 236 SBİO Lab-2 vuranda oradakı uşaqlar görünsün». Jurnal BİR
-qalır; bu yalnız GÖRÜNÜŞDÜR:
+Sahib 2026-11-08: «236 SBİO Lab-1 vuranda oradakı uşaqlar, aşağıda 236 SBİO Lab-2 vuranda oradakı uşaqlar görünsün» +
+«ana qrup hamısı olanda elə görünsün, mühazirə olanda da; seminar seçiləndə bölünən, lab seçəndə bölünənlər». Jurnal
+BİR qalır; bu yalnız GÖRÜNÜŞDÜR:
 
-* siyahı (:func:`attach_list_rows`): lab qrupu olan jurnalın altında hər qrup üçün sətir — ad
-  (:func:`apps.registrar.lab_groups.label`), tələbə sayı, keçid ``?kind=lab&lab=N``. Mühazirə / seminar süzgəcində
-  çıxmır. Səhifə dilimi üçün İKİ sorğu (sayılar + adlar), N+1 yoxdur;
-* jurnal (:func:`resolve` + :func:`apply`): yalnız həmin qrupun tələbələri və o qrupa aid lab dərsləri (qrupun öz
-  dərsləri + qrupsuz, hamıya aid lab dərsləri). Yazı qaydaları dəyişmir (``lab_groups.applies``).
+* siyahı (:func:`attach_list_rows`): «Laboratoriya» süzgəcində lab qrupu olan jurnalın altında hər lab qrupu, «Seminar»
+  süzgəcində hər seminar alt qrupu üçün sətir — ad, tələbə sayı, keçid. «Hamısı» / «Mühazirə»-də alt sətir YOXDUR
+  (ana qrup bütöv). Seçilmiş növ üçün İKİ sorğu (sayılar + adlar), N+1 yoxdur;
+* jurnal (:func:`resolve` + :func:`apply`): yalnız həmin qrupun tələbələri və o qrupa aid dərslər (qrupun öz
+  dərsləri + qrupsuz, hamıya aid dərslər). Yazı qaydaları dəyişmir (``lab_groups.applies``).
 """
 
 from __future__ import annotations
 
 from collections import defaultdict
 
-from . import lab_groups
-from .models import Enrollment, LabGroup, LessonKind
+from . import lab_groups, seminar_groups
+from .models import Enrollment, LabGroup, LessonKind, SeminarGroup
+
+#: növ → (sorğu parametri, qeydiyyat/dərs sahəsi, ad cədvəli, qayda modulu, ad memo-su, siyahı atributu)
+_SPLITS = {
+    LessonKind.LAB: ("lab", "lab_group", LabGroup, lab_groups, "_lab_group_names_memo", "lab_sections"),
+    LessonKind.SEMINAR: (
+        "seminar",
+        "seminar_group",
+        SeminarGroup,
+        seminar_groups,
+        "_seminar_group_names_memo",
+        "seminar_sections",
+    ),
+}
 
 
-def resolve(request, offering):
-    """``?lab=N`` → jurnalda mövcud lab qrupunun nömrəsi; yoxdursa ``None`` (adi görünüş)."""
-    raw = str(request.GET.get("lab") or "").strip() if request is not None else ""
+def resolve(request, offering, kind=LessonKind.LAB):
+    """``?lab=N`` / ``?seminar=N`` → jurnalda mövcud qrupun nömrəsi; yoxdursa ``None`` (adi görünüş)."""
+    param, _field, _model, rules, _memo, _attr = _SPLITS[kind]
+    raw = str(request.GET.get(param) or "").strip() if request is not None else ""
     if not raw.isdigit():
         return None
     number = int(raw)
-    return number if number in lab_groups.offering_groups(offering) else None
+    return number if number in rules.offering_groups(offering) else None
 
 
-def apply(journal, number) -> None:
-    """Jurnal lüğətini bir lab qrupuna daralt: sətirlər + sütunlar (xanalar sütun sırası ilə)."""
+def apply(journal, number, kind=LessonKind.LAB) -> None:
+    """Jurnal lüğətini bir qrupa daralt: sətirlər + sütunlar (xanalar sütun sırası ilə)."""
+    field = _SPLITS[kind][1]
     keep = [
         index
         for index, meta in enumerate(journal["lesson_meta"])
-        if meta["lesson"].kind == LessonKind.LAB and meta["lesson"].lab_group in (None, number)
+        if meta["lesson"].kind == kind and getattr(meta["lesson"], field) in (None, number)
     ]
     journal["lesson_meta"] = [journal["lesson_meta"][index] for index in keep]
     journal["lessons"] = [meta["lesson"] for meta in journal["lesson_meta"]]
-    rows = [row for row in journal["rows"] if row["enrollment"].lab_group == number]
+    rows = [row for row in journal["rows"] if getattr(row["enrollment"], field) == number]
     for row in rows:
         row["cells"] = [row["cells"][index] for index in keep]
     journal["rows"] = rows
@@ -44,17 +60,19 @@ def apply(journal, number) -> None:
 
 
 def attach_list_rows(offerings, selected_kind: str = "") -> None:
-    """Hər açılışa ``lab_sections = [{"number", "label", "count"}]`` (lab qrupu yoxdursa boş)."""
+    """Hər açılışa ``lab_sections`` / ``seminar_sections = [{"number", "label", "count"}]`` (seçilməyən növdə boş)."""
     offerings = list(offerings)
-    for offering in offerings:
-        offering.lab_sections = []
-    if selected_kind not in ("", LessonKind.LAB) or not offerings:
+    for _param, _field, _model, _rules, _memo, attr in _SPLITS.values():
+        for offering in offerings:
+            setattr(offering, attr, [])
+    if selected_kind not in _SPLITS or not offerings:
         return
+    _param, field, model, rules, memo, attr = _SPLITS[selected_kind]
     counts = defaultdict(dict)
-    for offering_id, number, total in _counts(offerings):
+    for offering_id, number, total in _counts(offerings, field):
         counts[offering_id][number] = total
     names = defaultdict(dict)
-    for offering_id, number, name in LabGroup.objects.filter(offering_id__in=list(counts), name__gt="").values_list(
+    for offering_id, number, name in model.objects.filter(offering_id__in=list(counts), name__gt="").values_list(
         "offering_id", "number", "name"
     ):
         names[offering_id][number] = name
@@ -62,26 +80,30 @@ def attach_list_rows(offerings, selected_kind: str = "") -> None:
         groups = counts.get(offering.pk)
         if not groups or getattr(offering, "journal_entry_url", ""):
             continue
-        offering._lab_group_names_memo = names.get(offering.pk, {})
-        offering.lab_sections = [
-            {"number": number, "label": lab_groups.label(number, offering), "count": groups[number]}
-            for number in sorted(groups)
-        ]
+        setattr(offering, memo, names.get(offering.pk, {}))
+        setattr(
+            offering,
+            attr,
+            [
+                {"number": number, "label": rules.label(number, offering), "count": groups[number]}
+                for number in sorted(groups)
+            ],
+        )
 
 
-def _counts(offerings):
+def _counts(offerings, field):
     from django.db.models import Count
 
     return (
         Enrollment.objects.filter(
             offering_id__in=[offering.pk for offering in offerings],
             status=Enrollment.Status.ENROLLED,
-            lab_group__isnull=False,
+            **{f"{field}__isnull": False},
         )
-        .values("offering_id", "lab_group")
+        .values("offering_id", field)
         .order_by()
         .annotate(total=Count("pk"))
-        .values_list("offering_id", "lab_group", "total")
+        .values_list("offering_id", field, "total")
     )
 
 

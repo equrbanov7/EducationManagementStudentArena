@@ -3,14 +3,16 @@
 * ``?kind=lab&lab=1`` — yalnız Lab-1 tələbələri və Lab-1 + qrupsuz lab dərsləri, başlıqda «<qrup> · Lab-1»;
   mövcud olmayan qrup → adi görünüş;
 * jurnal səhifəsində «Hamısı / Mühazirə / Seminar / Laboratoriya» düymələri (``jd2-kindnav``) yoxdur;
-* siyahıda lab qrupu olan jurnalın altında «<qrup> · Lab-N» sətirləri (say + keçid); mühazirə süzgəcində yox.
+* siyahıda lab qrupu olan jurnalın altında «<qrup> · Lab-N» sətirləri (say + keçid) — YALNIZ «Laboratoriya»
+  süzgəcində; «Hamısı» / «Mühazirə»-də ana qrup bütöv (sahib 2026-11-08);
+* seminar alt qrupu eyni yolla: «Seminar» süzgəcində alt sətirlər, jurnalda ``?kind=seminar&seminar=N``.
 """
 
 from django.test import TestCase
 from django.urls import reverse
 
 from apps.registrar import journal_lab_view
-from apps.registrar.models import LessonKind
+from apps.registrar.models import Enrollment, Lesson, LessonKind, SeminarGroup
 from apps.registrar.tests.test_lab_groups_2026_11_06 import _LabWorld
 from core.rls import bypass_rls
 
@@ -45,7 +47,7 @@ class JournalLabViewTest(_LabWorld, TestCase):
     def test_list_rows(self):
         offering = self._fresh()
         with bypass_rls():
-            journal_lab_view.attach_list_rows([offering])
+            journal_lab_view.attach_list_rows([offering], LessonKind.LAB)
         self.assertEqual(
             offering.lab_sections,
             [
@@ -56,3 +58,46 @@ class JournalLabViewTest(_LabWorld, TestCase):
         with bypass_rls():
             journal_lab_view.attach_list_rows([offering], LessonKind.LECTURE)
         self.assertEqual(offering.lab_sections, [])
+        with bypass_rls():
+            journal_lab_view.attach_list_rows([offering])  # «Hamısı» — ana qrup bütöv
+        self.assertEqual((offering.lab_sections, offering.seminar_sections), ([], []))
+
+    def _seminar_split(self):
+        with bypass_rls():
+            SeminarGroup.objects.create(organization=self.org, offering=self.offering, number=1, name="LAB-G1 K1")
+            SeminarGroup.objects.create(organization=self.org, offering=self.offering, number=2, name="LAB-G1 K2")
+            Enrollment.objects.filter(pk=self.e1.pk).update(seminar_group=1)
+            Enrollment.objects.filter(pk=self.e2.pk).update(seminar_group=2)
+            return (
+                Lesson.objects.create(
+                    organization=self.org,
+                    offering=self.offering,
+                    date=self.today,
+                    kind="seminar",
+                    hours=2,
+                    seminar_group=2,
+                ),
+                Lesson.objects.create(
+                    organization=self.org, offering=self.offering, date=self.today, kind="seminar", hours=2
+                ),
+            )
+
+    def test_seminar_list_rows_only_under_seminar_filter(self):
+        self._seminar_split()
+        offering = self._fresh()
+        with bypass_rls():
+            journal_lab_view.attach_list_rows([offering], LessonKind.SEMINAR)
+        self.assertEqual(
+            offering.seminar_sections,
+            [{"number": 1, "label": "LAB-G1 K1", "count": 1}, {"number": 2, "label": "LAB-G1 K2", "count": 1}],
+        )
+        self.assertEqual(offering.lab_sections, [])
+
+    def test_seminar_view_shows_only_its_students_and_lessons(self):
+        own, whole = self._seminar_split()
+        response = self._get(kind="seminar", seminar="2")
+        journal = response.context["journal"]
+        self.assertEqual([row["enrollment"].pk for row in journal["rows"]], [self.e2.pk])
+        self.assertEqual({lesson.pk for lesson in journal["lessons"]}, {own.pk, whole.pk})
+        self.assertContains(response, "LAB-G1 K2")
+        self.assertContains(response, 'data-jd-default-seminar-group="2"')
