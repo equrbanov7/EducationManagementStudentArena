@@ -24,7 +24,11 @@ REASON = "Sahib 2026-11-08: qrupsuz lab dərsi (jurnal bölünməmişdən əvvə
 UNDO_REASON = "Sahib 2026-11-08: lab dərsinin qrup bağının geri qaytarılması"
 RESOURCE = "registrar.lab_lesson_bind"
 #: (dərs, açılış, lab qrupu)
-PLAN = (("0a0d7a39-386f-4479-af71-e89156a2fa4c", "2c802889-5118-4712-89f6-97e850824d63", 1),)
+PLAN = (
+    ("0a0d7a39-386f-4479-af71-e89156a2fa4c", "2c802889-5118-4712-89f6-97e850824d63", 1),
+    # 236 K Fizika 27.10 lab (audit 3): 9 Lab-1 qeydi + 1 Lab-2 (İsmayılova M.) — eyni hal, Lab-1.
+    ("befdb559-0dfe-461f-a0ba-9c9039e11cef", "0d82dc92-f3b3-44b0-85a4-386b5036c5c6", 1),
+)
 
 
 def _model(name):
