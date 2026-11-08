@@ -156,6 +156,71 @@ class LegacyCellsFillTest(_LabWorld, TestCase):
         with bypass_rls():
             self.assertEqual(LessonMark.objects.get(lesson=self.lecture, enrollment=self.e0).status, "absent")
 
+    def test_legacy_point_codes_qb_absent_ie_present_excusable_excused(self):
+        """Köhnə sistemin kodu: «qb» → qayıb (saatı sayılır), «ie» → iştirak, rəqəm → bal, ``excusable=1`` → üzrlü."""
+        plan = {
+            "format": "legacy-cells/1",
+            "lessons": [
+                {
+                    "key": "M1",
+                    "offering": str(self.offering.pk),
+                    "date": "2026-10-21",
+                    "start_time": "10:10",
+                    "kind": "seminar",
+                    "hours": 2,
+                },
+                {
+                    "key": "M2",
+                    "offering": str(self.offering.pk),
+                    "date": "2026-10-14",
+                    "start_time": "13:35",
+                    "kind": "lecture",
+                    "hours": 2,
+                },
+            ],
+            "cells": [
+                {"lesson": "M1", "enrollment": str(self.e0.pk), "status": "qb"},
+                {"lesson": "M1", "enrollment": str(self.e1.pk), "point": "ie"},
+                {"lesson": "M1", "enrollment": str(self.e2.pk), "point": "7"},
+                {"lesson": "M2", "enrollment": str(self.e0.pk), "point": "qb", "excusable": 1},
+                {"lesson": "M2", "enrollment": str(self.e1.pk), "point": "QB"},
+                {"lesson": "M2", "enrollment": str(self.e2.pk), "point": "x"},
+            ],
+        }
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as handle:
+            json.dump(plan, handle)
+        counts = self._call("--file", handle.name, "--apply")
+        self.assertEqual((counts["lessons_created"], counts["cells_filled"], counts["cells_invalid"]), ("2", "5", "1"))
+        self.assertEqual(
+            (counts["cells_filled_absent"], counts["cells_filled_present"], counts["cells_filled_excused"]),
+            ("2", "2", "1"),
+        )
+        with bypass_rls():
+            seminar = Lesson.objects.get(offering=self.offering, date=datetime.date(2026, 10, 21))
+            lecture = Lesson.objects.get(offering=self.offering, date=datetime.date(2026, 10, 14))
+            self.assertEqual((seminar.kind, seminar.start_time), ("seminar", datetime.time(10, 10)))
+            self.assertEqual((lecture.kind, lecture.start_time), ("lecture", datetime.time(13, 35)))
+            marks = {(row.lesson_id, row.enrollment_id): (row.status, row.score) for row in LessonMark.objects.all()}
+            self.assertEqual(marks[(seminar.pk, self.e0.pk)], ("absent", None))
+            self.assertEqual(marks[(seminar.pk, self.e1.pk)], ("present", None))
+            self.assertEqual(marks[(seminar.pk, self.e2.pk)], ("present", 7))
+            self.assertEqual(marks[(lecture.pk, self.e0.pk)], ("excused", None))
+            self.assertEqual(marks[(lecture.pk, self.e1.pk)], ("absent", None))
+            # qb saatı: e0 — seminar 2 (üzrlü mühazirə sayılmır), e1 — mühazirə 2
+            self.assertEqual(Enrollment.objects.get(pk=self.e0.pk).absence_hours, 2)
+            self.assertEqual(Enrollment.objects.get(pk=self.e1.pk).absence_hours, 2)
+
+    def test_cell_status_mapping(self):
+        from apps.registrar.legacy_cells_fill_2026_11_08 import cell_status
+
+        self.assertEqual(cell_status({"status": "qb"}), ("absent", None))
+        self.assertEqual(cell_status({"point": " ie "}), ("present", None))
+        self.assertEqual(cell_status({"status": "absent", "excusable": "1"}), ("excused", None))
+        self.assertEqual(cell_status({"point": "ie", "excusable": 1}), ("present", None))
+        self.assertEqual(cell_status({"point": "10"}), ("present", 10))
+        self.assertEqual(cell_status({"status": "present", "score": 4}), ("present", 4))
+        self.assertEqual(cell_status({"point": "?"}), (None, None))
+
     def test_workflow_wiring(self):
         text = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("          - fill_legacy_cells_20261108\n", text)

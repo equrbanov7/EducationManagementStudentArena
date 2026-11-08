@@ -9,6 +9,10 @@ tarix + saat + növ, tələbə jurnalın öz siyahısında ad ilə) və YALNIZ i
                   "hours": 2}],
      "cells": [{"lesson": uuid | "L1", "enrollment": uuid, "status": "present"|"absent"|"excused", "score": null|ədəd}]}
 
+``status`` əvəzinə köhnə sistemin xana kodu da ola bilər (``status`` və ya ``point``): ``qb`` → qayıb, ``ie`` → iştirak,
+rəqəm → iştirak + bal; ``"excusable": 1`` qayıbı üzrlü edir (:func:`cell_status`, delta ilə eyni). ``allowed_qb``
+pəncərələri planı quranda ``excusable``-a çevrilməlidir.
+
 Xanada ``enrollment`` əvəzinə ``fin`` ola bilər (şifrəli plan — ``roster_tag`` = ``legacy-cells-…``): tələbə
 dərsin açılışında ``enrolled`` sətri olan FİN sahibi kimi tapılır; köhnə sistemdə FİN-i olmayan tələbə üçün ``name``
 («Soyad Ad») — açılışın siyahısında YEGANƏ uyğun gələn tələbə (iki eyni ad → yazılmır). Tapılmasa
@@ -55,6 +59,26 @@ RESOURCE = "registrar.legacy_cells_fill"
 LAST_LEGACY_DAY = datetime.date(2026, 10, 21)
 STATUSES = ("present", "absent", "excused")
 MAX_SCORE = 10
+#: Köhnə sistemin xana kodu (``journals_dates_points.point``) → status — delta ilə eyni
+#: (``legacy_import.delta.lessons.mark_value``): ``ie`` iştirak, ``qb`` qayıb, rəqəm iştirak + bal.
+LEGACY_POINTS = {"ie": "present", "iə": "present", "qb": "absent"}
+
+
+def cell_status(cell) -> tuple:
+    """``(status, score)``: ``status`` (və ya köhnə ``point``) EMS dəyəri, ``qb`` / ``ie`` kodu və ya rəqəm ola bilər;
+    köhnə sistemin ``excusable=1`` bayrağı qayıbı üzrlü edir (delta kimi). Tanınmayan kod → ``None`` (yazılmır)."""
+    score = cell.get("score")
+    raw = cell.get("status") if cell.get("status") not in (None, "") else cell.get("point")
+    token = str(raw if raw is not None else "").strip().lower()
+    if token in LEGACY_POINTS:
+        status = LEGACY_POINTS[token]
+    elif token.isdigit():
+        status, score = "present", int(token) if score is None else score
+    else:
+        status = token if token in STATUSES else None
+    if status == "absent" and str(cell.get("excusable") or "").strip().lower() in ("1", "true"):
+        status = "excused"
+    return status, score
 
 
 def _model(name):
@@ -219,7 +243,7 @@ def run(*, organization, actor, counts, cells, lessons_spec=()) -> None:
         if cell.get("enrollment") is None:
             continue
         lesson, enrollment = lessons.get(str(cell.get("lesson"))), enrollments.get(str(cell.get("enrollment")))
-        status, score = cell.get("status"), cell.get("score")
+        status, score = cell_status(cell)
         if lesson is None or enrollment is None or enrollment.offering_id != lesson.offering_id:
             counts["cells_target_mismatch"] += 1
         elif not lesson.offering.is_active or str(lesson.offering_id) in shut or enrollment.status != "enrolled":
@@ -241,6 +265,7 @@ def run(*, organization, actor, counts, cells, lessons_spec=()) -> None:
             touched[enrollment.pk] = enrollment
             counts["cells_filled"] += 1
             counts["cells_filled_scored" if score is not None else "cells_filled_attendance"] += 1
+            counts[f"cells_filled_{status}"] += 1
     recompute_absences(list(touched.values()))
     if created or manifest["lessons_created"]:
         log_action(
