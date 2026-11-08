@@ -16,7 +16,7 @@ from django.db import transaction
 from core.rls import apply_rls_request_context, bypass_rls
 from core.rls_pooling import rls_worker_atomic
 
-from ...services.inactive_students_2026_11_08 import run
+from ...services.inactive_students_2026_11_08 import run, skipped_report
 
 PREFIX = "inactive_students:"
 
@@ -29,6 +29,9 @@ class Command(BaseCommand):
         parser.add_argument("--actor", required=True, help="Aktiv superadmin istifadəçi adı (audit müəllifi)")
         parser.add_argument("--undo", action="store_true", help="Bu əmrin dondurduğunu geri qaytar")
         parser.add_argument("--apply", action="store_true", help="Faktiki yaz (defolt: dry-run)")
+        parser.add_argument(
+            "--show-skipped", action="store_true", help="Yalnız oxu: heç kimə yazılmamış jurnallı tələbələr + qrup id"
+        )
 
     def handle(self, *args, **options):
         actor = get_user_model().objects.filter(username=options["actor"], is_active=True, is_superuser=True).first()
@@ -42,6 +45,12 @@ class Command(BaseCommand):
             if organization is None:
                 raise CommandError("inactive_students_organization_unknown")
             apply_rls_request_context(user_id=actor.pk, org_id=organization.pk)
+            if options["show_skipped"]:
+                rows = skipped_report(organization)
+                self.stdout.write(f"{PREFIX} mode=show_skipped")
+                for student_id, group_id in rows:
+                    self.stdout.write(f"{PREFIX} no_evidence={student_id}_{group_id or 'none'}")
+                return
             with transaction.atomic():
                 run(organization=organization, actor=actor, counts=counts, undo=options["undo"], report=report)
                 if not options["apply"]:
