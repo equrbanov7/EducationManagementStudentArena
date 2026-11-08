@@ -188,6 +188,16 @@ class SubgroupJournalMergeTest(_LabWorld, TestCase):
                 lesson = self._lesson_at(self.o1, self.today - datetime.timedelta(days=days), LessonKind.LECTURE, T1010)
                 LessonMark.objects.create(organization=self.org, lesson=lesson, enrollment=o1_e3, status="present")
         self.assertEqual(self._call("--apply"), {"family_adds_empty_cells": "1"})
+        with bypass_rls():
+            before = LessonMark.objects.filter(enrollment__student=self.s3).count()
+        plan = ({**merge.PLAN[0], "allow_empty_cells": True},)
+        with mock.patch.object(merge, "PLAN", plan):
+            counts = self._call("--apply")
+        self.assertEqual(counts.get("families_merged"), "1", counts)
+        with bypass_rls():
+            self.assertEqual(
+                LessonMark.objects.filter(lesson__offering=self.offering, enrollment__student=self.s3).count(), before
+            )
 
     def test_component_scores_copied_and_final_grade_blocks(self):
         from apps.registrar.models import AssessmentComponent, ComponentScore
