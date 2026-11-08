@@ -150,6 +150,9 @@
 .jd2-teach-kind--lecture { background: #eff6ff; color: #1d4ed8; border-color: #dbeafe; }
 .jd2-teach-kind--seminar { background: #ecfdf5; color: #059669; border-color: #d1fae5; }
 .jd2-teach-kind--lab { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
+/* Başqa müəllimin payı (sahib 2026-11-09): solğun, kəsik haşiyəli — oxu üçün məlumat, cəmlərə daxil deyil. */
+.jd2-teach-kind--other { background: #f8fafc; color: #64748b; border-style: dashed; border-color: #cbd5e1; font-weight: 500; }
+.jd2-teach-kind--other b { color: #475569; }
 .jd2-teach-total { margin-left: auto; color: #475569; font-weight: 600; }
 .jd2-teach-total.is-over, .jd2-teach-total.is-over b { color: #dc2626; }
 

@@ -62,7 +62,13 @@ class JournalTeachingHeadingTests(TestCase):
         html = render_to_string(
             "registrar/partials/_journal_teaching_heading.html", {"teaching_summary": summary, "offering": self.course}
         )
-        self.assertNotIn("Seminar Teacher", html)
+        # Sahib 2026-11-09: seminarın KİMƏ təyin olunduğu görünür (oxu çipi), amma cəmlər öz payıdır.
+        self.assertEqual(
+            summary["others"],
+            [{"kind": "seminar", "label": "Seminar", "planned": 30, "held": 6, "teachers": ["Seminar Teacher"]}],
+        )
+        self.assertIn("Seminar Teacher", html)
+        self.assertIn("jd2-teach-kind--other", html)
         self.assertNotIn("/ 60", html)
         self.assertIn("/ 30", html)
 
@@ -71,10 +77,15 @@ class JournalTeachingHeadingTests(TestCase):
         self.assertEqual((30, 6), (summary["total"], summary["held_total"]))
         self.assertEqual(["Seminar Teacher"], summary["kinds"][0]["teachers"])
         self.assertEqual("seminar", summary["kinds"][0]["kind"])
+        self.assertEqual(
+            [("lecture", 30, 6, ["Lecture Teacher"])],
+            [(o["kind"], o["planned"], o["held"], o["teachers"]) for o in summary["others"]],
+        )
 
     def test_admin_full_history_with_unknown_author_not_owner_fallback(self):
         summary = journal_teaching_summary(self.course)
         self.assertFalse(summary["personal"])
+        self.assertNotIn("others", summary)
         self.assertEqual((60, 12), (summary["total"], summary["held_total"]))
         lecture = next(row for row in summary["kinds"] if row["kind"] == "lecture")
         self.assertEqual(2, len(lecture["teachers"]))

@@ -21,7 +21,7 @@ from . import exact_syllabus_recovery as core
 
 RestoreError = core.RestoreError
 PLAN_PATH = Path(__file__).resolve().parents[1] / "legacy_syllabi_2026_11_07.json"
-PLAN_SHA256 = "eda5c672c7125c8a27120fbbb9c1cf8ce4eb431c5457ef1e79b77dd48191b369"
+PLAN_SHA256 = "269ce0f7e08d0c179fed266c6309428d301c9d32466be2b7d47068c344f77061"
 FORMAT = "legacy-syllabi/1"
 MAX_PLAN = 2_000_000
 KINDS = ("lecture", "seminar", "practical", "lab")
@@ -88,7 +88,14 @@ def _check_target(target, sources):
         raise RestoreError("target_plan_shape")
     if target["action"] == "restore":
         source = sources.get(target.get("source"))
-        if source is None or source["teacher"] != target["teacher"] or plan_of(source["hours"]) != plan:
+        if source is None or source["teacher"] != target["teacher"]:
+            raise RestoreError("target_source_mismatch")
+        hours = plan_of(source["hours"])
+        # Sahib 2026-11-09 (235 EM Tətbiqi riyaziyyat): köhnə sillabusun həftəlik saatı rəsmi plandan AZ ola bilər
+        # (L30+S15 → L30+S30); ``week_gap_ok`` ilə plan saatı rəsmi yükdən, mövzular mənbədən — növ artırılmır.
+        if hours != plan and not (
+            target.get("week_gap_ok") and set(hours) == set(plan) and all(hours[k] <= plan[k] for k in plan)
+        ):
             raise RestoreError("target_source_mismatch")
     elif "source" in target or "retire_base" in target:
         raise RestoreError("target_shape")

@@ -2292,6 +2292,311 @@
     }
    },
    "teacher": 7760
+  },
+  "3953": {
+   "content_sha256": "028e9d537d5250844dd55630a5ff3449a9606b612ab136ce0a0c568f9efe70ad",
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "hours": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "legacy_lesson": 279,
+   "legacy_teacher": 625,
+   "sections": {
+    "assess": {
+     "exam_questions": [],
+     "midterm": 0,
+     "note": "YOXLAMA FORMASI: (imtahan, yoxlama, kollokvium və ya kurs işi, müstəqil işlər necə aparılacaq) İmtahan 3 sual nəzəriyyədən və 2 sual nəzəriyyənin praktik tətbiqinə aid, semestrin hər ayının sonunda yazılı şəkildə kollokvium keçirilir. İmtahandan əvvəl məsləhət saatları təşkil olunur.\n1. Tələbələrin imtahana və aralıq yoxlamalara buraxılması ilə bağlı məsələlər fakültə dekanı tərəfindən həll edilir. İmtahan və aralıq yoxlamalar Azərbaycan Respublikası Nazirlər Kabinetinin 24 dekabr 2013-cü il tarixli 348 nömrəli qərarı ilə təsdiq edilmiş “Ali təhsil müəssisələrinin bakalavriat və magistratura səviyyələrində kredit sistemi ilə təlimin təşkili Qaydaları”na əsasən aparılır.\n2. Kurs işlərinin mövzuları, müvafiq ədəbiyyat əvvəlcədən tələbələrə verilir. Kurs işlərinin müdafiəsi kafedrada yaradılmış komisiya tərəfindən qəbul edilir.\n3. Semestr ərzində hər bir tələbə 10 müstəqil iş yerinə yetirməlidir. Müstəqil işlərin mövzuları keçilən mövzuları əhatə edir. Hər bir müstəqil iş 10 ballıq sistemlə qiymətləndirilir və nəticə kimi bütün müstəqil işlərin ədədi ortası götürülür.",
+     "project": 0
+    },
+    "desc": {
+     "description": "FƏNNİN TƏSVİRİ: Fənnin məqsədi tələbələrin fundamental riyazi hazırlıq səviyyəsinin yüksəldilməsi və aldıqları biliklərin iqtisadiyyatın müxtəlif sahələrinə tətbiq etmək bacarıqlarının aşılanmasıdır. Fənnin tədrısı zamanı tələbələrə ehtimal nəzəriyyəsinin əsas postulatlarının ( ehtimalın klassik, statistik və həndəsi tərifləri) öyrədilir. Təsadüfü hadisələrin baş vermə ehtimallarının müxtəlif qanuna uyğunluqları haqqında məlumat verilir. Baxılan təsadüfü hadisəni kəmiyyət ifadə edən təsadüfü kəmiyyətlərin paylanma qanuna uyğunluqları və onların praktiki sahələrə tətbiqini yolları araşdırılır.\nRiyazi statistika bölməsinin tədrisi zamanı tələbələrlə statistik məlumatların toplanması, qruplaşdırılması, qiymətləndirilməsi üsulları araşdırılır. Bir təsadüfi kəmiyyətin başqa təsadüfi kəmiyyətlərdən asılılığının (funksional, statistik, korrelision asılılıqlar) qiymətləndirilməsi üsulları tədris olunur.\n\nFƏNNİN MƏQSƏDİ: Gələcək mütəxəssislərin elmi-metodik hazırlıqların təmin edilməsi, onlarda tədrisin həyata keçirilməsi üzrə müvafiq bilik, bacarıq və vərdişlərin formalaşdırılması, riyaziyyat və ehtimal nəzəriyyəsinin iqtisadiyyatın müxtəlif sahələrində tətbiq etmə bacarıqlarının, kreativ və müstəqil düşünmə qabiliyyətlərinin formalaşdırılması.",
+     "goal": ""
+    },
+    "info": {
+     "certificates": [],
+     "language": "az",
+     "lesson_hours": 45,
+     "office_hours": "",
+     "prerequisites": "",
+     "research_interests": [],
+     "teacher": "",
+     "welcome": ""
+    },
+    "lit": {
+     "additional": [],
+     "primary": [
+      "Əsas dərsliklər və dərs vəsaitləri: 1. Alməmmədov M. S. Ali riyaziyyat kursundan, ehtimal nəzəriyyəsi və riyazi statistikadan mühazirələr. Bakı – 2010 2. Əliyev Ə. Ali riyaziyyat Bakı – 2005. 3. Şahverdiyev M., Məmmədova Ü., Şəmsiyev T., Şərifov N. Riyaziyyat. Ehtimal nəzəriyyəsi və riyazi statistikanın elementləri. Bakı – 2015. 4. Теория вероятностей и математическая статистика. Н.Ш.Кремера Москва 2007. 5.Краткий курс математики. В.А.Кудрявцев. Б. П. Демидович. Москва 2010. 6.Теория вероятностей и математическая статистика. В. Е. Гмурман. Москва 2000. 7.Introductory mathematical Analysis for Business, Economics, and the Life and Social Sciences Ernest F. Haeussler, Jr. Richard Paul.2000. 8. A. Survey of Mathematics with Applications, Angel, Abbot, Runde 2009."
+     ]
+    },
+    "method": {
+     "methods": [
+      "DƏRSİN İŞLƏNMƏ FORMASI (TƏDRİSİN FORMA VƏ METODLARI):\n1. Mühazirə\n2. Mövzunun müzakirəsi və diskussiya\n3. Kollektivlə iş.\n4. Fərdi iş"
+     ],
+     "note": ""
+    },
+    "out": {
+     "outcomes": [
+      "ƏLDƏ OLUNACAQ TƏCRÜBƏ:\n1. Ehtimal nəzəriyyəsi və Riyazi statistika kursunun məqsəd və vəzifələri, elmi-tədqiqat metodları, digər elmlərlə əlaqəsini izah edir.\n2. Ehtimal nəzəriyyəsi və Riyazi statistika təliminin təşkili formalarını fərqləndirir, mövzuya uyğun formanı müəyyənləşdirir və tətbiq edir.\n3. Ehtimal nəzəriyyəsi və Riyazi statistika təliminin vasitələrini şərh və izah edir, konkret dərs üçün əyani vəsaitləri müəyyənləşdirir və seçir.\n4. Ehtimal nəzəriyyəsi və Riyazi statistika təliminin prinsiplərini, təlim metodlarını (texnologiyalarını) şərh və izah edir.\n5. Ehtimal nəzəriyyəsi və Riyazi statistika təliminin məqsəd və vəzifələrini şərh edir."
+     ]
+    },
+    "prev": {},
+    "self": {
+     "archived": [],
+     "option": "",
+     "topics": [
+      {
+       "title": "1. Еhtimal nəzəriyyəsinin əsas anlayışları .Təsadüfi hadisələr. Еhtimаlın klаssik tərifi. Həndəsi еhtimаl."
+      },
+      {
+       "title": "2. Hаdisələr üzərində əməllər. Uyuşmayan hadisələr. Ehtimallarının tоplаnmаsı teoremi."
+      },
+      {
+       "title": "3. Şərti еhtimаl. Ehtimal¬¬¬¬ların vurma teoremi. Asılı olmayan hadisələr."
+      },
+      {
+       "title": "4. Təkrar sınaqlar ardıcıllığı. Bernulli düsturu. Puasson düsturu."
+      },
+      {
+       "title": "5. Diskret təsadüfi kəmiyyətin riyazi gözləməsi və onun xassələri."
+      },
+      {
+       "title": "6. Diskret təsadüfi kəmiyyətin dispersiyası və onun xassələri."
+      },
+      {
+       "title": "7. Təsadüfi kəmiyyətin paylanma funksiyası və onun xassələri."
+      },
+      {
+       "title": "8. Kəsilməz paylanmalar: Müntəzəm, binomial və Puasson paylanması"
+      },
+      {
+       "title": "9. Normal paylanma qanunu."
+      },
+      {
+       "title": "10. Laplas funksiyası."
+      }
+     ]
+    },
+    "send": {},
+    "week": {
+     "rows": [
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Еhtimal nəzəriyyəsinin əsas anlayışları. Təsadüfi hadisələr üzrində əməllər.Birləşmələr nəzəriyyəsi. 2"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Еhtimаlın klаssik tərifi. Еhtimаlın stаtistik tərifi. Həndəsi еhtimаl. 2"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "yuşmayan hadisələrin ehtimallarının tоplаnmаsı teoremi. Asılı və asılı olmayan hadisələr. Asılı olmayan hadisələrin ehtimal¬¬¬¬larının vurma teoremi.."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Şərti ehtimal.Asılı hadisələrin ehtimallarının vurulması teoremi. Uyuşan hadisələrin ehtimallarının toplanması teoremi."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Heç olmazsa bir hadisənin baş vermə ehtimalı. Tam ehtimal düsturu. Bayes düsturu."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Asılı olmayan sınaqlar ardıcıllığı. Bernulli düsturu. Ən böyük ehtimallı ədəd. Puasson düsturu."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Təsаdüfi kəmiyyət anlayışı. Diskrеt təsаdüfi kəmiyyətin pаylаnmа qаnunu.Təsаdüfi kəmiyyətin pаylаnmа funksiyası."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Diskret təsаdüfi kəmiyyətin ədədi xarakteritikaları və xassələri: riyazi gözləmə, dispersiya və orta kvadratik meyl."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Diskret təsadüfi kəmiyyətin pаylаnmаları: Binomial və Puasson paylanmalar."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Kəsilməz təsadüfi kəmiyyətlərin sıxlıq funksiyası. Kəsilməz təsadüfi kəmiyyətin ədədi xarakteristikaları. ."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Kəsilməz paylanmalar: müntəzəm paylanma, normal paylanma. 2"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Nəzəri momentlər. median,moda,assimmetriya və eksses."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Ehtimal nəzəriyyəsinin limit teoremləri. 2"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Riyazi statistikanın əsas anlayişları. Baş və seçmə yığım.Variasiya sırası. Paliqon və histoqram. Empirik paylanma funksiyası. 2"
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Variasiya sirasının ədədi xarakteristikaları. Funksional statistik və korrelision asılılıqlar,cüt xətti reqressiya. 2"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Еhtimal nəzəriyyəsinin əsas anlayışları.Hadisələr üzrində əməllər. Birləşmələr (kombinatorka) elementləri."
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Еhtimаlın klаssik tərifi. Еhtimаlın stаtistik tərifi. Həndəsi еhtimаl."
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Asılı olan və asılı olmayan hadisələr. Şərti ehtimal. Hadisələrin ehtimallarının toplanması və vurulması teoremləri."
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Heç olmazsa bir hadisənin baş verməsi ehtimalı.Tam ehtimal. Bayes, Bernulli və Puasson düsturları. Ən böyük ehtimallı ədəd. 2"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Diskret təsadüfi kəmiyyət. Paylanma qanunu. Paylanma funksiyası. Diskret təsadüfi kəmiyyətin ədədi xarakteristikaları. Diskret paylanmalar."
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Kəsilməz təsadüfi kəmiyyətlər. Sıxlıq funksiyası. Kəsilməz təsadüfi kəmiyyətin ədədi xarakteristikaları. Müntəzəm və normal paylanmalar. 2"
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Riyazi statistikanın əsas elemehtləri. Poliqon və histoqramın variasiya sırası və onun ədədi xarakteristikaları. Emprik paylanma funksiyası."
+      },
+      {
+       "lab": 0,
+       "lecture": 0,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 1,
+       "topic": "Funksional, statistik, korrelision asılılıqlar.Cüt xətti reqressiya."
+      }
+     ]
+    }
+   },
+   "teacher": 8114
   }
  },
  "targets": [
@@ -2677,6 +2982,23 @@
     "8c6a7503-0be0-403a-b4bd-9ae711afb868"
    ],
    "teacher": 8204
+  },
+  {
+   "key": "em235tr",
+   "teacher": 8114,
+   "offering_id": "b68d6152-b909-4852-be65-e355a7b38b14",
+   "group_id": "e82cc58c-3c95-4502-8065-e283c86da101",
+   "subject_ids": [
+    "2b42409c-2945-437e-96ab-fe249fce79b4"
+   ],
+   "lesson_hours": 60,
+   "plan": {
+    "lecture": 30,
+    "seminar": 30
+   },
+   "action": "restore",
+   "source": "3953",
+   "week_gap_ok": true
   }
  ]
 }
