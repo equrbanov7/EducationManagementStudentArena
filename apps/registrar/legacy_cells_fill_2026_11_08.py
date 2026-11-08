@@ -142,6 +142,15 @@ def _norm(text) -> str:
     return " ".join(text.split()[:2])
 
 
+def _enrollment_names(ids) -> dict:
+    rows = (
+        _model("Enrollment")
+        .objects.filter(pk__in=list(ids))
+        .values_list("pk", "student__last_name", "student__first_name")
+    )
+    return {pk: _norm(f"{last} {first}") for pk, last, first in rows}
+
+
 def _name_enrollments(organization, cells, lessons) -> dict:
     """``{(açılış, «soyad ad») → qeydiyyat id}`` — yalnız açılışda YEGANƏ olan adlar."""
     wanted = {str(c.get("lesson")) for c in cells if c.get("name") and str(c.get("lesson")) in lessons}
@@ -178,11 +187,17 @@ def run(*, organization, actor, counts, cells, lessons_spec=()) -> None:
     )
     by_fin = _fin_enrollments(organization, cells, lessons)
     by_name = _name_enrollments(organization, cells, lessons)
+    names = _enrollment_names(set(by_fin.values()))
     for cell in cells:
         if (cell.get("fin") or cell.get("name")) and not cell.get("enrollment"):
             lesson = lessons.get(str(cell.get("lesson")))
             found = by_fin.get((lesson.offering_id, str(cell.get("fin") or "").strip().upper())) if lesson else None
-            if found is None and lesson is not None and cell.get("name"):
+            if found is not None and _norm(cell.get("name")) and names.get(found) != _norm(cell["name"]):
+                # Köhnə sistemdə FİN səhv tələbəyə yazılıb (2026-11-08: Cəfərli İslamın FİN-i Məcidova Gülüstanındır) —
+                # FİN adla təsdiqlənmirsə qəbul edilmir.
+                counts["cells_fin_name_mismatch"] += 1
+                found = None
+            if found is None and lesson is not None and _norm(cell.get("name")):
                 found = by_name.get((lesson.offering_id, _norm(cell["name"])))
             cell["enrollment"] = str(found) if found else None
             if found is None:
