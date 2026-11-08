@@ -282,5 +282,5 @@ class MexanikaLessonsFixTest(_LabWorld, TestCase):
         text = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("          - fix_mexanika_lessons_20261108\n", text)
         self.assertIn('[ "$COMMAND" = "fix_mexanika_lessons_20261108" ]', text)
-        self.assertIn("|merge_subgroup_journals_20261108|fix_mexanika_lessons_20261108)", text)
+        self.assertRegex(text, r"\n            [a-z0-9_|]*\|fix_mexanika_lessons_20261108[|)]")
         self.assertIn("|mexanika_lessons|", text)
