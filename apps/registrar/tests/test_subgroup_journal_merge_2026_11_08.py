@@ -248,6 +248,30 @@ class SubgroupJournalMergeTest(_LabWorld, TestCase):
         with bypass_rls():
             self.assertIsNone(Enrollment.objects.get(pk=self.e2.pk).seminar_group)
 
+    def test_student_alias_writes_duplicate_marks_to_main_account_row(self):
+        """536 Bİ: bloklanmış dublikat hesabın alt qrup xanaları əsas hesabın ana jurnal sətrinə."""
+        with bypass_rls():
+            duplicate = User.objects.create_user("sgm_dup", "sgm_dup@x.test", "pw")
+            self._member(duplicate, "student", [])
+            row = Enrollment.objects.create(organization=self.org, student=duplicate, offering=self.o2)
+            lecture2 = Lesson.objects.get(offering=self.o2, kind=LessonKind.LECTURE)
+            LessonMark.objects.create(organization=self.org, lesson=lecture2, enrollment=row, status="excused")
+            Enrollment.objects.filter(pk=self.e2.pk).update(lab_group=None)
+        plan = ({**merge.PLAN[0], "student_alias": {str(duplicate.pk): self.students[1].pk}},)
+        with mock.patch.object(merge, "PLAN", plan):
+            counts = self._call("--apply")
+        self.assertEqual(counts.get("families_merged"), "1", counts)
+        self.assertEqual(counts["student_alias_mapped"], "1")
+        with bypass_rls():
+            self.assertFalse(Enrollment.objects.filter(offering=self.offering, student=duplicate).exists())
+            self.assertEqual(
+                LessonMark.objects.get(
+                    lesson__offering=self.offering, lesson__kind="lecture", enrollment=self.e2
+                ).status,
+                "excused",
+            )
+            self.assertEqual(Enrollment.objects.get(pk=row.pk).status, "dropped")
+
     def test_blocked_enrollment_is_reported_by_id(self):
         def boom(*args, **kwargs):
             raise merge.IntegrityError("x")
