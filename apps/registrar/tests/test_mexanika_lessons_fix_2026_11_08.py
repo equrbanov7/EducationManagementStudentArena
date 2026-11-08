@@ -270,7 +270,7 @@ class MexanikaLessonsFixTest(_LabWorld, TestCase):
     def test_repo_plan_is_ids_only_and_reports_missing(self):
         data = fix.load_plan(fix.__file__.replace(".py", ".json"))
         allowed = {"legacy_journal", "offering", "date", "start_time", "from", "to", "source", "target"}
-        allowed |= {"remove_source_instructor", "lessons", "kind", "twin_offering", "twin_start_time"}
+        allowed |= {"remove_source_instructor", "lessons", "kind", "twin_offering", "twin_start_time", "twin_date"}
         keys = {key for row in data["kind_changes"] for key in row} | {k for row in data["duplicates"] for k in row}
         keys |= {key for row in data["moves"] for key in row} | {
             k for row in data["moves"] for r in row["lessons"] for k in r
