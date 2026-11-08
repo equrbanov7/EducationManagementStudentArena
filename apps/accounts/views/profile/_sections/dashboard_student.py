@@ -228,6 +228,27 @@ def _score_row(row, period, spec) -> dict:
     }
 
 
+def _interim_notice(spec, data_rows) -> str:
+    """Aralıq qiymətləndirmənin izahı; xarici dil səviyyə fənnində midterm 0–10-dur (sahib 2026-11-08).
+
+    Bütün fənlər səviyyə fənnidirsə izah elə onun tavanı ilə yazılır, qarışıqdırsa standart izaha səviyyə
+    fənlərinin tavanı əlavə olunur (sətirlərdə hər fənnin öz «/10» / «/30» tavanı onsuz da görünür)."""
+    from core import language_level_rule as levels
+
+    if not getattr(spec, "is_midterm", False):
+        return spec.description
+    level = [levels.is_level_name(row.get("subject_name")) for row in data_rows]
+    if level and all(level):
+        return pgettext("registrar.interim", "Midterm — aralıq imtahan (0–%(max)s bal)") % {"max": levels.MIDTERM_MAX}
+    if any(level):
+        return "%s %s" % (
+            spec.description,
+            pgettext(_CTX, "Xarici dil səviyyə fənlərində midterm 0–%(max)s bal, yekun imtahan 0–%(exam)s bal.")
+            % {"max": levels.MIDTERM_MAX, "exam": levels.EXAM_MAX},
+        )
+    return spec.description
+
+
 def student_scores(*, record, period, subjects, allowed_sections) -> dict | None:
     """Giriş balı (imtahana qədər toplanan) + aralıq qiymətləndirmə — fənn-fənn.
 
@@ -268,7 +289,7 @@ def student_scores(*, record, period, subjects, allowed_sections) -> dict | None
         rows=[_score_row(row, period, spec) for row in data_rows[:SUBJECT_ROW_LIMIT]],
         body="scores",
         subtitle=subtitle,
-        notice=spec.description,
+        notice=_interim_notice(spec, data_rows),
         total=count,
         wide=True,
         link=link,

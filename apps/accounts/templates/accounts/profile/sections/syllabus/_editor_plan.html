@@ -206,7 +206,8 @@ gəlir; RİM `academic.selfwork_enabled` yandırılanda midterm 20 + sərbəst i
   </ul>
 
   <p class="syl-hintbox syl-hintbox--ok">
-    {% if se.selfwork_active %}{% blocktrans context "accounts.syllabus" with semester=a.semester total=a.total %}Semestr balı {{ semester }} (davamiyyət + midterm + sərbəst iş + seminar/laboratoriya ədədi ortası), yekun imtahan 50 — cəmi {{ total }} bal. Bölgü universitet standartıdır və dəyişdirilmir.{% endblocktrans %}
+    {% if a.level %}{% blocktrans context "accounts.syllabus" with semester=a.semester final=a.final total=a.total %}Semestr balı {{ semester }} (davamiyyət + midterm + praktiki məşğələ balları), yekun imtahan {{ final }} — cəmi {{ total }} bal. Xarici dil səviyyə fənninin qaydasıdır və dəyişdirilmir.{% endblocktrans %}
+    {% elif se.selfwork_active %}{% blocktrans context "accounts.syllabus" with semester=a.semester total=a.total %}Semestr balı {{ semester }} (davamiyyət + midterm + sərbəst iş + seminar/laboratoriya ədədi ortası), yekun imtahan 50 — cəmi {{ total }} bal. Bölgü universitet standartıdır və dəyişdirilmir.{% endblocktrans %}
     {% else %}{% blocktrans context "accounts.syllabus" with semester=a.semester total=a.total %}Semestr balı {{ semester }} (davamiyyət + midterm + seminar/laboratoriya balları), yekun imtahan 50 — cəmi {{ total }} bal. Bölgü universitet standartıdır və dəyişdirilmir.{% endblocktrans %}{% endif %}
     <b>{{ a.formula }}</b>
   </p>

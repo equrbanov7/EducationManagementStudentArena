@@ -132,6 +132,8 @@ class EntryParts:
     activity_detail: activity_kinds.ActivityDetail | None = field(default=None, compare=False)
     #: Hissələrin cəmi tavanı (``cap``) keçib — yekun tavanla kəsilib (yuvarlaqlaşdırma deyil; yalnız görünüş).
     capped: bool = field(default=False, compare=False)
+    #: Aktivlik = «Praktiki məşğələ» ballarının ortası (xarici dil səviyyə fənni, sahib 2026-11-08; yalnız görünüş).
+    practical: bool = field(default=False, compare=False)
 
     @property
     def raw_sum(self) -> Decimal:

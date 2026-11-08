@@ -116090,3 +116090,50 @@ msgstr "Journal-Bereiche"
 msgctxt "registrar.lab_groups"
 msgid "%(group)s · Lab-%(n)s"
 msgstr "%(group)s · Laborgruppe %(n)s"
+
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "registrar.journal"
+msgid "Praktiki məşğələ ballarının ədədi ortası; balsız dərslər sayılmır."
+msgstr "Durchschnitt der Punkte aus praktischen Übungen; Stunden ohne Punkte zählen nicht."
+
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "registrar.journal"
+msgid "praktiki məşğələ"
+msgstr "praktische Übung"
+
+#: foreign-language level rule (owner 2026-11-08)
+#, python-format
+msgctxt "accounts.dashboard"
+msgid "Xarici dil səviyyə fənlərində midterm 0–%(max)s bal, yekun imtahan 0–%(exam)s bal."
+msgstr "In Fremdsprachen-Niveaukursen umfasst die Zwischenprüfung 0–%(max)s Punkte, die Abschlussprüfung 0–%(exam)s Punkte."
+
+#: foreign-language level rule (owner 2026-11-08)
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Semestr balı %(semester)s (davamiyyət + midterm + praktiki məşğələ balları), yekun imtahan %(final)s — cəmi %(total)s bal. Xarici dil səviyyə fənninin qaydasıdır və dəyişdirilmir."
+msgstr "Semesterpunkte %(semester)s (Anwesenheit + Zwischenprüfung + Punkte aus praktischen Übungen), Abschlussprüfung %(final)s — insgesamt %(total)s Punkte. Dies ist die Regel für Fremdsprachen-Niveaukurse und wird nicht geändert."
+
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "profile.subjects"
+msgid "Aktivlik (praktiki məşğələ)"
+msgstr "Aktivität (praktische Übungen)"
+
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "profile.subjects"
+msgid "Xarici dil səviyyə fənləri"
+msgstr "Fremdsprachen-Niveaukurse"
+
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "registrar.language_cohort"
+msgid "Səviyyə qaydası: davamiyyət 10, praktiki məşğələ 10, midterm 10, imtahan 70 bal. Qayıb limiti 10 q/b-dir; 11 q/b olduqda imtahana buraxılmır."
+msgstr "Niveauregel: Anwesenheit 10, praktische Übungen 10, Zwischenprüfung 10, Prüfung 70 Punkte. Die Fehlzeitengrenze liegt bei 10; bei 11 Fehlzeiten erfolgt keine Prüfungszulassung."
+
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "syllabus.assessment"
+msgid "Praktiki məşğələ (ədədi orta)"
+msgstr "Praktische Übungen (Durchschnitt)"
+
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "syllabus.assessment"
+msgid "Praktiki məşğələ balı: semestr ərzindəki bütün praktiki məşğələ qiymətlərinin ədədi ortası (maksimum 10)."
+msgstr "Punkte aus praktischen Übungen: Durchschnitt aller Noten aus praktischen Übungen im Semester (maximal 10)."

@@ -537,6 +537,8 @@ def exam_result_summary(*, student, subject_id, organization, offering_ids=()):
         "linked": True,
         "entry_score": result["entry_score"],
         "exam_score": result["effective_exam"],
+        # Fənnin imtahan şkalası (xarici dil səviyyə fənni 70, qalanları adətən 50 — sahib 2026-11-08).
+        "exam_score_max": result["exam_score_max"],
         "total": result["total"],
         "letter": result["letter"],
         "gpa": result["gpa"],

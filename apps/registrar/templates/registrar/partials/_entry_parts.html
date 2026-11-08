@@ -8,7 +8,7 @@ Tavanlar hesabın İŞLƏTDİYİ qaydadan gəlir (sahib 2026-10-10): Midterm /30
     {% if detail.split %}
     <span class="ems-badge ems-badge--neutral" title="{% trans 'Fəndə seminar və laboratoriya var: hər növün ədədi ortasının yarısı toplanır (5 + 5); balı olmayan növ 0 sayılır.' context 'registrar.journal' %}">{% trans "Aktivlik" context "registrar.journal" %}: <strong>{{ parts.activity|floatformat:"-2" }}</strong>/{{ parts.activity_max|floatformat:"-2" }} ({% trans "seminar" context "registrar.journal" %} {{ detail.seminar_part|floatformat:"-2" }} + {% trans "lab" context "registrar.journal" %} {{ detail.lab_part|floatformat:"-2" }})</span>
     {% else %}
-    <span class="ems-badge ems-badge--neutral" title="{% trans 'Seminar və laboratoriya ballarının ədədi ortası; balsız dərslər sayılmır.' context 'registrar.journal' %}">{% trans "Aktivlik" context "registrar.journal" %}: <strong>{{ parts.activity|floatformat:"-2" }}</strong>/{{ parts.activity_max|floatformat:"-2" }}</span>
+    <span class="ems-badge ems-badge--neutral" title="{% if parts.practical %}{% trans 'Praktiki məşğələ ballarının ədədi ortası; balsız dərslər sayılmır.' context 'registrar.journal' %}{% else %}{% trans 'Seminar və laboratoriya ballarının ədədi ortası; balsız dərslər sayılmır.' context 'registrar.journal' %}{% endif %}">{% trans "Aktivlik" context "registrar.journal" %}: <strong>{{ parts.activity|floatformat:"-2" }}</strong>/{{ parts.activity_max|floatformat:"-2" }}</span>
     {% endif %}
     {% endwith %}
     <span class="ems-badge ems-badge--neutral">{% trans "Midterm" context "registrar.journal" %}: <strong>{{ parts.midterm|floatformat:"-2" }}</strong>/{{ parts.midterm_max|floatformat:"-2" }}</span>

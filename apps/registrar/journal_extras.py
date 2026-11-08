@@ -170,8 +170,11 @@ def get_final_breakdown(offering):
     Hissələr giriş balının ÖZÜNDƏN gəlir (``entry_parts_for`` — eyni toplu dəst, eyni
     davamiyyət girişləri), yəni cəm ilə bölgü ayrıla bilməz; keçmiş dövrlər köhnə sütunlarla."""
     from apps.registrar import finals_batch, gradebook, gradebook_components
+    from apps.registrar import language_level_grading as levels
+    from apps.registrar import practical_label
     from apps.registrar.models import LessonKind, LessonMark
 
+    level = levels.is_level(offering)
     scheme = gradebook.ensure_assessment_scheme(offering=offering)
     interim, kolls = display_components(offering)
     enrollments = read_memo.enrolled_roster(offering)  # jurnal GET-də tablar arasında bir sorğu (PERF-1 F-06)
@@ -287,7 +290,9 @@ def get_final_breakdown(offering):
         # Yeni qayda (sahib 2026-10-10): sərbəst iş sütunu, 5 + 5 aktivlik sütunları, midterm tavanı.
         "selfwork_active": selfwork_active,
         "activity_split": standard and entry_batch.activity_split_for(offering),
-        "midterm_max": entry_batch.flags.midterm_max,
+        # Səviyyə fənni (``core.language_level_rule``, sahib 2026-11-08): midterm /10, seminar = «Praktiki məşğələ».
+        "midterm_max": Decimal(levels.MIDTERM_MAX) if level else entry_batch.flags.midterm_max,
+        "practical": practical_label.offering_is_practical(offering),
         "entry_max": scheme.entry_score_max,
         "allowed_absence": allowed_absence,
         "lesson_hours": allowed,  # Auditoriya saatı — plan (buraxılışın kanonik məxrəci)
