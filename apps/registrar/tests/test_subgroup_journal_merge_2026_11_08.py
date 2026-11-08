@@ -181,6 +181,14 @@ class SubgroupJournalMergeTest(_LabWorld, TestCase):
             self.assertTrue(CourseOffering.objects.get(pk=self.o1.pk).is_active)
             self.assertFalse(SeminarGroup.objects.filter(offering=self.offering).exists())
 
+    def test_merge_that_adds_empty_cells_is_blocked(self):
+        with bypass_rls():
+            o1_e3 = Enrollment.objects.get(offering=self.o1, student=self.s3)
+            for days in (4, 3, 2):  # K1-in K2-də olmayan 3 mühazirəsi → K2 tələbəsinə boş xana
+                lesson = self._lesson_at(self.o1, self.today - datetime.timedelta(days=days), LessonKind.LECTURE, T1010)
+                LessonMark.objects.create(organization=self.org, lesson=lesson, enrollment=o1_e3, status="present")
+        self.assertEqual(self._call("--apply"), {"family_adds_empty_cells": "1"})
+
     def test_component_scores_copied_and_final_grade_blocks(self):
         from apps.registrar.models import AssessmentComponent, ComponentScore
 

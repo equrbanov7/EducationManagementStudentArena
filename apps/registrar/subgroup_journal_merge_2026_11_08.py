@@ -59,6 +59,20 @@ def _model(name, app="registrar"):
     return django_apps.get_model(app, name)
 
 
+def _empty_cells(offering) -> int:
+    """Bu günədək dərslərdə tələbəyə AİD, amma boş xana sayı (lab / seminar alt qrupu nəzərə alınır)."""
+    from .lab_groups import applies
+
+    lessons = list(_model("Lesson").objects.filter(offering=offering, date__lte=timezone.localdate()))
+    rows = list(_model("Enrollment").objects.filter(offering=offering, status="enrolled"))
+    if not lessons or not rows:
+        return 0
+    filled = set(
+        _model("LessonMark").objects.filter(lesson__offering=offering).values_list("lesson_id", "enrollment_id")
+    )
+    return sum(1 for lesson in lessons for row in rows if applies(lesson, row) and (lesson.pk, row.pk) not in filled)
+
+
 class Blocked(Exception):
     """Ailə toxunulmur — savepoint geri qaytarılır, ``reason`` sayılır."""
 
@@ -162,6 +176,7 @@ class Merger:
     def _family(self, family) -> None:
         target, live = self._load(family)
         self._check_sources(target, live)
+        empty_before = sum(_empty_cells(offering) for offering in [*live, *([target] if target else [])])
         manifest = defaultdict(list)
         if target is None:
             target = self._create_target(family, live[0], manifest)
@@ -174,6 +189,10 @@ class Merger:
         self._load_rows(target, live, manifest)
         self._retire(live, manifest)
         recompute_absences(list({row.pk: row for row in by_student.values()}.values()))
+        # Sahib: «boş xana olmasın» — bir alt qrupun dərsləri o birinin tələbələrinə BOŞ xana kimi düşürsə (məs. F2-nin
+        # jurnalında 6, F1-də 26 dərs) birləşmə görünüşü pozur → ailə toxunulmur.
+        if _empty_cells(target) > empty_before:
+            raise Blocked("family_adds_empty_cells")
         self._syllabus(target, live, manifest)
         self.counts["families_merged"] += 1
         log_action(
