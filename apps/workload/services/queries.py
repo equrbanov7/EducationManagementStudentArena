@@ -9,6 +9,7 @@ from django.db.models import Q, Sum
 from core.search_text import tolerant_q
 
 from ..constants import (
+    ACTIVITY_TOTAL_FIELD,
     Activity,
     RowKind,
     Season,
@@ -17,6 +18,7 @@ from ..constants import (
 from ..models import TeacherAssignment, TeacherWorkloadProfile, TeachingTask, TeachingTaskRow
 from .assignments import balance_for_rows
 from .norms import norm_hours_for, norms_for
+from .patok import lectured_partner_ids
 from .row_filters import apply_row_filters
 
 # ⚠️ Etiketlər LAZY qalır (import anında `str()` dili dondururdu — QA-1 F3); mətnə çevirmə çağırış anındadır.
@@ -41,16 +43,28 @@ VACANT_FILTER = "vacant"
 MAX_PAGE_LIMIT = 300
 
 
-def _teacher_row_ids(task, teacher: str):
-    """Sağ paneldə seçilmiş müəllimin (və ya «Vakant»ın) bölgüsü olan sətir id-ləri (alt sorğu, JOIN-suz)."""
+def _teacher_q(task, teacher: str, activity: str = "") -> Q:
+    """Sağ paneldə seçilmiş müəllimin (və ya «Vakant»ın) sətirləri (alt sorğu, JOIN-suz).
+
+    ``activity`` verilsə — YALNIZ həmin fəaliyyətin bölgüsü (sahib 2026-11-08: tərəfdaş sətrin seminar müəllimi
+    «Mühazirə»də görünmür). Mühazirə (və ya fəaliyyətsiz) süzgəcində patok tərəfdaşları da: mühazirəsini bu
+    müəllimin apardığı sətirlər (:func:`.patok.lectured_partner_ids` — kartdakı «patok» xətti ilə eyni qayda).
+    """
     assignments = TeacherAssignment.objects.filter(row__task=task)
+    if activity in {str(key) for key in ACTIVITY_TOTAL_FIELD}:
+        assignments = assignments.filter(activity=activity)
+    else:
+        activity = ""
     if teacher == VACANT_FILTER:
-        return assignments.filter(teacher__isnull=True).values("row_id")
+        return Q(pk__in=assignments.filter(teacher__isnull=True).values("row_id"))
     try:
         teacher_pk = TeacherAssignment._meta.get_field("teacher").related_model._meta.pk.to_python(teacher)
     except (ValidationError, ValueError, TypeError):
-        return assignments.none().values("row_id")
-    return assignments.filter(teacher_id=teacher_pk).values("row_id")
+        return Q(pk__in=[])
+    condition = Q(pk__in=assignments.filter(teacher_id=teacher_pk).values("row_id"))
+    if activity in ("", str(Activity.LECTURE)):
+        condition |= Q(pk__in=lectured_partner_ids(TeachingTaskRow.objects.filter(task=task), teacher_pk))
+    return condition
 
 
 def task_rows(task, *, season: str = "", search: str = "", teacher: str = "", status: str = "", activity: str = ""):
@@ -64,7 +78,7 @@ def task_rows(task, *, season: str = "", search: str = "", teacher: str = "", st
     if season:
         queryset = queryset.filter(season=season)
     if teacher:
-        queryset = queryset.filter(pk__in=_teacher_row_ids(task, teacher))
+        queryset = queryset.filter(_teacher_q(task, teacher, activity))
     # 2026-10-25: bölgü vəziyyəti (vakantlı / tam / qismən …) və fəaliyyət növü — `row_filters` (server tərəfi).
     queryset = apply_row_filters(queryset, task, status=status, activity=activity)
     search_q = row_search_q(search)
@@ -180,7 +194,11 @@ def _serialize(task, rows: list, *, amend_targets=None) -> tuple[list[dict], lis
     from .tasks import _amendment_target_row_ids
 
     balance = balance_for_rows(rows)
-    patok = partner_lectures(rows)
+    # Kart xətti üçün yalnız göstəriş sahələri (``lead_id`` / ``linked`` daxili; açıq bağ — ``patok_lead_id``).
+    patok = {
+        pk: {key: info[key] for key in ("hours", "teacher_id", "teacher_name", "groups")}
+        for pk, info in partner_lectures(rows).items()
+    }
     aliases = verified_aliases(group for row in rows for group in row.groups.all())
     if amend_targets is None:
         amend_targets = _amendment_target_row_ids(task) if task.status == TaskStatus.AMENDED else set()
@@ -219,6 +237,7 @@ def _serialize(task, rows: list, *, amend_targets=None) -> tuple[list[dict], lis
                 "activities": info.get("activities", {}),
                 # Patokun ikinci/üçüncü qrupu: mühazirə aparıcı sətirdədir, burada yalnız GÖSTƏRİLİR (yükə düşmür).
                 "patok_lecture": patok.get(row.pk),
+                "patok_lead_id": str(row.patok_lead_id) if row.patok_lead_id else "",
                 "teaching_complete": info.get("teaching_complete", True),
                 "assignments": [
                     {
