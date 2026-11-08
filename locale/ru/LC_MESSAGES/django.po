@@ -115225,6 +115225,72 @@ msgctxt "registrar.lab_groups"
 msgid "%(group)s · Lab-%(n)s"
 msgstr "%(group)s · Лаб-%(n)s"
 
+# Jurnal banneri: mövcud sillabuslar + «dəyişmədən tətbiq et» (sahib 2026-11-08)
+msgctxt "registrar.syllabus"
+msgid "Aç"
+msgstr "Открыть"
+
+msgctxt "registrar.syllabus"
+msgid "Bu fənn üzrə mövcud sillabuslar"
+msgstr "Существующие силлабусы по этому предмету"
+
+#, python-format
+msgctxt "registrar.syllabus"
+msgid "Bu fənn üçün %(group)s qrupuna hazırladığınız sillabus var — dəyişmədən bu jurnala da tətbiq edilsin?"
+msgstr "У вас уже есть силлабус по этому предмету для группы %(group)s — применить его без изменений и к этому журналу?"
+
+msgctxt "registrar.syllabus"
+msgid "Bu fənn üçün hazırladığınız sillabus var"
+msgstr "У вас уже есть силлабус по этому предмету"
+
+msgctxt "registrar.syllabus"
+msgid "Bəli, dəyişmədən tətbiq et"
+msgstr "Да, применить без изменений"
+
+msgctxt "registrar.syllabus"
+msgid "Hər sillabusun hansı qrup üçün və kim tərəfindən yaradıldığı göstərilir. Sətrə klikləyib sillabusa keçə bilərsiniz."
+msgstr "Для каждого силлабуса указано, для какой группы и кем он создан. Нажмите на строку, чтобы открыть силлабус."
+
+msgctxt "registrar.syllabus"
+msgid "Ləğv et"
+msgstr "Отмена"
+
+msgctxt "registrar.syllabus"
+msgid "Müəllif"
+msgstr "Автор"
+
+msgctxt "registrar.syllabus"
+msgid "Müəllif məlum deyil"
+msgstr "Автор неизвестен"
+
+msgctxt "registrar.syllabus"
+msgid "Semestr dosyesi"
+msgstr "Досье семестра"
+
+msgctxt "registrar.syllabus"
+msgid "Sillabusu bu jurnalın müəllimi yaradır."
+msgstr "Силлабус создаёт преподаватель этого журнала."
+
+msgctxt "registrar.syllabus"
+msgid "Xeyr, yeni sillabus yarat"
+msgstr "Нет, создать новый силлабус"
+
+msgctxt "registrar.syllabus"
+msgid "Yeni sillabus yaradılmır və heç nə dəyişdirilmir — bu jurnal eyni sillabusu öz yerində istifadə edir. Təsdiq, dəyişikliklər və həftəlik plan bütün bağlı qruplar üçün ortaqdır."
+msgstr "Новый силлабус не создаётся и ничего не меняется — этот журнал использует тот же силлабус. Утверждение, изменения и недельный план общие для всех связанных групп."
+
+msgctxt "registrar.syllabus"
+msgid "bu jurnalın müəllimi"
+msgstr "преподаватель этого журнала"
+
+msgctxt "registrar.syllabus"
+msgid "təsdiqlənmiş versiya qüvvədədir"
+msgstr "действует утверждённая версия"
+
+msgctxt "registrar.syllabus"
+msgid "Əməliyyat yerinə yetirilmədi."
+msgstr "Не удалось выполнить операцию."
+
 msgctxt "accounts.syllabus"
 msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
 msgstr "Нужно заполнить оба поля — основную и дополнительную литературу. Источники можно записывать в любой форме: каждый с новой строки, через запятую или в одну строку."

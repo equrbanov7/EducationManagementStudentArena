@@ -154,7 +154,9 @@ def journal_detail(request, offering_id):
     # Dərs pəncərəsi (QA 2026-09-05 P1-8): default olaraq YALNIZ son N dərs sütunu
     # render olunur — 555×226 açılışda səhifə 41.5 MB idi. `?lw=0` → hamısı,
     # `?lo=` → pəncərənin başlanğıcı. Düzəliş rejimi də eyni pəncərədən keçir.
-    from apps.registrar import journal_activation, journal_close_notices, journal_extras, journal_policy
+    from apps.registrar import journal_activation, journal_close_notices, journal_extras
+    from apps.registrar import journal_lab_view as _lab_view
+    from apps.registrar import journal_policy
     from apps.registrar import journal_window as _jw
     from apps.registrar import syllabus_notice
 
@@ -179,6 +181,11 @@ def journal_detail(request, offering_id):
     # Laboratoriya» pilləsi jurnalın İÇİNDƏ də davam edir — müəllim seminar
     # seçəndə mühazirə sütunları qarışmır. Naməlum dəyər səssizcə «hamısı».
     lesson_kind = _jw.resolve_request_kind(request, offering)
+    # Lab qrupunun ayrıca görünüşü (sahib 2026-11-08): siyahıdakı «236 SBİO · Lab-1» → ?kind=lab&lab=1.
+    lab_view = _lab_view.resolve(request, offering) if active_tab == "grid" else None
+    # Seminar alt qrupu da eyni yolla (sahib 2026-11-08): «Seminar» süzgəcində «536 Bİ · Bİ2» → ?kind=seminar&seminar=2.
+    seminar_view = None if lab_view or active_tab != "grid" else _lab_view.resolve(request, offering, "seminar")
+    lesson_kind = "lab" if lab_view else "seminar" if seminar_view else lesson_kind
     share_scope = _share_guard.scope(request.user, offering)  # bölünmüş jurnal: öz sətir/sütunları
     journal = gradebook.get_offering_journal(
         offering=offering,
@@ -190,6 +197,10 @@ def journal_detail(request, offering_id):
         lesson_kind=lesson_kind if active_tab == "grid" else "",
         scope=share_scope,
     )
+    if lab_view:
+        _lab_view.apply(journal, lab_view)
+    elif seminar_view:
+        _lab_view.apply(journal, seminar_view, "seminar")
     corrections_map = corrections_service.corrections_map_for_offering(offering)
     legacy_excuse.attach_to_offering_journal(offering, journal, corrections_map)  # sarı üq sənədi
     # Ağır tab dataları YALNIZ lazım olanda (hər biri 555 sətirlik keçid idi).
@@ -259,6 +270,13 @@ def journal_detail(request, offering_id):
         "syllabus_gate": syllabus_gate,
         "lesson_kinds": practical_label.kind_choices(offering),  # «praktiki» açılışda seminar → «Praktiki məşğələ»
         "lab_group_choices": lab_groups.choices(offering),  # Lab-1 / Lab-2 (sahib 2026-11-06); bölünməyibsə boş
+        "journal_lab_view": lab_view,  # ?lab=N — yalnız bir lab qrupu (sahib 2026-11-08)
+        "journal_lab_label": (
+            lab_groups.label(lab_view, offering)
+            if lab_view
+            else seminar_groups.label(seminar_view, offering) if seminar_view else ""
+        ),
+        "journal_seminar_view": seminar_view,  # ?seminar=N — yalnız bir seminar alt qrupu
         "seminar_group_choices": seminar_groups.choices(offering),  # 234 K1 / 234 K2 (sahib 2026-11-07)
         "practical_toggle": _practical_toggle.context(request.user, offering),
         "locked_lesson_kind": journal_extras.locked_lesson_kind(offering),

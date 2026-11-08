@@ -137,7 +137,7 @@ varsa dərs tipi kilidlidir.
                 {% comment %}Seminar alt qrupları (sahib 2026-11-07): ana qrupun jurnalında seminar dərsi bir alt qrupa
                 («234 K1») bağlana bilər — yalnız onun tələbələrinindir. İstəyə bağlıdır: «Bütün qrup» = birgə seminar.
                 Sahə yalnız dərs tipi «seminar» olanda görünür — journal_lesson_seminar_group.js.{% endcomment %}
-                <div class="jd2-field" data-jd-seminar-group-field hidden>
+                <div class="jd2-field" data-jd-seminar-group-field{% if journal_seminar_view %} data-jd-default-seminar-group="{{ journal_seminar_view }}"{% endif %} hidden>
                     <span class="jd2-field-label">{% trans "SEMİNAR ALT QRUPU" context "registrar.seminar_groups" %}</span>
                     <div class="bootstrap-single-select bootstrap-single-select--ems">
                         <select name="lesson_seminar_group" class="ems-select bootstrap-single-select__native" data-jd-lesson-seminar-group data-bootstrap-select>
@@ -152,7 +152,7 @@ varsa dərs tipi kilidlidir.
                 {% comment %}Laboratoriya qrupları (sahib 2026-11-06): jurnal Lab-1 / Lab-2 siyahılarına bölünübsə lab dərsi
                 yalnız seçilmiş qrupun tələbələrinindir; qrup məcburidir (server də yoxlayır). Sahə yalnız dərs tipi
                 «laboratoriya» olanda görünür — journal_lesson_lab_group.js.{% endcomment %}
-                <div class="jd2-field" data-jd-lab-group-field hidden>
+                <div class="jd2-field" data-jd-lab-group-field{% if journal_lab_view %} data-jd-default-lab-group="{{ journal_lab_view }}"{% endif %} hidden>
                     <span class="jd2-field-label">{% trans "LABORATORİYA QRUPU" context "registrar.lab_groups" %}</span>
                     <div class="bootstrap-single-select bootstrap-single-select--ems">
                         <select name="lesson_lab_group" class="ems-select bootstrap-single-select__native" data-jd-lesson-lab-group data-bootstrap-select>

@@ -272,3 +272,7 @@
 
 /* İntensiv kurs (2026-10-25): qrupsuz jurnalın nişanı. */
 .jl-intensive { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--ems-warning-50, #fffbeb); color: var(--ems-warning-700, #b45309); border: 1px solid var(--ems-warning-200, #fde68a); }
+
+/* Lab qrupunun ayrıca sətri (sahib 2026-11-08): «236 SBİO · Lab-1» — ana jurnal sətrinin altında, girintili. */
+.jl-page .jl-table tbody tr.jl-row--lab td:nth-child(2) { padding-left: 28px; }
+.jl-page .jl-group--lab { background: var(--ems-violet-50, #f5f3ff); color: var(--ems-violet-700, #6d28d9); }

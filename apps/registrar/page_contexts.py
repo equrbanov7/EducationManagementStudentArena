@@ -14,7 +14,7 @@ from django.apps import apps as django_apps
 from django.urls import reverse
 from django.utils import timezone
 
-from apps.registrar import analytics_cache, analytics_display, journal_scope, schedule
+from apps.registrar import analytics_cache, analytics_display, journal_lab_view, journal_scope, schedule
 from apps.registrar.journal_group_identity import attach_labels, filter_group
 from apps.registrar.models import CourseOffering, StudentAcademicRecord
 
@@ -251,7 +251,7 @@ def journal_list_context(user, request=None) -> dict:
     )
     for offering in page_offerings:
         offering.student_count = counts_map.get(offering.pk, 0)
-    # Dərs tipi etiketləri YALNIZ görünən səhifə üçün (`kind` süzgəci yuxarıda DB tərəfdədir).
+    journal_lab_view.attach_list_rows(page_offerings, selected_kind)  # «236 SBİO · Lab-1» sətirləri (2026-11-08)
     attach_kind_labels(page_offerings, selected_kind, load_teachers=is_broad and (getattr(mirrored, "pk", 0) or True))
     if not is_broad or mirrored is not None:
         teacher_journal_list.attach(mirrored or user, page_offerings, selected_kind=selected_kind, links=not is_broad)

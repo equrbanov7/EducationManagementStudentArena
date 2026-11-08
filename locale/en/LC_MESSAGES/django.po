@@ -115032,6 +115032,72 @@ msgctxt "registrar.lab_groups"
 msgid "%(group)s · Lab-%(n)s"
 msgstr "%(group)s · Lab group %(n)s"
 
+# Jurnal banneri: mövcud sillabuslar + «dəyişmədən tətbiq et» (sahib 2026-11-08)
+msgctxt "registrar.syllabus"
+msgid "Aç"
+msgstr "Open"
+
+msgctxt "registrar.syllabus"
+msgid "Bu fənn üzrə mövcud sillabuslar"
+msgstr "Existing syllabi for this course"
+
+#, python-format
+msgctxt "registrar.syllabus"
+msgid "Bu fənn üçün %(group)s qrupuna hazırladığınız sillabus var — dəyişmədən bu jurnala da tətbiq edilsin?"
+msgstr "You already prepared a syllabus for this course for group %(group)s — apply it unchanged to this journal too?"
+
+msgctxt "registrar.syllabus"
+msgid "Bu fənn üçün hazırladığınız sillabus var"
+msgstr "You already have a syllabus for this course"
+
+msgctxt "registrar.syllabus"
+msgid "Bəli, dəyişmədən tətbiq et"
+msgstr "Yes, apply unchanged"
+
+msgctxt "registrar.syllabus"
+msgid "Hər sillabusun hansı qrup üçün və kim tərəfindən yaradıldığı göstərilir. Sətrə klikləyib sillabusa keçə bilərsiniz."
+msgstr "Each row shows the group the syllabus was created for and who created it. Click a row to open the syllabus."
+
+msgctxt "registrar.syllabus"
+msgid "Ləğv et"
+msgstr "Cancel"
+
+msgctxt "registrar.syllabus"
+msgid "Müəllif"
+msgstr "Author"
+
+msgctxt "registrar.syllabus"
+msgid "Müəllif məlum deyil"
+msgstr "Author unknown"
+
+msgctxt "registrar.syllabus"
+msgid "Semestr dosyesi"
+msgstr "Semester file"
+
+msgctxt "registrar.syllabus"
+msgid "Sillabusu bu jurnalın müəllimi yaradır."
+msgstr "The syllabus is created by this journal's teacher."
+
+msgctxt "registrar.syllabus"
+msgid "Xeyr, yeni sillabus yarat"
+msgstr "No, create a new syllabus"
+
+msgctxt "registrar.syllabus"
+msgid "Yeni sillabus yaradılmır və heç nə dəyişdirilmir — bu jurnal eyni sillabusu öz yerində istifadə edir. Təsdiq, dəyişikliklər və həftəlik plan bütün bağlı qruplar üçün ortaqdır."
+msgstr "No new syllabus is created and nothing is changed — this journal uses the same syllabus in place. Approval, changes and the weekly plan are shared by all linked groups."
+
+msgctxt "registrar.syllabus"
+msgid "bu jurnalın müəllimi"
+msgstr "this journal's teacher"
+
+msgctxt "registrar.syllabus"
+msgid "təsdiqlənmiş versiya qüvvədədir"
+msgstr "approved version is in force"
+
+msgctxt "registrar.syllabus"
+msgid "Əməliyyat yerinə yetirilmədi."
+msgstr "The action could not be completed."
+
 msgctxt "accounts.syllabus"
 msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
 msgstr "Both the primary and the additional literature fields must be filled in. You can write the sources in any form — one per line, separated by commas or on a single line."
