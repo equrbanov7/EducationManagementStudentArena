@@ -43,6 +43,8 @@ def offering_in_actor_scope(user, organization, offering, *, permission=JOURNAL_
     ETMİR (dövr yaranardı) — model app registry ilə həll olunur, alt-ağac
     yoxlaması isə ``OrgUnit.user_scope_covers`` daxilində, öz modulundadır.
     """
+    if own_offering_conflict(user, organization, offering):
+        return False
     scope = _permission_scope(user, organization, permission)
     if not scope.has_structure_access:
         return False
@@ -55,6 +57,19 @@ def offering_in_actor_scope(user, organization, offering, *, permission=JOURNAL_
 
     org_unit_model = django_apps.get_model("organizations", "OrgUnit")
     return org_unit_model.objects.filter(organization=organization, pk=group_id).filter(scope.unit_subtree_q()).exists()
+
+
+def own_offering_conflict(user, organization, offering) -> bool:
+    """Tələbə + heyət rolu (sahib 2026-11-08): açılış aktorun öz qrup ailəsinin və ya özünün yazıldığı jurnaldır.
+
+    Bütün «açılış əhatədədirmi» qapıları (imtahan balı, təhvil, cədvəl, üzrlü qayıb, müşahidə) bunu keçir.
+    Qeyri-qarışıq istifadəçi üçün sorğusuz.
+    """
+    if offering is None:
+        return False
+    from apps.organizations.public import is_self_conflict
+
+    return is_self_conflict(user, organization, offering_id=offering.pk, group_id=getattr(offering, "group_id", None))
 
 
 #: Jurnal müşahidəsi (siyahı + detal, YALNIZ-OXU) — ``journal_access.VIEW_PERMISSION`` ilə eyni açar.
@@ -111,8 +126,16 @@ def journal_view_q(user, organization):
     if not scope.has_structure_access:
         return None
     if scope.is_org_wide:
-        return Q(organization=organization)
-    return _unit_view_q(organization, scope, _kafedra_roots(user, organization, scope))
+        query = Q(organization=organization)
+    else:
+        query = _unit_view_q(organization, scope, _kafedra_roots(user, organization, scope))
+    # Tələbə + heyət rolu (sahib 2026-11-08): öz qrup ailəsinin və özünün yazıldığı jurnallar siyahıda yoxdur.
+    from apps.organizations.public import own_scope
+
+    own = own_scope(user, organization)
+    if own.offering_ids or own.group_ids:
+        query &= ~Q(pk__in=sorted(own.offering_ids)) & ~Q(group_id__in=sorted(own.group_ids))
+    return query
 
 
 def offering_in_journal_view_scope(user, organization, offering) -> bool:
@@ -122,6 +145,8 @@ def offering_in_journal_view_scope(user, organization, offering) -> bool:
     kafedra kökü → siyahı ilə EYNİ Q (həll yalnız bu açılış üçün). Siyahı ilə detal ayrılmasın deyə hər ikisi
     bu modulun eyni köməkçilərindən qurulur.
     """
+    if own_offering_conflict(user, organization, offering):
+        return False
     scope = _permission_scope(user, organization, JOURNAL_VIEW_PERMISSION)
     if not scope.has_structure_access:
         return False

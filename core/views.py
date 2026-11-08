@@ -256,8 +256,25 @@ def handler400(request, exception=None):
 
 
 def handler403(request, exception=None):
-    """Custom 403 Forbidden handler - prevents application detail exposure."""
-    return render(request, "errors/403.html", status=403)
+    """Custom 403 Forbidden handler - prevents application detail exposure.
+
+    Yalnız ``public_message`` daşıyan istisna (məs. tələbə + heyət rolu qapısı, ``SelfConflictDenied``) öz
+    istifadəçi mətnini göstərir — digər 403-lər əvvəlki kimi ümumi səhifədir (detal sızmır).
+    """
+    message = str(getattr(exception, "public_message", "") or "")
+    if message and _wants_json(request):
+        reason = str(getattr(exception, "reason_code", "") or "permission_denied")
+        return JsonResponse({"ok": False, "error": reason, "message": message}, status=403)
+    return render(request, "errors/403.html", {"public_message": message}, status=403)
+
+
+def _wants_json(request) -> bool:
+    accept = str(request.headers.get("Accept", "") or "")
+    return (
+        request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        or "application/json" in accept
+        or request.method not in ("GET", "HEAD")
+    )
 
 
 def handler404(request, exception=None):

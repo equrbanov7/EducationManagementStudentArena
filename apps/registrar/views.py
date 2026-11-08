@@ -88,9 +88,20 @@ def journal_detail(request, offering_id):
     TƏSDİQ ZƏNCİRİ YOXDUR (sahibin qərarı, 2026-08): müəllim balı yazır və bitir.
     Jurnalı semestr sonunda RİM toplu BAĞLAYIR — bax
     :mod:`apps.registrar.journal_close`."""
+    from apps.organizations.public import guard_self_conflict
+
     from .journal_access import offering_or_404
 
     offering = offering_or_404(request, offering_id)
+    # Tələbə + heyət rolu (sahib 2026-11-08): öz qrupunun / öz jurnalını heyət kimi açmaq — 403 + audit.
+    guard_self_conflict(
+        request.user,
+        offering.organization,
+        action="registrar.journal_detail",
+        request=request,
+        offering_id=offering.pk,
+        group_id=offering.group_id,
+    )
     if request.method == "GET" and request.GET.get("own_history") == "1":
         from .journal_own_history import detail
 

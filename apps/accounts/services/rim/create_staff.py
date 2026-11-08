@@ -58,7 +58,7 @@ def staff_units(actor):
     for scope in _scopes(actor):
         if not scope.has_structure_access:
             return queryset.none()
-        if not scope.is_org_wide:
+        if not scope.is_org_wide or scope.excluded_unit_ids:
             queryset = queryset.filter(scope.unit_subtree_q())
     return queryset
 

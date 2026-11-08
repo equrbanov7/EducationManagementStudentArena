@@ -18,6 +18,7 @@ from django.http import Http404, JsonResponse
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET, require_POST
 
+from apps.organizations.public import guard_self_conflict
 from core import superadmin_waiver
 from core.search_text import tolerant_q
 
@@ -57,6 +58,16 @@ def _offering_for_roster(request, offering_id, *, require_open=True):
     köhnəlmiş modal istifadəçiyə səbəbi göstərsin — qapı yenə bağlıdır.
     """
     offering = offering_or_404(request, offering_id)
+    # Tələbə + heyət rolu (sahib 2026-11-08): öz / öz qrupunun jurnal siyahısı — 403 + audit (404 deyil, səbəb aydın).
+    if guest_roster.can_manage_roster(request.user, offering.organization):
+        guard_self_conflict(
+            request.user,
+            offering.organization,
+            action="registrar.guest_roster",
+            request=request,
+            offering_id=offering.pk,
+            group_id=offering.group_id,
+        )
     if not guest_roster.can_manage_offering_roster(request.user, offering):
         raise Http404
     if require_open and not guest_roster.roster_is_open(offering):

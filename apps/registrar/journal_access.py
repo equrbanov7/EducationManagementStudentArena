@@ -96,6 +96,16 @@ def _snapshot_grade_input(user, organization) -> bool | None:
     )
 
 
+def staff_self_conflict(user, offering) -> bool:
+    """Tələbə + heyət rolu (sahib 2026-11-08): öz qrup ailəsinin / özünün yazıldığı jurnala heyət girişi YOXDUR.
+
+    Qeyri-qarışıq istifadəçi üçün sorğusuz (yüklənmiş üzvlüklərdən qərar) — bax ``organizations.self_conflict``.
+    """
+    from apps.organizations.public import offering_self_conflict
+
+    return offering_self_conflict(user, offering)
+
+
 def can_edit_journal(user, offering) -> bool:
     """Giriş + redaktə/korrektor səlahiyyəti: müəllim / sahib / superuser / İKT Rəhbəri.
 
@@ -105,7 +115,7 @@ def can_edit_journal(user, offering) -> bool:
     aktiv təşkilata bağlı gəlir. Yəni A universitetinin İKT-si B-nin jurnalını
     aça bilmir: fetch mərhələsində 404 alır.
     """
-    if not getattr(user, "is_authenticated", False):
+    if not getattr(user, "is_authenticated", False) or staff_self_conflict(user, offering):
         return False
     if getattr(user, "is_superuser", False) or getattr(user, "is_ikt_rehber", False):
         return True
@@ -137,7 +147,7 @@ def can_observe_journal(user, offering) -> bool:
     çata bilərdi — jurnalın iki sahibi yaranardı. Ayrı funksiya çağıran tərəfi
     «görmək» ilə «yazmaq» arasında seçim etməyə MƏCBUR edir.
     """
-    if not getattr(user, "is_authenticated", False):
+    if not getattr(user, "is_authenticated", False) or staff_self_conflict(user, offering):
         return False
 
     from .handover import is_handover_observer
@@ -178,7 +188,7 @@ def is_direct_editor(user, offering) -> bool:
     Ləğv edilmiş açılışda heç kim birbaşa redaktor deyil (J-09 — jurnal yalnız-oxu)."""
     if not getattr(user, "is_authenticated", False):
         return False
-    if not offering_accepts_writes(offering):
+    if not offering_accepts_writes(offering) or staff_self_conflict(user, offering):
         return False
     if getattr(user, "is_superuser", False) or getattr(user, "is_ikt_rehber", False):
         return True

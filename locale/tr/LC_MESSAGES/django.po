@@ -114531,3 +114531,7 @@ msgstr "İşlem gerçekleştirilemedi."
 msgctxt "syllabus.model"
 msgid "Təsdiqlənmiş sillabus başqa qrupdan (avtomatik)"
 msgstr "Başka gruptan onaylı müfredat (otomatik)"
+
+msgctxt "organizations.self_conflict"
+msgid "Siz bu təşkilatda həm də tələbəsiniz: işçi rolu ilə özünüzə, öz qrupunuza və öz jurnallarınıza aid əməliyyat apara bilməzsiniz."
+msgstr "Bu kurumda aynı zamanda öğrencisiniz: personel rolüyle kendinize, kendi grubunuza ve kendi yoklama defterlerinize ilişkin işlem yapamazsınız."

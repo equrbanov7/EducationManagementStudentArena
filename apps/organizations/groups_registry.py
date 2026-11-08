@@ -107,11 +107,14 @@ def student_record_scope_q(scope) -> Q:
     (`program.specialty_unit`); arxivlənmiş qrupu varsa o da sayılır.
     Təşkilat əhatəsi → filtr yoxdur; əhatəsiz → heç nə (fail-closed).
     """
+    # Tələbə + heyət rolu (sahib 2026-11-08): öz qrup ailəsinin tələbələri ixtisas budağından da düşməsin.
+    own = ~Q(group_id__in=sorted(scope.excluded_unit_ids)) if scope.excluded_unit_ids else Q()
     if scope.is_org_wide:
-        return Q()
-    return scope.unit_subtree_q(
-        path_field="program__specialty_unit__path", id_field="program__specialty_unit_id"
-    ) | scope.unit_subtree_q(path_field="group__path", id_field="group_id")
+        return own
+    return (
+        scope.unit_subtree_q(path_field="program__specialty_unit__path", id_field="program__specialty_unit_id")
+        | scope.unit_subtree_q(path_field="group__path", id_field="group_id")
+    ) & own
 
 
 def can_view_groups(request) -> bool:

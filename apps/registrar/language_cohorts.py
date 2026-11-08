@@ -33,7 +33,7 @@ def department_choices(user, organization):
     scope = apps.get_model("organizations", "OrgUnit").user_permission_scope(user, organization, "journal.roster")
     if not scope.has_structure_access:
         return units.none()
-    if not scope.is_org_wide:
+    if not scope.is_org_wide or scope.excluded_unit_ids:
         units = units.filter(scope.unit_subtree_q())
     return units.order_by("name", "id")
 

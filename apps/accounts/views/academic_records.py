@@ -387,7 +387,7 @@ def journal_teacher_search(request):
     offerings = CourseOffering.objects.filter(organization=organization, is_active=True, instructor__isnull=False)
     # Unit-scoped istifadəçi yalnız öz alt-ağacındakı qrupların offering-lərinin
     # müəllimlərini görür; org-wide hamısını.
-    if not scope.is_org_wide:
+    if not scope.is_org_wide or scope.excluded_unit_ids:
         offerings = offerings.filter(scope.unit_subtree_q(path_field="group__path", id_field="group_id"))
     teacher_ids = list(offerings.values_list("instructor_id", flat=True).distinct())
     if not teacher_ids:
