@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="{% static 'registrar/css/correction.css' %}?v=20260831-excuse">
     {% if selfwork_active %}<link rel="stylesheet" href="{% static 'registrar/css/selfwork_archive.css' %}?v=20260827-1">{% endif %}
     <link rel="stylesheet" href="{% static 'registrar/css/syllabus_view.css' %}?v=20261025-weeks">
+    {% if syllabus_notice.show_banner %}<link rel="stylesheet" href="{% static 'registrar/css/journal_syllabus_peers.css' %}?v=20261108-peers">{% endif %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal_guest.css' %}?v=20261104-divider">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_subject_exempt.css' %}?v=20261104-reason">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_removal_reason.css' %}?v=20261104-reason">
@@ -331,6 +332,8 @@
     <script src="{% static 'registrar/js/journal_detail.js' %}?v=20260715-jbatch2"></script>
     {% if excused_management_url %}<script src="{% static 'registrar/js/excused_management.js' %}?v=20261101"></script>{% endif %}
     <script src="{% static 'registrar/js/syllabus_view.js' %}?v=20261025-weeks"></script>
+    {# Banner: bu fənnin mövcud sillabusları + «dəyişmədən tətbiq et» təklifi (sahib 2026-11-08). #}
+    {% if syllabus_notice.show_banner %}<script src="{% static 'registrar/js/journal_syllabus_peers.js' %}?v=20261108-peers"></script>{% endif %}
     {# Korpus → otaq kaskadı journal_grid.js-dən ƏVVƏL yüklənir (o, modulu boot-da oxuyur). #}
     {# Seçilmiş tarixin cədvəl slotu (otaq + saat, sahib 2026-10-17) — otaq kaskadı ondan oxuyur. #}
     <script src="{% static 'registrar/js/journal_lesson_schedule.js' %}?v=20261017-room"></script>

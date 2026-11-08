@@ -1,0 +1,227 @@
+/* Jurnal — «Bu fənn üzrə mövcud sillabuslar» + «dəyişmədən tətbiq et» dialoqu (sahib 2026-11-08).
+ *
+ * Yalnız `--ems-*` tokenləri (syllabus_view.css ilə eyni qayda). Dialoq qabığı
+ * `corr-modal` komponentidir (correction.css) — burada yalnız gövdə.
+ */
+
+/* ── Siyahı ─────────────────────────────────────────────────────────────── */
+.jd2-sylpeers {
+    margin: -8px 0 16px;
+}
+
+.jd2-sylpeers__box {
+    border: 1px solid var(--ems-border);
+    border-radius: 12px;
+    background: var(--ems-neutral-0);
+}
+
+.jd2-sylpeers__summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 8px 14px;
+    font-size: 0.83rem;
+    font-weight: 700;
+    color: var(--ems-primary-800);
+    cursor: pointer;
+}
+
+.jd2-sylpeers__count {
+    color: var(--ems-text-muted);
+    font-weight: 600;
+}
+
+.jd2-sylpeers__lead {
+    margin: 0;
+    padding: 0 14px 8px;
+    font-size: 0.73rem;
+    color: var(--ems-text-muted);
+}
+
+.jd2-sylpeers__list {
+    margin: 0;
+    padding: 0 8px 8px;
+    list-style: none;
+}
+
+.jd2-sylpeers__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+    min-height: 44px;
+    padding: 8px 10px;
+    border-radius: 9px;
+    text-decoration: none;
+    color: var(--ems-text);
+}
+
+.jd2-sylpeers__row:hover,
+.jd2-sylpeers__row:focus-visible {
+    background: var(--ems-primary-50);
+}
+
+.jd2-sylpeers__main {
+    display: flex;
+    flex: 1 1 220px;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.jd2-sylpeers__group {
+    font-size: 0.83rem;
+    overflow-wrap: anywhere;
+}
+
+.jd2-sylpeers__author,
+.jd2-sylpeers__note {
+    font-size: 0.73rem;
+    color: var(--ems-text-muted);
+}
+
+.jd2-sylpeers__badge {
+    margin-left: 6px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-size: 0.71rem;
+    font-weight: 800;
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+}
+
+.jd2-sylpeers__status {
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 0.71rem;
+    font-weight: 800;
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-700);
+}
+
+.jd2-sylpeers__status--approved {
+    background: var(--ems-success-bg);
+    color: var(--ems-success-700);
+}
+
+.jd2-sylpeers__status--submitted,
+.jd2-sylpeers__status--review {
+    background: var(--ems-primary-100);
+    color: var(--ems-primary-800);
+}
+
+.jd2-sylpeers__status--revision,
+.jd2-sylpeers__status--draft {
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+}
+
+.jd2-sylpeers__status--rejected {
+    background: var(--ems-danger-bg);
+    color: var(--ems-danger-strong);
+}
+
+.jd2-sylpeers__open {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--ems-primary-600);
+}
+
+/* ── Təklif dialoqu ─────────────────────────────────────────────────────── */
+.jd2-sylreuse__card {
+    width: min(520px, 92vw);
+}
+
+.jd2-sylreuse__body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 1rem 1.25rem;
+}
+
+.jd2-sylreuse__source {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 14px;
+    border: 1px solid var(--ems-primary-200);
+    border-radius: 12px;
+    background: var(--ems-primary-50);
+}
+
+.jd2-sylreuse__question {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ems-primary-800);
+}
+
+.jd2-sylreuse__meta,
+.jd2-sylreuse__hint {
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--ems-text-muted);
+}
+
+.jd2-sylreuse__status {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--ems-text);
+}
+
+.jd2-sylreuse__yes,
+.jd2-sylreuse__no,
+.jd2-sylreuse__cancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 16px;
+    border-radius: 9px;
+    font-size: 0.83rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.jd2-sylreuse__yes {
+    align-self: flex-start;
+    border: 0;
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+}
+
+.jd2-sylreuse__yes:hover,
+.jd2-sylreuse__yes:focus-visible {
+    background: var(--ems-primary-700);
+}
+
+.jd2-sylreuse__yes:disabled {
+    opacity: 0.6;
+    cursor: progress;
+}
+
+.jd2-sylreuse__foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 0 1.25rem 1rem;
+}
+
+.jd2-sylreuse__no,
+.jd2-sylreuse__cancel {
+    border: 1px solid var(--ems-border);
+    background: var(--ems-neutral-0);
+    color: var(--ems-text);
+}
+
+.jd2-sylreuse__no:hover,
+.jd2-sylreuse__cancel:hover {
+    background: var(--ems-bg-subtle);
+}
