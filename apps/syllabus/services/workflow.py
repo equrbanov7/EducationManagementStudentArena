@@ -27,6 +27,7 @@ from ..constants import (
 )
 from ..models import ApprovalSource, ReviewDecision, Syllabus, SyllabusReview, SyllabusVersion
 from ..state_machine import Transition, TransitionDenied, check
+from . import approval_hooks
 from . import notifications as syllabus_notifications
 from . import versioning
 from .drafts import recompute_completion, refresh_pointers
@@ -288,6 +289,7 @@ def approve(*, version, actor, comment: str = "", section_comments=None, request
         decision_reason="",
     )
     Syllabus.objects.filter(pk=updated.syllabus_id).update(approved_version=updated, current_version=updated)
+    approval_hooks.fire(updated.syllabus_id)
     syllabus_notifications.notify_approved(updated)
     return updated
 
@@ -344,6 +346,7 @@ def auto_approve(*, version, request=None, notify: bool = True):
             reason=AUTO_APPROVAL_COMMENT,
         )
         Syllabus.objects.filter(pk=locked.syllabus_id).update(approved_version=locked, current_version=locked)
+        approval_hooks.fire(locked.syllabus_id)
     if notify:
         syllabus_notifications.notify_approved(locked)
     return locked

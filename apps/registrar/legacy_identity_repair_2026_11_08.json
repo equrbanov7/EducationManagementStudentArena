@@ -1,0 +1,2297 @@
+{
+ "format": "legacy-identity/1",
+ "source": "prod copy 2026-11-02 + old system myedu_new (semester 14)",
+ "cases": [
+  {
+   "key": "a",
+   "legacy_wrong": 11289,
+   "holder": 9104,
+   "person": 9159,
+   "journals": {
+    "3jsbtRN7Jn": "faaa34a2-87f2-46cf-b200-daeb7904765e",
+    "CgdQMPBk0l": "f800ea37-a2cb-4efa-9760-be8c78d92c00",
+    "GBkoJecEuu": "10fa7acc-2f0f-4720-a113-eb9bbbc5cf4c",
+    "LmLpb2WHpu": "acd0f14e-cbf3-4b01-813d-f8571df543f7",
+    "MNr3SKMWMY": "1cddc29b-1d4c-4450-ae90-7a48fce9959e",
+    "PPtoYdxGlx": "b68126a4-7a39-4fbc-bd0d-169db458d032",
+    "XK8aBmI6Rr": "0de35ccc-62a3-4abd-a27c-c20b7a844d70"
+   },
+   "items": [
+    {
+     "journal": "3jsbtRN7Jn",
+     "offering": "faaa34a2-87f2-46cf-b200-daeb7904765e",
+     "date": "2026-09-18",
+     "start_time": "08:30",
+     "holder_enrollment": "81ce97f3-33ae-48db-b85e-566805373d3b",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "3jsbtRN7Jn",
+     "offering": "faaa34a2-87f2-46cf-b200-daeb7904765e",
+     "date": "2026-09-18",
+     "start_time": "10:10",
+     "holder_enrollment": "81ce97f3-33ae-48db-b85e-566805373d3b",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "3jsbtRN7Jn",
+     "offering": "faaa34a2-87f2-46cf-b200-daeb7904765e",
+     "date": "2026-09-25",
+     "start_time": "08:30",
+     "holder_enrollment": "81ce97f3-33ae-48db-b85e-566805373d3b",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "3jsbtRN7Jn",
+     "offering": "faaa34a2-87f2-46cf-b200-daeb7904765e",
+     "date": "2026-10-02",
+     "start_time": "08:30",
+     "holder_enrollment": "81ce97f3-33ae-48db-b85e-566805373d3b",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "3jsbtRN7Jn",
+     "offering": "faaa34a2-87f2-46cf-b200-daeb7904765e",
+     "date": "2026-10-02",
+     "start_time": "10:10",
+     "holder_enrollment": "81ce97f3-33ae-48db-b85e-566805373d3b",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": 5.0
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": 5.0
+     }
+    },
+    {
+     "journal": "3jsbtRN7Jn",
+     "offering": "faaa34a2-87f2-46cf-b200-daeb7904765e",
+     "date": "2026-10-09",
+     "start_time": "08:30",
+     "holder_enrollment": "81ce97f3-33ae-48db-b85e-566805373d3b",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "CgdQMPBk0l",
+     "offering": "f800ea37-a2cb-4efa-9760-be8c78d92c00",
+     "date": "2026-09-21",
+     "start_time": "10:10",
+     "holder_enrollment": "9916a8e9-a47e-41fe-8b8b-6ba641b43248",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "CgdQMPBk0l",
+     "offering": "f800ea37-a2cb-4efa-9760-be8c78d92c00",
+     "date": "2026-09-25",
+     "start_time": "10:10",
+     "holder_enrollment": "9916a8e9-a47e-41fe-8b8b-6ba641b43248",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "CgdQMPBk0l",
+     "offering": "f800ea37-a2cb-4efa-9760-be8c78d92c00",
+     "date": "2026-10-05",
+     "start_time": "10:10",
+     "holder_enrollment": "9916a8e9-a47e-41fe-8b8b-6ba641b43248",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "CgdQMPBk0l",
+     "offering": "f800ea37-a2cb-4efa-9760-be8c78d92c00",
+     "date": "2026-10-09",
+     "start_time": "10:10",
+     "holder_enrollment": "9916a8e9-a47e-41fe-8b8b-6ba641b43248",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "CgdQMPBk0l",
+     "offering": "f800ea37-a2cb-4efa-9760-be8c78d92c00",
+     "date": "2026-10-19",
+     "start_time": "10:10",
+     "holder_enrollment": "9916a8e9-a47e-41fe-8b8b-6ba641b43248",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "GBkoJecEuu",
+     "offering": "10fa7acc-2f0f-4720-a113-eb9bbbc5cf4c",
+     "date": "2026-09-16",
+     "start_time": "10:10",
+     "holder_enrollment": "e076e7d0-ffde-4b76-8ade-c2d752bd2764",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "GBkoJecEuu",
+     "offering": "10fa7acc-2f0f-4720-a113-eb9bbbc5cf4c",
+     "date": "2026-09-22",
+     "start_time": "10:10",
+     "holder_enrollment": "e076e7d0-ffde-4b76-8ade-c2d752bd2764",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "GBkoJecEuu",
+     "offering": "10fa7acc-2f0f-4720-a113-eb9bbbc5cf4c",
+     "date": "2026-09-29",
+     "start_time": "10:10",
+     "holder_enrollment": "e076e7d0-ffde-4b76-8ade-c2d752bd2764",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "GBkoJecEuu",
+     "offering": "10fa7acc-2f0f-4720-a113-eb9bbbc5cf4c",
+     "date": "2026-10-06",
+     "start_time": "10:10",
+     "holder_enrollment": "e076e7d0-ffde-4b76-8ade-c2d752bd2764",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "LmLpb2WHpu",
+     "offering": "acd0f14e-cbf3-4b01-813d-f8571df543f7",
+     "date": "2026-09-15",
+     "start_time": "11:50",
+     "holder_enrollment": "e401ff02-d951-456f-a5d5-e13c3fef79d1",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "LmLpb2WHpu",
+     "offering": "acd0f14e-cbf3-4b01-813d-f8571df543f7",
+     "date": "2026-09-17",
+     "start_time": "11:50",
+     "holder_enrollment": "e401ff02-d951-456f-a5d5-e13c3fef79d1",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "LmLpb2WHpu",
+     "offering": "acd0f14e-cbf3-4b01-813d-f8571df543f7",
+     "date": "2026-09-18",
+     "start_time": "11:50",
+     "holder_enrollment": "e401ff02-d951-456f-a5d5-e13c3fef79d1",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "LmLpb2WHpu",
+     "offering": "acd0f14e-cbf3-4b01-813d-f8571df543f7",
+     "date": "2026-09-21",
+     "start_time": "11:50",
+     "holder_enrollment": "e401ff02-d951-456f-a5d5-e13c3fef79d1",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "LmLpb2WHpu",
+     "offering": "acd0f14e-cbf3-4b01-813d-f8571df543f7",
+     "date": "2026-09-22",
+     "start_time": "11:50",
+     "holder_enrollment": "e401ff02-d951-456f-a5d5-e13c3fef79d1",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "LmLpb2WHpu",
+     "offering": "acd0f14e-cbf3-4b01-813d-f8571df543f7",
+     "date": "2026-09-24",
+     "start_time": "11:50",
+     "holder_enrollment": "e401ff02-d951-456f-a5d5-e13c3fef79d1",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "LmLpb2WHpu",
+     "offering": "acd0f14e-cbf3-4b01-813d-f8571df543f7",
+     "date": "2026-09-26",
+     "start_time": "11:50",
+     "holder_enrollment": "e401ff02-d951-456f-a5d5-e13c3fef79d1",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "LmLpb2WHpu",
+     "offering": "acd0f14e-cbf3-4b01-813d-f8571df543f7",
+     "date": "2026-09-28",
+     "start_time": "11:50",
+     "holder_enrollment": "e401ff02-d951-456f-a5d5-e13c3fef79d1",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "LmLpb2WHpu",
+     "offering": "acd0f14e-cbf3-4b01-813d-f8571df543f7",
+     "date": "2026-09-29",
+     "start_time": "11:50",
+     "holder_enrollment": "e401ff02-d951-456f-a5d5-e13c3fef79d1",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "LmLpb2WHpu",
+     "offering": "acd0f14e-cbf3-4b01-813d-f8571df543f7",
+     "date": "2026-10-01",
+     "start_time": "11:50",
+     "holder_enrollment": "e401ff02-d951-456f-a5d5-e13c3fef79d1",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": 10.0
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": 10.0
+     }
+    },
+    {
+     "journal": "LmLpb2WHpu",
+     "offering": "acd0f14e-cbf3-4b01-813d-f8571df543f7",
+     "date": "2026-10-02",
+     "start_time": "11:50",
+     "holder_enrollment": "e401ff02-d951-456f-a5d5-e13c3fef79d1",
+     "value": {
+      "status": "present",
+      "score": 9.0
+     },
+     "holder_value": {
+      "status": "present",
+      "score": 9.0
+     },
+     "holder_fix": true,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "LmLpb2WHpu",
+     "offering": "acd0f14e-cbf3-4b01-813d-f8571df543f7",
+     "date": "2026-10-05",
+     "start_time": "11:50",
+     "holder_enrollment": "e401ff02-d951-456f-a5d5-e13c3fef79d1",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "LmLpb2WHpu",
+     "offering": "acd0f14e-cbf3-4b01-813d-f8571df543f7",
+     "date": "2026-10-06",
+     "start_time": "11:50",
+     "holder_enrollment": "e401ff02-d951-456f-a5d5-e13c3fef79d1",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "LmLpb2WHpu",
+     "offering": "acd0f14e-cbf3-4b01-813d-f8571df543f7",
+     "date": "2026-10-08",
+     "start_time": "11:50",
+     "holder_enrollment": "e401ff02-d951-456f-a5d5-e13c3fef79d1",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "LmLpb2WHpu",
+     "offering": "acd0f14e-cbf3-4b01-813d-f8571df543f7",
+     "date": "2026-10-12",
+     "start_time": "11:50",
+     "holder_enrollment": "e401ff02-d951-456f-a5d5-e13c3fef79d1",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "LmLpb2WHpu",
+     "offering": "acd0f14e-cbf3-4b01-813d-f8571df543f7",
+     "date": "2026-10-13",
+     "start_time": "11:50",
+     "holder_enrollment": "e401ff02-d951-456f-a5d5-e13c3fef79d1",
+     "value": {
+      "status": "present",
+      "score": 10.0
+     },
+     "holder_value": {
+      "status": "present",
+      "score": 10.0
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": 10.0
+     }
+    },
+    {
+     "journal": "LmLpb2WHpu",
+     "offering": "acd0f14e-cbf3-4b01-813d-f8571df543f7",
+     "date": "2026-10-15",
+     "start_time": "11:50",
+     "holder_enrollment": "e401ff02-d951-456f-a5d5-e13c3fef79d1",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "LmLpb2WHpu",
+     "offering": "acd0f14e-cbf3-4b01-813d-f8571df543f7",
+     "date": "2026-10-16",
+     "start_time": "11:50",
+     "holder_enrollment": "e401ff02-d951-456f-a5d5-e13c3fef79d1",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "MNr3SKMWMY",
+     "offering": "1cddc29b-1d4c-4450-ae90-7a48fce9959e",
+     "date": "2026-09-15",
+     "start_time": "08:30",
+     "holder_enrollment": "a1e4593f-4a7b-4f20-bf1b-5a50bddb68bc",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "MNr3SKMWMY",
+     "offering": "1cddc29b-1d4c-4450-ae90-7a48fce9959e",
+     "date": "2026-09-16",
+     "start_time": "08:30",
+     "holder_enrollment": "a1e4593f-4a7b-4f20-bf1b-5a50bddb68bc",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "MNr3SKMWMY",
+     "offering": "1cddc29b-1d4c-4450-ae90-7a48fce9959e",
+     "date": "2026-09-22",
+     "start_time": "08:30",
+     "holder_enrollment": "a1e4593f-4a7b-4f20-bf1b-5a50bddb68bc",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "MNr3SKMWMY",
+     "offering": "1cddc29b-1d4c-4450-ae90-7a48fce9959e",
+     "date": "2026-09-29",
+     "start_time": "08:30",
+     "holder_enrollment": "a1e4593f-4a7b-4f20-bf1b-5a50bddb68bc",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "MNr3SKMWMY",
+     "offering": "1cddc29b-1d4c-4450-ae90-7a48fce9959e",
+     "date": "2026-09-30",
+     "start_time": "08:30",
+     "holder_enrollment": "a1e4593f-4a7b-4f20-bf1b-5a50bddb68bc",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "MNr3SKMWMY",
+     "offering": "1cddc29b-1d4c-4450-ae90-7a48fce9959e",
+     "date": "2026-10-06",
+     "start_time": "08:30",
+     "holder_enrollment": "a1e4593f-4a7b-4f20-bf1b-5a50bddb68bc",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "MNr3SKMWMY",
+     "offering": "1cddc29b-1d4c-4450-ae90-7a48fce9959e",
+     "date": "2026-10-13",
+     "start_time": "08:30",
+     "holder_enrollment": "a1e4593f-4a7b-4f20-bf1b-5a50bddb68bc",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "MNr3SKMWMY",
+     "offering": "1cddc29b-1d4c-4450-ae90-7a48fce9959e",
+     "date": "2026-10-14",
+     "start_time": "08:30",
+     "holder_enrollment": "a1e4593f-4a7b-4f20-bf1b-5a50bddb68bc",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": 7.0
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": 7.0
+     }
+    },
+    {
+     "journal": "MNr3SKMWMY",
+     "offering": "1cddc29b-1d4c-4450-ae90-7a48fce9959e",
+     "date": "2026-10-20",
+     "start_time": "08:30",
+     "holder_enrollment": "a1e4593f-4a7b-4f20-bf1b-5a50bddb68bc",
+     "value": {
+      "status": "present",
+      "score": 6.0
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "PPtoYdxGlx",
+     "offering": "b68126a4-7a39-4fbc-bd0d-169db458d032",
+     "date": "2026-09-16",
+     "start_time": "10:10",
+     "holder_enrollment": "50a2d708-588e-4288-9ac4-8a91ff5ef970",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "PPtoYdxGlx",
+     "offering": "b68126a4-7a39-4fbc-bd0d-169db458d032",
+     "date": "2026-09-23",
+     "start_time": "10:10",
+     "holder_enrollment": "50a2d708-588e-4288-9ac4-8a91ff5ef970",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "PPtoYdxGlx",
+     "offering": "b68126a4-7a39-4fbc-bd0d-169db458d032",
+     "date": "2026-09-30",
+     "start_time": "10:10",
+     "holder_enrollment": "50a2d708-588e-4288-9ac4-8a91ff5ef970",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "PPtoYdxGlx",
+     "offering": "b68126a4-7a39-4fbc-bd0d-169db458d032",
+     "date": "2026-10-07",
+     "start_time": "10:10",
+     "holder_enrollment": "50a2d708-588e-4288-9ac4-8a91ff5ef970",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": 8.0
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": 8.0
+     }
+    },
+    {
+     "journal": "PPtoYdxGlx",
+     "offering": "b68126a4-7a39-4fbc-bd0d-169db458d032",
+     "date": "2026-10-14",
+     "start_time": "10:10",
+     "holder_enrollment": "50a2d708-588e-4288-9ac4-8a91ff5ef970",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "PPtoYdxGlx",
+     "offering": "b68126a4-7a39-4fbc-bd0d-169db458d032",
+     "date": "2026-10-21",
+     "start_time": "10:10",
+     "holder_enrollment": "50a2d708-588e-4288-9ac4-8a91ff5ef970",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "XK8aBmI6Rr",
+     "offering": "0de35ccc-62a3-4abd-a27c-c20b7a844d70",
+     "date": "2026-09-16",
+     "start_time": "11:50",
+     "holder_enrollment": "5cbbcc4f-7941-4e5a-8154-d84a2ea6a535",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "XK8aBmI6Rr",
+     "offering": "0de35ccc-62a3-4abd-a27c-c20b7a844d70",
+     "date": "2026-09-21",
+     "start_time": "08:30",
+     "holder_enrollment": "5cbbcc4f-7941-4e5a-8154-d84a2ea6a535",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "XK8aBmI6Rr",
+     "offering": "0de35ccc-62a3-4abd-a27c-c20b7a844d70",
+     "date": "2026-09-23",
+     "start_time": "11:50",
+     "holder_enrollment": "5cbbcc4f-7941-4e5a-8154-d84a2ea6a535",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "XK8aBmI6Rr",
+     "offering": "0de35ccc-62a3-4abd-a27c-c20b7a844d70",
+     "date": "2026-09-28",
+     "start_time": "11:50",
+     "holder_enrollment": "5cbbcc4f-7941-4e5a-8154-d84a2ea6a535",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "XK8aBmI6Rr",
+     "offering": "0de35ccc-62a3-4abd-a27c-c20b7a844d70",
+     "date": "2026-09-30",
+     "start_time": "11:50",
+     "holder_enrollment": "5cbbcc4f-7941-4e5a-8154-d84a2ea6a535",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "XK8aBmI6Rr",
+     "offering": "0de35ccc-62a3-4abd-a27c-c20b7a844d70",
+     "date": "2026-10-05",
+     "start_time": "08:30",
+     "holder_enrollment": "5cbbcc4f-7941-4e5a-8154-d84a2ea6a535",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "XK8aBmI6Rr",
+     "offering": "0de35ccc-62a3-4abd-a27c-c20b7a844d70",
+     "date": "2026-10-07",
+     "start_time": "11:50",
+     "holder_enrollment": "5cbbcc4f-7941-4e5a-8154-d84a2ea6a535",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "XK8aBmI6Rr",
+     "offering": "0de35ccc-62a3-4abd-a27c-c20b7a844d70",
+     "date": "2026-10-12",
+     "start_time": "08:30",
+     "holder_enrollment": "5cbbcc4f-7941-4e5a-8154-d84a2ea6a535",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "XK8aBmI6Rr",
+     "offering": "0de35ccc-62a3-4abd-a27c-c20b7a844d70",
+     "date": "2026-10-14",
+     "start_time": "11:50",
+     "holder_enrollment": "5cbbcc4f-7941-4e5a-8154-d84a2ea6a535",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": 10.0
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": 10.0
+     }
+    },
+    {
+     "journal": "XK8aBmI6Rr",
+     "offering": "0de35ccc-62a3-4abd-a27c-c20b7a844d70",
+     "date": "2026-10-19",
+     "start_time": "08:30",
+     "holder_enrollment": "5cbbcc4f-7941-4e5a-8154-d84a2ea6a535",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": false,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    }
+   ],
+   "releases": []
+  },
+  {
+   "key": "b",
+   "legacy_wrong": 10332,
+   "holder": 11346,
+   "person": null,
+   "journals": {
+    "3LZwaYDvPI": "6954a200-1dbb-4be2-ae84-9697665ffad2",
+    "62OG2rhhJ3": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+    "Kk6n4KOkeP": "067477fb-d9c1-4a86-a00a-9e66a218de04",
+    "NaUWNOZWvP": "2f101bc7-c75e-415f-acfe-c60d74b26404",
+    "uqOwiyLaPa": "216a542b-599c-400d-84bc-11088ccb9eb1"
+   },
+   "items": [
+    {
+     "journal": "3LZwaYDvPI",
+     "offering": "6954a200-1dbb-4be2-ae84-9697665ffad2",
+     "date": "2026-09-21",
+     "start_time": "08:30",
+     "holder_enrollment": "e9c76960-e5c9-4786-9d44-5270f0774ede",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "3LZwaYDvPI",
+     "offering": "6954a200-1dbb-4be2-ae84-9697665ffad2",
+     "date": "2026-09-22",
+     "start_time": "11:50",
+     "holder_enrollment": "e9c76960-e5c9-4786-9d44-5270f0774ede",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "3LZwaYDvPI",
+     "offering": "6954a200-1dbb-4be2-ae84-9697665ffad2",
+     "date": "2026-09-28",
+     "start_time": "08:30",
+     "holder_enrollment": "e9c76960-e5c9-4786-9d44-5270f0774ede",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "3LZwaYDvPI",
+     "offering": "6954a200-1dbb-4be2-ae84-9697665ffad2",
+     "date": "2026-10-05",
+     "start_time": "08:30",
+     "holder_enrollment": "e9c76960-e5c9-4786-9d44-5270f0774ede",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "3LZwaYDvPI",
+     "offering": "6954a200-1dbb-4be2-ae84-9697665ffad2",
+     "date": "2026-10-06",
+     "start_time": "11:50",
+     "holder_enrollment": "e9c76960-e5c9-4786-9d44-5270f0774ede",
+     "value": {
+      "status": "present",
+      "score": 10.0
+     },
+     "holder_value": {
+      "status": "present",
+      "score": 10.0
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "3LZwaYDvPI",
+     "offering": "6954a200-1dbb-4be2-ae84-9697665ffad2",
+     "date": "2026-10-12",
+     "start_time": "08:30",
+     "holder_enrollment": "e9c76960-e5c9-4786-9d44-5270f0774ede",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "3LZwaYDvPI",
+     "offering": "6954a200-1dbb-4be2-ae84-9697665ffad2",
+     "date": "2026-10-19",
+     "start_time": "08:30",
+     "holder_enrollment": "e9c76960-e5c9-4786-9d44-5270f0774ede",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "3LZwaYDvPI",
+     "offering": "6954a200-1dbb-4be2-ae84-9697665ffad2",
+     "date": "2026-10-20",
+     "start_time": "11:50",
+     "holder_enrollment": "e9c76960-e5c9-4786-9d44-5270f0774ede",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "62OG2rhhJ3",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+     "date": "2026-09-17",
+     "start_time": "08:30",
+     "holder_enrollment": "13620510-3aa0-4400-bf69-57f17204ca01",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "62OG2rhhJ3",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+     "date": "2026-09-17",
+     "start_time": "11:50",
+     "holder_enrollment": "13620510-3aa0-4400-bf69-57f17204ca01",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "62OG2rhhJ3",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+     "date": "2026-09-24",
+     "start_time": "08:30",
+     "holder_enrollment": "13620510-3aa0-4400-bf69-57f17204ca01",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "62OG2rhhJ3",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+     "date": "2026-09-24",
+     "start_time": "11:50",
+     "holder_enrollment": "13620510-3aa0-4400-bf69-57f17204ca01",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "62OG2rhhJ3",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+     "date": "2026-10-01",
+     "start_time": "08:30",
+     "holder_enrollment": "13620510-3aa0-4400-bf69-57f17204ca01",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "62OG2rhhJ3",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+     "date": "2026-10-01",
+     "start_time": "11:50",
+     "holder_enrollment": "13620510-3aa0-4400-bf69-57f17204ca01",
+     "value": {
+      "status": "present",
+      "score": 9.0
+     },
+     "holder_value": {
+      "status": "present",
+      "score": 9.0
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "62OG2rhhJ3",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+     "date": "2026-10-08",
+     "start_time": "11:50",
+     "holder_enrollment": "13620510-3aa0-4400-bf69-57f17204ca01",
+     "value": {
+      "status": "absent",
+      "score": null
+     },
+     "holder_value": {
+      "status": "absent",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "62OG2rhhJ3",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+     "date": "2026-10-14",
+     "start_time": "08:30",
+     "holder_enrollment": "13620510-3aa0-4400-bf69-57f17204ca01",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "62OG2rhhJ3",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+     "date": "2026-10-15",
+     "start_time": "11:50",
+     "holder_enrollment": "13620510-3aa0-4400-bf69-57f17204ca01",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "62OG2rhhJ3",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+     "date": "2026-10-21",
+     "start_time": "08:30",
+     "holder_enrollment": "13620510-3aa0-4400-bf69-57f17204ca01",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "Kk6n4KOkeP",
+     "offering": "067477fb-d9c1-4a86-a00a-9e66a218de04",
+     "date": "2026-09-16",
+     "start_time": "08:30",
+     "holder_enrollment": "d4ba1662-301e-4008-b56a-e4eb35507819",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "Kk6n4KOkeP",
+     "offering": "067477fb-d9c1-4a86-a00a-9e66a218de04",
+     "date": "2026-09-16",
+     "start_time": "11:50",
+     "holder_enrollment": "d4ba1662-301e-4008-b56a-e4eb35507819",
+     "value": {
+      "status": "present",
+      "score": 8.0
+     },
+     "holder_value": {
+      "status": "present",
+      "score": 8.0
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "Kk6n4KOkeP",
+     "offering": "067477fb-d9c1-4a86-a00a-9e66a218de04",
+     "date": "2026-09-23",
+     "start_time": "11:50",
+     "holder_enrollment": "d4ba1662-301e-4008-b56a-e4eb35507819",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "Kk6n4KOkeP",
+     "offering": "067477fb-d9c1-4a86-a00a-9e66a218de04",
+     "date": "2026-09-25",
+     "start_time": "08:30",
+     "holder_enrollment": "d4ba1662-301e-4008-b56a-e4eb35507819",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "Kk6n4KOkeP",
+     "offering": "067477fb-d9c1-4a86-a00a-9e66a218de04",
+     "date": "2026-09-30",
+     "start_time": "11:50",
+     "holder_enrollment": "d4ba1662-301e-4008-b56a-e4eb35507819",
+     "value": {
+      "status": "present",
+      "score": 9.0
+     },
+     "holder_value": {
+      "status": "present",
+      "score": 9.0
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "Kk6n4KOkeP",
+     "offering": "067477fb-d9c1-4a86-a00a-9e66a218de04",
+     "date": "2026-10-02",
+     "start_time": "08:30",
+     "holder_enrollment": "d4ba1662-301e-4008-b56a-e4eb35507819",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "Kk6n4KOkeP",
+     "offering": "067477fb-d9c1-4a86-a00a-9e66a218de04",
+     "date": "2026-10-07",
+     "start_time": "11:40",
+     "holder_enrollment": "d4ba1662-301e-4008-b56a-e4eb35507819",
+     "value": {
+      "status": "absent",
+      "score": null
+     },
+     "holder_value": {
+      "status": "absent",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "Kk6n4KOkeP",
+     "offering": "067477fb-d9c1-4a86-a00a-9e66a218de04",
+     "date": "2026-10-14",
+     "start_time": "11:50",
+     "holder_enrollment": "d4ba1662-301e-4008-b56a-e4eb35507819",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "NaUWNOZWvP",
+     "offering": "2f101bc7-c75e-415f-acfe-c60d74b26404",
+     "date": "2026-09-15",
+     "start_time": "08:30",
+     "holder_enrollment": "e677b356-a29e-4b0d-9d3b-5028c8d94444",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "NaUWNOZWvP",
+     "offering": "2f101bc7-c75e-415f-acfe-c60d74b26404",
+     "date": "2026-09-22",
+     "start_time": "08:30",
+     "holder_enrollment": "e677b356-a29e-4b0d-9d3b-5028c8d94444",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "NaUWNOZWvP",
+     "offering": "2f101bc7-c75e-415f-acfe-c60d74b26404",
+     "date": "2026-09-29",
+     "start_time": "08:30",
+     "holder_enrollment": "e677b356-a29e-4b0d-9d3b-5028c8d94444",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "NaUWNOZWvP",
+     "offering": "2f101bc7-c75e-415f-acfe-c60d74b26404",
+     "date": "2026-10-06",
+     "start_time": "08:30",
+     "holder_enrollment": "e677b356-a29e-4b0d-9d3b-5028c8d94444",
+     "value": {
+      "status": "present",
+      "score": 6.0
+     },
+     "holder_value": {
+      "status": "present",
+      "score": 6.0
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "NaUWNOZWvP",
+     "offering": "2f101bc7-c75e-415f-acfe-c60d74b26404",
+     "date": "2026-10-13",
+     "start_time": "08:30",
+     "holder_enrollment": "e677b356-a29e-4b0d-9d3b-5028c8d94444",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "NaUWNOZWvP",
+     "offering": "2f101bc7-c75e-415f-acfe-c60d74b26404",
+     "date": "2026-10-20",
+     "start_time": "08:30",
+     "holder_enrollment": "e677b356-a29e-4b0d-9d3b-5028c8d94444",
+     "value": {
+      "status": "present",
+      "score": 8.0
+     },
+     "holder_value": {
+      "status": "present",
+      "score": 8.0
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "uqOwiyLaPa",
+     "offering": "216a542b-599c-400d-84bc-11088ccb9eb1",
+     "date": "2026-09-07",
+     "start_time": "11:50",
+     "holder_enrollment": "277158e8-6ea5-4952-b709-3a24287ddaa7",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "uqOwiyLaPa",
+     "offering": "216a542b-599c-400d-84bc-11088ccb9eb1",
+     "date": "2026-09-15",
+     "start_time": "11:50",
+     "holder_enrollment": "277158e8-6ea5-4952-b709-3a24287ddaa7",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "uqOwiyLaPa",
+     "offering": "216a542b-599c-400d-84bc-11088ccb9eb1",
+     "date": "2026-09-16",
+     "start_time": "10:10",
+     "holder_enrollment": "277158e8-6ea5-4952-b709-3a24287ddaa7",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "uqOwiyLaPa",
+     "offering": "216a542b-599c-400d-84bc-11088ccb9eb1",
+     "date": "2026-09-16",
+     "start_time": "11:50",
+     "holder_enrollment": "277158e8-6ea5-4952-b709-3a24287ddaa7",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "uqOwiyLaPa",
+     "offering": "216a542b-599c-400d-84bc-11088ccb9eb1",
+     "date": "2026-09-17",
+     "start_time": "10:10",
+     "holder_enrollment": "277158e8-6ea5-4952-b709-3a24287ddaa7",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "uqOwiyLaPa",
+     "offering": "216a542b-599c-400d-84bc-11088ccb9eb1",
+     "date": "2026-09-23",
+     "start_time": "10:10",
+     "holder_enrollment": "277158e8-6ea5-4952-b709-3a24287ddaa7",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "uqOwiyLaPa",
+     "offering": "216a542b-599c-400d-84bc-11088ccb9eb1",
+     "date": "2026-09-29",
+     "start_time": "11:50",
+     "holder_enrollment": "277158e8-6ea5-4952-b709-3a24287ddaa7",
+     "value": {
+      "status": "present",
+      "score": 9.0
+     },
+     "holder_value": {
+      "status": "present",
+      "score": 9.0
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "uqOwiyLaPa",
+     "offering": "216a542b-599c-400d-84bc-11088ccb9eb1",
+     "date": "2026-09-30",
+     "start_time": "10:10",
+     "holder_enrollment": "277158e8-6ea5-4952-b709-3a24287ddaa7",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "uqOwiyLaPa",
+     "offering": "216a542b-599c-400d-84bc-11088ccb9eb1",
+     "date": "2026-10-07",
+     "start_time": "10:10",
+     "holder_enrollment": "277158e8-6ea5-4952-b709-3a24287ddaa7",
+     "value": {
+      "status": "absent",
+      "score": null
+     },
+     "holder_value": {
+      "status": "absent",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "uqOwiyLaPa",
+     "offering": "216a542b-599c-400d-84bc-11088ccb9eb1",
+     "date": "2026-10-13",
+     "start_time": "11:50",
+     "holder_enrollment": "277158e8-6ea5-4952-b709-3a24287ddaa7",
+     "value": {
+      "status": "present",
+      "score": 10.0
+     },
+     "holder_value": {
+      "status": "present",
+      "score": 10.0
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "uqOwiyLaPa",
+     "offering": "216a542b-599c-400d-84bc-11088ccb9eb1",
+     "date": "2026-10-14",
+     "start_time": "10:10",
+     "holder_enrollment": "277158e8-6ea5-4952-b709-3a24287ddaa7",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "uqOwiyLaPa",
+     "offering": "216a542b-599c-400d-84bc-11088ccb9eb1",
+     "date": "2026-10-21",
+     "start_time": "10:10",
+     "holder_enrollment": "277158e8-6ea5-4952-b709-3a24287ddaa7",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    }
+   ],
+   "releases": [
+    {
+     "enrollment": "d4ba1662-301e-4008-b56a-e4eb35507819",
+     "offering": "067477fb-d9c1-4a86-a00a-9e66a218de04"
+    },
+    {
+     "enrollment": "277158e8-6ea5-4952-b709-3a24287ddaa7",
+     "offering": "216a542b-599c-400d-84bc-11088ccb9eb1"
+    },
+    {
+     "enrollment": "e677b356-a29e-4b0d-9d3b-5028c8d94444",
+     "offering": "2f101bc7-c75e-415f-acfe-c60d74b26404"
+    },
+    {
+     "enrollment": "13620510-3aa0-4400-bf69-57f17204ca01",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5"
+    },
+    {
+     "enrollment": "e9c76960-e5c9-4786-9d44-5270f0774ede",
+     "offering": "6954a200-1dbb-4be2-ae84-9697665ffad2"
+    }
+   ]
+  },
+  {
+   "key": "c",
+   "legacy_wrong": 10336,
+   "holder": 8464,
+   "person": 8466,
+   "journals": {
+    "lsECNkWLah": "61798b47-0ec5-4afa-8724-b60b23ce1a08",
+    "mNFd85Cqnj": "f8ac5f36-0e26-47c2-97d1-9c54820a4bd6",
+    "xB0cSEXg6Z": "95666bd3-9583-424a-bd6a-7eef0dd772c8"
+   },
+   "items": [
+    {
+     "journal": "lsECNkWLah",
+     "offering": "61798b47-0ec5-4afa-8724-b60b23ce1a08",
+     "date": "2026-09-28",
+     "start_time": "08:30",
+     "holder_enrollment": "5c22c94d-75ba-45fa-bcb0-c1250242b4ce",
+     "value": {
+      "status": "absent",
+      "score": null
+     },
+     "holder_value": {
+      "status": "absent",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "mNFd85Cqnj",
+     "offering": "f8ac5f36-0e26-47c2-97d1-9c54820a4bd6",
+     "date": "2026-09-29",
+     "start_time": "08:30",
+     "holder_enrollment": "8e8ef58b-268a-4892-b2ff-68d21b5aba60",
+     "value": {
+      "status": "absent",
+      "score": null
+     },
+     "holder_value": {
+      "status": "absent",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": {
+      "status": "present",
+      "score": null
+     }
+    },
+    {
+     "journal": "xB0cSEXg6Z",
+     "offering": "95666bd3-9583-424a-bd6a-7eef0dd772c8",
+     "date": "2026-09-17",
+     "start_time": "08:30",
+     "holder_enrollment": "d8c5a0bc-d6de-41e8-a86a-4074a94b371f",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    }
+   ],
+   "releases": []
+  },
+  {
+   "key": "d",
+   "legacy_wrong": 11190,
+   "holder": 8561,
+   "person": 339,
+   "journals": {
+    "62OG2rhhJ3": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+    "puReCAqIWs": "4d5a6685-5175-4919-b210-20d55d79f98d"
+   },
+   "items": [
+    {
+     "journal": "62OG2rhhJ3",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+     "date": "2026-09-17",
+     "start_time": "08:30",
+     "holder_enrollment": "bee643dc-837a-48a1-a523-a50a8b63de72",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "62OG2rhhJ3",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+     "date": "2026-09-17",
+     "start_time": "11:50",
+     "holder_enrollment": "bee643dc-837a-48a1-a523-a50a8b63de72",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "62OG2rhhJ3",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+     "date": "2026-09-24",
+     "start_time": "08:30",
+     "holder_enrollment": "bee643dc-837a-48a1-a523-a50a8b63de72",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "62OG2rhhJ3",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+     "date": "2026-09-24",
+     "start_time": "11:50",
+     "holder_enrollment": "bee643dc-837a-48a1-a523-a50a8b63de72",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "62OG2rhhJ3",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+     "date": "2026-10-01",
+     "start_time": "08:30",
+     "holder_enrollment": "bee643dc-837a-48a1-a523-a50a8b63de72",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "62OG2rhhJ3",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+     "date": "2026-10-01",
+     "start_time": "11:50",
+     "holder_enrollment": "bee643dc-837a-48a1-a523-a50a8b63de72",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "62OG2rhhJ3",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+     "date": "2026-10-08",
+     "start_time": "11:50",
+     "holder_enrollment": "bee643dc-837a-48a1-a523-a50a8b63de72",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "62OG2rhhJ3",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+     "date": "2026-10-14",
+     "start_time": "08:30",
+     "holder_enrollment": "bee643dc-837a-48a1-a523-a50a8b63de72",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "62OG2rhhJ3",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5",
+     "date": "2026-10-15",
+     "start_time": "11:50",
+     "holder_enrollment": "bee643dc-837a-48a1-a523-a50a8b63de72",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "puReCAqIWs",
+     "offering": "4d5a6685-5175-4919-b210-20d55d79f98d",
+     "date": "2026-09-18",
+     "start_time": "13:35",
+     "holder_enrollment": "4cf661b3-bf1f-4c9c-ae14-896f8fd64607",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "puReCAqIWs",
+     "offering": "4d5a6685-5175-4919-b210-20d55d79f98d",
+     "date": "2026-09-18",
+     "start_time": "15:15",
+     "holder_enrollment": "4cf661b3-bf1f-4c9c-ae14-896f8fd64607",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "puReCAqIWs",
+     "offering": "4d5a6685-5175-4919-b210-20d55d79f98d",
+     "date": "2026-09-22",
+     "start_time": "16:55",
+     "holder_enrollment": "4cf661b3-bf1f-4c9c-ae14-896f8fd64607",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "puReCAqIWs",
+     "offering": "4d5a6685-5175-4919-b210-20d55d79f98d",
+     "date": "2026-09-25",
+     "start_time": "13:35",
+     "holder_enrollment": "4cf661b3-bf1f-4c9c-ae14-896f8fd64607",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    },
+    {
+     "journal": "puReCAqIWs",
+     "offering": "4d5a6685-5175-4919-b210-20d55d79f98d",
+     "date": "2026-09-25",
+     "start_time": "15:15",
+     "holder_enrollment": "4cf661b3-bf1f-4c9c-ae14-896f8fd64607",
+     "value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_value": {
+      "status": "present",
+      "score": null
+     },
+     "holder_fix": true,
+     "holder_own": null
+    }
+   ],
+   "releases": [
+    {
+     "enrollment": "bee643dc-837a-48a1-a523-a50a8b63de72",
+     "offering": "378373bb-02d0-434a-8a86-c1bc22c029a5"
+    },
+    {
+     "enrollment": "4cf661b3-bf1f-4c9c-ae14-896f8fd64607",
+     "offering": "4d5a6685-5175-4919-b210-20d55d79f98d"
+    }
+   ]
+  }
+ ]
+}

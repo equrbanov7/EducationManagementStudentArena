@@ -192,6 +192,15 @@ class TeachingTaskRow(UUIDModel, TimeStampedModel, OrderedModel):
         related_name="intensive_rows",
         help_text="Yalnız row_kind=intensive: bu sətrin intensiv kurs açılışı.",
     )
+    # Sahib 2026-11-08: patok tərəfdaşının (lecture_total=0) mühazirəsini aparan sətir — AÇIQ bağ (services.patok).
+    patok_lead = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="patok_partners",
+        help_text="Patok tərəfdaşı: mühazirəsi bu (eyni tapşırıq/fənn/semestr, lecture_total>0) sətirdədir.",
+    )
 
     class Meta:
         verbose_name = pgettext_lazy(_CTX, "tapşırıq sətri")

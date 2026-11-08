@@ -116203,3 +116203,7 @@ msgstr "freigegebene Version gilt"
 msgctxt "registrar.syllabus"
 msgid "Əməliyyat yerinə yetirilmədi."
 msgstr "Der Vorgang konnte nicht ausgeführt werden."
+
+msgctxt "syllabus.model"
+msgid "Təsdiqlənmiş sillabus başqa qrupdan (avtomatik)"
+msgstr "Genehmigter Syllabus aus einer anderen Gruppe (automatisch)"

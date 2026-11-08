@@ -74,11 +74,18 @@ def _empty_cells(offering) -> int:
 
 
 class Blocked(Exception):
-    """Ailə toxunulmur — savepoint geri qaytarılır, ``reason`` sayılır."""
+    """Ailə toxunulmur — savepoint geri qaytarılır, ``reason`` sayılır; ``detail`` — yalnız id/kod (şəxsi məlumat yox)."""
 
-    def __init__(self, reason):
-        super().__init__(reason)
-        self.reason = reason
+    def __init__(self, reason, detail=None):
+        super().__init__(reason, detail)
+        self.reason, self.detail = reason, dict(detail or {})
+
+
+def _constraint(exc) -> str:
+    """IntegrityError-un DB qaydasının adı (və ya SQLSTATE) — hesabat üçün, mətni yox."""
+    diag = getattr(getattr(exc, "__cause__", None), "diag", None)
+    name = getattr(diag, "constraint_name", None) or getattr(getattr(exc, "__cause__", None), "sqlstate", None)
+    return "".join(ch for ch in str(name or "unknown").lower() if ch.isalnum() or ch in "_-")[:60] or "unknown"
 
 
 class Merger:
@@ -89,12 +96,12 @@ class Merger:
     def run(self, plan=None) -> None:
         for index, family in enumerate(PLAN if plan is None else plan, start=1):
             before = dict(self.counts)
-            reason = ""
+            reason, detail = "", {}
             try:
                 with transaction.atomic():
                     self._family(family)
             except Blocked as exc:
-                reason = exc.reason
+                reason, detail = exc.reason, exc.detail
             except IntegrityError:
                 reason = "family_integrity_error"
             if reason:  # geri qaytarılmış ailənin sayları hesabatı şişirtməsin
@@ -104,7 +111,7 @@ class Merger:
             delta = {
                 key: value - before.get(key, 0) for key, value in self.counts.items() if value != before.get(key, 0)
             }
-            self.report.append((index, delta))
+            self.report.append((index, {**delta, **detail}))
 
     # ── yoxlamalar ────────────────────────────────────────────────────────
     def _load(self, family):
@@ -182,6 +189,8 @@ class Merger:
             target = self._create_target(family, live[0], manifest)
         numbers = self._seminar_groups(target, live, manifest)
         by_student = self._enrollments(target, live, numbers, manifest)
+        if family.get("seminar_default_source"):
+            self._seminar_default(target, live, numbers, family["seminar_default_source"], manifest)
         touched = self._lessons(target, live, by_student, manifest)
         self._tag_seminars(touched, numbers, manifest)
         self._component_scores(target, live, by_student, manifest)
@@ -277,8 +286,11 @@ class Merger:
                             added_by=self.actor if guest else None,
                             added_at=timezone.now() if guest else None,
                         )
-                except IntegrityError:
-                    raise Blocked("target_enrollment_blocked") from None
+                except IntegrityError as exc:
+                    raise Blocked(
+                        "target_enrollment_blocked",
+                        {"blocked_enrollment": str(row.pk)[:8], "blocked_rule": _constraint(exc)},
+                    ) from None
                 manifest["enrollments_created"].append(str(found.pk))
                 self.counts["enrollments_created"] += 1
             elif found.status == "dropped":
@@ -289,7 +301,7 @@ class Merger:
                 found.status, found.superseded_by_id = "enrolled", None
                 self.counts["enrollments_reactivated"] += 1
             elif found.status != "enrolled":
-                raise Blocked("target_enrollment_not_active")
+                raise Blocked("target_enrollment_not_active", {"blocked_enrollment": str(found.pk)[:8]})
             number = numbers.get(groups.get(row.student_id))
             if number and found.seminar_group is None:
                 Enrollment.objects.filter(pk=found.pk).update(seminar_group=number, updated_at=timezone.now())
@@ -298,6 +310,20 @@ class Merger:
                 self.counts["seminar_group_set"] += 1
             out[row.student_id] = found
         return out
+
+    def _seminar_default(self, target, live, numbers, source_pk, manifest) -> None:
+        """Ana jurnalda alt qrupu olmayan hər tələbə bu mənbənin alt qrupuna (sahib 2026-11-08: 536 Bi 1 ana qrupda
+        saxlanmışdı — ana qrupun öz tələbələri həmin alt qrupdur)."""
+        source = next((row for row in live if str(row.pk) == str(source_pk)), None)
+        number = numbers.get(source.group_id) if source is not None else None
+        if number is None:
+            raise Blocked("family_invalid")
+        Enrollment = _model("Enrollment")
+        rows = Enrollment.objects.filter(offering=target, status="enrolled", seminar_group__isnull=True)
+        ids = [str(pk) for pk in rows.values_list("pk", flat=True)]
+        rows.update(seminar_group=number, updated_at=timezone.now())
+        manifest["seminar_group_set"].extend(ids)
+        self.counts["seminar_group_set"] += len(ids)
 
     def _lessons(self, target, live, by_student, manifest) -> set:
         Lesson, LessonMark = _model("Lesson"), _model("LessonMark")

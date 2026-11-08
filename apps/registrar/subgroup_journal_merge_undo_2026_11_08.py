@@ -27,8 +27,9 @@ def _model(name, app="registrar"):
     return django_apps.get_model(app, name)
 
 
-def _changed(rows) -> bool:
-    return any((row.updated_at - row.created_at).total_seconds() > 5 for row in rows)
+def _changed(rows, since) -> bool:
+    """Birləşmədən sonra dəyişib — ``created_at`` köhnə xananın vaxtıdır (``copy_mark``), ona görə audit vaxtı ilə."""
+    return rows.filter(updated_at__gt=since).exists()
 
 
 def _post_merge_data(target_id, since, manifest) -> bool:
@@ -40,14 +41,14 @@ def _post_merge_data(target_id, since, manifest) -> bool:
     later = LessonMark.objects.filter(lesson__offering_id=target_id, created_at__gt=since)
     if any(str(pk) not in copied for pk in later.values_list("pk", flat=True)):
         return True
-    if _changed(LessonMark.objects.filter(pk__in=copied)):
+    if _changed(LessonMark.objects.filter(pk__in=copied), since):
         return True
     scores = set(manifest.get("scores_created", []))
     for name in _AFTER_MODELS:
         rows = _model(name).objects.filter(enrollment__offering_id=target_id, created_at__gt=since)
         if any(str(pk) not in scores for pk in rows.values_list("pk", flat=True)):
             return True
-    return _changed(_model("ComponentScore").objects.filter(pk__in=scores))
+    return _changed(_model("ComponentScore").objects.filter(pk__in=scores), since)
 
 
 def undo(*, organization, actor, counts) -> None:

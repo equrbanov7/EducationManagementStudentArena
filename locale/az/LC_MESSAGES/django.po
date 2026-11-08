@@ -114627,3 +114627,7 @@ msgstr "təsdiqlənmiş versiya qüvvədədir"
 msgctxt "registrar.syllabus"
 msgid "Əməliyyat yerinə yetirilmədi."
 msgstr "Əməliyyat yerinə yetirilmədi."
+
+msgctxt "syllabus.model"
+msgid "Təsdiqlənmiş sillabus başqa qrupdan (avtomatik)"
+msgstr "Təsdiqlənmiş sillabus başqa qrupdan (avtomatik)"

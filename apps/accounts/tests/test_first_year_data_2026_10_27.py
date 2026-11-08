@@ -94,6 +94,10 @@ class _FirstYearBase(TestCase):
             return UserProfile.objects.get(user=user).institutional_identifier
 
 
+#: Köhnə sistemin yazılışı (böyük hərf, «İ») — hesabın «Testov Bir» adı ilə eyni adam.
+LEGACY_NAME = {"last_name": "TESTOV", "first_name": "BİR"}
+
+
 class AssignStudentCodesTest(_FirstYearBase):
     @classmethod
     def setUpTestData(cls):
@@ -120,10 +124,10 @@ class AssignStudentCodesTest(_FirstYearBase):
         bundle = {
             "format": "ems-legacy-delta/1",
             "students": [
-                {"id": 9001, "fincode": "TSTA001", "group_id": 1, "azadedildi": 0},
-                {"id": 9010, "fincode": "TSTA002", "group_id": 1, "azadedildi": 0},
-                {"id": 9011, "fincode": "TSTA002", "group_id": 2, "azadedildi": 0},
-                {"id": 9003, "fincode": "TSTA003", "group_id": 1, "azadedildi": 0},
+                {"id": 9001, "fincode": "TSTA001", "group_id": 1, "azadedildi": 0, **LEGACY_NAME},
+                {"id": 9010, "fincode": "TSTA002", "group_id": 1, "azadedildi": 0, **LEGACY_NAME},
+                {"id": 9011, "fincode": "TSTA002", "group_id": 2, "azadedildi": 0, **LEGACY_NAME},
+                {"id": 9003, "fincode": "TSTA003", "group_id": 1, "azadedildi": 0, **LEGACY_NAME},
             ],
             "expelled_students": [],
             "groups": [{"id": 1, "name": "236 AA"}, {"id": 2, "name": "236 bb"}],
@@ -180,6 +184,16 @@ class AssignStudentCodesTest(_FirstYearBase):
             self.assertEqual(StudentAcademicRecord.objects.get(student=self.g_a_first).group_id, self.g_a.pk)
         again = self._run("--apply")
         self.assertEqual((again["targets"], again["written"]), ("1", "0"))  # yalnız ötürülən qalır
+
+    def test_fin_of_another_person_is_not_used(self):
+        """Sahib 2026-11-08: legacy sətirdə BAŞQA tələbənin FİN-i — ad tutmursa legacy id verilmir (qrup nömrəsi)."""
+        data = json.loads(gzip.decompress(self.bundle.read_bytes()))
+        data["students"][0].update(last_name="Başqa", first_name="Adam")
+        self.bundle.write_bytes(gzip.compress(json.dumps(data).encode()))
+        counts = self._run("--apply")
+        self.assertEqual((counts["legacy_fin_name_mismatch"], counts["legacy_assigned"]), ("1", "1"))
+        self.assertNotEqual(self.code_of(self.with_legacy), "9001")
+        self.assertTrue(self.code_of(self.with_legacy).startswith("236"))
 
     def test_bad_bundle_fails_closed(self):
         self.bundle.write_text('{"format": "other"}')

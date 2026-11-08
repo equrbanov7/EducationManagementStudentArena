@@ -21,7 +21,7 @@ from . import exact_syllabus_recovery as core
 
 RestoreError = core.RestoreError
 PLAN_PATH = Path(__file__).resolve().parents[1] / "legacy_syllabi_2026_11_07.json"
-PLAN_SHA256 = "7528fd008e7dc380ef4eec1616a2ae85663fba7f96501e9351cd055ac8f82993"
+PLAN_SHA256 = "eda5c672c7125c8a27120fbbb9c1cf8ce4eb431c5457ef1e79b77dd48191b369"
 FORMAT = "legacy-syllabi/1"
 MAX_PLAN = 2_000_000
 KINDS = ("lecture", "seminar", "practical", "lab")

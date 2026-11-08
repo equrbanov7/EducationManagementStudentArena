@@ -25,6 +25,8 @@ from collections import defaultdict
 
 from django.apps import apps as django_apps
 
+from core.person_names import same_person_name
+
 from ..legacy_text import clean_text
 from ..rehearsal_contracts import SOURCE_SYSTEM
 
@@ -74,6 +76,36 @@ def subject_key(name) -> str:
 
 def person_key(value) -> str:
     return re.sub(r"[^a-z]", "", _fold(text(value, limit=100)))
+
+
+def legacy_fin(row) -> str:
+    return str((row or {}).get("fincode") or "").strip().upper()
+
+
+def fin_owners(fins) -> dict:
+    """``FİN → (user_id, soyad, ad)`` — FİN tutuşdurması ad ilə təsdiqlənir (:func:`fin_owner`)."""
+
+    UserProfile = django_apps.get_model("accounts", "UserProfile")
+    wanted = sorted({str(fin or "").strip().upper() for fin in fins} - {""})
+    rows = UserProfile.objects.filter(fin__in=wanted).values_list(
+        "fin", "user_id", "user__last_name", "user__first_name"
+    )
+    return {str(fin).strip().upper(): (user_id, last, first) for fin, user_id, last, first in rows if fin}
+
+
+def fin_owner(row, owners: dict):
+    """``(user_id | None, ad_uyğunsuzdur)`` — legacy sətrin FİN-i hesabındırsa VƏ soyad + ad da eynidirsə.
+
+    Sahib 2026-11-08: köhnə sistemdə bir neçə tələbə sətrinə başqa tələbənin FİN-i yazılıb — yalnız FİN ilə tutmaq
+    bir adamın bal / qeydiyyatlarını FİN sahibinin hesabına yazırdı. Ad tutmursa FİN qəbul edilmir.
+    """
+
+    owner = owners.get(legacy_fin(row))
+    if owner is None:
+        return None, False
+    if same_person_name((row or {}).get("last_name"), (row or {}).get("first_name"), owner[1], owner[2]):
+        return owner[0], False
+    return None, True
 
 
 def period_year(name: str) -> str:
@@ -272,9 +304,12 @@ __all__ = [
     "SUBJECT_CODE_PREFIX",
     "Catalog",
     "collision_map",
+    "fin_owner",
+    "fin_owners",
     "group_key",
     "group_key_variants",
     "ledger_map",
+    "legacy_fin",
     "lesson_date",
     "period_year",
     "person_key",
