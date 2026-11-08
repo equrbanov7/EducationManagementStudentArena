@@ -174,8 +174,7 @@ class Merger:
         self._load_rows(target, live, manifest)
         self._retire(live, manifest)
         recompute_absences(list({row.pk: row for row in by_student.values()}.values()))
-        if not _model("Syllabus", "syllabus").objects.filter(offering=target).exists():
-            self.counts["target_without_syllabus"] += 1
+        self._syllabus(target, live, manifest)
         self.counts["families_merged"] += 1
         log_action(
             AuditAction.UPDATE,
@@ -352,6 +351,17 @@ class Merger:
             self.counts["seminar_lessons_tagged"] += 1
         if len(family) > 1 and any(family <= days for days in lecture_days.values()):
             raise Blocked("family_lectures_separate")
+        # Fərqli GÜNLƏRDƏ keçən ayrı mühazirələr: hər alt qrupun yalnız özünə aid mühazirəsi var və onlar birgə
+        # mühazirələrdən az deyil — ayrı sinifdir (boşluq olsa adətən yalnız BİR alt qrupda olur).
+        singles = [lesson for lesson in lessons if lesson.kind == "lecture" and self._single(lesson) is not None]
+        joint = sum(1 for lesson in lessons if lesson.kind == "lecture" and self._single(lesson) is None)
+        if len({self._single(lesson) for lesson in singles}) > 1 and len(singles) >= joint:
+            raise Blocked("family_lectures_separate")
+
+    @staticmethod
+    def _single(lesson):
+        groups = {mark.enrollment.seminar_group for mark in lesson.marks.all()}
+        return groups.pop() if len(groups) == 1 and None not in groups else None
 
     def _component_scores(self, target, live, by_student, manifest) -> None:
         Component, Score = _model("AssessmentComponent"), _model("ComponentScore")
@@ -391,6 +401,29 @@ class Merger:
             taken.add((component.pk, enrollment.pk))
             manifest["scores_created"].append(str(created.pk))
             self.counts["scores_copied"] += 1
+
+    def _syllabus(self, target, live, manifest) -> None:
+        """Ana jurnalın öz / paylaşılan sillabusu yoxdursa alt qrup jurnalının sillabusu ÖZ YERİNDƏ paylaşılır
+        (surət yox; təsdiqlənmiş üstündür) — müəllim jurnalda birdən «Sillabus yarat» görməsin."""
+        from apps.syllabus.public import link_legacy_share
+
+        Syllabus, Share = _model("Syllabus", "syllabus"), _model("SyllabusShare", "syllabus")
+        if Syllabus.objects.filter(offering=target).exists() or Share.objects.filter(offering=target).exists():
+            return
+        found = list(Syllabus.objects.filter(offering__in=live)) + [
+            row.syllabus for row in Share.objects.filter(offering__in=live).select_related("syllabus")
+        ]
+        if not found:
+            self.counts["target_without_syllabus"] += 1
+            return
+        found.sort(key=lambda row: (not row.versions.filter(status="approved").exists(), row.created_at))
+        outcome = link_legacy_share(syllabus=found[0], offering=target, user=self.actor)
+        if outcome == "linked":
+            share = Share.objects.get(offering=target)
+            manifest["syllabus_shares_created"].append(str(share.pk))
+            self.counts["syllabus_shared"] += 1
+        else:
+            self.counts[f"syllabus_not_shared_{outcome}"] += 1
 
     def _slots(self, target, live, manifest) -> None:
         ScheduleSlot = _model("ScheduleSlot")

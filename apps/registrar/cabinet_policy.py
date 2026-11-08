@@ -155,10 +155,28 @@ def assessment_weights_view(organization, period=None) -> dict:
     }
 
 
+def level_assessment_weights_view(rows) -> dict | None:
+    """Xarici dil SƏVİYYƏ fənlərinin struktur zolağı (sahib 2026-11-08) — tələbənin belə fənni varsa, yoxsa ``None``.
+
+    Tavanlar :mod:`core.language_level_rule`-dandır: davamiyyət 10 · praktiki məşğələ 10 · midterm 10 · imtahan 70."""
+    from core import language_level_rule as levels
+
+    if not any(levels.is_level_name(getattr(row.get("subject"), "name", "")) for row in rows or ()):
+        return None
+    return {
+        "attendance": levels.ATTENDANCE_MAX,
+        "activity": levels.ACTIVITY_MAX,
+        "midterm": levels.MIDTERM_MAX,
+        "final": levels.EXAM_MAX,
+        "total": levels.ENTRY_MAX + levels.EXAM_MAX,
+    }
+
+
 __all__ = [
     "TRANSCRIPT_APPLICATION_KIND",
     "approved_syllabus_offerings",
     "assessment_weights_view",
+    "level_assessment_weights_view",
     "other_period_subject_rows",
     "transcript_policy",
 ]

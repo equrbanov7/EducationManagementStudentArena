@@ -342,7 +342,7 @@ def build_student_journal_context(request, *, organization) -> dict | None:
     # həmin vaxt görünsün, 1 gün sonra yox»). Müəllim 2 saatlıq pəncərədə düzəltsə tələbə yenisini görür.
     marks = list(
         LessonMark.objects.filter(enrollment=enrollment)
-        .select_related("lesson", "lesson__room", "lesson__offering")  # açılış — «Praktiki məşğələ» etiketi
+        .select_related("lesson", "lesson__room", "lesson__offering__subject")  # «Praktiki məşğələ» sorğusuz
         .order_by("-lesson__date", "-lesson__created_at")
     )
     hidden_today = False

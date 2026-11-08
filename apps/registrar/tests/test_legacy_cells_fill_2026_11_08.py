@@ -74,8 +74,71 @@ class LegacyCellsFillTest(_LabWorld, TestCase):
             self.assertEqual(LessonMark.objects.count(), 1)
             self.assertEqual(Enrollment.objects.get(pk=self.e0.pk).absence_hours, 0)
 
+    def test_missing_lessons_created_once_with_cells_and_undo(self):
+        plan = {
+            "format": "legacy-cells/1",
+            "lessons": [
+                {
+                    "key": "N1",
+                    "offering": str(self.offering.pk),
+                    "date": "2026-10-03",
+                    "start_time": "13:35",
+                    "kind": "lecture",
+                    "hours": 2,
+                },
+                {
+                    "key": "N2",
+                    "offering": str(self.offering.pk),
+                    "date": "2026-11-03",
+                    "start_time": "13:35",
+                    "kind": "lecture",
+                    "hours": 2,
+                },
+            ],
+            "cells": [
+                {"lesson": "N1", "enrollment": str(self.e0.pk), "status": "absent", "score": None},
+                {"lesson": "N1", "enrollment": str(self.e1.pk), "status": "present", "score": None},
+            ],
+        }
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as handle:
+            json.dump(plan, handle)
+        counts = self._call("--file", handle.name, "--apply")
+        self.assertEqual(
+            (counts["lessons_created"], counts["lessons_invalid"], counts["cells_filled"]), ("1", "1", "2")
+        )
+        counts = self._call("--file", handle.name, "--apply")
+        self.assertEqual((counts["lessons_existing"], counts["cells_already_filled"]), ("1", "2"))
+        with bypass_rls():
+            created = Lesson.objects.get(offering=self.offering, date=datetime.date(2026, 10, 3))
+            self.assertEqual(
+                (created.instructor_id, created.end_time), (self.offering.instructor_id, datetime.time(14, 55))
+            )
+        counts = self._call("--apply", "--undo")
+        self.assertEqual((counts["undo_cells_deleted"], counts["undo_lessons_deleted"]), ("2", "1"))
+
+    def test_cells_by_fin(self):
+        from apps.accounts.models import UserProfile as Profile
+
+        with bypass_rls():
+            Profile.objects.update_or_create(user_id=self.e0.student_id, defaults={"fin": "AB12CD3"})
+        plan = {
+            "format": "legacy-cells/1",
+            "cells": [
+                {"lesson": str(self.lecture.pk), "fin": "ab12cd3", "status": "absent", "score": None},
+                {"lesson": str(self.lecture.pk), "fin": "ZZZ9999", "status": "present", "score": None},
+            ],
+        }
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as handle:
+            json.dump(plan, handle)
+        counts = self._call("--file", handle.name, "--apply")
+        self.assertEqual((counts["cells_filled"], counts["cells_student_not_found"]), ("1", "1"))
+        with bypass_rls():
+            self.assertEqual(LessonMark.objects.get(lesson=self.lecture, enrollment=self.e0).status, "absent")
+
     def test_workflow_wiring(self):
         text = WORKFLOW.read_text(encoding="utf-8")
         self.assertIn("          - fill_legacy_cells_20261108\n", text)
         self.assertIn('[ "$COMMAND" = "fill_legacy_cells_20261108" ]', text)
         self.assertIn("|legacy_cells|", text)
+        self.assertIn("^legacy-cells-[0-9a-z-]+$", text)
+        self.assertIn('--file "/tmp/legacy_cells_${GITHUB_RUN_ID}.json"', text)

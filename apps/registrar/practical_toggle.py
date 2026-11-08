@@ -61,9 +61,12 @@ def can_toggle(user, offering) -> bool:
 
 
 def context(user, offering) -> dict | None:
-    """Jurnal başlığındakı keçid (yalnız icazəlilər üçün); qalanlara ``None``."""
+    """Jurnal başlığındakı keçid (yalnız icazəlilər üçün); qalanlara ``None``.
 
-    if not can_toggle(user, offering):
+    Səviyyə fənnində (sahib 2026-11-08) seminar fənn adından həmişə «Praktiki məşğələ»dir — keçid göstərilmir."""
+    from .practical_label import subject_forces_practical
+
+    if subject_forces_practical(offering) or not can_toggle(user, offering):
         return None
     return {
         "on": bool(offering.seminar_is_practical),
