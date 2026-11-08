@@ -223,27 +223,26 @@ def self_conflict_message() -> str:
 
 
 def audit_self_conflict(user, organization, *, action: str, request=None, **targets) -> None:
-    """Rəddi audit jurnalına yaz (``AuditAction.DENY``). Audit xətası rəddi heç vaxt ləğv etmir."""
-    from core.audit import log_action
+    """Rəddi audit jurnalına yaz (``AuditAction.DENY``) — rollback-ə davamlı (``core.deferred_audit``).
+
+    Rədd adətən istisna ilə bitir; prod-da ``ATOMIC_REQUESTS`` həmin tranzaksiyanı geri alır, ona görə sətir
+    request daxilində view-dan SONRA yazılır. Audit xətası rəddi heç vaxt ləğv etmir.
+    """
     from core.constants import AuditAction
+    from core.deferred_audit import log_action_surviving_rollback
 
     hits = self_conflict_targets(own_scope(user, organization), **targets)
-    try:
-        log_action(
-            AuditAction.DENY,
-            user=user,
-            organization=organization,
-            request=request,
-            resource_type="organizations.self_conflict",
-            resource_id=str(next((v for v in targets.values() if v is not None), ""))[:64],
-            resource_repr=action[:200],
-            new_values={"action": action, "targets": {k: str(v) for k, v in targets.items() if v is not None}},
-            reason=f"{REASON_CODE}:{','.join(hits)}",
-        )
-    except Exception:  # noqa: BLE001 — audit yazısı uğursuz olsa da əməl rədd olunur
-        import logging
-
-        logging.getLogger(__name__).exception("self-conflict audit write failed")
+    log_action_surviving_rollback(
+        action=AuditAction.DENY,
+        user=user,
+        organization=organization,
+        request=request,
+        resource_type="organizations.self_conflict",
+        resource_id=str(next((v for v in targets.values() if v is not None), ""))[:64],
+        resource_repr=action[:200],
+        new_values={"action": action, "targets": {k: str(v) for k, v in targets.items() if v is not None}},
+        reason=f"{REASON_CODE}:{','.join(hits)}",
+    )
 
 
 def deny_self_conflict(user, organization, *, action: str, request=None, cached_only=False, **targets) -> str | None:

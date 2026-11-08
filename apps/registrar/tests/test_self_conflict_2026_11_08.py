@@ -379,3 +379,126 @@ class DatabaseGuardTest(_SelfConflictBase):
             LessonMark.objects.create(
                 organization=self.org, lesson=lesson, enrollment=enrollment, entered_by=self.plain_tutor
             )
+
+    def test_update_keeping_the_author_passes_and_count_command_reports_legacy_rows(self):
+        """Köhnə pozuntu: müəllif eyni qalan UPDATE keçir, müəllifi tələbəyə dəyişmək keçmir; say əmri onu tapır."""
+        if connection.vendor != "postgresql":
+            self.skipTest("PostgreSQL trigger")
+        from io import StringIO
+
+        from django.core.management import call_command
+
+        with bypass_rls():
+            lesson = Lesson.objects.create(
+                organization=self.org,
+                offering=self.other_offering,
+                date=datetime.date(2026, 9, 16),
+                kind=LessonKind.SEMINAR,
+            )
+            enrollment = Enrollment.objects.get(offering=self.other_offering, student=self.other)
+            mark = LessonMark.objects.create(
+                organization=self.org, lesson=lesson, enrollment=enrollment, entered_by=self.maryam
+            )
+            # Sonradan həmin açılışa yazılır → köhnə sətir artıq «pozuntu»dur.
+            own = Enrollment.objects.create(organization=self.org, student=self.maryam, offering=self.other_offering)
+            mark.score = 5
+            mark.save(update_fields=["score", "entered_by", "enrollment", "updated_at"])  # eyni müəllif → keçir
+            out = StringIO()
+            call_command("count_self_conflict_marks", stdout=out)
+            other = LessonMark.objects.create(
+                organization=self.org, lesson=lesson, enrollment=own, entered_by=self.plain_tutor
+            )
+            other.entered_by = self.maryam
+            with self.assertRaises(IntegrityError), transaction.atomic():
+                other.save(update_fields=["entered_by"])
+        self.assertIn("registrar_lessonmark: 1", out.getvalue())
+        self.assertIn("TOTAL: 1", out.getvalue())
+
+
+class ReviewFixesTest(_SelfConflictBase):
+    def test_cache_key_separates_excluded_scope(self):
+        from apps.accounts import academic_records_cache
+        from apps.organizations.public import UnitScope
+
+        plain = UnitScope(scope_type="unit", unit_ids=frozenset({self.faculty.pk}), unit_paths=(self.faculty.path,))
+        mixed = UnitScope(
+            scope_type="unit",
+            unit_ids=frozenset({self.faculty.pk}),
+            unit_paths=(self.faculty.path,),
+            excluded_unit_ids=frozenset({str(self.own_group.pk)}),
+        )
+        self.assertNotEqual(
+            academic_records_cache.scope_key(self.org, plain, {}),
+            academic_records_cache.scope_key(self.org, mixed, {}),
+        )
+
+    def test_student_in_subgroup_covers_parent_and_sibling_subgroups(self):
+        with bypass_rls():
+            sub2 = OrgUnit.objects.create(
+                organization=self.org,
+                name="632/6 İ-2",
+                slug="sc-g-sub2",
+                unit_type=OrgUnitType.GROUP,
+                parent=self.specialty,
+                settings={"parent_group": str(self.own_group.pk)},
+            )
+            sub2_mate, _record = self._student("sc_sub2", sub2)
+            tutor, _record = self._student("sc_subtutor", self.sub_group)
+            self._member(tutor, "tutor", self.faculty, primary=False)
+            scope = own_scope(self._fresh(tutor), self.org)
+        self.assertEqual(scope.group_ids, {str(self.own_group.pk), str(self.sub_group.pk), str(sub2.pk)})
+        self.assertIn(str(sub2_mate.pk), scope.student_ids)
+        self.assertIn(str(self.mate.pk), scope.student_ids)
+
+    def test_corrector_paths_skip_own_journals(self):
+        from unittest import mock
+
+        from apps.registrar.journal_list_scope import journal_list_base
+
+        maryam = self._fresh(self.maryam)
+        request = self._request(maryam)
+        with bypass_rls(), mock.patch("apps.registrar.corrections.can_correct_journal", return_value=True):
+            self.assertFalse(journal_access.can_correct_offering(request, self.own_offering))
+            self.assertTrue(journal_access.can_correct_offering(request, self.other_offering))
+            queryset, broad = journal_list_base(maryam, request)
+            visible = set(queryset.values_list("pk", flat=True))
+        self.assertTrue(broad)
+        self.assertNotIn(self.own_offering.pk, visible)
+        self.assertIn(self.other_offering.pk, visible)
+
+    def test_absence_credit_on_own_journal_is_refused(self):
+        from unittest import mock
+
+        with mock.patch("apps.registrar.corrections.can_correct_journal", return_value=True):
+            response = self._client(self.maryam).post(
+                reverse("registrar:absence_credit_apply", args=[self.own_offering.pk]),
+                {"enrollment": "x", "hours": "2", "reason": "x" * 12, "request_token": "x"},
+                HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+            )
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.json()["error"], "self_conflict")
+
+    def test_denial_audit_survives_atomic_request_rollback(self):
+        """Prod ATOMIC_REQUESTS: 403 rollback-indən sonra da audit qalır; qrup yoldaşı BAŞQA jurnala əlavə olunmur."""
+        settings_dict = connection.settings_dict
+        previous = settings_dict.get("ATOMIC_REQUESTS", False)
+        settings_dict["ATOMIC_REQUESTS"] = True
+        try:
+            response = self._client(self.maryam).post(
+                reverse("registrar:journal_guest_add", args=[self.other_offering.pk]),
+                {"student": self.sub_mate.pk, "group": str(self.sub_group.pk)},
+                HTTP_ACCEPT="application/json",
+            )
+        finally:
+            settings_dict["ATOMIC_REQUESTS"] = previous
+        self.assertEqual(response.status_code, 403)
+        with bypass_rls():
+            self.assertTrue(AuditLog.objects.filter(organization=self.org, reason__startswith="self_conflict").exists())
+
+    def test_plain_form_post_gets_html_403_not_json(self):
+        response = self._client(self.maryam).post(
+            reverse("registrar:journal_detail", args=[self.own_offering.pk]), {"action": "x"}
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertIn("text/html", response["Content-Type"])
+        self.assertContains(response, "tələbəsiniz", status_code=403)

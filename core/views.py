@@ -269,12 +269,9 @@ def handler403(request, exception=None):
 
 
 def _wants_json(request) -> bool:
+    """Yalnız açıq AJAX/JSON sorğusu — adi form POST-u HTML 403 səhifəsini alır (xam JSON yox)."""
     accept = str(request.headers.get("Accept", "") or "")
-    return (
-        request.headers.get("X-Requested-With") == "XMLHttpRequest"
-        or "application/json" in accept
-        or request.method not in ("GET", "HEAD")
-    )
+    return request.headers.get("X-Requested-With") == "XMLHttpRequest" or "application/json" in accept
 
 
 def handler404(request, exception=None):

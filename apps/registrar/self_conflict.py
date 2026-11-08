@@ -6,12 +6,12 @@ bu resolver ``RegistrarConfig.ready()``-də qoşulur və YALNIZ qarışıq (təl
 Əhatə (fail-closed — şübhəli halda daha çox gizlədir):
 
 * aktiv akademik qeydi (``enrolled`` / ``academic_leave``) olan qruplar;
-* həmin qrupların alt qrupları və ana qrupu (:func:`apps.registrar.subgroup_rollup.group_family` — reyestr izi
+* həmin qrupların alt qrupları, ana qrupu və ana qrupun digər alt qrupları (:func:`apps.registrar.subgroup_rollup.group_family` — reyestr izi
   ``settings.parent_group`` və ya ad şablonu);
 * bu qrup ailəsindəki bütün aktiv qeydlər (qrup yoldaşları);
 * qrup ailəsinin bütün açılışları + özünün yazıldığı (hər statusda) açılışlar.
 
-Ən çoxu 5 sorğu, nəticə request ömrü ərzində ``user``-də saxlanılır (bax ``organizations.self_conflict.own_scope``).
+Ən çoxu 6 sorğu, nəticə request ömrü ərzində ``user``-də saxlanılır (bax ``organizations.self_conflict.own_scope``).
 """
 
 from __future__ import annotations
@@ -48,9 +48,14 @@ def resolve_own_scope(user, organization):
         )
     )
     family = set(own_group_ids)
-    for subs, parents in group_family(organization, groups).values():
+    parents = {}
+    for subs, ancestors in group_family(organization, groups).values():
         family.update(unit.pk for unit in subs)
-        family.update(unit.pk for unit in parents)
+        parents.update((unit.pk, unit) for unit in ancestors)
+    family.update(parents)
+    # Alt qrupdakı tələbə üçün ana qrupun DİGƏR alt qrupları da (632/6 İ-1 → 632/6 İ → 632/6 İ-2) «öz» sayılır.
+    for subs, _ancestors in group_family(organization, list(parents.values())).values():
+        family.update(unit.pk for unit in subs)
     mates = list(
         StudentAcademicRecord.objects.filter(
             organization=organization, group_id__in=family, is_active=True

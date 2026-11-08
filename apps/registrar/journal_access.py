@@ -106,6 +106,16 @@ def staff_self_conflict(user, offering) -> bool:
     return offering_self_conflict(user, offering)
 
 
+def can_correct_offering(request, offering) -> bool:
+    """Korrektor (``journal.correct``) MƏHZ bu açılışda — tələbə + heyət rolu öz / öz qrupunun jurnalında YOX.
+
+    ``corrections.can_correct_journal`` açılışdan asılı deyil; açılış səviyyəli qapılar bunu işlədir (2026-11-08).
+    """
+    from . import corrections
+
+    return corrections.can_correct_journal(request) and not staff_self_conflict(request.user, offering)
+
+
 def can_edit_journal(user, offering) -> bool:
     """Giriş + redaktə/korrektor səlahiyyəti: müəllim / sahib / superuser / İKT Rəhbəri.
 
