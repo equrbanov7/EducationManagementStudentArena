@@ -57,6 +57,30 @@ class DuplicatePredecessorUnlinkTests(carry_tests.ExactHistoryCarryTests):
         target.refresh_from_db()
         self.assertEqual(target.absence_hours, 8)
 
+    def test_marks_restored_into_empty_twin_cells_then_unlinked(self):
+        source, target = self.transition()
+        for index in (0, 1):
+            self._timed(source, index)
+        own = self._timed(target, 0)
+        with bypass_rls():
+            twin = Lesson.objects.create(
+                organization=self.org,
+                offering=target.offering,
+                date=own.lesson.date + datetime.timedelta(days=1),
+                start_time=T,
+                kind="seminar",
+                hours=2,
+            )
+        counts = self._call("--apply")
+        self.assertEqual((counts["marks_restored"], counts["predecessors_unlinked"]), ("1", "1"))
+        with bypass_rls():
+            self.assertEqual(twin.marks.get().status, "absent")
+            self.assertIsNone(Enrollment.objects.get(pk=source.pk).superseded_by_id)
+        target.refresh_from_db()
+        self.assertEqual(target.absence_hours, 4)
+        counts = self._call("--apply", "--undo")
+        self.assertEqual((counts["undo_marks_deleted"], counts["undo_relinked"]), ("1", "1"))
+
     def test_partly_unique_predecessor_stays_linked(self):
         source, target = self.transition()
         self._timed(source, 0)
