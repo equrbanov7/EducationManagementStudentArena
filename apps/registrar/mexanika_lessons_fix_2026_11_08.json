@@ -61,7 +61,8 @@
   ],
   "share_removals": [
     {"offering": "9475e7d9-bd62-419a-9c2a-add5eccf31fe", "teacher": 7754},
-    {"offering": "eece84da-0c2b-4944-9023-a293e5bf4f97", "teacher": 7754}
+    {"offering": "eece84da-0c2b-4944-9023-a293e5bf4f97", "teacher": 7754},
+    {"offering": "25bb2857-41f4-4ecc-9795-8a57d98354bb", "teacher": 8251}
   ],
   "roster_trims": [
     {"legacy_journal": 15476, "offering": "0127bd1c-a028-4ded-8312-ff25aa357d74", "keep": ["848894fd-d72a-4aac-9d3d-02748dc538ad"]},
