@@ -125,18 +125,34 @@ class LegacyCellsFillTest(_LabWorld, TestCase):
             student.last_name, student.first_name = "Hüseynova", "İlahə"
             student.save(update_fields=["last_name", "first_name"])
         self.e1_name = "H&uuml;seynova İLAHƏ"
+        with bypass_rls():
+            for enrollment, (last, first) in ((self.e0, ("Abbasov", "Rauf")), (self.e2, ("Qasımova", "Leyla"))):
+                enrollment.student.last_name, enrollment.student.first_name = last, first
+                enrollment.student.save(update_fields=["last_name", "first_name"])
+        self.e2_name = "QASIMOVA LEYLA"
         plan = {
             "format": "legacy-cells/1",
             "cells": [
                 {"lesson": str(self.lecture.pk), "fin": "ab12cd3", "status": "absent", "score": None},
                 {"lesson": str(self.lecture.pk), "fin": "ZZZ9999", "status": "present", "score": None},
                 {"lesson": str(self.lecture.pk), "name": self.e1_name, "status": "present", "score": None},
+                # köhnə sistemdə FİN səhv tələbədədir: FİN e0-ındır, ad e2-nin — FİN qəbul edilmir, ad ilə e2
+                {
+                    "lesson": str(self.seminar.pk),
+                    "fin": "AB12CD3",
+                    "name": self.e2_name,
+                    "status": "present",
+                    "score": 7,
+                },
             ],
         }
         with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as handle:
             json.dump(plan, handle)
         counts = self._call("--file", handle.name, "--apply")
         self.assertEqual((counts["cells_filled"], counts["cells_student_not_found"]), ("2", "1"))
+        self.assertEqual(
+            (counts["cells_fin_name_mismatch"], counts["cells_already_filled"]), ("1", "1")
+        )  # e2 seminar dolu
         with bypass_rls():
             self.assertEqual(LessonMark.objects.get(lesson=self.lecture, enrollment=self.e0).status, "absent")
 
