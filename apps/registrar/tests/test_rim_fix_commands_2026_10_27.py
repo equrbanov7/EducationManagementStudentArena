@@ -236,6 +236,8 @@ class MergeTwinOfferingsTest(RimFixBase):
             extra = self._lesson(self.physics_g1, D(2025, 10, 14))
             source = Enrollment.objects.get(student=self.host, offering=self.physics_g1)
             self._mark(extra, source, score=9)
+            # Sahib 2026-11-08 (KƏMQ): T-nin boş mövzusu W-nin dərsindən dolur — silinən dərslə itmir.
+            Lesson.objects.filter(offering=self.physics_g1, date=D(2025, 10, 7)).update(topic="Müəllimin mövzusu")
         plan = {"format": "twin-merge/1", "pairs": [dict(self.plan["pairs"][0], target_marks="keep")]}
         counts = _counts(self._call("merge_twin_offerings", plan, "--apply"), "twin_merge:")
         self.assertEqual(counts["pairs_merged"], "1")
@@ -246,6 +248,7 @@ class MergeTwinOfferingsTest(RimFixBase):
             self.assertFalse(CourseOffering.objects.get(pk=self.physics_g1.pk).is_active)
             self.assertEqual(Lesson.objects.filter(offering=self.target, date=D(2025, 10, 7)).count(), 1)
             self.assertEqual(LessonMark.objects.get(lesson=same_day).score, 5, "T-nin dəyəri qalır")
+            self.assertEqual(Lesson.objects.get(pk=same_day.pk).topic, "Müəllimin mövzusu")
             moved = LessonMark.objects.get(lesson__offering=self.target, lesson__date=D(2025, 10, 14))
             self.assertEqual(moved.score, 9)
 
