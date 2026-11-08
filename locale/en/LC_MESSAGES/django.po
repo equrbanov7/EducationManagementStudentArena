@@ -115032,6 +115032,53 @@ msgctxt "registrar.lab_groups"
 msgid "%(group)s · Lab-%(n)s"
 msgstr "%(group)s · Lab group %(n)s"
 
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "registrar.journal"
+msgid "Praktiki məşğələ ballarının ədədi ortası; balsız dərslər sayılmır."
+msgstr "Average of practical session scores; lessons without a score are not counted."
+
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "registrar.journal"
+msgid "praktiki məşğələ"
+msgstr "practical session"
+
+#: foreign-language level rule (owner 2026-11-08)
+#, python-format
+msgctxt "accounts.dashboard"
+msgid "Xarici dil səviyyə fənlərində midterm 0–%(max)s bal, yekun imtahan 0–%(exam)s bal."
+msgstr "In foreign-language level courses the midterm is 0–%(max)s points and the final exam 0–%(exam)s points."
+
+#: foreign-language level rule (owner 2026-11-08)
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Semestr balı %(semester)s (davamiyyət + midterm + praktiki məşğələ balları), yekun imtahan %(final)s — cəmi %(total)s bal. Xarici dil səviyyə fənninin qaydasıdır və dəyişdirilmir."
+msgstr "Semester score %(semester)s (attendance + midterm + practical session scores), final exam %(final)s — %(total)s points in total. This is the foreign-language level course rule and cannot be changed."
+
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "profile.subjects"
+msgid "Aktivlik (praktiki məşğələ)"
+msgstr "Activity (practical sessions)"
+
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "profile.subjects"
+msgid "Xarici dil səviyyə fənləri"
+msgstr "Foreign-language level courses"
+
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "registrar.language_cohort"
+msgid "Səviyyə qaydası: davamiyyət 10, praktiki məşğələ 10, midterm 10, imtahan 70 bal. Qayıb limiti 10 q/b-dir; 11 q/b olduqda imtahana buraxılmır."
+msgstr "Level rule: attendance 10, practical sessions 10, midterm 10, exam 70 points. The absence limit is 10 absences; with 11 absences the student is not admitted to the exam."
+
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "syllabus.assessment"
+msgid "Praktiki məşğələ (ədədi orta)"
+msgstr "Practical sessions (average)"
+
+#: foreign-language level rule (owner 2026-11-08)
+msgctxt "syllabus.assessment"
+msgid "Praktiki məşğələ balı: semestr ərzindəki bütün praktiki məşğələ qiymətlərinin ədədi ortası (maksimum 10)."
+msgstr "Practical session score: the average of all practical session grades during the semester (maximum 10)."
+
 # Jurnal banneri: mövcud sillabuslar + «dəyişmədən tətbiq et» (sahib 2026-11-08)
 msgctxt "registrar.syllabus"
 msgid "Aç"

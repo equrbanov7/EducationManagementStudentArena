@@ -88,6 +88,7 @@ from .assessment_formula import (  # noqa: F401
     activity_note,
     formula_rows,
     formula_text,
+    is_level_kinds,
 )
 from .constants import (
     EDITABLE_STATUSES,
@@ -370,6 +371,7 @@ __all__ = [
     "activity_note",
     "formula_rows",
     "formula_text",
+    "is_level_kinds",
     "approved_version_for",
     "offering_syllabus_state",
     "preload_syllabus_for_offering",

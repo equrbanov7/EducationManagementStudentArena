@@ -7,14 +7,19 @@ from decimal import Decimal
 
 from django.db.models import Count, F, Sum
 
+from core.language_level_rule import (  # noqa: F401 — ATTENDANCE_MAX bu modulun açıq sabitidir (çağıranlar oxuyur)
+    ABSENCE_LIMIT,
+    ACTIVITY_MAX,
+    ATTENDANCE_MAX,
+    ENTRY_MAX,
+    EXAM_MAX,
+    MIDTERM_MAX,
+)
+
 from .language_levels import level_of
 
-ENTRY_MAX = 30
-EXAM_MAX = 70
-ATTENDANCE_MAX = 10
-SEMINAR_MAX = 10
-MIDTERM_MAX = 10
-ABSENCE_LIMIT = 10
+#: Tavanlar :mod:`core.language_level_rule`-dadır (TƏK reyestr): 10 + 10 + 10 = 30, imtahan 70.
+SEMINAR_MAX = ACTIVITY_MAX
 
 
 def is_level_name(subject_name):
@@ -274,6 +279,7 @@ def parts_for(
         attendance_barred=check["barred"],
         midterm_max=Decimal(MIDTERM_MAX),
         selfwork_active=False,
+        practical=True,
     )
 
 

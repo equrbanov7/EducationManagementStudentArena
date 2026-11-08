@@ -16,6 +16,10 @@ qayıdır; ``academic.activity_split`` seminar + laboratoriya olan fəndə fəal
 semestrdən asılı DEYİL — köhnə (2025/2026) semestrin sillabusu da cari düsturu göstərir; çağıran
 :mod:`apps.syllabus.rules`-dan aldığı qaydanı ötürür, ötürməsə CARİ qayda işlənir.
 
+Xarici dil SƏVİYYƏ fənni (sahib 2026-11-08, reyestr :mod:`core.language_level_rule`) — «…-1(elementary)» və s.:
+növ ``(LEVEL,)`` olur və düstur fənnin öz qaydasıdır — «Davamiyyət 10 + Midterm 10 + Praktiki məşğələ (ədədi orta)
+10 + Yekun imtahan 70 = 100 bal (semestr 30 + imtahan 70)»; RİM-in sərbəst iş / 5 + 5 açarları ona aid deyil.
+
 Fəaliyyət növü ``CourseOffering`` üzərindən tapılır: əvvəl dərs yükü sətri
 (``workload.TeachingTaskRow``: eyni fənn + dövr + qrup, ``seminar_*``/``lab_*``
 saatları), tapılmasa dərs cədvəli slotları (``registrar.ScheduleSlot`` növləri),
@@ -30,6 +34,7 @@ from django.apps import apps as django_apps
 from django.utils.translation import pgettext_lazy
 
 from core import academic_rules
+from core import language_level_rule as levels
 
 from .policy import assessment_weights
 
@@ -37,6 +42,8 @@ _CTX = "syllabus.assessment"
 
 SEMINAR = "seminar"
 LAB = "lab"
+#: Xarici dil səviyyə fənni — seminarı «Praktiki məşğələ», düsturu 10 / 10 / 10 / 70 (sahib 2026-11-08).
+LEVEL = "level"
 
 LABELS = {
     "attendance": pgettext_lazy(_CTX, "Davamiyyət"),
@@ -49,6 +56,7 @@ ACTIVITY_LABELS = {
     (SEMINAR,): pgettext_lazy(_CTX, "Seminar (ədədi orta)"),
     (LAB,): pgettext_lazy(_CTX, "Laboratoriya (ədədi orta)"),
     (SEMINAR, LAB): pgettext_lazy(_CTX, "Seminar + laboratoriya (birgə ədədi orta — cəm 2n-ə bölünür)"),
+    (LEVEL,): pgettext_lazy(_CTX, "Praktiki məşğələ (ədədi orta)"),
 }
 ACTIVITY_NOTES = {
     (SEMINAR,): pgettext_lazy(
@@ -61,6 +69,10 @@ ACTIVITY_NOTES = {
         _CTX,
         "Fənndə həm seminar, həm laboratoriya var: bütün seminar və laboratoriya qiymətləri toplanıb "
         "ümumi sayına (2n) bölünür — birgə ədədi orta, maksimum 10.",
+    ),
+    (LEVEL,): pgettext_lazy(
+        _CTX,
+        "Praktiki məşğələ balı: semestr ərzindəki bütün praktiki məşğələ qiymətlərinin ədədi ortası (maksimum 10).",
     ),
 }
 #: Sahib 2026-10-10 — 5 + 5 qaydası (seminar və laboratoriya AYRICA ortalanır).
@@ -92,8 +104,10 @@ SEMESTER_KEYS = ("attendance", "midterm", "selfwork", "activity")
 
 
 def normalize_kinds(kinds) -> tuple[str, ...]:
-    """Fəaliyyət növləri sabit sıra ilə: ``(seminar,)``, ``(lab,)`` və ya ``(seminar, lab)``.
+    """Fəaliyyət növləri sabit sıra ilə: ``(seminar,)``, ``(lab,)`` və ya ``(seminar, lab)``; səviyyə fənni ``(level,)``.
     Boş/naməlum → ``(seminar,)`` (defolt)."""
+    if LEVEL in (kinds or ()):
+        return (LEVEL,)
     present = {k for k in (kinds or ()) if k in (SEMINAR, LAB)}
     if not present:
         return (SEMINAR,)
@@ -101,9 +115,11 @@ def normalize_kinds(kinds) -> tuple[str, ...]:
 
 
 def activity_kinds_for_offering(offering) -> tuple[str, ...]:
-    """Açılışın fəaliyyət növləri — dərs yükü sətri → cədvəl slotu → defolt."""
+    """Açılışın fəaliyyət növləri — səviyyə fənni → dərs yükü sətri → cədvəl slotu → defolt."""
     if offering is None:
         return (SEMINAR,)
+    if _is_level_subject(getattr(offering, "subject", None)):
+        return (LEVEL,)
     kinds: set[str] = set()
     try:
         TaskRow = django_apps.get_model("workload", "TeachingTaskRow")
@@ -132,8 +148,19 @@ def activity_kinds_for_offering(offering) -> tuple[str, ...]:
     return normalize_kinds(kinds)
 
 
+def _is_level_subject(subject) -> bool:
+    return levels.is_level_name(getattr(subject, "name", ""))
+
+
 def activity_kinds_for_syllabus(syllabus) -> tuple[str, ...]:
+    """Sillabusun fəaliyyət növləri — açılışı yoxdursa da fənn səviyyə fənnidirsə ``(level,)``."""
+    if syllabus is not None and getattr(syllabus, "subject_id", None) and _is_level_subject(syllabus.subject):
+        return (LEVEL,)
     return activity_kinds_for_offering(getattr(syllabus, "offering", None))
+
+
+def is_level_kinds(kinds) -> bool:
+    return normalize_kinds(kinds) == (LEVEL,)
 
 
 def _split(split) -> bool:
@@ -141,14 +168,26 @@ def _split(split) -> bool:
 
 
 def activity_label(kinds, *, split=None) -> str:
-    """Fəallıq sətrinin adı; ``split`` — 5 + 5 qaydası (``None`` → CARİ RİM tənzimləməsi)."""
-    labels = SPLIT_LABELS if _split(split) else ACTIVITY_LABELS
-    return str(labels[normalize_kinds(kinds)])
+    """Fəallıq sətrinin adı; ``split`` — 5 + 5 qaydası (``None`` → CARİ RİM tənzimləməsi; səviyyə fənninə aid deyil)."""
+    kinds = normalize_kinds(kinds)
+    labels = ACTIVITY_LABELS if kinds == (LEVEL,) or not _split(split) else SPLIT_LABELS
+    return str(labels[kinds])
 
 
 def activity_note(kinds, *, split=None) -> str:
-    notes = SPLIT_NOTES if _split(split) else ACTIVITY_NOTES
-    return str(notes[normalize_kinds(kinds)])
+    kinds = normalize_kinds(kinds)
+    notes = ACTIVITY_NOTES if kinds == (LEVEL,) or not _split(split) else SPLIT_NOTES
+    return str(notes[kinds])
+
+
+def _level_rows() -> list[dict]:
+    """Səviyyə fənninin düsturu — tavanlar :mod:`core.language_level_rule`-dan (10 + 10 + 10 + 70)."""
+    return [
+        {"key": "attendance", "label": str(LABELS["attendance"]), "score": levels.ATTENDANCE_MAX},
+        {"key": "midterm", "label": str(LABELS["midterm"]), "score": levels.MIDTERM_MAX},
+        {"key": "activity", "label": str(ACTIVITY_LABELS[(LEVEL,)]), "score": levels.ACTIVITY_MAX},
+        {"key": "final", "label": str(LABELS["final"]), "score": levels.EXAM_MAX},
+    ]
 
 
 def _activity_rows(kinds, score: int, split: bool) -> list[dict]:
@@ -167,6 +206,8 @@ def formula_rows(kinds, organization=None, *, selfwork=None, split=None) -> list
 
     ``selfwork`` / ``split`` — tətbiq olunan qayda (``SyllabusRule``); ``None`` → CARİ qayda.
     Standart (sərbəst işsiz) qaydada sərbəst iş sətri yoxdur və midterm 30-dur (cəm yenə 50 + 50)."""
+    if normalize_kinds(kinds) == (LEVEL,):
+        return _level_rows()
     if selfwork is None:
         selfwork = academic_rules.selfwork_enabled()
     weights = assessment_weights(organization, selfwork=selfwork)
@@ -191,6 +232,7 @@ def formula_text(kinds, organization=None, *, selfwork=None, split=None) -> str:
 
 __all__ = [
     "LAB",
+    "LEVEL",
     "SEMINAR",
     "SEMESTER_KEYS",
     "SPLIT_LABELS",
@@ -202,5 +244,6 @@ __all__ = [
     "activity_note",
     "formula_rows",
     "formula_text",
+    "is_level_kinds",
     "normalize_kinds",
 ]

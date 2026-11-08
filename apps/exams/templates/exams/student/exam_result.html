@@ -187,7 +187,7 @@ təhlili → digər cəhdlər (desktopda cədvəl, telefonda kart). Bütün aça
             {% if show_journal_letter %}<span class="jr-letter jr-letter--{{ journal_result.letter|lower }}{% if journal_result.failed %} jr-letter--fail{% endif %}">{{ journal_result.letter }}</span>{% endif %}
         </div>
         {% if journal_result.entry_parts %}
-            {% include "partials/ems_ui/_entry_breakdown.html" with parts=journal_result.entry_parts final_score=journal_result.exam_score final_max=50 total=journal_result.total total_max=100 %}
+            {% include "partials/ems_ui/_entry_breakdown.html" with parts=journal_result.entry_parts final_score=journal_result.exam_score final_max=journal_result.exam_score_max|default:50 total=journal_result.total total_max=100 %}
         {% else %}
         <ul class="ems-breakdown">
             <li class="ems-breakdown__item">
