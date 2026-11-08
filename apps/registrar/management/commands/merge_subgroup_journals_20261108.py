@@ -24,10 +24,17 @@ class Command(BaseCommand):
         parser.add_argument("--apply", action="store_true", help="Faktiki yaz (defolt: dry-run)")
 
     def handle(self, *args, **options):
+        report = []
+
         def runner(organization, actor, counts):
             if options["undo"]:
                 undo(organization=organization, actor=actor, counts=counts)
-            else:
-                Merger(organization=organization, actor=actor, counts=counts).run()
+                return
+            merger = Merger(organization=organization, actor=actor, counts=counts)
+            merger.run()
+            report.extend(merger.report)
 
         run_plan(self, options=options, prefix=PREFIX, runner=runner)
+        for index, delta in report:
+            pairs = " ".join(f"{key}={value}" for key, value in sorted(delta.items()))
+            self.stdout.write(f"{PREFIX} family={index} {pairs}".rstrip())
