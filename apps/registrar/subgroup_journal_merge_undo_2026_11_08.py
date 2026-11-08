@@ -90,6 +90,7 @@ def _undo_family(organization, actor, counts, manifest, target_id) -> None:
             status="dropped", superseded_by_id=superseded or None, updated_at=timezone.now()
         )
     _model("SeminarGroup").objects.filter(pk__in=get("seminar_groups_created", [])).delete()
+    _model("SyllabusShare", "syllabus").objects.filter(pk__in=get("syllabus_shares_created", [])).delete()
     ScheduleSlot = _model("ScheduleSlot")
     ScheduleSlot.objects.filter(pk__in=get("slots_created", [])).delete()
     ScheduleSlot.all_objects.filter(pk__in=get("slots_soft_deleted", [])).update(is_deleted=False, deleted_at=None)
