@@ -132,6 +132,22 @@ class SubgroupFamilyResolveTest(merge_tests.SubgroupJournalMergeTest):
             self.assertFalse(Lesson.objects.filter(offering__in=[self.o1, self.o2], start_time=T0830).exists())
             self.assertEqual(Enrollment.objects.filter(offering=self.offering, status="enrolled").count(), 5)
 
+    def test_plan_options_reach_discovered_family(self):
+        plan = (
+            {
+                "name": "x",
+                "target": None,
+                "group": "g",
+                "sources": [str(self.o1.pk), str(self.o2.pk)],
+                "no_seminar_groups": True,
+            },
+        )
+        with mock.patch.object(resolve, "PLAN", plan):
+            families, _ambiguous = resolve.discover(self.org)
+        self.assertEqual(len(families), 1)
+        self.assertTrue(families[0]["no_seminar_groups"])
+        self.assertEqual(families[0]["target"], str(self.offering.pk))
+
     def test_unplaced_parent_student_blocks_split(self):
         self._separate_classes()
         with bypass_rls():
