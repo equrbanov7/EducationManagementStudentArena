@@ -203,7 +203,9 @@ class Merger:
         recompute_absences(list({row.pk: row for row in by_student.values()}.values()))
         # Sahib: «boş xana olmasın» — bir alt qrupun dərsləri o birinin tələbələrinə BOŞ xana kimi düşürsə (məs. F2-nin
         # jurnalında 6, F1-də 26 dərs) birləşmə görünüşü pozur → ailə toxunulmur.
-        if _empty_cells(target) > empty_before:
+        # ``allow_empty_cells`` (536 MU): köhnə sistemdə də seminar bir axındır — MU1 tələbələrinin xanaları köhnədən
+        # ``fill_legacy_cells_20261108`` ilə dolur, köhnədə də boş olanlar boş qalır (data itmir).
+        if _empty_cells(target) > empty_before and not family.get("allow_empty_cells"):
             raise Blocked("family_adds_empty_cells")
         self._syllabus(target, live, manifest)
         self.counts["families_merged"] += 1
