@@ -129,7 +129,7 @@ class GraduationSync:
         """Köhnə sistemdə azad edilmiş (``azadedildi=1``) hesablar — ``registry_sync`` ilə eyni güclü sübutla
         (cutover ledger-i, ``institutional_identifier``, FİN); ad tutuşdurması yoxdur."""
 
-        from .resolve import ledger_map
+        from .resolve import fin_owner, fin_owners, ledger_map, legacy_fin
 
         rows = [
             row
@@ -147,17 +147,16 @@ class GraduationSync:
                 "institutional_identifier", "user_id"
             )
         )
-        fins = sorted({str(row.get("fincode") or "").strip().upper() for row in rows} - {""})
-        by_fin = {
-            fin.upper(): user_id
-            for fin, user_id in UserProfile.objects.filter(fin__in=fins).values_list("fin", "user_id")
-            if fin
-        }
+        owners = fin_owners(legacy_fin(row) for row in rows)
         out = set()
         for row in rows:
             key = str(row["id"])
-            fin = str(row.get("fincode") or "").strip().upper()
-            user_id = int(ledger[key]) if key in ledger else by_inst.get(key) or by_fin.get(fin)
+            user_id = int(ledger[key]) if key in ledger else by_inst.get(key)
+            if user_id is None:
+                # FİN yalnız soyad + ad da tutanda (sahib 2026-11-08: başqasının FİN-i yazılmış sətirlər).
+                user_id, mismatch = fin_owner(row, owners)
+                if mismatch:
+                    self.run.count("graduation.fin_name_mismatch")
             if user_id is not None:
                 out.add(user_id)
         return out

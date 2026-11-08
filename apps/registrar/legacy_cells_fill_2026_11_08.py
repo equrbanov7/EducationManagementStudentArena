@@ -33,9 +33,7 @@ yenidən hesablanır. İdempotentdir: ikinci qaçışda xana artıq doludur → 
 from __future__ import annotations
 
 import datetime
-import html
 import json
-import unicodedata
 
 from django.apps import apps as django_apps
 from django.core.management.base import CommandError
@@ -43,6 +41,7 @@ from django.utils import timezone
 
 from core.audit import log_action
 from core.constants import AuditAction
+from core.person_names import name_key
 
 from . import lab_groups
 from .gradebook import lesson_allows_score
@@ -137,9 +136,7 @@ def _fin_enrollments(organization, cells, lessons) -> dict:
 
 def _norm(text) -> str:
     """«Soyad Ad» müqayisəsi: HTML varlıqları, böyük/kiçik, İ/ı, diakritika və boşluq fərqi sayılmır."""
-    text = html.unescape(str(text or "")).replace("İ", "I").replace("ı", "i").casefold()
-    text = "".join(ch for ch in unicodedata.normalize("NFKD", text) if not unicodedata.combining(ch))
-    return " ".join(text.split()[:2])
+    return " ".join(name_key(text).split()[:2])
 
 
 def _enrollment_names(ids) -> dict:

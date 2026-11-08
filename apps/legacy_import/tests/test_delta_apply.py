@@ -381,6 +381,37 @@ class DeltaApplyTests(TestCase):
             self.assertTrue(LessonMark.objects.filter(enrollment__student=created).exists())
             self.assertFalse(Enrollment.objects.filter(student=namesake).exists())
 
+    def test_fin_of_another_student_is_not_trusted(self):
+        """Sahib 2026-11-08: legacy sətrə BAŞQA tələbənin FİN-i yazılıb — FİN sahibinə bal/qeydiyyat yazılmır.
+
+        Ad tutmursa FİN atılır və ad yolu ilə öz hesabı (öz FİN-i fərqlidir) tapılır; tapılmasa hesab yaradılmır.
+        Eyni FİN + eyni ad (böyük hərf / «İ» fərqi) isə FİN ilə tutulur.
+        """
+        bundle = _bundle()
+        bundle["students"][0].update(last_name="MÖVCUD", first_name="AYSEL")
+        bundle["students"][1]["fincode"] = "AAA1111"  # Nicat-ın sətrində Ayselin FİN-i
+        run = self._run(apply=True, bundle=bundle)
+        self.assertEqual(run.counters["student.fin"], 1)
+        self.assertEqual(run.counters["student.fin_name_mismatch"], 1)
+        with bypass_rls():
+            self.assertFalse(User.objects.filter(profile__institutional_identifier="2").exists())
+            self.assertEqual(Enrollment.objects.filter(student=self.existing).count(), 1)
+        self.assertEqual(run.counters["mark.conflict_kept"], 0)  # Nicat-ın «q/b»-si Ayselin xanasına düşmür
+        with bypass_rls():
+            own = User.objects.create_user(
+                "nicat.own", "no@example.test", "x", first_name="Nicat", last_name="Yenizadə"
+            )
+            UserProfile.objects.filter(user=own).update(fin="CCC3333", patronymic="Orxan")
+            Membership.objects.create(
+                user=own, organization=self.org, role=self.org.roles.get(name="student"), is_active=True
+            )
+        again = self._run(apply=True, bundle=bundle)
+        self.assertEqual(again.counters["student.fin_name_mismatch"], 1)
+        self.assertEqual(again.counters["student.name"], 1)
+        with bypass_rls():
+            self.assertTrue(LessonMark.objects.filter(enrollment__student=own, status="absent").exists())
+            self.assertFalse(LessonMark.objects.filter(enrollment__student=self.existing, status="absent").exists())
+
     def test_ambiguous_namesake_is_created_only_with_explicit_flag(self):
         """Adaş eyni qrupdadır, ata adı yoxdur → ambiqü; ``snapshot.create_ambiguous`` ilə yeni hesab yaranır."""
         with bypass_rls():

@@ -57,7 +57,8 @@ def _bundle():
         "workers": [],
         "journals": [{"id": 1, "semestr": "14", "students_id": '["3"]', "groups_id": '["900"]'}],
         "students": [_row(3, "FIN0003")],
-        "expelled_students": [_row(7, "FIN0007", azad=1)],
+        # 9: başqa tələbənin FİN-i yazılmış azad edilmiş sətir (sahib 2026-11-08) — FİN sahibinə (1) aid edilmir
+        "expelled_students": [_row(7, "FIN0007", azad=1), _row(9, "FIN0001", azad=1)],
     }
 
 
@@ -108,7 +109,13 @@ class GraduationPhaseTests(TestCase):
                 8: (master, 2024, final),  # magistr — məzun
             }
             for number, (program, year, last) in plan.items():
-                user = User.objects.create_user(f"grad.s{number}", f"g{number}@example.test", "x")
+                user = User.objects.create_user(
+                    f"grad.s{number}",
+                    f"g{number}@example.test",
+                    "x",
+                    first_name=f"Ad{number}",
+                    last_name=f"Soyad{number}",
+                )
                 UserProfile.objects.filter(user=user).update(fin=f"FIN000{number}")
                 Membership.objects.create(user=user, organization=cls.org, role=role, is_primary=True, is_active=True)
                 curriculum, _ = Curriculum.objects.get_or_create(
@@ -167,6 +174,7 @@ class GraduationPhaseTests(TestCase):
         self.assertEqual(counters["graduation.untouched.in_journal"], 1)
         self.assertEqual(counters["graduation.untouched.in_legacy_journal"], 1)
         self.assertEqual(counters["graduation.untouched.legacy_expelled"], 1)
+        self.assertEqual(counters["graduation.fin_name_mismatch"], 1)
         self.assertEqual(counters["graduation.review.period_not_ended"], 1)
         self.assertEqual(counters["graduation.review.year_unknown"], 1)
         self.assertEqual(counters["graduation.review.left_before_final_year"], 1)

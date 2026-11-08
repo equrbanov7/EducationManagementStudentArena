@@ -90,7 +90,10 @@ def _bundle():
         ],
         "expelled_students": [
             _student(6, "FIN0006", 900, azad=1, order_no="", order_date=None),
-            _student(8, "FIN0001", 900, azad=1),  # əsas bölmədə olan adamın köhnə sətri — toxunulmur
+            # əsas bölmədə olan adamın köhnə sətri — toxunulmur
+            _student(8, "FIN0001", 900, azad=1, first_name="AD1", last_name="SOYAD1"),
+            # başqa tələbənin FİN-i yazılmış sətir (sahib 2026-11-08) — FİN sahibinə bağlanmır
+            _student(9, "FIN0004", 900, azad=1),
         ],
     }
 
@@ -139,7 +142,13 @@ class RegistrySyncTests(TestCase):
             role = cls.org.roles.get(name="student")
             cls.records = {}
             for number, home in ((1, cls.g_a), (2, cls.g_a), (3, cls.g_a), (4, cls.g_b), (5, cls.g_a), (6, cls.g_a)):
-                user = User.objects.create_user(f"sync.s{number}", f"s{number}@example.test", "x")
+                user = User.objects.create_user(
+                    f"sync.s{number}",
+                    f"s{number}@example.test",
+                    "x",
+                    first_name=f"Ad{number}",
+                    last_name=f"Soyad{number}",
+                )
                 UserProfile.objects.filter(user=user).update(fin=f"FIN000{number}")
                 Membership.objects.create(user=user, organization=cls.org, role=role, is_primary=True, is_active=True)
                 cls.records[number] = StudentAcademicRecord.objects.create(
@@ -152,7 +161,7 @@ class RegistrySyncTests(TestCase):
                     status="enrolled",
                     is_active=True,
                 )
-            user = User.objects.create_user("sync.s7", "s7@example.test", "x")
+            user = User.objects.create_user("sync.s7", "s7@example.test", "x", first_name="Ad7", last_name="Soyad7")
             UserProfile.objects.filter(user=user).update(fin="FIN0007")
             Membership.objects.create(user=user, organization=cls.org, role=role, is_primary=True, is_active=True)
             cls.records[7] = StudentAcademicRecord.objects.create(
@@ -210,6 +219,8 @@ class RegistrySyncTests(TestCase):
         self.assertEqual(counters["registry.expel.in_snapshot"], 1)
         self.assertEqual(counters["registry.expel.not_in_snapshot"], 1)
         self.assertEqual(counters["registry.expelled_readmitted"], 1)
+        self.assertEqual(counters["registry.expelled_fin_name_mismatch"], 1)
+        self.assertEqual(counters["registry.expelled_unlinked"], 1)
         self.assertEqual(counters["registry.group.system_changed"], 1)
         self.assertEqual(counters["registry.group.legacy_unchanged_system_wins"], 1)
         self.assertEqual(counters["registry.group.subgroup_parent"], 1)
