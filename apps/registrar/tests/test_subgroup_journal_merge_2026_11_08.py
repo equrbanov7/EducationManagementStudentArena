@@ -1,0 +1,188 @@
+"""Sahib 2026-11-08: alt qrup jurnalları ana qrupun jurnalına — mühazirədə bir jurnal, seminarda alt qruplar.
+
+Xanalar KOPYALANIR (alt qrup jurnalı passiv olur, xanaları silinmir); eyni tarix + saat + növ → bir dərs; ana jurnalda
+dolu xana qalır; bir alt qrupun seminarı həmin seminar alt qrupuna bağlanır; defolt dry-run, idempotent, ``--undo``
+geri qaytarır; stdout-da yalnız saylar; prod-data-ops-a qoşulub.
+"""
+
+import datetime
+import io
+from unittest import mock
+
+from django.core.management import call_command
+from django.test import TestCase
+
+from apps.organizations.models import OrgUnit
+from apps.registrar import services as registrar_services
+from apps.registrar import subgroup_journal_merge_2026_11_08 as merge
+from apps.registrar.models import (
+    CourseOffering,
+    Curriculum,
+    Enrollment,
+    Lesson,
+    LessonKind,
+    LessonMark,
+    Program,
+    SeminarGroup,
+    StudentAcademicRecord,
+)
+from apps.registrar.tests.test_lab_groups_2026_11_06 import WORKFLOW, User, _LabWorld
+from core.constants import OrgUnitType
+from core.rls import bypass_rls
+
+T1010, T1150 = datetime.time(10, 10), datetime.time(11, 50)
+
+
+class SubgroupJournalMergeTest(_LabWorld, TestCase):
+    def setUp(self):
+        with bypass_rls():
+            self.owner.is_superuser = True
+            self.owner.save(update_fields=["is_superuser"])
+            program = Program.objects.create(organization=self.org, code="SGM", name="Sgm")
+            curriculum = Curriculum.objects.create(organization=self.org, program=program, admission_year=2026)
+            self.k1, self.k2 = (
+                OrgUnit.objects.create(
+                    organization=self.org, name=f"LAB-G1 K{n}", slug=f"lab-g1-k{n}", unit_type=OrgUnitType.GROUP
+                )
+                for n in (1, 2)
+            )
+            self.s3 = User.objects.create_user("sgm_s3", "sgm_s3@x.test", "pw")
+            self.s4 = User.objects.create_user("sgm_s4", "sgm_s4@x.test", "pw")
+            for student in (self.s3, self.s4):
+                self._member(student, "student", [])
+            for student, unit in ((self.students[0], self.k1), (self.s3, self.k1), (self.s4, self.k2)):
+                StudentAcademicRecord.objects.create(
+                    organization=self.org,
+                    student=student,
+                    program=program,
+                    curriculum=curriculum,
+                    group=unit,
+                    admission_year=2026,
+                )
+            self.o1, self.o2 = (
+                registrar_services.get_or_create_offering(
+                    organization=self.org, subject=self.offering.subject, period=self.period, group=unit
+                )
+                for unit in (self.k1, self.k2)
+            )
+            day, day2 = self.today - datetime.timedelta(days=7), self.today - datetime.timedelta(days=6)
+            self.parent_lecture = self._lesson_at(self.offering, day, LessonKind.LECTURE, T1010)
+            LessonMark.objects.create(
+                organization=self.org, lesson=self.parent_lecture, enrollment=self.e1, status="absent"
+            )
+            o1_e3 = Enrollment.objects.create(organization=self.org, student=self.s3, offering=self.o1)
+            o1_e0 = Enrollment.objects.create(organization=self.org, student=self.students[0], offering=self.o1)
+            o2_e4 = Enrollment.objects.create(organization=self.org, student=self.s4, offering=self.o2)
+            lecture1 = self._lesson_at(self.o1, day, LessonKind.LECTURE, T1010)
+            seminar1 = self._lesson_at(self.o1, day2, LessonKind.SEMINAR, T1150)
+            lecture2 = self._lesson_at(self.o2, day, LessonKind.LECTURE, T1010)
+            for lesson, enrollment in (
+                (lecture1, o1_e3),
+                (lecture1, o1_e0),
+                (seminar1, o1_e3),
+                (seminar1, o1_e0),
+                (lecture2, o2_e4),
+            ):
+                LessonMark.objects.create(organization=self.org, lesson=lesson, enrollment=enrollment, status="present")
+        plan = ({"name": "test", "target": str(self.offering.pk), "sources": (str(self.o1.pk), str(self.o2.pk))},)
+        patch = mock.patch.object(merge, "PLAN", plan)
+        patch.start()
+        self.addCleanup(patch.stop)
+
+    def _lesson_at(self, offering, day, kind, start):
+        return Lesson.objects.create(
+            organization=self.org, offering=offering, date=day, kind=kind, hours=2, start_time=start
+        )
+
+    def _call(self, *extra):
+        out = io.StringIO()
+        call_command(
+            "merge_subgroup_journals_20261108",
+            "--org",
+            self.org.slug,
+            "--actor",
+            self.owner.username,
+            *extra,
+            stdout=out,
+        )
+        counts = {}
+        for line in out.getvalue().splitlines():
+            self.assertRegex(line, r"^subgroup_merge: [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$")
+            if "mode=" not in line:
+                counts.update(pair.split("=", 1) for pair in line[len("subgroup_merge: ") :].split())
+        return counts
+
+    def _parent_marks(self):
+        with bypass_rls():
+            return sorted(
+                (mark.lesson.kind, mark.enrollment.student.username, mark.status)
+                for mark in LessonMark.objects.filter(lesson__offering=self.offering).select_related(
+                    "lesson", "enrollment__student"
+                )
+            )
+
+    def test_dry_run_apply_idempotent_undo(self):
+        before = self._parent_marks()
+        counts = self._call()
+        self.assertEqual(counts.get("families_merged"), "1", counts)
+        self.assertEqual(self._parent_marks(), before)  # dry-run
+        counts = self._call("--apply")
+        self.assertEqual(counts["enrollments_created"], "2")
+        self.assertEqual(counts["lessons_matched"], "2")  # iki alt qrupun 10:10 mühazirəsi → ananın dərsi
+        self.assertEqual(counts["lessons_created"], "1")
+        self.assertEqual(counts["marks_copied"], "4")
+        self.assertEqual(counts["marks_target_kept"], "1")  # ananın «q/b» xanası qalır
+        self.assertEqual(counts["seminar_lessons_tagged"], "1")
+        self.assertEqual(counts["sources_retired"], "2")
+        with bypass_rls():
+            lecture = Lesson.objects.filter(offering=self.offering, kind=LessonKind.LECTURE)
+            self.assertEqual(lecture.count(), 1)
+            seminar = Lesson.objects.get(offering=self.offering, kind=LessonKind.SEMINAR)
+            self.assertEqual(seminar.seminar_group, 1)
+            self.assertEqual(
+                dict(SeminarGroup.objects.filter(offering=self.offering).values_list("number", "name")),
+                {1: "LAB-G1 K1", 2: "LAB-G1 K2"},
+            )
+            groups = dict(
+                Enrollment.objects.filter(offering=self.offering).values_list("student__username", "seminar_group")
+            )
+            self.assertEqual(
+                (groups["lab_st0"], groups["sgm_s3"], groups["sgm_s4"], groups["lab_st1"]), (1, 1, 2, None)
+            )
+            self.assertFalse(CourseOffering.objects.get(pk=self.o1.pk).is_active)
+            self.assertEqual(LessonMark.objects.filter(lesson__offering=self.o1).count(), 4)  # silinmir
+            self.assertEqual(
+                LessonMark.objects.get(
+                    lesson__offering=self.offering, enrollment=self.e1, lesson__kind="lecture"
+                ).status,
+                "absent",
+            )
+        self.assertEqual(self._call("--apply"), {"already_merged": "1"})
+        counts = self._call("--apply", "--undo")
+        self.assertEqual(counts["undo_families"], "1")
+        self.assertEqual(self._parent_marks(), before)
+        with bypass_rls():
+            self.assertTrue(CourseOffering.objects.get(pk=self.o1.pk).is_active)
+            self.assertEqual(Enrollment.objects.filter(offering=self.o2, status="enrolled").count(), 1)
+            self.assertFalse(SeminarGroup.objects.filter(offering=self.offering).exists())
+
+    def test_scores_block_family(self):
+        from apps.registrar.models import AssessmentComponent, ComponentScore
+
+        with bypass_rls():
+            component = AssessmentComponent.objects.create(
+                organization=self.org, offering=self.o1, name="Midterm", max_score=30
+            )
+            ComponentScore.objects.create(
+                organization=self.org,
+                component=component,
+                enrollment=Enrollment.objects.get(offering=self.o1, student=self.s3),
+                score=10,
+            )
+        self.assertEqual(self._call("--apply"), {"source_has_scores": "1"})
+
+    def test_workflow_wiring(self):
+        text = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("          - merge_subgroup_journals_20261108\n", text)
+        self.assertIn('[ "$COMMAND" = "merge_subgroup_journals_20261108" ]', text)
+        self.assertIn("|subgroup_merge|", text)
