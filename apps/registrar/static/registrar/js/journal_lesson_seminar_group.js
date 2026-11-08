@@ -21,7 +21,11 @@
         var field = modal.querySelector("[name='lesson_kind']");
         var isSeminar = !!field && field.value === SEMINAR;
         wrap.hidden = !isSeminar;
-        if (!isSeminar) setValue(wrap.querySelector("[data-jd-lesson-seminar-group]"), "");
+        var select = wrap.querySelector("[data-jd-lesson-seminar-group]");
+        if (!isSeminar) setValue(select, "");
+        // ?seminar=N görünüşü (sahib 2026-11-08): yeni seminar dərsində həmin alt qrup öncədən seçilir.
+        var preset = wrap.getAttribute("data-jd-default-seminar-group") || "";
+        if (isSeminar && select && !select.value && preset && modal.getAttribute("data-jd-seminar-editing") !== "1") setValue(select, preset);
     }
 
     // ⚠️ EMSDelegate «hadisə|selektor» cütü üzrə TƏK işləyici saxlayır — lab skripti eyni hadisələri başqa
@@ -31,6 +35,7 @@
     });
 
     window.EMSDelegate.on("jd:lesson-modal-open", "[data-jd-lesson-modal][data-jd-seminar-modal]", function (event, modal) {
+        modal.setAttribute("data-jd-seminar-editing", event.detail ? "1" : "");
         setValue(modal.querySelector("[data-jd-lesson-seminar-group]"), (event.detail && event.detail.seminarGroup) || "");
         sync(modal);
     });
