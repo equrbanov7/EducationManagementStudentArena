@@ -59,7 +59,10 @@
     {"legacy_journal": 15127, "offering": "0f7f3cc3-e22c-4da5-a4d2-07f11bacd711", "date": "2026-10-01", "start_time": "11:50", "twin_start_time": "10:10", "kind": "seminar"},
     {"legacy_journal": 15102, "offering": "10fa7acc-2f0f-4720-a113-eb9bbbc5cf4c", "date": "2026-10-13", "start_time": "08:30", "twin_start_time": "10:10", "kind": "lecture"},
     {"legacy_journal": 14055, "offering": "225a53d0-2d40-419b-972c-1370d40b66ae", "date": "2026-09-29", "start_time": "10:10", "twin_start_time": "11:50", "kind": "lecture"},
-    {"legacy_journal": 14055, "offering": "225a53d0-2d40-419b-972c-1370d40b66ae", "date": "2026-09-29", "start_time": "10:10", "twin_start_time": "08:30", "kind": "lecture"}
+    {"legacy_journal": 14055, "offering": "225a53d0-2d40-419b-972c-1370d40b66ae", "date": "2026-09-29", "start_time": "10:10", "twin_start_time": "08:30", "kind": "lecture"},
+    {"legacy_journal": 15106, "offering": "d266baf3-dbe7-462f-b916-cd4909398fe0", "twin_offering": "5ce57ac5-73cd-4917-b160-229b2f1a87f5", "date": "2026-09-21", "start_time": "16:55", "twin_start_time": "16:55", "kind": "seminar"},
+    {"legacy_journal": 15106, "offering": "d266baf3-dbe7-462f-b916-cd4909398fe0", "twin_offering": "5ce57ac5-73cd-4917-b160-229b2f1a87f5", "date": "2026-10-05", "start_time": "16:55", "twin_start_time": "16:55", "kind": "seminar"},
+    {"legacy_journal": 15106, "offering": "d266baf3-dbe7-462f-b916-cd4909398fe0", "twin_offering": "5ce57ac5-73cd-4917-b160-229b2f1a87f5", "date": "2026-10-19", "start_time": "16:55", "twin_start_time": "16:55", "kind": "seminar"}
   ],
   "share_removals": [
     {"offering": "9475e7d9-bd62-419a-9c2a-add5eccf31fe", "teacher": 7754},
