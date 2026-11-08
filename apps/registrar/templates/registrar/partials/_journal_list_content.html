@@ -227,6 +227,16 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
                     <td class="jl-col-action"><a class="jl-open-btn" href="{% url 'registrar:journal_detail' offering.id %}?kind=lab&amp;lab={{ lab.number }}">{% trans "Jurnalı aç" context "registrar.journal" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a></td>
                 </tr>
                 {% endfor %}
+                {% comment %}Seminar alt qrupları (sahib 2026-11-08): yalnız «Seminar» süzgəcində — «536 Bİ2» → o alt qrupun tələbələri.{% endcomment %}
+                {% for seminar in offering.seminar_sections %}
+                <tr class="jl-row jl-row--lab" data-jl-href="{% url 'registrar:journal_detail' offering.id %}?kind=seminar&amp;seminar={{ seminar.number }}">
+                    <td class="jl-col-no"></td>
+                    <td><div class="jl-group-line"><span class="jl-group jl-group--lab">{{ seminar.label }}</span><span class="jl-subject">{{ offering.subject.name }}</span></div></td>
+                    <td class="jl-col-kind" data-label="{% trans "DƏRS TİPİ" context "registrar.journal" %}"><span class="jl-kind">{% trans "Seminar" context "registrar.lesson_kind" %}</span></td>
+                    <td class="jl-col-count" data-label="{% trans "TƏLƏBƏ SAYI" context "registrar.journal" %}"><span class="jl-students"><i class="fas fa-user-group" aria-hidden="true"></i>{{ seminar.count }}</span></td>
+                    <td class="jl-col-action"><a class="jl-open-btn" href="{% url 'registrar:journal_detail' offering.id %}?kind=seminar&amp;seminar={{ seminar.number }}">{% trans "Jurnalı aç" context "registrar.journal" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a></td>
+                </tr>
+                {% endfor %}
                 {% endfor %}
             </tbody>
         </table>
