@@ -388,6 +388,16 @@ class Fixer:
 
         remove_duplicate(self, spec)
 
+    def share(self, spec) -> None:
+        from .mexanika_lessons_dup_2026_11_08 import remove_share
+
+        remove_share(self, spec)
+
+    def trim(self, spec) -> None:
+        from .mexanika_lessons_dup_2026_11_08 import trim_roster
+
+        trim_roster(self, spec)
+
     def _touch(self, enrollments) -> None:
         self.touched.update((row.pk, row) for row in enrollments)
 
@@ -419,6 +429,12 @@ def run(*, organization, actor, counts, plan) -> None:
     for spec in plan.get("duplicates") or []:
         with transaction.atomic():
             fixer.duplicate(spec if isinstance(spec, dict) else {})
+    for spec in plan.get("share_removals") or []:
+        with transaction.atomic():
+            fixer.share(spec if isinstance(spec, dict) else {})
+    for spec in plan.get("roster_trims") or []:
+        with transaction.atomic():
+            fixer.trim(spec if isinstance(spec, dict) else {})
     fixer.finish(actor)
 
 
@@ -436,6 +452,7 @@ class Undoer:
             "move": self._move,
             "instructor": self._instructor,
             "duplicate": self._duplicate,
+            "trim": self._trim,
         }.get(item.get("type"))
         if handler is None:
             self.counts["undo_item_unknown"] += 1
@@ -517,6 +534,11 @@ class Undoer:
         from .mexanika_lessons_dup_2026_11_08 import restore_duplicate
 
         restore_duplicate(self, item)
+
+    def _trim(self, item) -> None:
+        from .mexanika_lessons_dup_2026_11_08 import restore_trim
+
+        restore_trim(self, item)
 
 
 def undo(*, organization, actor, counts) -> None:

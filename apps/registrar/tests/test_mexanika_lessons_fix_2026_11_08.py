@@ -106,7 +106,7 @@ class MexanikaLessonsFixTest(_LabWorld, TestCase):
             )
         return lesson
 
-    def _plan(self, *, kinds=None, moves=None, duplicates=None):
+    def _plan(self, *, kinds=None, moves=None, duplicates=None, extra=None):
         kinds = kinds or [
             *(
                 {"offering": str(self.fiz.pk), "date": day, "start_time": "10:10", "from": "seminar", "to": "lab"}
@@ -147,7 +147,14 @@ class MexanikaLessonsFixTest(_LabWorld, TestCase):
         ]
         with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as handle:
             json.dump(
-                {"format": fix.FORMAT, "kind_changes": kinds, "moves": moves, "duplicates": duplicates or []}, handle
+                {
+                    "format": fix.FORMAT,
+                    "kind_changes": kinds,
+                    "moves": moves,
+                    "duplicates": duplicates or [],
+                    **(extra or {}),
+                },
+                handle,
             )
         return handle.name
 
@@ -307,6 +314,36 @@ class MexanikaLessonsFixTest(_LabWorld, TestCase):
             back = Lesson.objects.get(offering=self.cih, date=_day("2026-09-18"), start_time=T1335)
             self.assertEqual(sorted(back.marks.values_list("status", flat=True)), ["absent", "present"])
             self.assertEqual(Lesson.objects.get(pk=twin.pk).topic, "")
+
+    def test_share_removal_and_roster_trim_keep_data_and_undo(self):
+        noop = {"kinds": [{"offering": str(self.riy.pk), "date": "2026-01-01", "start_time": "10:10"}], "moves": []}
+        keep = self.enr[self.rob.pk][0]
+        with bypass_rls():
+            marked = self.enr[self.rob.pk][1]
+            lesson = self._make(self.rob, "2026-10-01", T1335, LessonKind.LECTURE, [])
+            LessonMark.objects.create(organization=self.org, lesson=lesson, enrollment=marked, status="present")
+        plan = self._plan(
+            kinds=noop["kinds"],
+            moves=[{"source": str(self.cih.pk), "target": str(self.rob.pk), "lessons": []}],
+            extra={
+                "share_removals": [
+                    {"offering": str(self.cih.pk), "teacher": self.hamidova.pk},
+                    {"offering": str(self.cih.pk), "teacher": self.leman.pk},  # yükdədir — qalır
+                ],
+                "roster_trims": [{"offering": str(self.rob.pk), "keep": [str(keep.pk)]}],
+            },
+        )
+        counts = self._call("--file", plan, "--apply")
+        self.assertEqual(counts["share_removed"], "1")
+        self.assertEqual(counts["share_teacher_in_workload_kept"], "1")
+        self.assertEqual((counts["trim_dropped"], counts["trim_row_has_data_kept"]), ("1", "1"))
+        with bypass_rls():
+            self.assertFalse(JournalShare.objects.get(offering=self.cih, teacher=self.hamidova).is_active)
+            self.assertEqual(Enrollment.objects.get(pk=marked.pk).status, "enrolled")
+        counts = self._call("--apply", "--undo")
+        self.assertEqual((counts["undo_trim_restored"], counts["undo_instructor_restored"]), ("1", "1"))
+        with bypass_rls():
+            self.assertEqual(Enrollment.objects.filter(offering=self.rob, status="enrolled").count(), 3)
 
     def test_workflow_wiring(self):
         text = WORKFLOW.read_text(encoding="utf-8")

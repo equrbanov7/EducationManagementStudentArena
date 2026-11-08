@@ -118,3 +118,85 @@ def restore_duplicate(self, item) -> None:
     self.touched.update((row.pk, row) for row in homes.values())
     self.counts["undo_duplicates_restored"] += 1
     self.done.append({"type": "duplicate", "restored_lesson": str(lesson.pk)})
+
+
+def remove_share(self, spec) -> None:
+    """D. Yükdə OLMAYAN müəllimin aktiv payı passiv olur (jurnal sahibi deyilsə, dərsi yoxdursa) — data qalır."""
+    from django.db.models import Q
+
+    from .schedule_slot_teachers import _workload_teacher_ids
+
+    counts = self.counts
+    counts["share_in_plan"] += 1
+    JournalShare = _model("JournalShare")
+    offering = _offerings(self.organization, [spec.get("offering")]).get(str(spec.get("offering")))
+    teacher_id = spec.get("teacher")
+    if not _open(offering):
+        counts["share_offering_closed"] += 1
+        return
+    workload = _workload_teacher_ids(offering)
+    if not workload or teacher_id in workload:
+        counts["share_teacher_in_workload_kept"] += 1
+        return
+    if offering.instructor_id == teacher_id:
+        counts["share_teacher_is_owner_kept"] += 1
+        return
+    if offering.lessons.filter(Q(instructor_id=teacher_id) | Q(created_by_id=teacher_id)).exists():
+        counts["share_teacher_has_lessons_kept"] += 1
+        return
+    shares = [
+        str(pk)
+        for pk in JournalShare.objects.select_for_update()
+        .filter(offering=offering, teacher_id=teacher_id, is_active=True)
+        .values_list("pk", flat=True)
+    ]
+    if not shares:
+        counts["share_already_inactive"] += 1
+        return
+    JournalShare.objects.filter(pk__in=shares).update(is_active=False, updated_at=timezone.now())
+    counts["share_removed"] += 1
+    self.items.append({"type": "instructor", "offering": str(offering.pk), "teacher": teacher_id, "shares": shares})
+
+
+def trim_roster(self, spec) -> None:
+    """E. Jurnalda yalnız ``keep`` qeydiyyatları qalır; qalanlar ``dropped`` olur — YALNIZ heç bir xanası, balı,
+    yekun nəticəsi yoxdursa (data itmir); xanalı sətir qalır və sayılır."""
+    counts = self.counts
+    Enrollment = _model("Enrollment")
+    offering = _offerings(self.organization, [spec.get("offering")]).get(str(spec.get("offering")))
+    keep = {str(pk) for pk in spec.get("keep") or []}
+    if not _open(offering) or not keep:
+        counts["trim_invalid"] += 1
+        return
+    rows = list(Enrollment.objects.select_for_update().filter(offering=offering, status="enrolled"))
+    if not keep <= {str(row.pk) for row in rows}:
+        counts["trim_keep_missing"] += 1
+        return
+    dropped = []
+    for row in rows:
+        if str(row.pk) in keep:
+            continue
+        if any(
+            _model(name).objects.filter(enrollment=row).exists()
+            for name in ("LessonMark", "ComponentScore", "FinalGrade", "CourseWork", "CriterionScore")
+        ):
+            counts["trim_row_has_data_kept"] += 1
+            continue
+        dropped.append(str(row.pk))
+    Enrollment.objects.filter(pk__in=dropped).update(status="dropped", updated_at=timezone.now())
+    counts["trim_dropped"] += len(dropped)
+    if dropped:
+        self.items.append({"type": "trim", "offering": str(offering.pk), "dropped": dropped})
+
+
+def restore_trim(self, item) -> None:
+    Enrollment = _model("Enrollment")
+    offering = _offerings(self.organization, [item.get("offering")]).get(str(item.get("offering")))
+    if not _open(offering):
+        self.counts["undo_offering_closed"] += 1
+        return
+    restored = Enrollment.objects.filter(
+        pk__in=item.get("dropped") or [], offering=offering, status="dropped", superseded_by__isnull=True
+    ).update(status="enrolled", updated_at=timezone.now())
+    self.counts["undo_trim_restored"] += restored
+    self.done.append(item)
