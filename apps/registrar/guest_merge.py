@@ -271,6 +271,27 @@ def restore_source(*, target, by_user, reason=""):
 # ── Köçürülən iş (hədəf jurnalda görünür) ────────────────────────────────────
 
 
+def _own_lesson_slots(target_marks) -> set:
+    """Hədəf qeydiyyatların ÖZ jurnalında xanası olan dərslər: ``(hədəf, tarix, saat, növ)`` və ``(hədəf, tarix, növ)``.
+
+    Köhnə delta ana qrupun jurnalına alt qrup dərslərinin SURƏTİNİ yazmışdı (135 TSPX): ana sətir əvəzlənəndə həmin
+    dərslərin qayıbı «əvvəlki jurnal» kimi alt qrup jurnalındakı EYNİ dərsin qayıbının üstünə gəlirdi — ikiqat."""
+    slots: set = set()
+    for mark in target_marks:
+        lesson = mark.lesson
+        slots.add((mark.enrollment_id, lesson.date, lesson.start_time, lesson.kind))
+        slots.add((mark.enrollment_id, lesson.date, None, lesson.kind))
+    return slots
+
+
+def _same_lesson_written(slots, target_id, lesson) -> bool:
+    if target_id is None:
+        return False
+    if lesson.start_time is None:
+        return (target_id, lesson.date, None, lesson.kind) in slots
+    return (target_id, lesson.date, lesson.start_time, lesson.kind) in slots
+
+
 def carry_over_map(target_ids, *, with_entry_score: bool = True) -> dict:
     """``{hədəf_enrollment_id: xülasə}`` — birləşmədən gələn əvvəlki jurnal işi.
 
@@ -318,8 +339,16 @@ def carry_over_map(target_ids, *, with_entry_score: bool = True) -> dict:
         return {}
     marks_by_enrollment: dict = {}
     per_enrollment: dict = {}
-    marks = LessonMark.objects.filter(enrollment_id__in=[row.pk for row in predecessors]).select_related("lesson")
+    successor = {row.pk: row.superseded_by_id for row in predecessors}
+    # Bir sorğu: əvvəlki qeydiyyatların VƏ hədəflərin xanaları (hədəfinki yalnız «eyni dərs» yoxlaması üçün).
+    rows = list(
+        LessonMark.objects.filter(enrollment_id__in=[*successor, *set(successor.values())]).select_related("lesson")
+    )
+    twins = _own_lesson_slots(mark for mark in rows if mark.enrollment_id not in successor)
+    marks = [mark for mark in rows if mark.enrollment_id in successor]
     for mark in marks:
+        if _same_lesson_written(twins, successor.get(mark.enrollment_id), mark.lesson):
+            continue  # sahib 2026-11-08 (135 TSPX): eyni dərs hədəf jurnalda da yazılıb — ikinci dəfə sayılmır
         marks_by_enrollment.setdefault(mark.enrollment_id, []).append(mark)
         bucket = per_enrollment.setdefault(mark.enrollment_id, {"marks": 0, "scored": 0, "count": 0, "hours": 0})
         bucket["marks"] += 1
