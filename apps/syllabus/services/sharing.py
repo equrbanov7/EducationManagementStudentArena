@@ -195,33 +195,61 @@ def unshare(*, syllabus, offering_id, actor, request=None) -> None:
     row.delete()
 
 
-def link_legacy(*, syllabus, offering, user=None) -> str:
-    """Köhnə sistemin «bir sillabus — bir neçə jurnal» faktı (idxal / təmir) — FILL-ONLY, icazə yoxlamır.
-
-    Qayıdış: ``"linked"`` və ya səbəb kodu (``"already"``, ``"has_own"``, ``"taken"``, ``"not_sibling"``,
-    ``"other_teacher"``).  Yalnız idxal borusundan (management command / delta fazası) çağırılmalıdır.
-    """
+def _link(*, syllabus, offering, user, source) -> tuple:
+    """``link_legacy`` / ``link_carry`` gövdəsi — ``(kod, sətir|None)``; FILL-ONLY, icazə yoxlamır."""
     if not _same_slot(syllabus, offering):
-        return "not_sibling"
+        return "not_sibling", None
     owners = {syllabus.author_id, getattr(syllabus.offering, "instructor_id", None) if syllabus.offering_id else None}
     if offering.instructor_id is None or offering.instructor_id not in owners:
-        return "other_teacher"
+        return "other_teacher", None
     state = target_code(offering, syllabus_id=syllabus.pk)
     if state:
-        return {CODE_HAS_OWN: "has_own", CODE_ALREADY: "already", CODE_TAKEN: "taken"}[state]
+        return {CODE_HAS_OWN: "has_own", CODE_ALREADY: "already", CODE_TAKEN: "taken"}[state], None
     try:
         with transaction.atomic():
             row = SyllabusShare.objects.create(
                 organization_id=syllabus.organization_id,
                 syllabus=syllabus,
                 offering_id=offering.pk,
-                source=ShareSource.LEGACY,
+                source=source,
                 created_by=user,
             )
     except IntegrityError:
-        return "taken"
+        return "taken", None
     _audit(row, action=AuditAction.CREATE, user=user)
-    return "linked"
+    return "linked", row
+
+
+def link_legacy(*, syllabus, offering, user=None) -> str:
+    """Köhnə sistemin «bir sillabus — bir neçə jurnal» faktı (idxal / təmir) — FILL-ONLY, icazə yoxlamır.
+
+    Qayıdış: ``"linked"`` və ya səbəb kodu (``"already"``, ``"has_own"``, ``"taken"``, ``"not_sibling"``,
+    ``"other_teacher"``).  Yalnız idxal borusundan (management command / delta fazası) çağırılmalıdır.
+    """
+    return _link(syllabus=syllabus, offering=offering, user=user, source=ShareSource.LEGACY)[0]
+
+
+def link_carry(*, syllabus, offering, user=None) -> tuple:
+    """Sahib 2026-11-08: müəllimin başqa qrupdakı TƏSDİQLƏNMİŞ sillabusu bu jurnalda da — ``link_legacy`` qaydaları.
+
+    Namizəd seçimi (dil, saat, birmənalılıq) registrar qatındadır (``apps.registrar.syllabus_carry``); burada yalnız
+    paylaşım qaydaları 1–3 + yazı.  Qayıdış ``(kod, SyllabusShare|None)``.
+    """
+    return _link(syllabus=syllabus, offering=offering, user=user, source=ShareSource.CARRY)
+
+
+def unlink_carry(*, share_id, organization, user=None) -> bool:
+    """Avtomatik (``carry``) paylaşımı ayır — yalnız həmin mənbəli sətir; geri qaytarma əmri üçün."""
+    row = (
+        SyllabusShare.objects.select_for_update()
+        .filter(pk=share_id, organization=organization, source=ShareSource.CARRY)
+        .first()
+    )
+    if row is None:
+        return False
+    _audit(row, action=AuditAction.DELETE, user=user)
+    row.delete()
+    return True
 
 
 def release_offering(*, organization, offering, user=None, request=None) -> int:
@@ -243,6 +271,7 @@ __all__ = [
     "REASON_CODES",
     "RESOURCE_TYPE",
     "effective_shares",
+    "link_carry",
     "link_legacy",
     "release_offering",
     "share",
@@ -251,5 +280,6 @@ __all__ = [
     "shared_syllabus_ids",
     "shares_of",
     "target_code",
+    "unlink_carry",
     "unshare",
 ]

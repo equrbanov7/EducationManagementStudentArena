@@ -1489,6 +1489,236 @@
    },
    "teacher": 7740
   },
+  "8666": {
+   "content_sha256": "b2199d984ae505d00d9282d6e0bd237fd2c9a030bb9ebb6e64b60c3a4d9d8e49",
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "hours": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "legacy_lesson": 2683,
+   "legacy_teacher": 760,
+   "sections": {
+    "assess": {
+     "exam_questions": [],
+     "midterm": 0,
+     "note": "Sərbəst iş üçün tələb olunan yazı qaydaları\nŞrift və ölçüsü: Arial 12 pt\nSətirlərarası interval: 1,5\nÜmumi işin həcmi: minimum 3 səhifə\nSon təqdim olunma tarixi: semestrin sonuna 2 həftə qalmış",
+     "project": 0
+    },
+    "desc": {
+     "description": "“Kompüter əsaslı mühəndis qrafikası” fənninin əsas məqsədi tələbələrə mühəndis qrafikasının nəzəri əsaslarını, texniki çertyojların hazırlanması və oxunması qaydalarını öyrətmək, həmçinin müasir kompüter texnologiyalarından və CAD proqramlarından istifadə etməklə mühəndis məsələlərinin qrafik həllini həyata keçirmək bacarığı formalaşdırmaqdır.\nFənnin tədrisi nəticəsində tələbələr AutoCAD və digər kompüter əsaslı layihələndirmə proqramlarından istifadə etməklə 2D çertyojların hazırlanması, 3D modellərin qurulması, ölçüləndirmə və texniki sənədlərin müvafiq standartlara uyğun tərtib edilməsi üzrə praktiki bacarıqlara yiyələnirlər. Fənn tələbələrdə mühəndis layihələrinin qrafik şəkildə təqdim edilməsi və layihələndirmə prosesində müasir informasiya texnologiyalarından səmərəli istifadə etmək qabiliyyətinin inkişafına xidmət edir.",
+     "goal": ""
+    },
+    "info": {
+     "certificates": [],
+     "language": "az",
+     "lesson_hours": 45,
+     "office_hours": "",
+     "prerequisites": "",
+     "research_interests": [],
+     "teacher": "",
+     "welcome": ""
+    },
+    "lit": {
+     "additional": [],
+     "primary": [
+      "1. Qasımov, M. Mühəndis qrafikası. Bakı: Maarif.2. Quliyev, A. Mühəndis qrafikası və çertyojların tərtibatı. Bakı.3. Əliyev, R. Kompüter qrafikası və AutoCAD. Bakı.4. Omura, G. Mastering AutoCAD. Wiley.5. Shih, R. H. AutoCAD 2024 Tutorial: 2D Fundamentals. SDC Publications.6. Tickoo, S. AutoCAD 2024: A Problem-Solving Approach. CADCIM Technologies."
+     ]
+    },
+    "method": {
+     "methods": [
+      "Yekun qiymət cari qiymətləndirməyə - məşğələ (seminar və laboratoriya işi) (0 - 30 bal), sərbəst iş (0 - 10 bal), davamiyyət (0 - 10 bal) və aralıq qiymətləndirməyə - semestr sonu imtahanlara (0 - 50 bal) görə verilən balların cəmidir. Eyni fəndən əlavə olaraq təcrübi və əməli dərslər nəzərdə tutulduğu halda bu dərslərin qiymətləndirilməsi üçün (0 – 10) bal ayrılır.\nYekun qiymət = cari qiymətləndirmə + aralıq qiymətləndirmə"
+     ],
+     "note": ""
+    },
+    "out": {
+     "outcomes": [
+      "Fənnin təlim nəticələri “Kompüter əsaslı mühəndis qrafikası” fənnini mənimsədikdən sonra tələbə:\n1. Kompüter əsaslı mühəndis qrafikasının əsas anlayışlarını, prinsiplərini və tətbiq sahələrini izah edir.\n2. Mühəndis çertyojlarının hazırlanması və tərtib edilməsi qaydalarını, standartlarını və şərti işarələrini tətbiq edir.\n3. Mühəndis qrafikasında istifadə olunan proyeksiya üsullarını və həndəsi təsvirlərin qurulması prinsiplərini tətbiq edir.\n4. AutoCAD və digər CAD proqramlarının əsas funksiyalarını və alətlərini istifadə edir.\n5. AutoCAD proqramında ikiölçülü (2D) çertyojlar hazırlayır, redaktə edir və ölçüləndirir."
+     ]
+    },
+    "prev": {},
+    "self": {
+     "archived": [],
+     "option": "",
+     "topics": [
+      {
+       "title": "1. AutoCAD proqramının interfeysi və əsas iş alətləri"
+      },
+      {
+       "title": "2. AutoCAD proqramında həndəsi fiqurların qurulması"
+      },
+      {
+       "title": "3. Mühəndis çertyojlarının standartlara uyğun hazırlanması"
+      },
+      {
+       "title": "4. AutoCAD proqramında ölçüləndirmə və ölçü üslublarının yaradılması"
+      },
+      {
+       "title": "5. Mühəndis qrafikasında proyeksiyaların qurulması"
+      },
+      {
+       "title": "6. AutoCAD proqramında layların (Layers) yaradılması və idarə edilməsi"
+      },
+      {
+       "title": "7. İkiölçülü (2D) mühəndis çertyojlarının hazırlanması"
+      },
+      {
+       "title": "8. AutoCAD proqramında üçölçülü (3D) modelləşdirmənin əsasları"
+      },
+      {
+       "title": "9. Maşın hissələrinin və detallarının kompüter vasitəsilə layihələndirilməsi"
+      }
+     ]
+    },
+    "send": {},
+    "week": {
+     "rows": [
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Giriş. Proyeksiya üsulları. Ortogonal proyeksiya. Proyeksiya müstəviləri. Qaspar Monj üsulu. Nöqtə. Müxtəlif nöqtələrin proyeksiya müstəvisinə proyeksiyaları. Düz xətt. Düz xəttin proyeksiya müstəvilərinə nəzərən vəziyyəti. Nöqtə ilə düz xəttin qarşılıqlı vəziyyəti. Düz xətt parçasının həqiqi uzunluğu. Düz xəttin izləri. İki düz xətt. İki düz xəttin qarşılıqlı vəziyyəti. İki perpendikulyar düz xətt."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Funksiya anlayışı və onun verilməsinin əsas üsulları. Əsas elementar funksiyalar və onların qrafikləri."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Həndəsi quruluşlar. Düz xətlərin və bucaqların bölünməsi və qurulması. Düz xətt parçasının iki bərabər hissəyə bölünməsi. İki düz xəttin birləşdirilməsi. Çevrə ilə düz xəttin birləşdirilməsi. İki çevrənin birləşdirilməsi. Daxili və xarici toxunmalar."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Düz xəttin proyeksiya müstəvilərinə nəzərən vəziyyəti. Düz xətt parçasının həqiqi uzunluğunun müəyyən edilməsi. Düz xəttin izləri. İki düz xəttin qarşılıqlı vəziyyəti. Məsələlər."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Müstəvinin proyeksiya müstəvilərinə nəzərən müxtəlif vəziyyətləri. Müstəvinin əsas xətləri. Məsələlər."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "İki müstəvi. İki müstəvinin kəsişməsi. İki paralel və perpendikulyar müstəvi. Verilmiş müstəvi üzərində yerləşən düz xətlər və nöqtələr. Məsələlər."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Metrik məsələlər. Nöqtədən müstəviyə qədər məsafənin müəyyən edilməsi. İki müstəvi arasındakı məsafənin müəyyən edilməsi. Məsələlər."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Detalın üç görünüşünün eskizinin hazırlanması. Detalın kəsiklərinin və ölçülərinin göstərilməsi."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Detalın üçüncü proyeksiyasının qurulması. Verilmiş iki proyeksiya əsasında detalın üçüncü proyeksiyasının qurulması, kəsiklərinin və ölçülərinin göstərilməsi."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Aksonometrik proyeksiyalar. Kubun və çevrənin izometrik proyeksiyası. İzometrik oxlar və izometrik miqyas."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Çoxüzlünün kompleks çertyojunun qurulması. Çoxüzlünün müstəvi ilə kəsişməsi. Çoxüzlünün düz xətlə kəsişməsi. Məsələlər."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Yivlər. Yivin çertyojda göstərilməsi. İki detalın yiv vasitəsilə birləşdirilməsi. Variantlara uyğun olaraq bolt parametrlərinin hesablanması və iki detalın bolt birləşməsinin çertyojunun hazırlanması. Variantlara uyğun olaraq şpilka parametrlərinin hesablanması və iki detalın şpilka birləşməsinin çertyojunun hazırlanması."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 2,
+       "topic": "Qaynaq birləşmələri. Qaynaq birləşmələrinin növləri."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 0,
+       "topic": "Drawing və Modify alətlər panelinin əmrləri. Çəkmə və redaktə etmə alətlər panelinin əsas əmrləri."
+      },
+      {
+       "lab": 0,
+       "lecture": 2,
+       "note": "",
+       "outcome": "",
+       "practical": 0,
+       "seminar": 1,
+       "topic": "Drawing və Modify əmrlərinin tətbiqi. Detalların layihələndirilməsi zamanı çəkmə və redaktə etmə əmrlərinin tətbiqi."
+      }
+     ]
+    }
+   },
+   "teacher": 8204
+  },
   "8802": {
    "content_sha256": "943ee1b458b967fefd2b121f608c838fdd8cb153c5edd9af014318a19acae254",
    "excluded": [
@@ -2431,6 +2661,22 @@
     "f2259a9a-7a7f-4869-93ef-41140232606e"
    ],
    "teacher": 8114
+  },
+  {
+   "action": "restore",
+   "group_id": "bb710525-2453-4ca0-85bc-71da98736988",
+   "key": "mx235qm",
+   "lesson_hours": 45,
+   "offering_id": "0b81acf5-9751-42b4-b103-98680be3410a",
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "source": "8666",
+   "subject_ids": [
+    "8c6a7503-0be0-403a-b4bd-9ae711afb868"
+   ],
+   "teacher": 8204
   }
  ]
 }

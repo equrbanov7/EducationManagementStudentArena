@@ -7,7 +7,9 @@ Müəllim
     ledger vahidi.
 
 Tələbə
-    ledger (``student``) → ``institutional_identifier`` = legacy id (əvvəlki delta yaradıbsa) → FİN →
+    ledger (``student``) → ``institutional_identifier`` = legacy id (əvvəlki delta yaradıbsa) → FİN (yalnız soyad +
+    ad da tutanda — sahib 2026-11-08: köhnə sistemdə bəzi sətirlərə BAŞQA tələbənin FİN-i yazılıb; tutmursa
+    ``student.fin_name_mismatch`` sayılır, FİN atılır və ad yoluna keçilir, tapılmasa hesab YARADILMIR) →
     ad + soyad (tək namizəd; ata adı, qrup və ya doğum tarixi uyğun gəlməlidir). Tapılmasa və AZAD EDİLMƏYİBSƏ,
     qrupu və proqramı həll olunursa — RİM-in ``intake.create.create_account`` yolu ilə hesab (parolsuz,
     ``legacy.<ad>@placeholder.invalid``; ilk girişdə öz e-poçtunu yazır, birdəfəlik parolu RİM verir).
@@ -19,6 +21,8 @@ import re
 from collections import Counter, defaultdict
 
 from django.apps import apps as django_apps
+
+from core.person_names import same_person_name
 
 from ..legacy_demographics import GENDER_FEMALE, GENDER_MALE, GENDER_UNSPECIFIED, legacy_birth_date, legacy_gender
 from .resolve import ledger_map, person_key, text
@@ -123,11 +127,17 @@ class StudentMapper:
             )
         )
         fins = sorted({str(row.get("fincode") or "").strip().upper() for row in students.values()} - {""})
-        self.by_fin = {
-            fin.upper(): user_id
-            for fin, user_id in UserProfile.objects.filter(fin__in=fins).values_list("fin", "user_id")
-            if fin
-        }
+        #: hesab → (soyad, ad): FİN tutuşdurması ad ilə təsdiqlənir (:meth:`_fin_name_ok`).
+        self.names: dict = {}
+        self.by_fin = {}
+        for fin, user_id, last, first in UserProfile.objects.filter(fin__in=fins).values_list(
+            "fin", "user_id", "user__last_name", "user__first_name"
+        ):
+            if fin:
+                self.by_fin[fin.upper()] = user_id
+                self.names[user_id] = (last, first)
+        #: FİN-i başqa adamın hesabına düşən legacy sətirləri (bir dəfə sayılır).
+        self.fin_name_mismatch: set = set()
         #: Paket daxilində eyni FİN-li legacy sətirləri (eyni adamın iki legacy qeydi) → EYNİ hesab.
         self.bundle_fin: dict = {}
         self.student_ids = set(
@@ -150,6 +160,7 @@ class StudentMapper:
         for user_id, first, last, patronymic, birth, fin in UserProfile.objects.filter(
             user_id__in=self.student_ids
         ).values_list("user_id", "user__first_name", "user__last_name", "patronymic", "birth_date", "fin"):
+            self.names[user_id] = (last, first)
             self.by_name[(person_key(last), person_key(first))].append((user_id, person_key(patronymic), birth))
             if fin:
                 self.fin_of[user_id] = fin.strip().upper()
@@ -179,7 +190,7 @@ class StudentMapper:
         # «identifikator» ilə tapılır, ad iddiası isə yenə rədd olunur).
         self._name_claims.setdefault(result[0], legacy_id)
         fin = _fin(self.students.get(legacy_id))
-        if fin:
+        if fin and legacy_id not in self.fin_name_mismatch:
             self.bundle_fin.setdefault(fin, result[0])
 
     def prepare(self) -> None:
@@ -216,11 +227,22 @@ class StudentMapper:
         if row is None:
             return None, "source_missing"
         fin = _fin(row)
+        mismatch = False
         if fin and fin in self.by_fin:
             user_id = self.by_fin[fin]
-            return (user_id, "fin") if user_id in self.student_ids else (None, "fin_not_student")
-        if fin and fin in self.bundle_fin:
-            return self.bundle_fin[fin], "fin_same_person"
+            if self._fin_name_ok(user_id, row):
+                return (user_id, "fin") if user_id in self.student_ids else (None, "fin_not_student")
+            mismatch = True
+        elif fin and fin in self.bundle_fin:
+            if self._fin_name_ok(self.bundle_fin[fin], row):
+                return self.bundle_fin[fin], "fin_same_person"
+            mismatch = True
+        if mismatch:
+            # FİN başqa adamındır — sətir FİN-siz kimi davam edir (adaşın öz FİN-i fərqli ola bilər).
+            if legacy_id not in self.fin_name_mismatch:
+                self.fin_name_mismatch.add(legacy_id)
+                self.run.count("student.fin_name_mismatch")
+            fin = ""
         group = self._group(row)
         candidates = [
             candidate
@@ -252,6 +274,9 @@ class StudentMapper:
                 self.run.names("student_ambiguous", _display(row), str(len(candidates)))
                 reason = "claimed_by_other" if claimed is not None else _ambiguity(candidates, row, narrowed)
                 return None, f"name_ambiguous.{reason}"
+        if mismatch:
+            # FİN-i başqasının hesabında olan sətir üçün hesab yaradılmır — RİM qərar verir.
+            return None, "fin_other_person_unresolved"
         if not create:
             return None, "not_found"
         if int(row.get("azadedildi") or 0) == 1:
@@ -260,6 +285,14 @@ class StudentMapper:
         if group is None:
             return None, "group_unresolved"
         return self._create(legacy_id, row, group, fin)
+
+    def _fin_name_ok(self, user_id, row) -> bool:
+        """FİN hesabının soyad + adı legacy sətirlə eynidir (bilinməyən hesab — yaradılmış — həmişə uyğundur)."""
+
+        known = self.names.get(user_id)
+        if known is None:
+            return True
+        return same_person_name(row.get("last_name"), row.get("first_name"), known[0], known[1])
 
     def _same_legacy_person(self, other_legacy_id, row) -> bool:
         """İki legacy sətri eyni adamdır: soyad + ad + ata adı eyni, doğum tarixi (hər ikisində varsa) eyni."""
@@ -353,6 +386,7 @@ class StudentMapper:
         self.student_ids.add(user.pk)
         self.active_ids.add(user.pk)
         self.group_of[user.pk] = group.pk
+        self.names[user.pk] = (last, first)
         if fin:
             self.by_fin[fin] = user.pk
             self.fin_of[user.pk] = fin

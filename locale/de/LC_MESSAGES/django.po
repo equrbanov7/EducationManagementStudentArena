@@ -116204,6 +116204,10 @@ msgctxt "registrar.syllabus"
 msgid "Əməliyyat yerinə yetirilmədi."
 msgstr "Der Vorgang konnte nicht ausgeführt werden."
 
+msgctxt "syllabus.model"
+msgid "Təsdiqlənmiş sillabus başqa qrupdan (avtomatik)"
+msgstr "Genehmigter Syllabus aus einer anderen Gruppe (automatisch)"
+
 msgctxt "accounts.syllabus"
 msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
 msgstr "Sowohl das Feld für Grundlagenliteratur als auch das für weiterführende Literatur muss ausgefüllt werden. Die Quellen können in beliebiger Form angegeben werden — untereinander, durch Kommas getrennt oder in einer Zeile."

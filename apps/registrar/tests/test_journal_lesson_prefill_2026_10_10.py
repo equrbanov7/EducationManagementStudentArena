@@ -254,7 +254,8 @@ class LessonPrefillBase(TestCase):
     def _fresh(self, offering=None):
         """Memo-suz təzə obyekt (``lesson_rows``/``offering_slots`` obyektə yapışır)."""
         with bypass_rls():
-            return CourseOffering.objects.select_related("period", "organization").get(
+            # Jurnal səhifəsi kimi (``journal_access.offering_or_404``): fənn keşdədir.
+            return CourseOffering.objects.select_related("subject", "period", "organization").get(
                 pk=(offering or self.offering).pk
             )
 

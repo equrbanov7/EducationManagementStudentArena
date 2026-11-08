@@ -9,8 +9,14 @@ tarix + saat + növ, tələbə jurnalın öz siyahısında ad ilə) və YALNIZ i
                   "hours": 2}],
      "cells": [{"lesson": uuid | "L1", "enrollment": uuid, "status": "present"|"absent"|"excused", "score": null|ədəd}]}
 
+``status`` əvəzinə köhnə sistemin xana kodu da ola bilər (``status`` və ya ``point``): ``qb`` → qayıb, ``ie`` → iştirak,
+rəqəm → iştirak + bal; ``"excusable": 1`` qayıbı üzrlü edir (:func:`cell_status`, delta ilə eyni). ``allowed_qb``
+pəncərələri planı quranda ``excusable``-a çevrilməlidir.
+
 Xanada ``enrollment`` əvəzinə ``fin`` ola bilər (şifrəli plan — ``roster_tag`` = ``legacy-cells-…``): tələbə
-dərsin açılışında ``enrolled`` sətri olan FİN sahibi kimi tapılır (tapılmasa ``cells_student_not_found``).
+dərsin açılışında ``enrolled`` sətri olan FİN sahibi kimi tapılır; köhnə sistemdə FİN-i olmayan tələbə üçün ``name``
+(«Soyad Ad») — açılışın siyahısında YEGANƏ uyğun gələn tələbə (iki eyni ad → yazılmır). Tapılmasa
+``cells_student_not_found``.
 
 ``lessons`` — köhnə sistemdə olub EMS-də OLMAYAN dərs: eyni açılışda eyni tarix + saat + növdə dərs varsa o işlədilir
 (ikinci dərs yaranmır), yoxdursa yaradılır (müəllim — açılışın müəllimi, köhnə sistemin dərsi kimi); açılış aktiv və
@@ -39,6 +45,7 @@ from django.utils import timezone
 
 from core.audit import log_action
 from core.constants import AuditAction
+from core.person_names import name_key
 
 from . import lab_groups
 from .gradebook import lesson_allows_score
@@ -51,6 +58,26 @@ RESOURCE = "registrar.legacy_cells_fill"
 LAST_LEGACY_DAY = datetime.date(2026, 10, 21)
 STATUSES = ("present", "absent", "excused")
 MAX_SCORE = 10
+#: Köhnə sistemin xana kodu (``journals_dates_points.point``) → status — delta ilə eyni
+#: (``legacy_import.delta.lessons.mark_value``): ``ie`` iştirak, ``qb`` qayıb, rəqəm iştirak + bal.
+LEGACY_POINTS = {"ie": "present", "iə": "present", "qb": "absent"}
+
+
+def cell_status(cell) -> tuple:
+    """``(status, score)``: ``status`` (və ya köhnə ``point``) EMS dəyəri, ``qb`` / ``ie`` kodu və ya rəqəm ola bilər;
+    köhnə sistemin ``excusable=1`` bayrağı qayıbı üzrlü edir (delta kimi). Tanınmayan kod → ``None`` (yazılmır)."""
+    score = cell.get("score")
+    raw = cell.get("status") if cell.get("status") not in (None, "") else cell.get("point")
+    token = str(raw if raw is not None else "").strip().lower()
+    if token in LEGACY_POINTS:
+        status = LEGACY_POINTS[token]
+    elif token.isdigit():
+        status, score = "present", int(token) if score is None else score
+    else:
+        status = token if token in STATUSES else None
+    if status == "absent" and str(cell.get("excusable") or "").strip().lower() in ("1", "true"):
+        status = "excused"
+    return status, score
 
 
 def _model(name):
@@ -131,6 +158,40 @@ def _fin_enrollments(organization, cells, lessons) -> dict:
     return {(offering_id, str(fin).strip().upper()): pk for offering_id, fin, pk in rows}
 
 
+def _norm(text) -> str:
+    """«Soyad Ad» müqayisəsi: HTML varlıqları, böyük/kiçik, İ/ı, diakritika və boşluq fərqi sayılmır."""
+    return " ".join(name_key(text).split()[:2])
+
+
+def _enrollment_names(ids) -> dict:
+    rows = (
+        _model("Enrollment")
+        .objects.filter(pk__in=list(ids))
+        .values_list("pk", "student__last_name", "student__first_name")
+    )
+    return {pk: _norm(f"{last} {first}") for pk, last, first in rows}
+
+
+def _name_enrollments(organization, cells, lessons) -> dict:
+    """``{(açılış, «soyad ad») → qeydiyyat id}`` — yalnız açılışda YEGANƏ olan adlar."""
+    wanted = {str(c.get("lesson")) for c in cells if c.get("name") and str(c.get("lesson")) in lessons}
+    offerings = {lessons[key].offering_id for key in wanted}
+    if not offerings:
+        return {}
+    rows = (
+        _model("Enrollment")
+        .objects.filter(organization=organization, offering_id__in=offerings, status="enrolled")
+        .values_list("offering_id", "student__last_name", "student__first_name", "pk")
+    )
+    found, twice = {}, set()
+    for offering_id, last, first, pk in rows:
+        key = (offering_id, _norm(f"{last} {first}"))
+        if key in found:
+            twice.add(key)
+        found[key] = pk
+    return {key: pk for key, pk in found.items() if key not in twice}
+
+
 def run(*, organization, actor, counts, cells, lessons_spec=()) -> None:
     Lesson, Enrollment, LessonMark = _model("Lesson"), _model("Enrollment"), _model("LessonMark")
     manifest = {"lessons_created": []}
@@ -146,10 +207,19 @@ def run(*, organization, actor, counts, cells, lessons_spec=()) -> None:
         }
     )
     by_fin = _fin_enrollments(organization, cells, lessons)
+    by_name = _name_enrollments(organization, cells, lessons)
+    names = _enrollment_names(set(by_fin.values()))
     for cell in cells:
-        if cell.get("fin") and not cell.get("enrollment"):
+        if (cell.get("fin") or cell.get("name")) and not cell.get("enrollment"):
             lesson = lessons.get(str(cell.get("lesson")))
-            found = by_fin.get((lesson.offering_id, str(cell["fin"]).strip().upper())) if lesson else None
+            found = by_fin.get((lesson.offering_id, str(cell.get("fin") or "").strip().upper())) if lesson else None
+            if found is not None and _norm(cell.get("name")) and names.get(found) != _norm(cell["name"]):
+                # Köhnə sistemdə FİN səhv tələbəyə yazılıb (2026-11-08: Cəfərli İslamın FİN-i Məcidova Gülüstanındır) —
+                # FİN adla təsdiqlənmirsə qəbul edilmir.
+                counts["cells_fin_name_mismatch"] += 1
+                found = None
+            if found is None and lesson is not None and _norm(cell.get("name")):
+                found = by_name.get((lesson.offering_id, _norm(cell["name"])))
             cell["enrollment"] = str(found) if found else None
             if found is None:
                 counts["cells_student_not_found"] += 1
@@ -170,7 +240,7 @@ def run(*, organization, actor, counts, cells, lessons_spec=()) -> None:
         if cell.get("enrollment") is None:
             continue
         lesson, enrollment = lessons.get(str(cell.get("lesson"))), enrollments.get(str(cell.get("enrollment")))
-        status, score = cell.get("status"), cell.get("score")
+        status, score = cell_status(cell)
         if lesson is None or enrollment is None or enrollment.offering_id != lesson.offering_id:
             counts["cells_target_mismatch"] += 1
         elif not lesson.offering.is_active or str(lesson.offering_id) in shut or enrollment.status != "enrolled":
@@ -192,6 +262,7 @@ def run(*, organization, actor, counts, cells, lessons_spec=()) -> None:
             touched[enrollment.pk] = enrollment
             counts["cells_filled"] += 1
             counts["cells_filled_scored" if score is not None else "cells_filled_attendance"] += 1
+            counts[f"cells_filled_{status}"] += 1
     recompute_absences(list(touched.values()))
     if created or manifest["lessons_created"]:
         log_action(

@@ -115338,6 +115338,10 @@ msgctxt "registrar.syllabus"
 msgid "Əməliyyat yerinə yetirilmədi."
 msgstr "Не удалось выполнить операцию."
 
+msgctxt "syllabus.model"
+msgid "Təsdiqlənmiş sillabus başqa qrupdan (avtomatik)"
+msgstr "Утверждённый силлабус из другой группы (автоматически)"
+
 msgctxt "accounts.syllabus"
 msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
 msgstr "Нужно заполнить оба поля — основную и дополнительную литературу. Источники можно записывать в любой форме: каждый с новой строки, через запятую или в одну строку."

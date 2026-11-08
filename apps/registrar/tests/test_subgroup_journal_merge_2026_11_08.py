@@ -181,6 +181,14 @@ class SubgroupJournalMergeTest(_LabWorld, TestCase):
             self.assertTrue(CourseOffering.objects.get(pk=self.o1.pk).is_active)
             self.assertFalse(SeminarGroup.objects.filter(offering=self.offering).exists())
 
+    def test_merge_that_adds_empty_cells_is_blocked(self):
+        with bypass_rls():
+            o1_e3 = Enrollment.objects.get(offering=self.o1, student=self.s3)
+            for days in (4, 3, 2):  # K1-in K2-də olmayan 3 mühazirəsi → K2 tələbəsinə boş xana
+                lesson = self._lesson_at(self.o1, self.today - datetime.timedelta(days=days), LessonKind.LECTURE, T1010)
+                LessonMark.objects.create(organization=self.org, lesson=lesson, enrollment=o1_e3, status="present")
+        self.assertEqual(self._call("--apply"), {"family_adds_empty_cells": "1"})
+
     def test_component_scores_copied_and_final_grade_blocks(self):
         from apps.registrar.models import AssessmentComponent, ComponentScore
 
@@ -215,6 +223,40 @@ class SubgroupJournalMergeTest(_LabWorld, TestCase):
         with bypass_rls():
             row = Enrollment.objects.get(pk=self.e1.pk)
             self.assertEqual((row.status, row.superseded_by_id), ("dropped", o1_e0.pk))
+
+    def test_seminar_default_puts_parent_own_students_into_subgroup(self):
+        """536 Bİ: ana qrupun öz tələbələri (reyestrdə alt qrupu yoxdur) Bi 1 alt qrupudur."""
+        with bypass_rls():
+            Enrollment.objects.filter(pk=self.e0.pk).update(status="dropped")
+            row = Enrollment.objects.create(organization=self.org, student=self.students[1], offering=self.o1)
+            for lesson in Lesson.objects.filter(offering=self.o1):
+                LessonMark.objects.create(organization=self.org, lesson=lesson, enrollment=row, status="present")
+        plan = ({**merge.PLAN[0], "seminar_default_source": str(self.o1.pk)},)
+        with mock.patch.object(merge, "PLAN", plan):
+            counts = self._call("--apply")
+        self.assertEqual(counts.get("families_merged"), "1", counts)
+        with bypass_rls():
+            number = SeminarGroup.objects.get(offering=self.offering, unit=self.k1).number
+            self.assertEqual(Enrollment.objects.get(pk=self.e2.pk).seminar_group, number)
+            self.assertFalse(
+                Enrollment.objects.filter(
+                    offering=self.offering, status="enrolled", seminar_group__isnull=True
+                ).exists()
+            )
+        with mock.patch.object(merge, "PLAN", plan):
+            self._call("--apply", "--undo")
+        with bypass_rls():
+            self.assertIsNone(Enrollment.objects.get(pk=self.e2.pk).seminar_group)
+
+    def test_blocked_enrollment_is_reported_by_id(self):
+        def boom(*args, **kwargs):
+            raise merge.IntegrityError("x")
+
+        with mock.patch.object(Enrollment.objects, "create", side_effect=boom):
+            counts = self._call("--apply")
+        self.assertEqual(counts["target_enrollment_blocked"], "1")
+        self.assertRegex(counts["blocked_enrollment"], r"^[0-9a-f]{8}$")
+        self.assertEqual(counts["blocked_rule"], "unknown")
 
     def test_different_teachers_block_family(self):
         with bypass_rls():

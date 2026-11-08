@@ -99,6 +99,8 @@ def build(offering, context, *, now=None, scope=None) -> dict:
     candidates = open_slots(offering, today, todays)
     rooms = _slot_rooms(offering, candidates)
     for slot in candidates:
+        if slot.offering_id == offering.pk:
+            slot.offering = offering  # «Praktiki məşğələ» adı jurnalın keşlənmiş fənnindən — slot başına sorğu yox
         kind = journal_activation.slot_kind(slot)
         data["slots"][str(slot.pk)] = {
             "kind": kind,

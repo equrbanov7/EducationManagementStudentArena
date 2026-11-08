@@ -12,6 +12,20 @@ class RegistrarConfig(AppConfig):
         register_student_transfer(_transfer_student_group)
         _register_retake_media()
         _register_off_schedule_reevaluation()
+        _register_syllabus_carry()
+
+
+def _register_syllabus_carry():
+    """Sahib 2026-11-08: təsdiqlənmiş sillabus müəllimin başqa (boş) qrup jurnalına da — təsdiqdə və müəllim təyinində."""
+    from django.db.models.signals import post_save
+
+    from apps.syllabus.public import register_approval_hook
+
+    from .models import CourseOffering
+    from .syllabus_carry import carry_for_syllabus, offering_saved
+
+    register_approval_hook(carry_for_syllabus)
+    post_save.connect(offering_saved, sender=CourseOffering, dispatch_uid="registrar_syllabus_carry_offering_saved")
 
 
 def _register_off_schedule_reevaluation():
