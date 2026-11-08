@@ -31,6 +31,8 @@ class ShareSource(models.TextChoices):
 
     TEACHER = "teacher", pgettext_lazy(_CTX, "Müəllimin seçimi")
     LEGACY = "legacy", pgettext_lazy(_CTX, "Köhnə sistem (bir sillabus bir neçə jurnalda)")
+    #: Sahib 2026-11-08: müəllimin bu fənn üzrə başqa qrupda TƏSDİQLƏNMİŞ sillabusu (avtomatik).
+    CARRY = "carry", pgettext_lazy(_CTX, "Təsdiqlənmiş sillabus başqa qrupdan (avtomatik)")
 
 
 class SyllabusShare(UUIDModel, TimeStampedModel):
@@ -62,7 +64,7 @@ class SyllabusShare(UUIDModel, TimeStampedModel):
         constraints = [
             models.UniqueConstraint(fields=["offering"], name="uniq_syllabus_share_offering"),
             models.CheckConstraint(
-                condition=models.Q(source__in=["teacher", "legacy"]), name="syllabus_share_source_valid"
+                condition=models.Q(source__in=["teacher", "legacy", "carry"]), name="syllabus_share_source_valid"
             ),
         ]
         indexes = [models.Index(fields=["organization", "syllabus"], name="syllabus_share_org_syl")]
