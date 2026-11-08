@@ -224,6 +224,40 @@ class SubgroupJournalMergeTest(_LabWorld, TestCase):
             row = Enrollment.objects.get(pk=self.e1.pk)
             self.assertEqual((row.status, row.superseded_by_id), ("dropped", o1_e0.pk))
 
+    def test_seminar_default_puts_parent_own_students_into_subgroup(self):
+        """536 Bİ: ana qrupun öz tələbələri (reyestrdə alt qrupu yoxdur) Bi 1 alt qrupudur."""
+        with bypass_rls():
+            Enrollment.objects.filter(pk=self.e0.pk).update(status="dropped")
+            row = Enrollment.objects.create(organization=self.org, student=self.students[1], offering=self.o1)
+            for lesson in Lesson.objects.filter(offering=self.o1):
+                LessonMark.objects.create(organization=self.org, lesson=lesson, enrollment=row, status="present")
+        plan = ({**merge.PLAN[0], "seminar_default_source": str(self.o1.pk)},)
+        with mock.patch.object(merge, "PLAN", plan):
+            counts = self._call("--apply")
+        self.assertEqual(counts.get("families_merged"), "1", counts)
+        with bypass_rls():
+            number = SeminarGroup.objects.get(offering=self.offering, unit=self.k1).number
+            self.assertEqual(Enrollment.objects.get(pk=self.e2.pk).seminar_group, number)
+            self.assertFalse(
+                Enrollment.objects.filter(
+                    offering=self.offering, status="enrolled", seminar_group__isnull=True
+                ).exists()
+            )
+        with mock.patch.object(merge, "PLAN", plan):
+            self._call("--apply", "--undo")
+        with bypass_rls():
+            self.assertIsNone(Enrollment.objects.get(pk=self.e2.pk).seminar_group)
+
+    def test_blocked_enrollment_is_reported_by_id(self):
+        def boom(*args, **kwargs):
+            raise merge.IntegrityError("x")
+
+        with mock.patch.object(Enrollment.objects, "create", side_effect=boom):
+            counts = self._call("--apply")
+        self.assertEqual(counts["target_enrollment_blocked"], "1")
+        self.assertRegex(counts["blocked_enrollment"], r"^[0-9a-f]{8}$")
+        self.assertEqual(counts["blocked_rule"], "unknown")
+
     def test_different_teachers_block_family(self):
         with bypass_rls():
             other = User.objects.create_user("sgm_t2", "sgm_t2@x.test", "pw")
