@@ -464,6 +464,11 @@ class BiMuUndoTransactionTests(TransactionTestCase):
     def setUp(self):
         BiMuRosterTests.setUpTestData.__func__(type(self))
         BiMuRosterTests.setUp(self)
+        # Təsdiqli sillabusun avtomatik paylaşılması (on_commit) bu köhnə təmir alətinin «dəyişməmiş qəbz» yoxlamasına
+        # aid deyil — burada yalnız qeydiyyat / xana bərpası yoxlanır.
+        carry = patch("apps.registrar.syllabus_carry._run_offering")
+        carry.start()
+        self.addCleanup(carry.stop)
 
     execute = BiMuRosterTests.execute
     snapshot = BiMuRosterTests.snapshot
