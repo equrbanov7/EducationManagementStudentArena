@@ -50,11 +50,16 @@ class DeferredAuditMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        # İç-içə request (eyni axında test client / daxili çağırış) xarici növbəni sındırmasın — əvvəlki bərpa olunur.
+        outer = getattr(_local, "pending", None)
         _local.pending = []
         try:
             return self.get_response(request)
         finally:
-            pending, _local.pending = _local.pending, None
+            pending, _local.pending = _local.pending or [], outer
+            if outer is not None and transaction.get_connection().in_atomic_block:
+                outer.extend(pending)  # xarici request-in atomic bloku hələ açıqdır — onunla birgə sonra yazılır
+                pending = []
             for entry in pending:
                 _write(entry)
 
