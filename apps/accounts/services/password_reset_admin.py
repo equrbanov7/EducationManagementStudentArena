@@ -47,6 +47,7 @@ from django.db import transaction
 from django.utils.translation import pgettext
 
 from apps.audit.public import log_action
+from apps.organizations.public import self_conflict_message
 from core.constants import AuditAction
 from core.rate_limit import clear_rate_limit, record_rate_limit_hit
 from core.utils import get_client_ip
@@ -102,6 +103,7 @@ _RIM_CODE_MAP = {
     "target_rank_too_high": ("target_rank_too_high", 403),
     "no_organization_context": ("no_organization_context", 403),
     "permission_denied": ("permission_denied", 403),
+    "self_conflict": ("self_conflict", 403),
 }
 
 
@@ -133,6 +135,8 @@ def error_message(code: str) -> str:
         "reason_required": pgettext(_CTX, "Səbəb yazılmalıdır (ən azı 10 simvol)."),
         "query_too_short": pgettext(_CTX, "Ən azı 2 simvol daxil edin."),
         "password_generation_failed": pgettext(_CTX, "Parol yaradıla bilmədi. Yenidən cəhd edin."),
+        # Tələbə + heyət rolu (sahib 2026-11-08): qrup yoldaşının parolu — mətn ``organizations.self_conflict``-dədir.
+        "self_conflict": self_conflict_message(),
     }
     return messages.get(code) or messages["permission_denied"]
 

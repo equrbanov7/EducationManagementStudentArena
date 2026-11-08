@@ -12,7 +12,7 @@ from django.views.decorators.http import require_GET
 
 from core.tenancy import get_request_organization, request_has_active_organization_context
 
-from . import corrections, guest_roster, journal_access
+from . import guest_roster, journal_access
 from . import journal_reviewed_history_spec as fixed
 from . import journal_shares
 from .models import CourseOffering, Enrollment, LessonMark
@@ -22,7 +22,7 @@ def _can_open(request, offering):
     return (
         journal_access.can_edit_journal(request.user, offering)
         or journal_access.can_observe_journal(request.user, offering)
-        or corrections.can_correct_journal(request)
+        or journal_access.can_correct_offering(request, offering)
         or guest_roster.can_manage_offering_roster(request.user, offering)
     )
 

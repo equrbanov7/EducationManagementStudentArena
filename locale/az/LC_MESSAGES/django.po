@@ -114631,3 +114631,7 @@ msgstr "Əməliyyat yerinə yetirilmədi."
 msgctxt "syllabus.model"
 msgid "Təsdiqlənmiş sillabus başqa qrupdan (avtomatik)"
 msgstr "Təsdiqlənmiş sillabus başqa qrupdan (avtomatik)"
+
+msgctxt "organizations.self_conflict"
+msgid "Siz bu təşkilatda həm də tələbəsiniz: işçi rolu ilə özünüzə, öz qrupunuza və öz jurnallarınıza aid əməliyyat apara bilməzsiniz."
+msgstr "Siz bu təşkilatda həm də tələbəsiniz: işçi rolu ilə özünüzə, öz qrupunuza və öz jurnallarınıza aid əməliyyat apara bilməzsiniz."

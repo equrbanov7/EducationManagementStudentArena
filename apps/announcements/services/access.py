@@ -139,7 +139,7 @@ def scope_unit_choices(scope, organization) -> list:
         OrgUnitType.GROUP,
     ]
     queryset = OrgUnit.objects.filter(organization=organization, unit_type__in=wanted, is_active=True)
-    if not scope.is_org_wide:
+    if not scope.is_org_wide or scope.excluded_unit_ids:
         queryset = queryset.filter(scope.unit_subtree_q())
     rows = queryset.order_by("path").values_list("pk", "name", "unit_type", "level")[:2000]
     from ..constants import UNIT_TYPE_LABELS

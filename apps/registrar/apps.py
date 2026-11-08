@@ -10,9 +10,19 @@ class RegistrarConfig(AppConfig):
         from apps.organizations.public import register_student_transfer
 
         register_student_transfer(_transfer_student_group)
+        _register_self_conflict()
         _register_retake_media()
         _register_off_schedule_reevaluation()
         _register_syllabus_carry()
+
+
+def _register_self_conflict():
+    """Tələbə + heyət rolu qapısının «öz əhatə» resolver-i (sahib 2026-11-08, ``self_conflict``)."""
+    from apps.organizations.public import register_own_scope_resolver
+
+    from .self_conflict import resolve_own_scope
+
+    register_own_scope_resolver(resolve_own_scope)
 
 
 def _register_syllabus_carry():

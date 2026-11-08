@@ -24,7 +24,7 @@ məhz bundan idi. İndi yalnız ``get_permission_scope`` var; hər çağıran
 qoruduğu məlumata uyğun icazə açarını AÇIQ verir.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from django.db.models import Q, QuerySet
 
@@ -54,6 +54,9 @@ class UnitScope:
     scope_type: str
     unit_ids: frozenset = field(default_factory=frozenset)
     unit_paths: tuple = field(default_factory=tuple)
+    #: Tələbə + heyət rolu (sahib 2026-11-08, ``self_conflict``): öz qrupu + alt/ana qrupları əhatədən ÇIXIR.
+    #: Adi istifadəçidə boşdur — filtr SQL-i dəyişmir.
+    excluded_unit_ids: frozenset = field(default_factory=frozenset)
 
     @property
     def is_org_wide(self) -> bool:
@@ -73,13 +76,24 @@ class UnitScope:
         Boş scope üçün heç nə uyğun gəlməyən Q qaytarır.
         """
         if self.is_org_wide:
-            return Q()
-        if not self.unit_paths:
+            q = Q()
+        elif not self.unit_paths:
             return Q(pk__in=[])
-        q = Q(**{f"{id_field}__in": list(self.unit_ids)})
-        for path in self.unit_paths:
-            q |= Q(**{f"{path_field}__startswith": f"{path}/"})
+        else:
+            q = Q(**{f"{id_field}__in": list(self.unit_ids)})
+            for path in self.unit_paths:
+                q |= Q(**{f"{path_field}__startswith": f"{path}/"})
+        if self.excluded_unit_ids:
+            q &= ~Q(**{f"{id_field}__in": sorted(self.excluded_unit_ids)})
         return q
+
+    def excludes_unit(self, unit_id) -> bool:
+        """Vahid «öz qrupu» kimi əhatədən çıxarılıbmı (sorğusuz)."""
+        return (
+            bool(self.excluded_unit_ids)
+            and unit_id is not None
+            and str(unit_id).strip().lower() in self.excluded_unit_ids
+        )
 
 
 ORG_WIDE_SCOPE = UnitScope(scope_type="org")
@@ -190,6 +204,9 @@ def invalidate_permission_scope_cache(user) -> None:
                 delattr(user, attr)
         except Exception:  # noqa: BLE001 — dəyişməz obyektlər üçün (nadir)
             pass
+    from .self_conflict import drop_own_scope_cache
+
+    drop_own_scope_cache(user)
     # Middleware-in request üzvlük snapshot-u da (bax `request_memberships`).
     drop_request_memberships(user)
 
@@ -276,6 +293,14 @@ def get_permission_scope(user, organization, permission: str, request=None) -> U
                     unit_ids=frozenset(pk for pk, _path in resolved),
                     unit_paths=tuple(path for _pk, path in resolved if path),
                 )
+        if scope.has_structure_access:
+            # Sahib 2026-11-08: tələbə + heyət rolu — öz qrupu (və alt/ana qrupları) heyət əhatəsindən çıxır.
+            # Qeyri-qarışıq istifadəçi üçün sorğusuz (yüklənmiş üzvlüklərdən qərar).
+            from .self_conflict import own_scope_excludes
+
+            excluded = own_scope_excludes(user, organization, permission, memberships)
+            if excluded:
+                scope = replace(scope, excluded_unit_ids=excluded)
 
     if request is not None:
         request._unit_scope_cache[cache_key] = scope
@@ -296,6 +321,8 @@ def unit_in_scope(scope: UnitScope, unit) -> bool:
     başlayan yol; əhatəsiz / ``None`` → yox (fail-closed).
     """
     if unit is None:
+        return False
+    if scope.excludes_unit(getattr(unit, "pk", None)):
         return False
     if scope.is_org_wide:
         return True
@@ -320,7 +347,7 @@ def widen_chair_scope_to_faculty(organization, scope: UnitScope, request=None) -
     """
     if not scope.is_unit_scoped or organization is None:
         return scope
-    cache_key = ("faculty_read", getattr(organization, "pk", None), scope.unit_ids)
+    cache_key = ("faculty_read", getattr(organization, "pk", None), scope.unit_ids, scope.excluded_unit_ids)
     cache = getattr(request, "_unit_scope_cache", None) if request is not None else None
     if cache is not None and cache_key in cache:
         return cache[cache_key]
@@ -358,7 +385,10 @@ def widen_chair_scope_to_faculty(organization, scope: UnitScope, request=None) -
         else:
             roots[unit.pk] = unit.path
     widened = UnitScope(
-        scope_type="unit", unit_ids=frozenset(roots), unit_paths=tuple(path for path in roots.values() if path)
+        scope_type="unit",
+        unit_ids=frozenset(roots),
+        unit_paths=tuple(path for path in roots.values() if path),
+        excluded_unit_ids=scope.excluded_unit_ids,
     )
     if cache is not None:
         cache[cache_key] = widened
@@ -416,9 +446,9 @@ def permission_scope_units(user, organization, permission: str) -> tuple:
 
 def scope_org_units(queryset: QuerySet, scope: UnitScope) -> QuerySet:
     """OrgUnit queryset-ini scope-a görə məhdudlaşdırır."""
-    if scope.is_org_wide:
+    if scope.is_org_wide and not scope.excluded_unit_ids:
         return queryset
-    if not scope.is_unit_scoped:
+    if not scope.has_structure_access:
         return queryset.none()
     return queryset.filter(scope.unit_subtree_q())
 
@@ -432,7 +462,8 @@ def scope_memberships_by_unit(queryset: QuerySet, scope: UnitScope, organization
     Membership üzərində scope_unit__in filtri index-lənmiş FK-dır.
     """
     if scope.is_org_wide:
-        return queryset
+        # Org-wide + «öz qrupu» istisnası: yalnız o qrupa bağlı üzvlüklər düşür (``scope_unit`` NULL olanlar qalır).
+        return queryset.exclude(scope_unit__in=sorted(scope.excluded_unit_ids)) if scope.excluded_unit_ids else queryset
     if not scope.is_unit_scoped:
         return queryset.none()
 
@@ -509,7 +540,7 @@ def user_scope_covers_unit(user, organization, unit_id, permission) -> bool:
     from .models import OrgUnit
 
     scope = get_permission_scope(user, organization, permission)
-    if not scope.has_structure_access:
+    if not scope.has_structure_access or scope.excludes_unit(unit_id):
         return False
     if scope.is_org_wide:
         return True

@@ -153,7 +153,7 @@ def offerings_in_actor_scope(user, organization, offerings):
     if not scope.has_structure_access:
         return []
     if scope.is_org_wide:
-        return offerings
+        return [o for o in offerings if not scope.excludes_unit(getattr(o, "group_id", None))]
     from django.apps import apps as django_apps
 
     group_ids = {getattr(o, "group_id", None) for o in offerings} - {None}
@@ -167,7 +167,12 @@ def offerings_in_actor_scope(user, organization, offerings):
 
 
 def assert_offering_in_actor_scope(user, organization, offering):
-    """Əhatədən kənar açılışda yazını fail-closed dayandır."""
+    """Əhatədən kənar açılışda yazını fail-closed dayandır (öz qrupu / öz jurnalı — 403 + audit, 2026-11-08)."""
+    from apps.organizations.public import guard_self_conflict
+
+    guard_self_conflict(
+        user, organization, action=ENTRY_PERMISSION, offering_id=offering.pk, group_id=offering.group_id
+    )
     if not offering_in_actor_scope(user, organization, offering):
         raise PermissionDenied(pgettext(_CTX, "Bu açılış sizin struktur əhatənizdə deyil."))
 

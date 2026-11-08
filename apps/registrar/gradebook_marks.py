@@ -146,6 +146,19 @@ def save_marks(
     from apps.registrar.gradebook_lessons import parse_lesson_score
     from apps.registrar.journal_full_edit import CLEAR
 
+    if by_user is not None:
+        # Tələbə + heyət rolu (sahib 2026-11-08): öz / öz qrupunun jurnalına bal yazmaq — 403 + audit.
+        from apps.organizations.public import guard_self_conflict
+
+        guard_self_conflict(
+            by_user,
+            offering.organization,
+            action="registrar.save_marks",
+            request=request,
+            offering_id=offering.pk,
+            group_id=offering.group_id,
+            cached_only=True,
+        )
     journal_locked = gradebook.journal_is_locked(offering)
     if journal_locked and not full_edit:
         return {"written": 0, "rejected": 0} if report else 0

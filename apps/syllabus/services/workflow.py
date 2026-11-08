@@ -98,6 +98,29 @@ def _guard(*, version, actor, name: str, reason: str = ""):
     )
 
 
+def _guard_self_conflict(*, version, actor, name: str, request=None) -> None:
+    """Tələbə + heyət rolu (sahib 2026-11-08): öz qrupunun / özünün oxuduğu fənnin sillabusu üzrə QƏRAR yoxdur.
+
+    Yalnız qərar keçidləri (baxış, təsdiq, düzəliş, rədd); qeyri-qarışıq aktor üçün sorğusuz.
+    """
+    if name not in _SCOPE_PERMISSION or name == Transition.ARCHIVE or actor.is_superadmin:
+        return
+    from apps.organizations.public import guard_self_conflict, own_scope
+
+    syllabus = version.syllabus
+    if not syllabus.offering_id or not own_scope(actor.user, actor.organization):
+        return
+    offering = syllabus.offering
+    guard_self_conflict(
+        actor.user,
+        actor.organization,
+        action=f"syllabus.{name}",
+        request=request,
+        offering_id=offering.pk,
+        group_id=offering.group_id,
+    )
+
+
 def _record(*, version, actor, name: str, reason: str, comment: str, section_comments):
     decision = _DECISION_BY_TRANSITION.get(name)
     if decision is None:
@@ -148,6 +171,7 @@ def _apply(
     təsdiq zamanı köhnə APPROVED versiyanın arxivlənməsi məhz burada baş verir,
     əks halda ``uniq_syllabus_approved_version`` məhdudiyyəti pozulardı.
     """
+    _guard_self_conflict(version=version, actor=actor, name=name, request=request)
     with transaction.atomic():
         locked = SyllabusVersion.objects.select_for_update(of=("self",)).get(pk=version.pk)
         locked.syllabus = version.syllabus

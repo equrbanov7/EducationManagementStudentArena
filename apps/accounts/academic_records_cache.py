@@ -48,6 +48,9 @@ def scope_key(organization, scope, filters) -> str:
                 "org": str(getattr(organization, "pk", "")),
                 "scope": [scope.scope_type, sorted(str(u) for u in (scope.unit_ids or ()))],
                 "filters": {k: str(v) for k, v in sorted((filters or {}).items()) if v},
+                # Tələbə + heyət rolu (sahib 2026-11-08): «öz qrupu» istisnası olan əhatə adi əhatə ilə eyni deyil —
+                # açar ayrılmasa sayğaclar 300 s ərzində bir-birinə sızar.
+                "excluded": sorted(str(u) for u in (getattr(scope, "excluded_unit_ids", None) or ())),
             },
             sort_keys=True,
         )

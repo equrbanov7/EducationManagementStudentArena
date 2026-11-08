@@ -82,7 +82,7 @@ def registry_records_qs(actor, *, request=None):
     if not scope.has_structure_access:
         return StudentAcademicRecord.objects.none()
     records = StudentAcademicRecord.objects.filter(organization=organization)
-    if not scope.is_org_wide:
+    if not scope.is_org_wide or scope.excluded_unit_ids:
         records = records.filter(scope.unit_subtree_q(path_field="group__path", id_field="group_id"))
     return records
 

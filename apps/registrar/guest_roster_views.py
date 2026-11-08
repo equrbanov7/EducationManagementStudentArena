@@ -18,6 +18,7 @@ from django.http import Http404, JsonResponse
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET, require_POST
 
+from apps.organizations.public import guard_self_conflict
 from core import superadmin_waiver
 from core.search_text import tolerant_q
 
@@ -57,6 +58,16 @@ def _offering_for_roster(request, offering_id, *, require_open=True):
     köhnəlmiş modal istifadəçiyə səbəbi göstərsin — qapı yenə bağlıdır.
     """
     offering = offering_or_404(request, offering_id)
+    # Tələbə + heyət rolu (sahib 2026-11-08): öz / öz qrupunun jurnal siyahısı — 403 + audit (404 deyil, səbəb aydın).
+    if guest_roster.can_manage_roster(request.user, offering.organization):
+        guard_self_conflict(
+            request.user,
+            offering.organization,
+            action="registrar.guest_roster",
+            request=request,
+            offering_id=offering.pk,
+            group_id=offering.group_id,
+        )
     if not guest_roster.can_manage_offering_roster(request.user, offering):
         raise Http404
     if require_open and not guest_roster.roster_is_open(offering):
@@ -226,6 +237,9 @@ def guest_add(request, offering_id):
     group_id = _uuid(_field(data, "group"))
     if student_id is None or group_id is None:
         return _error(pgettext(_CTX, "Qrup və tələbə seçilməlidir."))
+    # Tələbə + heyət rolu (sahib 2026-11-08): özünü / qrup yoldaşını BAŞQA jurnala da əlavə edə bilməz — qrup
+    # əhatəsindən və tranzaksiyadan ƏVVƏL (aydın 403 + audit).
+    _guard_target(request, offering, student_id, group_id=group_id)
 
     group = guest_roster.scoped_group_queryset(request.user, offering.organization).filter(pk=group_id).first()
     if group is None:
@@ -321,6 +335,7 @@ def guest_remove(request, offering_id):
     )
     if enrollment is None:
         return _error(pgettext(_CTX, "Qeydiyyat tapılmadı."), status=404)
+    _guard_target(request, offering, enrollment.student_id)
     # Sahib 2026-11-04: çıxarılma səbəbi siyahıdan MƏCBURİ seçilir («Digər» üçün qeyd də).
     try:
         removal = journal_removal.clean_payload(data)
@@ -354,6 +369,22 @@ def guest_remove(request, offering_id):
     except ValidationError as exc:
         return _error("; ".join(exc.messages))
     return JsonResponse({"ok": True, "message": pgettext(_CTX, "Tələbə jurnaldan çıxarıldı.")})
+
+
+def _guard_target(request, offering, student_id, *, group_id=None):
+    """Hədəf tələbə (və ya mənbə qrupu) aktorun özü / qrup yoldaşı / öz qrupudursa 403 + audit."""
+    guard_self_conflict(
+        request.user,
+        offering.organization,
+        action="registrar.guest_roster",
+        request=request,
+        offering_id=offering.pk,
+        student_id=student_id,
+    )
+    if group_id is not None:
+        guard_self_conflict(
+            request.user, offering.organization, action="registrar.guest_roster", request=request, group_id=group_id
+        )
 
 
 def _error(message, status=400):

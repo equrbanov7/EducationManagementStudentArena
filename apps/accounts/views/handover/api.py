@@ -243,7 +243,7 @@ def handover_options(request):
     ]
     scope = handover_read.actor_scope(actor.user, actor.organization)
     units = org_unit.objects.filter(organization=actor.organization, is_active=True)
-    if not scope.is_org_wide:
+    if not scope.is_org_wide or scope.excluded_unit_ids:
         units = units.filter(scope.unit_subtree_q())
     return _json(
         {

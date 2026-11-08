@@ -42,9 +42,9 @@ def _(text):
 
 def _viewer_mode(request, offering) -> str | None:
     """``staff`` / ``student`` / ``observer`` / ``None`` — redaktə, qeydiyyat və yalnız-oxu qapıları."""
-    from apps.registrar import corrections as corrections_service
-
-    if journal_access.can_edit_journal(request.user, offering) or corrections_service.can_correct_journal(request):
+    if journal_access.can_edit_journal(request.user, offering) or journal_access.can_correct_offering(
+        request, offering
+    ):
         return MODE_STAFF
 
     from .models import Enrollment

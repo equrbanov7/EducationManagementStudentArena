@@ -262,6 +262,9 @@ def assert_can_manage(actor: RimActor, target_user) -> None:
     if organization is None:
         raise RimAccessError("no_organization_context", "Aktiv təşkilat konteksti yoxdur.")
 
+    # (4b) Tələbə + heyət rolu: qrup yoldaşının hesabı da «öz» sayılır (sahib 2026-11-08).
+    assert_no_self_conflict(actor.user, organization, action="rim.manage_user", student_id=target_user.pk)
+
     # (7) Tenant izolyasiyası — hədəf aktorun təşkilatının üzvü olmalıdır.
     #
     # SİLİNMİŞ hesab üçün üzvlüyün DEAKTİV olması kifayətdir: soft-delete bütün
@@ -300,6 +303,18 @@ def assert_can_manage(actor: RimActor, target_user) -> None:
             "target_rank_too_high",
             "Özünüzlə eyni və ya daha yüksək səlahiyyətli hesabı idarə edə bilməzsiniz.",
         )
+
+
+def assert_no_self_conflict(user, organization, *, action: str, request=None, **targets) -> None:
+    """Tələbə + heyət rolu (sahib 2026-11-08): özü, qrup yoldaşı, öz qrupu → ``RimAccessError`` 403 + audit.
+
+    Qeyri-qarışıq aktor üçün sorğusuz (``organizations.self_conflict``).
+    """
+    from apps.organizations.public import REASON_CODE, deny_self_conflict
+
+    message = deny_self_conflict(user, organization, action=action, request=request, **targets)
+    if message:
+        raise RimAccessError(REASON_CODE, message, status=403)
 
 
 def assert_no_foreign_authority(actor: RimActor, target_user) -> None:
@@ -375,6 +390,12 @@ def manageable_users_queryset(actor: RimActor):
     owner_id = getattr(organization, "owner_id", None)
     if owner_id:
         queryset = queryset.exclude(pk=owner_id)
+    # Tələbə + heyət rolu (sahib 2026-11-08): qrup yoldaşları RİM axtarışında görünmür.
+    from apps.organizations.public import own_scope
+
+    own_students = own_scope(actor.user, organization).student_ids
+    if own_students:
+        queryset = queryset.exclude(pk__in=sorted(own_students))
 
     # Ciddi iyerarxiya queryset səviyyəsində — `target_level()` ilə eyni qayda:
     # aktiv hesab üçün AKTİV üzvlüklər, silinmiş hesab üçün BÜTÜN üzvlüklər.
@@ -412,6 +433,7 @@ __all__ = [
     "RIM_PERMISSIONS",
     "RimAccessError",
     "assert_no_foreign_authority",
+    "assert_no_self_conflict",
     "RimActor",
     "STUDENT_ACCOUNT_PERMISSIONS",
     "assert_can_manage",
