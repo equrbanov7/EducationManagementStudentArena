@@ -11,6 +11,8 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
+from apps.organizations.public import guard_self_conflict
+
 from . import absence_credit, corrections
 from .journal_access import offering_or_404, writable_offering_or_404
 from .models import AbsenceCredit, Enrollment
@@ -22,6 +24,15 @@ def apply(request, offering_id):
     if not corrections.can_correct_journal(request):
         raise Http404
     offering = writable_offering_or_404(offering_or_404(request, offering_id))
+    # Tələbə + heyət rolu (sahib 2026-11-08): öz / öz qrupunun jurnalında qayıb güzəşti — 403 + audit.
+    guard_self_conflict(
+        request.user,
+        offering.organization,
+        action="registrar.absence_credit",
+        request=request,
+        offering_id=offering.pk,
+        group_id=offering.group_id,
+    )
     try:
         entry = absence_credit.adjust(
             request=request,

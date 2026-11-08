@@ -84,7 +84,7 @@ def _subject_options(organization, scope):
     from apps.registrar.models import CourseOffering
 
     offerings = CourseOffering.objects.filter(organization=organization, is_active=True)
-    if not scope.is_org_wide:
+    if not scope.is_org_wide or scope.excluded_unit_ids:
         offerings = offerings.filter(scope.unit_subtree_q(path_field="group__path", id_field="group_id"))
     rows = (
         offerings.values_list("subject_id", "subject__code", "subject__name")

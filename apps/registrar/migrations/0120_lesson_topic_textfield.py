@@ -9,7 +9,7 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    dependencies = [("registrar", "0118_seminar_groups")]
+    dependencies = [("registrar", "0119_self_conflict_author_guard")]
 
     operations = [
         migrations.AlterField(

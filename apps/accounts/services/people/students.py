@@ -69,6 +69,9 @@ def scoped_student_records(actor, *, request=None, filters=None):
         from apps.organizations.models import OrgUnit
 
         records = records.filter(group_id__in=OrgUnit.objects.filter(scope.unit_subtree_q()).values("pk"))
+    elif scope.excluded_unit_ids:
+        # Tələbə + heyət rolu (sahib 2026-11-08): org-wide əhatədə də öz qrup ailəsi düşür.
+        records = records.exclude(group_id__in=sorted(scope.excluded_unit_ids))
 
     if filters is not None:
         structure_q = structure_filter_q(organization, filters, path_field="group__path", id_field="group_id")

@@ -20,8 +20,11 @@ class CreditConflict(ValidationError):
 
 
 def _check_request(request, offering):
+    from .journal_access import staff_self_conflict
+
     if (
         not corrections.can_correct_journal(request)
+        or staff_self_conflict(request.user, offering)  # tələbə + heyət rolu (sahib 2026-11-08)
         or getattr(request, "organization", None) != offering.organization
         or not offering.is_active
     ):

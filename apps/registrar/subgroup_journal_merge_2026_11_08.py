@@ -162,7 +162,8 @@ class Merger:
             teachers.add(target.instructor_id)
         if len(teachers) > 1:
             raise Blocked("family_instructors_differ")
-        if _model("JournalShare").objects.filter(offering__in=live, is_active=True).exists():
+        shares = _model("JournalShare").objects.filter(offering__in=live, is_active=True)
+        if shares.exists() and not self._shares_covered(target, shares):
             raise Blocked("source_has_shares")
         lessons = Lesson.objects.filter(offering__in=live)
         if (
@@ -181,14 +182,16 @@ class Merger:
 
     # ── ailə ──────────────────────────────────────────────────────────────
     def _family(self, family) -> None:
+        self._family_options = family
         target, live = self._load(family)
         self._check_sources(target, live)
         empty_before = sum(_empty_cells(offering) for offering in [*live, *([target] if target else [])])
         manifest = defaultdict(list)
         if target is None:
             target = self._create_target(family, live[0], manifest)
-        numbers = self._seminar_groups(target, live, manifest)
-        by_student = self._enrollments(target, live, numbers, manifest)
+        # Sahib 2026-11-08 (536 Bİ): «Bİ-ni hissələrə bölmə» — ailədə ``no_seminar_groups``: alt qrup seminar sətri yox.
+        numbers = {} if family.get("no_seminar_groups") else self._seminar_groups(target, live, manifest)
+        by_student = self._enrollments(target, live, numbers, manifest, family.get("student_alias") or {})
         if family.get("seminar_default_source"):
             self._seminar_default(target, live, numbers, family["seminar_default_source"], manifest)
         touched = self._lessons(target, live, by_student, manifest)
@@ -200,7 +203,9 @@ class Merger:
         recompute_absences(list({row.pk: row for row in by_student.values()}.values()))
         # Sahib: «boş xana olmasın» — bir alt qrupun dərsləri o birinin tələbələrinə BOŞ xana kimi düşürsə (məs. F2-nin
         # jurnalında 6, F1-də 26 dərs) birləşmə görünüşü pozur → ailə toxunulmur.
-        if _empty_cells(target) > empty_before:
+        # ``allow_empty_cells`` (536 MU): köhnə sistemdə də seminar bir axındır — MU1 tələbələrinin xanaları köhnədən
+        # ``fill_legacy_cells_20261108`` ilə dolur, köhnədə də boş olanlar boş qalır (data itmir).
+        if _empty_cells(target) > empty_before and not family.get("allow_empty_cells"):
             raise Blocked("family_adds_empty_cells")
         self._syllabus(target, live, manifest)
         self.counts["families_merged"] += 1
@@ -256,17 +261,30 @@ class Merger:
             self.counts["seminar_groups_created"] += 1
         return numbers
 
-    def _enrollments(self, target, live, numbers, manifest) -> dict:
-        """``{tələbə id → ana jurnal qeydiyyatı}`` — alt qrup jurnalında ``enrolled`` olan hər tələbə üçün."""
+    def _enrollments(self, target, live, numbers, manifest, alias=None) -> dict:
+        """``{tələbə id → ana jurnal qeydiyyatı}`` — alt qrup jurnalında ``enrolled`` olan hər tələbə üçün.
+
+        ``alias`` — ``{dublikat hesab id: əsas hesab id}`` (sahibin təsdiqi): bloklanmış dublikat hesabın alt qrup
+        jurnalındakı xanaları əsas hesabın ana jurnal sətrinə yazılır (o sətir ana jurnalda AKTİV olmalıdır)."""
         Enrollment, Record = _model("Enrollment"), _model("StudentAcademicRecord")
         existing = {row.student_id: row for row in Enrollment.objects.select_for_update().filter(offering=target)}
-        rows = list(Enrollment.objects.select_for_update().filter(offering__in=live, status="enrolled"))
+        out = {}
+        for duplicate, keep in (alias or {}).items():
+            found = existing.get(int(keep))
+            if found is None or found.status != "enrolled":
+                raise Blocked("alias_target_not_enrolled")
+            out[int(duplicate)] = found
+            self.counts["student_alias_mapped"] += 1
+        rows = list(
+            Enrollment.objects.select_for_update()
+            .filter(offering__in=live, status="enrolled")
+            .exclude(student_id__in=list(out))
+        )
         groups = dict(
             Record.objects.filter(
                 organization=self.organization, student_id__in=[row.student_id for row in rows], is_active=True
             ).values_list("student_id", "group_id")
         )
-        out = {}
         for row in sorted(rows, key=lambda item: (item.created_at, item.pk)):
             if row.student_id in out:
                 continue
@@ -520,7 +538,23 @@ class Merger:
             manifest["load_rows_group_added"].append(str(row.pk))
             self.counts["load_rows_group_added"] += 1
 
+    def _shares_covered(self, target, shares) -> bool:
+        """Sahib 2026-11-08 (536 MU): ailədə ``retire_source_shares`` — alt qrup jurnalının payı passiv olur YALNIZ hər
+        pay müəlliminin ana jurnalda girişi (sahib və ya aktiv pay) varsa; yoxdursa ailə toxunulmur."""
+        if target is None or not getattr(self, "_family_options", {}).get("retire_source_shares"):
+            return False
+        on_target = set(
+            _model("JournalShare").objects.filter(offering=target, is_active=True).values_list("teacher_id", flat=True)
+        ) | ({target.instructor_id} if target.instructor_id else set())
+        return all(share.teacher_id in on_target for share in shares)
+
     def _retire(self, live, manifest) -> None:
+        JournalShare = _model("JournalShare")
+        shares = list(JournalShare.objects.filter(offering__in=live, is_active=True).values_list("pk", flat=True))
+        if shares:
+            JournalShare.objects.filter(pk__in=shares).update(is_active=False, updated_at=timezone.now())
+            manifest["source_shares_retired"].extend(str(pk) for pk in shares)
+            self.counts["source_shares_retired"] += len(shares)
         Enrollment = _model("Enrollment")
         ids = list(Enrollment.objects.filter(offering__in=live, status="enrolled").values_list("pk", flat=True))
         Enrollment.objects.filter(pk__in=ids).update(status="dropped", updated_at=timezone.now())

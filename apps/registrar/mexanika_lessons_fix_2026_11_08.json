@@ -22,5 +22,35 @@
         {"date": "2026-10-12", "start_time": "15:15", "kind": "seminar"}
       ]
     }
+  ],
+  "duplicates": [
+    {"legacy_journal": 14155, "offering": "4c90e0fe-6abf-4df0-bd7a-e48a66e6f1d0", "twin_offering": "824f715c-3157-4013-9b61-b72ae22465f8", "date": "2026-09-18", "start_time": "13:35", "twin_start_time": "13:35", "kind": "lecture"},
+    {"legacy_journal": 14155, "offering": "4c90e0fe-6abf-4df0-bd7a-e48a66e6f1d0", "twin_offering": "824f715c-3157-4013-9b61-b72ae22465f8", "date": "2026-09-18", "start_time": "15:15", "twin_start_time": "15:15", "kind": "seminar"},
+    {"legacy_journal": 15127, "offering": "0f7f3cc3-e22c-4da5-a4d2-07f11bacd711", "date": "2026-09-17", "start_time": "11:50", "twin_start_time": "10:10", "kind": "seminar"},
+    {"legacy_journal": 15127, "offering": "0f7f3cc3-e22c-4da5-a4d2-07f11bacd711", "date": "2026-09-23", "start_time": "11:50", "twin_start_time": "10:10", "kind": "seminar"},
+    {"legacy_journal": 15127, "offering": "0f7f3cc3-e22c-4da5-a4d2-07f11bacd711", "date": "2026-09-24", "start_time": "11:50", "twin_start_time": "10:10", "kind": "seminar"},
+    {"legacy_journal": 15127, "offering": "0f7f3cc3-e22c-4da5-a4d2-07f11bacd711", "date": "2026-10-01", "start_time": "11:50", "twin_start_time": "10:10", "kind": "seminar"},
+    {"legacy_journal": 15127, "offering": "0f7f3cc3-e22c-4da5-a4d2-07f11bacd711", "date": "2026-10-06", "start_time": "08:30", "twin_start_time": "10:10", "kind": "seminar"},
+    {"legacy_journal": 15127, "offering": "0f7f3cc3-e22c-4da5-a4d2-07f11bacd711", "date": "2026-10-15", "start_time": "11:50", "twin_start_time": "10:10", "kind": "seminar"},
+    {"legacy_journal": 15127, "offering": "0f7f3cc3-e22c-4da5-a4d2-07f11bacd711", "date": "2026-10-20", "start_time": "08:30", "twin_start_time": "10:10", "kind": "seminar"},
+    {"legacy_journal": 15130, "offering": "225a53d0-2d40-419b-972c-1370d40b66ae", "date": "2026-09-16", "start_time": "11:50", "twin_start_time": "10:10", "kind": "seminar"},
+    {"legacy_journal": 15130, "offering": "225a53d0-2d40-419b-972c-1370d40b66ae", "date": "2026-09-23", "start_time": "11:50", "twin_start_time": "10:10", "kind": "seminar"},
+    {"legacy_journal": 15130, "offering": "225a53d0-2d40-419b-972c-1370d40b66ae", "date": "2026-10-01", "start_time": "08:30", "twin_start_time": "10:10", "kind": "seminar"},
+    {"legacy_journal": 15130, "offering": "225a53d0-2d40-419b-972c-1370d40b66ae", "date": "2026-10-06", "start_time": "08:30", "twin_start_time": "10:10", "kind": "seminar"},
+    {"legacy_journal": 15130, "offering": "225a53d0-2d40-419b-972c-1370d40b66ae", "date": "2026-10-08", "start_time": "08:30", "twin_start_time": "10:10", "kind": "seminar"},
+    {"legacy_journal": 15130, "offering": "225a53d0-2d40-419b-972c-1370d40b66ae", "date": "2026-10-15", "start_time": "11:50", "twin_start_time": "10:10", "kind": "seminar"},
+    {"legacy_journal": 15130, "offering": "225a53d0-2d40-419b-972c-1370d40b66ae", "date": "2026-10-20", "start_time": "08:30", "twin_start_time": "10:10", "kind": "seminar"},
+    {"legacy_journal": 15130, "offering": "225a53d0-2d40-419b-972c-1370d40b66ae", "date": "2026-09-06", "start_time": "08:30", "twin_date": "2026-09-15", "twin_start_time": "10:10", "kind": "seminar"},
+    {"legacy_journal": 14055, "offering": "225a53d0-2d40-419b-972c-1370d40b66ae", "date": "2026-09-22", "start_time": "11:50", "twin_start_time": "10:10", "kind": "lecture"},
+    {"legacy_journal": 14055, "offering": "225a53d0-2d40-419b-972c-1370d40b66ae", "date": "2026-10-13", "start_time": "08:30", "twin_start_time": "10:10", "kind": "lecture"}
+  ],
+  "share_removals": [
+    {"offering": "9475e7d9-bd62-419a-9c2a-add5eccf31fe", "teacher": 7754},
+    {"offering": "eece84da-0c2b-4944-9023-a293e5bf4f97", "teacher": 7754}
+  ],
+  "roster_trims": [
+    {"legacy_journal": 15476, "offering": "0127bd1c-a028-4ded-8312-ff25aa357d74", "keep": ["848894fd-d72a-4aac-9d3d-02748dc538ad"]},
+    {"legacy_journal": 15476, "offering": "b086a31f-0392-47b2-a638-14936af1e1ff", "keep": ["c4d69607-4060-46c7-8cdf-5f8d70d721d6"]},
+    {"legacy_journal": 15476, "offering": "8658a369-e696-486b-8c01-6d12857b02f1", "keep": ["87696bc4-3831-4bd1-b4a3-fe82d66ccb25"]}
   ]
 }

@@ -226,7 +226,10 @@ class JournalSyllabusBridgeTest(TestCase):
         self.assertNotIn("Dərslər başlayıb", str(empty["message"]))
         with bypass_rls():
             gradebook.create_lesson(
-                allow_past=True, offering=self.offering, date=datetime.date(2024, 10, 1), kind=LessonKind.LECTURE
+                allow_past=True,
+                offering=self.offering,
+                date=datetime.date.fromisoformat(str(self.offering.period.start_date)),
+                kind=LessonKind.LECTURE,
             )
         started = self._client(self.teacher).get(
             reverse("registrar:journal_detail", args=[self.offering.id]), {"kind": "seminar", "lw": "1"}

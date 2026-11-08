@@ -151,6 +151,9 @@ def set_account_status(
 ) -> dict:
     """Hesabı dayandırır (``active=False``) və ya bərpa edir (``active=True``)."""
     _require(actor, PERM_MANAGE_STATUS)
+    rim_policy.assert_no_self_conflict(
+        actor.user, actor.organization, action="people.account_status", request=request, student_id=target.pk
+    )
     catalog = assert_in_catalog_scope(actor, target, request=request)
     rim = _rim_actor(actor, request, extra_permissions={rim_policy.PERM_BLOCK})
 

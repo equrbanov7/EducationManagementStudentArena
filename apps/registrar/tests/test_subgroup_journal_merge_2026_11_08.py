@@ -188,6 +188,16 @@ class SubgroupJournalMergeTest(_LabWorld, TestCase):
                 lesson = self._lesson_at(self.o1, self.today - datetime.timedelta(days=days), LessonKind.LECTURE, T1010)
                 LessonMark.objects.create(organization=self.org, lesson=lesson, enrollment=o1_e3, status="present")
         self.assertEqual(self._call("--apply"), {"family_adds_empty_cells": "1"})
+        with bypass_rls():
+            before = LessonMark.objects.filter(enrollment__student=self.s3).count()
+        plan = ({**merge.PLAN[0], "allow_empty_cells": True},)
+        with mock.patch.object(merge, "PLAN", plan):
+            counts = self._call("--apply")
+        self.assertEqual(counts.get("families_merged"), "1", counts)
+        with bypass_rls():
+            self.assertEqual(
+                LessonMark.objects.filter(lesson__offering=self.offering, enrollment__student=self.s3).count(), before
+            )
 
     def test_component_scores_copied_and_final_grade_blocks(self):
         from apps.registrar.models import AssessmentComponent, ComponentScore
@@ -247,6 +257,79 @@ class SubgroupJournalMergeTest(_LabWorld, TestCase):
             self._call("--apply", "--undo")
         with bypass_rls():
             self.assertIsNone(Enrollment.objects.get(pk=self.e2.pk).seminar_group)
+
+    def test_student_alias_writes_duplicate_marks_to_main_account_row(self):
+        """536 Bİ: bloklanmış dublikat hesabın alt qrup xanaları əsas hesabın ana jurnal sətrinə."""
+        with bypass_rls():
+            duplicate = User.objects.create_user("sgm_dup", "sgm_dup@x.test", "pw")
+            self._member(duplicate, "student", [])
+            row = Enrollment.objects.create(organization=self.org, student=duplicate, offering=self.o2)
+            lecture2 = Lesson.objects.get(offering=self.o2, kind=LessonKind.LECTURE)
+            LessonMark.objects.create(organization=self.org, lesson=lecture2, enrollment=row, status="excused")
+            Enrollment.objects.filter(pk=self.e2.pk).update(lab_group=None)
+        plan = ({**merge.PLAN[0], "student_alias": {str(duplicate.pk): self.students[1].pk}},)
+        with mock.patch.object(merge, "PLAN", plan):
+            counts = self._call("--apply")
+        self.assertEqual(counts.get("families_merged"), "1", counts)
+        self.assertEqual(counts["student_alias_mapped"], "1")
+        with bypass_rls():
+            self.assertFalse(Enrollment.objects.filter(offering=self.offering, student=duplicate).exists())
+            self.assertEqual(
+                LessonMark.objects.get(
+                    lesson__offering=self.offering, lesson__kind="lecture", enrollment=self.e2
+                ).status,
+                "excused",
+            )
+            self.assertEqual(Enrollment.objects.get(pk=row.pk).status, "dropped")
+
+    def test_no_seminar_groups_merges_without_subgroup_rows(self):
+        """536 Bİ: hər iki alt qrupun eyni günlü seminarı var — bir jurnal, alt qrup sətri yoxdur."""
+        with bypass_rls():
+            Enrollment.objects.filter(pk__in=[self.e2.pk, self.e0.pk]).update(status="dropped")
+            day2 = self.today - datetime.timedelta(days=6)
+            seminar2 = self._lesson_at(self.o2, day2, LessonKind.SEMINAR, T1150)
+            LessonMark.objects.create(
+                organization=self.org,
+                lesson=seminar2,
+                enrollment=Enrollment.objects.get(offering=self.o2, student=self.s4),
+                status="present",
+            )
+        plan = ({**merge.PLAN[0], "no_seminar_groups": True},)
+        with mock.patch.object(merge, "PLAN", plan):
+            counts = self._call("--apply")
+        self.assertEqual(counts.get("families_merged"), "1", counts)
+        self.assertNotIn("seminar_groups_created", counts)
+        with bypass_rls():
+            self.assertFalse(SeminarGroup.objects.filter(offering=self.offering).exists())
+            self.assertFalse(Lesson.objects.filter(offering=self.offering, seminar_group__isnull=False).exists())
+
+    def test_source_shares_retired_only_when_teacher_has_target_access(self):
+        from apps.registrar.models import JournalShare
+
+        with bypass_rls():
+            CourseOffering.objects.filter(pk__in=[self.o1.pk, self.o2.pk, self.offering.pk]).update(
+                instructor=self.teacher
+            )
+            other = User.objects.create_user("sgm_sh", "sgm_sh@x.test", "pw")
+            self._member(other, "teacher", ["grade.input"])
+            share = JournalShare.objects.create(
+                organization=self.org, offering=self.o1, teacher=other, kinds=["seminar"], source="workload"
+            )
+        self.assertEqual(self._call("--apply"), {"source_has_shares": "1"})
+        plan = ({**merge.PLAN[0], "retire_source_shares": True},)
+        with mock.patch.object(merge, "PLAN", plan):
+            self.assertEqual(self._call("--apply"), {"source_has_shares": "1"})  # ana jurnalda girişi yoxdur
+            with bypass_rls():
+                JournalShare.objects.create(
+                    organization=self.org, offering=self.offering, teacher=other, kinds=["seminar"], source="workload"
+                )
+            counts = self._call("--apply")
+            self.assertEqual(counts.get("source_shares_retired"), "1", counts)
+            with bypass_rls():
+                self.assertFalse(JournalShare.objects.get(pk=share.pk).is_active)
+            self._call("--apply", "--undo")
+        with bypass_rls():
+            self.assertTrue(JournalShare.objects.get(pk=share.pk).is_active)
 
     def test_blocked_enrollment_is_reported_by_id(self):
         def boom(*args, **kwargs):

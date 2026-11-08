@@ -66,6 +66,21 @@ def _require_corrector(request):
         raise Http404
 
 
+def _guard_own(request, offering):
+    """Tələbə + heyət rolu (sahib 2026-11-08): öz / öz qrupunun jurnalında sənədli düzəliş — 403 + audit."""
+    from apps.organizations.public import guard_self_conflict
+
+    guard_self_conflict(
+        request.user,
+        offering.organization,
+        action="registrar.journal_correction",
+        request=request,
+        offering_id=offering.pk,
+        group_id=offering.group_id,
+    )
+    return offering
+
+
 def _active_org(request):
     org = getattr(request, "organization", None)
     if org is None:
@@ -208,7 +223,9 @@ def correction_apply(request, offering_id):
     _require_corrector(request)
     org = _active_org(request)
     # J-09 (audit 2026-09-28): ləğv edilmiş açılışa sənədli düzəliş də yazılmır.
-    offering = writable_offering_or_404(get_object_or_404(CourseOffering, pk=offering_id, organization=org))
+    offering = _guard_own(
+        request, writable_offering_or_404(get_object_or_404(CourseOffering, pk=offering_id, organization=org))
+    )
 
     target = (request.POST.get("target") or "grade").strip()
     try:
@@ -249,7 +266,9 @@ def correction_delete(request, offering_id):
     _require_corrector(request)
     org = _active_org(request)
     # J-09 (audit 2026-09-28): ləğv edilmiş açılışa sənədli düzəliş də yazılmır.
-    offering = writable_offering_or_404(get_object_or_404(CourseOffering, pk=offering_id, organization=org))
+    offering = _guard_own(
+        request, writable_offering_or_404(get_object_or_404(CourseOffering, pk=offering_id, organization=org))
+    )
     try:
         ok = _revert_requested_correction(request, offering)
     except ValidationError as exc:

@@ -27,7 +27,7 @@ from django.views.decorators.http import require_GET
 from core.search_text import tolerant_match
 
 from . import journal_extras, lesson_rooms
-from .journal_access import can_edit_journal, can_observe_journal, offering_or_404
+from .journal_access import can_correct_offering, can_edit_journal, can_observe_journal, offering_or_404
 
 _PAGE_SIZE = 20
 _MAX_PAGE = 50
@@ -39,12 +39,11 @@ def _offering_for_lesson_modal(request, offering_id):
     siyahı idarəçisi (koordinator/dekanlıq) və ya təhvil vermiş köhnə müəllim
     (yalnız-oxu). Heç biri deyilsə 404 — mövcudluq sızmasın."""
     offering = offering_or_404(request, offering_id)
-    from . import corrections as corrections_service
     from . import guest_roster
 
     allowed = (
         can_edit_journal(request.user, offering)
-        or corrections_service.can_correct_journal(request)
+        or can_correct_offering(request, offering)
         or guest_roster.can_manage_offering_roster(request.user, offering)
         or can_observe_journal(request.user, offering)
     )

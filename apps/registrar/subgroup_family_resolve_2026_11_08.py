@@ -78,10 +78,15 @@ def discover(organization) -> tuple[list[dict], int]:
         )
         family["sources"].append(str(row.pk))
     families = list(found.values())
-    seen = {frozenset(row["sources"]) for row in families}
+    by_sources = {frozenset(row["sources"]): row for row in families}
     for family in PLAN:  # adla tapılmış ailələr (reyestr izi olmayanlar)
-        if frozenset(family["sources"]) not in seen:
+        known = by_sources.get(frozenset(family["sources"]))
+        if known is None:
             families.append(dict(family))
+        else:  # PLAN-ın sahib seçimləri (student_alias, no_seminar_groups …) kəşf olunan ailəyə də keçir
+            known.update(
+                {key: value for key, value in family.items() if key not in ("name", "target", "group", "sources")}
+            )
     return families, ambiguous
 
 

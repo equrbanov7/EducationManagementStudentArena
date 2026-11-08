@@ -73,6 +73,7 @@ def _assignment_map(*, organization, teacher_id, include_hours=False):
     children = _registered_children(organization, groups) if groups else {}
     aliases = canonical_aliases(groups)
     result = defaultdict(lambda: defaultdict(int)) if include_hours else defaultdict(set)
+    caps: dict = {}
     for row in rows:
         if row.row_kind == RowKind.INTENSIVE:
             offering = row.intensive_offering
@@ -112,6 +113,7 @@ def _assignment_map(*, organization, teacher_id, include_hours=False):
                         key = (row.subject_id, row.period_id, canonical.pk)
                         if include_hours:
                             result[key][assignment.activity] += assignment.hours
+                            _cap(caps, key, row, assignment.activity)
                         else:
                             result[key].add(assignment.activity)
     for row in partners:
@@ -124,7 +126,26 @@ def _assignment_map(*, organization, teacher_id, include_hours=False):
                     result[key]["lecture"] = max(result[key]["lecture"], int(row.lecture_plan))
                 else:
                     result[key].add("lecture")
+    if include_hours:
+        # Sahib 2026-11-08: jurnal BİR qrupundur — başlıqda fənnin qrup başına saatı (L30 + S10 + Lab5 = 45), müəllimin
+        # bütün axınlar üzrə yükü (30 + 2×10 + 3×5 = 65) yox. Bölgü saatı sətrin ``*_plan``-ı ilə məhdudlaşır.
+        for key, kinds in result.items():
+            for activity, limit in caps.get(key, {}).items():
+                if limit and kinds.get(activity, 0) > limit:
+                    kinds[activity] = limit
     return dict(result)
+
+
+_PLAN_FIELDS = {Activity.LECTURE: "lecture_plan", Activity.SEMINAR: "seminar_plan", Activity.LAB: "lab_plan"}
+
+
+def _cap(caps, key, row, activity) -> None:
+    """Açar + fəaliyyət üzrə qrup başına plan saatı (bir neçə sətir varsa ən böyüyü)."""
+    field = _PLAN_FIELDS.get(activity)
+    plan = int(getattr(row, field, 0) or 0) if field else 0
+    if plan:
+        bucket = caps.setdefault(key, {})
+        bucket[activity] = max(bucket.get(activity, 0), plan)
 
 
 def teacher_journal_assignments(*, organization, teacher_id):

@@ -109,6 +109,8 @@ def can_manage_offering(user, organization, offering) -> bool:
         return True
     if getattr(organization, "owner_id", None) == getattr(user, "pk", None):
         return True
+    if journal_scope.own_offering_conflict(user, organization, offering):
+        return False  # tələbə + heyət rolu — öz qrupunun / öz açılışının cədvəli (sahib 2026-11-08)
     if journal_scope.offering_in_actor_scope(user, organization, offering, permission=SCHEDULE_PERMISSION):
         return True
     extra = _extra_offering_q(user, organization, actor_scope(user, organization, SCHEDULE_PERMISSION), widened=True)
@@ -133,7 +135,7 @@ def can_manage_group_subject(user, organization, group, subject) -> bool:
     if getattr(user, "is_superuser", False) or getattr(organization, "owner_id", None) == getattr(user, "pk", None):
         return True
     scope = actor_scope(user, organization)
-    if not scope.has_structure_access:
+    if not scope.has_structure_access or scope.excludes_unit(group.pk):
         return False
     if scope.is_org_wide:
         return True

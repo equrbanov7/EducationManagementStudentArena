@@ -47,7 +47,7 @@ def journal_list_base(user, request=None):
     view_q = journal_scope.journal_view_q(user, organization) if organization is not None else None
     own_q = journal_shares.own_or_shared_q(user)  # öz jurnalı + bölünmüş jurnalın payı (sahib 2026-10-26)
     if can_correct and organization is not None:
-        return base_qs.filter(organization=organization), True
+        return base_qs.filter(organization=organization).filter(_not_own_q(user, organization)), True
     if can_roster or view_q is not None:
         # Əhatə üzrə görünən jurnallar YALNIZ aktiv cari dövrdən gəlir: köçürülmüş
         # tarixi semestrlərin jurnalı koordinatorun siyahısında ÇIXMAMALIDIR (əks
@@ -63,6 +63,16 @@ def journal_list_base(user, request=None):
     from apps.registrar.teacher_journal_list import own_visible_queryset
 
     return own_visible_queryset(base_qs, user, organization), False
+
+
+def _not_own_q(user, organization):
+    """Tələbə + heyət rolu (sahib 2026-11-08): korrektorun org-wide siyahısından öz / öz qrupunun jurnalları düşür."""
+    from apps.organizations.public import own_scope
+
+    own = own_scope(user, organization)
+    if not (own.offering_ids or own.group_ids):
+        return Q()
+    return ~Q(pk__in=sorted(own.offering_ids)) & ~Q(group_id__in=sorted(own.group_ids))
 
 
 __all__ = ["journal_list_base"]

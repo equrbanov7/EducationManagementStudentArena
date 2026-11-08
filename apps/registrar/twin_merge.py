@@ -226,6 +226,17 @@ class Merger:
         self.counts["enrollments_created"] += created
         return out, created
 
+    def _fill_empty_fields(self, twin, lesson) -> None:
+        """Sahib 2026-11-08 (KƏMQ): hədəf dərsdə BOŞ olan mövzu / otaq / müəllim mənbə dərsdən — silinən dərslə itməsin."""
+        filled = {
+            name: getattr(lesson, name)
+            for name in ("topic", "room_id", "instructor_id", "end_time")
+            if getattr(lesson, name) and not getattr(twin, name)
+        }
+        if filled:
+            _model("Lesson").objects.filter(pk=twin.pk).update(**filled, updated_at=timezone.now())
+            self.counts["lesson_fields_filled"] += 1
+
     def _lessons(self, source, target, enrollments, *, keep_target=False) -> tuple[int, int, int]:
         Lesson = _model("Lesson")
         by_slot, by_day = {}, {}
@@ -252,6 +263,7 @@ class Merger:
                 created += 1
             else:
                 reused += 1
+                self._fill_empty_fields(twin, lesson)
             for mark in lesson.marks.all().order_by("created_at"):
                 enrollment = enrollments.get(mark.enrollment_id)
                 if enrollment is None:

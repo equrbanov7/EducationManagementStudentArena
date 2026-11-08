@@ -50,6 +50,7 @@ from .groups_registry import (
 from .groups_registry import visible_group as _visible_group
 from .models import Organization, OrgUnit
 from .scoping import scope_org_units
+from .self_conflict import REASON_CODE, deny_self_conflict
 from .subgroup_targets import bind_parent, eligible_records_q
 from .views.shared._helpers import _unique_unit_slug
 
@@ -486,7 +487,22 @@ def group_action(request, slug):
     handler = _HANDLERS.get((request.POST.get("action") or "").strip())
     if handler is None:
         return _error(pgettext(_CTX, "Naməlum əməl."), code="unknown_action")
+    conflict = _self_conflict(request, organization)
+    if conflict:
+        return _error(conflict, status=403, code=REASON_CODE)
     return handler(request, organization, scope)
+
+
+def _self_conflict(request, organization):
+    """Tələbə + heyət rolu (sahib 2026-11-08): öz qrupu / özü / qrup yoldaşı hədəfdirsə mətn (audit yazılır)."""
+    action = "organizations.group_action:" + (request.POST.get("action") or "").strip()[:40]
+    targets = [{"group_id": (request.POST.get(key) or "").strip() or None} for key in ("id", "parent")]
+    targets += [{"record_id": record_id} for record_id in [request.POST.get("record_id"), *_record_ids(request)]]
+    for target in targets:
+        message = deny_self_conflict(request.user, organization, action=action, request=request, **target)
+        if message:
+            return message
+    return None
 
 
 __all__ = ["MAX_COURSE_YEAR", "REASON_MIN_LENGTH", "group_action"]

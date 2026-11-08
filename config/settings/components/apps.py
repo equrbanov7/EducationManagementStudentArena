@@ -88,6 +88,8 @@ MIDDLEWARE = [
     # org/RLS konteksti hədəf istifadəçinin üzvlüyü üzərində qurulur.
     "apps.accounts.middleware.ViewAsMiddleware",
     "apps.organizations.middleware.OrganizationMiddleware",
+    # Rədd auditi rollback-dən sonra (ATOMIC_REQUESTS) — org RLS kontekstinin İÇİNDƏ, view-dan kənarda. Bax core/deferred_audit.py.
+    "core.deferred_audit.DeferredAuditMiddleware",
     "apps.accounts.middleware.SuspendedOrganizationMiddleware",
     # Şəbəkə zonası (publik domen): jurnal + inzibati hesablar yalnız daxili şəbəkədən.
     "apps.accounts.network_zone.NetworkZoneMiddleware",

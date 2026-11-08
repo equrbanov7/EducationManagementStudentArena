@@ -8,8 +8,12 @@
 {% block kicker %}{% trans 'İcazə məhduddur' %}{% endblock %}
 {% block title %}{% trans 'Bu səhifəyə giriş qadağandır' %}{% endblock %}
 {% block description %}
-    {% trans 'Bu bölməyə baxmaq üçün hesabınızda kifayət qədər icazə yoxdur.' %}
-    {% trans 'Düzgün hesabla daxil olduğunuzu yoxlayın və lazım gələrsə administratora müraciət edin.' %}
+    {% if public_message %}
+        {{ public_message }}
+    {% else %}
+        {% trans 'Bu bölməyə baxmaq üçün hesabınızda kifayət qədər icazə yoxdur.' %}
+        {% trans 'Düzgün hesabla daxil olduğunuzu yoxlayın və lazım gələrsə administratora müraciət edin.' %}
+    {% endif %}
 {% endblock %}
 {% block pills %}
     <span class="error-pill"><i class="fas fa-user-check"></i> {% trans 'Hesabınızı yenidən yoxlayın' %}</span>

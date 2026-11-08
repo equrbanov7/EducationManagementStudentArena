@@ -116208,6 +116208,10 @@ msgctxt "syllabus.model"
 msgid "Təsdiqlənmiş sillabus başqa qrupdan (avtomatik)"
 msgstr "Genehmigter Syllabus aus einer anderen Gruppe (automatisch)"
 
+msgctxt "organizations.self_conflict"
+msgid "Siz bu təşkilatda həm də tələbəsiniz: işçi rolu ilə özünüzə, öz qrupunuza və öz jurnallarınıza aid əməliyyat apara bilməzsiniz."
+msgstr "Sie sind in dieser Organisation auch Studierende(r): Mit einer Mitarbeiterrolle können Sie keine Aktionen an sich selbst, Ihrer eigenen Gruppe oder Ihren eigenen Journalen ausführen."
+
 msgctxt "accounts.syllabus"
 msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
 msgstr "Sowohl das Feld für Grundlagenliteratur als auch das für weiterführende Literatur muss ausgefüllt werden. Die Quellen können in beliebiger Form angegeben werden — untereinander, durch Kommas getrennt oder in einer Zeile."
