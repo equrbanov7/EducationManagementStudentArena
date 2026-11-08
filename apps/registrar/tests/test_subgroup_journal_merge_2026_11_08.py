@@ -293,6 +293,34 @@ class SubgroupJournalMergeTest(_LabWorld, TestCase):
             self.assertFalse(SeminarGroup.objects.filter(offering=self.offering).exists())
             self.assertFalse(Lesson.objects.filter(offering=self.offering, seminar_group__isnull=False).exists())
 
+    def test_source_shares_retired_only_when_teacher_has_target_access(self):
+        from apps.registrar.models import JournalShare
+
+        with bypass_rls():
+            CourseOffering.objects.filter(pk__in=[self.o1.pk, self.o2.pk, self.offering.pk]).update(
+                instructor=self.teacher
+            )
+            other = User.objects.create_user("sgm_sh", "sgm_sh@x.test", "pw")
+            self._member(other, "teacher", ["grade.input"])
+            share = JournalShare.objects.create(
+                organization=self.org, offering=self.o1, teacher=other, kinds=["seminar"], source="workload"
+            )
+        self.assertEqual(self._call("--apply"), {"source_has_shares": "1"})
+        plan = ({**merge.PLAN[0], "retire_source_shares": True},)
+        with mock.patch.object(merge, "PLAN", plan):
+            self.assertEqual(self._call("--apply"), {"source_has_shares": "1"})  # ana jurnalda girişi yoxdur
+            with bypass_rls():
+                JournalShare.objects.create(
+                    organization=self.org, offering=self.offering, teacher=other, kinds=["seminar"], source="workload"
+                )
+            counts = self._call("--apply")
+            self.assertEqual(counts.get("source_shares_retired"), "1", counts)
+            with bypass_rls():
+                self.assertFalse(JournalShare.objects.get(pk=share.pk).is_active)
+            self._call("--apply", "--undo")
+        with bypass_rls():
+            self.assertTrue(JournalShare.objects.get(pk=share.pk).is_active)
+
     def test_blocked_enrollment_is_reported_by_id(self):
         def boom(*args, **kwargs):
             raise merge.IntegrityError("x")
