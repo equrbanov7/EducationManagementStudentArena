@@ -114527,3 +114527,7 @@ msgstr "onaylı sürüm yürürlükte"
 msgctxt "registrar.syllabus"
 msgid "Əməliyyat yerinə yetirilmədi."
 msgstr "İşlem gerçekleştirilemedi."
+
+msgctxt "syllabus.model"
+msgid "Təsdiqlənmiş sillabus başqa qrupdan (avtomatik)"
+msgstr "Başka gruptan onaylı müfredat (otomatik)"

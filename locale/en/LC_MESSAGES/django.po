@@ -115144,3 +115144,7 @@ msgstr "approved version is in force"
 msgctxt "registrar.syllabus"
 msgid "Əməliyyat yerinə yetirilmədi."
 msgstr "The action could not be completed."
+
+msgctxt "syllabus.model"
+msgid "Təsdiqlənmiş sillabus başqa qrupdan (avtomatik)"
+msgstr "Approved syllabus from another group (automatic)"

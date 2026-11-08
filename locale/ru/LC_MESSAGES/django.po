@@ -115337,3 +115337,7 @@ msgstr "действует утверждённая версия"
 msgctxt "registrar.syllabus"
 msgid "Əməliyyat yerinə yetirilmədi."
 msgstr "Не удалось выполнить операцию."
+
+msgctxt "syllabus.model"
+msgid "Təsdiqlənmiş sillabus başqa qrupdan (avtomatik)"
+msgstr "Утверждённый силлабус из другой группы (автоматически)"

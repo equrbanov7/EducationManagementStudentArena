@@ -101,3 +101,10 @@ __all__ = [
 from .services.mr83_repair import MR83Error, repair_mr83_syllabus  # noqa: E402,F401
 
 __all__ += ["MR83Error", "repair_mr83_syllabus"]
+
+# Sahib 2026-11-08: təsdiqlənmiş sillabus müəllimin başqa qrupunda da — açılış tərəfi qarmağı + paylaşım yazısı.
+from .services.approval_hooks import register as register_approval_hook  # noqa: E402,F401
+from .services.sharing import link_carry as link_carry_share  # noqa: E402,F401
+from .services.sharing import unlink_carry as unlink_carry_share  # noqa: E402,F401
+
+__all__ += ["link_carry_share", "register_approval_hook", "unlink_carry_share"]
