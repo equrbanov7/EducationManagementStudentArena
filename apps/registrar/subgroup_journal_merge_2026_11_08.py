@@ -187,7 +187,8 @@ class Merger:
         manifest = defaultdict(list)
         if target is None:
             target = self._create_target(family, live[0], manifest)
-        numbers = self._seminar_groups(target, live, manifest)
+        # Sahib 2026-11-08 (536 Bİ): «Bİ-ni hissələrə bölmə» — ailədə ``no_seminar_groups``: alt qrup seminar sətri yox.
+        numbers = {} if family.get("no_seminar_groups") else self._seminar_groups(target, live, manifest)
         by_student = self._enrollments(target, live, numbers, manifest, family.get("student_alias") or {})
         if family.get("seminar_default_source"):
             self._seminar_default(target, live, numbers, family["seminar_default_source"], manifest)

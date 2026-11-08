@@ -272,6 +272,27 @@ class SubgroupJournalMergeTest(_LabWorld, TestCase):
             )
             self.assertEqual(Enrollment.objects.get(pk=row.pk).status, "dropped")
 
+    def test_no_seminar_groups_merges_without_subgroup_rows(self):
+        """536 Bİ: hər iki alt qrupun eyni günlü seminarı var — bir jurnal, alt qrup sətri yoxdur."""
+        with bypass_rls():
+            Enrollment.objects.filter(pk__in=[self.e2.pk, self.e0.pk]).update(status="dropped")
+            day2 = self.today - datetime.timedelta(days=6)
+            seminar2 = self._lesson_at(self.o2, day2, LessonKind.SEMINAR, T1150)
+            LessonMark.objects.create(
+                organization=self.org,
+                lesson=seminar2,
+                enrollment=Enrollment.objects.get(offering=self.o2, student=self.s4),
+                status="present",
+            )
+        plan = ({**merge.PLAN[0], "no_seminar_groups": True},)
+        with mock.patch.object(merge, "PLAN", plan):
+            counts = self._call("--apply")
+        self.assertEqual(counts.get("families_merged"), "1", counts)
+        self.assertNotIn("seminar_groups_created", counts)
+        with bypass_rls():
+            self.assertFalse(SeminarGroup.objects.filter(offering=self.offering).exists())
+            self.assertFalse(Lesson.objects.filter(offering=self.offering, seminar_group__isnull=False).exists())
+
     def test_blocked_enrollment_is_reported_by_id(self):
         def boom(*args, **kwargs):
             raise merge.IntegrityError("x")
