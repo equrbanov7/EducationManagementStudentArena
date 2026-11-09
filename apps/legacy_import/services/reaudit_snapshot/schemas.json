@@ -1008,7 +1008,8 @@
     ],
     "org_path": "organization_id",
     "period_path": "",
-    "filters": {}
+    "filters": {},
+    "body_policy": "current-period-all-offerings-nonarchived-and-referenced-lineage/1"
   },
   "syllabus.SyllabusShare": {
     "fields": [

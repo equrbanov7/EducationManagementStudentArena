@@ -9,6 +9,9 @@ from django.contrib.auth import get_user_model
 from django.db.models import CharField, Q
 from django.db.models.functions import Cast
 
+from .syllabus_body import POLICY as SYLLABUS_BODY_POLICY
+from .syllabus_body import version_ids as syllabus_body_version_ids
+
 ORG = "526cfa63-4f80-4bba-a7a7-61c8fbb3d918"
 PERIOD = "a4f88744-8d49-4772-84ef-c28a96c3b372"
 SCHEMA_FILE = Path(__file__).with_name("schemas.json")
@@ -53,6 +56,10 @@ def scoped_query(label, spec):
         query = query.filter(**spec["filters"])
     if spec.get("exam_path"):
         query = query.filter(**{spec["exam_path"] + "__in": current_exam_ids()})
+    if label == "syllabus.SyllabusSection":
+        if spec.get("body_policy") != SYLLABUS_BODY_POLICY:
+            raise ValueError("fixed_schema_required")
+        query = query.filter(version_id__in=syllabus_body_version_ids(ORG, PERIOD))
     if label in {"legacy_import.LegacyEntityMap", "legacy_import.LegacyEntityMapVersion"}:
         # Historical final rows need canonical offering/enrollment map versions.
         # Lesson/mark routes stay current-period, matching the bounded cell tables.
