@@ -26,6 +26,7 @@ from apps.registrar import (
     gradebook_components,
     grading_scale,
     language_level_grading,
+    legacy_entry_only,
     read_memo,
     services,
 )
@@ -151,7 +152,7 @@ def legacy_level_entry_only(enrollment, *, frozen, graded, barred) -> bool:
 
 def _status(eligibility, *, graded, entry_only):
     if entry_only:
-        return exam_eligibility.STATUS_LEGACY_ENTRY_ONLY
+        return legacy_entry_only.STATUS_LEGACY_ENTRY_ONLY
     return eligibility_status(eligibility, graded=graded)
 
 
@@ -303,8 +304,16 @@ def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=N
         # sistemin BOŞLUĞUNDAN gəlir (bax exam_eligibility.status_code).
         # Köhnə q/b qərarı nəticədir (``legacy``) — «köhnə sistemdə nəticə yoxdur» DEYİL.
         "status_code": _status(eligibility, graded=graded or legacy_qb, entry_only=entry_only),
-        "status_label": eligibility_label(_status(eligibility, graded=graded or legacy_qb, entry_only=entry_only)),
-        "status_notice": eligibility_notice(_status(eligibility, graded=graded or legacy_qb, entry_only=entry_only)),
+        "status_label": (
+            legacy_entry_only.LABEL
+            if entry_only
+            else eligibility_label(eligibility_status(eligibility, graded=graded or legacy_qb))
+        ),
+        "status_notice": (
+            legacy_entry_only.NOTICE
+            if entry_only
+            else eligibility_notice(eligibility_status(eligibility, graded=graded or legacy_qb))
+        ),
         "legacy_entry_only": entry_only,
         "uomg_excluded": entry_only and not LEGACY_LEVEL_ENTRY_IN_UOMG,
         # Görünən sahələr də resolver-dən gəlir — çağıran yenidən hesablamır.

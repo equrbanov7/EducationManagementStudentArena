@@ -170,13 +170,14 @@ class FrozenLanguageLevelStatus(TestCase):
         return finals.compute_final_result(enrollment=fresh)
 
     def test_no_exam_reads_as_entry_only_pass(self):
-        from apps.registrar import exam_eligibility, language_level_grading
+        from apps.registrar import language_level_grading, legacy_entry_only
 
         fresh = Enrollment.objects.select_related("offering", "offering__subject").get(pk=self.quiet_enr.pk)
         self.assertFalse(language_level_grading.is_level(fresh.offering))  # köhnə dövr — səviyyə qaydası yox
         result = self._result(self.quiet_enr)
         self.assertFalse(result["barred"])
-        self.assertEqual(result["status_code"], exam_eligibility.STATUS_LEGACY_ENTRY_ONLY)
+        self.assertEqual(result["status_code"], legacy_entry_only.STATUS_LEGACY_ENTRY_ONLY)
+        self.assertEqual(str(result["status_label"]), str(legacy_entry_only.LABEL))
         self.assertTrue(result["passed"])
         self.assertFalse(result["failed"])
         self.assertEqual(result["total"], result["entry_score"])
