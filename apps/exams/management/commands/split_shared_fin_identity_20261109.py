@@ -36,7 +36,7 @@ from django.db import transaction
 
 from core.audit import log_action
 from core.constants import AuditAction
-from core.rls import apply_rls_request_context, bypass_rls
+from core.rls import apply_rls_request_context, bypass_rls, journal_unlock
 from core.rls_pooling import rls_worker_atomic
 
 FORMAT = "legacy-identity-split/1"
@@ -302,7 +302,9 @@ class Command(BaseCommand):
                 raise CommandError("legacy_split_organization_unknown")
             apply_rls_request_context(user_id=actor.pk, org_id=organization.pk)
             try:
-                with transaction.atomic():
+                # Sistem yazısı: köhnə xanaların/komponent ballarının köçürülməsi (yeni sətir + köhnənin silinməsi)
+                # jurnalın 2 saatlıq DB qoruyucusundan keçməlidir — ``twin_merge_scored`` / midterm_bridge ilə eyni rəsmi yol.
+                with journal_unlock(), transaction.atomic():  # unlock atomic-dən SONRA bağlanır (dry-run rollback)
                     run(organization=organization, actor=actor, cases=cases, counts=counts)
                     if not options["apply"]:
                         transaction.set_rollback(True)
