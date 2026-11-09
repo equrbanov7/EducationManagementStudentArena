@@ -155,6 +155,8 @@ SOURCE_LEGACY = "legacy"
 STATUS_LIVE = "live"
 STATUS_LEGACY = "legacy"
 STATUS_LEGACY_NO_RESULT = "legacy_no_result"
+#: Köçürülmüş səviyyə kursu (ing. dili) — köhnə sistemdə imtahan olmayıb, yekun = giriş balı (sahib 2026-11-09).
+STATUS_LEGACY_ENTRY_ONLY = "legacy_entry_only"
 
 #: Defolt buraxılış həddi — ``Program.absence_limit_percent`` boş olduqda.
 DEFAULT_LIMIT_PERCENT = 25
@@ -174,6 +176,14 @@ NO_LEGACY_RESULT_NOTICE = pgettext_lazy(
     "registrar.eligibility",
     "Köhnə sistem bu fənn üzrə imtahan nəticəsi yazmayıb. Ona görə status nə "
     "«keçib», nə «kəsilib» kimi göstərilir — məlumat mövcud deyil.",
+)
+
+LEGACY_ENTRY_ONLY_LABEL = pgettext_lazy("registrar.eligibility", "Köhnə sistem: imtahansız kurs, yekun = giriş balı")
+
+LEGACY_ENTRY_ONLY_NOTICE = pgettext_lazy(
+    "registrar.eligibility",
+    "Köhnə sistemdə xarici dil səviyyə kursları imtahansız aparılıb: yekun bal giriş balına bərabərdir və fənn "
+    "keçilmiş sayılır. Bu nəticə ÜOMG-yə daxil edilmir.",
 )
 
 UNKNOWN_HOURS_NOTICE = pgettext_lazy(
@@ -498,12 +508,14 @@ def resolve(
 STATUS_LABELS = {
     STATUS_LEGACY: FROZEN_BADGE,
     STATUS_LEGACY_NO_RESULT: NO_LEGACY_RESULT_LABEL,
+    STATUS_LEGACY_ENTRY_ONLY: LEGACY_ENTRY_ONLY_LABEL,
 }
 
 #: ``status_code`` → «niyə belədir» izahı (tooltip).
 STATUS_NOTICES = {
     STATUS_LEGACY: FROZEN_NOTICE,
     STATUS_LEGACY_NO_RESULT: NO_LEGACY_RESULT_NOTICE,
+    STATUS_LEGACY_ENTRY_ONLY: LEGACY_ENTRY_ONLY_NOTICE,
 }
 
 
@@ -581,11 +593,14 @@ __all__ = [
     "uomg_from",
     "FROZEN_BADGE",
     "FROZEN_NOTICE",
+    "LEGACY_ENTRY_ONLY_LABEL",
+    "LEGACY_ENTRY_ONLY_NOTICE",
     "NO_LEGACY_RESULT_LABEL",
     "NO_LEGACY_RESULT_NOTICE",
     "SOURCE_LEGACY",
     "SOURCE_LIVE",
     "STATUS_LEGACY",
+    "STATUS_LEGACY_ENTRY_ONLY",
     "STATUS_LEGACY_NO_RESULT",
     "STATUS_LIVE",
     "UNKNOWN_HOURS_NOTICE",

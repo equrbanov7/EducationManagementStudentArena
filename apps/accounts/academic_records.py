@@ -299,8 +299,8 @@ def _new_acc() -> dict:
 
 def _accumulate(acc, result) -> None:
     """Bir enrollment nəticəsini tələbənin akkumulyatoruna əlavə edir."""
-    if result["passed"] or result["failed"]:
-        # ÜOMG 100 bal: Σ(yekun_bal × kredit) / Σ(kredit) (transcript ilə eyni).
+    if (result["passed"] or result["failed"]) and not result.get("uomg_excluded", False):
+        # ÜOMG 100 bal: Σ(yekun_bal × kredit) / Σ(kredit) (transcript ilə eyni); imtahansız səviyyə kursu xaric.
         acc["quality_points"] += result["total"] * result["credit"]
         acc["gpa_credits"] += result["credit"]
     if result["passed"]:

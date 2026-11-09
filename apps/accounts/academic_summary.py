@@ -60,6 +60,7 @@ from apps.registrar.models import (
 from apps.registrar.public import analytics, credit_source, effective_exam_score
 from apps.registrar.public import eligibility_rules as exam_eligibility
 from apps.registrar.public import entry_standard, selfwork_points
+from core import language_level_rule
 
 _ZERO = Decimal("0")
 _ONE = Decimal("1")
@@ -260,10 +261,22 @@ def _offering_info(offering_ids, *, with_bits=False) -> tuple[dict, list, dict]:
             "organization__settings__registrar__midterm_from_year",
             "subject_id",
             "period_id",
+            "subject__name",
         )
     )
     periods: dict = {}
-    for offering_id, key, lesson_hours, ects, academic_year, start_date, from_year_raw, subject_id, period_id in rows:
+    for (
+        offering_id,
+        key,
+        lesson_hours,
+        ects,
+        academic_year,
+        start_date,
+        from_year_raw,
+        subject_id,
+        period_id,
+        subject_name,
+    ) in rows:
         entry_max, pass_threshold, min_exam = schemes.get(key, _DEFAULT_SCHEME)
         # ``exam_eligibility.lesson_hours_for`` güzgüsü: kanonik saat 0/None
         # olduqda açılışın bütün dərslərinin saat cəmi işlədilir.
@@ -289,6 +302,8 @@ def _offering_info(offering_ids, *, with_bits=False) -> tuple[dict, list, dict]:
             subject_id,
             # Dövrün iki sahəsi (kredit həlledicisinin semestr seçimi üçün) — sorğusuz obyekt-əvəzi, dövr başına bir.
             periods.setdefault(period_id, _PeriodFields(academic_year, start_date)),
+            # Köçürülmüş imtahansız səviyyə kursu: yekun = giriş, keçilmiş, ÜOMG-dən xaric (finals güzgüsü, 2026-11-09).
+            language_level_rule.is_level_name(subject_name or ""),
         )
     bits = entry_standard.activity_bits_map(midterm_keys) if with_bits and midterm_keys else {}
     return info, lesson_source_ids, {midterm_keys[oid]: value for oid, value in bits.items()}
@@ -354,6 +369,7 @@ def accumulate_summary(organization, enrollment_qs, acc) -> None:
             has_selfwork,
             subject_id,
             period,
+            level_name,
         ) = info[offering_key]
         limit, exempt = records.get(student_key, (_DEFAULT_ABSENCE_LIMIT, False))
         credit = credits.credit(student_key, subject_id, period=period, catalogue=credit)
@@ -427,8 +443,13 @@ def accumulate_summary(organization, enrollment_qs, acc) -> None:
         passed = graded and not barred and total >= pass_threshold and exam_ok
         failed = barred or (graded and not passed)
 
+        # Köçürülmüş imtahansız səviyyə kursu (``finals.legacy_level_entry_only`` güzgüsü): keçilmiş, ÜOMG-dən xaric.
+        entry_only = bool(frozen) and not graded and not barred and level_name
+        if entry_only:
+            passed, failed = True, False
+
         # ── Box-lar (academic_records._accumulate güzgüsü) ────────────────────
-        if passed or failed:
+        if (passed or failed) and not entry_only:
             quality_points += total * credit
             gpa_credits += credit
         if passed:

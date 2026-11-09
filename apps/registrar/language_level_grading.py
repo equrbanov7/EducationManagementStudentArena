@@ -27,8 +27,21 @@ def is_level_name(subject_name):
 
 
 def is_level(offering):
+    """Səviyyə qaydası (10+10+10 / 70) yalnız Midterm dövrünün (2026/2027+) açılışlarına aiddir.
+
+    Cari semestrdə həmişə qüvvədədir. Köçürülmüş (keçmiş, cari olmayan) semestrlərdə səviyyə adlı fənlər köhnə sistemdə universitet standartı ilə
+    (giriş 0–50) aparılıb və imtahansız qalıb — sahib 2026-11-09: onlar adi fənn kimi oxunur, yekun = giriş balı
+    (bax :func:`apps.registrar.finals.compute_final_result`). Ad yoxlaması üçün :func:`is_level_name` qalır.
+    """
     subject = getattr(offering, "subject", None)
-    return bool(subject is not None and is_level_name(getattr(subject, "name", "")))
+    if subject is None or not is_level_name(getattr(subject, "name", "")):
+        return False
+    period = getattr(offering, "period", None)
+    if period is not None and getattr(period, "is_current", False):
+        return True  # cari semestr — qayda qüvvədədir (2026-11-01-dən)
+    from . import interim_assessment
+
+    return interim_assessment.is_midterm_offering(offering)
 
 
 def entry_cap(subject_name, configured):

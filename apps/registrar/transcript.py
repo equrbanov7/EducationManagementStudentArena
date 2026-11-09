@@ -67,7 +67,7 @@ def _build_row(enrollment, organization=None, *, exempt=False, hours_map=None, b
     )
     credit = _credit_for(offering) if credit is None else int(credit)
     # Definite outcome → contributes to GPA; still-open course is excluded.
-    in_gpa = bool(result["passed"] or result["failed"])
+    in_gpa = bool(result["passed"] or result["failed"]) and not result.get("uomg_excluded", False)
     return {
         "enrollment": enrollment,
         # Köçürülmüş qiymət nişanının SABİT qoşma açarı (bax

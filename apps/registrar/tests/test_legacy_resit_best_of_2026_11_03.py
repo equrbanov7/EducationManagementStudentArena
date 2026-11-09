@@ -146,9 +146,10 @@ class LiveResitStillReplaces(TestCase):
 
 
 class FrozenLanguageLevelStatus(TestCase):
-    """Köçürülmüş xarici dil səviyyə kursu imtahansızdırsa «Davam edir» deyil, «köhnə sistemdə nəticə yoxdur».
+    """Köçürülmüş səviyyə kursu (2024/2025) — sahib 2026-11-09: imtahansızdır, yekun = giriş balı, keçilmiş sayılır.
 
-    11 q/b qaydası (``language_level_grading.eligibility``) tarixi semestrdə də qərar verir — qadağa qalır.
+    Səviyyə qaydası (10+10+10 / 70, 11 q/b) yalnız Midterm dövrünə (2026/2027+) aiddir; köhnə semestrdə fənn adi
+    fənn kimi oxunur, canlı q/b qadağası yenidən hesablanmır (köhnə vərəqin «Kəsr» qərarı ``legacy_qb_fail``-dir).
     """
 
     @classmethod
@@ -168,16 +169,36 @@ class FrozenLanguageLevelStatus(TestCase):
         fresh = Enrollment.objects.select_related("offering", "offering__subject").get(pk=enrollment.pk)
         return finals.compute_final_result(enrollment=fresh)
 
-    def test_no_exam_reads_as_no_legacy_result(self):
-        from apps.registrar import exam_eligibility
+    def test_no_exam_reads_as_entry_only_pass(self):
+        from apps.registrar import exam_eligibility, language_level_grading
 
+        fresh = Enrollment.objects.select_related("offering", "offering__subject").get(pk=self.quiet_enr.pk)
+        self.assertFalse(language_level_grading.is_level(fresh.offering))  # köhnə dövr — səviyyə qaydası yox
         result = self._result(self.quiet_enr)
         self.assertFalse(result["barred"])
-        self.assertEqual(result["status_code"], exam_eligibility.STATUS_LEGACY_NO_RESULT)
+        self.assertEqual(result["status_code"], exam_eligibility.STATUS_LEGACY_ENTRY_ONLY)
+        self.assertTrue(result["passed"])
+        self.assertFalse(result["failed"])
+        self.assertEqual(result["total"], result["entry_score"])
+        self.assertTrue(result["uomg_excluded"])
+        self.assertEqual((result["letter"], result["gpa"]), ("", None))
 
-    def test_eleven_absence_rule_still_bars(self):
+    def test_live_absences_do_not_bar_a_frozen_level_course(self):
         result = self._result(self.absent_enr)
-        self.assertTrue(result["barred"])
+        self.assertFalse(result["barred"])
+        self.assertTrue(result["legacy_entry_only"])
+
+    def test_level_policy_still_applies_in_the_midterm_era(self):
+        from apps.registrar import language_level_grading
+
+        period = _seed_period(self.ctx, name="2026/2027 Payız", year="2026/2027", start="2026-09-15", end="2027-01-31")
+        _user, _r, enrollment = _seed_student(self.ctx, "lvl_live", period)
+        fresh = Enrollment.objects.select_related("offering", "offering__subject", "offering__period").get(
+            pk=enrollment.pk
+        )
+        self.assertTrue(language_level_grading.is_level(fresh.offering))
+        result = finals.compute_final_result(enrollment=fresh)
+        self.assertFalse(result["legacy_entry_only"])
 
 
 class LegacyAttendanceFail(TestCase):

@@ -376,7 +376,8 @@ def build_period_analytics(*, organization, period, scope_q=None) -> dict:
         organization, flat.values("student_id"), subject_ids={row[14] for row in info.values()}
     )
 
-    level_ids = [row[7] for row in info.values() if language_level_grading.is_level_name(row[10])]
+    # Səviyyə qaydası donmuş (köçürülmüş) açılışa aid deyil (``language_level_grading.is_level`` güzgüsü, 2026-11-09).
+    level_ids = [row[7] for row in info.values() if language_level_grading.is_level_name(row[10]) and not row[6]]
     level_results = (
         language_level_analytics.results_for(flat, organization=organization, offering_ids=level_ids)
         if level_ids
@@ -497,24 +498,33 @@ def build_period_analytics(*, organization, period, scope_q=None) -> dict:
             barred, graded, total, passed, failed = (
                 level_result[k] for k in ("barred", "graded", "total", "passed", "failed")
             )
-        overall.add_row(student_key, absent, lesson_hours, barred, graded, total, passed, failed, credit)
+        # Köçürülmüş imtahansız səviyyə kursu (``finals.legacy_level_entry_only`` güzgüsü): keçilmiş, ÜOMG-dən xaric.
+        entry_only = bool(frozen) and not graded and not barred and language_level_grading.is_level_name(subject_name)
+        if entry_only:
+            passed, failed = True, False
+        in_gpa = False if entry_only else None
+        overall.add_row(student_key, absent, lesson_hours, barred, graded, total, passed, failed, credit, in_gpa=in_gpa)
 
         if program_id is not None:
             bucket = programs.get(program_id)
             if bucket is None:
                 bucket = programs[program_id] = analytics._Bucket(program_id, program_name, program_code)
-            bucket.add_row(student_key, absent, lesson_hours, barred, graded, total, passed, failed, credit)
+            bucket.add_row(
+                student_key, absent, lesson_hours, barred, graded, total, passed, failed, credit, in_gpa=in_gpa
+            )
 
         if group_id is not None:
             bucket = groups.get(group_id)
             if bucket is None:
                 bucket = groups[group_id] = analytics._Bucket(group_id, group_name)
-            bucket.add_row(student_key, absent, lesson_hours, barred, graded, total, passed, failed, credit)
+            bucket.add_row(
+                student_key, absent, lesson_hours, barred, graded, total, passed, failed, credit, in_gpa=in_gpa
+            )
 
         bucket = subjects.get(offering_id)
         if bucket is None:
             bucket = subjects[offering_id] = analytics._Bucket(offering_id, subject_name, subject_code)
-        bucket.add_row(student_key, absent, lesson_hours, barred, graded, total, passed, failed, credit)
+        bucket.add_row(student_key, absent, lesson_hours, barred, graded, total, passed, failed, credit, in_gpa=in_gpa)
 
     return analytics.assemble_payload(period, overall, programs, groups, subjects)
 
