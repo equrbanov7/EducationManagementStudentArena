@@ -90,6 +90,8 @@
         parts.push("limit=" + Math.max(PAGE, opts.keep || 0));
         parts.push("offset=" + (opts.offset || 0));
         if (opts.panel === false) parts.push("panel=0");
+        // 2026-11-09: «bir fənn = bir kart» — kart render modulu yüklənibsə server ailə üzrə kartlar qaytarır.
+        if (window.EMSWorkloadCards) parts.push("view=cards");
         var d = dist();
         var host = d ? d.root() : null;
         var focus = host ? host.dataset.focusRow : "";
@@ -271,10 +273,9 @@
         if (!node) return;
         node.hidden = !state.total;
         if (state.total) {
-            node.textContent = fmt(gettext("Göstərilir: %(shown)s / %(total)s sətir"), {
-                shown: state.rows.length,
-                total: state.total,
-            });
+            node.textContent = state.cards
+                ? fmt(gettext("Göstərilir: %(shown)s / %(total)s fənn"), { shown: state.cards.length, total: state.total })
+                : fmt(gettext("Göstərilir: %(shown)s / %(total)s sətir"), { shown: state.rows.length, total: state.total });
         }
     }
 
@@ -353,7 +354,15 @@
                 state.rows.forEach(function (row) { seen[row.id] = true; });
                 var added = (payload.rows || []).filter(function (row) { return !seen[row.id]; });
                 state.rows = state.rows.concat(added);
-                Render.rows(d.q("[data-wl-rows]"), added, d.labels(), { append: true, teacher: view.teacher });
+                if (state.cards && payload.cards && Render.cards) {
+                    var seenCards = {};
+                    state.cards.forEach(function (card) { seenCards[card.id] = true; });
+                    var addedCards = payload.cards.filter(function (card) { return !seenCards[card.id]; });
+                    state.cards = state.cards.concat(addedCards);
+                    Render.cards(d.q("[data-wl-rows]"), addedCards, d.labels(), { append: true, teacher: view.teacher });
+                } else {
+                    Render.rows(d.q("[data-wl-rows]"), added, d.labels(), { append: true, teacher: view.teacher });
+                }
                 state.loadingMore = false;
                 afterLoad(payload);
             })

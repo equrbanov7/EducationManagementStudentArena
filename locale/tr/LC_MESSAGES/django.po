@@ -114535,3 +114535,55 @@ msgstr "Başka gruptan onaylı müfredat (otomatik)"
 msgctxt "organizations.self_conflict"
 msgid "Siz bu təşkilatda həm də tələbəsiniz: işçi rolu ilə özünüzə, öz qrupunuza və öz jurnallarınıza aid əməliyyat apara bilməzsiniz."
 msgstr "Bu kurumda aynı zamanda öğrencisiniz: personel rolüyle kendinize, kendi grubunuza ve kendi yoklama defterlerinize ilişkin işlem yapamazsınız."
+
+msgctxt "accounts.workload"
+msgid "Alt qrup"
+msgstr "Alt grup"
+
+msgctxt "accounts.workload"
+msgid "Aşağıda hər sətri bir axına salın və axının mühazirəçisini seçin. Bir sətrin qrupları birlikdə hərəkət edir — qrupları ayırmaq üçün sətri «Redaktə» ilə bölün."
+msgstr "Aşağıda her satırı bir akışa yerleştirin ve akışın öğretim üyesini seçin. Bir satırın grupları birlikte hareket eder — ayırmak için satırı «Düzenle» ile bölün."
+
+msgctxt "accounts.workload"
+msgid "Hər qrup üçün müəllimi və saatı seçin; bir qrupa bir neçə müəllim (saat bölgüsü və ya Lab-1 / Lab-2) əlavə edilə bilər. Saat sətrin cəmindən çox ola bilməz."
+msgstr "Her grup için öğretmeni ve saati seçin; bir gruba birden fazla öğretmen (saat bölüşümü veya Lab-1 / Lab-2) eklenebilir. Saat, satır toplamını aşamaz."
+
+msgctxt "accounts.workload"
+msgid "Kafedranın illik tədris tapşırığını müəllimlər arasında bölün. Eyni fənn, semestr və kredit — bir kartdır: mühazirə axınları (patok), seminar və laboratoriya qrup-qrup bölünür; qalıq saat real vaxtda göstərilir. Bölgü təsdiqlənəndə müəllimlərə bildiriş gedir və elektron jurnal açılışları yaradılır."
+msgstr "Bölümün yıllık ders görevini öğretmenler arasında dağıtın. Aynı ders, dönem ve kredi tek karttır: ders akışları (ortak dersler), seminer ve laboratuvar grup grup dağıtılır; kalan saat anlık gösterilir. Dağıtım onaylandığında öğretmenlere bildirim gider ve e-defter açılışları oluşturulur."
+
+msgctxt "accounts.workload"
+msgid "Mühazirə axınları (patok)"
+msgstr "Ders akışları (ortak dersler)"
+
+msgctxt "accounts.workload"
+msgid "Nəticə"
+msgstr "Sonuç"
+
+msgctxt "accounts.workload"
+msgid "Patok — bir neçə qrupun mühazirəni birlikdə dinləməsidir. Eyni axındakı qrupların mühazirəsi müəllimin yükünə BİR dəfə düşür."
+msgstr "Ortak ders (akış), birkaç grubun dersi birlikte dinlemesidir. Aynı akıştaki grupların dersi öğretmenin yüküne BİR kez sayılır."
+
+msgctxt "accounts.workload"
+msgid "Qayda"
+msgstr "Kural"
+
+msgctxt "accounts.workload"
+msgid "Qruplar üzrə bölgü"
+msgstr "Gruplara göre dağıtım"
+
+msgctxt "accounts.workload"
+msgid "Sil"
+msgstr "Kaldır"
+
+msgctxt "accounts.workload"
+msgid "Sistem axını «aparıcı sətir» bağı ilə tanıyır: axının mühazirə saatı aparıcı sətirdə qalır, digər sətirlərdə mühazirə cəmi 0 olur və onlar aparıcıya bağlanır. Hər qrupun jurnalında mühazirə öz saatı ilə görünür."
+msgstr "Sistem akışı «öncü satır» bağıyla tanır: akışın ders saati öncü satırda kalır, diğer satırlarda ders toplamı 0 olur ve öncüye bağlanır. Her grubun defterinde ders kendi saatiyle görünür."
+
+msgctxt "accounts.workload"
+msgid "Sətirlər → axın"
+msgstr "Satırlar → akış"
+
+msgctxt "accounts.workload"
+msgid "Ödəniş"
+msgstr "Ödeme"

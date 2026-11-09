@@ -35,6 +35,7 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
      data-unassign-url="{{ workload_distribution_section.unassign_url }}"
      data-confirm-url="{{ workload_distribution_section.confirm_url }}"
      data-amend-url="{{ workload_distribution_section.amend_url }}"
+     data-streams-url="{{ workload_distribution_section.streams_url }}"
      data-teachers-url="{{ workload_distribution_section.teachers_url }}"
      data-options-url="{{ workload_distribution_section.options_url }}"
      data-curriculum-url="{{ workload_distribution_section.curriculum_url }}"
@@ -66,7 +67,7 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
     <div>
       {% comment %}Başlıq profil qabığında artıq göstərilir — bölmə içində təkrarlanmır.{% endcomment %}
       <p class="wl__intro">
-        {% trans "Kafedranın illik tədris tapşırığını müəllimlər arasında bölün. Hər fəaliyyət növü (mühazirə, seminar, laboratoriya) ayrıca bölünür; qalıq saat real vaxtda göstərilir. Bölgü təsdiqlənəndə müəllimlərə bildiriş gedir və elektron jurnal açılışları yaradılır." context "accounts.workload" %}
+        {% trans "Kafedranın illik tədris tapşırığını müəllimlər arasında bölün. Eyni fənn, semestr və kredit — bir kartdır: mühazirə axınları (patok), seminar və laboratoriya qrup-qrup bölünür; qalıq saat real vaxtda göstərilir. Bölgü təsdiqlənəndə müəllimlərə bildiriş gedir və elektron jurnal açılışları yaradılır." context "accounts.workload" %}
       </p>
     </div>
     <span class="wl__status" data-wl-status-chip hidden></span>
@@ -245,6 +246,8 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
   </div>
 
   {% if workload_distribution_section.can_intensive %}{% include "accounts/profile/sections/workload/_intensive_modal.html" %}{% endif %}
+  {# Sahib 2026-11-09: «bir fənn = bir kart» — axın (patok) və qrup bölgüsü modalları. #}
+  {% include "accounts/profile/sections/workload/_card_pickers.html" %}
 
   {# ══ MODAL — sətir yaratma/redaktə ══════════════════════════════════ #}
   <div class="modal fade wl-modal" id="wlRowModal" tabindex="-1" aria-hidden="true" data-wl-row-modal>
@@ -364,6 +367,9 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
           <form class="wl-form" data-wl-assign-form novalidate>
             <input type="hidden" name="row_id" data-wl-assign-row-id>
             <input type="hidden" name="assignment_id" data-wl-assign-id>
+            {# 2026-11-09: bölgünün struktur qrup bağı / alt qrup nömrəsi — redaktədə itməsin (seçici kartdadır). #}
+            <input type="hidden" name="group_id" data-wl-assign-group>
+            <input type="hidden" name="sub_number" data-wl-assign-sub>
             <label class="wl-form__field">
               <span>{% trans "Fəaliyyət növü" context "accounts.workload" %}</span>
               <div class="bootstrap-single-select">

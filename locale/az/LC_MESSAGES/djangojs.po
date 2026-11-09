@@ -3203,3 +3203,149 @@ msgstr "Patok"
 #, javascript-format
 msgid "Patok · %(groups)s ilə birlikdə"
 msgstr "Patok · %(groups)s ilə birlikdə"
+
+#, javascript-format
+msgid "%(credits)s kredit"
+msgstr "%(credits)s kredit"
+
+#, javascript-format
+msgid "%(hours)s s"
+msgstr "%(hours)s s"
+
+#, javascript-format
+msgid "%(hours)s saat"
+msgstr "%(hours)s saat"
+
+#, javascript-format
+msgid "%(kind)s bölgüsü — %(subject)s"
+msgstr "%(kind)s bölgüsü — %(subject)s"
+
+#, javascript-format
+msgid "%(n)s axın (qruplar ayrılmayıb)"
+msgstr "%(n)s axın (qruplar ayrılmayıb)"
+
+#, javascript-format
+msgid "%(n)s axın · yükə %(hours)s"
+msgstr "%(n)s axın · yükə %(hours)s"
+
+#, javascript-format
+msgid "%(n)s qrup"
+msgstr "%(n)s qrup"
+
+#, javascript-format
+msgid "%(n)s qrup · %(hours)s"
+msgstr "%(n)s qrup · %(hours)s"
+
+#, javascript-format
+msgid "%(n)s tələbə"
+msgstr "%(n)s tələbə"
+
+msgid "Aparıcı başqa kartdadır"
+msgstr "Aparıcı başqa kartdadır"
+
+msgid "Aparıcı seçilməyib — mühazirə yükə düşmür"
+msgstr "Aparıcı seçilməyib — mühazirə yükə düşmür"
+
+#, javascript-format
+msgid "Axın %(n)s"
+msgstr "Axın %(n)s"
+
+msgid "Axınları dəyiş"
+msgstr "Axınları dəyiş"
+
+msgid "Bir sətrin qrupları birlikdə hərəkət edir — ayırmaq üçün sətri «Redaktə» ilə bölün."
+msgstr "Bir sətrin qrupları birlikdə hərəkət edir — ayırmaq üçün sətri «Redaktə» ilə bölün."
+
+msgid "Birgə — saat başqa sətirdədir"
+msgstr "Birgə — saat başqa sətirdədir"
+
+msgid "Bu fəndə aparıcısı seçilməmiş patok sətri var — «Axınları dəyiş» ilə qrupları axına bağlayın."
+msgstr "Bu fəndə aparıcısı seçilməmiş patok sətri var — «Axınları dəyiş» ilə qrupları axına bağlayın."
+
+msgid "Bütün qrup"
+msgstr "Bütün qrup"
+
+msgid "Bütün qruplar birlikdə"
+msgstr "Bütün qruplar birlikdə"
+
+#, javascript-format
+msgid "Göstərilir: %(shown)s / %(total)s fənn"
+msgstr "Göstərilir: %(shown)s / %(total)s fənn"
+
+msgid "Mühazirə"
+msgstr "Mühazirə"
+
+#, javascript-format
+msgid "Mühazirəsiz qruplar: %(groups)s"
+msgstr "Mühazirəsiz qruplar: %(groups)s"
+
+msgid "Mühazirəçi"
+msgstr "Mühazirəçi"
+
+msgid "Mühazirəçi seçilməyib"
+msgstr "Mühazirəçi seçilməyib"
+
+msgid "Müəllim axtar…"
+msgstr "Müəllim axtar…"
+
+msgid "Müəllim əlavə et"
+msgstr "Müəllim əlavə et"
+
+msgid "Patok: bir axının mühazirəsi müəllimin yükünə bir dəfə düşür və hər qrupun jurnalında görünür."
+msgstr "Patok: bir axının mühazirəsi müəllimin yükünə bir dəfə düşür və hər qrupun jurnalında görünür."
+
+#, javascript-format
+msgid "Qalıq %(hours)s"
+msgstr "Qalıq %(hours)s"
+
+msgid "Qrup qeydi tanınmadı"
+msgstr "Qrup qeydi tanınmadı"
+
+msgid "Qrupsuz bölgü"
+msgstr "Qrupsuz bölgü"
+
+msgid "Saat"
+msgstr "Saat"
+
+msgid "Saat sıfırdan böyük olmalıdır."
+msgstr "Saat sıfırdan böyük olmalıdır."
+
+#, javascript-format
+msgid "Sətirlər (%(n)s)"
+msgstr "Sətirlər (%(n)s)"
+
+msgid "Sətri sil"
+msgstr "Sətri sil"
+
+#, javascript-format
+msgid "Sətrin cəmindən çox saat bölünüb: %(groups)s"
+msgstr "Sətrin cəmindən çox saat bölünüb: %(groups)s"
+
+#, javascript-format
+msgid "Tapşırıq sətirləri (%(n)s) — redaktə, silmə, saatlar"
+msgstr "Tapşırıq sətirləri (%(n)s) — redaktə, silmə, saatlar"
+
+msgid "Təyin olunmayıb"
+msgstr "Təyin olunmayıb"
+
+msgid "bir sətir"
+msgstr "bir sətir"
+
+#, javascript-format
+msgid "mühazirə %(hours)s · yükə bir dəfə"
+msgstr "mühazirə %(hours)s · yükə bir dəfə"
+
+#, javascript-format
+msgid "qrup planı %(hours)s"
+msgstr "qrup planı %(hours)s"
+
+msgid "saathesabı"
+msgstr "saathesabı"
+
+#, javascript-format
+msgid "sətir qalığı %(hours)s"
+msgstr "sətir qalığı %(hours)s"
+
+#, javascript-format
+msgid "№%(n)s"
+msgstr "№%(n)s"

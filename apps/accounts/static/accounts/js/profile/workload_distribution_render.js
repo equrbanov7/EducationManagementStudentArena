@@ -259,6 +259,9 @@
         );
     }
 
+    /** 2026-11-09: fənn kartının açılan «Sətirlər» hissəsi köhnə sətir kartını təkrar işlədir (`workload_distribution_cards.js`). */
+    Render.rowHtml = rowHtml;
+
     /**
      * Sətir kartlarını cədvəl sahəsinə yazır. ``opts.append`` — mövcud kartların ARDINA əlavə (tənbəl yükləmə,
      * 2026-10-25); ``opts.teacher`` — seçilmiş müəllimin çipləri vurğulanır.

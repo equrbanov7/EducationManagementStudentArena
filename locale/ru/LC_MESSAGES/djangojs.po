@@ -3218,3 +3218,149 @@ msgstr "Поток"
 #, javascript-format
 msgid "Patok · %(groups)s ilə birlikdə"
 msgstr "Поток · вместе с %(groups)s"
+
+#, javascript-format
+msgid "%(credits)s kredit"
+msgstr "%(credits)s кредитов"
+
+#, javascript-format
+msgid "%(hours)s s"
+msgstr "%(hours)s ч"
+
+#, javascript-format
+msgid "%(hours)s saat"
+msgstr "%(hours)s часов"
+
+#, javascript-format
+msgid "%(kind)s bölgüsü — %(subject)s"
+msgstr "Распределение: %(kind)s — %(subject)s"
+
+#, javascript-format
+msgid "%(n)s axın (qruplar ayrılmayıb)"
+msgstr "%(n)s потока (группы не разделены)"
+
+#, javascript-format
+msgid "%(n)s axın · yükə %(hours)s"
+msgstr "%(n)s поток(а) · в нагрузку %(hours)s"
+
+#, javascript-format
+msgid "%(n)s qrup"
+msgstr "%(n)s групп"
+
+#, javascript-format
+msgid "%(n)s qrup · %(hours)s"
+msgstr "%(n)s групп · %(hours)s"
+
+#, javascript-format
+msgid "%(n)s tələbə"
+msgstr "%(n)s студентов"
+
+msgid "Aparıcı başqa kartdadır"
+msgstr "Ведущая строка в другой карточке"
+
+msgid "Aparıcı seçilməyib — mühazirə yükə düşmür"
+msgstr "Ведущая строка не выбрана — лекция не входит в нагрузку"
+
+#, javascript-format
+msgid "Axın %(n)s"
+msgstr "Поток %(n)s"
+
+msgid "Axınları dəyiş"
+msgstr "Изменить потоки"
+
+msgid "Bir sətrin qrupları birlikdə hərəkət edir — ayırmaq üçün sətri «Redaktə» ilə bölün."
+msgstr "Группы одной строки перемещаются вместе — чтобы разделить, разбейте строку через «Редактировать»."
+
+msgid "Birgə — saat başqa sətirdədir"
+msgstr "Совместно — часы в другой строке"
+
+msgid "Bu fəndə aparıcısı seçilməmiş patok sətri var — «Axınları dəyiş» ilə qrupları axına bağlayın."
+msgstr "У этого предмета есть строка потока без ведущей — свяжите группы с потоком через «Изменить потоки»."
+
+msgid "Bütün qrup"
+msgstr "Вся группа"
+
+msgid "Bütün qruplar birlikdə"
+msgstr "Все группы вместе"
+
+#, javascript-format
+msgid "Göstərilir: %(shown)s / %(total)s fənn"
+msgstr "Показано %(shown)s из %(total)s предметов"
+
+msgid "Mühazirə"
+msgstr "Лекция"
+
+#, javascript-format
+msgid "Mühazirəsiz qruplar: %(groups)s"
+msgstr "Группы без лекции: %(groups)s"
+
+msgid "Mühazirəçi"
+msgstr "Лектор"
+
+msgid "Mühazirəçi seçilməyib"
+msgstr "Лектор не выбран"
+
+msgid "Müəllim axtar…"
+msgstr "Поиск преподавателя…"
+
+msgid "Müəllim əlavə et"
+msgstr "Добавить преподавателя"
+
+msgid "Patok: bir axının mühazirəsi müəllimin yükünə bir dəfə düşür və hər qrupun jurnalında görünür."
+msgstr "Поток: лекция потока учитывается в нагрузке один раз и отображается в журнале каждой группы."
+
+#, javascript-format
+msgid "Qalıq %(hours)s"
+msgstr "Остаток %(hours)s"
+
+msgid "Qrup qeydi tanınmadı"
+msgstr "Запись о группе не распознана"
+
+msgid "Qrupsuz bölgü"
+msgstr "Распределение без группы"
+
+msgid "Saat"
+msgstr "Часы"
+
+msgid "Saat sıfırdan böyük olmalıdır."
+msgstr "Часы должны быть больше нуля."
+
+#, javascript-format
+msgid "Sətirlər (%(n)s)"
+msgstr "Строки (%(n)s)"
+
+msgid "Sətri sil"
+msgstr "Удалить строку"
+
+#, javascript-format
+msgid "Sətrin cəmindən çox saat bölünüb: %(groups)s"
+msgstr "Распределено больше часов, чем итог строки: %(groups)s"
+
+#, javascript-format
+msgid "Tapşırıq sətirləri (%(n)s) — redaktə, silmə, saatlar"
+msgstr "Строки поручения (%(n)s) — редактирование, удаление, часы"
+
+msgid "Təyin olunmayıb"
+msgstr "Не назначено"
+
+msgid "bir sətir"
+msgstr "одна строка"
+
+#, javascript-format
+msgid "mühazirə %(hours)s · yükə bir dəfə"
+msgstr "лекция %(hours)s · в нагрузку один раз"
+
+#, javascript-format
+msgid "qrup planı %(hours)s"
+msgstr "план группы %(hours)s"
+
+msgid "saathesabı"
+msgstr "почасовая"
+
+#, javascript-format
+msgid "sətir qalığı %(hours)s"
+msgstr "остаток строки %(hours)s"
+
+#, javascript-format
+msgid "№%(n)s"
+msgstr "№ %(n)s"

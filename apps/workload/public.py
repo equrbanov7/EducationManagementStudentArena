@@ -132,6 +132,8 @@ def build_distribution_context(
         "unassign_url": reverse("workload:unassign"),
         "confirm_url": reverse("workload:confirm"),
         "amend_url": reverse("workload:amend"),
+        # Sahib 2026-11-09: «bir fənn = bir kart» — mühazirə axınları seçicisi.
+        "streams_url": reverse("workload:patok_streams"),
         "teachers_url": reverse("workload:teachers"),
         "options_url": reverse("workload:options"),
         "curriculum_url": reverse("workload:curriculum"),

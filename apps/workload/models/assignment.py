@@ -47,6 +47,23 @@ class TeacherAssignment(UUIDModel, TimeStampedModel):
     groups_note = models.CharField(
         max_length=255, blank=True, help_text="Hansı qrup/yarımqrup — «236 İ ing, 2-ci yarımqrup»."
     )
+    # Sahib 2026-11-09 («bir fənn = bir kart»): bölgünün STRUKTUR qrup bağı — sərbəst ``groups_note`` mətninin
+    # yerinə. Boş = sətrin bütün qrupları (köhnə davranış). ``sub_number`` — jurnalın lab qrupu / seminar alt qrupu
+    # nömrəsi (``Enrollment.lab_group`` / ``seminar_group``, 1–9); boş = bütün qrup. Jurnal və paylar əvvəl bu
+    # bağı, yoxdursa qeydin parse-ini oxuyur (``services.offering_shares._assignment_group``).
+    group = models.ForeignKey(
+        "organizations.OrgUnit",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="workload_assignments_as_group",
+        help_text="Bölgünün qrupu (sətrin qruplarından biri); boş = sətrin bütün qrupları.",
+    )
+    sub_number = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        help_text="Lab qrupu / seminar alt qrupu nömrəsi (jurnaldakı Lab-1, Lab-2 …); boş = bütün qrup.",
+    )
     is_hourly_paid = models.BooleanField(default=False, help_text="Saathesabı fondundan ödənilir.")
     assigned_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -63,6 +80,10 @@ class TeacherAssignment(UUIDModel, TimeStampedModel):
         ordering = ["row", "activity", "created_at"]
         constraints = [
             models.CheckConstraint(check=models.Q(hours__gt=0), name="workload_assignment_hours_positive"),
+            models.CheckConstraint(
+                check=models.Q(sub_number__isnull=True) | models.Q(sub_number__gte=1, sub_number__lte=9),
+                name="workload_assignment_sub_number_range",
+            ),
         ]
         indexes = [
             models.Index(fields=["row", "activity"]),
