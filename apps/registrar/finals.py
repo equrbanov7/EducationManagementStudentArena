@@ -26,6 +26,7 @@ from apps.registrar import (
     gradebook_components,
     grading_scale,
     language_level_grading,
+    legacy_entry_only,
     read_memo,
     services,
 )
@@ -131,6 +132,28 @@ def legacy_attendance_fail(enrollment, *, frozen, effective_exam) -> bool:
     köhnə rəsmi vərəqin «Davamiyyət … (Kəsr)» qərarı göstərilir — «Q/b-dan kəsilib», «nəticə yoxdur» deyil.
     """
     return bool(frozen) and effective_exam is None and bool(getattr(enrollment, "legacy_qb_fail", False))
+
+
+#: Köçürülmüş imtahansız səviyyə kursunun «yekun = giriş» nəticəsi ÜOMG-yə daxil edilsinmi (sahib qərarı 2026-11-09).
+LEGACY_LEVEL_ENTRY_IN_UOMG = False
+
+
+def legacy_level_entry_only(enrollment, *, frozen, graded, barred) -> bool:
+    """Köçürülmüş (donmuş) səviyyə adlı kurs, imtahan/25 % yoxdur, q/b qadağası yoxdur → yekun = giriş (sahib 2026-11-09).
+
+    Köhnə sistem 2024/2025–2025/2026 səviyyə kurslarını imtahansız aparıb (bal vərəqində yalnız giriş); tələbə
+    «nəticə yoxdur» əvəzinə giriş balını yekun kimi görür, fənn keçilmiş sayılır, ÜOMG-yə daxil edilmir.
+    """
+    if not frozen or graded or barred:
+        return False
+    subject = getattr(getattr(enrollment, "offering", None), "subject", None)
+    return bool(subject is not None and language_level_grading.is_level_name(getattr(subject, "name", "")))
+
+
+def _status(eligibility, *, graded, entry_only):
+    if entry_only:
+        return legacy_entry_only.STATUS_LEGACY_ENTRY_ONLY
+    return eligibility_status(eligibility, graded=graded)
 
 
 def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=None, hours_map=None, batch=None):
@@ -249,6 +272,12 @@ def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=N
     passed = graded and not barred and total >= scheme.pass_threshold and exam_ok
     # Failed once we can judge it: barred (no exam needed) or graded-but-not-passed.
     failed = barred or (graded and not passed)
+    entry_only = legacy_level_entry_only(enrollment, frozen=eligibility.get("frozen"), graded=graded, barred=barred)
+    if entry_only:
+        # Sahib 2026-11-09: köçürülmüş səviyyə kursu imtahansızdır — yekun = giriş balı, keçilmiş sayılır.
+        passed, failed = True, False
+        if not LEGACY_LEVEL_ENTRY_IN_UOMG:
+            letter, gpa = "", None
 
     return {
         "entry_score": entry_score,
@@ -274,9 +303,19 @@ def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=N
         # Şəffaflıq: status canlı qaydadan, köhnə sistemdən, yoxsa köhnə
         # sistemin BOŞLUĞUNDAN gəlir (bax exam_eligibility.status_code).
         # Köhnə q/b qərarı nəticədir (``legacy``) — «köhnə sistemdə nəticə yoxdur» DEYİL.
-        "status_code": eligibility_status(eligibility, graded=graded or legacy_qb),
-        "status_label": eligibility_label(eligibility_status(eligibility, graded=graded or legacy_qb)),
-        "status_notice": eligibility_notice(eligibility_status(eligibility, graded=graded or legacy_qb)),
+        "status_code": _status(eligibility, graded=graded or legacy_qb, entry_only=entry_only),
+        "status_label": (
+            legacy_entry_only.LABEL
+            if entry_only
+            else eligibility_label(eligibility_status(eligibility, graded=graded or legacy_qb))
+        ),
+        "status_notice": (
+            legacy_entry_only.NOTICE
+            if entry_only
+            else eligibility_notice(eligibility_status(eligibility, graded=graded or legacy_qb))
+        ),
+        "legacy_entry_only": entry_only,
+        "uomg_excluded": entry_only and not LEGACY_LEVEL_ENTRY_IN_UOMG,
         # Görünən sahələr də resolver-dən gəlir — çağıran yenidən hesablamır.
         "attendance_score": eligibility["attendance_score"],
         "exempt": eligibility["exempt"],

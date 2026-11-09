@@ -343,9 +343,12 @@ class _Bucket:
             result["passed"],
             result["failed"],
             result["credit"],
+            in_gpa=(result["passed"] or result["failed"]) and not result.get("uomg_excluded", False),
         )
 
-    def add_row(self, student_id, absence_hours, lesson_hours, barred, graded, total, passed, failed, credit):
+    def add_row(
+        self, student_id, absence_hours, lesson_hours, barred, graded, total, passed, failed, credit, *, in_gpa=None
+    ):
         """Yığımın TƏK gövdəsi — dict qurmadan da çağırıla bilir.
 
         ``analytics_fast`` sürətli yolu məhz bunu çağırır: nəticə dicti
@@ -360,8 +363,9 @@ class _Bucket:
         if graded:
             self.graded += 1
             self.total_sum += total
-        if passed or failed:
-            # ÜOMG 100 bal üzərindən: Σ(yekun_bal × kredit) / Σ(kredit) (transcript ilə eyni).
+        if (passed or failed) if in_gpa is None else in_gpa:
+            # ÜOMG 100 bal üzərindən: Σ(yekun_bal × kredit) / Σ(kredit) (transcript ilə eyni);
+            # köçürülmüş imtahansız səviyyə kursu (``uomg_excluded``) məxrəcə düşmür.
             self.quality_points += total * credit
             self.gpa_credits += credit
         if passed:
