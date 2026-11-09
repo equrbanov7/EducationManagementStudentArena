@@ -13030,6 +13030,206 @@
     "prev": {},
     "send": {}
    }
+  },
+  "9009": {
+   "teacher": 8385,
+   "legacy_teacher": 60,
+   "legacy_lesson": 2240,
+   "hours": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "content_sha256": "65957a076a640a27b688ccd791ae096703e206a42da8f28f5ddedaac368b31aa",
+   "sections": {
+    "info": {
+     "teacher": "",
+     "office_hours": "",
+     "prerequisites": "",
+     "language": "en",
+     "lesson_hours": 45,
+     "welcome": "",
+     "research_interests": [],
+     "certificates": []
+    },
+    "desc": {
+     "description": "The course examines the major processes of international and regional integration and the evolution, structure, functions, and contemporary challenges of international organizations. It introduces students to major theoretical approaches to integration and institutional cooperation and applies these approaches to the analysis of organizations such as the United Nations, European Union, World Trade Organization, International Monetary Fund, World Bank, NATO, Council of Europe, African Union, ASEAN, and other regional and international institutions.\nParticular attention is given to the relationship between sovereignty and integration, the development of supranational and intergovernmental institutions, economic and political integration, regionalism, global governance, institutional effectiveness, international crises, and emerging challenges to multilateral cooperation.",
+     "goal": ""
+    },
+    "out": {
+     "outcomes": [
+      "The main aim of the course is to provide students with advanced theoretical and practical knowledge of:\n• international integration processes;\n• regional integration and regionalism;\n• theories of international cooperation and institutionalization;\n• the structure and functioning of international organizations;\n• the interaction between states, international organizations, and non-state actors;\n• contemporary challenges facing multilateral institutions."
+     ]
+    },
+    "week": {
+     "rows": [
+      {
+       "topic": "Introduction: Concepts, definitions, evolution of international cooperation",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Theories of International Integration",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "International Cooperation and Institutionalism",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "United Nations System",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Regional Integration and Regionalism",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "European Integration",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "International Economic Organizations",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Security and Defence Organizations",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "African Union, ASEAN, MERCOSUR, BRICS, Shanghai Cooperational Organization",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "African Union, ASEAN, MERCOSUR, BRICS, Shanghai Cooperational Organization",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Gulf Cooperation Council ,NAFTA,",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Organization of Turkic States",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "International Organizations and Global Governance",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Contemporary Challenges to International Integration",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Azerbaijan in International Organizations",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      }
+     ]
+    },
+    "method": {
+     "methods": [],
+     "note": ""
+    },
+    "assess": {
+     "midterm": 0,
+     "project": 0,
+     "note": "Yekun qiymət cari qiymətləndirməyə - məşğələ (seminar və laboratoriya işi) (0 - 30 bal), sərbəst iş (0 - 10 bal), davamiyyət (0 - 10 bal) və aralıq qiymətləndirməyə - semestr sonu imtahanlara (0 - 50 bal) görə verilən balların cəmidir. Eyni fəndən əlavə olaraq təcrübi və əməli dərslər nəzərdə tutulduğu halda bu dərslərin qiymətləndirilməsi üçün (0 – 10) bal ayrılır.\nYekun qiymət = cari qiymətləndirmə + aralıq qiymətləndirmə\nKollokviumlar akademik təqvimə uyğun olaraq hər semestrdə 3 dəfə təşkil olunur. Hər kollokvium 0 - 10 bal ilə qiymətləndirilir. Kollokviumun keçirilməsi məcburidir. Kollokviumda iştirak etməyən tələbəyə 0 bal yazılır. 0-30",
+     "exam_questions": []
+    },
+    "self": {
+     "option": "",
+     "topics": [],
+     "archived": []
+    },
+    "lit": {
+     "primary": [
+      "• Ernst B. Haas — The Uniting of Europe\n• Leon N. Lindberg — The Political Dynamics of European Economic Integration\n• Andrew Moravcsik — The Choice for Europe\n• Robert O. Keohane — After Hegemony\n• Robert O. Keohane and Joseph S. Nye — Power and Interdependence\n• Alexander Wendt — Social Theory of International Politics\n• Joseph S. Nye — Peace in Parts\nInternational Organizations\n• Ian Hurd — International Organizations: Politics, Law, Practice\n• Margaret P. Karns, Karen A. Mingst and Kendall W. Stiles — International Organizations: The Politics and Processes of Global Governance\n• Clive Archer — International Organizations\n• Thomas G. Weiss and Rorden Wilkinson — International Organization and Global Governance\nEuropean Integration\n• Desmond Dinan — Europe Recast: A History of European Union\n• Mark Pollack — works on EU integration and institutions"
+     ],
+     "additional": []
+    },
+    "prev": {},
+    "send": {}
+   }
   }
  },
  "targets": [
@@ -14293,6 +14493,22 @@
    },
    "action": "restore",
    "source": "8978"
+  },
+  {
+   "key": "r0319c70d",
+   "teacher": 8385,
+   "offering_id": "0319c70d-73f0-43a7-9410-50edecaf9cf7",
+   "group_id": "eacdd889-8490-4e36-94bc-a52d692eabfb",
+   "subject_ids": [
+    "d543b4c8-bba3-418d-a5dc-fe11e6cc395b"
+   ],
+   "lesson_hours": 45,
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "action": "restore",
+   "source": "9009"
   }
  ]
 }

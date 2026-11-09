@@ -392,7 +392,8 @@ def build(
         if offering is not None:
             offerings.setdefault(offering.id, offering)
     offering_ids = list(offerings)
-    level_ids = {o.pk for o in offerings.values() if language_level_grading.is_level_name(o.subject.name)}
+    # Səviyyə qaydası dövr-qapılıdır (``is_level``: cari / Midterm dövrü) — köçürülmüş səviyyə kursu adi fənn kimi oxunur.
+    level_ids = {o.pk for o in offerings.values() if language_level_grading.is_level(o)}
     # Yeni qaydanın RİM bayraqları BİR dəfə (sətir başına oxu yox) — bütün sətirlərin qaydası eynidir.
     flags = entry_standard.rule_flags()
 

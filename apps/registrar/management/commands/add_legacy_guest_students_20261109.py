@@ -94,6 +94,19 @@ REFUSALS = (
 )
 
 
+_SLUG_MAP = {ord(a): b for a, b in zip("əöüçşğı", "eoucsgi")}
+
+
+def refusal_slug(message: str) -> str:
+    """İmtina mətnindən sabit, yalnız ``[a-z0-9_]`` açar (xülasə regex-i üçün) — ilk 40 simvol."""
+    import re
+    import unicodedata
+
+    text = unicodedata.normalize("NFKD", str(message or "").lower().translate(_SLUG_MAP))
+    text = "".join(ch for ch in text if not unicodedata.combining(ch))
+    return re.sub(r"[^a-z0-9]+", "_", text).strip("_")[:40] or "unknown"
+
+
 def refusal_code(message: str) -> str:
     """Qonaq əlavəsinin imtina mətni → sabit sayğac adı (stdout-a mətn yox, yalnız kod çıxır)."""
     for needles, code in REFUSALS:
@@ -140,6 +153,7 @@ def run(*, organization, actor, items, counts, apply) -> None:
             counts[code] += 1
             if code == "skip_refused":
                 refusals.add(message[:160])  # sistem mətni, şəxsi məlumat yoxdur — səbəbi görmək üçün
+                counts[f"skip_refused_{refusal_slug(message)}"] += 1  # xülasə sətrinə düşür (yalnız [a-z0-9_])
             continue
         counts["added"] += 1
         counts[f"added_{'level' if offering.group_id is None else 'group'}"] += 1
