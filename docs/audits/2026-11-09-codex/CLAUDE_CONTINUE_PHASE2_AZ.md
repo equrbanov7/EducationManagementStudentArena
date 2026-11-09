@@ -1,5 +1,47 @@
 # Claude / növbəti agent üçün Mərhələ 2 davam sənədi
 
+## Cari vəziyyət — 9 noyabr, PR280 merge və ilk data düzəlişi
+
+- **F14 APPLIED AND VERIFIED:** iki inactive offering-in exact8 ScheduleSlot
+  is_parked false→true dəyişdi. Dry42562794891; apply42562924595;
+  receipt `f3627129-aa9d-4c8e-bf73-803c7fc08023`.
+  Repeat42563321447 `already_applied`, changed0, SAMEreceipt və
+  baseline==apply.after_baseline. Native protected full-graph before/after PASS.
+  Marks/credits/counters dəyişiklik0; digər slot sahələri dəqiq qorunub.
+  Workflow backup.sh uğurlu qayıtmadan apply edə bilməz. Private review qərarı
+  `structure-packages/park-inactive-slots8/application-review.private.json`.
+  Global capture hələ yoxdur; native bu fixed8 scope-un bütün cari qrafını,
+  period slots/headers və exactsourcegeometry-ni yoxlayıb. Global capture hüceyrə
+  və sillabus planı üçün hələ tələb olunur, o yoxlama buradan çıxarılmayıb.
+- **PR280 MERGED:** `ce379324b59ad240c83e15cc39cf598ef0077e73`.
+  PR CI42561958266 və CodeQL42561958267 SUCCESS. MainCI42563501700 və
+  mainCodeQL42563501663 gedir; real deployed SHA hələ7c0940e18-dir.
+  Yeni indexed graph/safe diagnostic kodu canlıda təsdiqlənmədən təkrar capture
+  başlatmayın. Deploy statusunu private JSON-dan oxuyun.
+- Fresh exam probe42563348123: totalopen7,4hnew0,15mstart0/finish0,live6h0;
+  midtermactiveopen42. Bu saylar konkret capture vaxtına aiddir.
+- Readonly current-final audit42561996293 failed04:35:32,427s;
+  host opaque ValueError, completed summary yoxdur. Timebudget ehtimalı səbəb kimi
+  təsdiqlənməyib. Yeni followup transport yalnız exact allowlisted final refusal
+  kodunu göstərəcək (58 test PASS), rawstderr heç vaxt çıxarılmır.
+- Cari yeni branch `codex/reaudit-appeal-undo-20261109`, ce379324b parent.
+  Hələ commit olunmamış: (1) second accepted appeal və reversal canonical twin/
+  formalmerged subject-də wrongly overridden bugFIX,82PGtest PASS; (2) old
+  presemesterundo duplicate-ID/partialrestore guard fix, agent testləri gedir;
+  (3) final readonly refusal safe transport. Bunları PR280 branch-ə push etməyin.
+- 33presemester sourcegrade private review hazırdır:33/33 legacy verification,
+  6equalcurrentcandidate,1differentfilled,8typedroutelessonmissing,18incomplete.
+  Bunlar exactsame-event/current-source repair authority DEYİL.59cleanup dərslə
+  kəsişmə hələ sübut edilməyib; genişundo istifadə edilməməlidir.
+  `PRIVATE/presemester-review/REPORT_AZ.md`, `grade-recovery-review.json`.
+- **Bal/QB/sillabus data tətbiqi hələ0**; cədvəl8flag above həqiqətən tətbiq edilib.
+  Source28/Farida/Anar guards hələhold; halfpair timeoutfix deploysonra freshdry.
+- `PRIVATE/production-progress.json`, `operations-ledger.jsonl` və tracked
+  aşağıdakı runbook paths davam üçün əsasdır. İstifadəçidən təsdiq gözləməyin;
+  onun səlahiyyəti var, lakin native proof/receipt/rollback guardlarını boşaltmayın.
+
+Aşağıdakı checkpoint-lər tarixidir.
+
 ## Cari vəziyyət — 9 noyabr, diaqnostika və indeks düzəlişi
 
 - PR278 MERGED və production deploy SUCCESS: main/deployed

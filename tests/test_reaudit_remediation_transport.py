@@ -5,6 +5,7 @@ import importlib.util
 import json
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -50,6 +51,59 @@ def test_defaults_cannot_apply(operation):
     assert value["apply"] is False
     args = operation.native_args(value, {"plan_sha256": "b" * 64}, "/tmp/ems-reaudit-op-1-1")
     assert "--apply" not in args
+
+
+def test_final_refusal_contract_matches_native_command(operation):
+    from apps.exams.management.commands.audit_reaudit_final_results_20261109 import REFUSALS
+
+    assert operation.FINAL_REFUSALS == REFUSALS | {"final_audit_refused"}
+
+
+def test_final_budget_refusal_is_visible_without_private_stderr(operation, monkeypatch, capsys):
+    monkeypatch.setattr(
+        operation.subprocess,
+        "run",
+        lambda *a, **k: SimpleNamespace(
+            returncode=1,
+            stdout="PRIVATE partial output",
+            stderr="PRIVATE SQL/actor/params\nCommandError: final_audit_execution_budget\n",
+        ),
+    )
+    with pytest.raises(ValueError, match="^native_readonly_audit_refused$"):
+        operation.readonly_native(["synthetic"], "finals")
+    assert capsys.readouterr().err == "native_refusal=final_audit_execution_budget\n"
+
+
+@pytest.mark.parametrize(
+    "stderr",
+    [
+        "CommandError: PRIVATE",
+        "CommandError: final_audit_private_identity",
+        "PRIVATE SQL",
+        "CommandError: final_audit_row_budget\nCommandError: final_audit_execution_budget\n",
+        "CommandError: final_audit_execution_budget\n" + "PRIVATE" * 50000,
+        "CommandError: final_audit_execution_budget PRIVATE suffix",
+    ],
+)
+def test_unrecognized_readonly_failure_does_not_expose_stderr(operation, monkeypatch, capsys, stderr):
+    monkeypatch.setattr(
+        operation.subprocess,
+        "run",
+        lambda *a, **k: SimpleNamespace(returncode=1, stdout="PRIVATE", stderr=stderr),
+    )
+    with pytest.raises(ValueError):
+        operation.readonly_native(["synthetic"], "finals")
+    assert capsys.readouterr().err == "native_refusal=inspect_current_state\n"
+
+
+def test_readonly_success_keeps_summary_and_ignores_stderr(operation, monkeypatch, capsys):
+    monkeypatch.setattr(
+        operation.subprocess,
+        "run",
+        lambda *a, **k: SimpleNamespace(returncode=0, stdout="safe summary", stderr="PRIVATE"),
+    )
+    assert operation.readonly_native(["synthetic"], "finals") == "safe summary"
+    assert capsys.readouterr().err == ""
 
 
 @pytest.mark.parametrize(
@@ -129,6 +183,11 @@ def test_readonly_audit_runs_only_its_fixed_command_without_private_asset(operat
         return prefix + ": " + json.dumps(result)
 
     monkeypatch.setattr(operation, "command", command)
+    monkeypatch.setattr(
+        operation.subprocess,
+        "run",
+        lambda args, **kwargs: SimpleNamespace(returncode=0, stdout=command(args), stderr=""),
+    )
     monkeypatch.setattr(operation, "verify_head", heads.append)
     monkeypatch.setattr(operation, "download", lambda **kw: pytest.fail("Read-only audit must not fetch a bundle"))
     operation.run(
@@ -158,6 +217,13 @@ def test_duplicate_audit_refuses_changed_summary(operation, tmp_path, monkeypatc
     monkeypatch.setattr(operation, "verify_head", lambda _: None)
     monkeypatch.setattr(
         operation, "command", lambda *args, **kwargs: 'reaudit_duplicate_qb: {"status":"applied","changed":1}'
+    )
+    monkeypatch.setattr(
+        operation.subprocess,
+        "run",
+        lambda *a, **k: SimpleNamespace(
+            returncode=0, stdout='reaudit_duplicate_qb: {"status":"applied","changed":1}', stderr=""
+        ),
     )
     with pytest.raises(ValueError, match="must_not_mutate"):
         operation.run(
