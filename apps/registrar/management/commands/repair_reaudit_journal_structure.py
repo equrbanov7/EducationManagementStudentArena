@@ -36,7 +36,7 @@ class Command(BaseCommand):
                 trace.phase = "authority"
                 authority = (
                     spec.private_bytes(options["authority_file"], manifest["authority_sha256"])
-                    if options["apply"]
+                    if options["apply"] or manifest["operation"] == "owner_present_conflict"
                     else None
                 )
                 trace.phase = "actor"

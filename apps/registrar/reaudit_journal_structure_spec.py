@@ -15,6 +15,7 @@ PERIOD = "a4f88744-8d49-4772-84ef-c28a96c3b372"
 RESOURCE = "registrar.reaudit_journal_structure_v1"
 SCOPE_SHA = "abcaa3792034c47263275183f35eadea63cce6650595b23e836068316716c190"
 HALF_AUTHORITY_SHA = "127a1dbe67fcc2f1e5aa9756988032cd6d3b0c36ef8d3be934ee5d79cc4ec96a"
+CONFLICT_AUTHORITY_SHA = "537372126c64231f9d51e96a2a72705d2294549978c0a4d23bb745f62cb245a7"
 MAX_BYTES = 1024 * 1024
 
 
@@ -58,7 +59,9 @@ def validate(value):
         "structure_manifest_tenant_period",
     )
     require(
-        value["operation"] in {"half_pair", "inactive_cache", "timetable", "park_inactive_slots"}, "structure_operation"
+        value["operation"]
+        in {"half_pair", "inactive_cache", "timetable", "park_inactive_slots", "owner_present_conflict"},
+        "structure_operation",
     )
     ids = value["target_ids"]
     require(isinstance(ids, list) and 0 < len(ids) <= 25 and len(set(ids)) == len(ids), "structure_target_budget")
@@ -68,7 +71,9 @@ def validate(value):
         "structure_authority_required",
     )
     registry = scope()
-    if value["operation"] == "half_pair":
+    if value["operation"] == "owner_present_conflict":
+        require(len(ids) == 2 and value["authority_sha256"] == CONFLICT_AUTHORITY_SHA, "structure_conflict_authority")
+    elif value["operation"] == "half_pair":
         require(
             set(ids) == {case["lesson_id"] for case in registry["half_pair_cases"]}
             and value["authority_sha256"] == HALF_AUTHORITY_SHA,

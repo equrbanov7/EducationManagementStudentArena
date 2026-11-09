@@ -26,6 +26,14 @@ def verify_body_projection(manifest):
         raise ValueError("syllabus_body_projection_changed")
     if manifest.get("schema_sha256") == current_schema and actual != expected:
         raise ValueError("syllabus_body_projection_required")
+    if actual:
+        for label in expected:
+            table = manifest["tables"][label]
+            if type(table.get("body_complete")) is not bool or table.get("fields") != schemas[label]["fields"]:
+                raise ValueError("syllabus_body_projection_changed")
+            for key in ("body_complete", "excluded_body_fields"):
+                if table.get(key) != schemas[label].get(key):
+                    raise ValueError("syllabus_body_projection_changed")
 
 
 def read_private(path, limit):

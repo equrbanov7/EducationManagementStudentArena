@@ -136,7 +136,7 @@ def native_args(value, bundle, remote):
             "--sha256" if operation == "cells" else "--file-sha256",
             bundle["plan_sha256"],
         ]
-        if operation == "structure" and value["apply"]:
+        if operation == "structure" and (value["apply"] or bundle["authority"]):
             if not bundle["authority"]:
                 raise ValueError("structure_authority_required")
             args += ["--authority-file", remote + "/authority.json"]
