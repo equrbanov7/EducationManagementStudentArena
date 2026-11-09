@@ -95,8 +95,11 @@ def move_enrollments(*, organization, actor, holder, person, ids, counts) -> lis
     ``source_group`` DB-də write-once olduğu üçün (``registrar_guard_enrollment_source_group``) yazılışın özü
     köçürülmür — adam qrupun öz tələbəsi kimi təmiz yazılış alır, tarixçə holder-da saxlanır.
     """
-    from apps.registrar.models import ComponentScore, Enrollment, LessonMark
     from apps.registrar.public import recompute_absence_hours_many
+
+    Enrollment = django_apps.get_model("registrar", "Enrollment")
+    LessonMark = django_apps.get_model("registrar", "LessonMark")
+    ComponentScore = django_apps.get_model("registrar", "ComponentScore")
 
     created = []
     for raw in ids:
@@ -180,7 +183,8 @@ def move_enrollments(*, organization, actor, holder, person, ids, counts) -> lis
 def move_attempt(*, organization, actor, holder, person, spec, counts) -> None:
     from apps.exams.models import ExamAttempt
     from apps.exams.services.midterm_journal_sync import sync_midterm_attempt
-    from apps.registrar.models import ComponentScore
+
+    ComponentScore = django_apps.get_model("registrar", "ComponentScore")
 
     finished_on = datetime.date.fromisoformat(str(spec["finished_on"]))
     attempts = list(
