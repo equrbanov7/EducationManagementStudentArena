@@ -196,6 +196,7 @@ class FamilyCardTests(CardsBase):
         self.assertEqual([(e["teacher_name"], e["hours"]) for e in shared["entries"]], [(orucova, 90)])
         self.assertEqual((shared["plan"], shared["total"], shared["remaining"]), (45, 90, 0))
         self.assertEqual(seminar["plan"], 45)
+        self.assertEqual(seminar["total"], 45 + 45 + 90 + 90)  # sətir cəmləri bir dəfə
 
     def test_pagination_is_per_family_and_focus_extends(self):
         first = self._cards(limit=1)

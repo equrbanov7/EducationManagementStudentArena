@@ -254,6 +254,7 @@ def _kind_lines(rows, kind, payload_by_pk, balance, sections) -> dict:
     lines: list = []
     label = _label(_ACTIVITY_LABELS, kind)
     plan = 0
+    row_totals: dict = {}  # sətir cəmi BİR dəfə (çox qruplu sətrin xətləri eyni cəmi daşıyır)
     for row in rows:
         payload = payload_by_pk[str(row.pk)]
         total = int(getattr(row, _TOTAL[kind], 0) or 0)
@@ -263,6 +264,7 @@ def _kind_lines(rows, kind, payload_by_pk, balance, sections) -> dict:
         if total <= 0 and not assignments and per_group <= 0:
             continue
         plan = max(plan, per_group)
+        row_totals[row.pk] = total
         groups = payload["groups"]
         entries_by_id = {a["id"]: _entry(a) for a in payload["assignments"] if a["activity"] == kind}
         base = {
@@ -345,11 +347,7 @@ def _kind_lines(rows, kind, payload_by_pk, balance, sections) -> dict:
         "label": str(label),
         "plan": plan,
         "lines": lines,
-        "total": (
-            sum(line["total"] for line in lines if line["group_id"] or line.get("joint") or line.get("shared"))
-            if lines
-            else 0
-        ),
+        "total": sum(row_totals.values()),
     }
 
 
