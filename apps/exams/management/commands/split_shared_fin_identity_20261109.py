@@ -142,7 +142,7 @@ def move_enrollments(*, organization, actor, holder, person, ids, counts) -> lis
             marks += 1
         scores = 0
         for row in ComponentScore.objects.filter(organization=organization, enrollment=source):
-            created = ComponentScore.objects.create(
+            copied_score = ComponentScore.objects.create(
                 organization=organization,
                 component_id=row.component_id,
                 enrollment=target,
@@ -150,7 +150,7 @@ def move_enrollments(*, organization, actor, holder, person, ids, counts) -> lis
                 entered_by_id=row.entered_by_id,
                 exam_source=row.exam_source,
             )
-            ComponentScore.objects.filter(pk=created.pk).update(created_at=row.created_at)
+            ComponentScore.objects.filter(pk=copied_score.pk).update(created_at=row.created_at)
             row.delete()
             scores += 1
         previous = source.status
