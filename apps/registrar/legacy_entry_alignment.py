@@ -297,7 +297,7 @@ def _align_one(
         unchanged = {"entry_after": current, "total_after": before["total"], "result_after": _result(before)}
         row = EntryAlignment(outcome="same", **base, **known, **unchanged)
         if force_total and official_total is not None:
-            row, total_write = _force_total(enrollment, row, before, official_total, batch, organization)
+            row, total_write, _undo = _force_total(enrollment, row, before, official_total, batch, organization)
             return row, None, total_write
         return row, None, None
     scores = batch.scores_by_enrollment[enrollment.id]
@@ -325,14 +325,23 @@ def _align_one(
         **base,
         **known,
     )
+    undo_total = None
     if outcome == "skip_total_mismatch" and force_total:
         # Giriş rəsmiyə bərabərləşdirilmiş halda (simulyasiya dəstdə qalır) sayılan imtahan balı rəsmi yekuna çatdırılır.
-        fixed, total_write = _force_total(
+        fixed, total_write, undo_total = _force_total(
             enrollment, dataclasses.replace(row, outcome="written"), after, official_total, batch, organization
         )
-        if total_write is not None or fixed.total_fix == "kept_higher":
+        if total_write is not None or fixed.total_fix in ("kept_higher", "rounded_equal"):
             row = fixed
             outcome = "written"
+    if outcome == "written" and known["result_before"] == "pass" and row.result_after == "fail":
+        # Sahib 2026-11-09: keçmiş nəticə heç vaxt kəsrə çevrilmir (apellyasiya / yay məktəbi qeydləri yoxdur) —
+        # rəsmi vərəq aşağı deyirsə də, sistemdəki keçid saxlanılır; sətir yalnız adla hesabata düşür.
+        if undo_total is not None:
+            undo_total()
+        row = dataclasses.replace(row, outcome="skip_pass_protected", total_fix="")
+        outcome = "skip_pass_protected"
+        total_write = None
     if outcome != "written":
         batch.scores_by_enrollment[enrollment.id] = scores
         return row, None, None
@@ -342,16 +351,18 @@ def _align_one(
 def _force_total(enrollment, row, after, official_total, batch, organization):
     """Yeni yekun < rəsmi yekun → sayılan imtahan balını fərq qədər artır (yaddaşda yoxlanılıb).
 
-    Qaytarır ``(sətir, yazı)``: yazı ``("exam" | "resit", enrollment, köhnə, yeni)`` və ya ``None``.
+    Qaytarır ``(sətir, yazı, geri-al)``: yazı ``("exam" | "resit", enrollment, köhnə, yeni)`` və ya ``None``;
+    ``geri-al`` simulyasiyanı dəstdən çıxaran funksiyadır (yazı varsa).
     """
     from . import gradebook
 
     official = gradebook.round_score(Decimal(str(official_total)))
     total = Decimal(after["total"])
     if total == official:
-        return row, None
+        # Rəsmi yekun kəsrli çap olunub (54.6) — görünən yekun (55) onsuz da bərabərdir, yazı lazım deyil.
+        return dataclasses.replace(row, total_fix="rounded_equal"), None, None
     if total > official:
-        return dataclasses.replace(row, total_fix="kept_higher"), None
+        return dataclasses.replace(row, total_fix="kept_higher"), None, None
     diff = official - total
     exam_max = Decimal(after["exam_score_max"])
     resit = after.get("resit")
@@ -362,7 +373,7 @@ def _force_total(enrollment, row, after, official_total, batch, organization):
         old = Decimal(resit.resit_score)
         new = old + diff
         if not Decimal("0") <= new <= exam_max:
-            return row, None
+            return row, None, None
         simulated = copy.copy(resit)
         simulated.resit_score = new
         saved = batch.resits.get(enrollment.id)
@@ -373,7 +384,7 @@ def _force_total(enrollment, row, after, official_total, batch, organization):
         old = Decimal(grade.exam_score) if grade is not None and grade.exam_score is not None else None
         new = (old if old is not None else Decimal("0")) + diff
         if not Decimal("0") <= new <= exam_max:
-            return row, None
+            return row, None, None
         simulated = (
             copy.copy(grade) if grade is not None else FinalGrade(organization=organization, enrollment=enrollment)
         )
@@ -381,19 +392,21 @@ def _force_total(enrollment, row, after, official_total, batch, organization):
         saved = batch.final_grades.get(enrollment.id)
         batch.final_grades[enrollment.id] = simulated
         kind = "exam"
-    check = finals.compute_final_result(enrollment=enrollment, organization=organization, batch=batch)
-    if Decimal(check["total"]) != official or Decimal(check["entry_score"]) != Decimal(after["entry_score"]):
-        # Geri: simulyasiya saxlanılmır, sətir dəyişməz qalır.
+
+    def undo():
         if kind == "resit":
             batch.resits[enrollment.id] = saved
+        elif saved is None:
+            batch.final_grades.pop(enrollment.id, None)
         else:
-            if saved is None:
-                batch.final_grades.pop(enrollment.id, None)
-            else:
-                batch.final_grades[enrollment.id] = saved
-        return row, None
+            batch.final_grades[enrollment.id] = saved
+
+    check = finals.compute_final_result(enrollment=enrollment, organization=organization, batch=batch)
+    if Decimal(check["total"]) != official or Decimal(check["entry_score"]) != Decimal(after["entry_score"]):
+        undo()  # Geri: simulyasiya saxlanılmır, sətir dəyişməz qalır.
+        return row, None, None
     fixed = dataclasses.replace(row, total_after=check["total"], result_after=_result(check), total_fix=kind)
-    return fixed, (kind, enrollment, old, new)
+    return fixed, (kind, enrollment, old, new), undo
 
 
 __all__ = ["EntryAlignment", "EntryTarget", "align_archive_entries"]

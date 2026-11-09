@@ -82,6 +82,26 @@ def resolve_students(organization, items) -> dict:
     return out
 
 
+REFUSALS = (
+    (("artıq jurnaldadır", "onsuz da bu qrupun"), "skip_already_enrolled"),
+    (("öz qrupunun jurnalında aktivdir", "birdən çox aktiv jurnalı"), "skip_other_journal_active"),
+    (("bağlanıb", "bağlıdır"), "skip_roster_closed"),
+    (("akademik qeyd", "uyğun"), "skip_no_active_record"),
+    (("köçürmə tarixçəsi",), "skip_transfer_history"),
+    (("mənbə qrupu fərqlidir",), "skip_source_group_differs"),
+    (("icraçı",), "skip_actor_required"),
+    (("səbəb",), "skip_reason_required"),
+)
+
+
+def refusal_code(message: str) -> str:
+    """Qonaq əlavəsinin imtina mətni → sabit sayğac adı (stdout-a mətn yox, yalnız kod çıxır)."""
+    for needles, code in REFUSALS:
+        if any(needle in message for needle in needles):
+            return code
+    return "skip_refused"
+
+
 def run(*, organization, actor, items, counts, apply) -> None:
     from apps.registrar import guest_roster
 
@@ -113,17 +133,7 @@ def run(*, organization, actor, items, counts, apply) -> None:
             with transaction.atomic():
                 guest_roster.add_guest_student(offering=offering, student=student, by_user=actor, reason=reason)
         except ValidationError as exc:
-            message = " ".join(str(m) for m in exc.messages)
-            if "artıq jurnaldadır" in message or "onsuz da bu qrupun" in message:
-                counts["skip_already_enrolled"] += 1
-            elif "öz qrupunun jurnalında aktivdir" in message or "birdən çox aktiv jurnalı" in message:
-                counts["skip_other_journal_active"] += 1
-            elif "bağlanıb" in message or "bağlıdır" in message:
-                counts["skip_roster_closed"] += 1
-            elif "akademik qeyd" in message or "uyğun" in message:
-                counts["skip_no_active_record"] += 1
-            else:
-                counts["skip_refused"] += 1
+            counts[refusal_code(" ".join(str(m) for m in exc.messages))] += 1
             continue
         counts["added"] += 1
         counts[f"added_{'level' if offering.group_id is None else 'group'}"] += 1
