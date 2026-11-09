@@ -90,8 +90,15 @@ def validate_actor(username):
     return actor
 
 
-def capture(username, public_key, output_dir):
+def capture(username, public_key, output_dir, *, diagnostic=None):
     """One repeatable-read snapshot; bounded ciphertext shards, no plaintext disk."""
+    diagnostic = diagnostic if isinstance(diagnostic, dict) else {}
+
+    def phase(operation, model=None, page=None):
+        diagnostic.clear()
+        diagnostic.update(operation=operation, model=model, page=page)
+
+    phase("preflight")
     if connection.vendor != "postgresql" or connection.in_atomic_block:
         raise ValueError("fresh_postgresql_transaction_required")
     directory = Path(output_dir)
@@ -101,6 +108,7 @@ def capture(username, public_key, output_dir):
         raise ValueError("output_directory_must_be_empty")
     key = Path(public_key).read_bytes()
     # Check the recipient before any database query.
+    phase("encrypt")
     encrypt_export({}, key, fingerprint=KEY_FINGERPRINT)
     manifest = {
         "format": FORMAT,
@@ -114,14 +122,17 @@ def capture(username, public_key, output_dir):
     }
     total = total_bytes = 0
     started = time.monotonic()
+    phase("transaction")
     with transaction.atomic():
         with connection.cursor() as cursor:
             cursor.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
             cursor.execute("SET LOCAL statement_timeout = '120s'")
             cursor.execute("SET LOCAL lock_timeout = '5s'")
+        phase("actor")
         actor = validate_actor(username)
         manifest["captured_at"] = timezone.now().isoformat()
         for label, spec in SCHEMAS.items():
+            phase("count", label)
             query = scoped_query(label, spec).order_by("pk")
             count = query.count()
             if count > MAX_TABLE_ROWS or total + count > MAX_TOTAL_ROWS:
@@ -131,6 +142,8 @@ def capture(username, public_key, output_dir):
             observed = page = 0
             last_pk = None
             for _query_page in range((count + CHUNK_ROWS - 1) // CHUNK_ROWS):
+                # Page means the next emitted shard, including byte subdivisions.
+                phase("read", label, page)
                 if time.monotonic() - started > MAX_SECONDS:
                     raise ValueError("snapshot_time_budget_exceeded")
                 window = query if last_pk is None else query.filter(pk__gt=last_pk)
@@ -149,6 +162,7 @@ def capture(username, public_key, output_dir):
                     "read_only": True,
                     "model": label,
                 }
+                phase("encode", label, page)
                 for payload, plaintext in byte_chunks(context, rows, page):
                     if time.monotonic() - started > MAX_SECONDS:
                         raise ValueError("snapshot_time_budget_exceeded")
@@ -158,7 +172,9 @@ def capture(username, public_key, output_dir):
                     if total_bytes > MAX_TOTAL_BYTES:
                         raise ValueError("snapshot_total_byte_budget_exceeded")
                     file = f"{label.lower()}-{page:04}.enc.json"
+                    phase("encrypt", label, page)
                     envelope = encrypt_export(payload, key, fingerprint=KEY_FINGERPRINT)
+                    phase("write", label, page)
                     encrypted_sha = save_new(directory / file, envelope)
                     manifest["shards"].append(
                         {
@@ -171,8 +187,11 @@ def capture(username, public_key, output_dir):
                         }
                     )
                     page += 1
+                    phase("encode", label, page)
+            phase("read", label, page)
             if observed != count:
                 raise ValueError("snapshot_table_count_changed")
+        phase("finalize")
         with connection.cursor() as cursor:
             cursor.execute("SHOW transaction_read_only")
             if cursor.fetchone()[0] != "on":
@@ -180,6 +199,7 @@ def capture(username, public_key, output_dir):
         manifest["complete"] = True
         manifest["total_rows"] = total
         manifest["finished_at"] = timezone.now().isoformat()
+    phase("write")
     manifest_sha = save_new(directory / "manifest.json", manifest)
     return {
         "tables": len(manifest["tables"]),

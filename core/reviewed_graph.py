@@ -25,9 +25,9 @@ def rows(query, *, limit=20000):
     table = connection.ops.quote_name(query.model._meta.db_table)
     pk = connection.ops.quote_name(query.model._meta.pk.column)
     with connection.cursor() as cursor:
-        cursor.execute(
-            f"SELECT to_jsonb(t) FROM {table} t WHERE t.{pk}::text=ANY(%s) ORDER BY t.{pk}", [list(map(str, ids))]
-        )
+        # Keep the ORM's typed IDs so PostgreSQL can use the primary-key index.
+        # Casting the column to text scans large related tables during dry-runs.
+        cursor.execute(f"SELECT to_jsonb(t) FROM {table} t WHERE t.{pk}=ANY(%s) ORDER BY t.{pk}", [ids])
         return [json.loads(row[0]) if isinstance(row[0], str) else row[0] for row in cursor.fetchall()]
 
 
