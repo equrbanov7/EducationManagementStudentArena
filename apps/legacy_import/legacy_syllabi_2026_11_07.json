@@ -13644,6 +13644,1501 @@
     "prev": {},
     "send": {}
    }
+  },
+  "3788": {
+   "teacher": 7810,
+   "legacy_teacher": 268,
+   "legacy_lesson": 1405,
+   "hours": {
+    "lecture": 30,
+    "seminar": 30
+   },
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "content_sha256": "29cf9bb9558603d36848f4a5f1921dacc10017805e506e7f4df9ad68c556b993",
+   "sections": {
+    "info": {
+     "teacher": "",
+     "office_hours": "",
+     "prerequisites": "",
+     "language": "az",
+     "lesson_hours": 60,
+     "welcome": "",
+     "research_interests": [],
+     "certificates": []
+    },
+    "desc": {
+     "description": "FƏNNİN MƏQSƏDİ:\nMühasibat Uçotunun Beynəlxalq Standartları əsasında təhsilalanlarda aşağıda qeyd edilmiş məsələlər üzrə nəzəri biliklərin, analitik və praktiki səriştələrin formalaşmasına nail olmaqdır:\no tələbələrə Mühasibat Uçotunun Beynəlxalq Standartları sahəsində istifadə edilən əsas anlayışlar, kateqoriyalar və terminilogiyanın öyrədilməsi;\no Mühasibat Uçotunun Beynəlxalq Standartlarının bilavasitə təşkili – ilkin sənədləşmə, qiymətləndirmə, mühasibat uçotu hesablarında və mühasibat hesabatlarında əməliyyatların əks etdirilməsi qaydası;\n təşkilatın təsərrüfat fəaliyyətinin vəziyyəti barədə informasiya almaq məqsədilə göstəri-cilərin toplanması və emalı üsulları;\n hazır məhsulun reallaşdırılmasında xüsusi rol oynayan gələcək dövrün xərclərinin uçotunun qurulmasının xüsusiyyətləri;\n məhsulun maya dəyərinin hesablanması və müəssisənin məsrəflərinin uçotunda əks etdirilməsi qaydalarını Mühasibat Uçotunun Beynəlxalq Standartlarına əsasən öyrətmək.\nFƏNNİN NƏTİCƏLƏRİ:\n“Mühasibat Uçotunun Beynəlxalq Standartları” fənninin öyrənilməsi - xarici ölkələrdə mühasibat uçotunun hüquqi tənzimlənməsi, idarəetmə qərarlarının qəbul edilməsi üçün, uçot informasiyalarından istifadə olunmasına, müxtəlif mülkiyyət formalarının təsərrüfatçılıq subyektlərinin kapitalının dövriyyəsi və vəziyyəti, aralıq və illik mühasibat hesabatlarının tərtib edilməsi qaydasını;mühasibat hesabatı formalarının göstəricilərinin pariteti, qarşılıqlı əlaqəsi; alınan məlumatların etibarlılığına nəzarət üsulları; balans, mənfəət və zərər hesabatını tərtib etməyi bacarmağ; əldə edilmiş bilikləri təşkilatların təcrübəsində tətbiq etmək. Mühasibat Uçotunun Beynəlxalq Standartlarının təşkili sahəsində gələcək mütəxəssislərin nəzəri biliklərinin və təcrübi bacarıqlarının, vərdişlərinin formalaşdırır:\n• Azərbaycan Respublikasında Mühasibat Uçotunun Beynəlxalq Standartlarının normativ-hüquqi sənədlərlə tənzimlənməsinin sistemini, ölkədə və dünya praktikasında mühasibat maliyyə uçotunun inkişaf tendensiyasını biləcəklər;\n• mühasibat uçotunun əsas prinsiplərini, aktivlərin, öhdəliklərin və xüsusi kapitalın mühasibat maliyyə uçotunun aparılmasının əsas baza qaydalarını;\n• uçot siyasətinin işlənməsi və əsaslandırılması üçün mühasibat uşotunun prinsipləri üzrə biliklər sistemindən istifadə etməyi;\n• təşkilatın təsərrüfat həyatının faktlarının mühasibat uçotunun hesablarında təsnifləşdirməyi və sistemləşdirməyi;\n• informasiyanı ümumiləşdirməyi və fərdi mühasibat(maliyyə) hesabatını tərtib etməyi;\n• təsərrüfat fəaliyyətinin bir funksiyası kimi mühasibat uçotu üzrə biliklər sisteminə yiyələnməyi;\n• müxtəlif istifadəçiləri təmin edən maliyyə informasiyasının, mühasibat və statistik hesabatların hazırlanması və təqdim edilməsini.\nFənnin vəzifələri:\n istifadəçilərin dəqiq və müqayisə edilə bilən informasiya ilə təmin edilməsində Mühasibat Uçotunun Beynəlxalq Standartlarının beynəlxalq standartlarının rolunu və imkanlarının təhlil edilməsi;\n qloballaşan iqtisadi şəraitdə Mühasibat Uçotunun Beynəlxalq Standartlarının əhəmiyyəti və Azərbaycan üçün aktuallığını təhlil etmək;\n Mühasibat Uçotunun Beynəlxalq Standartları əsasında maliyyə hesabatlarının tərtib edilməsinin prinsiplərini və strukturunu öyrənmək və əks etdirmək;\n Mühasibat Uçotunun Beynəlxalq Standartlarının beynəlxalq standartlara müvafiq hazırlanmasının və təqdim edilməsinin konsepsiyasının şərh edilməsi;\n Mühasibat Uçotunun Beynəlxalq Standartlarının beynəlxalq standartlarının hər birinin təhlili əsasında onların tətbiqinin qaydası və texnikasını tələbələrə aşılamaq.",
+     "goal": ""
+    },
+    "out": {
+     "outcomes": [
+      "Fənnin mənimsənilməsi nəticəsində təhsilalanlar\nBİLƏCƏKLƏR:\n Mühasibat Uçotunun Beynəlxalq Standartları işlənməsi və tətbiq edilməsi qaydasını;\n təsərrüfat əməliyyatlarının sənədləşdirilməsini Mühasibat Uçotunun Beynəlxalq Standartlarına müvafiq olaraq həyata keçirmək, vəsaitlərin uçotunu aparmaq, təşkilatın mühasibat uçotu üçün hesabların iş planını hazırlamaq və onun əsasında mühasibat yazılışlarını formalaşdırmaq;\n məlumatları təhlil və şərh etməklə Mühasibat Uçotunun Beynəlxalq Standartlarının müvafiq hazırlanarkən əsaslandırmaları;\n Mühasibat Uçotunun Beynəlxalq Standartlarına müvafiq hazırlanmış mühasibat hesabatlarının tərkibi və mahiyyətini;\n Mühasibat Uçotunun Beynəlxalq Standartlarına mütləq olaraq qoşma edilən Xüsusi qeydləri tərtib etməyi.\nBACARACAQLAR:\n Mühasibat Uçotunun Beynəlxalq Standartlarının beynəlxalq standartlarının konsepsiyasında istifadə edilən əsas anlayışların dəqiq və tam izahını verməyi;\n Aktivlərin qiymətləndirilməsi prosedurunun mahiyyətini və prosedurun MUBS-də əks etdirilməsini;;\n MUBS əks etdirilən informasiyanın hazırlanmasını;\n Müxtəlif mənbələrdə verilmiş maliyyə məlumatlarının səriştəli surətdə təhlil edilməsini və interpretasiyasını;\n MUBS-a aid iqtisadi göstəricilərin toplanması, emalı və təhlili sahəsində müasir metodlardan istifadə etməyi.\nSahib olacaqlar:\n\n- təsərrüfat əməliyyatlarını sənədləşdirmək, təşkilatın mühasibat uçotu üçün hesabların işçi planını hazırlamaq və onun əsasında mühasibat yazılışlarını formalaşdırmaq bacarığına;\n-maliyyə uçotunun aparılması üsuluna uyğun olaraq beynəlxalq mühasibat standartları ilə təmin edilmiş metodologiyaya;\n- yerli standartlarla müqayisədə beynəlxalq standartların mahiyyətini açmaq bacarığa;\n- MUBS-a uyğun olaraq aktivlərin, öhdəliklərin, kapitalın, gəlir və xərclərin göstəricilərinin qiymətləndirilməsi və hesablanması metoduna."
+     ]
+    },
+    "week": {
+     "rows": [
+      {
+       "topic": "İctimai Sektor üçün Mühasibat Uçotunun Beynəlxalq Standartlarına əsasən mühasibat uçotunun aparılması qaydaları və əsas anlayışlar.",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "MUBS-nin konseptual əsasları",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "“Maliyyə hesabatlarının təqdimatı” adlı 1№-li Mühasibat Uçotunun Beynəlxalq Standartı",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "“Ehtiyatlar” adlı 2 №-li Mühasibat Uçotunun Beynəlxalq Standartı",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "“Pul vəsaitlərinin hərəkəti haqqında hesabat” adlı 7№-li Mühasibat Uçotunun Beynəlxalq Standartı",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "“Uçot siyasətləri, uçot qiymətləndirmələrində dəyişikliklər və səhvlər” adlı 8 №li MühasibatUçotunun Beynəlxalq Standartı",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "“Hesabat dövründən sonrakı hadisələr “ adlı 10 №-li Mühasibat Uçotunun Beynəlxalq Standartı",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "“Mənfəət vergisi” adlı 12 №-li Mühasibat Uçotunun Beynəlxalq Standartı",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "18 №-Lİ MÜHASİBAT UÇOTUNUN BEYNƏLXALQ STANDARTI -GƏLİRLƏR",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "\"İşçilərin mükafatlandırılması” adlı 19 №-li Mühasibat Uçotunun Beynəlxalq Standartı",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "“Hökumət subsidiyalarının uçotu və hökumət yardımı haqqında məlumatın açıqlanması” adlı 20№-li Mühasibat Uçotunun Beynəlxalq Standartı",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "“Borclar üzrə məsrəflər” adlı 23 №-li Mühasibat Uçotunun Beynəlxalq Standartı",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "“Pensiya təminatı planları üzrə mühasibat uçotu və hesabatlılığı” adlı 26 №-li Mühasibat Uçotunun Beynəl-xalq Standartı",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "“Hiperinflyasiyalı iqtisadiyyatlarda maliyyə hesabatlılığı” adlı 29 №-li Mühasibat Uçotunun Beynəlxalq Standartı",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "“İnvestisiya mülkiyyəti” adlı 40 №-li Mühasibat Uçotunun Beynəlxalq Standartı",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      }
+     ]
+    },
+    "method": {
+     "methods": [
+      "1. Mühazirə\n2. Mövzunun(mövzuların) müzakirəsi və müxtəlif mənbədən olan ədəbiyyatlar üzrə diskussiyalar.\n3. Seminar və kollokviumlar.\n4. Prezentasiyalar üçün noutbuk, lövhə və proyektordan istifadə."
+     ],
+     "note": ""
+    },
+    "assess": {
+     "midterm": 0,
+     "project": 0,
+     "note": "1. İmtahandan əvvəl məsləhət saatları təşkil olunur.\n2. İmtahanlar yazılı, ə kollokviumlar prezentasiyalar formasında aparılır.\n3. Tələbələrin imtahanlara və kollokviumlara buraxılması ilə bağlı məsələlər AR NK 15.12.2013 tarixli qərarı ilə təsdiq edilmiş “Ali təhsil müəssisələrində bakalavriat və magistratura səviyyələrində kredit sistemi ilə təlimin təşkili Qaydaları”na əsasən aparılır.\n4. Semestr ərzində hər bir tələbə 1 müstəqil iş yerinə yetirməlidir. Müstəqil iş keçilmiş mövzuları əhatə edir. Hər bir müstəqil iş 10 ballıq sistemlə qiymətləndirilir.\n5. Sərbəst işin mövzusu tələbəyə müəllim tərəfindən hər semestrin 2-ci həftəsindən gec olmamaq şərtilə təqdim edilir və ən gec müvafiq semestrin bitməsinə 2 həftə qalmış təhvil alınır.",
+     "exam_questions": []
+    },
+    "self": {
+     "option": "",
+     "topics": [
+      {
+       "title": "1. Beynəlxalq Mühasibat Uçotu Standartları(BMUS) üzrə anlayış və fənnin mahiyyəti. 2. Beynəlxalq Mühasibat Uçotu Standartları Komitənin yaranmasının tarixi. 3. BMUS prinsipləri, funksiyaları, elementləri. 4. BMUS-nın Konseptual Əsaslarını təyinatı, Konseptual Əsasların məqsədi, Maliyyə hesabatlarının istifadəçiləri. 5. Konseptual Əsasların tətbiq sahəsi,Ümumi təyinatlı maliyyə hesabatlarının hazırlanmasının məqsədi. 6. “Maliyyə hesabatlarının təqdimatı” adlı 1№-li Mühasibat Uçotunun Beynəlxalq Standartı - standartın məqsədi, Standartın tətbiqi sahəsi, Əsas anlayışlar. 7. Maliyyə hesabatları. Maliyyə hesabatlarının məqsədi.Маliyyə hеsаbаtlаrının tаm toplusu. 8. “Pul vəsaitlərinin hərəkəti haqqında hesabat” adlı 7№-li Mühasibat Uçotunun Beynəlxalq Standartı - Məqsəd, Standartın tətbiqi sahəsi, Pul vəsaitlərinin hərəkəti haqqında informasiyanın səmərəliyi. 9. Əsas anlayışlar Pul vəsaitləri və onların ekvivalentləri. 10. Pul vəsaitlərinin hərəkəti haqqında hesabatın təqdim edilməsi. 11. Əməliyyat fəaliyyətləri.İnvestisiya fəaliyyətləri.Maliyyələşdirmə üzrə fəaliyyətlər 12. Əməliyyat fəaliyyətlərindən yaranan pul vəsaitlərinin hərəkəti haqqında məlumatların təqdim edilməsi. 13. “İnvestisiya mülkiyyəti” adlı 40 №-li Mühasibat Uçotunun Beynəlxalq Standartı Standartın tətbiq sahəsi. Maliyyə hesabatlarının yenidən təqdim olunması. 14. İlkin dəyərə əsaslanan maliyyə hesabatları.Maliyyə vəziyyəti haqqında hesabat. 15. Məcmu gəlir hesabatı. Xalis monetar maddələr üzrə mənfəət və zərər. 16. Cari dəyərə əsaslanan maliyyə hesabatları. Birləşdirilmiş (konsolidə edilmiş) maliyyə hesabatları. 17. Ümumi qiymət indeksinin seçilməsi və istifadəsi. 18. Hiperinflyasiya şəraitindən çıxan iqtisadiyyat"
+      }
+     ],
+     "archived": []
+    },
+    "lit": {
+     "primary": [
+      "1. Mühasibat Uçotunun beynəlxalq Standartları: нязяриййядян практикайа\nhttp://muhasib-az.narod.ru/kitab/ifrs/Maliyye_hesabat_beynelxalq_standart.pdf\n2. Mühasibat hesabatı Sifariz Səbzəliyev\nhttps://unec.edu.az/application/uploads/2020/05/D-rslik-M-hasibat-hesabat-Sifariz-S-bz-liyev-1.doc.pdf\nhttps://mamipizza.ru/az/kredity/otchetnost-po-mezhdunarodnym-standartam-finansovoi-otchetnosti.html\n3. Maliyyə hesabatlarının beynəlxalq standartları\nhttp://maliyye.gov.az/static/141/maliyye-hesabatlarinin-beynelxalq-standartlari-\n\n4. Международные стандарты финансовой отчетности, Гетьман, Виктор Григорьевич;Рожнова, О. В.;Рожнова, О. В., 2012г.\nhttps://znanium.com/catalog/document?id=238583\n5. МЕЖДУНАРОДНЫЕ СТАНДАРТЫ ФИНАНСОВОЙ ОТЧЕТНОСТИ (МСФО)\nhttps://normativ.kontur.ru/document?moduleId=41&documentId=248939\nМеждународные стандарты финансовой отчетности (IFRS)\n6. МСФО (IFRS) 1 \"Первое применение международных стандартов финансовой отчетности\"\n7. Международные стандарты финансовой отчетности (IAS) МСФО (IAS) 1\"Представление финансовой отчетности\"\n8. Международные стандарты финансовой отчетности: Учебное пособие / Николаева О.Е.,Шишкова Т.В. – М.: Едиториал УРСС, 2021. – 240с.\n9. Соловьева О.В. МСФО и ГААП: учет и отчетность. - М.: ИД ФБК-ПРЕСС, 2020.\n10. Соловьева О.В. Международная практика учета и отчетности:Учебник. - М.: ИНФРА-М, 2021.\n11. Палий В.Ф. Международные стандарты учета и финансовой отчетности:Учебник. – М.: ИНФРА-М, 2020.\n12. Международный учет и аудит. Учебное пособие / Галузина С. М., Пупшис Т. М. – М.:ПИТЕР, 2021"
+     ],
+     "additional": []
+    },
+    "prev": {},
+    "send": {}
+   }
+  },
+  "8887": {
+   "teacher": 11591,
+   "legacy_teacher": 1055,
+   "legacy_lesson": 2308,
+   "hours": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "content_sha256": "5c24f99b4486a2b3f8bf75bd955fd5c9def22c5f1d5debde4902c73adf11b3ec",
+   "sections": {
+    "info": {
+     "teacher": "",
+     "office_hours": "",
+     "prerequisites": "",
+     "language": "en",
+     "lesson_hours": 45,
+     "welcome": "",
+     "research_interests": [],
+     "certificates": []
+    },
+    "desc": {
+     "description": "This graduate-level course examines the theoretical foundations, methodological choices and practical limitations of financial control and auditing. It links governance, internal control systems, risk-based assurance, audit evidence, materiality, sampling, professional judgment, digital audit techniques and reporting. Particular attention is given to designing defensible methodologies for complex transactions, detecting control weaknesses, and communicating findings to those charged with governance.To enable students to critically select, justify and apply financial-control and audit methodologies; assess the quality and limitations of evidence; and develop practical responses to methodological challenges in modern organizations.",
+     "goal": ""
+    },
+    "out": {
+     "outcomes": [
+      "Differentiate internal control, internal audit, external audit and other assurance engagements in terms of objectives, responsibilities and evidence.\nAnalyze governance structures and evaluate the design and operating effectiveness of key financial controls.\nDevelop a risk-based audit plan, including materiality, scoping, procedures and documentation.\nCritically compare audit evidence-gathering methods, sampling approaches and analytical procedures.\nEvaluate methodological challenges relating to estimates, fraud risk, IT systems and data reliability.\nInterpret audit findings and draft appropriately supported recommendations and assurance reports."
+     ]
+    },
+    "week": {
+     "rows": [
+      {
+       "topic": "Concept, scope and evolution of financial control and audit methodology",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Governance, accountability and assurance roles; the Three Lines Model",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Internal control frameworks: COSO; control environment and risk assessment",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Control activities, information systems, monitoring and control testing",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Audit planning: engagement risk, scope, ethics and professional skepticism",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Materiality, performance materiality and risk of material misstatement",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Risk-based audit approach: responses to assessed risks",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Audit evidence: sufficiency, appropriateness and reliability",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Sampling and non-sampling risk; selecting items for testing",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Analytical procedures and financial-statement assertions",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Accounting estimates, fair values and expert work",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Fraud risk, management override and professional judgment",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Audit of information systems, automated controls and data analytics",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Documentation, internal-audit findings and management responses",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Reporting, quality management and emerging methodological debates",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      }
+     ]
+    },
+    "method": {
+     "methods": [
+      "Interactive lectures, instructor-led problem solving, applied case studies, guided reading, seminar discussion, individual assignments and short group presentations. Students will work with spreadsheet-based analyses and publicly available financial or audit examples where appropriate."
+     ],
+     "note": ""
+    },
+    "assess": {
+     "midterm": 0,
+     "project": 0,
+     "note": "Students should prepare assigned readings, participate in seminars, complete tasks on time, substantiate calculations, and cite all external materials. Plagiarism, impersonation, fabricated data or references, unauthorized collaboration and use of unacknowledged third-party work are prohibited. Any use of AI tools must comply with the instructor’s written assignment instructions and university rules. Classroom conduct must remain respectful and professional.",
+     "exam_questions": []
+    },
+    "self": {
+     "option": "",
+     "topics": [],
+     "archived": []
+    },
+    "lit": {
+     "primary": [
+      "International Auditing and Assurance Standards Board (IAASB). International Standards on Auditing (ISAs), especially ISA 200, 315, 320, 330, 500, 530 and 540; use the edition designated by the instructor.Committee of Sponsoring Organizations of the Treadway Commission (COSO). Internal Control—Integrated Framework (2013).Arens, A. A., Elder, R. J., Beasley, M. S. and Hogan, C. E. Auditing and Assurance Services: An Integrated Approach (latest available edition).The Institute of Internal Auditors. The IIA’s Three Lines Model and Global Internal Audit Standards (official guidance).IAASB official standards and implementation materials: https://www.iaasb.org/The IIA official practice resources: https://www.theiia.org/; COSO: https://www.coso.org/."
+     ],
+     "additional": []
+    },
+    "prev": {},
+    "send": {}
+   }
+  },
+  "8885": {
+   "teacher": 11591,
+   "legacy_teacher": 1055,
+   "legacy_lesson": 2670,
+   "hours": {
+    "lecture": 10,
+    "seminar": 5
+   },
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "content_sha256": "249528298ddf82e35a2d2151939f340b9d2d519de8aa5ceaa41d57857fa16121",
+   "sections": {
+    "info": {
+     "teacher": "",
+     "office_hours": "",
+     "prerequisites": "",
+     "language": "en",
+     "lesson_hours": 15,
+     "welcome": "",
+     "research_interests": [],
+     "certificates": []
+    },
+    "desc": {
+     "description": "This graduate course explores how enterprises identify, measure, prioritize, respond to and monitor financial risks. It addresses the integration of risk appetite and governance with liquidity and cash-flow planning, credit exposures, market risks, foreign exchange, interest rates, capital structure, operational vulnerabilities and emerging financial threats. Students will use quantitative indicators, scenarios and stress tests to develop evidence-based mitigation and reporting strategies.To equip students to design an enterprise-level financial risk management process, select fit-for-purpose quantitative and qualitative methods, and communicate defensible risk responses to decision-makers.",
+     "goal": ""
+    },
+    "out": {
+     "outcomes": [
+      "Intended learning outcomes\nEstablish risk taxonomy, governance responsibilities, risk appetite and a coherent financial risk register.\nIdentify credit, liquidity, market, operational and strategic financial risks in a business model.\nCalculate and interpret exposure measures, cash-flow forecasts, sensitivity tests and selected risk metrics.\nDesign proportionate mitigation responses, including limits, diversification, controls and hedging principles.\nEvaluate risk interdependencies and perform scenario and stress-test analyses.\nPrepare a management-facing risk dashboard, action plan and monitoring indicators."
+     ]
+    },
+    "week": {
+     "rows": [
+      {
+       "topic": "Governance appetite and frameworks Board and management roles; independent assurance; appetite, tolerance, capacity and limits; COSO ERM and ISO 31000. Applied work: Draft liquidity and FX appetite statements and assign owners for the supplied enterprise case.",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Identification assessment and risk indicators Risk register; likelihood and impact; risk criteria; inherent and residual risk; KRIs and thresholds.",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Liquidity funding and credit risk Cash forecasts; working capital; DSO and overdue balances; debt service; covenant headroom; counterparty limits.",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Currency interest rate and market risk Currency mismatch; floating-rate debt; sensitivity and scenario analysis; natural hedges, forwards and swaps at introductory level.",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Risk treatment reporting and integrated case Avoid, reduce, share or accept risk; monitoring, escalation, risk culture and assurance; link risk with budgets and strategy.",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      }
+     ]
+    },
+    "method": {
+     "methods": [
+      "Interactive lectures, instructor-led problem solving, applied case studies, guided reading, seminar discussion, individual assignments and short group presentations. Students will work with spreadsheet-based analyses and publicly available financial or audit examples where appropriate."
+     ],
+     "note": ""
+    },
+    "assess": {
+     "midterm": 0,
+     "project": 0,
+     "note": "Students should prepare assigned readings, participate in seminars, complete tasks on time, substantiate calculations, and cite all external materials. Plagiarism, impersonation, fabricated data or references, unauthorized collaboration and use of unacknowledged third-party work are prohibited. Any use of AI tools must comply with the instructor’s written assignment instructions and university rules. Classroom conduct must remain respectful and professional.",
+     "exam_questions": []
+    },
+    "self": {
+     "option": "",
+     "topics": [],
+     "archived": []
+    },
+    "lit": {
+     "primary": [],
+     "additional": []
+    },
+    "prev": {},
+    "send": {}
+   }
+  },
+  "7715": {
+   "teacher": 8204,
+   "legacy_teacher": 760,
+   "legacy_lesson": 2040,
+   "hours": {
+    "lecture": 30,
+    "seminar": 30
+   },
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "content_sha256": "796597ff8da65ea1a6f6c34f18ed94dcd3b340d7d1f3cb8f4e11daabb67de1cf",
+   "sections": {
+    "info": {
+     "teacher": "",
+     "office_hours": "",
+     "prerequisites": "",
+     "language": "en",
+     "lesson_hours": 60,
+     "welcome": "",
+     "research_interests": [],
+     "certificates": []
+    },
+    "desc": {
+     "description": "- Maşın istehsalında texnoloji proseslərin təyinatı, quruluşu, onları yerinə yetirmə xüsusiyyətləri haqqında olan materialların tələbələr tərəfindən mənimsənilməsi;\n- Tələbələrdə maşın və onun hissələrinin istehsalı üzrə ümumi biliklərin formalaşdırılması;\n- Texnoloji sistem elementləri arasında təsirdə olan qanunauyğunluqlar və bu qanunauyğunluqlardan texnoloji proseslərin idarə edilməsində istifadə qaydalarının strukturu ilə tanışlıq;\n- Maşın və onun hissələrinin konstruksiyalarının və istehsal proseslərinin araşdırılması və formalaşdırılan keyfiyyətə təsir edən amilləri aşkar və idarə edilmə xüsusiyyətlərinin öyrənilməsi;\n- Müxtəlif proseslərin texnoloji parametrlərinin, səmərəliliyinin qiymətləndirməsi, texnoloji prosesin etibarlığının təmin edilməsi xüsusiyyətlərinin öyrənilməsi.\n- Bakalavr pilləsində təhsil alan tələbələrə maşın istehsalı sahəsində istifadə olunan praktik tapşırıqların yerinə yetirilməsi;\n- Praktik tapşırıqların hansı səviyyədə yerinə yetirilməsinə nəzarət edilməsi, araşdırılması;",
+     "goal": ""
+    },
+    "out": {
+     "outcomes": [
+      "Seçilmiş ixtisas üzrə tədris ediləcək “Materiallar və proseslər” fənni maşın və onların hissələrinin istehsal keyfiyyətinin təmin edilməsi özəllikləri və onları hazırlama proseslərində təsirdə olan qanunauyğunluqlar üzrə baza biliklərinin verilməsi, onlarda aldıqları nəzəri bikliklərə əsaslanaraq texnoloji prosesləri idarə etmə vərdişlərini yaratmaqla yanaşı maşın istehsalının əsas istiqamətləri haqqında geniş materialların tədrisi üçün nəzərdə tutulmuşdur. “Materiallar və proseslər” fənni tədris ediləcək digər əsas ixtisas fənnləri ilə sıx əlaqəlidır"
+     ]
+    },
+    "week": {
+     "rows": [
+      {
+       "topic": "Mövzu №1 Fənnə giriş, əsas mövzusu, əsas anlayışlar. Fənnin predmeti və məsələlərı. 2 2 Gülgəzli “Manipulyator mexanizmlərinin mexanikası” mühazirə toplus",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №2 Robotlar haqqında ümumi anlayış; Robotların növləri və istifadə sahələri",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №3 Müasir dövr sənaye robotları, təsnifatı, ümumi anlayış; Onların xüsusiyyətləri, quruluşu, tərkib hissıləri, iş prinsipləri.",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №4 Sənaye robotlarının strukturu və kinematik xüsusiyyətləri",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №5 Mexanizmlər haqqında ümumi məlumat, bəndlər, kinematik cütlər, kinematik silsilə, sərbəstlik dərəcələri.",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №6 Sənaye robotlarının əsas mexanizmi – manipulyatorlar, onların tərkib hissəlşələri, quruluşu. izafi sərbəstlik dərəcələri",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №7 Manipulyator mexanizmlərinin struktur analizi, sərbəstlik dərəcələri, manevrliliyi.",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №8 Manipulyator bəndlərinin gərginlikli-deformasiyalı halı. Bаş gərginliкlər, bаş охlаr, baş müstəvilər.",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №9 9 Deformasiyalar; Müstəvi dеfоrmаsiyа; Müstəvi gərginliк vəziyyəti; Dеfоrmаsiyаlаrlа yеrdəyişmələr аrаsındа əlаqə; Ümumiləşmiş Huк qаnunu",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №10 Vektor cəbrinin elementləri; Vektorlar üzərində əməllər; Sağ və sol koordinat sistemləri; Vektorun uzunluğu, proeksiyaları və istiqamətləndirici kosinusları.",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №11 Matrislər. Matrislər üzərində əməllər Determinant, ümumi anlayış, xassələri. Tenzorlar; Koordinatların çevrilməsi. Bazis vektorlar",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №12 Materiallar. Sənaye robotlarının hazırlandığı materiallar, klassifikasiyası, fiziki, kimyavi və mexaniki xassələri.",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Tenzorlar; Koordinatların çevrilməsi. Bazis vektorlar",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Sağ və sol koordinat sistemləri; Vektorun uzunluğu, proeksiyaları və istiqamətləndirici kosinusları.",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Dеfоrmаsiyаlаrlа yеrdəyişmələr аrаsındа əlаqə; Ümumiləşmiş Huк qаnunu",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      }
+     ]
+    },
+    "method": {
+     "methods": [
+      "Yekun qiymət cari qiymətləndirməyə - məşğələ (seminar və laboratoriya işi) (0 - 30 bal), sərbəst iş (0 - 10 bal), davamiyyət (0 - 10 bal) və aralıq qiymətləndirməyə - semestr sonu imtahanlara (0 - 50 bal) görə verilən balların cəmidir. Eyni fəndən əlavə olaraq təcrübi və əməli dərslər nəzərdə tutulduğu halda bu dərslərin qiymətləndirilməsi üçün (0 – 10) bal ayrılır.\nYekun qiymət = cari qiymətləndirmə + aralıq qiymətləndirmə"
+     ],
+     "note": ""
+    },
+    "assess": {
+     "midterm": 0,
+     "project": 0,
+     "note": "Kollokviumlar akademik təqvimə uyğun olaraq hər semestrdə 3 dəfə təşkil olunur. Hər kollokvium 0 - 10 bal ilə qiymətləndirilir. Kollokviumun keçirilməsi məcburidir. Kollokviumda iştirak etməyən tələbəyə 0 bal yazılır.",
+     "exam_questions": []
+    },
+    "self": {
+     "option": "",
+     "topics": [
+      {
+       "title": "1. Mexaniki ötürmələr. Qayış ötürməsi."
+      },
+      {
+       "title": "2. Sonsuzvint ötürməsi. Novikov ötürməsi."
+      },
+      {
+       "title": "3. Planetar dişli çarx ötürməsi və reduktorlar."
+      },
+      {
+       "title": "4. Mexaniki ötürmələrin optimallaşdırılması və EHM-də hesablanması."
+      }
+     ],
+     "archived": []
+    },
+    "lit": {
+     "primary": [
+      "1. Rəsulov N.M. Maşın istehsalı texnologiyası. Dərslik, Bakı, Təhsil, NPM, 2010, 432 s2. Kərimov Z. H. Maşın hissələri və yükqaldırıcı – nəqledici maşınlar. Ali texniki məktəblər üçün dərslik. II nəşri – Bakı, 2002, 596 səh."
+     ],
+     "additional": []
+    },
+    "prev": {},
+    "send": {}
+   }
+  },
+  "7426": {
+   "teacher": 7736,
+   "legacy_teacher": 946,
+   "legacy_lesson": 2619,
+   "hours": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "content_sha256": "6c01dce24dfb7453392634b5c6f93fd56bb096e7ef27bdbc17a0a0b5392769e2",
+   "sections": {
+    "info": {
+     "teacher": "",
+     "office_hours": "",
+     "prerequisites": "",
+     "language": "az",
+     "lesson_hours": 45,
+     "welcome": "",
+     "research_interests": [],
+     "certificates": []
+    },
+    "desc": {
+     "description": "",
+     "goal": ""
+    },
+    "out": {
+     "outcomes": []
+    },
+    "week": {
+     "rows": [
+      {
+       "topic": "Müqayisəli beynəlxalq münasibətlərə giriş",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Müqayisə metodunun elmi əsasları",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Case study və cross-national comparison",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Beynəlxalq münasibətlər nəzəriyyələrinin müqayisəsi",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Dövlət anlayışının müqayisəli təhlili",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Siyasi rejimlərin xarici siyasətə təsiri",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Xarici siyasət modellərinin müqayisəsi",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Milli maraq anlayışının müqayisəli izahı",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Təhlükəsizlik siyasətinin müqayisəli analizi",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Regional inteqrasiya modellərinin müqayisəsi",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Qlobal və regional güclərin müqayisəli rolu",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Beynəlxalq təşkilatların müqayisəli təhlili",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Münaqişə və müharibələrin müqayisəli analizi",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Qloballaşma və dövlətlərin xarici siyasəti",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Qeyri-dövlət aktorlarının müqayisəli rolu",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      }
+     ]
+    },
+    "method": {
+     "methods": [],
+     "note": ""
+    },
+    "assess": {
+     "midterm": 0,
+     "project": 0,
+     "note": "1. İmtahandan əvvəl məsləhət saatları təşkil olunur. 2. İmtahanlar və aralıq yoxlamalar (kollekviumlar) yazılı formada aparılır. 3. Tələbələrin imtahana və aralıq yoxlamalara buraxılması ilə bağlı məsələlər fakültə dekanı tərəfindən həll edilir. İmtahan və aralıq yoxlamalar Azərbaycan Respublikası Nazirlər Kabinetinin 24 dekabr 2013-cü il tarixli 348 nömrəli qərarı ilə təsdiq edilmiş “Ali təhsil müəssisələrinin bakalavr və magistratura səviyyələrində kredit sistemi ilə təlimin təşkili Qaydaları”na əsasən aparılır. 4. Semestr ərzində hər bir tələbə 1 müstəqil iş yerinə yetirməlidir. Müstəqil işlərin mövzuları keçilən mövzuları əhatə edir. Hər bir müstəqil iş 10 ballıq sistemlə qiymətləndirilir. 5. Sərbəst işin mövzusu tələbəyə müəllim tərəfindən hər semestrin 2-ci həftəsindən gec olmamaq şərti ilə təqdim edilir və ən gec müvafiq semestrin bitməsinə 2 həftə qalmış təhvil alınır. IV. ÜMUMİ QAYDALAR: 1. DAVAMİYYƏT: Fənn üzrə ayrılmış bütün saatların 25% -dən çoxunda iştirak etməyən tələbə imtahana buraxılmır. 2. FƏNNİN MƏNİMSƏNİLMƏSİ QAYDASI: Balların maksimum miqdarı – 100 bal 1. Semestr ərzində toplanan maksimum bal – 50 bal - Dərsdə davamiyyətə görə maksimum - 10 bal - Tələbələrin müstəqil işinə görə maksimum - 10 bal - Seminar məşğələlərində fəallığa görə maksimum - 30 bal Seminar dərslərində tələbənin jurnalda ən azı 3( üç) qiyməti olduğu halda ona tədrisin bu növü üzrə ballar hesablanır. Əks təqdirdə ona bal hesablanmır.Ayrı-ayrı fənlər üzrə tələbəyə fənn üzrə semester ərzində 1 (bir) sərbəst iş tapşırığı verilir.Sərbəst işlərin tapşırıqları müxtəlif formada (mühazirə mövzuları üzrə problem və praktiki xarakterli tapşırıqlar, məsələ, missallar və s.) ola bilər. Həmin tapşırıqlar fənni tədris edən müəllim tərəfindən müəyyənləşdirilir. Tapşırığın yerinə yetirilməsi 10 balla qiymətləndirilir.Tapşırıqların yoxlanılması və qəbulu müəllim tərəfindən dərsdən kənar vaxtda həyata keçirilir. 2. İmtahan nəticələrinə görə maksimum - 50 bal Tələbənin imtahandan topladığı balın miqdarı 17-dən az olmamalıdır. 3. Semestr ərzində və imtahanın nəticəsinə görə toplanan balların cəmi 50-dən yuxarıolan tələbələr fənni mənimsəmiş hesab edilir. V. TƏLƏBƏLƏRİN BİLİYİNİN QİYMƏTLƏNDİRİLMƏSİ: Qiymətləndirmə meyarları: - 51 baldan aşağı – \"qeyri kafi \"- F - 51 - 60 \"qənaətbəxş\" - E - 61 -70 -\"kafi \" – D - 71 – 80 – \"yaxşı\" – C - 81 – 90 – \"çox yaxşı\" – B - 91 – 100 - \"əla\" – A",
+     "exam_questions": []
+    },
+    "self": {
+     "option": "",
+     "topics": [],
+     "archived": []
+    },
+    "lit": {
+     "primary": [],
+     "additional": []
+    },
+    "prev": {},
+    "send": {}
+   }
+  },
+  "8937": {
+   "teacher": 7733,
+   "legacy_teacher": 54,
+   "legacy_lesson": 2213,
+   "hours": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "content_sha256": "0a00d631f90dac0978341fb93153851629452a1917a0c0b61ab76f33084d23b2",
+   "sections": {
+    "info": {
+     "teacher": "",
+     "office_hours": "",
+     "prerequisites": "",
+     "language": "en",
+     "lesson_hours": 45,
+     "welcome": "",
+     "research_interests": [],
+     "certificates": []
+    },
+    "desc": {
+     "description": "The course focuses on ways of writing a dissertation, case studies and political processes which concerns political subjects. It asks critical questions that interest political science and students.",
+     "goal": ""
+    },
+    "out": {
+     "outcomes": [
+      "In the end of the course, students learn 1. how to explore political field 2. how to squeeze political issues and narrow down political problems 3. get skills on methods and be instructed in main methodological approaches 4. how to write a political analysis"
+     ]
+    },
+    "week": {
+     "rows": [
+      {
+       "topic": "What is a theory",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Hypothesis",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Testing",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "How can theories be made",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "How can specific event be explained",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "What is a good theory",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Hermeneutics",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Strong or Weak tests",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "How can specific events be explained",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Methodology Myths",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Inferrence",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Explaining Cases",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Case Selection",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Dissertation Proposal",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Final Discussion",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      }
+     ]
+    },
+    "method": {
+     "methods": [
+      "Lecture and Seminar"
+     ],
+     "note": ""
+    },
+    "assess": {
+     "midterm": 0,
+     "project": 0,
+     "note": "1. Academic integrity means ensuring the originality of one’s work and properly acknowledging the ideas or findings of others by providing appropriate references. Violations of academic integrity: 1. Plagiarism 2. Cheating 3. Submitting all or part of a previously completed assignment, homework, or project for another course without proper citation 4. Referring to non-existent sources or creating false data 5. Preparing course materials or assignments on behalf of other students 6. Engaging in behavior to gain unfair advantage (e.g., submitting a medical certificate without actual illness, providing false excuses to extend deadlines or for other purposes) 7. Taking an exam on behalf of another student or having someone else take an exam in one’s place",
+     "exam_questions": []
+    },
+    "self": {
+     "option": "",
+     "topics": [
+      {
+       "title": "1. Is presidential or parliamentary democracy better choice for newly democratic regimes? 2.What are the advantages and disadvantages of consensus vis-a-vis majoritarian democracy? 3. What is civil societ and compare countries in Central Asia. 4. Why have there been so few totalitarian regime? 5. Can an authoritarian regime win much popular support if so, how? 6. What isthe differenece between totalitarianism and authoritarianism? 7.Representative or Direct Democracy? Make your own argument? 8. What are the problems of coalition governance? 9. What is the presidentialization of politics? 10. Do electoral systems shape party systems?"
+      }
+     ],
+     "archived": []
+    },
+    "lit": {
+     "primary": [
+      "Stephen Van Evera 1997 Guide to Methods for Students of Political Science, Cornell University Press. Ithac"
+     ],
+     "additional": []
+    },
+    "prev": {},
+    "send": {}
+   }
+  },
+  "4754": {
+   "teacher": 7742,
+   "legacy_teacher": 87,
+   "legacy_lesson": 114,
+   "hours": {
+    "lecture": 30,
+    "seminar": 30
+   },
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "content_sha256": "790c56080e36a2312ce954a9bc3a5504b54f10adc088b7d95de037e37828cdaf",
+   "sections": {
+    "info": {
+     "teacher": "",
+     "office_hours": "",
+     "prerequisites": "",
+     "language": "az",
+     "lesson_hours": 60,
+     "welcome": "",
+     "research_interests": [],
+     "certificates": []
+    },
+    "desc": {
+     "description": "İnsanın idrak fəliyyətində hisslərin rolu xüsusi əhəmiyyət daşıyır. Emosiya və motivasiya fənninin tədrisinin başlıca məqsədidə bu fənn haqqında tələbələrə vacib anlayışları öyrətməkdən ibarətdir. Təlim prosesində tələbələrin emosional cəhətdən fəallaşdırılması nəinki elmi, həm də köklü praktik məsələ kimi meydana çıxır.İnsanın psixi həyatı çoxcəhətli və rəngarəngdir. İdrak prosesləri (duyğu, qavrayış, diqqət, hafizə, təfəkkür, təxəyyül, nitq) emosiya və hisslərlə dialektik vəhdət təşkil edir. Bu köklü qanunauyğunluq müasir təlim nəzəriyyəsi üçün fundamental əhəmiyyətə malikdir. Belə ki, hissələrin qeyri adi qüvvəsindən istifadə etməklə tələbələrin idrak fəaliyyətini fəallaşdırmaq yolu ilə, təlim prosesinin məhsuldarlığını yüksəltmək olar. Kurs nəzəri və seminar dərslərindən ibarətdir. Burada hər bir psixoloji anlayışların təsviri, ayrı-ayrı nəzəriyyələrin izahı və onların tətbiqi əks olunur.\nİnsan psixologiyasi haqqinda elmi, yəni obyektiv və düzgün biliklər olmadan cəmiyyət inkişaf edə bilməz. İctimai praktikanın müxtəlif sahələrində insan haqqinda biliklərə olan elmi-praktik tələbat bu kursun tədrisini labüd edir. Təlim prosesində tələbələrin emosional cəhətdən fəallaşdırılması nəinki elmi, həm də köklü praktik məsələ kimi meydana çıxır.İnsanın psixi həyatı çoxcəhətli və rəngarəngdir.",
+     "goal": ""
+    },
+    "out": {
+     "outcomes": [
+      "Kursun məqsəd və vəzifələri, elmi-tədqiqat metodları, digər elmlərlə əlaqəsi haqqında təsəvvürlərin formalaşdırılması;\nEmosiya və hislərin yaranma tarıxi haqqında təsəvvürlərin formalaşdırılması;\nTələbələrdə hisslərin rolu haqqında təsəvvürlərin formalaşdırılması;\nTələbələrdə emosiya və hisslərin dialektik vəhdəti haqqında təsəvvürlərin formalaşdırılması;\nTələbələrdə bu kursun məzmunu, qurulması xüsusiyyətləri haqqında təsəvvürlərin formalaşdırılması;"
+     ]
+    },
+    "week": {
+     "rows": [
+      {
+       "topic": "Emosiyalar haqqında ümumi anlayış. Emosiyaların mənşəyi.",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Emosiya nəzəriyyələri",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Emosiya nəzəriyyələri",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Emosiyaların təsnifatı problemi",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Emosiyaların xarakteristikası",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Emosiyaların xarakteristikası",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Emosiyaların funksiyaları. Emosiyaların tədqiqi metodları",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Hisslər və onun psixoloji mahiyyəti",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "“Motiv” və “motivasiya” anlayışı. Motiv mürəkkəb psixoloji quruluş kimi",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Motivasiyanın tədqinin başlıca istiqamətləri",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Əlamətlər nəzəriyyələri və motivasiya problemi",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Əlamətlər nəzəriyyələri və motivasiya problemi",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Situasionizm nəzəriyyələri və motivasiya problemi",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Sosial, prososial və antisosial motivlər",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Motivlərin tədqiqi metodları",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      }
+     ]
+    },
+    "method": {
+     "methods": [
+      "1. mühazirə\n2. mövzunun müzakirəsi və diskussiya\n3. seminar və kollokviumlar"
+     ],
+     "note": ""
+    },
+    "assess": {
+     "midterm": 0,
+     "project": 0,
+     "note": "1. Tələbə iki imtahan formasından birini seçə bilər: açıq suallar və CASE.\n2. İmtahandan əvvəl məsləhət saatları təşkil olunur.\n3. İmtahanlar və aralıq yoxlamalar (kollekviumlar) yazılı formada aparılır.\n4. Tələbələrin imtahana və aralıq yoxlamara buraxılması ilə bağlı məsələlər fakültə dekanı tərəfindən həll edilir. İmtahan və aralıq yoxlamalar Azərbaycan Respublikası Nazirlər Kabinetinin 24 dekabr 2013-cü il tarixli 348 nömrəli qərarı ilə təsdiq edilmiş “Ali təhsil müəssisələrinin bakalvriat və magistratura səviyyələrində kredit sistemi ilə təlimin təşkili Qaydaları”na əsasən aparılır.\n5. Kurs işlərinin mövzuları, müvafiq ədəbiyyat əvvəlcədən tələbələrə verilir. Kurs işlərinin müdafiəsi kafedrada yaradılmış komissiya tərəfindən qəbul edilir.\n6. Semestr ərzində hər bir tələbə müstəqil iş yerinə yetirməlidir. Müstəqil işlərin mövzuları keçilən mövzuları əhatə edir. Müstəqil iş maksimum 10 ballı sistemlə qiymətləndirilir.",
+     "exam_questions": []
+    },
+    "self": {
+     "option": "",
+     "topics": [
+      {
+       "title": "1. Emosiyaların mənşəyi. Emosiyaların funksiyaları"
+      },
+      {
+       "title": "2. Emosiyaların bioloji və koqnitiv nəzəriyyəsi"
+      },
+      {
+       "title": "3. Emosiya nəzəriyyələri"
+      },
+      {
+       "title": "4. Emosiyaların təsnifinə fərqli yanaşmalar"
+      },
+      {
+       "title": "5. Aparıcı və törəmə emosiyalar"
+      },
+      {
+       "title": "6. Hisslərin təsnifatı"
+      },
+      {
+       "title": "7. Motiv psixoloji fenomen kimi"
+      },
+      {
+       "title": "8. Motivasiyanın tədqinin başlıca istiqamətləri"
+      },
+      {
+       "title": "9. А.Maslounun motivasiya nəzəriyyəsi"
+      },
+      {
+       "title": "10. Mak-Dauqollun instinktlərin nəzəriyyəsi"
+      },
+      {
+       "title": "11. K.Levinin konfilikt nəzəriyyəsi"
+      },
+      {
+       "title": "12. Meyllər nəzəriyyəsi"
+      },
+      {
+       "title": "13. Alturizm nəzəriyyələri"
+      },
+      {
+       "title": "14. Attraksiya anlayışı"
+      },
+      {
+       "title": "15. S.Şexterin emosiyaların koqnitiv-fizioloji nəzəriyyəsi"
+      }
+     ],
+     "archived": []
+    },
+    "lit": {
+     "primary": [
+      "1. G.Q.Hüseynova, Y.Ə.Vəliyeva Emosiyaların psixologiyası, Bakı 2023",
+      "2. Seyidov S.İ.Həmzəyev M.R. Psixologiya.Bakı: 2007",
+      "3. Məmmədov A.İdrak prosesləri.Bakı: 2005",
+      "4. Маклаков С.Я. Общая психология. М: 2006",
+      "5. Ильин Е.П. «Эмоции и чувства».Питер,2002",
+      "6. Изард К.Э. «Психология эмоции». Питер,2002",
+      "7. Ильин Е.П. «Мотивация и мотив».Питер,2004"
+     ],
+     "additional": []
+    },
+    "prev": {},
+    "send": {}
+   }
+  },
+  "8926": {
+   "teacher": 9522,
+   "legacy_teacher": 1075,
+   "legacy_lesson": 2708,
+   "hours": {
+    "lecture": 10,
+    "seminar": 5
+   },
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "content_sha256": "ce76df22cd023eb0b69629046d08e3c8f5fa8642a6a29e04a57a53647d47e62b",
+   "sections": {
+    "info": {
+     "teacher": "",
+     "office_hours": "",
+     "prerequisites": "",
+     "language": "az",
+     "lesson_hours": 15,
+     "welcome": "",
+     "research_interests": [],
+     "certificates": []
+    },
+    "desc": {
+     "description": "",
+     "goal": ""
+    },
+    "out": {
+     "outcomes": []
+    },
+    "week": {
+     "rows": [
+      {
+       "topic": "Tarixdə xalq və xalqlar anlayışı",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Türk xalqları ailəsi və Türk dillərinin inkişaf dövrləri",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Qədim Türk dastanı “Köç”",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "“Xalqların böyük köçü” termini",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Böyük köçün səbəbləri",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      }
+     ]
+    },
+    "method": {
+     "methods": [],
+     "note": ""
+    },
+    "assess": {
+     "midterm": 0,
+     "project": 0,
+     "note": "",
+     "exam_questions": []
+    },
+    "self": {
+     "option": "",
+     "topics": [],
+     "archived": []
+    },
+    "lit": {
+     "primary": [],
+     "additional": []
+    },
+    "prev": {},
+    "send": {}
+   }
   }
  },
  "targets": [
@@ -14955,6 +16450,151 @@
    },
    "action": "restore",
    "source": "8521"
+  },
+  {
+   "key": "n10d06508",
+   "teacher": 7810,
+   "offering_id": "d0650878-404c-43e1-859f-39f0b932444f",
+   "group_id": "95cd66eb-3be1-410f-a231-8d28cc7223e8",
+   "subject_ids": [
+    "58a7a26d-c5b1-4249-8475-b1108ebaeb42"
+   ],
+   "lesson_hours": 60,
+   "plan": {
+    "lecture": 30,
+    "seminar": 30
+   },
+   "action": "restore",
+   "source": "3788"
+  },
+  {
+   "key": "n10ad0dfe",
+   "teacher": 11591,
+   "offering_id": "ad0dfe2f-8f5c-460b-beff-ad3a3b56dd2f",
+   "group_id": "8d82ad51-a241-44c1-8423-656b32ae5d9f",
+   "subject_ids": [
+    "cbdd03c4-38ce-4b81-a6c1-932229678fce"
+   ],
+   "lesson_hours": 45,
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "action": "restore",
+   "source": "8887"
+  },
+  {
+   "key": "n10e56683",
+   "teacher": 11591,
+   "offering_id": "e5668397-e1a3-49ab-a3fd-67de3b9cd47d",
+   "group_id": "bcba7eeb-68b7-4473-8ac4-2b214bf2d4d6",
+   "subject_ids": [
+    "4df639f3-4e1f-458c-b7d1-ff63c18a992c"
+   ],
+   "lesson_hours": 15,
+   "plan": {
+    "lecture": 10,
+    "seminar": 5
+   },
+   "action": "restore",
+   "source": "8885"
+  },
+  {
+   "key": "n10824f71",
+   "teacher": 8204,
+   "offering_id": "824f715c-3157-4013-9b61-b72ae22465f8",
+   "group_id": "46dd0490-a127-47ba-b296-15bd03935b32",
+   "subject_ids": [
+    "8c7e8620-1dec-43b0-95c2-07c77aa62c01"
+   ],
+   "lesson_hours": 60,
+   "plan": {
+    "lecture": 30,
+    "seminar": 30
+   },
+   "action": "restore",
+   "source": "7715"
+  },
+  {
+   "key": "n10cc542a",
+   "teacher": 7736,
+   "offering_id": "cc542ace-988f-4166-ba00-356cc6037cca",
+   "group_id": "bb57e45d-e218-49ef-93ca-e9a7ad386408",
+   "subject_ids": [
+    "dd0dc9e9-79b6-495e-b3bb-b58cde8764c6"
+   ],
+   "lesson_hours": 45,
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "action": "restore",
+   "source": "7426"
+  },
+  {
+   "key": "n10b1ed79",
+   "teacher": 7733,
+   "offering_id": "b1ed79dd-af82-406c-a249-319faffff98f",
+   "group_id": "eacdd889-8490-4e36-94bc-a52d692eabfb",
+   "subject_ids": [
+    "a4eb1b36-a1a7-4b2d-bf75-d9f501f58537"
+   ],
+   "lesson_hours": 45,
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "action": "restore",
+   "source": "8937"
+  },
+  {
+   "key": "n103bafe1",
+   "teacher": 7742,
+   "offering_id": "3bafe127-2385-425e-aba4-0ef48a612abc",
+   "group_id": "c895b91a-d8c2-48ac-a971-10b8812a2692",
+   "subject_ids": [
+    "4fd6fb56-22f5-4e13-84ee-adff66e17a07"
+   ],
+   "lesson_hours": 60,
+   "plan": {
+    "lecture": 30,
+    "seminar": 30
+   },
+   "action": "restore",
+   "source": "4754"
+  },
+  {
+   "key": "n103dc553",
+   "teacher": 9522,
+   "offering_id": "3dc55356-e14d-42cc-967b-df90fd77eae4",
+   "group_id": "aced4cd7-31d3-412e-a44a-37de2f405a37",
+   "subject_ids": [
+    "a9f60efe-adf5-4835-aea0-e90b6a22d25e"
+   ],
+   "lesson_hours": 45,
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "action": "restore",
+   "source": "8926",
+   "week_gap_ok": true
+  },
+  {
+   "key": "n1047fd2c",
+   "teacher": 7938,
+   "offering_id": "47fd2c25-ecf0-4c61-b144-e121ee073e0c",
+   "group_id": "5d1243ad-e6a0-4395-9f68-379767562f87",
+   "subject_ids": [
+    "44a71458-77c8-4f1a-8b85-158848c79aaa"
+   ],
+   "lesson_hours": 45,
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "action": "restore",
+   "source": "8300"
   }
  ]
 }
