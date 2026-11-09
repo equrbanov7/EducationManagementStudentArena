@@ -10,7 +10,9 @@ from django.urls import reverse
 from apps.workload.models import TeacherAssignment, TeachingTaskRow
 from apps.workload.public import teacher_journal_assignments
 from apps.workload.services.patok_streams import apply_streams
+from apps.workload.services.queries import teacher_load_panel
 from apps.workload.services.scoping import WorkloadDenied, resolve_actor
+from apps.workload.services.subject_cards import cards_page
 
 from .test_subject_cards_2026_11_09 import CardsBase
 
@@ -107,6 +109,51 @@ class ApplyStreamsTests(StreamsBase):
         with self.assertRaises(WorkloadDenied) as ctx:
             self._apply([{"row_ids": [str(self.row_bi.pk), str(seminar_only.pk)]}])
         self.assertEqual(ctx.exception.code, "workload.stream_no_lecture")
+
+
+class LoadGuaranteeTests(StreamsBase):
+    """Sahib 2026-11-09: «müəllimlərin yüklərini pozmayacaq ki?» — kart oxuyur, yazmır; dəyişməyən axın yükü dəyişmir."""
+
+    code = "LG"
+
+    def _totals(self):
+        return {
+            card["name"]: (card["hours"], card["fall_hours"], card["spring_hours"])
+            for card in teacher_load_panel(self.task)
+        }
+
+    def test_cards_are_read_only_and_identity_streams_keep_every_total(self):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        before = self._totals()
+        snapshot = sorted(
+            TeacherAssignment.objects.filter(row__task=self.task).values_list(
+                "teacher_id", "activity", "hours", "is_hourly_paid", "row_id"
+            )
+        )
+        with CaptureQueriesContext(connection) as queries:
+            page = cards_page(self.task, limit=50)
+        self.assertEqual(page["total"], 3)
+        writes = [q["sql"] for q in queries if q["sql"].split()[0].upper() in ("INSERT", "UPDATE", "DELETE")]
+        self.assertEqual(writes, [])
+        # Mövcud bölgünü eyni ilə yenidən yazmaq (hər sətir öz axınında, mühazirəçi göndərilmir) heç nəyi dəyişmir.
+        current = [
+            {"row_ids": [str(row.pk)]}
+            for row in (self.row_mu, self.row_bi, self.row_mrk_dbi)
+            if int(row.lecture_total) > 0
+        ]
+        current[0]["row_ids"].append(str(self.row_i_ml.pk))  # İ/ML artıq MU-nun tərəfdaşıdır
+        self._apply(current)
+        self.assertEqual(self._totals(), before)
+        self.assertEqual(
+            sorted(
+                TeacherAssignment.objects.filter(row__task=self.task).values_list(
+                    "teacher_id", "activity", "hours", "is_hourly_paid", "row_id"
+                )
+            ),
+            snapshot,
+        )
 
 
 class StreamsEndpointTests(StreamsBase):

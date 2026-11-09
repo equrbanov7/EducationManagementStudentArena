@@ -5,10 +5,8 @@ from __future__ import annotations
 
 import json
 
-from django.apps import apps as django_apps
 from django.urls import reverse
 
-from apps.workload.migrations import __name__ as _migrations_pkg  # noqa: F401 — paket var
 from apps.workload.models import TeacherAssignment
 from apps.workload.public import teacher_journal_assignments
 from apps.workload.services.offering_shares import _assignment_group, plan_for_rows
@@ -122,10 +120,9 @@ class AssignmentGroupTests(CardsBase):
         TeacherAssignment.objects.filter(pk=a.pk).update(sub_number=None, teacher=None)
         self.assertFalse(plan_for_rows([row], group=group)["ambiguous"])  # vakant sayılmır
 
-    def test_migration_backfill_links_single_group_notes(self):
-        from importlib import import_module
+    def test_backfill_service_is_dry_run_by_default_and_links_single_group_notes(self):
+        from apps.workload.services.assignment_groups import backfill_groups
 
-        migration = import_module("apps.workload.migrations.0011_assignment_group")
         self._allow_lab()
         exact = TeacherAssignment.objects.create(
             organization=self.org,
@@ -133,7 +130,7 @@ class AssignmentGroupTests(CardsBase):
             teacher=self.habibov,
             activity="lab",
             hours=1,
-            groups_note=f"{self.g_i.name}",
+            groups_note=self.g_i.name,
         )
         two = TeacherAssignment.objects.create(
             organization=self.org,
@@ -151,7 +148,13 @@ class AssignmentGroupTests(CardsBase):
             hours=1,
             groups_note="2-ci yarımqrup",
         )
-        migration._backfill(django_apps, None)
+        dry = backfill_groups(organization=self.org)
+        self.assertEqual((dry["candidates"], dry["linked"], dry["multi_group"], dry["unparsed"]), (4, 2, 1, 1))
+        self.assertFalse(
+            TeacherAssignment.objects.filter(pk__in=[exact.pk, two.pk, free.pk], group__isnull=False).exists()
+        )
+        applied = backfill_groups(organization=self.org, apply=True)
+        self.assertEqual(applied["linked"], 2)
         exact.refresh_from_db()
         two.refresh_from_db()
         free.refresh_from_db()
@@ -160,3 +163,4 @@ class AssignmentGroupTests(CardsBase):
         self.assertIsNone(free.group_id)
         dbi = TeacherAssignment.objects.get(row=self.row_mrk_dbi, teacher=self.orucova)
         self.assertEqual(dbi.group_id, self.g_dbi.pk)  # «536 DBİ» qeydi → bağ
+        self.assertEqual(backfill_groups(organization=self.org)["candidates"], 2)  # idempotent

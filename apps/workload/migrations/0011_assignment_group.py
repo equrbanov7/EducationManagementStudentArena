@@ -1,54 +1,12 @@
 # Sahib 2026-11-09 («bir fənn = bir kart»): bölgünün struktur qrup bağı + lab/seminar alt qrupu nömrəsi.
 #
-# Backfill: ``groups_note`` sətrin qruplarından DÜZ BİRİNİN adına/koduna parse olunursa (``offering_shares.
-# _assignment_group`` qaydası — vergül/nöqtəli vergül/«+» ilə bir neçə hissə, hamısı eyni qrup) ``group`` yazılır;
-# birdən çox qrup və ya tanınmayan mətn — qeyd olduğu kimi qalır (jurnal onu əvvəlki kimi parse edir). Saat
-# dəyişmir; DB balans trigger-i yalnız sütun yeniləməsini görür (``id <> NEW.id`` — cəm eyni qalır).
-
-import re
+# YALNIZ SXEMA: iki nullable sütun + CHECK. Heç bir sətir yenidən yazılmır (sahib: «müəllimlərin yüklərini
+# pozmayacaq ki?» — saat, müəllim, fəaliyyət toxunulmur). Köhnə ``groups_note`` qeydləri əvvəlki kimi parse olunur
+# (``offering_shares._assignment_group``); qeyddən bağa köçürmə ayrıca, dry-run-lı servisdir
+# (``services.assignment_groups.backfill_groups`` — prod-data-ops yolu ilə, istənilsə).
 
 import django.db.models.deletion
-from django.db import migrations, models, transaction
-
-
-def _normalize(value):
-    return re.sub(r"\s+", "", str(value or "")).casefold()
-
-
-def _backfill(apps, schema_editor):
-    TeacherAssignment = apps.get_model("workload", "TeacherAssignment")
-    Through = apps.get_model("workload", "TeachingTaskRow").groups.through
-    OrgUnit = apps.get_model("organizations", "OrgUnit")
-    pending = list(
-        TeacherAssignment.objects.filter(group__isnull=True).exclude(groups_note="").values("id", "row_id", "groups_note")
-    )
-    if not pending:
-        return
-    row_ids = {item["row_id"] for item in pending}
-    groups_by_row = {}
-    links = list(Through.objects.filter(teachingtaskrow_id__in=row_ids).values_list("teachingtaskrow_id", "orgunit_id"))
-    units = {
-        unit.pk: unit for unit in OrgUnit.objects.filter(pk__in={unit_id for _row_id, unit_id in links}).only("name", "code")
-    }
-    for row_id, unit_id in links:
-        groups_by_row.setdefault(row_id, []).append(units[unit_id])
-    for item in pending:
-        known = {}
-        for unit in groups_by_row.get(item["row_id"], ()):
-            for label in (unit.name, getattr(unit, "code", "")):
-                if label:
-                    known.setdefault(_normalize(label), set()).add(unit.pk)
-        parts = [_normalize(part) for part in re.split(r"[,;+\n]+", item["groups_note"]) if part.strip()]
-        if not parts or any(part not in known or len(known[part]) != 1 for part in parts):
-            continue
-        found = {next(iter(known[part])) for part in parts}
-        if len(found) != 1:
-            continue
-        try:
-            with transaction.atomic():
-                TeacherAssignment.objects.filter(pk=item["id"]).update(group_id=found.pop())
-        except Exception:  # noqa: BLE001 — bir sətrin köhnə balans pozuntusu miqrasiyanı dayandırmasın
-            continue
+from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
@@ -87,5 +45,4 @@ class Migration(migrations.Migration):
                 name="workload_assignment_sub_number_range",
             ),
         ),
-        migrations.RunPython(_backfill, migrations.RunPython.noop),
     ]
