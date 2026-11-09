@@ -46,6 +46,11 @@ CORE_LABELS = {
     "legacy_import.LegacyEntityMap",
     "legacy_import.LegacyEntityMapVersion",
     "audit.AuditLog",
+    # 2026-11-10 kafedra yükü yoxlaması: cədvəl slotları, jurnal payları, üzvlüklər (kiçik cədvəllər).
+    "registrar.ScheduleSlot",
+    "registrar.JournalShare",
+    "registrar.JournalShare_enrollments",
+    "organizations.Membership",
 }
 CREATION_RESOURCES = [
     "registrar.legacy_cells_fill",
