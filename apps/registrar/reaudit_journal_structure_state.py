@@ -58,7 +58,12 @@ def actor_scope(organization, actor):
 def family_for(organization, manifest):
     target = manifest["target_ids"]
     operation = manifest["operation"]
-    if operation == "half_pair":
+    if operation == "owner_present_conflict":
+        targets = list(LessonMark.objects.filter(organization=organization, pk__in=target).select_related("lesson"))
+        require(len(targets) == len(target), "structure_target_missing")
+        roots = {row.lesson.offering_id for row in targets}
+        enrollment_ids = {row.enrollment_id for row in targets}
+    elif operation == "half_pair":
         targets = list(Lesson.objects.filter(organization=organization, pk__in=target).order_by("pk"))
         require(len(targets) == len(target), "structure_target_missing")
         roots = {lesson.offering_id for lesson in targets}
@@ -185,6 +190,10 @@ def capture(organization, actor, manifest):
     extra["tasks"] = rows(
         apps.get_model("workload.TeachingTask").objects.filter(organization=organization, pk__in=task_ids)
     )
+    if manifest["operation"] == "owner_present_conflict":
+        from .reaudit_attendance_conflict import capture_maps
+
+        extra.update(capture_maps(courses, family))
     if manifest["operation"] in {"timetable", "park_inactive_slots"}:
         extra["period_slots"] = rows(
             ScheduleSlot.all_objects.filter(organization=organization, offering__period=period)
@@ -227,6 +236,8 @@ def counters(enrollments, marks, lessons, credits, manifest):
         old[eid] = old.get(eid, 0) + lesson["hours"]
         if manifest["operation"] == "half_pair" and lesson["id"] in manifest["target_ids"]:
             delta[eid] = delta.get(eid, 0) + 1 - lesson["hours"]
+        if manifest["operation"] == "owner_present_conflict" and mark["id"] in manifest["target_ids"]:
+            delta[eid] = delta.get(eid, 0) - lesson["hours"]
 
     def derived(eid, after):
         raw = old.get(eid, 0) + (delta.get(eid, 0) if after else 0)
@@ -294,8 +305,14 @@ def protected(snapshot, manifest, *, correction_ids=(), reversal_ids=(), slot_id
         from .reaudit_journal_structure_parking import protect
 
         protect(value, manifest)
+    if manifest["operation"] == "owner_present_conflict":
+        for row in data.get("registrar.LessonMark", []):
+            if row["id"] in manifest["target_ids"]:
+                row.pop("status", None)
+                row.pop("updated_at", None)
     for label, ids in (
         ("registrar.LessonCorrection", correction_ids),
+        ("registrar.JournalCorrection", correction_ids if manifest["operation"] == "owner_present_conflict" else ()),
         ("registrar.CorrectionReversal", reversal_ids),
         ("registrar.ScheduleSlot", slot_ids),
     ):

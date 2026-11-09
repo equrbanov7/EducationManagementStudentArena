@@ -280,6 +280,18 @@ CODES = frozenset(
         "structure_fresh_baseline_required",
         "structure_graph_cross_course_history",
         "structure_half_pair_fixed_source",
+        "structure_conflict_authority",
+        "structure_conflict_map_budget",
+        "structure_conflict_mark_changed",
+        "structure_conflict_grade_or_attendance",
+        "structure_conflict_scope",
+        "structure_conflict_source",
+        "structure_conflict_mapping",
+        "structure_conflict_target_changed",
+        "structure_conflict_formal_history",
+        "structure_conflict_reversal",
+        "structure_conflict_postcondition",
+        "structure_conflict_counter_forecast",
         "structure_half_pair_hours_changed",
         "structure_half_pair_identity_changed",
         "structure_half_pair_missing",
@@ -316,7 +328,7 @@ CODES = frozenset(
     }
 )
 PHASES = frozenset({"manifest", "authority", "actor", "rls", "organization", "repair", "reset_rls"})
-OPERATIONS = frozenset({"half_pair", "inactive_cache", "timetable", "park_inactive_slots"})
+OPERATIONS = frozenset({"half_pair", "inactive_cache", "timetable", "park_inactive_slots", "owner_present_conflict"})
 EXCEPTIONS = frozenset(
     {
         "Exception",

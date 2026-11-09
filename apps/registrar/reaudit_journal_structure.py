@@ -55,7 +55,11 @@ def validate_counters(before, after, *, undo=False, original=None, operation=Non
 
 def apply_changes(organization, actor, manifest, before, plan):
     corrections, slots = [], []
-    if manifest["operation"] == "half_pair":
+    if manifest["operation"] == "owner_present_conflict":
+        from .reaudit_attendance_conflict import apply as apply_conflicts
+
+        corrections = apply_conflicts(organization, actor, manifest, plan)
+    elif manifest["operation"] == "half_pair":
         for lesson in Lesson.objects.filter(organization=organization, pk__in=manifest["target_ids"]).order_by("pk"):
             correction = apply_lesson_correction(
                 lesson=lesson,
@@ -82,7 +86,28 @@ def apply_changes(organization, actor, manifest, before, plan):
 
 def undo_changes(organization, actor, manifest, record):
     reversal_ids = []
-    if manifest["operation"] == "half_pair":
+    if manifest["operation"] == "owner_present_conflict":
+        from .correction_reversals import revert_last_grade_correction
+
+        for correction_id in record["correction_ids"]:
+            correction = (
+                apps.get_model("registrar.JournalCorrection")
+                .objects.select_related("lesson_mark")
+                .get(organization=organization, pk=correction_id)
+            )
+            require(str(correction.lesson_mark_id) in manifest["target_ids"], "structure_conflict_reversal")
+            require(
+                revert_last_grade_correction(mark=correction.lesson_mark, by_user=actor, correction_id=correction_id),
+                "structure_conflict_reversal",
+            )
+            reversal_ids.append(
+                str(
+                    apps.get_model("registrar.CorrectionReversal")
+                    .objects.get(organization=organization, journal_correction_id=correction_id)
+                    .pk
+                )
+            )
+    elif manifest["operation"] == "half_pair":
         for correction_id in record["correction_ids"]:
             correction = apps.get_model("registrar.LessonCorrection").objects.get(
                 pk=correction_id, organization=organization
@@ -120,6 +145,11 @@ def undo_changes(organization, actor, manifest, record):
 def run(*, organization, actor, manifest, apply=False, expected_baseline="", undo="", authority_bytes=None):
     spec.validate(manifest)
     require(type(apply) is bool, "structure_explicit_apply")
+    conflict_proof = None
+    if manifest["operation"] == "owner_present_conflict":
+        from .reaudit_attendance_conflict import authority
+
+        conflict_proof = authority(authority_bytes, manifest)
     if apply:
         require(
             isinstance(authority_bytes, bytes)
@@ -158,7 +188,15 @@ def run(*, organization, actor, manifest, apply=False, expected_baseline="", und
         if not undo:
             return {**result, "status": "already_applied"}
     plan, proposed = None, []
-    if manifest["operation"] == "half_pair":
+    if manifest["operation"] == "owner_present_conflict":
+        from .reaudit_attendance_conflict import validate
+
+        if not record:
+            validate(before, manifest, conflict_proof, actor, organization)
+            result["reviewed_counter_forecast_verified"] = True
+        plan = conflict_proof
+        result["planned"] = 2
+    elif manifest["operation"] == "half_pair":
         state.half_pair_pins(before, hours=1 if record else 2)
         if not record:
             require(
@@ -206,6 +244,10 @@ def run(*, organization, actor, manifest, apply=False, expected_baseline="", und
         state.protected(before, manifest, **exclusions) == state.protected(after, manifest, **exclusions),
         "structure_protected_graph_changed",
     )
+    if manifest["operation"] == "owner_present_conflict":
+        from .reaudit_attendance_conflict import postcheck
+
+        postcheck(before, after, manifest, correction_ids, reversal_ids, actor, undo=bool(undo))
     validate_counters(before, after, undo=bool(undo), original=record, operation=manifest["operation"])
     if manifest["operation"] == "half_pair":
         state.half_pair_pins(after, hours=2 if undo else 1)
@@ -229,13 +271,20 @@ def run(*, organization, actor, manifest, apply=False, expected_baseline="", und
         "changed": result["planned"],
         "canonical_half_pair_undo_does_not_recreate_stale_cache": True,
     }
+    if manifest["operation"] == "owner_present_conflict":
+        values["counter_preview_before"] = touched
+        values["counter_preview_after"] = [r for r in after["preview"] if r["enrollment_id"] in after["affected_ids"]]
     log_action(
         AuditAction.UPDATE,
         user=actor,
         organization=organization,
         resource_type=spec.RESOURCE,
         resource_id=receipt,
-        reason="Reviewed bounded journal structure correction; preserved marks and credits",
+        reason=(
+            "Reviewed exact owner-present conflict; preserved scores authorship credits and history"
+            if manifest["operation"] == "owner_present_conflict"
+            else "Reviewed bounded journal structure correction; preserved marks and credits"
+        ),
         old_values={"before_sha256": graph_baseline, "reviewed_baseline": baseline},
         new_values=values,
     )
@@ -243,6 +292,7 @@ def run(*, organization, actor, manifest, apply=False, expected_baseline="", und
         **result,
         "status": "undone" if undo else "applied",
         "changed": result["planned"],
+        "marks_changed": result["planned"] if manifest["operation"] == "owner_present_conflict" else 0,
         "receipt": receipt,
         "after_baseline": digest(after),
     }

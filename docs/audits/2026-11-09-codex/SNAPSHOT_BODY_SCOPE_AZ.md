@@ -1,33 +1,26 @@
-# Cari sillabus gövdələrinin ixrac sərhədi
+# Sillabus gövdələri və akademik məlumat ixracı
 
-Native oxu-yalnız ixrac bütün tenantın bütün tarixli sillabus gövdələrini
-daşıdıqda ümumi 512 MiB həddində dayandı. Hədd artırılmır. Yeni seçim siyasəti
-`schemas.json` hash-ına və manifestin gövdə cədvəlinə daxil edilir:
-`current-period-all-offerings-nonarchived-and-referenced-lineage/1`.
+Bütün tenantın sillabus gövdələri 512 MiB həddini aşdı. Cari jurnal/donor
+zənciri ilə daralma da kifayət etmədi. Hədd artırılmır. `SyllabusSection`
+cədvəlində yalnız `data` gövdəsi bu ixracdan çıxarılır; bütün təşkilatın bütün
+bölmə sətirlərinin metadatası, başlıqları, versiyaları, paylaşım əlaqələri və
+`SyllabusReview` qərar tarixçəsi bütöv saxlanır. Digər77cədvəlin sorğuları və
+sahələri dəyişmir; ballar, iştirak, mapping/version, audit və tarixi final
+məlumatlarının əhatəsi sillabus gövdəsindən asılı deyil.
 
-Yalnız `SyllabusSection` sətirləri versiya seçimi ilə
-məhdudlaşır. Bütün tenantın sillabus başlıqları, bütün versiya və paylaşım
-metadatası, bütün `SyllabusReview` qərar tarixçəsi əvvəlki kimi qalır. Bal, dərs, xəritə, apellyasiya, tarixi final və
-digər cədvəllərin sorğuları dəyişmir.
+Siyasət schema hash-ına və manifestə bağlanır:
+`body_policy=metadata-only-bodies-deferred-to-native-connected-batches/1`,
+`body_complete=false`, `excluded_body_fields=["data"]`. Decoder bu məlumatları
+schema ilə yoxlayır. Bu capture metadata/akademik sətirlər üzrə tamdır;
+**sillabus məzmunu üzrə tam deyil**. Gövdənin ixracda olmaması boş sillabus və
+ya itmiş məzmun kimi şərh edilə bilməz. Offline məzmun tamlığı qərarı UNKNOWN
+qalmalıdır; metadata batch planner məzmunu təsdiqləmir.
 
-Köklər bütün cari semestr açılışlarıdır; qeyri-aktiv və birləşmədən əvvəlki
-jurnallar çıxarılmır. Cari semestr dosyeləri, bağlı dosyelər, paylaşım və dil
-kohortunun mənbə dosyeləri, eyni fənn+müəllim üzrə digər semestr/baza namizədləri
-daxildir. `reused_from`, bütün versiyaların `source_version` zənciri və
-current/approved istinadları donorların köhnə semestrinə qədər izlənir.
+Sillabus source packet-i dəqiq legacy mənbədən ayrıca hazırlanır. Canlı native
+syllabus dry/apply/undo hər explicit əlaqəli batch üçün bütün reviziyaların
+**tam gövdələrini** PostgreSQL-dən oxuyur, kilidləyir və qorunan tarixçə
+fingerprint-inə daxil edir. Batch≤100, donor və tarixçə closure-u, təzə baseline,
+ehtiyat nüsxə, receipt və repeat şərtləri dəyişmir. Metadata ixracı bu yoxlamanı
+əvəz etmir; lazımi body oxunmadan sillabus nə təsdiqlənir, nə də yayımlanır.
 
-Bu əlaqələrdə arxivlənməmiş bütün versiyaların gövdələri saxlanılır; qaralama,
-təqdim edilmiş, baxışda, düzəliş tələb olunan, təsdiqlənmiş və rədd edilmiş
-versiyalar buna daxildir. Arxiv versiyası current/approved istinadı və ya
-mənbə-versiya əlaqəsi ilə istifadə edilirsə onun gövdəsi də saxlanılır.
-Əlaqəsiz köhnə və istinadsız arxiv gövdələri bu proyeksiyaya daxil deyil.
-
-Ona görə həmin gövdənin ixracda olmaması boş sillabus və ya itmiş məlumat
-sübutu deyil. Offline batch helper bütün metadata ilə əvvəlki kimi əlaqəli
-komponentləri qurur; köhnə semestrə/qeyri-aktiv və icazəsiz açılışa yayılan
-komponentlər hold qalır. Bu ixrac universal sillabus tarixçəsi arxivi deyil.
-
-Canlı sillabus dry/apply/undo əmrləri hər reviziyanın tam gövdəsini yenə
-PostgreSQL-dən oxuyur, kilidləyir və qorunan tarixçə fingerprint-inə daxil edir.
-İxrac həmin native qraf, təzə baseline, receipt və geri qaytarma sübutlarını
-əvəz etmir. RLS, oxu-yalnız RR transaction, sətir/bayt/vaxt hədləri dəyişmir.
+Oxu-yalnız RR transaction, RLS, sətir/bayt/vaxt hədləri əvvəlki kimidir.

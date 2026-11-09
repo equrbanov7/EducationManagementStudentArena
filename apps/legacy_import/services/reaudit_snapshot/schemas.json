@@ -1001,7 +1001,6 @@
       "organization_id",
       "version_id",
       "section_id",
-      "data",
       "is_complete",
       "revision",
       "updated_by_id"
@@ -1009,7 +1008,11 @@
     "org_path": "organization_id",
     "period_path": "",
     "filters": {},
-    "body_policy": "current-period-all-offerings-nonarchived-and-referenced-lineage/1"
+    "body_policy": "metadata-only-bodies-deferred-to-native-connected-batches/1",
+    "body_complete": false,
+    "excluded_body_fields": [
+      "data"
+    ]
   },
   "syllabus.SyllabusShare": {
     "fields": [
