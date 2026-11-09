@@ -96,13 +96,15 @@ def prefetch_memberships(users, organization=None) -> None:
 
 
 def _linked_username(user, profile) -> str:
-    from ...shared_fin import linked_user
-
-    try:
-        other = linked_user(user) if profile is not None else None
-    except Exception:  # noqa: BLE001 — siyahı heç vaxt bu sahəyə görə sınmasın
+    """Bağlı hesabın username-i — YALNIZ yüklənmiş (select_related) əlaqədən, sorğusuz (siyahı 0 sorğu qaydası)."""
+    if profile is None:
         return ""
-    return other.username if other is not None else ""
+    cache = getattr(getattr(profile, "_state", None), "fields_cache", {}) or {}
+    other = cache.get("fin_shared_with") if getattr(profile, "fin_shared_with_id", None) else None
+    if other is None:
+        secondary = (getattr(getattr(user, "_state", None), "fields_cache", {}) or {}).get("fin_shared_secondary")
+        other = getattr(secondary, "user", None) if secondary is not None else None
+    return getattr(other, "username", "") or ""
 
 
 def serialize_row(user, actor: RimActor):
