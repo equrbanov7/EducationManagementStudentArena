@@ -88,9 +88,14 @@ def fin_owners(fins) -> dict:
     UserProfile = django_apps.get_model("accounts", "UserProfile")
     wanted = sorted({str(fin or "").strip().upper() for fin in fins} - {""})
     rows = UserProfile.objects.filter(fin__in=wanted).values_list(
-        "fin", "user_id", "user__last_name", "user__first_name"
+        "fin", "user_id", "user__last_name", "user__first_name", "fin_shared_with_id"
     )
-    return {str(fin).strip().upper(): (user_id, last, first) for fin, user_id, last, first in rows if fin}
+    # Sahib 2026-11-09: eyni FİN bağlı işçi hesabında da ola bilər — əsas (tələbə, ``fin_shared_with`` boş) qalır.
+    return {
+        str(fin).strip().upper(): (user_id, last, first)
+        for fin, user_id, last, first, _linked in sorted(rows, key=lambda row: 0 if row[4] else 1)
+        if fin
+    }
 
 
 def fin_owner(row, owners: dict):

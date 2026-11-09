@@ -95,6 +95,16 @@ def prefetch_memberships(users, organization=None) -> None:
     prefetch_related_objects(list(users), Prefetch("memberships", queryset=queryset, to_attr=PREFETCH_ATTR))
 
 
+def _linked_username(user, profile) -> str:
+    from ...shared_fin import linked_user
+
+    try:
+        other = linked_user(user) if profile is not None else None
+    except Exception:  # noqa: BLE001 — siyahı heç vaxt bu sahəyə görə sınmasın
+        return ""
+    return other.username if other is not None else ""
+
+
 def serialize_row(user, actor: RimActor):
     """Axtarış siyahısının bir sətri — username AÇIQ göstərilir (əsas tələb)."""
     profile = _profile_of(user)
@@ -112,6 +122,8 @@ def serialize_row(user, actor: RimActor):
         "patronymic": getattr(profile, "patronymic", "") or "",
         "email": user.email or "",
         "fin": getattr(profile, "fin", "") or "",
+        # Sahib 2026-11-09: eyni FİN-li bağlı hesab (tələbə ↔ işçi) — operator görsün.
+        "fin_shared_with": _linked_username(user, profile),
         "phone": getattr(profile, "phone", "") or "",
         "phone_country": phone_parts.region,
         "phone_national": phone_parts.national,

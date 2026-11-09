@@ -110,6 +110,21 @@ def is_mixed_student_staff(memberships) -> bool:
     return bool(names & STUDENT_ROLE_NAMES) and bool(names - NON_STAFF_ROLE_NAMES)
 
 
+def linked_student_of(user, memberships):
+    """Heyət rolu olan istifadəçinin bağlı tələbə hesabı (``UserProfile.fin_shared_with``) və ya ``None``.
+
+    Yalnız heyət üzvlüyü varsa baxılır; profil adətən yüklənmişdir (request qapıları) — əlavə sorğu yoxdur.
+    """
+    names = {name for name in (_role_name(m) for m in memberships or ()) if name}
+    if not names - NON_STAFF_ROLE_NAMES:
+        return None
+    profile = getattr(user, "profile", None)
+    if profile is None or not getattr(profile, "fin_shared_with_id", None):
+        return None
+    student = profile.fin_shared_with
+    return student if student is not None and getattr(student, "is_active", True) else None
+
+
 def _exempt(user, organization) -> bool:
     return (
         user is None
@@ -156,8 +171,15 @@ def own_scope(user, organization, *, memberships=None, cached_only=False) -> Own
 
         memberships = _permission_scope_memberships(user, organization)
     scope = EMPTY_OWN_SCOPE
-    if is_mixed_student_staff(memberships) and _resolver is not None:
-        scope = _resolver(user, organization) or EMPTY_OWN_SCOPE
+    if _resolver is not None:
+        if is_mixed_student_staff(memberships):
+            scope = _resolver(user, organization) or EMPTY_OWN_SCOPE
+        else:
+            # Sahib 2026-11-09: ayrıca işçi hesabı eyni FİN-li tələbə hesabı ilə bağlıdırsa (``accounts.shared_fin``,
+            # bağ işçi profilindədir — sorğusuz) həmin tələbə «özü» sayılır: öz qrupu / jurnalı işçi rolu ilə bağlıdır.
+            student = linked_student_of(user, memberships)
+            if student is not None:
+                scope = _resolver(user, organization, student=student) or EMPTY_OWN_SCOPE
     if cache is None:
         cache = {}
         try:
@@ -276,7 +298,9 @@ def own_scope_excludes(user, organization, permission: str, memberships) -> froz
     Açarı TƏLƏBƏ üzvlüyü də daşıyırsa (``course.view`` …) heç nə çıxarılmır — tələbənin öz səthi qırılmasın.
     """
     if not is_mixed_student_staff(memberships):
-        return frozenset()
+        if linked_student_of(user, memberships) is None:
+            return frozenset()
+        return own_scope(user, organization, memberships=memberships).group_ids
     from core.permissions import has_permission
 
     if any(
@@ -300,6 +324,7 @@ __all__ = [
     "guard_self_conflict",
     "is_mixed_student_staff",
     "is_self_conflict",
+    "linked_student_of",
     "is_student_membership",
     "offering_self_conflict",
     "own_scope",

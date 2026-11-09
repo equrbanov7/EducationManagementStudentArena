@@ -26,21 +26,25 @@ from .models import AcademicStatus, CourseOffering, Enrollment, StudentAcademicR
 STUDYING_STATUSES = (AcademicStatus.ENROLLED, AcademicStatus.ACADEMIC_LEAVE)
 
 
-def resolve_own_scope(user, organization):
+def resolve_own_scope(user, organization, student=None):
+    """``student`` — tələbə kimi baxılan hesab (defolt ``user``); sahib 2026-11-09: eyni FİN-li bağlı tələbə hesabı."""
     from django.apps import apps as django_apps
 
     from .subgroup_rollup import group_family
 
+    student = student or user
     own_group_ids = set(
         StudentAcademicRecord.objects.filter(
-            organization=organization, student=user, is_active=True, status__in=STUDYING_STATUSES
+            organization=organization, student=student, is_active=True, status__in=STUDYING_STATUSES
         )
         .exclude(group_id=None)
         .values_list("group_id", flat=True)
     )
     if not own_group_ids:
         # Akademik qeydi yoxdursa yenə də özünün yazıldığı jurnallar qorunur.
-        return build_own_scope(user_id=user.pk, offering_ids=_offering_ids(user, organization, set()))
+        return build_own_scope(
+            user_id=user.pk, student_ids=[student.pk], offering_ids=_offering_ids(student, organization, set())
+        )
     org_unit = django_apps.get_model("organizations", "OrgUnit")
     groups = list(
         org_unit.objects.filter(organization=organization, pk__in=own_group_ids).only(
@@ -61,15 +65,15 @@ def resolve_own_scope(user, organization):
             organization=organization, group_id__in=family, is_active=True
         ).values_list("pk", "student_id")
     )
-    own_records = StudentAcademicRecord.objects.filter(organization=organization, student=user).values_list(
+    own_records = StudentAcademicRecord.objects.filter(organization=organization, student=student).values_list(
         "pk", flat=True
     )
     return build_own_scope(
         user_id=user.pk,
-        student_ids=[student_id for _pk, student_id in mates],
+        student_ids=[student.pk, *(student_id for _pk, student_id in mates)],
         record_ids=[pk for pk, _student_id in mates] + list(own_records),
         group_ids=family,
-        offering_ids=_offering_ids(user, organization, family),
+        offering_ids=_offering_ids(student, organization, family),
     )
 
 

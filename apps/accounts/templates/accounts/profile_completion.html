@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{% static 'accounts/css/login_first_login.css' %}?v=20260930-email">
     <link rel="stylesheet" href="{% static 'accounts/css/profile_completion.css' %}?v=20261025-phone">
     <link rel="stylesheet" href="{% static 'css/phone_field.css' %}?v=20261025-2">
+    {% if link_offer %}<link rel="stylesheet" href="{% static 'accounts/css/profile_completion_shared_fin.css' %}?v=20261109-1">{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -28,6 +29,12 @@
             {% for message in messages %}
             <div class="auth-message auth-message--{{ message.tags }}" role="{% if 'error' in message.tags %}alert{% else %}status{% endif %}">{{ message }}</div>
             {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if link_offer %}
+        <div class="auth-messages pc-shared-fin-conflict" data-shared-fin-conflict hidden>
+            <div class="auth-message auth-message--error" role="alert">{{ link_offer.conflict_message }}</div>
         </div>
         {% endif %}
 
@@ -80,6 +87,36 @@
             {% endif %}
         </form>
 
+        {% if link_offer %}
+        {% comment %}Sahib 2026-11-09: eyni FİN eyni adlı tələbə/işçi hesabındadır — bir dəfəlik təsdiq modalı.
+        «Bəli» eyni dəyərləri + gizli təsdiq sahəsini göndərir (FİN hər iki hesabda qalır, bir daha soruşulmur);
+        «Xeyr» modalı bağlayıb adi «başqa hesabda» imtinasını göstərir. JS: profile_completion_shared_fin.js.{% endcomment %}
+        <div class="sf-overlay" data-shared-fin>
+          <section class="sf-card" role="alertdialog" aria-modal="true" aria-labelledby="sf-title" aria-describedby="sf-lead">
+            <div class="sf-icon" aria-hidden="true"><i class="fas fa-id-card"></i></div>
+            <p class="sf-kicker">{% trans "Təsdiq tələb olunur" context "accounts.profile_completion" %}</p>
+            <h2 id="sf-title" class="sf-title">{% trans "Bu FİN ilə sistemdə başqa hesabınız da var" context "accounts.profile_completion" %}</h2>
+            <p id="sf-lead" class="sf-lead">
+              {% blocktrans with label=link_offer.holder_label name=link_offer.holder_name context "accounts.profile_completion" %}Yazdığınız FİN artıq {{ label }} ilə qeydə alınıb: <strong>{{ name }}</strong>. Hər iki hesab sizindirsə təsdiqləyin — FİN hər iki hesabda görünəcək və bu sual bir daha verilməyəcək.{% endblocktrans %}
+            </p>
+            <p class="sf-note">{% trans "İşçi hesabı ilə öz qrupunuza və öz jurnallarınıza aid əməliyyatlar aparıla bilməz — bu, sistem tərəfindən avtomatik qorunur." context "accounts.profile_completion" %}</p>
+            <form method="post" action="{% url 'accounts:complete_profile' %}" class="sf-actions" novalidate data-clarity-mask="True">
+              {% csrf_token %}
+              {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
+              {% for key, value in link_offer.values %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}
+              <input type="hidden" name="{{ link_offer.confirm_field }}" value="1">
+              <button type="submit" class="sf-btn sf-btn--primary" data-shared-fin-yes>
+                <i class="fas fa-check" aria-hidden="true"></i>
+                {% trans "Bəli, hər iki hesab mənimdir" context "accounts.profile_completion" %}
+              </button>
+              <button type="button" class="sf-btn sf-btn--ghost" data-shared-fin-no>
+                {% trans "Xeyr, bu mən deyiləm" context "accounts.profile_completion" %}
+              </button>
+            </form>
+          </section>
+        </div>
+        {% endif %}
+
         {# Çıxış YALNIZ POST ilə işləyir (logout_view). #}
         <form method="post" action="{% url 'accounts:logout' %}" class="auth-footer-text auth-logout-form">
             {% csrf_token %}
@@ -93,4 +130,5 @@
 <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 <script src="{% static 'js/bootstrap_select.js' %}?v=20261029-searchfix"></script>
 <script src="{% static 'js/phone_field.js' %}?v=20261025-1"></script>
+{% if link_offer %}<script src="{% static 'accounts/js/profile_completion_shared_fin.js' %}?v=20261109-1" defer></script>{% endif %}
 {% endblock %}

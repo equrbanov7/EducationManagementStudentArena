@@ -22,7 +22,8 @@ from core.constants import AuditAction
 from core.helpers import _safe_same_origin_redirect_path
 
 from ... import profile_completion as policy
-from ...services.profile_completion import complete_profile
+from ... import shared_fin
+from ...services.profile_completion import complete_profile, fin_conflict_message
 
 _CTX = "accounts.profile_completion"
 logger = logging.getLogger(__name__)
@@ -53,6 +54,25 @@ def _audit_skip(request, missing) -> None:
         logger.exception("profile completion skip audit failed")
 
 
+def _link_offer_context(link_offer, submitted):
+    if not link_offer:
+        return None
+    family = link_offer.get("holder_family")
+    label = (
+        pgettext(_CTX, "tələbə hesabınız")
+        if family == policy.ROLE_STUDENT
+        else pgettext(_CTX, "işçi hesabınız") if family == policy.ROLE_STAFF else pgettext(_CTX, "başqa hesabınız")
+    )
+    return {
+        "holder_name": link_offer.get("holder_name", ""),
+        "holder_label": label,
+        "confirm_field": shared_fin.CONFIRM_FIELD,
+        # Təsdiq forması eyni dəyərləri yenidən göndərir (FİN daxil) + gizli təsdiq sahəsi.
+        "values": [(key, value) for key, value in submitted.items() if value],
+        "conflict_message": fin_conflict_message(),
+    }
+
+
 def _leave(request):
     return redirect(_next_url(request) or "accounts:profile")
 
@@ -75,6 +95,7 @@ def complete_profile_view(request):
 
     errors, submitted = {}, {}
     phone_country = ""
+    link_offer = None
     if request.method == "POST":
         submitted = {spec.key: (request.POST.get(spec.key) or "").strip()[: spec.max_length] for spec in missing}
         # Xəta ilə yenidən göstərəndə istifadəçinin seçdiyi ölkə saxlanır (boşdursa dəyər nömrədən tanınır).
@@ -84,6 +105,7 @@ def complete_profile_view(request):
             messages.success(request, pgettext(_CTX, "Məlumatlarınız saxlanıldı. Təşəkkür edirik!"))
             return _leave(request)
         errors = result.errors
+        link_offer = result.link_offer
 
     user = request.user
     fields = [
@@ -105,5 +127,7 @@ def complete_profile_view(request):
             "has_errors": bool(errors),
             "can_skip": policy.skip_allowed(),
             "phone_country": phone_country,
+            # Sahib 2026-11-09: FİN eyni adlı tələbə/işçi hesabındadır — «hər iki hesab mənimdir?» modalı.
+            "link_offer": _link_offer_context(link_offer, submitted),
         },
     )

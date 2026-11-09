@@ -102,7 +102,11 @@ def _assert_fin_available(fin: str, profile) -> None:
         return
     from apps.accounts.models import UserProfile
 
-    if UserProfile.objects.filter(fin__iexact=fin).exclude(pk=profile.pk).exists():
+    # Sahib 2026-11-09: bağlı (tələbə + işçi) cüt eyni FİN-i daşıyır — toqquşma deyil (``accounts.shared_fin``).
+    others = UserProfile.objects.filter(fin__iexact=fin).exclude(pk=profile.pk)
+    if profile.fin_shared_with_id:
+        others = others.exclude(user_id=profile.fin_shared_with_id)
+    if others.exclude(fin_shared_with_id=profile.user_id).exists():
         raise RimAccessError("fin_taken", "Bu FİN başqa hesabda qeydiyyatdadır.", status=409)
 
 

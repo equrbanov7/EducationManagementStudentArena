@@ -130,9 +130,11 @@ class StudentMapper:
         #: hesab → (soyad, ad): FİN tutuşdurması ad ilə təsdiqlənir (:meth:`_fin_name_ok`).
         self.names: dict = {}
         self.by_fin = {}
-        for fin, user_id, last, first in UserProfile.objects.filter(fin__in=fins).values_list(
-            "fin", "user_id", "user__last_name", "user__first_name"
-        ):
+        rows = UserProfile.objects.filter(fin__in=fins).values_list(
+            "fin", "user_id", "user__last_name", "user__first_name", "fin_shared_with_id"
+        )
+        # Sahib 2026-11-09: bağlı işçi hesabı eyni FİN-i daşıyır — əsas (tələbə) hesab sonuncu yazılıb qalır.
+        for fin, user_id, last, first, _linked in sorted(rows, key=lambda row: 0 if row[4] else 1):
             if fin:
                 self.by_fin[fin.upper()] = user_id
                 self.names[user_id] = (last, first)

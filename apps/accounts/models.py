@@ -160,15 +160,36 @@ class UserProfile(models.Model):
         help_text="Yalnız təsdiqlənmiş import mapping-i ilə doldurulan tələbə açarı.",
     )
 
+    # Unikallıq: ƏSAS hesablar arasında (``Meta.constraints`` — ``fin_shared_with`` boş olanlar). Sahib 2026-11-09:
+    # eyni adam həm tələbə, həm işçi hesabı daşıya bilər — ikinci hesab FİN-i yalnız açıq təsdiqlə, bağlı hesab kimi
+    # saxlayır (bax ``apps/accounts/shared_fin.py``).
     fin = models.CharField(
         max_length=7,
         null=True,
         blank=True,
         default=None,
-        unique=True,
         validators=[validate_fin],
         verbose_name="FİN",
         help_text="Şəxsiyyət vəsiqəsi FİN kodu (7 simvol, A-Z0-9) — idxal/uzlaşdırma açarı.",
+    )
+    # Sahib 2026-11-09: bu profil eyni FİN-li BAŞQA (əsas) hesabla bağlıdır — adam həm tələbə, həm işçidir.
+    # Bağ yalnız sahibinin «hər iki hesab mənimdir» təsdiqi ilə qurulur; bir əsas hesabın ən çoxu bir bağlı hesabı olur.
+    fin_shared_with = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        default=None,
+        on_delete=models.SET_NULL,
+        related_name="fin_shared_secondary",
+        verbose_name="FİN-i paylaşdığı əsas hesab",
+        help_text="Eyni FİN-li digər (əsas) hesab — tələbə + işçi hesabı bir adama məxsusdur.",
+    )
+    fin_shared_confirmed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        default=None,
+        verbose_name="FİN paylaşımı təsdiqlənib",
+        help_text="Sahibin «hər iki hesab mənimdir» təsdiqinin vaxtı.",
     )
 
     student_specialization = models.CharField(
@@ -446,6 +467,15 @@ class UserProfile(models.Model):
         # aşağı kardinallıqlı sahə/kompozit indekslər silindi; FİN (unique),
         # user (unique) və organization FK indeksi qalır.
         indexes = []
+        constraints = [
+            # Sahib 2026-11-09: FİN unikallığı ƏSAS hesablar arasında — bağlı (tələbə + işçi) ikinci hesab eyni FİN-i
+            # ``fin_shared_with`` ilə daşıyır (bax ``apps/accounts/shared_fin.py``).
+            models.UniqueConstraint(
+                fields=["fin"],
+                condition=models.Q(fin_shared_with__isnull=True),
+                name="accounts_userprofile_fin_primary_uniq",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.user.username} - {self.get_role_display()}"
