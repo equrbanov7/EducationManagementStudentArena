@@ -264,6 +264,15 @@ def run(*, organization, actor, cases, counts) -> None:
             move_attempt(organization=organization, actor=actor, holder=holder, person=person, spec=spec, counts=counts)
 
 
+def failure_code(exc: BaseException) -> str:
+    """``legacy_split_failed_<sinif>_<mesaj>`` — yalnız ``[a-z0-9_]`` (şəxsi məlumat / sitat yoxdur), ≤ 120 simvol."""
+    import re
+
+    text = f"{type(exc).__name__} {str(exc)[:160]}".lower()
+    text = re.sub(r"[^a-z0-9]+", "_", text).strip("_")
+    return ("legacy_split_failed_" + text)[:120].rstrip("_")
+
+
 class Command(BaseCommand):
     help = (
         "Köhnə sistemdə eyni FİN-lə bir hesaba birləşmiş tələbənin yazılışlarını və Midterm cəhdini öz hesabına keçir."
@@ -292,9 +301,15 @@ class Command(BaseCommand):
             if organization is None:
                 raise CommandError("legacy_split_organization_unknown")
             apply_rls_request_context(user_id=actor.pk, org_id=organization.pk)
-            with transaction.atomic():
-                run(organization=organization, actor=actor, cases=cases, counts=counts)
-                if not options["apply"]:
-                    transaction.set_rollback(True)
+            try:
+                with transaction.atomic():
+                    run(organization=organization, actor=actor, cases=cases, counts=counts)
+                    if not options["apply"]:
+                        transaction.set_rollback(True)
+            except CommandError:
+                raise
+            except Exception as exc:  # noqa: BLE001 — iş axını yalnız «CommandError: kod» sətrini göstərir
+                # Prod dry-run 42652974176: traceback süzülür, səbəb görünmürdü — sinif + mesaj yalnız [a-z0-9_] kimi.
+                raise CommandError(failure_code(exc)) from None
         self.stdout.write(f"{PREFIX} mode={'apply' if options['apply'] else 'dry_run'}")
         self.stdout.write(PREFIX + " " + " ".join(f"{key}={value}" for key, value in sorted(counts.items())))

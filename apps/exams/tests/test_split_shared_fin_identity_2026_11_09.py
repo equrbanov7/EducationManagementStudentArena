@@ -167,6 +167,18 @@ class SplitSharedFinIdentityTests(_GuestRosterBase):
         )
         self.assertEqual(again["skip_attempt_missing"], "1")
 
+    def test_unexpected_failure_surfaces_as_command_error_code(self):
+        from apps.exams.management.commands import split_shared_fin_identity_20261109 as command_module
+
+        self.assertEqual(
+            command_module.failure_code(RuntimeError("journal mark is frozen (15 min window elapsed)")),
+            "legacy_split_failed_runtimeerror_journal_mark_is_frozen_15_min_window_elapsed",
+        )
+        with mock.patch.object(command_module, "run", side_effect=RuntimeError("boom x")):
+            with self.assertRaises(CommandError) as ctx:
+                self._call([{"holder": self.host.pk, "person": self.guest.pk, "enrollments": []}])
+        self.assertEqual(str(ctx.exception), "legacy_split_failed_runtimeerror_boom_x")
+
     def test_bad_plan_is_refused(self):
         path = Path(tempfile.mkdtemp()) / "plan.json"
         path.write_text(json.dumps({"format": "legacy-identity-split/1", "cases": [{"holder": 1, "person": 1}]}))
