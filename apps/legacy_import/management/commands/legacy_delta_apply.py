@@ -63,6 +63,11 @@ class Command(BaseCommand):
             default=[],
             help="Yalnız bu faza(lar) (default: paketin snapshot.phases-i, yoxdursa opt-in fazalardan — registry_sync, graduation, history*, subject_collisions, syllabi_backfill — başqa hamısı)",
         )
+        parser.add_argument(
+            "--force-official-total",
+            action="store_true",
+            help="official_entry: yeni yekun rəsmi vərəqdən aşağıdırsa sayılan imtahan/25 % balı rəsmi yekuna çatdırılır (sahib 2026-11-09); yuxarı olan toxunulmur",
+        )
         parser.add_argument("--report-out", default="", help="Saylar (JSON, adsız)")
         parser.add_argument("--names-out", default="", help="Adlı siyahı (CSV, 0600) — yaradılan/ambiqü hesablar")
 
@@ -106,6 +111,11 @@ class Command(BaseCommand):
                     apply=bool(options["apply"]),
                     until=until,
                     phases=tuple(options["phase"] or (bundle.get("snapshot") or {}).get("phases") or DEFAULT_PHASES),
+                    setup=(
+                        (lambda run: setattr(run, "force_official_total", True))
+                        if options["force_official_total"]
+                        else None
+                    ),
                 )
             except HistoryPhaseMismatch as error:
                 raise CommandError(str(error)) from None

@@ -172,13 +172,16 @@ def apply_official_entry(run) -> None:
     for pk, (_enrollment, value, source, _semester, _export, total, row) in wanted.items():
         exam, resit = official_finals(row) if source == "total" else (None, None)
         targets[pk] = EntryTarget(entry=value, total=total, exam=exam, resit=resit, qb_fail=_qb_fail(row))
+    force_total = bool(getattr(run, "force_official_total", False))
     rows = align_archive_entries(
         organization=run.organization,
         actor=run.actor,
         targets=targets,
         archive_name=ARCHIVE_COMPONENT_NAME,
         archive_kind=ARCHIVE_COMPONENT_KIND,
-        reason=f"SYS-1: köhnə sistemin rəsmi bal vərəqinə görə giriş balı ({run.tag})",
+        reason=f"SYS-1: köhnə sistemin rəsmi bal vərəqinə görə giriş balı ({run.tag})"
+        + (" · yekun rəsmi vərəqə məcburi bərabərləşdirildi (sahib 2026-11-09)" if force_total else ""),
+        force_total=force_total,
     )
     for row in rows:
         _enrollment, target, source, semester, export_id, _total, _row = wanted[row.enrollment_id]
@@ -186,6 +189,16 @@ def apply_official_entry(run) -> None:
         run.count(f"{prefix}.{row.outcome}")
         for kind in row.filled:
             run.count(f"{prefix}.filled_{kind}")
+        if row.total_fix:
+            run.count(f"{prefix}.total_fix_{row.total_fix}")
+            run.count(f"official_entry.total_fix_{row.total_fix}")
+            if row.total_fix != "kept_higher":
+                run.names(
+                    "official_entry_total_forced",
+                    row.student,
+                    f"{row.subject} · {row.period} · yekun {_n(row.total_before)}→{_n(row.total_after)} "
+                    f"({row.result_before}→{row.result_after}) · {row.total_fix} · vərəq #{export_id}",
+                )
         if row.outcome == "skip_total_mismatch":
             run.names(
                 "official_entry_total_mismatch",
@@ -193,8 +206,8 @@ def apply_official_entry(run) -> None:
                 f"{row.subject} · {row.period} · giriş {_n(row.entry_before)}→{_n(row.entry_after)} · yeni yekun "
                 f"{_n(row.total_after)} ≠ rəsmi {_n(_total)} (imtahan/25 % fərqi) · vərəq #{export_id}",
             )
-        if row.outcome in ("same", "no_entry") and row.filled:
-            pass  # giriş dəyişmir, yalnız imtahan / 25 % / köhnə q/b doldurulub — nəticə dəyişə bilər
+        if row.outcome in ("same", "no_entry") and (row.filled or row.total_fix in ("exam", "resit")):
+            pass  # giriş dəyişmir, yalnız imtahan / 25 % / köhnə q/b doldurulub və ya yekun məcburi — nəticə dəyişə bilər
         elif row.outcome != "written":
             continue
         else:

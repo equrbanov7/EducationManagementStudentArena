@@ -308,6 +308,14 @@ class OfficialEntryPhaseTests(TestCase):
                 (7137, "14", (6, 7, 6), None),  # yeni sistemdə imtahan balı YOXDUR → rəsmi 17 doldurulur
                 (7138, "15", (6, 7, 6), "17"),  # giriş düzdür (34), yalnız 25 % balı yoxdur: 34+17 → 34+20
                 (7139, "5", (2, 2, 2), None),  # köhnə vərəqdə q/b kəsri, imtahan yoxdur (giriş mənfi çap olunub)
+                (
+                    7140,
+                    "15",
+                    (6, 7, 6),
+                    "12",
+                ),  # giriş düzdür (34), imtahan 12 ≠ rəsmi 17 → yekun 46 < rəsmi 51 (force: 17)
+                (7141, "15", (6, 7, 6), "20"),  # giriş düzdür, yekun 54 > rəsmi 51 → toxunulmur (kept_higher)
+                (7142, "15", (6, 7, 6), "10"),  # tamamlanmış 25 % (13) sayılır: 34+13=47 < rəsmi 52 → 25 % 18
             ):
                 user = User.objects.create_user(
                     f"s{sid}", f"s{sid}@example.test", "x", first_name="T", last_name=str(sid)
@@ -333,6 +341,14 @@ class OfficialEntryPhaseTests(TestCase):
                     )
                 if exam is not None:
                     FinalGrade.objects.create(organization=cls.org, enrollment=enrollment, exam_score=D(exam))
+                if sid == 7142:
+                    ResitRecord.objects.create(
+                        organization=cls.org,
+                        enrollment=enrollment,
+                        reason="total",
+                        status="completed",
+                        resit_score=D("13"),
+                    )
                 cls.students[sid] = enrollment
 
     def _rows(self):
@@ -348,7 +364,15 @@ class OfficialEntryPhaseTests(TestCase):
             _row("ZMRpRj5xOW", 7134, entry="-2", exam=None, total=None),
         ]
 
-    def _run(self, *, apply, bundle=None, phases=("official_entry",)):
+    def _force_rows(self):
+        return [
+            _row("ZMRpRj5xOW", 7140, entry="34", exam="17", total="51"),
+            _row("ZMRpRj5xOW", 7141, entry="34", exam="17", total="51"),
+            _row("ZMRpRj5xOW", 7142, entry="34", exam="10", total="52", resit="18"),
+            _row("ZMRpRj5xOW", 7136, entry="34", exam="17", total="51"),
+        ]
+
+    def _run(self, *, apply, bundle=None, phases=("official_entry",), force_total=False):
         ledger = {f"ZMRpRj5xOW:{sid}": str(enrollment.pk) for sid, enrollment in self.students.items()}
 
         def fake(_organization, entity_type, legacy_pks=None):
@@ -365,6 +389,7 @@ class OfficialEntryPhaseTests(TestCase):
                 until=dt.date(2026, 11, 3),
                 tag="delta-sys1",
                 phases=phases,
+                setup=(lambda run: setattr(run, "force_official_total", True)) if force_total else None,
             )
 
     def _archive(self, sid):
@@ -501,3 +526,46 @@ class OfficialEntryPhaseTests(TestCase):
     def test_bundle_rejects_other_phases(self):
         with self.assertRaises(OfficialEntryPhaseMismatch):
             self._run(apply=False, phases=("official_entry", "lessons"))
+
+
+class OfficialTotalForceTests(OfficialEntryPhaseTests):
+    """Sahib 2026-11-09: köhnə bazadakı rəsmi yekun (maksimum) tələbənin nəticəsidir — imtahan/25 % balı ona çatdırılır."""
+
+    def test_without_flag_lower_totals_stay_listed_only(self):
+        run = self._run(apply=True, bundle=_bundle(self._force_rows()))
+        self.assertEqual(run.counters["official_entry.sem12.same"], 3)
+        self.assertEqual(run.counters["official_entry.sem12.skip_total_mismatch"], 1)
+        self.assertFalse(any(key.startswith("official_entry.total_fix") for key in run.counters))
+        with bypass_rls():
+            self.assertEqual(FinalGrade.objects.get(enrollment=self.students[7140]).exam_score, D(12))
+
+    def test_force_raises_counted_exam_or_resit_to_the_official_total(self):
+        run = self._run(apply=True, bundle=_bundle(self._force_rows()), force_total=True)
+        counters = run.counters
+        self.assertEqual(counters["official_entry.total_fix_exam"], 2)  # 7140 (giriş eyni) + 7136 (giriş 33→34)
+        self.assertEqual(counters["official_entry.total_fix_resit"], 1)  # 7142
+        self.assertEqual(counters["official_entry.total_fix_kept_higher"], 1)  # 7141
+        self.assertEqual(counters["official_entry.sem12.skip_total_mismatch"], 0)
+        self.assertEqual(counters["official_entry.sem12.written"], 1)  # 7136 giriş + imtahan
+        self.assertEqual(counters["official_entry.fail_to_pass"], 3)
+        with bypass_rls():
+            self.assertEqual(FinalGrade.objects.get(enrollment=self.students[7140]).exam_score, D(17))
+            self.assertEqual(FinalGrade.objects.get(enrollment=self.students[7141]).exam_score, D(20))
+            self.assertEqual(FinalGrade.objects.get(enrollment=self.students[7136]).exam_score, D(17))
+            self.assertEqual(FinalGrade.objects.get(enrollment=self.students[7142]).exam_score, D(10))
+            self.assertEqual(ResitRecord.objects.get(enrollment=self.students[7142]).resit_score, D(18))
+            audit = AuditLog.objects.filter(resource_type="registrar.grade.final", resource_id=str(self.offering.pk))
+            self.assertTrue(audit.exists())
+            self.assertTrue(any("rəsmi yekuna" in (str(a.new_values) + str(a.changes)) for a in audit))
+        self.assertEqual(self._archive(7136), D("15"))
+        forced = [row for row in run.name_rows if row[0] == "official_entry_total_forced"]
+        self.assertEqual(len(forced), 3)
+        self.assertTrue(any("yekun 46→51" in row[2] for row in forced))
+        self.assertTrue(any("yekun 47→52" in row[2] for row in forced))
+
+    def test_force_is_idempotent(self):
+        self._run(apply=True, bundle=_bundle(self._force_rows()), force_total=True)
+        again = self._run(apply=True, bundle=_bundle(self._force_rows()), force_total=True)
+        self.assertEqual(again.counters["official_entry.sem12.same"], 4)
+        self.assertEqual(again.counters.get("official_entry.total_fix_exam", 0), 0)
+        self.assertEqual(again.counters.get("official_entry.total_fix_resit", 0), 0)
