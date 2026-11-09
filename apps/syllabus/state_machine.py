@@ -61,6 +61,7 @@ class Transition:
     """Keçid adları — servis API-si və audit qeydi eyni sətirləri işlədir."""
 
     SUBMIT = "submit"
+    REVIEWED_SUBMIT = "reviewed_submit"
     WITHDRAW = "withdraw"
     START_REVIEW = "start_review"
     APPROVE = "approve"
@@ -91,6 +92,15 @@ class TransitionRule:
 
 
 TRANSITIONS = {
+    Transition.REVIEWED_SUBMIT: TransitionRule(
+        name=Transition.REVIEWED_SUBMIT,
+        sources=frozenset({SyllabusStatus.DRAFT.value, SyllabusStatus.REVISION.value}),
+        target=SyllabusStatus.SUBMITTED.value,
+        permission=PERM_APPROVE,
+        requires_complete=True,
+        reason_required=True,
+        forbid_author=True,
+    ),
     Transition.SUBMIT: TransitionRule(
         name=Transition.SUBMIT,
         sources=frozenset({SyllabusStatus.DRAFT.value, SyllabusStatus.REVISION.value}),
@@ -169,7 +179,10 @@ APPROVED_LOCK_MESSAGE_CODE = "version.approved_locked"
 
 def allowed_transitions(status: str) -> tuple:
     """Verilmiş statusdan mümkün keçidlərin adları."""
-    return tuple(name for name, rule in TRANSITIONS.items() if status in rule.sources)
+    # Reviewed operator publication has a dedicated guarded service, never a UI action.
+    return tuple(
+        name for name, rule in TRANSITIONS.items() if status in rule.sources and name != Transition.REVIEWED_SUBMIT
+    )
 
 
 def get_rule(name: str) -> TransitionRule:

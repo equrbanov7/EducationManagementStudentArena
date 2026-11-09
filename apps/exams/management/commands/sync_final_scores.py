@@ -15,7 +15,7 @@ Addımlar (hamısı bir tranzaksiyada; dry-run sonda geri qaytarılır):
 
 1. **Bağlantı** — hər final imtahanın jurnal bağlantısı (``Exam.journal_offerings``) yenidən hesablanır
    (``exam_journal_link.refresh_links``) — körpü tələbənin balını bağlı jurnala yazır.
-2. **Yazı** — hər (tələbə, fənn) üçün yalnız RƏSMİ (ən son başlamış, bitmiş, sınaq olmayan) final cəhdi
+2. **Yazı** — hər jurnal qeydiyyatı üçün yalnız RƏSMİ (ən son başlamış, bitmiş, sınaq olmayan) final cəhdi
    ``sync_final_attempt`` ilə yazılır (25% cəhdi ``ResitRecord``-a, qeydiyyatı olmayan → ``no_enrollment``).
 
 İdempotentdir: ``finals.set_exam_score`` audit izini yalnız bal DƏYİŞƏNDƏ yazır.
@@ -34,6 +34,7 @@ from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.models import Exam, ExamAttempt
 from apps.exams.services import exam_journal_link, journal_sync
 from apps.exams.services.access_policy import FINAL_EXAM_CATEGORY
+from apps.exams.services.journal_sync_scope import target_key
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 
@@ -53,7 +54,7 @@ def _exam_filter(values) -> Q:
 
 
 def official_final_attempts(queryset):
-    """``queryset``-dəki bitmiş final cəhdlərindən (tələbə, fənn) üzrə RƏSMİ olanları (ən son başlamış)."""
+    """Bitmiş final cəhdlərindən hər jurnal qeydiyyatı üzrə ən son başlamış rəsmi cəhdi seç."""
     rows = (
         queryset.filter(
             exam__subject__isnull=False,
@@ -63,11 +64,12 @@ def official_final_attempts(queryset):
             status__in=ATTEMPT_FINISHED_STATUSES,
         )
         .select_related("exam", "exam__organization", "user")
+        .prefetch_related("exam__journal_offerings")
         .order_by("user_id", "exam__subject_id", F("started_at").desc(nulls_last=True), "-pk")
     )
     seen = set()
     for attempt in rows.iterator(chunk_size=500):
-        key = (attempt.user_id, attempt.exam.subject_id)
+        key = target_key(attempt)
         if key in seen:
             continue
         seen.add(key)

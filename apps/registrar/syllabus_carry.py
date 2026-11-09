@@ -134,11 +134,13 @@ def _is_approved(syllabus) -> bool:
     return version is not None and version.status == SyllabusStatus.APPROVED.value
 
 
-def choose_source(offering, *, hours_memo=None) -> tuple:
+def choose_source(offering, *, hours_memo=None, allow_existing=False) -> tuple:
     """``(kod, dosye|None)`` — yazmadan, yalnız seçim (qaydalar modul docstring-indədir)."""
     if offering is None or not offering.is_active or offering.instructor_id is None or offering.period_id is None:
         return NO_INSTRUCTOR, None
-    if _resolved(offering) is not None:
+    # Completion may inspect the same guarded donor for an occupied dossier.
+    # The carry writer never opts in and retains its empty-target requirement.
+    if not allow_existing and _resolved(offering) is not None:
         return HAS_SYLLABUS, None
     candidates = _candidates(offering)
     approved = [row for row in candidates if _is_approved(row)]

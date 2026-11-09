@@ -160,7 +160,7 @@ def _finalize_session_attempts(session) -> dict:
     """
     finalized = 0
     attempts = (
-        ExamAttempt.objects.select_for_update()
+        ExamAttempt.objects.select_for_update(of=("self",))
         .filter(final_tickets__session=session)
         .exclude(status__in=("submitted", "expired"))
         .select_related("exam")

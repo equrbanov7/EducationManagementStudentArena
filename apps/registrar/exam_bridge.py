@@ -21,8 +21,6 @@ from __future__ import annotations
 import logging
 from decimal import ROUND_HALF_UP, Decimal
 
-from django.db import transaction
-
 from apps.registrar import absence_limit
 from apps.registrar import exam_eligibility as eligibility_gate
 from apps.registrar import finals, gradebook, services
@@ -114,14 +112,16 @@ def choose_enrollment(candidates, period, linked_offering_ids=()):
     return pick_enrollment([e for e in past if e.offering.period.start_date == latest], linked_offering_ids)
 
 
-def linked_enrollment(student, organization, offering_ids):
+def linked_enrollment(student, organization, offering_ids, *, subject_id):
     """Tələbənin imtahanın bağlı jurnallarından birindəki aktiv qeydiyyatı (yoxdursa ``None``)."""
     if not offering_ids or student is None:
         return None
     candidates = Enrollment.objects.filter(
         student=student,
+        organization=organization,
         offering_id__in=list(offering_ids),
         offering__organization=organization,
+        offering__subject_id=subject_id,
         status=Enrollment.Status.ENROLLED,
     ).select_related("offering", "offering__period", "offering__subject")
     return pick_enrollment(candidates, offering_ids)
@@ -138,16 +138,39 @@ def resolve_enrollment(*, student, subject_id, organization, offering_ids=()):
     (körpü sadəcə no-op olur, mövcud davranış pozulmur)."""
     if not subject_id or student is None:
         return None
-    linked = linked_enrollment(student, organization, offering_ids)
+    # A journal's subject can be repaired after the exam was linked. The stale
+    # M2M link cannot route either a final or a midterm into another subject.
+    linked = linked_enrollment(student, organization, offering_ids, subject_id=subject_id)
     if linked is not None:
         return linked
     candidates = Enrollment.objects.filter(
         student=student,
+        organization=organization,
         offering__subject_id=subject_id,
         offering__organization=organization,
         status=Enrollment.Status.ENROLLED,
     ).select_related("offering", "offering__period", "offering__subject")
     return choose_enrollment(candidates, _current_period(organization), offering_ids)
+
+
+def resolve_exam_result_target(*, student, subject_id, organization, offering_ids=(), attempt=None):
+    """Sinxron cəhdlərin rəqabət açarı — yazıçının faktiki hədəfi (yalnız oxu).
+
+    Finalın 25% yolu ayrıca nəticə xanasıdır: əsas imtahan apellyasiyası ilə
+    təkrar imtahan biri digərini əvəz etmir. Midterm çağıranı attempt vermir.
+    """
+    if attempt is not None:
+        from .retake_results import RESULT_ACCEPTING, application_for_attempt
+
+        application = application_for_attempt(
+            student=student, subject_id=subject_id, organization=organization, attempt=attempt
+        )
+        if application is not None:
+            return ("retake", application.enrollment_id) if application.status in RESULT_ACCEPTING else None
+    enrollment = resolve_enrollment(
+        student=student, subject_id=subject_id, organization=organization, offering_ids=offering_ids
+    )
+    return ("enrollment", enrollment.pk) if enrollment is not None else None
 
 
 def exam_eligibility(*, student, subject_id, organization):
@@ -499,25 +522,16 @@ def record_final_result(
     scheme = gradebook.ensure_assessment_scheme(offering=enrollment.offering)
     exam_score = 0 if is_expelled else _to_exam_scale(score_percent, scheme)
     note = "imtahan mərkəzi" if by_user is not None else "imtahan mərkəzi · avtomatik"
-    if appeal_id is None:
-        grade = finals.set_exam_score(enrollment=enrollment, score=exam_score, by_user=by_user, source_note=note)
-        return FINAL_WRITTEN, grade
-    # Audit 2026-09-28 EXA-03: apellyasiya qərarı balı dəyişirsə ledger-də «apellyasiya» sətri.
-    from apps.registrar.exam_score_entry import record_appeal_score_change
-    from apps.registrar.models import FinalGrade
+    from .exam_score_precedence import record_attempt_final_score
 
-    with transaction.atomic():
-        previous = FinalGrade.objects.filter(enrollment=enrollment).values_list("exam_score", flat=True).first()
-        grade = finals.set_exam_score(enrollment=enrollment, score=exam_score, by_user=by_user, source_note=note)
-        if grade is not None:
-            record_appeal_score_change(
-                enrollment=enrollment,
-                old_score=previous,
-                new_score=grade.exam_score,
-                by_user=by_user,
-                appeal_id=appeal_id,
-            )
-    return FINAL_WRITTEN, grade
+    return record_attempt_final_score(
+        enrollment=enrollment,
+        score=exam_score,
+        by_user=by_user,
+        source_note=note,
+        attempt=attempt,
+        appeal_id=appeal_id,
+    )
 
 
 def exam_result_summary(*, student, subject_id, organization, offering_ids=()):

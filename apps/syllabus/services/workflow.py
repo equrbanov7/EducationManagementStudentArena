@@ -35,6 +35,7 @@ from .scoping import is_author, is_self_authored_by_decider
 
 #: Keçid → domen qeydinin qərar dəyəri.
 _DECISION_BY_TRANSITION = {
+    Transition.REVIEWED_SUBMIT: ReviewDecision.SUBMITTED.value,
     Transition.SUBMIT: ReviewDecision.SUBMITTED.value,
     Transition.WITHDRAW: ReviewDecision.WITHDRAWN.value,
     Transition.START_REVIEW: ReviewDecision.OPENED.value,
@@ -45,6 +46,7 @@ _DECISION_BY_TRANSITION = {
 
 #: Kafedra tərəfindən icra olunan keçidlərdə əhatə hansı icazə üzrə yoxlanılır.
 _SCOPE_PERMISSION = {
+    Transition.REVIEWED_SUBMIT: PERM_APPROVE,
     Transition.START_REVIEW: PERM_REVIEW,
     Transition.APPROVE: PERM_APPROVE,
     Transition.REQUEST_REVISION: PERM_REVISE,
@@ -58,6 +60,7 @@ _SCOPE_PERMISSION = {
 #: növbəni açıb oxuya və şərh yaza bilir, sadəcə qərar verə bilmir.
 _CHAIR_LEVEL_TRANSITIONS = frozenset(
     {
+        Transition.REVIEWED_SUBMIT,
         Transition.APPROVE,
         Transition.REQUEST_REVISION,
         Transition.REJECT,

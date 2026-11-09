@@ -32,6 +32,12 @@ def _blocker_label(code: str) -> str:
     labels = {
         "journal_locked": pgettext(_CTX, "jurnal bağlanıb (təsdiqlənib / dərc olunub) — əvvəl jurnalı açın"),
         "retake_links": pgettext(_CTX, "bu cəhdə 25% (yenidən imtahan) müraciəti bağlıdır"),
+        "final_manual_restore_required": pgettext(
+            _CTX, "əvvəlki sənədli imtahan balının bərpası ayrıca yoxlanmalıdır — cəhd silinmədi"
+        ),
+        "midterm_manual_restore_required": pgettext(
+            _CTX, "əvvəlki sənədli midterm balının bərpası ayrıca yoxlanmalıdır — cəhd silinmədi"
+        ),
     }
     return labels.get(code, code)
 

@@ -59,6 +59,7 @@ FACT_KEYS = (
     "inactive_offering",
     "unknown_kind",
     "legacy",
+    "subgroup_not_representable",
 )
 
 
@@ -183,7 +184,15 @@ def _room_label(name, code) -> str:
 
 
 def load_facts(
-    *, organization, period, date_from, date_to, teacher=None, snap_minutes: int = DEFAULT_SNAP_MINUTES, safe_mode=True
+    *,
+    organization,
+    period,
+    date_from,
+    date_to,
+    teacher=None,
+    snap_minutes: int = DEFAULT_SNAP_MINUTES,
+    safe_mode=True,
+    offering_ids=None,
 ) -> tuple[list[LessonFact], Counter]:
     """Aralığın dərsləri → slot üçün yararlı faktlar + sayğac (``FACT_KEYS``)."""
     queryset = Lesson.objects.filter(
@@ -191,6 +200,8 @@ def load_facts(
     )
     if teacher is not None:
         queryset = queryset.filter(Q(instructor=teacher) | Q(instructor__isnull=True, offering__instructor=teacher))
+    if offering_ids is not None:
+        queryset = queryset.filter(offering_id__in=offering_ids)
     allocation_proof = positive_allocations(organization, period) if safe_mode else None
     fields = (
         "offering_id",
@@ -207,6 +218,8 @@ def load_facts(
         "room__code",
         "off_schedule_reason",
         "is_legacy_synthesised",
+        "lab_group",
+        "seminar_group",
     )
     stats: Counter = Counter({key: 0 for key in FACT_KEYS})
     facts = []
@@ -226,12 +239,18 @@ def load_facts(
             room_code,
             off,
             legacy,
+            lab_group,
+            seminar_group,
         ) = row
         stats["lessons"] += 1
         if legacy:
             stats["legacy"] += 1
         teacher_id = inference_teacher(own, owner, legacy, safe_mode=safe_mode)
-        if start is None or safe_mode and (end is None or end <= start):
+        if safe_mode and (lab_group is not None or seminar_group is not None):
+            # ScheduleSlot has no subgroup mask. Inferring this lesson would
+            # advertise a half-group lesson to the whole offering.
+            stats["subgroup_not_representable"] += 1
+        elif start is None or safe_mode and (end is None or end <= start):
             stats["no_time"] += 1
         elif (off or "").strip():
             stats["off_schedule"] += 1

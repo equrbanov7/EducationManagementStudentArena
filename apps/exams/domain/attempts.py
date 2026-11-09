@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
@@ -355,6 +355,7 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         )
         return True
 
+    @transaction.atomic
     def mark_finished(self, status="submitted", extra_update_fields=None):
         was_finished = self.is_finished
         self.status = status
@@ -374,12 +375,11 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
             update_fields.extend(extra_update_fields)
         self.save(update_fields=list(dict.fromkeys(update_fields)))
         if not was_finished:
+            from apps.exams import score_adjustments
             from apps.exams.metrics import record_attempt_submitted
 
+            score_adjustments.finish_corrections(self)
             record_attempt_submitted(getattr(self.exam, "exam_type", "unknown"), status)
-            # 2026-08 auditi (G9): cəhdin bitməsi jurnal körpüsünün YEGANƏ
-            # boğaz nöqtəsidir — tələbənin təhvili, vaxt bitməsi, proctor
-            # dayandırması və final-mərkəz təhvili hamısı buradan keçir.
             from apps.exams.services.journal_sync import schedule_journal_sync
 
             schedule_journal_sync(self)

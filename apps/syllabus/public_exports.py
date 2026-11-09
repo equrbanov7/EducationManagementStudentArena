@@ -108,3 +108,9 @@ from .services.sharing import link_carry as link_carry_share  # noqa: E402,F401
 from .services.sharing import unlink_carry as unlink_carry_share  # noqa: E402,F401
 
 __all__ += ["link_carry_share", "register_approval_hook", "unlink_carry_share"]
+
+from .services.approval_hooks import reviewed_batch_without_carry  # noqa: E402,F401
+from .services.reviewed_publication import publish_reviewed_draft  # noqa: E402,F401
+from .services.reviewed_publication import reviewed_completion_report  # noqa: E402,F401
+
+__all__ += ["publish_reviewed_draft", "reviewed_batch_without_carry", "reviewed_completion_report"]

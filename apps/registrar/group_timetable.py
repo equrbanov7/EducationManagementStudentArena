@@ -37,7 +37,16 @@ def _person(user) -> str:
 
 
 def _slot_key(slot):
-    return (slot.weekday, slot.start_time, slot.kind, slot.offering.subject_id, effective_instructor_id(slot))
+    return (
+        slot.weekday,
+        slot.start_time,
+        slot.end_time,
+        slot.week_type,
+        slot.room,
+        slot.kind,
+        slot.offering.subject_id,
+        effective_instructor_id(slot),
+    )
 
 
 def group_timetable(group, *, period, subjects) -> list:
