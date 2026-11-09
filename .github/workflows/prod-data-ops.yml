@@ -254,6 +254,7 @@
 #       «tərəfdaş_uuid:aparıcı_uuid,…». Saat / bölgü dəyişmir. Defolt dry-run; loga YALNIZ saylar və sətir id-ləri.
 #   fill_legacy_cells_20261108 — sahib 2026-11-08: köhnə sistemin xanaları EMS jurnalının BOŞ xanalarına (plan
 #       repodadır, yalnız id-lər; müəllimin yazdığına toxunulmur). Defolt dry-run; `batch=undo` (apply) geri qaytarır.
+#       `batch=correct` (sahib 2026-11-09): köçürmənin yazdığı toxunulmamış dolu xana da köhnə dəyərə (ie↔qb, bal).
 #   fix_mexanika_lessons_20261108 — sahib 2026-11-08: köhnə sistemə görə dərs növü (236 YDK Fizika seminar → lab,
 #       236 EM Riyaziyyat-1 15.09 seminar → mühazirə) və «Sənaye cihazları»na düşmüş «Sənaye robotları» dərsləri
 #       xanaları ilə öz jurnalına. Plan repodadır (yalnız id/tarix/saat/növ); defolt dry-run; `batch=undo` (apply)
@@ -1746,8 +1747,12 @@ jobs:
               if [ "$BATCH" = "undo" ]; then
                 test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }
                 args+=(--undo)
+              elif [ "$BATCH" = "correct" ]; then
+                # Sahib 2026-11-09: köçürmənin yazdığı toxunulmamış dolu xana da köhnə dəyərə (ie↔qb, bal) gətirilir.
+                args+=(--correct)
+                [ -n "$ROSTER_TAG" ] && args+=(--file "/tmp/legacy_cells_${GITHUB_RUN_ID}.json")
               elif [ -n "$BATCH" ]; then
-                echo "batch yalnız 'undo' ola bilər" >&2; exit 2
+                echo "batch yalnız 'undo' və ya 'correct' ola bilər" >&2; exit 2
               elif [ -n "$ROSTER_TAG" ]; then
                 args+=(--file "/tmp/legacy_cells_${GITHUB_RUN_ID}.json")
               fi

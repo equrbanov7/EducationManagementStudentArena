@@ -7,6 +7,7 @@ import tempfile
 
 from django.core.management import call_command
 from django.test import TestCase
+from django.utils import timezone
 
 from apps.registrar.models import Enrollment, Lesson, LessonKind, LessonMark
 from apps.registrar.tests.test_lab_groups_2026_11_06 import WORKFLOW, _LabWorld
@@ -210,6 +211,92 @@ class LegacyCellsFillTest(_LabWorld, TestCase):
             self.assertEqual(Enrollment.objects.get(pk=self.e0.pk).absence_hours, 2)
             self.assertEqual(Enrollment.objects.get(pk=self.e1.pk).absence_hours, 2)
 
+    def test_correct_mode_fixes_only_untouched_imported_cells_and_undo(self):
+        """Sahib 2026-11-09: səhv ie↔qb və yazılmamış bal mənbəyə görə düzəlir; müəllimin yazdığı qalır."""
+        from apps.registrar.models import JournalCorrection
+
+        with bypass_rls():
+            imported_qb = LessonMark.objects.create(
+                organization=self.org, lesson=self.lecture, enrollment=self.e0, status="absent"
+            )  # köçürmə «qb» yazıb, köhnə sistemdə «ie»
+            imported_noscore = LessonMark.objects.create(
+                organization=self.org, lesson=self.seminar, enrollment=self.e1, status="present"
+            )  # bal köçməyib, köhnə sistemdə 7
+            teacher_cell = LessonMark.objects.create(
+                organization=self.org, lesson=self.lecture, enrollment=self.e1, status="present", entered_by=self.owner
+            )  # müəllim yazıb — toxunulmur
+            later = LessonMark.objects.create(
+                organization=self.org, lesson=self.lecture, enrollment=self.e2, status="present"
+            )
+            LessonMark.objects.filter(pk=later.pk).update(
+                created_at=later.created_at - datetime.timedelta(minutes=30)
+            )  # sonradan dəyişdirilmiş (updated_at ≫ created_at) — toxunulmur
+            aged = timezone.now() - datetime.timedelta(hours=3)  # 15 dəqiqəlik dondurma pəncərəsi keçib
+            LessonMark.objects.filter(pk__in=[imported_qb.pk, imported_noscore.pk]).update(
+                created_at=aged, updated_at=aged
+            )
+            with_history = LessonMark.objects.get(lesson=self.seminar, enrollment=self.e2)  # setUp: «qb»
+            JournalCorrection.objects.create(
+                organization=self.org,
+                lesson_mark=with_history,
+                lesson_mark_ref=with_history.pk,
+                lesson_ref=self.seminar.pk,
+                enrollment_ref=self.e2.pk,
+                field="attendance",
+                old_status="absent",
+                new_status="present",
+                reason="technical",
+                note="test",
+                corrected_by=self.owner,
+                corrected_by_name="test",
+            )
+        from apps.registrar.gradebook_marks import recompute_absence_hours_many
+
+        with bypass_rls():
+            recompute_absence_hours_many([self.e0])
+            self.assertEqual(Enrollment.objects.get(pk=self.e0.pk).absence_hours, 2)
+        plan = {
+            "format": "legacy-cells/1",
+            "cells": [
+                {"lesson": str(self.lecture.pk), "enrollment": str(self.e0.pk), "point": "ie"},
+                {"lesson": str(self.seminar.pk), "enrollment": str(self.e1.pk), "point": "7"},
+                {"lesson": str(self.lecture.pk), "enrollment": str(self.e1.pk), "point": "qb"},
+                {"lesson": str(self.lecture.pk), "enrollment": str(self.e2.pk), "point": "qb"},
+                {"lesson": str(self.seminar.pk), "enrollment": str(self.e2.pk), "point": "ie"},
+                {"lesson": str(self.seminar.pk), "enrollment": str(self.e0.pk), "point": "ie"},
+            ],
+        }
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as handle:
+            json.dump(plan, handle)
+        without = self._call("--file", handle.name)
+        self.assertEqual((without["cells_already_filled"], without["cells_filled"]), ("5", "1"))
+        counts = self._call("--file", handle.name, "--correct")  # dry-run
+        self.assertEqual((counts["cells_corrected"], counts["cells_correct_protected"]), ("2", "3"))
+        with bypass_rls():
+            self.assertEqual(LessonMark.objects.get(pk=imported_qb.pk).status, "absent")
+        counts = self._call("--file", handle.name, "--correct", "--apply")
+        self.assertEqual(
+            (counts["cells_corrected_status"], counts["cells_corrected_score"], counts["cells_filled"]), ("1", "1", "1")
+        )
+        with bypass_rls():
+            self.assertEqual(LessonMark.objects.get(pk=imported_qb.pk).status, "present")
+            self.assertEqual(LessonMark.objects.get(pk=imported_noscore.pk).score, 7)
+            self.assertEqual(LessonMark.objects.get(pk=teacher_cell.pk).status, "present")
+            self.assertEqual(LessonMark.objects.get(pk=later.pk).status, "present")
+            self.assertEqual(LessonMark.objects.get(pk=with_history.pk).status, "absent")
+            self.assertEqual(Enrollment.objects.get(pk=self.e0.pk).absence_hours, 0)
+        again = self._call("--file", handle.name, "--correct", "--apply")
+        self.assertEqual(
+            (again.get("cells_corrected", "0"), again["cells_already_filled"], again["cells_correct_protected"]),
+            ("0", "3", "3"),
+        )
+        counts = self._call("--apply", "--undo")
+        self.assertEqual((counts["undo_cells_restored"], counts["undo_cells_deleted"]), ("2", "1"))
+        with bypass_rls():
+            self.assertEqual(LessonMark.objects.get(pk=imported_qb.pk).status, "absent")
+            self.assertIsNone(LessonMark.objects.get(pk=imported_noscore.pk).score)
+            self.assertEqual(Enrollment.objects.get(pk=self.e0.pk).absence_hours, 2)
+
     def test_cell_status_mapping(self):
         from apps.registrar.legacy_cells_fill_2026_11_08 import cell_status
 
@@ -228,3 +315,5 @@ class LegacyCellsFillTest(_LabWorld, TestCase):
         self.assertIn("|legacy_cells|", text)
         self.assertIn("^legacy-cells-[0-9a-z-]+$", text)
         self.assertIn('--file "/tmp/legacy_cells_${GITHUB_RUN_ID}.json"', text)
+        self.assertIn('[ "$BATCH" = "correct" ]', text)
+        self.assertIn("args+=(--correct)", text)

@@ -26,6 +26,11 @@ class Command(BaseCommand):
         parser.add_argument("--file", default=str(DEFAULT_PLAN), help="legacy-cells/1 JSON planı")
         parser.add_argument("--undo", action="store_true", help="Bu əmrin yaratdığı xanaları sil")
         parser.add_argument("--apply", action="store_true", help="Faktiki yaz (defolt: dry-run)")
+        parser.add_argument(
+            "--correct",
+            action="store_true",
+            help="Sahib 2026-11-09: köçürmənin yazdığı toxunulmamış dolu xananı da köhnə dəyərə gətir",
+        )
 
     def handle(self, *args, **options):
         plan = {"lessons": [], "cells": []} if options["undo"] else fill.load_plan(options["file"])
@@ -40,6 +45,7 @@ class Command(BaseCommand):
                     counts=counts,
                     cells=plan["cells"],
                     lessons_spec=plan["lessons"],
+                    correct=options["correct"],
                 )
 
         run_plan(self, options=options, prefix=PREFIX, runner=runner)

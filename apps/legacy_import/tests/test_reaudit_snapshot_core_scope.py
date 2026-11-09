@@ -51,6 +51,7 @@ CREATION_RESOURCES = [
     "registrar.legacy_cells_fill",
     "registrar.subgroup_journal_merge",
     "registrar.subgroup_parent_retire",
+    "legacy_import.subject_collision",  # delta routing map for colliding QKU-<n> legacy subject codes
 ]
 
 
