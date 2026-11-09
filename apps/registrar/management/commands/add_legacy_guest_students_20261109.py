@@ -94,7 +94,7 @@ REFUSALS = (
 )
 
 
-_SLUG_MAP = str.maketrans("əöüçşğıi̇", "eoucsgii")
+_SLUG_MAP = {ord(a): b for a, b in zip("əöüçşğı", "eoucsgi")}
 
 
 def refusal_slug(message: str) -> str:
