@@ -14,10 +14,24 @@ PERIOD = "a4f88744-8d49-4772-84ef-c28a96c3b372"
 SYLLABUS_BODY_POLICY = "metadata-only-bodies-deferred-to-native-connected-batches/1"
 SCHEMA_FILE = Path(__file__).with_name("schemas.json")
 SCHEMAS = json.loads(SCHEMA_FILE.read_text())
+# Bounded core: identity, maps, enrollment, lesson, mark, correction, load and
+# syllabus headers only. Omitted tables are undeclared, never empty.
+CORE_SCHEMA_FILE = Path(__file__).with_name("schemas_core.json")
+CORE_SCHEMAS = json.loads(CORE_SCHEMA_FILE.read_text())
+SCOPES = {"full": (SCHEMA_FILE, SCHEMAS), "core": (CORE_SCHEMA_FILE, CORE_SCHEMAS)}
+CORE_MAP_ROUTE_SCOPE = "direct_and_offering_only"
 
 
-def schema_digest():
-    return hashlib.sha256(SCHEMA_FILE.read_bytes()).hexdigest()
+def schemas_for(scope):
+    if scope not in SCOPES:
+        raise ValueError("fixed_capture_scope_required")
+    return SCOPES[scope][1]
+
+
+def schema_digest(scope="full"):
+    if scope not in SCOPES:
+        raise ValueError("fixed_capture_scope_required")
+    return hashlib.sha256(SCOPES[scope][0].read_bytes()).hexdigest()
 
 
 def current_exam_ids():
@@ -34,8 +48,9 @@ def current_exam_ids():
     )
 
 
-def scoped_query(label, spec):
-    if label not in SCHEMAS or SCHEMAS[label] != spec:
+def scoped_query(label, spec, scope="full"):
+    schemas = schemas_for(scope)
+    if label not in schemas or schemas[label] != spec:
         raise ValueError("fixed_schema_required")
     if label == "auth.User":
         return (
@@ -71,11 +86,18 @@ def scoped_query(label, spec):
         offerings = apps.get_model("registrar", "CourseOffering").objects.filter(organization_id=ORG)
         ids = offerings.annotate(text_id=Cast("pk", CharField())).values("text_id")
         routes = Q(target_model_label__in=direct) | Q(target_model_label="registrar.courseoffering", target_pk__in=ids)
-        for target, path in (
-            ("Enrollment", ""),
-            ("Lesson", "offering__period_id"),
-            ("LessonMark", "enrollment__offering__period_id"),
-        ):
+        # The bounded core keeps only identity/offering routes; per-cell map rows
+        # (enrollment, lesson, mark targets) are the full capture's own scope.
+        cell_targets = (
+            ()
+            if spec.get("route_scope") == CORE_MAP_ROUTE_SCOPE
+            else (
+                ("Enrollment", ""),
+                ("Lesson", "offering__period_id"),
+                ("LessonMark", "enrollment__offering__period_id"),
+            )
+        )
+        for target, path in cell_targets:
             scope = {path: PERIOD} if path else {}
             target_ids = (
                 apps.get_model("registrar", target)

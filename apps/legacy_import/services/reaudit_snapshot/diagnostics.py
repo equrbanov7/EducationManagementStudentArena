@@ -19,6 +19,7 @@ CODES = frozenset(
         "active_fixed_organization_required",
         "active_fixed_tenant_superuser_required",
         "fixed_schema_required",
+        "fixed_capture_scope_required",
         "snapshot_row_budget_exceeded",
         "snapshot_time_budget_exceeded",
         "snapshot_unexpected_empty_page",

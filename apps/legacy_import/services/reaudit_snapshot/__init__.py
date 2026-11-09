@@ -16,7 +16,7 @@ from django.utils import timezone
 from core.encrypted_export import encrypt_export
 from core.rls import apply_rls_request_context
 
-from .queries import ORG, PERIOD, SCHEMAS, schema_digest, scoped_query
+from .queries import ORG, PERIOD, SCHEMAS, schema_digest, schemas_for, scoped_query
 
 KEY_FINGERPRINT = "f21b002d94fdd65fb346e557e6eb85109f60bda3afa8d8c5a2a14e4b9fc922bf"
 FORMAT = "qku-reaudit-state/1"
@@ -90,9 +90,12 @@ def validate_actor(username):
     return actor
 
 
-def capture(username, public_key, output_dir, *, diagnostic=None):
+def capture(username, public_key, output_dir, *, scope="full", diagnostic=None):
     """One repeatable-read snapshot; bounded ciphertext shards, no plaintext disk."""
     diagnostic = diagnostic if isinstance(diagnostic, dict) else {}
+    # "full" keeps the historical 78-table contract; "core" is the bounded
+    # identity/map/cell/correction/load/syllabus-header subset for planning.
+    schemas = SCHEMAS if scope == "full" else schemas_for(scope)
 
     def phase(operation, model=None, page=None):
         diagnostic.clear()
@@ -112,9 +115,10 @@ def capture(username, public_key, output_dir, *, diagnostic=None):
     encrypt_export({}, key, fingerprint=KEY_FINGERPRINT)
     manifest = {
         "format": FORMAT,
+        "scope": scope,
         "organization_id": ORG,
         "period_id": PERIOD,
-        "schema_sha256": schema_digest(),
+        "schema_sha256": schema_digest(scope),
         "read_only": True,
         "complete": False,
         "tables": {},
@@ -131,14 +135,14 @@ def capture(username, public_key, output_dir, *, diagnostic=None):
         phase("actor")
         actor = validate_actor(username)
         manifest["captured_at"] = timezone.now().isoformat()
-        for label, spec in SCHEMAS.items():
+        for label, spec in schemas.items():
             phase("count", label)
-            query = scoped_query(label, spec).order_by("pk")
+            query = scoped_query(label, spec, scope).order_by("pk")
             count = query.count()
             if count > MAX_TABLE_ROWS or total + count > MAX_TOTAL_ROWS:
                 raise ValueError("snapshot_row_budget_exceeded")
             total += count
-            manifest["tables"][label] = {"rows": count, "fields": spec["fields"]}
+            manifest["tables"][label] = {"rows": count, "fields": spec["fields"], "bytes": 0}
             for metadata_key in ("body_policy", "body_complete", "excluded_body_fields"):
                 if metadata_key in spec:
                     manifest["tables"][label][metadata_key] = spec[metadata_key]
@@ -157,6 +161,7 @@ def capture(username, public_key, output_dir, *, diagnostic=None):
                 observed += len(rows)
                 context = {
                     "format": FORMAT,
+                    "scope": scope,
                     "organization_id": ORG,
                     "period_id": PERIOD,
                     "captured_at": manifest["captured_at"],
@@ -170,6 +175,7 @@ def capture(username, public_key, output_dir, *, diagnostic=None):
                     if time.monotonic() - started > MAX_SECONDS:
                         raise ValueError("snapshot_time_budget_exceeded")
                     total_bytes += len(plaintext)
+                    manifest["tables"][label]["bytes"] += len(plaintext)
                     if len(plaintext) > MAX_CHUNK_BYTES:
                         raise ValueError("snapshot_chunk_budget_exceeded")
                     if total_bytes > MAX_TOTAL_BYTES:
@@ -201,6 +207,7 @@ def capture(username, public_key, output_dir, *, diagnostic=None):
                 raise ValueError("readonly_transaction_required")
         manifest["complete"] = True
         manifest["total_rows"] = total
+        manifest["total_bytes"] = total_bytes
         manifest["finished_at"] = timezone.now().isoformat()
     phase("write")
     manifest_sha = save_new(directory / "manifest.json", manifest)

@@ -22,7 +22,18 @@ def group_ids(journal):
 
 
 class Builder:
-    def __init__(self, *, source, current, organization_id, period_id, source_system, source_sha256, current_sha256):
+    def __init__(
+        self,
+        *,
+        source,
+        current,
+        organization_id,
+        period_id,
+        source_system,
+        source_sha256,
+        current_sha256,
+        owner_present_policy="applicable_blank_without_grade_hold",
+    ):
         self.source, self.tables = source, normalize(current["tables"])
         self.org, self.period, self.system = organization_id, period_id, source_system
         self.current_hash = current_sha256
@@ -66,7 +77,7 @@ class Builder:
             "cutoff": CUTOFF.isoformat(),
             "scope": "entire_active_period",
             "offering_ids": sorted(r["id"] for r in self.offerings),
-            "owner_present_policy": "applicable_blank_without_grade_hold",
+            "owner_present_policy": owner_present_policy,
             "allow_new_lessons": bool(source.get("class_authorities")),
             "routes": [],
             "sources": [],

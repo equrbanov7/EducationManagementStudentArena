@@ -13,6 +13,21 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 FINGERPRINT = "f21b002d94fdd65fb346e557e6eb85109f60bda3afa8d8c5a2a14e4b9fc922bf"
+SCHEMA_FILES = {"full": "schemas.json", "core": "schemas_core.json"}
+
+
+def verify_scope(manifest):
+    """A bounded core manifest must pin the core schema; omitted tables stay undeclared."""
+    scope = manifest.get("scope", "full")
+    if scope not in SCHEMA_FILES:
+        raise ValueError("capture_scope_unknown")
+    folder = Path(__file__).resolve().parents[2] / "apps/legacy_import/services/reaudit_snapshot"
+    raw = (folder / SCHEMA_FILES[scope]).read_bytes()
+    if scope != "full" and manifest.get("schema_sha256") != hashlib.sha256(raw).hexdigest():
+        raise ValueError("core_schema_changed")
+    if scope != "full" and set(manifest["tables"]) != set(json.loads(raw)):
+        raise ValueError("core_table_set_changed")
+    return scope
 
 
 def verify_body_projection(manifest):
@@ -54,6 +69,9 @@ def decode(folder, private_key, output, expected_tool, expected_deployed):
     manifest = json.loads(raw)
     if manifest.get("complete") is not True or manifest.get("format") != "qku-reaudit-state/1":
         raise ValueError("complete_snapshot_required")
+    scope = verify_scope(manifest)
+    if transport.get("scope", "full") != scope:
+        raise ValueError("capture_scope_changed")
     verify_body_projection(manifest)
     key = serialization.load_pem_private_key(read_private(private_key, 16384), password=None)
     der = key.public_key().public_bytes(serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo)
@@ -93,6 +111,8 @@ def decode(folder, private_key, output, expected_tool, expected_deployed):
         for field in ("format", "organization_id", "period_id", "schema_sha256", "captured_at", "read_only"):
             if payload[field] != manifest[field]:
                 raise ValueError("shard_scope_changed")
+        if payload.get("scope", "full") != scope:
+            raise ValueError("shard_scope_changed")
         label = shard["model"]
         if payload["model"] != label or payload["page"] != shard["page"] or len(payload["rows"]) != shard["rows"]:
             raise ValueError("shard_identity_changed")

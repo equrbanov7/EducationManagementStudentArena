@@ -14,6 +14,7 @@ CONTAINER = "educationmanagementstudentarena-app-1"
 PUBLIC_SHA = "e20fe8121835f907deec3e05ea1a449758fdc6ef22a3920513516efb70bec224"
 SHA = r"[a-f0-9]{40}"
 ERROR_PREFIX = "reaudit_snapshot_error: "
+SCOPES = ("full", "core")
 
 
 class NativeSnapshotError(ValueError):
@@ -67,7 +68,10 @@ def inputs(values):
         raise ValueError("actor_required")
     if not isinstance(deployed, str) or not re.fullmatch(SHA, deployed):
         raise ValueError("deployed_head_required")
-    return actor, deployed
+    scope = values.get("capture_scope", "full") or "full"
+    if scope not in SCOPES:
+        raise ValueError("capture_scope_required")
+    return actor, deployed, scope
 
 
 def verify_head(expected):
@@ -76,10 +80,12 @@ def verify_head(expected):
         raise ValueError("deployed_head_changed")
 
 
-def verify_artifact(folder):
+def verify_artifact(folder, scope="full"):
     manifest = json.loads((folder / "manifest.json").read_bytes())
     if manifest.get("format") != "qku-reaudit-state/1" or manifest.get("complete") is not True:
         raise ValueError("complete_snapshot_required")
+    if manifest.get("scope", "full") != scope:
+        raise ValueError("capture_scope_changed")
     expected = {"manifest.json"}
     counts = {}
     for shard in manifest["shards"]:
@@ -106,7 +112,7 @@ def verify_artifact(folder):
 
 
 def run(env):
-    actor, deployed = inputs(json.loads(Path(env["GITHUB_EVENT_PATH"]).read_bytes()).get("inputs"))
+    actor, deployed, scope = inputs(json.loads(Path(env["GITHUB_EVENT_PATH"]).read_bytes()).get("inputs"))
     print("::add-mask::" + actor, flush=True)
     run_id, attempt = env["GITHUB_RUN_ID"], env["GITHUB_RUN_ATTEMPT"]
     if any(not re.fullmatch(r"[1-9][0-9]*", v) for v in (run_id, attempt)):
@@ -142,6 +148,8 @@ def run(env):
                 remote + "/public.pem",
                 "--output-dir",
                 remote + "/output",
+                "--scope",
+                scope,
             ],
             timeout=720,
         )
@@ -150,11 +158,12 @@ def run(env):
             raise ValueError("fixed_capture_summary_required")
         verify_head(deployed)
         command(["docker", "cp", CONTAINER + ":" + remote + "/output/.", str(output)], timeout=180)
-        manifest = verify_artifact(output)
+        manifest = verify_artifact(output, scope)
         if digest(output / "manifest.json") != summary["sha256"]:
             raise ValueError("manifest_changed")
         receipt = {
             "format": "qku-reaudit-transport/1",
+            "scope": scope,
             "tool_head": env["GITHUB_SHA"],
             "deployed_head": deployed,
             "run_id": run_id,
