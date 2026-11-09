@@ -24,6 +24,8 @@ CREDIT_SOURCE_ALLOWANCE = 2
 RECOGNITION_ALLOWANCE = 1
 #: 2026-11-06: adlı lab qrupları (``LabGroup``) jurnal qridinə SABİT 1 sorğu əlavə edir (``lab_groups.prime``).
 LAB_GROUP_ALLOWANCE = 1
+#: 2026-11-07: seminar alt qrupları (``SeminarGroup``) qridə SABİT 1 sorğu əlavə edir (``seminar_groups.prime``).
+SEMINAR_GROUP_ALLOWANCE = 1
 CREDIT_SURFACES = (
     "transcript/",
     "period_analytics/",
@@ -93,7 +95,7 @@ class _ParityChecks:
                     if surface.startswith("transcript/"):
                         allowance += RECOGNITION_ALLOWANCE
                     if surface.startswith("journal_grid/"):
-                        allowance += LAB_GROUP_ALLOWANCE
+                        allowance += LAB_GROUP_ALLOWANCE + SEMINAR_GROUP_ALLOWANCE
                     self.assertLessEqual(count, BASELINE["queries"][surface] + allowance)
 
 

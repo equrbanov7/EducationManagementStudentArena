@@ -138,7 +138,10 @@ MIN_OUTCOME_CHARS = 15
 #: Sahib 2026-10-15: sillabus üzrə YALNIZ 1 təlim nəticəsi məcburidir (əvvəl 3); həftə sətrinin
 #: nəticəyə bağlanması istəyə bağlıdır — bax ``completion._check_out`` / ``_check_week``.
 MIN_OUTCOMES = 1
-MIN_TOPIC_CHARS = 4
+#: Sahib 2026-11-03: «mövzu adında uzunluq məsələsi olmasın» — BOŞ OLMAYAN istənilən mövzu
+#: (məs. «SQL», «OOP») həftə sətrini doldurulmuş sayır; əvvəl 4 simvoldan qısa mövzu sayılmırdı.
+#: Yuxarı hədd yalnız ümumi ``MAX_TEXT_CHARS`` sağlamlıq qapısıdır (``section_shape``).
+MIN_TOPIC_CHARS = 1
 WEEK_ROWS = 16
 MIN_FILLED_WEEKS = 14
 #: Bir dərs (cüt) — 2 akademik saat. Sahib 2026-09-21: həftəlik cədvəldə saat
@@ -146,11 +149,17 @@ MIN_FILLED_WEEKS = 14
 #: (``ceil(saat / 2)``) — 15 saat → 8 sətir (7×2 + 1). Bax ``week_plan.py``.
 WEEK_SESSION_HOURS = 2
 MIN_METHODS = 2
-MIN_PRIMARY_SOURCES = 2
+#: Sahib 2026-11-03: «ədəbiyyat yerində rahat olsun, alt-alta yazılmasa da qəbul et» — hər sahə
+#: (əsas / əlavə) üçün BOŞ OLMAYAN istənilən mətn kifayətdir: bir sətirdə, vergüllə, nömrəsiz.
+#: Əvvəl əsasda ən azı 2 ayrı sətir (hər biri > 8 simvol) tələb olunurdu. Bax ``completion._check_lit``.
+MIN_PRIMARY_SOURCES = 1
 MIN_ADDITIONAL_SOURCES = 1
-MIN_SOURCE_CHARS = 8
+#: Ədəbiyyat sahəsində saxlanılan sətir həddi (ümumi ``MAX_LIST_ITEMS`` = 60 əvəzinə): uzun siyahını
+#: mənbələr arasında boş sətirlə yazan müəllim 60 sətrə tez çatırdı (``section.too_long``).
+MAX_LIT_LINES = 1000
 MIN_OFFICE_HOURS_CHARS = 6
-MIN_SELFWORK_TOPIC_CHARS = 10
+#: Sahib 2026-11-03 (mövzu adında uzunluq həddi yoxdur): sərbəst iş mövzusu da BOŞ deyilsə sayılır (əvvəl 10).
+MIN_SELFWORK_TOPIC_CHARS = 1
 
 #: Auditoriya saatı növləri — həftəlik cədvəldəki sütunlar və tədris planı açarları.
 LESSON_HOUR_KINDS = ("lecture", "seminar", "lab")
@@ -194,6 +203,7 @@ PERM_MANAGE = "syllabus.manage"
 
 __all__ = [
     "MAX_LIST_ITEMS",
+    "MAX_LIT_LINES",
     "MAX_TEXT_CHARS",
     "MAX_WEEK_ROWS",
     "EDITABLE_STATUSES",

@@ -137,7 +137,11 @@ SECTION_META = {
     SectionKey.LIT.value: (
         pgettext_lazy(_CTX, "Ədəbiyyat"),
         pgettext_lazy(_CTX, "Əsas və əlavə ədəbiyyat"),
-        pgettext_lazy(_CTX, "Əsas ədəbiyyatda ən azı 2, əlavə ədəbiyyatda ən azı 1 mənbə göstərilməlidir."),
+        pgettext_lazy(
+            _CTX,
+            "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza "
+            "bilərsiniz — alt-alta, vergüllə və ya bir sətirdə.",
+        ),
     ),
     SectionKey.PREV.value: (
         pgettext_lazy(_CTX, "Yekun görünüş"),

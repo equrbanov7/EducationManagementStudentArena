@@ -14,7 +14,14 @@ from __future__ import annotations
 
 import math
 
-from ..constants import LESSON_HOUR_KINDS, MAX_LIST_ITEMS, MAX_TEXT_CHARS, MAX_WEEK_ROWS, SectionKey
+from ..constants import (
+    LESSON_HOUR_KINDS,
+    MAX_LIST_ITEMS,
+    MAX_LIT_LINES,
+    MAX_TEXT_CHARS,
+    MAX_WEEK_ROWS,
+    SectionKey,
+)
 from ..state_machine import TransitionDenied
 
 _MAX_DEPTH = 8  # köçürülmüş `archived[].gelecek_sahe.nested[]` kimi iç-içə açarlar keçməlidir
@@ -92,15 +99,15 @@ def _scalar_or_nested(value, field: str, depth: int):
     raise shape_error("section.invalid_shape", field)
 
 
-def _string_list(value, field: str) -> list[str]:
+def _string_list(value, field: str, limit: int = MAX_LIST_ITEMS) -> list[str]:
     if value is None:
         return []
     if isinstance(value, str):
         return [_text(value, field)]
     if not isinstance(value, list):
         raise shape_error("section.invalid_shape", field)
-    if len(value) > MAX_LIST_ITEMS:
-        raise shape_error("section.too_long", field, max=MAX_LIST_ITEMS)
+    if len(value) > limit:
+        raise shape_error("section.too_long", field, max=limit)
     return [_text(item, f"{field}[{index}]") for index, item in enumerate(value)]
 
 
@@ -151,7 +158,8 @@ def normalize_section_data(section_id: str, data: dict) -> dict:
         if section_id == SectionKey.WEEK.value and key == "rows":
             out[key] = _week_rows(value)
         elif key in _LIST_FIELDS.get(section_id, ()):
-            out[key] = _string_list(value, key)
+            limit = MAX_LIT_LINES if section_id == SectionKey.LIT.value else MAX_LIST_ITEMS
+            out[key] = _string_list(value, key, limit)
         else:
             out[key] = _scalar_or_nested(value, key, 1)
     return out
