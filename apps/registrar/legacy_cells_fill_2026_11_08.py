@@ -32,6 +32,11 @@ Qaydalar (hər xana kilid altında yenidən yoxlanılır; uyğun gəlməyən say
 
 Yaradılan xanaların id-ləri audit sətrindədir — ``--undo`` YALNIZ onları (sonradan dəyişməyibsə) silir. Qayıb saatı
 yenidən hesablanır. İdempotentdir: ikinci qaçışda xana artıq doludur → ``cells_already_filled``.
+
+``--correct`` (sahib 2026-11-09: «səhv ie var qb, səhv qb varsa ie; bal yazılmayıbsa bərpa et») — DOLU xana da köhnə
+sistemin dəyərinə gətirilir, amma YALNIZ köçürmənin/doldurmanın yazdığı xanada: ``entered_by`` boş, yaradılandan sonra
+dəyişməyib (``updated_at`` ≈ ``created_at``), rəsmi düzəlişi (``JournalCorrection``) yoxdur. Müəllimin yazdığı xanaya
+toxunulmur (``cells_correct_protected``). Əvvəlki dəyər audit sətrində (``marks_corrected``) — ``--undo`` onu qaytarır.
 """
 
 from __future__ import annotations
@@ -61,6 +66,8 @@ MAX_SCORE = 10
 #: Köhnə sistemin xana kodu (``journals_dates_points.point``) → status — delta ilə eyni
 #: (``legacy_import.delta.lessons.mark_value``): ``ie`` iştirak, ``qb`` qayıb, rəqəm iştirak + bal.
 LEGACY_POINTS = {"ie": "present", "iə": "present", "qb": "absent"}
+#: Köçürmənin yazdığı xana sonradan toxunulmamış sayılır — yaradılma ilə yenilənmə arası (saniyə).
+UNTOUCHED_SECONDS = 5
 
 
 def cell_status(cell) -> tuple:
@@ -158,6 +165,19 @@ def _fin_enrollments(organization, cells, lessons) -> dict:
     return {(offering_id, str(fin).strip().upper()): pk for offering_id, fin, pk in rows}
 
 
+def _score_text(value):
+    return None if value is None else str(float(value))
+
+
+def _correctable(mark, corrected_pairs) -> bool:
+    """Yalnız köçürmənin / doldurmanın yazdığı, sonradan toxunulmamış, rəsmi düzəlişsiz xana."""
+    return (
+        mark.entered_by_id is None
+        and (mark.updated_at - mark.created_at).total_seconds() < UNTOUCHED_SECONDS
+        and (mark.lesson_id, mark.enrollment_id) not in corrected_pairs
+    )
+
+
 def _norm(text) -> str:
     """«Soyad Ad» müqayisəsi: HTML varlıqları, böyük/kiçik, İ/ı, diakritika və boşluq fərqi sayılmır."""
     return " ".join(name_key(text).split()[:2])
@@ -192,9 +212,9 @@ def _name_enrollments(organization, cells, lessons) -> dict:
     return {key: pk for key, pk in found.items() if key not in twice}
 
 
-def run(*, organization, actor, counts, cells, lessons_spec=()) -> None:
+def run(*, organization, actor, counts, cells, lessons_spec=(), correct=False) -> None:
     Lesson, Enrollment, LessonMark = _model("Lesson"), _model("Enrollment"), _model("LessonMark")
-    manifest = {"lessons_created": []}
+    manifest = {"lessons_created": [], "marks_corrected": []}
     planned = _lessons(organization, lessons_spec, counts, manifest)
     lessons = dict(planned)
     lessons.update(
@@ -230,11 +250,19 @@ def run(*, organization, actor, counts, cells, lessons_spec=()) -> None:
         )
     }
     shut = closed({lesson.offering_id for lesson in lessons.values()})
-    filled = set(
-        LessonMark.objects.filter(
-            lesson_id__in=[row.pk for row in lessons.values()], enrollment_id__in=list(enrollments)
-        ).values_list("lesson_id", "enrollment_id")
+    existing_marks = LessonMark.objects.filter(
+        lesson_id__in=[row.pk for row in lessons.values()], enrollment_id__in=list(enrollments)
     )
+    if correct:
+        existing = {(row.lesson_id, row.enrollment_id): row for row in existing_marks.select_for_update(of=("self",))}
+        corrected_pairs = set(
+            _model("JournalCorrection")
+            .objects.filter(organization=organization, enrollment_ref__in=list(enrollments))
+            .values_list("lesson_ref", "enrollment_ref")
+        )
+    else:
+        existing, corrected_pairs = {}, set()
+    filled = set(existing) if correct else set(existing_marks.values_list("lesson_id", "enrollment_id"))
     created, touched = [], {}
     for cell in cells:
         if cell.get("enrollment") is None:
@@ -246,7 +274,24 @@ def run(*, organization, actor, counts, cells, lessons_spec=()) -> None:
         elif not lesson.offering.is_active or str(lesson.offering_id) in shut or enrollment.status != "enrolled":
             counts["cells_journal_closed_or_inactive"] += 1
         elif (lesson.pk, enrollment.pk) in filled:
-            counts["cells_already_filled"] += 1
+            mark = existing.get((lesson.pk, enrollment.pk))
+            if mark is None:
+                counts["cells_already_filled"] += 1
+            elif status not in STATUSES or lesson.date > LAST_LEGACY_DAY:
+                counts["cells_invalid"] += 1
+            elif score is not None and (not lesson_allows_score(lesson) or not 0 <= float(score) <= MAX_SCORE):
+                counts["cells_score_not_allowed"] += 1
+            elif (mark.status, _score_text(mark.score)) == (status, _score_text(score)):
+                counts["cells_already_filled"] += 1
+            elif not _correctable(mark, corrected_pairs):
+                counts["cells_correct_protected"] += 1
+            else:
+                before = {"id": str(mark.pk), "status": mark.status, "score": _score_text(mark.score)}
+                LessonMark.objects.filter(pk=mark.pk).update(status=status, score=score, updated_at=timezone.now())
+                manifest["marks_corrected"].append({**before, "to_status": status, "to_score": _score_text(score)})
+                touched[enrollment.pk] = enrollment
+                counts["cells_corrected"] += 1
+                counts["cells_corrected_status" if mark.status != status else "cells_corrected_score"] += 1
         elif status not in STATUSES or lesson.date > LAST_LEGACY_DAY:
             counts["cells_invalid"] += 1
         elif not lab_groups.applies(lesson, enrollment):
@@ -264,13 +309,21 @@ def run(*, organization, actor, counts, cells, lessons_spec=()) -> None:
             counts["cells_filled_scored" if score is not None else "cells_filled_attendance"] += 1
             counts[f"cells_filled_{status}"] += 1
     recompute_absences(list(touched.values()))
-    if created or manifest["lessons_created"]:
+    if created or manifest["lessons_created"] or manifest["marks_corrected"]:
         log_action(
             AuditAction.UPDATE,
             user=actor,
             organization=organization,
-            new_values={"cells": len(created), "lessons": len(manifest["lessons_created"])},
-            changes={"marks_created": created, "lessons_created": manifest["lessons_created"]},
+            new_values={
+                "cells": len(created),
+                "lessons": len(manifest["lessons_created"]),
+                "corrected": len(manifest["marks_corrected"]),
+            },
+            changes={
+                "marks_created": created,
+                "lessons_created": manifest["lessons_created"],
+                "marks_corrected": manifest["marks_corrected"],
+            },
             reason=REASON,
             resource_type=RESOURCE,
             resource_id=timezone.now().strftime("%Y%m%d%H%M%S"),
@@ -290,6 +343,21 @@ def undo(*, organization, actor, counts) -> None:
         counts["undo_lessons_deleted"] += Lesson.objects.filter(
             pk__in=(row.changes or {}).get("lessons_created") or [], marks__isnull=True
         ).delete()[0]
+        for item in (row.changes or {}).get("marks_corrected") or []:
+            # Yalnız hələ də düzəlişin yazdığı dəyərdə qalan xana əvvəlki dəyərinə qayıdır.
+            mark = LessonMark.objects.select_related("enrollment").filter(pk=item["id"]).first()
+            if mark is None:
+                counts["undo_cells_already_gone"] += 1
+            elif (mark.status, _score_text(mark.score)) != (item["to_status"], item["to_score"]):
+                counts["undo_cells_changed_kept"] += 1
+            else:
+                LessonMark.objects.filter(pk=mark.pk).update(
+                    status=item["status"],
+                    score=None if item["score"] is None else float(item["score"]),
+                    updated_at=timezone.now(),
+                )
+                enrollments[mark.enrollment_id] = mark.enrollment
+                counts["undo_cells_restored"] += 1
         recompute_absences(list(enrollments.values()))
         log_action(
             AuditAction.UPDATE,
