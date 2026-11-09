@@ -43,7 +43,10 @@ def scoped_query(label, spec):
             .distinct()
         )
     model = apps.get_model(label)
-    query = model.objects.filter(**{spec["org_path"]: ORG})
+    # Timetable recovery needs the retained rows of earlier soft deletions.
+    # Keep the same fixed tenant/period filters; application reads stay unchanged.
+    manager = model.all_objects if label == "registrar.ScheduleSlot" else model.objects
+    query = manager.filter(**{spec["org_path"]: ORG})
     if spec["period_path"]:
         query = query.filter(**{spec["period_path"]: PERIOD})
     if spec["filters"]:

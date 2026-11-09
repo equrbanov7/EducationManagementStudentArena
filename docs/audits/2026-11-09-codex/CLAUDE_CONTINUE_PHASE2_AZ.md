@@ -1,9 +1,9 @@
 # Claude / növbəti agent üçün Mərhələ 2 davam sənədi
 
-## Cari vəziyyət — 9 noyabr, 03:13 UTC
+## Cari vəziyyət — 9 noyabr, 03:28 UTC
 
 - PR **#278** açıqdır: `codex/reaudit-remediation-20261109`, published HEAD
-  `57be1ba6c848a06ff6ffbf4709b2227b0aa901d1`. Məxfi audit tarixi yeni branch-də
+  `9026fc9418e3afee2356c9500259b7afc7c6e4b9` (bundan sonrakı dəqiq HEAD üçün private status və `git rev-parse HEAD`). Məxfi audit tarixi yeni branch-də
   yoxdur; ilkin commit yalnız main `be25b9a5e...` parent-lidir. Köhnə
   `codex/reaudit-20261109` tarixini push etməyin.
 - **Bu mərhələdə production akademik data tətbiqi hələ 0**, bizim deploy yoxdur.
@@ -18,7 +18,7 @@
   Yanlış/undone/stale/malformed merge proof və ancient subject-pin fallback bloklanır.
   Failing files: `apps/exams/tests/test_exam_journal_gaps_2026_10_27.py`,
   `apps/workload/tests/test_repair_twins_2026_11_05b.py`.
-  Agentlər freeze edib; bütün düzəlişlər bir combined fix commit ilə yeni CI-yə gedir.
+  Düzəlişlər9026fc commitindədir; CI42555077213 tam SUCCESS, CodeQL42555077216 də SUCCESS. Son snapshot completeness patch ayrıca yenidən CI-yə gedir.
 - Cari canlı əsas kod `be25b9a5efa433d6052a20c7cfe1aff38662b851`-dir.
   Source28 main native DRY42552819564 `reviewed_source28_unresolved_course_audit_requires_review`
   ilə saxlanıb. Source ce94 SHA tam yoxlanıb. Heç apply edilməyib.
@@ -31,6 +31,20 @@
   sahə əlavədir. Tenant/Sep1/caps saxlanıb. Class-history adapter native prefix+date
   sərhədini saxlayır, fingerprint/seal dəyişmir.27PGtest keçdi. Köhnə snapshotı yeni
   schemahash kimi re-label etməyin; yeni deployed HEAD-dən fresh capture alın.
+- Son snapshot düzəlişi: `ScheduleSlot.all_objects` ilə silinmiş cədvəl tarixçəsi də
+  fixed tenant/period daxilində ixrac edilir; tətbiqdə slotlar aktivləşmir.2PGtest keçdi.
+  Böyük audit JSON-ları query2000 limitini və32MiB/512MiB büdcələrini artırmadan
+  byte-bounded encrypted shard-lara bölünür. Root birgə snapshot/history dəsti35/35PG test keçdi; fullBlack/isort/flake8(5230fayl),3modulgate,Django check/makemigrations keçdi.
+  Private cells verifier dəyişən shard rowcount/contiguouspage qaydasına uyğunlaşıb9test keçib.
+  Native decoder fixed2000/ceil fərziyyəsi etmir; manifest/page/hash/scope/duplicate/count
+  yoxlayır. Yeni sharding üçün format/field/schema dəyişmir, capture yeni deployedHEAD-dəndir.
+- Native imtahan probe42555411803,03:16UTC: last15m start/finish0,live6h0,last4hnewopen0.
+- Şifrəli structure paketləri hazırlanıb və public prerelease-də yalnız ciphertext
+  yüklənib; remote asset SHA/size təsdiqlənib. Bu akademik data tətbiqi DEYİL.
+  `PRIVATE/structure-packages/index.json`, `upload-receipts.json` və
+  `PRIVATE/operations-ledger.jsonl` dəqiq yolları/hash-ləri saxlayır.
+- Private final-runner7test və source28-review10test keçib; real fresh snapshotı
+  hələ işlətməyiblər. Onlara actual capture+manifest+transport exactHEAD verilir.
 - Private güncəl status: `PRIVATE/production-progress.json`; CI logları da private.
   `PRIVATE` = `/Users/elvin/Desktop/RIM/Secret/reaudit-20261109`.
   Operator recipes: `execution-runbook/`, `syllabus-batches/OPERATOR_AZ.md`,

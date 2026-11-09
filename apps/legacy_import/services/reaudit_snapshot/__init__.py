@@ -41,6 +41,28 @@ def save_new(path, value):
     return hashlib.sha256(encoded).hexdigest()
 
 
+def byte_chunks(context, rows, page):
+    """Split a bounded query page by exact UTF-8 JSON size, never split a row."""
+    selected = []
+    size = len(encode({**context, "page": page, "rows": []}))
+    for row in rows:
+        row_size = len(encode(row))
+        if selected and size + 2 + row_size > MAX_CHUNK_BYTES:
+            payload = {**context, "page": page, "rows": selected}
+            yield payload, encode(payload)
+            page += 1
+            selected = []
+            size = len(encode({**context, "page": page, "rows": []}))
+        addition = row_size + (2 if selected else 0)  # default JSON separator: ", "
+        if size + addition > MAX_CHUNK_BYTES:
+            raise ValueError("snapshot_chunk_budget_exceeded")
+        selected.append(row)
+        size += addition
+    if selected:
+        payload = {**context, "page": page, "rows": selected}
+        yield payload, encode(payload)
+
+
 def validate_actor(username):
     apply_rls_request_context(user_id=None, org_id=ORG, bypass=False, local=True)
     if (
@@ -106,9 +128,9 @@ def capture(username, public_key, output_dir):
                 raise ValueError("snapshot_row_budget_exceeded")
             total += count
             manifest["tables"][label] = {"rows": count, "fields": spec["fields"]}
-            observed = 0
+            observed = page = 0
             last_pk = None
-            for page in range((count + CHUNK_ROWS - 1) // CHUNK_ROWS):
+            for _query_page in range((count + CHUNK_ROWS - 1) // CHUNK_ROWS):
                 if time.monotonic() - started > MAX_SECONDS:
                     raise ValueError("snapshot_time_budget_exceeded")
                 window = query if last_pk is None else query.filter(pk__gt=last_pk)
@@ -117,7 +139,7 @@ def capture(username, public_key, output_dir):
                     raise ValueError("snapshot_unexpected_empty_page")
                 last_pk = rows[-1]["id"]
                 observed += len(rows)
-                payload = {
+                context = {
                     "format": FORMAT,
                     "organization_id": ORG,
                     "period_id": PERIOD,
@@ -126,28 +148,29 @@ def capture(username, public_key, output_dir):
                     "actor_id": actor,
                     "read_only": True,
                     "model": label,
-                    "page": page,
-                    "rows": rows,
                 }
-                plaintext = encode(payload)
-                total_bytes += len(plaintext)
-                if len(plaintext) > MAX_CHUNK_BYTES:
-                    raise ValueError("snapshot_chunk_budget_exceeded")
-                if total_bytes > MAX_TOTAL_BYTES:
-                    raise ValueError("snapshot_total_byte_budget_exceeded")
-                file = f"{label.lower()}-{page:04}.enc.json"
-                envelope = encrypt_export(payload, key, fingerprint=KEY_FINGERPRINT)
-                encrypted_sha = save_new(directory / file, envelope)
-                manifest["shards"].append(
-                    {
-                        "file": file,
-                        "model": label,
-                        "page": page,
-                        "rows": len(rows),
-                        "sha256": encrypted_sha,
-                        "plaintext_sha256": hashlib.sha256(plaintext).hexdigest(),
-                    }
-                )
+                for payload, plaintext in byte_chunks(context, rows, page):
+                    if time.monotonic() - started > MAX_SECONDS:
+                        raise ValueError("snapshot_time_budget_exceeded")
+                    total_bytes += len(plaintext)
+                    if len(plaintext) > MAX_CHUNK_BYTES:
+                        raise ValueError("snapshot_chunk_budget_exceeded")
+                    if total_bytes > MAX_TOTAL_BYTES:
+                        raise ValueError("snapshot_total_byte_budget_exceeded")
+                    file = f"{label.lower()}-{page:04}.enc.json"
+                    envelope = encrypt_export(payload, key, fingerprint=KEY_FINGERPRINT)
+                    encrypted_sha = save_new(directory / file, envelope)
+                    manifest["shards"].append(
+                        {
+                            "file": file,
+                            "model": label,
+                            "page": page,
+                            "rows": len(payload["rows"]),
+                            "sha256": encrypted_sha,
+                            "plaintext_sha256": hashlib.sha256(plaintext).hexdigest(),
+                        }
+                    )
+                    page += 1
             if observed != count:
                 raise ValueError("snapshot_table_count_changed")
         with connection.cursor() as cursor:
@@ -158,4 +181,9 @@ def capture(username, public_key, output_dir):
         manifest["total_rows"] = total
         manifest["finished_at"] = timezone.now().isoformat()
     manifest_sha = save_new(directory / "manifest.json", manifest)
-    return {"tables": len(manifest["tables"]), "shards": len(manifest["shards"]), "rows": total, "sha256": manifest_sha}
+    return {
+        "tables": len(manifest["tables"]),
+        "shards": len(manifest["shards"]),
+        "rows": total,
+        "sha256": manifest_sha,
+    }
