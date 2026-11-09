@@ -208,7 +208,7 @@ def _superseded_by_later_final_attempt(attempt, subject_id) -> bool:
             later,
             user_id=attempt.user_id,
             exam__organization_id=attempt.exam.organization_id,
-            exam__subject_id=subject_id,
+            exam__subject__isnull=False,
             exam__exam_type_extended=FINAL_EXAM_CATEGORY,
             exam__is_deleted=False,
             is_trial=False,

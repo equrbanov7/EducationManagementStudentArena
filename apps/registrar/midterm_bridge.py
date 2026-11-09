@@ -136,7 +136,7 @@ def record_midterm_result(
     ``offering_ids`` — imtahanın AÇIQ bağlandığı jurnallar (``Exam.journal_offerings``, 2026-10-24): tələbə
     onlardan birində qeydiyyatdadırsa bal ORAYA yazılır, yoxsa fənn üzrə qeydiyyat (əvvəlki qayda)."""
     enrollment = exam_bridge.resolve_enrollment(
-        student=student, subject_id=subject_id, organization=organization, offering_ids=offering_ids
+        student=student, subject_id=subject_id, organization=organization, offering_ids=offering_ids, exam_id=exam_id
     )
     if enrollment is None:
         return NO_ENROLLMENT, None

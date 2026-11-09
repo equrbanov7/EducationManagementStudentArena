@@ -112,7 +112,7 @@ def choose_enrollment(candidates, period, linked_offering_ids=()):
     return pick_enrollment([e for e in past if e.offering.period.start_date == latest], linked_offering_ids)
 
 
-def linked_enrollment(student, organization, offering_ids, *, subject_id):
+def linked_enrollment(student, organization, offering_ids, *, subject_id, exam_id=None):
     """Tələbənin imtahanın bağlı jurnallarından birindəki aktiv qeydiyyatı (yoxdursa ``None``)."""
     if not offering_ids or student is None:
         return None
@@ -121,13 +121,23 @@ def linked_enrollment(student, organization, offering_ids, *, subject_id):
         organization=organization,
         offering_id__in=list(offering_ids),
         offering__organization=organization,
-        offering__subject_id=subject_id,
         status=Enrollment.Status.ENROLLED,
     ).select_related("offering", "offering__period", "offering__subject")
-    return pick_enrollment(candidates, offering_ids)
+    candidates = list(candidates)
+    exact = [row for row in candidates if _linked_key(row.offering.subject_id) == _linked_key(subject_id)]
+    if exact:
+        return pick_enrollment(exact, offering_ids)
+    from .exam_journal_scope import linked_twin_offering_ids
+
+    twins = linked_twin_offering_ids(organization, subject_id, [row.offering for row in candidates])
+    if not twins:
+        from .exam_journal_merge_scope import merged_offering_ids
+
+        twins = merged_offering_ids(organization, subject_id, [row.offering for row in candidates], exam_id=exam_id)
+    return pick_enrollment([row for row in candidates if row.offering_id in twins], offering_ids)
 
 
-def resolve_enrollment(*, student, subject_id, organization, offering_ids=()):
+def resolve_enrollment(*, student, subject_id, organization, offering_ids=(), exam_id=None):
     """Tələbənin bu fənn üzrə aktiv qeydiyyatını tap.
 
     ``offering_ids`` — imtahanın AÇIQ bağlandığı jurnallar (``Exam.journal_offerings``, 2026-10-24): tələbə
@@ -139,8 +149,9 @@ def resolve_enrollment(*, student, subject_id, organization, offering_ids=()):
     if not subject_id or student is None:
         return None
     # A journal's subject can be repaired after the exam was linked. The stale
-    # M2M link cannot route either a final or a midterm into another subject.
-    linked = linked_enrollment(student, organization, offering_ids, subject_id=subject_id)
+    # M2M link cannot route a final/midterm into another subject unless the
+    # existing journal-link scope still explicitly validates its canonical twin.
+    linked = linked_enrollment(student, organization, offering_ids, subject_id=subject_id, exam_id=exam_id)
     if linked is not None:
         return linked
     candidates = Enrollment.objects.filter(
@@ -153,7 +164,7 @@ def resolve_enrollment(*, student, subject_id, organization, offering_ids=()):
     return choose_enrollment(candidates, _current_period(organization), offering_ids)
 
 
-def resolve_exam_result_target(*, student, subject_id, organization, offering_ids=(), attempt=None):
+def resolve_exam_result_target(*, student, subject_id, organization, offering_ids=(), attempt=None, exam_id=None):
     """Sinxron cəhdlərin rəqabət açarı — yazıçının faktiki hədəfi (yalnız oxu).
 
     Finalın 25% yolu ayrıca nəticə xanasıdır: əsas imtahan apellyasiyası ilə
@@ -168,7 +179,11 @@ def resolve_exam_result_target(*, student, subject_id, organization, offering_id
         if application is not None:
             return ("retake", application.enrollment_id) if application.status in RESULT_ACCEPTING else None
     enrollment = resolve_enrollment(
-        student=student, subject_id=subject_id, organization=organization, offering_ids=offering_ids
+        student=student,
+        subject_id=subject_id,
+        organization=organization,
+        offering_ids=offering_ids,
+        exam_id=exam_id or getattr(attempt, "exam_id", None),
     )
     return ("enrollment", enrollment.pk) if enrollment is not None else None
 
@@ -508,7 +523,11 @@ def record_final_result(
     if retake is not _NOT_RETAKE:
         return (FINAL_RETAKE if retake is not None else FINAL_RETAKE_CLOSED), retake
     enrollment = resolve_enrollment(
-        student=student, subject_id=subject_id, organization=organization, offering_ids=offering_ids
+        student=student,
+        subject_id=subject_id,
+        organization=organization,
+        offering_ids=offering_ids,
+        exam_id=getattr(attempt, "exam_id", None),
     )
     if enrollment is None:
         return FINAL_NO_ENROLLMENT, None

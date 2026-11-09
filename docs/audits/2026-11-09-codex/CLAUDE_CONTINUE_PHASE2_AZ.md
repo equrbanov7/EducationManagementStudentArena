@@ -1,21 +1,54 @@
 # Claude / növbəti agent üçün Mərhələ 2 davam sənədi
 
-## Cari vəziyyət — 9 noyabr, 02:30 UTC
+## Cari vəziyyət — 9 noyabr, 03:13 UTC
 
-Bu sənəddə aşağıdakı checkpoint-lər tarixidir; bu üst hissə son vəziyyətdir.
-Kod hazırlanıb, amma bu mərhələnin production akademik data tətbiqi **hələ 0**.
-Claude-un CI/deploy-u bitib; bizim clean-parent PR/CI/deploy sonra fresh snapshot
-və qəbzli data bərpası qalır. Yalnız main-də deploy edilmiş native command işlədilir.
-Son root commit `039fed8e2`. Process supervisor: 6 real Linux process testi və 36 host transport/status testi
-keçib; son race təkrar testi/freeze sonrası clean commit. Full Black/isort/flake8
-5224 faylda, modul/worker/context/i18n gate-ləri və Django check/migrations keçib. Heç bir generated JSON-u
-force-add etməyin və köhnə `codex/reaudit-20261109` tarixini push etməyin.
+- PR **#278** açıqdır: `codex/reaudit-remediation-20261109`, published HEAD
+  `57be1ba6c848a06ff6ffbf4709b2227b0aa901d1`. Məxfi audit tarixi yeni branch-də
+  yoxdur; ilkin commit yalnız main `be25b9a5e...` parent-lidir. Köhnə
+  `codex/reaudit-20261109` tarixini push etməyin.
+- **Bu mərhələdə production akademik data tətbiqi hələ 0**, bizim deploy yoxdur.
+  Claude-un main CI/deploy-u bitib. PR-in bütün testləri keçəndən sonra fresh
+  imtahan probe, exact-head merge, main deploy, encrypted full snapshot qalır.
+- CI42551368437 tək synthetic process startup race göstərdi; tests-only readiness
+  handshake ilə düzəldi, real Linux6 test keçdi. CI42552659855-də həmin dəst keçdi.
+- CI42552659855 tam bitdi: iki legitimate twin-subject bal marşrutu testi və
+  köhnə audit scope-options testi düşüb. Digər bütün CI sahələri keçib.
+  Root audit options testini yeniləyib (7/7 pass). Formal twin + receipt-li merge
+  scope + latest same-target precedence düzəldi:122/122 authentic PG test keçdi.
+  Yanlış/undone/stale/malformed merge proof və ancient subject-pin fallback bloklanır.
+  Failing files: `apps/exams/tests/test_exam_journal_gaps_2026_10_27.py`,
+  `apps/workload/tests/test_repair_twins_2026_11_05b.py`.
+  Agentlər freeze edib; bütün düzəlişlər bir combined fix commit ilə yeni CI-yə gedir.
+- Cari canlı əsas kod `be25b9a5efa433d6052a20c7cfe1aff38662b851`-dir.
+  Source28 main native DRY42552819564 `reviewed_source28_unresolved_course_audit_requires_review`
+  ilə saxlanıb. Source ce94 SHA tam yoxlanıb. Heç apply edilməyib.
+- Source28 diagnostic42553116190 uğurlu:57audit,13full-row-hash anchor,
+  4semantic receipt,40remaining candidate (39grade +1repeated_sections).
+  Metadata həmin40-ın zərərsiz olduğunu sübut etmir; fresh fullsnapshot gövdəsi
+  ilə join lazımdır.133existingcapture faylında həmin gövdələr tapılmayıb.
+- Typed AuditLog export genişləndi: blank resource_type-li native merge/restore/
+  companion auditləri content_type app4 vasitəsilə daxil edilir; iki natural-key
+  sahə əlavədir. Tenant/Sep1/caps saxlanıb. Class-history adapter native prefix+date
+  sərhədini saxlayır, fingerprint/seal dəyişmir.27PGtest keçdi. Köhnə snapshotı yeni
+  schemahash kimi re-label etməyin; yeni deployed HEAD-dən fresh capture alın.
+- Private güncəl status: `PRIVATE/production-progress.json`; CI logları da private.
+  `PRIVATE` = `/Users/elvin/Desktop/RIM/Secret/reaudit-20261109`.
+  Operator recipes: `execution-runbook/`, `syllabus-batches/OPERATOR_AZ.md`,
+  `cells-offline/OPERATOR_AZ.md`, `phase2-cells/duplicate-qb-safe-paths.json`.
+- Sillabus default385 dry scope, **apply≤100** explicit IDs; shared/reuse bağlı
+  komponentlər bölünmədən batch edilir. Private batching helper7test keçib.
+- Cells224897nonblank +870conditionalblank;261numeric0. Rawsource atmamaq.
+  Full native stdout aggregate-dir; private offline per-source adapter9PGtest
+  keçib,0SQL. Provisionaldır: exporter-in preSept1correction və crossperiod
+  predecessor coverage boşluqları native capture qədər authority yaratmır.
+- **Half-pair3 fixed74-mark əməliyyatı cells-dən ƏVVƏL**: cells pinləri dəyişə bilər.
+  Struktur/authorship sonrası freshcapture ilə cells plan yenidən qurulur.
+  Cells/park sonrası hər syllabus batch ayrıca freshbaseline alır.
+- Historical final comparator13offline test keçib;109262source winner təsdiqlidir.
+  Source sem2–13-dür; cari sem14-də im/im2 yoxdur. Actual production comparison
+  hələ edilməyib. Heç bir nəticəni sadəcə maksimum olduğuna görə seçməyin.
 
-Historical final comparator hazırdır: `evidence/final_history_compare.py`,13 offline
-regression testi keçib,109262 source winner yenidən təsdiqlənib. Bütün nəticələr
-read-only/apply=false; fresh capture ilə actual comparison hələ edilməyib.
-Source sem2–13-dür, cari sem14-də im/im2 yoxdur; yalnız cari dövrə baxıb bütün
-final balları yoxlanmış saymaq olmaz. AcademicPeriod canonical closure artıq əlavədir.
+Aşağıdakı checkpoint-lər tarixidir; son status üçün üst hissə və private JSON əsasdır.
 
 ## Son checkpoint — 9 noyabr, 02:03 UTC
 

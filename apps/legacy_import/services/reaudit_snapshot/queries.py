@@ -90,5 +90,8 @@ def scoped_query(label, spec):
             | Q(resource_type__startswith="legacy_import.")
             | Q(resource_type__startswith="workload.")
             | Q(resource_type__startswith="syllabus.")
+            # Native twin merge/restore logs identify their object via the
+            # GenericForeignKey and intentionally leave resource_type blank.
+            | Q(content_type__app_label__in=("registrar", "workload", "syllabus", "legacy_import"))
         )
     return query

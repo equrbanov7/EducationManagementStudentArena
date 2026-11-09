@@ -65,7 +65,7 @@ def official_final_attempts(queryset):
         )
         .select_related("exam", "exam__organization", "user")
         .prefetch_related("exam__journal_offerings")
-        .order_by("user_id", "exam__subject_id", F("started_at").desc(nulls_last=True), "-pk")
+        .order_by("user_id", F("started_at").desc(nulls_last=True), "-pk")
     )
     seen = set()
     for attempt in rows.iterator(chunk_size=500):

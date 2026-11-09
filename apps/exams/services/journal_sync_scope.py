@@ -16,6 +16,7 @@ def target_identity(attempt):
         subject_id=exam.subject_id,
         organization=exam.organization,
         offering_ids=[offering.pk for offering in exam.journal_offerings.all()],
+        exam_id=exam.pk,
         attempt=attempt if exam.exam_type_extended == "final" else None,
     )
 
@@ -30,7 +31,6 @@ def target_key(attempt):
     return (
         attempt.exam.organization_id,
         attempt.user_id,
-        attempt.exam.subject_id,
         identity,
         None if identity is not None else attempt.exam_id,
     )

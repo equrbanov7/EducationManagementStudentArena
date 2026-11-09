@@ -1,5 +1,7 @@
 """Shared, read-only missing-class history fingerprint, including deleted lesson evidence."""
 
+from datetime import datetime
+
 from .manifest import digest, normalize, require
 
 CORRECTION_FROM = "2026-09-01T00:00:00+00:00"
@@ -140,7 +142,17 @@ def from_tables(tables):
         "lessons": "registrar.Lesson",
     }
     require(all(label in tables for label in labels.values()), "class_history_capture_missing")
-    return {key: normalize(tables[label]) for key, label in labels.items()}
+    result = {key: normalize(tables[label]) for key, label in labels.items()}
+    # Full evidence also includes typed merge receipts with no resource prefix.
+    # Class authority must keep capture_class_history's exact window and scope.
+    cutoff = datetime.fromisoformat(AUDIT_FROM)
+    result["audits"] = [
+        row
+        for row in result["audits"]
+        if str(row.get("resource_type") or "").startswith(AUDIT_PREFIXES)
+        and datetime.fromisoformat(row["created_at"]) >= cutoff
+    ]
+    return result
 
 
 def from_snapshot(snapshot):

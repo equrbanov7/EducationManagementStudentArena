@@ -89,13 +89,13 @@ def _later_attempts_q(attempt):
     return Q(started_at__gt=started_at) | Q(started_at=started_at, pk__gt=attempt.pk)
 
 
-def _official_filter(subject_id):
-    """Rəsmi midterm cəhdlərinin ortaq süzgəci (fənn üzrə; bütün avtomatik formatlar — fənnin TƏK xanası)."""
+def _official_filter():
+    """Rəsmi midterm formatları; eyni xana aşağıda canonical resolver ilə yoxlanır."""
     from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
     from apps.exams.services.journal_sync import MIDTERM_EXAM_CATEGORY
 
     return {
-        "exam__subject_id": subject_id,
+        "exam__subject__isnull": False,
         "exam__exam_type_extended": MIDTERM_EXAM_CATEGORY,
         "exam__exam_type__in": AUTO_MIDTERM_EXAM_TYPES,
         "exam__is_deleted": False,
@@ -116,7 +116,7 @@ def superseded_by_later_midterm(attempt, subject_id) -> bool:
             _later_attempts_q(attempt),
             user_id=attempt.user_id,
             exam__organization_id=attempt.exam.organization_id,
-            **_official_filter(subject_id),
+            **_official_filter(),
         )
         .exclude(pk=attempt.pk)
         .select_related("exam", "exam__organization", "user")
@@ -239,7 +239,7 @@ def official_attempts(queryset):
         )
         .select_related("exam", "exam__organization", "user")
         .prefetch_related("exam__journal_offerings")
-        .order_by("user_id", "exam__subject_id", F("started_at").desc(nulls_last=True), "-pk")
+        .order_by("user_id", F("started_at").desc(nulls_last=True), "-pk")
     )
     seen = set()
     for attempt in rows.iterator(chunk_size=500):
