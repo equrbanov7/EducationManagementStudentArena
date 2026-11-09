@@ -87,12 +87,18 @@ class SplitSharedFinIdentityTests(_GuestRosterBase):
             LessonMark.objects.create(
                 organization=self.org, enrollment=enrollment, lesson=lesson, status="present", score=7
             )
+            # Komponent balı da köçür (prod 42663741505: ``created`` adı kölgələnib ComponentScore-a çevrilmişdi).
+            component = AssessmentComponent.objects.create(
+                organization=self.org, offering=self.other_offering, name="Fəallıq", kind="activity", max_score=10
+            )
+            ComponentScore.objects.create(organization=self.org, component=component, enrollment=enrollment, score=4)
         counts = self._call(
             [{"holder": self.host.pk, "person": self.guest.pk, "enrollments": [str(enrollment.pk)]}], apply=True
         )
         self.assertEqual(counts["mode"], "apply")
         self.assertEqual(counts["enrollments_moved"], "1")
         self.assertEqual(counts["marks_moved"], "1")
+        self.assertEqual(counts["scores_moved"], "1")
         with bypass_rls():
             target = Enrollment.objects.get(student=self.guest, offering=self.other_offering)
             self.assertEqual((target.status, target.source_group_id), ("enrolled", None))
