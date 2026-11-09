@@ -95,6 +95,18 @@ def prefetch_memberships(users, organization=None) -> None:
     prefetch_related_objects(list(users), Prefetch("memberships", queryset=queryset, to_attr=PREFETCH_ATTR))
 
 
+def _linked_username(user, profile) -> str:
+    """Bağlı hesabın username-i — YALNIZ yüklənmiş (select_related) əlaqədən, sorğusuz (siyahı 0 sorğu qaydası)."""
+    if profile is None:
+        return ""
+    cache = getattr(getattr(profile, "_state", None), "fields_cache", {}) or {}
+    other = cache.get("fin_shared_with") if getattr(profile, "fin_shared_with_id", None) else None
+    if other is None:
+        secondary = (getattr(getattr(user, "_state", None), "fields_cache", {}) or {}).get("fin_shared_secondary")
+        other = getattr(secondary, "user", None) if secondary is not None else None
+    return getattr(other, "username", "") or ""
+
+
 def serialize_row(user, actor: RimActor):
     """Axtarış siyahısının bir sətri — username AÇIQ göstərilir (əsas tələb)."""
     profile = _profile_of(user)
@@ -112,6 +124,8 @@ def serialize_row(user, actor: RimActor):
         "patronymic": getattr(profile, "patronymic", "") or "",
         "email": user.email or "",
         "fin": getattr(profile, "fin", "") or "",
+        # Sahib 2026-11-09: eyni FİN-li bağlı hesab (tələbə ↔ işçi) — operator görsün.
+        "fin_shared_with": _linked_username(user, profile),
         "phone": getattr(profile, "phone", "") or "",
         "phone_country": phone_parts.region,
         "phone_national": phone_parts.national,

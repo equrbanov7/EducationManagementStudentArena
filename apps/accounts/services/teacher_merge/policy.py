@@ -38,6 +38,7 @@ _REPOINT = (
     "accounts.RuntimeSetting.updated_by",
     "accounts.UserProfile.blocked_by",
     "accounts.UserProfile.deleted_by",
+    "accounts.UserProfile.fin_shared_with",  # eyni FİN-li bağlı hesab (shared_fin) — bağ saxlanılan hesaba keçir
     # announcements
     "announcements.Announcement.created_by",
     "announcements.Announcement.deleted_by",

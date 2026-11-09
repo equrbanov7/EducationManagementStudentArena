@@ -367,7 +367,11 @@ def manageable_users_queryset(actor: RimActor):
     if actor.user is None:
         return User.objects.none()
 
-    queryset = User.objects.select_related("profile", "profile__organization").exclude(is_superuser=True)
+    # ``profile__fin_shared_with`` / ``fin_shared_secondary__user``: eyni FİN-li bağlı hesab (shared_fin) siyahıda
+    # sorğusuz göstərilsin (``rim.detail._linked_username`` yalnız yüklənmiş əlaqəni oxuyur).
+    queryset = User.objects.select_related(
+        "profile", "profile__organization", "profile__fin_shared_with", "fin_shared_secondary__user"
+    ).exclude(is_superuser=True)
     queryset = queryset.exclude(pk=getattr(actor.user, "pk", None))
 
     if actor.is_superadmin:

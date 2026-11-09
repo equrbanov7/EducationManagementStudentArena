@@ -27,6 +27,7 @@ from core.constants import AuditAction
 from core.rate_limit import record_rate_limit_hit
 
 from .. import profile_completion as policy
+from .. import shared_fin
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
@@ -47,10 +48,13 @@ class CompletionResult:
     saved: list = field(default_factory=list)
     errors: dict = field(default_factory=dict)
     remaining: list = field(default_factory=list)
+    #: Sahib 2026-11-09: FİN başqa (fərqli ailədən, eyni adlı) hesabdadır — «hər iki hesab mənimdir?» təsdiqi
+    #: gözlənilir; heç nə yazılmayıb. Dəyərlər: ``holder_name``, ``holder_family`` (``student`` / ``staff``).
+    link_offer: dict | None = None
 
     @property
     def ok(self) -> bool:
-        return not self.errors
+        return not self.errors and self.link_offer is None
 
 
 def _fin_conflict_message() -> str:
@@ -59,6 +63,9 @@ def _fin_conflict_message() -> str:
         "Bu FİN kod başqa hesabda qeydə alınıb. Düzgün yazdığınıza əminsinizsə, RİM-ə müraciət edin — "
         "hesablarınız yoxlanılıb birləşdiriləcək.",
     )
+
+
+fin_conflict_message = _fin_conflict_message
 
 
 def _rate_limited_message(retry_after: int | None) -> str:
@@ -116,9 +123,9 @@ def _clean(missing_keys, data) -> tuple[dict, dict]:
     return values, errors
 
 
-def _conflicts(values: dict, user) -> dict:
+def _conflicts(values: dict, user, *, holder=None) -> dict:
     errors = {}
-    if policy.FIELD_FIN in values and _fin_taken(values[policy.FIELD_FIN], user):
+    if policy.FIELD_FIN in values and holder is None and _fin_taken(values[policy.FIELD_FIN], user):
         errors[policy.FIELD_FIN] = _fin_conflict_message()
     if policy.FIELD_EMAIL in values and _email_taken(values[policy.FIELD_EMAIL], user):
         errors[policy.FIELD_EMAIL] = _email_conflict_message()
@@ -164,16 +171,32 @@ def complete_profile(request, data) -> CompletionResult:
             message = _rate_limited_message(retry_after)
             keys = [key for key in (policy.FIELD_FIN, policy.FIELD_EMAIL) if key in values]
             return CompletionResult(errors={key: message for key in keys}, remaining=missing_keys)
-    conflicts = _conflicts(values, user)
+    # Sahib 2026-11-09: FİN eyni adlı, fərqli ailədən (tələbə ↔ heyət) hesabdadırsa — bağ təklifi; təsdiq gələndə
+    # FİN hər iki hesabda qalır (``shared_fin.link_accounts``), bir daha soruşulmur.
+    holder = shared_fin.link_offer(values[policy.FIELD_FIN], user) if policy.FIELD_FIN in values else None
+    conflicts = _conflicts(values, user, holder=holder)
     if conflicts:
         _audit(request, user, reason=AUDIT_REASON_CONFLICT, fields=list(conflicts), extra={"outcome": "duplicate"})
     errors.update(conflicts)
     if errors:
         return CompletionResult(errors=errors, remaining=missing_keys)
+    if holder is not None and str(data.get(shared_fin.CONFIRM_FIELD) or "") != "1":
+        _audit(request, user, reason=AUDIT_REASON_CONFLICT, fields=[policy.FIELD_FIN], extra={"outcome": "link_offer"})
+        return CompletionResult(
+            remaining=missing_keys,
+            link_offer={
+                "holder_name": holder.get_full_name() or holder.username,
+                "holder_family": shared_fin.family_of(holder),
+            },
+        )
 
     try:
         with transaction.atomic():
-            _write(user, values, completed=True)
+            if holder is not None:
+                _write(user, {k: v for k, v in values.items() if k != policy.FIELD_FIN}, completed=True)
+                shared_fin.link_accounts(user, holder, fin=values[policy.FIELD_FIN], request=request)
+            else:
+                _write(user, values, completed=True)
     except IntegrityError:
         # Yoxlama ilə yazı arasında eyni FİN / e-poçt başqa hesaba yazılıb (yarış) — unikal indeks qoruyur.
         user.refresh_from_db(fields=["email"])
@@ -198,4 +221,5 @@ __all__ = [
     "IDENTITY_CHECK_SCOPE",
     "CompletionResult",
     "complete_profile",
+    "fin_conflict_message",
 ]
