@@ -13,7 +13,7 @@
 (function (window, document) {
     "use strict";
 
-    var STATE = { catalog: null, rows: [], task: null, readiness: null, teachers: [] };
+    var STATE = { catalog: null, rows: [], cards: [], task: null, readiness: null, teachers: [] };
 
     function root() {
         return document.querySelector("[data-wl-root]");
@@ -134,7 +134,7 @@
             return;
         }
         var url = List.url(host.dataset.rowsUrl, params, {
-            keep: fresh ? 0 : STATE.rows.length,
+            keep: fresh ? 0 : (STATE.cards ? STATE.cards.length : STATE.rows.length),
             panel: !(arg && arg.panel === false),
         });
         setBusy(true);
@@ -143,13 +143,18 @@
             .then(function (payload) {
                 if (mine !== STATE.rowsSeq) return;
                 STATE.rows = payload.rows || [];
+                STATE.cards = payload.cards || null; // «bir fənn = bir kart» (yalnız kafedra rejimi)
                 STATE.task = payload.task || null;
                 STATE.allChairs = allChairs && !!payload.all_chairs;
                 if (STATE.allChairs) STATE.teachers = []; // kafedrasız rejimdə müəllim paneli yoxdur
                 if (payload.teachers) STATE.teachers = payload.teachers; // yalnız ilk dilimdə gəlir
                 var Render = window.EMSWorkloadRender;
                 if (Render) {
-                    Render.rows(q("[data-wl-rows]"), STATE.rows, activityLabels(), { teacher: List.teacher() });
+                    if (STATE.cards && Render.cards) {
+                        Render.cards(q("[data-wl-rows]"), STATE.cards, activityLabels(), { teacher: List.teacher() });
+                    } else {
+                        Render.rows(q("[data-wl-rows]"), STATE.rows, activityLabels(), { teacher: List.teacher() });
+                    }
                     if (payload.teachers) {
                         Render.teachers(q("[data-wl-teacher-panel]"), STATE.teachers, { active: List.teacher() });
                     }
@@ -481,6 +486,8 @@
             form.elements.hours.value = assignment ? assignment.hours : 1;
             form.elements.groups_note.value = assignment ? assignment.groups_note || "" : "";
             form.elements.is_hourly_paid.checked = !!(assignment && assignment.is_hourly_paid);
+            if (form.elements.group_id) form.elements.group_id.value = assignment ? assignment.group_id || "" : ""; // qrup bağı
+            if (form.elements.sub_number) form.elements.sub_number.value = assignment ? assignment.sub_number || "" : "";
         }
         var activitySelect = q("[data-wl-assign-activity]");
         if (activitySelect && Render) {
@@ -517,6 +524,7 @@
         root: root,
         modal: modal,
         rowById: rowById,
+        cardById: function (id) { return (STATE.cards || []).filter(function (c) { return c.id === id; })[0] || null; },
         loadRows: loadRows,
         filters: filters,
         labels: activityLabels,
@@ -580,6 +588,7 @@
             if (!root()) return; // bölmə swap olunmayıb — null-safe
             STATE.catalog = null;
             STATE.rows = [];
+            STATE.cards = []; // 2026-11-09: fənn kartları
             STATE.focusedRow = "";
             if (window.EMSWorkloadList) window.EMSWorkloadList.restore(); // müəllim süzgəci URL-dən qayıdır
             fillCatalogSelects();

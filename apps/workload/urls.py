@@ -33,6 +33,8 @@ urlpatterns = [
     path("bolgu/sil/", views.unassign_view, name="unassign"),
     path("bolgu/tesdiq/", views.confirm, name="confirm"),
     path("duzelis/", views.amend, name="amend"),
+    # Sahib 2026-11-09: «bir fənn = bir kart» — mühazirə axınlarının (patok) yazılması.
+    path("patok/axinlar/", views.patok_streams, name="patok_streams"),
     # Mərhələ 4 — zəncirin bütün mutasiyaları (tək endpoint)
     path("emel/", workload_action, name="action"),
     # Sahib 2026-10-23: Tədris şöbəsinin «Dərs yükü faylı» Excel şablonu

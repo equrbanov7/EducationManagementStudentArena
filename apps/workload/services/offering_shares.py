@@ -14,7 +14,13 @@ SHARE_COUNTER_KEYS = tuple(
 
 
 def _assignment_group(assignment, row, group, *, known_groups=None):
-    """True/False=exact fiziki qrup qeydi; None=strukturlaşdırılmamış yarımqrup mətni."""
+    """True/False=exact fiziki qrup qeydi; None=strukturlaşdırılmamış yarımqrup mətni.
+
+    Sahib 2026-11-09: struktur bağ (``TeacherAssignment.group``) qeyddən ÜSTÜNDÜR — varsa qrup məhz odur.
+    """
+    group_id = getattr(assignment, "group_id", None)
+    if group_id is not None:
+        return group.pk == group_id
     note = (assignment.groups_note or "").strip()
     if not note:
         return True
@@ -34,7 +40,14 @@ def _assignment_group(assignment, row, group, *, known_groups=None):
 
 
 def plan_for_rows(rows, *, group, owner_rows=None):
+    """Açılışın (qrupun) növ payları: ``teachers`` (müəllim → növlər), ``sections`` (müəllim → növ → alt qrup
+    nömrələri — sahib 2026-11-09, bir jurnalda iki lab müəllimi), ``ambiguous``.
+
+    Eyni növ iki müəllimdədirsə pay yalnız hər ikisinin AYRI alt qrupu olanda yazılır; əks halda (bölməsiz
+    bölgü, tanınmayan qeyd) əvvəlki kimi «qeyri-müəyyən» — heç kimə bütün-roster girişi açılmır.
+    """
     teachers, activity_owners = defaultdict(set), defaultdict(set)
+    sections: dict = defaultdict(lambda: defaultdict(set))
     unclear_group = False
     for row in rows:
         if not plan_reached_chair(row.task):
@@ -47,10 +60,29 @@ def plan_for_rows(rows, *, group, owner_rows=None):
                     continue
                 teachers[assignment.teacher_id].add(assignment.activity)
                 activity_owners[assignment.activity].add(assignment.teacher_id)
+                number = getattr(assignment, "sub_number", None)
+                if number:
+                    sections[assignment.teacher_id][assignment.activity].add(int(number))
+    ambiguous = unclear_group
+    for activity, owners in activity_owners.items():
+        if len(owners) < 2:
+            continue
+        taken: set = set()
+        for teacher_id in owners:
+            numbers = sections[teacher_id].get(activity) or set()
+            if not numbers or taken & numbers:
+                ambiguous = True
+                break
+            taken |= numbers
     return {
         "owner_id": getattr(owner_for_rows(rows if owner_rows is None else owner_rows), "pk", None),
         "teachers": teachers,
-        "ambiguous": unclear_group or any(len(owners) > 1 for owners in activity_owners.values()),
+        "sections": {
+            teacher_id: {activity: sorted(numbers) for activity, numbers in kinds.items() if numbers}
+            for teacher_id, kinds in sections.items()
+            if any(kinds.values())
+        },
+        "ambiguous": ambiguous,
     }
 
 

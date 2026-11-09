@@ -15,6 +15,7 @@ from .distribution_api import (
 )
 from .intensive_api import intensive_lookup
 from .row_transfer_api import row_transfer, row_transfer_destinations
+from .streams_api import patok_streams
 from .teacher_api import my_export, my_rows
 
 __all__ = [
@@ -26,6 +27,7 @@ __all__ = [
     "my_export",
     "my_rows",
     "options",
+    "patok_streams",
     "row_delete",
     "row_save",
     "row_transfer",

@@ -115161,6 +115161,58 @@ msgctxt "registrar.journal"
 msgid "müəllim təyin olunmayıb"
 msgstr "no teacher assigned"
 
+msgctxt "accounts.workload"
+msgid "Alt qrup"
+msgstr "Sub-group"
+
+msgctxt "accounts.workload"
+msgid "Aşağıda hər sətri bir axına salın və axının mühazirəçisini seçin. Bir sətrin qrupları birlikdə hərəkət edir — qrupları ayırmaq üçün sətri «Redaktə» ilə bölün."
+msgstr "Below, put each row into a stream and pick the stream's lecturer. The groups of one row move together — to separate them, split the row via “Edit”."
+
+msgctxt "accounts.workload"
+msgid "Hər qrup üçün müəllimi və saatı seçin; bir qrupa bir neçə müəllim (saat bölgüsü və ya Lab-1 / Lab-2) əlavə edilə bilər. Saat sətrin cəmindən çox ola bilməz."
+msgstr "Pick a teacher and hours for each group; a group may get several teachers (hour split or Lab-1 / Lab-2). Hours cannot exceed the row total."
+
+msgctxt "accounts.workload"
+msgid "Kafedranın illik tədris tapşırığını müəllimlər arasında bölün. Eyni fənn, semestr və kredit — bir kartdır: mühazirə axınları (patok), seminar və laboratoriya qrup-qrup bölünür; qalıq saat real vaxtda göstərilir. Bölgü təsdiqlənəndə müəllimlərə bildiriş gedir və elektron jurnal açılışları yaradılır."
+msgstr "Distribute the department's annual teaching assignment among teachers. Same subject, semester and credits form one card: lecture streams (joint lectures), seminars and labs are distributed group by group; remaining hours update live. Confirming the distribution notifies teachers and creates the e-journal offerings."
+
+msgctxt "accounts.workload"
+msgid "Mühazirə axınları (patok)"
+msgstr "Lecture streams (joint lectures)"
+
+msgctxt "accounts.workload"
+msgid "Nəticə"
+msgstr "Result"
+
+msgctxt "accounts.workload"
+msgid "Patok — bir neçə qrupun mühazirəni birlikdə dinləməsidir. Eyni axındakı qrupların mühazirəsi müəllimin yükünə BİR dəfə düşür."
+msgstr "A joint lecture (stream) is several groups attending the lecture together. The lecture of groups in one stream counts ONCE in the teacher's load."
+
+msgctxt "accounts.workload"
+msgid "Qayda"
+msgstr "Rule"
+
+msgctxt "accounts.workload"
+msgid "Qruplar üzrə bölgü"
+msgstr "Distribution by groups"
+
+msgctxt "accounts.workload"
+msgid "Sil"
+msgstr "Delete"
+
+msgctxt "accounts.workload"
+msgid "Sistem axını «aparıcı sətir» bağı ilə tanıyır: axının mühazirə saatı aparıcı sətirdə qalır, digər sətirlərdə mühazirə cəmi 0 olur və onlar aparıcıya bağlanır. Hər qrupun jurnalında mühazirə öz saatı ilə görünür."
+msgstr "The system recognises a stream by the “lead row” link: the stream's lecture hours stay on the lead row, the other rows get a lecture total of 0 and are linked to the lead. Each group's journal still shows the lecture with its own hours."
+
+msgctxt "accounts.workload"
+msgid "Sətirlər → axın"
+msgstr "Rows → stream"
+
+msgctxt "accounts.workload"
+msgid "Ödəniş"
+msgstr "Payment"
+
 msgctxt "accounts.syllabus"
 msgid "Əsas və əlavə ədəbiyyat sahələrinin hər biri doldurulmalıdır. Mənbələri istənilən formada yaza bilərsiniz — alt-alta, vergüllə və ya bir sətirdə."
 msgstr "Both the primary and the additional literature fields must be filled in. You can write the sources in any form — one per line, separated by commas or on a single line."

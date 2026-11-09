@@ -159,6 +159,9 @@
         var card = q('[data-wl-row][data-row-id="' + focus.replace(/[^0-9a-fA-F-]/g, "") + '"]');
         if (!card) return;
         D.state.focusedRow = focus;
+        // 2026-11-09: sətir fənn kartının açılan «Sətirlər» hissəsindədirsə — əvvəl açılır.
+        var details = card.closest ? card.closest("[data-wl-card-rows]") : null;
+        if (details) details.open = true;
         card.classList.add("is-focus");
         card.tabIndex = -1;
         if (card.scrollIntoView) card.scrollIntoView({ block: "center" });

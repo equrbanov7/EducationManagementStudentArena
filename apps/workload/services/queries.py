@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
-from django.db.models import Q, Sum
+from django.db.models import Prefetch, Q, Sum
 
 from core.search_text import tolerant_q
 
@@ -67,14 +67,20 @@ def _teacher_q(task, teacher: str, activity: str = "") -> Q:
     return condition
 
 
-def task_rows(task, *, season: str = "", search: str = "", teacher: str = "", status: str = "", activity: str = ""):
-    queryset = (
+def base_rows_queryset(task):
+    """Tapşırığın sətirləri — kart/sətir serializasiyasının prefetch dəsti (qruplar, bölgülər + müəllim + qrup)."""
+    assignments = TeacherAssignment.objects.select_related("teacher", "group").order_by("activity", "created_at")
+    return (
         TeachingTaskRow.objects.filter(task=task)
         .select_related("subject", "specialty", "period", "intensive_offering")
-        .prefetch_related("groups", "assignments__teacher")
+        .prefetch_related("groups", Prefetch("assignments", queryset=assignments))
         # `pk` — səhifələmə sabit olsun (eyni `order` dəyəri olan sətirlər yerini dəyişməsin).
         .order_by("season", "order", "created_at", "pk")
     )
+
+
+def task_rows(task, *, season: str = "", search: str = "", teacher: str = "", status: str = "", activity: str = ""):
+    queryset = base_rows_queryset(task)
     if season:
         queryset = queryset.filter(season=season)
     if teacher:
@@ -166,13 +172,31 @@ def rows_page(
     offset: int = 0,
     limit: int = 0,
     focus_row=None,
+    view: str = "",
 ) -> dict:
     """Tənbəl yükləmə (2026-10-25): süzgəcə uyğun sətirlərin ``offset`` / ``limit`` dilimi + cəmi say.
+
+    ``view="cards"`` (sahib 2026-11-09): eyni fənn + semestr + kredit sətirləri BİR kartda, səhifələmə kart üzrə —
+    :func:`.subject_cards.cards_page` (cavabda ``cards`` + düz ``rows``).
 
     Sorğu sayı sətir sayından asılı deyil (dilim + qruplar + təyinatlar prefetch, balans BİR GROUP BY).
     ``limit=0`` — sətir oxunmur (yalnız say). ``focus_row`` (ilk dilim) — «Redaktə et» keçidinin sətri dilimdən
     kənardadırsa, dilim ona qədər genişləndirilir ki, JS ona sürüşə bilsin.
     """
+    if view == "cards":
+        from .subject_cards import cards_page
+
+        return cards_page(
+            task,
+            season=season,
+            search=search,
+            teacher=teacher,
+            status=status,
+            activity=activity,
+            offset=offset,
+            limit=limit,
+            focus_row=focus_row,
+        )
     queryset = task_rows(task, season=season, search=search, teacher=teacher, status=status, activity=activity)
     total = queryset.count()
     offset = max(int(offset or 0), 0)
@@ -254,6 +278,10 @@ def _serialize(task, rows: list, *, amend_targets=None) -> tuple[list[dict], lis
                         "is_vacant": assignment.teacher_id is None,
                         "is_hourly_paid": assignment.is_hourly_paid,
                         "groups_note": assignment.groups_note,
+                        # Sahib 2026-11-09: struktur qrup bağı + lab/seminar alt qrupu nömrəsi.
+                        "group_id": str(assignment.group_id) if assignment.group_id else "",
+                        "group_name": assignment.group.name if assignment.group_id else "",
+                        "sub_number": assignment.sub_number,
                     }
                     for assignment in row.assignments.all()
                 ],
@@ -531,6 +559,7 @@ def chair_tasks(*, organization, chair_ids, academic_year: str = ""):
 __all__ = [
     "MAX_PAGE_LIMIT",
     "VACANT_FILTER",
+    "base_rows_queryset",
     "chair_tasks",
     "row_search_q",
     "rows_page",

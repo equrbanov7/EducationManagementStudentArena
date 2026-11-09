@@ -3218,3 +3218,149 @@ msgstr "Joint lecture"
 #, javascript-format
 msgid "Patok · %(groups)s ilə birlikdə"
 msgstr "Joint lecture · together with %(groups)s"
+
+#, javascript-format
+msgid "%(credits)s kredit"
+msgstr "%(credits)s credits"
+
+#, javascript-format
+msgid "%(hours)s s"
+msgstr "%(hours)s h"
+
+#, javascript-format
+msgid "%(hours)s saat"
+msgstr "%(hours)s hours"
+
+#, javascript-format
+msgid "%(kind)s bölgüsü — %(subject)s"
+msgstr "%(kind)s distribution — %(subject)s"
+
+#, javascript-format
+msgid "%(n)s axın (qruplar ayrılmayıb)"
+msgstr "%(n)s streams (groups not separated)"
+
+#, javascript-format
+msgid "%(n)s axın · yükə %(hours)s"
+msgstr "%(n)s stream(s) · %(hours)s in load"
+
+#, javascript-format
+msgid "%(n)s qrup"
+msgstr "%(n)s groups"
+
+#, javascript-format
+msgid "%(n)s qrup · %(hours)s"
+msgstr "%(n)s groups · %(hours)s"
+
+#, javascript-format
+msgid "%(n)s tələbə"
+msgstr "%(n)s students"
+
+msgid "Aparıcı başqa kartdadır"
+msgstr "Lead row is on another card"
+
+msgid "Aparıcı seçilməyib — mühazirə yükə düşmür"
+msgstr "No lead row selected — lecture is not counted in the load"
+
+#, javascript-format
+msgid "Axın %(n)s"
+msgstr "Stream %(n)s"
+
+msgid "Axınları dəyiş"
+msgstr "Change streams"
+
+msgid "Bir sətrin qrupları birlikdə hərəkət edir — ayırmaq üçün sətri «Redaktə» ilə bölün."
+msgstr "The groups of one row move together — split the row via “Edit” to separate them."
+
+msgid "Birgə — saat başqa sətirdədir"
+msgstr "Joint — hours are on another row"
+
+msgid "Bu fəndə aparıcısı seçilməmiş patok sətri var — «Axınları dəyiş» ilə qrupları axına bağlayın."
+msgstr "This subject has a joint-lecture row without a lead — link the groups to a stream via “Change streams”."
+
+msgid "Bütün qrup"
+msgstr "Whole group"
+
+msgid "Bütün qruplar birlikdə"
+msgstr "All groups together"
+
+#, javascript-format
+msgid "Göstərilir: %(shown)s / %(total)s fənn"
+msgstr "Showing %(shown)s of %(total)s subjects"
+
+msgid "Mühazirə"
+msgstr "Lecture"
+
+#, javascript-format
+msgid "Mühazirəsiz qruplar: %(groups)s"
+msgstr "Groups without lecture: %(groups)s"
+
+msgid "Mühazirəçi"
+msgstr "Lecturer"
+
+msgid "Mühazirəçi seçilməyib"
+msgstr "No lecturer selected"
+
+msgid "Müəllim axtar…"
+msgstr "Search teacher…"
+
+msgid "Müəllim əlavə et"
+msgstr "Add teacher"
+
+msgid "Patok: bir axının mühazirəsi müəllimin yükünə bir dəfə düşür və hər qrupun jurnalında görünür."
+msgstr "Joint lecture: a stream's lecture counts once in the teacher's load and appears in every group's journal."
+
+#, javascript-format
+msgid "Qalıq %(hours)s"
+msgstr "Remaining %(hours)s"
+
+msgid "Qrup qeydi tanınmadı"
+msgstr "Group note not recognised"
+
+msgid "Qrupsuz bölgü"
+msgstr "Distribution without a group"
+
+msgid "Saat"
+msgstr "Hours"
+
+msgid "Saat sıfırdan böyük olmalıdır."
+msgstr "Hours must be greater than zero."
+
+#, javascript-format
+msgid "Sətirlər (%(n)s)"
+msgstr "Rows (%(n)s)"
+
+msgid "Sətri sil"
+msgstr "Remove line"
+
+#, javascript-format
+msgid "Sətrin cəmindən çox saat bölünüb: %(groups)s"
+msgstr "More hours allocated than the row total: %(groups)s"
+
+#, javascript-format
+msgid "Tapşırıq sətirləri (%(n)s) — redaktə, silmə, saatlar"
+msgstr "Assignment rows (%(n)s) — edit, delete, hours"
+
+msgid "Təyin olunmayıb"
+msgstr "Not assigned"
+
+msgid "bir sətir"
+msgstr "one row"
+
+#, javascript-format
+msgid "mühazirə %(hours)s · yükə bir dəfə"
+msgstr "lecture %(hours)s · counted once"
+
+#, javascript-format
+msgid "qrup planı %(hours)s"
+msgstr "group plan %(hours)s"
+
+msgid "saathesabı"
+msgstr "hourly paid"
+
+#, javascript-format
+msgid "sətir qalığı %(hours)s"
+msgstr "row remaining %(hours)s"
+
+#, javascript-format
+msgid "№%(n)s"
+msgstr "No. %(n)s"
