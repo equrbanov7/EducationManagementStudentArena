@@ -7,7 +7,8 @@ kafedrası» tapşırığındadır — faylda hər ikisi Politologiyanın yükü
 ``other_chair_row`` deyə ATLAYIR (saat iki dəfə sayılmasın). Jurnalların hamısı var və aparılır — yalnız sətirlər
 yerində deyil. :data:`PLAN`:
 
-* 6 sətir → Politologiya tapşırığı (``task`` dəyişir; faculty/ixtisas/qrup toxunulmaz);
+* 6 sətir → Politologiya tapşırığı (``task`` dəyişir; faculty/ixtisas/qrup toxunulmaz); Məmmədov Adıgözəlin 2 payız
+  sətri (sosial iş fənləri, Sİ qrupları) Politologiyadan → Sosial iş tapşırığı (sahib 2026-11-09);
 * Heydərlinin bölgüləri faylda «saathesabı: bəli» → ``is_hourly_paid=True``;
 * «Politologiya 533DBİ» (S30, ayrıca sətir) faylda «533 İ, 533 DBİ, 533 ML, 533 MU» BİR sətirdir (M15 S15) →
   533DBİ qrupu ML/MU/İ sətrinə əlavə olunur, ayrıca sətir bölgüsü ilə silinir (jurnal qalır — açılış sətrə bağlı
@@ -37,34 +38,43 @@ REASON = "Sahib 2026-11-09: Politologiya kafedrasının rəsmi dərs yükü fayl
 
 #: Hədəf: Politologiya və beynəlxalq münasibətlər kafedrasının 2026/2027 tapşırığı.
 TARGET_TASK = "574fdd61-6f93-4387-8b1c-55f7b98bfab2"
+#: Sosial iş kafedrasının 2026/2027 tapşırığı (sahib 2026-11-09: «fənn hansı kafedraya aiddirsə ora»).
+SOSIAL_TASK = "a2415422-6b68-4752-920c-47502b6a5ae1"
+IT_TASK = "663dbec7-6043-4b12-9f69-9d1278a1b7cb"
+DIZAYN_TASK = "d52fe9ce-94ae-422f-8829-69e988f986f9"
 
-#: Köçürülən sətirlər (id, mənbə tapşırıq, saathesabı?).
+#: Köçürülən sətirlər (id, mənbə tapşırıq, hədəf tapşırıq, saathesabı?).
 MOVES = (
-    # Heydərli Aytən — İnformasiya texnologiyaları kafedrası tapşırığından
-    {
-        "row": "7f26354c-e1e6-4552-92a0-a663837afcb9",
-        "source_task": "663dbec7-6043-4b12-9f69-9d1278a1b7cb",
-        "hourly": True,
-    },
-    {
-        "row": "86b25c1e-0427-48eb-8fbf-3a2477a4452a",
-        "source_task": "663dbec7-6043-4b12-9f69-9d1278a1b7cb",
-        "hourly": True,
-    },
-    {
-        "row": "5816b4bd-f9a5-4976-818e-794f95239fd1",
-        "source_task": "663dbec7-6043-4b12-9f69-9d1278a1b7cb",
-        "hourly": True,
-    },
-    # Əsgərov Murad — Dizayn kafedrası tapşırığından
+    # Heydərli Aytən — İnformasiya texnologiyaları tapşırığından → Politologiya (faylda saathesabı «bəli»)
+    {"row": "7f26354c-e1e6-4552-92a0-a663837afcb9", "source_task": IT_TASK, "target_task": TARGET_TASK, "hourly": True},
+    {"row": "86b25c1e-0427-48eb-8fbf-3a2477a4452a", "source_task": IT_TASK, "target_task": TARGET_TASK, "hourly": True},
+    {"row": "5816b4bd-f9a5-4976-818e-794f95239fd1", "source_task": IT_TASK, "target_task": TARGET_TASK, "hourly": True},
+    # Əsgərov Murad — Dizayn tapşırığından → Politologiya
     {
         "row": "66f3c6c3-c09d-4012-837f-f1d74b7ecb1c",
-        "source_task": "d52fe9ce-94ae-422f-8829-69e988f986f9",
+        "source_task": DIZAYN_TASK,
+        "target_task": TARGET_TASK,
         "hourly": False,
     },
     {
         "row": "6cb19568-2c2d-480e-afa2-fefdc9b729d5",
-        "source_task": "d52fe9ce-94ae-422f-8829-69e988f986f9",
+        "source_task": DIZAYN_TASK,
+        "target_task": TARGET_TASK,
+        "hourly": False,
+    },
+    # Məmmədov Adıgözəl — Politologiya tapşırığından → Sosial iş («bu semestr bizdə dərsi yoxdur»; fənnlər sosial iş
+    # fənləridir: Sosial layihələrin idarəedilməsi 134 Sİ rus, Keys menecment 135 Sİ ing). «BM-də mental
+    # portretologiya» (133 Sİ ing) beynəlxalq münasibətlər fənnidir — Politologiyada qalır.
+    {
+        "row": "7ef9cf41-fa9d-4052-81ad-4ee9d5d1d255",
+        "source_task": TARGET_TASK,
+        "target_task": SOSIAL_TASK,
+        "hourly": False,
+    },
+    {
+        "row": "33f5ff81-9aa7-4dcc-bec5-ed64a9aac0af",
+        "source_task": TARGET_TASK,
+        "target_task": SOSIAL_TASK,
         "hourly": False,
     },
 )
@@ -92,8 +102,11 @@ def _row(organization, row_id, task_ids):
 def run(*, organization, actor, counts: Counter) -> None:
     TeachingTask = django_apps.get_model("workload", "TeachingTask")
     TeacherAssignment = django_apps.get_model("workload", "TeacherAssignment")
-    target = TeachingTask.objects.filter(organization=organization, pk=TARGET_TASK).first()
-    if target is None:
+    targets = {
+        pk: TeachingTask.objects.filter(organization=organization, pk=pk).first()
+        for pk in {spec["target_task"] for spec in MOVES} | {TARGET_TASK}
+    }
+    if any(task is None for task in targets.values()):
         raise CommandError("task_rows_move_target_missing")
 
     def audit(row, *, old, new):
@@ -138,16 +151,16 @@ def run(*, organization, actor, counts: Counter) -> None:
 
     # 2) Sətirlər hədəf tapşırığa; saathesabı bayrağı fayla görə.
     for spec in MOVES:
-        row = _row(organization, spec["row"], (spec["source_task"], TARGET_TASK))
+        row = _row(organization, spec["row"], (spec["source_task"], spec["target_task"]))
         if row is None:
             counts["row_missing"] += 1
             continue
         assignments = TeacherAssignment.objects.filter(organization=organization, row=row)
-        if str(row.task_id) == TARGET_TASK:
+        if str(row.task_id) == spec["target_task"]:
             counts["already_moved"] += 1
         else:
-            audit(row, old={"task": str(row.task_id)}, new={"task": TARGET_TASK, "hourly": spec["hourly"]})
-            row.task = target
+            audit(row, old={"task": str(row.task_id)}, new={"task": spec["target_task"], "hourly": spec["hourly"]})
+            row.task = targets[spec["target_task"]]
             row.save(update_fields=["task", "updated_at"])
             counts["rows_moved"] += 1
         changed = assignments.exclude(is_hourly_paid=spec["hourly"]).update(is_hourly_paid=spec["hourly"])

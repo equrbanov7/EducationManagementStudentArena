@@ -29,6 +29,7 @@ class MovePolitologiyaRowsTests(TestCase):
             cls.it = make_structure(cls.org, code="IT")
             cls.dz = make_structure(cls.org, code="DZ")
             cls.pol = make_structure(cls.org, code="POL")
+            cls.sos = make_structure(cls.org, code="SOS")
             cls.actor = User.objects.create_superuser("mpr_actor", "mpr_actor@qku.edu.az", "pw")
             cls.teacher = User.objects.create_user("mpr_heyderli", "h@qku.edu.az", "pw")
             it_task = make_task(cls.org, cls.it["chair"], status=TaskStatus.AMENDED)
@@ -37,9 +38,19 @@ class MovePolitologiyaRowsTests(TestCase):
             TeachingTask.objects.filter(pk=dz_task.pk).update(id=command_module.MOVES[3]["source_task"])
             pol_task = make_task(cls.org, cls.pol["chair"], status=TaskStatus.AMENDED)
             TeachingTask.objects.filter(pk=pol_task.pk).update(id=command_module.TARGET_TASK)
+            sos_task = make_task(cls.org, cls.sos["chair"], status=TaskStatus.AMENDED)
+            TeachingTask.objects.filter(pk=sos_task.pk).update(id=command_module.SOSIAL_TASK)
             cls.it_task = TeachingTask.objects.get(pk=command_module.MOVES[0]["source_task"])
             cls.dz_task = TeachingTask.objects.get(pk=command_module.MOVES[3]["source_task"])
             cls.pol_task = TeachingTask.objects.get(pk=command_module.TARGET_TASK)
+            cls.sos_task = TeachingTask.objects.get(pk=command_module.SOSIAL_TASK)
+            cls.task_by_id = {str(x.pk): x for x in (cls.it_task, cls.dz_task, cls.pol_task, cls.sos_task)}
+            cls.stack_by_task = {
+                str(cls.it_task.pk): cls.it,
+                str(cls.dz_task.pk): cls.dz,
+                str(cls.pol_task.pk): cls.pol,
+                str(cls.sos_task.pk): cls.sos,
+            }
             cls.dbi = OrgUnit.objects.create(
                 organization=cls.org,
                 name="533DBİ",
@@ -49,8 +60,8 @@ class MovePolitologiyaRowsTests(TestCase):
             )
             OrgUnit.objects.filter(pk=cls.dbi.pk).update(id=command_module.MERGE["group"])
             for spec in command_module.MOVES:
-                stack = cls.it if spec["source_task"] == str(cls.it_task.pk) else cls.dz
-                task = cls.it_task if spec["source_task"] == str(cls.it_task.pk) else cls.dz_task
+                stack = cls.stack_by_task[spec["source_task"]]
+                task = cls.task_by_id[spec["source_task"]]
                 cls._row(task, stack, spec["row"], lecture=15, seminar=15, groups_text="533ML, 533MU, 533İ")
                 for activity in (Activity.LECTURE, Activity.SEMINAR):
                     TeacherAssignment.objects.create(
@@ -105,20 +116,21 @@ class MovePolitologiyaRowsTests(TestCase):
     def test_dry_run_counts_and_writes_nothing(self):
         counts = self._call()
         self.assertEqual(counts["mode"], "dry_run")
-        self.assertEqual((counts["rows_moved"], counts["merged_rows_removed"]), ("5", "1"))
+        self.assertEqual((counts["rows_moved"], counts["merged_rows_removed"]), ("7", "1"))
         with bypass_rls():
-            self.assertEqual(TeachingTaskRow.objects.filter(task=self.pol_task).count(), 0)
+            self.assertEqual(TeachingTaskRow.objects.filter(task=self.pol_task).count(), 2)  # Məmmədov (hələ)
             self.assertTrue(TeachingTaskRow.objects.filter(pk=command_module.MERGE["row"]).exists())
 
     def test_apply_moves_rows_merges_dbi_and_marks_hourly(self):
         counts = self._call(apply=True)
         self.assertEqual(counts["mode"], "apply")
         self.assertEqual(
-            (counts["rows_moved"], counts["merged_rows_removed"], counts["merged_assignments_removed"]), ("5", "1", "1")
+            (counts["rows_moved"], counts["merged_rows_removed"], counts["merged_assignments_removed"]), ("7", "1", "1")
         )
         self.assertEqual(counts["assignments_hourly_set"], "6")  # Heydərlinin 3 sətri × 2 bölgü
         with bypass_rls():
             self.assertEqual(TeachingTaskRow.objects.filter(task=self.pol_task).count(), 5)
+            self.assertEqual(TeachingTaskRow.objects.filter(task=self.sos_task).count(), 2)
             self.assertEqual(TeachingTaskRow.objects.filter(task__in=[self.it_task, self.dz_task]).count(), 0)
             self.assertFalse(TeachingTaskRow.objects.filter(pk=command_module.MERGE["row"]).exists())
             into = TeachingTaskRow.objects.get(pk=command_module.MERGE["into_row"])
@@ -128,7 +140,7 @@ class MovePolitologiyaRowsTests(TestCase):
             esgerov_rows = [spec["row"] for spec in command_module.MOVES if not spec["hourly"]]
             self.assertFalse(TeacherAssignment.objects.filter(row_id__in=esgerov_rows, is_hourly_paid=True).exists())
         again = self._call(apply=True)
-        self.assertEqual((again["already_moved"], again["already_merged"]), ("5", "1"))
+        self.assertEqual((again["already_moved"], again["already_merged"]), ("7", "1"))
         self.assertNotIn("rows_moved", again)
 
     def test_workflow_wiring(self):
