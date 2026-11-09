@@ -139,6 +139,8 @@ def capture(username, public_key, output_dir, *, diagnostic=None):
                 raise ValueError("snapshot_row_budget_exceeded")
             total += count
             manifest["tables"][label] = {"rows": count, "fields": spec["fields"]}
+            if spec.get("body_policy"):
+                manifest["tables"][label]["body_policy"] = spec["body_policy"]
             observed = page = 0
             last_pk = None
             for _query_page in range((count + CHUNK_ROWS - 1) // CHUNK_ROWS):

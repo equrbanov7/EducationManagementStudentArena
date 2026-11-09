@@ -15,6 +15,19 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 FINGERPRINT = "f21b002d94fdd65fb346e557e6eb85109f60bda3afa8d8c5a2a14e4b9fc922bf"
 
 
+def verify_body_projection(manifest):
+    schema_file = Path(__file__).resolve().parents[2] / "apps/legacy_import/services/reaudit_snapshot/schemas.json"
+    raw = schema_file.read_bytes()
+    schemas = json.loads(raw)
+    expected = {label: spec["body_policy"] for label, spec in schemas.items() if spec.get("body_policy")}
+    actual = {label: spec["body_policy"] for label, spec in manifest["tables"].items() if spec.get("body_policy")}
+    current_schema = hashlib.sha256(raw).hexdigest()
+    if actual and (actual != expected or manifest.get("schema_sha256") != current_schema):
+        raise ValueError("syllabus_body_projection_changed")
+    if manifest.get("schema_sha256") == current_schema and actual != expected:
+        raise ValueError("syllabus_body_projection_required")
+
+
 def read_private(path, limit):
     if path.is_symlink() or not path.is_file() or path.stat().st_mode & 0o077 or path.stat().st_size > limit:
         raise ValueError("private_bounded_file_required")
@@ -33,6 +46,7 @@ def decode(folder, private_key, output, expected_tool, expected_deployed):
     manifest = json.loads(raw)
     if manifest.get("complete") is not True or manifest.get("format") != "qku-reaudit-state/1":
         raise ValueError("complete_snapshot_required")
+    verify_body_projection(manifest)
     key = serialization.load_pem_private_key(read_private(private_key, 16384), password=None)
     der = key.public_key().public_bytes(serialization.Encoding.DER, serialization.PublicFormat.SubjectPublicKeyInfo)
     if hashlib.sha256(der).hexdigest() != FINGERPRINT:

@@ -162,6 +162,8 @@ def test_complete_capture_executes_all_schemas_with_fixed_tenant(tmp_path, monke
     assert result["tables"] == len(SCHEMAS)
     manifest = json.loads((tmp_path / "manifest.json").read_text())
     assert manifest["complete"] and manifest["read_only"]
+    for label in ("syllabus.SyllabusSection",):
+        assert manifest["tables"][label]["body_policy"] == SCHEMAS[label]["body_policy"]
     rows = json.loads((tmp_path / "registrar.program-0000.enc.json").read_text())["synthetic"]["rows"]
     assert [row["id"] for row in rows] == [str(kept.pk)]
     assert not [q for q in queries if q["sql"].lstrip().upper().startswith(("INSERT ", "UPDATE ", "DELETE "))]
