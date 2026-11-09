@@ -114,6 +114,8 @@ def run(*, organization, actor, items, counts, apply) -> None:
     }
     users = resolve_students(organization, items)
     seen = set()
+    refusals: set = set()
+    counts["_refusals"] = refusals  # ``handle`` ayrıca sətirlərlə çap edir
     for index, item in enumerate(items):
         offering = offerings.get(str(item["offering"]).strip())
         if offering is None or not offering.is_active:
@@ -133,7 +135,11 @@ def run(*, organization, actor, items, counts, apply) -> None:
             with transaction.atomic():
                 guest_roster.add_guest_student(offering=offering, student=student, by_user=actor, reason=reason)
         except ValidationError as exc:
-            counts[refusal_code(" ".join(str(m) for m in exc.messages))] += 1
+            message = " ".join(str(m) for m in exc.messages)
+            code = refusal_code(message)
+            counts[code] += 1
+            if code == "skip_refused":
+                refusals.add(message[:160])  # sistem mətni, şəxsi məlumat yoxdur — səbəbi görmək üçün
             continue
         counts["added"] += 1
         counts[f"added_{'level' if offering.group_id is None else 'group'}"] += 1
@@ -168,5 +174,8 @@ class Command(BaseCommand):
                 run(organization=organization, actor=actor, items=items, counts=counts, apply=bool(options["apply"]))
                 if not options["apply"]:
                     transaction.set_rollback(True)
+        refusals = counts.pop("_refusals", set())
         self.stdout.write(f"{PREFIX} mode={'apply' if options['apply'] else 'dry_run'}")
         self.stdout.write(PREFIX + " " + " ".join(f"{key}={value}" for key, value in sorted(counts.items())))
+        for message in sorted(refusals):
+            self.stdout.write(f"legacy_guests_refusal: {message}")
