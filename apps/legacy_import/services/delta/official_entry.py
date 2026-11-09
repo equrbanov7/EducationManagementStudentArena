@@ -65,6 +65,7 @@ def resolve_targets(run, rows) -> dict:
     ledger = run.ledger_enrollments(keys)
     wanted: dict = {}
     clashing: set = set()
+    unresolved: list = []
     for row in rows:
         semester = int(row.get("semestr") or 0)
         prefix = f"official_entry.sem{semester}"
@@ -79,6 +80,8 @@ def resolve_targets(run, rows) -> dict:
                 found[enrollment.pk] = enrollment
         if len(found) != 1:
             run.count(f"{prefix}.skip_enrollment_{'unresolved' if not found else 'ambiguous'}")
+            if not found:
+                unresolved.append((row, semester))
             continue
         ((pk, enrollment),) = found.items()
         total = _official_total(row) if source == "total" else None
@@ -91,7 +94,58 @@ def resolve_targets(run, rows) -> dict:
         wanted[pk] = (enrollment, value, source, semester, row.get("export_id"), total, row)
     for pk in clashing:
         run.count(f"official_entry.sem{wanted.pop(pk)[3]}.skip_target_conflict")
+    explain_unresolved(run, unresolved)
     return wanted
+
+
+def explain_unresolved(run, unresolved) -> None:
+    """Yazılışı tapılmayan vərəq sətirlərinin SƏBƏBİ (yalnız say + ad; heç nə yazılmır).
+
+    * ``no_student_account`` — köhnə tələbə heç bir hesaba köçməyib;
+    * ``journal_not_imported`` — vərəqin jurnalı (uniqid) ledger-də heç bir tələbə üçün yoxdur (jurnal köçməyib);
+    * ``student_not_in_journal`` — jurnal köçüb, tələbənin hesabı var, amma o jurnalın yazılışında deyil
+      (köhnədə siyahıda idi, yenidə yazılışı yoxdur) — adlar ``official_entry_unresolved`` ilə çıxır.
+    """
+
+    if not unresolved:
+        return
+    from django.apps import apps as django_apps
+
+    from .resolve import ledger_map
+
+    students = ledger_map(run.organization, "student", {str(row["student_id"]) for row, _ in unresolved})
+    journals = {key.split(":", 1)[0] for key in ledger_map(run.organization, "journal_enrollment")}
+    User = django_apps.get_model("auth", "User")
+    users = User.objects.filter(pk__in=[_as_uuid(v) for v in students.values()]).in_bulk()
+    for row, semester in unresolved:
+        prefix = f"official_entry.sem{semester}"
+        user = users.get(_as_uuid(students.get(str(row["student_id"]))))
+        uniqids = list(row.get("journals") or ())
+        if user is None:
+            reason = "no_student_account"
+        elif not any(uq in journals for uq in uniqids):
+            reason = "journal_not_imported"
+        else:
+            reason = "student_not_in_journal"
+        run.count(f"{prefix}.unresolved_{reason}")
+        run.count(f"official_entry.unresolved_{reason}")
+        if reason != "no_student_account":
+            run.names(
+                "official_entry_unresolved",
+                user.get_full_name() or user.get_username(),
+                f"sem {semester} · jurnal {'/'.join(uniqids) or '—'} · giriş {row.get('entry') or '—'} · "
+                f"imtahan {row.get('exam') or '—'} · 25 % {row.get('resit') or '—'} · yekun {row.get('total') or '—'} · "
+                f"{reason} · vərəq #{row.get('export_id')}",
+            )
+
+
+def _as_uuid(value):
+    import uuid
+
+    try:
+        return uuid.UUID(str(value))
+    except (TypeError, ValueError):
+        return value
 
 
 def copied_attempts(organization, wanted) -> set:
@@ -242,4 +296,10 @@ def _n(value) -> str:
     return format(Decimal(value).normalize(), "f") if value is not None else "—"
 
 
-__all__ = ["OfficialEntryPhaseMismatch", "apply_official_entry", "check_phases", "resolve_targets"]
+__all__ = [
+    "OfficialEntryPhaseMismatch",
+    "apply_official_entry",
+    "check_phases",
+    "explain_unresolved",
+    "resolve_targets",
+]

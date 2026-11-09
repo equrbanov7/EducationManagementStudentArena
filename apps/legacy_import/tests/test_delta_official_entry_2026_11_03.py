@@ -416,6 +416,8 @@ class OfficialEntryPhaseTests(TestCase):
         self.assertEqual(counters["official_entry.sem12.same"], 2)
         self.assertEqual(counters["official_entry.sem12.skip_edited_kept"], 1)
         self.assertEqual(counters["official_entry.sem12.skip_enrollment_unresolved"], 1)
+        self.assertEqual(counters["official_entry.sem12.unresolved_no_student_account"], 1)
+        self.assertEqual(counters["official_entry.unresolved_no_student_account"], 1)
         self.assertEqual(counters["official_entry.sem12.skip_out_of_range"], 1)
         self.assertEqual(self._archive(7131), D("15"))
         self.assertEqual(self._archive(7132), D("20"))
