@@ -116219,3 +116219,55 @@ msgstr "Diese Unterrichtsart gehört zum Anteil einer anderen Lehrkraft — nur 
 msgctxt "registrar.journal"
 msgid "müəllim təyin olunmayıb"
 msgstr "keine Lehrkraft zugewiesen"
+
+msgctxt "accounts.workload"
+msgid "Alt qrup"
+msgstr "Untergruppe"
+
+msgctxt "accounts.workload"
+msgid "Aşağıda hər sətri bir axına salın və axının mühazirəçisini seçin. Bir sətrin qrupları birlikdə hərəkət edir — qrupları ayırmaq üçün sətri «Redaktə» ilə bölün."
+msgstr "Ordnen Sie unten jede Zeile einem Strom zu und wählen Sie den Dozenten des Stroms. Die Gruppen einer Zeile bewegen sich gemeinsam — zum Trennen die Zeile über „Bearbeiten“ aufteilen."
+
+msgctxt "accounts.workload"
+msgid "Hər qrup üçün müəllimi və saatı seçin; bir qrupa bir neçə müəllim (saat bölgüsü və ya Lab-1 / Lab-2) əlavə edilə bilər. Saat sətrin cəmindən çox ola bilməz."
+msgstr "Wählen Sie für jede Gruppe Lehrkraft und Stunden; eine Gruppe kann mehrere Lehrkräfte haben (Stundenaufteilung oder Lab-1 / Lab-2). Die Stunden dürfen die Zeilensumme nicht überschreiten."
+
+msgctxt "accounts.workload"
+msgid "Kafedranın illik tədris tapşırığını müəllimlər arasında bölün. Eyni fənn, semestr və kredit — bir kartdır: mühazirə axınları (patok), seminar və laboratoriya qrup-qrup bölünür; qalıq saat real vaxtda göstərilir. Bölgü təsdiqlənəndə müəllimlərə bildiriş gedir və elektron jurnal açılışları yaradılır."
+msgstr "Verteilen Sie den jährlichen Lehrauftrag des Lehrstuhls auf die Lehrkräfte. Gleiches Fach, Semester und Credits bilden eine Karte: Vorlesungsströme (gemeinsame Vorlesungen), Seminare und Labore werden gruppenweise verteilt; die Reststunden werden live angezeigt. Mit der Bestätigung werden die Lehrkräfte benachrichtigt und die E-Journale angelegt."
+
+msgctxt "accounts.workload"
+msgid "Mühazirə axınları (patok)"
+msgstr "Vorlesungsströme (gemeinsame Vorlesungen)"
+
+msgctxt "accounts.workload"
+msgid "Nəticə"
+msgstr "Ergebnis"
+
+msgctxt "accounts.workload"
+msgid "Patok — bir neçə qrupun mühazirəni birlikdə dinləməsidir. Eyni axındakı qrupların mühazirəsi müəllimin yükünə BİR dəfə düşür."
+msgstr "Ein Strom (gemeinsame Vorlesung) bedeutet, dass mehrere Gruppen die Vorlesung zusammen hören. Die Vorlesung der Gruppen eines Stroms zählt EINMAL in der Lehrbelastung."
+
+msgctxt "accounts.workload"
+msgid "Qayda"
+msgstr "Regel"
+
+msgctxt "accounts.workload"
+msgid "Qruplar üzrə bölgü"
+msgstr "Verteilung nach Gruppen"
+
+msgctxt "accounts.workload"
+msgid "Sil"
+msgstr "Löschen"
+
+msgctxt "accounts.workload"
+msgid "Sistem axını «aparıcı sətir» bağı ilə tanıyır: axının mühazirə saatı aparıcı sətirdə qalır, digər sətirlərdə mühazirə cəmi 0 olur və onlar aparıcıya bağlanır. Hər qrupun jurnalında mühazirə öz saatı ilə görünür."
+msgstr "Das System erkennt einen Strom über die Verknüpfung „führende Zeile“: die Vorlesungsstunden bleiben in der führenden Zeile, die übrigen Zeilen erhalten eine Vorlesungssumme von 0 und werden mit ihr verknüpft. Im Journal jeder Gruppe erscheint die Vorlesung mit ihren eigenen Stunden."
+
+msgctxt "accounts.workload"
+msgid "Sətirlər → axın"
+msgstr "Zeilen → Strom"
+
+msgctxt "accounts.workload"
+msgid "Ödəniş"
+msgstr "Vergütung"

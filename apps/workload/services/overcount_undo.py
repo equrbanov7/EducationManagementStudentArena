@@ -45,6 +45,8 @@ def _restore_assignments(row, items, organization) -> int:
             activity=item["activity"],
             hours=item["hours"],
             groups_note=item.get("groups_note") or "",
+            group_id=item.get("group_id") or None,
+            sub_number=item.get("sub_number") or None,
             is_hourly_paid=bool(item.get("is_hourly_paid")),
             note=item.get("note") or "",
             assigned_by_id=item.get("assigned_by_id"),

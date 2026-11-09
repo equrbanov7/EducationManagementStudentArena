@@ -3271,3 +3271,149 @@ msgstr "Gemeinsame Vorlesung"
 #, javascript-format
 msgid "Patok · %(groups)s ilə birlikdə"
 msgstr "Gemeinsame Vorlesung · zusammen mit %(groups)s"
+
+#, javascript-format
+msgid "%(credits)s kredit"
+msgstr "%(credits)s Credits"
+
+#, javascript-format
+msgid "%(hours)s s"
+msgstr "%(hours)s Std."
+
+#, javascript-format
+msgid "%(hours)s saat"
+msgstr "%(hours)s Stunden"
+
+#, javascript-format
+msgid "%(kind)s bölgüsü — %(subject)s"
+msgstr "Verteilung %(kind)s — %(subject)s"
+
+#, javascript-format
+msgid "%(n)s axın (qruplar ayrılmayıb)"
+msgstr "%(n)s Ströme (Gruppen nicht getrennt)"
+
+#, javascript-format
+msgid "%(n)s axın · yükə %(hours)s"
+msgstr "%(n)s Strom/Ströme · %(hours)s in der Belastung"
+
+#, javascript-format
+msgid "%(n)s qrup"
+msgstr "%(n)s Gruppen"
+
+#, javascript-format
+msgid "%(n)s qrup · %(hours)s"
+msgstr "%(n)s Gruppen · %(hours)s"
+
+#, javascript-format
+msgid "%(n)s tələbə"
+msgstr "%(n)s Studierende"
+
+msgid "Aparıcı başqa kartdadır"
+msgstr "Führende Zeile ist auf einer anderen Karte"
+
+msgid "Aparıcı seçilməyib — mühazirə yükə düşmür"
+msgstr "Keine führende Zeile gewählt — Vorlesung zählt nicht zur Belastung"
+
+#, javascript-format
+msgid "Axın %(n)s"
+msgstr "Strom %(n)s"
+
+msgid "Axınları dəyiş"
+msgstr "Ströme ändern"
+
+msgid "Bir sətrin qrupları birlikdə hərəkət edir — ayırmaq üçün sətri «Redaktə» ilə bölün."
+msgstr "Die Gruppen einer Zeile bewegen sich gemeinsam — zum Trennen die Zeile über „Bearbeiten“ aufteilen."
+
+msgid "Birgə — saat başqa sətirdədir"
+msgstr "Gemeinsam — Stunden stehen in einer anderen Zeile"
+
+msgid "Bu fəndə aparıcısı seçilməmiş patok sətri var — «Axınları dəyiş» ilə qrupları axına bağlayın."
+msgstr "Dieses Fach hat eine Stromzeile ohne führende Zeile — verknüpfen Sie die Gruppen über „Ströme ändern“."
+
+msgid "Bütün qrup"
+msgstr "Ganze Gruppe"
+
+msgid "Bütün qruplar birlikdə"
+msgstr "Alle Gruppen zusammen"
+
+#, javascript-format
+msgid "Göstərilir: %(shown)s / %(total)s fənn"
+msgstr "%(shown)s von %(total)s Fächern angezeigt"
+
+msgid "Mühazirə"
+msgstr "Vorlesung"
+
+#, javascript-format
+msgid "Mühazirəsiz qruplar: %(groups)s"
+msgstr "Gruppen ohne Vorlesung: %(groups)s"
+
+msgid "Mühazirəçi"
+msgstr "Dozent"
+
+msgid "Mühazirəçi seçilməyib"
+msgstr "Kein Dozent gewählt"
+
+msgid "Müəllim axtar…"
+msgstr "Lehrkraft suchen…"
+
+msgid "Müəllim əlavə et"
+msgstr "Lehrkraft hinzufügen"
+
+msgid "Patok: bir axının mühazirəsi müəllimin yükünə bir dəfə düşür və hər qrupun jurnalında görünür."
+msgstr "Gemeinsame Vorlesung: die Vorlesung eines Stroms zählt einmal zur Belastung und erscheint im Journal jeder Gruppe."
+
+#, javascript-format
+msgid "Qalıq %(hours)s"
+msgstr "Rest %(hours)s"
+
+msgid "Qrup qeydi tanınmadı"
+msgstr "Gruppenvermerk nicht erkannt"
+
+msgid "Qrupsuz bölgü"
+msgstr "Verteilung ohne Gruppe"
+
+msgid "Saat"
+msgstr "Stunden"
+
+msgid "Saat sıfırdan böyük olmalıdır."
+msgstr "Die Stunden müssen größer als null sein."
+
+#, javascript-format
+msgid "Sətirlər (%(n)s)"
+msgstr "Zeilen (%(n)s)"
+
+msgid "Sətri sil"
+msgstr "Zeile entfernen"
+
+#, javascript-format
+msgid "Sətrin cəmindən çox saat bölünüb: %(groups)s"
+msgstr "Mehr Stunden verteilt als die Zeilensumme: %(groups)s"
+
+#, javascript-format
+msgid "Tapşırıq sətirləri (%(n)s) — redaktə, silmə, saatlar"
+msgstr "Auftragszeilen (%(n)s) — bearbeiten, löschen, Stunden"
+
+msgid "Təyin olunmayıb"
+msgstr "Nicht zugewiesen"
+
+msgid "bir sətir"
+msgstr "eine Zeile"
+
+#, javascript-format
+msgid "mühazirə %(hours)s · yükə bir dəfə"
+msgstr "Vorlesung %(hours)s · einmal gezählt"
+
+#, javascript-format
+msgid "qrup planı %(hours)s"
+msgstr "Gruppenplan %(hours)s"
+
+msgid "saathesabı"
+msgstr "Stundenbasis"
+
+#, javascript-format
+msgid "sətir qalığı %(hours)s"
+msgstr "Zeilenrest %(hours)s"
+
+#, javascript-format
+msgid "№%(n)s"
+msgstr "Nr. %(n)s"

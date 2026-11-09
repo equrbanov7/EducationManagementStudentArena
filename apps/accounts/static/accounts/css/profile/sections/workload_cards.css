@@ -1,0 +1,584 @@
+/* Dərs yükü — FƏNN KARTI qatı (sahib 2026-11-09: «bir fənn = bir kart»).
+ * Kaskadda `workload_base.css` → `workload_dialog.css`-dən SONRA yüklənir; rənglər yalnız `--ems-*` tokenlərindən.
+ * Markup: `workload_distribution_cards.js` (kart) və `workload_distribution_pickers.js` (axın / növ modalları). */
+
+/* ── Kart ──────────────────────────────────────────────────────────────── */
+.wl-card {
+  padding: 16px 18px 12px;
+  margin-bottom: 14px;
+  background: #fff;
+  border: 1px solid var(--ems-neutral-200, #e2e8f0);
+  border-radius: 14px;
+}
+
+.wl-card.is-complete {
+  border-color: var(--ems-success-bd, #b7e2c6);
+}
+
+.wl-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.wl-card__subject {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ems-neutral-900, #1b2733);
+}
+
+.wl-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: var(--ems-neutral-600, #5b6b7c);
+}
+
+.wl-card__meta span {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--ems-neutral-100, #eef2f7);
+}
+
+.wl-card__actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.wl-card__groups {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 4px;
+  padding: 0;
+}
+
+.wl-card__group {
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ems-neutral-800, #2c3e50);
+  background: var(--ems-neutral-50, #f7f9fc);
+  border: 1px solid var(--ems-neutral-200, #e2e8f0);
+}
+
+.wl-card__warn {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  color: #8a5a00;
+  background: var(--ems-warning-bg, #fdf6e3);
+  border: 1px solid var(--ems-warning-bd, #f0c36d);
+}
+
+/* ── Növ bölməsi (mühazirə / seminar / lab) ───────────────────────────── */
+.wl-kind {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--ems-neutral-200, #e2e8f0);
+}
+
+.wl-kind__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+}
+
+.wl-kind__label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ems-neutral-800, #2c3e50);
+}
+
+.wl-kind__sum {
+  font-size: 0.78rem;
+  color: var(--ems-neutral-600, #5b6b7c);
+  font-variant-numeric: tabular-nums;
+}
+
+.wl-kind__head .wl-btn {
+  margin-left: auto;
+}
+
+.wl-kind__rule,
+.wl-kind__note {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  margin: 8px 0 0;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: var(--ems-neutral-500, #6b7a8c);
+}
+
+.wl-kind__rule i {
+  margin-top: 2px;
+  color: var(--ems-info, #2563a8);
+}
+
+.wl-btn--sm {
+  padding: 4px 10px;
+  font-size: 0.78rem;
+}
+
+/* ── Axınlar ──────────────────────────────────────────────────────────── */
+.wl-streams,
+.wl-lines {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.wl-stream {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  background: var(--ems-primary-50, #eef4ff);
+  border: 1px solid var(--ems-primary-100, #d5e3fb);
+}
+
+.wl-stream.is-complete {
+  background: var(--ems-success-bg, #e8f7ee);
+  border-color: var(--ems-success-bd, #b7e2c6);
+}
+
+.wl-stream.is-orphan {
+  background: var(--ems-warning-bg, #fdf6e3);
+  border-color: var(--ems-warning-bd, #f0c36d);
+}
+
+.wl-stream__groups {
+  font-weight: 700;
+  color: var(--ems-neutral-900, #1b2733);
+}
+
+.wl-stream__dot {
+  margin: 0 5px;
+  color: var(--ems-neutral-400, #94a3b8);
+}
+
+.wl-stream__arrow {
+  color: var(--ems-neutral-400, #94a3b8);
+}
+
+.wl-stream__who {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.wl-stream__teacher {
+  font-weight: 600;
+  color: var(--ems-primary-700, #1b4fa0);
+}
+
+.wl-stream__teacher.is-vacant {
+  color: #8a5a00;
+  font-weight: 500;
+}
+
+.wl-stream__teacher.is-match,
+.wl-chip.is-match {
+  outline: 2px solid var(--ems-primary-300, #8fb2ee);
+  outline-offset: 1px;
+  border-radius: 6px;
+}
+
+.wl-stream__hours {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  color: var(--ems-neutral-700, #3f5063);
+}
+
+/* ── Qrup xətləri ─────────────────────────────────────────────────────── */
+.wl-line {
+  display: grid;
+  grid-template-columns: minmax(110px, 160px) 56px minmax(0, 1fr) auto;
+  gap: 6px 10px;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  border: 1px solid var(--ems-neutral-200, #e2e8f0);
+}
+
+.wl-line.is-complete {
+  border-color: var(--ems-success-bd, #b7e2c6);
+  background: var(--ems-success-bg, #e8f7ee);
+}
+
+.wl-line__group {
+  font-weight: 700;
+  color: var(--ems-neutral-900, #1b2733);
+}
+
+.wl-line__plan {
+  font-variant-numeric: tabular-nums;
+  color: var(--ems-neutral-600, #5b6b7c);
+}
+
+.wl-line__entries {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.wl-line__vacant {
+  color: #8a5a00;
+  font-size: 0.78rem;
+}
+
+.wl-line__badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+/* Bölgü çipi */
+.wl-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px 3px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  background: var(--ems-primary-50, #eef4ff);
+  color: var(--ems-primary-700, #1b4fa0);
+  border: 1px solid var(--ems-primary-100, #d5e3fb);
+}
+
+.wl-chip.is-vacant {
+  background: var(--ems-warning-bg, #fdf6e3);
+  color: #8a5a00;
+  border-color: var(--ems-warning-bd, #f0c36d);
+}
+
+.wl-chip.is-unclear {
+  border-style: dashed;
+}
+
+.wl-chip__name {
+  font-weight: 600;
+}
+
+.wl-chip__hours,
+.wl-chip__section,
+.wl-chip__note {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+.wl-chip__section {
+  padding: 0 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.wl-chip__btn {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 2px;
+  font-size: 0.8rem;
+}
+
+.wl-chip__btn--remove {
+  font-size: 1rem;
+}
+
+.wl-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--ems-neutral-700, #3f5063);
+  background: var(--ems-neutral-100, #eef2f7);
+}
+
+.wl-badge--info {
+  color: var(--ems-info, #2563a8);
+  background: var(--ems-primary-50, #eef4ff);
+}
+
+.wl-badge--warn {
+  color: #8a5a00;
+  background: var(--ems-warning-bg, #fdf6e3);
+}
+
+/* Digər fəaliyyətlər — köhnə zolaq, çiplər altda */
+.wl-kind--other .wl-act {
+  grid-template-columns: 130px minmax(80px, 1fr) auto auto;
+  border-top: 0;
+}
+
+.wl-act__chips {
+  grid-column: 1 / -1;
+}
+
+/* ── Sətirlər (açılan) ───────────────────────────────────────────────── */
+.wl-card__rows {
+  margin-top: 12px;
+  border-top: 1px dashed var(--ems-neutral-200, #e2e8f0);
+  padding-top: 8px;
+}
+
+.wl-card__rows > summary {
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: var(--ems-neutral-600, #5b6b7c);
+  list-style: none;
+}
+
+.wl-card__rows > summary::before {
+  content: "▸ ";
+}
+
+.wl-card__rows[open] > summary::before {
+  content: "▾ ";
+}
+
+.wl-card__rows-body {
+  margin-top: 8px;
+}
+
+.wl-card__rows-body .wl-row {
+  background: var(--ems-neutral-50, #f7f9fc);
+  margin-bottom: 8px;
+}
+
+/* ── Axın modalı ─────────────────────────────────────────────────────── */
+.wl-rule {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--ems-neutral-700, #3f5063);
+  background: var(--ems-primary-50, #eef4ff);
+  border: 1px solid var(--ems-primary-100, #d5e3fb);
+}
+
+.wl-rule ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+
+.wl-su {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 60px 150px;
+  gap: 10px;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px dashed var(--ems-neutral-200, #e2e8f0);
+  font-size: 0.85rem;
+}
+
+.wl-su__groups {
+  font-weight: 600;
+}
+
+.wl-su__plan {
+  font-variant-numeric: tabular-nums;
+  color: var(--ems-neutral-600, #5b6b7c);
+}
+
+.wl-sp {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--ems-neutral-50, #f7f9fc);
+  border: 1px solid var(--ems-neutral-200, #e2e8f0);
+}
+
+.wl-sp__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: baseline;
+  font-size: 0.82rem;
+}
+
+.wl-sp__title {
+  font-weight: 700;
+}
+
+.wl-sp__groups {
+  color: var(--ems-neutral-800, #2c3e50);
+}
+
+.wl-sp__hours {
+  margin-left: auto;
+  color: var(--ems-neutral-600, #5b6b7c);
+}
+
+.wl-sp__teacher {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+}
+
+.wl-modal__section-title {
+  margin: 14px 0 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ems-neutral-800, #2c3e50);
+}
+
+/* ── Növ cədvəli ─────────────────────────────────────────────────────── */
+.wl-kt {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.wl-kt th,
+.wl-kt td {
+  padding: 6px 6px;
+  vertical-align: middle;
+}
+
+.wl-kt thead th {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: var(--ems-neutral-500, #6b7a8c);
+  border-bottom: 1px solid var(--ems-neutral-200, #e2e8f0);
+}
+
+.wl-kt__group th {
+  padding-top: 12px;
+  text-align: left;
+  font-weight: 600;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  align-items: center;
+  border-bottom: 1px dashed var(--ems-neutral-200, #e2e8f0);
+}
+
+.wl-kt__name {
+  font-weight: 700;
+  color: var(--ems-neutral-900, #1b2733);
+}
+
+.wl-kt__plan {
+  color: var(--ems-neutral-600, #5b6b7c);
+  font-weight: 500;
+}
+
+.wl-kt__remaining {
+  margin-left: auto;
+  font-weight: 600;
+  color: var(--ems-success, #1c7a41);
+}
+
+.wl-kt__remaining.is-open {
+  color: #8a5a00;
+}
+
+.wl-kt__remaining.is-over {
+  color: var(--ems-danger, #b42318);
+}
+
+.wl-kt__hours {
+  width: 80px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--ems-neutral-300, #cbd5e1);
+}
+
+.wl-kt__hourly {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  white-space: nowrap;
+  font-size: 0.76rem;
+  color: var(--ems-neutral-600, #5b6b7c);
+}
+
+.wl-kt__muted {
+  color: var(--ems-neutral-400, #94a3b8);
+}
+
+.wl-kt__add td {
+  padding: 4px 6px 10px;
+}
+
+/* ── Mobil ───────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .wl-line {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .wl-line__entries,
+  .wl-line__badges {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+
+  .wl-stream__hours {
+    margin-left: 0;
+  }
+
+  .wl-su {
+    grid-template-columns: minmax(0, 1fr) 60px;
+  }
+
+  .wl-su .bootstrap-single-select {
+    grid-column: 1 / -1;
+  }
+
+  .wl-sp__teacher {
+    grid-template-columns: 1fr;
+  }
+
+  .wl-kt thead {
+    display: none;
+  }
+
+  .wl-kt__item {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--ems-neutral-200, #e2e8f0);
+  }
+
+  .wl-kt__item td {
+    padding: 2px 0;
+  }
+
+  .wl-kt__item td:first-child {
+    grid-column: 1 / -1;
+  }
+}

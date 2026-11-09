@@ -44,6 +44,7 @@ from ..services import (
 )
 from ..services.all_chairs import ALL_CHAIRS
 from ..services.patok import LEAD_ERRORS
+from ..services.patok_streams import STREAM_ERRORS
 from ..services.tasks import ROW_HAS_OBJECTIONS, TOTAL_BELOW_ASSIGNED
 from ._base import active_organization, actor_for, denied, error, json_body, no_org
 from .all_chairs_api import all_chairs_rows
@@ -66,6 +67,11 @@ _INPUT_CODES = frozenset(
         "workload.note_required",
         # Sahib 2026-11-08: patok aparıcı sətri bağının yoxlaması (``services.patok.LEAD_ERRORS``).
         *LEAD_ERRORS,
+        # Sahib 2026-11-09: qrup bağı / alt qrup nömrəsi və mühazirə axınları (``services.patok_streams``).
+        "workload.group_not_in_row",
+        "workload.sub_number_invalid",
+        "workload.sub_number_activity",
+        *STREAM_ERRORS,
     }
 )
 
@@ -205,6 +211,8 @@ def _rows_paged(request, task, *, season: str, search: str) -> JsonResponse:
         offset=offset,
         limit=_DEFAULT_PAGE if limit is None else limit,
         focus_row=parse_uuid(request.GET.get("focus")),
+        # Sahib 2026-11-09: ``view=cards`` — eyni fənn + semestr + kredit sətirləri bir kartda (``subject_cards``).
+        view=(request.GET.get("view") or "").strip(),
     )
     payload = {"ok": True, "task": _task_payload(task), **page}
     if offset <= 0 and request.GET.get("panel") != "0":
@@ -463,6 +471,9 @@ def assign(request) -> JsonResponse:
             note=payload.get("note") or "",
             assignment=assignment,
             request=request,
+            # Sahib 2026-11-09: bölgünün qrupu + lab/seminar alt qrupu nömrəsi («bir fənn = bir kart» seçicisi).
+            group_id=payload.get("group_id") or None,
+            sub_number=payload.get("sub_number") or None,
         )
     except WorkloadDenied as exc:
         return _write_denied(exc)

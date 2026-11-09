@@ -1,0 +1,68 @@
+{% load i18n %}
+{% comment %}
+«Bir fənn = bir kart» seçiciləri (sahib 2026-11-09) — `_workload_distribution.html` panelinin İÇİNDƏ:
+  1) mühazirə axınları (patok) modalı; 2) seminar / laboratoriya bölgü cədvəli.
+Məntiq `workload_distribution_pickers.js`-dədir (xarici JS — template dəyişənləri yoxdur); dinamik siyahılar JS ilə
+doldurulur, sabit mətnlər burada tərcümə olunur.
+{% endcomment %}
+<div class="modal fade wl-modal" id="wlStreamsModal" tabindex="-1" aria-hidden="true" data-wl-streams-modal>
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{% trans "Mühazirə axınları (patok)" context "accounts.workload" %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'accounts.workload' %}"></button>
+      </div>
+      <div class="modal-body">
+        <p class="wl-assign__row" data-wl-streams-subject></p>
+        <div class="wl-rule" role="note">
+          <strong>{% trans "Qayda" context "accounts.workload" %}</strong>
+          <ul>
+            <li>{% trans "Patok — bir neçə qrupun mühazirəni birlikdə dinləməsidir. Eyni axındakı qrupların mühazirəsi müəllimin yükünə BİR dəfə düşür." context "accounts.workload" %}</li>
+            <li>{% trans "Sistem axını «aparıcı sətir» bağı ilə tanıyır: axının mühazirə saatı aparıcı sətirdə qalır, digər sətirlərdə mühazirə cəmi 0 olur və onlar aparıcıya bağlanır. Hər qrupun jurnalında mühazirə öz saatı ilə görünür." context "accounts.workload" %}</li>
+            <li>{% trans "Aşağıda hər sətri bir axına salın və axının mühazirəçisini seçin. Bir sətrin qrupları birlikdə hərəkət edir — qrupları ayırmaq üçün sətri «Redaktə» ilə bölün." context "accounts.workload" %}</li>
+          </ul>
+        </div>
+        <h6 class="wl-modal__section-title">{% trans "Sətirlər → axın" context "accounts.workload" %}</h6>
+        <div data-wl-streams-units></div>
+        <h6 class="wl-modal__section-title">{% trans "Nəticə" context "accounts.workload" %}</h6>
+        <div data-wl-streams-preview></div>
+        <p class="wl-form__error" data-wl-streams-error role="alert" hidden></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="wl-btn wl-btn--ghost" data-bs-dismiss="modal">{% trans "Bağla" context "accounts.workload" %}</button>
+        <button type="button" class="wl-btn wl-btn--primary" data-wl-streams-save>{% trans "Yadda saxla" context "accounts.workload" %}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade wl-modal" id="wlKindModal" tabindex="-1" aria-hidden="true" data-wl-kind-modal>
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" data-wl-kind-title>{% trans "Qruplar üzrə bölgü" context "accounts.workload" %}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'accounts.workload' %}"></button>
+      </div>
+      <div class="modal-body">
+        <p class="wl-aside__hint">{% trans "Hər qrup üçün müəllimi və saatı seçin; bir qrupa bir neçə müəllim (saat bölgüsü və ya Lab-1 / Lab-2) əlavə edilə bilər. Saat sətrin cəmindən çox ola bilməz." context "accounts.workload" %}</p>
+        <table class="wl-kt">
+          <thead>
+            <tr>
+              <th scope="col">{% trans "Müəllim" context "accounts.workload" %}</th>
+              <th scope="col">{% trans "Alt qrup" context "accounts.workload" %}</th>
+              <th scope="col">{% trans "Saat" context "accounts.workload" %}</th>
+              <th scope="col">{% trans "Ödəniş" context "accounts.workload" %}</th>
+              <th scope="col"><span class="visually-hidden">{% trans "Sil" context "accounts.workload" %}</span></th>
+            </tr>
+          </thead>
+          <tbody data-wl-kind-lines></tbody>
+        </table>
+        <p class="wl-form__error" data-wl-kind-error role="alert" hidden></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="wl-btn wl-btn--ghost" data-bs-dismiss="modal">{% trans "Bağla" context "accounts.workload" %}</button>
+        <button type="button" class="wl-btn wl-btn--primary" data-wl-kind-save>{% trans "Yadda saxla" context "accounts.workload" %}</button>
+      </div>
+    </div>
+  </div>
+</div>

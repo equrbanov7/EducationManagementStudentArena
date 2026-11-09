@@ -203,6 +203,8 @@ def row_snapshot(row) -> dict:
             "activity": item.activity,
             "hours": item.hours,
             "groups_note": item.groups_note,
+            "group_id": str(item.group_id) if item.group_id else "",
+            "sub_number": item.sub_number,
             "is_hourly_paid": item.is_hourly_paid,
             "note": item.note,
             "assigned_by_id": item.assigned_by_id,

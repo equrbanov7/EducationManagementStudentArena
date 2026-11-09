@@ -104,6 +104,35 @@ def remaining_hours(row: TeachingTaskRow, activity: str, *, exclude_assignment_i
     return max(total - int(used), 0)
 
 
+#: Alt qrup nömrəsi yalnız bu fəaliyyətlərdə (jurnalın lab qrupu / seminar alt qrupu).
+_SECTION_ACTIVITIES = frozenset({str(Activity.SEMINAR), str(Activity.LAB)})
+
+
+def _resolve_group(row, activity: str, group_id, sub_number):
+    """``(qrup | None, alt qrup № | None)`` — qrup sətrin qruplarından olmalıdır; № 1–9, yalnız seminar/lab."""
+    from core.http_ids import parse_uuid
+
+    group = None
+    if group_id:
+        wanted = parse_uuid(group_id)
+        group = next((unit for unit in row.groups.all() if unit.pk == wanted), None) if wanted else None
+        if group is None:
+            raise WorkloadDenied("workload.group_not_in_row", "Qrup bu sətrin qruplarından deyil.")
+    number = None
+    if sub_number not in (None, "", 0, "0"):
+        try:
+            number = int(sub_number)
+        except (TypeError, ValueError):
+            raise WorkloadDenied("workload.sub_number_invalid", "Alt qrup nömrəsi 1–9 arası tam ədəd olmalıdır.")
+        if not 1 <= number <= 9:
+            raise WorkloadDenied("workload.sub_number_invalid", "Alt qrup nömrəsi 1–9 arası tam ədəd olmalıdır.")
+        if str(activity) not in _SECTION_ACTIVITIES:
+            raise WorkloadDenied(
+                "workload.sub_number_activity", "Alt qrup yalnız seminar və laboratoriya bölgüsündə seçilir."
+            )
+    return group, number
+
+
 def _ensure_assignable(task) -> None:
     # Zəncir qapısı ƏVVƏLCƏ: göndərilmiş sənəd dekanlıq təsdiqindən keçməyibsə
     # bölgü açılmır (plan §2/14 — «distribution only when approved»).
@@ -132,8 +161,14 @@ def assign_teacher(
     request=None,
     sync_offerings: bool = True,
     existing_owner_authority=None,
+    group_id=None,
+    sub_number=None,
 ) -> TeacherAssignment:
-    """Bir fəaliyyət üzrə saatı müəllimə (və ya «Vakant»a) bağlayır."""
+    """Bir fəaliyyət üzrə saatı müəllimə (və ya «Vakant»a) bağlayır.
+
+    ``group_id`` — bölgünün qrupu (sətrin qruplarından biri; boş = sətrin bütün qrupları), ``sub_number`` —
+    jurnalın lab qrupu / seminar alt qrupu nömrəsi (yalnız seminar/lab; sahib 2026-11-09, «bir fənn = bir kart»).
+    """
     task = row.task
     ensure_can_distribute(actor, task.chair_id)
     ensure_not_intensive(row)  # intensiv kursun müəllimi services.intensive ilə (2026-10-25)
@@ -151,6 +186,7 @@ def assign_teacher(
     # Sətri kilidləyirik: paralel iki bölgü eyni qalığı «xərcləyə» bilməsin.
     locked = TeachingTaskRow.objects.select_for_update(of=("self",)).get(pk=row.pk)
     locked.task = task
+    group, number = _resolve_group(locked, activity, group_id, sub_number)  # giriş yoxlaması balansdan ƏVVƏL
     # Plan kafedraya çatıbmı — status (approved → distributing) dəyişməzdən ƏVVƏL.
     create_offerings = plan_reached_chair(task)
     available = remaining_hours(locked, activity, exclude_assignment_id=getattr(assignment, "pk", None))
@@ -202,7 +238,10 @@ def assign_teacher(
     assignment.activity = activity
     assignment.hours = hours
     assignment.teacher = teacher
-    assignment.groups_note = (groups_note or "").strip()[:255]
+    assignment.group = group
+    assignment.sub_number = number
+    # Köhnə oxucular (qeyd parse-i, «Dərs yüküm») üçün qrup adı qeydə də yazılır — qeyd boşdursa.
+    assignment.groups_note = ((groups_note or "").strip() or (group.name if group is not None else ""))[:255]
     assignment.is_hourly_paid = bool(is_hourly_paid)
     assignment.note = (note or "").strip()
     assignment.assigned_by = getattr(actor, "user", None)
@@ -228,6 +267,8 @@ def assign_teacher(
             "activity": activity,
             "hours": hours,
             "teacher": str(teacher.pk) if teacher else "",
+            "group": str(group.pk) if group is not None else "",
+            "sub_number": number or "",
             "offerings": assignment.offering_sync,
         },
         reason="workload.assigned",

@@ -115353,3 +115353,55 @@ msgstr "Этот вид занятий относится к доле друго
 msgctxt "registrar.journal"
 msgid "müəllim təyin olunmayıb"
 msgstr "преподаватель не назначен"
+
+msgctxt "accounts.workload"
+msgid "Alt qrup"
+msgstr "Подгруппа"
+
+msgctxt "accounts.workload"
+msgid "Aşağıda hər sətri bir axına salın və axının mühazirəçisini seçin. Bir sətrin qrupları birlikdə hərəkət edir — qrupları ayırmaq üçün sətri «Redaktə» ilə bölün."
+msgstr "Ниже поместите каждую строку в поток и выберите лектора потока. Группы одной строки перемещаются вместе — чтобы разделить их, разбейте строку через «Редактировать»."
+
+msgctxt "accounts.workload"
+msgid "Hər qrup üçün müəllimi və saatı seçin; bir qrupa bir neçə müəllim (saat bölgüsü və ya Lab-1 / Lab-2) əlavə edilə bilər. Saat sətrin cəmindən çox ola bilməz."
+msgstr "Выберите преподавателя и часы для каждой группы; у группы может быть несколько преподавателей (разделение часов или Lab-1 / Lab-2). Часы не могут превышать итог строки."
+
+msgctxt "accounts.workload"
+msgid "Kafedranın illik tədris tapşırığını müəllimlər arasında bölün. Eyni fənn, semestr və kredit — bir kartdır: mühazirə axınları (patok), seminar və laboratoriya qrup-qrup bölünür; qalıq saat real vaxtda göstərilir. Bölgü təsdiqlənəndə müəllimlərə bildiriş gedir və elektron jurnal açılışları yaradılır."
+msgstr "Распределите годовое учебное поручение кафедры между преподавателями. Один предмет, семестр и кредиты — одна карточка: лекционные потоки, семинары и лабораторные распределяются по группам; остаток часов обновляется в реальном времени. При подтверждении преподаватели получают уведомление и создаются электронные журналы."
+
+msgctxt "accounts.workload"
+msgid "Mühazirə axınları (patok)"
+msgstr "Лекционные потоки"
+
+msgctxt "accounts.workload"
+msgid "Nəticə"
+msgstr "Результат"
+
+msgctxt "accounts.workload"
+msgid "Patok — bir neçə qrupun mühazirəni birlikdə dinləməsidir. Eyni axındakı qrupların mühazirəsi müəllimin yükünə BİR dəfə düşür."
+msgstr "Поток — несколько групп слушают лекцию вместе. Лекция групп одного потока учитывается в нагрузке преподавателя ОДИН раз."
+
+msgctxt "accounts.workload"
+msgid "Qayda"
+msgstr "Правило"
+
+msgctxt "accounts.workload"
+msgid "Qruplar üzrə bölgü"
+msgstr "Распределение по группам"
+
+msgctxt "accounts.workload"
+msgid "Sil"
+msgstr "Удалить"
+
+msgctxt "accounts.workload"
+msgid "Sistem axını «aparıcı sətir» bağı ilə tanıyır: axının mühazirə saatı aparıcı sətirdə qalır, digər sətirlərdə mühazirə cəmi 0 olur və onlar aparıcıya bağlanır. Hər qrupun jurnalında mühazirə öz saatı ilə görünür."
+msgstr "Система распознаёт поток по связи «ведущая строка»: лекционные часы потока остаются в ведущей строке, у остальных строк итог лекций становится 0, и они привязываются к ведущей. В журнале каждой группы лекция отображается со своими часами."
+
+msgctxt "accounts.workload"
+msgid "Sətirlər → axın"
+msgstr "Строки → поток"
+
+msgctxt "accounts.workload"
+msgid "Ödəniş"
+msgstr "Оплата"
