@@ -8,6 +8,11 @@ Tələbə əvvəl FİN-lə, FİN yoxdursa təşkilatın tələbə üzvləri aras
 fənn üzrə başqa jurnalda aktiv deyil — əks halda sətir ATLANIR, birləşmə edilmir). Defolt dry-run (eyni kod, geri
 qaytarılır); stdout-a YALNIZ saylar (``legacy_guests: açar=say``). Geri qaytarma: jurnaldan çıxarma (RİM) — audit izi
 ``registrar.guest_roster`` sətirlərindədir.
+
+Səviyyə (dil) qrupunun jurnalı (``LanguageLevelCohort``): qonaq qapısı imtina edir («siyahını səviyyə idarəetməsindən
+dəyişin»), ona görə tələbə :func:`apps.registrar.language_cohort_placement.place_student` ilə yerləşdirilir — YALNIZ
+tələbənin bu dil ailəsində heç bir aktiv jurnalı yoxdursa (təmiz əlavə). Aktiv başqa səviyyəsi varsa bu KÖÇÜRMƏDİR —
+inzibati qərar, sətir ``skip_level_move_needed`` ilə atlanır (sahib 2026-11-09).
 """
 
 from __future__ import annotations
@@ -115,6 +120,49 @@ def refusal_code(message: str) -> str:
     return "skip_refused"
 
 
+def place_level_guest(*, offering, student, actor, reason):
+    """Səviyyə qrupunun jurnalı: ``None`` (səviyyə deyil) | ``"added_level_cohort"`` | ``"skip_already_enrolled"`` |
+    ``"skip_level_move_needed"``.
+
+    ``ValidationError`` yerləşdirmə qapılarından (azad fənn, bağlı siyahı, qeyd yoxdur) olduğu kimi qalxır.
+    """
+    from apps.registrar import language_cohort_placement, language_cohorts
+    from apps.registrar.models import AcademicStatus
+
+    LanguageLevelCohort = django_apps.get_model("registrar", "LanguageLevelCohort")
+    StudentAcademicRecord = django_apps.get_model("registrar", "StudentAcademicRecord")
+    cohort = (
+        LanguageLevelCohort.objects.filter(organization=offering.organization, offering=offering)
+        .select_related("organization", "offering")
+        .first()
+    )
+    if cohort is None:
+        return None
+    Enrollment = django_apps.get_model("registrar", "Enrollment")
+    if Enrollment.objects.filter(
+        organization=offering.organization, offering=offering, student=student, status=Enrollment.Status.ENROLLED
+    ).exists():
+        return "skip_already_enrolled"
+    if language_cohorts.eligible_family_enrollments(cohort=cohort, student_id=student.pk):
+        return "skip_level_move_needed"
+    record = (
+        StudentAcademicRecord.objects.filter(
+            organization=offering.organization,
+            student=student,
+            is_active=True,
+            status=AcademicStatus.ENROLLED,
+            group__is_active=True,
+            group__language_cohort__isnull=True,
+        )
+        .order_by("-updated_at")
+        .first()
+    )
+    if record is None:
+        raise ValidationError("Tələbənin aktiv akademik qeydi yoxdur (səviyyə yerləşdirməsi).")
+    language_cohort_placement.place_student(cohort=cohort, record_id=record.pk, actor=actor, reason=reason)
+    return "added_level_cohort"
+
+
 def run(*, organization, actor, items, counts, apply) -> None:
     from apps.registrar import guest_roster
 
@@ -146,7 +194,12 @@ def run(*, organization, actor, items, counts, apply) -> None:
         reason = str(item.get("reason") or "").strip() or "Köhnə sistemin jurnalında iştirak/bal qeydi (2026-11-09)"
         try:
             with transaction.atomic():
-                guest_roster.add_guest_student(offering=offering, student=student, by_user=actor, reason=reason)
+                level = place_level_guest(offering=offering, student=student, actor=actor, reason=reason)
+                if level in ("skip_level_move_needed", "skip_already_enrolled"):
+                    counts[level] += 1
+                    continue
+                if level is None:
+                    guest_roster.add_guest_student(offering=offering, student=student, by_user=actor, reason=reason)
         except ValidationError as exc:
             message = " ".join(str(m) for m in exc.messages)
             code = refusal_code(message)
@@ -156,7 +209,7 @@ def run(*, organization, actor, items, counts, apply) -> None:
                 counts[f"skip_refused_{refusal_slug(message)}"] += 1  # xülasə sətrinə düşür (yalnız [a-z0-9_])
             continue
         counts["added"] += 1
-        counts[f"added_{'level' if offering.group_id is None else 'group'}"] += 1
+        counts[level or f"added_{'level' if offering.group_id is None else 'group'}"] += 1
 
 
 class Command(BaseCommand):
