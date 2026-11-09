@@ -96,7 +96,7 @@ def move_enrollments(*, organization, actor, holder, person, ids, counts) -> lis
     köçürülmür — adam qrupun öz tələbəsi kimi təmiz yazılış alır, tarixçə holder-da saxlanır.
     """
     from apps.registrar.models import ComponentScore, Enrollment, LessonMark
-    from apps.registrar.twin_relocate import copy_mark, recompute_absences
+    from apps.registrar.public import recompute_absence_hours_many
 
     created = []
     for raw in ids:
@@ -125,7 +125,16 @@ def move_enrollments(*, organization, actor, holder, person, ids, counts) -> lis
         # eyni məzmunla yeni sətir yaranır (``created_at`` köhnəsi kimi), köhnə sətir silinir (twin_relocate qaydası).
         marks = 0
         for mark in LessonMark.objects.filter(organization=organization, enrollment=source).select_related("lesson"):
-            copy_mark(mark, lesson=mark.lesson, enrollment=target)
+            copied = LessonMark.objects.create(
+                organization=organization,
+                lesson=mark.lesson,
+                enrollment=target,
+                status=mark.status,
+                score=mark.score,
+                entered_by_id=mark.entered_by_id,
+            )
+            # ``created_at`` köhnəsi kimi (redaktə pəncərəsi yenidən açılmır) — INSERT-dən dərhal sonra UPDATE keçir.
+            LessonMark.objects.filter(pk=copied.pk).update(created_at=mark.created_at)
             mark.delete()
             marks += 1
         scores = 0
@@ -163,7 +172,8 @@ def move_enrollments(*, organization, actor, holder, person, ids, counts) -> lis
             counts["holder_enrollments_dropped"] += 1
         created.append(target)
         created.append(source)
-    recompute_absences(created)
+    if created:
+        recompute_absence_hours_many(created)
     return created
 
 
