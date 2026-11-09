@@ -51,6 +51,7 @@ from django.utils import timezone
 from core.audit import log_action
 from core.constants import AuditAction
 from core.person_names import name_key
+from core.rls import journal_unlock
 
 from . import lab_groups
 from .gradebook import lesson_allows_score
@@ -287,7 +288,8 @@ def run(*, organization, actor, counts, cells, lessons_spec=(), correct=False) -
                 counts["cells_correct_protected"] += 1
             else:
                 before = {"id": str(mark.pk), "status": mark.status, "score": _score_text(mark.score)}
-                LessonMark.objects.filter(pk=mark.pk).update(status=status, score=score, updated_at=timezone.now())
+                with journal_unlock():  # 15 dəqiqəlik dondurma trigger-i: köçürmənin xanası rəsmi düzəlişlə dəyişir
+                    LessonMark.objects.filter(pk=mark.pk).update(status=status, score=score, updated_at=timezone.now())
                 manifest["marks_corrected"].append({**before, "to_status": status, "to_score": _score_text(score)})
                 touched[enrollment.pk] = enrollment
                 counts["cells_corrected"] += 1
@@ -351,11 +353,12 @@ def undo(*, organization, actor, counts) -> None:
             elif (mark.status, _score_text(mark.score)) != (item["to_status"], item["to_score"]):
                 counts["undo_cells_changed_kept"] += 1
             else:
-                LessonMark.objects.filter(pk=mark.pk).update(
-                    status=item["status"],
-                    score=None if item["score"] is None else float(item["score"]),
-                    updated_at=timezone.now(),
-                )
+                with journal_unlock():
+                    LessonMark.objects.filter(pk=mark.pk).update(
+                        status=item["status"],
+                        score=None if item["score"] is None else float(item["score"]),
+                        updated_at=timezone.now(),
+                    )
                 enrollments[mark.enrollment_id] = mark.enrollment
                 counts["undo_cells_restored"] += 1
         recompute_absences(list(enrollments.values()))

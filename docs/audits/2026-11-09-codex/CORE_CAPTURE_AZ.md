@@ -17,7 +17,8 @@ cari-dövr hissəsini oxuyur.
   (`Syllabus`, `SyllabusVersion`, `SyllabusShare`, `LanguageLevelCohort`), xəritə
   (`LegacyEntityMap[Version]` — yalnız identity/offering yolları, `LegacyMigrationRun`) və
   `audit.AuditLog` — yalnız native copy/fill receipt növləri (`legacy_cells_fill`,
-  `subgroup_journal_merge`, `subgroup_parent_retire`). Sahə siyahıları tam müqavilə ilə
+  `subgroup_journal_merge`, `subgroup_parent_retire`) və delta-nın fənn kodu toqquşma xəritəsi
+  (`legacy_import.subject_collision`). Sahə siyahıları tam müqavilə ilə
   eynidir; yalnız `Enrollment.period_path`, AuditLog `resource_type__in` filtri və xəritə
   `route_scope` fərqlənir (`test_reaudit_snapshot_core_scope.py` bunu bərkidir).
 - `export_reaudit_state_20261109 --scope {full,core}`; manifest `scope`, scope-un öz

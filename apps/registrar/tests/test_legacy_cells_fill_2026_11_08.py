@@ -7,6 +7,7 @@ import tempfile
 
 from django.core.management import call_command
 from django.test import TestCase
+from django.utils import timezone
 
 from apps.registrar.models import Enrollment, Lesson, LessonKind, LessonMark
 from apps.registrar.tests.test_lab_groups_2026_11_06 import WORKFLOW, _LabWorld
@@ -230,6 +231,10 @@ class LegacyCellsFillTest(_LabWorld, TestCase):
             LessonMark.objects.filter(pk=later.pk).update(
                 created_at=later.created_at - datetime.timedelta(minutes=30)
             )  # sonradan dəyişdirilmiş (updated_at ≫ created_at) — toxunulmur
+            aged = timezone.now() - datetime.timedelta(hours=3)  # 15 dəqiqəlik dondurma pəncərəsi keçib
+            LessonMark.objects.filter(pk__in=[imported_qb.pk, imported_noscore.pk]).update(
+                created_at=aged, updated_at=aged
+            )
             with_history = LessonMark.objects.get(lesson=self.seminar, enrollment=self.e2)  # setUp: «qb»
             JournalCorrection.objects.create(
                 organization=self.org,

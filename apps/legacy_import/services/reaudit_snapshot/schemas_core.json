@@ -590,7 +590,8 @@
       "resource_type__in": [
         "registrar.legacy_cells_fill",
         "registrar.subgroup_journal_merge",
-        "registrar.subgroup_parent_retire"
+        "registrar.subgroup_parent_retire",
+        "legacy_import.subject_collision"
       ]
     }
   }
