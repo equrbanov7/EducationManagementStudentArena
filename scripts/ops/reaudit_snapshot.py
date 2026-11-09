@@ -1,6 +1,7 @@
 """Fixed native read-only snapshot command with exact deployed HEAD verification."""
 
 import hashlib
+import importlib.util
 import json
 import os
 import re
@@ -12,6 +13,39 @@ ROOT = Path(__file__).resolve().parents[2]
 CONTAINER = "educationmanagementstudentarena-app-1"
 PUBLIC_SHA = "e20fe8121835f907deec3e05ea1a449758fdc6ef22a3920513516efb70bec224"
 SHA = r"[a-f0-9]{40}"
+ERROR_PREFIX = "reaudit_snapshot_error: "
+
+
+class NativeSnapshotError(ValueError):
+    def __init__(self, diagnostic):
+        self.diagnostic = diagnostic
+        super().__init__("snapshot_native_failed")
+
+
+def native_command(argv, timeout=720):
+    result = subprocess.run(argv, capture_output=True, text=True, timeout=timeout)
+    if not result.returncode:
+        return result.stdout
+    # Share the native fixed contract without importing Django on the runner.
+    path = ROOT / "apps/legacy_import/services/reaudit_snapshot/diagnostics.py"
+    spec = importlib.util.spec_from_file_location("reaudit_snapshot_diagnostics", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    lines = [line[len(ERROR_PREFIX) :] for line in result.stderr.splitlines() if line.startswith(ERROR_PREFIX)]
+    if len(result.stderr) > 256 * 1024 or len(lines) != 1:
+        raise ValueError("snapshot_safe_diagnostic_required")
+    try:
+        diagnostic = module.validate(json.loads(lines[0]))
+    except (ValueError, TypeError, KeyError):
+        raise ValueError("snapshot_safe_diagnostic_invalid") from None
+    raise NativeSnapshotError(diagnostic)
+
+
+def failure_message(exc):
+    prefix = ""
+    if isinstance(exc, NativeSnapshotError):
+        prefix = ERROR_PREFIX + json.dumps(exc.diagnostic, sort_keys=True) + "\n"
+    return prefix + "reaudit_capture_refused:" + type(exc).__name__
 
 
 def digest(path):
@@ -94,7 +128,7 @@ def run(env):
         command(["docker", "exec", CONTAINER, "mkdir", "-m", "700", remote])
         command(["docker", "cp", str(public), CONTAINER + ":" + remote + "/public.pem"])
         command(["docker", "exec", CONTAINER, "mkdir", "-m", "700", remote + "/output"])
-        raw = command(
+        raw = native_command(
             [
                 "docker",
                 "exec",
@@ -142,5 +176,5 @@ if __name__ == "__main__":
     try:
         run(os.environ)
     except Exception as exc:
-        print("reaudit_capture_refused:" + type(exc).__name__, file=sys.stderr)
+        print(failure_message(exc), file=sys.stderr)
         sys.exit(2)

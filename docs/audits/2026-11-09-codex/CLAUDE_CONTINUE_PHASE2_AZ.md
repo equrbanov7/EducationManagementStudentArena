@@ -1,5 +1,42 @@
 # Claude / növbəti agent üçün Mərhələ 2 davam sənədi
 
+## Cari vəziyyət — 9 noyabr, diaqnostika və indeks düzəlişi
+
+- PR278 MERGED və production deploy SUCCESS: main/deployed
+  `7c0940e18ea67c8de6bffebde77180beebf35b27`, build.sha04:05:09UTC-də təsdiqləndi.
+  Main CI42557999274, CodeQL42557999265 keçib; public `/ping/`200.
+- **Akademik məlumat tətbiqi hələ0.** Kod deploy-u məlumatın bərpası demək deyil.
+- Snapshot42559906051 failed04:08:36: opaque ValueError, tam capture yoxdur.
+  Səbəb hələ sübut olunmayıb. Yeni safe diagnostic mərhələ/model/page/SQLSTATE
+  göstərəcək; SQL, actor, parametr və şəxsi məlumat loga çıxmır.
+- Half-pair74 dry42560414421 failed04:13:46. Admin PostgreSQL logunda04:13:45.846
+  `exams_examanswer_selected_options` üçün statement timeout təsdiqləndi.
+  `core.reviewed_graph.rows` PK sütununu text-ə çevirirdi; yeni patch ORM-dən
+  gələn typed IDs ilə indeksli ANY işlədir. Full-column JSON/order/locks/RLS,
+  20k graph limit və exact74 mark/source guard eynidir. 12 real PG parity/planner
+  testi və birləşdirilmiş110 test keçib. Caps/guards boşaldılmır.
+- Cari branch `codex/reaudit-snapshot-diagnostics-20261109`; yeni PR/head/status
+  private `production-progress.json`-dadır. Yeni deploy-dan sonra fresh capture
+  və fresh half-pair dry alınmalıdır. Global capture olmadan fixed bounded repair
+  yalnız native exact pins+locked full graph+authority+freshbaseline tam keçirsə
+  tətbiq edilə bilər. Half-pair cells-dən əvvəl qalır.
+- Anar dry42561283298 `anar_other_teacher_share` ilə saxlanıb; heç apply yoxdur.
+  Current JournalShare authority araşdırılmadan guard silinməməlidir.
+- Source28 hələ unknown40 audit-body proof tələb edir; Farida fresh graph fərqi
+  saxlanır. Source28 reviewer/private final runner hazırdır, freshcapture görməyib.
+- PR20441byteidentical+10maincompatibility fayl müqayisəsi ilə tam superseded
+  təsdiqlənib və bağlanıb. Bu, actual final-data yoxlamasının bitməsi deyil.
+- 33 presemester numeric source grades ayrıca araşdırılır: 59cleanup lesson/917mark
+  ilə exact kəsişmə əvvəl sübut edilməyib. Mənbə balı itirilməməlidir, lakin
+  yanlış date/identity/route ilə kənar perioda dərs yaradılmamalıdır.
+- Private status/ledger: `/Users/elvin/Desktop/RIM/Secret/reaudit-20261109/`:
+  `production-progress.json`, `operations-ledger.jsonl`, `operations/`,
+  `structure-packages/index.json`, `cells-offline/OPERATOR_AZ.md`,
+  `syllabus-batches/OPERATOR_AZ.md`, `final-runner/OPERATOR_AZ.txt`.
+  Heç private/raw nəticəni public Git-ə əlavə etməyin.
+
+Aşağıdakı bütün checkpoint-lər tarixidir; yuxarıdakı vəziyyət və private status əsasdır.
+
 ## Cari vəziyyət — 9 noyabr, 03:28 UTC
 
 - PR **#278** açıqdır: `codex/reaudit-remediation-20261109`, published HEAD

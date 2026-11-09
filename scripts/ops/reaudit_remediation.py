@@ -1,5 +1,6 @@
 """Three reviewed native repair commands; encrypted inputs, backup, baseline and undo."""
 
+import importlib.util
 import json
 import os
 import re
@@ -23,6 +24,26 @@ COMMANDS = {
 READ_ONLY = {"finals", "duplicate_qb"}
 RUNNER = "scripts/ops/reaudit_command_runner.py"
 UUID = r"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
+
+
+def emit_structure_diagnostic(stderr):
+    """Expose the native fixed contract, never raw stderr or exception text."""
+    prefix = "reaudit_structure_error: "
+    lines = [line[len(prefix) :] for line in stderr.splitlines() if line.startswith(prefix)]
+    if not lines:
+        return False
+    if len(stderr) > 256 * 1024 or len(lines) != 1:
+        raise ValueError("structure_safe_diagnostic_required")
+    path = Path(__file__).resolve().parents[2] / "apps/registrar/reaudit_structure_diagnostics.py"
+    spec = importlib.util.spec_from_file_location("reaudit_structure_diagnostics", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    try:
+        diagnostic = module.validate(json.loads(lines[0]))
+    except (ValueError, TypeError, KeyError):
+        raise ValueError("structure_safe_diagnostic_invalid") from None
+    print(prefix + json.dumps(diagnostic, sort_keys=True), file=sys.stderr)
+    return True
 
 
 def inputs(value):
@@ -230,6 +251,8 @@ def run(env):
             timeout=900,
         )
         if result.returncode:
+            if value["operation"] == "structure":
+                emit_structure_diagnostic(result.stderr)
             codes = re.findall(
                 r"(?:CommandError:|reaudit_cells_refused:)\s*([a-z][a-z0-9_]{0,100})(?:\s|$)", result.stderr
             )
