@@ -309,3 +309,21 @@ class AmendmentTest(TestCase):
         with self.assertRaises(ValidationError):
             amendment.delete()
         self.assertEqual(WorkloadAmendment.objects.filter(task=self.task).count(), 1)
+
+
+class GroupsLabelTests(__import__("django.test", fromlist=["TestCase"]).TestCase):
+    """Sahib 2026-11-09: ekranda reyestr qrup adı («935 BM ing»), faylın xam mətni («935 ing») deyil."""
+
+    def test_groups_label_prefers_registry_units(self):
+        from unittest import mock
+
+        from apps.workload.models import TeachingTaskRow
+
+        row = TeachingTaskRow(groups_text="935 ing")
+        unit = mock.Mock()
+        unit.name = "935 BM ing"
+        with mock.patch.object(TeachingTaskRow, "groups", new_callable=mock.PropertyMock) as groups:
+            groups.return_value.all.return_value = [unit]
+            self.assertEqual(row.groups_label, "935 BM ing")
+            groups.return_value.all.return_value = []
+            self.assertEqual(row.groups_label, "935 ing")
