@@ -16,14 +16,25 @@ runner = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(runner)
 
 WRAPPER = """
-import importlib.util,sys
+import importlib.util,sys,time
 from pathlib import Path
 spec=importlib.util.spec_from_file_location('runner',sys.argv[1]);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 m.GRACE=.2
+if len(sys.argv)>5 and sys.argv[5]=='wait-ready':
+    class ReadyProcess(m.subprocess.Popen):
+        def communicate(self,*args,**kwargs):
+            until=time.monotonic()+20
+            while not (Path(sys.argv[2])/'pids.json').exists():
+                if self.poll() is not None or time.monotonic()>=until:
+                    raise AssertionError('Synthetic process tree readiness failed')
+                time.sleep(.02)
+            return super().communicate(*args,**kwargs)
+    m.subprocess.Popen=ReadyProcess
 try:
     code,out,err=m.execute(Path(sys.argv[2]),[sys.executable,'-c',sys.argv[3]],deadline=float(sys.argv[4]))
     sys.stdout.buffer.write(out);sys.stderr.buffer.write(err);sys.exit(code)
-except ValueError:
+except ValueError as exc:
+    sys.stderr.write(str(exc))
     sys.exit(124)
 """
 
@@ -43,26 +54,42 @@ class RunnerProcessTests(unittest.TestCase):
         if self.folder.exists():
             runner.cleanup(self.folder)
 
-    def launch(self, code, deadline):
+    def launch(self, code, deadline, *, wait_ready=False):
         process = subprocess.Popen(
-            [sys.executable, "-c", WRAPPER, str(SCRIPT), str(self.folder), code, str(deadline)],
+            [sys.executable, "-c", WRAPPER, str(SCRIPT), str(self.folder), code, str(deadline)]
+            + (["wait-ready"] if wait_ready else []),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
         self.processes.append(process)
         return process
 
-    def descendants(self):
-        return (
-            "import json,os,signal,subprocess,sys,time;"
+    def descendants(self, *, startup_delay=0):
+        ready = self.folder / "descendant-ready"
+        child = (
+            "import signal,time;from pathlib import Path;"
             "signal.signal(signal.SIGTERM,signal.SIG_IGN);"
-            "p=subprocess.Popen([sys.executable,'-c','import signal,time;signal.signal(signal.SIGTERM,signal.SIG_IGN);time.sleep(30)']);"
-            f"open({str(self.folder / 'pids.json')!r},'w').write(json.dumps([os.getpid(),p.pid]));"
+            f"Path({str(ready)!r}).touch();time.sleep(30)"
+        )
+        return (
+            "import json,os,signal,subprocess,sys,time\n"
+            "from pathlib import Path\n"
+            "signal.signal(signal.SIGTERM,signal.SIG_IGN)\n"
+            f"time.sleep({startup_delay!r})\n"
+            f"p=subprocess.Popen([sys.executable,'-c',{child!r}])\n"
+            "until=time.monotonic()+20\n"
+            f"while not Path({str(ready)!r}).exists():\n"
+            "    if p.poll() is not None or time.monotonic()>=until:\n"
+            "        raise AssertionError('Synthetic descendant readiness failed')\n"
+            "    time.sleep(.02)\n"
+            f"pending=Path({str(self.folder / 'pids.next')!r})\n"
+            "pending.write_text(json.dumps([os.getpid(),p.pid]))\n"
+            f"pending.replace({str(self.folder / 'pids.json')!r})\n"
             "time.sleep(30)"
         )
 
     def await_pids(self):
-        until = time.monotonic() + 5
+        until = time.monotonic() + 20
         target = self.folder / "pids.json"
         while time.monotonic() < until:
             if target.exists():
@@ -84,10 +111,13 @@ class RunnerProcessTests(unittest.TestCase):
         self.assertFalse(self.folder.exists())
 
     def test_timeout_kills_term_ignoring_parent_and_descendant(self):
-        process = self.launch(self.descendants(), 0.6)
+        # Startup deliberately exceeds the real deadline. Only this test's
+        # communicate wrapper waits until both SIGTERM handlers are installed.
+        process = self.launch(self.descendants(startup_delay=1), 0.6, wait_ready=True)
         pids = self.await_pids()
-        process.communicate(timeout=10)
+        stdout, stderr = process.communicate(timeout=10)
         self.assertEqual(process.returncode, 124)
+        self.assertEqual((stdout, stderr), (b"", b"reaudit_native_deadline_expired_receipt_unknown"))
         self.assert_dead(pids)
         runner.cleanup(self.folder)
         self.assertFalse(self.folder.exists())
