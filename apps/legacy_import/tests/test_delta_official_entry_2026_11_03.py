@@ -565,6 +565,38 @@ class OfficialTotalForceTests(OfficialEntryPhaseTests):
         self.assertTrue(any("yekun 46→51" in row[2] for row in forced))
         self.assertTrue(any("yekun 47→52" in row[2] for row in forced))
 
+    def test_rounded_official_total_counts_as_equal_without_writing_exam(self):
+        rows = [
+            _row("ZMRpRj5xOW", 7140, entry="34", exam="12.4", total="46.4"),  # giriş eyni, 46 == round(46.4)
+            _row("ZMRpRj5xOW", 7136, entry="34", exam="9.6", total="43.6"),  # giriş 33→34, 44 == round(43.6)
+        ]
+        run = self._run(apply=True, bundle=_bundle(rows), force_total=True)
+        counters = run.counters
+        self.assertEqual(counters["official_entry.total_fix_rounded_equal"], 2)
+        self.assertEqual(counters["official_entry.sem12.same"], 1)
+        self.assertEqual(counters["official_entry.sem12.written"], 1)
+        self.assertEqual(counters.get("official_entry.sem12.skip_total_mismatch", 0), 0)
+        self.assertEqual(counters.get("official_entry.total_fix_exam", 0), 0)
+        self.assertEqual(self._archive(7136), D("15"))
+        with bypass_rls():
+            self.assertEqual(FinalGrade.objects.get(enrollment=self.students[7140]).exam_score, D(12))
+            self.assertEqual(FinalGrade.objects.get(enrollment=self.students[7136]).exam_score, D(10))
+        self.assertFalse([row for row in run.name_rows if row[0] == "official_entry_total_forced"])
+
+    def test_passing_result_is_never_lowered_to_fail(self):
+        rows = [_row("ZMRpRj5xOW", 7141, entry="30", exam="20", total="50")]  # sistem 34+20=54 keçib, vərəq 50 kəsr
+        for force in (False, True):
+            run = self._run(apply=True, bundle=_bundle(rows), force_total=force)
+            self.assertEqual(run.counters["official_entry.sem12.skip_pass_protected"], 1)
+            self.assertEqual(run.counters.get("official_entry.sem12.written", 0), 0)
+            self.assertEqual(run.counters.get("official_entry.pass_to_fail", 0), 0)
+            self.assertEqual(self._archive(7141), D("15"))
+            with bypass_rls():
+                self.assertEqual(FinalGrade.objects.get(enrollment=self.students[7141]).exam_score, D(20))
+            protected = [row for row in run.name_rows if row[0] == "official_entry_pass_protected"]
+            self.assertEqual(len(protected), 1)
+            self.assertIn("yekun 54→50 rəsmi 50", protected[0][2])
+
     def test_force_is_idempotent(self):
         self._run(apply=True, bundle=_bundle(self._force_rows()), force_total=True)
         again = self._run(apply=True, bundle=_bundle(self._force_rows()), force_total=True)

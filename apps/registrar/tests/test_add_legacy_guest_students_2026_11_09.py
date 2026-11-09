@@ -89,6 +89,19 @@ class AddLegacyGuestStudentsCommandTests(_GuestRosterBase):
         self.assertEqual(again.get("added", "0"), "0")
         self.assertEqual(again["skip_already_enrolled"], "1")
 
+    def test_refusal_messages_map_to_fixed_codes(self):
+        from apps.registrar.management.commands.add_legacy_guest_students_20261109 import refusal_code
+
+        self.assertEqual(refusal_code("Bu tələbə artıq jurnaldadır."), "skip_already_enrolled")
+        self.assertEqual(
+            refusal_code("Bu tələbənin burada rəsmi köçürmə tarixçəsi var — inzibati yoxlama tələb olunur."),
+            "skip_transfer_history",
+        )
+        self.assertEqual(refusal_code("Əvvəlki əlavənin mənbə qrupu fərqlidir."), "skip_source_group_differs")
+        self.assertEqual(refusal_code("Bu semestr bağlıdır — keçmiş dövrün jurnalına …"), "skip_roster_closed")
+        self.assertEqual(refusal_code("Tələbənin aktiv akademik qeydi (qrupu) yoxdur."), "skip_no_active_record")
+        self.assertEqual(refusal_code("nəsə başqa"), "skip_refused")
+
     def test_bad_plan_is_refused(self):
         path = Path(tempfile.mkdtemp()) / "plan.json"
         path.write_text(json.dumps({"format": "other/1", "items": []}))

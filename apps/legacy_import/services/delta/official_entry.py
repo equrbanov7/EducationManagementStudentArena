@@ -246,13 +246,20 @@ def apply_official_entry(run) -> None:
         if row.total_fix:
             run.count(f"{prefix}.total_fix_{row.total_fix}")
             run.count(f"official_entry.total_fix_{row.total_fix}")
-            if row.total_fix != "kept_higher":
+            if row.total_fix not in ("kept_higher", "rounded_equal"):
                 run.names(
                     "official_entry_total_forced",
                     row.student,
                     f"{row.subject} · {row.period} · yekun {_n(row.total_before)}→{_n(row.total_after)} "
                     f"({row.result_before}→{row.result_after}) · {row.total_fix} · vərəq #{export_id}",
                 )
+        if row.outcome == "skip_pass_protected":
+            run.names(
+                "official_entry_pass_protected",
+                row.student,
+                f"{row.subject} · {row.period} · giriş {_n(row.entry_before)}→{_n(row.entry_after)} · yekun "
+                f"{_n(row.total_before)}→{_n(row.total_after)} rəsmi {_n(_total)} (keçib→kəsr yazılmadı) · vərəq #{export_id}",
+            )
         if row.outcome == "skip_total_mismatch":
             run.names(
                 "official_entry_total_mismatch",
