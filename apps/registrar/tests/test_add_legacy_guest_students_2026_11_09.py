@@ -89,6 +89,60 @@ class AddLegacyGuestStudentsCommandTests(_GuestRosterBase):
         self.assertEqual(again.get("added", "0"), "0")
         self.assertEqual(again["skip_already_enrolled"], "1")
 
+    def _level_cohort(self):
+        """Səviyyə qrupu: Tarix fənni «Xarici dil-1 (Elementary)» olur (qonağın aktiv jurnalı eyni ailədə), yeni
+        «Intermediate» fənni ilə səviyyə qrupu yaradılır."""
+        from apps.registrar import language_cohorts
+        from apps.registrar.models import Subject
+
+        with bypass_rls():
+            self.history.name = "Xarici dil-1 (Elementary)"
+            self.history.save(update_fields=["name"])
+            intermediate = Subject.objects.create(
+                organization=self.org, code="LANG-INT", name="Xarici dil-1 (Intermediate)"
+            )
+            for user in (self.host, self.guest, self.teacher):
+                user.profile.organization = self.org
+                user.profile.save(update_fields=["organization"])
+            return language_cohorts.create_cohort(
+                organization=self.org,
+                actor=self.coordinator,
+                department=self.chair,
+                period=self.period,
+                subject=intermediate,
+                instructor=self.teacher,
+                name="Evening English",
+                hours=30,
+                lecture_hours=0,
+                seminar_hours=30,
+                lab_hours=0,
+                entry_score_max=50,
+                pass_threshold=51,
+                min_final_exam_score=17,
+            )
+
+    def test_level_cohort_adds_only_without_active_level_journal(self):
+        cohort = self._level_cohort()
+        self.guest.first_name, self.guest.last_name = "Qonaq", "Tələbə"
+        self.guest.save(update_fields=["first_name", "last_name"])
+        items = [{"offering": str(cohort.offering_id), "name": "Tələbə Qonaq", "reason": "Köhnə jurnal 8v2jO5Imte"}]
+        # Qonağın eyni dil ailəsində aktiv jurnalı var (Elementary) → köçürmə inzibati qərardır, yazılmır.
+        counts = self._call(items, apply=True)
+        self.assertEqual(counts["skip_level_move_needed"], "1")
+        self.assertNotIn("added", counts)
+        with bypass_rls():
+            self.assertFalse(Enrollment.objects.filter(offering=cohort.offering, student=self.guest).exists())
+        # Aktiv səviyyə jurnalı yoxdursa → səviyyə idarəetməsi ilə təmiz əlavə.
+        self._drop_own_history(self.guest)
+        counts = self._call(items, apply=True)
+        self.assertEqual((counts["added"], counts["added_level_cohort"]), ("1", "1"))
+        with bypass_rls():
+            enrollment = Enrollment.objects.get(offering=cohort.offering, student=self.guest)
+            self.assertEqual((enrollment.status, enrollment.source_group_id), ("enrolled", self.group2.pk))
+        again = self._call(items, apply=True)
+        self.assertEqual(again.get("added", "0"), "0")
+        self.assertEqual(again["skip_already_enrolled"], "1")
+
     def test_refusal_messages_map_to_fixed_codes(self):
         from apps.registrar.management.commands.add_legacy_guest_students_20261109 import refusal_code
 
