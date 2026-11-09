@@ -9,8 +9,14 @@ on:
       scope:
         description: "full = bütün audit · logs = yalnız «Loglar» zənciri (promtail → Loki ← Django, ~40 s)"
         type: choice
-        options: [full, logs]
+        options: [full, logs, reaudit]
         default: full
+      actor:
+        description: "Yalnız reaudit: aktiv qku superadmini"
+        type: string
+      deployed_head:
+        description: "Yalnız reaudit: yoxlanmış canlı tətbiqin 40 simvolluq SHA-sı"
+        type: string
 
 concurrency:
   group: prod-ops
@@ -21,6 +27,7 @@ permissions:
 
 jobs:
   audit:
+    if: inputs.scope != 'reaudit'
     name: 🔎 prod-audit
     runs-on: [self-hosted]
     environment: production
@@ -56,3 +63,28 @@ jobs:
           name: prod-audit-report
           path: ${{ runner.temp }}/prod-audit.md
           retention-days: 30
+  reaudit:
+    if: inputs.scope == 'reaudit'
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 20
+    concurrency:
+      group: production-deploy
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Capture fixed qku snapshot with exact deployed HEAD verification
+        id: capture
+        run: python3 scripts/ops/reaudit_snapshot.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: reaudit-state-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ steps.capture.outputs.artifact_dir }}
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+      - name: Remove temporary artifacts
+        if: always()
+        run: rm -rf -- "$RUNNER_TEMP/reaudit-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"

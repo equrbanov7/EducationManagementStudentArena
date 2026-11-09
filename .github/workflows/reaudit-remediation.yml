@@ -1,0 +1,57 @@
+name: Reviewed journal syllabus and grade remediation
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        type: choice
+        required: true
+        options: [cells, syllabi, structure, finals, duplicate_qb]
+      actor:
+        type: string
+        required: true
+      release_tag:
+        description: "Private encrypted reaudit-20261109-* source bundle"
+        type: string
+        required: false
+      cipher_sha256:
+        type: string
+        required: false
+      baseline:
+        description: "Fresh dry-run baseline for apply"
+        type: string
+        default: ""
+      apply:
+        type: boolean
+        default: false
+      undo:
+        description: "Exact original apply receipt UUID, if reversing"
+        type: string
+        default: ""
+      confirm:
+        description: "APPLY only for a reviewed write"
+        type: string
+        default: ""
+permissions:
+  contents: read
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  reviewed:
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Run pinned native dry-run or receipt-backed repair
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STAFF_PLAN_KEY: ${{ secrets.STAFF_PLAN_KEY }}
+        run: python3 scripts/ops/reaudit_remediation.py
+      - name: Remove private temporary files
+        if: always()
+        # Failure/cancellation leaves the result unknown: inspect native receipts,
+        # then obtain a fresh dry-run baseline before retrying any write.
+        run: python3 scripts/ops/reaudit_remediation.py --cleanup

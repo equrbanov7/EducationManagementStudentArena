@@ -1,35 +1,540 @@
-{"lessons": {
-  "14b0e21c-0dd1-4d90-a425-9e33869976be": {"fields": {"created_at": "2026-10-23T23:35:44.230528+00:00", "created_by_id": null, "date": "2026-10-06", "end_time": null, "hours": 2, "id": "14b0e21c-0dd1-4d90-a425-9e33869976be", "is_legacy_synthesised": false, "kind": "seminar", "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 269, "start_time": "13:35:00", "syllabus_week": 2, "topic": "Menecmentin elmi məкtəbləri", "updated_at": "2026-10-23T23:35:44.230531+00:00"}},
-  "1cbbb888-4976-47ab-9c29-9f814f786183": {"fields": {"created_at": "2026-10-23T23:35:45.321537+00:00", "created_by_id": null, "date": "2026-10-13", "end_time": null, "hours": 2, "id": "1cbbb888-4976-47ab-9c29-9f814f786183", "is_legacy_synthesised": false, "kind": "seminar", "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 269, "start_time": "13:35:00", "syllabus_week": 4, "topic": "Təşkilat menecmentin obyekti kimi", "updated_at": "2026-10-23T23:35:45.32154+00:00"}},
-  "22a27fd7-ad7c-4c4d-ae07-011426df6373": {"fields": {"created_at": "2026-10-23T23:35:44.256521+00:00", "created_by_id": null, "date": "2026-10-08", "end_time": null, "hours": 2, "id": "22a27fd7-ad7c-4c4d-ae07-011426df6373", "is_legacy_synthesised": false, "kind": "lecture", "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 242, "start_time": "16:55:00", "syllabus_week": 5, "topic": "Mеnеcmеntin təşкilаti fоrmаlаrı", "updated_at": "2026-10-23T23:35:44.256524+00:00"}},
-  "2a4dfd4b-685c-45fa-a941-b6e9c02e07bf": {"fields": {"created_at": "2026-10-23T23:35:43.175058+00:00", "created_by_id": null, "date": "2026-09-22", "end_time": null, "hours": 2, "id": "2a4dfd4b-685c-45fa-a941-b6e9c02e07bf", "is_legacy_synthesised": false, "kind": "seminar", "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 272, "start_time": "13:35:00", "syllabus_week": 2, "topic": "Menecmentin elmi məкtəbləri", "updated_at": "2026-10-23T23:35:43.175061+00:00"}},
-  "350dd066-1052-4992-8ff1-809e2777264e": {"fields": {"created_at": "2026-10-23T23:35:45.326064+00:00", "created_by_id": null, "date": "2026-10-20", "end_time": null, "hours": 2, "id": "350dd066-1052-4992-8ff1-809e2777264e", "is_legacy_synthesised": false, "kind": "lecture", "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 333, "start_time": "15:15:00", "syllabus_week": 6, "topic": "Mеnеcmеntin təşкilаti quruluşu", "updated_at": "2026-10-23T23:35:45.326067+00:00"}},
-  "381607ba-07fd-4deb-917f-e30924f6cdbb": {"fields": {"created_at": "2026-10-23T23:35:44.99044+00:00", "created_by_id": null, "date": "2026-10-19", "end_time": null, "hours": 2, "id": "381607ba-07fd-4deb-917f-e30924f6cdbb", "is_legacy_synthesised": false, "kind": "seminar", "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 237, "start_time": "15:15:00", "syllabus_week": 5, "topic": "Mеnеcmеntin təşкilаti fоrmаlаrı", "updated_at": "2026-10-23T23:35:44.990443+00:00"}},
-  "4e1ac907-614d-4ee2-890b-6a543a41c645": {"fields": {"created_at": "2026-10-23T23:35:44.256579+00:00", "created_by_id": null, "date": "2026-10-08", "end_time": null, "hours": 2, "id": "4e1ac907-614d-4ee2-890b-6a543a41c645", "is_legacy_synthesised": false, "kind": "lecture", "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 242, "start_time": "16:55:00", "syllabus_week": 5, "topic": "Mеnеcmеntin təşкilаti fоrmаlаrı", "updated_at": "2026-10-23T23:35:44.256582+00:00"}},
-  "5f2b0365-4f66-4adc-b29c-c3d62024d4df": {"fields": {"created_at": "2026-10-23T23:35:43.150232+00:00", "created_by_id": null, "date": "2026-09-15", "end_time": null, "hours": 2, "id": "5f2b0365-4f66-4adc-b29c-c3d62024d4df", "is_legacy_synthesised": false, "kind": "seminar", "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 272, "start_time": "15:15:00", "syllabus_week": 1, "topic": "Menecmentin təşəkkül tapması, predmeti ,mahiyyəti və inkişafı", "updated_at": "2026-10-23T23:35:43.150235+00:00"}},
-  "633cc9e3-fad0-4cc9-975c-8e1966fc412a": {"fields": {"created_at": "2026-10-23T23:35:44.23192+00:00", "created_by_id": null, "date": "2026-10-06", "end_time": null, "hours": 2, "id": "633cc9e3-fad0-4cc9-975c-8e1966fc412a", "is_legacy_synthesised": false, "kind": "lecture", "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 272, "start_time": "15:15:00", "syllabus_week": 5, "topic": "Mеnеcmеntin təşкilаti fоrmаlаrı", "updated_at": "2026-10-23T23:35:44.231922+00:00"}},
-  "64fab318-670b-4061-9e22-02bab3ddc892": {"fields": {"created_at": "2026-10-23T23:35:44.989986+00:00", "created_by_id": null, "date": "2026-10-12", "end_time": null, "hours": 2, "id": "64fab318-670b-4061-9e22-02bab3ddc892", "is_legacy_synthesised": false, "kind": "seminar", "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 237, "start_time": "15:15:00", "syllabus_week": 4, "topic": "Təşkilat menecmentin obyekti kimi", "updated_at": "2026-10-23T23:35:44.989989+00:00"}},
-  "6f0e365b-b8bb-405e-95f4-5b3b59b086de": {"fields": {"created_at": "2026-10-23T23:35:43.543518+00:00", "created_by_id": null, "date": "2026-09-29", "end_time": null, "hours": 2, "id": "6f0e365b-b8bb-405e-95f4-5b3b59b086de", "is_legacy_synthesised": false, "kind": "seminar", "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 327, "start_time": "13:35:00", "syllabus_week": 2, "topic": "Menecmentin elmi məкtəbləri", "updated_at": "2026-10-23T23:35:43.543521+00:00"}},
-  "76ce12a3-0f27-4c8f-9991-c6e3bf777ecb": {"fields": {"created_at": "2026-10-23T23:35:45.32616+00:00", "created_by_id": null, "date": "2026-10-20", "end_time": null, "hours": 2, "id": "76ce12a3-0f27-4c8f-9991-c6e3bf777ecb", "is_legacy_synthesised": false, "kind": "lecture", "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 333, "start_time": "15:15:00", "syllabus_week": 6, "topic": "Mеnеcmеntin təşкilаti quruluşu", "updated_at": "2026-10-23T23:35:45.326163+00:00"}},
-  "784448fd-ebe7-4ce4-a09d-a3eb91226800": {"fields": {"created_at": "2026-10-23T23:35:45.321692+00:00", "created_by_id": null, "date": "2026-10-15", "end_time": null, "hours": 2, "id": "784448fd-ebe7-4ce4-a09d-a3eb91226800", "is_legacy_synthesised": false, "kind": "lecture", "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 242, "start_time": "16:55:00", "syllabus_week": 5, "topic": "Mеnеcmеntin təşкilаti fоrmаlаrı", "updated_at": "2026-10-23T23:35:45.321695+00:00"}},
-  "849a82de-5966-4588-aa60-1888456db5e1": {"fields": {"created_at": "2026-10-23T23:35:44.231956+00:00", "created_by_id": null, "date": "2026-10-06", "end_time": null, "hours": 2, "id": "849a82de-5966-4588-aa60-1888456db5e1", "is_legacy_synthesised": false, "kind": "lecture", "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 272, "start_time": "15:15:00", "syllabus_week": 5, "topic": "Mеnеcmеntin təşкilаti fоrmаlаrı", "updated_at": "2026-10-23T23:35:44.231959+00:00"}},
-  "8ae6279f-1df0-41f9-bc54-6d146b9d5a6d": {"fields": {"created_at": "2026-10-23T23:35:43.181117+00:00", "created_by_id": null, "date": "2026-09-22", "end_time": null, "hours": 2, "id": "8ae6279f-1df0-41f9-bc54-6d146b9d5a6d", "is_legacy_synthesised": false, "kind": "lecture", "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 272, "start_time": "15:15:00", "syllabus_week": 2, "topic": "Menecmentin elmi məкtəbləri", "updated_at": "2026-10-23T23:35:43.18112+00:00"}},
-  "93778602-1aeb-40ef-8c88-fa0a95ea0527": {"fields": {"created_at": "2026-10-23T23:35:43.878208+00:00", "created_by_id": null, "date": "2026-10-01", "end_time": null, "hours": 2, "id": "93778602-1aeb-40ef-8c88-fa0a95ea0527", "is_legacy_synthesised": false, "kind": "lecture", "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 242, "start_time": "16:55:00", "syllabus_week": 2, "topic": "Menecmentin elmi məкtəbləri", "updated_at": "2026-10-23T23:35:43.878211+00:00"}},
-  "9d989538-6a52-48c0-86bd-1a2ef0cc931a": {"fields": {"created_at": "2026-10-23T23:35:43.157823+00:00", "created_by_id": null, "date": "2026-09-17", "end_time": null, "hours": 2, "id": "9d989538-6a52-48c0-86bd-1a2ef0cc931a", "is_legacy_synthesised": false, "kind": "lecture", "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 242, "start_time": "16:55:00", "syllabus_week": 1, "topic": "Menecmentin təşəkkül tapması, predmeti ,mahiyyəti və inkişafı", "updated_at": "2026-10-23T23:35:43.157826+00:00"}},
-  "ac3255f0-8699-4f5e-9ba5-6d40cd8dfc3d": {"fields": {"created_at": "2026-10-23T23:35:43.150212+00:00", "created_by_id": null, "date": "2026-09-15", "end_time": null, "hours": 2, "id": "ac3255f0-8699-4f5e-9ba5-6d40cd8dfc3d", "is_legacy_synthesised": false, "kind": "seminar", "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 272, "start_time": "15:15:00", "syllabus_week": 1, "topic": "Menecmentin təşəkkül tapması, predmeti ,mahiyyəti və inkişafı", "updated_at": "2026-10-23T23:35:43.150215+00:00"}},
-  "aed49321-bc00-4fdd-b016-39571f37aaea": {"fields": {"created_at": "2026-10-23T23:35:43.157861+00:00", "created_by_id": null, "date": "2026-09-17", "end_time": null, "hours": 2, "id": "aed49321-bc00-4fdd-b016-39571f37aaea", "is_legacy_synthesised": false, "kind": "lecture", "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 242, "start_time": "16:55:00", "syllabus_week": 1, "topic": "Menecmentin təşəkkül tapması, predmeti ,mahiyyəti və inkişafı", "updated_at": "2026-10-23T23:35:43.157864+00:00"}},
-  "b21a4a90-8343-4cf4-b39b-27ccc2f1aa47": {"fields": {"created_at": "2026-10-23T23:35:43.168217+00:00", "created_by_id": null, "date": "2026-09-21", "end_time": null, "hours": 2, "id": "b21a4a90-8343-4cf4-b39b-27ccc2f1aa47", "is_legacy_synthesised": false, "kind": "seminar", "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 329, "start_time": "15:15:00", "syllabus_week": 1, "topic": "Menecmentin təşəkkül tapması, predmeti ,mahiyyəti və inkişafı", "updated_at": "2026-10-23T23:35:43.168221+00:00"}},
-  "cc9a3b7e-d951-4a71-b86f-4960898972bf": {"fields": {"created_at": "2026-10-23T23:35:43.181435+00:00", "created_by_id": null, "date": "2026-09-22", "end_time": null, "hours": 2, "id": "cc9a3b7e-d951-4a71-b86f-4960898972bf", "is_legacy_synthesised": false, "kind": "lecture", "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 272, "start_time": "15:15:00", "syllabus_week": 2, "topic": "Menecmentin elmi məкtəbləri", "updated_at": "2026-10-23T23:35:43.181438+00:00"}},
-  "d021bddd-3bfe-4784-9d03-de759a85809d": {"fields": {"created_at": "2026-10-23T23:35:43.523508+00:00", "created_by_id": null, "date": "2026-09-24", "end_time": null, "hours": 2, "id": "d021bddd-3bfe-4784-9d03-de759a85809d", "is_legacy_synthesised": false, "kind": "lecture", "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 242, "start_time": "16:55:00", "syllabus_week": 2, "topic": "Menecmentin elmi məкtəbləri", "updated_at": "2026-10-23T23:35:43.523511+00:00"}},
-  "d038d498-c2d4-47e1-a14b-21968b8cc803": {"fields": {"created_at": "2026-10-23T23:35:44.990398+00:00", "created_by_id": null, "date": "2026-10-15", "end_time": null, "hours": 2, "id": "d038d498-c2d4-47e1-a14b-21968b8cc803", "is_legacy_synthesised": false, "kind": "lecture", "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 242, "start_time": "16:55:00", "syllabus_week": 6, "topic": "Mеnеcmеntin təşкilаti quruluşu", "updated_at": "2026-10-23T23:35:44.990402+00:00"}},
-  "e81b2c35-028c-4dde-941e-1631ba73436a": {"fields": {"created_at": "2026-10-23T23:35:43.896416+00:00", "created_by_id": null, "date": "2026-10-05", "end_time": null, "hours": 2, "id": "e81b2c35-028c-4dde-941e-1631ba73436a", "is_legacy_synthesised": false, "kind": "seminar", "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 237, "start_time": "15:15:00", "syllabus_week": 2, "topic": "Menecmentin elmi məкtəbləri", "updated_at": "2026-10-23T23:35:43.896419+00:00"}},
-  "ee647f0c-6c7e-49ab-bea9-88d603be7f25": {"fields": {"created_at": "2026-10-23T23:35:43.523488+00:00", "created_by_id": null, "date": "2026-09-24", "end_time": null, "hours": 2, "id": "ee647f0c-6c7e-49ab-bea9-88d603be7f25", "is_legacy_synthesised": false, "kind": "lecture", "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 242, "start_time": "16:55:00", "syllabus_week": 2, "topic": "Menecmentin elmi məкtəbləri", "updated_at": "2026-10-23T23:35:43.523491+00:00"}},
-  "fa9fbbdd-058c-46c5-ac6c-6ad9786fccfd": {"fields": {"created_at": "2026-10-23T23:35:45.321862+00:00", "created_by_id": null, "date": "2026-10-20", "end_time": null, "hours": 2, "id": "fa9fbbdd-058c-46c5-ac6c-6ad9786fccfd", "is_legacy_synthesised": false, "kind": "seminar", "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 269, "start_time": "13:35:00", "syllabus_week": 5, "topic": "Mеnеcmеntin təşкilаti fоrmаlаrı", "updated_at": "2026-10-23T23:35:45.321865+00:00"}},
-  "fb1b456f-1b60-44e9-9daa-7991beb0ca80": {"fields": {"created_at": "2026-10-23T23:35:43.877925+00:00", "created_by_id": null, "date": "2026-10-01", "end_time": null, "hours": 2, "id": "fb1b456f-1b60-44e9-9daa-7991beb0ca80", "is_legacy_synthesised": false, "kind": "lecture", "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 242, "start_time": "16:55:00", "syllabus_week": 2, "topic": "Menecmentin elmi məкtəbləri", "updated_at": "2026-10-23T23:35:43.877928+00:00"}},
-  "fc2bcf4a-aedf-47a3-bb42-2d71ad87161f": {"fields": {"created_at": "2026-10-23T23:35:43.536052+00:00", "created_by_id": null, "date": "2026-09-28", "end_time": null, "hours": 2, "id": "fc2bcf4a-aedf-47a3-bb42-2d71ad87161f", "is_legacy_synthesised": false, "kind": "seminar", "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b", "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918", "room_id": 329, "start_time": "15:15:00", "syllabus_week": 2, "topic": "Menecmentin elmi məкtəbləri", "updated_at": "2026-10-23T23:35:43.536055+00:00"}}
-},
-  "marks_sha256": "b4124d37ca631c3ab8867a9ba31883a9312022bcfb38af7325d04a2a645dd889",
-  "marks_count": 817,
+{
+  "lessons": {
+    "14b0e21c-0dd1-4d90-a425-9e33869976be": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:44.230528+00:00",
+        "created_by_id": null,
+        "date": "2026-10-06",
+        "end_time": null,
+        "hours": 2,
+        "id": "14b0e21c-0dd1-4d90-a425-9e33869976be",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 269,
+        "start_time": "13:35:00",
+        "syllabus_week": 2,
+        "topic": "Menecmentin elmi məкtəbləri",
+        "updated_at": "2026-10-23T23:35:44.230531+00:00"
+      }
+    },
+    "1cbbb888-4976-47ab-9c29-9f814f786183": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:45.321537+00:00",
+        "created_by_id": null,
+        "date": "2026-10-13",
+        "end_time": null,
+        "hours": 2,
+        "id": "1cbbb888-4976-47ab-9c29-9f814f786183",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 269,
+        "start_time": "13:35:00",
+        "syllabus_week": 4,
+        "topic": "Təşkilat menecmentin obyekti kimi",
+        "updated_at": "2026-10-23T23:35:45.32154+00:00"
+      }
+    },
+    "22a27fd7-ad7c-4c4d-ae07-011426df6373": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:44.256521+00:00",
+        "created_by_id": null,
+        "date": "2026-10-08",
+        "end_time": null,
+        "hours": 2,
+        "id": "22a27fd7-ad7c-4c4d-ae07-011426df6373",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 242,
+        "start_time": "16:55:00",
+        "syllabus_week": 5,
+        "topic": "Mеnеcmеntin təşкilаti fоrmаlаrı",
+        "updated_at": "2026-10-23T23:35:44.256524+00:00"
+      }
+    },
+    "2a4dfd4b-685c-45fa-a941-b6e9c02e07bf": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:43.175058+00:00",
+        "created_by_id": null,
+        "date": "2026-09-22",
+        "end_time": null,
+        "hours": 2,
+        "id": "2a4dfd4b-685c-45fa-a941-b6e9c02e07bf",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 272,
+        "start_time": "13:35:00",
+        "syllabus_week": 2,
+        "topic": "Menecmentin elmi məкtəbləri",
+        "updated_at": "2026-10-23T23:35:43.175061+00:00"
+      }
+    },
+    "350dd066-1052-4992-8ff1-809e2777264e": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:45.326064+00:00",
+        "created_by_id": null,
+        "date": "2026-10-20",
+        "end_time": null,
+        "hours": 2,
+        "id": "350dd066-1052-4992-8ff1-809e2777264e",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 333,
+        "start_time": "15:15:00",
+        "syllabus_week": 6,
+        "topic": "Mеnеcmеntin təşкilаti quruluşu",
+        "updated_at": "2026-10-23T23:35:45.326067+00:00"
+      }
+    },
+    "381607ba-07fd-4deb-917f-e30924f6cdbb": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:44.99044+00:00",
+        "created_by_id": null,
+        "date": "2026-10-19",
+        "end_time": null,
+        "hours": 2,
+        "id": "381607ba-07fd-4deb-917f-e30924f6cdbb",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 237,
+        "start_time": "15:15:00",
+        "syllabus_week": 5,
+        "topic": "Mеnеcmеntin təşкilаti fоrmаlаrı",
+        "updated_at": "2026-10-23T23:35:44.990443+00:00"
+      }
+    },
+    "4e1ac907-614d-4ee2-890b-6a543a41c645": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:44.256579+00:00",
+        "created_by_id": null,
+        "date": "2026-10-08",
+        "end_time": null,
+        "hours": 2,
+        "id": "4e1ac907-614d-4ee2-890b-6a543a41c645",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 242,
+        "start_time": "16:55:00",
+        "syllabus_week": 5,
+        "topic": "Mеnеcmеntin təşкilаti fоrmаlаrı",
+        "updated_at": "2026-10-23T23:35:44.256582+00:00"
+      }
+    },
+    "5f2b0365-4f66-4adc-b29c-c3d62024d4df": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:43.150232+00:00",
+        "created_by_id": null,
+        "date": "2026-09-15",
+        "end_time": null,
+        "hours": 2,
+        "id": "5f2b0365-4f66-4adc-b29c-c3d62024d4df",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 272,
+        "start_time": "15:15:00",
+        "syllabus_week": 1,
+        "topic": "Menecmentin təşəkkül tapması, predmeti ,mahiyyəti və inkişafı",
+        "updated_at": "2026-10-23T23:35:43.150235+00:00"
+      }
+    },
+    "633cc9e3-fad0-4cc9-975c-8e1966fc412a": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:44.23192+00:00",
+        "created_by_id": null,
+        "date": "2026-10-06",
+        "end_time": null,
+        "hours": 2,
+        "id": "633cc9e3-fad0-4cc9-975c-8e1966fc412a",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 272,
+        "start_time": "15:15:00",
+        "syllabus_week": 5,
+        "topic": "Mеnеcmеntin təşкilаti fоrmаlаrı",
+        "updated_at": "2026-10-23T23:35:44.231922+00:00"
+      }
+    },
+    "64fab318-670b-4061-9e22-02bab3ddc892": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:44.989986+00:00",
+        "created_by_id": null,
+        "date": "2026-10-12",
+        "end_time": null,
+        "hours": 2,
+        "id": "64fab318-670b-4061-9e22-02bab3ddc892",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 237,
+        "start_time": "15:15:00",
+        "syllabus_week": 4,
+        "topic": "Təşkilat menecmentin obyekti kimi",
+        "updated_at": "2026-10-23T23:35:44.989989+00:00"
+      }
+    },
+    "6f0e365b-b8bb-405e-95f4-5b3b59b086de": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:43.543518+00:00",
+        "created_by_id": null,
+        "date": "2026-09-29",
+        "end_time": null,
+        "hours": 2,
+        "id": "6f0e365b-b8bb-405e-95f4-5b3b59b086de",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 327,
+        "start_time": "13:35:00",
+        "syllabus_week": 2,
+        "topic": "Menecmentin elmi məкtəbləri",
+        "updated_at": "2026-10-23T23:35:43.543521+00:00"
+      }
+    },
+    "76ce12a3-0f27-4c8f-9991-c6e3bf777ecb": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:45.32616+00:00",
+        "created_by_id": null,
+        "date": "2026-10-20",
+        "end_time": null,
+        "hours": 2,
+        "id": "76ce12a3-0f27-4c8f-9991-c6e3bf777ecb",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 333,
+        "start_time": "15:15:00",
+        "syllabus_week": 6,
+        "topic": "Mеnеcmеntin təşкilаti quruluşu",
+        "updated_at": "2026-10-23T23:35:45.326163+00:00"
+      }
+    },
+    "784448fd-ebe7-4ce4-a09d-a3eb91226800": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:45.321692+00:00",
+        "created_by_id": null,
+        "date": "2026-10-15",
+        "end_time": null,
+        "hours": 2,
+        "id": "784448fd-ebe7-4ce4-a09d-a3eb91226800",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 242,
+        "start_time": "16:55:00",
+        "syllabus_week": 5,
+        "topic": "Mеnеcmеntin təşкilаti fоrmаlаrı",
+        "updated_at": "2026-10-23T23:35:45.321695+00:00"
+      }
+    },
+    "849a82de-5966-4588-aa60-1888456db5e1": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:44.231956+00:00",
+        "created_by_id": null,
+        "date": "2026-10-06",
+        "end_time": null,
+        "hours": 2,
+        "id": "849a82de-5966-4588-aa60-1888456db5e1",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 272,
+        "start_time": "15:15:00",
+        "syllabus_week": 5,
+        "topic": "Mеnеcmеntin təşкilаti fоrmаlаrı",
+        "updated_at": "2026-10-23T23:35:44.231959+00:00"
+      }
+    },
+    "8ae6279f-1df0-41f9-bc54-6d146b9d5a6d": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:43.181117+00:00",
+        "created_by_id": null,
+        "date": "2026-09-22",
+        "end_time": null,
+        "hours": 2,
+        "id": "8ae6279f-1df0-41f9-bc54-6d146b9d5a6d",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 272,
+        "start_time": "15:15:00",
+        "syllabus_week": 2,
+        "topic": "Menecmentin elmi məкtəbləri",
+        "updated_at": "2026-10-23T23:35:43.18112+00:00"
+      }
+    },
+    "93778602-1aeb-40ef-8c88-fa0a95ea0527": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:43.878208+00:00",
+        "created_by_id": null,
+        "date": "2026-10-01",
+        "end_time": null,
+        "hours": 2,
+        "id": "93778602-1aeb-40ef-8c88-fa0a95ea0527",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 242,
+        "start_time": "16:55:00",
+        "syllabus_week": 2,
+        "topic": "Menecmentin elmi məкtəbləri",
+        "updated_at": "2026-10-23T23:35:43.878211+00:00"
+      }
+    },
+    "9d989538-6a52-48c0-86bd-1a2ef0cc931a": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:43.157823+00:00",
+        "created_by_id": null,
+        "date": "2026-09-17",
+        "end_time": null,
+        "hours": 2,
+        "id": "9d989538-6a52-48c0-86bd-1a2ef0cc931a",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 242,
+        "start_time": "16:55:00",
+        "syllabus_week": 1,
+        "topic": "Menecmentin təşəkkül tapması, predmeti ,mahiyyəti və inkişafı",
+        "updated_at": "2026-10-23T23:35:43.157826+00:00"
+      }
+    },
+    "ac3255f0-8699-4f5e-9ba5-6d40cd8dfc3d": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:43.150212+00:00",
+        "created_by_id": null,
+        "date": "2026-09-15",
+        "end_time": null,
+        "hours": 2,
+        "id": "ac3255f0-8699-4f5e-9ba5-6d40cd8dfc3d",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 272,
+        "start_time": "15:15:00",
+        "syllabus_week": 1,
+        "topic": "Menecmentin təşəkkül tapması, predmeti ,mahiyyəti və inkişafı",
+        "updated_at": "2026-10-23T23:35:43.150215+00:00"
+      }
+    },
+    "aed49321-bc00-4fdd-b016-39571f37aaea": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:43.157861+00:00",
+        "created_by_id": null,
+        "date": "2026-09-17",
+        "end_time": null,
+        "hours": 2,
+        "id": "aed49321-bc00-4fdd-b016-39571f37aaea",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 242,
+        "start_time": "16:55:00",
+        "syllabus_week": 1,
+        "topic": "Menecmentin təşəkkül tapması, predmeti ,mahiyyəti və inkişafı",
+        "updated_at": "2026-10-23T23:35:43.157864+00:00"
+      }
+    },
+    "b21a4a90-8343-4cf4-b39b-27ccc2f1aa47": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:43.168217+00:00",
+        "created_by_id": null,
+        "date": "2026-09-21",
+        "end_time": null,
+        "hours": 2,
+        "id": "b21a4a90-8343-4cf4-b39b-27ccc2f1aa47",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 329,
+        "start_time": "15:15:00",
+        "syllabus_week": 1,
+        "topic": "Menecmentin təşəkkül tapması, predmeti ,mahiyyəti və inkişafı",
+        "updated_at": "2026-10-23T23:35:43.168221+00:00"
+      }
+    },
+    "cc9a3b7e-d951-4a71-b86f-4960898972bf": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:43.181435+00:00",
+        "created_by_id": null,
+        "date": "2026-09-22",
+        "end_time": null,
+        "hours": 2,
+        "id": "cc9a3b7e-d951-4a71-b86f-4960898972bf",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 272,
+        "start_time": "15:15:00",
+        "syllabus_week": 2,
+        "topic": "Menecmentin elmi məкtəbləri",
+        "updated_at": "2026-10-23T23:35:43.181438+00:00"
+      }
+    },
+    "d021bddd-3bfe-4784-9d03-de759a85809d": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:43.523508+00:00",
+        "created_by_id": null,
+        "date": "2026-09-24",
+        "end_time": null,
+        "hours": 2,
+        "id": "d021bddd-3bfe-4784-9d03-de759a85809d",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 242,
+        "start_time": "16:55:00",
+        "syllabus_week": 2,
+        "topic": "Menecmentin elmi məкtəbləri",
+        "updated_at": "2026-10-23T23:35:43.523511+00:00"
+      }
+    },
+    "d038d498-c2d4-47e1-a14b-21968b8cc803": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:44.990398+00:00",
+        "created_by_id": null,
+        "date": "2026-10-15",
+        "end_time": null,
+        "hours": 2,
+        "id": "d038d498-c2d4-47e1-a14b-21968b8cc803",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 242,
+        "start_time": "16:55:00",
+        "syllabus_week": 6,
+        "topic": "Mеnеcmеntin təşкilаti quruluşu",
+        "updated_at": "2026-10-23T23:35:44.990402+00:00"
+      }
+    },
+    "e81b2c35-028c-4dde-941e-1631ba73436a": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:43.896416+00:00",
+        "created_by_id": null,
+        "date": "2026-10-05",
+        "end_time": null,
+        "hours": 2,
+        "id": "e81b2c35-028c-4dde-941e-1631ba73436a",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 237,
+        "start_time": "15:15:00",
+        "syllabus_week": 2,
+        "topic": "Menecmentin elmi məкtəbləri",
+        "updated_at": "2026-10-23T23:35:43.896419+00:00"
+      }
+    },
+    "ee647f0c-6c7e-49ab-bea9-88d603be7f25": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:43.523488+00:00",
+        "created_by_id": null,
+        "date": "2026-09-24",
+        "end_time": null,
+        "hours": 2,
+        "id": "ee647f0c-6c7e-49ab-bea9-88d603be7f25",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 242,
+        "start_time": "16:55:00",
+        "syllabus_week": 2,
+        "topic": "Menecmentin elmi məкtəbləri",
+        "updated_at": "2026-10-23T23:35:43.523491+00:00"
+      }
+    },
+    "fa9fbbdd-058c-46c5-ac6c-6ad9786fccfd": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:45.321862+00:00",
+        "created_by_id": null,
+        "date": "2026-10-20",
+        "end_time": null,
+        "hours": 2,
+        "id": "fa9fbbdd-058c-46c5-ac6c-6ad9786fccfd",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 269,
+        "start_time": "13:35:00",
+        "syllabus_week": 5,
+        "topic": "Mеnеcmеntin təşкilаti fоrmаlаrı",
+        "updated_at": "2026-10-23T23:35:45.321865+00:00"
+      }
+    },
+    "fb1b456f-1b60-44e9-9daa-7991beb0ca80": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:43.877925+00:00",
+        "created_by_id": null,
+        "date": "2026-10-01",
+        "end_time": null,
+        "hours": 2,
+        "id": "fb1b456f-1b60-44e9-9daa-7991beb0ca80",
+        "is_legacy_synthesised": false,
+        "kind": "lecture",
+        "offering_id": "3a56acc0-cb00-43ba-976a-6eae2afbe666",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 242,
+        "start_time": "16:55:00",
+        "syllabus_week": 2,
+        "topic": "Menecmentin elmi məкtəbləri",
+        "updated_at": "2026-10-23T23:35:43.877928+00:00"
+      }
+    },
+    "fc2bcf4a-aedf-47a3-bb42-2d71ad87161f": {
+      "fields": {
+        "created_at": "2026-10-23T23:35:43.536052+00:00",
+        "created_by_id": null,
+        "date": "2026-09-28",
+        "end_time": null,
+        "hours": 2,
+        "id": "fc2bcf4a-aedf-47a3-bb42-2d71ad87161f",
+        "is_legacy_synthesised": false,
+        "kind": "seminar",
+        "offering_id": "8cc86c4b-eee6-43a8-ba18-5a69ab94e99b",
+        "organization_id": "526cfa63-4f80-4bba-a7a7-61c8fbb3d918",
+        "room_id": 329,
+        "start_time": "15:15:00",
+        "syllabus_week": 2,
+        "topic": "Menecmentin elmi məкtəbləri",
+        "updated_at": "2026-10-23T23:35:43.536055+00:00"
+      }
+    }
+  },
+  "marks_sha256": "4870edd5f87d98febf7d6637c54f4a90a78dc08f38341ef0373f08c20404e5da",
+  "marks_count": 823,
   "source_graph_sha256": "dd3cabf0fc2aabb048e5bcce492dce34a18734e6d7224b9b41594fe9dd862cf2",
   "identity_inventory_sha256": "757203ba98db56d9ad675ef8428b229354acfcf44bb9317eab66117eea3c8020",
   "safe_guards": [

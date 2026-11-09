@@ -221,6 +221,88 @@ class SubgroupJournalMergeTest(_LabWorld, TestCase):
             )
         self.assertEqual(self._call("--apply", "--undo")["undo_scores_deleted"], "1")
 
+    def test_same_name_different_component_scale_rolls_back_family(self):
+        from apps.registrar.models import AssessmentComponent, ComponentScore
+
+        with bypass_rls():
+            source = AssessmentComponent.objects.create(
+                organization=self.org, offering=self.o1, name="Midterm", max_score=30
+            )
+            AssessmentComponent.objects.create(
+                organization=self.org, offering=self.offering, name="Midterm", max_score=10
+            )
+            ComponentScore.objects.create(
+                organization=self.org,
+                component=source,
+                enrollment=Enrollment.objects.get(offering=self.o1, student=self.s3),
+                score=17,
+            )
+            before = LessonMark.objects.count()
+        self.assertEqual(self._call("--apply"), {"family_component_definition_differs": "1"})
+        with bypass_rls():
+            self.o1.refresh_from_db()
+            self.assertTrue(self.o1.is_active)
+            self.assertEqual(LessonMark.objects.count(), before)
+            self.assertFalse(ComponentScore.objects.filter(component__offering=self.offering).exists())
+
+    def test_partial_target_timetable_keeps_uncovered_source_slot_and_undo(self):
+        from apps.registrar.models import ScheduleSlot
+
+        with bypass_rls():
+            target_slot = ScheduleSlot.objects.create(
+                organization=self.org,
+                offering=self.offering,
+                weekday=1,
+                start_time=T1010,
+                end_time=T1150,
+                kind="lecture",
+                room="A1",
+            )
+            source_slot = ScheduleSlot.objects.create(
+                organization=self.org,
+                offering=self.o1,
+                weekday=3,
+                start_time=T1010,
+                end_time=T1150,
+                kind="lecture",
+                room="A2",
+            )
+        counts = self._call("--apply")
+        self.assertEqual(counts.get("slots_moved"), "1", counts)
+        with bypass_rls():
+            self.assertTrue(ScheduleSlot.objects.filter(pk=target_slot.pk).exists())
+            self.assertTrue(ScheduleSlot.objects.filter(offering=self.offering, weekday=3, room="A2").exists())
+        self._call("--apply", "--undo")
+        with bypass_rls():
+            self.assertTrue(ScheduleSlot.objects.filter(pk=source_slot.pk).exists())
+            self.assertFalse(ScheduleSlot.objects.filter(offering=self.offering, weekday=3).exists())
+
+    def test_slot_identity_retains_duration_room_week_and_teacher(self):
+        from types import SimpleNamespace
+
+        from apps.registrar.subgroup_merge_slot_scope import slot_key
+
+        values = dict(
+            weekday=1,
+            start_time=T1010,
+            end_time=T1150,
+            room="A1",
+            week_type="all",
+            kind="lecture",
+            instructor_id=None,
+            offering=SimpleNamespace(instructor_id=1),
+            is_parked=False,
+        )
+        original = slot_key(SimpleNamespace(**values))
+        for field, value in {
+            "end_time": datetime.time(12),
+            "room": "A2",
+            "week_type": "odd",
+            "instructor_id": 2,
+            "is_parked": True,
+        }.items():
+            self.assertNotEqual(original, slot_key(SimpleNamespace(**{**values, field: value})))
+
     def test_dropped_parent_row_is_reactivated_and_restored_on_undo(self):
         with bypass_rls():
             o1_e0 = Enrollment.objects.get(offering=self.o1, student=self.students[0])

@@ -63,7 +63,7 @@ SKIP_NON_FINAL_CATEGORY = "non_final_category"
 SKIP_UNCATEGORIZED = "uncategorized_category"
 #: Audit 2026-09-28 EX28-02: cəhd hələ bitməyib (draft / in_progress) — qismən bal rəsmi jurnala düşməsin.
 SKIP_NOT_FINISHED = "attempt_not_finished"
-#: Audit 2026-09-28 EXA-01 / EX28-06: eyni tələbə + fənn üzrə DAHA SONRAKI bitmiş final cəhdi var —
+#: Audit EXA-01 / F01: eyni jurnal qeydiyyatı üzrə DAHA SONRAKI bitmiş final cəhdi var —
 #: rəsmi nəticə ən son bitmiş (sınaq olmayan) final cəhdidir; köhnə cəhdin gecikmiş yoxlaması
 #: və ya apellyasiyası yeni cəhdin jurnal balını əzmir.
 SKIP_SUPERSEDED_ATTEMPT = "superseded_attempt"
@@ -71,6 +71,8 @@ SKIP_SUPERSEDED_ATTEMPT = "superseded_attempt"
 #: qeydiyyatı (bağlı jurnalda da) yoxdur — bal HEÇ YERƏ yazılmadı. Əvvəl bu hal səssiz no-op idi; midterm
 #: körpüsü kimi (``midterm_no_enrollment``) indi WARNING + sayğac. Bərpa: ``manage.py sync_final_scores``.
 SKIP_NO_ENROLLMENT = "no_enrollment"
+#: Cəhddən sonra yazılmış rəsmi manual/sənədli nəticə avtomatik təkrar yazıdan qorunur.
+SKIP_OVERRIDDEN_RESULT = "overridden"
 
 #: ``Exam.exam_type_extended`` → ``FinalGrade``-ə yazılırmı (tək təsnifat mənbəyi):
 #:
@@ -121,11 +123,9 @@ def _test_attempt_percent(attempt):
     qoşulur; qoşulmayıbsa neytral ``None`` → xam faizə düşürük)."""
     from apps.exams import score_adjustments
 
-    try:
-        effective = score_adjustments.effective_test_score(attempt)
-    except Exception:  # noqa: BLE001 — bonus hesablanmasa xam bal yenə yazılmalıdır
-        logger.exception("journal_sync: effective test score failed for attempt %s", getattr(attempt, "id", "?"))
-        effective = None
+    # Hesab xətası xam balı yazmağa icazə vermir: yuxarı qat bunu
+    # percent_unavailable kimi loglayır/sayır; bərpa eyni effektiv hesabı təkrar edir.
+    effective = score_adjustments.effective_test_score(attempt)
     if effective is not None:
         return float(effective["effective_percentage"])
     return float(attempt.score_percent)
@@ -189,31 +189,36 @@ def _attempt_percent(attempt):
 def _superseded_by_later_final_attempt(attempt, subject_id) -> bool:
     """Eyni tələbənin eyni fənn üzrə bu cəhddən SONRA başlamış bitmiş final cəhdi varmı.
 
-    Sahib siyasəti (2026-09-28): rəsmi nəticə (user, subject) üzrə ən son bitmiş,
-    sınaq olmayan final cəhdidir. «Sonra» — ``started_at`` (bərabərdirsə ``pk``)."""
+    Rəsmi nəticə eyni jurnal qeydiyyatına yazılan ən son bitmiş, sınaq olmayan
+    final cəhdidir. «Sonra» — ``started_at`` (bərabərdirsə ``pk``). Başqa semestr
+    və ya açılışın cəhdi köhnə jurnalın apellyasiyasını bloklamır."""
     from django.db.models import Q
 
     from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
     from apps.exams.models import ExamAttempt
     from apps.exams.services.access_policy import FINAL_EXAM_CATEGORY
+    from apps.exams.services.journal_sync_scope import has_same_target
 
     started_at = getattr(attempt, "started_at", None)
     if started_at is None:
         return False
     later = Q(started_at__gt=started_at) | Q(started_at=started_at, pk__gt=attempt.pk)
-    return (
+    candidates = (
         ExamAttempt.objects.filter(
             later,
             user_id=attempt.user_id,
-            exam__subject_id=subject_id,
+            exam__organization_id=attempt.exam.organization_id,
+            exam__subject__isnull=False,
             exam__exam_type_extended=FINAL_EXAM_CATEGORY,
             exam__is_deleted=False,
             is_trial=False,
             status__in=ATTEMPT_FINISHED_STATUSES,
         )
         .exclude(pk=attempt.pk)
-        .exists()
+        .select_related("exam", "exam__organization", "user")
+        .prefetch_related("exam__journal_offerings")
     )
+    return has_same_target(attempt, candidates)
 
 
 def _resolve_actor(attempt, actor):
@@ -286,7 +291,12 @@ def sync_final_attempt(attempt, *, actor=None, appeal_id=None):
     organization = getattr(exam, "organization", None)
     if organization is None:
         return _skipped(SKIP_NO_ORGANIZATION, attempt)
-    if _superseded_by_later_final_attempt(attempt, subject_id):
+    try:
+        superseded = _superseded_by_later_final_attempt(attempt, subject_id)
+    except Exception:  # hədəf yoxlanmadan rəsmi balı dəyişmə
+        logger.exception("journal_sync: target resolution failed for attempt %s", getattr(attempt, "id", "?"))
+        return _skipped(SKIP_WRITE_FAILED, attempt, level=None)
+    if superseded:
         # Audit 2026-09-28 EXA-01 / EX28-06: köhnə cəhdin apellyasiyası / gecikmiş
         # yoxlaması sonrakı (rəsmi) cəhdin balını əzməsin — gözlənilən hal, INFO.
         return _skipped(SKIP_SUPERSEDED_ATTEMPT, attempt, level=logging.INFO)
@@ -320,6 +330,8 @@ def sync_final_attempt(attempt, *, actor=None, appeal_id=None):
     except Exception:  # körpü heç vaxt imtahanı sındırmır
         logger.exception("journal_sync: failed to write attempt %s to FinalGrade", getattr(attempt, "id", "?"))
         return _skipped(SKIP_WRITE_FAILED, attempt, level=None)
+    if status == SKIP_OVERRIDDEN_RESULT:
+        return _skipped(status, attempt, level=logging.INFO)
     if status == SKIP_NO_ENROLLMENT:
         # 2026-10-26: əvvəl səssiz no-op idi — tələbə jurnalda yoxdur, bal itir → WARNING + sayğac.
         return _skipped(SKIP_NO_ENROLLMENT, attempt)

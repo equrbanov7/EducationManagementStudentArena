@@ -76,6 +76,7 @@ from .correction_reversals import revert_last_lesson_correction  # noqa: F401
 from .corrections import CORRECT_PERMISSION  # noqa: F401
 from .corrections import apply_correction, apply_lesson_correction  # noqa: F401
 from .curriculum_registry import build_curriculum_editor  # noqa: F401
+from .finals import effective_exam_score  # noqa: F401
 from .gradebook import recompute_absence_hours  # noqa: F401
 from .grading_scale import bands_text  # noqa: F401
 from .grading_scale import is_custom  # noqa: F401
@@ -92,6 +93,7 @@ from .page_contexts import _season_label as season_label  # noqa: F401
 from .plan_hours import plan_hours_for_offering  # noqa: F401
 from .plan_hours import program_for_offering  # noqa: F401
 from .plan_hours import workload_hours_for_offering  # noqa: F401
+from .reaudit_final_projection import inspect_reaudit_exam_target  # noqa: F401
 from .reviewed_onomastics_roster import (  # noqa: F401
     append_reviewed_onomastics_roster,
     reviewed_onomastics_access_snapshot,
@@ -106,6 +108,8 @@ from .reviewed_workload_share import (  # noqa: F401
 )
 from .semester_open import build_semester_opening  # noqa: F401
 from .semester_open import offering_counts_by_chair  # noqa: F401
+from .syllabus_carry import choose_source as choose_syllabus_carry_source  # noqa: F401
+from .syllabus_carry import group_language as syllabus_group_language  # noqa: F401
 from .syllabus_pdf import render_syllabus_pdf  # noqa: F401
 from .syllabus_reuse_targets import instructor_offering  # noqa: F401
 from .syllabus_reuse_targets import instructor_offerings  # noqa: F401
@@ -189,6 +193,10 @@ __all__ = [
     "offering_counts_by_chair",
     "plan_hours_by_offering",
     "plan_hours_for_offering",
+    "inspect_reaudit_exam_target",
+    "effective_exam_score",
+    "choose_syllabus_carry_source",
+    "syllabus_group_language",
     "cohort_plans",
     "programs_by_offering",
     "workload_hours_for_offering",

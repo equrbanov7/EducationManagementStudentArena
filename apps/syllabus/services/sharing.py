@@ -56,7 +56,20 @@ def _guard_q() -> Q:
 
 def effective_shares():
     """QÜVVƏDƏ olan paylaşımlar — aktiv dosye + tətbiq qapısı (qayda 4)."""
-    return SyllabusShare.objects.filter(syllabus__is_active=True).filter(_guard_q())
+    # A later subject/period correction must not leave a valid-looking stale link.
+    return SyllabusShare.objects.filter(
+        syllabus__is_active=True,
+        syllabus__offering__isnull=False,
+        syllabus__period__isnull=False,
+        syllabus__reused_from__isnull=True,
+        organization_id=F("offering__organization_id"),
+        syllabus__organization_id=F("offering__organization_id"),
+        syllabus__offering__organization_id=F("offering__organization_id"),
+        syllabus__subject_id=F("offering__subject_id"),
+        syllabus__period_id=F("offering__period_id"),
+        syllabus__offering__subject_id=F("syllabus__subject_id"),
+        syllabus__offering__period_id=F("syllabus__period_id"),
+    ).filter(_guard_q())
 
 
 def shared_syllabus_ids(offering_ids) -> dict:

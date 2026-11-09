@@ -29,6 +29,7 @@ from ..policy import assessment_weights, standard_midterm, standard_project, sta
 from ..rules import for_version as rule_for_version
 from ..state_machine import TransitionDenied
 from .copy_into import copy_from_previous  # noqa: F401 — geriyə-uyğunluq (köhnə idxal yolu)
+from .offering_scope import validate_offering_scope
 from .scoping import is_author
 from .section_shape import normalize_section_data
 from .units import ensure_chair_unit, resolve_syllabus_chair_unit
@@ -239,6 +240,7 @@ def create_draft(
     if not actor.has(PERM_EDIT):
         raise TransitionDenied("transition.permission_denied", params={"permission": PERM_EDIT})
 
+    validate_offering_scope(organization=organization, subject=subject, period=period, offering=offering)
     # R-2: çağıran tərəf ixtisas (``offering.group.parent``) ötürə bilər — təsdiq
     # əhatəsi isə KAFEDRA-ya bağlıdır.  Normallaşdırma burada, bir yerdədir ki,
     # hər yeni çağıran səth qaydanı təkrar yazmasın.

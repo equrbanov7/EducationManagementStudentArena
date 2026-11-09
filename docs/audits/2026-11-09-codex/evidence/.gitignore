@@ -1,0 +1,3 @@
+# Generated audit evidence is private; the content-free SHA inventory is tracked.
+/*.json
+!/large-evidence-index.json

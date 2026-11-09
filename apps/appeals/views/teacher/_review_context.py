@@ -117,7 +117,7 @@ def appeal_timeline(appeal, items):
                     "icon": "fa-key",
                     "text": pgettext(
                         "appeals.history",
-                        "{no}-ci sual: cavab açarı düzəldildi — {credited}/{affected} tələbəyə kredit",
+                        "{no}-ci sual: cavab açarı düzəldildi — {credited}/{affected} cəhd üçün düzəliş",
                     ).format(no=index, credited=correction.credited_count, affected=correction.affected_count),
                     "actor": _person(correction.created_by),
                 }

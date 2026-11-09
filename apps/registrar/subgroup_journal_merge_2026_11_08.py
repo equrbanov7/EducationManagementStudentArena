@@ -437,6 +437,10 @@ class Merger:
                 continue
             source = score.component
             component = own.get(source.name)
+            if component is not None and any(
+                getattr(component, field) != getattr(source, field) for field in ("kind", "max_score", "held_on")
+            ):
+                raise Blocked("family_component_definition_differs")
             if component is None:
                 component = Component.objects.create(
                     organization=self.organization,
@@ -490,27 +494,29 @@ class Merger:
 
     def _slots(self, target, live, manifest) -> None:
         ScheduleSlot = _model("ScheduleSlot")
-        own = list(ScheduleSlot.objects.select_for_update().filter(offering__in=live))
-        if not own:
-            return
         from .schedule_lock import lock_schedule
 
         lock_schedule(self.organization.pk, target.period_id)
-        keep_target = ScheduleSlot.objects.filter(offering=target).exists()
+        own = list(ScheduleSlot.objects.select_for_update().filter(offering__in=live).select_related("offering"))
+        if not own:
+            return
+        from .subgroup_merge_slot_scope import slot_key
+
+        covered = {
+            slot_key(slot)
+            for slot in ScheduleSlot.objects.select_for_update().filter(offering=target).select_related("offering")
+        }
         now = timezone.now()
         ScheduleSlot.all_objects.filter(pk__in=[slot.pk for slot in own]).update(
             is_deleted=True, deleted_at=now, updated_at=now
         )
         manifest["slots_soft_deleted"].extend(str(slot.pk) for slot in own)
         self.counts["slots_soft_deleted"] += len(own)
-        if keep_target:
-            return
-        seen = set()
         for slot in own:
-            key = tuple(getattr(slot, name) for name in ("weekday", "start_time", "kind", "week_type"))
-            if key in seen:
+            key = slot_key(slot)
+            if key in covered:
                 continue
-            seen.add(key)
+            covered.add(key)
             created = ScheduleSlot.objects.create(
                 organization=self.organization,
                 offering=target,

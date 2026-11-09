@@ -89,13 +89,13 @@ def _later_attempts_q(attempt):
     return Q(started_at__gt=started_at) | Q(started_at=started_at, pk__gt=attempt.pk)
 
 
-def _official_filter(subject_id):
-    """Rəsmi midterm cəhdlərinin ortaq süzgəci (fənn üzrə; bütün avtomatik formatlar — fənnin TƏK xanası)."""
+def _official_filter():
+    """Rəsmi midterm formatları; eyni xana aşağıda canonical resolver ilə yoxlanır."""
     from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
     from apps.exams.services.journal_sync import MIDTERM_EXAM_CATEGORY
 
     return {
-        "exam__subject_id": subject_id,
+        "exam__subject__isnull": False,
         "exam__exam_type_extended": MIDTERM_EXAM_CATEGORY,
         "exam__exam_type__in": AUTO_MIDTERM_EXAM_TYPES,
         "exam__is_deleted": False,
@@ -105,16 +105,24 @@ def _official_filter(subject_id):
 
 
 def superseded_by_later_midterm(attempt, subject_id) -> bool:
-    """Eyni tələbənin eyni fənn üzrə bu cəhddən SONRA başlamış bitmiş midterm cəhdi varmı (format fərq etmir)."""
+    """Eyni jurnal qeydiyyatına yazılan sonrakı bitmiş midterm cəhdi varmı (format fərq etmir)."""
     from apps.exams.models import ExamAttempt
+    from apps.exams.services.journal_sync_scope import has_same_target
 
     if getattr(attempt, "started_at", None) is None:
         return False
-    return (
-        ExamAttempt.objects.filter(_later_attempts_q(attempt), user_id=attempt.user_id, **_official_filter(subject_id))
+    candidates = (
+        ExamAttempt.objects.filter(
+            _later_attempts_q(attempt),
+            user_id=attempt.user_id,
+            exam__organization_id=attempt.exam.organization_id,
+            **_official_filter(),
+        )
         .exclude(pk=attempt.pk)
-        .exists()
+        .select_related("exam", "exam__organization", "user")
+        .prefetch_related("exam__journal_offerings")
     )
+    return has_same_target(attempt, candidates)
 
 
 def _status(status, attempt, row=None):
@@ -147,7 +155,12 @@ def sync_midterm_attempt(attempt, *, actor=None, appeal_id=None, notify=True):
         return _status(NO_ORGANIZATION, attempt)
     if getattr(exam, "results_hidden_from_students", False):
         return _status(RESULTS_HIDDEN, attempt)
-    if superseded_by_later_midterm(attempt, subject_id):
+    try:
+        superseded = superseded_by_later_midterm(attempt, subject_id)
+    except Exception:  # hədəf yoxlanmadan rəsmi balı dəyişmə
+        logger.exception("midterm_journal_sync: target resolution failed for attempt %s", attempt.pk)
+        return _status(WRITE_FAILED, attempt)
+    if superseded:
         return _status(SUPERSEDED, attempt)
 
     from apps.exams.services import journal_sync
@@ -208,11 +221,12 @@ def grading_complete(attempt) -> bool:
 
 
 def official_attempts(queryset):
-    """``queryset``-dəki bitmiş midterm cəhdlərindən (tələbə, fənn) üzrə RƏSMİ olanları (ən son başlamış)."""
+    """Bitmiş midterm cəhdlərindən hər jurnal qeydiyyatı üzrə ən son başlamış rəsmi cəhdi seç."""
     from django.db.models import F
 
     from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
     from apps.exams.services.journal_sync import MIDTERM_EXAM_CATEGORY
+    from apps.exams.services.journal_sync_scope import target_key
 
     rows = (
         queryset.filter(
@@ -224,11 +238,12 @@ def official_attempts(queryset):
             status__in=ATTEMPT_FINISHED_STATUSES,
         )
         .select_related("exam", "exam__organization", "user")
-        .order_by("user_id", "exam__subject_id", F("started_at").desc(nulls_last=True), "-pk")
+        .prefetch_related("exam__journal_offerings")
+        .order_by("user_id", F("started_at").desc(nulls_last=True), "-pk")
     )
     seen = set()
     for attempt in rows.iterator(chunk_size=500):
-        key = (attempt.user_id, attempt.exam.subject_id)
+        key = target_key(attempt)
         if key in seen:
             continue
         seen.add(key)

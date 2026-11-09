@@ -29,6 +29,7 @@ from apps.registrar.models import (
     FinalGrade,
     LessonMark,
     ResitRecord,
+    ResitStatus,
     StudentAcademicRecord,
 )
 
@@ -153,7 +154,7 @@ def _resit_map(enrollment_ids):
     return {
         e_id: score
         for e_id, score in ResitRecord.objects.filter(
-            enrollment_id__in=enrollment_ids, resit_score__isnull=False
+            enrollment_id__in=enrollment_ids, status=ResitStatus.COMPLETED, resit_score__isnull=False
         ).values_list("enrollment_id", "resit_score")
     }
 

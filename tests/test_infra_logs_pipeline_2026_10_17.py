@@ -107,7 +107,9 @@ def test_prod_audit_has_a_logs_only_scope_passed_through_env():
     workflow = yaml.safe_load(AUDIT_WORKFLOW.read_text(encoding="utf-8"))
     triggers = workflow.get("on") or workflow.get(True)
     scope = triggers["workflow_dispatch"]["inputs"]["scope"]
-    assert scope["type"] == "choice" and scope["options"] == ["full", "logs"] and scope["default"] == "full"
+    assert scope["type"] == "choice" and scope["options"] == ["full", "logs", "reaudit"] and scope["default"] == "full"
+    assert workflow["jobs"]["audit"]["if"] == "inputs.scope != 'reaudit'"
+    assert workflow["jobs"]["reaudit"]["if"] == "inputs.scope == 'reaudit'"
     step = next(step for step in workflow["jobs"]["audit"]["steps"] if step.get("name") == "🔎 Audit")
     assert step["env"]["AUDIT_SCOPE"] == "${{ inputs.scope || 'full' }}"
     assert "${{" not in step["run"], "input run: blokuna birbaşa interpolasiya olunmamalıdır (env ilə)"

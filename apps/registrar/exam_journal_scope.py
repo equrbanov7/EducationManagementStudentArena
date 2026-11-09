@@ -85,4 +85,25 @@ def journal_offerings_by_unit(organization, period, subject_id, linked) -> dict:
     return out
 
 
-__all__ = ["journal_offerings_by_unit", "twin_subject_ids", "unit_families"]
+def linked_twin_offering_ids(organization, subject_id, offerings) -> set:
+    """Açıq bağlı jurnallardan hazırkı rəsmi əkiz/ailə qaydasına uyğun olanlar.
+
+    Link köhnəlmiş ola bilər: hər dövrün ailəsi yenidən yoxlanır. Ailədə exact
+    fənn açılışı varsa əkiz qəbul edilmir; oxşar ad üçün ayrıca təxmin yoxdur.
+    """
+    by_period = {}
+    for offering in offerings:
+        if offering.is_active:
+            by_period.setdefault(offering.period, []).append(offering)
+    accepted = set()
+    for period, rows in by_period.items():
+        _, _, families = unit_families(organization, [row.group_id for row in rows])
+        coverage = journal_offerings_by_unit(organization, period, subject_id, families)
+        for row in rows:
+            twins = coverage.get(row.group_id, {}).get("twin", ())
+            if any(pk == row.pk for pk, _group in twins):
+                accepted.add(row.pk)
+    return accepted
+
+
+__all__ = ["journal_offerings_by_unit", "linked_twin_offering_ids", "twin_subject_ids", "unit_families"]

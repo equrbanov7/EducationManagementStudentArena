@@ -42,6 +42,17 @@ WRAP_PATTERN = re.compile(r"rls_worker_atomic")
 # Bilərəkdən istisnalar — DB-yə toxunmayan komponentlər.
 # Yeni istisna əlavə edərkən komment ilə səbəbini yaz.
 INTENTIONAL_EXEMPTIONS = {
+    # November 9 fixed snapshot/final audit own fresh RR READ ONLY transactions,
+    # with explicit tenant-local non-bypass RLS. An outer worker transaction
+    # would invalidate SET TRANSACTION; real PostgreSQL write rejection is tested.
+    "apps/legacy_import/management/commands/export_reaudit_state_20261109.py",
+    "apps/exams/management/commands/audit_reaudit_final_results_20261109.py",
+    # Offline JSON planner performs no DB queries (system checks disabled).
+    "apps/registrar/management/commands/build_audit_cells_plan_20261109.py",
+    # Repair owns a single fresh RR transaction, READ ONLY by default or explicit
+    # apply/undo READ WRITE, tenant SET LOCAL and reset in finally. Pooled-RLS,
+    # DB-enforced read-only and receipt apply/undo have authentic PG tests.
+    "apps/registrar/management/commands/repair_audit_cells_20261109.py",
     # Fixed WCU snapshot delegates every DB read to scoped_snapshot.capture(), which
     # requires a FRESH transaction before SET TRANSACTION REPEATABLE READ READ ONLY,
     # sets fixed tenant + bypass=False locally, and cannot be wrapped outside.

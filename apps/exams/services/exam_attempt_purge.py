@@ -13,7 +13,7 @@ SET_NULL ilə qalır. Cavab açarı düzəlişinin özü, PIN, şans qeydləri �
 Jurnal izləri (``trial_exam_purge``-un yolu ilə):
 
 * **Midterm** — cəhdin avtomatik yazdığı «Midterm» xanası (``ComponentScore.exam_source.attempt_id``) silinir, sonra
-  eyni tələbə + fənn üzrə BAŞQA rəsmi midterm cəhdi varsa ``sync_midterm_attempt`` (bildirişsiz) onu yenidən yazır;
+  eyni qeydiyyat xanasına yazılan BAŞQA rəsmi midterm cəhdi varsa ``sync_midterm_attempt`` onu yenidən yazır;
 * **Final** — ``FinalGrade.exam_score``-un imtahana bağlantısı yoxdur; iz körpünün qaydası ilə yoxlanılır
   (``registrar.exam_result_trace``: cəhd rəsmi idi + jurnaldakı bal cəhdin balına bərabərdir). İz bu cəhdindirsə:
   başqa rəsmi final cəhdi varsa ``sync_attempt_to_journal`` onu yazır, yoxdursa bal boşaldılır.
@@ -88,6 +88,7 @@ class AttemptPurgePlan:
     component_score_ids: list = field(default_factory=list)
     midterm_sources: list = field(default_factory=list)
     final_expected: object = None
+    final_target: object = None
     final_source: object = None
     next_same_exam_start: object = None
 
@@ -146,7 +147,7 @@ def find_attempt(*, organization, user, attempt_id=None, latest=False):
 
 
 # ── toplama (yazısız) ────────────────────────────────────────────────────────
-def build_plan(attempt, *, allow_retake_links=False) -> AttemptPurgePlan:
+def build_plan(attempt, *, allow_retake_links=False, lock_journal=False) -> AttemptPurgePlan:
     from apps.exams.models import (
         CodingSubmission,
         ExamAnswer,
@@ -184,8 +185,8 @@ def build_plan(attempt, *, allow_retake_links=False) -> AttemptPurgePlan:
     c["coding_submissions"] = CodingSubmission.objects.filter(attempt=attempt).count()
     c["tickets_unlinked"] = FinalExamTicket.objects.filter(attempt=attempt).count()
     _collect_appeals(plan)
-    _collect_midterm(plan)
-    _collect_final(plan)
+    _collect_midterm(plan, lock_journal=lock_journal)
+    _collect_final(plan, lock_journal=lock_journal)
     _collect_retake_links(plan, allow_retake_links=allow_retake_links)
     _collect_notifications(plan)
     c["audit_rows_kept"] = _audit_rows(attempt)
@@ -224,11 +225,8 @@ def _collect_appeals(plan):
     c["appeal_ledger_rows_kept"] = entries.count() if entries is not None else 0
 
 
-def _collect_midterm(plan):
+def _collect_midterm(plan, *, lock_journal=False):
     """Cəhdin avtomatik yazdığı «Midterm» xanaları (``trial_exam_purge._collect_journal``-un tək cəhd variantı)."""
-    from apps.exams.models import ExamAttempt
-    from apps.exams.services.midterm_journal_sync import official_attempts
-
     attempt = plan.attempt
     rows = list(
         _model("registrar.ComponentScore")
@@ -239,6 +237,7 @@ def _collect_midterm(plan):
             "component__name",
             "component__offering_id",
             "component__offering__subject_id",
+            "enrollment_id",
             "enrollment__student_id",
         )
     )
@@ -257,11 +256,10 @@ def _collect_midterm(plan):
     c["journal_locked"] = sum(1 for row in rows if row["component__offering_id"] in locked)
     if c["journal_locked"]:
         plan.blockers.append("journal_locked")
-    sources = []
-    for user_id, subject_id in {(r["enrollment__student_id"], r["component__offering__subject_id"]) for r in rows}:
-        queryset = ExamAttempt.objects.filter(user_id=user_id, exam__subject_id=subject_id).exclude(pk=attempt.pk)
-        sources.extend(official_attempts(queryset))
+    sources = trial._other_official_attempts(attempt.exam, rows, exclude_attempt_id=attempt.pk)
     plan.midterm_sources = sources
+    if trial._midterm_manual_restore_required(attempt.exam, rows, sources, lock_journal=lock_journal):
+        plan.blockers.append("midterm_manual_restore_required")
     c["journal_midterm_restore"] = len(sources)
 
 
@@ -284,14 +282,19 @@ def _official_final_percent(attempt):
 
 
 def _final_source(attempt):
-    """Eyni tələbə + fənn üzrə ən son BAŞQA rəsmi (bitmiş, sınaq olmayan, silinməmiş) final cəhdi."""
+    """Eyni faktiki nəticə xanasına yazılan ən son BAŞQA rəsmi final cəhdi."""
     from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
     from apps.exams.models import ExamAttempt
     from apps.exams.services.access_policy import FINAL_EXAM_CATEGORY
+    from apps.exams.services.journal_sync_scope import target_identity
 
-    return (
+    identity = target_identity(attempt)
+    if identity is None:
+        return None
+    candidates = (
         ExamAttempt.objects.filter(
             user_id=attempt.user_id,
+            exam__organization_id=attempt.exam.organization_id,
             exam__subject_id=attempt.exam.subject_id,
             exam__exam_type_extended=FINAL_EXAM_CATEGORY,
             exam__is_deleted=False,
@@ -300,13 +303,15 @@ def _final_source(attempt):
         )
         .exclude(pk=attempt.pk)
         .select_related("exam", "exam__organization", "user")
+        .prefetch_related("exam__journal_offerings")
         .order_by(F("started_at").desc(nulls_last=True), "-pk")
-        .first()
     )
+    return next((source for source in candidates if target_identity(source) == identity), None)
 
 
-def _collect_final(plan):
+def _collect_final(plan, *, lock_journal=False):
     from apps.exams.services import exam_journal_link
+    from apps.exams.services.journal_sync_scope import target_identity
     from apps.registrar.public import exam_result_trace
 
     attempt = plan.attempt
@@ -323,12 +328,19 @@ def _collect_final(plan):
         is_expelled=expelled,
         attempt=attempt,
         offering_ids=exam_journal_link.linked_offering_ids(exam),
+        lock_enrollment=lock_journal,
     )
     if not trace["matches"]:
         return  # jurnaldakı bal bu cəhdin deyil (əl ilə daxiletmə / 25% / qeydiyyat yoxdur) — toxunulmur
     plan.final_expected = trace["expected"]
+    plan.final_target = target_identity(attempt)
     plan.final_source = _final_source(attempt)
     plan.counts["journal_final_from_attempt"] = 1
+    if plan.final_target is not None and exam_result_trace.manual_restore_required(
+        enrollment_id=plan.final_target[1], attempt=attempt, source_attempt=plan.final_source
+    ):
+        plan.blockers.append("final_manual_restore_required")
+        return
     plan.counts["journal_final_restore"] = int(plan.final_source is not None)
     plan.counts["journal_final_cleared"] = int(plan.final_source is None)
 
@@ -389,6 +401,7 @@ def apply_purge(
         ProctoringLog,
         SupervisionIncident,
     )
+    from apps.registrar.public import exam_result_trace
 
     with transaction.atomic():
         locked = (
@@ -399,9 +412,10 @@ def apply_purge(
         )
         if locked is None:
             return None  # idempotent: paralel / əvvəlki qaçış artıq silib
-        plan = build_plan(locked, allow_retake_links=allow_retake_links)
+        plan = build_plan(locked, allow_retake_links=allow_retake_links, lock_journal=True)
         if plan.blockers:
             raise PurgeRefused(plan)
+        proof = exam_result_trace.capture_purge_provenance(locked)
         if plan.counts.get("grade_events"):
             # organizations 0073: append-only qoruyucusu YALNIZ bayraqdakı cəhdin sətirlərinə icazə verir.
             with connection.cursor() as cursor:
@@ -419,6 +433,9 @@ def apply_purge(
         CodingSubmission.objects.filter(attempt=locked).delete()
         exam = locked.exam
         locked.delete()  # cavablar, fayl sətirləri — CASCADE; bilet — SET_NULL
+        exam_result_trace.record_purge_provenance(
+            proof, organization=exam.organization, reason=reason, actor=actor, request=request
+        )
         _restore_journal(locked, plan)
         _audit(exam, locked, plan, reason, actor=actor, request=request, extra=audit_extra)
         transaction.on_commit(lambda: trial._after_commit(exam.pk, plan.file_names))
@@ -429,18 +446,27 @@ def _restore_journal(attempt, plan):
     """Silinmədən SONRA: midterm xanasına / yekun bala başqa rəsmi cəhdi yaz, yoxdursa yekun balı boşalt."""
     from apps.exams.services import exam_journal_link
     from apps.exams.services.journal_sync import sync_attempt_to_journal
+    from apps.exams.services.journal_sync_scope import target_identity
     from apps.exams.services.midterm_journal_sync import sync_midterm_attempt
     from apps.registrar.public import exam_result_trace
 
     written = 0
+    midterm_targets = {("enrollment", row["enrollment_id"]) for row in plan.journal_rows}
     for source in plan.midterm_sources:
+        if target_identity(source) not in midterm_targets:
+            continue
         status, _row = sync_midterm_attempt(source, notify=False)
         written += int(status == "written")
     plan.counts["journal_midterm_restore"] = written
     if plan.final_expected is None:
         return
-    restored = sync_attempt_to_journal(plan.final_source) if plan.final_source is not None else None
-    is_final_grade = getattr(getattr(restored, "_meta", None), "model_name", "") == "finalgrade"
+    source = plan.final_source
+    same_target = source is not None and plan.final_target is not None and target_identity(source) == plan.final_target
+    restored = sync_attempt_to_journal(source) if same_target else None
+    is_final_grade = (
+        getattr(getattr(restored, "_meta", None), "model_name", "") == "finalgrade"
+        and ("enrollment", restored.enrollment_id) == plan.final_target
+    )
     plan.counts["journal_final_restore"] = int(is_final_grade)
     cleared = False
     if not is_final_grade:
@@ -451,6 +477,7 @@ def _restore_journal(attempt, plan):
             organization=exam.organization,
             expected_score=plan.final_expected,
             offering_ids=exam_journal_link.linked_offering_ids(exam),
+            expected_enrollment_id=plan.final_target[1] if plan.final_target is not None else None,
         )
     plan.counts["journal_final_cleared"] = int(cleared)
 

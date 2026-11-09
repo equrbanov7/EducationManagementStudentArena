@@ -67,6 +67,10 @@ def _default_status_by_attempt(attempt_ids):
     return {}
 
 
+def _default_finish_corrections(attempt):
+    return 0
+
+
 _HOOKS = {
     "bonus_map": _default_bonus_map,
     "apply_bonus": _default_apply_bonus,
@@ -81,6 +85,7 @@ _HOOKS = {
     "is_applicable": _default_is_applicable,
     "deadline": _default_deadline,
     "status_by_attempt": _default_status_by_attempt,
+    "finish_corrections": _default_finish_corrections,
 }
 
 
@@ -89,6 +94,11 @@ def register(name, fn):
     if name not in _HOOKS:
         raise KeyError(f"Naməlum score-adjustment hook-u: {name!r}")
     _HOOKS[name] = fn
+
+
+def finish_corrections(attempt):
+    """Bitən cəhdə aktiv açar düzəlişlərini atomik, auditli tətbiq et."""
+    return _HOOKS["finish_corrections"](attempt)
 
 
 def bonus_map(attempt_ids):

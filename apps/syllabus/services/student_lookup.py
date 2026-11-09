@@ -31,17 +31,22 @@ _FIELDS = (
     "subject_id",
     "period_id",
     "author_id",
+    "offering__subject_id",
 )
 
 
 def _tier(row, offering, shared=None):
-    pk, s_offering, s_offering_period, s_offering_teacher, subject_id, period_id, author_id = row
-    if s_offering is not None and s_offering == offering.id:
-        return 1
-    if shared is not None and pk == shared:
-        return 2
+    pk, s_offering, s_offering_period, s_offering_teacher, subject_id, period_id, author_id, bound_subject = row
     if subject_id != offering.subject_id:
         return None
+    if s_offering is not None and bound_subject != subject_id:
+        return None
+    if s_offering is not None and period_id not in (None, offering.period_id):
+        return None
+    if s_offering is not None and s_offering == offering.id:
+        return 1
+    if shared is not None and pk == shared and s_offering_period == period_id == offering.period_id:
+        return 2
     if s_offering is None and period_id is not None and period_id == offering.period_id:
         return 3
     teacher = offering.instructor_id

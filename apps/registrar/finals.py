@@ -206,7 +206,7 @@ def compute_final_result(*, enrollment, scheme=None, organization=None, exempt=N
         if hours_map is None:
             hours_map = batch.hours_map
     exam_score = final_grade.exam_score if (final_grade and final_grade.exam_score is not None) else None
-    resit_done = bool(resit and resit.resit_score is not None)
+    resit_done = bool(resit and resit.status == ResitStatus.COMPLETED and resit.resit_score is not None)
     legacy = False
     if resit_done and exam_score is not None and exam_score > resit.resit_score:
         # Donma yalnız lazım olanda soruşulur (toplu dəstdə onsuz da var, tək sətirdə memolu sorğu).

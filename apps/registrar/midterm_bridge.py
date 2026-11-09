@@ -19,8 +19,8 @@ Qaydalar:
 * **Sistem yazısı** — İmtahan Mərkəzi pəncərəsindən və 2 saat kilidindən asılı deyil
   (``journal_unlock`` — sənədli düzəlişin işlətdiyi rəsmi yol). Bağlanmış (dərc olunmuş) jurnala
   yazılmır (``journal_locked``) — giriş balı bağlı jurnalda dəyişmir.
-* **Yeganə əl ilə müdaxilə** — RİM / İKT rəhbərinin sənədli düzəlişi
-  (``item_corrections.apply_component_correction``, PDF + səbəb + audit). Cəhd BİTDİKDƏN SONRA
+* **Rəsmi əl ilə müdaxilə** — sənədli komponent düzəlişi və ya İmtahan Mərkəzinin
+  kağız midterm qeydi (``ExamScoreEntry``). Cəhd BİTDİKDƏN SONRA
   edilmiş qüvvədə olan düzəliş varsa həmin cəhdin təkrar sinxronizasiyası (apellyasiya, açar düzəlişi)
   onu əzmir (``overridden``); düzəlişdən sonra bitən YENİ cəhd yenə yazır.
 * **İdempotent** — bal və mənbə eynidirsə heç nə yazılmır; audit + bildiriş YALNIZ bal dəyişəndə.
@@ -41,6 +41,8 @@ from apps.registrar.models import (
     ComponentScore,
     ComponentScoreCorrection,
     CourseOffering,
+    ExamAssessment,
+    ExamScoreEntry,
 )
 
 logger = logging.getLogger(__name__)
@@ -81,14 +83,26 @@ def _source_payload(*, attempt_id, exam_id, exam_title, exam_slug, percent) -> d
     }
 
 
-def _overridden(component, enrollment, attempt_finished_at) -> bool:
+def _overridden(component, enrollment, attempt_finished_at, existing=None) -> bool:
     """Cəhd bitdikdən SONRA edilmiş, geri alınmamış sənədli düzəliş varmı (RİM müdaxiləsi qalib gəlir)."""
     corrections = ComponentScoreCorrection.objects.filter(
         component=component, enrollment=enrollment, reversal__isnull=True
     )
     if attempt_finished_at is not None:
         corrections = corrections.filter(created_at__gt=attempt_finished_at)
-    return corrections.exists()
+    if corrections.exists():
+        return True
+    # Rəqəmsal midterm apellyasiyası bu ledger-ə yazmır; onun izi grade_audit-dədir.
+    # Buradakı midterm sətirləri kağız/sənədli qərardır və köhnə cəhd onları əzməməlidir.
+    entries = ExamScoreEntry.objects.filter(
+        organization_id=enrollment.organization_id, enrollment=enrollment, assessment=ExamAssessment.MIDTERM
+    )
+    later = entries.filter(created_at__gte=attempt_finished_at) if attempt_finished_at is not None else entries
+    if later.exists():
+        return True
+    source = getattr(existing, "exam_source", None)
+    # Mənbə kağızdır, lakin tarixçəsi yoxdursa hansının son olduğu sübut olunmur.
+    return isinstance(source, dict) and source.get("source") == "paper_sheet" and not entries.exists()
 
 
 def _writer(organization, by_user):
@@ -122,7 +136,7 @@ def record_midterm_result(
     ``offering_ids`` — imtahanın AÇIQ bağlandığı jurnallar (``Exam.journal_offerings``, 2026-10-24): tələbə
     onlardan birində qeydiyyatdadırsa bal ORAYA yazılır, yoxsa fənn üzrə qeydiyyat (əvvəlki qayda)."""
     enrollment = exam_bridge.resolve_enrollment(
-        student=student, subject_id=subject_id, organization=organization, offering_ids=offering_ids
+        student=student, subject_id=subject_id, organization=organization, offering_ids=offering_ids, exam_id=exam_id
     )
     if enrollment is None:
         return NO_ENROLLMENT, None
@@ -162,7 +176,7 @@ def _write(
         return JOURNAL_LOCKED, None
     component = interim_components.ensure_kollokviums(offering)[0]
     component, enrollment, existing = lock_component(component, enrollment)
-    if _overridden(component, enrollment, attempt_finished_at):
+    if _overridden(component, enrollment, attempt_finished_at, existing):
         return OVERRIDDEN, existing
     from .language_level_grading import MIDTERM_MAX, is_level
 

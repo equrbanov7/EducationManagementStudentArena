@@ -9,12 +9,25 @@ xətası keçidi heç vaxt geri qaytarmır (bildirişlərlə eyni konvensiya —
 from __future__ import annotations
 
 import logging
+from contextlib import contextmanager
+from contextvars import ContextVar
 
 from django.db import transaction
 
 logger = logging.getLogger(__name__)
 
 _HOOKS: list = []
+_REVIEWED_BATCH = ContextVar("syllabus_reviewed_batch_hooks", default=False)
+
+
+@contextmanager
+def reviewed_batch_without_carry():
+    """A reviewed receipt owns its explicit carry writes, including rollback."""
+    token = _REVIEWED_BATCH.set(True)
+    try:
+        yield
+    finally:
+        _REVIEWED_BATCH.reset(token)
 
 
 def register(hook) -> None:
@@ -33,7 +46,7 @@ def _run(hook, syllabus_id) -> None:
 
 def fire(syllabus_id) -> None:
     """Təsdiqlənmiş dosye üçün qarmaqları commit-dən sonraya planlaşdırır."""
-    if syllabus_id is None:
+    if syllabus_id is None or _REVIEWED_BATCH.get():
         return
     for hook in tuple(_HOOKS):
         transaction.on_commit(lambda hook=hook: _run(hook, syllabus_id))
