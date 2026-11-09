@@ -58,7 +58,7 @@ class LegacySyllabiWorkflowTests(SimpleTestCase):
 
     def test_repo_plan_is_pinned_and_has_no_personal_sections(self):
         plan = plan_module.load()
-        self.assertEqual(len(plan["targets"]), 79)
+        self.assertEqual(len(plan["targets"]), 80)
         for source in plan["sources"].values():
             info = source["sections"]["info"]
             self.assertEqual({k: info[k] for k in plan_module.PERSONAL_INFO}, plan_module.PERSONAL_INFO)
