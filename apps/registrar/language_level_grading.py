@@ -36,12 +36,54 @@ def is_level(offering):
     subject = getattr(offering, "subject", None)
     if subject is None or not is_level_name(getattr(subject, "name", "")):
         return False
-    period = getattr(offering, "period", None)
-    if period is not None and getattr(period, "is_current", False):
-        return True  # cari semestr — qayda qüvvədədir (2026-11-01-dən)
-    from . import interim_assessment
+    return level_era(offering)
 
-    return interim_assessment.is_midterm_offering(offering)
+
+#: Dövr qapısının keşi: ``period_id → (vaxt, qüvvədədir)``. Açılış başına sorğu OLMASIN deyə (döngülərdə 37 çağırış
+#: yeri var) dövr sahələri dövr başına bir dəfə oxunur və qısa müddət saxlanılır (semestr dəyişəndə ≤ TTL gecikmə).
+_ERA_TTL_SECONDS = 120
+_era_cache: dict = {}
+
+
+def level_era(offering) -> bool:
+    """Səviyyə qaydası bu açılışın dövründə qüvvədədirmi: cari semestr və ya Midterm dövrü (2026/2027+)."""
+    import time
+
+    from . import entry_standard, interim_assessment
+
+    state = getattr(offering, "_state", None)
+    period = state.fields_cache.get("period") if state is not None else None
+    if period is not None:  # FK artıq yüklənib — sorğusuz
+        return bool(getattr(period, "is_current", False)) or (
+            interim_assessment.mode_for_period(period, getattr(offering, "organization", None))
+            == interim_assessment.MODE_MIDTERM
+        )
+    period_id = getattr(offering, "period_id", None)
+    if period_id is None:
+        return True  # dövrsüz (yazılmamış) nümunə — cari qayda
+    now = time.monotonic()
+    hit = _era_cache.get(period_id)
+    if hit is not None and now - hit[0] < _ERA_TTL_SECONDS:
+        return hit[1]
+    from django.apps import apps as django_apps
+
+    row = (
+        django_apps.get_model("organizations", "AcademicPeriod")
+        .objects.filter(pk=period_id)
+        .values_list(
+            "is_current", "academic_year", "start_date", "organization__settings__registrar__midterm_from_year"
+        )
+        .first()
+    )
+    if row is None:
+        value = True
+    else:
+        is_current, academic_year, start_date, from_year_raw = row
+        value = bool(is_current) or entry_standard.is_midterm_fields(
+            academic_year, start_date, from_year_raw=from_year_raw
+        )
+    _era_cache[period_id] = (now, value)
+    return value
 
 
 def entry_cap(subject_name, configured):

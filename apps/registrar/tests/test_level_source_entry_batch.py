@@ -39,6 +39,10 @@ class LevelHistoryBatchTests(_GuestRosterBase):
                     LessonMark.objects.create(organization=self.org, enrollment=source, lesson=lesson, status="absent")
                 sources.append(source)
             raw = list(LessonMark.objects.order_by("pk").values_list("pk", "status", "score"))
+            # Səviyyə dövr qapısı dövr başına BİR dəfə oxunur və keşlənir (2026-11-09) — sayğac müqayisəsindən əvvəl isit.
+            from apps.registrar import language_level_grading
+
+            language_level_grading.is_level(sources[0].offering)
             with CaptureQueriesContext(connection) as one:
                 first, _ = guest_merge._source_entry_scores(sources[:1], {})
             with CaptureQueriesContext(connection) as many:
