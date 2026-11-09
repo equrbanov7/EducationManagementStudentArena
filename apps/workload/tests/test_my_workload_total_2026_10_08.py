@@ -97,7 +97,8 @@ class MyWorkloadVisibleTotalTest(TestCase):
 
     def test_combined_groups_are_not_double_counted(self):
         payload = self._rows("fall")
-        combined = [row for row in payload["rows"] if row["groups"] == "2233 İ 2232 İ"]
+        # Sahib 2026-11-09: qrup etiketi reyestr adlarından qurulur (sıra/ayırıcı dəyişə bilər) — iki qrupu da ehtiva edən sətir.
+        combined = [row for row in payload["rows"] if "2232 İ" in row["groups"]]
         self.assertEqual(len(combined), 2)  # mühazirə + seminar, qrup başına YOX
         self.assertEqual(
             teacher_workload_summary(organization=self.org, teacher=self.teacher, academic_year=YEAR)["total_hours"],

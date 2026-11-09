@@ -226,6 +226,13 @@ class TeachingTaskRow(UUIDModel, TimeStampedModel, OrderedModel):
         return self.subject_text or "—"
 
     @property
+    def groups_label(self) -> str:
+        """Göstərilən qrup adları — reyestrdəki vahidlərin adı (məs. «935 BM ing»), yalnız bağlı vahid yoxdursa
+        faylın xam mətni (``groups_text``, məs. «935 ing»). Sahib 2026-11-09: ekranda köhnə ad görünməsin."""
+        names = [unit.name for unit in self.groups.all() if getattr(unit, "name", "")]
+        return ", ".join(names) if names else (self.groups_text or "")
+
+    @property
     def computed_total_hours(self) -> int:
         return sum(int(getattr(self, field, 0) or 0) for field in TOTAL_HOUR_FIELDS)
 

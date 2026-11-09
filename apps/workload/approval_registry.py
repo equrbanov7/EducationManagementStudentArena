@@ -173,7 +173,7 @@ def build_approval(request, organization) -> dict:
             "id": str(row.pk),
             "subject": row.subject_label,
             "specialty": row.specialty.name if row.specialty_id else row.specialty_text,
-            "groups": row.groups_text or ", ".join(unit.name for unit in row.groups.all()),
+            "groups": row.groups_label,
             "season": row.season,
             "season_label": str(Season(row.season).label) if row.season in Season.values else row.season,
             "total_hours": row.total_hours,

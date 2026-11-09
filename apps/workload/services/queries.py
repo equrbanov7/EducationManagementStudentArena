@@ -247,7 +247,7 @@ def _serialize(task, rows: list, *, amend_targets=None) -> tuple[list[dict], lis
                 "groups": [
                     {"id": str(aliases.get(g.pk, g).pk), "name": aliases.get(g.pk, g).name} for g in row.groups.all()
                 ],
-                "groups_text": row.groups_text,
+                "groups_text": row.groups_label,
                 "education_form": row.education_form,
                 "degree_level": row.degree_level,
                 "student_count": row.student_count,
@@ -400,7 +400,7 @@ def teacher_workload_rows(*, organization, teacher, academic_year: str = "", sea
                 "season": row.season,
                 "season_label": _label(_SEASON_LABELS, row.season),
                 "subject": row.subject_label,
-                "groups": row.groups_text or ", ".join(group.name for group in row.groups.all()),
+                "groups": row.groups_label,
                 "activity": assignment.activity,
                 "activity_label": _label(_ACTIVITY_LABELS, assignment.activity),
                 "hours": assignment.hours,

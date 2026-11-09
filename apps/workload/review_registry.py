@@ -77,7 +77,7 @@ def _serialize(row, review) -> dict:
     return {
         "id": str(row.pk),
         "subject": row.subject_label,
-        "groups": row.groups_text or ", ".join(unit.name for unit in row.groups.all()),
+        "groups": row.groups_label,
         "season": row.season,
         "season_label": str(Season(row.season).label) if row.season in Season.values else row.season,
         "degree_level": row.degree_level,
