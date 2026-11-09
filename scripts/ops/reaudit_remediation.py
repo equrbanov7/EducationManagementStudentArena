@@ -22,8 +22,34 @@ COMMANDS = {
     "duplicate_qb": ("inspect_reaudit_duplicate_qb", "reaudit_duplicate_qb"),
 }
 READ_ONLY = {"finals", "duplicate_qb"}
+FINAL_REFUSALS = frozenset(
+    {
+        "final_audit_fixed_organization",
+        "final_audit_active_tenant_superuser",
+        "final_audit_current_period_changed",
+        "final_audit_fresh_postgresql_transaction",
+        "final_audit_readonly_lost",
+        "final_audit_execution_budget",
+        "final_audit_attempt_budget",
+        "final_audit_row_budget",
+        "final_audit_refused",
+    }
+)
 RUNNER = "scripts/ops/reaudit_command_runner.py"
 UUID = r"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
+
+
+def readonly_native(argv, operation):
+    result = subprocess.run(argv, capture_output=True, text=True, timeout=900)
+    if result.returncode:
+        code = "inspect_current_state"
+        if operation == "finals" and len(result.stderr) <= 256 * 1024:
+            matches = re.findall(r"^CommandError: ([a-z_]+)\s*$", result.stderr, re.MULTILINE)
+            if len(matches) == 1 and matches[0] in FINAL_REFUSALS:
+                code = matches[0]
+        print("native_refusal=" + code, file=sys.stderr)
+        raise ValueError("native_readonly_audit_refused")
+    return result.stdout
 
 
 def emit_structure_diagnostic(stderr):
@@ -178,9 +204,9 @@ def run(env):
         _folder, remote = paths(env)
         try:
             command(["docker", "exec", CONTAINER, "python", RUNNER, "prepare", remote])
-            raw = command(
+            raw = readonly_native(
                 ["docker", "exec", CONTAINER, "python", RUNNER, "run", remote, native, "--actor", value["actor"]],
-                timeout=900,
+                value["operation"],
             )
         finally:
             cleanup(env)

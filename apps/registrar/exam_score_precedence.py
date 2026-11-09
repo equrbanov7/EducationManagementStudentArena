@@ -35,15 +35,32 @@ def _digital_appeal_entry(entry, enrollment, attempt) -> bool:
     if attempt.user_id != enrollment.student_id:
         return False
     Appeal = django_apps.get_model("appeals", "Appeal")
-    appeal = Appeal.objects.filter(
-        pk=int(match[1]),
-        organization_id=enrollment.organization_id,
-        exam_id=attempt.exam_id,
-        exam__organization_id=enrollment.organization_id,
-        exam__subject_id=enrollment.offering.subject_id,
-    ).first()
+    appeal = (
+        Appeal.objects.filter(
+            pk=int(match[1]),
+            organization_id=enrollment.organization_id,
+            exam_id=attempt.exam_id,
+            exam__organization_id=enrollment.organization_id,
+        )
+        .select_related("exam")
+        .first()
+    )
     if appeal is None:
         return False
+    if appeal.exam.subject_id != enrollment.offering.subject_id:
+        from .exam_bridge import resolve_enrollment
+
+        # A reviewed merge or canonical twin can retain the exam's old subject.
+        # Reuse the writer's live route proof; a bare M2M link is insufficient.
+        resolved = resolve_enrollment(
+            student=attempt.user,
+            subject_id=appeal.exam.subject_id,
+            organization=enrollment.organization,
+            offering_ids=list(appeal.exam.journal_offerings.values_list("pk", flat=True)),
+            exam_id=appeal.exam_id,
+        )
+        if resolved is None or resolved.pk != enrollment.pk:
+            return False
     if appeal.attempt_id == attempt.pk and appeal.student_id == enrollment.student_id:
         if appeal.status in {"accepted", "partially_accepted"}:
             return True
