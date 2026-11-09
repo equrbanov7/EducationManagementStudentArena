@@ -6,9 +6,11 @@
    Sahib: «köhnədə necə idisə elə olsun» — hər iki payın siyahısı köhnə sistemin siyahısı ilə ƏVƏZ olunur (plan:
    ``first_year_splits_2026_11_07.json`` → ``shares.adiak_m``; yalnız id-lər). Siyahıda olmayan tələbə qrupsuz qalır
    (sahib görür).
-2. **409/6MBA** — köhnə sistemdə fənn «Akademik yazı və oxu» (jurnal 14926) adı ilə aparılıb, dərslər həmin jurnaldadır.
-   2026-10-30-da yaranmış boş «Akademik yazı və etika» əkizi (0 dərs, yük sətri yoxdur) rəsmi jurnala birləşdirilir
-   (:class:`apps.registrar.twin_merge.Merger`, boş əkiz qaydası) — tələbə bir jurnalda qalır.
+2. **409/6MBA** — köhnə sistemdə jurnal (14926) «Akademik yazı və oxu» kartı ilə açılıb, amma onun sillabusu (7711)
+   «Akademik yazı və etika» fənninindir; paralel 409/6MBA ing jurnalı və kafedranın rəsmi yük faylı da «etika»dır.
+   Yəni dərslər səhv fənn kartının jurnalındadır. Dərsləri/xanaları olan «oxu» jurnalı (W) təsdiqli «etika»
+   sillabusu olan rəsmi «etika» jurnalına (T, xanasız) birləşdirilir (:class:`apps.registrar.twin_merge.Merger`).
+   Yük sətrinin fənni əvvəlcədən veb ilə «etika»ya dəyişdirilir (sinxron «oxu» jurnalını yenidən açmasın).
 
 Stdout-a YALNIZ saylar (``lab_groups: açar=say …``). İdempotentdir.
 """
@@ -27,8 +29,8 @@ from .relocate_twin_enrollment import run_plan
 PREFIX = "lab_groups:"
 SPLIT_KEY = "adiak_m"
 SECOND_TEACHER = 11608  # Məmmədova Solmaz (solmaz.memmedova3) — köhnə sistemdə işçi 1070
-#: Boş əkiz (Akademik yazı və etika, 409/6MBA) → köhnə sistemin adı ilə rəsmi jurnal (Akademik yazı və oxu).
-TWIN_PAIRS = ({"source": "6817a9ac-ffee-47a9-b6ba-4143c19238b6", "target": "a8923008-f83e-408b-a37a-996d5c215797"},)
+#: Səhv fənn kartındakı jurnal (Akademik yazı və oxu, dərslərlə) → rəsmi jurnal (Akademik yazı və etika, 409/6MBA).
+TWIN_PAIRS = ({"source": "a8923008-f83e-408b-a37a-996d5c215797", "target": "6817a9ac-ffee-47a9-b6ba-4143c19238b6"},)
 
 
 def split_m(*, organization, actor, counts) -> None:

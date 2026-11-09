@@ -13230,6 +13230,420 @@
     "prev": {},
     "send": {}
    }
+  },
+  "8271": {
+   "teacher": 8107,
+   "legacy_teacher": 617,
+   "legacy_lesson": 1499,
+   "hours": {
+    "lecture": 30,
+    "seminar": 30
+   },
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "content_sha256": "f27c97fb5ab103ecece078bdc051509e970bb18e4ac80dfec3b6f129edf7cccc",
+   "sections": {
+    "info": {
+     "teacher": "",
+     "office_hours": "",
+     "prerequisites": "",
+     "language": "en",
+     "lesson_hours": 60,
+     "welcome": "",
+     "research_interests": [],
+     "certificates": []
+    },
+    "desc": {
+     "description": "Təbiət , o cümlədən ətraf mühitin mühafəzəsi və onun yaxşılaşdırılması ilə bağlı Azərbaycan dövləti ətraf mühitə,atmosfer havasına zərərli təsir göstərən amillərin qarşısını n alınması na yönəldilmiş elmi – texniki , iqtisadi , sosial və digər tədbirlər kompleksini həyata keçirir . Bu tədbirlərin qanunvericilik bazası öz əksini Azərbaycan Respublikasının Konstitusiyasında , ətraf mühitin və atmosfer havasının mühafizəsinə dair Azərbaycan Respublikasının qanunlarında və digər normativ aktlarda tapmışdır. Ekoloji ictimai münasibətlərin birbaıa məqsədindən (“istisna”məqsədindən ) başqa həmişə xüsusi məqsədləri də olur ki, həmin məqsədlər əmlakın təsərrüfat istismarı məqsədindən fərqlənir . Həmin məqsədlər aşağIdakılardır: a) Təbiət obyektlərindən istifadə zamanı həmin obyektlərin mühafizəsi b) Təbiət obyektlərindən istifadə edərkən onların yaxşılaşdırılması c) Pozulmuş təbiət obyektlərinin bərpası d) Ətraf təbii mühitin insanların həyat və sağlamlığına , normal inkişafına mühüm təsiri vardır. Bu mənada ətraf mühitin mühafizəsi cəmiyyətin hər bir üzvünün borcudur. e) Ətraf mühit dedikdə , insan fəaliyyətindən asılı olmayaraq onu əhatə edən canlı və cansız təbiətin mıəsmusu başa düşülür (Ətraf mühitin mühafizəsi haqqında Qanun ,1-ci maddə).Qüvvədə olan qanunvericiliyə əsasən , ətraf mühitin mühafizəsi sahəsində tədbirlər müvafiq proqramlarda nəzərə alınır , təbiətdən istifadənin müxtəlif istiqamətləri üzrə dövlət proqramılarına və kosepsiyalarına daxil edilir. FƏNNİN TƏSVİRİ: Gələcək ixtisaslı mütəxəssisin öz fəaliyyətini müstəqil həyata keçirməsi üçün, onun müvafiq bilik, bacarıq və vərdişlərlərin formalaşdırılması, onun elmi-nəzəri və peşəkar(əməli) hazırlığını təmin edilməsi.",
+     "goal": ""
+    },
+    "out": {
+     "outcomes": [
+      "1. Ekologiya hüququ və təbiətdən istifadənin hüquqi əsasları predmeti, məqsəd və vəzifələri, elmi-tədqiqat metodları, digər elmlərlə əlaqəsini izah edir. 2. Ekologiya hüququ və təbiətdən istifadənin hüquqi əsasları əsas müddəaları üçün iqtisadi fəaliyyət sahəsində hüquq sahələrinin konkret iqtisadi münasibətlərə tətbiqin izah edir 3. Məntiqi mühakimələr yürüdür, nəticə çıxarır və onları əsaslandırır."
+     ]
+    },
+    "week": {
+     "rows": [
+      {
+       "topic": "Ekologiya hüququn ümumi səciyyəsi",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Ekologiya hüququn prinsipləri",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Ekologiya hüquq prinsiplərinin anlayışı və xüsusiyyətləri",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Ekologiya hüququn obyektləri",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Ekoloji hüquq münasibətləri sferasında idarə etmənin tənzimi",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzunun davamı",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Təbiətdən istifadə hüququ ekoloji hüququn institutu kimi",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Ekoloji ziyanın anlayışı və növləri",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Ekoloji ziyanın ödənilməsinin üsulları",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Ekologiya qanunvericiliyinin pozulmasına görə məsuliyyət anlayışı",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Təbiətdən istifadənin idarə edilməsinin anlayışı və funksiyaları",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Təbiət obyektlərinə mülkiyyət hüququ",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Təbiətdən istifadənin idarə edilməsinin funksiyaları",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Xüsusi mühafizə olunan təbiət obyektlərinin hüquqi rejimi",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Ətraf mühitin mühafizəsinin beynəlxalq hüquqi mexanizimləri",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      }
+     ]
+    },
+    "method": {
+     "methods": [
+      "1. mühazirə 2. mövzunun müzakirəsi və diskussiya 3. video materiallardan və digər əyani vasitələrdən istifadə."
+     ],
+     "note": ""
+    },
+    "assess": {
+     "midterm": 0,
+     "project": 0,
+     "note": "1. İmtahandan əvvəl məsləhət saatları təşkil olunur. 2. İmtahanlar və aralıq yoxlamalar (kollokviumlar) açıq suallar və tapşırıqlar vasitəsilə aparılır. 3. Tələbələrin imtahana və aralıq yoxlamara buraxılması ilə bağlı məsələlər fakültə dekanı tərəfindən həll edilir. İmtahan və aralıq yoxlamalar Azərbaycan Respublikası Nazirlər Kabinetinin 24 dekabr 2013-cü il tarixli 348 nömrəli qərarı ilə təsdiq edilmiş “Ali təhsil müəssisələrinin bakalvriat və magistratura səviyyələrində kredit sistemi ilə təlimin təşkili Qaydaları”na əsasən aparılır. 4. Kurs işlərinin mövzuları, müvafiq ədəbiyyat əvvəlcədən tələbələrə verilir. 5. Semestr ərzində hər bir tələbə 10 sərbəst iş yerinə yetirməlidir. Sərbəstl işlərin mövzuları keçilən mövzuları əhatə edir. Hər bir sərbəst iş 1 balla sistemlə qiymətləndirilir. Kurs işlərinin müdafiəsi kafedrada yaradılmış komissiya tərəfindən qəbul edilir.",
+     "exam_questions": []
+    },
+    "self": {
+     "option": "",
+     "topics": [],
+     "archived": []
+    },
+    "lit": {
+     "primary": [
+      "Конституция Азербайджанской Республики Баку 2015",
+      "Кодекс административных правонарушений АР Баку 2012",
+      "Гражданский Кодекс АР Баку 2014",
+      "Уголовный Кодекс АР Баку 202",
+      "Дубовик О.Л экологическое право в вопросах и ответах М. 2003",
+      "Ерофеев Б.В. экологическое право М. 2"
+     ],
+     "additional": []
+    },
+    "prev": {},
+    "send": {}
+   }
+  },
+  "8521": {
+   "teacher": 8107,
+   "legacy_teacher": 617,
+   "legacy_lesson": 1160,
+   "hours": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "content_sha256": "1a636819dea77ec274561ac7e480e195f57f3a51471ee385c080156e8c641e1a",
+   "sections": {
+    "info": {
+     "teacher": "",
+     "office_hours": "",
+     "prerequisites": "",
+     "language": "az",
+     "lesson_hours": 45,
+     "welcome": "",
+     "research_interests": [],
+     "certificates": []
+    },
+    "desc": {
+     "description": "Təbiət , o cümlədən ətraf mühitin mühafəzəsi və onun yaxşılaşdırılması ilə bağlı Azərbaycan dövləti ətraf mühitə,atmosfer havasına zərərli təsir göstərən amillərin qarşısını n alınması na yönəldilmiş elmi – texniki , iqtisadi , sosial və digər tədbirlər kompleksini həyata keçirir . Bu tədbirlərin qanunvericilik bazası öz əksini Azərbaycan Respublikasının Konstitusiyasında , ətraf mühitin və atmosfer havasının mühafizəsinə dair Azərbaycan Respublikasının qanunlarında və digər normativ aktlarda tapmışdır. Ekoloji ictimai münasibətlərin birbaıa məqsədindən (“istisna”məqsədindən ) başqa həmişə xüsusi məqsədləri də olur ki, həmin məqsədlər əmlakın təsərrüfat istismarı məqsədindən fərqlənir . Həmin məqsədlər aşağIdakılardır: a) Təbiət obyektlərindən istifadə zamanı həmin obyektlərin mühafizəsi b) Təbiət obyektlərindən istifadə edərkən onların yaxşılaşdırılması c) Pozulmuş təbiət obyektlərinin bərpası d) Ətraf təbii mühitin insanların həyat və sağlamlığına , normal inkişafına mühüm təsiri vardır. Bu mənada ətraf mühitin mühafizəsi cəmiyyətin hər bir üzvünün borcudur. e) Ətraf mühit dedikdə , insan fəaliyyətindən asılı olmayaraq onu əhatə edən canlı və cansız təbiətin mıəsmusu başa düşülür (Ətraf mühitin mühafizəsi haqqında Qanun ,1-ci maddə).Qüvvədə olan qanunvericiliyə əsasən , ətraf mühitin mühafizəsi sahəsində tədbirlər müvafiq proqramlarda nəzərə alınır , təbiətdən istifadənin müxtəlif istiqamətləri üzrə dövlət proqramılarına və kosepsiyalarına daxil edilir. FƏNNİN TƏSVİRİ: Gələcək ixtisaslı mütəxəssisin öz fəaliyyətini müstəqil həyata keçirməsi üçün, onun müvafiq bilik, bacarıq və vərdişlərlərin formalaşdırılması, onun elmi-nəzəri və peşəkar(əməli) hazırlığını təmin edilməsi.",
+     "goal": ""
+    },
+    "out": {
+     "outcomes": [
+      "1. Ekologiya hüququ və təbiətdən istifadənin hüquqi əsasları predmeti, məqsəd və vəzifələri, elmi-tədqiqat metodları, digər elmlərlə əlaqəsini izah edir. 2. Ekologiya hüququ və təbiətdən istifadənin hüquqi əsasları əsas müddəaları üçün iqtisadi fəaliyyət sahəsində hüquq sahələrinin konkret iqtisadi münasibətlərə tətbiqin izah edir 3. Məntiqi mühakimələr yürüdür, nəticə çıxarır və onları əsaslandırır."
+     ]
+    },
+    "week": {
+     "rows": [
+      {
+       "topic": "Ekologiya hüququn ümumi səciyyəsi",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Ekologiya hüququn prinsipləri",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Ekologiya hüquq prinsiplərinin anlayışı və xüsusiyyətləri",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Ekologiya hüququn obyektləri",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Ekoloji hüquq münasibətləri sferasında idarə etmənin tənzimi",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzunun davamı",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Təbiətdən istifadə hüququ ekoloji hüququn institutu kimi",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Ekoloji ziyanın anlayışı və növləri",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Ekoloji ziyanın ödənilməsinin üsulları",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Ekologiya qanunvericiliyinin pozulmasına görə məsuliyyət anlayışı",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Təbiətdən istifadənin idarə edilməsinin anlayışı və funksiyaları",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Təbiət obyektlərinə mülkiyyət hüququ",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Təbiətdən istifadənin idarə edilməsinin funksiyaları",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Ətraf mühitin mühafizəsinin beynəlxalq hüquqi mexanizimləri",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Xüsusi mühafizə olunan təbiət obyektlərinin hüquqi rejimi",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      }
+     ]
+    },
+    "method": {
+     "methods": [
+      "1. mühazirə 2. mövzunun müzakirəsi və diskussiya 3. video materiallardan və digər əyani vasitələrdən istifadə."
+     ],
+     "note": ""
+    },
+    "assess": {
+     "midterm": 0,
+     "project": 0,
+     "note": "1. İmtahandan əvvəl məsləhət saatları təşkil olunur. 2. İmtahanlar və aralıq yoxlamalar (kollokviumlar) açıq suallar və tapşırıqlar vasitəsilə aparılır. 3. Tələbələrin imtahana və aralıq yoxlamara buraxılması ilə bağlı məsələlər fakültə dekanı tərəfindən həll edilir. İmtahan və aralıq yoxlamalar Azərbaycan Respublikası Nazirlər Kabinetinin 24 dekabr 2013-cü il tarixli 348 nömrəli qərarı ilə təsdiq edilmiş “Ali təhsil müəssisələrinin bakalvriat və magistratura səviyyələrində kredit sistemi ilə təlimin təşkili Qaydaları”na əsasən aparılır. 4. Kurs işlərinin mövzuları, müvafiq ədəbiyyat əvvəlcədən tələbələrə verilir. 5. Semestr ərzində hər bir tələbə 10 sərbəst iş yerinə yetirməlidir. Sərbəstl işlərin mövzuları keçilən mövzuları əhatə edir. Hər bir sərbəst iş 1 balla sistemlə qiymətləndirilir. Kurs işlərinin müdafiəsi kafedrada yaradılmış komissiya tərəfindən qəbul edilir.",
+     "exam_questions": []
+    },
+    "self": {
+     "option": "",
+     "topics": [],
+     "archived": []
+    },
+    "lit": {
+     "primary": [
+      "Конституция Азербайджанской Республики Баку 2015",
+      "Кодекс административных правонарушений АР Баку 2012",
+      "Гражданский Кодекс АР Баку 2014",
+      "Уголовный Кодекс АР Баку 202",
+      "Дубовик О.Л экологическое право в вопросах и ответах М. 2003",
+      "Ерофеев Б.В. экологическое право М. 2009"
+     ],
+     "additional": []
+    },
+    "prev": {},
+    "send": {}
+   }
   }
  },
  "targets": [
@@ -14509,6 +14923,38 @@
    },
    "action": "restore",
    "source": "9009"
+  },
+  {
+   "key": "sbio233eh",
+   "teacher": 8107,
+   "offering_id": "1fc53964-0807-4a97-bab4-53ca47147d71",
+   "group_id": "1fd290e3-d385-4dab-acc0-2c750ebfb075",
+   "subject_ids": [
+    "4e26edc8-1563-44fa-9e8d-eec8f8586b6d"
+   ],
+   "lesson_hours": 60,
+   "plan": {
+    "lecture": 30,
+    "seminar": 30
+   },
+   "action": "restore",
+   "source": "8271"
+  },
+  {
+   "key": "eko233eh",
+   "teacher": 8107,
+   "offering_id": "c31c5e05-27b5-43e1-9650-9f883bec31e1",
+   "group_id": "5c5af292-26ab-4ace-b4af-b1ca05cff3ea",
+   "subject_ids": [
+    "111b9c16-0105-4c1d-b6b8-3fb619040415"
+   ],
+   "lesson_hours": 45,
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "action": "restore",
+   "source": "8521"
   }
  ]
 }
