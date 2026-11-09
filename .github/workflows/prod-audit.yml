@@ -17,6 +17,11 @@ on:
       deployed_head:
         description: "Yalnız reaudit: yoxlanmış canlı tətbiqin 40 simvolluq SHA-sı"
         type: string
+      capture_scope:
+        description: "Yalnız reaudit: full = 78 cədvəl · core = identity/map/xana/düzəliş/yük/sillabus başlıqları"
+        type: choice
+        options: [full, core]
+        default: full
 
 concurrency:
   group: prod-ops

@@ -40,6 +40,13 @@ class Command(BaseCommand):
             "out",
         ):
             parser.add_argument("--" + key, required=True)
+        # Phase control: source grades/confirmed attendance first; owner-present
+        # blanks are a separate reviewed pass with their own plan and receipt.
+        parser.add_argument(
+            "--owner-present-policy",
+            choices=("applicable_blank_without_grade_hold", "disabled"),
+            default="applicable_blank_without_grade_hold",
+        )
 
     def handle(self, *args, **options):
         try:
@@ -47,9 +54,15 @@ class Command(BaseCommand):
             # The authenticated full-capture producer permits 512 MiB; executable
             # repair plans retain their smaller native 256 MiB contract.
             current = private_json(options["current_file"], options["current_sha256"], max_bytes=512 * 1024 * 1024)
+            manifest = current.get("manifest") if isinstance(current, dict) else None
+            require(
+                manifest is None or (manifest.get("complete") is True and manifest.get("read_only") is True),
+                "complete_capture_required",
+            )
             plan = Builder(
                 source=source,
                 current=current,
+                owner_present_policy=options["owner_present_policy"],
                 **{
                     key: options[key]
                     for key in ("organization_id", "period_id", "source_system", "source_sha256", "current_sha256")

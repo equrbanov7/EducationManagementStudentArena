@@ -1,0 +1,597 @@
+{
+  "organizations.AcademicPeriod": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "opening_status",
+      "locked_at",
+      "locked_by_id",
+      "lock_reason",
+      "organization_id",
+      "name",
+      "period_type",
+      "academic_year",
+      "start_date",
+      "end_date",
+      "registration_start",
+      "registration_end",
+      "exam_session_start",
+      "exam_session_end",
+      "is_current",
+      "is_active"
+    ],
+    "org_path": "organization_id",
+    "period_path": "",
+    "filters": {}
+  },
+  "organizations.OrgUnit": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "order",
+      "organization_id",
+      "parent_id",
+      "unit_type",
+      "name",
+      "slug",
+      "code",
+      "head_id",
+      "settings",
+      "level",
+      "path",
+      "is_active",
+      "is_service_unit"
+    ],
+    "org_path": "organization_id",
+    "period_path": "",
+    "filters": {}
+  },
+  "registrar.Subject": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "is_archived",
+      "archived_reason",
+      "archived_at",
+      "archived_by_id",
+      "organization_id",
+      "code",
+      "name",
+      "ects",
+      "kind",
+      "chair_unit_id",
+      "description",
+      "is_active"
+    ],
+    "org_path": "organization_id",
+    "period_path": "",
+    "filters": {}
+  },
+  "auth.User": {
+    "fields": [
+      "id",
+      "username",
+      "first_name",
+      "last_name",
+      "is_active",
+      "last_login",
+      "date_joined"
+    ],
+    "org_path": "organization_id",
+    "period_path": "",
+    "filters": {}
+  },
+  "accounts.UserProfile": {
+    "fields": [
+      "id",
+      "user_id",
+      "organization_id",
+      "patronymic",
+      "birth_date",
+      "institutional_identifier",
+      "fin",
+      "access_state",
+      "is_deleted",
+      "created_at",
+      "updated_at"
+    ],
+    "org_path": "organization_id",
+    "period_path": "",
+    "filters": {}
+  },
+  "registrar.CourseOffering": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "course_format",
+      "starts_on",
+      "ends_on",
+      "format_note",
+      "seminar_is_practical",
+      "organization_id",
+      "subject_id",
+      "period_id",
+      "group_id",
+      "course_id",
+      "instructor_id",
+      "lesson_hours",
+      "is_active"
+    ],
+    "org_path": "organization_id",
+    "period_path": "",
+    "filters": {}
+  },
+  "registrar.Enrollment": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "organization_id",
+      "student_id",
+      "offering_id",
+      "kind",
+      "status",
+      "superseded_by_id",
+      "absence_hours",
+      "legacy_qb_fail",
+      "source_group_id",
+      "added_by_id",
+      "added_at",
+      "lab_group",
+      "seminar_group"
+    ],
+    "org_path": "organization_id",
+    "period_path": "offering__period_id",
+    "filters": {}
+  },
+  "registrar.Lesson": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "organization_id",
+      "offering_id",
+      "date",
+      "kind",
+      "topic",
+      "syllabus_week",
+      "hours",
+      "start_time",
+      "end_time",
+      "created_by_id",
+      "instructor_id",
+      "room_id",
+      "is_legacy_synthesised",
+      "off_schedule_reason",
+      "lab_group",
+      "seminar_group"
+    ],
+    "org_path": "organization_id",
+    "period_path": "offering__period_id",
+    "filters": {}
+  },
+  "registrar.AssessmentComponent": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "order",
+      "organization_id",
+      "offering_id",
+      "name",
+      "kind",
+      "held_on",
+      "max_score",
+      "rubric_id"
+    ],
+    "org_path": "organization_id",
+    "period_path": "offering__period_id",
+    "filters": {}
+  },
+  "registrar.LessonMark": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "organization_id",
+      "lesson_id",
+      "enrollment_id",
+      "status",
+      "score",
+      "entered_by_id"
+    ],
+    "org_path": "organization_id",
+    "period_path": "enrollment__offering__period_id",
+    "filters": {}
+  },
+  "registrar.JournalCorrection": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "organization_id",
+      "lesson_mark_id",
+      "lesson_mark_ref",
+      "lesson_ref",
+      "enrollment_ref",
+      "field",
+      "old_status",
+      "new_status",
+      "old_score",
+      "new_score",
+      "created_mark",
+      "reason",
+      "note",
+      "document",
+      "corrected_by_id",
+      "corrected_by_name"
+    ],
+    "org_path": "organization_id",
+    "period_path": "",
+    "filters": {
+      "created_at__gte": "2026-09-01T00:00:00+00:00"
+    }
+  },
+  "registrar.LessonCorrection": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "organization_id",
+      "lesson_id",
+      "lesson_label",
+      "is_deletion",
+      "old_date",
+      "new_date",
+      "old_kind",
+      "new_kind",
+      "old_hours",
+      "new_hours",
+      "old_time",
+      "new_time",
+      "old_topic",
+      "new_topic",
+      "old_instructor_id",
+      "new_instructor_id",
+      "reason",
+      "note",
+      "document",
+      "corrected_by_id",
+      "corrected_by_name"
+    ],
+    "org_path": "organization_id",
+    "period_path": "",
+    "filters": {
+      "created_at__gte": "2026-09-01T00:00:00+00:00"
+    }
+  },
+  "registrar.CorrectionReversal": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "organization_id",
+      "journal_correction_id",
+      "lesson_correction_id",
+      "selfwork_correction_id",
+      "coursework_correction_id",
+      "component_correction_id",
+      "reverted_by_id",
+      "reverted_by_ref",
+      "reason_code",
+      "reason_note"
+    ],
+    "org_path": "organization_id",
+    "period_path": "",
+    "filters": {
+      "created_at__gte": "2026-09-01T00:00:00+00:00"
+    }
+  },
+  "registrar.LanguageLevelCohort": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "organization_id",
+      "department_id",
+      "group_id",
+      "offering_id",
+      "period_id",
+      "source_offering_id",
+      "lecture_hours",
+      "seminar_hours",
+      "lab_hours",
+      "name",
+      "family",
+      "level",
+      "created_by_id"
+    ],
+    "org_path": "organization_id",
+    "period_path": "period_id",
+    "filters": {}
+  },
+  "syllabus.Syllabus": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "organization_id",
+      "subject_id",
+      "period_id",
+      "offering_id",
+      "program_id",
+      "chair_unit_id",
+      "author_id",
+      "current_version_id",
+      "approved_version_id",
+      "reused_from_id",
+      "plan_hours_override",
+      "is_active"
+    ],
+    "org_path": "organization_id",
+    "period_path": "",
+    "filters": {}
+  },
+  "syllabus.SyllabusVersion": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "organization_id",
+      "syllabus_id",
+      "major",
+      "minor",
+      "status",
+      "change_kind",
+      "applies_to_period_id",
+      "source_version_id",
+      "plan_hours",
+      "completion_percent",
+      "created_by_id",
+      "submitted_at",
+      "submitted_by_id",
+      "review_started_at",
+      "reviewer_id",
+      "decided_at",
+      "decision_reason",
+      "approved_at",
+      "approved_by_id",
+      "approval_source",
+      "locked_at",
+      "archived_at"
+    ],
+    "org_path": "organization_id",
+    "period_path": "",
+    "filters": {}
+  },
+  "syllabus.SyllabusShare": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "organization_id",
+      "syllabus_id",
+      "offering_id",
+      "source",
+      "created_by_id"
+    ],
+    "org_path": "organization_id",
+    "period_path": "",
+    "filters": {}
+  },
+  "workload.TeachingTask": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "organization_id",
+      "academic_year",
+      "chair_id",
+      "status",
+      "revision",
+      "created_by_id",
+      "submitted_by_id",
+      "submitted_at",
+      "distributed_by_id",
+      "distributed_at",
+      "note"
+    ],
+    "org_path": "organization_id",
+    "period_path": "",
+    "filters": {
+      "academic_year": "2026/2027"
+    }
+  },
+  "workload.TeachingTaskRow": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "order",
+      "organization_id",
+      "task_id",
+      "season",
+      "period_id",
+      "subject_id",
+      "subject_text",
+      "row_kind",
+      "specialty_id",
+      "specialty_text",
+      "faculty_id",
+      "groups_text",
+      "education_form",
+      "degree_level",
+      "student_count",
+      "student_count_text",
+      "union_count",
+      "subgroup_count",
+      "lecture_plan",
+      "lecture_total",
+      "seminar_plan",
+      "seminar_total",
+      "lab_plan",
+      "lab_total",
+      "consult_hours",
+      "exam_hours",
+      "thesis_hours",
+      "postgrad_hours",
+      "practice_research_hours",
+      "practice_production_hours",
+      "total_hours",
+      "credits",
+      "credits_value",
+      "review_status",
+      "note",
+      "intensive_offering_id",
+      "patok_lead_id"
+    ],
+    "org_path": "organization_id",
+    "period_path": "",
+    "filters": {
+      "task__academic_year": "2026/2027"
+    }
+  },
+  "workload.TeacherAssignment": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "organization_id",
+      "row_id",
+      "teacher_id",
+      "activity",
+      "hours",
+      "groups_note",
+      "group_id",
+      "sub_number",
+      "is_hourly_paid",
+      "assigned_by_id",
+      "note"
+    ],
+    "org_path": "organization_id",
+    "period_path": "",
+    "filters": {
+      "row__task__academic_year": "2026/2027"
+    }
+  },
+  "workload.TeachingTaskRow_groups": {
+    "fields": [
+      "id",
+      "teachingtaskrow_id",
+      "orgunit_id"
+    ],
+    "org_path": "teachingtaskrow__organization_id",
+    "period_path": "",
+    "filters": {}
+  },
+  "legacy_import.LegacyMigrationRun": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "organization_id",
+      "source_system",
+      "snapshot_sha256",
+      "snapshot_size_bytes",
+      "source_row_count",
+      "schema_version",
+      "transform_version",
+      "mode",
+      "accounting_mode",
+      "status",
+      "origin",
+      "initiated_by_id",
+      "started_at",
+      "finished_at",
+      "migrated_count",
+      "skipped_count",
+      "quarantined_count",
+      "failure_code"
+    ],
+    "org_path": "organization_id",
+    "period_path": "",
+    "filters": {}
+  },
+  "legacy_import.LegacyEntityMap": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "organization_id",
+      "source_system",
+      "entity_type",
+      "legacy_pk",
+      "source_row_hash",
+      "transform_version",
+      "target_model_label",
+      "target_pk",
+      "created_run_id",
+      "state",
+      "reconciliation_status"
+    ],
+    "org_path": "organization_id",
+    "period_path": "",
+    "filters": {},
+    "route_scope": "direct_and_offering_only"
+  },
+  "legacy_import.LegacyEntityMapVersion": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "organization_id",
+      "entity_map_id",
+      "version_number",
+      "supersedes_id",
+      "recorded_run_id",
+      "source_row_hash",
+      "transform_version",
+      "target_model_label",
+      "target_pk",
+      "state",
+      "reconciliation_status",
+      "approved_issue_id",
+      "reviewed_by_id",
+      "reviewed_at",
+      "review_reason_code",
+      "review_evidence_digest",
+      "applied_by_id"
+    ],
+    "org_path": "organization_id",
+    "period_path": "",
+    "filters": {},
+    "route_scope": "direct_and_offering_only"
+  },
+  "audit.AuditLog": {
+    "fields": [
+      "id",
+      "user_id",
+      "organization_id",
+      "action",
+      "resource_type",
+      "resource_id",
+      "object_id",
+      "content_type__app_label",
+      "content_type__model",
+      "old_values",
+      "new_values",
+      "changes",
+      "reason",
+      "created_at"
+    ],
+    "org_path": "organization_id",
+    "period_path": "",
+    "filters": {
+      "created_at__gte": "2026-09-01T00:00:00+04:00",
+      "resource_type__in": [
+        "registrar.legacy_cells_fill",
+        "registrar.subgroup_journal_merge",
+        "registrar.subgroup_parent_retire"
+      ]
+    }
+  }
+}

@@ -15,11 +15,23 @@ class Command(BaseCommand):
         parser.add_argument("--actor", required=True)
         parser.add_argument("--public-key", required=True)
         parser.add_argument("--output-dir", required=True)
+        parser.add_argument(
+            "--scope",
+            choices=("full", "core"),
+            default="full",
+            help="full = tarixi 78 cədvəl; core = yalnız identity/map/xana/düzəliş/yük/sillabus başlıqları",
+        )
 
     def handle(self, *args, **options):
         diagnostic = {}
         try:
-            result = capture(options["actor"], options["public_key"], options["output_dir"], diagnostic=diagnostic)
+            result = capture(
+                options["actor"],
+                options["public_key"],
+                options["output_dir"],
+                scope=options["scope"],
+                diagnostic=diagnostic,
+            )
         except Exception as exc:
             self.stderr.write(PREFIX + json.dumps(safe_failure(exc, diagnostic), sort_keys=True))
             raise CommandError("reaudit_snapshot_failed") from None
