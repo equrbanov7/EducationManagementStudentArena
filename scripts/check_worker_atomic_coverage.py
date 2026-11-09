@@ -123,6 +123,8 @@ INTENTIONAL_EXEMPTIONS = {
     "apps/registrar/management/commands/apply_lab_groups_20261106.py",
     # 2026-11-07 1-ci kurslar (Fizika/kimya Lab-1/Lab-2 + ADİAK payları): eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/apply_first_year_splits_20261107.py",
+    # 2026-11-10 236 M ADİAK + 409/6MBA əkiz: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
+    "apps/registrar/management/commands/fix_azdili_journals_20261110.py",
     "apps/registrar/management/commands/restore_subgroup_parent_enrollments.py",
     "apps/registrar/management/commands/apply_seminar_groups.py",
     "apps/registrar/management/commands/bind_lab_lessons_20261108.py",
