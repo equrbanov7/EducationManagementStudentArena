@@ -115153,6 +115153,14 @@ msgctxt "organizations.self_conflict"
 msgid "Siz bu təşkilatda həm də tələbəsiniz: işçi rolu ilə özünüzə, öz qrupunuza və öz jurnallarınıza aid əməliyyat apara bilməzsiniz."
 msgstr "You are also a student in this organization: with a staff role you cannot act on yourself, your own group or your own journals."
 
+msgctxt "registrar.journal"
+msgid "Bu növ başqa müəllimin payıdır — yalnız məlumat üçün"
+msgstr "This lesson type belongs to another teacher's share — for information only"
+
+msgctxt "registrar.journal"
+msgid "müəllim təyin olunmayıb"
+msgstr "no teacher assigned"
+
 msgctxt "accounts.workload"
 msgid "Alt qrup"
 msgstr "Sub-group"

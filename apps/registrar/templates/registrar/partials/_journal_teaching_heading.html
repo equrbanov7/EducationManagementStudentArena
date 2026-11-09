@@ -1,9 +1,14 @@
 {% load i18n %}
-        {% if teaching_summary.kinds %}
+        {% if teaching_summary.kinds or teaching_summary.others %}
         <div class="jd2-teach-summary">
             {% for k in teaching_summary.kinds %}
             <span class="jd2-teach-kind jd2-teach-kind--{{ k.kind }}">
                 <b>{{ k.label }}</b> · {{ k.held }}{% if k.planned %} / {{ k.planned }}{% endif %} {% trans "saat" context "registrar.journal" %}{% if k.teachers %} · {{ k.teachers|join:", " }}{% endif %}
+            </span>
+            {% endfor %}
+            {% for k in teaching_summary.others %}
+            <span class="jd2-teach-kind jd2-teach-kind--{{ k.kind }} jd2-teach-kind--other" title="{% trans "Bu növ başqa müəllimin payıdır — yalnız məlumat üçün" context "registrar.journal" %}">
+                <b>{{ k.label }}</b> · {{ k.held }} / {{ k.planned }} {% trans "saat" context "registrar.journal" %} · {% if k.teachers %}{{ k.teachers|join:", " }}{% else %}{% trans "müəllim təyin olunmayıb" context "registrar.journal" %}{% endif %}
             </span>
             {% endfor %}
             <span class="jd2-teach-total{% if teaching_summary.over %} is-over{% endif %}">
