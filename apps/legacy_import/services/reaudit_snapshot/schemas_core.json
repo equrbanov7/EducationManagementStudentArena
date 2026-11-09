@@ -594,5 +594,78 @@
         "legacy_import.subject_collision"
       ]
     }
+  },
+  "registrar.ScheduleSlot": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "is_deleted",
+      "deleted_at",
+      "organization_id",
+      "offering_id",
+      "weekday",
+      "start_time",
+      "end_time",
+      "room",
+      "week_type",
+      "kind",
+      "created_by_id",
+      "instructor_id",
+      "is_parked",
+      "parked_at",
+      "parked_by_id",
+      "park_reason"
+    ],
+    "org_path": "organization_id",
+    "period_path": "offering__period_id",
+    "filters": {}
+  },
+  "registrar.JournalShare": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "organization_id",
+      "offering_id",
+      "teacher_id",
+      "kinds",
+      "source",
+      "batch",
+      "is_active",
+      "created_by_id"
+    ],
+    "org_path": "organization_id",
+    "period_path": "offering__period_id",
+    "filters": {}
+  },
+  "registrar.JournalShare_enrollments": {
+    "fields": [
+      "id",
+      "journalshare_id",
+      "enrollment_id"
+    ],
+    "org_path": "journalshare__organization_id",
+    "period_path": "journalshare__offering__period_id",
+    "filters": {}
+  },
+  "organizations.Membership": {
+    "fields": [
+      "created_at",
+      "updated_at",
+      "id",
+      "user_id",
+      "organization_id",
+      "role_id",
+      "scope_unit_id",
+      "title",
+      "employee_id",
+      "assigned_by_id",
+      "is_primary",
+      "is_active"
+    ],
+    "org_path": "organization_id",
+    "period_path": "",
+    "filters": {}
   }
 }
