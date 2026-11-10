@@ -24,6 +24,7 @@ from __future__ import annotations
 from django.apps import apps as django_apps
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 
 #: ``workload.constants.TaskStatus.CANCELLED`` / ``Activity`` dəyərləri (import YOX — bax modul şərhi).
 _CANCELLED_TASK = "cancelled"
@@ -65,6 +66,46 @@ def _workload_teacher_ids(offering) -> set:
         row__groups=offering.group_id,
         teacher__isnull=False,
         activity__in=_TEACHING_ACTIVITIES,
+    ).exclude(row__task__status=_CANCELLED_TASK)
+    return set(rows.order_by().values_list("teacher_id", flat=True).distinct()) | _patok_lecturer_ids(offering)
+
+
+def _patok_lecturer_ids(offering) -> set:
+    """Patok tərəfdaşı qrupun mühazirəçiləri — aparıcı sətrin mühazirə bölgüsü (sahib 2026-11-10).
+
+    Tərəfdaş sətirdə (``lecture_total = 0``) mühazirə bölgüsü yoxdur; mühazirəçi aparıcıdadır (açıq ``patok_lead`` bağı,
+    bağ yoxdursa eyni tapşırığın mühazirəsi olan sətri). Qayda :mod:`.schedule_stale_teachers` ``_patok_lecture`` ilə
+    eynidir — redaktor tərəfdaş qrupun mühazirə slotuna patokun mühazirəçisini seçə bilsin."""
+    Row = django_apps.get_model("workload", "TeachingTaskRow")
+    Assignment = django_apps.get_model("workload", "TeacherAssignment")
+    partners = list(
+        Row.objects.filter(
+            organization_id=offering.organization_id,
+            subject_id=offering.subject_id,
+            period_id=offering.period_id,
+            groups=offering.group_id,
+            row_kind="teaching",
+            lecture_plan__gt=0,
+            lecture_total=0,
+        )
+        .exclude(task__status=_CANCELLED_TASK)
+        .values_list("patok_lead_id", "task_id")
+    )
+    if not partners:
+        return set()
+    condition = Q(row_id__in={lead for lead, _task in partners if lead}) | Q(
+        row__task_id__in={task for lead, task in partners if not lead}
+    )
+    rows = Assignment.objects.filter(
+        condition,
+        organization_id=offering.organization_id,
+        activity="lecture",
+        teacher__isnull=False,
+        row__subject_id=offering.subject_id,
+        row__period_id=offering.period_id,
+        row__row_kind="teaching",
+        row__lecture_total__gt=0,
+        row__patok_lead__isnull=True,
     ).exclude(row__task__status=_CANCELLED_TASK)
     return set(rows.order_by().values_list("teacher_id", flat=True).distinct())
 
