@@ -15,6 +15,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.cache import patch_vary_headers
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET
 
@@ -35,6 +36,15 @@ from ._shared import (
 
 PAGE_SIZE = 50
 _CTX = "exams.assignees"
+#: Klient (``teacher_exam_assignees.js``) süzgəc / səhifə / təyinat dəyişəndə YALNIZ dəyişən hissələri istəyir
+#: (sahib 2026-11-10: «səhifə çox zəif hərəkət edir») — baza şablonu, menyu və skriptlər yenidən qurulmur.
+PARTIAL_HEADER = "X-EAS-Partial"
+_PAGE_TEMPLATE = "exams/teacher/teacher_exam_assignees.html"
+_PARTIAL_TEMPLATE = "exams/teacher/partials/assignees/_live.html"
+
+
+def wants_partial(request) -> bool:
+    return request.headers.get(PARTIAL_HEADER) == "1"
 
 
 def can_edit_assignees(request, exam) -> bool:
@@ -155,13 +165,16 @@ def teacher_exam_assignees(request, slug):
     if nav_query:
         detail_url = f"{detail_url}?{nav_query}"
     title = pgettext(_CTX, "Tapşırıq təyin olunmuşlar")
-    return render(
+    partial = wants_partial(request)
+    response = render(
         request,
-        "exams/teacher/teacher_exam_assignees.html",
+        _PARTIAL_TEMPLATE if partial else _PAGE_TEMPLATE,
         {
             "exam": exam,
             "page_title": title,
-            "exam_crumbs": exam_breadcrumbs(request, exam, current=title, navigation_query=nav_query),
+            "exam_crumbs": (
+                [] if partial else exam_breadcrumbs(request, exam, current=title, navigation_query=nav_query)
+            ),
             "detail_url": detail_url,
             "back_label": pgettext("exams.template.teacher_exam_detail", "action_back"),
             "can_edit": can_edit,
@@ -190,6 +203,11 @@ def teacher_exam_assignees(request, slug):
             "user_search_url": reverse("exams:user_search"),
         },
     )
+    if partial:
+        # Fraqment brauzer keşinə / «geri» tarixçəsinə tam səhifə kimi düşməsin.
+        response["Cache-Control"] = "no-store"
+        patch_vary_headers(response, [PARTIAL_HEADER])
+    return response
 
 
-__all__ = ["can_edit_assignees", "teacher_exam_assignees"]
+__all__ = ["PARTIAL_HEADER", "can_edit_assignees", "teacher_exam_assignees", "wants_partial"]

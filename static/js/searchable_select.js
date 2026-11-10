@@ -127,8 +127,8 @@
     var lastTerm = null;
     var hasMore = false;
     var loading = false;
-    var pending = null; // sorğu gedərkən yazılan son axtarış (trailing re-fetch)
-    var reqSeq = 0;
+    var pending = null; // sorğu gedərkən istənən növbəti SƏHİFƏ (trailing re-fetch)
+    var reqSeq = 0, controller = null; // controller — gedən sorğunun AbortController-i
 
     function emit() {
       listeners.change.forEach(function (cb) {
@@ -364,22 +364,26 @@
     }
 
     function fetchOpts(term, append) {
-      if (loading) {
-        // Sorğu getdiyi an yazılan axtarışı ATMA — növbəyə al və cari sorğu
-        // bitəndə işə sal. Əvvəllər belə keystroke səssizcə itirdi: istifadəçi
-        // ad yazırdı, siyahı isə KÖHNƏ nəticədə donub qalırdı (yalnız ikinci
-        // dəfə yazanda düzəlirdi).
+      if (loading && (append || !controller)) {
+        // Sorğu gedərkən istənən növbəti səhifəni ATMA — növbəyə al, cari sorğu bitəndə işə sal.
         pending = { term: term, append: append };
         return;
       }
+      if (loading) {
+        // 2026-11-11: YENİ axtarış köhnə sorğunu gözləmir — köhnəsi ləğv olunur, yenisi dərhal gedir.
+        controller.abort();
+        pending = null;
+      }
       loading = true;
       var seq = ++reqSeq;
+      controller = typeof window.AbortController === "function" ? new window.AbortController() : null;
       var off = append ? offset : 0;
       if (!append) {
         setEmpty(false);
         setSkeleton(true);
       }
-      fetch(buildUrl(term, off), { headers: { "X-Requested-With": "XMLHttpRequest" } })
+      var signal = controller ? controller.signal : undefined;
+      fetch(buildUrl(term, off), { headers: { "X-Requested-With": "XMLHttpRequest" }, signal: signal })
         .then(function (r) {
           return r.ok ? r.json() : { results: [], has_more: false };
         })
@@ -414,9 +418,10 @@
           }
         })
         .catch(function () {
-          setSkeleton(false);
+          return seq === reqSeq && setSkeleton(false);
         })
         .finally(function () {
+          if (seq !== reqSeq) return; // ləğv olunmuş köhnə sorğu — vəziyyət artıq yeni sorğuya məxsusdur
           loading = false;
           if (pending) {
             var queued = pending;

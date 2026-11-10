@@ -35,6 +35,7 @@ from apps.exams.services.access_policy import _ensure_teacher
 from . import unit_assignment as _units
 from . import unit_coverage as _unit_coverage
 from ._shared import _ensure_exam_permission, _get_editable_exam_or_404, _resolve_required_organization
+from .assignees import wants_partial
 
 logger = logging.getLogger(__name__)
 
@@ -283,8 +284,13 @@ def exam_assignees_update(request, slug):
     except _Reject as reject:
         return JsonResponse(reject.payload, status=reject.status)
 
+    warnings = [str(warning) for warning in _journal_coverage.exam_coverage_warnings(exam)]
+    if wants_partial(request):
+        # Klient səhifəni yenidən YÜKLƏMİR (yalnız dəyişən hissələri çəkir) — mesajlar cavabda gedir; flash
+        # yazılsaydı növbəti tam səhifədə ikinci dəfə görünərdi.
+        return JsonResponse({"success": True, "message": _success_message(action), "warnings": warnings})
     messages.success(request, _success_message(action))
-    for warning in _journal_coverage.exam_coverage_warnings(exam):
+    for warning in warnings:
         messages.warning(request, warning)
     return JsonResponse({"success": True, "message": _success_message(action)})
 

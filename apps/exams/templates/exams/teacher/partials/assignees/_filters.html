@@ -1,7 +1,7 @@
 {% load i18n %}
 {# Süzgəclər — dəyişəndə dərhal tətbiq olunur (results_filter_ui.js); axtarış hərf-dözümlüdür (ə/e, ı/i, …). #}
 <section class="ems-card eas-filters" aria-label="{% trans 'Filtrlər' context 'exams.assignees' %}">
-    <form method="get" class="etp-toolbar js-results-filters-form" role="search" novalidate>
+    <form method="get" class="etp-toolbar js-results-filters-form js-eas-filter-form" role="search" novalidate>
         {% if request.GET.from_section %}<input type="hidden" name="from_section" value="{{ request.GET.from_section }}">{% endif %}
         {% if request.GET.return_to %}<input type="hidden" name="return_to" value="{{ request.GET.return_to }}">{% endif %}
         <div class="etp-toolbar__field etp-toolbar__field--grow">

@@ -1,0 +1,5 @@
+{% comment %}«Tapşırıq təyin olunmuşlar» — YALNIZ canlı hissələr (başlıq `X-EAS-Partial: 1`). Tam səhifə ilə eyni
+partial-lar; JS (`teacher_exam_assignees.js`) `data-eas-live` adına görə uyğun hissəni əvəz edir.{% endcomment %}
+<div data-eas-live="summary">{% include "exams/teacher/partials/assignees/_summary.html" %}</div>
+<div data-eas-live="filters">{% include "exams/teacher/partials/assignees/_filters.html" %}</div>
+<div data-eas-live="table">{% include "exams/teacher/partials/assignees/_table.html" %}</div>

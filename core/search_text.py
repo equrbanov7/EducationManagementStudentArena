@@ -242,21 +242,31 @@ def word_prefix_match(query: str, *texts) -> bool:
     return all(any(re.search(word_prefix_regex(token), text, re.IGNORECASE) for text in haystack) for token in tokens)
 
 
-def tolerant_match(query: str, *texts, compact: bool = False) -> bool:
-    """Yaddaşda uyğunluq (``tolerant_q`` ilə eyni qayda): hər token mətnlərdən hər hansı birində.
+def tolerant_matcher(query: str, *, compact: bool = False):
+    """``tolerant_match``-in HAZIR yoxlayıcısı: ``matcher(*texts) -> bool`` — şablonlar BİR dəfə kompilyasiya olunur.
 
-    Boş sorğu → ``True`` (süzgəc yoxdur).
+    Yaddaşdakı böyük siyahıları (məs. 400 tələbə) süzmək üçün: ``tolerant_match`` hər sətirdə şablonu yenidən
+    qururdu (sətir × token). Boş sorğu → həmişə ``True``.
     """
     tokens = tokens_of(query)
     if not tokens:
-        return True
-    haystack = [str(text).replace("\u0307", "") for text in texts if text not in (None, "")]
-
-    def _hit(pattern: str) -> bool:
-        rx = re.compile(pattern, re.IGNORECASE)
-        return any(rx.search(text) for text in haystack)
-
-    if all(_hit(code_regex(token) if compact else fold_regex(token)) for token in tokens):
-        return True
+        return lambda *texts: True
+    token_rx = [re.compile(code_regex(token) if compact else fold_regex(token), re.IGNORECASE) for token in tokens]
     glued = _glued(tokens) if compact else None
-    return bool(glued) and _hit(glued)
+    glued_rx = re.compile(glued, re.IGNORECASE) if glued else None
+
+    def _matcher(*texts) -> bool:
+        haystack = [str(text).replace("\u0307", "") for text in texts if text not in (None, "")]
+        if all(any(rx.search(text) for text in haystack) for rx in token_rx):
+            return True
+        return glued_rx is not None and any(glued_rx.search(text) for text in haystack)
+
+    return _matcher
+
+
+def tolerant_match(query: str, *texts, compact: bool = False) -> bool:
+    """Yaddaşda uyğunluq (``tolerant_q`` ilə eyni qayda): hər token mətnlərdən hər hansı birində.
+
+    Boş sorğu → ``True`` (süzgəc yoxdur). Çox sətir üçün :func:`tolerant_matcher` (şablon bir dəfə qurulur).
+    """
+    return tolerant_matcher(query, compact=compact)(*texts)
