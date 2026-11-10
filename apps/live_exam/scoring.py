@@ -37,6 +37,7 @@ from apps.live_exam.delivery import late_delivery_shift_ms, question_seen_at
 from apps.live_exam.domain.question_config import resolve_question_config
 from apps.live_exam.domain.session import build_question_phase_times, get_active_question, question_points
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
+from apps.live_exam.power_modes import apply_double_points
 from apps.live_exam.roster import eligible_count_for_current, is_pending
 from apps.live_exam.serializers import personal_result_from_answer, speed_rank
 from apps.live_exam.session_settings import MULTI_SCORING_STRICT
@@ -320,6 +321,8 @@ def _persist_answer(*, pin, player_id, client_id, question_id, option_ids, text,
         if error:
             return False, error, None, False, session
 
+        # 2026-11-10: «×2 Xal» rejimi (dondurulmuş qayda) — müsbət xal ikiqat; sonra bomba qaydası.
+        apply_double_points(config, score)
         bomb_triggered, reset_amount, points = bomb_score_effect(config, score, player.score)
         score["awarded_points"] = points
         answer = LiveAnswer.objects.create(

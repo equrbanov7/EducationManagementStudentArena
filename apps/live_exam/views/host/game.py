@@ -251,11 +251,15 @@ def host_update_settings(request, pin):
         payload = {}
 
     try:
-        settings = services.update_host_settings(
+        settings, modifiers = services.update_host_settings_with_modifiers(
             session,
             payload,
             max_participants_cap=allowed_max_participants_for_user(request.user),
         )
     except SessionSettingsError as exc:
         return JsonResponse({"ok": False, "message": str(exc)}, status=400)
-    return JsonResponse({"ok": True, "settings": settings, "is_locked": bool(session.is_locked)})
+    response = {"ok": True, "settings": settings, "is_locked": bool(session.is_locked)}
+    # 2026-11-10: bomba / ×2 rejimi — cari suala tətbiq olundu / olunmadı (host bildirişi üçün).
+    if modifiers is not None:
+        response["modifiers"] = modifiers
+    return JsonResponse(response)

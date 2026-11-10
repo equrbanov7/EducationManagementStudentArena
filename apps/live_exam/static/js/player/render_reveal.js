@@ -2,14 +2,14 @@
 // Yalnız serverin göndərdiyi məlumat göstərilir: şəxsi nəticə (`player_answer`), `rank`,
 // `gap_to_next`, `next_nickname`, `streak`, multi üçün `correct_selected/total_correct`,
 // yazılı cavab üçün `your_text`/`accepted_answers`. Sahə yoxdursa — o hissə sadəcə göstərilmir.
-import { LEADERBOARD_LIMIT, PHASES, prefersReducedMotion } from './config.js?v=lx20261019s';
-import { playSound } from './audio.js?v=lx20261019s';
-import { buzz, HAPTIC } from './haptics.js?v=lx20261019s';
-import { optionLabel, optionMark, toneIndex } from './shapes.js?v=lx20261019s';
-import { isFormal } from '../host_lobby/style_mode.js?v=lx20261019s';
-import { state } from './state.js?v=lx20261019s';
-import { previousRank, rememberRank } from './stats.js?v=lx20261019s';
-import { announce, setQuestionChip, setRank, setScore, setTimer, stopTimeBar } from './ui.js?v=lx20261019s';
+import { LEADERBOARD_LIMIT, PHASES, prefersReducedMotion } from './config.js?v=lx20261110p';
+import { playSound } from './audio.js?v=lx20261110p';
+import { buzz, HAPTIC } from './haptics.js?v=lx20261110p';
+import { optionLabel, optionMark, toneIndex } from './shapes.js?v=lx20261110p';
+import { isFormal } from '../host_lobby/style_mode.js?v=lx20261110p';
+import { state } from './state.js?v=lx20261110p';
+import { previousRank, rememberRank } from './stats.js?v=lx20261110p';
+import { announce, setQuestionChip, setRank, setScore, setTimer, stopTimeBar } from './ui.js?v=lx20261110p';
 import {
     esc,
     fmt,
@@ -26,9 +26,10 @@ import {
     showQuestionsOnDevices,
     toInt,
     tr,
-} from './utils.js?v=lx20261019s';
-import { mountView } from './views.js?v=lx20261019s';
-import { CHECK_SVG } from './render_round.js?v=lx20261019s';
+} from './utils.js?v=lx20261110p';
+import { mountView } from './views.js?v=lx20261110p';
+import { CHECK_SVG } from './render_round.js?v=lx20261110p';
+import { doubleChipMarkup, resultIsDouble } from './powerups.js?v=lx20261110p';
 
 const CROSS_SVG =
     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg>';
@@ -163,6 +164,9 @@ export function renderResult(payload) {
     };
     const icons = { correct: CHECK_SVG, partial: HALF_SVG, wrong: CROSS_SVG, none: CLOCK_SVG };
     const chips = [];
+    // 2026-11-10: «×2 Xal» rejimi — serverin `points_multiplier`-i (xal artıq ikiqatdır).
+    const doubled = resultIsDouble(result, payload);
+    if (doubled) chips.push(doubleChipMarkup(result, payload));
     if (result && hasNumber(result.total_correct) && Number(result.total_correct) > 0 && !isTextQuestion(question)) {
         let detail = fmt(tr("resultPartialDetail", "{correct}/{total} düzgün"), {
             correct: toInt(result.correct_selected, 0),
@@ -187,7 +191,7 @@ export function renderResult(payload) {
     const yourText = typedAnswer ? `<p class="lxp-typed-echo" data-lxp-echo></p>` : "";
     const pointsMarkup =
         points > 0
-            ? `<p class="lxp-result__points" data-lxp-points>+${esc(formatNumber(points))} <small>${esc(tr("pointsShort", "xal"))}</small></p>`
+            ? `<p class="lxp-result__points${doubled ? " is-double" : ""}" data-lxp-points>+${esc(formatNumber(points))} <small>${esc(tr("pointsShort", "xal"))}</small></p>`
             : `<p class="lxp-result__points is-zero">${esc(outcome === "none" ? tr("resultMissed", "Bu sualı buraxdın") : tr("resultNoPoints", "Bu dəfə xal yoxdur"))}</p>`;
 
     const { el, created } = mountView(
@@ -229,7 +233,8 @@ export function renderResult(payload) {
     }
     const soundByOutcome = { correct: "correct", partial: "partial", wrong: "wrong", none: "timeup" };
     playSound(soundByOutcome[outcome], revealKey);
-    if (streak >= 3) window.setTimeout(() => playSound("streak", revealKey), 520);
+    if (doubled) window.setTimeout(() => playSound("double", revealKey), 420);
+    if (streak >= 3) window.setTimeout(() => playSound("streak", revealKey), doubled ? 900 : 520);
     buzz({ correct: HAPTIC.correct, partial: HAPTIC.partial, wrong: HAPTIC.wrong, none: HAPTIC.timeup }[outcome]);
     announce(points > 0 ? `${titles[outcome]} +${points} ${tr("pointsShort", "xal")}` : titles[outcome]);
 }

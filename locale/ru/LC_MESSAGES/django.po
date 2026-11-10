@@ -118473,3 +118473,155 @@ msgstr "Нет, это не я"
 msgctxt "accounts.workload"
 msgid "Birgə (patok)"
 msgstr "Совместно (поток)"
+
+msgctxt "live_exam.power_modes"
+msgid "Bomba rejimi"
+msgstr "Режим бомбы"
+
+msgctxt "live_exam.power_modes"
+msgid "×2 Xal rejimi"
+msgstr "Режим ×2 очков"
+
+msgctxt "live_exam.power_modes"
+msgid "Oyun effektləri"
+msgstr "Игровые эффекты"
+
+msgctxt "live_exam.power_modes"
+msgid "Hər sual bombadır: səhv cavab bu oyundakı xalı sıfırlayır."
+msgstr "Каждый вопрос — бомба: неверный ответ обнуляет очки в этой игре."
+
+msgctxt "live_exam.power_modes"
+msgid "Düzgün cavab ikiqat xal gətirir."
+msgstr "Правильный ответ даёт двойные очки."
+
+msgctxt "live_exam.power_modes"
+msgid "Final rəqs şousu"
+msgstr "Финальное танцевальное шоу"
+
+msgctxt "live_exam.power_modes"
+msgid "Final səhnəsində avatarlar viral və özünəməxsus rəqslər edir."
+msgstr "В финальной сцене аватары исполняют вирусные и фирменные танцы."
+
+msgctxt "live_exam.power_modes"
+msgid "Açıq olanda nəşr olunan hər sual bomba sualıdır: səhv və ya qismən düzgün cavab oyunçunun bu oyundakı xalını sıfırlayır. Cavabsız qalmaq partlatmır. Oyun gedərkən də dəyişir — cari suala hələ cavab yoxdursa dərhal, əks halda növbəti sualdan."
+msgstr "Когда включено, каждый опубликованный вопрос — вопрос-бомба: неверный или частично верный ответ обнуляет очки игрока в этой игре. Отсутствие ответа не взрывает бомбу. Можно менять во время игры — к текущему вопросу применяется сразу, если ещё никто не ответил, иначе со следующего вопроса."
+
+msgctxt "live_exam.power_modes"
+msgid "Açıq olanda düzgün cavab ikiqat xal gətirir (sürət əmsalı saxlanılır). Bomba ilə birlikdə işləyir: düzgün → ×2, səhv → sıfırlanma. Oyun gedərkən də dəyişir."
+msgstr "Когда включено, правильный ответ даёт двойные очки (коэффициент скорости сохраняется). Работает вместе с бомбой: верно → ×2, неверно → обнуление. Можно менять во время игры."
+
+msgctxt "live_exam.power_modes"
+msgid "Final səhnəsində podium və tamaşaçı avatarları viral rəqslər və hər personajın özünəməxsus hərəkətini edir (telefonlarda da). Söndürüləndə avatarlar sakit dayanır."
+msgstr "В финальной сцене аватары на подиуме и в зале исполняют вирусные танцы и фирменное движение каждого персонажа (и на телефонах). Когда выключено, аватары стоят спокойно."
+
+msgctxt "live_exam.power_modes"
+msgid "Bomba sualı"
+msgstr "Вопрос-бомба"
+
+msgctxt "live_exam.power_modes"
+msgid "×2 xal"
+msgstr "×2 очков"
+
+msgctxt "live_exam.power_modes"
+msgid "×2 xal!"
+msgstr "×2 очков!"
+
+msgctxt "live_exam.power_modes"
+msgid "Səhv cavab bu oyundakı xalı sıfırlayır"
+msgstr "Неверный ответ обнуляет очки в этой игре"
+
+msgctxt "live_exam.power_modes"
+msgid "Düzgün cavab ikiqat xal gətirir"
+msgstr "Правильный ответ даёт двойные очки"
+
+msgctxt "live_exam.power_modes"
+msgid "Bomba partladı!"
+msgstr "Бомба взорвалась!"
+
+msgctxt "live_exam.power_modes"
+msgid "{count} bomba partladı!"
+msgstr "Взорвалось бомб: {count}!"
+
+msgctxt "live_exam.power_modes"
+msgid "cari suala tətbiq olundu"
+msgstr "применено к текущему вопросу"
+
+msgctxt "live_exam.power_modes"
+msgid "cari sualdan götürüldü"
+msgstr "снято с текущего вопроса"
+
+msgctxt "live_exam.power_modes"
+msgid "Bu suala artıq cavab var — dəyişiklik növbəti sualdan keçərlidir"
+msgstr "На этот вопрос уже есть ответы — изменение действует со следующего вопроса"
+
+msgctxt "live_exam.power_modes"
+msgid "Növbəti sualdan keçərlidir"
+msgstr "Действует со следующего вопроса"
+
+msgctxt "live_exam.power_modes"
+msgid "Rejimlər söndürülüb"
+msgstr "Режимы выключены"
+
+msgctxt "live_exam.power_modes"
+msgid "Növbəti sualdan: {modes}"
+msgstr "Со следующего вопроса: {modes}"
+
+msgctxt "live_exam.power_modes"
+msgid "Cari sual: {modes}"
+msgstr "Текущий вопрос: {modes}"
+
+msgctxt "live_exam.power_modes"
+msgid "Cari sual: rejim yoxdur"
+msgstr "Текущий вопрос: без режима"
+
+msgctxt "live_exam.power_modes"
+msgid "açıq"
+msgstr "вкл"
+
+msgctxt "live_exam.power_modes"
+msgid "bağlı"
+msgstr "выкл"
+
+msgctxt "live_exam.power_modes"
+msgid "Növbəti sual bomba olur: səhv cavab bu oyundakı xalı sıfırlayır. Hər sual üçün yenidən basılır."
+msgstr "Следующий вопрос станет бомбой: неверный ответ обнуляет очки в этой игре. Нажимайте заново для каждого вопроса."
+
+msgctxt "live_exam.power_modes"
+msgid "Növbəti sualda düzgün cavab ikiqat xal gətirir. Hər sual üçün yenidən basılır."
+msgstr "В следующем вопросе правильный ответ даёт двойные очки. Нажимайте заново для каждого вопроса."
+
+msgctxt "live_exam.power_modes"
+msgid "Bir sual üçün aktivləşir: növbəti sual bomba sualı olur — səhv və ya qismən düzgün cavab oyunçunun bu oyundakı xalını sıfırlayır, cavabsız qalmaq partlatmır. Sual nəşr olunanda özü sönür — hər sual üçün səhnədəki ikona (və ya bu keçidə) yenidən basılır. Sual gedərkən basılsa və hələ cavab yoxdursa, elə həmin suala tətbiq olunur."
+msgstr "Включается на один вопрос: следующий вопрос становится вопросом-бомбой — неверный или частично верный ответ обнуляет очки игрока в этой игре, отсутствие ответа не взрывает. При публикации вопроса выключается само — нажимайте значок на сцене (или этот переключатель) заново для каждого вопроса. Если нажать во время вопроса, на который ещё никто не ответил, применится к этому же вопросу."
+
+msgctxt "live_exam.power_modes"
+msgid "Bir sual üçün aktivləşir: növbəti sualda düzgün cavab ikiqat xal gətirir (sürət əmsalı saxlanılır), sonra özü sönür — hər sual üçün yenidən basılır. Bomba ilə birlikdə işləyir: düzgün → ×2, səhv → sıfırlanma."
+msgstr "Включается на один вопрос: в следующем вопросе правильный ответ даёт двойные очки (коэффициент скорости сохраняется), затем выключается само — нажимайте заново для каждого вопроса. Работает вместе с бомбой: верно → ×2, неверно → обнуление."
+
+msgctxt "live_exam.power_modes"
+msgid "Bu suala artıq cavab var — növbəti sual üçün aktivləşdi"
+msgstr "На этот вопрос уже есть ответы — включено для следующего вопроса"
+
+msgctxt "live_exam.power_modes"
+msgid "növbəti sual üçün aktivləşdi"
+msgstr "включено для следующего вопроса"
+
+msgctxt "live_exam.power_modes"
+msgid "növbəti sual üçün söndürüldü"
+msgstr "выключено для следующего вопроса"
+
+msgctxt "live_exam.power_modes"
+msgid "bu sualda"
+msgstr "в этом вопросе"
+
+msgctxt "live_exam.power_modes"
+msgid "növbəti sual"
+msgstr "следующий вопрос"
+
+msgctxt "live_exam.power_modes"
+msgid "Rejim seçilməyib — hər sual üçün ikona bas"
+msgstr "Режим не выбран — нажимайте значок для каждого вопроса"
+
+msgctxt "live_exam.power_modes"
+msgid "Növbəti sual: {modes}"
+msgstr "Следующий вопрос: {modes}"

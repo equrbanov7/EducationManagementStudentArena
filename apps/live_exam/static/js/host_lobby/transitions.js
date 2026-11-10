@@ -1,5 +1,5 @@
-import { reducedMotion } from './utils.js?v=lx20261019s';
-import { isFormal } from './style_mode.js?v=lx20261019s';
+import { reducedMotion } from './utils.js?v=lx20261110p';
+import { isFormal } from './style_mode.js?v=lx20261110p';
 
 /* Suallar arası «pərdə» keçidi — TƏK süpürmə (sahib 2026-09-30, «animasiya iki dəfə oynayır»).
  *

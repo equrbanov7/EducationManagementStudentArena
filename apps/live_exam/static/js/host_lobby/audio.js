@@ -1,5 +1,5 @@
-import { state } from './state.js?v=lx20261019s';
-import { isFormal } from './style_mode.js?v=lx20261019s';
+import { state } from './state.js?v=lx20261110p';
+import { isFormal } from './style_mode.js?v=lx20261110p';
 
 /* ═══════════════════════════════════════════════════════════════════
  *  SƏS MÜHƏRRİKİ (2026-09-29 LX-FE-STAGE) — yalnız WebAudio sintezi, fayl yoxdur.
@@ -454,3 +454,69 @@ export function startDanceBeat(maxBars = 32, onEnd) {
 }
 
 export function stopDanceBeat() { stopLoop("dance", 1); }
+
+/* ── Güc rejimləri (2026-11-10): 💣 bomba və ×2 cue-ları ───────────────── */
+
+/** Ürək döyüntüsü dövrəsi — bomba sualının cavab pəncərəsində; `bpm` artdıqca sürətlənir. */
+export function startHeartbeat(bpm = 64, gain = 1) {
+    const rate = Math.max(40, Math.min(160, Math.round(Number(bpm) || 64)));
+    startLoop("heart", {
+        id: `heart:${rate}:${Math.round(gain * 10)}`, bpm: rate, music: false, gain,
+        onStep(step, t, bus) {
+            const s = step % 4; // bir vuruş = 4 addım
+            if (s === 0) {
+                tone({ f: 72, f2: 38, glide: 0.16, t, type: "sine", g: 0.34, a: 0.004, r: 0.26, bus });
+                noise({ ft: "lowpass", f: 180, t, g: 0.08, a: 0.004, r: 0.12, bus });
+            } else if (s === 1) {
+                tone({ f: 60, f2: 34, glide: 0.14, t: t + 0.02, type: "sine", g: 0.22, a: 0.004, r: 0.22, bus });
+            }
+        },
+    });
+}
+
+export function stopHeartbeat() { stopLoop("heart", 0.4); }
+
+/** Fitil cızıltısı — bomba sualı açılanda (qısa, yüksək tezlikli xışıltı + kiçik qığılcımlar). */
+export function playFuseHiss(key) {
+    const c = live();
+    if (!c || !once(key)) return;
+    const t = c.currentTime + 0.01;
+    noise({ ft: "highpass", f: 3800, t, g: 0.07, a: 0.05, hold: 0.55, r: 0.3 });
+    for (let i = 0; i < 7; i += 1) {
+        noise({ ft: "bandpass", f: 5200 + Math.random() * 2500, q: 6, t: t + 0.08 + Math.random() * 0.6, g: 0.05, a: 0.001, r: 0.03 });
+    }
+}
+
+/** Partlayış — bomba sıfırlanması açılanda: sub zərbə, geniş küy, qırıntılar, uğultu. */
+export function playExplosion(key) {
+    const c = live();
+    if (!c || !once(key)) return;
+    const t = c.currentTime + 0.01;
+    tone({ f: 140, f2: 24, glide: 0.5, t, type: "sine", g: 0.6, a: 0.002, r: 0.7 });
+    tone({ f: 90, f2: 30, glide: 0.35, t: t + 0.03, type: "triangle", g: 0.2, a: 0.002, r: 0.5, lp: 400 });
+    noise({ ft: "lowpass", f: 900, f2: 120, glide: 0.9, t, g: 0.42, a: 0.003, hold: 0.08, r: 0.9 });
+    noise({ ft: "highpass", f: 2500, t: t + 0.02, g: 0.14, a: 0.002, r: 0.35 });
+    for (let i = 0; i < 9; i += 1) {
+        noise({ ft: "bandpass", f: 900 + Math.random() * 2600, q: 3, t: t + 0.25 + Math.random() * 0.9, g: 0.05, a: 0.002, r: 0.08 });
+    }
+    noise({ ft: "lowpass", f: 220, t: t + 0.4, g: 0.1, a: 0.3, hold: 0.6, r: 1.2 });
+}
+
+/** ×2 — parıltılı yüksələn arpecio (qazanılan xal ikiqat olanda). */
+export function playDoubleUp(key) {
+    const c = live();
+    if (!c || !once(key)) return;
+    const t = c.currentTime + 0.01;
+    [76, 83, 88, 95].forEach((m, i) => pluck(m, t + i * 0.07, 0.06, 0.4, undefined, "sine"));
+    chord([64, 71, 76], t + 0.28, 0.035, 0.9, undefined, "triangle");
+    noise({ ft: "highpass", f: 6500, t: t + 0.26, g: 0.03, a: 0.01, r: 0.6 });
+}
+
+/** Rejim keçidi — açılanda yuxarı, bağlananda aşağı qısa «whoosh + klik». */
+export function playPowerArm(key, on) {
+    const c = live();
+    if (!c || !once(key)) return;
+    const t = c.currentTime + 0.01;
+    tone({ f: on ? 220 : 520, f2: on ? 620 : 180, glide: 0.18, t, type: "triangle", g: 0.07, a: 0.01, r: 0.22, lp: 2400 });
+    noise({ ft: "bandpass", f: on ? 1800 : 900, q: 4, t: t + 0.12, g: 0.09, a: 0.001, r: 0.05 });
+}

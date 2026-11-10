@@ -4,13 +4,13 @@
 //  * köhnə mesaj yenisini geri qaytarmır (zaman xətti müqayisəsi, utils.js);
 //  * hər faza açarla render olunur → təkrar mesaj ikiqat animasiya/səs vermir;
 //  * faza dəyişəndə bütün taymerlər təmizlənir.
-import { BOOTSTRAP, PHASES } from './config.js?v=lx20261019s';
-import { handleAnswerError, handleAnswerSaved, setAnswerHooks } from './answer.js?v=lx20261019s';
-import { fetchState } from './api.js?v=lx20261019s';
-import { renderFinal } from './finale.js?v=lx20261019s';
-import { isFinalReveal, renderFinalSuspense, stageRevealOffsetMs } from './final_gate.js?v=lx20261019s';
-import { stopStatePolling } from './polling.js?v=lx20261019s';
-import { renderPlayerIdentity, setRank } from './ui.js?v=lx20261019s';
+import { BOOTSTRAP, PHASES } from './config.js?v=lx20261110p';
+import { handleAnswerError, handleAnswerSaved, setAnswerHooks } from './answer.js?v=lx20261110p';
+import { fetchState } from './api.js?v=lx20261110p';
+import { renderFinal } from './finale.js?v=lx20261110p';
+import { isFinalReveal, renderFinalSuspense, stageRevealOffsetMs } from './final_gate.js?v=lx20261110p';
+import { stopStatePolling } from './polling.js?v=lx20261110p';
+import { renderPlayerIdentity, setRank } from './ui.js?v=lx20261110p';
 import {
     questionKeyOf,
     renderGetReady,
@@ -19,12 +19,13 @@ import {
     renderQuestion,
     renderTimeUp,
     updateSelectionUI,
-} from './render_round.js?v=lx20261019s';
-import { answeredButUnknown, renderLeaderboard, renderResult } from './render_reveal.js?v=lx20261019s';
-import { renderIdle, renderLateJoin, renderRemoved } from './render_status.js?v=lx20261019s';
-import { applySessionSettings } from './settings.js?v=lx20261019s';
-import { closePlayerSocket, sendJson } from './sockets.js?v=lx20261019s';
-import { state } from './state.js?v=lx20261019s';
+} from './render_round.js?v=lx20261110p';
+import { answeredButUnknown, renderLeaderboard, renderResult } from './render_reveal.js?v=lx20261110p';
+import { renderIdle, renderLateJoin, renderRemoved } from './render_status.js?v=lx20261110p';
+import { applySessionSettings } from './settings.js?v=lx20261110p';
+import { applyQuestionModifiers, syncBombAmbience } from './powerups.js?v=lx20261110p';
+import { closePlayerSocket, sendJson } from './sockets.js?v=lx20261110p';
+import { state } from './state.js?v=lx20261110p';
 import {
     clearAckTimer,
     clearAllTimers,
@@ -33,7 +34,7 @@ import {
     queuePhaseTransition,
     scheduleBoundary,
     startTicker,
-} from './timers.js?v=lx20261019s';
+} from './timers.js?v=lx20261110p';
 import {
     getRevealKey,
     getRevealTimings,
@@ -42,8 +43,8 @@ import {
     shouldApplyTimelinePayload,
     ts,
     updateServerTimeOffset,
-} from './utils.js?v=lx20261019s';
-import { currentViewEl } from './views.js?v=lx20261019s';
+} from './utils.js?v=lx20261110p';
+import { currentViewEl } from './views.js?v=lx20261110p';
 
 let revealRefetchKey = "";
 let finalRefetchDone = false;
@@ -95,6 +96,12 @@ function hasRecordedAnswer(answer) {
 }
 
 export function syncQuestionPhase() {
+    syncQuestionPhaseView();
+    // 2026-11-10: bomba ambiyansı (vinyet + ürək döyüntüsü) faza/vaxta görə; başqa fazada dayanır.
+    syncBombAmbience();
+}
+
+function syncQuestionPhaseView() {
     const question = state.currentQuestion;
     if (!question || state.revealPayload || finalGate || state.phase === PHASES.FINAL || state.phase === PHASES.REMOVED) {
         return;
@@ -166,6 +173,7 @@ export function applyReveal(payload) {
     const key = getRevealKey(payload);
     state.revealKey = key;
     state.revealPayload = payload;
+    syncBombAmbience();
     if (answeredButUnknown(payload) && revealRefetchKey !== key) {
         // Cavab verilib, amma şəxsi nəticə gəlməyib — snapshot tam nəticəni gətirir (bir dəfə).
         revealRefetchKey = key;
@@ -197,6 +205,7 @@ function revealFinal() {
 
 export function applyFinished(payload) {
     const data = payload || {};
+    syncBombAmbience();
     if (finalGate) {
         // Təkrar `finished` (WS + snapshot): məlumat tamamlanır, açılma VAXTI dəyişmir.
         finalGate.payload = Object.assign({}, finalGate.payload, data, {
@@ -307,9 +316,14 @@ export function handleSocketMessage(message) {
             if (applySessionSettings(data.settings)) renderPlayerIdentity(); // üslub: avatar ↔ baş hərflər
             if (state.currentQuestion && !state.revealPayload) syncQuestionPhase();
             break;
+        case "question_modifiers":
+            // 2026-11-10: aparıcı bomba / ×2 rejimini cavabsız cari suala tətbiq etdi → görünüş yenilənir.
+            if (applyQuestionModifiers(data)) syncQuestionPhase();
+            break;
         case "question_published":
             if (!shouldApplyTimelinePayload(data)) break;
             rememberTimelinePayload(data);
+            if (data.settings && applySessionSettings(data.settings)) renderPlayerIdentity();
             if (isPendingQuestion(data.question)) {
                 enterLateJoinWait(null);
                 break;

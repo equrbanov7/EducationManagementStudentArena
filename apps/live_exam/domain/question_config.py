@@ -37,6 +37,8 @@ class QuestionConfig:
     typo_tolerance: bool
     multi_scoring: str
     is_bomb: bool = False
+    # 2026-11-10: «×2 Xal» rejimi nəşrdə dondurulur (power_modes.py).
+    is_double: bool = False
 
     @property
     def is_text(self) -> bool:
@@ -48,7 +50,11 @@ class QuestionConfig:
         return not self.is_text and not self.correct_ids
 
     def to_payload_fields(self) -> dict[str, Any]:
-        fields: dict[str, Any] = {"answer_input": self.answer_input, "is_bomb": self.is_bomb}
+        fields: dict[str, Any] = {
+            "answer_input": self.answer_input,
+            "is_bomb": self.is_bomb,
+            "is_double": self.is_double,
+        }
         if self.is_text:
             fields["text_max_length"] = TEXT_MAX_LENGTH
         return fields
@@ -72,7 +78,8 @@ def _live_rules(session, exam_question) -> dict[str, Any]:
         if eligible:
             answer_input = ANSWER_INPUT_TEXT
             accepted = dedupe_accepted(typed_entry.get("accepted") or []) or defaults
-    is_bomb = int(exam_question.id) in settings.get("bomb_questions", [])
+    # 2026-11-10: per-sual siyahı VƏ YA «Bomba rejimi» açarı (hər nəşr olunan sual bomba).
+    is_bomb = int(exam_question.id) in settings.get("bomb_questions", []) or bool(settings.get("bomb_mode"))
     # Bomb penalties must retain the published answer key/selection limits.
     bomb_key = None
     if is_bomb:
@@ -86,6 +93,7 @@ def _live_rules(session, exam_question) -> dict[str, Any]:
         "typo_tolerance": bool(settings.get("typed_typo_tolerance", True)),
         "multi_scoring": settings.get("multi_scoring") or MULTI_SCORING_PARTIAL,
         "is_bomb": is_bomb,
+        "is_double": bool(settings.get("double_mode")),
     }
 
 
@@ -118,6 +126,7 @@ def resolve_question_config(session, exam_question) -> QuestionConfig:
         typo_tolerance=bool(rules.get("typo_tolerance", True)),
         multi_scoring=multi_scoring,
         is_bomb=rules.get("is_bomb") is True,
+        is_double=rules.get("is_double") is True,
     )
 
 
@@ -127,6 +136,27 @@ def freeze_question_config(session, exam_question) -> None:
     # 2026-10-08 (L2): sualın vaxtı da dondurulur — aparıcı vaxtı sual gedərkən dəyişsə
     # cari raundun pəncərəsi/«time_limit»-i dəyişmir, yeni dəyər növbəti sualdan keçərlidir.
     rules["time_limit"] = configured_time_limit(session, exam_question)
+    raw = dict(getattr(session, "host_settings", None) or {})
+    raw[QUESTION_CONFIG_KEY] = {"question_id": int(exam_question.id), **rules}
+    session.host_settings = raw
+
+
+def live_modifier_flags(session, exam_question) -> tuple[bool, bool]:
+    """CANLI ayarlardan ``(is_bomb, is_double)`` — dondurulmuş snapshot nəzərə alınmır (2026-11-10)."""
+    rules = _live_rules(session, exam_question)
+    return bool(rules.get("is_bomb")), bool(rules.get("is_double"))
+
+
+def refreeze_question_modifiers(session, exam_question) -> None:
+    """Cari sualın dondurulmuş qaydasını CANLI ayarlarla yenidən qurur, VAXTI isə saxlayır.
+
+    2026-11-10 (güc rejimləri): aparıcı bomba / ×2 rejimini sual gedərkən dəyişəndə — hələ cavab
+    yoxdursa — qayda yenilənir. Sualın dondurulmuş ``time_limit``-i dəyişmir (vaxt ayarı həmişə
+    növbəti sualdan keçərlidir). Çağıran kilid altındadır və ``save`` edir.
+    """
+    previous = _frozen_snapshot(session, exam_question.id) or {}
+    rules = _live_rules(session, exam_question)
+    rules["time_limit"] = previous.get("time_limit") or configured_time_limit(session, exam_question)
     raw = dict(getattr(session, "host_settings", None) or {})
     raw[QUESTION_CONFIG_KEY] = {"question_id": int(exam_question.id), **rules}
     session.host_settings = raw

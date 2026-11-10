@@ -6,7 +6,8 @@ const { JSDOM } = require('jsdom');
 const source = fs.readFileSync(path.resolve(__dirname, '../../apps/live_exam/static/js/player/bombs.js'), 'utf8');
 const load = () => import('data:text/javascript;base64,' + Buffer.from(source).toString('base64'));
 function fixture({ reduced = false, storage } = {}) {
-    const dom = new JSDOM('<div id="lxpViews"><div><p class="lxp-kicker">Sual1</p><div class="lxp-result"></div></div></div>');
+    // 2026-11-10: qayda mətni yalnız raund görünüşündəki kicker-ə yazılır (.lxp-intro / .lxp-ready / .lxp-round).
+    const dom = new JSDOM('<div id="lxpViews"><div><div class="lxp-intro"><p class="lxp-kicker">Sual1</p></div><div class="lxp-result"></div></div></div>');
     const state = { player: { id: 42 }, currentQuestion: { id: 9, is_bomb: true }, currentAnswer: { bomb_triggered: true, score_reset_amount: 2000, total_score: 0 } };
     return { document: dom.window.document, state, pin: 'SESSION1', storage: storage || dom.window.sessionStorage, reducedMotion: () => reduced };
 }

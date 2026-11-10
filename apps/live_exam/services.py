@@ -27,6 +27,7 @@ skip_question_intro       – intro-nu keçib cavab pəncərəsini dərhal açı
 toggle_session_lock       – toggle (or explicitly set) the session lock flag
 remove_player             – oyunçunu çıxarır: lobbidə silir, oyun gedərkən «çıxarıldı» (L6, 2026-10-08)
 update_host_settings      – ayarları yazır (typed/multi yoxlaması ilə) və yayımlayır
+update_host_settings_with_modifiers – eyni + bomba/×2 rejimini cavabsız cari suala tətbiq edir (2026-11-10)
 """
 
 from __future__ import annotations
@@ -40,7 +41,12 @@ from django.utils import timezone
 
 from apps.live_exam.auth import remember_kicked_client
 from apps.live_exam.constants import SERVER_AUTO_REVEAL_GRACE_SECONDS
-from apps.live_exam.domain.question_config import freeze_question_config, resolve_question_config
+from apps.live_exam.domain.question_config import (
+    freeze_question_config,
+    live_modifier_flags,
+    refreeze_question_modifiers,
+    resolve_question_config,
+)
 from apps.live_exam.domain.session import (
     build_question_phase_times,
     clear_question_phase_override,
@@ -52,10 +58,16 @@ from apps.live_exam.domain.session import (
     set_question_phase_override,
 )
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
+from apps.live_exam.power_modes import (
+    POWER_MODE_SETTING_KEYS,
+    build_question_modifiers_payload,
+    consume_power_modes,
+)
 from apps.live_exam.reveal import build_final_bundle, build_reveal_bundle
 from apps.live_exam.roster import eligible_players
 from apps.live_exam.session_settings import (
     get_host_session_settings,
+    get_session_settings,
     public_session_settings,
     update_session_settings,
 )
@@ -132,10 +144,14 @@ def publish_question(locked: LiveSession, exam_question, *, idx: int, total: int
     """(Kilid altında) sualı nəşr edir: qaydanı dondurur, vaxtları yazır, paketi qaytarır."""
     clear_question_phase_override(locked)
     freeze_question_config(locked, exam_question)
+    # 2026-11-10: bomba / ×2 bir sual üçündür — qayda donduruldu, bayraq söndürülür (hər sual yenidən basılır).
+    consume_power_modes(locked)
     locked.state = LiveSession.STATE_QUESTION
     locked.current_index = idx
     locked.current_question_id = exam_question.id
     payload, started_at, ends_at = build_question_payload(locked, exam_question, idx=idx, total=total)
+    # Klientlər istehlak olunmuş bayraqları ayrıca sorğusuz görsün (ictimai görünüş).
+    payload["settings"] = get_session_settings(locked)
     locked.question_started_at = started_at
     locked.question_ends_at = ends_at
     locked.save(
@@ -462,11 +478,49 @@ def _progress_payload(locked: LiveSession) -> dict[str, Any] | None:
     )
 
 
-def update_host_settings(session: LiveSession, raw_updates: dict | None, *, max_participants_cap: int) -> dict:
-    """Ayarları kilid altında yazır; TAM ayarları qaytarır. ``SessionSettingsError`` → 400."""
+def _sync_question_modifiers(locked: LiveSession) -> dict[str, Any] | None:
+    """(Kilid altında) bomba / ×2 rejimi dəyişəndə cari sualın dondurulmuş qaydası (2026-11-10).
+
+    * Sual yoxdur / qayda onsuz da eynidir → ``None`` (heç nə yayımlanmır).
+    * Cari suala cavab YOXDUR → qayda yenidən dondurulur (vaxt saxlanır), ``applied=True``.
+    * Cavab VAR → qayda dəyişmir (ədalət), ``applied=False`` — növbəti sualdan keçərlidir.
+    """
+    if locked.state != LiveSession.STATE_QUESTION:
+        return None
+    exam_question = get_active_question(locked)
+    if exam_question is None:
+        return None
+    frozen = resolve_question_config(locked, exam_question)
+    if (frozen.is_bomb, frozen.is_double) == live_modifier_flags(locked, exam_question):
+        return None
+    answered = LiveAnswer.objects.filter(session_id=locked.id, question_id=exam_question.id).in_game().exists()
+    if answered:
+        return build_question_modifiers_payload(exam_question.id, frozen, applied=False)
+    refreeze_question_modifiers(locked, exam_question)
+    consume_power_modes(locked)  # bir-sual bayrağı cari suala «xərcləndi»
+    locked.save(update_fields=["host_settings"])
+    return build_question_modifiers_payload(
+        exam_question.id, resolve_question_config(locked, exam_question), applied=True
+    )
+
+
+def update_host_settings_with_modifiers(
+    session: LiveSession, raw_updates: dict | None, *, max_participants_cap: int
+) -> tuple[dict, dict[str, Any] | None]:
+    """Ayarları kilid altında yazır; ``(TAM ayarlar, question_modifiers | None)``. ``SessionSettingsError`` → 400.
+
+    Bomba / ×2 rejimi dəyişibsə cari sualın qaydası ``_sync_question_modifiers`` ilə yoxlanır; tətbiq
+    olunubsa ``question_modifiers`` hadisəsi host + oyunçu play qruplarına gedir.
+    """
+    touches_modes = isinstance(raw_updates, dict) and any(key in raw_updates for key in POWER_MODE_SETTING_KEYS)
+    modifiers = None
     with transaction.atomic():
         locked = lock_session(session)
         settings = update_session_settings(locked, raw_updates, max_participants_cap=max_participants_cap)
+        if touches_modes:
+            modifiers = _sync_question_modifiers(locked)
+            if modifiers is not None and modifiers.get("applied"):
+                settings = get_host_session_settings(locked)
     _sync_instance(session, locked, ("host_settings", "presentation_style"))
 
     public = public_session_settings(settings)
@@ -475,4 +529,14 @@ def update_host_settings(session: LiveSession, raw_updates: dict | None, *, max_
     _after_commit(lambda: broadcast(locked.pin, lobby_state, "lobby"))
     _after_commit(lambda: broadcast_host(locked.pin, {**event, "settings": settings}))
     _after_commit(lambda: broadcast_players(locked.pin, {**event, "settings": public}))
+    if modifiers is not None and modifiers.get("applied"):
+        _after_commit(lambda: broadcast_play(locked.pin, modifiers))
+    return settings, modifiers
+
+
+def update_host_settings(session: LiveSession, raw_updates: dict | None, *, max_participants_cap: int) -> dict:
+    """Ayarları kilid altında yazır; TAM ayarları qaytarır. ``SessionSettingsError`` → 400."""
+    settings, _modifiers = update_host_settings_with_modifiers(
+        session, raw_updates, max_participants_cap=max_participants_cap
+    )
     return settings

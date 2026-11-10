@@ -1,6 +1,6 @@
-import { icon } from './icons.js?v=lx20261019s';
-import { tr } from './utils.js?v=lx20261019s';
-import { audioEnabled, audioStatus, onAudioStatus, setMuted, setMusicEnabled, setSfxVolume, soundPrefs, unlockAudio } from './audio.js?v=lx20261019s';
+import { icon } from './icons.js?v=lx20261110p';
+import { tr } from './utils.js?v=lx20261110p';
+import { audioEnabled, audioStatus, onAudioStatus, setMuted, setMusicEnabled, setSfxVolume, soundPrefs, unlockAudio } from './audio.js?v=lx20261110p';
 
 /* Proyektor ekranında görünən səs idarəsi (sol aşağı küncdə):
  *   düymə → susdur/aç; ox → panel (səs səviyyəsi, fon musiqisi).

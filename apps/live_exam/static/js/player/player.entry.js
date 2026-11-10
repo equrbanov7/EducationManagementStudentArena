@@ -1,17 +1,19 @@
-import { bombText } from '../host_lobby/bomb_text.js?v=lx20261019s';
-import { installBombUI } from './bombs.js?v=lx20261019s';
-import { state } from './state.js?v=lx20261019s';
+import { bombText } from '../host_lobby/bomb_text.js?v=lx20261110p';
+import { installBombUI } from './bombs.js?v=lx20261110p';
+import { state } from './state.js?v=lx20261110p';
 // LX-FE-PLAYER (2026-09-29): iştirakçı ekranının giriş nöqtəsi.
-import { BOOTSTRAP, SESSION_SETTINGS, prefersReducedMotion } from './config.js?v=lx20261019s';
-import { fetchState, setSnapshotHandlers } from './api.js?v=lx20261019s';
-import { bindPlayerEvents } from './events.js?v=lx20261019s';
-import { bindCopyGuard } from './guard.js?v=lx20261019s';
-import { handleAuthLost, handleSnapshot, handleSocketMessage } from './flow.js?v=lx20261019s';
-import { resetWatchdog, startStatePolling } from './polling.js?v=lx20261019s';
-import { renderBoot } from './render_status.js?v=lx20261019s';
-import { applySessionSettings } from './settings.js?v=lx20261019s';
-import { openPlayerSocket } from './sockets.js?v=lx20261019s';
-import { renderPlayerIdentity, renderSoundToggle, setNetSignal, setNetStatus } from './ui.js?v=lx20261019s';
+import { BOOTSTRAP, SESSION_SETTINGS, prefersReducedMotion } from './config.js?v=lx20261110p';
+import { fetchState, setSnapshotHandlers } from './api.js?v=lx20261110p';
+import { bindPlayerEvents } from './events.js?v=lx20261110p';
+import { bindCopyGuard } from './guard.js?v=lx20261110p';
+import { handleAuthLost, handleSnapshot, handleSocketMessage } from './flow.js?v=lx20261110p';
+import { resetWatchdog, startStatePolling } from './polling.js?v=lx20261110p';
+import { renderBoot } from './render_status.js?v=lx20261110p';
+import { applySessionSettings } from './settings.js?v=lx20261110p';
+import { openPlayerSocket } from './sockets.js?v=lx20261110p';
+import { renderPlayerIdentity, renderSoundToggle, setNetSignal, setNetStatus } from './ui.js?v=lx20261110p';
+import { playSound } from './audio.js?v=lx20261110p';
+import { buzz, HAPTIC } from './haptics.js?v=lx20261110p';
 
 applySessionSettings(SESSION_SETTINGS);
 renderPlayerIdentity();
@@ -63,4 +65,6 @@ try {
 installBombUI({
     state, pin: BOOTSTRAP.pin, document, storage: bombStorage,
     reducedMotion: prefersReducedMotion, labels: bombText(document.documentElement.lang),
+    // 2026-11-10: partlayış səsi + ağır vibrasiya (bir dəfə, açarla).
+    onExplode: (key) => { playSound("boom", key); buzz(HAPTIC.explode); },
 });

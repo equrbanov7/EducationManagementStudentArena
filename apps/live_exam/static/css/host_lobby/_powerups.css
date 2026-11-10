@@ -1,0 +1,380 @@
+/* ═══ Aparıcı ekranı — GÜC REJİMLƏRİ (sahib 2026-11-10): 💣 Bomba, ×2 Xal, final rəqsi ═══
+ * İdarə: sürətli düymələr (üst sağ), sol paneldəki «Oyun effektləri» bloku, çekməcə qrupu.
+ * Səhnə: bomba sualında qırmızı nəbz vinyeti + üzən fitilli bomba (ürək döyüntüsü audio.js-dədir),
+ * ×2-də qızıl sikkə aurası; reveal-də partlayış (flaş, dalğa, qırıntılar, ekran titrəyişi).
+ * Yalnız transform/opacity animasiyaları; prefers-reduced-motion → statik; «Rəsmi» üslubda
+ * səhnə effektləri gizlənir (nişanlar qalır — qayda görünməlidir). */
+
+:root {
+    --hx-bomb: #ff4d6d;
+    --hx-bomb-2: #ff8f3f;
+    --hx-bomb-ink: #2b0710;
+    --hx-double: #ffd166;
+    --hx-double-2: #f59e0b;
+    --hx-double-ink: #3b2300;
+    --hx-heart: 0.94s;
+}
+
+/* ── Səhnə dok-u: 💣 və ×2 ikon-düymələri (powerups.js #presentationStage içinə qurur) ────────
+ * Səhnənin aşağı sağ küncündə, həmişə görünür (lobbi / sual / reveal; final səhnəsində gizli).
+ * Söndürülmüş: tutqun, yüngül üzmə. Açıq: bomba — fitil yanır, qığılcım, ürək döyüntüsü ilə nəbz;
+ * ×2 — fırlanan qızıl sikkə, parıltı. Klik («is-kick»): titrəyiş + halqa + qığılcım partlaması. */
+.hx-power-dock {
+    position: absolute;
+    right: clamp(14px, 1.6cqw, 32px);
+    bottom: clamp(14px, 1.6cqw, 32px);
+    z-index: 40;
+    display: flex;
+    align-items: flex-end;
+    gap: clamp(10px, 1.1cqw, 22px);
+    pointer-events: none;
+}
+
+.hx-power-dock[hidden] { display: none !important; }
+
+.hx-power {
+    --pw: clamp(78px, 7.2cqw, 128px);
+    position: relative;
+    display: grid;
+    grid-template-rows: var(--pw) auto;
+    justify-items: center;
+    gap: 6px;
+    width: calc(var(--pw) + 28px);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    pointer-events: auto;
+    isolation: isolate;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.hx-power.is-readonly { cursor: default; }
+.hx-power:disabled:not(.is-readonly) { cursor: progress; }
+.hx-power:focus-visible { outline: none; }
+.hx-power:focus-visible .hx-power__ring { opacity: 1; transform: scale(1.08); }
+
+.hx-power__halo {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: var(--pw);
+    height: var(--pw);
+    margin-left: calc(var(--pw) / -2);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.12), transparent 70%);
+    transition: background 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
+}
+
+.hx-power__ring {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: var(--pw);
+    height: var(--pw);
+    margin-left: calc(var(--pw) / -2);
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.35);
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.hx-power__art {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: var(--pw);
+    height: var(--pw);
+    border-radius: 50%;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04));
+    border: 1px solid var(--hx-line);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    filter: grayscale(0.85) brightness(0.75);
+    transition: filter 0.35s ease, transform 0.25s var(--hx-ease-out, ease), box-shadow 0.35s ease, border-color 0.35s ease;
+    animation: hxDockIdle 5.2s ease-in-out infinite;
+}
+
+.hx-power--double .hx-power__art { animation-delay: -2.4s; }
+.hx-power:not(:disabled):hover .hx-power__art { transform: translateY(-4px) scale(1.04); filter: grayscale(0.4) brightness(0.95); }
+.hx-power:not(:disabled):active .hx-power__art { transform: translateY(1px) scale(0.96); }
+
+.hx-power__art .hx-bomb__art { width: 78%; height: 78%; overflow: visible; }
+.hx-power__art .hx-bomb__spark { transform-box: fill-box; transform-origin: 50% 50%; opacity: 0; transition: opacity 0.25s ease; }
+
+.hx-power__coin {
+    display: grid;
+    place-items: center;
+    width: 72%;
+    height: 72%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff3c4, #ffd166 45%, #d97706 100%);
+    color: var(--hx-double-ink);
+    box-shadow: inset 0 -5px 0 rgba(120, 53, 15, 0.45), 0 10px 24px rgba(245, 158, 11, 0.35);
+    will-change: transform;
+}
+
+.hx-power__coin .hx-icon { width: 58%; height: 58%; }
+
+.hx-power__text {
+    display: grid;
+    justify-items: center;
+    gap: 1px;
+    max-width: 100%;
+    font: 800 clamp(11px, 0.95cqw, 15px)/1.2 var(--hx-font);
+    letter-spacing: 0.04em;
+    color: var(--hx-muted);
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+.hx-power__state {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 0.82em;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+/* yanan fitil — bombanın altındakı qığılcım izi */
+.hx-power__fuse {
+    position: absolute;
+    top: calc(var(--pw) * 0.08);
+    right: calc(var(--pw) * 0.08);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ffd166;
+    box-shadow: 0 0 14px 4px rgba(255, 183, 3, 0.8);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ── AÇIQ vəziyyət ── */
+.hx-power.is-on .hx-power__art { filter: none; }
+.hx-power.is-on .hx-power__text { color: #fff; }
+
+.hx-power--bomb.is-on .hx-power__art {
+    border-color: rgba(255, 143, 63, 0.9);
+    background: radial-gradient(circle at 50% 60%, rgba(255, 77, 109, 0.45), rgba(120, 8, 32, 0.6) 70%);
+    box-shadow: 0 0 0 2px rgba(255, 77, 109, 0.35), 0 0 48px rgba(255, 77, 109, 0.55), 0 16px 36px rgba(0, 0, 0, 0.45);
+    animation: hxArmedPulse var(--hx-heart) ease-in-out infinite;
+}
+
+.hx-power--bomb.is-on .hx-power__halo { background: radial-gradient(circle, rgba(255, 77, 109, 0.45), transparent 70%); transform: scale(1.5); animation: hxVignettePulse var(--hx-heart) ease-in-out infinite; }
+.hx-power--bomb.is-on .hx-bomb__spark { opacity: 1; animation: hxSpark 0.22s steps(2) infinite; }
+.hx-power--bomb.is-on .hx-power__fuse { opacity: 1; animation: hxTrail 0.9s ease-out infinite; }
+.hx-power--bomb.is-on .hx-power__state { background: linear-gradient(135deg, #b4173a, #ff8f3f); }
+
+.hx-power--double.is-on .hx-power__art {
+    border-color: rgba(255, 209, 102, 0.95);
+    background: radial-gradient(circle at 50% 60%, rgba(255, 209, 102, 0.35), rgba(120, 53, 15, 0.55) 70%);
+    box-shadow: 0 0 0 2px rgba(255, 209, 102, 0.4), 0 0 48px rgba(245, 158, 11, 0.55), 0 16px 36px rgba(0, 0, 0, 0.45);
+}
+
+.hx-power--double.is-on .hx-power__halo { background: radial-gradient(circle, rgba(255, 209, 102, 0.45), transparent 70%); transform: scale(1.5); }
+.hx-power--double.is-on .hx-power__coin { animation: hxCoinSpin 3.2s cubic-bezier(0.45, 0, 0.3, 1) infinite; }
+.hx-power--double.is-on .hx-power__state { background: linear-gradient(135deg, #b45309, #ffd166); color: var(--hx-double-ink); }
+
+/* cari sualda həqiqətən aktiv — «canlı» nöqtə */
+.hx-power.is-live::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    right: 18px;
+    z-index: 2;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.28);
+    animation: hxLiveDot 1.2s ease-in-out infinite;
+}
+
+.hx-power.is-busy .hx-power__art { opacity: 0.7; }
+
+/* sual gedərkən növbəti sual üçün silahlanıb (cavab var idi) — ikon tutqun, amma vəziyyət nişanı yanır */
+.hx-power.is-armed-next .hx-power__state { background: rgba(255, 255, 255, 0.22); color: #fff; }
+.hx-power.is-armed-next .hx-power__art { filter: grayscale(0.4) brightness(0.9); }
+
+/* ── KLİK hissi ── */
+.hx-power.is-kick .hx-power__ring,
+.hx-power.is-kick-off .hx-power__ring { animation: hxKickRing 0.8s ease-out forwards; }
+.hx-power--bomb.is-kick .hx-power__art { animation: hxKickBomb 0.7s cubic-bezier(0.36, 0.07, 0.19, 0.97) both, hxArmedPulse var(--hx-heart) ease-in-out 0.7s infinite; }
+.hx-power--bomb.is-kick-off .hx-power__art { animation: hxKickOff 0.5s ease-out both; }
+.hx-power--double.is-kick .hx-power__coin { animation: hxKickCoin 0.85s cubic-bezier(0.3, 0.9, 0.3, 1) both, hxCoinSpin 3.2s cubic-bezier(0.45, 0, 0.3, 1) 0.85s infinite; }
+.hx-power--double.is-kick-off .hx-power__art { animation: hxKickOff 0.5s ease-out both; }
+.hx-power--bomb.is-kick .hx-power__ring { border-color: rgba(255, 143, 63, 0.95); }
+.hx-power--double.is-kick .hx-power__ring { border-color: rgba(255, 209, 102, 0.95); }
+
+.hx-power__spark {
+    position: absolute;
+    top: calc(var(--pw) / 2 - 4px);
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    margin-left: -4px;
+    border-radius: 50%;
+    background: #ffd166;
+    box-shadow: 0 0 10px 3px rgba(255, 183, 3, 0.75);
+    transform: rotate(var(--a, 0deg)) translateY(0) scale(0.4);
+    opacity: 0;
+    animation: hxPowerSpark 0.75s cubic-bezier(0.15, 0.7, 0.3, 1) forwards;
+    pointer-events: none;
+}
+
+.hx-power--double .hx-power__spark { background: #fff3c4; box-shadow: 0 0 10px 3px rgba(255, 209, 102, 0.9); }
+
+@keyframes hxDockIdle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+@keyframes hxKickRing {
+    0% { opacity: 1; transform: scale(0.9); }
+    100% { opacity: 0; transform: scale(2.1); }
+}
+
+@keyframes hxKickBomb {
+    0% { transform: scale(1) rotate(0deg); }
+    15% { transform: scale(1.28) rotate(-10deg); }
+    30% { transform: scale(1.18) rotate(9deg); }
+    45% { transform: scale(1.22) rotate(-7deg); }
+    60% { transform: scale(1.12) rotate(5deg); }
+    80% { transform: scale(1.06) rotate(-2deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes hxKickCoin {
+    0% { transform: perspective(500px) rotateY(0deg) scale(1); }
+    50% { transform: perspective(500px) rotateY(360deg) scale(1.3); }
+    100% { transform: perspective(500px) rotateY(720deg) scale(1); }
+}
+
+@keyframes hxKickOff {
+    0% { transform: scale(1); filter: none; }
+    40% { transform: scale(0.84); }
+    100% { transform: scale(1); filter: grayscale(0.85) brightness(0.75); }
+}
+
+@keyframes hxPowerSpark {
+    0% { transform: rotate(var(--a, 0deg)) translateY(0) scale(0.4); opacity: 0; }
+    15% { opacity: 1; }
+    100% { transform: rotate(var(--a, 0deg)) translateY(calc(-1 * var(--d, 60px))) scale(1); opacity: 0; }
+}
+
+/* kiçik ekran (idarə konsolu önizləməsi) */
+@container hxstage (max-width: 700px) {
+    .hx-power { --pw: 64px; }
+    .hx-power__text { font-size: 11px; }
+}
+
+/* ── Sol panel: «Oyun effektləri» ──────────────────────────────────── */
+.control-power {
+    display: grid;
+    gap: 8px;
+    padding: 12px 12px 10px;
+    border: 1px solid var(--hx-line);
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
+}
+
+.control-power__title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font: 800 13px/1.2 var(--hx-font);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--hx-muted);
+}
+
+.control-power__title .hx-icon { width: 16px; height: 16px; color: var(--hx-gold); }
+
+.control-power__item {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border: 1px solid transparent;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.25s ease;
+}
+
+.control-power__item .host-settings-item__copy strong { color: #fff; font-size: 15px; }
+.control-power__item .host-settings-item__copy span { color: var(--hx-muted); font-size: 12.5px; line-height: 1.35; }
+
+.control-power__art {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 11px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #e2e8f0;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.25s ease;
+}
+
+.control-power__art .hx-icon { width: 20px; height: 20px; }
+
+.control-power__item--bomb.is-on { border-color: rgba(255, 77, 109, 0.55); background: rgba(255, 77, 109, 0.12); }
+.control-power__item--bomb.is-on .control-power__art { background: linear-gradient(135deg, #b4173a, #ff8f3f); color: #fff; animation: hxArmedPulse var(--hx-heart) ease-in-out infinite; }
+.control-power__item--double.is-on { border-color: rgba(255, 209, 102, 0.6); background: rgba(255, 209, 102, 0.12); }
+.control-power__item--double.is-on .control-power__art { background: linear-gradient(135deg, #b45309, #ffd166); color: var(--hx-double-ink); transform: rotate(-8deg); }
+.control-power__item--dance.is-on { border-color: rgba(167, 139, 250, 0.6); background: rgba(167, 139, 250, 0.12); }
+.control-power__item--dance.is-on .control-power__art { background: linear-gradient(135deg, #6d28d9, #c084fc); color: #fff; }
+
+.control-power__status {
+    margin: 2px 2px 0;
+    min-height: 1.2em;
+    font: 700 12.5px/1.35 var(--hx-font);
+    color: var(--hx-muted);
+}
+
+/* Çekməcə qrupu: başlıqdakı ikon */
+.host-settings-item__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+    border-radius: 8px;
+    vertical-align: -6px;
+    color: #fff;
+}
+
+.host-settings-item__icon .hx-icon { width: 15px; height: 15px; }
+.host-settings-item--bomb .host-settings-item__icon { background: linear-gradient(135deg, #b4173a, #ff8f3f); }
+.host-settings-item--double .host-settings-item__icon { background: linear-gradient(135deg, #b45309, #ffd166); color: var(--hx-double-ink); }
+.host-settings-item--dance .host-settings-item__icon { background: linear-gradient(135deg, #6d28d9, #c084fc); }
+
+/* ── Səhnə nişanları ───────────────────────────────────────────────── */
+.hx-badge--bomb {
+    background: linear-gradient(135deg, rgba(180, 23, 58, 0.55), rgba(255, 143, 63, 0.35));
+    border-color: rgba(255, 143, 63, 0.75);
+    color: #ffe4ea;
+    box-shadow: 0 0 22px rgba(255, 77, 109, 0.35);
+    animation: hxArmedPulse var(--hx-heart) ease-in-out infinite;
+}
+
+.hx-badge--double {
+    background: linear-gradient(135deg, rgba(180, 83, 9, 0.6), rgba(255, 209, 102, 0.45));
+    border-color: rgba(255, 209, 102, 0.85);
+    color: #fff4d6;
+    box-shadow: 0 0 22px rgba(245, 158, 11, 0.35);
+}
+
+.hx-badge--bomb .hx-icon,
+.hx-badge--double .hx-icon { width: 22px; height: 22px; }
+
+.hx-stat--bomb { color: #ffd0d8; }
+.hx-stat--bomb .hx-icon { color: var(--hx-bomb); }
+
+/* Səhnə effektləri (vinyet, üzən bomba, ×2 aura, partlayış), bütün @keyframes, «Rəsmi» və
+ * azaldılmış-hərəkət qaydaları: _powerups_fx.css (bu fayldan sonra yüklənir). */

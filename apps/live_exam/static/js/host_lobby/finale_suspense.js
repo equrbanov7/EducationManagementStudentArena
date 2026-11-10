@@ -1,11 +1,11 @@
-import { UI } from './dom.js?v=lx20261019s';
-import { FINAL_SUSPENSE_MS, PHASES } from './constants.js?v=lx20261019s';
-import { state } from './state.js?v=lx20261019s';
-import { playRiser } from './audio.js?v=lx20261019s';
-import { icon } from './icons.js?v=lx20261019s';
-import { setPresentationMarkup } from './presentation.js?v=lx20261019s';
-import { isFormal } from './style_mode.js?v=lx20261019s';
-import { controlsEnabled, esc, tr } from './utils.js?v=lx20261019s';
+import { UI } from './dom.js?v=lx20261110p';
+import { FINAL_SUSPENSE_MS, PHASES } from './constants.js?v=lx20261110p';
+import { state } from './state.js?v=lx20261110p';
+import { playRiser } from './audio.js?v=lx20261110p';
+import { icon } from './icons.js?v=lx20261110p';
+import { setPresentationMarkup } from './presentation.js?v=lx20261110p';
+import { isFormal } from './style_mode.js?v=lx20261110p';
+import { controlsEnabled, esc, tr } from './utils.js?v=lx20261110p';
 
 /* Sahib 2026-09-30: SON sualdan sonra liderlər lövhəsi göstərilmir — yerlər final səhnəsində
  * sürpriz kimi açılır. Son sualın nəticə fazasından sonra bu qısa «Nəticələr…» səhnəsi gəlir

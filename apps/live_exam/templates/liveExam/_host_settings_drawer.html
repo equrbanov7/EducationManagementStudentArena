@@ -181,6 +181,36 @@
             </label>
         </section>
 
+        {% comment %}2026-11-10 (sahib): güc rejimləri — bomba / ×2 oyun gedərkən də dəyişir; final rəqsi yalnız
+        «Qeyri-rəsmi» üslubda mənalıdır (data-playful-only).{% endcomment %}
+        <section class="host-settings-group host-settings-group--power">
+            <div class="host-settings-group__title">{% trans "Oyun effektləri" context "live_exam.power_modes" %}</div>
+            <label class="host-settings-item host-settings-item--power host-settings-item--bomb">
+                <div class="host-settings-item__copy">
+                    <strong><span class="hx-i host-settings-item__icon" data-icon="bomb"></span>{% trans "Bomba rejimi" context "live_exam.power_modes" %}</strong>
+                    <span>{% trans "Bir sual üçün aktivləşir: növbəti sual bomba sualı olur — səhv və ya qismən düzgün cavab oyunçunun bu oyundakı xalını sıfırlayır, cavabsız qalmaq partlatmır. Sual nəşr olunanda özü sönür — hər sual üçün səhnədəki ikona (və ya bu keçidə) yenidən basılır. Sual gedərkən basılsa və hələ cavab yoxdursa, elə həmin suala tətbiq olunur." context "live_exam.power_modes" %}</span>
+                </div>
+                <input id="settingBombMode" class="host-switch__input" type="checkbox">
+                <span class="host-switch" aria-hidden="true"><span></span></span>
+            </label>
+            <label class="host-settings-item host-settings-item--power host-settings-item--double">
+                <div class="host-settings-item__copy">
+                    <strong><span class="hx-i host-settings-item__icon" data-icon="double"></span>{% trans "×2 Xal rejimi" context "live_exam.power_modes" %}</strong>
+                    <span>{% trans "Bir sual üçün aktivləşir: növbəti sualda düzgün cavab ikiqat xal gətirir (sürət əmsalı saxlanılır), sonra özü sönür — hər sual üçün yenidən basılır. Bomba ilə birlikdə işləyir: düzgün → ×2, səhv → sıfırlanma." context "live_exam.power_modes" %}</span>
+                </div>
+                <input id="settingDoubleMode" class="host-switch__input" type="checkbox">
+                <span class="host-switch" aria-hidden="true"><span></span></span>
+            </label>
+            <label class="host-settings-item host-settings-item--power host-settings-item--dance" data-playful-only>
+                <div class="host-settings-item__copy">
+                    <strong><span class="hx-i host-settings-item__icon" data-icon="trophy"></span>{% trans "Final rəqs şousu" context "live_exam.power_modes" %}</strong>
+                    <span>{% trans "Final səhnəsində podium və tamaşaçı avatarları viral rəqslər və hər personajın özünəməxsus hərəkətini edir (telefonlarda da). Söndürüləndə avatarlar sakit dayanır." context "live_exam.power_modes" %}</span>
+                </div>
+                <input id="settingFinaleDance" class="host-switch__input" type="checkbox">
+                <span class="host-switch" aria-hidden="true"><span></span></span>
+            </label>
+        </section>
+
         <section class="host-settings-group">
             <div class="host-settings-group__title">{% trans "group_security" context "live_exam.host_settings" %}</div>
             <label class="host-settings-item">

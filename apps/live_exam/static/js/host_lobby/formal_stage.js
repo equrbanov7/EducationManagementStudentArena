@@ -5,8 +5,8 @@
  * kanvası YOXDUR. Sıra — serverin `top` sırası (stage_logic.buildStageModel), müştəridə sıralanmır.
  * Proyektorda oxunaqlı: 10 sətir, iri rəqəmlər; telefonda (idarə paneli) cədvəl üfüqi sürüşmür.
  */
-import { icon } from './icons.js?v=lx20261019s';
-import { avatarImageMarkup, esc, fmt, formatNumber, formatSeconds, tr } from './utils.js?v=lx20261019s';
+import { icon } from './icons.js?v=lx20261110p';
+import { avatarImageMarkup, esc, fmt, formatNumber, formatSeconds, tr } from './utils.js?v=lx20261110p';
 
 function correctCell(player) {
     if (player?.answered_count == null || player?.correct_count == null) return "—";

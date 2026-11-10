@@ -12,7 +12,10 @@
  *
  * opts: size (px, 72), className, interactive (false → .is-static), label,
  *       crop ("auto" | "full" | "portrait"; auto: size < 96 → portrait),
- *       backdrop (true), dance ("bounce|sway|spin|jump|wave|cheer|idle").
+ *       backdrop (true), dance ("bounce|sway|spin|jump|wave|cheer|idle"
+ *         + viral: floss|griddy|dab|moonwalk|robot|shuffle|woah|hype|macarena|gangnam|orange|worm
+ *         + imza: tailspin|roll|roar|pounce|snooze|wiggle|leap|tentacle|swing|prance|hophop|wheel|howl|slide|handstand
+ *         — hamısının CSS qaydası live_avatar.css-dədir; seçim stage_logic.js-də).
  *
  * CSS QARMAQLARI (sabit): .lva-rig .lva-shadow .lva-tail .lva-body .lva-feet
  *   .lva-arm(--l/--r) .lva-paw .lva-head .lva-ear(--l/--r) .lva-eyes .lva-eye
@@ -22,7 +25,14 @@
  */
 (function () {
     const catalog = window.LiveAvatarCatalog || {};
-    const DANCES = ["bounce", "sway", "spin", "jump", "wave", "cheer", "idle"];
+    const DANCES = [
+        // əsas
+        "bounce", "sway", "spin", "jump", "wave", "cheer", "idle",
+        // viral (2026-11-10)
+        "floss", "griddy", "dab", "moonwalk", "robot", "shuffle", "woah", "hype", "macarena", "gangnam", "orange", "worm",
+        // imza (növə görə)
+        "tailspin", "roll", "roar", "pounce", "snooze", "wiggle", "leap", "tentacle", "swing", "prance", "hophop", "wheel", "howl", "slide", "handstand",
+    ];
 
     function esc(value) {
         return String(value == null ? "" : value)

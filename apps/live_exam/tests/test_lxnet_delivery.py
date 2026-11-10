@@ -396,6 +396,8 @@ class PlayerAssetPrefetchTest(TestCase):
                 "host_lobby/code_text.js",
                 "host_lobby/style_mode.js",
                 "host_lobby/bomb_text.js",
+                # 2026-11-10: güc rejimlərinin saf rəsmi (bomba SVG) — telefon da üzən bombanı göstərir.
+                "host_lobby/power_art.js",
             },
         )
         self.assertLessEqual(on_disk, names)

@@ -1,10 +1,10 @@
-import { mountBombDrawer } from './bomb_drawer.js?v=lx20261019s';
-import { bindDebugToggle, log, tr } from './utils.js?v=lx20261019s';
-import { state } from './state.js?v=lx20261019s';
-import { setSfxVolume, stopAllLoops } from './audio.js?v=lx20261019s';
-import { hydrateIcons } from './icons.js?v=lx20261019s';
-import { setSessionState } from './presentation.js?v=lx20261019s';
-import { applySessionSettings } from './settings.js?v=lx20261019s';
+import { mountBombDrawer } from './bomb_drawer.js?v=lx20261110p';
+import { bindDebugToggle, log, tr } from './utils.js?v=lx20261110p';
+import { state } from './state.js?v=lx20261110p';
+import { setSfxVolume, stopAllLoops } from './audio.js?v=lx20261110p';
+import { hydrateIcons } from './icons.js?v=lx20261110p';
+import { setSessionState } from './presentation.js?v=lx20261110p';
+import { applySessionSettings } from './settings.js?v=lx20261110p';
 import {
     clearPendingStateSync,
     startLobbyResync,
@@ -12,16 +12,17 @@ import {
     stopLobbyResync,
     stopStatePolling,
     syncState,
-} from './api.js?v=lx20261019s';
-import { closeHostSockets, connectHostSockets, ensureInitialStateSync } from './sockets.js?v=lx20261019s';
-import { bindAudioUnlockEvents, bindHostEvents } from './events.js?v=lx20261019s';
-import { installHostController } from './controller.js?v=lx20261019s';
-import { mountSoundDock } from './sound_dock.js?v=lx20261019s';
-import { mountTypedDrawer } from './typed_drawer.js?v=lx20261019s';
-import { bindCopyGuard } from './copy_guard.js?v=lx20261019s';
-import { bindTimeSettingEvents, renderTimeSettings } from './time_setting.js?v=lx20261019s';
-import { bindPlayersDrawer } from './players_drawer.js?v=lx20261019s';
-import { applyStyleToDocument, setPresentationStyle } from './style_mode.js?v=lx20261019s';
+} from './api.js?v=lx20261110p';
+import { closeHostSockets, connectHostSockets, ensureInitialStateSync } from './sockets.js?v=lx20261110p';
+import { bindAudioUnlockEvents, bindHostEvents } from './events.js?v=lx20261110p';
+import { installHostController } from './controller.js?v=lx20261110p';
+import { mountSoundDock } from './sound_dock.js?v=lx20261110p';
+import { mountTypedDrawer } from './typed_drawer.js?v=lx20261110p';
+import { bindCopyGuard } from './copy_guard.js?v=lx20261110p';
+import { bindTimeSettingEvents, renderTimeSettings } from './time_setting.js?v=lx20261110p';
+import { bindPlayersDrawer } from './players_drawer.js?v=lx20261110p';
+import { applyStyleToDocument, setPresentationStyle } from './style_mode.js?v=lx20261110p';
+import { mountPowerControls } from './powerups.js?v=lx20261110p';
 
 // 2026-10-19: təqdimat üslubu İLK render-dən əvvəl (lobbi səhnəsi baş hərflərlə çəkilsin).
 setPresentationStyle(state.sessionSettings);
@@ -47,6 +48,7 @@ bindAudioUnlockEvents();
 mountSoundDock();
 mountTypedDrawer();
 mountBombDrawer();
+mountPowerControls();
 renderTimeSettings();
 ensureInitialStateSync();
 startStatePolling();

@@ -23,7 +23,7 @@ from django.templatetags.static import static
 
 PLAYER_JS_DIR = Path(__file__).resolve().parents[2] / "static" / "js" / "player"
 ENTRY_MODULE = "player.entry.js"
-ENTRY_VERSION = "lxp-bomb20261101"
+ENTRY_VERSION = "lxp-power20261110"
 #: ``./x.js`` və ortaq SAF modullar ``../host_lobby/x.js`` (stage_logic.js, code_text.js — 2026-10-19).
 _IMPORT_RE = re.compile(
     r"""(?:\bfrom\s*|\bimport\s*\(\s*|\bimport\s+)(['"])(\./|\.\./host_lobby/)([\w.-]+\.js)(\?v=[\w.-]+)?\1"""
@@ -32,14 +32,17 @@ _IMPORT_RE = re.compile(
 #: (yol, versiya) — player_screen.html-in stil faylları (sıra vacibdir).
 PLAYER_CSS = (
     ("css/design-tokens.css", "20260701-1"),
-    ("css/live_avatar.css", "lx-20260929"),
+    ("css/live_avatar.css", "lxdance-20261110"),
+    ("css/live_avatar_dances.css", "lxdance-20261110"),
     ("css/live_theme.css", "lx-20260929"),
     ("css/player/_base.css", "lxp-20260930"),
     ("css/player/_ui.css", "lxp-20261002"),
     ("css/player/_round.css", "lxp-20261019"),
     ("css/player/_answer.css", "lxp-20261019m4"),
     ("css/player/_reveal.css", "lxp-20260930"),
-    ("css/player/_bomb.css", "lxbomb20261101"),
+    ("css/player/_bomb.css", "lxpower-20261110"),
+    # 2026-11-10: güc rejimləri — bomba vinyeti/partlayış, ×2 nişanı (bomb.css-dən sonra, üstələyir).
+    ("css/player/_powerups.css", "lxpower-20261110"),
     ("css/player/_finale.css", "lxp-20260929"),
     ("css/live_code_text.css", "lx-20261019"),
     # 2026-10-19: «Rəsmi» təqdimat üslubu qatı (body[data-lx-style="formal"]) — SONDA, üstələyir.

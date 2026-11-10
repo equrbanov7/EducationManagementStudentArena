@@ -6,7 +6,7 @@
  * 2026-10-19: «Rəsmi» üslubda oyunbaz ikonlar (şimşək, alov, tac, kubok, ulduz, parıltı) sakit xətti
  * qarşılıqları ilə əvəzlənir (FORMAL_SWAP) — çağıranlar dəyişmir.
  */
-import { isFormal } from './style_mode.js?v=lx20261019s';
+import { isFormal } from './style_mode.js?v=lx20261110p';
 
 const STROKE = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
 
@@ -38,6 +38,9 @@ const PATHS = {
     expand: `<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" ${STROKE}/>`,
     sliders: `<path d="M4 6.5h9M17 6.5h3M4 12h3M11 12h9M4 17.5h11M19 17.5h1" ${STROKE}/><circle cx="15" cy="6.5" r="2" ${STROKE}/><circle cx="9" cy="12" r="2" ${STROKE}/><circle cx="17" cy="17.5" r="2" ${STROKE}/>`,
     qr: `<rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1" ${STROKE}/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1" ${STROKE}/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1" ${STROKE}/><path d="M14 14h2.5v2.5H14zM18 18h2.5v2.5H18zM14 18.5h1.5M18.5 14h2" ${STROKE}/>`,
+    // 2026-11-10: güc rejimləri — 💣 bomba (fitilli) və ×2 (ikiqat xal) ikonları.
+    bomb: `<circle cx="11" cy="14" r="7" fill="currentColor"/><path d="M14.5 7.5l2.2-2.2" ${STROKE}/><path d="M16.7 5.3c1.4-1.3 2.9-.9 3.6.4" ${STROKE}/><circle cx="21" cy="4.5" r="1.3" fill="currentColor"/><circle cx="8.6" cy="11.8" r="1.6" fill="#fff" opacity=".55"/>`,
+    double: `<path d="M5.5 8.5c0-1.8 1.4-3 3.2-3s3.1 1.1 3.1 2.8c0 1.5-1 2.5-2.4 3.7L5.5 15.3h6.6" ${STROKE}/><path d="M14.5 9.5l5 5M19.5 9.5l-5 5" ${STROKE} stroke-width="2.6"/>`,
     keyboard: `<rect x="2.5" y="6" width="19" height="12" rx="2.5" ${STROKE}/><path d="M6.5 10h.01M10 10h.01M13.5 10h.01M17 10h.01M6.5 13.8h.01M17 13.8h.01M9.5 14h5" ${STROKE} stroke-width="2.4"/>`,
     chevronRight: `<path d="M9.5 5.5l6.5 6.5-6.5 6.5" ${STROKE} stroke-width="2.4"/>`,
     chevronDown: `<path d="M5.5 9.5l6.5 6.5 6.5-6.5" ${STROKE} stroke-width="2.4"/>`,

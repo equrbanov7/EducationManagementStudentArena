@@ -1,7 +1,7 @@
 // LX-FE-PLAYER (2026-09-29): telefon səsləri — WebAudio sintezi (xarici fayl yoxdur).
 // Musiqili, yumşaq zərf (attack/decay), low-pass süzgəc və kompressor; susdurma localStorage-da.
 // Brauzerin autoplay siyasətinə görə kontekst ilk toxunuşda açılır (unlockAudio).
-import { isFormal } from '../host_lobby/style_mode.js?v=lx20261019s';
+import { isFormal } from '../host_lobby/style_mode.js?v=lx20261110p';
 
 const AudioCtor = window.AudioContext || window.webkitAudioContext;
 const STORE_KEY = "lx.player.sound";
@@ -232,6 +232,23 @@ const CUES = {
     pop(at) {
         tone({ at, freq: N.C6, endFreq: N.G6, dur: 0.09, type: "sine", gain: 0.045 });
     },
+    // 2026-11-10 — güc rejimləri: fitil cızıltısı, partlayış, ×2 parıltısı.
+    fuse(at) {
+        noiseSweep(at, 0.55, 0.03, 3500, 6500);
+        [0.08, 0.21, 0.37, 0.5].forEach((d) => tone({ at: at + d, freq: 5200 + d * 900, dur: 0.03, type: "triangle", gain: 0.018, filter: 8000 }));
+    },
+    boom(at) {
+        tone({ at, freq: 130, endFreq: 28, dur: 0.75, type: "sine", gain: 0.3, attack: 0.002, filter: 600 });
+        tone({ at: at + 0.02, freq: 85, endFreq: 32, dur: 0.5, type: "triangle", gain: 0.1, attack: 0.002, filter: 400 });
+        noiseSweep(at, 0.9, 0.2, 900, 120);
+        noiseSweep(at + 0.02, 0.35, 0.07, 3000, 1200);
+        noiseSweep(at + 0.4, 1.1, 0.045, 260, 90);
+    },
+    double(at) {
+        [N.E5, N.B5, N.E6, 1975.53].forEach((f, i) => bell(at + i * 0.07, f, 0.26, 0.05));
+        [N.E5, N.B5].forEach((f) => tone({ at: at + 0.28, freq: f, dur: 0.9, type: "triangle", gain: 0.025, filter: 3200 }));
+        noiseSweep(at + 0.26, 0.6, 0.012, 5000, 9000);
+    },
 };
 
 // `key` verilərsə eyni səs eyni açarla ikinci dəfə çalınmır (eyni faza təkrar render olanda).
@@ -250,4 +267,33 @@ export function playSound(name, key) {
         return false;
     }
     return true;
+}
+
+
+/* ── Ürək döyüntüsü (bomba sualının cavab pəncərəsi) — planlayıcı ilə dövrə (2026-11-10) ── */
+let heart = null;
+
+export function startHeartbeat(bpm = 64) {
+    const rate = Math.max(40, Math.min(160, Math.round(Number(bpm) || 64)));
+    if (heart && heart.bpm === rate) return;
+    stopHeartbeat();
+    if (!ctx || muted || isFormal()) return;
+    const beat = 60 / rate;
+    heart = { bpm: rate, next: ctx.currentTime + 0.05, timer: 0 };
+    heart.timer = window.setInterval(() => {
+        if (!ctx || ctx.state !== "running" || muted) return;
+        if (heart.next < ctx.currentTime) heart.next = ctx.currentTime + 0.05;
+        while (heart.next < ctx.currentTime + 0.3) {
+            const t = heart.next;
+            tone({ at: t, freq: 70, endFreq: 38, dur: 0.22, type: "sine", gain: 0.11, attack: 0.004, filter: 320 });
+            tone({ at: t + beat * 0.22, freq: 58, endFreq: 34, dur: 0.2, type: "sine", gain: 0.075, attack: 0.004, filter: 300 });
+            heart.next += beat;
+        }
+    }, 80);
+}
+
+export function stopHeartbeat() {
+    if (!heart) return;
+    window.clearInterval(heart.timer);
+    heart = null;
 }

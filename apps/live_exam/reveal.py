@@ -41,6 +41,7 @@ from apps.live_exam.domain.session import (
     safe_int,
 )
 from apps.live_exam.models import LiveAnswer
+from apps.live_exam.power_modes import modifier_fields
 from apps.live_exam.serializers import answer_choice_ids, question_mode_fields, speed_order_key
 from apps.live_exam.typed_answers import build_typed_summary
 
@@ -246,6 +247,9 @@ def build_reveal_bundle(session, question_id: int, *, revealed_at=None, exam_que
         "answer_input": config.answer_input,
         "correct_option_ids": list(config.correct_ids),
         "distribution": _distribution(answers),
+        # 2026-11-10: güc rejimləri (bomba / ×2) + bu raundda partlayan bomba sayı (ekran effekti üçün).
+        **modifier_fields(config),
+        "bomb_count": sum(1 for answer in answers if answer.get("bomb_triggered")),
         **_timing_fields(session, revealed_at, final=final),
     }
     if final:

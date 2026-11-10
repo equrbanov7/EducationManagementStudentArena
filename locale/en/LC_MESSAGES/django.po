@@ -118267,3 +118267,155 @@ msgstr "No, that is not me"
 msgctxt "accounts.workload"
 msgid "Birgə (patok)"
 msgstr "Joint (stream)"
+
+msgctxt "live_exam.power_modes"
+msgid "Bomba rejimi"
+msgstr "Bomb mode"
+
+msgctxt "live_exam.power_modes"
+msgid "×2 Xal rejimi"
+msgstr "×2 Points mode"
+
+msgctxt "live_exam.power_modes"
+msgid "Oyun effektləri"
+msgstr "Game effects"
+
+msgctxt "live_exam.power_modes"
+msgid "Hər sual bombadır: səhv cavab bu oyundakı xalı sıfırlayır."
+msgstr "Every question is a bomb: a wrong answer resets the score in this game."
+
+msgctxt "live_exam.power_modes"
+msgid "Düzgün cavab ikiqat xal gətirir."
+msgstr "A correct answer earns double points."
+
+msgctxt "live_exam.power_modes"
+msgid "Final rəqs şousu"
+msgstr "Final dance show"
+
+msgctxt "live_exam.power_modes"
+msgid "Final səhnəsində avatarlar viral və özünəməxsus rəqslər edir."
+msgstr "On the final stage the avatars perform viral and signature dances."
+
+msgctxt "live_exam.power_modes"
+msgid "Açıq olanda nəşr olunan hər sual bomba sualıdır: səhv və ya qismən düzgün cavab oyunçunun bu oyundakı xalını sıfırlayır. Cavabsız qalmaq partlatmır. Oyun gedərkən də dəyişir — cari suala hələ cavab yoxdursa dərhal, əks halda növbəti sualdan."
+msgstr "When on, every published question is a bomb question: a wrong or partly correct answer resets the player's score in this game. Not answering does not explode. Can be changed during the game — applies to the current question at once if nobody has answered yet, otherwise from the next question."
+
+msgctxt "live_exam.power_modes"
+msgid "Açıq olanda düzgün cavab ikiqat xal gətirir (sürət əmsalı saxlanılır). Bomba ilə birlikdə işləyir: düzgün → ×2, səhv → sıfırlanma. Oyun gedərkən də dəyişir."
+msgstr "When on, a correct answer earns double points (the speed factor is kept). Works together with the bomb: correct → ×2, wrong → reset. Can be changed during the game."
+
+msgctxt "live_exam.power_modes"
+msgid "Final səhnəsində podium və tamaşaçı avatarları viral rəqslər və hər personajın özünəməxsus hərəkətini edir (telefonlarda da). Söndürüləndə avatarlar sakit dayanır."
+msgstr "On the final stage the podium and audience avatars perform viral dances and each character's signature move (on phones too). When off, the avatars stand still."
+
+msgctxt "live_exam.power_modes"
+msgid "Bomba sualı"
+msgstr "Bomb question"
+
+msgctxt "live_exam.power_modes"
+msgid "×2 xal"
+msgstr "×2 points"
+
+msgctxt "live_exam.power_modes"
+msgid "×2 xal!"
+msgstr "×2 points!"
+
+msgctxt "live_exam.power_modes"
+msgid "Səhv cavab bu oyundakı xalı sıfırlayır"
+msgstr "A wrong answer resets the score in this game"
+
+msgctxt "live_exam.power_modes"
+msgid "Düzgün cavab ikiqat xal gətirir"
+msgstr "A correct answer earns double points"
+
+msgctxt "live_exam.power_modes"
+msgid "Bomba partladı!"
+msgstr "The bomb exploded!"
+
+msgctxt "live_exam.power_modes"
+msgid "{count} bomba partladı!"
+msgstr "{count} bombs exploded!"
+
+msgctxt "live_exam.power_modes"
+msgid "cari suala tətbiq olundu"
+msgstr "applied to the current question"
+
+msgctxt "live_exam.power_modes"
+msgid "cari sualdan götürüldü"
+msgstr "removed from the current question"
+
+msgctxt "live_exam.power_modes"
+msgid "Bu suala artıq cavab var — dəyişiklik növbəti sualdan keçərlidir"
+msgstr "This question already has answers — the change applies from the next question"
+
+msgctxt "live_exam.power_modes"
+msgid "Növbəti sualdan keçərlidir"
+msgstr "Applies from the next question"
+
+msgctxt "live_exam.power_modes"
+msgid "Rejimlər söndürülüb"
+msgstr "Modes are off"
+
+msgctxt "live_exam.power_modes"
+msgid "Növbəti sualdan: {modes}"
+msgstr "From the next question: {modes}"
+
+msgctxt "live_exam.power_modes"
+msgid "Cari sual: {modes}"
+msgstr "Current question: {modes}"
+
+msgctxt "live_exam.power_modes"
+msgid "Cari sual: rejim yoxdur"
+msgstr "Current question: no mode"
+
+msgctxt "live_exam.power_modes"
+msgid "açıq"
+msgstr "on"
+
+msgctxt "live_exam.power_modes"
+msgid "bağlı"
+msgstr "off"
+
+msgctxt "live_exam.power_modes"
+msgid "Növbəti sual bomba olur: səhv cavab bu oyundakı xalı sıfırlayır. Hər sual üçün yenidən basılır."
+msgstr "The next question becomes a bomb: a wrong answer resets the score in this game. Press again for each question."
+
+msgctxt "live_exam.power_modes"
+msgid "Növbəti sualda düzgün cavab ikiqat xal gətirir. Hər sual üçün yenidən basılır."
+msgstr "In the next question a correct answer earns double points. Press again for each question."
+
+msgctxt "live_exam.power_modes"
+msgid "Bir sual üçün aktivləşir: növbəti sual bomba sualı olur — səhv və ya qismən düzgün cavab oyunçunun bu oyundakı xalını sıfırlayır, cavabsız qalmaq partlatmır. Sual nəşr olunanda özü sönür — hər sual üçün səhnədəki ikona (və ya bu keçidə) yenidən basılır. Sual gedərkən basılsa və hələ cavab yoxdursa, elə həmin suala tətbiq olunur."
+msgstr "Arms for one question: the next question becomes a bomb question — a wrong or partly correct answer resets the player's score in this game, not answering does not explode. It switches itself off when the question is published — press the stage icon (or this switch) again for every question. Pressed during a question with no answers yet, it applies to that very question."
+
+msgctxt "live_exam.power_modes"
+msgid "Bir sual üçün aktivləşir: növbəti sualda düzgün cavab ikiqat xal gətirir (sürət əmsalı saxlanılır), sonra özü sönür — hər sual üçün yenidən basılır. Bomba ilə birlikdə işləyir: düzgün → ×2, səhv → sıfırlanma."
+msgstr "Arms for one question: in the next question a correct answer earns double points (the speed factor is kept), then it switches itself off — press again for every question. Works together with the bomb: correct → ×2, wrong → reset."
+
+msgctxt "live_exam.power_modes"
+msgid "Bu suala artıq cavab var — növbəti sual üçün aktivləşdi"
+msgstr "This question already has answers — armed for the next question"
+
+msgctxt "live_exam.power_modes"
+msgid "növbəti sual üçün aktivləşdi"
+msgstr "armed for the next question"
+
+msgctxt "live_exam.power_modes"
+msgid "növbəti sual üçün söndürüldü"
+msgstr "switched off for the next question"
+
+msgctxt "live_exam.power_modes"
+msgid "bu sualda"
+msgstr "this question"
+
+msgctxt "live_exam.power_modes"
+msgid "növbəti sual"
+msgstr "next question"
+
+msgctxt "live_exam.power_modes"
+msgid "Rejim seçilməyib — hər sual üçün ikona bas"
+msgstr "No mode selected — press an icon for each question"
+
+msgctxt "live_exam.power_modes"
+msgid "Növbəti sual: {modes}"
+msgstr "Next question: {modes}"
