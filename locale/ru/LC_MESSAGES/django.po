@@ -118469,3 +118469,7 @@ msgstr "Да, обе учётные записи мои"
 msgctxt "accounts.profile_completion"
 msgid "Xeyr, bu mən deyiləm"
 msgstr "Нет, это не я"
+
+msgctxt "accounts.workload"
+msgid "Birgə (patok)"
+msgstr "Совместно (поток)"

@@ -3364,3 +3364,6 @@ msgstr "остаток строки %(hours)s"
 #, javascript-format
 msgid "№%(n)s"
 msgstr "№ %(n)s"
+
+msgid "Birgə (patok)"
+msgstr "Совместно (поток)"

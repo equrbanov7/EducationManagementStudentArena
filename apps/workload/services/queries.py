@@ -391,6 +391,9 @@ def teacher_workload_rows(*, organization, teacher, academic_year: str = "", sea
                 # 2026-10-15: «Mənim dərs yüküm» fənn + qrup (tapşırıq sətri) üzrə birləşir və redaktə keçidi
                 # kafedraya görə qurulur (``services.my_workload_lines``).
                 "row_id": str(row.pk),
+                # Sahib 2026-11-10: patok axını «Dərs yüküm»də BİR xətdir — tərəfdaş sətir aparıcıya göstərir
+                # (aparıcının özündə boşdur). FK sütunudur, əlavə sorğu yoxdur.
+                "patok_lead_id": str(row.patok_lead_id or ""),
                 "task_id": str(row.task_id),
                 "chair_id": str(row.task.chair_id),
                 # Sahib 2026-10-25: yük bütün kafedralardan gəlir (ştat bir kafedrada, saathesabı başqasında) —

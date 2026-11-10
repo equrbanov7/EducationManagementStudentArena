@@ -119742,3 +119742,7 @@ msgstr "Ja, beide Konten gehören mir"
 msgctxt "accounts.profile_completion"
 msgid "Xeyr, bu mən deyiləm"
 msgstr "Nein, das bin ich nicht"
+
+msgctxt "accounts.workload"
+msgid "Birgə (patok)"
+msgstr "Gemeinsam (Strom)"

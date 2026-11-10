@@ -117461,3 +117461,7 @@ msgstr "Evet, her iki hesap da benim"
 msgctxt "accounts.profile_completion"
 msgid "Xeyr, bu mən deyiləm"
 msgstr "Hayır, bu ben değilim"
+
+msgctxt "accounts.workload"
+msgid "Birgə (patok)"
+msgstr "Ortak (akış)"

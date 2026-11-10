@@ -10,6 +10,11 @@ TƏQDİMAT qatıdır (bölmə cədvəli, JSON ``lines`` və Excel ixracı eyni f
 Redaktə keçidi: aktorun ``workload.distribute`` əhatəsinə düşən kafedranın xəttində «Redaktə et» →
 «Yük bölgüsü» redaktoru həmin sətrə fokusla (``row_edit.distribution_edit_url``). Müəllimdə açar yoxdur —
 keçid çıxmır (öz kafedrasının müdiri olan müəllimdə çıxır).
+
+Patok (sahib 2026-11-10: «patokları birlikdə yaz, ayrı-ayrı alt-alta yazma»): eyni axının sətirləri
+(``patok_lead_id or row_id`` + eyni semestr) BİR xətdir — qruplar «236 BT, 536 T», fəaliyyətlər cəmlənir
+(«Mühazirə 15 · Seminar 30»), saat = cəm, hər qrupun jurnalı ayrıca keçid (``journals``). Aparıcı sətir başqa
+müəllimdədirsə tərəfdaş sətirlər öz aralarında birləşir. Cəmlər və etirazlar birləşməmiş ``rows`` ilə işləyir.
 """
 
 from __future__ import annotations
@@ -49,6 +54,7 @@ def group_workload_lines(rows, *, edit_chair_ids=None) -> list[dict]:
             line = lines[key] = {
                 "key": key,
                 "row_id": row.get("row_id", ""),
+                "patok_lead_id": str(row.get("patok_lead_id") or ""),
                 "task_id": row.get("task_id", ""),
                 "chair_id": chair_id,
                 "chair_name": row.get("chair_name", ""),
@@ -87,12 +93,61 @@ def group_workload_lines(rows, *, edit_chair_ids=None) -> list[dict]:
             )
         else:  # eyni fəaliyyət iki yarımqrupa — bir yerdə
             same["hours"] += hours
-    result = list(lines.values())
+    result = _merge_patok_streams(list(lines.values()))
     for line in result:
         line["activities"].sort(key=lambda item: _ACTIVITY_ORDER.get(item["activity"], 99))
         line["activity_label"] = _activity_text(line["activities"])
     result.sort(key=lambda item: (_SEASON_ORDER.get(item["season"], 99), item["subject"].casefold(), item["groups"]))
     return result
+
+
+def _journal(line: dict) -> list[dict]:
+    return [{"offering_id": line["offering_id"], "label": line["groups"]}] if line["offering_id"] else []
+
+
+def _merge_patok_streams(lines: list[dict]) -> list[dict]:
+    """Sətir xətləri → patok axını başına bir xətt (axınsız sətir — olduğu kimi, ``journals`` əlavə olunur)."""
+    streams: dict = {}
+    for line in lines:
+        stream = line.pop("patok_lead_id", "") or line["row_id"] or line["key"]
+        streams.setdefault((line["season"], stream), []).append(line)
+    merged = []
+    for (_season, stream), members in streams.items():
+        if len(members) == 1:
+            line = members[0]
+            line.update(journals=_journal(line), is_patok=False, row_ids=[line["row_id"]] if line["row_id"] else [])
+            merged.append(line)
+            continue
+        # Aparıcı əvvəl, sonra tərəfdaşlar qrup adına görə.
+        members.sort(key=lambda item: (item["row_id"] != stream, item["groups"].casefold()))
+        head = members[0]
+        line = dict(head)
+        groups: list[str] = []
+        journals: list[dict] = []
+        activities: dict = {}
+        for member in members:
+            if member["groups"] and member["groups"] not in groups:
+                groups.append(member["groups"])
+            for journal in _journal(member):
+                if all(item["offering_id"] != journal["offering_id"] for item in journals):
+                    journals.append(journal)
+            for item in member["activities"]:
+                bucket = activities.setdefault(item["activity"], {**item, "hours": 0})
+                bucket["hours"] += item["hours"]
+        line.update(
+            groups=", ".join(groups),
+            activities=list(activities.values()),
+            hours=sum(member["hours"] for member in members),
+            is_hourly_paid=any(member["is_hourly_paid"] for member in members),
+            is_intensive=any(member["is_intensive"] for member in members),
+            assignment_ids=[item for member in members for item in member["assignment_ids"]],
+            row_ids=[member["row_id"] for member in members if member["row_id"]],
+            journals=journals,
+            offering_id=journals[0]["offering_id"] if journals else "",
+            is_patok=True,
+        )
+        merged.append(line)
+    return merged
 
 
 __all__ = ["group_workload_lines"]

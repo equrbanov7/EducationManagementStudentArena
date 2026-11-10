@@ -3417,3 +3417,6 @@ msgstr "Zeilenrest %(hours)s"
 #, javascript-format
 msgid "№%(n)s"
 msgstr "Nr. %(n)s"
+
+msgid "Birgə (patok)"
+msgstr "Gemeinsam (Strom)"
