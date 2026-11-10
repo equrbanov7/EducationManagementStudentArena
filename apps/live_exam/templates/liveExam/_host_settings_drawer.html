@@ -188,7 +188,7 @@
             <label class="host-settings-item host-settings-item--power host-settings-item--bomb">
                 <div class="host-settings-item__copy">
                     <strong><span class="hx-i host-settings-item__icon" data-icon="bomb"></span>{% trans "Bomba rejimi" context "live_exam.power_modes" %}</strong>
-                    <span>{% trans "Açıq olanda nəşr olunan hər sual bomba sualıdır: səhv və ya qismən düzgün cavab oyunçunun bu oyundakı xalını sıfırlayır. Cavabsız qalmaq partlatmır. Oyun gedərkən də dəyişir — cari suala hələ cavab yoxdursa dərhal, əks halda növbəti sualdan." context "live_exam.power_modes" %}</span>
+                    <span>{% trans "Bir sual üçün aktivləşir: növbəti sual bomba sualı olur — səhv və ya qismən düzgün cavab oyunçunun bu oyundakı xalını sıfırlayır, cavabsız qalmaq partlatmır. Sual nəşr olunanda özü sönür — hər sual üçün səhnədəki ikona (və ya bu keçidə) yenidən basılır. Sual gedərkən basılsa və hələ cavab yoxdursa, elə həmin suala tətbiq olunur." context "live_exam.power_modes" %}</span>
                 </div>
                 <input id="settingBombMode" class="host-switch__input" type="checkbox">
                 <span class="host-switch" aria-hidden="true"><span></span></span>
@@ -196,7 +196,7 @@
             <label class="host-settings-item host-settings-item--power host-settings-item--double">
                 <div class="host-settings-item__copy">
                     <strong><span class="hx-i host-settings-item__icon" data-icon="double"></span>{% trans "×2 Xal rejimi" context "live_exam.power_modes" %}</strong>
-                    <span>{% trans "Açıq olanda düzgün cavab ikiqat xal gətirir (sürət əmsalı saxlanılır). Bomba ilə birlikdə işləyir: düzgün → ×2, səhv → sıfırlanma. Oyun gedərkən də dəyişir." context "live_exam.power_modes" %}</span>
+                    <span>{% trans "Bir sual üçün aktivləşir: növbəti sualda düzgün cavab ikiqat xal gətirir (sürət əmsalı saxlanılır), sonra özü sönür — hər sual üçün yenidən basılır. Bomba ilə birlikdə işləyir: düzgün → ×2, səhv → sıfırlanma." context "live_exam.power_modes" %}</span>
                 </div>
                 <input id="settingDoubleMode" class="host-switch__input" type="checkbox">
                 <span class="host-switch" aria-hidden="true"><span></span></span>

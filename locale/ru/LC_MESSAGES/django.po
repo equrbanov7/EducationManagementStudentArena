@@ -118581,3 +118581,47 @@ msgstr "вкл"
 msgctxt "live_exam.power_modes"
 msgid "bağlı"
 msgstr "выкл"
+
+msgctxt "live_exam.power_modes"
+msgid "Növbəti sual bomba olur: səhv cavab bu oyundakı xalı sıfırlayır. Hər sual üçün yenidən basılır."
+msgstr "Следующий вопрос станет бомбой: неверный ответ обнуляет очки в этой игре. Нажимайте заново для каждого вопроса."
+
+msgctxt "live_exam.power_modes"
+msgid "Növbəti sualda düzgün cavab ikiqat xal gətirir. Hər sual üçün yenidən basılır."
+msgstr "В следующем вопросе правильный ответ даёт двойные очки. Нажимайте заново для каждого вопроса."
+
+msgctxt "live_exam.power_modes"
+msgid "Bir sual üçün aktivləşir: növbəti sual bomba sualı olur — səhv və ya qismən düzgün cavab oyunçunun bu oyundakı xalını sıfırlayır, cavabsız qalmaq partlatmır. Sual nəşr olunanda özü sönür — hər sual üçün səhnədəki ikona (və ya bu keçidə) yenidən basılır. Sual gedərkən basılsa və hələ cavab yoxdursa, elə həmin suala tətbiq olunur."
+msgstr "Включается на один вопрос: следующий вопрос становится вопросом-бомбой — неверный или частично верный ответ обнуляет очки игрока в этой игре, отсутствие ответа не взрывает. При публикации вопроса выключается само — нажимайте значок на сцене (или этот переключатель) заново для каждого вопроса. Если нажать во время вопроса, на который ещё никто не ответил, применится к этому же вопросу."
+
+msgctxt "live_exam.power_modes"
+msgid "Bir sual üçün aktivləşir: növbəti sualda düzgün cavab ikiqat xal gətirir (sürət əmsalı saxlanılır), sonra özü sönür — hər sual üçün yenidən basılır. Bomba ilə birlikdə işləyir: düzgün → ×2, səhv → sıfırlanma."
+msgstr "Включается на один вопрос: в следующем вопросе правильный ответ даёт двойные очки (коэффициент скорости сохраняется), затем выключается само — нажимайте заново для каждого вопроса. Работает вместе с бомбой: верно → ×2, неверно → обнуление."
+
+msgctxt "live_exam.power_modes"
+msgid "Bu suala artıq cavab var — növbəti sual üçün aktivləşdi"
+msgstr "На этот вопрос уже есть ответы — включено для следующего вопроса"
+
+msgctxt "live_exam.power_modes"
+msgid "növbəti sual üçün aktivləşdi"
+msgstr "включено для следующего вопроса"
+
+msgctxt "live_exam.power_modes"
+msgid "növbəti sual üçün söndürüldü"
+msgstr "выключено для следующего вопроса"
+
+msgctxt "live_exam.power_modes"
+msgid "bu sualda"
+msgstr "в этом вопросе"
+
+msgctxt "live_exam.power_modes"
+msgid "növbəti sual"
+msgstr "следующий вопрос"
+
+msgctxt "live_exam.power_modes"
+msgid "Rejim seçilməyib — hər sual üçün ikona bas"
+msgstr "Режим не выбран — нажимайте значок для каждого вопроса"
+
+msgctxt "live_exam.power_modes"
+msgid "Növbəti sual: {modes}"
+msgstr "Следующий вопрос: {modes}"

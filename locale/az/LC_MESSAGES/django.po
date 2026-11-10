@@ -117698,3 +117698,47 @@ msgstr "açıq"
 msgctxt "live_exam.power_modes"
 msgid "bağlı"
 msgstr "bağlı"
+
+msgctxt "live_exam.power_modes"
+msgid "Növbəti sual bomba olur: səhv cavab bu oyundakı xalı sıfırlayır. Hər sual üçün yenidən basılır."
+msgstr "Növbəti sual bomba olur: səhv cavab bu oyundakı xalı sıfırlayır. Hər sual üçün yenidən basılır."
+
+msgctxt "live_exam.power_modes"
+msgid "Növbəti sualda düzgün cavab ikiqat xal gətirir. Hər sual üçün yenidən basılır."
+msgstr "Növbəti sualda düzgün cavab ikiqat xal gətirir. Hər sual üçün yenidən basılır."
+
+msgctxt "live_exam.power_modes"
+msgid "Bir sual üçün aktivləşir: növbəti sual bomba sualı olur — səhv və ya qismən düzgün cavab oyunçunun bu oyundakı xalını sıfırlayır, cavabsız qalmaq partlatmır. Sual nəşr olunanda özü sönür — hər sual üçün səhnədəki ikona (və ya bu keçidə) yenidən basılır. Sual gedərkən basılsa və hələ cavab yoxdursa, elə həmin suala tətbiq olunur."
+msgstr "Bir sual üçün aktivləşir: növbəti sual bomba sualı olur — səhv və ya qismən düzgün cavab oyunçunun bu oyundakı xalını sıfırlayır, cavabsız qalmaq partlatmır. Sual nəşr olunanda özü sönür — hər sual üçün səhnədəki ikona (və ya bu keçidə) yenidən basılır. Sual gedərkən basılsa və hələ cavab yoxdursa, elə həmin suala tətbiq olunur."
+
+msgctxt "live_exam.power_modes"
+msgid "Bir sual üçün aktivləşir: növbəti sualda düzgün cavab ikiqat xal gətirir (sürət əmsalı saxlanılır), sonra özü sönür — hər sual üçün yenidən basılır. Bomba ilə birlikdə işləyir: düzgün → ×2, səhv → sıfırlanma."
+msgstr "Bir sual üçün aktivləşir: növbəti sualda düzgün cavab ikiqat xal gətirir (sürət əmsalı saxlanılır), sonra özü sönür — hər sual üçün yenidən basılır. Bomba ilə birlikdə işləyir: düzgün → ×2, səhv → sıfırlanma."
+
+msgctxt "live_exam.power_modes"
+msgid "Bu suala artıq cavab var — növbəti sual üçün aktivləşdi"
+msgstr "Bu suala artıq cavab var — növbəti sual üçün aktivləşdi"
+
+msgctxt "live_exam.power_modes"
+msgid "növbəti sual üçün aktivləşdi"
+msgstr "növbəti sual üçün aktivləşdi"
+
+msgctxt "live_exam.power_modes"
+msgid "növbəti sual üçün söndürüldü"
+msgstr "növbəti sual üçün söndürüldü"
+
+msgctxt "live_exam.power_modes"
+msgid "bu sualda"
+msgstr "bu sualda"
+
+msgctxt "live_exam.power_modes"
+msgid "növbəti sual"
+msgstr "növbəti sual"
+
+msgctxt "live_exam.power_modes"
+msgid "Rejim seçilməyib — hər sual üçün ikona bas"
+msgstr "Rejim seçilməyib — hər sual üçün ikona bas"
+
+msgctxt "live_exam.power_modes"
+msgid "Növbəti sual: {modes}"
+msgstr "Növbəti sual: {modes}"

@@ -149,6 +149,84 @@ ENTRIES = {
             "Aktuelle Frage: kein Modus",
         ),
         "açıq": t("on", "вкл", "açık", "an"),
+        # 2026-11-10 (axşam): bir-sual semantikası — hər sual üçün ikona yenidən basılır.
+        "Növbəti sual bomba olur: səhv cavab bu oyundakı xalı sıfırlayır. Hər sual üçün yenidən basılır.": t(
+            "The next question becomes a bomb: a wrong answer resets the score in this game. Press again for each question.",
+            "Следующий вопрос станет бомбой: неверный ответ обнуляет очки в этой игре. Нажимайте заново для каждого вопроса.",
+            "Sonraki soru bomba olur: yanlış cevap bu oyundaki puanı sıfırlar. Her soru için yeniden basılır.",
+            "Die nächste Frage wird zur Bombe: Eine falsche Antwort setzt die Punkte in diesem Spiel zurück. Für jede Frage erneut drücken.",
+        ),
+        "Növbəti sualda düzgün cavab ikiqat xal gətirir. Hər sual üçün yenidən basılır.": t(
+            "In the next question a correct answer earns double points. Press again for each question.",
+            "В следующем вопросе правильный ответ даёт двойные очки. Нажимайте заново для каждого вопроса.",
+            "Sonraki soruda doğru cevap iki kat puan kazandırır. Her soru için yeniden basılır.",
+            "In der nächsten Frage bringt eine richtige Antwort doppelte Punkte. Für jede Frage erneut drücken.",
+        ),
+        "Bir sual üçün aktivləşir: növbəti sual bomba sualı olur — səhv və ya qismən düzgün cavab oyunçunun bu "
+        "oyundakı xalını sıfırlayır, cavabsız qalmaq partlatmır. Sual nəşr olunanda özü sönür — hər sual üçün "
+        "səhnədəki ikona (və ya bu keçidə) yenidən basılır. Sual gedərkən basılsa və hələ cavab yoxdursa, elə "
+        "həmin suala tətbiq olunur.": t(
+            "Arms for one question: the next question becomes a bomb question — a wrong or partly correct answer "
+            "resets the player's score in this game, not answering does not explode. It switches itself off when "
+            "the question is published — press the stage icon (or this switch) again for every question. Pressed "
+            "during a question with no answers yet, it applies to that very question.",
+            "Включается на один вопрос: следующий вопрос становится вопросом-бомбой — неверный или частично верный "
+            "ответ обнуляет очки игрока в этой игре, отсутствие ответа не взрывает. При публикации вопроса "
+            "выключается само — нажимайте значок на сцене (или этот переключатель) заново для каждого вопроса. "
+            "Если нажать во время вопроса, на который ещё никто не ответил, применится к этому же вопросу.",
+            "Tek soru için etkinleşir: sonraki soru bomba sorusu olur — yanlış veya kısmen doğru cevap oyuncunun bu "
+            "oyundaki puanını sıfırlar, cevapsız kalmak patlatmaz. Soru yayınlanınca kendiliğinden kapanır — her "
+            "soru için sahnedeki simgeye (veya bu anahtara) yeniden basılır. Soru sırasında basılır ve henüz cevap "
+            "yoksa, o soruya uygulanır.",
+            "Gilt für eine Frage: Die nächste Frage wird zur Bombenfrage — eine falsche oder teilweise richtige "
+            "Antwort setzt die Punkte des Spielers in diesem Spiel zurück, keine Antwort explodiert nicht. Beim "
+            "Veröffentlichen der Frage schaltet es sich selbst aus — für jede Frage das Bühnensymbol (oder diesen "
+            "Schalter) erneut drücken. Während einer Frage ohne Antworten gedrückt, gilt es für genau diese Frage.",
+        ),
+        "Bir sual üçün aktivləşir: növbəti sualda düzgün cavab ikiqat xal gətirir (sürət əmsalı saxlanılır), sonra "
+        "özü sönür — hər sual üçün yenidən basılır. Bomba ilə birlikdə işləyir: düzgün → ×2, səhv → sıfırlanma.": t(
+            "Arms for one question: in the next question a correct answer earns double points (the speed factor is "
+            "kept), then it switches itself off — press again for every question. Works together with the bomb: "
+            "correct → ×2, wrong → reset.",
+            "Включается на один вопрос: в следующем вопросе правильный ответ даёт двойные очки (коэффициент скорости "
+            "сохраняется), затем выключается само — нажимайте заново для каждого вопроса. Работает вместе с бомбой: "
+            "верно → ×2, неверно → обнуление.",
+            "Tek soru için etkinleşir: sonraki soruda doğru cevap iki kat puan kazandırır (hız katsayısı korunur), "
+            "sonra kendiliğinden kapanır — her soru için yeniden basılır. Bomba ile birlikte çalışır: doğru → ×2, "
+            "yanlış → sıfırlama.",
+            "Gilt für eine Frage: In der nächsten Frage bringt eine richtige Antwort doppelte Punkte (der Tempofaktor "
+            "bleibt), dann schaltet es sich selbst aus — für jede Frage erneut drücken. Funktioniert mit der Bombe "
+            "zusammen: richtig → ×2, falsch → Zurücksetzen.",
+        ),
+        "Bu suala artıq cavab var — növbəti sual üçün aktivləşdi": t(
+            "This question already has answers — armed for the next question",
+            "На этот вопрос уже есть ответы — включено для следующего вопроса",
+            "Bu soruya zaten cevap var — sonraki soru için etkinleştirildi",
+            "Zu dieser Frage gibt es schon Antworten — für die nächste Frage aktiviert",
+        ),
+        "növbəti sual üçün aktivləşdi": t(
+            "armed for the next question",
+            "включено для следующего вопроса",
+            "sonraki soru için etkinleştirildi",
+            "für die nächste Frage aktiviert",
+        ),
+        "növbəti sual üçün söndürüldü": t(
+            "switched off for the next question",
+            "выключено для следующего вопроса",
+            "sonraki soru için kapatıldı",
+            "für die nächste Frage ausgeschaltet",
+        ),
+        "bu sualda": t("this question", "в этом вопросе", "bu soruda", "diese Frage"),
+        "növbəti sual": t("next question", "следующий вопрос", "sonraki soru", "nächste Frage"),
+        "Rejim seçilməyib — hər sual üçün ikona bas": t(
+            "No mode selected — press an icon for each question",
+            "Режим не выбран — нажимайте значок для каждого вопроса",
+            "Mod seçilmedi — her soru için simgeye basın",
+            "Kein Modus gewählt — für jede Frage ein Symbol drücken",
+        ),
+        "Növbəti sual: {modes}": t(
+            "Next question: {modes}", "Следующий вопрос: {modes}", "Sonraki soru: {modes}", "Nächste Frage: {modes}"
+        ),
         "bağlı": t("off", "выкл", "kapalı", "aus"),
     },
 }

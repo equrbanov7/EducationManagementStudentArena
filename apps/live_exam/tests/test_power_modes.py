@@ -20,7 +20,7 @@ from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
 from apps.live_exam.power_modes import DOUBLE_MULTIPLIER, apply_double_points
 from apps.live_exam.reveal import build_reveal_bundle
 from apps.live_exam.scoring import save_answer_and_score
-from apps.live_exam.services import update_host_settings, update_host_settings_with_modifiers
+from apps.live_exam.services import publish_question, update_host_settings, update_host_settings_with_modifiers
 from apps.live_exam.session_settings import default_session_settings, get_session_settings
 from apps.live_exam.tests import test_scoring as fixtures
 from apps.live_exam.tests import test_views as view_fixtures
@@ -129,7 +129,7 @@ class PowerModeRoundTests(TestCase):
         settings, modifiers = update_host_settings_with_modifiers(
             self.session, {"bomb_mode": True, "double_mode": True}, max_participants_cap=200
         )
-        self.assertTrue(settings["bomb_mode"])
+        self.assertFalse(settings["bomb_mode"])  # cari suala tətbiq olunub → bir-sual bayrağı istehlak olundu
         self.assertEqual(modifiers["type"], "question_modifiers")
         self.assertTrue(modifiers["applied"])
         self.assertEqual(modifiers["question_id"], self.question.pk)
@@ -145,6 +145,39 @@ class PowerModeRoundTests(TestCase):
         self.player.refresh_from_db()
         self.assertEqual(self.player.score, 0)
 
+    def test_publish_consumes_one_shot_flags_but_keeps_the_frozen_rule(self):
+        """Sahib 2026-11-10: bomba / ×2 BİR sual üçündür — nəşrdə bayraq sönür, hər sual yenidən basılır."""
+        update_host_settings(self.session, {"bomb_mode": True, "double_mode": True}, max_participants_cap=200)
+        self.session.state = LiveSession.STATE_LOBBY
+        self.session.save(update_fields=["state"])
+        payload = publish_question(self.session, self.question, idx=0, total=1)
+        self.session.refresh_from_db()
+        config = resolve_question_config(self.session, self.question)
+        self.assertTrue(config.is_bomb and config.is_double)
+        self.assertTrue(payload["question"]["is_bomb"] and payload["question"]["is_double"])
+        # Bayraqlar istehlak olunub — növbəti sual üçün yenidən basılmalıdır; klientlər bunu payload-da görür.
+        self.assertFalse(self.session.host_settings["bomb_mode"])
+        self.assertFalse(self.session.host_settings["double_mode"])
+        self.assertFalse(payload["settings"]["bomb_mode"])
+        self.assertFalse(payload["settings"]["double_mode"])
+        self.assertNotIn("bomb_questions", payload["settings"])
+
+    def test_toggle_applied_to_current_question_is_consumed(self):
+        self.arm()
+        settings, modifiers = update_host_settings_with_modifiers(
+            self.session, {"bomb_mode": True}, max_participants_cap=200
+        )
+        self.assertTrue(modifiers["applied"])
+        self.assertTrue(resolve_question_config(self.session, self.question).is_bomb)
+        self.assertFalse(settings["bomb_mode"])  # cari suala «xərcləndi»
+        # Eyni ikona yenidən basmaq (cavab yoxdur) cari sualdan bombanı götürür.
+        settings, modifiers = update_host_settings_with_modifiers(
+            self.session, {"bomb_mode": False}, max_participants_cap=200
+        )
+        self.assertTrue(modifiers["applied"])
+        self.assertFalse(modifiers["is_bomb"])
+        self.assertFalse(resolve_question_config(self.session, self.question).is_bomb)
+
     def test_toggle_after_an_answer_is_deferred_to_next_question(self):
         self.arm()
         self.submit(self.correct_option)
@@ -154,6 +187,7 @@ class PowerModeRoundTests(TestCase):
         self.assertFalse(modifiers["applied"])
         self.assertFalse(modifiers["is_bomb"])
         self.assertFalse(resolve_question_config(self.session, self.question).is_bomb)
+        self.assertTrue(_settings["bomb_mode"])  # növbəti sual üçün silahlı qalır
         # Növbəti nəşrdə canlı ayar işləyir.
         freeze_question_config(self.session, self.question)
         self.assertTrue(resolve_question_config(self.session, self.question).is_bomb)
@@ -183,6 +217,6 @@ class PowerModeRoundTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         body = response.json()
-        self.assertTrue(body["settings"]["double_mode"])
+        self.assertFalse(body["settings"]["double_mode"])  # cavabsız cari suala tətbiq olundu → istehlak
         self.assertTrue(body["modifiers"]["applied"])
         self.assertTrue(body["modifiers"]["is_double"])

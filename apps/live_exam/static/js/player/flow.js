@@ -323,6 +323,7 @@ export function handleSocketMessage(message) {
         case "question_published":
             if (!shouldApplyTimelinePayload(data)) break;
             rememberTimelinePayload(data);
+            if (data.settings && applySessionSettings(data.settings)) renderPlayerIdentity();
             if (isPendingQuestion(data.question)) {
                 enterLateJoinWait(null);
                 break;

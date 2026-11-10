@@ -37,6 +37,11 @@ let lastExplosionKey = "";
 let lastFuseKey = "";
 
 const settingOn = (key) => Boolean(state.sessionSettings?.[key]);
+// Cari sualda qayda həqiqətən aktivdirmi (serverin dondurulmuş bayrağı).
+const liveOn = (key) => (key === "bomb_mode" ? isBombQuestion(state.currentQuestion) : isDoubleQuestion(state.currentQuestion));
+// Düymənin göstərdiyi vəziyyət: sual gedərkən — cari sual; lobbi/reveal-də — növbəti sual üçün silahlanıb.
+// 2026-11-10 (sahib): rejim BİR sual üçündür — nəşrdə server bayrağı söndürür, hər sual yenidən basılır.
+const effectiveOn = (key) => (state.sessionState === "question" ? liveOn(key) : settingOn(key));
 
 /* ── Səhnə ambiyansı ─────────────────────────────────────────────── */
 
@@ -129,9 +134,11 @@ export function handleQuestionModifiers(data) {
 
 function toastModifiers(modifiers, key, on) {
     if (!modifiers) {
-        if (state.sessionState === "question" || state.sessionState === "reveal") {
-            showToast(tr("powerNextQuestion", "Növbəti sualdan keçərlidir"), "info", 2600);
-        }
+        showToast(
+            `${modeLabel(key)}: ${on ? tr("powerArmedNext", "növbəti sual üçün aktivləşdi") : tr("powerDisarmedNext", "növbəti sual üçün söndürüldü")}`,
+            on ? "ok" : "info",
+            2600
+        );
         return;
     }
     if (modifiers.applied) {
@@ -142,13 +149,13 @@ function toastModifiers(modifiers, key, on) {
             2600
         );
     } else {
-        showToast(tr("powerDeferred", "Bu suala artıq cavab var — dəyişiklik növbəti sualdan keçərlidir"), "info", 3400);
+        showToast(tr("powerDeferred", "Bu suala artıq cavab var — növbəti sual üçün aktivləşdi"), "info", 3400);
     }
 }
 
 async function toggleSetting(key, button) {
     if (!controlsEnabled() || !CONFIG?.urls?.settings || pending.has(key)) return;
-    const on = !settingOn(key);
+    const on = !effectiveOn(key);
     pending.add(key);
     renderControls();
     let result = null;
@@ -201,20 +208,16 @@ function kick(button, key, on) {
 
 function statusText() {
     const question = state.currentQuestion;
-    const inRound = state.sessionState === "question" || state.sessionState === "reveal";
     const armed = KEYS.filter(settingOn);
-    if (!armed.length) return tr("powerStatusOff", "Rejimlər söndürülüb");
-    if (!inRound || !question) {
-        return tr("powerStatusNext", "Növbəti sualdan: {modes}").replace("{modes}", armedLabel(armed));
+    if (state.sessionState === "question" && question) {
+        const current = KEYS.filter(liveOn).map((key) => (key === "bomb_mode" ? tr("bombBadge", "Bomba sualı") : tr("doubleBadge", "×2 xal")));
+        const now = current.length
+            ? tr("powerStatusCurrent", "Cari sual: {modes}").replace("{modes}", current.join(" · "))
+            : tr("powerStatusCurrentNone", "Cari sual: rejim yoxdur");
+        return armed.length ? `${now} · ${tr("powerStatusNext", "Növbəti sual: {modes}").replace("{modes}", armedLabel(armed))}` : now;
     }
-    const current = [];
-    if (isBombQuestion(question)) current.push(tr("bombBadge", "Bomba sualı"));
-    if (isDoubleQuestion(question)) current.push(tr("doubleBadge", "×2 xal"));
-    const now = current.length
-        ? tr("powerStatusCurrent", "Cari sual: {modes}").replace("{modes}", current.join(" · "))
-        : tr("powerStatusCurrentNone", "Cari sual: rejim yoxdur");
-    const pendingModes = KEYS.filter((key) => settingOn(key) !== (key === "bomb_mode" ? isBombQuestion(question) : isDoubleQuestion(question)));
-    return pendingModes.length ? `${now} · ${tr("powerNextQuestion", "Növbəti sualdan keçərlidir")}` : now;
+    if (!armed.length) return tr("powerStatusOff", "Rejim seçilməyib — hər sual üçün ikona bas");
+    return tr("powerStatusNext", "Növbəti sual: {modes}").replace("{modes}", armedLabel(armed));
 }
 
 function armedLabel(keys) {
@@ -263,19 +266,22 @@ export function renderControls() {
         dock.hidden = !visible;
         dock.querySelectorAll("[data-power-toggle]").forEach((button) => {
             const key = button.dataset.powerToggle;
-            const on = settingOn(key);
+            const on = effectiveOn(key);
+            const inQuestion = state.sessionState === "question";
             button.classList.toggle("is-on", on);
             button.classList.toggle("is-busy", pending.has(key));
+            // Sual gedərkən növbəti sual üçün silahlanıb (cavab var idi) — kiçik «növbəti» nişanı.
+            button.classList.toggle("is-armed-next", inQuestion && settingOn(key) && !liveOn(key));
             if (controlsEnabled()) button.disabled = pending.has(key);
             button.setAttribute("aria-pressed", on ? "true" : "false");
-            const stateLabel = on ? tr("powerOn", "açıq") : tr("powerOff", "bağlı");
+            const stateLabel = on
+                ? inQuestion ? tr("powerOnCurrent", "bu sualda") : tr("powerOnNext", "növbəti sual")
+                : inQuestion && settingOn(key) ? tr("powerOnNext", "növbəti sual") : tr("powerOff", "bağlı");
             button.setAttribute("aria-label", `${modeLabel(key)}: ${stateLabel}`);
             button.title = button.getAttribute("aria-label");
             const stateEl = button.querySelector("[data-power-state]");
             if (stateEl && stateEl.textContent !== stateLabel) stateEl.textContent = stateLabel;
-            // Cari sualda həqiqətən aktivdirmi (serverin dondurulmuş bayrağı) — «canlı» nöqtə.
-            const live = state.sessionState === "question" && (key === "bomb_mode" ? isBombQuestion(state.currentQuestion) : isDoubleQuestion(state.currentQuestion));
-            button.classList.toggle("is-live", Boolean(live));
+            button.classList.toggle("is-live", inQuestion && liveOn(key));
         });
     }
     const status = document.querySelector("[data-power-status]");

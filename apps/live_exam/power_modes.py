@@ -1,18 +1,20 @@
 """Canlı oyunun «güc rejimləri» (sahib 2026-11-10): 💣 Bomba rejimi, ×2 Xal rejimi, final rəqs şousu.
 
-* ``bomb_mode`` — açıq olanda NƏŞR olunan hər sual bomba sualıdır (per-sual ``bomb_questions``
-  siyahısı ilə BİRLİKDƏ: hər ikisi «və ya» ilə birləşir). Səhv / qismən cavab bu oyundakı xalı
-  sıfırlayır (bax :mod:`apps.live_exam.bombs`).
-* ``double_mode`` — açıq olanda nəşr olunan sualda qazanılan xal ``DOUBLE_MULTIPLIER`` dəfə artır
-  (düzgün və qismən düzgün cavab; səhv cavab onsuz da 0 xaldır). Bomba ilə birlikdə işləyə bilər:
-  düzgün → 2×, səhv → sıfırlanma.
+* ``bomb_mode`` — BİR SUAL ÜÇÜN «silahlanma» (sahib 2026-11-10: «hər sualda tək-tək aktivləşməlidir»):
+  aparıcı ikona basır → növbəti nəşr olunan sual bomba sualıdır və bayraq nəşrdə İSTEHLAK olunur
+  (``consume_power_modes``) — 2-ci sual üçün yenidən basılmalıdır. Per-sual ``bomb_questions`` siyahısı
+  ilə «və ya» birləşir. Səhv / qismən cavab bu oyundakı xalı sıfırlayır (bax :mod:`apps.live_exam.bombs`).
+* ``double_mode`` — eyni bir-sual qaydası: növbəti sualda qazanılan xal ``DOUBLE_MULTIPLIER`` dəfə artır
+  (düzgün və qismən düzgün cavab; səhv cavab onsuz da 0 xaldır), nəşrdə istehlak olunur. Bomba ilə
+  birlikdə işləyə bilər: düzgün → 2×, səhv → sıfırlanma.
 * ``finale_dance`` — final səhnəsində avatarların rəqs şousu (yalnız təqdimat qatı, bal yoxdur).
 
 ƏDALƏT QAYDASI. Rejim bayraqları sual NƏŞR olunanda digər qaydalarla birgə ``_question_config``-da
 dondurulur (``domain.question_config``). Aparıcı rejimi oyun gedərkən dəyişsə:
 
 * cari suala HƏLƏ heç bir cavab qəbul olunmayıbsa (giriş sayı, oxunma vaxtı, pəncərənin ilk anları) —
-  dondurulmuş qayda yenilənir və hamıya ``question_modifiers`` hadisəsi gedir (ekranlar dərhal dəyişir);
+  dondurulmuş qayda yenilənir, bayraq istehlak olunur və hamıya ``question_modifiers`` hadisəsi gedir
+  (ekranlar dərhal dəyişir);
 * ən azı bir cavab varsa — cari sualın qaydası DƏYİŞMİR (hamı eyni qayda ilə qiymətləndirilir), yeni
   dəyər növbəti sualdan keçərlidir; aparıcıya «növbəti sualdan» bildirişi qaytarılır.
 
@@ -67,3 +69,20 @@ def build_question_modifiers_payload(question_id: int, config, *, applied: bool)
         "applied": bool(applied),
         **modifier_fields(config),
     }
+
+
+def consume_power_modes(session) -> bool:
+    """Bir-sual bayraqlarını söndürür (nəşrdə / cari suala tətbiqdə). ``True`` — nəsə dəyişdi.
+
+    Çağıran kilid altındadır və ``host_settings``-i özü saxlayır. Dondurulmuş ``_question_config``
+    toxunulmur — cari sualın qaydası artıq oradadır.
+    """
+    raw = getattr(session, "host_settings", None)
+    if not isinstance(raw, dict):
+        return False
+    changed = False
+    for key in POWER_MODE_SETTING_KEYS:
+        if raw.get(key):
+            raw[key] = False
+            changed = True
+    return changed

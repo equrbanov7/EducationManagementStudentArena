@@ -93,6 +93,8 @@ function onPlayMessage(event) {
             if (!shouldApplyTimelinePayload(data)) return;
             rememberTimelinePayload(data);
             markStateMutation();
+            // 2026-11-10: nəşrdə istehlak olunmuş bir-sual bayraqları (bomb_mode / double_mode) payload-da gəlir.
+            if (data.settings) applySessionSettings(data.settings);
             const sameQuestion = state.currentQuestion && Number(state.currentQuestion.id) === Number(data.question?.id);
             // 2026-10-08 (L3): server bu suala cavab verməli oyunçu sayını göndərir (gec qoşulanlar növbəti sualdan).
             const total = data.total_players != null ? Number(data.total_players) : state.totalPlayers;

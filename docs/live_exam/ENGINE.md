@@ -193,6 +193,12 @@ verən ikon olsun… settings-də yandırıb-söndürmək olsun… final səhnə
   keçiddir; bomba və ×2 həm də **səhnənin öz ikonlarıdır** (`.hx-power-dock`, aşağı sağ künc, `host_lobby/powerups.js`):
   klik → yandır/söndür (fitil alışması / sikkə çevrilməsi + səs). Per-sual `bomb_questions` siyahısı qalır və
   `bomb_mode` ilə «və ya» birləşir.
+* **Bir sual üçün** (sahib 2026-11-10 axşam: «hər sualda tək-tək aktivləşməlidir»): `bomb_mode` / `double_mode`
+  «silahlanma»dır — nəşrdə qayda dondurulur və bayraq `power_modes.consume_power_modes` ilə SÖNDÜRÜLÜR (nəşr
+  payload-ında `settings` ictimai görünüşü gedir, klientlər ayrıca sorğusuz görür); 2-ci sual üçün ikona yenidən
+  basılır. Sual gedərkən cavabsız suala tətbiq olunanda da bayraq istehlak olunur; cavab varsa silahlı qalır və
+  növbəti nəşrdə xərclənir. Səhnə ikonu sual gedərkən CARİ sualın dondurulmuş bayrağını, lobbi/reveal-də növbəti
+  sual üçün silahlanmanı göstərir (`effectiveOn`); «növbəti sual» nişanı — cavablı sualda sonrakı üçün silahlanıb.
 * **Dondurma.** Hər iki rejim sual NƏŞR olunanda `_question_config`-a yazılır (`is_bomb`, `is_double`) və raund boyu
   dəyişmir. Aparıcı rejimi oyun gedərkən dəyişsə (`services.update_host_settings_with_modifiers` →
   `_sync_question_modifiers`): cari suala **cavab yoxdursa** qayda yenidən dondurulur (vaxt saxlanır,

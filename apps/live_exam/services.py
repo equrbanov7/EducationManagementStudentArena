@@ -58,11 +58,16 @@ from apps.live_exam.domain.session import (
     set_question_phase_override,
 )
 from apps.live_exam.models import LiveAnswer, LivePlayer, LiveSession
-from apps.live_exam.power_modes import POWER_MODE_SETTING_KEYS, build_question_modifiers_payload
+from apps.live_exam.power_modes import (
+    POWER_MODE_SETTING_KEYS,
+    build_question_modifiers_payload,
+    consume_power_modes,
+)
 from apps.live_exam.reveal import build_final_bundle, build_reveal_bundle
 from apps.live_exam.roster import eligible_players
 from apps.live_exam.session_settings import (
     get_host_session_settings,
+    get_session_settings,
     public_session_settings,
     update_session_settings,
 )
@@ -139,10 +144,14 @@ def publish_question(locked: LiveSession, exam_question, *, idx: int, total: int
     """(Kilid altında) sualı nəşr edir: qaydanı dondurur, vaxtları yazır, paketi qaytarır."""
     clear_question_phase_override(locked)
     freeze_question_config(locked, exam_question)
+    # 2026-11-10: bomba / ×2 bir sual üçündür — qayda donduruldu, bayraq söndürülür (hər sual yenidən basılır).
+    consume_power_modes(locked)
     locked.state = LiveSession.STATE_QUESTION
     locked.current_index = idx
     locked.current_question_id = exam_question.id
     payload, started_at, ends_at = build_question_payload(locked, exam_question, idx=idx, total=total)
+    # Klientlər istehlak olunmuş bayraqları ayrıca sorğusuz görsün (ictimai görünüş).
+    payload["settings"] = get_session_settings(locked)
     locked.question_started_at = started_at
     locked.question_ends_at = ends_at
     locked.save(
@@ -488,6 +497,7 @@ def _sync_question_modifiers(locked: LiveSession) -> dict[str, Any] | None:
     if answered:
         return build_question_modifiers_payload(exam_question.id, frozen, applied=False)
     refreeze_question_modifiers(locked, exam_question)
+    consume_power_modes(locked)  # bir-sual bayrağı cari suala «xərcləndi»
     locked.save(update_fields=["host_settings"])
     return build_question_modifiers_payload(
         exam_question.id, resolve_question_config(locked, exam_question), applied=True
@@ -509,6 +519,8 @@ def update_host_settings_with_modifiers(
         settings = update_session_settings(locked, raw_updates, max_participants_cap=max_participants_cap)
         if touches_modes:
             modifiers = _sync_question_modifiers(locked)
+            if modifiers is not None and modifiers.get("applied"):
+                settings = get_host_session_settings(locked)
     _sync_instance(session, locked, ("host_settings", "presentation_style"))
 
     public = public_session_settings(settings)
