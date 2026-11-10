@@ -90,7 +90,7 @@ def _record(cohort, record_id):
 
 
 def _authorize_record(actor, cohort, record, sources):
-    if not language_cohorts.can_manage(actor, cohort):
+    if not language_cohorts.can_manage_as_staff(actor, cohort):
         raise PermissionDenied
     if guest_roster.unit_in_scope(actor, cohort.organization, record.group_id):
         return
@@ -237,7 +237,7 @@ def place_student(*, cohort, record_id, actor, reason, source_enrollment_id=None
 def remove_student(*, cohort, enrollment_id, actor, reason):
     reason = _reason(reason)
     cohort = _cohort(cohort)
-    if not language_cohorts.can_manage(actor, cohort):
+    if not language_cohorts.can_manage_as_staff(actor, cohort):
         raise PermissionDenied
     enrollment = Enrollment.objects.get(
         organization=cohort.organization, offering=cohort.offering, pk=enrollment_id, status=Enrollment.Status.ENROLLED
@@ -256,7 +256,7 @@ def remove_student(*, cohort, enrollment_id, actor, reason):
     get_user_model().objects.select_for_update().only("pk").get(pk=record.student_id)
     CourseOffering.objects.select_for_update().get(organization=cohort.organization, pk=cohort.offering_id)
     cohort = _cohort(cohort)
-    if not language_cohorts.can_manage(actor, cohort):
+    if not language_cohorts.can_manage_as_staff(actor, cohort):
         raise PermissionDenied
     enrollment = (
         Enrollment.objects.select_for_update(of=("self",))

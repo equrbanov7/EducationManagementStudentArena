@@ -224,7 +224,9 @@ def lesson_topic_choices(offering):
     rows = syllabus_topic_rows(offering)
     if rows:
         return [row["title"] for row in rows]
-    return _course_topic_titles(offering)
+    from .journal_topic_fallback import fallback_topic_rows
+
+    return [row["title"] for row in fallback_topic_rows(offering)]
 
 
 def lesson_topic_meta(offering, lessons):
@@ -247,7 +249,11 @@ def lesson_topic_meta(offering, lessons):
         covered_kinds.setdefault(topic, set()).add(lesson.kind)
     rows = syllabus_topic_rows(offering)
     if not rows:
-        rows = [{"title": title, "kinds": (), "week": None} for title in _course_topic_titles(offering)]
+        # 2026-11-10 (sahib): təsdiqlənmiş sillabus yoxdursa mövzular ehtiyat mənbədən (LMS kursu → öz
+        # təsdiqlənməmiş sillabusu → eyni fənnin təsdiqlənmiş sillabusu) — bax ``journal_topic_fallback``.
+        from .journal_topic_fallback import fallback_topic_rows
+
+        rows = fallback_topic_rows(offering)
     meta = [
         {
             "title": row["title"],
@@ -257,6 +263,7 @@ def lesson_topic_meta(offering, lessons):
             "kinds_attr": " ".join(row["kinds"]),
             "covered_kinds": sorted(covered_kinds.get(row["title"], ())),
             "week": row.get("week"),
+            "fallback": bool(row.get("fallback")),
         }
         for row in rows
     ]

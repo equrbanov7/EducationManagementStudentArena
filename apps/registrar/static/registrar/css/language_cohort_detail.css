@@ -1,0 +1,126 @@
+/* ═══ Səviyyə qrupu detal səhifəsi — 2026-11-10 redizayn ════════════════════
+   Sahib: «səliqəyə sal, modern formada, UX/UI prinsiplərinə fikir ver». Ortaq
+   `language_cohorts.css`-dən SONRA yüklənir; yalnız `design-tokens.css` tokenləri.
+     .lcd-hero    — başlıq kartı: işarə + ad + səviyyə, say + «Jurnalı aç», fakt çipləri, qrup seçici
+     .lcd-table   — tələbə cədvəli: nömrə, ad, əsas qrup, sağa düzlənmiş əməl
+     .lcd-remove  — «Qrupdan çıxar»: kontur-təhlükə düyməsi → səbəb + təsdiq forması
+   Mobil (≤640px): cədvəl sətirləri kart kimi yığılır. Inline stil/skript YOXDUR. */
+
+.lc-page--detail .lc-crumbs { margin-bottom: var(--ems-sp-3); }
+
+/* ── Başlıq kartı ─────────────────────────────────────────────────────────── */
+.lcd-hero {
+    display: grid; gap: var(--ems-sp-4); margin: 0 0 var(--ems-sp-4);
+    padding: var(--ems-sp-5); border: 1px solid var(--ems-border); border-radius: var(--ems-r-2xl);
+    background: var(--ems-bg); box-shadow: var(--ems-sh-card);
+}
+.lcd-hero__top { display: flex; align-items: center; gap: var(--ems-sp-4); flex-wrap: wrap; }
+.lcd-hero__title { display: flex; align-items: center; flex-wrap: wrap; gap: var(--ems-sp-2) var(--ems-sp-3); min-width: 0; flex: 1 1 220px; }
+.lcd-hero__title .lc-title { overflow-wrap: anywhere; }
+.lcd-level {
+    display: inline-flex; align-items: center; padding: 4px 12px; border-radius: var(--ems-r-pill);
+    background: var(--ems-success-bg); color: var(--ems-success-700); border: 1px solid var(--ems-success-bd);
+    font-size: var(--ems-fs-xs); font-weight: 800; letter-spacing: .05em; text-transform: uppercase; white-space: nowrap;
+}
+.lcd-hero__actions { display: flex; align-items: center; gap: var(--ems-sp-3); margin-left: auto; }
+.lcd-stat {
+    display: inline-flex; align-items: baseline; gap: 6px; padding: 0 var(--ems-sp-3); min-height: 40px;
+    border-right: 1px solid var(--ems-border); color: var(--ems-text-muted); font-size: var(--ems-fs-sm); font-weight: 600;
+    line-height: 40px; white-space: nowrap;
+}
+.lcd-stat b { color: var(--ems-text); font-size: var(--ems-fs-xl); font-weight: 800; font-variant-numeric: tabular-nums; }
+
+/* Fakt çipləri: etiket üstdə kiçik, dəyər altda — eyni hündürlükdə, sətirə sığmayanda sarınır */
+.lcd-facts {
+    margin: 0; display: grid; gap: var(--ems-sp-2);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+.lcd-fact {
+    min-width: 0; padding: var(--ems-sp-2) var(--ems-sp-3); border-radius: var(--ems-r-lg);
+    background: var(--ems-bg-subtle); border: 1px solid var(--ems-border);
+}
+.lcd-fact dt { margin: 0 0 2px; font-size: var(--ems-fs-xs); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ems-neutral-500); }
+.lcd-fact dd { margin: 0; font-weight: 700; color: var(--ems-text); overflow-wrap: anywhere; line-height: 1.35; }
+
+/* Qrup seçici — başlıq kartının alt zolağı */
+.lcd-picker { display: grid; gap: 6px; padding-top: var(--ems-sp-4); border-top: 1px solid var(--ems-border); }
+.lcd-picker__row { display: flex; gap: var(--ems-sp-2); align-items: stretch; flex-wrap: wrap; }
+.lcd-picker__select { flex: 1 1 260px; min-width: 0; max-width: 520px; }
+
+/* Qayda zolağı — daha yığcam */
+.lcd-rule { font-size: var(--ems-fs-sm); }
+
+/* ── Tələbə cədvəli ───────────────────────────────────────────────────────── */
+.lcd-table-card { padding: 0; overflow-x: auto; }
+.lcd-table { min-width: 0; }
+.lcd-table th, .lcd-table td { vertical-align: middle; }
+.lcd-table thead th:first-child { border-top-left-radius: var(--ems-r-2xl); }
+.lcd-table thead th:last-child { border-top-right-radius: var(--ems-r-2xl); }
+.lcd-table tbody tr { transition: background-color .12s ease; }
+.lcd-table tbody tr:hover { background: var(--ems-primary-50); }
+.lcd-col-num { width: 48px; color: var(--ems-neutral-500); font-variant-numeric: tabular-nums; text-align: right; }
+.lcd-table thead .lcd-col-num { text-align: right; }
+.lcd-student { font-weight: 700; color: var(--ems-text); }
+.lcd-col-group { white-space: nowrap; }
+.lcd-col-action { width: 1%; white-space: nowrap; text-align: right; }
+.lcd-table td.lcd-col-action form { min-width: 0; }
+.lcd-muted { color: var(--ems-neutral-400); }
+
+/* «Qrupdan çıxar» — kontur-təhlükə düyməsi; açılanda səbəb + təsdiq */
+.lcd-remove { display: inline-block; text-align: left; }
+.lcd-remove > summary.lcd-btn-danger-ghost {
+    list-style: none; background: transparent; color: var(--ems-danger-700);
+    border-color: var(--ems-danger-bd); font-weight: 700;
+}
+.lcd-remove > summary.lcd-btn-danger-ghost::-webkit-details-marker { display: none; }
+.lcd-remove > summary.lcd-btn-danger-ghost:hover,
+.lcd-remove[open] > summary.lcd-btn-danger-ghost { background: var(--ems-danger-bg); }
+.lcd-remove[open] > summary { margin-bottom: var(--ems-sp-2); }
+.lcd-remove__form {
+    width: min(340px, 78vw); padding: var(--ems-sp-3); white-space: normal;
+    border: 1px solid var(--ems-danger-bd); border-radius: var(--ems-r-lg); background: var(--ems-bg);
+}
+.lcd-remove__form .lc-btn { justify-self: end; }
+
+/* ── Mobil ────────────────────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+    .lcd-hero { padding: var(--ems-sp-4); }
+    .lcd-hero__actions { margin-left: 0; width: 100%; }
+    .lcd-hero__actions .lc-btn { flex: 1 1 auto; width: auto; }
+    .lcd-picker__row .lc-btn { flex: 1 1 100%; }
+    .lcd-picker__select { max-width: none; }
+    .lcd-table .lc-btn { width: auto; }
+}
+@media (max-width: 640px) {
+    .lcd-table thead { display: none; }
+    .lcd-table, .lcd-table tbody { display: block; }
+    .lcd-table tbody tr {
+        display: grid; grid-template-columns: auto 1fr; gap: 4px var(--ems-sp-3); align-items: center;
+        padding: var(--ems-sp-3) var(--ems-sp-4); border-bottom: 1px solid var(--ems-border);
+    }
+    .lcd-table tbody tr:last-child { border-bottom: 0; }
+    .lcd-table tbody tr > * { padding: 0; border: 0; }
+    .lcd-table .lcd-col-num { width: auto; grid-row: span 2; align-self: start; }
+    .lcd-table .lcd-col-action { grid-column: 2; width: auto; text-align: left; }
+    .lcd-table .lc-empty { grid-column: 1 / -1; }
+    .lcd-table .lcd-remove, .lcd-table .lcd-remove > summary { width: 100%; }
+    .lcd-remove__form { width: 100%; }
+}
+
+/* ── Reyestr (siyahı) səhifəsi — eyni dil (2026-11-10) ───────────────────── */
+.lcd-hero__title--stack { flex-direction: column; align-items: flex-start; gap: 4px; }
+.lcd-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--ems-sp-2); }
+.lcd-statcard {
+    display: flex; align-items: baseline; gap: var(--ems-sp-2); padding: var(--ems-sp-3) var(--ems-sp-4);
+    border-radius: var(--ems-r-lg); background: var(--ems-primary-50); border: 1px solid var(--ems-primary-100);
+    color: var(--ems-primary-800); font-size: var(--ems-fs-sm); font-weight: 600;
+}
+.lcd-statcard b { font-size: var(--ems-fs-2xl); font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.lcd-statcard--muted { background: var(--ems-bg-subtle); border-color: var(--ems-border); color: var(--ems-neutral-700); }
+.lcd-cohort .lc-cohort__period { display: inline-flex; align-items: center; gap: 6px; }
+.lcd-cohort .lc-actions .lc-btn { flex: 1 1 auto; }
+.lcd-table--existing th[scope="row"] { font-weight: 700; }
+@media (max-width: 640px) {
+    .lcd-table--existing tbody tr { grid-template-columns: 1fr; }
+    .lcd-table--existing .lcd-col-action { grid-column: 1; }
+}

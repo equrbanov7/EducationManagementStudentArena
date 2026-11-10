@@ -21,7 +21,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import pgettext
 
-from core.upload_markup import MARKUP_EXTENSIONS, guessed_type_is_markup
+from core.upload_markup import MARKUP_EXTENSIONS, guessed_type_is_markup, server_side_mime_allowed
 
 DEFAULT_MAX_UPLOAD_SIZE_MB = 25
 
@@ -356,7 +356,7 @@ def validate_uploaded_file(
 
     mime_type = _resolve_mime_type(uploaded_file)
     if not mime_type:
-        raise ValidationError(pgettext("upload.security.error", "Faylın MIME tipi müəyyən edilə bilmədi."))
+        raise ValidationError(pgettext("upload.security.error", "Faylın tipi müəyyən edilə bilmədi."))
 
     if mime_type in BLOCKED_MIME_TYPES:
         raise ValidationError(pgettext("upload.security.error", "Bu MIME tipi təhlükəsizlik səbəbi ilə bloklanıb."))
@@ -390,10 +390,9 @@ def validate_uploaded_file(
     elif verify_image:
         _verify_image_with_pillow(uploaded_file, extension)
 
-    allowed_mime_set = set(allowed_mime_types or DEFAULT_ALLOWED_MIME_TYPES)
-    has_allowed_prefix = any(mime_type.startswith(prefix) for prefix in (allowed_mime_prefixes or ()))
-    if mime_type not in allowed_mime_set and not has_allowed_prefix:
-        raise ValidationError(pgettext("upload.security.error", "Bu MIME tipi dəstəklənmir."))
+    allowed = (set(allowed_mime_types or DEFAULT_ALLOWED_MIME_TYPES), tuple(allowed_mime_prefixes or ()))
+    if not server_side_mime_allowed(mime_type, getattr(uploaded_file, "name", ""), allowed, BLOCKED_MIME_TYPES):
+        raise ValidationError(pgettext("upload.security.error", "Bu fayl tipi dəstəklənmir."))
 
 
 def randomize_uploaded_filename(uploaded_file):

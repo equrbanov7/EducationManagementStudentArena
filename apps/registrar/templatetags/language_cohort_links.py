@@ -8,7 +8,10 @@
   (``language_cohorts.department_choices`` / səviyyə açılışının müəllimi); nəticə
   bir request-də BİR dəfə hesablanır (`request._ems_language_cohort_nav`) — sidebar
   bir neçə şablonda eyni açarı oxuyur.
-* ``language_cohort_manage_entry`` — jurnal qridində «səviyyə qrupunu idarə et» keçidi.
+* ``language_cohort_manage_entry`` — jurnal alət zolağında «Xarici dil səviyyə qrupları» düyməsi.
+  Sahib 2026-11-10: müəllimə GÖRÜNMÜR — yalnız kohortun kafedrası `journal.roster` əhatəsində
+  olan heyətə (laborant, tyutor, dekanlıq, kafedra müdiri …), bax
+  ``language_cohorts.can_manage_as_staff``. Səhifənin öz qapısı (``can_manage``) dəyişməyib.
 """
 
 from django import template
@@ -16,7 +19,7 @@ from django.db.models import Q
 from django.urls import reverse
 
 from apps.registrar.integrity import is_authorized_instructor
-from apps.registrar.language_cohorts import can_manage, department_choices
+from apps.registrar.language_cohorts import can_manage_as_staff, department_choices
 from apps.registrar.language_levels import LEVEL_RE
 from apps.registrar.models import CourseOffering, LanguageLevelCohort
 
@@ -92,4 +95,4 @@ def language_cohort_manage_entry(offering, user):
         .select_related("organization", "offering")
         .first()
     )
-    return {"cohort": cohort if cohort is not None and can_manage(user, cohort) else None}
+    return {"cohort": cohort if cohort is not None and can_manage_as_staff(user, cohort) else None}

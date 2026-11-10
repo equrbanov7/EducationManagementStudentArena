@@ -74,8 +74,10 @@ def _client(user, organization):
 # ── Sənəd hədləri ─────────────────────────────────────────────────────────────
 
 
-def test_new_attachment_limits_are_ten_files_of_25_mb():
-    assert (MAX_ATTACHMENTS_PER_ACTION, MAX_ATTACHMENT_MB) == (10, 25)
+def test_new_attachment_limits_are_ten_files_of_50_mb():
+    # 2026-11-10 (sahib): 25 → 50 MB, PowerPoint əlavə olundu.
+    assert (MAX_ATTACHMENTS_PER_ACTION, MAX_ATTACHMENT_MB) == (10, 50)
+    assert {".ppt", ".pptx", ".gif"} <= ALLOWED_ATTACHMENT_EXTENSIONS
     assert {".doc", ".xls", ".xlsx", ".docx", ".pdf", ".zip"} <= ALLOWED_ATTACHMENT_EXTENSIONS
     # Məzmunu validator-da yoxlanmayan tiplər QƏSDƏN əlavə olunmayıb.
     assert not {".heic", ".txt"} & ALLOWED_ATTACHMENT_EXTENSIONS
@@ -93,18 +95,18 @@ def test_eleven_files_are_rejected_not_silently_dropped(world):
     assert not Application.objects.filter(organization=world["organization"]).exists()
 
 
-def test_file_over_25_mb_is_rejected(world):
+def test_file_over_50_mb_is_rejected(world):
     big = SimpleUploadedFile(
-        "boyuk.pdf", PDF_BYTES + b"0" * (25 * 1024 * 1024 + 1 - len(PDF_BYTES)), content_type="application/pdf"
+        "boyuk.pdf", PDF_BYTES + b"0" * (50 * 1024 * 1024 + 1 - len(PDF_BYTES)), content_type="application/pdf"
     )
     with pytest.raises(ValidationError) as excinfo:
         _submit(world, files=[big])
-    assert "25 MB" in str(excinfo.value)
+    assert "50 MB" in str(excinfo.value)
 
 
-def test_file_of_exactly_25_mb_passes_the_field_validator():
+def test_file_of_exactly_50_mb_passes_the_field_validator():
     exact = SimpleUploadedFile(
-        "tam.pdf", PDF_BYTES + b"0" * (25 * 1024 * 1024 - len(PDF_BYTES)), content_type="application/pdf"
+        "tam.pdf", PDF_BYTES + b"0" * (50 * 1024 * 1024 - len(PDF_BYTES)), content_type="application/pdf"
     )
     validate_uploaded_file(exact, allowed_extensions=ALLOWED_ATTACHMENT_EXTENSIONS, max_size_mb=MAX_ATTACHMENT_MB)
 

@@ -18,12 +18,38 @@ MARKUP_EXTENSIONS = frozenset({".xht", ".xpdl", ".rdf", ".wsdl", ".rss", ".atom"
 _MARKUP_TYPES = frozenset({"application/xml", "text/xml", "text/xsl", "text/html", "application/xml-dtd"})
 
 
+def _is_markup_type(value: str) -> bool:
+    value = (value or "").split(";")[0].strip().lower()
+    return value.endswith("+xml") or value in _MARKUP_TYPES or "javascript" in value or "ecmascript" in value
+
+
 def guessed_type_is_markup(file_name: str) -> bool:
     """Uzantıdan təxmin edilən MIME brauzerdə skript icra edə bilən markup-dırmı."""
     guessed = (mimetypes.guess_type(file_name or "")[0] or "").lower()
     if not guessed:
         return False
-    return guessed.endswith("+xml") or guessed in _MARKUP_TYPES or "javascript" in guessed or "ecmascript" in guessed
+    return _is_markup_type(guessed)
 
 
-__all__ = ["MARKUP_EXTENSIONS", "guessed_type_is_markup"]
+def server_side_mime_allowed(declared: str, file_name: str, allowed, blocked) -> bool:
+    """Bəyan edilən MIME, yoxdursa UZANTIDAN təyin edilən MIME icazəlidirmi.
+
+    2026-11-10 (sahib: «fayl göndərəndə bəzən MIME error deyir»): Windows-da Office/Acrobat qeydiyyatı
+    olmayanda .xlsx/.pdf ``application/octet-stream`` (və ya ``application/x-pdf`` kimi qəribə tiplə) gəlir və
+    real sənəd rədd olunurdu. Çağıran (``upload_security``) uzantını blok/allow-list-dən və məzmun imzasından
+    artıq keçirib — belə halda MIME serverdə uzantıdan götürülür. Uzantıdan tanınmayan tip (``.bin``) və
+    blok-siyahıdakı tip yenə rədd olunur. ``allowed`` = ``(mime dəsti, prefikslər)``."""
+    mimes, prefixes = allowed
+
+    def ok(value):
+        return value in mimes or any(value.startswith(prefix) for prefix in prefixes)
+
+    if ok(declared):
+        return True
+    if _is_markup_type(declared):
+        return False  # brauzer faylı özü HTML/XML/JS kimi bəyan edib — uzantıya keçid YOXDUR
+    guessed = (mimetypes.guess_type(file_name or "")[0] or "").lower()
+    return bool(guessed) and guessed not in blocked and ok(guessed)
+
+
+__all__ = ["MARKUP_EXTENSIONS", "guessed_type_is_markup", "server_side_mime_allowed"]

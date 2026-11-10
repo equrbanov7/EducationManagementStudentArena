@@ -172,7 +172,7 @@ class LanguageCohortTests(_GuestRosterBase):
             organization=self.org, lesson=own_lesson, enrollment=target, status="absent"
         )
         placement.remove_student(
-            cohort=cohort, enrollment_id=target.pk, actor=self.teacher, reason="Səviyyə qrupundan çıxarılır"
+            cohort=cohort, enrollment_id=target.pk, actor=self.coordinator, reason="Səviyyə qrupundan çıxarılır"
         )
         target.refresh_from_db()
         self.assertEqual(target.status, "dropped")
@@ -205,14 +205,20 @@ class LanguageCohortTests(_GuestRosterBase):
         self.assertEqual(target.status, "enrolled")
         self.assertEqual(cohort.placements.count(), 1)
 
-    def test_teacher_can_move_own_authorized_student_but_not_other_home_group_directory(self):
+    def test_teacher_is_read_only_and_cannot_place_or_remove_students(self):
+        """Sahib 2026-11-10: müəllim səviyyə qrupunu yalnız görür; tərkibi heyət idarə edir."""
         cohort = self.create()
-        allowed = list(language_cohort_query.candidate_records(cohort=cohort, actor=self.teacher))
-        self.assertIn(self.host.pk, {r.student_id for r in allowed})
-        self.assertNotIn(self.far_student.pk, {r.student_id for r in allowed})
-        self.move(cohort, actor=self.teacher)
+        with self.assertRaises(PermissionDenied):
+            self.move(cohort, actor=self.teacher)
         with self.assertRaises(PermissionDenied):
             self.move(cohort, student=self.far_student, actor=self.teacher)
+        target = self.move(cohort)  # heyət (koordinator) yerləşdirir
+        with self.assertRaises(PermissionDenied):
+            placement.remove_student(
+                cohort=cohort, enrollment_id=target.pk, actor=self.teacher, reason="Səviyyə qrupundan çıxarılır"
+            )
+        target.refresh_from_db()
+        self.assertEqual(target.status, "enrolled")
 
     def test_wrong_profile_state_missing_father_irrelevant_to_exact_student_ids(self):
         cohort = self.create()
@@ -658,15 +664,18 @@ class LanguageCohortTests(_GuestRosterBase):
         self.assertFalse(cohort.placements.exists())
         self.assertFalse(Enrollment.objects.filter(offering=cohort.offering).exists())
 
-    def test_teacher_readds_own_removed_student_using_explicit_placement_history(self):
+    def test_staff_readds_removed_student_using_explicit_placement_history(self):
+        # Sahib 2026-11-10: tərkibi heyət idarə edir (əvvəl müəllim də edə bilirdi).
         cohort = self.create()
         target = self.move(cohort)
         placement.remove_student(
-            cohort=cohort, enrollment_id=target.pk, actor=self.teacher, reason="Qrup siyahısı yenilənir"
+            cohort=cohort, enrollment_id=target.pk, actor=self.coordinator, reason="Qrup siyahısı yenilənir"
         )
-        candidates = language_cohort_query.candidate_records(cohort=cohort, actor=self.teacher)
+        candidates = language_cohort_query.candidate_records(cohort=cohort, actor=self.coordinator)
         self.assertIn(self.host.pk, {row.student_id for row in candidates})
-        restored = self.move(cohort, actor=self.teacher)
+        with self.assertRaises(PermissionDenied):
+            self.move(cohort, actor=self.teacher)
+        restored = self.move(cohort)
         self.assertEqual(restored.pk, target.pk)
         self.assertEqual(cohort.placements.count(), 3)
 
@@ -698,3 +707,72 @@ class LanguageCohortTests(_GuestRosterBase):
         with self.assertRaises(PermissionDenied):
             self.create(source_offering=foreign_source, confirm_separate=True)
         self.assertEqual(LanguageLevelCohort.objects.count(), before)
+
+    # ── Sahib 2026-11-10: müəllim yalnız baxır; jurnal düyməsi yalnız heyətə ──────────────────
+    def test_staff_rule_excludes_plain_teacher_but_teacher_keeps_view(self):
+        cohort = self.create()
+        self.assertTrue(language_cohorts.can_manage_as_staff(self.coordinator, cohort))
+        self.assertFalse(language_cohorts.can_manage_as_staff(self.teacher, cohort))
+        self.assertFalse(language_cohorts.can_manage_as_staff(self.outsider, cohort))
+        self.assertTrue(language_cohorts.can_manage(self.teacher, cohort))
+
+    def test_teacher_post_add_or_remove_is_403_and_writes_nothing(self):
+        cohort = self.create()
+        target = self.move(cohort)
+        url = reverse("registrar:language_cohort_detail", args=[cohort.pk])
+        client = self._client(self.teacher)
+        before = (Enrollment.objects.filter(status="enrolled").count(), LanguageLevelPlacement.objects.count())
+        remove = client.post(
+            url, {"action": "remove", "enrollment": str(target.pk), "reason": "Müəllim çıxarmaq istəyir"}
+        )
+        self.assertEqual(remove.status_code, 403)
+        record = self.record(self.guest)
+        add = client.post(url, {"action": "place", "record": str(record.pk), "reason": "Müəllim əlavə etmək istəyir"})
+        self.assertEqual(add.status_code, 403)
+        self.assertEqual(
+            before, (Enrollment.objects.filter(status="enrolled").count(), LanguageLevelPlacement.objects.count())
+        )
+
+    def test_teacher_detail_and_list_pages_have_no_management_actions(self):
+        cohort = self.create()
+        self.move(cohort)
+        client = self._client(self.teacher)
+        detail = client.get(reverse("registrar:language_cohort_detail", args=[cohort.pk]))
+        self.assertEqual(detail.status_code, 200)
+        self.assertNotContains(detail, 'name="action"')
+        self.assertNotContains(detail, "Qrupdan çıxar")
+        self.assertNotContains(detail, 'name="q"')
+        self.assertContains(detail, "koordinator / dekanlıq idarə edir")
+        listing = client.get(reverse("registrar:language_cohorts"))
+        self.assertEqual(listing.status_code, 200)
+        self.assertNotContains(listing, "data-lc-manage")
+        self.assertNotContains(listing, 'class="lc-form"')
+        staff_client = self._client(self.coordinator)
+        staff_detail = staff_client.get(reverse("registrar:language_cohort_detail", args=[cohort.pk]))
+        self.assertContains(staff_detail, 'name="action" value="remove"')
+        self.assertContains(staff_detail, 'class="lc-btn lc-btn--primary"')
+        self.assertContains(staff_client.get(reverse("registrar:language_cohorts")), "data-lc-manage")
+
+    def test_journal_toolbar_cohort_button_only_for_staff(self):
+        from django.template import Context, Template
+
+        cohort = self.create()
+        self.move(cohort)
+        marker = "data-jd-language-cohort"
+
+        def entry(user):
+            source = "{% load language_cohort_links %}{% language_cohort_manage_entry offering user %}"
+            return Template(source).render(Context({"offering": cohort.offering, "user": user}))
+
+        self.assertIn(marker, entry(self.coordinator))
+        self.assertNotIn(marker, entry(self.teacher))
+        self.assertNotIn(marker, entry(self.outsider))
+        url = reverse("registrar:journal_detail", args=[cohort.offering_id])
+        teacher_page = self._client(self.teacher).get(url)
+        self.assertEqual(teacher_page.status_code, 200)
+        self.assertContains(teacher_page, 'class="jd2-tabsbar-actions"')
+        self.assertNotContains(teacher_page, marker)
+        staff_page = self._client(self.coordinator).get(url)
+        self.assertEqual(staff_page.status_code, 200)
+        toolbar = staff_page.content.decode().split('class="jd2-tabsbar-actions"', 1)[1].split("</nav>", 1)[0]
+        self.assertIn(marker, toolbar)
