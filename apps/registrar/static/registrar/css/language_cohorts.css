@@ -14,8 +14,9 @@
     max-width: 1120px; margin: 0 auto; padding: var(--ems-sp-5) var(--ems-sp-5) var(--ems-sp-8);
     color: var(--ems-text); font-size: var(--ems-fs-base);
 }
-.lc-page a { color: var(--ems-primary-700); }
-.lc-page a:hover { color: var(--ems-primary-800); }
+/* `.lc-btn` keçidləri öz rəngini saxlayır (2026-11-10: «Jurnalı aç» göy fonda göy mətn idi). */
+.lc-page a:not(.lc-btn) { color: var(--ems-primary-700); }
+.lc-page a:not(.lc-btn):hover { color: var(--ems-primary-800); }
 .lc-page :is(a, button, summary, input, select):focus-visible { outline: 3px solid var(--ems-primary-400); outline-offset: 2px; }
 
 /* ── Breadcrumb ───────────────────────────────────────────────────────────── */

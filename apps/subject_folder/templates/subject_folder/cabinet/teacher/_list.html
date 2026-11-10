@@ -6,30 +6,34 @@
 {% include "partials/ems_ui/_filter_bar.html" with filter_section="subject-folders" filter_prefix="sf_" filter_fields=sp.filter_fields filter_count_label=sp.filter_count_label filter_auto=True filter_bootstrap=True %}
 <div class="sfc-listwrap" data-ems-filter-target>
 {% if sp.folders %}
+    {# Sahib 2026-11-10: kart quruluşu SABİT — başlıq sətri (fənn + status), ad, meta (semestr · yaradan · yenilənmə), #}
+    {# yığcam sayğaclar, altda əməl. Kartlar sətirdə eyni hündürlükdədir (grid stretch + flex sütun, foot aşağıda). #}
     <ul class="sfc-grid" role="list">
         {% for row in sp.folders %}
-        <li class="ems-card sfc-card">
-            <div class="ems-card__head sfc-card__head">
-                <div class="sfc-card__titles">
-                    <p class="sfc-eyebrow">{{ row.folder.subject.name }}</p>
-                    <h2 class="ems-card__title sfc-card__title"><a href="{{ row.url }}">{{ row.folder.title }}</a></h2>
-                    <p class="ems-card__sub">{{ row.period_label }}</p>
-                </div>
-                <span class="ems-badge ems-badge--{{ row.chip.tone }}">{{ row.chip.label }}</span>
+        <li class="ems-card sfc-card sfc-fcard sfc-fcard--{{ row.chip.key }}">
+            <div class="sfc-card__top">
+                <p class="sfc-eyebrow sfc-card__subject" title="{{ row.folder.subject.name }}">{{ row.folder.subject.name }}</p>
+                <span class="ems-badge ems-badge--{{ row.chip.tone }} sfc-card__status">{{ row.chip.label }}</span>
             </div>
-            <div class="ems-card__body">
-                <dl class="sfc-stats">
-                    <div class="sfc-stats__item"><dt>{% trans "Mövzu" context "subject_folder.ui" %}</dt><dd>{{ row.counts.topics }}</dd></div>
-                    <div class="sfc-stats__item"><dt>{% trans "Material" context "subject_folder.ui" %}</dt><dd>{{ row.counts.materials }}</dd></div>
-                    {% if row.selfwork_active %}<div class="sfc-stats__item"><dt>{% trans "Sərbəst iş" context "subject_folder.ui" %}</dt><dd>{{ row.counts.selfwork }}</dd></div>{% endif %}
-                    <div class="sfc-stats__item"><dt>{% trans "Ev tapşırığı" context "subject_folder.ui" %}</dt><dd>{{ row.counts.homework }}</dd></div>
-                </dl>
-                <div class="sfc-card__foot">
-                    {% if row.counts.pending %}
-                        <span class="ems-badge ems-badge--warning"><i class="fas fa-inbox" aria-hidden="true"></i> {% blocktrans trimmed with n=row.counts.pending context "subject_folder.ui" %}Yoxlama gözləyir: {{ n }}{% endblocktrans %}</span>
-                    {% endif %}
-                    <a class="ems-btn ems-btn--sm sfc-card__open" href="{{ row.url }}">{% trans "Aç" context "subject_folder.ui" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-                </div>
+            <h2 class="sfc-card__title"><a href="{{ row.url }}">{{ row.folder.title }}</a></h2>
+            <ul class="sfc-card__meta" role="list">
+                <li><i class="fas fa-calendar-days" aria-hidden="true"></i> {{ row.period_label }}</li>
+                <li class="sfc-card__creator"><i class="fas fa-user-pen" aria-hidden="true"></i> {% trans "Yaradan" context "subject_folder.ui" %}: <strong>{{ row.creator_name }}</strong></li>
+                {% if row.owner_name %}<li><i class="fas fa-chalkboard-user" aria-hidden="true"></i> {% trans "Müəllim" context "subject_folder.ui" %}: <strong>{{ row.owner_name }}</strong></li>{% endif %}
+                <li><i class="fas fa-clock-rotate-left" aria-hidden="true"></i> {% trans "Yeniləndi" context "subject_folder.ui" %}: {{ row.folder.updated_at|date:"d.m.Y" }}</li>
+            </ul>
+            <ul class="sfc-cstats" role="list">
+                <li class="sfc-cstat"><span class="sfc-cstat__n">{{ row.counts.groups }}</span> <span class="sfc-cstat__l">{% trans "Qrup" context "subject_folder.ui" %}</span></li>
+                <li class="sfc-cstat"><span class="sfc-cstat__n">{{ row.counts.topics }}</span> <span class="sfc-cstat__l">{% trans "Mövzu" context "subject_folder.ui" %}</span></li>
+                <li class="sfc-cstat"><span class="sfc-cstat__n">{{ row.counts.materials }}</span> <span class="sfc-cstat__l">{% trans "Material" context "subject_folder.ui" %}</span></li>
+                {% if row.selfwork_active %}<li class="sfc-cstat"><span class="sfc-cstat__n">{{ row.counts.selfwork }}</span> <span class="sfc-cstat__l">{% trans "Sərbəst iş" context "subject_folder.ui" %}</span></li>{% endif %}
+                <li class="sfc-cstat"><span class="sfc-cstat__n">{{ row.counts.homework }}</span> <span class="sfc-cstat__l">{% trans "Ev tapşırığı" context "subject_folder.ui" %}</span></li>
+            </ul>
+            <div class="sfc-card__foot">
+                {% if row.counts.pending %}
+                    <span class="ems-badge ems-badge--warning"><i class="fas fa-inbox" aria-hidden="true"></i> {% blocktrans trimmed with n=row.counts.pending context "subject_folder.ui" %}Yoxlama gözləyir: {{ n }}{% endblocktrans %}</span>
+                {% endif %}
+                <a class="ems-btn ems-btn--sm sfc-card__open" href="{{ row.url }}">{% trans "Aç" context "subject_folder.ui" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
             </div>
         </li>
         {% endfor %}
@@ -50,7 +54,7 @@
 </div>
 {% if sp.create_options %}
     {% trans "Yeni fənn qovluğu" context "subject_folder.ui" as dlg_title %}
-    {% trans "Fənni və semestri seçin. Qovluq qaralama kimi yaranır; qruplara təyin edəndə aktivləşir." context "subject_folder.ui" as dlg_sub %}
+    {% trans "Fənni və semestri seçin. Qovluq həmin semestrdə bu fəndən dərs dediyiniz bütün qruplara avtomatik təyin olunur." context "subject_folder.ui" as dlg_sub %}
     {% trans "Yarat" context "subject_folder.ui" as dlg_submit %}
     {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="sfFolderCreate" form_dialog_title=dlg_title form_dialog_subtitle=dlg_sub form_dialog_submit_label=dlg_submit form_dialog_body_include="subject_folder/cabinet/teacher/dlg/_folder_create.html" form_dialog_data=sp.forms.folder_create.data form_dialog_hidden=sp.forms.folder_create.hidden %}
 {% endif %}

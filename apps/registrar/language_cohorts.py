@@ -38,15 +38,23 @@ def department_choices(user, organization):
     return units.order_by("name", "id")
 
 
-def can_manage(user, cohort):
-    if (
-        not user
-        or not user.is_authenticated
-        or not user.is_active
-        or getattr(getattr(user, "profile", None), "access_state", None) != "active"
-    ):
+def can_manage_as_staff(user, cohort):
+    """Heyət yolu: kohortun kafedrası aktorun `journal.roster` struktur əhatəsindədir
+    (laborant, tyutor, dekanlıq, kafedra müdiri, koordinator, RİM …). Jurnal sahibi olan adi
+    müəllim üçün False. Sahib 2026-11-10: tələbə tərkibini (əlavə / çıxar / səviyyə dəyiş) YALNIZ
+    heyət idarə edir — müəllim səviyyə qrupunu yalnız GÖRÜR (``can_manage`` = baxış qapısı);
+    jurnaldakı «Xarici dil səviyyə qrupları» düyməsi də yalnız bu yolla görünür."""
+    if not _active_actor(user):
         return False
-    if guest_roster.unit_in_scope(user, cohort.organization, cohort.department_id):
+    return guest_roster.unit_in_scope(user, cohort.organization, cohort.department_id)
+
+
+def can_manage(user, cohort):
+    """BAXIŞ qapısı (detal səhifəsi): heyət və ya kohort jurnalının səlahiyyətli müəllimi.
+    Yazma (yerləşdirmə/çıxarma) üçün ``can_manage_as_staff`` işlədilir."""
+    if not _active_actor(user):
+        return False
+    if can_manage_as_staff(user, cohort):
         return True
     offering = cohort.offering
     return offering.instructor_id == user.pk and is_authorized_instructor(
@@ -68,12 +76,14 @@ def authorized_cohorts(user, organization):
     result = []
     for row in rows:
         if row.department_id in managed:
+            row.can_edit_roster = True  # heyət — tərkibi idarə edir
             result.append(row)
             continue
         if row.offering.instructor_id == user.pk:
             if instructor_ok is None:
                 instructor_ok = is_authorized_instructor(organization=organization, instructor=user)
             if instructor_ok:
+                row.can_edit_roster = False  # müəllim — yalnız baxış (sahib 2026-11-10)
                 result.append(row)
     return result
 

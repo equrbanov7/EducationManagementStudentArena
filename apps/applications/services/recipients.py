@@ -25,10 +25,48 @@ def recipient_users(unit):
     )
 
 
+def _recipient_titles(unit, user_ids):
+    """Hər alıcının vəzifəsi: üzvlük ``title``-ı, yoxdursa profilin ``staff_position``-ı.
+
+    2026-11-10 (sahib): «prorektorun adı-soyadı yanında NƏ prorektoru olduğu da yazılsın» —
+    məs. «Tədris işləri üzrə prorektor». Hər iki mənbə bir sorğu ilə oxunur (N+1 yox).
+    """
+    from django.contrib.auth import get_user_model
+
+    from apps.organizations.models import Membership
+
+    titles = {}
+    memberships = Membership.objects.filter(
+        organization_id=unit.organization_id,
+        user_id__in=user_ids,
+        is_active=True,
+        role__name__in=unit.role_names,
+    ).exclude(title="")
+    for user_id, title in memberships.values_list("user_id", "title"):
+        titles.setdefault(user_id, title.strip())
+    missing = [pk for pk in user_ids if not titles.get(pk)]
+    if missing:
+        rows = get_user_model().objects.filter(pk__in=missing).values_list("pk", "profile__staff_position")
+        for user_id, position in rows:
+            if (position or "").strip():
+                titles[user_id] = position.strip()
+    return titles
+
+
 def destination_payload(unit):
     if not unit.requires_recipient:
         return []
-    return [{"id": str(user.pk), "name": user.get_full_name() or user.username} for user in recipient_users(unit)]
+    users = list(recipient_users(unit))
+    titles = _recipient_titles(unit, [user.pk for user in users])
+    if "vice_rector" in unit.role_names:
+        # Heyət siyahısında vəzifə bölmə başlığı ilə yazılıb («Elmi işlər üzrə») — «… üzrə prorektor» oxunsun.
+        titles = {
+            pk: title if "prorektor" in title.casefold() else f"{title} prorektor" for pk, title in titles.items()
+        }
+    return [
+        {"id": str(user.pk), "name": user.get_full_name() or user.username, "title": titles.get(user.pk, "")}
+        for user in users
+    ]
 
 
 def validate_destination(unit, user, organization, family, recipient_id):

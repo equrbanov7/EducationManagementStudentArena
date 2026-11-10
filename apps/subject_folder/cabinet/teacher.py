@@ -156,7 +156,11 @@ def _folder_card(folder, base, organization=None) -> dict:
         "chip": common.folder_chip(folder.status),
         "url": common.section_url(base, SECTION_TEACHER, folder=folder.pk),
         "period_label": _period_label(folder.period),
+        # Sahib 2026-11-10: «kim tərəfindən yaradıldığı bilinsin» — yaradan (köhnə sətirdə boşdur → sahib müəllim).
+        "creator_name": common.user_name(folder.created_by or folder.owner),
+        "owner_name": common.user_name(folder.owner) if folder.created_by_id not in (None, folder.owner_id) else "",
         "counts": {
+            "groups": folder.group_count,
             "topics": folder.topic_count,
             "materials": folder.material_count,
             "selfwork": folder.selfwork_count,

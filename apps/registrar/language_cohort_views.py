@@ -174,7 +174,11 @@ def detail(request, cohort_id):
     )
     if not language_cohorts.can_manage(request.user, cohort):
         raise Http404
+    # Sahib 2026-11-10: müəllim səviyyə qrupunu yalnız GÖRÜR; tərkibi (əlavə/çıxar) heyət idarə edir.
+    can_edit_roster = language_cohorts.can_manage_as_staff(request.user, cohort)
     if request.method == "POST":
+        if not can_edit_roster:
+            raise PermissionDenied  # → 403 (baxış icazəsi var, yazma yox)
         try:
             if request.POST.get("action") == "remove":
                 language_cohort_placement.remove_student(
@@ -210,7 +214,8 @@ def detail(request, cohort_id):
     groups = home_group_map(organization_id=org.pk, student_ids=[e.student_id for e in enrollments])
     rows = [{"enrollment": e, "home_group": groups.get(e.student_id)} for e in enrollments]
     candidates = []
-    if guest_roster.roster_is_open(cohort.offering):
+    roster_open = guest_roster.roster_is_open(cohort.offering)
+    if roster_open and can_edit_roster:
         for record in language_cohort_query.candidate_records(
             cohort=cohort, actor=request.user, query=request.GET.get("q")
         ):
@@ -242,7 +247,8 @@ def detail(request, cohort_id):
             "rows": rows,
             "candidates": candidates,
             "events": events,
-            "roster_open": guest_roster.roster_is_open(cohort.offering),
+            "roster_open": roster_open,
+            "can_edit_roster": can_edit_roster,
             "query": request.GET.get("q", ""),
         },
     )

@@ -20,7 +20,7 @@ from django.urls import reverse
 from openpyxl import Workbook, load_workbook
 
 from apps.accounts.models import UserProfile
-from apps.organizations.models import Membership, OrgUnit
+from apps.organizations.models import AcademicPeriod, Membership, OrgUnit
 from apps.registrar.models import CourseOffering, Curriculum, Enrollment, Program, StudentAcademicRecord, Subject
 from apps.workload.load_actions import LOAD_SESSION_KEY
 from apps.workload.models import TeacherAssignment, TeachingTask, TeachingTaskRow
@@ -270,3 +270,30 @@ class LoadUploadFlowTests(TestCase):
         self.assertTrue(CourseOffering.objects.filter(subject__name="Veb texnologiyalar", group=self.group).exists())
         self.assertFalse(Enrollment.objects.filter(offering=offering, student=self.student).exists())
         self.assertTrue(Enrollment.objects.filter(offering=offering, student=other).exists())
+
+    def test_student_active_in_other_journal_of_subject_is_not_double_enrolled(self):
+        """Boş xanalar hesabatı 2026-11-10: tələbə fənni başqa jurnalda (alt qrupdan əlavə) keçirsə, yükləmə onu öz qrup
+        jurnalına İKİNCİ dəfə yazmır — əks halda öz qrup jurnalında keçmiş bütün dərslər boş görünürdü."""
+        from apps.workload.services.task_workbook_parsing import PERIODS
+
+        name, start, end = PERIODS["fall"]
+        period = AcademicPeriod.objects.create(
+            organization=self.org, name=name, period_type="semester", academic_year=YEAR,
+            start_date=start, end_date=end, is_current=True, is_active=True,
+        )  # fmt: skip
+        sibling_group = OrgUnit.objects.create(
+            organization=self.org, name="235 EKO-1", unit_type=OrgUnitType.GROUP, parent=self.group.parent
+        )
+        veb = Subject.objects.get(organization=self.org, name="Veb texnologiyalar")
+        sibling = CourseOffering.objects.create(organization=self.org, subject=veb, period=period, group=sibling_group)
+        Enrollment.objects.create(
+            organization=self.org, offering=sibling, student=self.student, source_group=self.group
+        )
+
+        self._upload(_xlsx(ROWS))
+        response = self._apply()
+        self.assertEqual(response.status_code, 200, response.content)
+        own = CourseOffering.objects.get(subject=veb, group=self.group, period=period)
+        self.assertFalse(Enrollment.objects.filter(offering=own, student=self.student).exists())
+        torpaq = CourseOffering.objects.get(subject__name="Torpaqşünaslıq", group=self.group)
+        self.assertTrue(Enrollment.objects.filter(offering=torpaq, student=self.student).exists())

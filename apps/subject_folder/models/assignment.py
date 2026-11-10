@@ -51,6 +51,16 @@ class FolderAssignment(UUIDModel, TimeStampedModel):
         default=True, help_text="Bu təyinat açılışın sərbəst işini qiymətləndirirmi (açılış üzrə yalnız biri)."
     )
     is_active = models.BooleanField(default=True, db_index=True)
+    auto_assigned = models.BooleanField(
+        default=False,
+        help_text="Sahib 2026-11-10: müəllimin bu fənn + semestrdə tədris etdiyi qrupa AVTOMATİK təyin olunub.",
+    )
+    auto_batch = models.CharField(
+        max_length=40,
+        blank=True,
+        default="",
+        help_text="Avtomatik təyinatın partiya id-si (``subject_folder_auto_assign --undo --batch``).",
+    )
     unassigned_at = models.DateTimeField(null=True, blank=True)
     unassigned_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"

@@ -16,7 +16,9 @@ from core.constants import AuditAction
 from ..constants import MAX_DESCRIPTION_CHARS, MAX_TITLE_CHARS, FolderStatus, TaskKind, TopicSource
 from ..errors import FolderError
 from ..models import FolderMaterial, FolderTask, FolderTopic, SubjectFolder, TaskAttachment
-from . import access, lookups
+from . import access
+from . import auto_assign as auto_assign_service
+from . import lookups
 from .events import audit_change
 from .sync import sync_from_syllabus
 
@@ -55,13 +57,15 @@ def create_folder(
     offering=None,
     request=None,
     require_teaching: bool = True,
+    auto_assign: bool = True,
 ) -> tuple[SubjectFolder, bool, dict]:
     """Qovluq yaradır və ya MÖVCUDU qaytarır → ``(folder, created, sync_summary)``.
 
     İcazə: inzibatçı istənilən müəllim üçün; müəllim YALNIZ özü üçün və yalnız
     tədris etdiyi fənn üzrə (``teaches_subject``; köçürmədə ``require_teaching=False``
     — növbəti semestrin açılışları hələ yoxdur). Yaradılan kimi sillabusdan
-    mövzular + sərbəst iş slotları çəkilir.
+    mövzular + sərbəst iş slotları çəkilir. Sahib 2026-11-10 (``auto_assign``): sahibin həmin fənn + semestrdə
+    tədris etdiyi bütün aktiv açılışlara qovluq DƏRHAL təyin olunur — qrupu əl ilə seçmək lazım deyil.
     """
     same_org(organization, subject, period, offering)
     if not lookups.is_org_admin(by_user, organization):
@@ -77,6 +81,8 @@ def create_folder(
         organization=organization, subject=subject, owner=owner, period=period
     ).first()
     if existing is not None:
+        if auto_assign and existing.period_id:  # təkrar «Yeni qovluq» — sonradan yaranan qrupları da tut
+            auto_assign_service.auto_assign([existing], actor=by_user, request=request)
         return existing, False, {}
     try:
         with transaction.atomic():
@@ -84,6 +90,7 @@ def create_folder(
                 organization=organization,
                 subject=subject,
                 owner=owner,
+                created_by=by_user if getattr(by_user, "pk", None) else None,
                 period=period,
                 title=clean_title(title, required=False) or subject.name[:MAX_TITLE_CHARS],
                 description=clean_text(description),
@@ -99,6 +106,8 @@ def create_folder(
         request=request,
     )
     summary = sync_from_syllabus(folder, by_user=by_user, offering=offering)
+    if auto_assign and folder.period_id:
+        summary = {**summary, "auto_assign": auto_assign_service.auto_assign([folder], actor=by_user, request=request)}
     return folder, True, summary
 
 

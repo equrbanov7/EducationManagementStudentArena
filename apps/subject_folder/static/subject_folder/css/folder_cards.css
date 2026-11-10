@@ -1,0 +1,128 @@
+/* =========================================================================
+   «Fənn qovluqları» (müəllim) — qovluq kartları (sahib 2026-11-10 redizayn).
+   `cabinet.css`-dən sonra yüklənir (teacher/_panel.html). Rəng yalnız `--ems-*` token-dir.
+   ========================================================================= */
+
+/* ---- Müəllim qovluq kartı (sahib 2026-11-10: sabit quruluş) -------------
+   Başlıq sətri: fənn (bir sətir, kəsilir) + status pill HƏMİŞƏ sağ yuxarıda
+   (`ems-card__head`-in flex-wrap-ı pill-i başlığın altına salırdı). Kartlar
+   sətirdə eyni hündürlükdədir: grid stretch + flex sütun, foot `margin-top: auto`. */
+
+.sfc-fcard {
+    gap: var(--ems-sp-3);
+    height: 100%;
+    padding: var(--ems-sp-5) var(--ems-sp-5) var(--ems-sp-4);
+    border-top: 3px solid var(--ems-neutral-300);
+    transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.sfc-fcard--active {
+    border-top-color: var(--ems-success-600);
+}
+
+.sfc-fcard--archived {
+    border-top-color: var(--ems-neutral-200);
+}
+
+.sfc-fcard:hover,
+.sfc-fcard:focus-within {
+    box-shadow: var(--ems-sh-raised);
+}
+
+.sfc-card__top {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-3);
+    min-width: 0;
+}
+
+.sfc-card__subject {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.sfc-card__status {
+    flex: 0 0 auto;
+}
+
+.sfc-fcard .sfc-card__title {
+    display: -webkit-box;
+    margin: 0;
+    overflow: hidden;
+    font-size: var(--ems-fs-lg);
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--ems-neutral-900);
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.sfc-card__meta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--ems-fs-sm);
+    color: var(--ems-neutral-600);
+}
+
+.sfc-card__meta li {
+    display: flex;
+    align-items: baseline;
+    gap: var(--ems-sp-2);
+    min-width: 0;
+}
+
+.sfc-card__meta i {
+    flex: 0 0 1rem;
+    text-align: center;
+    color: var(--ems-neutral-500);
+}
+
+.sfc-card__meta strong {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-weight: 600;
+    color: var(--ems-neutral-800);
+}
+
+.sfc-cstats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+    margin: 0;
+    padding: var(--ems-sp-3) 0 0;
+    border-top: 1px solid var(--ems-border);
+    list-style: none;
+}
+
+.sfc-cstat {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--ems-sp-1);
+    padding: 2px var(--ems-sp-2);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-50);
+    white-space: nowrap;
+    font-size: var(--ems-fs-xs);
+    color: var(--ems-neutral-600);
+}
+
+.sfc-cstat__n {
+    font-size: var(--ems-fs-sm);
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+
+.sfc-fcard .sfc-card__foot {
+    margin-top: auto;
+    padding-top: var(--ems-sp-2);
+}

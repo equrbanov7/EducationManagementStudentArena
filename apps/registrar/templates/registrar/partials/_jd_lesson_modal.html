@@ -94,7 +94,11 @@ varsa dərs tipi kilidlidir.
                     <input type="text" name="lesson_topic_custom" data-jd-lesson-topic-custom
                            placeholder="{% trans '…və ya planda olmayan mövzunu özünüz yazın' context 'registrar.journal_topics' %}"
                            aria-label="{% trans 'Planda olmayan mövzu' context 'registrar.journal_topics' %}">
+                    {% if topic_choices_meta.0.fallback %}
+                    <small class="jd-field-hint">{% trans "Təsdiqlənmiş sillabus hələ yoxdur — mövzular sillabus qaralamasından və ya eyni fənnin təsdiqlənmiş sillabusundan götürülüb." context "registrar.journal_topics" %}</small>
+                    {% else %}
                     <small class="jd-field-hint">{% trans "Plandan seçilən mövzu sillabusun həftəlik planında «keçilib» kimi işarələnir." context "registrar.journal_topics" %}</small>
+                    {% endif %}
                     {% else %}
                     <input type="text" name="lesson_topic" data-jd-lesson-topic
                            placeholder="{% trans 'Mövzunu yazın…' context 'registrar.journal' %}" aria-label="{% trans 'Mövzunu yazın…' context 'registrar.journal' %}">
