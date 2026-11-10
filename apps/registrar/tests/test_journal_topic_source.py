@@ -101,7 +101,9 @@ def test_without_a_syllabus_the_topic_list_is_empty(bridge):
     assert journal_topics.lesson_topic_choices(bridge["offering"]) == []
 
 
-def test_a_draft_syllabus_does_not_leak_into_the_journal(bridge):
+def test_a_draft_syllabus_feeds_only_unbound_topic_suggestions(bridge):
+    """Sahib 2026-11-10: təsdiqlənməmiş sillabusun mövzuları modalda TƏKLİF kimi görünür (əvvəl boş idi),
+    amma jurnal strukturuna sızmır — sətir bağı (``week``) yoxdur, ``week_progress`` boşdur."""
     actor = services.resolve_actor(bridge["teacher"], bridge["org"])
     _syllabus, version = services.create_draft(
         organization=bridge["org"],
@@ -118,7 +120,10 @@ def test_a_draft_syllabus_does_not_leak_into_the_journal(bridge):
         data=complete_section_data()[SectionKey.WEEK.value],
         actor=actor,
     )
-    assert journal_topics.lesson_topic_choices(bridge["offering"]) == []
+    offering = bridge["offering"].__class__.objects.get(pk=bridge["offering"].pk)
+    meta = journal_topics.lesson_topic_meta(offering, [])
+    assert meta and all(row["fallback"] and row["week"] is None for row in meta)
+    assert journal_topics.week_progress(offering, []) == []
 
 
 def test_the_approved_weekly_plan_becomes_the_journal_topic_list(bridge):
