@@ -40,6 +40,14 @@ class SubjectFolder(UUIDModel, TimeStampedModel):
         related_name="subject_folders",
         help_text="Semestr. Boşdursa qovluq istənilən semestrin açılışına təyin oluna bilər.",
     )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        help_text="Qovluğu yaradan (boşdursa — köhnə sətir, sahib müəllim göstərilir).",
+    )
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     status = models.CharField(max_length=16, choices=FolderStatus.choices, default=FolderStatus.DRAFT, db_index=True)

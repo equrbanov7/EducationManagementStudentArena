@@ -171,6 +171,7 @@ _REPOINT = (
     "subject_folder.FolderMaterial.created_by",
     "subject_folder.FolderTask.created_by",
     "subject_folder.SimilarityMatch.dismissed_by",
+    "subject_folder.SubjectFolder.created_by",
     "subject_folder.SubjectFolder.owner",
     "subject_folder.Submission.reviewed_by",
     "subject_folder.SubmissionFile.uploaded_by",

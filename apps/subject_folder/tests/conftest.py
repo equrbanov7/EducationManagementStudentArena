@@ -64,8 +64,15 @@ def world(db):
 
 @pytest.fixture
 def folder(world):
+    # Əl ilə təyinat axınının testləri üçün avtomatik təyinat (sahib 2026-11-10) burada SÖNDÜRÜLÜB —
+    # avtomatik qayda ``test_auto_assign_groups_2026_11_10.py``-də yoxlanılır.
     folder, created, _summary = public.create_folder(
-        organization=world.org, subject=world.subject, owner=world.teacher, by_user=world.teacher, period=world.period
+        organization=world.org,
+        subject=world.subject,
+        owner=world.teacher,
+        by_user=world.teacher,
+        period=world.period,
+        auto_assign=False,
     )
     assert created
     return folder
