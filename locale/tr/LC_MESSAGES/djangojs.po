@@ -3353,3 +3353,6 @@ msgstr "satır kalanı %(hours)s"
 #, javascript-format
 msgid "№%(n)s"
 msgstr "No %(n)s"
+
+msgid "Birgə (patok)"
+msgstr "Ortak (akış)"

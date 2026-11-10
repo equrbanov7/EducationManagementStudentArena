@@ -139,17 +139,19 @@ CSS/JS XARİCİ fayllardadır və `profile.html`-dən yüklənir.
       </thead>
       {% comment %}2026-10-15 (sahib: «631/5K-nı birləşdir … məndə birlikdədir»): bir fənn + qrup = BİR xətt,
       fəaliyyətlər açılışda («Mühazirə 30 · Seminar 15»), saat — cəm. «Redaktə et» yalnız `workload.distribute`
-      əhatəsindəki kafedranın xəttində (kafedra müdiri / RİM); müəllim üçün cədvəl yalnız-oxudur.{% endcomment %}
+      əhatəsindəki kafedranın xəttində (kafedra müdiri / RİM); müəllim üçün cədvəl yalnız-oxudur.
+      2026-11-10 (sahib: «patokları birlikdə yaz»): patok axını BİR xətdir — «Birgə (patok)» nişanı, qruplar
+      vergüllə, hər qrupun jurnalı ayrıca «Aç · 236 BT» keçidi (alt-alta).{% endcomment %}
       <tbody data-wlm-rows>
         {% for line in my_workload_section.lines %}
         <tr>
-          <td>{{ line.subject }}{% if line.is_intensive %} <span class="wlm-intensive">{% trans "İntensiv" context "registrar.intensive" %}</span>{% endif %}{% if line.chair_name %}<div class="wlm-table__chair">{{ line.chair_name }}</div>{% endif %}</td>
+          <td>{{ line.subject }}{% if line.is_patok %} <span class="wlm-patok">{% trans "Birgə (patok)" context "accounts.workload" %}</span>{% endif %}{% if line.is_intensive %} <span class="wlm-intensive">{% trans "İntensiv" context "registrar.intensive" %}</span>{% endif %}{% if line.chair_name %}<div class="wlm-table__chair">{{ line.chair_name }}</div>{% endif %}</td>
           <td>{{ line.groups }}</td>
           <td>{{ line.activity_label }}</td>
           <td class="wlm-table__num">{{ line.hours }}</td>
           <td>{{ line.education_form_label }}</td>
           <td>{{ line.degree_level_label }}</td>
-          <td>{% if line.offering_id %}<a href="{{ my_workload_section.journal_base_url }}{{ line.offering_id }}/">{% trans "Aç" context "accounts.workload" %}</a>{% endif %}</td>
+          <td>{% if line.journals|length > 1 %}<div class="wlm-journals">{% for journal in line.journals %}<a href="{{ my_workload_section.journal_base_url }}{{ journal.offering_id }}/">{% trans "Aç" context "accounts.workload" %} · {{ journal.label }}</a>{% endfor %}</div>{% elif line.offering_id %}<a href="{{ my_workload_section.journal_base_url }}{{ line.offering_id }}/">{% trans "Aç" context "accounts.workload" %}</a>{% endif %}</td>
           {% if my_workload_section.can_edit_any %}<td>{% if line.edit_url %}<a class="wl-btn wl-btn--ghost wlm-edit" href="{{ line.edit_url }}">{% trans "Redaktə et" context "accounts.workload" %}</a>{% endif %}</td>{% endif %}
         </tr>
         {% endfor %}

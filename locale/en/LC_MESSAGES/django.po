@@ -118263,3 +118263,7 @@ msgstr "Yes, both accounts are mine"
 msgctxt "accounts.profile_completion"
 msgid "Xeyr, bu mən deyiləm"
 msgstr "No, that is not me"
+
+msgctxt "accounts.workload"
+msgid "Birgə (patok)"
+msgstr "Joint (stream)"

@@ -91,3 +91,24 @@
   color: var(--ems-danger-700, #b91c1c);
   font-size: 0.86rem;
 }
+
+/* «Birgə (patok)» (sahib 2026-11-10) — «Mənim dərs yüküm»də patok axını bir xətdir; hər qrupun jurnalı alt-alta. */
+.wlm-patok {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  vertical-align: middle;
+  background: var(--ems-neutral-100, #f3f4f6);
+  color: var(--ems-neutral-600, #4b5563);
+  border: 1px solid var(--ems-neutral-200, #e5e7eb);
+}
+
+.wlm-journals {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  white-space: nowrap;
+}

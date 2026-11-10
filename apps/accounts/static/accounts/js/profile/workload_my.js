@@ -86,9 +86,16 @@
         var canEdit = !!host && host.dataset.canEdit === "1";
         body.innerHTML = (lines || rows || [])
             .map(function (row) {
-                var journal = row.offering_id
-                    ? '<a href="' + esc(base + row.offering_id) + '/">' + esc(gettext("Aç")) + "</a>"
-                    : "";
+                /* 2026-11-10 (sahib: «patokları birlikdə yaz»): patok xəttində hər qrupun jurnalı ayrıca. */
+                var journals = row.journals || [];
+                var journal = journals.length > 1
+                    ? '<div class="wlm-journals">' + journals.map(function (item) {
+                        return '<a href="' + esc(base + item.offering_id) + '/">' +
+                            esc(gettext("Aç") + " · " + item.label) + "</a>";
+                    }).join("") + "</div>"
+                    : row.offering_id
+                        ? '<a href="' + esc(base + row.offering_id) + '/">' + esc(gettext("Aç")) + "</a>"
+                        : "";
                 var edit = row.edit_url
                     ? '<a class="wl-btn wl-btn--ghost wlm-edit" href="' + esc(row.edit_url) + '">' +
                       esc(gettext("Redaktə et")) + "</a>"
@@ -96,6 +103,7 @@
                 return (
                     "<tr>" +
                     "<td>" + esc(row.subject) +
+                    (row.is_patok ? ' <span class="wlm-patok">' + esc(gettext("Birgə (patok)")) + "</span>" : "") +
                     (row.is_intensive ? ' <span class="wlm-intensive">' + esc(gettext("İntensiv")) + "</span>" : "") +
                     (row.chair_name ? '<div class="wlm-table__chair">' + esc(row.chair_name) + "</div>" : "") +
                     "</td>" +
