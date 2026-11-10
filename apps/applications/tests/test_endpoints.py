@@ -86,8 +86,24 @@ def test_catalog_lists_only_the_kinds_open_to_the_sender(world):
         "min_note_length": 10,
         # 2026-11-04 (sahib): 5 fayl / 10 MB → 10 fayl / 25 MB, köhnə Word + Excel əlavə olundu.
         "max_files": 10,
-        "max_file_mb": 25,
-        "allowed_extensions": [".doc", ".docx", ".jpeg", ".jpg", ".pdf", ".png", ".webp", ".xls", ".xlsx", ".zip"],
+        # 2026-11-10 (sahib): 25 → 50 MB; PowerPoint, GIF, JFIF əlavə olundu.
+        "max_file_mb": 50,
+        "allowed_extensions": [
+            ".doc",
+            ".docx",
+            ".gif",
+            ".jfif",
+            ".jpeg",
+            ".jpg",
+            ".pdf",
+            ".png",
+            ".ppt",
+            ".pptx",
+            ".webp",
+            ".xls",
+            ".xlsx",
+            ".zip",
+        ],
     }
 
 

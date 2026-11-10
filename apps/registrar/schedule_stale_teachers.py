@@ -54,6 +54,10 @@ from core.constants import AuditAction
 from .models import JournalShare, LanguageLevelCohort, ScheduleSlot, TeachingHandover
 from .schedule_slot_teachers import _CANCELLED_TASK, _TEACHING_ACTIVITIES
 
+#: ``workload.constants.Activity.LECTURE`` / ``RowKind.TEACHING`` (import YOX — bax modul şərhi).
+_LECTURE = "lecture"
+_TEACHING_ROW = "teaching"
+
 #: Audit səbəbi (qarşısının alınması və təmizləmə əmri eyni mətni yazır).
 RELEASE_REASON = (
     "Slotun müəllimi bu jurnalın sahibi/pay sahibi deyil və dərs yükündə yoxdur — slot jurnal sahibinə qaytarıldı"
@@ -74,6 +78,50 @@ def _load(**filters):
     )
 
 
+def _patok_lecture(**filters):
+    """Patok tərəfdaşı qrupun MÜHAZİRƏSİ — aparıcı sətrin mühazirə bölgüsü (sahib 2026-11-10).
+
+    Sahib: «patok dərslərində 4 qrup varsa, 2 qrupun saatı görünür, qalan 2 qrupun yox … patokdakı bütün qrupların
+    dərs cədvəli müəllimlərə görünməlidir». Patokda mühazirə yükə BİR dəfə düşür (:mod:`apps.workload.services.patok`):
+    aparıcı sətirdə (``lecture_total > 0``, mühazirə bölgüsü), tərəfdaş sətirlərdə ``lecture_total = 0`` və mühazirə
+    bölgüsü YOXDUR. Ona görə :func:`_load` yalnız aparıcı sətrin qruplarını tapırdı — tərəfdaş qrupların mühazirə slotu
+    mühazirəçinin cədvəlindən düşürdü (və ``release`` slota yazılmış mühazirəçini «köhnəlmiş» sayıb boşaldırdı).
+
+    Tərəfdaş qrup = açılışın qrupu eyni fənn + semestr üzrə tərəfdaş sətirdədir (``lecture_plan > 0``,
+    ``lecture_total = 0``), mühazirəçi isə onun aparıcısının mühazirə bölgüsündədir: əvvəlcə AÇIQ bağ
+    (``patok_lead``), bağ yoxdursa ``patok.py``-in evristikası — eyni tapşırığın mühazirəsi olan sətri."""
+    partner = {
+        "lecture_plan__gt": 0,
+        "lecture_total": 0,
+        "row_kind": _TEACHING_ROW,
+        "subject_id": OuterRef("offering__subject_id"),
+        "period_id": OuterRef("offering__period_id"),
+        "groups": OuterRef("offering__group_id"),
+    }
+    Assignment = django_apps.get_model("workload", "TeacherAssignment")
+    leads = Assignment.objects.filter(
+        activity=_LECTURE,
+        row__row_kind=_TEACHING_ROW,
+        row__lecture_total__gt=0,
+        row__patok_lead__isnull=True,
+        row__subject_id=OuterRef("offering__subject_id"),
+        row__period_id=OuterRef("offering__period_id"),
+        **filters,
+    ).exclude(row__task__status=_CANCELLED_TASK)
+    linked = leads.filter(**{f"row__patok_partners__{key}": value for key, value in partner.items()})
+    # Bir ``filter()`` çağırışı — çoxqiymətli əlaqənin şərtləri EYNİ tərəfdaş sətrinə aiddir.
+    unlinked = {**partner, "patok_lead__isnull": True}
+    heuristic = leads.filter(**{f"row__task__rows__{key}": value for key, value in unlinked.items()})
+    return Exists(linked) | Exists(heuristic)
+
+
+def _kind_load(teacher) -> Q:
+    """``teacher``-in slotun NÖVÜNDƏ (``kind`` = bölgünün ``activity``-si) bu qrup üzrə dərs yükü — patok daxil."""
+    return Exists(_load(teacher_id=teacher, activity=OuterRef("kind"))) | (
+        Q(kind=_LECTURE) & _patok_lecture(teacher_id=teacher)
+    )
+
+
 def owner_current_q() -> Q:
     """Müəllimi BOŞ slotun jurnal sahibi hələ də bu dərsi aparırmı (modul şərhi — «jurnal sahibinə düşən slot»).
 
@@ -82,7 +130,7 @@ def owner_current_q() -> Q:
     owner = OuterRef("offering__instructor_id")
     return (
         Exists(LanguageLevelCohort.objects.filter(offering_id=OuterRef("offering_id")))
-        | Exists(_load(teacher_id=owner, activity=OuterRef("kind")))
+        | _kind_load(owner)
         | Exists(JournalShare.objects.filter(offering_id=OuterRef("offering_id"), teacher_id=owner, is_active=True))
         | Exists(
             TeachingHandover.objects.filter(
@@ -95,11 +143,7 @@ def owner_current_q() -> Q:
 def load_inherited_q(teacher) -> Q:
     """Müəllimi BOŞ, sahibi cari OLMAYAN slot — ``teacher``-in bu növdə dərs yükü bölgüsü varsa onun cədvəlinə düşür."""
     teacher_id = getattr(teacher, "pk", teacher)
-    return (
-        Q(instructor__isnull=True, offering__instructor__isnull=False)
-        & ~owner_current_q()
-        & Exists(_load(teacher_id=teacher_id, activity=OuterRef("kind")))
-    )
+    return Q(instructor__isnull=True, offering__instructor__isnull=False) & ~owner_current_q() & _kind_load(teacher_id)
 
 
 def current_q() -> Q:
@@ -113,8 +157,7 @@ def current_q() -> Q:
         offering_id=OuterRef("offering_id"), to_instructor_id=teacher, reverted_at__isnull=True
     )
     return (Q(instructor__isnull=True) & owner_current_q()) | (
-        Q(instructor__isnull=False)
-        & (Exists(_load(teacher_id=teacher, activity=OuterRef("kind"))) | Exists(shared) | Exists(handed))
+        Q(instructor__isnull=False) & (_kind_load(teacher) | Exists(shared) | Exists(handed))
     )
 
 

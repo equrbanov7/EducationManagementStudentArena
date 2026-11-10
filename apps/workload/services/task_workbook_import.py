@@ -26,6 +26,7 @@ from apps.workload.constants import ACTIVITY_TOTAL_FIELD, TEACHING_ACTIVITIES, R
 from apps.workload.models import TeacherAssignment, TeachingTask, TeachingTaskRow
 from apps.workload.services.assignments import assign_teacher, remaining_hours
 from apps.workload.services.distribution import confirm_distribution, teacher_loads
+from apps.workload.services.enroll_guard import active_elsewhere
 from apps.workload.services.imports import normalize
 from apps.workload.services.scoping import resolve_actor
 from apps.workload.services.task_load_reassign import (
@@ -573,7 +574,11 @@ class Importer(TeacherResolverMixin):
             records = StudentAcademicRecord.objects.filter(
                 organization=self.org, group=offering.group, is_active=True, status="enrolled"
             ).select_related("student")
+            elsewhere = active_elsewhere(offering, [record.student_id for record in records])  # bax enroll_guard
             for record in records:
+                if record.student_id in elsewhere:
+                    self.counters["enrollment_elsewhere_skipped"] += 1
+                    continue
                 # Aktiv tələbə üzvlüyü olmayan qeyd DB qoruyucusunda (registrar_guard_active_member) dayanır —
                 # bütün idxal geri qayıtmasın (2026-10-17 magistratura): savepoint + say, `enroll_group_students` kimi.
                 try:
