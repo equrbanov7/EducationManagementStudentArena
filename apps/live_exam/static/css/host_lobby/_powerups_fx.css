@@ -1,0 +1,305 @@
+/* ═══ Aparıcı ekranı — GÜC REJİMLƏRİ, səhnə effektləri (2026-11-10) ═══
+ * _powerups.css-in davamı: bomba vinyeti + üzən bomba, ×2 sikkə aurası, partlayış, bütün @keyframes
+ * (dok/panel animasiyaları da burada adlanır), «Rəsmi» üslub və prefers-reduced-motion qaydaları. */
+
+/* ── Səhnə: bomba vinyeti (nəbz) + üzən bomba ──────────────────────── */
+.hx-bomb-vignette {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    background:
+        radial-gradient(ellipse at center, transparent 48%, rgba(180, 23, 58, 0.28) 78%, rgba(120, 8, 32, 0.62) 100%);
+    transition: opacity 0.6s ease;
+}
+
+.presentation-stage.is-bomb .hx-bomb-vignette {
+    opacity: 1;
+    animation: hxVignettePulse var(--hx-heart) ease-in-out infinite;
+}
+
+.presentation-stage[data-bomb-urgency="2"] { --hx-heart: 0.62s; }
+.presentation-stage[data-bomb-urgency="3"] { --hx-heart: 0.47s; }
+
+.presentation-stage.is-bomb .hx-timer__arc { stroke: var(--hx-bomb); }
+.presentation-stage.is-bomb .hx-timer__track { stroke: rgba(255, 77, 109, 0.22); }
+.presentation-stage.is-bomb .hx-qcard { box-shadow: 0 0 0 2px rgba(255, 77, 109, 0.35), 0 24px 60px rgba(120, 8, 32, 0.45); }
+
+.hx-bomb {
+    position: absolute;
+    top: clamp(96px, 10.5cqw, 190px);
+    right: clamp(20px, 3cqw, 64px);
+    z-index: 3;
+    width: clamp(92px, 9.5cqw, 170px);
+    height: clamp(92px, 9.5cqw, 170px);
+    pointer-events: none;
+    /* qara gövdə tünd fonda itməsin: narıncı haşiyə işığı + kölgə */
+    filter: drop-shadow(0 0 16px rgba(255, 143, 63, 0.7)) drop-shadow(0 16px 26px rgba(0, 0, 0, 0.6));
+    animation: hxBombFloat 7.5s ease-in-out infinite;
+    will-change: transform;
+}
+
+.hx-bomb .hx-bomb__body { stroke: rgba(255, 196, 150, 0.55); stroke-width: 2.5; }
+
+.hx-bomb__art { width: 100%; height: 100%; overflow: visible; }
+.hx-bomb__spark { transform-box: fill-box; transform-origin: 50% 50%; animation: hxSpark 0.22s steps(2) infinite; }
+.hx-bomb__fuse { stroke-dasharray: 46; stroke-dashoffset: 0; }
+
+.hx-bomb__trail {
+    position: absolute;
+    top: 8%;
+    right: 2%;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #ffd166;
+    box-shadow: 0 0 12px 3px rgba(255, 183, 3, 0.7);
+    animation: hxTrail 0.9s ease-out infinite;
+}
+
+.hx-bomb__trail--2 { animation-delay: 0.45s; width: 5px; height: 5px; }
+
+/* ── Səhnə: ×2 qızıl sikkə aurası ──────────────────────────────────── */
+.hx-double {
+    position: absolute;
+    top: clamp(64px, 7cqw, 120px);
+    left: clamp(24px, 4cqw, 80px);
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: clamp(84px, 8cqw, 150px);
+    height: clamp(84px, 8cqw, 150px);
+    pointer-events: none;
+}
+
+.hx-double__coin {
+    display: grid;
+    place-items: center;
+    width: 72%;
+    height: 72%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff3c4, #ffd166 45%, #d97706 100%);
+    color: var(--hx-double-ink);
+    box-shadow: inset 0 -6px 0 rgba(120, 53, 15, 0.45), 0 14px 30px rgba(245, 158, 11, 0.45);
+    animation: hxCoinSpin 3.2s cubic-bezier(0.45, 0, 0.3, 1) infinite;
+    will-change: transform;
+}
+
+.hx-double__coin .hx-icon { width: 58%; height: 58%; }
+
+.hx-double__ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 209, 102, 0.7);
+    animation: hxRingOut 2.2s ease-out infinite;
+}
+
+.presentation-stage.is-double .hx-tile { box-shadow: 0 0 0 2px rgba(255, 209, 102, 0.25), 0 18px 44px rgba(245, 158, 11, 0.18); }
+/* bomba sağda, sikkə solda — ikisi də açıqdırsa simmetrik */
+.hx-double { top: clamp(96px, 10.5cqw, 190px); }
+
+/* ── Partlayış (reveal-də bomba sıfırlanması) ──────────────────────── */
+.hx-explosion {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.hx-explosion__flash {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 50%, #fff7e6 0%, #ffb703 22%, rgba(255, 77, 109, 0.75) 48%, transparent 72%);
+    animation: hxFlash 0.75s ease-out forwards;
+}
+
+.hx-explosion__wave {
+    position: absolute;
+    width: 12vmin;
+    height: 12vmin;
+    border-radius: 50%;
+    border: 1.2vmin solid rgba(255, 230, 180, 0.9);
+    animation: hxWave 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+.hx-explosion__wave--2 { border-color: rgba(255, 77, 109, 0.8); animation-delay: 0.12s; }
+
+.hx-explosion__core {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 18vmin;
+    height: 18vmin;
+    color: #1b1d29;
+    animation: hxCore 0.6s ease-out forwards;
+}
+
+.hx-explosion__core .hx-icon { width: 100%; height: 100%; }
+
+.hx-explosion__shard {
+    position: absolute;
+    width: calc(1.6vmin * var(--s, 1));
+    height: calc(2.6vmin * var(--s, 1));
+    border-radius: 0.4vmin;
+    background: linear-gradient(180deg, #ffd166, #ff8f3f 60%, #b4173a);
+    box-shadow: 0 0 1.2vmin rgba(255, 183, 3, 0.8);
+    transform: rotate(var(--a, 0deg)) translateY(0) scale(0.3);
+    opacity: 0;
+    animation: hxShard var(--t, 0.7s) cubic-bezier(0.15, 0.7, 0.3, 1) 0.08s forwards;
+}
+
+.hx-explosion__label {
+    position: absolute;
+    bottom: 16vh;
+    padding: 1.2vmin 3vmin;
+    border-radius: 999px;
+    background: rgba(43, 7, 16, 0.78);
+    border: 1px solid rgba(255, 143, 63, 0.8);
+    color: #ffe4ea;
+    font: 800 clamp(20px, 2.4cqw, 44px)/1.1 var(--hx-display);
+    letter-spacing: 0.02em;
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
+    animation: hxLabelIn 2.4s ease-out forwards;
+}
+
+body.lx-shake .presentation-stage { animation: hxShake 0.7s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+
+/* ── Animasiyalar ──────────────────────────────────────────────────── */
+@keyframes hxArmedPulse {
+    0%, 100% { transform: scale(1); }
+    18% { transform: scale(1.045); }
+    36% { transform: scale(1); }
+    52% { transform: scale(1.03); }
+}
+
+@keyframes hxShimmer {
+    0%, 55% { transform: translateX(-70%); }
+    100% { transform: translateX(70%); }
+}
+
+@keyframes hxFuseRun {
+    from { background-position: -40% 0; }
+    to { background-position: 140% 0; }
+}
+
+@keyframes hxLiveDot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(0.7); opacity: 0.55; }
+}
+
+@keyframes hxVignettePulse {
+    0%, 100% { opacity: 0.55; }
+    18% { opacity: 1; }
+    36% { opacity: 0.6; }
+    52% { opacity: 0.9; }
+}
+
+@keyframes hxBombFloat {
+    0% { transform: translate3d(0, 0, 0) rotate(-8deg); }
+    25% { transform: translate3d(-6cqw, 2cqw, 0) rotate(6deg); }
+    50% { transform: translate3d(-12cqw, -1cqw, 0) rotate(-5deg); }
+    75% { transform: translate3d(-5cqw, 3cqw, 0) rotate(7deg); }
+    100% { transform: translate3d(0, 0, 0) rotate(-8deg); }
+}
+
+@keyframes hxSpark {
+    0% { transform: scale(0.8) rotate(0deg); opacity: 0.85; }
+    100% { transform: scale(1.25) rotate(22deg); opacity: 1; }
+}
+
+@keyframes hxTrail {
+    0% { transform: translate3d(0, 0, 0) scale(1); opacity: 1; }
+    100% { transform: translate3d(2.4vmin, -3vmin, 0) scale(0.2); opacity: 0; }
+}
+
+@keyframes hxCoinSpin {
+    0% { transform: perspective(500px) rotateY(0deg); }
+    45% { transform: perspective(500px) rotateY(180deg); }
+    55% { transform: perspective(500px) rotateY(180deg); }
+    100% { transform: perspective(500px) rotateY(360deg); }
+}
+
+@keyframes hxRingOut {
+    0% { transform: scale(0.7); opacity: 0.9; }
+    100% { transform: scale(1.45); opacity: 0; }
+}
+
+@keyframes hxFlash {
+    0% { opacity: 0; transform: scale(0.6); }
+    12% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.3); }
+}
+
+@keyframes hxWave {
+    0% { transform: scale(0.2); opacity: 1; }
+    100% { transform: scale(9); opacity: 0; }
+}
+
+@keyframes hxCore {
+    0% { transform: scale(0.4) rotate(-20deg); opacity: 1; }
+    40% { transform: scale(1.25) rotate(8deg); opacity: 1; }
+    100% { transform: scale(2.4) rotate(30deg); opacity: 0; }
+}
+
+@keyframes hxShard {
+    0% { transform: rotate(var(--a, 0deg)) translateY(0) scale(0.3); opacity: 0; }
+    15% { opacity: 1; }
+    100% { transform: rotate(var(--a, 0deg)) translateY(calc(-1 * var(--d, 40vmin))) scale(var(--s, 1)) rotate(260deg); opacity: 0; }
+}
+
+@keyframes hxLabelIn {
+    0% { transform: translateY(40px) scale(0.8); opacity: 0; }
+    15% { transform: translateY(0) scale(1.05); opacity: 1; }
+    80% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-10px) scale(0.98); opacity: 0; }
+}
+
+@keyframes hxShake {
+    10%, 90% { transform: translate3d(-2px, 1px, 0); }
+    20%, 80% { transform: translate3d(4px, -2px, 0); }
+    30%, 50%, 70% { transform: translate3d(-7px, 3px, 0); }
+    40%, 60% { transform: translate3d(7px, -3px, 0); }
+}
+
+/* ── «Rəsmi» üslub: səhnə effektləri yoxdur (nişanlar qalır) ──────── */
+body[data-lx-style="formal"] .hx-bomb,
+body[data-lx-style="formal"] .hx-bomb-vignette,
+body[data-lx-style="formal"] .hx-double,
+body[data-lx-style="formal"] .hx-explosion { display: none !important; }
+body[data-lx-style="formal"] .hx-badge--bomb,
+body[data-lx-style="formal"] .hx-power .hx-power__art,
+body[data-lx-style="formal"] .hx-power .hx-power__halo,
+body[data-lx-style="formal"] .hx-power .hx-power__coin,
+body[data-lx-style="formal"] .hx-power .hx-bomb__spark,
+body[data-lx-style="formal"] .hx-power .hx-power__fuse,
+body[data-lx-style="formal"] .control-power__item--bomb.is-on .control-power__art { animation: none; }
+
+/* ── Azaldılmış hərəkət ────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    .hx-power .hx-power__art,
+    .hx-power .hx-power__halo,
+    .hx-power .hx-power__coin,
+    .hx-power .hx-bomb__spark,
+    .hx-power .hx-power__fuse,
+    .hx-power .hx-power__ring,
+    .hx-power.is-live::before,
+    .hx-power__spark,
+    .control-power__item--bomb.is-on .control-power__art,
+    .hx-badge--bomb,
+    .presentation-stage.is-bomb .hx-bomb-vignette,
+    .hx-bomb,
+    .hx-bomb__spark,
+    .hx-bomb__trail,
+    .hx-double__coin,
+    .hx-double__ring,
+    body.lx-shake .presentation-stage { animation: none; }
+    .hx-explosion__shard { display: none; }
+    .hx-explosion__flash,
+    .hx-explosion__wave,
+    .hx-explosion__core { animation-duration: 0.01s; }
+}

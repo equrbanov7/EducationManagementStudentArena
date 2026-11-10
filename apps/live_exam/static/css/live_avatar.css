@@ -4,7 +4,14 @@
  *              [is-static]" data-dance="…">  (live_avatar_renderer.js yaradır)
  *
  * RƏQS API-si (oyunçu ekranı da işlədə bilər):
- *   data-dance="bounce | sway | spin | jump | wave | cheer | idle"
+ *   data-dance="bounce | sway | spin | jump | wave | cheer | idle"           — əsas
+ *   viral (2026-11-10): floss | griddy | dab | moonwalk | robot | shuffle | woah | hype
+ *                       | macarena | gangnam | orange | worm
+ *   imza (növə görə; stage_logic.js SIGNATURE_DANCES):
+ *     tailspin (tülkü) | roll (panda) | roar (şir) | pounce (pələng) | snooze (koala)
+ *     | wiggle (donuz) | leap (qurbağa) | tentacle (osminoq) | swing (meymun)
+ *     | prance (təkbuynuz) | hophop (dovşan ×2) | wheel (hamster) | howl (canavar)
+ *     | slide (ağ ayı) | handstand (qırmızı panda)
  *   --lva-beat   : bir vuruşun müddəti (default .55s ≈ 109 BPM); bütün hərəkətlər ona bağlıdır
  *   --lva-delay  : faza sürüşməsi (tamaşaçılar üçün, məs. -0.2s)
  *   JS: LiveAvatarRenderer.setDance(el, "jump") — atributu dəyişir (animasiya yenidən başlayır).
@@ -78,11 +85,17 @@
 .live-avatar .lva-tail,
 .live-avatar .lva-rig,
 .live-avatar .lva-sparkle,
-.live-avatar .lva-accessory {
+.live-avatar .lva-accessory,
+.live-avatar .lva-feet,
+.live-avatar .lva-body,
+.live-avatar .lva-paw {
     transform-box: fill-box;
 }
 
 .live-avatar .lva-head { transform-origin: 50% 100%; }
+.live-avatar .lva-feet { transform-origin: 50% 50%; }
+.live-avatar .lva-body { transform-origin: 50% 100%; }
+.live-avatar .lva-paw { transform-origin: 50% 50%; }
 .live-avatar .lva-ear { transform-origin: 50% 100%; }
 .live-avatar .lva-eye { transform-origin: 50% 50%; }
 .live-avatar .lva-arm--l { transform-origin: 100% 0%; }
@@ -150,7 +163,10 @@
 .live-avatar[data-dance] .lva-arm,
 .live-avatar[data-dance] .lva-head,
 .live-avatar[data-dance] .lva-ear,
-.live-avatar[data-dance] .lva-tail {
+.live-avatar[data-dance] .lva-tail,
+.live-avatar[data-dance] .lva-feet,
+.live-avatar[data-dance] .lva-body,
+.live-avatar[data-dance] .lva-paw {
     animation-delay: var(--lva-delay);
     animation-timing-function: ease-in-out;
     animation-iteration-count: infinite;
@@ -252,7 +268,8 @@
 @keyframes lvaEarFlop { 0%, 100% { transform: rotate(0deg); } 40% { transform: rotate(-9deg); } 70% { transform: rotate(5deg); } }
 @keyframes lvaWag { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(10deg); } }
 
-/* Qalib üçün: tacın parıltısı (səhnə tacı ayrıca elementdir — bax stage CSS). */
+/* 2026-11-10: viral + imza rəqsləri (floss … handstand) ayrıca faylda — live_avatar_dances.css
+ * (modul ölçü büdcəsi); bu fayldan SONRA yüklənir. Azaldılmış hərəkət bloku aşağıda hamısını əhatə edir. */
 
 @media (prefers-reduced-motion: reduce) {
     .live-avatar,
@@ -263,7 +280,10 @@
     .live-avatar[data-dance] .lva-arm,
     .live-avatar[data-dance] .lva-head,
     .live-avatar[data-dance] .lva-ear,
-    .live-avatar[data-dance] .lva-tail {
+    .live-avatar[data-dance] .lva-tail,
+    .live-avatar[data-dance] .lva-feet,
+    .live-avatar[data-dance] .lva-body,
+    .live-avatar[data-dance] .lva-paw {
         animation: none !important;
     }
 
@@ -272,12 +292,26 @@
     }
 
     .live-avatar[data-dance="cheer"] .lva-arm--l,
-    .live-avatar[data-dance="jump"] .lva-arm--l {
+    .live-avatar[data-dance="jump"] .lva-arm--l,
+    .live-avatar[data-dance="hype"] .lva-arm--l,
+    .live-avatar[data-dance="leap"] .lva-arm--l {
         transform: rotate(115deg);
     }
 
     .live-avatar[data-dance="cheer"] .lva-arm--r,
-    .live-avatar[data-dance="jump"] .lva-arm--r {
+    .live-avatar[data-dance="jump"] .lva-arm--r,
+    .live-avatar[data-dance="hype"] .lva-arm--r,
+    .live-avatar[data-dance="leap"] .lva-arm--r {
         transform: rotate(-115deg);
     }
+
+    /* Statik «imza» pozaları: dab, woah (çarpaz), macarena (əllər başda) */
+    .live-avatar[data-dance="dab"] .lva-arm--r { transform: rotate(150deg); }
+    .live-avatar[data-dance="dab"] .lva-arm--l { transform: rotate(80deg); }
+    .live-avatar[data-dance="dab"] .lva-head { transform: rotate(-16deg); }
+    .live-avatar[data-dance="woah"] .lva-arm--l { transform: rotate(-105deg); }
+    .live-avatar[data-dance="woah"] .lva-arm--r { transform: rotate(105deg); }
+    .live-avatar[data-dance="macarena"] .lva-arm--l { transform: rotate(165deg); }
+    .live-avatar[data-dance="macarena"] .lva-arm--r { transform: rotate(-165deg); }
+    .live-avatar[data-dance="snooze"] .lva-eye { transform: scaleY(0.1); }
 }

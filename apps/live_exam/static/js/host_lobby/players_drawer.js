@@ -5,12 +5,12 @@
  * qayıtmır, balı liderlər lövhəsində görünmür). Lobbi baloncuqlarındakı «×» də eyni dialoqdan keçir.
  * Siyahı: lobbi roster-i (WS `lobby_state`) + açılışda HTTP snapshot. Hadisələr document-də delegasiya.
  */
-import { state } from './state.js?v=lx20261019s';
-import { post, syncState } from './api.js?v=lx20261019s';
-import { showToast } from './toast.js?v=lx20261019s';
-import { presentationStyle } from './style_mode.js?v=lx20261019s';
-import { avatarImageMarkup, controlsEnabled, esc, fmt, formatNumber, tr } from './utils.js?v=lx20261019s';
-import { icon } from './icons.js?v=lx20261019s';
+import { state } from './state.js?v=lx20261110p';
+import { post, syncState } from './api.js?v=lx20261110p';
+import { showToast } from './toast.js?v=lx20261110p';
+import { presentationStyle } from './style_mode.js?v=lx20261110p';
+import { avatarImageMarkup, controlsEnabled, esc, fmt, formatNumber, tr } from './utils.js?v=lx20261110p';
+import { icon } from './icons.js?v=lx20261110p';
 
 const $ = (id) => document.getElementById(id);
 let bound = false;

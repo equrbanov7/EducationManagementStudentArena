@@ -1,0 +1,531 @@
+/* live_avatar_dances.css — viral və imza rəqsləri (sahib 2026-11-10). live_avatar.css-dən SONRA yüklənir;
+ * eyni RƏQS API-si (`data-dance`, --lva-beat, --lva-delay), yalnız transform; reduced-motion bloku bazadadır.
+ * Adlar: stage_logic.js VIRAL_DANCES / SIGNATURE_DANCES və live_avatar_renderer.js DANCES (test yoxlayır). */
+
+/* ══ VİRAL RƏQSLƏR (2026-11-10) ══════════════════════════════════════════
+ * Hamısı dövri, --lva-beat-ə bağlı, yalnız transform. Əl bucağı yaddaşı
+ * (çiyin mərkəzli, istirahətdə əllər aşağı-kənara sallanır):
+ *   sol əl  (.lva-arm--l): +  → kənara/yuxarı,  − → bədənin önündən çarpaz
+ *   sağ əl  (.lva-arm--r): −  → kənara/yuxarı,  + → bədənin önündən çarpaz
+ *   düz yuxarı ≈ L 150 / R −150; düz kənara ≈ L 60 / R −60; düz aşağı ≈ L −30 / R 30
+ * Növbəli addım (sağ əl/ayaq yarım vuruş gec): animation-delay: calc(var(--lva-delay) - var(--lva-beat) / 2)
+ * Ortaq hissə kadrları: lvaFeetStep (ayaqlar sağa-sola), lvaTailWhip (quyruq şallağı),
+ *   lvaPawPulse (pəncə açılır), lvaFeetTuck (ayaqlar yığılır).
+ */
+
+/* floss — əllər eyni tərəfə yellənir, ombalar əks tərəfə (2 vuruş) */
+.live-avatar[data-dance="floss"] { animation-name: lvaFlossHips; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="floss"] .lva-arm--l { animation-name: lvaFlossArms; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="floss"] .lva-arm--r { animation-name: lvaFlossArms; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="floss"] .lva-head { animation-name: lvaHeadTilt; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="floss"] .lva-feet { animation-name: lvaFeetStep; animation-duration: calc(var(--lva-beat) * 2); }
+
+/* griddy — cəld ayaq dəyişmə + əl pompaları (sağ əl yarım vuruş gec) */
+.live-avatar[data-dance="griddy"] { animation-name: lvaGriddy; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="griddy"] .lva-feet { animation-name: lvaFeetStep; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="griddy"] .lva-arm--l { animation-name: lvaPumpL; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="griddy"] .lva-arm--r { animation-name: lvaPumpR; animation-duration: var(--lva-beat); animation-delay: calc(var(--lva-delay) - var(--lva-beat) / 2); }
+.live-avatar[data-dance="griddy"] .lva-head { animation-name: lvaHeadTilt; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="griddy"] .lva-ear { animation-name: lvaEarFlop; animation-duration: var(--lva-beat); }
+
+/* dab — əyil, sağ əl üzün üstündən, sol əl kənara; saxla, qayıt (4 vuruş) */
+.live-avatar[data-dance="dab"] { animation-name: lvaDab; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="dab"] .lva-arm--r { animation-name: lvaDabArmR; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="dab"] .lva-arm--l { animation-name: lvaDabArmL; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="dab"] .lva-head { animation-name: lvaDabHead; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="dab"] .lva-ear { animation-name: lvaEarFlop; animation-duration: var(--lva-beat); }
+
+/* moonwalk — arxaya əyilib yana sürüşmə, ayaqlar yerdə sürüşür (4 vuruş) */
+.live-avatar[data-dance="moonwalk"] { animation-name: lvaMoonwalk; animation-duration: calc(var(--lva-beat) * 4); animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1); }
+.live-avatar[data-dance="moonwalk"] .lva-feet { animation-name: lvaGlide; animation-duration: var(--lva-beat); animation-timing-function: linear; }
+.live-avatar[data-dance="moonwalk"] .lva-arm--l { animation-name: lvaMoonArmL; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="moonwalk"] .lva-arm--r { animation-name: lvaMoonArmR; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="moonwalk"] .lva-head { animation-name: lvaMoonHead; animation-duration: calc(var(--lva-beat) * 4); }
+
+/* robot — pilləli (steps) sərt hərəkət: bədən, əllər, baş, pəncə */
+.live-avatar[data-dance="robot"] { animation-name: lvaRobot; animation-duration: calc(var(--lva-beat) * 4); animation-timing-function: steps(1, end); }
+.live-avatar[data-dance="robot"] .lva-arm--l { animation-name: lvaRobotArmL; animation-duration: calc(var(--lva-beat) * 4); animation-timing-function: steps(1, end); }
+.live-avatar[data-dance="robot"] .lva-arm--r { animation-name: lvaRobotArmR; animation-duration: calc(var(--lva-beat) * 4); animation-timing-function: steps(1, end); }
+.live-avatar[data-dance="robot"] .lva-head { animation-name: lvaRobotHead; animation-duration: calc(var(--lva-beat) * 2); animation-timing-function: steps(1, end); }
+.live-avatar[data-dance="robot"] .lva-paw { animation-name: lvaPawPulse; animation-duration: var(--lva-beat); animation-timing-function: steps(1, end); }
+.live-avatar[data-dance="robot"] .lva-tail { animation-name: lvaWag; animation-duration: calc(var(--lva-beat) * 2); animation-timing-function: steps(2, end); }
+
+/* shuffle — cəld sağa-sola sürüşmə, dizlər yaylanır (2 vuruş), ayaqlar iki dəfə sürətli */
+.live-avatar[data-dance="shuffle"] { animation-name: lvaShuffle; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="shuffle"] .lva-feet { animation-name: lvaFeetShuffle; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="shuffle"] .lva-arm--l { animation-name: lvaSwingL; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="shuffle"] .lva-arm--r { animation-name: lvaSwingR; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="shuffle"] .lva-head { animation-name: lvaHeadTilt; animation-duration: calc(var(--lva-beat) * 2); }
+
+/* woah — yırğalan, sonra əllər çarpaz DONMA (4 vuruş) */
+.live-avatar[data-dance="woah"] { animation-name: lvaWoah; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="woah"] .lva-arm--l { animation-name: lvaWoahArmL; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="woah"] .lva-arm--r { animation-name: lvaWoahArmR; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="woah"] .lva-head { animation-name: lvaWoahHead; animation-duration: calc(var(--lva-beat) * 4); }
+
+/* hype — hər vuruşda iki əl yuxarı pompa + tullanma */
+.live-avatar[data-dance="hype"] { animation-name: lvaHype; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="hype"] .lva-arm--l { animation-name: lvaHypeL; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="hype"] .lva-arm--r { animation-name: lvaHypeR; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="hype"] .lva-paw { animation-name: lvaPawPulse; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="hype"] .lva-ear { animation-name: lvaEarFlop; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="hype"] .lva-tail { animation-name: lvaWag; animation-duration: var(--lva-beat); }
+
+/* macarena — əllər irəli → başa → ombaya → omba yırğalanması (4 vuruş = 4 poza) */
+.live-avatar[data-dance="macarena"] { animation-name: lvaMacarenaBody; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="macarena"] .lva-arm--l { animation-name: lvaMacarenaL; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="macarena"] .lva-arm--r { animation-name: lvaMacarenaR; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="macarena"] .lva-head { animation-name: lvaMacarenaHead; animation-duration: calc(var(--lva-beat) * 4); }
+
+/* gangnam — at çapma yaylanması, sol əl cilovda, sağ əl kəmənd fırladır */
+.live-avatar[data-dance="gangnam"] { animation-name: lvaGallop; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="gangnam"] .lva-arm--l { animation-name: lvaReinsL; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="gangnam"] .lva-arm--r { animation-name: lvaLassoR; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="gangnam"] .lva-feet { animation-name: lvaFeetStomp; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="gangnam"] .lva-head { animation-name: lvaHeadTilt; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="gangnam"] .lva-tail { animation-name: lvaWag; animation-duration: var(--lva-beat); }
+
+/* orange — Orange Justice: əllər dairə cızır, bədən burulur (2 vuruş) */
+.live-avatar[data-dance="orange"] { animation-name: lvaOrangeTwist; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="orange"] .lva-arm--l { animation-name: lvaCircleL; animation-duration: calc(var(--lva-beat) * 2); animation-timing-function: linear; }
+.live-avatar[data-dance="orange"] .lva-arm--r { animation-name: lvaCircleR; animation-duration: calc(var(--lva-beat) * 2); animation-timing-function: linear; }
+.live-avatar[data-dance="orange"] .lva-head { animation-name: lvaHeadTilt; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="orange"] .lva-feet { animation-name: lvaFeetStep; animation-duration: calc(var(--lva-beat) * 2); }
+
+/* worm — bədən dalğası: baş → gövdə → ayaqlar zəncirlənmiş gecikmə ilə (2 vuruş) */
+.live-avatar[data-dance="worm"] { animation-name: lvaWormRoot; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="worm"] .lva-head { animation-name: lvaWormHead; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="worm"] .lva-body { animation-name: lvaWormBody; animation-duration: calc(var(--lva-beat) * 2); animation-delay: calc(var(--lva-delay) - var(--lva-beat) * 0.3); }
+.live-avatar[data-dance="worm"] .lva-feet { animation-name: lvaWormFeet; animation-duration: calc(var(--lva-beat) * 2); animation-delay: calc(var(--lva-delay) - var(--lva-beat) * 0.6); }
+.live-avatar[data-dance="worm"] .lva-arm--l { animation-name: lvaWormArmL; animation-duration: calc(var(--lva-beat) * 2); animation-delay: calc(var(--lva-delay) - var(--lva-beat) * 0.15); }
+.live-avatar[data-dance="worm"] .lva-arm--r { animation-name: lvaWormArmR; animation-duration: calc(var(--lva-beat) * 2); animation-delay: calc(var(--lva-delay) - var(--lva-beat) * 0.15); }
+
+@keyframes lvaFlossHips {
+    0%, 100% { transform: translate3d(5%, 0, 0) rotate(3deg); }
+    25%, 75% { transform: translate3d(0, -2%, 0) rotate(0deg); }
+    50% { transform: translate3d(-5%, 0, 0) rotate(-3deg); }
+}
+/* Hər iki əl eyni işarə: ombalar sağda (0%) ikən əllər solda (+70), sonra əksinə. */
+@keyframes lvaFlossArms { 0%, 100% { transform: rotate(70deg); } 50% { transform: rotate(-70deg); } }
+
+@keyframes lvaGriddy {
+    0%, 100% { transform: translate3d(-4%, 0, 0) scale(1.04, 0.95); }
+    25% { transform: translate3d(-1%, -7%, 0) scale(0.98, 1.03); }
+    50% { transform: translate3d(4%, 0, 0) scale(1.04, 0.95); }
+    75% { transform: translate3d(1%, -7%, 0) scale(0.98, 1.03); }
+}
+
+@keyframes lvaDab {
+    0%, 20%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+    10% { transform: translate3d(0, -4%, 0) rotate(0deg); }
+    30%, 70% { transform: translate3d(-5%, 1%, 0) rotate(-9deg); }
+    80% { transform: translate3d(0, -3%, 0) rotate(2deg); }
+}
+@keyframes lvaDabArmR { 0%, 20%, 100% { transform: rotate(0deg); } 30%, 70% { transform: rotate(150deg); } 80% { transform: rotate(-20deg); } }
+@keyframes lvaDabArmL { 0%, 20%, 100% { transform: rotate(0deg); } 30%, 70% { transform: rotate(80deg); } 80% { transform: rotate(10deg); } }
+@keyframes lvaDabHead { 0%, 20%, 100% { transform: rotate(0deg) translate3d(0, 0, 0); } 30%, 70% { transform: rotate(-16deg) translate3d(-2%, 2%, 0); } }
+
+@keyframes lvaMoonwalk {
+    0%, 100% { transform: translate3d(10%, 0, 0) rotate(4deg); }
+    45% { transform: translate3d(-10%, 0, 0) rotate(4deg); }
+    50% { transform: translate3d(-10%, 0, 0) rotate(-4deg); }
+    95% { transform: translate3d(10%, 0, 0) rotate(-4deg); }
+}
+@keyframes lvaGlide { 0%, 100% { transform: translate3d(-3%, 0, 0) scaleX(1.05); } 50% { transform: translate3d(3%, 0, 0) scaleX(0.95); } }
+@keyframes lvaMoonArmL { 0%, 100% { transform: rotate(-15deg); } 50% { transform: rotate(25deg); } }
+@keyframes lvaMoonArmR { 0%, 100% { transform: rotate(-25deg); } 50% { transform: rotate(15deg); } }
+@keyframes lvaMoonHead { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+
+@keyframes lvaRobot {
+    0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+    25% { transform: translate3d(-4%, 0, 0) rotate(-3deg); }
+    50% { transform: translate3d(0, -3%, 0) rotate(0deg); }
+    75% { transform: translate3d(4%, 0, 0) rotate(3deg); }
+}
+@keyframes lvaRobotArmL { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(60deg); } 50% { transform: rotate(110deg); } 75% { transform: rotate(-40deg); } }
+@keyframes lvaRobotArmR { 0%, 100% { transform: rotate(-110deg); } 25% { transform: rotate(0deg); } 50% { transform: rotate(-60deg); } 75% { transform: rotate(40deg); } }
+@keyframes lvaRobotHead { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } }
+
+@keyframes lvaShuffle {
+    0%, 100% { transform: translate3d(-8%, 0, 0) scale(1.05, 0.94); }
+    25%, 75% { transform: translate3d(0, -3%, 0) scale(0.98, 1.03); }
+    50% { transform: translate3d(8%, 0, 0) scale(1.05, 0.94); }
+}
+@keyframes lvaFeetShuffle { 0%, 100% { transform: translate3d(-5%, 0, 0) rotate(-10deg); } 50% { transform: translate3d(5%, 0, 0) rotate(10deg); } }
+
+@keyframes lvaWoah {
+    0%, 40%, 100% { transform: translate3d(-4%, 0, 0) rotate(-5deg) scale(1); }
+    20% { transform: translate3d(4%, 0, 0) rotate(5deg) scale(1); }
+    55% { transform: translate3d(2%, -6%, 0) rotate(3deg) scale(1.02); }
+    60%, 88% { transform: translate3d(0, 0, 0) rotate(-2deg) scale(1.06, 0.96); }
+}
+@keyframes lvaWoahArmL { 0%, 40%, 100% { transform: rotate(10deg); } 20% { transform: rotate(50deg); } 55% { transform: rotate(80deg); } 60%, 88% { transform: rotate(-105deg); } }
+@keyframes lvaWoahArmR { 0%, 40%, 100% { transform: rotate(-10deg); } 20% { transform: rotate(-50deg); } 55% { transform: rotate(-80deg); } 60%, 88% { transform: rotate(105deg); } }
+@keyframes lvaWoahHead { 0%, 40%, 100% { transform: rotate(-5deg); } 20% { transform: rotate(5deg); } 60%, 88% { transform: rotate(9deg); } }
+
+@keyframes lvaHype {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1.08, 0.9); }
+    45% { transform: translate3d(0, -20%, 0) scale(0.96, 1.06); }
+    75% { transform: translate3d(0, -4%, 0) scale(1, 1); }
+}
+@keyframes lvaHypeL { 0%, 100% { transform: rotate(40deg); } 45% { transform: rotate(150deg); } }
+@keyframes lvaHypeR { 0%, 100% { transform: rotate(-40deg); } 45% { transform: rotate(-150deg); } }
+@keyframes lvaPawPulse { 0%, 100% { transform: scale(1); } 45% { transform: scale(1.3); } }
+
+@keyframes lvaMacarenaBody {
+    0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+    12%, 37%, 62% { transform: translate3d(0, -3%, 0) rotate(0deg); }
+    25%, 50%, 75% { transform: translate3d(0, 0, 0) rotate(0deg); }
+    81% { transform: translate3d(-4%, 0, 0) rotate(-8deg); }
+    94% { transform: translate3d(4%, 0, 0) rotate(8deg); }
+}
+/* L: irəli (60) → başa (165) → ombaya (−15) → yırğalan */
+@keyframes lvaMacarenaL { 0%, 22% { transform: rotate(60deg); } 25%, 47% { transform: rotate(165deg); } 50%, 72% { transform: rotate(-15deg); } 81% { transform: rotate(-22deg); } 94% { transform: rotate(-8deg); } 100% { transform: rotate(60deg); } }
+@keyframes lvaMacarenaR { 0%, 22% { transform: rotate(-60deg); } 25%, 47% { transform: rotate(-165deg); } 50%, 72% { transform: rotate(15deg); } 81% { transform: rotate(8deg); } 94% { transform: rotate(22deg); } 100% { transform: rotate(-60deg); } }
+@keyframes lvaMacarenaHead { 0%, 75%, 100% { transform: rotate(0deg); } 25%, 47% { transform: rotate(-4deg) translate3d(0, 1%, 0); } 81% { transform: rotate(6deg); } 94% { transform: rotate(-6deg); } }
+
+@keyframes lvaGallop {
+    0%, 100% { transform: translate3d(0, 0, 0) rotate(4deg) scale(1.06, 0.92); }
+    45% { transform: translate3d(0, -12%, 0) rotate(-2deg) scale(0.97, 1.05); }
+    70% { transform: translate3d(0, -3%, 0) rotate(2deg) scale(1, 1); }
+}
+@keyframes lvaReinsL { 0%, 100% { transform: rotate(-50deg); } 45% { transform: rotate(-35deg); } }
+@keyframes lvaLassoR {
+    0%, 100% { transform: rotate(-150deg) translate3d(0, 0, 0); }
+    25% { transform: rotate(-170deg) translate3d(3%, 0, 0); }
+    50% { transform: rotate(-128deg) translate3d(0, 2%, 0); }
+    75% { transform: rotate(-160deg) translate3d(-3%, 0, 0); }
+}
+@keyframes lvaFeetStomp { 0%, 100% { transform: translate3d(0, 0, 0) scaleX(1.1); } 45% { transform: translate3d(0, -4%, 0) scaleX(0.95); } }
+
+@keyframes lvaOrangeTwist {
+    0%, 100% { transform: perspective(600px) translate3d(-4%, 0, 0) rotateY(-28deg) rotate(-6deg) scale(1, 1); }
+    25%, 75% { transform: perspective(600px) translate3d(0, -8%, 0) rotateY(0deg) rotate(0deg) scale(0.97, 1.04); }
+    50% { transform: perspective(600px) translate3d(4%, 0, 0) rotateY(28deg) rotate(6deg) scale(1, 1); }
+}
+@keyframes lvaCircleL { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes lvaCircleR { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
+
+@keyframes lvaWormRoot {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1, 1) rotate(0deg); }
+    25% { transform: translate3d(-3%, -5%, 0) scale(0.96, 1.06) rotate(-3deg); }
+    50% { transform: translate3d(0, 2%, 0) scale(1.08, 0.92) rotate(0deg); }
+    75% { transform: translate3d(3%, -5%, 0) scale(0.96, 1.06) rotate(3deg); }
+}
+@keyframes lvaWormHead {
+    0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+    25% { transform: translate3d(-4%, -6%, 0) rotate(-8deg); }
+    50% { transform: translate3d(0, 3%, 0) rotate(0deg); }
+    75% { transform: translate3d(4%, -6%, 0) rotate(8deg); }
+}
+@keyframes lvaWormBody {
+    0%, 100% { transform: scale(1, 1) skewX(0deg); }
+    25% { transform: scale(0.94, 1.08) skewX(-4deg); }
+    50% { transform: scale(1.08, 0.92) skewX(0deg); }
+    75% { transform: scale(0.94, 1.08) skewX(4deg); }
+}
+@keyframes lvaWormFeet { 0%, 50%, 100% { transform: translate3d(0, 0, 0) scaleX(1); } 25% { transform: translate3d(-3%, 0, 0) scaleX(1.08); } 75% { transform: translate3d(3%, 0, 0) scaleX(1.08); } }
+@keyframes lvaWormArmL { 0%, 100% { transform: rotate(20deg); } 50% { transform: rotate(-12deg); } }
+@keyframes lvaWormArmR { 0%, 100% { transform: rotate(-20deg); } 50% { transform: rotate(12deg); } }
+
+/* Ortaq hissə kadrları */
+@keyframes lvaFeetStep { 0%, 100% { transform: translate3d(6%, 0, 0) rotate(-6deg); } 50% { transform: translate3d(-6%, 0, 0) rotate(6deg); } }
+@keyframes lvaTailWhip { 0%, 100% { transform: rotate(-35deg); } 50% { transform: rotate(45deg); } }
+@keyframes lvaFeetTuck { 0%, 100% { transform: scale(1) translate3d(0, 0, 0); } 50% { transform: scale(0.8) translate3d(0, -4%, 0); } }
+
+/* ══ İMZA RƏQSLƏRİ (hər növə biri; stage_logic.js SIGNATURE_DANCES) ═══════ */
+
+/* tailspin (tülkü) — çömbəlib öz oxu ətrafında fasiləsiz fırlanır, quyruq şallaq kimi */
+.live-avatar[data-dance="tailspin"] { animation-name: lvaTailspin; animation-duration: calc(var(--lva-beat) * 2); animation-timing-function: linear; }
+.live-avatar[data-dance="tailspin"] .lva-tail { animation-name: lvaTailWhip; animation-duration: calc(var(--lva-beat) / 2); }
+.live-avatar[data-dance="tailspin"] .lva-arm--l { animation-name: lvaArmOutL; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="tailspin"] .lva-arm--r { animation-name: lvaArmOutR; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="tailspin"] .lva-ear { animation-name: lvaEarFlop; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="tailspin"] .lva-head { animation-name: lvaHeadTilt; animation-duration: calc(var(--lva-beat) * 2); }
+
+/* roll (panda) — sağa yumbalanır, geri yumbalanır; əllər-ayaqlar yığılır (4 vuruş) */
+.live-avatar[data-dance="roll"] { transform-origin: 50% 58%; animation-name: lvaRoll; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="roll"] .lva-arm--l { animation-name: lvaTuckL; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="roll"] .lva-arm--r { animation-name: lvaTuckR; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="roll"] .lva-feet { animation-name: lvaFeetTuck; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="roll"] .lva-ear { animation-name: lvaEarFlop; animation-duration: var(--lva-beat); }
+
+/* roar (şir) — çömbəl, dikəl, baş böyüyüb yal silkələnir, əllər geniş açıq (4 vuruş) */
+.live-avatar[data-dance="roar"] { animation-name: lvaRoar; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="roar"] .lva-head { animation-name: lvaRoarHead; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="roar"] .lva-arm--l { animation-name: lvaRoarArmL; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="roar"] .lva-arm--r { animation-name: lvaRoarArmR; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="roar"] .lva-tail { animation-name: lvaTailWhip; animation-duration: var(--lva-beat); }
+
+/* pounce (pələng) — sağda çömbəl, sola sıçra, eniş, geri sürüş (2 vuruş) */
+.live-avatar[data-dance="pounce"] { animation-name: lvaPounce; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="pounce"] .lva-arm--l { animation-name: lvaPounceArmL; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="pounce"] .lva-arm--r { animation-name: lvaPounceArmR; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="pounce"] .lva-head { animation-name: lvaPounceHead; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="pounce"] .lva-feet { animation-name: lvaFeetTuck; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="pounce"] .lva-tail { animation-name: lvaTailWhip; animation-duration: calc(var(--lva-beat) * 2); }
+
+/* snooze (koala) — yavaş-yavaş yana əyilib mürgüləyir, gözlər yumulu, sonda diksinir (8 vuruş) */
+.live-avatar[data-dance="snooze"] { animation-name: lvaSnooze; animation-duration: calc(var(--lva-beat) * 8); }
+.live-avatar[data-dance="snooze"] .lva-head { animation-name: lvaSnoozeHead; animation-duration: calc(var(--lva-beat) * 8); }
+.live-avatar[data-dance="snooze"] .lva-ear { animation-name: lvaEarDroop; animation-duration: calc(var(--lva-beat) * 8); }
+.live-avatar[data-dance="snooze"] .lva-arm--l { animation-name: lvaSnoozeArmL; animation-duration: calc(var(--lva-beat) * 8); }
+.live-avatar[data-dance="snooze"] .lva-arm--r { animation-name: lvaSnoozeArmR; animation-duration: calc(var(--lva-beat) * 8); }
+.live-avatar[data-dance="snooze"] .lva-eye { animation: lvaSnoozeEyes calc(var(--lva-beat) * 8) ease-in-out infinite; animation-delay: var(--lva-delay); }
+
+/* wiggle (donuz) — bütün bədən cəld titrəyir, gövdə yan-yana yırğalanır, quyruq sürətli */
+.live-avatar[data-dance="wiggle"] { animation-name: lvaWiggle; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="wiggle"] .lva-body { animation-name: lvaWiggleBody; animation-duration: calc(var(--lva-beat) / 2); }
+.live-avatar[data-dance="wiggle"] .lva-tail { animation-name: lvaWag; animation-duration: calc(var(--lva-beat) / 2); }
+.live-avatar[data-dance="wiggle"] .lva-ear { animation-name: lvaEarFlop; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="wiggle"] .lva-arm--l { animation-name: lvaSwingL; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="wiggle"] .lva-arm--r { animation-name: lvaSwingR; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="wiggle"] .lva-head { animation-name: lvaHeadTilt; animation-duration: var(--lva-beat); }
+
+/* leap (qurbağa) — dərin çömbəlmə, nəhəng sıçrayış, yastı eniş (2 vuruş) */
+.live-avatar[data-dance="leap"] { animation-name: lvaLeap; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="leap"] .lva-arm--l { animation-name: lvaLeapArmL; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="leap"] .lva-arm--r { animation-name: lvaLeapArmR; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="leap"] .lva-feet { animation-name: lvaLeapFeet; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="leap"] .lva-head { animation-name: lvaLeapHead; animation-duration: calc(var(--lva-beat) * 2); }
+
+/* tentacle (osminoq) — suda üzür, qollar (gövdə) yuxarıdan dalğalanır, əllər növbə ilə burulur */
+.live-avatar[data-dance="tentacle"] { animation-name: lvaFloaty; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="tentacle"] .lva-body { transform-origin: 50% 0%; animation-name: lvaTentacles; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="tentacle"] .lva-arm--l { animation-name: lvaTentacleArmL; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="tentacle"] .lva-arm--r { animation-name: lvaTentacleArmR; animation-duration: calc(var(--lva-beat) * 2); animation-delay: calc(var(--lva-delay) - var(--lva-beat) / 2); }
+.live-avatar[data-dance="tentacle"] .lva-head { animation-name: lvaHeadTilt; animation-duration: calc(var(--lva-beat) * 2); }
+
+/* swing (meymun) — yuxarıdan asılıb sarmaşıqda yellənir, əllər yuxarıda, ayaqlar sallanır */
+.live-avatar[data-dance="swing"] { transform-origin: 50% -45%; animation-name: lvaVineSwing; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="swing"] .lva-arm--l { animation-name: lvaHangL; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="swing"] .lva-arm--r { animation-name: lvaHangR; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="swing"] .lva-feet { animation-name: lvaDangle; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="swing"] .lva-tail { animation-name: lvaWag; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="swing"] .lva-head { animation-name: lvaHeadTilt; animation-duration: calc(var(--lva-beat) * 2); }
+
+/* prance (təkbuynuz) — yüksək addımlı at yerişi, baş yalını silkələyir */
+.live-avatar[data-dance="prance"] { animation-name: lvaPrance; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="prance"] .lva-feet { animation-name: lvaPranceFeet; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="prance"] .lva-head { animation-name: lvaHeadToss; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="prance"] .lva-arm--l { animation-name: lvaPranceArmL; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="prance"] .lva-arm--r { animation-name: lvaPranceArmR; animation-duration: var(--lva-beat); animation-delay: calc(var(--lva-delay) - var(--lva-beat) / 2); }
+.live-avatar[data-dance="prance"] .lva-tail { animation-name: lvaWag; animation-duration: var(--lva-beat); }
+
+/* hophop (dovşan ×2) — kiçik hoppanma + böyük hoppanma, qulaqlar çırpınır, pəncələr yığılı (2 vuruş) */
+.live-avatar[data-dance="hophop"] { animation-name: lvaHopHop; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="hophop"] .lva-ear { animation-name: lvaEarFlap; animation-duration: var(--lva-beat); }
+.live-avatar[data-dance="hophop"] .lva-arm--l { animation-name: lvaPawsUpL; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="hophop"] .lva-arm--r { animation-name: lvaPawsUpR; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="hophop"] .lva-feet { animation-name: lvaFeetKick; animation-duration: calc(var(--lva-beat) * 2); }
+
+/* wheel (hamster) — irəli əyilib yerində cəld qaçır (yarım vuruş addım) */
+.live-avatar[data-dance="wheel"] { animation-name: lvaWheelRun; animation-duration: calc(var(--lva-beat) / 2); }
+.live-avatar[data-dance="wheel"] .lva-feet { animation-name: lvaScurry; animation-duration: calc(var(--lva-beat) / 2); animation-timing-function: linear; }
+.live-avatar[data-dance="wheel"] .lva-arm--l { animation-name: lvaScurryArmL; animation-duration: calc(var(--lva-beat) / 2); }
+.live-avatar[data-dance="wheel"] .lva-arm--r { animation-name: lvaScurryArmR; animation-duration: calc(var(--lva-beat) / 2); animation-delay: calc(var(--lva-delay) - var(--lva-beat) / 4); }
+.live-avatar[data-dance="wheel"] .lva-head { animation-name: lvaBobHead; animation-duration: calc(var(--lva-beat) / 2); }
+.live-avatar[data-dance="wheel"] .lva-ear { animation-name: lvaEarFlop; animation-duration: calc(var(--lva-beat) / 2); }
+
+/* howl (canavar) — çömbəl, dikəl, baş arxaya — ulama; bir pəncə sinədə, quyruq yuxarı (4 vuruş) */
+.live-avatar[data-dance="howl"] { animation-name: lvaHowl; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="howl"] .lva-head { animation-name: lvaHowlHead; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="howl"] .lva-arm--l { animation-name: lvaHowlArmL; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="howl"] .lva-arm--r { animation-name: lvaHowlArmR; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="howl"] .lva-tail { animation-name: lvaTailUp; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="howl"] .lva-ear { animation-name: lvaEarsBack; animation-duration: calc(var(--lva-beat) * 4); }
+
+/* slide (ağ ayı) — qarın üstə buzda sola sürüşür, əllər irəli, ayaqlar çırpınır; qalxıb qayıdır (4 vuruş) */
+.live-avatar[data-dance="slide"] { animation-name: lvaBellySlide; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="slide"] .lva-arm--l { animation-name: lvaSlideArmL; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="slide"] .lva-arm--r { animation-name: lvaSlideArmR; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="slide"] .lva-head { animation-name: lvaSlideHead; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="slide"] .lva-feet { animation-name: lvaFeetStep; animation-duration: var(--lva-beat); }
+
+/* handstand (qırmızı panda) — çömbəl, başı aşağı dur, yırğalanaraq tarazlıq saxla, qayıt (4 vuruş) */
+.live-avatar[data-dance="handstand"] { transform-origin: 50% 55%; animation-name: lvaHandstand; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="handstand"] .lva-arm--l { animation-name: lvaHandstandArmL; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="handstand"] .lva-arm--r { animation-name: lvaHandstandArmR; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="handstand"] .lva-feet { animation-name: lvaFeetSplit; animation-duration: calc(var(--lva-beat) * 4); }
+.live-avatar[data-dance="handstand"] .lva-tail { animation-name: lvaTailWhip; animation-duration: calc(var(--lva-beat) * 2); }
+.live-avatar[data-dance="handstand"] .lva-head { animation-name: lvaHeadTilt; animation-duration: calc(var(--lva-beat) * 2); }
+
+@keyframes lvaTailspin {
+    0% { transform: perspective(600px) rotateY(0deg) rotate(-6deg) scale(1.04, 0.94); }
+    50% { transform: perspective(600px) translate3d(0, -4%, 0) rotateY(180deg) rotate(6deg) scale(1, 1); }
+    100% { transform: perspective(600px) rotateY(360deg) rotate(-6deg) scale(1.04, 0.94); }
+}
+
+@keyframes lvaRoll {
+    0%, 100% { transform: translate3d(-12%, 0, 0) rotate(0deg) scale(1); }
+    10% { transform: translate3d(-10%, -4%, 0) rotate(0deg) scale(1.02, 0.96); }
+    45% { transform: translate3d(12%, 2%, 0) rotate(360deg) scale(0.96); }
+    50% { transform: translate3d(12%, 0, 0) rotate(360deg) scale(1.04, 0.95); }
+    55% { transform: translate3d(12%, -3%, 0) rotate(360deg) scale(1); }
+    90% { transform: translate3d(-12%, 2%, 0) rotate(0deg) scale(0.96); }
+}
+@keyframes lvaTuckL { 0%, 5%, 52%, 100% { transform: rotate(0deg); } 15%, 45%, 60%, 90% { transform: rotate(-70deg); } }
+@keyframes lvaTuckR { 0%, 5%, 52%, 100% { transform: rotate(0deg); } 15%, 45%, 60%, 90% { transform: rotate(70deg); } }
+
+@keyframes lvaRoar {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    15% { transform: translate3d(0, 2%, 0) scale(1.06, 0.92); }
+    30%, 65% { transform: translate3d(0, -6%, 0) scale(1.02, 1.08); }
+    35%, 55% { transform: translate3d(-1.5%, -6%, 0) scale(1.02, 1.08); }
+    45% { transform: translate3d(1.5%, -6%, 0) scale(1.02, 1.08); }
+    80% { transform: translate3d(0, 0, 0) scale(1.03, 0.98); }
+}
+@keyframes lvaRoarHead {
+    0%, 100% { transform: rotate(0deg) scale(1) translate3d(0, 0, 0); }
+    15% { transform: rotate(4deg) scale(0.97) translate3d(0, 2%, 0); }
+    30%, 65% { transform: rotate(0deg) scale(1.14) translate3d(0, -5%, 0); }
+    35%, 55% { transform: rotate(-7deg) scale(1.14) translate3d(0, -5%, 0); }
+    45% { transform: rotate(7deg) scale(1.14) translate3d(0, -5%, 0); }
+    80% { transform: rotate(0deg) scale(1) translate3d(0, 0, 0); }
+}
+@keyframes lvaRoarArmL { 0%, 100% { transform: rotate(0deg); } 15% { transform: rotate(-10deg); } 30%, 65% { transform: rotate(85deg); } 80% { transform: rotate(5deg); } }
+@keyframes lvaRoarArmR { 0%, 100% { transform: rotate(0deg); } 15% { transform: rotate(10deg); } 30%, 65% { transform: rotate(-85deg); } 80% { transform: rotate(-5deg); } }
+
+@keyframes lvaPounce {
+    0%, 100% { transform: translate3d(8%, 0, 0) scale(1, 1) rotate(0deg); }
+    25% { transform: translate3d(9%, 5%, 0) scale(1.12, 0.84) rotate(3deg); }
+    50% { transform: translate3d(-4%, -28%, 0) scale(0.94, 1.1) rotate(-12deg); }
+    68% { transform: translate3d(-12%, 0, 0) scale(1.1, 0.88) rotate(-4deg); }
+    85% { transform: translate3d(-4%, -2%, 0) scale(1, 1) rotate(2deg); }
+}
+@keyframes lvaPounceArmL { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-20deg); } 50%, 60% { transform: rotate(95deg); } 68% { transform: rotate(10deg); } }
+@keyframes lvaPounceArmR { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(20deg); } 50%, 60% { transform: rotate(60deg); } 68% { transform: rotate(-10deg); } }
+@keyframes lvaPounceHead { 0%, 100% { transform: rotate(0deg) translate3d(0, 0, 0); } 25% { transform: rotate(6deg) translate3d(0, 4%, 0); } 50% { transform: rotate(-10deg) translate3d(-2%, -2%, 0); } 68% { transform: rotate(-3deg) translate3d(0, 2%, 0); } }
+
+@keyframes lvaSnooze {
+    0%, 100% { transform: rotate(0deg) translate3d(0, 0, 0) scale(1); }
+    40% { transform: rotate(7deg) translate3d(2%, 1%, 0) scale(1.02, 0.99); }
+    70% { transform: rotate(9deg) translate3d(3%, 2%, 0) scale(1.02, 0.98); }
+    78% { transform: rotate(-3deg) translate3d(-1%, -2%, 0) scale(0.99, 1.03); }
+    86% { transform: rotate(1deg) translate3d(0, 0, 0) scale(1); }
+}
+@keyframes lvaSnoozeHead {
+    0%, 100% { transform: rotate(0deg) translate3d(0, 0, 0); }
+    40% { transform: rotate(14deg) translate3d(1%, 3%, 0); }
+    70% { transform: rotate(20deg) translate3d(2%, 5%, 0); }
+    78% { transform: rotate(-8deg) translate3d(0, -2%, 0); }
+    86% { transform: rotate(2deg) translate3d(0, 0, 0); }
+}
+@keyframes lvaSnoozeEyes { 0%, 100% { transform: scaleY(1); } 10%, 72% { transform: scaleY(0.1); } 80%, 92% { transform: scaleY(1); } }
+@keyframes lvaEarDroop { 0%, 100% { transform: rotate(0deg) translate3d(0, 0, 0); } 40%, 70% { transform: rotate(-8deg) translate3d(0, 2%, 0); } 78% { transform: rotate(6deg) translate3d(0, 0, 0); } }
+@keyframes lvaSnoozeArmL { 0%, 100% { transform: rotate(0deg); } 40%, 70% { transform: rotate(-14deg); } 78% { transform: rotate(25deg); } }
+@keyframes lvaSnoozeArmR { 0%, 100% { transform: rotate(0deg); } 40%, 70% { transform: rotate(14deg); } 78% { transform: rotate(-25deg); } }
+
+@keyframes lvaWiggle {
+    0%, 100% { transform: rotate(-5deg) translate3d(-3%, 0, 0) scale(1.02, 0.98); }
+    25%, 75% { transform: rotate(0deg) translate3d(0, -2%, 0) scale(0.98, 1.03); }
+    50% { transform: rotate(5deg) translate3d(3%, 0, 0) scale(1.02, 0.98); }
+}
+@keyframes lvaWiggleBody { 0%, 100% { transform: scaleX(1.05); } 50% { transform: scaleX(0.95); } }
+
+@keyframes lvaLeap {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1, 1); }
+    22% { transform: translate3d(0, 6%, 0) scale(1.16, 0.8); }
+    50% { transform: translate3d(0, -46%, 0) scale(0.9, 1.14); }
+    72% { transform: translate3d(0, 0, 0) scale(1.14, 0.86); }
+    86% { transform: translate3d(0, -2%, 0) scale(0.98, 1.02); }
+}
+@keyframes lvaLeapArmL { 0%, 100% { transform: rotate(0deg); } 22% { transform: rotate(-15deg); } 50% { transform: rotate(120deg); } 72% { transform: rotate(20deg); } }
+@keyframes lvaLeapArmR { 0%, 100% { transform: rotate(0deg); } 22% { transform: rotate(15deg); } 50% { transform: rotate(-120deg); } 72% { transform: rotate(-20deg); } }
+@keyframes lvaLeapFeet { 0%, 100% { transform: scaleX(1) translate3d(0, 0, 0); } 22% { transform: scaleX(1.25) translate3d(0, 0, 0); } 50% { transform: scaleX(0.85) translate3d(0, 2%, 0); } 72% { transform: scaleX(1.3) translate3d(0, 0, 0); } }
+@keyframes lvaLeapHead { 0%, 100% { transform: scale(1) translate3d(0, 0, 0); } 22% { transform: scale(1, 0.92) translate3d(0, 0, 0); } 50% { transform: scale(1.04) translate3d(0, -3%, 0); } 72% { transform: scale(1.02, 0.95) translate3d(0, 1%, 0); } }
+
+@keyframes lvaFloaty { 0%, 100% { transform: translate3d(-2%, 0, 0) rotate(-4deg); } 50% { transform: translate3d(2%, -6%, 0) rotate(4deg); } }
+@keyframes lvaTentacles {
+    0%, 100% { transform: skewX(-10deg) scaleY(1); }
+    25% { transform: skewX(0deg) scaleY(1.05); }
+    50% { transform: skewX(10deg) scaleY(1); }
+    75% { transform: skewX(0deg) scaleY(0.96); }
+}
+@keyframes lvaTentacleArmL { 0%, 100% { transform: rotate(-15deg); } 33% { transform: rotate(55deg); } 66% { transform: rotate(20deg); } }
+@keyframes lvaTentacleArmR { 0%, 100% { transform: rotate(15deg); } 33% { transform: rotate(-55deg); } 66% { transform: rotate(-20deg); } }
+
+@keyframes lvaVineSwing { 0%, 100% { transform: rotate(-18deg); } 50% { transform: rotate(18deg); } }
+@keyframes lvaHangL { 0%, 100% { transform: rotate(150deg); } 50% { transform: rotate(165deg); } }
+@keyframes lvaHangR { 0%, 100% { transform: rotate(-165deg); } 50% { transform: rotate(-150deg); } }
+@keyframes lvaDangle { 0%, 100% { transform: translate3d(4%, 0, 0) rotate(10deg); } 50% { transform: translate3d(-4%, 0, 0) rotate(-10deg); } }
+
+@keyframes lvaPrance {
+    0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1.03, 0.97); }
+    50% { transform: translate3d(0, -10%, 0) rotate(-4deg) scale(0.98, 1.04); }
+}
+@keyframes lvaPranceFeet {
+    0%, 100% { transform: rotate(-14deg) translate3d(-3%, -2%, 0); }
+    25%, 75% { transform: rotate(0deg) translate3d(0, 0, 0); }
+    50% { transform: rotate(14deg) translate3d(3%, -2%, 0); }
+}
+@keyframes lvaHeadToss { 0%, 100% { transform: rotate(-4deg) translate3d(0, 0, 0); } 40% { transform: rotate(10deg) translate3d(0, -3%, 0); } 60% { transform: rotate(-12deg) translate3d(0, -1%, 0); } }
+@keyframes lvaPranceArmL { 0%, 100% { transform: rotate(-10deg); } 50% { transform: rotate(35deg); } }
+@keyframes lvaPranceArmR { 0%, 100% { transform: rotate(10deg); } 50% { transform: rotate(-35deg); } }
+
+@keyframes lvaHopHop {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1.08, 0.9) rotate(0deg); }
+    18% { transform: translate3d(0, -16%, 0) scale(0.97, 1.05) rotate(0deg); }
+    36% { transform: translate3d(0, 0, 0) scale(1.08, 0.9) rotate(0deg); }
+    60% { transform: translate3d(0, -30%, 0) scale(0.95, 1.08) rotate(-3deg); }
+    84% { transform: translate3d(0, 0, 0) scale(1.1, 0.88) rotate(0deg); }
+}
+@keyframes lvaEarFlap { 0%, 100% { transform: rotate(-16deg); } 50% { transform: rotate(10deg); } }
+@keyframes lvaPawsUpL { 0%, 100% { transform: rotate(45deg); } 50% { transform: rotate(70deg); } }
+@keyframes lvaPawsUpR { 0%, 100% { transform: rotate(-45deg); } 50% { transform: rotate(-70deg); } }
+@keyframes lvaFeetKick { 0%, 36%, 84%, 100% { transform: scaleX(1) translate3d(0, 0, 0); } 18%, 60% { transform: scaleX(1.12) translate3d(0, 2%, 0); } }
+
+@keyframes lvaWheelRun { 0%, 100% { transform: translate3d(0, 0, 0) rotate(8deg); } 50% { transform: translate3d(0, -3%, 0) rotate(8deg); } }
+@keyframes lvaScurry { 0%, 100% { transform: translate3d(-9%, 0, 0) rotate(-10deg); } 50% { transform: translate3d(9%, 0, 0) rotate(10deg); } }
+@keyframes lvaScurryArmL { 0%, 100% { transform: rotate(-20deg); } 50% { transform: rotate(60deg); } }
+@keyframes lvaScurryArmR { 0%, 100% { transform: rotate(20deg); } 50% { transform: rotate(-60deg); } }
+@keyframes lvaBobHead { 0%, 100% { transform: translate3d(0, 0, 0) rotate(2deg); } 50% { transform: translate3d(0, -3%, 0) rotate(-2deg); } }
+
+@keyframes lvaHowl {
+    0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+    15% { transform: translate3d(0, 2%, 0) rotate(2deg) scale(1.05, 0.94); }
+    30%, 72% { transform: translate3d(0, -5%, 0) rotate(-7deg) scale(0.97, 1.07); }
+    40% { transform: translate3d(0, -6%, 0) rotate(-8deg) scale(0.97, 1.08); }
+    56% { transform: translate3d(0, -5%, 0) rotate(-6deg) scale(0.97, 1.07); }
+    85% { transform: translate3d(0, 0, 0) rotate(1deg) scale(1.02, 0.98); }
+}
+@keyframes lvaHowlHead {
+    0%, 100% { transform: rotate(0deg) translate3d(0, 0, 0); }
+    15% { transform: rotate(6deg) translate3d(0, 1%, 0); }
+    30%, 72% { transform: rotate(-26deg) translate3d(-3%, -5%, 0); }
+    40% { transform: rotate(-29deg) translate3d(-3%, -6%, 0); }
+    56% { transform: rotate(-24deg) translate3d(-3%, -5%, 0); }
+    85% { transform: rotate(3deg) translate3d(0, 0, 0); }
+}
+@keyframes lvaHowlArmL { 0%, 100% { transform: rotate(0deg); } 15% { transform: rotate(-8deg); } 30%, 72% { transform: rotate(-45deg); } 85% { transform: rotate(6deg); } }
+@keyframes lvaHowlArmR { 0%, 100% { transform: rotate(0deg); } 15% { transform: rotate(8deg); } 30%, 72% { transform: rotate(-50deg); } 85% { transform: rotate(-6deg); } }
+@keyframes lvaTailUp { 0%, 100% { transform: rotate(0deg); } 15% { transform: rotate(8deg); } 30%, 72% { transform: rotate(-30deg); } 85% { transform: rotate(4deg); } }
+@keyframes lvaEarsBack { 0%, 100% { transform: rotate(0deg); } 30%, 72% { transform: rotate(14deg); } }
+
+@keyframes lvaBellySlide {
+    0%, 100% { transform: translate3d(10%, 0, 0) rotate(0deg) scale(1); }
+    12% { transform: translate3d(10%, -4%, 0) rotate(-4deg) scale(0.98, 1.03); }
+    22% { transform: translate3d(8%, 6%, 0) rotate(-14deg) scale(1.12, 0.86); }
+    65% { transform: translate3d(-12%, 6%, 0) rotate(-14deg) scale(1.12, 0.86); }
+    80% { transform: translate3d(-10%, -3%, 0) rotate(2deg) scale(0.98, 1.04); }
+    92% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+}
+@keyframes lvaSlideArmL { 0%, 100% { transform: rotate(0deg); } 12% { transform: rotate(20deg); } 22%, 65% { transform: rotate(95deg); } 80% { transform: rotate(10deg); } }
+@keyframes lvaSlideArmR { 0%, 100% { transform: rotate(0deg); } 12% { transform: rotate(-20deg); } 22%, 65% { transform: rotate(110deg); } 80% { transform: rotate(-10deg); } }
+@keyframes lvaSlideHead { 0%, 100% { transform: rotate(0deg) translate3d(0, 0, 0); } 22%, 65% { transform: rotate(12deg) translate3d(-2%, -2%, 0); } 80% { transform: rotate(-3deg) translate3d(0, 0, 0); } }
+
+@keyframes lvaHandstand {
+    0%, 100% { transform: rotate(0deg) translate3d(0, 0, 0) scale(1); }
+    12% { transform: rotate(-10deg) translate3d(0, 3%, 0) scale(1.06, 0.92); }
+    30%, 70% { transform: rotate(180deg) translate3d(0, 0, 0) scale(1); }
+    40% { transform: rotate(176deg) translate3d(1%, 0, 0) scale(1); }
+    50% { transform: rotate(184deg) translate3d(-1%, 0, 0) scale(1); }
+    60% { transform: rotate(177deg) translate3d(0.5%, 0, 0) scale(1); }
+    88% { transform: rotate(0deg) translate3d(0, -2%, 0) scale(1.04, 0.95); }
+}
+@keyframes lvaHandstandArmL { 0%, 100% { transform: rotate(0deg); } 12% { transform: rotate(40deg); } 25%, 75% { transform: rotate(150deg); } 88% { transform: rotate(20deg); } }
+@keyframes lvaHandstandArmR { 0%, 100% { transform: rotate(0deg); } 12% { transform: rotate(-40deg); } 25%, 75% { transform: rotate(-150deg); } 88% { transform: rotate(-20deg); } }
+@keyframes lvaFeetSplit { 0%, 100% { transform: scaleX(1); } 30%, 70% { transform: scaleX(1.35); } 45% { transform: scaleX(1.5); } }
+
+/* Qalib üçün: tacın parıltısı (səhnə tacı ayrıca elementdir — bax stage CSS). */
+

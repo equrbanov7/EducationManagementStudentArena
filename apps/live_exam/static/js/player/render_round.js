@@ -1,12 +1,12 @@
 // LX-FE-PLAYER (2026-09-29): raund görünüşləri — «Hazır ol», giriş (sual oxunur), cavab plitələri
 // (tək/çox seçim, yazılı cavab), «cavab qəbul edildi» və «vaxt bitdi». Hər görünüş açarla qurulur
 // (views.js) — eyni açarla təkrar çağırış yalnız dinamik hissələri (saniyə, sayğac) yeniləyir.
-import { PHASES, TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20261019s';
-import { playSound } from './audio.js?v=lx20261019s';
-import { state } from './state.js?v=lx20261019s';
-import { optionLabel, optionMark, toneIndex } from './shapes.js?v=lx20261019s';
-import { isFormal } from '../host_lobby/style_mode.js?v=lx20261019s';
-import { announce, setQuestionChip, setTimer, startTimeBar, stopTimeBar } from './ui.js?v=lx20261019s';
+import { PHASES, TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20261110p';
+import { playSound } from './audio.js?v=lx20261110p';
+import { state } from './state.js?v=lx20261110p';
+import { optionLabel, optionMark, toneIndex } from './shapes.js?v=lx20261110p';
+import { isFormal } from '../host_lobby/style_mode.js?v=lx20261110p';
+import { announce, setQuestionChip, setTimer, startTimeBar, stopTimeBar } from './ui.js?v=lx20261110p';
 import {
     esc,
     fmt,
@@ -18,9 +18,10 @@ import {
     toInt,
     tr,
     ts,
-} from './utils.js?v=lx20261019s';
-import { currentViewEl, mountView } from './views.js?v=lx20261019s';
-import { hasCodeBlock } from '../host_lobby/code_text.js?v=lx20261019s';
+} from './utils.js?v=lx20261110p';
+import { currentViewEl, mountView } from './views.js?v=lx20261110p';
+import { hasCodeBlock } from '../host_lobby/code_text.js?v=lx20261110p';
+import { modsKey, powerArtMarkup, powerBadgesMarkup, powerClass, powerKickerMarkup } from './powerups.js?v=lx20261110p';
 
 export const CHECK_SVG =
     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -64,6 +65,8 @@ function roundKicker(question) {
     } else if (isMulti(question)) {
         parts.push(`<span class="lxp-badge">${esc(tr("multiBadge", "Bir neçə cavab"))}</span>`);
     }
+    // 2026-11-10: güc rejimləri — 💣 Bomba sualı · ×2 xal (serverin dondurulmuş bayraqları).
+    parts.push(powerBadgesMarkup(question));
     return `<p class="lxp-kicker">${parts.join("")}</p>`;
 }
 
@@ -141,11 +144,12 @@ function typedMarkup(question) {
 
 // --- «Hazır ol» (yalnız 1-ci sual) ---------------------------------------------------------
 export function renderGetReady(question, msLeft) {
-    const key = `ready:${questionKeyOf(question)}`;
+    const key = `ready:${questionKeyOf(question)}:${modsKey(question)}`;
     const seconds = Math.max(1, Math.ceil(msLeft / 1000));
     const { el, created } = mountView(
         key,
-        `<div class="lxp-ready">` +
+        `<div class="lxp-ready${powerClass(question)}">` +
+            powerArtMarkup(question) +
             roundKicker(question) +
             `<div class="lxp-ready__ring" aria-hidden="true"><span class="lxp-ready__num" data-lxp-count>${seconds}</span></div>` +
             `<h1 class="lxp-title">${esc(tr("getReadyTitle", "Hazır ol!"))}</h1>` +
@@ -172,11 +176,12 @@ export function renderGetReady(question, msLeft) {
 
 // --- Giriş: sual oxunur, cavablar bir neçə saniyədən sonra açılır ----------------------------
 export function renderIntro(question, msLeft, totalMs) {
-    const key = `intro:${questionKeyOf(question)}:${showQuestionsOnDevices() ? 1 : 0}`;
+    const key = `intro:${questionKeyOf(question)}:${showQuestionsOnDevices() ? 1 : 0}:${modsKey(question)}`;
     const show = showQuestionsOnDevices();
     const { el, created } = mountView(
         key,
-        `<div class="lxp-intro">` +
+        `<div class="lxp-intro${powerClass(question)}">` +
+            powerArtMarkup(question) +
             roundKicker(question) +
             questionCardMarkup(question) +
             `<div class="lxp-meter" aria-hidden="true"><span class="lxp-meter__fill" data-lxp-intro-fill></span></div>` +
@@ -237,7 +242,7 @@ export function updateSelectionUI(root = currentViewEl()) {
 }
 
 export function renderQuestion(question, msLeft) {
-    const key = `question:${questionKeyOf(question)}:${showQuestionsOnDevices() ? 1 : 0}`;
+    const key = `question:${questionKeyOf(question)}:${showQuestionsOnDevices() ? 1 : 0}:${modsKey(question)}`;
     const typed = isTextQuestion(question);
     const multi = !typed && isMulti(question);
     const hint = typed
@@ -247,7 +252,9 @@ export function renderQuestion(question, msLeft) {
           : "";
     const { el, created } = mountView(
         key,
-        `<div class="lxp-round${typed ? " is-typed" : ""}">` +
+        `<div class="lxp-round${typed ? " is-typed" : ""}${powerClass(question)}">` +
+            powerArtMarkup(question) +
+            powerKickerMarkup(question) +
             questionCardMarkup(question, { compact: true }) +
             hint +
             (typed ? typedMarkup(question) : tilesMarkup(question) + (multi ? multiBarMarkup(question) : "")) +
@@ -263,6 +270,7 @@ export function renderQuestion(question, msLeft) {
     if (created) {
         setQuestionChip(question);
         playSound("go", questionKeyOf(question));
+        if (question.is_bomb) playSound("fuse", `fuse:${questionKeyOf(question)}`);
         startTimeBar(`q:${questionKeyOf(question)}`, msLeft, Math.max(msLeft, endsAt - answerStartsAt));
         announce(
             fmt(tr("announceAnswersOpen", "Cavab ver! {seconds} saniyə"), { seconds: Math.ceil(msLeft / 1000) })

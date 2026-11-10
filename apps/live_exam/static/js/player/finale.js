@@ -5,12 +5,12 @@
 // animasiyamız (.lxp-dance-fallback) işləyir. Yer/xal/statistika yalnız serverdən gəlir.
 // 2026-10-19: «Rəsmi» üslubda (renderFormalFinal) — yer, xal, statistika və sakit sıralama siyahısı;
 // tac, medal, rəqs, konfetti, fanfar və vibrasiya YOXDUR.
-import { PODIUM_SIZE, PHASES, prefersReducedMotion } from './config.js?v=lx20261019s';
-import { playSound } from './audio.js?v=lx20261019s';
-import { UI } from './dom.js?v=lx20261019s';
-import { buzz, HAPTIC } from './haptics.js?v=lx20261019s';
-import { state } from './state.js?v=lx20261019s';
-import { announce, setQuestionChip, setRank, setScore, setTimer, stopTimeBar } from './ui.js?v=lx20261019s';
+import { PODIUM_SIZE, PHASES, prefersReducedMotion } from './config.js?v=lx20261110p';
+import { playSound } from './audio.js?v=lx20261110p';
+import { UI } from './dom.js?v=lx20261110p';
+import { buzz, HAPTIC } from './haptics.js?v=lx20261110p';
+import { state } from './state.js?v=lx20261110p';
+import { announce, setQuestionChip, setRank, setScore, setTimer, stopTimeBar } from './ui.js?v=lx20261110p';
 import {
     esc,
     fmt,
@@ -24,9 +24,11 @@ import {
     pickFirst,
     toInt,
     tr,
-} from './utils.js?v=lx20261019s';
-import { mountView } from './views.js?v=lx20261019s';
-import { isFormal } from '../host_lobby/style_mode.js?v=lx20261019s';
+} from './utils.js?v=lx20261110p';
+import { mountView } from './views.js?v=lx20261110p';
+import { isFormal } from '../host_lobby/style_mode.js?v=lx20261110p';
+import { danceFor } from '../host_lobby/stage_logic.js?v=lx20261110p';
+import { SESSION_SETTINGS } from './config.js?v=lx20261110p';
 
 const CROWN_SVG =
     '<svg viewBox="0 0 64 44" aria-hidden="true" focusable="false"><path d="M6 14l13 11L32 5l13 20 13-11-5 26H11z" fill="#fcd34d" stroke="#b45309" stroke-width="3" stroke-linejoin="round"/><circle cx="32" cy="5" r="4" fill="#fb7185"/><circle cx="6" cy="14" r="3.5" fill="#38bdf8"/><circle cx="58" cy="14" r="3.5" fill="#34d399"/><rect x="11" y="34" width="42" height="6" rx="2" fill="#f59e0b"/></svg>';
@@ -53,6 +55,33 @@ function finalAvatar(player, size, dance) {
         className: "lxp-final__art",
         dance,
     });
+}
+
+// 2026-11-10: rəqs növbəsi — hər 8 vuruşda (≈4.3 s) növbəti hərəkət; ən çox 40 fraza, view DOM-dan çıxanda
+// və ya tab gizlənəndə dayanır. `matchMedia` olmayan mühitdə (jsdom testləri) heç başlamır — proses asılı qalmasın.
+const DANCE_PHRASE_MS = 4300;
+const DANCE_MAX_PHRASES = 40;
+let danceRun = 0;
+let danceTimer = 0;
+function startDanceCycle(root, place) {
+    danceRun += 1;
+    const run = danceRun;
+    window.clearTimeout(danceTimer);
+    if (prefersReducedMotion() || typeof window.matchMedia !== "function") return;
+    let phrase = 0;
+    const step = () => {
+        if (run !== danceRun || !root.isConnected) return;
+        const art = root.querySelector(".lxp-final__dancer .live-avatar");
+        if (!art) return;
+        phrase += 1;
+        if (phrase >= DANCE_MAX_PHRASES) {
+            art.dataset.dance = "idle";
+            return;
+        }
+        if (!document.hidden) art.dataset.dance = danceFor(place || 4, phrase, state.player.avatar_key);
+        danceTimer = window.setTimeout(step, DANCE_PHRASE_MS);
+    };
+    danceTimer = window.setTimeout(step, DANCE_PHRASE_MS);
 }
 
 // STAGE-in rəqs CSS-i yüklənməyibsə (animasiya yoxdur) öz ehtiyat animasiyamızı qoşuruq.
@@ -232,7 +261,10 @@ export function renderFinal(payload) {
         3: tr("finalThird", "Bürünc medal!"),
         0: fmt(tr("finalWellPlayed", "Əla oyun idi, {name}!"), { name }),
     };
-    const dance = { 1: "jump", 2: "bounce", 3: "sway", 0: "wave" }[place];
+    // 2026-11-10 (sahib): «Final rəqs şousu» — öz avatarın imza hərəkəti ↔ viral rəqs (hər ~4 s dəyişir);
+    // ayar söndürülübsə avatar sakit dayanır (idle). Podium yerləri eyni xoreoqrafiyadan (stage_logic) keçir.
+    const danceShow = SESSION_SETTINGS.finale_dance !== false;
+    const dance = danceShow ? danceFor(place || 4, 0, state.player.avatar_key) : "idle";
     const hero =
         `<div class="lxp-final__stage">` +
         `<span class="lxp-final__spot" aria-hidden="true"></span>` +
@@ -271,6 +303,7 @@ export function renderFinal(payload) {
     const crown = el.querySelector(".lxp-final__crown");
     if (art && crown) art.appendChild(crown);
     ensureDance(el);
+    if (danceShow) startDanceCycle(el, place);
     if (place) {
         countUp(el.querySelector("[data-lxp-countup]"), score);
         playSound("fanfare", key);

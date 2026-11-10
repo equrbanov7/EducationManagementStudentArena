@@ -1,7 +1,7 @@
-import { state } from './state.js?v=lx20261019s';
-import { postJson } from './api.js?v=lx20261019s';
-import { icon } from './icons.js?v=lx20261019s';
-import { esc, tr } from './utils.js?v=lx20261019s';
+import { state } from './state.js?v=lx20261110p';
+import { postJson } from './api.js?v=lx20261110p';
+import { icon } from './icons.js?v=lx20261110p';
+import { esc, tr } from './utils.js?v=lx20261110p';
 
 /* Tənzimləmə çekməcəsi → «Cavab rejimi» bölməsi:
  *   • çox seçimli suallarda bal: "partial" (qismən) | "strict" (hamısı düzgün);

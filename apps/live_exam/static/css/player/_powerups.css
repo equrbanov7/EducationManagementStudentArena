@@ -1,0 +1,272 @@
+/* LX-FE-PLAYER — GÜC REJİMLƏRİ (sahib 2026-11-10): telefonda 💣 bomba və ×2 xal.
+ * Bomba sualı: qırmızı nəbz vinyeti (ürək döyüntüsü ritmi), üzən fitilli bomba, qırmızı vaxt zolağı;
+ * partlayış (bombs.js `.lxp-bomb-burst` içində): flaş, dalğa, qırıntılar, ekran titrəyişi.
+ * ×2: qızıl nişan + sikkə; nəticədə «×2» çipi. Yalnız transform/opacity; reduced-motion → statik;
+ * «Rəsmi» üslubda effektlər gizlənir, nişanlar qalır. */
+
+:root {
+    --lxp-bomb: #ff4d6d;
+    --lxp-bomb-2: #ff8f3f;
+    --lxp-double: #ffd166;
+    --lxp-double-ink: #3b2300;
+    --lxp-heart: 0.94s;
+}
+
+/* ── Nişanlar (kicker) ── */
+.lxp-badge--bomb {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, rgba(180, 23, 58, 0.6), rgba(255, 143, 63, 0.4));
+    border-color: rgba(255, 143, 63, 0.8);
+    color: #ffe4ea;
+    box-shadow: 0 0 16px rgba(255, 77, 109, 0.4);
+    animation: lxpArmed var(--lxp-heart) ease-in-out infinite;
+}
+
+.lxp-badge--double {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, rgba(180, 83, 9, 0.65), rgba(255, 209, 102, 0.5));
+    border-color: rgba(255, 209, 102, 0.9);
+    color: #fff4d6;
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.4);
+}
+
+.lxp-badge--bomb svg,
+.lxp-badge--double svg { width: 16px; height: 16px; }
+
+.lxp-kicker--power { margin-bottom: 6px; }
+
+/* ── Bomba vinyeti (bütün ekran, oyun fazasında) ── */
+body.lxp-bomb-armed .lxp-shell::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    pointer-events: none;
+    /* yalnız kənarlar qızarır — mətn və plitələr oxunaqlı qalır */
+    background: radial-gradient(ellipse at center, transparent 64%, rgba(180, 23, 58, 0.22) 86%, rgba(120, 8, 32, 0.55) 100%);
+    animation: lxpVignette var(--lxp-heart) ease-in-out infinite;
+}
+
+body.lxp-bomb-armed[data-bomb-urgency="2"] { --lxp-heart: 0.62s; }
+body.lxp-bomb-armed[data-bomb-urgency="3"] { --lxp-heart: 0.47s; }
+body.lxp-bomb-armed .lxp-timebar__fill,
+body.lxp-bomb-armed #timeBarFill { background: linear-gradient(90deg, var(--lxp-bomb), var(--lxp-bomb-2)); }
+body.lxp-bomb-armed .lxp-qcard { box-shadow: 0 0 0 2px rgba(255, 77, 109, 0.45), 0 12px 30px rgba(120, 8, 32, 0.45); }
+
+/* ── Üzən bomba (sual görünüşünün üstündə) ── */
+.lxp-bomb {
+    position: absolute;
+    top: 2px;
+    right: 6px;
+    z-index: 3;
+    width: 58px;
+    height: 58px;
+    pointer-events: none;
+    filter: drop-shadow(0 0 10px rgba(255, 143, 63, 0.7)) drop-shadow(0 8px 14px rgba(0, 0, 0, 0.5));
+    animation: lxpBombFloat 6.5s ease-in-out infinite;
+    will-change: transform;
+}
+
+.lxp-bomb svg { width: 100%; height: 100%; overflow: visible; }
+.lxp-bomb .hx-bomb__spark { transform-box: fill-box; transform-origin: 50% 50%; animation: lxpSpark 0.22s steps(2) infinite; }
+
+.lxp-round, .lxp-intro, .lxp-ready { position: relative; }
+.lxp-round.is-bomb, .lxp-round.is-double { padding-top: 14px; }
+.lxp-intro.is-bomb, .lxp-intro.is-double, .lxp-ready.is-bomb, .lxp-ready.is-double { padding-top: 10px; }
+
+/* ── ×2 sikkə ── */
+.lxp-double {
+    position: absolute;
+    top: -4px;
+    left: 4px;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff3c4, #ffd166 45%, #d97706 100%);
+    color: var(--lxp-double-ink);
+    box-shadow: inset 0 -4px 0 rgba(120, 53, 15, 0.45), 0 10px 22px rgba(245, 158, 11, 0.45);
+    pointer-events: none;
+    animation: lxpCoin 3.2s cubic-bezier(0.45, 0, 0.3, 1) infinite;
+}
+
+.lxp-double svg { width: 26px; height: 26px; }
+.lxp-round.is-double .lxp-tile { box-shadow: 0 0 0 2px rgba(255, 209, 102, 0.3), 0 10px 26px rgba(245, 158, 11, 0.2); }
+
+/* ── Nəticə: ×2 çipi və xal ── */
+.lxp-pill--double {
+    background: linear-gradient(135deg, #b45309, #ffd166);
+    border-color: rgba(255, 209, 102, 0.9);
+    color: var(--lxp-double-ink);
+    animation: lxpPop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) 0.2s both;
+}
+
+.lxp-result__points.is-double { color: #ffe08a; text-shadow: 0 0 18px rgba(255, 209, 102, 0.6); }
+
+/* ── Bomba qaydası / bildirişi (bombs.js) — yenidən üslub ── */
+.lxp-bomb-rule, .lxp-bomb-notice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(255, 143, 63, 0.75);
+    border-radius: 16px;
+    color: #ffe4ea;
+    background: linear-gradient(135deg, rgba(120, 8, 32, 0.92), rgba(180, 23, 58, 0.78));
+    font-weight: 700;
+    line-height: 1.4;
+    text-align: left;
+    box-shadow: 0 10px 30px rgba(120, 8, 32, 0.45);
+}
+
+.lxp-bomb-notice { margin-top: 10px; font-size: 1.02rem; }
+
+/* ── Partlayış (bombs.js `.lxp-bomb-burst`) ── */
+.lxp-bomb-burst {
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    overflow: hidden;
+    font-size: 0;
+    animation: lxpBurstLife 2.4s linear forwards;
+}
+
+.lxp-bomb-burst__flash {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 45%, #fff7e6 0%, #ffb703 20%, rgba(255, 77, 109, 0.8) 46%, transparent 72%);
+    animation: lxpFlash 0.7s ease-out forwards;
+}
+
+.lxp-bomb-burst__wave {
+    position: absolute;
+    width: 22vmin;
+    height: 22vmin;
+    border-radius: 50%;
+    border: 2vmin solid rgba(255, 230, 180, 0.9);
+    animation: lxpWave 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+.lxp-bomb-burst__wave--2 { border-color: rgba(255, 77, 109, 0.85); animation-delay: 0.12s; }
+
+.lxp-bomb-burst__core {
+    position: absolute;
+    width: 30vmin;
+    height: 30vmin;
+    animation: lxpCore 0.6s ease-out forwards;
+}
+
+.lxp-bomb-burst__core svg { width: 100%; height: 100%; }
+
+.lxp-bomb-burst__shard {
+    position: absolute;
+    width: calc(2.4vmin * var(--s, 1));
+    height: calc(4vmin * var(--s, 1));
+    border-radius: 0.6vmin;
+    background: linear-gradient(180deg, #ffd166, #ff8f3f 60%, #b4173a);
+    box-shadow: 0 0 2vmin rgba(255, 183, 3, 0.8);
+    transform: rotate(var(--a, 0deg)) translateY(0) scale(0.3);
+    opacity: 0;
+    animation: lxpShard var(--t, 0.7s) cubic-bezier(0.15, 0.7, 0.3, 1) 0.08s forwards;
+}
+
+body.lxp-shake .lxp-shell { animation: lxpShake 0.7s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+
+/* ── Animasiyalar ── */
+@keyframes lxpArmed {
+    0%, 100% { transform: scale(1); }
+    18% { transform: scale(1.06); }
+    36% { transform: scale(1); }
+    52% { transform: scale(1.035); }
+}
+
+@keyframes lxpVignette {
+    0%, 100% { opacity: 0.45; }
+    18% { opacity: 1; }
+    36% { opacity: 0.5; }
+    52% { opacity: 0.85; }
+}
+
+@keyframes lxpBombFloat {
+    0% { transform: translate3d(0, 0, 0) rotate(-8deg); }
+    30% { transform: translate3d(-34vw, 6px, 0) rotate(7deg); }
+    55% { transform: translate3d(-62vw, -4px, 0) rotate(-6deg); }
+    80% { transform: translate3d(-30vw, 8px, 0) rotate(6deg); }
+    100% { transform: translate3d(0, 0, 0) rotate(-8deg); }
+}
+
+@keyframes lxpSpark {
+    0% { transform: scale(0.8) rotate(0deg); opacity: 0.85; }
+    100% { transform: scale(1.25) rotate(22deg); opacity: 1; }
+}
+
+@keyframes lxpCoin {
+    0% { transform: perspective(400px) rotateY(0deg); }
+    45%, 55% { transform: perspective(400px) rotateY(180deg); }
+    100% { transform: perspective(400px) rotateY(360deg); }
+}
+
+@keyframes lxpPop {
+    0% { transform: scale(0.4); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes lxpBurstLife { 0%, 99% { opacity: 1; } 100% { opacity: 0; } }
+
+@keyframes lxpFlash {
+    0% { opacity: 0; transform: scale(0.6); }
+    12% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.3); }
+}
+
+@keyframes lxpWave {
+    0% { transform: scale(0.2); opacity: 1; }
+    100% { transform: scale(7); opacity: 0; }
+}
+
+@keyframes lxpCore {
+    0% { transform: scale(0.4) rotate(-20deg); opacity: 1; }
+    40% { transform: scale(1.25) rotate(8deg); opacity: 1; }
+    100% { transform: scale(2.4) rotate(30deg); opacity: 0; }
+}
+
+@keyframes lxpShard {
+    0% { transform: rotate(var(--a, 0deg)) translateY(0) scale(0.3); opacity: 0; }
+    15% { opacity: 1; }
+    100% { transform: rotate(var(--a, 0deg)) translateY(calc(-1 * var(--d, 40vmin))) scale(var(--s, 1)) rotate(260deg); opacity: 0; }
+}
+
+@keyframes lxpShake {
+    10%, 90% { transform: translate3d(-2px, 1px, 0); }
+    20%, 80% { transform: translate3d(4px, -2px, 0); }
+    30%, 50%, 70% { transform: translate3d(-7px, 3px, 0); }
+    40%, 60% { transform: translate3d(7px, -3px, 0); }
+}
+
+/* ── «Rəsmi» üslub ── */
+body[data-lx-style="formal"] .lxp-bomb,
+body[data-lx-style="formal"] .lxp-double,
+body[data-lx-style="formal"] .lxp-bomb-burst,
+body[data-lx-style="formal"].lxp-bomb-armed .lxp-shell::after { display: none !important; }
+body[data-lx-style="formal"] .lxp-badge--bomb { animation: none; }
+
+/* ── Azaldılmış hərəkət ── */
+@media (prefers-reduced-motion: reduce) {
+    .lxp-badge--bomb,
+    body.lxp-bomb-armed .lxp-shell::after,
+    .lxp-bomb,
+    .lxp-bomb .hx-bomb__spark,
+    .lxp-double,
+    .lxp-pill--double,
+    body.lxp-shake .lxp-shell { animation: none; }
+    .lxp-bomb-burst { display: none; }
+}

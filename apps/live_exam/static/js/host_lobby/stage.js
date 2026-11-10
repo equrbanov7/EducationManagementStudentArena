@@ -1,9 +1,10 @@
-import { UI } from './dom.js?v=lx20261019s';
-import { icon } from './icons.js?v=lx20261019s';
-import { createFx } from './fx.js?v=lx20261019s';
-import { formalStageMarkup } from './formal_stage.js?v=lx20261019s';
-import { isFormal } from './style_mode.js?v=lx20261019s';
-import { audienceDelay, buildStageModel, danceFor, stageTimeline } from './stage_logic.js?v=lx20261019s';
+import { UI } from './dom.js?v=lx20261110p';
+import { icon } from './icons.js?v=lx20261110p';
+import { createFx } from './fx.js?v=lx20261110p';
+import { formalStageMarkup } from './formal_stage.js?v=lx20261110p';
+import { isFormal } from './style_mode.js?v=lx20261110p';
+import { audienceDance, audienceDelay, buildStageModel, danceFor, stageTimeline } from './stage_logic.js?v=lx20261110p';
+import { state } from './state.js?v=lx20261110p';
 import {
     playCheer,
     playFanfare,
@@ -12,8 +13,8 @@ import {
     startDanceBeat,
     startDrumroll,
     stopDanceBeat,
-} from './audio.js?v=lx20261019s';
-import { avatarMarkup, countUp, esc, fmt, formatNumber, formatSeconds, reducedMotion, tr } from './utils.js?v=lx20261019s';
+} from './audio.js?v=lx20261110p';
+import { avatarMarkup, countUp, esc, fmt, formatNumber, formatSeconds, reducedMotion, tr } from './utils.js?v=lx20261110p';
 
 /* FİNAL SƏHNƏSİ — qaranlıq zal, açılan pərdələr, süpürən projektorlar, qalxan
  * 3 pilləli podium; 3-cü → 2-ci → barabam → 1-ci (tac, fanfar, sol+sağ konfetti
@@ -204,22 +205,37 @@ function fireworks() {
     S.fx.burst(rect.left - host.left + rect.width / 2 + (Math.random() - 0.5) * rect.width, rect.top - host.top - rect.height * 0.15, 40);
 }
 
+/** 2026-11-10 (sahib): «Final rəqs şousu» ayarı — söndürüləndə avatarlar sakit dayanır (idle). */
+const danceShowEnabled = () => state.sessionSettings?.finale_dance !== false;
+
 function setDances(phraseIndex) {
     if (!S.root) return;
+    // 2026-11-10: hər personajın imza hərəkəti (cüt fraza) ↔ viral rəqs (tək fraza); fraza hamı üçün
+    // ortaqdır — podium birlikdə «imza → viral» keçir, viral hərəkətlər yerə görə fərqlidir.
     S.model.podium.forEach((entry) => {
         const avatar = stepEl(entry.place)?.querySelector(".live-avatar");
-        if (avatar) avatar.dataset.dance = danceFor(entry.place, phraseIndex + entry.place);
+        if (avatar) avatar.dataset.dance = danceFor(entry.place, phraseIndex, entry.player?.avatar_key);
     });
     S.root.querySelectorAll(".hx-fan .live-avatar").forEach((avatar, index) => {
-        avatar.dataset.dance = Math.floor(phraseIndex / 2) % 2 === 0 ? "cheer" : "bounce";
+        avatar.dataset.dance = audienceDance(index, phraseIndex);
         avatar.style.setProperty("--lva-delay", `${audienceDelay(index).toFixed(3)}s`);
     });
+}
+
+function setIdle() {
+    S.root?.querySelectorAll(".live-avatar").forEach((avatar) => { avatar.dataset.dance = "idle"; });
 }
 
 function startParty(run) {
     if (!S.root) return;
     S.root.dataset.phase = "party";
     delete S.root.dataset.focus;
+    if (!danceShowEnabled()) {
+        // Rəqs şousu söndürülüb — podium açıq qalır, avatarlar nəfəs alır, ritm çalınmır.
+        setIdle();
+        S.done = true;
+        return;
+    }
     S.phrase = 0;
     setDances(0);
     window.clearInterval(S.danceTimer);

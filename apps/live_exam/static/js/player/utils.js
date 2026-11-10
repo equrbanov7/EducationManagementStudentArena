@@ -5,10 +5,10 @@ import {
     I18N,
     LANG,
     SESSION_SETTINGS,
-} from './config.js?v=lx20261019s';
-import { clockOffsetMs, recordPush, recordRoundTrip } from './clock.js?v=lx20261019s';
-import { state } from './state.js?v=lx20261019s';
-import { plainText } from '../host_lobby/style_mode.js?v=lx20261019s';
+} from './config.js?v=lx20261110p';
+import { clockOffsetMs, recordPush, recordRoundTrip } from './clock.js?v=lx20261110p';
+import { state } from './state.js?v=lx20261110p';
+import { plainText } from '../host_lobby/style_mode.js?v=lx20261110p';
 
 // Tərcümə hələ kompilyasiya olunmayıbsa {% trans %} msgid-i («answer_locked») qaytarır —
 // belə açarı xam göstərmirik, JS-dəki (az) ehtiyat mətni işlədirik.

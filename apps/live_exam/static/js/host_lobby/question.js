@@ -1,12 +1,12 @@
-import { $, UI } from './dom.js?v=lx20261019s';
-import { PHASES } from './constants.js?v=lx20261019s';
-import { state } from './state.js?v=lx20261019s';
-import { playAllAnswered, playCountdownSound, playIntroSound, playTick, playTimeUp, playWhoosh } from './audio.js?v=lx20261019s';
-import { icon } from './icons.js?v=lx20261019s';
-import { answerTileMarkup, optionsLengthClass, tilesGridClass } from './options.js?v=lx20261019s';
-import { revealQuestion } from './api.js?v=lx20261019s';
-import { playWipe } from './transitions.js?v=lx20261019s';
-import { secondsLabel } from './time_setting.js?v=lx20261019s';
+import { $, UI } from './dom.js?v=lx20261110p';
+import { PHASES } from './constants.js?v=lx20261110p';
+import { state } from './state.js?v=lx20261110p';
+import { playAllAnswered, playCountdownSound, playIntroSound, playTick, playTimeUp, playWhoosh } from './audio.js?v=lx20261110p';
+import { icon } from './icons.js?v=lx20261110p';
+import { answerTileMarkup, optionsLengthClass, tilesGridClass } from './options.js?v=lx20261110p';
+import { revealQuestion } from './api.js?v=lx20261110p';
+import { playWipe } from './transitions.js?v=lx20261110p';
+import { secondsLabel } from './time_setting.js?v=lx20261110p';
 import {
     controlsEnabled,
     esc,
@@ -19,8 +19,10 @@ import {
     questionKey,
     toMs,
     tr,
-} from './utils.js?v=lx20261019s';
-import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261019s';
+} from './utils.js?v=lx20261110p';
+import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261110p';
+import { bombSceneMarkup, doubleSceneMarkup, powerBadgesMarkup, powerSceneClass } from './power_markup.js?v=lx20261110p';
+import { setQuestionRerenderHook, syncPowerAmbience } from './powerups.js?v=lx20261110p';
 
 const isTextQuestion = (question) => String(question?.answer_input || "choice") === "text";
 
@@ -81,6 +83,7 @@ function headMarkup(question) {
             <span class="hx-pill">${esc(progressLabel(question))}</span>
             ${timePillMarkup(question)}
             ${badgesMarkup(question)}
+            ${powerBadgesMarkup(question)}
             ${lateJoinPinMarkup()}
         </header>
     `;
@@ -136,7 +139,8 @@ function renderQuestionOnlyStage(question) {
         PHASES.QUESTION,
         `${state.questionKey}:${PHASES.QUESTION}`,
         `
-            <section class="hx-scene hx-question hx-question--reading" aria-live="polite">
+            <section class="hx-scene hx-question hx-question--reading${powerSceneClass(question)}" aria-live="polite">
+                ${bombSceneMarkup(question)}${doubleSceneMarkup(question)}
                 ${headMarkup(question)}
                 ${cardMarkup(question, false)}
                 <div class="hx-readbar" aria-hidden="true">
@@ -198,7 +202,8 @@ function renderAnswersStage(question) {
         PHASES.ANSWERS,
         `${state.questionKey}:${PHASES.ANSWERS}`,
         `
-            <section class="hx-scene hx-question hx-question--answers ${text ? "is-text" : ""}" data-opt-len="${optionsLengthClass(options)}">
+            <section class="hx-scene hx-question hx-question--answers ${text ? "is-text" : ""}${powerSceneClass(question)}" data-opt-len="${optionsLengthClass(options)}">
+                ${bombSceneMarkup(question)}${doubleSceneMarkup(question)}
                 ${headMarkup(question)}
                 <div class="hx-qrow">
                     ${hudMarkup()}
@@ -333,7 +338,18 @@ function syncQuestionPresentation() {
         renderAnswersStage(state.currentQuestion);
         updateTimer(now);
     }
+    // 2026-11-10: bomba ürək döyüntüsü / ×2 aurası — faza və qalan vaxta görə (ucuz, idempotent).
+    syncPowerAmbience();
 }
+
+/** Güc rejimi cari suala tətbiq olunanda (question_modifiers) eyni fazanı yenidən çəkir. */
+export function rerenderQuestionScene() {
+    if (state.sessionState !== "question" || !state.currentQuestion) return;
+    state.phaseSignature = "";
+    state.countdownValue = null;
+    syncQuestionPresentation();
+}
+setQuestionRerenderHook(rerenderQuestionScene);
 
 function scheduleAutoReveal(question) {
     clearTimeout(state.autoRevealTimeout);

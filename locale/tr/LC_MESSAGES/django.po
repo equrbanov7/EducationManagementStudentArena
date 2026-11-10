@@ -117465,3 +117465,111 @@ msgstr "Hayır, bu ben değilim"
 msgctxt "accounts.workload"
 msgid "Birgə (patok)"
 msgstr "Ortak (akış)"
+
+msgctxt "live_exam.power_modes"
+msgid "Bomba rejimi"
+msgstr "Bomba modu"
+
+msgctxt "live_exam.power_modes"
+msgid "×2 Xal rejimi"
+msgstr "×2 Puan modu"
+
+msgctxt "live_exam.power_modes"
+msgid "Oyun effektləri"
+msgstr "Oyun efektleri"
+
+msgctxt "live_exam.power_modes"
+msgid "Hər sual bombadır: səhv cavab bu oyundakı xalı sıfırlayır."
+msgstr "Her soru bombadır: yanlış cevap bu oyundaki puanı sıfırlar."
+
+msgctxt "live_exam.power_modes"
+msgid "Düzgün cavab ikiqat xal gətirir."
+msgstr "Doğru cevap iki kat puan kazandırır."
+
+msgctxt "live_exam.power_modes"
+msgid "Final rəqs şousu"
+msgstr "Final dans şovu"
+
+msgctxt "live_exam.power_modes"
+msgid "Final səhnəsində avatarlar viral və özünəməxsus rəqslər edir."
+msgstr "Final sahnesinde avatarlar viral ve kendilerine özgü danslar yapar."
+
+msgctxt "live_exam.power_modes"
+msgid "Açıq olanda nəşr olunan hər sual bomba sualıdır: səhv və ya qismən düzgün cavab oyunçunun bu oyundakı xalını sıfırlayır. Cavabsız qalmaq partlatmır. Oyun gedərkən də dəyişir — cari suala hələ cavab yoxdursa dərhal, əks halda növbəti sualdan."
+msgstr "Açıkken yayınlanan her soru bomba sorusudur: yanlış veya kısmen doğru cevap oyuncunun bu oyundaki puanını sıfırlar. Cevapsız kalmak patlatmaz. Oyun sırasında da değiştirilebilir — mevcut soruya henüz cevap yoksa hemen, aksi halde sonraki sorudan itibaren uygulanır."
+
+msgctxt "live_exam.power_modes"
+msgid "Açıq olanda düzgün cavab ikiqat xal gətirir (sürət əmsalı saxlanılır). Bomba ilə birlikdə işləyir: düzgün → ×2, səhv → sıfırlanma. Oyun gedərkən də dəyişir."
+msgstr "Açıkken doğru cevap iki kat puan kazandırır (hız katsayısı korunur). Bomba ile birlikte çalışır: doğru → ×2, yanlış → sıfırlama. Oyun sırasında da değiştirilebilir."
+
+msgctxt "live_exam.power_modes"
+msgid "Final səhnəsində podium və tamaşaçı avatarları viral rəqslər və hər personajın özünəməxsus hərəkətini edir (telefonlarda da). Söndürüləndə avatarlar sakit dayanır."
+msgstr "Final sahnesinde podyum ve seyirci avatarları viral danslar ve her karakterin kendine özgü hareketini yapar (telefonlarda da). Kapalıyken avatarlar sakin durur."
+
+msgctxt "live_exam.power_modes"
+msgid "Bomba sualı"
+msgstr "Bomba sorusu"
+
+msgctxt "live_exam.power_modes"
+msgid "×2 xal"
+msgstr "×2 puan"
+
+msgctxt "live_exam.power_modes"
+msgid "×2 xal!"
+msgstr "×2 puan!"
+
+msgctxt "live_exam.power_modes"
+msgid "Səhv cavab bu oyundakı xalı sıfırlayır"
+msgstr "Yanlış cevap bu oyundaki puanı sıfırlar"
+
+msgctxt "live_exam.power_modes"
+msgid "Düzgün cavab ikiqat xal gətirir"
+msgstr "Doğru cevap iki kat puan kazandırır"
+
+msgctxt "live_exam.power_modes"
+msgid "Bomba partladı!"
+msgstr "Bomba patladı!"
+
+msgctxt "live_exam.power_modes"
+msgid "{count} bomba partladı!"
+msgstr "{count} bomba patladı!"
+
+msgctxt "live_exam.power_modes"
+msgid "cari suala tətbiq olundu"
+msgstr "mevcut soruya uygulandı"
+
+msgctxt "live_exam.power_modes"
+msgid "cari sualdan götürüldü"
+msgstr "mevcut sorudan kaldırıldı"
+
+msgctxt "live_exam.power_modes"
+msgid "Bu suala artıq cavab var — dəyişiklik növbəti sualdan keçərlidir"
+msgstr "Bu soruya zaten cevap var — değişiklik sonraki sorudan itibaren geçerli"
+
+msgctxt "live_exam.power_modes"
+msgid "Növbəti sualdan keçərlidir"
+msgstr "Sonraki sorudan itibaren geçerli"
+
+msgctxt "live_exam.power_modes"
+msgid "Rejimlər söndürülüb"
+msgstr "Modlar kapalı"
+
+msgctxt "live_exam.power_modes"
+msgid "Növbəti sualdan: {modes}"
+msgstr "Sonraki sorudan: {modes}"
+
+msgctxt "live_exam.power_modes"
+msgid "Cari sual: {modes}"
+msgstr "Mevcut soru: {modes}"
+
+msgctxt "live_exam.power_modes"
+msgid "Cari sual: rejim yoxdur"
+msgstr "Mevcut soru: mod yok"
+
+msgctxt "live_exam.power_modes"
+msgid "açıq"
+msgstr "açık"
+
+msgctxt "live_exam.power_modes"
+msgid "bağlı"
+msgstr "kapalı"

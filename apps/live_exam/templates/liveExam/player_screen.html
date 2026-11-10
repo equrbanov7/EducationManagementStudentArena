@@ -88,6 +88,9 @@
         }
     }</script>
     <script id="playerI18n" type="application/json">{
+        "bombBadge": "{% filter escapejs %}{% trans 'Bomba sualı' context 'live_exam.power_modes' %}{% endfilter %}",
+        "doubleBadge": "{% filter escapejs %}{% trans '×2 xal' context 'live_exam.power_modes' %}{% endfilter %}",
+        "doubleChip": "{% filter escapejs %}{% trans '×2 xal!' context 'live_exam.power_modes' %}{% endfilter %}",
         "pageTitle": "{% filter escapejs %}{% trans 'page_title' context 'live_exam.player' %}{% endfilter %}",
         "announceAnswersOpen": "{% filter escapejs %}{% trans 'announce_answers_open' context 'live_exam.player' %}{% endfilter %}",
         "announceQuestion": "{% filter escapejs %}{% trans 'announce_question' context 'live_exam.player' %}{% endfilter %}",

@@ -96,10 +96,64 @@ const MOVES = {
     3: ["bounce", "sway", "jump", "wave"],
 };
 
-/** Hər 8 vuruşda (≈4.3 s) yerə görə növbəti rəqs hərəkəti. */
-export function danceFor(place, phrase) {
-    const list = MOVES[place] || ["cheer", "bounce"];
-    return list[Math.abs(Number(phrase) || 0) % list.length];
+/* ── Viral + imza rəqsləri (2026-11-10). Adlar live_avatar.css `data-dance`
+ * qaydaları və live_avatar_renderer.js DANCES siyahısı ilə eynidir (test yoxlayır). */
+export const VIRAL_DANCES = Object.freeze([
+    "floss", "griddy", "dab", "moonwalk", "robot", "shuffle",
+    "woah", "hype", "macarena", "gangnam", "orange", "worm",
+]);
+
+/** avatar_1…avatar_16 → növün imza hərəkəti (live_avatar_catalog.js sırası). */
+export const SIGNATURE_DANCES = Object.freeze({
+    avatar_1: "tailspin", // tülkü
+    avatar_2: "roll", // panda
+    avatar_3: "roar", // şir
+    avatar_4: "pounce", // pələng
+    avatar_5: "snooze", // koala
+    avatar_6: "wiggle", // donuz
+    avatar_7: "leap", // qurbağa
+    avatar_8: "tentacle", // osminoq
+    avatar_9: "swing", // meymun
+    avatar_10: "prance", // təkbuynuz
+    avatar_11: "hophop", // dovşan
+    avatar_12: "wheel", // hamster
+    avatar_13: "howl", // canavar
+    avatar_14: "slide", // ağ ayı
+    avatar_15: "handstand", // qırmızı panda
+    avatar_16: "hophop", // nanə/lop dovşan
+});
+
+export function signatureDance(avatarKey) {
+    return SIGNATURE_DANCES[String(avatarKey ?? "")] || "bounce";
+}
+
+const phraseIndex = (phrase) => Math.abs(Math.trunc(Number(phrase) || 0));
+
+/**
+ * Hər 8 vuruşda (≈4.3 s) növbəti rəqs hərəkəti.
+ *   danceFor(place, phrase)            → köhnə davranış (yerə görə əsas hərəkətlər).
+ *   danceFor(place, phrase, avatarKey) → cüt frazada imza hərəkəti, tək frazada viral;
+ *     viral indeksi yer + frazadan çıxır (1-2-3-cü yerlər eyni anda eyni viralı etmir;
+ *     ofset 4 → fraza yerə görə ±1 sürüşsə də toqquşmur).
+ */
+export function danceFor(place, phrase, avatarKey) {
+    const n = phraseIndex(phrase);
+    if (avatarKey == null || avatarKey === "") {
+        const list = MOVES[place] || ["cheer", "bounce"];
+        return list[n % list.length];
+    }
+    if (n % 2 === 0) return signatureDance(avatarKey);
+    const slot = Math.max(0, (Number(place) || 1) - 1);
+    return VIRAL_DANCES[(Math.floor(n / 2) + slot * 4) % VIRAL_DANCES.length];
+}
+
+const AUDIENCE_POOL = Object.freeze([...VIRAL_DANCES, "cheer", "bounce"]);
+
+/** Tamaşaçı (4–10-cu yer) üçün hərəkət: qonşular fərqli, fraza ilə dəyişir, deterministik. */
+export function audienceDance(index, phrase) {
+    const i = Math.abs(Math.trunc(Number(index) || 0));
+    // 5 və 14 qarşılıqlı sadədir → ardıcıl 14 tamaşaçı hamısı fərqli; 7 fraza addımı dövrü sürüşdürür.
+    return AUDIENCE_POOL[(i * 5 + phraseIndex(phrase) * 7) % AUDIENCE_POOL.length];
 }
 
 /** Tamaşaçı sırası üçün faza sürüşməsi (hamı eyni anda tullanmasın). */

@@ -1,7 +1,7 @@
-import { bombText } from './bomb_text.js?v=lx20261019s';
-import { state } from './state.js?v=lx20261019s';
-import { postJson } from './api.js?v=lx20261019s';
-import { esc } from './utils.js?v=lx20261019s';
+import { bombText } from './bomb_text.js?v=lx20261110p';
+import { state } from './state.js?v=lx20261110p';
+import { postJson } from './api.js?v=lx20261110p';
+import { esc } from './utils.js?v=lx20261110p';
 
 export function mountBombDrawer() {
     const root = document.getElementById("hostBombSection");

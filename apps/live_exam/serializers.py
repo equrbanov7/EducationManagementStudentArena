@@ -205,17 +205,20 @@ def question_mode_fields(config, choice_ids: list[int] | None = None, text: str 
     """Cavab növünə görə əlavə şəxsi sahələr (yazılı: ``your_text``; multi: seçim sayları)."""
     if config is None:
         return {}
+    # 2026-11-10: «×2 Xal» rejimi — oyunçu nəticəsində çarpan (telefon «×2» nişanı göstərir).
+    fields: dict[str, Any] = {"points_multiplier": 2} if getattr(config, "is_double", False) else {}
     if config.is_text:
-        return {"your_text": text or ""}
+        return {**fields, "your_text": text or ""}
     if config.is_multi:
         chosen = {safe_int(value, 0) for value in (choice_ids or [])}
         correct = set(config.correct_ids)
         return {
+            **fields,
             "correct_selected": len(chosen & correct),
             "wrong_selected": len(chosen - correct),
             "total_correct": len(correct),
         }
-    return {}
+    return fields
 
 
 def speed_rank(session_id: int, question_id: int, answer) -> int:

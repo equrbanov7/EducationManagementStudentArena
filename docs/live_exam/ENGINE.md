@@ -182,3 +182,37 @@ Sahib: «müəllimlər ciddi mühitdə ikonlar olaraq uşaq əyləncəli olanlar
   çıxarılır, liderlik sətirləri sürüşmür, final — sakit sıralama cədvəli (`formal_stage.js`), telefonda — yer, xal,
   statistika və ilk 5. Kod nümunələrinin göstərilməsi (`code_text.js`, `live_code_text.css`) dəyişmir.
 * **«Qeyri-rəsmi»:** əvvəlki davranış dəyişməyib.
+
+## Güc rejimləri: 💣 Bomba, ×2 Xal, final rəqs şousu (2026-11-10)
+
+Sahib: «oyun ekranında bombanı aktivləşdir deyə bir şey olsun, sual gedərkən dayandırmaq da olsun… ikiqat nəticə
+verən ikon olsun… settings-də yandırıb-söndürmək olsun… final səhnəsində ikonlar viral rəqslər etsin».
+
+* **Ayarlar** (`session_settings.DEFAULT_SESSION_SETTINGS`, ictimai): `bomb_mode` (False), `double_mode` (False),
+  `finale_dance` (True). Üçü də aparıcının sol panelindəki «Oyun effektləri» blokunda və «Tənzimləmələr» çekməcəsində
+  keçiddir; bomba və ×2 həm də **səhnənin öz ikonlarıdır** (`.hx-power-dock`, aşağı sağ künc, `host_lobby/powerups.js`):
+  klik → yandır/söndür (fitil alışması / sikkə çevrilməsi + səs). Per-sual `bomb_questions` siyahısı qalır və
+  `bomb_mode` ilə «və ya» birləşir.
+* **Dondurma.** Hər iki rejim sual NƏŞR olunanda `_question_config`-a yazılır (`is_bomb`, `is_double`) və raund boyu
+  dəyişmir. Aparıcı rejimi oyun gedərkən dəyişsə (`services.update_host_settings_with_modifiers` →
+  `_sync_question_modifiers`): cari suala **cavab yoxdursa** qayda yenidən dondurulur (vaxt saxlanır,
+  `refreeze_question_modifiers`) və `question_modifiers {applied: true, is_bomb, is_double}` host + oyunçu play
+  qruplarına gedir (səhnə/telefon nişanları dərhal dəyişir); **cavab varsa** qayda dəyişmir, HTTP cavabında
+  `modifiers.applied=false` qayıdır — aparıcıya «növbəti sualdan» bildirişi. Bu, bir raund içində hamının eyni qayda ilə
+  qiymətləndirilməsini qoruyur.
+* **Bal.** `power_modes.apply_double_points`: dondurulmuş `is_double`-da müsbət `awarded_points` × 2 (sürət əmsalı
+  saxlanılır, qismən bal da ikiqat), səhv cavab 0; sonra bomba qaydası (`bombs.bomb_score_effect`). Bomba + ×2 birgə:
+  düzgün → ×2, səhv → sıfırlanma. `LiveAnswer` sxemi dəyişmir (0007 CHECK qüvvədə).
+* **Protokol — əlavə sahələr:** `question.is_double` (sual paketi, `to_payload_fields`), reveal paketində
+  `is_bomb`, `is_double`, `points_multiplier` (1|2), `bomb_count`; şəxsi nəticədə `points_multiplier`
+  (`question_mode_fields`); yeni hadisə `question_modifiers`; `host_update_settings` cavabında `modifiers`.
+* **Təqdimat.** Səhnə: bomba sualında qırmızı nəbz vinyeti + üzən fitilli bomba + ürək döyüntüsü (`audio.js`
+  `startHeartbeat`, 64 → 96 → 128 bpm son 10/5 s-də), ×2-də qızıl sikkə aurası; reveal-də `bomb_count > 0` →
+  partlayış (flaş, dalğa, qırıntılar, titrəyiş, səs). Telefon: eyni nişanlar, vinyet, ürək döyüntüsü, `bombs.js`
+  partlayışı + ağır vibrasiya, nəticədə «×2 xal!» çipi. «Rəsmi» üslubda effektlər gizlənir, nişanlar (qayda) qalır.
+* **Final rəqsi.** `stage_logic.js`: `VIRAL_DANCES` (floss, griddy, dab, moonwalk, robot, shuffle, woah, hype,
+  macarena, gangnam, orange, worm), `SIGNATURE_DANCES` (avatar_1…16 → tailspin, roll, roar, pounce, snooze, wiggle,
+  leap, tentacle, swing, prance, hophop, wheel, howl, slide, handstand), `danceFor(place, phrase, avatarKey)` — cüt
+  frazada imza, tək frazada viral (yerlər fərqli), `audienceDance(index, phrase)`. CSS `live_avatar.css`
+  `data-dance` qaydaları (34 ad; test: tests/js/live_stage.test.js). `finale_dance=false` → avatarlar `idle`, ritm yox.
+* **Testlər:** `apps/live_exam/tests/test_power_modes.py`, `tests/js/live_stage.test.js`, `tests/js/live_bomb.test.js`.

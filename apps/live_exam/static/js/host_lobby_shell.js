@@ -60,6 +60,13 @@ document.addEventListener("DOMContentLoaded", () => {
         ["settingNicknameGenerator", "nickname_generator"],
         ["settingTwoStepJoin", "two_step_join"],
         ["settingLateJoinEnabled", "late_join_enabled"],
+        // 2026-11-10: güc rejimləri — çekməcə + sol panel (eyni açar, iki keçid).
+        ["settingBombMode", "bomb_mode"],
+        ["settingDoubleMode", "double_mode"],
+        ["settingFinaleDance", "finale_dance"],
+        ["controlBombMode", "bomb_mode"],
+        ["controlDoubleMode", "double_mode"],
+        ["controlFinaleDance", "finale_dance"],
     ].map(([id, key]) => [document.getElementById(id), key]).filter(([element]) => Boolean(element));
 
     const copy = {

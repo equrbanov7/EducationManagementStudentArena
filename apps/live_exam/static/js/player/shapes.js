@@ -2,9 +2,9 @@
 // 1 üçbucaq (qırmızı), 2 romb (mavi), 3 dairə (kəhrəba), 4 kvadrat (yaşıl), 5 ulduz (server açarı
 // «pentagon»), 6 altıbucaq (firuzəyi). Rəng yalnız köməkçidir — forma rəngkor oyunçu üçün əsasdır.
 // 2026-10-19: «Rəsmi» üslubda fiqur əvəzinə HƏRF nişanı (A, B, C, D…) — host ekranı ilə eyni sıra.
-import { OPTION_SHAPES } from './config.js?v=lx20261019s';
-import { fmt, tr } from './utils.js?v=lx20261019s';
-import { isFormal, optionLetter } from '../host_lobby/style_mode.js?v=lx20261019s';
+import { OPTION_SHAPES } from './config.js?v=lx20261110p';
+import { fmt, tr } from './utils.js?v=lx20261110p';
+import { isFormal, optionLetter } from '../host_lobby/style_mode.js?v=lx20261110p';
 
 const PATHS = {
     triangle:

@@ -1,12 +1,12 @@
-import { UI } from './dom.js?v=lx20261019s';
-import { PHASES } from './constants.js?v=lx20261019s';
-import { state } from './state.js?v=lx20261019s';
-import { playRevealSound } from './audio.js?v=lx20261019s';
-import { icon } from './icons.js?v=lx20261019s';
-import { answerTileMarkup, distributionBarsMarkup, optionsLengthClass, tilesGridClass } from './options.js?v=lx20261019s';
-import { nextQuestion } from './api.js?v=lx20261019s';
-import { renderScoreboardStage } from './scoreboard.js?v=lx20261019s';
-import { isFinalReveal, renderFinalSuspenseStage } from './finale_suspense.js?v=lx20261019s';
+import { UI } from './dom.js?v=lx20261110p';
+import { PHASES } from './constants.js?v=lx20261110p';
+import { state } from './state.js?v=lx20261110p';
+import { playRevealSound } from './audio.js?v=lx20261110p';
+import { icon } from './icons.js?v=lx20261110p';
+import { answerTileMarkup, distributionBarsMarkup, optionsLengthClass, tilesGridClass } from './options.js?v=lx20261110p';
+import { nextQuestion } from './api.js?v=lx20261110p';
+import { renderScoreboardStage } from './scoreboard.js?v=lx20261110p';
+import { isFinalReveal, renderFinalSuspenseStage } from './finale_suspense.js?v=lx20261110p';
 import {
     avatarImageMarkup,
     controlsEnabled,
@@ -22,8 +22,10 @@ import {
     revealKey,
     toMs,
     tr,
-} from './utils.js?v=lx20261019s';
-import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261019s';
+} from './utils.js?v=lx20261110p';
+import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261110p';
+import { powerBadgesMarkup, powerSceneClass } from './power_markup.js?v=lx20261110p';
+import { bombCountStatMarkup, handleRevealPower } from './powerups.js?v=lx20261110p';
 
 export function destroyRevealChart() {
     /* Chart.js artıq işlədilmir (xüsusi CSS sütunları) — köhnə çağırışlar üçün no-op. */
@@ -81,6 +83,9 @@ function footMarkup(question, payload, distribution) {
             );
         }
     }
+    // 2026-11-10: bu raundda partlayan bomba sayı (server `bomb_count`).
+    const bombStat = bombCountStatMarkup(payload);
+    if (bombStat) parts.push(bombStat);
     const scoring = String(payload?.multi_scoring || "");
     if (question?.multi && (scoring === "partial" || scoring === "strict")) {
         const text = scoring === "partial"
@@ -98,7 +103,7 @@ function headMarkup(question, payload) {
     const text = isText(question, payload)
         ? `<span class="hx-badge hx-badge--text">${icon("keyboard")}${esc(tr("textBadge", "Yazılı cavab"))}</span>`
         : "";
-    return `<header class="hx-qhead"><span class="hx-pill">${esc(progressLabel(question))}</span>${multi}${text}</header>`;
+    return `<header class="hx-qhead"><span class="hx-pill">${esc(progressLabel(question))}</span>${multi}${text}${powerBadgesMarkup(payload?.is_bomb != null ? payload : question)}</header>`;
 }
 
 function cardMarkup(question) {
@@ -171,7 +176,7 @@ function renderRevealStage(question, payload) {
         PHASES.REVEAL,
         `${state.revealKey}:${PHASES.REVEAL}`,
         `
-            <section class="hx-scene hx-reveal ${text ? "hx-reveal--text" : ""}" data-opt-len="${optionsLengthClass(options)}" aria-live="polite">
+            <section class="hx-scene hx-reveal ${text ? "hx-reveal--text" : ""}${powerSceneClass(payload?.is_bomb != null ? payload : question)}" data-opt-len="${optionsLengthClass(options)}" aria-live="polite">
                 ${headMarkup(question, payload)}
                 ${cardMarkup(question)}
                 ${
@@ -257,6 +262,8 @@ export function applyRevealState(payload, question) {
     state.revealKey = nextKey;
     playRevealSound(`reveal:${nextKey}`);
     updateStreaks(state.currentReveal);
+    // 2026-11-10: bomba partlayışı / ×2 parıltısı (idempotent — açarla).
+    handleRevealPower(state.currentReveal);
 
     clearTimeout(state.autoRevealTimeout);
     clearTimeout(state.allAnsweredTimeout);

@@ -119746,3 +119746,111 @@ msgstr "Nein, das bin ich nicht"
 msgctxt "accounts.workload"
 msgid "Birgə (patok)"
 msgstr "Gemeinsam (Strom)"
+
+msgctxt "live_exam.power_modes"
+msgid "Bomba rejimi"
+msgstr "Bombenmodus"
+
+msgctxt "live_exam.power_modes"
+msgid "×2 Xal rejimi"
+msgstr "×2-Punkte-Modus"
+
+msgctxt "live_exam.power_modes"
+msgid "Oyun effektləri"
+msgstr "Spieleffekte"
+
+msgctxt "live_exam.power_modes"
+msgid "Hər sual bombadır: səhv cavab bu oyundakı xalı sıfırlayır."
+msgstr "Jede Frage ist eine Bombe: Eine falsche Antwort setzt die Punkte in diesem Spiel zurück."
+
+msgctxt "live_exam.power_modes"
+msgid "Düzgün cavab ikiqat xal gətirir."
+msgstr "Eine richtige Antwort bringt doppelte Punkte."
+
+msgctxt "live_exam.power_modes"
+msgid "Final rəqs şousu"
+msgstr "Finale Tanzshow"
+
+msgctxt "live_exam.power_modes"
+msgid "Final səhnəsində avatarlar viral və özünəməxsus rəqslər edir."
+msgstr "Auf der Finalbühne tanzen die Avatare virale und charaktereigene Tänze."
+
+msgctxt "live_exam.power_modes"
+msgid "Açıq olanda nəşr olunan hər sual bomba sualıdır: səhv və ya qismən düzgün cavab oyunçunun bu oyundakı xalını sıfırlayır. Cavabsız qalmaq partlatmır. Oyun gedərkən də dəyişir — cari suala hələ cavab yoxdursa dərhal, əks halda növbəti sualdan."
+msgstr "Wenn aktiv, ist jede veröffentlichte Frage eine Bombenfrage: Eine falsche oder teilweise richtige Antwort setzt die Punkte des Spielers in diesem Spiel zurück. Keine Antwort lässt nichts explodieren. Auch während des Spiels änderbar — gilt sofort für die aktuelle Frage, wenn noch niemand geantwortet hat, sonst ab der nächsten Frage."
+
+msgctxt "live_exam.power_modes"
+msgid "Açıq olanda düzgün cavab ikiqat xal gətirir (sürət əmsalı saxlanılır). Bomba ilə birlikdə işləyir: düzgün → ×2, səhv → sıfırlanma. Oyun gedərkən də dəyişir."
+msgstr "Wenn aktiv, bringt eine richtige Antwort doppelte Punkte (der Tempofaktor bleibt). Funktioniert mit der Bombe zusammen: richtig → ×2, falsch → Zurücksetzen. Auch während des Spiels änderbar."
+
+msgctxt "live_exam.power_modes"
+msgid "Final səhnəsində podium və tamaşaçı avatarları viral rəqslər və hər personajın özünəməxsus hərəkətini edir (telefonlarda da). Söndürüləndə avatarlar sakit dayanır."
+msgstr "Auf der Finalbühne tanzen Podiums- und Publikumsavatare virale Tänze und die charaktereigene Bewegung jeder Figur (auch auf den Handys). Ausgeschaltet stehen die Avatare ruhig."
+
+msgctxt "live_exam.power_modes"
+msgid "Bomba sualı"
+msgstr "Bombenfrage"
+
+msgctxt "live_exam.power_modes"
+msgid "×2 xal"
+msgstr "×2 Punkte"
+
+msgctxt "live_exam.power_modes"
+msgid "×2 xal!"
+msgstr "×2 Punkte!"
+
+msgctxt "live_exam.power_modes"
+msgid "Səhv cavab bu oyundakı xalı sıfırlayır"
+msgstr "Eine falsche Antwort setzt die Punkte in diesem Spiel zurück"
+
+msgctxt "live_exam.power_modes"
+msgid "Düzgün cavab ikiqat xal gətirir"
+msgstr "Eine richtige Antwort bringt doppelte Punkte"
+
+msgctxt "live_exam.power_modes"
+msgid "Bomba partladı!"
+msgstr "Die Bombe ist explodiert!"
+
+msgctxt "live_exam.power_modes"
+msgid "{count} bomba partladı!"
+msgstr "{count} Bomben sind explodiert!"
+
+msgctxt "live_exam.power_modes"
+msgid "cari suala tətbiq olundu"
+msgstr "auf die aktuelle Frage angewendet"
+
+msgctxt "live_exam.power_modes"
+msgid "cari sualdan götürüldü"
+msgstr "von der aktuellen Frage entfernt"
+
+msgctxt "live_exam.power_modes"
+msgid "Bu suala artıq cavab var — dəyişiklik növbəti sualdan keçərlidir"
+msgstr "Zu dieser Frage gibt es schon Antworten — die Änderung gilt ab der nächsten Frage"
+
+msgctxt "live_exam.power_modes"
+msgid "Növbəti sualdan keçərlidir"
+msgstr "Gilt ab der nächsten Frage"
+
+msgctxt "live_exam.power_modes"
+msgid "Rejimlər söndürülüb"
+msgstr "Modi sind aus"
+
+msgctxt "live_exam.power_modes"
+msgid "Növbəti sualdan: {modes}"
+msgstr "Ab der nächsten Frage: {modes}"
+
+msgctxt "live_exam.power_modes"
+msgid "Cari sual: {modes}"
+msgstr "Aktuelle Frage: {modes}"
+
+msgctxt "live_exam.power_modes"
+msgid "Cari sual: rejim yoxdur"
+msgstr "Aktuelle Frage: kein Modus"
+
+msgctxt "live_exam.power_modes"
+msgid "açıq"
+msgstr "an"
+
+msgctxt "live_exam.power_modes"
+msgid "bağlı"
+msgstr "aus"

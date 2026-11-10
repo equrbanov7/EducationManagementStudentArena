@@ -1,13 +1,14 @@
-import { UI } from './dom.js?v=lx20261019s';
-import { state } from './state.js?v=lx20261019s';
-import { applySessionSettings } from './settings.js?v=lx20261019s';
-import { isFormal } from './style_mode.js?v=lx20261019s';
-import { renderLobbyPlayers } from './lobby.js?v=lx20261019s';
-import { applyQuestionState, updateAnsweredCounter, updateReceivedCounter } from './question.js?v=lx20261019s';
-import { applyRevealState } from './reveal.js?v=lx20261019s';
-import { renderPodium } from './podium.js?v=lx20261019s';
-import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20261019s';
-import { clearPendingStateSync, setPlaySocket, stopStatePolling, syncState } from './api.js?v=lx20261019s';
+import { UI } from './dom.js?v=lx20261110p';
+import { state } from './state.js?v=lx20261110p';
+import { applySessionSettings } from './settings.js?v=lx20261110p';
+import { isFormal } from './style_mode.js?v=lx20261110p';
+import { renderLobbyPlayers } from './lobby.js?v=lx20261110p';
+import { applyQuestionState, updateAnsweredCounter, updateReceivedCounter } from './question.js?v=lx20261110p';
+import { applyRevealState } from './reveal.js?v=lx20261110p';
+import { renderPodium } from './podium.js?v=lx20261110p';
+import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20261110p';
+import { clearPendingStateSync, setPlaySocket, stopStatePolling, syncState } from './api.js?v=lx20261110p';
+import { handleQuestionModifiers } from './powerups.js?v=lx20261110p';
 import {
     esc,
     fmt,
@@ -19,7 +20,7 @@ import {
     tr,
     updateServerTimeOffset,
     wsUrl,
-} from './utils.js?v=lx20261019s';
+} from './utils.js?v=lx20261110p';
 
 /* WS: lobbi + oyun kanalları. Bağlantı qopanda eksponensial gözləmə ilə yenidən
  * qoşulur (1 → 2 → 4 … ≤ 15 s + titrəmə); açılanda HTTP snapshot ilə vəziyyət
@@ -124,6 +125,11 @@ function onPlayMessage(event) {
         if (data.type === "session_settings") {
             if (data.settings) applySessionSettings(data.settings);
             if (data.is_locked != null) state.isLocked = Boolean(data.is_locked);
+            return;
+        }
+        if (data.type === "question_modifiers") {
+            // 2026-11-10: bomba / ×2 rejimi cavabsız cari suala tətbiq olundu — səhnə yenilənir.
+            if (data.applied) handleQuestionModifiers(data);
             return;
         }
         if (data.type === "finished") {

@@ -65,6 +65,12 @@ DEFAULT_SESSION_SETTINGS: dict[str, Any] = {
     "multi_scoring": MULTI_SCORING_PARTIAL,
     "typed_questions": {},
     "bomb_questions": [],
+    # 2026-11-10 (sahib): «güc rejimləri» — bax apps/live_exam/power_modes.py.
+    # bomb_mode: nəşr olunan HƏR sual bomba; double_mode: qazanılan xal ×2; finale_dance: final rəqs şousu.
+    # bomb_mode/double_mode oyun gedərkən də dəyişir (cavabsız cari suala dərhal, əks halda növbəti sualdan).
+    "bomb_mode": False,
+    "double_mode": False,
+    "finale_dance": True,
     # 2026-10-08 (L2): «Hər sual üçün vaxt» — ``None`` = standart (sualın / imtahanın vaxtı,
     # boşdursa 30 s); rəqəm = HƏR sual bu qədər saniyə (5–300). Növbəti sualdan tətbiq olunur.
     "question_time_seconds": None,
@@ -92,6 +98,9 @@ BOOLEAN_SETTING_KEYS = {
     "two_step_join",
     "typed_typo_tolerance",
     "late_join_enabled",
+    "bomb_mode",
+    "double_mode",
+    "finale_dance",
 }
 
 NICKNAME_ADJECTIVES = (

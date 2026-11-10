@@ -51,6 +51,40 @@ host_lobby/icons.js onları xüsusi SVG ilə doldurur (Font Awesome yoxdur).{% e
             </label>
         </div>
 
+        {% comment %}2026-11-10 (sahib): güc rejimləri — sol paneldə də yandırıb-söndürmək olur (oyun gedərkən də).
+        Vəziyyət mətni (cari sual / növbəti sualdan) host_lobby/powerups.js tərəfindən yazılır.{% endcomment %}
+        <section class="control-power" data-power-panel aria-label="{% trans 'Oyun effektləri' context 'live_exam.power_modes' %}">
+            <div class="control-power__title"><span class="hx-i" data-icon="sparkle"></span>{% trans "Oyun effektləri" context "live_exam.power_modes" %}</div>
+            <label class="host-settings-item control-power__item control-power__item--bomb">
+                <span class="control-power__art hx-i" data-icon="bomb" aria-hidden="true"></span>
+                <span class="host-settings-item__copy">
+                    <strong>{% trans "Bomba rejimi" context "live_exam.power_modes" %}</strong>
+                    <span>{% trans "Hər sual bombadır: səhv cavab bu oyundakı xalı sıfırlayır." context "live_exam.power_modes" %}</span>
+                </span>
+                <input id="controlBombMode" class="host-switch__input" type="checkbox" data-power-switch="bomb_mode">
+                <span class="host-switch" aria-hidden="true"><span></span></span>
+            </label>
+            <label class="host-settings-item control-power__item control-power__item--double">
+                <span class="control-power__art hx-i" data-icon="double" aria-hidden="true"></span>
+                <span class="host-settings-item__copy">
+                    <strong>{% trans "×2 Xal rejimi" context "live_exam.power_modes" %}</strong>
+                    <span>{% trans "Düzgün cavab ikiqat xal gətirir." context "live_exam.power_modes" %}</span>
+                </span>
+                <input id="controlDoubleMode" class="host-switch__input" type="checkbox" data-power-switch="double_mode">
+                <span class="host-switch" aria-hidden="true"><span></span></span>
+            </label>
+            <label class="host-settings-item control-power__item control-power__item--dance" data-playful-only>
+                <span class="control-power__art hx-i" data-icon="trophy" aria-hidden="true"></span>
+                <span class="host-settings-item__copy">
+                    <strong>{% trans "Final rəqs şousu" context "live_exam.power_modes" %}</strong>
+                    <span>{% trans "Final səhnəsində avatarlar viral və özünəməxsus rəqslər edir." context "live_exam.power_modes" %}</span>
+                </span>
+                <input id="controlFinaleDance" class="host-switch__input" type="checkbox" data-power-switch="finale_dance">
+                <span class="host-switch" aria-hidden="true"><span></span></span>
+            </label>
+            <p class="control-power__status" data-power-status role="status"></p>
+        </section>
+
         <label class="auto-toggle host-settings-item">
             <span class="host-settings-item__copy"><strong>{% trans "auto_label" context "live_exam.host_lobby" %}</strong></span>
             <input type="checkbox" id="autoMode" class="host-switch__input" {% if session_settings.autoplay %}checked{% endif %}>

@@ -27,6 +27,8 @@
             <button id="quickLockBtn" class="host-quick-action hx-btn hx-btn--glass hx-btn--icon" type="button" aria-pressed="false" aria-label="{% trans 'lobby_open' context 'live_exam.host_lobby' %}" title="{% trans 'lobby_open' context 'live_exam.host_lobby' %}">
                 <span class="hx-i" data-icon="unlock"></span>
             </button>
+            {% comment %}2026-11-10 (sahib): güc rejimləri (💣 Bomba / ×2 Xal) səhnənin öz ikonlarıdır —
+            host_lobby/powerups.js #presentationStage içinə `.hx-power-dock` qurur (klik = yandır/söndür).{% endcomment %}
             <button id="quickFlowBtn" class="host-quick-action hx-btn hx-btn--gold" type="button" hidden>
                 <span class="hx-i" data-icon="next"></span>
                 <span>{% trans "next_button" context "live_exam.host_lobby" %}</span>

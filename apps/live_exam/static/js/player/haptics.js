@@ -13,6 +13,8 @@ export const HAPTIC = Object.freeze({
     wrong: [70],
     timeup: [40, 60, 40],
     finale: [30, 50, 30, 50, 90],
+    // 2026-11-10: bomba partlayışı — ağır, qısa seriyalı.
+    explode: [120, 40, 60, 40, 160],
 });
 
 export function markUserActivation() {
