@@ -77,3 +77,10 @@ def test_unknown_binary_and_fake_content_are_still_rejected():
         )
     with pytest.raises(ValidationError):
         validate_uploaded_file(SimpleUploadedFile("x.pdf", b"MZ\x90\x00", content_type="application/octet-stream"))
+    # brauzer HTML/JS kimi bəyan edibsə uzantıya keçid yoxdur
+    with pytest.raises(ValidationError):
+        validate_uploaded_file(
+            SimpleUploadedFile("erize.pdf", b"%PDF-1.7\n", content_type="text/html"),
+            allowed_mime_types={"application/pdf"},
+            allowed_mime_prefixes=(),
+        )
