@@ -157,6 +157,25 @@ class LegacyCellsFillTest(_LabWorld, TestCase):
         with bypass_rls():
             self.assertEqual(LessonMark.objects.get(lesson=self.lecture, enrollment=self.e0).status, "absent")
 
+    def test_plan_last_day_lifts_the_legacy_date_limit(self):
+        """Sahib 2026-11-11: «yalnız q/b sütununda boş = iştirak» planı 21.10-dan SONRAKI dərsə də yazır —
+        yalnız plan öz ``last_day`` həddini verəndə; həddən sonrakı dərs yenə rədd olunur."""
+        with bypass_rls():
+            Lesson.objects.filter(pk=self.lecture.pk).update(date=datetime.date(2026, 11, 5))
+            LessonMark.objects.filter(lesson=self.lecture).delete()
+        cells = [{"lesson": str(self.lecture.pk), "enrollment": str(self.e1.pk), "point": "ie"}]
+        for extra, expected in (({}, ("0", "1")), ({"last_day": "2026-11-04"}, ("0", "1"))):
+            with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as handle:
+                json.dump({"format": "legacy-cells/1", "lessons": [], "cells": cells, **extra}, handle)
+            counts = self._call("--file", handle.name, "--apply")
+            self.assertEqual((counts.get("cells_filled", "0"), counts["cells_invalid"]), expected)
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as handle:
+            json.dump({"format": "legacy-cells/1", "lessons": [], "cells": cells, "last_day": "2026-11-10"}, handle)
+        counts = self._call("--file", handle.name, "--apply")
+        self.assertEqual((counts["cells_filled"], counts["cells_filled_present"]), ("1", "1"))
+        with bypass_rls():
+            self.assertEqual(LessonMark.objects.get(lesson=self.lecture, enrollment=self.e1).status, "present")
+
     def test_legacy_point_codes_qb_absent_ie_present_excusable_excused(self):
         """Köhnə sistemin kodu: «qb» → qayıb (saatı sayılır), «ie» → iştirak, rəqəm → bal, ``excusable=1`` → üzrlü."""
         plan = {
