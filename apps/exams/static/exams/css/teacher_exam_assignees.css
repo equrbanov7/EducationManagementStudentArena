@@ -191,3 +191,30 @@
         white-space: normal;
     }
 }
+
+/* ── Canlı hissələr (2026-11-11): süzgəc / təyinat dəyişəndə yalnız bunlar yenilənir ───────────── */
+.eas-live {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-6);
+    min-width: 0;
+    transition: opacity 0.15s ease;
+}
+
+.eas-live--busy {
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+.eas-page--sending .eas-add .ems-btn,
+.eas-page--sending .eas-unit__remove,
+.eas-page--sending .js-eas-user-action {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .eas-live {
+        transition: none;
+    }
+}

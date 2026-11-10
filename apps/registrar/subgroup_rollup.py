@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from functools import lru_cache
 
 from django.core.exceptions import ValidationError
 
@@ -56,8 +57,13 @@ def group_sector(name: str) -> str:
     return match.group(1).casefold() if match else DEFAULT_SECTOR
 
 
+@lru_cache(maxsize=8192)
 def subgroup_pattern(base: str) -> re.Pattern:
     """Bazaya görə alt qrup şablonu (ad ``_norm``-dan keçmiş olmalıdır).
+
+    Keşlənir (2026-11-11): ``group_family`` / ``parent_group_candidates`` HƏR qardaş qrupun adından şablon
+    qurur — təşkilatda > 512 fərqli ad olanda ``re``-nin daxili keşi daşırdı və hər cüt üçün şablon YENİDƏN
+    kompilyasiya olunurdu (17 qruplu imtahana qrup əlavə etmək ≈ 12 600 kompilyasiya, ~1 s CPU).
 
     Baza boşluqlara həssas deyil (hər simvol arasında ``\\s*``); nömrədən əvvəl
     sektor və/və ya ayırıcı («-», «/», boşluq), sonra isə sektor ola bilər.
@@ -74,9 +80,12 @@ def subgroup_pattern(base: str) -> re.Pattern:
     return re.compile(rf"^{loose}{before}\s*(?P<num>\d+)(?:\s*(?P<sec2>{_SECTOR}))?$")
 
 
+@lru_cache(maxsize=16384)
 def is_subgroup_of(combined_name: str, candidate_name: str) -> bool:
     """«234 K az» ↔ «234 K-1» ✓, «534 TB az» ↔ «534 TB 1» ✓, «233KE» ↔ «233 KE-1» ✓,
-    «234 K ing» ↔ «234 K-1» ✗ (sektor fərqli), «036» ↔ «0361» ✗."""
+    «234 K ing» ↔ «234 K-1» ✗ (sektor fərqli), «036» ↔ «0361» ✗.
+
+    Saf funksiyadır (yalnız iki ad) — nəticə keşlənir: eyni cütlər hər sorğuda təkrar yoxlanır."""
     match = subgroup_pattern(base_group_name(combined_name)).match(_norm(candidate_name))
     if not match:
         return False

@@ -24,7 +24,7 @@ from django.contrib.auth import get_user_model
 from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.domain.unit_assignment import unit_assigned_student_ids
 from core.person_names import user_display_name_with_patronymic
-from core.search_text import tolerant_match
+from core.search_text import tolerant_matcher
 
 SOURCE_GROUP = "group"
 SOURCE_INDIVIDUAL = "individual"
@@ -66,11 +66,11 @@ class AssigneeRow:
         return self.user.pk
 
 
-def eligible_student_ids(exam) -> set:
+def eligible_student_ids(exam, *, unit_student_ids=None) -> set:
     """İmtahanı verə bilən tələbələr — kanonik çoxluq (PIN provizionu ilə EYNİ funksiya)."""
     from apps.exams.services.student_pins import _assigned_student_ids
 
-    return _assigned_student_ids(exam)
+    return _assigned_student_ids(exam, unit_student_ids=unit_student_ids)
 
 
 def assignee_count(exam) -> int:
@@ -78,8 +78,8 @@ def assignee_count(exam) -> int:
     return len(eligible_student_ids(exam))
 
 
-def _group_member_ids(exam) -> set:
-    ids = set(unit_assigned_student_ids(exam))
+def _group_member_ids(exam, unit_student_ids) -> set:
+    ids = set(unit_student_ids)
     ids.update(pk for pk in exam.allowed_groups.values_list("students__id", flat=True) if pk)
     return ids
 
@@ -137,10 +137,12 @@ def _attempt_map(exam) -> dict:
 
 def build_roster(exam) -> list:
     """Bütün təyin olunmuşlar (istisnalar bayraqla) → :class:`AssigneeRow` siyahısı, ad sırası ilə."""
-    eligible = eligible_student_ids(exam)
+    # Reyestr qrupu üzvləri (alt qrup + fənn jurnalı) BİR dəfə hesablanır və hər iki istifadəyə ötürülür.
+    unit_student_ids = unit_assigned_student_ids(exam)
+    eligible = eligible_student_ids(exam, unit_student_ids=unit_student_ids)
     excluded = set(exam.excluded_users.values_list("id", flat=True))
     individual = set(exam.allowed_users.values_list("id", flat=True))
-    group_members = _group_member_ids(exam)
+    group_members = _group_member_ids(exam, unit_student_ids)
     course_members = _course_member_ids(exam)
     shown = eligible | (excluded & (individual | group_members | course_members))
     if not shown:
@@ -231,6 +233,7 @@ def sort_rows(rows, sort_by, sort_dir) -> list:
 def filter_rows(rows, *, query="", group="", source="", status="") -> list:
     """Süzgəclər: mətn (ad / ata adı / istifadəçi adı / kod — hərf-dözümlü), qrup adı, mənbə, status."""
     out = []
+    matches = tolerant_matcher(query) if query else None  # şablon bir dəfə qurulur (sətir × token YOX)
     for row in rows:
         if group and row.group_name != group:
             continue
@@ -241,7 +244,7 @@ def filter_rows(rows, *, query="", group="", source="", status="") -> list:
                 continue
         elif status in STATUSES and (row.is_excluded or row.status != status):
             continue
-        if query and not tolerant_match(query, row.name, row.user.username, row.code, row.user.email):
+        if matches and not matches(row.name, row.user.username, row.code, row.user.email):
             continue
         out.append(row)
     return out

@@ -75,8 +75,10 @@ def exam_requires_student_pins(exam) -> bool:
     return getattr(exam, "exam_type_extended", None) in SECURE_PIN_CATEGORIES
 
 
-def _assigned_student_ids(exam) -> set[int]:
+def _assigned_student_ids(exam, *, unit_student_ids=None) -> set[int]:
     # İmtahana təyin olunmuş bütün tələbələr (fərdi + qrup + kurs üzvləri).
+    # ``unit_student_ids`` — çağıran ``unit_assigned_student_ids(exam)``-i artıq hesablayıbsa (siyahı səhifəsi)
+    # təkrar sorğu getməsin; verilməyibsə əvvəlki kimi burada hesablanır.
     from apps.exams.domain.unit_assignment import unit_assigned_student_ids
     from apps.notifications.public import get_exam_assigned_user_ids
 
@@ -85,7 +87,7 @@ def _assigned_student_ids(exam) -> set[int]:
     # də açıqdır (``user_in_allowed_units`` — sahib 2026-09-21), amma bildiriş sayğacı alt qrupları
     # genişləndirmir → alt qrup tələbəsinə PIN YARANMIRDI və o, imtahanı görüb verə bilmirdi.
     # Giriş siyasəti ilə eyni mənbə: ``unit_assigned_student_ids`` (alt qruplar daxil).
-    unit_ids = unit_assigned_student_ids(exam)
+    unit_ids = unit_assigned_student_ids(exam) if unit_student_ids is None else set(unit_student_ids)
     if unit_ids - ids:
         excluded = set(exam.excluded_users.values_list("id", flat=True))
         ids |= unit_ids - excluded

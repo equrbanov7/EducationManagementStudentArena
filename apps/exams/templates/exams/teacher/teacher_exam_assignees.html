@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{% static 'css/ems_ui/table.css' %}?v=20261018-pkga">
     <link rel="stylesheet" href="{% static 'css/ems_ui/overlay.css' %}?v=20261019-mob">
     <link rel="stylesheet" href="{% static 'exams/css/teacher_page_shell.css' %}?v=20261010-wp3exams">
-    <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_assignees.css' %}?v=20261027-assignees">
+    <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_assignees.css' %}?v=20261111-live">
 {% endblock %}
 
 {% block content %}
@@ -50,29 +50,12 @@ Süzgəclər GET formasıdır (dəyişəndə dərhal tətbiq — results_filter_
         </div>
         {% endif %}
 
-        <section class="etp-kpis" aria-label="{% trans 'Xülasə' context 'exams.assignees' %}">
-            <div class="etp-kpi etp-kpi--primary">
-                <span class="etp-kpi__icon"><i class="fas fa-user-check" aria-hidden="true"></i></span>
-                <span class="etp-kpi__body"><span class="etp-kpi__value">{{ stats.eligible }}</span><span class="etp-kpi__label">{% trans "İmtahanı verə bilər" context "exams.assignees" %}</span></span>
-            </div>
-            <div class="etp-kpi etp-kpi--violet">
-                <span class="etp-kpi__icon"><i class="fas fa-users" aria-hidden="true"></i></span>
-                <span class="etp-kpi__body"><span class="etp-kpi__value">{{ stats.group }} / {{ stats.individual }}</span><span class="etp-kpi__label">{% trans "Qrupla / fərdi" context "exams.assignees" %}</span></span>
-            </div>
-            <div class="etp-kpi etp-kpi--success">
-                <span class="etp-kpi__icon"><i class="fas fa-flag-checkered" aria-hidden="true"></i></span>
-                <span class="etp-kpi__body"><span class="etp-kpi__value">{{ stats.finished }}</span><span class="etp-kpi__label">{% trans "Bitirib" context "exams.assignees" %}{% if stats.in_progress %} · {% blocktrans trimmed with n=stats.in_progress context "exams.assignees" %}{{ n }} davam edir{% endblocktrans %}{% endif %}</span></span>
-            </div>
-            <div class="etp-kpi etp-kpi--danger">
-                <span class="etp-kpi__icon"><i class="fas fa-user-slash" aria-hidden="true"></i></span>
-                <span class="etp-kpi__body"><span class="etp-kpi__value">{{ stats.excluded }}</span><span class="etp-kpi__label">{% trans "İstisna edilib" context "exams.assignees" %}</span></span>
-            </div>
-        </section>
-
-        {% include "exams/teacher/partials/assignees/_units.html" %}
+        {% comment %}Canlı hissələr (`data-eas-live`): süzgəc / səhifə / təyinat dəyişəndə JS yalnız bunları
+        `partials/assignees/_live.html` cavabından yeniləyir — tam səhifə yenidən yüklənmir.{% endcomment %}
+        <div class="eas-live" data-eas-live="summary">{% include "exams/teacher/partials/assignees/_summary.html" %}</div>
         {% if can_edit %}{% include "exams/teacher/partials/assignees/_add.html" %}{% endif %}
-        {% include "exams/teacher/partials/assignees/_filters.html" %}
-        {% include "exams/teacher/partials/assignees/_table.html" %}
+        <div class="eas-live" data-eas-live="filters">{% include "exams/teacher/partials/assignees/_filters.html" %}</div>
+        <div class="eas-live" data-eas-live="table">{% include "exams/teacher/partials/assignees/_table.html" %}</div>
     </div>
 </div>
 {% if can_edit %}{% include "exams/teacher/partials/assignees/_dialogs.html" %}{% endif %}
@@ -81,5 +64,5 @@ Süzgəclər GET formasıdır (dəyişəndə dərhal tətbiq — results_filter_
 {% block extraJs %}
 <script src="{% static 'js/ems_ui/overlay.js' %}?v=20261015-reqfields"></script>
 <script src="{% static 'js/results_filter_ui.js' %}?v=20261014-searchux"></script>
-{% if can_edit %}<script src="{% static 'exams/js/teacher_exam_assignees.js' %}?v=20261027-assignees"></script>{% endif %}
+<script src="{% static 'exams/js/teacher_exam_assignees.js' %}?v=20261111-live"></script>
 {% endblock %}
