@@ -91,6 +91,62 @@ def _grader_decision(folder, offering, assignment, option) -> tuple[bool, list]:
     return True, warnings
 
 
+def assign_offering(folder, offering, *, by_user, request=None, auto_batch: str = "", notify_students=True) -> dict:
+    """Bir açılışa təyinat (yaradır / passivi aktivləşdirir) — icazəni ÇAĞIRAN yoxlayır.
+
+    ``auto_batch`` doludursa təyinat avtomatikdir (sahib 2026-11-10, :mod:`auto_assign`): YALNIZ yeni sətir
+    yaradılır — müəllimin əl ilə ləğv etdiyi (passiv) təyinat avtomatik geri qaytarılmır.
+    """
+    _check_offering(folder, offering)
+    # Paralel təyinatlar arasında «sərbəst işi kim qiymətləndirir» qərarı serializasiya olunsun
+    # (DB-də açılış üzrə aktiv qiymətləndirici UNİKALDIR — bu, ikinci qatdır).
+    advisory_lock("sf", "offering", offering.pk)
+    assignment = FolderAssignment.objects.select_for_update().filter(folder=folder, offering=offering).first()
+    if auto_batch and assignment is not None:
+        return {"assignment": assignment, "created": False, "reactivated": False, "warnings": []}
+    version = syllabus_bridge.approved_version_for_offering(offering)
+    structure = syllabus_bridge.selfwork_structure(version)
+    option = structure["option"] if structure else ""
+    created = reactivated = False
+    grades, warnings = _grader_decision(folder, offering, assignment, option)
+    if not selfwork_rule.offering_active(offering):
+        warnings = []  # sahib 2026-10-10: bu dövrdə sərbəst iş yoxdur — onun xəbərdarlığı da yoxdur
+    now = timezone.now()
+    if assignment is None:
+        assignment = FolderAssignment.objects.create(
+            organization_id=folder.organization_id,
+            folder=folder,
+            offering=offering,
+            assigned_by=by_user if getattr(by_user, "pk", None) else None,
+            assigned_at=now,
+            syllabus_version_ref=getattr(version, "pk", None),
+            selfwork_option=option,
+            grades_selfwork=grades,
+            auto_assigned=bool(auto_batch),
+            auto_batch=auto_batch,
+        )
+        created = True
+    elif not assignment.is_active:
+        assignment.is_active = True
+        assignment.assigned_by = by_user
+        assignment.assigned_at = now
+        assignment.unassigned_at = None
+        assignment.unassigned_by = None
+        assignment.syllabus_version_ref = getattr(version, "pk", None)
+        assignment.selfwork_option = option
+        assignment.grades_selfwork = grades
+        assignment.save()
+        reactivated = True
+    if created or reactivated:
+        changes = {"assigned": str(offering.pk), "grades_selfwork": grades, "option": option}
+        if auto_batch:
+            changes["auto_batch"] = auto_batch
+        audit_change(assignment, actor=by_user, changes=changes, request=request)
+        if notify_students:
+            notify.folder_assigned(assignment)
+    return {"assignment": assignment, "created": created, "reactivated": reactivated, "warnings": warnings}
+
+
 @transaction.atomic
 def assign_folder(folder, offerings, *, by_user, request=None) -> list[dict]:
     """Qovluğu açılışlara təyin edir (təkrar çağırış idempotentdir, passiv təyinat yenidən aktivləşir).
@@ -104,50 +160,7 @@ def assign_folder(folder, offerings, *, by_user, request=None) -> list[dict]:
         _check_offering(folder, offering)
         if not lookups.teaches_offering(by_user, offering):
             raise FolderError.of("permission.not_teaching")
-        # Paralel təyinatlar arasında «sərbəst işi kim qiymətləndirir» qərarı serializasiya olunsun
-        # (DB-də açılış üzrə aktiv qiymətləndirici UNİKALDIR — bu, ikinci qatdır).
-        advisory_lock("sf", "offering", offering.pk)
-        version = syllabus_bridge.approved_version_for_offering(offering)
-        structure = syllabus_bridge.selfwork_structure(version)
-        option = structure["option"] if structure else ""
-        assignment = FolderAssignment.objects.select_for_update().filter(folder=folder, offering=offering).first()
-        created = reactivated = False
-        grades, warnings = _grader_decision(folder, offering, assignment, option)
-        if not selfwork_rule.offering_active(offering):
-            warnings = []  # sahib 2026-10-10: bu dövrdə sərbəst iş yoxdur — onun xəbərdarlığı da yoxdur
-        now = timezone.now()
-        if assignment is None:
-            assignment = FolderAssignment.objects.create(
-                organization_id=folder.organization_id,
-                folder=folder,
-                offering=offering,
-                assigned_by=by_user,
-                assigned_at=now,
-                syllabus_version_ref=getattr(version, "pk", None),
-                selfwork_option=option,
-                grades_selfwork=grades,
-            )
-            created = True
-        elif not assignment.is_active:
-            assignment.is_active = True
-            assignment.assigned_by = by_user
-            assignment.assigned_at = now
-            assignment.unassigned_at = None
-            assignment.unassigned_by = None
-            assignment.syllabus_version_ref = getattr(version, "pk", None)
-            assignment.selfwork_option = option
-            assignment.grades_selfwork = grades
-            assignment.save()
-            reactivated = True
-        if created or reactivated:
-            audit_change(
-                assignment,
-                actor=by_user,
-                changes={"assigned": str(offering.pk), "grades_selfwork": grades, "option": option},
-                request=request,
-            )
-            notify.folder_assigned(assignment)
-        results.append({"assignment": assignment, "created": created, "reactivated": reactivated, "warnings": warnings})
+        results.append(assign_offering(folder, offering, by_user=by_user, request=request))
     if results and folder.status == FolderStatus.DRAFT:
         folder.status = FolderStatus.ACTIVE
         folder.save(update_fields=["status", "updated_at"])
@@ -254,6 +267,7 @@ __all__ = [
     "WINDOW_NOT_OPEN",
     "WINDOW_OPEN",
     "assign_folder",
+    "assign_offering",
     "assignable_offerings",
     "clear_deadline",
     "deadline_for",

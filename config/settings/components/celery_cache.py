@@ -160,6 +160,12 @@ CELERY_BEAT_SCHEDULE = {
         "task": "subject_folder.send_submission_digests",
         "schedule": crontab(minute="*/15"),
     },
+    # Sahib 2026-11-10: qovluq sahibin həmin fənn + semestrdə tədris etdiyi YENİ açılışlara avtomatik təyin olunur
+    # (sonradan yaranan / təhvil alınan qruplar). Söndürmək: SUBJECT_FOLDER_AUTO_ASSIGN=False.
+    "subject-folder-auto-assign-groups": {
+        "task": "subject_folder.auto_assign_groups",
+        "schedule": crontab(minute="5,35"),
+    },
     # Fon işi tutumu 2026-10-07: böyüyən cədvəllərin gecəlik saxlama süpürgələri (pik
     # saatlardan kənar, hissə-hissə silmə — core/batch_purge.py). Əvvəl heç biri işləmirdi:
     # django_session (cached_db) vaxtı keçmiş sətirləri, OTP-lər və istifadəçinin sildiyi

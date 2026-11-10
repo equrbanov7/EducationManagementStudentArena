@@ -6,7 +6,7 @@ sərbəst iş ləğv olunubsa (`sp.selfwork_active`) onun nişanları və izahı
     <div class="ems-card__head">
         <div>
             <h3 class="ems-card__title" id="sfAssignTitle">{% trans "Qrupa təyinat" context "subject_folder.ui" %}</h3>
-            <p class="ems-card__sub">{% if sp.selfwork_active %}{% trans "Qovluğu tədris etdiyiniz qruplara təyin edin — tələbələr yalnız təyin olunmuş qovluğu görür. Sərbəst iş balı yalnız bir qovluqdan qəbul edilir." context "subject_folder.ui" %}{% else %}{% trans "Qovluğu tədris etdiyiniz qruplara təyin edin — tələbələr yalnız təyin olunmuş qovluğu görür." context "subject_folder.ui" %}{% endif %}</p>
+            <p class="ems-card__sub">{% if sp.selfwork_active %}{% trans "Bu fənn və semestrdə dərs dediyiniz qruplar avtomatik əlavə olunur — tələbələr yalnız təyin olunmuş qovluğu görür. Sərbəst iş balı yalnız bir qovluqdan qəbul edilir." context "subject_folder.ui" %}{% else %}{% trans "Bu fənn və semestrdə dərs dediyiniz qruplar avtomatik əlavə olunur — tələbələr yalnız təyin olunmuş qovluğu görür." context "subject_folder.ui" %}{% endif %}</p>
         </div>
     </div>
     <div class="ems-card__body">
@@ -21,6 +21,7 @@ sərbəst iş ləğv olunubsa (`sp.selfwork_active`) onun nişanları və izahı
                 <li class="sfc-offering{% if row.is_active %} sfc-offering--active{% endif %}">
                     {% if row.is_active %}
                         <span class="sfc-offering__label"><i class="fas fa-circle-check sfc-ok" aria-hidden="true"></i> {{ row.label }}</span>
+                        {% if row.assignment.auto_assigned %}<span class="ems-badge ems-badge--neutral">{% trans "avtomatik" context "subject_folder.ui" %}</span>{% endif %}
                         {% if not sp.selfwork_active %}
                         {% elif row.grades_selfwork %}<span class="ems-badge ems-badge--primary">{% trans "sərbəst iş buradan" context "subject_folder.ui" %}</span>
                         {% elif row.selfwork_elsewhere %}<span class="ems-badge ems-badge--warning">{% trans "sərbəst iş başqa qovluqdan" context "subject_folder.ui" %}</span>{% endif %}

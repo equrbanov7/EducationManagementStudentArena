@@ -15,6 +15,7 @@ from core.search_text import tolerant_q  # kanonik API; burada geri-uyğun re-ex
 from ..constants import FINAL_STATUSES, FolderStatus, SubmissionStatus, TaskKind
 from ..errors import FolderError
 from ..models import (
+    FolderAssignment,
     FolderMaterial,
     FolderTask,
     FolderTopic,
@@ -74,8 +75,9 @@ def list_folders(*, organization, actor, period=None, subject=None, statuses=Non
     )
     return (
         folders.distinct()
-        .select_related("subject", "period", "owner")
+        .select_related("subject", "period", "owner", "created_by")
         .annotate(
+            group_count=_count_subquery(FolderAssignment, fk="folder", is_active=True),
             topic_count=_count_subquery(FolderTopic, fk="folder", is_archived=False),
             material_count=_count_subquery(FolderMaterial, fk="folder", is_archived=False),
             selfwork_count=_count_subquery(FolderTask, fk="folder", is_archived=False, kind=TaskKind.SELFWORK),

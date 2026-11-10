@@ -9,6 +9,7 @@ orkestrator əlavə edir)::
 
     "subject-folder-sync-journal": {"task": "subject_folder.sync_journal_pending", "schedule": crontab(minute="*/10")},
     "subject-folder-digests": {"task": "subject_folder.send_submission_digests", "schedule": crontab(minute="*/15")},
+    "subject-folder-auto-assign": {"task": "subject_folder.auto_assign_groups", "schedule": crontab(minute="5,35")},
 """
 
 from __future__ import annotations
@@ -60,3 +61,26 @@ def send_submission_digests():
 
     with rls_worker_atomic(), bypass_rls():
         return _send(force=False)
+
+
+@shared_task(name="subject_folder.auto_assign_groups")
+def auto_assign_groups():
+    """Sahib 2026-11-10: qovluqları sahibin həmin fənn + semestrdə tədris etdiyi YENİ açılışlara avtomatik təyin edir.
+
+    ``SUBJECT_FOLDER_AUTO_ASSIGN = False`` ilə söndürülür (qovluq yaradılanda təyinat yenə də işləyir).
+    """
+    from django.conf import settings
+
+    from core.rls import bypass_rls
+    from core.rls_pooling import rls_worker_atomic
+
+    from .services import auto_assign
+
+    if not getattr(settings, "SUBJECT_FOLDER_AUTO_ASSIGN", True):
+        return {"skipped": "disabled"}
+    with rls_worker_atomic(), bypass_rls():
+        folders = auto_assign.candidate_folders().select_related("organization", "owner")
+        summary = auto_assign.auto_assign(folders, batch=auto_assign.new_batch_id("sfauto-beat"))
+    if summary["counts"]:
+        logger.info("subject_folder.auto_assign_groups: %s", summary)
+    return summary
