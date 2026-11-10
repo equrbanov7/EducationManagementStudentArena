@@ -165,10 +165,27 @@ STATUS_PALETTE = {
 #: ``.heic`` və ``.txt`` QƏSDƏN YOXDUR: validator onların məzmununu yoxlamır (imza cədvəlində deyil),
 #: yəni istənilən bayt «şəkil»/«mətn» adı ilə keçərdi. Limitlər 10 MB / 5 fayl → 25 MB / 10 fayl;
 #: nginx-də bu iki endpoint üçün gövdə tavanı ayrıca qaldırılıb (``docker/nginx/nginx.conf``).
+#: 2026-11-10 (sahib: «50 MB-a kimi pdf, excel, şəkil və s. getsin»): 25 → 50 MB; PowerPoint
+#: (``.ppt``/``.pptx``), ``.gif`` və ``.jfif`` əlavə olundu — hamısı imza cədvəlindədir.
 ALLOWED_ATTACHMENT_EXTENSIONS = frozenset(
-    {".pdf", ".jpg", ".jpeg", ".png", ".webp", ".doc", ".docx", ".xls", ".xlsx", ".zip"}
+    {
+        ".pdf",
+        ".jpg",
+        ".jpeg",
+        ".jfif",
+        ".png",
+        ".gif",
+        ".webp",
+        ".doc",
+        ".docx",
+        ".xls",
+        ".xlsx",
+        ".ppt",
+        ".pptx",
+        ".zip",
+    }
 )
-MAX_ATTACHMENT_MB = 25
+MAX_ATTACHMENT_MB = 50
 MAX_ATTACHMENTS_PER_ACTION = 10
 #: Fayl seçicisinin `accept` atributu + UI mətni üçün sabit sıra (frozenset
 #: sırasız olduğu üçün payload hər dəfə eyni görünsün deyə çeşidlənir).

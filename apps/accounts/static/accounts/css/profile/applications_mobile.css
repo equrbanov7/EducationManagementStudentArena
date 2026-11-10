@@ -1,7 +1,17 @@
 .apx-msg__text, .apx-step__note, .apx-modal__title { overflow-wrap: anywhere; white-space: pre-wrap; }
 .apx-msg__main, .apx-step__text { min-width: 0; }
 [data-apx-recipient-field] { display: grid; gap: .5rem; margin-block: 1rem; }
-[data-apx-recipient] { width: 100%; min-width: 0; min-height: 44px; padding: .6rem; }
+/* 2026-11-10: prorektor seçimi seçilmiş növün ALTINDA, ona bağlı «açılan» panel kimi. */
+.apx-options > .apx-recipient {
+    margin: -5px 0 0;
+    padding: 12px 14px 14px;
+    border: 1px solid var(--ems-primary-600);
+    border-top: 0;
+    border-radius: 0 0 10px 10px;
+    background: var(--ems-primary-50);
+}
+.apx-options > .apx-option[aria-selected="true"]:has(+ .apx-recipient) { border-radius: 10px 10px 0 0; }
+.apx-recipient .bootstrap-single-select { width: 100%; min-width: 0; }
 @media (max-width: 640px) {
  .apx-modal__close { min-width: 44px; min-height: 44px; justify-content: center; flex-shrink: 0; }
  .apx-modal__closeglyph { font-size: 24px; line-height: 1; }
