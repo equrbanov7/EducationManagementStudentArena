@@ -100,7 +100,19 @@ def load_plan(path) -> dict:
         raise CommandError("legacy_cells_file_unreadable") from None
     if not isinstance(data, dict) or data.get("format") != FORMAT:
         raise CommandError("legacy_cells_format_unknown")
-    return {"lessons": list(data.get("lessons") or []), "cells": list(data.get("cells") or [])}
+    # Sahib 2026-11-11 («yalnız q/b yazılmış sütunda boş xana = iştirak»): belə plan köhnə datanın son günündən
+    # SONRAKI dərslərə də aiddir — plan ``last_day`` (ISO tarix) ilə öz həddini verir; yoxdursa LAST_LEGACY_DAY.
+    last_day = None
+    if data.get("last_day"):
+        try:
+            last_day = datetime.date.fromisoformat(str(data["last_day"]))
+        except ValueError:
+            raise CommandError("legacy_cells_format_unknown") from None
+    return {
+        "lessons": list(data.get("lessons") or []),
+        "cells": list(data.get("cells") or []),
+        "last_day": last_day,
+    }
 
 
 def _lessons(organization, specs, counts, manifest) -> dict:
@@ -213,7 +225,8 @@ def _name_enrollments(organization, cells, lessons) -> dict:
     return {key: pk for key, pk in found.items() if key not in twice}
 
 
-def run(*, organization, actor, counts, cells, lessons_spec=(), correct=False) -> None:
+def run(*, organization, actor, counts, cells, lessons_spec=(), correct=False, last_day=None) -> None:
+    last_day = last_day or LAST_LEGACY_DAY
     Lesson, Enrollment, LessonMark = _model("Lesson"), _model("Enrollment"), _model("LessonMark")
     manifest = {"lessons_created": [], "marks_corrected": []}
     planned = _lessons(organization, lessons_spec, counts, manifest)
@@ -278,7 +291,7 @@ def run(*, organization, actor, counts, cells, lessons_spec=(), correct=False) -
             mark = existing.get((lesson.pk, enrollment.pk))
             if mark is None:
                 counts["cells_already_filled"] += 1
-            elif status not in STATUSES or lesson.date > LAST_LEGACY_DAY:
+            elif status not in STATUSES or lesson.date > last_day:
                 counts["cells_invalid"] += 1
             elif score is not None and (not lesson_allows_score(lesson) or not 0 <= float(score) <= MAX_SCORE):
                 counts["cells_score_not_allowed"] += 1
@@ -294,7 +307,7 @@ def run(*, organization, actor, counts, cells, lessons_spec=(), correct=False) -
                 touched[enrollment.pk] = enrollment
                 counts["cells_corrected"] += 1
                 counts["cells_corrected_status" if mark.status != status else "cells_corrected_score"] += 1
-        elif status not in STATUSES or lesson.date > LAST_LEGACY_DAY:
+        elif status not in STATUSES or lesson.date > last_day:
             counts["cells_invalid"] += 1
         elif not lab_groups.applies(lesson, enrollment):
             counts["cells_other_subgroup"] += 1

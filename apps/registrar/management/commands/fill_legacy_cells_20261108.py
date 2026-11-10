@@ -33,7 +33,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        plan = {"lessons": [], "cells": []} if options["undo"] else fill.load_plan(options["file"])
+        plan = {"lessons": [], "cells": [], "last_day": None} if options["undo"] else fill.load_plan(options["file"])
 
         def runner(organization, actor, counts):
             if options["undo"]:
@@ -46,6 +46,7 @@ class Command(BaseCommand):
                     cells=plan["cells"],
                     lessons_spec=plan["lessons"],
                     correct=options["correct"],
+                    last_day=plan.get("last_day"),
                 )
 
         run_plan(self, options=options, prefix=PREFIX, runner=runner)
