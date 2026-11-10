@@ -18,6 +18,7 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
+from apps.legacy_import.services.repair_support import RepairContext, establish_rls_scope, resolve_organization
 from apps.syllabus.public import (
     TransitionDenied,
     completion_report,
@@ -26,7 +27,6 @@ from apps.syllabus.public import (
     resolve_actor,
     section_data_map,
 )
-from core.rls import apply_rls_request_context, bypass_rls
 from core.rls_pooling import rls_worker_atomic
 
 PREFIX = "reviewed_publish:"
@@ -93,14 +93,12 @@ class Command(BaseCommand):
         )
         if actor is None:
             raise CommandError("actor_must_be_active_superuser")
-        Organization = django_apps.get_model("organizations", "Organization")
         counts: Counter = Counter()
         try:
-            with rls_worker_atomic(), bypass_rls():
-                organization = Organization.objects.filter(slug=str(options["org"]).strip()).first()
-                if organization is None:
-                    raise CommandError("reviewed_publish_organization_unknown")
-                apply_rls_request_context(user_id=actor.pk, org_id=organization.pk)
+            with rls_worker_atomic():
+                organization = resolve_organization(options["org"])
+                # Bypass YOX — yalnız bu tenant + aktor konteksti (repair_audit_syllabi_20261109 ilə eyni yol).
+                establish_rls_scope(RepairContext(organization, actor, options["apply"], 0))
                 with transaction.atomic():
                     run(organization=organization, actor=actor, apply=options["apply"], counts=counts)
         except CommandError:
