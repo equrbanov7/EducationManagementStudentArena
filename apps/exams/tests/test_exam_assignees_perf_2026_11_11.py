@@ -445,7 +445,8 @@ class ClientContractTests(SimpleTestCase):
 
     def test_assignees_js_refreshes_regions_instead_of_reloading(self):
         js = self._read("apps/exams/static/exams/js/teacher_exam_assignees.js")
-        self.assertNotIn("location.reload", js)
+        self.assertEqual(js.count("location.reload"), 1)  # yalnız ehtiyat yol (`hardNavigate`)
+        self.assertIn("refresh(window.location.href, { keepUrl: true })", js)
         self.assertIn('"X-EAS-Partial"', js)
         self.assertIn("AbortController", js)
         self.assertIn("liveController.abort()", js)

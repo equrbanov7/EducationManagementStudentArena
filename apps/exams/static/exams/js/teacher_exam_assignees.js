@@ -72,6 +72,15 @@
         });
     }
 
+    /** Ehtiyat yol: adi (tam) keçid — eyni ünvandırsa yenidən yükləmə. */
+    function hardNavigate(url) {
+        if (url.toString() === window.location.href) {
+            window.location.reload();
+        } else {
+            window.location.assign(url.toString());
+        }
+    }
+
     function moveChildren(from, to) {
         to.textContent = "";
         while (from.firstChild) {
@@ -175,7 +184,7 @@
         opts = opts || {};
         var url = new URL(String(target), window.location.href);
         if (!root() || typeof window.fetch !== "function" || typeof window.DOMParser !== "function") {
-            window.location.assign(url.toString());
+            hardNavigate(url);
             return;
         }
         if (liveController) {
@@ -227,7 +236,7 @@
                     return;
                 }
                 if (mine === liveSeq) {
-                    window.location.assign(url.toString()); // ehtiyat: adi keçid
+                    hardNavigate(url);
                 }
             });
     }
@@ -235,7 +244,7 @@
     function clearPickers() {
         [".js-eas-unit-picker", ".js-eas-user-picker"].forEach(function (selector) {
             var pick = picker(selector);
-            if (pick && pick.ids().length) {
+            if (pick && typeof pick.reset === "function" && pick.ids().length) {
                 pick.reset();
             }
         });
@@ -264,8 +273,9 @@
             sending = false;
             el.classList.remove("eas-page--sending");
         };
-        window.EMSCore.fetchJSON(el.dataset.updateUrl, { method: "POST", body: body, headers: headers })
-            .then(function (payload) {
+        // then(uğur, rədd): uğur qolundakı xəta «əməliyyat alınmadı» kimi GÖSTƏRİLMİR (əməl artıq saxlanıb).
+        window.EMSCore.fetchJSON(el.dataset.updateUrl, { method: "POST", body: body, headers: headers }).then(
+            function (payload) {
                 done();
                 payload = payload || {};
                 if (payload.message) {
@@ -276,8 +286,8 @@
                 });
                 clearPickers();
                 refresh(window.location.href, { keepUrl: true });
-            })
-            .catch(function (err) {
+            },
+            function (err) {
                 done();
                 var payload = (err && err.payload) || {};
                 if (payload.unit_coverage_required) {
@@ -289,7 +299,8 @@
                     return;
                 }
                 toast(payload.error || msg("msgError"));
-            });
+            }
+        );
     }
 
     function groupLine(group) {
