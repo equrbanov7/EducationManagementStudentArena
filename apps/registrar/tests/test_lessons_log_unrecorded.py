@@ -212,10 +212,18 @@ class UnrecordedSlotsTest(TestCase):
         url = reverse("accounts:profile_section_fragment", kwargs={"section": "lessons-log"})
         response = client.get(url, {"ll_range": "custom", "ll_from": "2025-09-01", "ll_to": "2026-01-31"})
         self.assertEqual(response.status_code, 200)
-        unrecorded = response.context["lessons_log_section"]["unrecorded"]
-        self.assertGreaterEqual(unrecorded["count"], 1)
+        # PERF 2026-11-11: keş boşdursa kart bölmənin ilk cavabını GÖZLƏTMİR — yer tutucu gəlir, hesab tənbəl
+        # ucdadır (`accounts:lessons_log_insights`), o da bölmə ilə EYNİ dövr / süzgəc parametrlərini alır.
+        section = response.context["lessons_log_section"]
+        self.assertIsNone(section["unrecorded"])
+        self.assertTrue(section["unrecorded_pending"])
         html = response.json()["html"] if response.get("Content-Type", "").startswith("application/json") else ""
         html = html or response.content.decode()
-        self.assertIn("llog-unrec", html)
+        self.assertIn("llog-unrec--pending", html)
         self.assertIn("Cədvəldə var, qeydə alınmayıb", html)
+        lazy = client.get(section["insights_url"])
+        self.assertEqual(lazy.status_code, 200)
+        card = lazy.json()["unrecorded_html"]
+        self.assertIn("llog-unrec is-alert", card)
+        self.assertIn("Jurnalı aç", card)
         self.assertIn("llog-offsched", html)

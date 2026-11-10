@@ -118763,3 +118763,178 @@ msgid ""
 msgstr ""
 "Группы, у которых вы ведёте этот предмет в этом семестре, добавляются "
 "автоматически — студенты видят только назначенную им папку."
+
+msgctxt "ui.filters"
+msgid "Daha çox süzgəc"
+msgstr "Ещё фильтры"
+
+msgctxt "accounts.lessons_log"
+msgid "Akademik saat"
+msgstr "Академические часы"
+
+msgctxt "accounts.lessons_log"
+msgid "Bu müəllimin dərsləri əhatənizdə deyil."
+msgstr "Занятия этого преподавателя вне вашей области доступа."
+
+msgctxt "accounts.lessons_log"
+msgid "Bölmə üzrə (tədris dili)"
+msgstr "По секторам (язык обучения)"
+
+msgctxt "accounts.lessons_log"
+msgid "Cədvəl formasında bax"
+msgstr "Показать таблицей"
+
+msgctxt "accounts.lessons_log"
+msgid "Cədvəl jurnalla tutuşdurulur…"
+msgstr "Расписание сверяется с журналом…"
+
+msgctxt "accounts.lessons_log"
+msgid "Cədvəl yüklənmədi. Yenidən cəhd edin."
+msgstr "Не удалось загрузить таблицу. Повторите попытку."
+
+msgctxt "accounts.lessons_log"
+msgid "Cəmi"
+msgstr "Итого"
+
+msgctxt "accounts.lessons_log"
+msgid ""
+"Cəmi %(total)s dərs — siyahı yeni tarixdən köhnəyə doğru hissə-hissə açılır."
+msgstr ""
+"Всего занятий: %(total)s — список открывается частями, от новых к старым."
+
+msgctxt "accounts.lessons_log"
+msgid "Daha çox göstər"
+msgstr "Показать ещё"
+
+msgctxt "accounts.lessons_log"
+msgid "Dərs növü"
+msgstr "Вид занятия"
+
+msgctxt "accounts.lessons_log"
+msgid "Dərs növü üzrə"
+msgstr "По видам занятий"
+
+msgctxt "accounts.lessons_log"
+msgid "Dərslər"
+msgstr "Занятия"
+
+msgctxt "accounts.lessons_log"
+msgid "Excel kimi yüklə"
+msgstr "Скачать в Excel"
+
+msgctxt "accounts.lessons_log"
+msgid "Keçilmiş saat"
+msgstr "Проведено часов"
+
+msgctxt "accounts.lessons_log"
+msgid "Müəllimin keçdiyi dərslər"
+msgstr "Занятия, проведённые преподавателем"
+
+msgctxt "accounts.lessons_log"
+msgid "Məlumat yüklənmədi. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Не удалось загрузить данные. Обновите страницу и повторите попытку."
+
+msgctxt "accounts.lessons_log"
+msgid "Otaq"
+msgstr "Аудитория"
+
+msgctxt "accounts.lessons_log"
+msgid ""
+"Patok (bir neçə qrupa birgə keçilən) dərs bir dəfə sayılır: eyni fənn, eyni "
+"dərs növü, eyni tarix və saat — bir dərs."
+msgstr ""
+"Потоковое занятие (проведённое совместно для нескольких групп) считается "
+"один раз: тот же предмет, тот же вид занятия, та же дата и время — одно "
+"занятие."
+
+msgctxt "accounts.lessons_log"
+msgid "Seçilmiş dövrdə bu müəllimin keçilmiş dərsi yoxdur."
+msgstr "У этого преподавателя нет проведённых занятий за выбранный период."
+
+msgctxt "accounts.lessons_log"
+msgid "Yüklənir…"
+msgstr "Загрузка…"
+
+msgctxt "accounts.lessons_log"
+msgid "hesablanır…"
+msgstr "вычисляется…"
+
+msgctxt "accounts.lessons_log"
+msgid "patok"
+msgstr "поток"
+
+msgctxt "accounts.lessons_log"
+msgid "Ətraflı bax"
+msgstr "Подробнее"
+
+msgctxt "registrar.lessons_log"
+msgid "%(hours)s saat (%(lessons)s dərs)"
+msgstr "%(hours)s ч. (%(lessons)s занятий)"
+
+msgctxt "registrar.lessons_log"
+msgid "Azərbaycan bölməsi"
+msgstr "Азербайджанский сектор"
+
+msgctxt "registrar.lessons_log"
+msgid "İngilis bölməsi"
+msgstr "Английский сектор"
+
+msgctxt "registrar.lessons_log"
+msgid "Rus bölməsi"
+msgstr "Русский сектор"
+
+msgctxt "registrar.lessons_log"
+msgid "Qarışıq bölmə (birgə dərs)"
+msgstr "Смешанный сектор (совместное занятие)"
+
+msgctxt "registrar.lessons_log"
+msgid "Bölməsi göstərilməyib"
+msgstr "Сектор не указан"
+
+msgctxt "registrar.lessons_log"
+msgid "Bölmə"
+msgstr "Сектор"
+
+msgctxt "registrar.lessons_log"
+msgid "Bölmə üzrə"
+msgstr "По секторам"
+
+msgctxt "registrar.lessons_log"
+msgid "Cəmi"
+msgstr "Итого"
+
+msgctxt "registrar.lessons_log"
+msgid "Dərs növü"
+msgstr "Вид занятия"
+
+msgctxt "registrar.lessons_log"
+msgid "Dərs növü üzrə"
+msgstr "По видам занятий"
+
+msgctxt "registrar.lessons_log"
+msgid "Dərs sayı"
+msgstr "Количество занятий"
+
+msgctxt "registrar.lessons_log"
+msgid "Dərslər"
+msgstr "Занятия"
+
+msgctxt "registrar.lessons_log"
+msgid "Həftənin günü"
+msgstr "День недели"
+
+msgctxt "registrar.lessons_log"
+msgid "Keçilmiş saat"
+msgstr "Проведено часов"
+
+msgctxt "registrar.lessons_log"
+msgid "Qeyd olunan"
+msgstr "Отмечено"
+
+msgctxt "registrar.lessons_log"
+msgid "Yekun"
+msgstr "Итог"
+
+msgctxt "registrar.lessons_log"
+msgid "İcmal"
+msgstr "Сводка"

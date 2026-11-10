@@ -19,6 +19,7 @@ from .views import group_lead as group_lead_views
 from .views import hr_analytics as hr_analytics_views
 from .views import journal_hygiene as journal_hygiene_views
 from .views import journal_removals as journal_removals_views
+from .views import lessons_log_lazy as lessons_log_lazy_views
 from .views import network_zone_page
 from .views import session_ping as session_ping_views
 from .views import subgroup_students as subgroup_students_views
@@ -144,6 +145,9 @@ urlpatterns = [
         views.profile_section_fragment,
         name="profile_section_fragment",
     ),
+    # «Keçilmiş dərslər» — tənbəl KPI / «qeydə alınmayıb» və gün siyahısının növbəti səhifəsi (PERF 2026-11-11).
+    path("profile/api/lessons-log/insights/", lessons_log_lazy_views.lessons_log_insights, name="lessons_log_insights"),
+    path("profile/api/lessons-log/rows/", lessons_log_lazy_views.lessons_log_rows, name="lessons_log_rows"),
     path(
         "profile/api/badges/",
         views.profile_badges_api,

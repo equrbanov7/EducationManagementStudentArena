@@ -114,6 +114,41 @@ def range_totals(lessons_qs) -> dict:
     return totals
 
 
+#: Seçici siyahılarının (fakültə / kafedra / fənn / qrup / müəllim) keş müddəti — siyahı yalnız etiketdir,
+#: yeni açılışın siyahıda iki dəqiqə gec görünməsi qəbul olunur (KPI keşi ilə eyni siyasət, daha qısa).
+OPTIONS_CACHE_TTL = 120
+
+
+def cached_by_query(prefix: str, queryset, compute, *, ttl: int = OPTIONS_CACHE_TTL):
+    """``compute()`` nəticəsini sorğunun ÖZÜNÜN hash-i ilə keşlə (PERF 2026-11-11).
+
+    Açar :func:`totals_cache_key` ilə eyni prinsiplədir: SQL mətni əhatəni, təşkilatı və bütün parametrləri
+    daşıyır — fərqli əhatəli iki aktor eyni açarı paylaşmır. Nəticə sadə data olmalıdır (pickle)."""
+    raw = f"{prefix}|{queryset.order_by().values('id').query}"
+    key = "registrar:lessons_log_q:" + hashlib.sha1(raw.encode("utf-8"), usedforsecurity=False).hexdigest()
+    cached = cache.get(key)
+    if cached is not None:
+        return cached
+    value = compute()
+    cache.set(key, value, ttl)
+    return value
+
+
+def cached_range_totals(lessons_qs):
+    """Keşdəki KPI-lar və ya ``None`` — bölmənin İLK cavabı ağır aqreqatı gözləmir (2026-11-11).
+
+    Keş boşdursa bölmə yalnız :func:`quick_totals`-ı (dərs sayı + saat, index-only) göstərir; iştirak / boş /
+    gec kartları tənbəl ucdan (`range_totals`) dolur."""
+    cached = cache.get(totals_cache_key(lessons_qs))
+    return dict(cached) if cached is not None else None
+
+
+def quick_totals(lessons_qs) -> dict:
+    """``{"lessons", "hours"}`` — TƏK yüngül aqreqat (xana cədvəlinə JOIN yoxdur)."""
+    row = lessons_qs.order_by().aggregate(lessons=Count("id"), hours=Sum("hours"))
+    return {"lessons": int(row["lessons"] or 0), "hours": int(row["hours"] or 0)}
+
+
 def _compute_range_totals(lessons_qs) -> dict:
     # `note_state`: `(written - lesson_date) > 48 saat`, `written` tam TARİXDİR
     # (`localtime(first_mark).date()`) → fərq ≥ 3 gün ⇔ `written >= date + 3 gün`.
@@ -165,11 +200,15 @@ def _compute_range_totals(lessons_qs) -> dict:
 
 __all__ = [
     "LATE_AFTER_HOURS",
+    "OPTIONS_CACHE_TTL",
     "TOTALS_CACHE_TTL",
+    "cached_by_query",
+    "cached_range_totals",
     "imported_lesson_q",
     "is_imported_lesson",
     "lesson_new_system_mark_q",
     "new_system_mark_q",
+    "quick_totals",
     "range_totals",
     "totals_cache_key",
 ]

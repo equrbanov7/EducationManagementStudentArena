@@ -117877,3 +117877,177 @@ msgid ""
 msgstr ""
 "Bu fənn və semestrdə dərs dediyiniz qruplar avtomatik əlavə olunur — "
 "tələbələr yalnız təyin olunmuş qovluğu görür."
+
+msgctxt "ui.filters"
+msgid "Daha çox süzgəc"
+msgstr "Daha çox süzgəc"
+
+msgctxt "accounts.lessons_log"
+msgid "Akademik saat"
+msgstr "Akademik saat"
+
+msgctxt "accounts.lessons_log"
+msgid "Bu müəllimin dərsləri əhatənizdə deyil."
+msgstr "Bu müəllimin dərsləri əhatənizdə deyil."
+
+msgctxt "accounts.lessons_log"
+msgid "Bölmə üzrə (tədris dili)"
+msgstr "Bölmə üzrə (tədris dili)"
+
+msgctxt "accounts.lessons_log"
+msgid "Cədvəl formasında bax"
+msgstr "Cədvəl formasında bax"
+
+msgctxt "accounts.lessons_log"
+msgid "Cədvəl jurnalla tutuşdurulur…"
+msgstr "Cədvəl jurnalla tutuşdurulur…"
+
+msgctxt "accounts.lessons_log"
+msgid "Cədvəl yüklənmədi. Yenidən cəhd edin."
+msgstr "Cədvəl yüklənmədi. Yenidən cəhd edin."
+
+msgctxt "accounts.lessons_log"
+msgid "Cəmi"
+msgstr "Cəmi"
+
+msgctxt "accounts.lessons_log"
+msgid ""
+"Cəmi %(total)s dərs — siyahı yeni tarixdən köhnəyə doğru hissə-hissə açılır."
+msgstr ""
+"Cəmi %(total)s dərs — siyahı yeni tarixdən köhnəyə doğru hissə-hissə açılır."
+
+msgctxt "accounts.lessons_log"
+msgid "Daha çox göstər"
+msgstr "Daha çox göstər"
+
+msgctxt "accounts.lessons_log"
+msgid "Dərs növü"
+msgstr "Dərs növü"
+
+msgctxt "accounts.lessons_log"
+msgid "Dərs növü üzrə"
+msgstr "Dərs növü üzrə"
+
+msgctxt "accounts.lessons_log"
+msgid "Dərslər"
+msgstr "Dərslər"
+
+msgctxt "accounts.lessons_log"
+msgid "Excel kimi yüklə"
+msgstr "Excel kimi yüklə"
+
+msgctxt "accounts.lessons_log"
+msgid "Keçilmiş saat"
+msgstr "Keçilmiş saat"
+
+msgctxt "accounts.lessons_log"
+msgid "Müəllimin keçdiyi dərslər"
+msgstr "Müəllimin keçdiyi dərslər"
+
+msgctxt "accounts.lessons_log"
+msgid "Məlumat yüklənmədi. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Məlumat yüklənmədi. Səhifəni yeniləyib yenidən cəhd edin."
+
+msgctxt "accounts.lessons_log"
+msgid "Otaq"
+msgstr "Otaq"
+
+msgctxt "accounts.lessons_log"
+msgid ""
+"Patok (bir neçə qrupa birgə keçilən) dərs bir dəfə sayılır: eyni fənn, eyni "
+"dərs növü, eyni tarix və saat — bir dərs."
+msgstr ""
+"Patok (bir neçə qrupa birgə keçilən) dərs bir dəfə sayılır: eyni fənn, eyni "
+"dərs növü, eyni tarix və saat — bir dərs."
+
+msgctxt "accounts.lessons_log"
+msgid "Seçilmiş dövrdə bu müəllimin keçilmiş dərsi yoxdur."
+msgstr "Seçilmiş dövrdə bu müəllimin keçilmiş dərsi yoxdur."
+
+msgctxt "accounts.lessons_log"
+msgid "Yüklənir…"
+msgstr "Yüklənir…"
+
+msgctxt "accounts.lessons_log"
+msgid "hesablanır…"
+msgstr "hesablanır…"
+
+msgctxt "accounts.lessons_log"
+msgid "patok"
+msgstr "patok"
+
+msgctxt "accounts.lessons_log"
+msgid "Ətraflı bax"
+msgstr "Ətraflı bax"
+
+msgctxt "registrar.lessons_log"
+msgid "%(hours)s saat (%(lessons)s dərs)"
+msgstr "%(hours)s saat (%(lessons)s dərs)"
+
+msgctxt "registrar.lessons_log"
+msgid "Azərbaycan bölməsi"
+msgstr "Azərbaycan bölməsi"
+
+msgctxt "registrar.lessons_log"
+msgid "İngilis bölməsi"
+msgstr "İngilis bölməsi"
+
+msgctxt "registrar.lessons_log"
+msgid "Rus bölməsi"
+msgstr "Rus bölməsi"
+
+msgctxt "registrar.lessons_log"
+msgid "Qarışıq bölmə (birgə dərs)"
+msgstr "Qarışıq bölmə (birgə dərs)"
+
+msgctxt "registrar.lessons_log"
+msgid "Bölməsi göstərilməyib"
+msgstr "Bölməsi göstərilməyib"
+
+msgctxt "registrar.lessons_log"
+msgid "Bölmə"
+msgstr "Bölmə"
+
+msgctxt "registrar.lessons_log"
+msgid "Bölmə üzrə"
+msgstr "Bölmə üzrə"
+
+msgctxt "registrar.lessons_log"
+msgid "Cəmi"
+msgstr "Cəmi"
+
+msgctxt "registrar.lessons_log"
+msgid "Dərs növü"
+msgstr "Dərs növü"
+
+msgctxt "registrar.lessons_log"
+msgid "Dərs növü üzrə"
+msgstr "Dərs növü üzrə"
+
+msgctxt "registrar.lessons_log"
+msgid "Dərs sayı"
+msgstr "Dərs sayı"
+
+msgctxt "registrar.lessons_log"
+msgid "Dərslər"
+msgstr "Dərslər"
+
+msgctxt "registrar.lessons_log"
+msgid "Həftənin günü"
+msgstr "Həftənin günü"
+
+msgctxt "registrar.lessons_log"
+msgid "Keçilmiş saat"
+msgstr "Keçilmiş saat"
+
+msgctxt "registrar.lessons_log"
+msgid "Qeyd olunan"
+msgstr "Qeyd olunan"
+
+msgctxt "registrar.lessons_log"
+msgid "Yekun"
+msgstr "Yekun"
+
+msgctxt "registrar.lessons_log"
+msgid "İcmal"
+msgstr "İcmal"
