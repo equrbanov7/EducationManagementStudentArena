@@ -427,11 +427,42 @@
         apply(form);
     });
 
+    /* ---- «Daha çox süzgəc» (2026-11-11) ----------------------------------
+       İkinci dərəcəli sahələr (`field.secondary`) eyni formanın gizli blokundadır.
+       Server bloku yalnız orada tətbiq olunmuş süzgəc varsa açıq göndərir; istifadəçi
+       əl ilə açıbsa, avto rejimin hər yenidən yükləməsində bağlanmasın deyə seçim
+       bölmə açarı ilə yadda saxlanılır (səhifə ömrü boyu). */
+    var moreOpen = Object.create(null);
+
+    function setMore(form, open) {
+        var panel = form.querySelector("[data-ems-filters-more-panel]");
+        var btn = form.querySelector("[data-ems-filters-more]");
+        if (!panel || !btn) {
+            return;
+        }
+        panel.hidden = !open;
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+
+    window.EMSDelegate.on("click", "[data-ems-filters-more]", function (event, btn) {
+        event.preventDefault();
+        var form = btn.closest("[data-ems-filters]");
+        if (!form) {
+            return;
+        }
+        var open = btn.getAttribute("aria-expanded") !== "true";
+        moreOpen[form.dataset.section || "_"] = open;
+        setMore(form, open);
+    });
+
     /* İlk render + hər AJAX swap: applied baseline-i sahələrdən oxu. */
     window.EMSReady(function () {
         var forms = document.querySelectorAll("[data-ems-filters]");
         for (var i = 0; i < forms.length; i += 1) {
             var form = forms[i];
+            if (moreOpen[form.dataset.section || "_"] === true) {
+                setMore(form, true);
+            }
             var nodes = fields(form);
             for (var j = 0; j < nodes.length; j += 1) {
                 var el = nodes[j];

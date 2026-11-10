@@ -148,8 +148,14 @@ def _teacher_label(user) -> str:
     return (user.get_full_name() or "").strip() or user.username
 
 
-def unrecorded_slots(user, organization, *, supervisor, window, periods=None, filters=None, today=None) -> dict:
-    """``{"count", "items", "start", "end", "limit", "slots"}`` — «Cədvəldə var, qeydə alınmayıb»."""
+def unrecorded_slots(
+    user, organization, *, supervisor, window, periods=None, filters=None, today=None, cached_only=False
+):
+    """``{"count", "items", "start", "end", "limit", "slots"}`` — «Cədvəldə var, qeydə alınmayıb».
+
+    ``cached_only=True`` (2026-11-11, bölmənin ilk açılışı): yalnız keşə baxılır — keşdə yoxdursa ``None``
+    qayıdır və hesab TƏNBƏL uca (`lessons_log_lazy.insights`) qalır; slot / dərs sorğuları və Python dövrü
+    səhifənin ilk cavabını gecikdirmir."""
     today = today or timezone.localdate()
     end = min(window["end"], today - _dt.timedelta(days=1))
     # Tavan pəncərənin SONUNDAN sayılır — keçmiş semestrə baxan kafedra müdiri də nəticə görür.
@@ -178,10 +184,16 @@ def unrecorded_slots(user, organization, *, supervisor, window, periods=None, fi
     cached = cache.get(key)
     if cached is not None:
         return dict(cached)
+    if cached_only:
+        return None
 
     slots = list(
         slots_qs.select_related(
-            "offering__period", "offering__subject", "offering__group", "offering__instructor"
+            "offering__period",
+            "offering__subject",
+            "offering__subject__chair_unit",
+            "offering__group",
+            "offering__instructor",
         ).order_by("weekday", "start_time")
     )
     if not slots:
@@ -206,6 +218,10 @@ def unrecorded_slots(user, organization, *, supervisor, window, periods=None, fi
             missing.append((day, slot))
     missing.sort(key=lambda item: (-item[0].toordinal(), item[1].start_time))  # yeni gün əvvəl, gün içində saat sırası
 
+    from apps.registrar import design_practical_scope
+
+    # «Praktiki məşğələ» etiketi (`slot.get_kind_display`) sətir başına sorğu etməsin — toplu (PERF 2026-11-11).
+    design_practical_scope.prime(slot.offering for _day, slot in missing[:ITEM_LIMIT] if slot.kind == "seminar")
     items = []
     for day, slot in missing[:ITEM_LIMIT]:
         offering = slot.offering

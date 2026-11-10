@@ -1,0 +1,106 @@
+{% load i18n %}
+{% comment %}«Keçilmiş dərslər» → «Cədvəl formasında bax» (sahib 2026-11-11).
+
+İki dialoq: (1) müəllimin icmal cədvəli — sətir = qrup / patok × fənn × dərs növü, altda cəmlər (ümumi, növ üzrə,
+bölmə üzrə) və «Excel kimi yüklə»; (2) «Ətraflı bax» — sətrin dərsləri (tarix, gün, saat, mövzu, otaq, iştirak).
+
+Markup yalnız QABIQDIR: məzmunu `lessons_log.js` JSON uclarından (`registrar:lessons_log_teacher_table` /
+`…_teacher_lessons`) doldurur (DOM `textContent` ilə — istifadəçi mətni HTML kimi yazılmır). Mətnlər tərcümə
+üçün `data-label-*` atributlarındadır. Kontekst: `tt` = `lessons_log_section.teacher_table`.
+Dialoqlar panelin İÇİNDƏDİR (AJAX swap qaydası); davranış `ems_ui/overlay.js`-dədir.{% endcomment %}
+<div class="ems-overlay ems-overlay--dialog" id="llogTeacherTable" hidden data-llog-table
+     data-table-url="{{ tt.table_url }}"
+     data-lessons-url="{{ tt.lessons_url }}"
+     data-label-loading="{% trans 'Yüklənir…' context 'accounts.lessons_log' %}"
+     data-label-empty="{% trans 'Seçilmiş dövrdə bu müəllimin keçilmiş dərsi yoxdur.' context 'accounts.lessons_log' %}"
+     data-label-error="{% trans 'Cədvəl yüklənmədi. Yenidən cəhd edin.' context 'accounts.lessons_log' %}"
+     data-label-denied="{% trans 'Bu müəllimin dərsləri əhatənizdə deyil.' context 'accounts.lessons_log' %}"
+     data-label-detail="{% trans 'Ətraflı bax' context 'accounts.lessons_log' %}"
+     data-label-joint="{% trans 'patok' context 'accounts.lessons_log' %}"
+     data-label-total="{% trans 'Cəmi' context 'accounts.lessons_log' %}"
+     data-label-notopic="{% trans 'Mövzu yazılmayıb' context 'accounts.lessons_log' %}">
+    <div class="ems-dialog llog-tt" role="dialog" aria-modal="true" aria-labelledby="llogTeacherTable-title">
+        <div class="ems-dialog__head">
+            <div>
+                <h2 class="ems-dialog__title" id="llogTeacherTable-title">{% trans "Müəllimin keçdiyi dərslər" context "accounts.lessons_log" %}</h2>
+                <p class="ems-dialog__sub" data-llog-tt-sub></p>
+            </div>
+            <button type="button" class="ems-dialog__x" data-ems-overlay-close aria-label="{% trans 'Bağla' context 'ui.dialog' %}">×</button>
+        </div>
+        <div class="ems-dialog__body">
+            <p class="llog-tt__state" data-llog-tt-state role="status" aria-live="polite">{% trans "Yüklənir…" context "accounts.lessons_log" %}</p>
+            <div class="llog-tt__content" data-llog-tt-content hidden>
+                <div class="ems-tablescroll">
+                    <table class="ems-table ems-table--zebra llog-tt__table">
+                        <thead>
+                            <tr>
+                                <th scope="col">{% trans "Qrup" context "accounts.lessons_log" %}</th>
+                                <th scope="col">{% trans "Fənn" context "accounts.lessons_log" %}</th>
+                                <th scope="col">{% trans "Dərs növü" context "accounts.lessons_log" %}</th>
+                                <th scope="col">{% trans "Keçilmiş saat" context "accounts.lessons_log" %}</th>
+                                <th scope="col"><span class="visually-hidden">{% trans "Ətraflı bax" context "accounts.lessons_log" %}</span></th>
+                            </tr>
+                        </thead>
+                        <tbody data-llog-tt-rows></tbody>
+                        <tfoot data-llog-tt-foot></tfoot>
+                    </table>
+                </div>
+                <div class="llog-tt__totals">
+                    <section class="llog-tt__card">
+                        <h3 class="llog-tt__card-title">{% trans "Dərs növü üzrə" context "accounts.lessons_log" %}</h3>
+                        <ul class="llog-tt__list" data-llog-tt-kinds></ul>
+                    </section>
+                    <section class="llog-tt__card">
+                        <h3 class="llog-tt__card-title">{% trans "Bölmə üzrə (tədris dili)" context "accounts.lessons_log" %}</h3>
+                        <ul class="llog-tt__list" data-llog-tt-sectors></ul>
+                    </section>
+                </div>
+                <p class="llog-tt__hint">
+                    <i class="fas fa-circle-info" aria-hidden="true"></i>
+                    {% trans "Patok (bir neçə qrupa birgə keçilən) dərs bir dəfə sayılır: eyni fənn, eyni dərs növü, eyni tarix və saat — bir dərs." context "accounts.lessons_log" %}
+                </p>
+            </div>
+        </div>
+        <div class="ems-dialog__foot">
+            <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Bağla" context "ui.dialog" %}</button>
+            <a class="ems-btn ems-btn--primary" href="{{ tt.xlsx_url }}" data-llog-tt-xlsx data-force-navigation="true">
+                <i class="fas fa-file-excel" aria-hidden="true"></i>
+                {% trans "Excel kimi yüklə" context "accounts.lessons_log" %}
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="ems-overlay ems-overlay--dialog" id="llogTeacherLessons" hidden data-llog-lessons>
+    <div class="ems-dialog llog-tt llog-tt--lessons" role="dialog" aria-modal="true" aria-labelledby="llogTeacherLessons-title">
+        <div class="ems-dialog__head">
+            <div>
+                <h2 class="ems-dialog__title" id="llogTeacherLessons-title" data-llog-tl-title>{% trans "Dərslər" context "accounts.lessons_log" %}</h2>
+                <p class="ems-dialog__sub" data-llog-tl-sub></p>
+            </div>
+            <button type="button" class="ems-dialog__x" data-ems-overlay-close aria-label="{% trans 'Bağla' context 'ui.dialog' %}">×</button>
+        </div>
+        <div class="ems-dialog__body">
+            <p class="llog-tt__state" data-llog-tl-state role="status" aria-live="polite">{% trans "Yüklənir…" context "accounts.lessons_log" %}</p>
+            <div class="ems-tablescroll" data-llog-tl-content hidden>
+                <table class="ems-table ems-table--zebra llog-tt__table llog-tt__table--lessons">
+                    <thead>
+                        <tr>
+                            <th scope="col">№</th>
+                            <th scope="col">{% trans "Tarix" context "accounts.lessons_log" %}</th>
+                            <th scope="col">{% trans "Saat" context "accounts.lessons_log" %}</th>
+                            <th scope="col">{% trans "Akademik saat" context "accounts.lessons_log" %}</th>
+                            <th scope="col">{% trans "Keçilən mövzu" context "accounts.lessons_log" %}</th>
+                            <th scope="col">{% trans "Otaq" context "accounts.lessons_log" %}</th>
+                            <th scope="col">{% trans "İştirak" context "accounts.lessons_log" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody data-llog-tl-rows></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="ems-dialog__foot">
+            <button type="button" class="ems-btn" data-ems-overlay-close>{% trans "Bağla" context "ui.dialog" %}</button>
+        </div>
+    </div>
+</div>

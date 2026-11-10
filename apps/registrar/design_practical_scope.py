@@ -58,6 +58,65 @@ def is_design_offering(offering):
     return value
 
 
+def prime(offerings) -> None:
+    """TOPLU memo (PERF 2026-11-11): siyahının «praktiki» bayraqlı açılışları üçün :func:`is_design_offering`
+    nəticəsini SABİT sayda sorğu ilə əvvəlcədən doldurur.
+
+    «Keçilmiş dərslər» kimi siyahılarda hər seminar sətri öz açılış nüsxəsi ilə gəlirdi — kafedrası boş (dil)
+    fənnin bayraqlı açılışı sətir başına 5 sorğu edirdi (EXISTS + fənnin kafedrası + rəsmi kafedranın 3 sorğusu;
+    prod surətində 90 sətirdə 65 əlavə sorğu). Burada: fənn + kafedra keşdədirsə (``select_related(
+    "offering__subject__chair_unit")``) kafedralı açılış sorğusuz həll olunur, kafedrasızların HAMISI üçün rəsmi
+    kafedra BİR dəfə (``official_offering_chairs`` + bir ad sorğusu) oxunur. Qayda :func:`is_design_offering` ilə
+    eynidir; fənn / kafedra keşdə deyilsə açılış toxunulmur (tək-tək yol işləyir)."""
+    allowed = {name.casefold() for name in PRACTICAL_CHAIR_NAMES}
+    chairless: dict = {}
+    for offering in offerings:
+        if offering is None or not getattr(offering, "pk", None) or MEMO in offering.__dict__:
+            continue
+        if not getattr(offering, "seminar_is_practical", False) or not offering.subject_id:
+            continue
+        if not type(offering).subject.is_cached(offering):
+            continue
+        subject = offering.subject
+        if not type(subject).chair_unit.is_cached(subject):
+            continue
+        chair = subject.chair_unit
+        if chair is None:
+            chairless.setdefault(offering.pk, []).append(offering)
+            continue
+        offering.__dict__[MEMO] = bool(
+            chair.organization_id == offering.organization_id == subject.organization_id
+            and chair.unit_type == "chair"
+            and chair.name.casefold() in allowed
+        )
+    if not chairless:
+        return
+    from django.apps import apps as django_apps
+
+    from .models import CourseOffering
+    from .offering_chairs import official_offering_chairs
+
+    by_org: dict = {}
+    for copies in chairless.values():
+        by_org.setdefault(copies[0].organization_id, []).append(copies[0].pk)
+    for organization_id, ids in by_org.items():
+        chairs = official_offering_chairs(CourseOffering.objects.filter(pk__in=ids), organization_id)
+        chair_ids = {str(pk) for values in chairs.values() for pk in values}
+        practical_ids = set()
+        if chair_ids:
+            practical_ids = {
+                str(pk)
+                for pk, name in django_apps.get_model("organizations", "OrgUnit")
+                .objects.filter(organization_id=organization_id, unit_type="chair", pk__in=chair_ids)
+                .values_list("id", "name")
+                if name.casefold() in allowed
+            }
+        for offering_id in ids:
+            value = any(str(pk) in practical_ids for pk in chairs.get(offering_id, ()))
+            for offering in chairless[offering_id]:
+                offering.__dict__[MEMO] = value
+
+
 def _subject_chair_id(offering):
     from .models import Subject
 

@@ -1,0 +1,52 @@
+{% load i18n ems_ui %}
+{% comment %}«Keçilmiş dərslər» — gün kartları (bir səhifə). Həm bölmənin ilk cavabı, həm də «Daha çox göstər»
+(AJAX, `accounts:lessons_log_rows`) bunu render edir. Kontekst: `days`, `is_supervisor`.
+Gün başlığındakı cəm günün TAM cəmidir; səhifə günü yarıda kəsibsə `lessons_log.js` davam sətirlərini
+`data-llog-day` üzrə mövcud karta əlavə edir.{% endcomment %}
+{% for day in days %}
+<div class="llog-day" data-llog-day="{{ day.date|date:'Y-m-d' }}">
+    <div class="llog-day__head">
+        <span class="llog-day__date">{{ day.date|date:"d.m.Y" }}</span>
+        <span class="llog-day__weekday">{{ day.weekday }}</span>
+        <span class="llog-day__total">{% blocktrans count n=day.lessons context "accounts.lessons_log" %}{{ n }} dərs{% plural %}{{ n }} dərs{% endblocktrans %} · {% blocktrans count n=day.hours context "accounts.lessons_log" %}{{ n }} saat{% plural %}{{ n }} saat{% endblocktrans %}</span>
+    </div>
+    <div class="ems-tablescroll">
+        <table class="ems-table ems-table--zebra llog-table">
+            <thead>
+                <tr>
+                    <th scope="col">{% trans "Saat" context "accounts.lessons_log" %}</th>
+                    {% if is_supervisor %}<th scope="col">{% trans "Müəllim" context "accounts.lessons_log" %}</th>{% endif %}
+                    <th scope="col">{% trans "Fənn və qrup" context "accounts.lessons_log" %}</th>
+                    <th scope="col">{% trans "Keçilən mövzu" context "accounts.lessons_log" %}</th>
+                    <th scope="col">{% trans "Dərsin tipi" context "accounts.lessons_log" %}</th>
+                    <th scope="col">{% trans "İştirak" context "accounts.lessons_log" %}</th>
+                    <th scope="col">{% trans "Saat" context "accounts.lessons_log" %}</th>
+                    <th scope="col">{% trans "Jurnal qeydi" context "accounts.lessons_log" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in day.rows %}
+                <tr class="{% if row.note == 'empty' %}llog-row--empty{% endif %}">
+                    <th scope="row" class="llog-time">
+                        <span class="llog-time__main">{% if row.start_time %}{{ row.start_time|time:"H:i" }}{% if row.end_time %} – {{ row.end_time|time:"H:i" }}{% endif %}{% else %}—{% endif %}</span>
+                    </th>
+                    {% if is_supervisor %}<td>{{ row.teacher|default:"—" }}</td>{% endif %}
+                    <td>
+                        <span class="llog-subject">{{ row.subject_name }}</span>
+                        <span class="llog-submeta">{{ row.group }}{% if row.room %} · {{ row.room }}{% endif %}</span>
+                    </td>
+                    <td>
+                        {% if row.has_topic %}{{ row.topic }}
+                        {% else %}<span class="llog-notopic">{% trans "Mövzu yazılmayıb" context "accounts.lessons_log" %}</span>{% endif %}
+                    </td>
+                    <td>{{ row.kind_label }}{% if row.off_schedule %} <span class="ems-badge ems-badge--warning llog-offsched" title="{{ row.off_schedule_reason }}"><i class="fas fa-flag" aria-hidden="true"></i> {% trans "cədvəldən kənar" context "accounts.lessons_log" %}</span>{% endif %}</td>
+                    <td class="ems-table__num">{{ row.attendance_label }}{% if row.excused %} <span class="llog-excused" title="{% trans 'Üzrlü qayıb' context 'accounts.lessons_log' %}">+{{ row.excused }}</span>{% endif %}</td>
+                    <td class="ems-table__num">{{ row.hours }}</td>
+                    <td>{% ems_status_badge "journal_note" row.note %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endfor %}

@@ -28,6 +28,7 @@ from . import (
     lab_groups_views,
     language_cohort_history,
     language_cohort_views,
+    lessons_log_teacher_views,
     lessons_log_views,
     pdf_views,
     practical_toggle,
@@ -89,6 +90,20 @@ urlpatterns = [
     # URL auditi A11 (2026-10-10): `analitika/` səhifəsi silindi — kabinet `?section=analytics`.
     # Ekran 21 — «Keçilmiş dərslər» hesabatının CSV ixracı (oxu-only, əhatəli).
     path("kecilmis-dersler/export.csv", lessons_log_views.lessons_log_csv, name="lessons_log_csv"),
+    # «Cədvəl formasında bax» (sahib 2026-11-11): müəllimin icmal cədvəli, sətrin dərsləri, Excel.
+    path(
+        "kecilmis-dersler/muellim-cedveli/", lessons_log_teacher_views.teacher_table, name="lessons_log_teacher_table"
+    ),
+    path(
+        "kecilmis-dersler/muellim-cedveli/dersler/",
+        lessons_log_teacher_views.teacher_table_lessons,
+        name="lessons_log_teacher_lessons",
+    ),
+    path(
+        "kecilmis-dersler/muellim-cedveli/export.xlsx",
+        lessons_log_teacher_views.teacher_table_xlsx,
+        name="lessons_log_teacher_xlsx",
+    ),
     path("transkript.pdf", pdf_views.my_transcript_pdf, name="my_transcript_pdf"),
     # «Xarici nəticənin tanınması» (Erasmus+ / mübadilə / başqa ali məktəb → fəndən azad, sahib 2026-10-25).
     path("xarici-netice/telebe/<int:student_id>/", credit_recognition_views.create, name="credit_recognition_create"),

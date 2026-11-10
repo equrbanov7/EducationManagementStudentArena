@@ -27,6 +27,9 @@ KONTEKST MÜQAVİLƏSİ
   field.kind="datetime" — tarix-saat sahəsi (EMSDateTime vidceti; bölmə ems_datetime*.js yükləməlidir).
   field.kind="date"  — tarix sahəsi; `range_select` (+ `range_custom`) verilsə,
                        dəyişəndə həmin select «seçilmiş aralıq» dəyərinə keçir.
+  filter_more        — opsional (2026-11-11); True olduqda `field.secondary` sahələri «Daha çox süzgəc»
+                       düyməsi ilə açılan blokda göstərilir (`filter_more_open` — açıq gəlsin,
+                       `filter_more_count` — blokda tətbiq olunmuş süzgəc sayı). Sahələr eyni formadadır.
   Avto rejimdə «Sıfırla» formanın ÖZ sahələrini (+ səhifə) URL-dən ATIB
   bölməni SERVER DEFOLTLARI ilə yükləyir (boş dəyər = default qaydası);
   aktiv tab / görünüş yerində qalır.
@@ -38,43 +41,7 @@ KONTEKST MÜQAVİLƏSİ
       {% if filter_base_url %}data-base-url="{{ filter_base_url }}"{% endif %}
       {% if filter_auto %}data-ems-filters-auto="1"{% endif %}
       role="search">
-    {% for field in filter_fields %}
-        {% if field.kind == "hidden" %}
-        {% comment %}Əhatədə TƏK seçim (sahib, 2026-10-14): dəyər server tərəfindən seçilib, sahə
-        göstərilmir; gizli input tətbiq zamanı URL-ə eyni dəyəri yazır (server onu yenə yoxlayır).{% endcomment %}
-        <input type="hidden" name="{{ field.name }}" value="{{ field.value|default_if_none:'' }}" data-ems-filter data-ems-filter-locked>
-        {% else %}
-        <div class="ems-field{% if field.wide %} ems-field--wide{% endif %}">
-            <label class="ems-field__label" for="f-{{ field.name }}">{{ field.label }}</label>
-            {% if field.kind == "select" %}
-                {% if filter_bootstrap %}<div class="bootstrap-single-select bootstrap-single-select--ems">{% endif %}
-                <select class="ems-select{% if filter_bootstrap %} bootstrap-single-select__native{% endif %}" id="f-{{ field.name }}" name="{{ field.name }}" data-ems-filter{% if field.default is not None and field.default != "" %} data-ems-default="{{ field.default }}"{% endif %}{% if filter_bootstrap %} data-bootstrap-select{% if field.searchable %} data-live-search="true" data-live-search-placeholder="{% trans 'Axtar…' context 'ui.filters' %}" data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'ui.filters' %}"{% endif %}{% endif %}>
-                    {% for option in field.options %}
-                        <option value="{{ option.value }}"{% if option.value|stringformat:'s' == field.value|stringformat:'s' %} selected{% endif %}>{{ option.label }}</option>
-                    {% endfor %}
-                </select>
-                {% if filter_bootstrap %}</div>{% endif %}
-            {% elif field.kind == "date" %}
-                {% comment %}Tarix aralığı sahəsi. `range_select` verilibsə, tarix
-                dəyişən kimi həmin select `range_custom` («Seçilmiş aralıq») dəyərinə
-                keçir — istifadəçi ayrıca «custom» seçməyə məcbur qalmır (filter_bar.js).{% endcomment %}
-                <input class="ems-input ems-input--date" type="date" id="f-{{ field.name }}" name="{{ field.name }}"
-                       value="{{ field.value|default_if_none:'' }}"
-                       {% if field.min %}min="{{ field.min }}"{% endif %} {% if field.max %}max="{{ field.max }}"{% endif %}
-                       data-ems-filter{% if field.range_select %} data-ems-range-select="{{ field.range_select }}" data-ems-range-custom="{{ field.range_custom|default:'custom' }}"{% endif %}>
-            {% elif field.kind == "datetime" %}
-                {% comment %}Tarix-SAAT sahəsi (2026-10-27): layihənin «gg.aa.iiii ss:dd» vidceti + təqvim
-                seçicisi (`ems_datetime*.js`); `range_select` «date» sahəsindəki kimi işləyir.{% endcomment %}
-                {% ems_filter_datetime_input field %}
-            {% else %}
-                <input class="ems-input" type="search" id="f-{{ field.name }}" name="{{ field.name }}"
-                       value="{{ field.value|default_if_none:'' }}"
-                       placeholder="{{ field.placeholder|default_if_none:'' }}"
-                       data-ems-filter{% if field.kind == "search" %} data-ems-filter-search{% endif %}>
-            {% endif %}
-        </div>
-        {% endif %}
-    {% endfor %}
+    {% for field in filter_fields %}{% if not field.secondary %}{% include "partials/ems_ui/_filter_field.html" %}{% endif %}{% endfor %}
 
     <div class="ems-filters__actions">
         {% comment %}
@@ -86,9 +53,22 @@ KONTEKST MÜQAVİLƏSİ
         görünürdü və səhifənin əsl əməl düyməsi ilə (məs. «Yeni fənn») rəqabət
         edirdi (subject-catalog-da 2 primary düymə).
         {% endcomment %}
+        {% if filter_more %}
+        <button type="button" class="ems-btn ems-filters__more-toggle" data-ems-filters-more
+                aria-expanded="{% if filter_more_open %}true{% else %}false{% endif %}" aria-controls="f-more-{{ filter_section }}">
+            <i class="fas fa-sliders" aria-hidden="true"></i>
+            {% trans "Daha çox süzgəc" context "ui.filters" %}{% if filter_more_count %} <span class="ems-filters__more-count">{{ filter_more_count }}</span>{% endif %}
+        </button>
+        {% endif %}
         {% if not filter_auto %}<button type="submit" class="ems-btn ems-filters__apply">{% trans "Tətbiq et" context "ui.filters" %}</button>{% endif %}
         <button type="button" class="ems-btn" data-ems-filters-reset>{% trans "Sıfırla" context "ui.filters" %}</button>
     </div>
+
+    {% if filter_more %}
+    <div class="ems-filters__more" id="f-more-{{ filter_section }}" data-ems-filters-more-panel{% if not filter_more_open %} hidden{% endif %}>
+        {% for field in filter_fields %}{% if field.secondary %}{% include "partials/ems_ui/_filter_field.html" %}{% endif %}{% endfor %}
+    </div>
+    {% endif %}
 
     {% if filter_count_label %}
         <div class="ems-filters__count" aria-live="polite">{{ filter_count_label }}</div>

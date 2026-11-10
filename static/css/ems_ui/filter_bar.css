@@ -207,3 +207,52 @@
 .ems-skelcard .skeleton-line {
     margin: 0;
 }
+
+/* ── «Daha çox süzgəc» (2026-11-11) ───────────────────────────────────────
+   İkinci dərəcəli sahələr ayrıca sətirdə, eyni formanın içində; düymə əməllər
+   sırasındadır. Blok `hidden` ilə gizlənir (JS: filter_bar.js `setMore`). */
+.ems-filters__more {
+    flex: 1 1 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    align-items: end;
+    gap: var(--ems-sp-5);
+    padding-top: 12px;
+    border-top: 1px dashed var(--ems-border);
+}
+
+.ems-filters__more[hidden] {
+    display: none;
+}
+
+.ems-filters__more .ems-field,
+.ems-filters__more .ems-field--wide {
+    min-width: 0;
+}
+
+.ems-filters__more-toggle[aria-expanded="true"] {
+    border-color: var(--ems-primary-300);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+}
+
+.ems-filters__more-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    margin-left: 4px;
+    border-radius: 999px;
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+    font-size: var(--ems-fs-2xs, 0.7rem);
+    font-weight: 700;
+}
+
+@media (max-width: 768px) {
+    .ems-filters__more {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

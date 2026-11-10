@@ -121,14 +121,30 @@
 }
 
 .llog-more {
-    margin: 12px 0 0;
-    padding: 12px;
-    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px 14px;
+    margin: 14px 0 0;
+    padding: 12px 14px;
+    background: var(--ems-neutral-0);
+    border: 1px dashed var(--ems-neutral-300, var(--ems-neutral-200));
+    border-radius: var(--ems-r-md, 12px);
+}
+
+.llog-more[hidden] {
+    display: none;
+}
+
+.llog-more__note {
     font-size: var(--ems-fs-xs, 0.78rem);
     color: var(--ems-neutral-600);
-    background: var(--ems-neutral-0);
-    border: 1px solid var(--ems-neutral-200);
-    border-radius: var(--ems-r-md, 12px);
+}
+
+.llog-more [aria-busy="true"] {
+    opacity: 0.6;
+    cursor: progress;
 }
 
 @media (max-width: 640px) {
@@ -286,4 +302,189 @@
     .llog-unrec__summary {
         flex-wrap: wrap;
     }
+}
+
+/* ══ REDİZAYN 2026-11-11 (sahib: «daha səliqəli, yaxşı görünüş») ═══════════
+   Yığcam KPI zolağı, əsas / ikinci dərəcəli süzgəclər, sakit yüklənmə kartı,
+   daha oxunaqlı gün kartları. Rəng və ölçülər yalnız `--ems-*` tokenlərindəndir. */
+
+/* Başlıq: əməllər bir sırada, dar ekranda tam en. */
+.profile-section--lessons-log .ems-header {
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.profile-section--lessons-log .ems-header__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* KPI: beş kart bir sətirdə (enli ekran), yığcam daxili boşluq. */
+.profile-section--lessons-log .ems-kpis {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.profile-section--lessons-log .ems-kpi {
+    padding: 11px 14px;
+    border-radius: var(--ems-r-lg, 14px);
+}
+
+.profile-section--lessons-log .ems-kpi__value {
+    font-size: 1.35rem;
+    line-height: 1.2;
+}
+
+.profile-section--lessons-log .ems-kpi__note {
+    margin-top: 2px;
+}
+
+/* Tənbəl KPI: dəyər gələnə qədər sakit nəbz (mətn `ems-kpi--skeleton` ilə şəffafdır). */
+.profile-section--lessons-log .ems-kpi--skeleton .ems-kpi__value,
+.profile-section--lessons-log .ems-kpi--skeleton .ems-kpi__note {
+    border-radius: var(--ems-r-sm, 6px);
+    background: var(--ems-neutral-100);
+    animation: llog-pulse 1.2s ease-in-out infinite;
+}
+
+.profile-section--lessons-log .ems-kpi--skeleton .ems-kpi__value {
+    width: 56%;
+}
+
+@keyframes llog-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.45;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .profile-section--lessons-log .ems-kpi--skeleton .ems-kpi__value,
+    .profile-section--lessons-log .ems-kpi--skeleton .ems-kpi__note {
+        animation: none;
+    }
+}
+
+@media (max-width: 1100px) {
+    .profile-section--lessons-log .ems-kpis {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-section--lessons-log .ems-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* Süzgəclər: əsas sıra bərabər sütunlu grid (axtarış iki sütun), əməllər sağda. */
+.profile-section--lessons-log .ems-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    align-items: end;
+    gap: 10px 12px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    border-radius: var(--ems-r-lg, 14px);
+}
+
+.profile-section--lessons-log .ems-filters .ems-field,
+.profile-section--lessons-log .ems-filters .ems-field--wide {
+    min-width: 0;
+}
+
+/* Əməllər öz sətrindədir (sahələrin altında, sağda) — dar sütuna sıxılıb alt-alta düşməsin. */
+.profile-section--lessons-log .ems-filters__actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.profile-section--lessons-log .ems-filters__actions .ems-btn {
+    min-height: 34px;
+    padding-block: 6px;
+}
+
+.profile-section--lessons-log .ems-filters__more {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px 12px;
+}
+
+.profile-section--lessons-log .ems-filters .ems-input--date {
+    min-width: 0;
+    width: 100%;
+}
+
+.profile-section--lessons-log .ems-applied {
+    margin-bottom: 12px;
+}
+
+@media (max-width: 768px) {
+    .profile-section--lessons-log .ems-filters {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .profile-section--lessons-log .ems-filters__actions {
+        justify-content: stretch;
+    }
+}
+
+/* «Qeydə alınmayıb» kartı: yüklənmə vəziyyəti + bir qədər yığcam başlıq. */
+.llog-unrec-slot:empty {
+    display: none;
+}
+
+.llog-unrec--pending {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 15px;
+    border-left: 4px solid var(--ems-neutral-300, var(--ems-neutral-200));
+}
+
+.llog-unrec--pending .llog-unrec__icon {
+    background: var(--ems-neutral-100);
+    color: var(--ems-neutral-600);
+    animation: llog-pulse 1.2s ease-in-out infinite;
+}
+
+.llog-unrec__summary,
+.llog-unrec.is-clear {
+    padding: 10px 15px;
+}
+
+.llog-unrec__count {
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: var(--ems-neutral-0);
+    font-size: 1.1rem;
+}
+
+/* Gün kartları: yapışqan olmayan sakit başlıq, sıx sətirlər. */
+.llog-day__head {
+    padding: 9px 14px;
+}
+
+.llog-day__date {
+    font-size: var(--ems-fs-base, 0.92rem);
+}
+
+.llog-table > thead th {
+    font-size: var(--ems-fs-2xs, 0.72rem);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-600);
+}
+
+.llog-table > tbody td,
+.llog-table > tbody th {
+    vertical-align: top;
 }

@@ -1,0 +1,38 @@
+{% comment %}Filtr panelinin TƏK sahəsi — `_filter_bar.html` əsas sırada və «Daha çox süzgəc» blokunda eyni
+markup-ı işlətsin deyə ayrıca fayldadır. Kontekst: `field`, `filter_bootstrap` (bax `_filter_bar.html`).{% endcomment %}
+{% load i18n ems_ui %}
+{% if field.kind == "hidden" %}
+{% comment %}Əhatədə TƏK seçim (sahib, 2026-10-14): dəyər server tərəfindən seçilib, sahə
+göstərilmir; gizli input tətbiq zamanı URL-ə eyni dəyəri yazır (server onu yenə yoxlayır).{% endcomment %}
+<input type="hidden" name="{{ field.name }}" value="{{ field.value|default_if_none:'' }}" data-ems-filter data-ems-filter-locked>
+{% else %}
+<div class="ems-field{% if field.wide %} ems-field--wide{% endif %}">
+    <label class="ems-field__label" for="f-{{ field.name }}">{{ field.label }}</label>
+    {% if field.kind == "select" %}
+        {% if filter_bootstrap %}<div class="bootstrap-single-select bootstrap-single-select--ems">{% endif %}
+        <select class="ems-select{% if filter_bootstrap %} bootstrap-single-select__native{% endif %}" id="f-{{ field.name }}" name="{{ field.name }}" data-ems-filter{% if field.default is not None and field.default != "" %} data-ems-default="{{ field.default }}"{% endif %}{% if filter_bootstrap %} data-bootstrap-select{% if field.searchable %} data-live-search="true" data-live-search-placeholder="{% trans 'Axtar…' context 'ui.filters' %}" data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'ui.filters' %}"{% endif %}{% endif %}>
+            {% for option in field.options %}
+                <option value="{{ option.value }}"{% if option.value|stringformat:'s' == field.value|stringformat:'s' %} selected{% endif %}>{{ option.label }}</option>
+            {% endfor %}
+        </select>
+        {% if filter_bootstrap %}</div>{% endif %}
+    {% elif field.kind == "date" %}
+        {% comment %}Tarix aralığı sahəsi. `range_select` verilibsə, tarix
+        dəyişən kimi həmin select `range_custom` («Seçilmiş aralıq») dəyərinə
+        keçir — istifadəçi ayrıca «custom» seçməyə məcbur qalmır (filter_bar.js).{% endcomment %}
+        <input class="ems-input ems-input--date" type="date" id="f-{{ field.name }}" name="{{ field.name }}"
+               value="{{ field.value|default_if_none:'' }}"
+               {% if field.min %}min="{{ field.min }}"{% endif %} {% if field.max %}max="{{ field.max }}"{% endif %}
+               data-ems-filter{% if field.range_select %} data-ems-range-select="{{ field.range_select }}" data-ems-range-custom="{{ field.range_custom|default:'custom' }}"{% endif %}>
+    {% elif field.kind == "datetime" %}
+        {% comment %}Tarix-SAAT sahəsi (2026-10-27): layihənin «gg.aa.iiii ss:dd» vidceti + təqvim
+        seçicisi (`ems_datetime*.js`); `range_select` «date» sahəsindəki kimi işləyir.{% endcomment %}
+        {% ems_filter_datetime_input field %}
+    {% else %}
+        <input class="ems-input" type="search" id="f-{{ field.name }}" name="{{ field.name }}"
+               value="{{ field.value|default_if_none:'' }}"
+               placeholder="{{ field.placeholder|default_if_none:'' }}"
+               data-ems-filter{% if field.kind == "search" %} data-ems-filter-search{% endif %}>
+    {% endif %}
+</div>
+{% endif %}

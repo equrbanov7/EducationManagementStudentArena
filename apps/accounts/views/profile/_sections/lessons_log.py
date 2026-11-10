@@ -40,6 +40,12 @@ PREFIX = "ll_"
 #: Seçici siyahılarının tavanı (fənn / qrup / müəllim) — menyunun daxili axtarışı var.
 OPTION_CAP = 300
 
+#: KPI kartlarının açarları (`data-ems-kpi-key`) — tənbəl uc kartı bu açarla tapır.
+KPI_KEYS = ("lessons", "hours", "attendance", "empty", "late")
+
+#: «Daha çox süzgəc» altına yığılan (ikinci dərəcəli) sahələr — əsas sırada axtarış, aralıq, müəllim, fənn, qrup qalır.
+SECONDARY_FIELDS = ("year", "season", "from", "to", "form", "faculty", "kafedra", "kind")
+
 
 def _weekday_labels() -> tuple:
     """Həftə günü adları — MODUL SƏVİYYƏSİNDƏ hesablanmır.
@@ -86,87 +92,29 @@ def build_lessons_log_section(request, section, *, active_organization, allowed_
         )
         return section
 
-    from apps.registrar.public import schedule as schedule_service
-
-    supervisor = service.is_supervisor(request.user, active_organization)
+    # Sorğunun TƏK həlli (əhatə → dövr → fakültə/kafedra → süzgəclər) — tənbəl uclar və müəllim cədvəli ilə eyni.
+    ctx = service.resolve_request(request, active_organization)
+    supervisor = ctx["supervisor"]
     section["has_access"] = True
     section["is_supervisor"] = supervisor
+    selection, window, current = ctx["selection"], ctx["window"], ctx["current"]
+    values, units, lessons = ctx["values"], ctx["units"], ctx["lessons"]
+    only_flagged = ctx["only_flagged"]
 
-    legacy_period = _param(request, "period")
-    period_view = schedule_service.resolve_display_period(active_organization, requested=legacy_period)
-    current = period_view["period"]
-
-    selection = service.resolve_selection(
-        active_organization,
-        current=current,
-        year=_param(request, "year"),
-        season=_param(request, "season"),
-        legacy_period=legacy_period,
-        range_key=_param(request, "range", service.RANGE_SEMESTER),
-        start_raw=_param(request, "from"),
-        end_raw=_param(request, "to"),
-    )
-    window = selection["window"]
-
-    lessons_all = service.scoped_lessons(request.user, active_organization, supervisor=supervisor)
-    lessons = lessons_all.filter(date__gte=window["start"], date__lte=window["end"])
-    if selection["apply_period_filter"]:
-        lessons = lessons.filter(offering__period__in=selection["periods"])
-
-    values = {
-        "q": _param(request, "q"),
-        "offering": _param(request, "offering"),
-        "kind": _param(request, "kind"),
-        "group": _param(request, "group"),
-        "teacher": _param(request, "teacher") if supervisor else "",
-        "form": _param(request, "form"),
-        "range": window["key"],
-        "year": selection["year"],
-        "season": selection["season"],
-    }
-    only_flagged = _param(request, "flagged") == "1"
-    # Seçici siyahıları SEÇİLMİŞ dövrlərə görə daralır (yoxsa bütün əhatə).
-    option_source = lessons_all
-    if selection["periods"] is not None:
-        option_source = option_source.filter(offering__period__in=selection["periods"])
-    # Fakültə / Kafedra (sahib, 2026-09-25) — tərif, əhatə və kaskad `registrar.lessons_log_units`-dədir.
-    units = service.unit_filter_state(
-        request.user,
-        active_organization,
-        option_source,
-        supervisor=supervisor,
-        faculty_raw=_param(request, "faculty"),
-        kafedra_raw=_param(request, "kafedra"),
-    )
-    values["faculty"], values["kafedra"] = units["faculty_value"], units["kafedra_value"]
-    unit_filters = {"faculty_unit": units["faculty"], "kafedra_unit": units["kafedra"]}
-    lessons = service.apply_filters(
-        lessons,
-        q=values["q"],
-        offering=values["offering"],
-        kind=values["kind"],
-        group=values["group"],
-        teacher=values["teacher"],
-        form=values["form"],
-        supervisor=supervisor,
-        **unit_filters,
-    )
-    if units["invalid"]:
-        # Seçilmiş fakültə/kafedra tapılmadı — «hamısı» göstərilmir. `.none()` YOX: KPI keş açarı
-        # sorğunun SQL mətnindən qurulur (`totals_cache_key`), boş queryset isə SQL vermir.
-        lessons = lessons.filter(pk__isnull=True)
-
-    totals = service.range_totals(lessons)
-    rows = service.build_rows(lessons)
-    # «Cədvəldə var, qeydə alınmayıb» (UNEC P1-1) — eyni əhatə, dövr və filtrlərlə; sabit 2 sorğu + keş.
-    section["unrecorded"] = service.unrecorded_slots(
-        request.user,
-        active_organization,
-        supervisor=supervisor,
-        window=window,
-        periods=selection["periods"] if selection["apply_period_filter"] else None,
-        filters=dict(values, invalid_unit=units["invalid"], **unit_filters),
-    )
+    # PERF 2026-11-11 (sahib: «girəndə bir az yavaşlama olur»): ilk cavab ağır hesabı GÖZLƏMİR.
+    # * KPI: dərs sayı + saat yüngül aqreqatdır; iştirak / boş / gec (xana cədvəli üzərində aqreqat) keşdədirsə
+    #   dərhal, yoxdursa tənbəl ucdan (`lessons_log_insights`) dolur.
+    # * «Cədvəldə var, qeydə alınmayıb»: keşdədirsə dərhal, yoxdursa eyni tənbəl ucdan.
+    # * Gün siyahısı: ilk səhifə (`PAGE_SIZE` dərs), qalanı «Daha çox göstər» ilə; gün başlığı günün TAM cəmidir.
+    # * Seçici siyahıları (fakültə / kafedra / fənn / qrup / müəllim) 120 s keşlidir (`cached_by_query`).
+    full_totals = service.cached_range_totals(lessons)
+    totals = full_totals or service.quick_totals(lessons)
+    page = service.page_rows(lessons)
+    rows = page["rows"]
+    unrecorded = service.unrecorded_for(request, active_organization, ctx, cached_only=True)
+    section["unrecorded"] = unrecorded
+    section["insights_pending"] = full_totals is None or unrecorded is None
+    section["unrecorded_pending"] = unrecorded is None
     if only_flagged:
         rows = [row for row in rows if row["note"] != service.NOTE_ON_TIME]
 
@@ -186,31 +134,44 @@ def build_lessons_log_section(request, section, *, active_organization, allowed_
             "period": current,
             "totals": totals,
             "rows": rows,
-            "days": _group_by_day(rows),
-            "row_cap": service.ROW_CAP,
-            "has_more": totals["lessons"] > service.ROW_CAP,
+            "days": _group_by_day(rows, page["day_totals"]),
+            "page_size": service.PAGE_SIZE,
+            "next_offset": page["next_offset"],
+            "has_more": page["next_offset"] is not None,
             "only_flagged": only_flagged,
             "prefix": PREFIX,
         }
     )
-    section["kpi_tiles"] = _kpi_tiles(totals)
+    section["kpi_tiles"] = _kpi_tiles(totals, pending=full_totals is None)
     section["filters"] = _filter_fields(
         # Kaskad: fənn / qrup / müəllim siyahıları seçilmiş fakültə və kafedraya görə daralır.
-        service.apply_filters(option_source, **unit_filters),
+        service.apply_filters(ctx["option_source"], **ctx["unit_filters"]),
         selection=selection,
         current=current,
         supervisor=supervisor,
         values=values,
         units=units,
     )
-    # İxrac bölmə ilə EYNİ effektiv filtrləri daşıyır (kaskadda atılmış kafedra URL-də qalmasın).
+    # İxrac və AJAX ucları bölmə ilə EYNİ effektiv filtrləri daşıyır (kaskadda atılmış kafedra URL-də qalmasın).
     export_params = request.GET.copy()
     for key in ("faculty", "kafedra"):
         if values[key]:
             export_params[PREFIX + key] = values[key]
         else:
             export_params.pop(PREFIX + key, None)
-    section["export_url"] = "%s?%s" % (reverse("registrar:lessons_log_csv"), export_params.urlencode())
+    for key in ("section", PREFIX + "offset", "row"):
+        export_params.pop(key, None)
+    query = export_params.urlencode()
+    section["export_url"] = "%s?%s" % (reverse("registrar:lessons_log_csv"), query)
+    section["insights_url"] = "%s?%s" % (reverse("accounts:lessons_log_insights"), query)
+    section["rows_url"] = "%s?%s" % (reverse("accounts:lessons_log_rows"), query)
+    # «Cədvəl formasında bax» (sahib 2026-11-11): nəzarətçidə YALNIZ müəllim seçiləndə; müəllim öz cədvəlini görür.
+    section["teacher_table"] = {
+        "show": bool(values["teacher"]) if supervisor else True,
+        "table_url": "%s?%s" % (reverse("registrar:lessons_log_teacher_table"), query),
+        "lessons_url": "%s?%s" % (reverse("registrar:lessons_log_teacher_lessons"), query),
+        "xlsx_url": "%s?%s" % (reverse("registrar:lessons_log_teacher_xlsx"), query),
+    }
     section["journal_list_url"] = reverse("registrar:journal_list")
     section["header_subtitle"] = (
         pgettext(
@@ -225,7 +186,7 @@ def build_lessons_log_section(request, section, *, active_organization, allowed_
             "istənilən aralığa baxa bilərsiniz.",
         )
     )
-    section["header_note"] = "%s — %s" % (window["start"].isoformat(), window["end"].isoformat())
+    section["header_note"] = "%s — %s" % (window["start"].strftime("%d.%m.%Y"), window["end"].strftime("%d.%m.%Y"))
 
     if not rows:
         _empty_state(
@@ -236,7 +197,9 @@ def build_lessons_log_section(request, section, *, active_organization, allowed_
     return section
 
 
-def _group_by_day(rows) -> list:
+def _group_by_day(rows, day_totals=None) -> list:
+    """Sətirləri günə görə qruplaşdırır. ``day_totals`` (`lessons_log_pages.day_totals`) verilibsə gün başlığının
+    «N dərs · M saat»ı günün TAM cəmidir — səhifə günü yarıda kəsə bilər."""
     weekdays = _weekday_labels()
     days: list = []
     index: dict = {}
@@ -256,11 +219,17 @@ def _group_by_day(rows) -> list:
         bucket["rows"].append(row)
         bucket["lessons"] += 1
         bucket["hours"] += row["hours"]
+    for bucket in days:
+        full = (day_totals or {}).get(bucket["date"])
+        if full:
+            bucket["lessons"], bucket["hours"] = full["lessons"], full["hours"]
     return days
 
 
-def _kpi_tiles(totals) -> list:
-    return [
+def _kpi_tiles(totals, *, pending: bool = False) -> list:
+    """KPI kartları. ``pending`` — ağır aqreqat hələ hesablanmayıb: iştirak / boş / gec kartları skelet kimi
+    gəlir və ``lessons_log.js`` onları tənbəl ucun cavabı ilə (``key`` üzrə) doldurur."""
+    tiles = [
         _kpi(
             pgettext(_CTX, "Keçilmiş dərs"),
             totals["lessons"],
@@ -273,26 +242,40 @@ def _kpi_tiles(totals) -> list:
             note=pgettext(_CTX, "akademik saat cəmi"),
             tone="primary",
         ),
-        _kpi(
-            pgettext(_CTX, "Orta iştirak"),
-            "%s%%" % totals["attendance_rate"],
-            note=pgettext(_CTX, "dərsə gələn tələbə payı"),
-        ),
-        _kpi(
-            pgettext(_CTX, "Jurnalı boş dərs"),
-            totals["empty"],
-            note=(
-                pgettext(_CTX, "mövzu və qiymət yazılmayıb") if totals["empty"] else pgettext(_CTX, "hamısı doldurulub")
-            ),
-            tone="danger" if totals["empty"] else "",
-        ),
-        _kpi(
-            pgettext(_CTX, "Gec yazılan qeyd"),
-            totals["late"],
-            note=(pgettext(_CTX, "dərsdən 48 saat sonra") if totals["late"] else pgettext(_CTX, "gecikmə yoxdur")),
-            tone="warning" if totals["late"] else "",
-        ),
     ]
+    if pending:
+        tiles += [
+            _kpi(pgettext(_CTX, "Orta iştirak"), "—", note=pgettext(_CTX, "hesablanır…"), tone="skeleton"),
+            _kpi(pgettext(_CTX, "Jurnalı boş dərs"), "—", note=pgettext(_CTX, "hesablanır…"), tone="skeleton"),
+            _kpi(pgettext(_CTX, "Gec yazılan qeyd"), "—", note=pgettext(_CTX, "hesablanır…"), tone="skeleton"),
+        ]
+    else:
+        tiles += [
+            _kpi(
+                pgettext(_CTX, "Orta iştirak"),
+                "%s%%" % totals["attendance_rate"],
+                note=pgettext(_CTX, "dərsə gələn tələbə payı"),
+            ),
+            _kpi(
+                pgettext(_CTX, "Jurnalı boş dərs"),
+                totals["empty"],
+                note=(
+                    pgettext(_CTX, "mövzu və qiymət yazılmayıb")
+                    if totals["empty"]
+                    else pgettext(_CTX, "hamısı doldurulub")
+                ),
+                tone="danger" if totals["empty"] else "",
+            ),
+            _kpi(
+                pgettext(_CTX, "Gec yazılan qeyd"),
+                totals["late"],
+                note=(pgettext(_CTX, "dərsdən 48 saat sonra") if totals["late"] else pgettext(_CTX, "gecikmə yoxdur")),
+                tone="warning" if totals["late"] else "",
+            ),
+        ]
+    for tile, key in zip(tiles, KPI_KEYS):
+        tile["key"] = key
+    return tiles
 
 
 def _unit_field(name, label, all_label, value, options, *, locked=False) -> dict:
@@ -326,11 +309,7 @@ def _filter_fields(option_source, *, selection, current, supervisor, values, uni
 
     academic_period = django_apps.get_model("organizations", "AcademicPeriod")
 
-    options = list(
-        option_source.values_list(
-            "offering_id", "offering__subject__code", "offering__subject__name", "offering__group__name"
-        ).distinct()[:OPTION_CAP]
-    )
+    options = service.offering_option_rows(option_source, OPTION_CAP)
     offering_options = [{"value": "", "label": pgettext(_CTX, "Bütün fənlər")}]
     offering_labels: dict = {}
     group_names: list = []
@@ -460,16 +439,8 @@ def _filter_fields(option_source, *, selection, current, supervisor, values, uni
     teacher_labels: dict = {}
     if supervisor:
         teachers = []
-        for teacher_id, first, last, username in (
-            option_source.exclude(offering__instructor__isnull=True)
-            .values_list(
-                "offering__instructor_id",
-                "offering__instructor__first_name",
-                "offering__instructor__last_name",
-                "offering__instructor__username",
-            )
-            .distinct()[:OPTION_CAP]
-        ):
+        teacher_rows = service.teacher_option_rows(option_source, OPTION_CAP)
+        for teacher_id, first, last, username in teacher_rows:
             key = str(teacher_id)
             if key in teacher_labels:
                 continue
@@ -548,7 +519,23 @@ def _filter_fields(option_source, *, selection, current, supervisor, values, uni
         if values[key] and not (units or {}).get(f"{key}_locked"):
             applied.append({"name": PREFIX + key, "label": label, "value_label": value_label or values[key]})
 
-    return {"fields": fields, "applied": applied, "section": "lessons-log", "prefix": PREFIX}
+    # REDİZAYN 2026-11-11 (sahib: «daha səliqəli»): əsas sırada axtarış, müəllim, fənn, qrup, tarix aralığı;
+    # qalan sahələr «Daha çox süzgəc» altındadır (ikinci dərəcəli süzgəc tətbiq olunubsa blok açıq gəlir).
+    secondary = {PREFIX + name for name in SECONDARY_FIELDS}
+    primary_order = {PREFIX + name: index for index, name in enumerate(("q", "teacher", "offering", "group", "range"))}
+    for field in fields:
+        field["secondary"] = field["name"] in secondary and field["kind"] != "hidden"
+    fields.sort(key=lambda field: (field["secondary"], primary_order.get(field["name"], len(primary_order))))
+    more_count = sum(1 for chip in applied if chip["name"] in secondary)
+    return {
+        "fields": fields,
+        "applied": applied,
+        "section": "lessons-log",
+        "prefix": PREFIX,
+        "has_more_fields": any(field["secondary"] for field in fields),
+        "more_count": more_count,
+        "more_open": bool(more_count) or values["range"] == service.RANGE_CUSTOM,
+    }
 
 
 __all__ = ["OPTION_CAP", "PREFIX", "build_lessons_log_section"]

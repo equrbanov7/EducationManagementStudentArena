@@ -103,7 +103,18 @@ def _in_scopes(path, unit_id, scopes) -> bool:
 
 
 def _unit_candidates(option_source, organization) -> tuple[dict, dict]:
-    """``({fakültə_id: (ad, yol)}, {kafedra_id: (ad, yol)})`` — dörd sabit sorğu, sətir sayından asılı deyil."""
+    """:func:`_compute_unit_candidates` — 120 s keşli (bölmənin hər açılışında 8 sorğu təkrarlanmasın)."""
+    from apps.registrar.lessons_log_totals import cached_by_query
+
+    return cached_by_query(
+        f"unit-candidates:{organization.pk}",
+        option_source,
+        lambda: _compute_unit_candidates(option_source, organization),
+    )
+
+
+def _compute_unit_candidates(option_source, organization) -> tuple[dict, dict]:
+    """``({fakültə_id: (ad, yol)}, {kafedra_id: (ad, yol)})`` — sabit sayda sorğu, sətir sayından asılı deyil."""
     paths = [
         path
         for path in option_source.order_by()
@@ -130,6 +141,49 @@ def _unit_candidates(option_source, organization) -> tuple[dict, dict]:
     )
     chairs = offering_chairs.chair_candidates(offerings, organization.pk)
     return faculties, chairs
+
+
+def _offerings_of(option_source):
+    """Görünən dərslərin AÇILIŞLARI (yarı-birləşmə): dərs cədvəlində yalnız ``offering_id`` oxunur.
+
+    PERF 2026-11-11: əvvəl seçici siyahıları ``dərs ⋈ açılış ⋈ fənn ⋈ qrup`` üzərində DISTINCT idi (prod
+    surətində 12 000 dərs → 80–150 ms); etiketlər açılış başına birdir — dərs sətirlərini etiketlərlə
+    çoxaltmağa ehtiyac yoxdur."""
+    return django_apps.get_model("registrar", "CourseOffering").objects.filter(
+        pk__in=option_source.order_by().values("offering_id")
+    )
+
+
+def offering_option_rows(option_source, cap: int = OPTION_CAP) -> list:
+    """``[(açılış_id, fənn kodu, fənn adı, qrup adı)]`` — «Fənn» / «Qrup» seçiciləri üçün (120 s keşli)."""
+    from apps.registrar.lessons_log_totals import cached_by_query
+
+    return cached_by_query(
+        "offering-options",
+        option_source,
+        lambda: list(
+            _offerings_of(option_source)
+            .order_by("subject__name", "group__name", "id")
+            .values_list("id", "subject__code", "subject__name", "group__name")[:cap]
+        ),
+    )
+
+
+def teacher_option_rows(option_source, cap: int = OPTION_CAP) -> list:
+    """``[(müəllim_id, ad, soyad, istifadəçi adı)]`` — «Müəllim» seçicisi üçün (120 s keşli)."""
+    from apps.registrar.lessons_log_totals import cached_by_query
+
+    return cached_by_query(
+        "teacher-options",
+        option_source,
+        lambda: list(
+            _offerings_of(option_source)
+            .exclude(instructor__isnull=True)
+            .order_by()
+            .values_list("instructor_id", "instructor__first_name", "instructor__last_name", "instructor__username")
+            .distinct()[:cap]
+        ),
+    )
 
 
 def _options(units, *, scopes=None, under=None) -> list:
@@ -256,6 +310,8 @@ __all__ = [
     "kafedra_lesson_q",
     "kafedra_offering_q",
     "kafedra_slot_q",
+    "offering_option_rows",
     "resolve_unit",
+    "teacher_option_rows",
     "unit_options",
 ]

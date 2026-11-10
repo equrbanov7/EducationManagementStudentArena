@@ -1,0 +1,137 @@
+/* =========================================================================
+   «Keçilmiş dərslər» → «Cədvəl formasında bax» (sahib 2026-11-11) — müəllim
+   cədvəli və «Ətraflı bax» dialoqlarının düzümü.
+
+   Ayrıca fayl: `lessons_log.css` modul-ölçü qapısının 600 sətir həddinə çatırdı.
+   Dialoq qabığı (`.ems-overlay`, `.ems-dialog`) və cədvəl (`.ems-table`)
+   komponent qatındadır; burada yalnız bu iki dialoqun öz ölçü / cəm kartları var.
+   Rəng birbaşa YAZILMIR — hamısı `--ems-*` tokenlərindən.
+   ========================================================================= */
+
+.llog-tt {
+    max-width: 980px;
+}
+
+.llog-tt--lessons {
+    max-width: 1040px;
+}
+
+.llog-tt__state {
+    margin: 0;
+    padding: 28px 12px;
+    text-align: center;
+    color: var(--ems-neutral-600);
+}
+
+.llog-tt__state[hidden],
+.llog-tt__content[hidden] {
+    display: none;
+}
+
+.llog-tt__table {
+    min-width: 640px;
+    margin: 0;
+}
+
+.llog-tt__table--lessons {
+    min-width: 760px;
+}
+
+.llog-tt__group {
+    font-weight: 700;
+    color: var(--ems-neutral-900);
+}
+
+.llog-tt__joint {
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.llog-tt__hours {
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.llog-tt__kind,
+.llog-tt__room,
+.llog-tt__date {
+    white-space: nowrap;
+}
+
+.llog-tt__action {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.llog-tt__total > th,
+.llog-tt__total > td {
+    border-top: 2px solid var(--ems-neutral-300, var(--ems-neutral-200));
+    background: var(--ems-neutral-50);
+    font-weight: 800;
+    color: var(--ems-neutral-900);
+}
+
+.llog-tt__totals {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.llog-tt__card {
+    padding: 12px 14px;
+    border: 1px solid var(--ems-neutral-200);
+    border-radius: var(--ems-r-lg, 14px);
+    background: var(--ems-neutral-0);
+}
+
+.llog-tt__card-title {
+    margin: 0 0 8px;
+    font-size: var(--ems-fs-xs, 0.78rem);
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--ems-neutral-600);
+}
+
+.llog-tt__list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.llog-tt__item {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.llog-tt__item-label {
+    color: var(--ems-neutral-700, var(--ems-neutral-600));
+}
+
+.llog-tt__item-value {
+    white-space: nowrap;
+    color: var(--ems-neutral-900);
+}
+
+.llog-tt__hint {
+    margin: 12px 0 0;
+    font-size: var(--ems-fs-sm, 0.8rem);
+    color: var(--ems-text-muted);
+}
+
+.llog-tt__hint i {
+    margin-right: 6px;
+    color: var(--ems-neutral-400);
+}
+
+@media (max-width: 640px) {
+    .llog-tt__totals {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

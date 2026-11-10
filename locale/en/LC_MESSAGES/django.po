@@ -118560,3 +118560,176 @@ msgid ""
 msgstr ""
 "Groups you teach in this subject and semester are added automatically — "
 "students only see folders assigned to them."
+
+msgctxt "ui.filters"
+msgid "Daha çox süzgəc"
+msgstr "More filters"
+
+msgctxt "accounts.lessons_log"
+msgid "Akademik saat"
+msgstr "Academic hours"
+
+msgctxt "accounts.lessons_log"
+msgid "Bu müəllimin dərsləri əhatənizdə deyil."
+msgstr "This teacher's lessons are outside your scope."
+
+msgctxt "accounts.lessons_log"
+msgid "Bölmə üzrə (tədris dili)"
+msgstr "By sector (language of instruction)"
+
+msgctxt "accounts.lessons_log"
+msgid "Cədvəl formasında bax"
+msgstr "View as a table"
+
+msgctxt "accounts.lessons_log"
+msgid "Cədvəl jurnalla tutuşdurulur…"
+msgstr "Comparing the timetable with the journal…"
+
+msgctxt "accounts.lessons_log"
+msgid "Cədvəl yüklənmədi. Yenidən cəhd edin."
+msgstr "The table could not be loaded. Please try again."
+
+msgctxt "accounts.lessons_log"
+msgid "Cəmi"
+msgstr "Total"
+
+msgctxt "accounts.lessons_log"
+msgid ""
+"Cəmi %(total)s dərs — siyahı yeni tarixdən köhnəyə doğru hissə-hissə açılır."
+msgstr "%(total)s lessons in total — the list opens in parts, newest first."
+
+msgctxt "accounts.lessons_log"
+msgid "Daha çox göstər"
+msgstr "Show more"
+
+msgctxt "accounts.lessons_log"
+msgid "Dərs növü"
+msgstr "Lesson type"
+
+msgctxt "accounts.lessons_log"
+msgid "Dərs növü üzrə"
+msgstr "By lesson type"
+
+msgctxt "accounts.lessons_log"
+msgid "Dərslər"
+msgstr "Lessons"
+
+msgctxt "accounts.lessons_log"
+msgid "Excel kimi yüklə"
+msgstr "Download as Excel"
+
+msgctxt "accounts.lessons_log"
+msgid "Keçilmiş saat"
+msgstr "Hours held"
+
+msgctxt "accounts.lessons_log"
+msgid "Müəllimin keçdiyi dərslər"
+msgstr "Lessons held by the teacher"
+
+msgctxt "accounts.lessons_log"
+msgid "Məlumat yüklənmədi. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "The data could not be loaded. Refresh the page and try again."
+
+msgctxt "accounts.lessons_log"
+msgid "Otaq"
+msgstr "Room"
+
+msgctxt "accounts.lessons_log"
+msgid ""
+"Patok (bir neçə qrupa birgə keçilən) dərs bir dəfə sayılır: eyni fənn, eyni "
+"dərs növü, eyni tarix və saat — bir dərs."
+msgstr ""
+"A stream lesson (held jointly for several groups) is counted once: same "
+"subject, same lesson type, same date and time — one lesson."
+
+msgctxt "accounts.lessons_log"
+msgid "Seçilmiş dövrdə bu müəllimin keçilmiş dərsi yoxdur."
+msgstr "This teacher has no lessons held in the selected period."
+
+msgctxt "accounts.lessons_log"
+msgid "Yüklənir…"
+msgstr "Loading…"
+
+msgctxt "accounts.lessons_log"
+msgid "hesablanır…"
+msgstr "calculating…"
+
+msgctxt "accounts.lessons_log"
+msgid "patok"
+msgstr "stream"
+
+msgctxt "accounts.lessons_log"
+msgid "Ətraflı bax"
+msgstr "View details"
+
+msgctxt "registrar.lessons_log"
+msgid "%(hours)s saat (%(lessons)s dərs)"
+msgstr "%(hours)s hours (%(lessons)s lessons)"
+
+msgctxt "registrar.lessons_log"
+msgid "Azərbaycan bölməsi"
+msgstr "Azerbaijani sector"
+
+msgctxt "registrar.lessons_log"
+msgid "İngilis bölməsi"
+msgstr "English sector"
+
+msgctxt "registrar.lessons_log"
+msgid "Rus bölməsi"
+msgstr "Russian sector"
+
+msgctxt "registrar.lessons_log"
+msgid "Qarışıq bölmə (birgə dərs)"
+msgstr "Mixed sectors (joint lesson)"
+
+msgctxt "registrar.lessons_log"
+msgid "Bölməsi göstərilməyib"
+msgstr "Sector not specified"
+
+msgctxt "registrar.lessons_log"
+msgid "Bölmə"
+msgstr "Sector"
+
+msgctxt "registrar.lessons_log"
+msgid "Bölmə üzrə"
+msgstr "By sector"
+
+msgctxt "registrar.lessons_log"
+msgid "Cəmi"
+msgstr "Total"
+
+msgctxt "registrar.lessons_log"
+msgid "Dərs növü"
+msgstr "Lesson type"
+
+msgctxt "registrar.lessons_log"
+msgid "Dərs növü üzrə"
+msgstr "By lesson type"
+
+msgctxt "registrar.lessons_log"
+msgid "Dərs sayı"
+msgstr "Number of lessons"
+
+msgctxt "registrar.lessons_log"
+msgid "Dərslər"
+msgstr "Lessons"
+
+msgctxt "registrar.lessons_log"
+msgid "Həftənin günü"
+msgstr "Day of the week"
+
+msgctxt "registrar.lessons_log"
+msgid "Keçilmiş saat"
+msgstr "Hours held"
+
+msgctxt "registrar.lessons_log"
+msgid "Qeyd olunan"
+msgstr "Marked"
+
+msgctxt "registrar.lessons_log"
+msgid "Yekun"
+msgstr "Summary"
+
+msgctxt "registrar.lessons_log"
+msgid "İcmal"
+msgstr "Summary"

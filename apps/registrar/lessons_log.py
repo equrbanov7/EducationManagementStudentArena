@@ -11,9 +11,11 @@ məlumat mövcud ``Lesson`` / ``LessonMark`` sətirlərindən hesablanır.
   və ``teacher`` filtrini aça bilir. Əhatəsiz aktor BOŞ nəticə alır — bütün
   universitet AÇILMIR.
 * **Aqreqasiya aşağıdan yuxarı (§8/13):** heç bir yekun rəqəm SAXLANILMIR.
-* **Sorğu büdcəsi:** dövr üzrə 4 sorğu (aqreqat sətirlər, davamiyyət aqreqatı,
-  səhifə sətirləri, səhifənin xana aqreqatı) + filtr seçiciləri. Sətir-sətir
-  sorğu YOXDUR (test ``CaptureQueriesContext`` ilə kilidləyir).
+* **Sorğu büdcəsi (2026-11-11):** bölmənin İLK cavabı — yüngül cəm (dərs sayı + saat), səhifə
+  sətirləri, səhifənin xana aqreqatı, gün cəmləri + filtr seçiciləri (120 s keşli). Ağır hesab
+  (iştirak / boş / gec aqreqatı, «qeydə alınmayıb») keşdə yoxdursa TƏNBƏL ucdadır
+  (``accounts:lessons_log_insights``); gün siyahısı səhifələnir (``lessons_log_pages``).
+  Sətir-sətir sorğu YOXDUR (testlər ``CaptureQueriesContext`` ilə kilidləyir).
 * **«Gec yazılıb» tərifi:** dərsin İLK xanası dərs tarixindən
   :data:`LATE_AFTER_HOURS` saat sonra yazılıbsa. Model dəyişikliyi tələb
   etmir — ``LessonMark.created_at`` vs ``Lesson.date``. TƏK qayda
@@ -38,6 +40,7 @@ from django.utils.translation import pgettext
 
 from apps.registrar import lessons_log_units
 from apps.registrar.lessons_late_rule import is_late
+from apps.registrar.lessons_log_pages import PAGE_SIZE, page_rows, parse_offset  # noqa: F401 — «Daha çox göstər»
 from apps.registrar.lessons_log_periods import (  # noqa: F401 — geri-uyğun re-export
     ALL,
     RANGE_CUSTOM,
@@ -59,17 +62,22 @@ from apps.registrar.lessons_log_periods import (  # noqa: F401 — geri-uyğun r
     window_for_periods,
     year_options,
 )
+from apps.registrar.lessons_log_request import resolve_request, unrecorded_for  # noqa: F401 — sorğunun tək həlli
 from apps.registrar.lessons_log_totals import (  # noqa: F401 — geri-uyğun re-export
     LATE_AFTER_HOURS,
     TOTALS_CACHE_TTL,
+    cached_by_query,
+    cached_range_totals,
     is_imported_lesson,
     new_system_mark_q,
+    quick_totals,
     range_totals,
     totals_cache_key,
 )
 from apps.registrar.lessons_log_units import filter_state as unit_filter_state  # noqa: F401 — Fakültə/Kafedra
+from apps.registrar.lessons_log_units import offering_option_rows, teacher_option_rows  # noqa: F401 — seçicilər
 from apps.registrar.lessons_log_unrecorded import unrecorded_slots  # noqa: F401 — «Cədvəldə var, qeydə alınmayıb»
-from apps.registrar.models import AttendanceStatus, Lesson, LessonMark
+from apps.registrar.models import AttendanceStatus, Lesson, LessonKind, LessonMark
 from apps.registrar.models.catalog_meta import EducationForm
 from core.search_text import tolerant_q
 
@@ -347,12 +355,14 @@ def _room_label(room) -> str:
     return name or building
 
 
-def build_rows(lessons_qs, *, limit=ROW_CAP) -> list:
-    """Səhifə sətirləri — İKİ sorğu (dərslər + xana aqreqatı)."""
+def build_rows(lessons_qs, *, limit=ROW_CAP, offset=0) -> list:
+    """Səhifə sətirləri — İKİ sorğu (dərslər + xana aqreqatı). ``offset`` — «Daha çox göstər» səhifələməsi."""
     lessons = list(
         lessons_qs.select_related(
             "offering",
             "offering__subject",
+            # «Praktiki məşğələ» etiketi fənnin kafedrasına baxır — keşdə olmasa sətir başına sorğu (bax aşağı).
+            "offering__subject__chair_unit",
             "offering__group",
             "offering__period",
             # ⚠️ Aşağıdakı `teacher` buna geri çəkilir və bu NORMAL yoldur
@@ -361,8 +371,13 @@ def build_rows(lessons_qs, *, limit=ROW_CAP) -> list:
             "offering__instructor",
             "instructor",
             "room",
-        ).order_by("-date", "-start_time", "-created_at")[:limit]
+        ).order_by("-date", "-start_time", "-created_at", "-id")[offset : offset + limit]
     )
+    # PERF 2026-11-11: «Praktiki məşğələ» etiketi (`get_kind_display`) bayraqlı açılışda kafedranı yoxlayır —
+    # əvvəl hər seminar sətri üçün 5 sorğu gedirdi (prod surətində 90 sətirdə 65). İndi səhifə üçün toplu.
+    from apps.registrar import design_practical_scope
+
+    design_practical_scope.prime(lesson.offering for lesson in lessons if lesson.kind == LessonKind.SEMINAR)
     stats = marks_by_lesson([lesson.id for lesson in lessons])
     # Mövzusuz, sillabus sətrinə bağlı (köçürülmüş) dərsin mövzusu sətirdən — toplu, ≤ 3 sorğu (2026-10-25).
     from apps.registrar.journal_topics import attach_syllabus_topics
@@ -477,6 +492,7 @@ __all__ = [
     "NOTE_EMPTY",
     "NOTE_LATE",
     "NOTE_ON_TIME",
+    "PAGE_SIZE",
     "RANGE_CUSTOM",
     "RANGE_LABELS",
     "RANGE_SEMESTER",
@@ -490,6 +506,8 @@ __all__ = [
     "UNIT_VIEW_PERMISSION",
     "apply_filters",
     "build_rows",
+    "cached_by_query",
+    "cached_range_totals",
     "coverage_for_offering",
     "csv_rows",
     "education_form_options",
@@ -497,16 +515,23 @@ __all__ = [
     "is_supervisor",
     "marks_by_lesson",
     "note_state",
+    "offering_option_rows",
     "offering_totals",
+    "page_rows",
+    "parse_offset",
     "period_catalog",
+    "quick_totals",
     "range_totals",
+    "resolve_request",
     "resolve_range",
     "resolve_selection",
     "scoped_lessons",
     "season_of",
     "select_periods",
     "supervision_q",
+    "teacher_option_rows",
     "unit_filter_state",
+    "unrecorded_for",
     "unrecorded_slots",
     "window_for_periods",
     "year_options",
