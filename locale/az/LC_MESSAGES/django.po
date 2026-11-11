@@ -118445,3 +118445,14 @@ msgstr ""
 "%(hours)s. Əvvəlcə «Tapşırıq sətirləri»ndə hər sətri «Redaktə» ilə düzəldin "
 "(məs. 45 saatlıq fənn: «Mühazirə» 30, «Seminar» 15), sonra axınları "
 "birləşdirin."
+
+msgctxt "exams.attempt_reset"
+msgid ""
+"gözlənilməz texniki xəta — cəhd dəyişmədi, xəta qeydə alındı; RİM-ə bildirin"
+msgstr ""
+"gözlənilməz texniki xəta — cəhd dəyişmədi, xəta qeydə alındı; RİM-ə bildirin"
+
+#, python-format
+msgctxt "exams.attempt_reset"
+msgid "Sıfırlanmayan cəhdlər: %(ids)s."
+msgstr "Sıfırlanmayan cəhdlər: %(ids)s."

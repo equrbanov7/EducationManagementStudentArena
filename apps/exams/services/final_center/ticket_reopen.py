@@ -66,6 +66,12 @@ def _startable_updates() -> dict:
         "ready_at": None,
         "started_at": None,
         "completed_at": None,
+        # 2026-11-12: uzaqlaşdırılmış (``removed``) cəhdin bileti sıfırlananda «çıxarılıb» izləri qalırdı —
+        # təzə başlanğıc kimi təmizlənir (``readmit_student`` ilə eyni; tarixçə bilet audit sətirlərindədir).
+        "removed_at": None,
+        "removed_by": None,
+        "removal_action": "",
+        "removal_reason": "",
         "updated_at": timezone.now(),
     }
 
@@ -81,6 +87,9 @@ def reset_tickets_after_attempt_purge(ticket_ids, by, *, attempt_id, request=Non
     """
     reset = []
     for ticket in FinalExamTicket.objects.select_related("exam", "organization").filter(pk__in=list(ticket_ids)):
+        previous = {"previous_attempt_id": attempt_id, "previous_status": ticket.status}
+        if ticket.removal_action:
+            previous["previous_removal_action"] = ticket.removal_action
         updates = _startable_updates()
         if not FinalExamTicket.objects.filter(pk=ticket.pk, attempt__isnull=True).update(**updates):
             continue  # paralel axın bileti artıq yeni cəhdə bağlayıb
@@ -93,7 +102,7 @@ def reset_tickets_after_attempt_purge(ticket_ids, by, *, attempt_id, request=Non
             user=by,
             request=request,
             reason="final_ticket_reset_after_attempt_purge",
-            changes={"previous_attempt_id": attempt_id},
+            changes=previous,
         )
         reset.append(ticket.pk)
         if ticket.session_id:

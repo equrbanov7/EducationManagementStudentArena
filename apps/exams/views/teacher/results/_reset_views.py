@@ -38,6 +38,9 @@ def _blocker_label(code: str) -> str:
         "midterm_manual_restore_required": pgettext(
             _CTX, "əvvəlki sənədli midterm balının bərpası ayrıca yoxlanmalıdır — cəhd silinmədi"
         ),
+        attempt_reset.FAILED_BLOCKER: pgettext(
+            _CTX, "gözlənilməz texniki xəta — cəhd dəyişmədi, xəta qeydə alındı; RİM-ə bildirin"
+        ),
     }
     return labels.get(code, code)
 
@@ -94,11 +97,31 @@ def _report(request, summary) -> None:
             pgettext(_CTX, "%(count)s cəhd sıfırlanmadı: %(reason)s.")
             % {"count": count, "reason": _blocker_label(code)},
         )
+    if summary.failed_ids:
+        messages.error(
+            request,
+            pgettext(_CTX, "Sıfırlanmayan cəhdlər: %(ids)s.")
+            % {"ids": ", ".join(f"#{pk}" for pk in summary.failed_ids)},
+        )
     if summary.missing_count:
         messages.warning(
             request,
             pgettext(_CTX, "%(count)s cəhd tapılmadı (artıq silinib).") % {"count": summary.missing_count},
         )
+
+
+#: ``bigint`` sərhədi — daha böyük «id» ``pk__in``-də ``DataError`` (500) verirdi.
+_MAX_PK = 2**63 - 1
+
+
+def _parse_attempt_ids(raw_ids) -> list[int]:
+    """Yalnız ASCII rəqəmli, ``bigint`` daxilindəki id-lər (``"²".isdigit()`` → ``int`` xətası idi)."""
+    ids = set()
+    for raw in raw_ids:
+        value = str(raw or "").strip()
+        if value.isascii() and value.isdigit() and 0 < int(value) <= _MAX_PK:
+            ids.add(int(value))
+    return sorted(ids)
 
 
 def _all_matching_attempt_ids(exam, post):
@@ -140,7 +163,7 @@ def reset_exam_attempts(request, slug):
             return redirect(redirect_url)
     else:
         raw_ids = request.POST.getlist("attempt_ids") + [request.POST.get("attempt_id") or ""]
-        attempt_ids = sorted({int(raw) for raw in raw_ids if str(raw).strip().isdigit()})
+        attempt_ids = _parse_attempt_ids(raw_ids)
     if not attempt_ids:
         messages.warning(request, pgettext(_CTX, "Sıfırlamaq üçün cəhd seçin."))
         return redirect(redirect_url)

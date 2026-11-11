@@ -119340,3 +119340,15 @@ msgstr ""
 "%(hours)s. Сначала исправьте каждую строку в «Строках задания» через "
 "«Редактировать» (напр. курс на 45 ч: «Лекция» 30, «Семинар» 15), затем "
 "объедините потоки."
+
+msgctxt "exams.attempt_reset"
+msgid ""
+"gözlənilməz texniki xəta — cəhd dəyişmədi, xəta qeydə alındı; RİM-ə bildirin"
+msgstr ""
+"непредвиденная техническая ошибка — попытка не изменена, ошибка записана; "
+"сообщите в RİM"
+
+#, python-format
+msgctxt "exams.attempt_reset"
+msgid "Sıfırlanmayan cəhdlər: %(ids)s."
+msgstr "Не сброшенные попытки: %(ids)s."

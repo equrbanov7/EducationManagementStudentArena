@@ -120633,3 +120633,15 @@ msgstr ""
 "unterscheiden sie sich: %(hours)s. Korrigieren Sie zuerst jede Zeile unter "
 "„Auftragszeilen“ mit „Bearbeiten“ (z. B. 45-Stunden-Fach: „Vorlesung“ 30, "
 "„Seminar“ 15) und führen Sie dann die Ströme zusammen."
+
+msgctxt "exams.attempt_reset"
+msgid ""
+"gözlənilməz texniki xəta — cəhd dəyişmədi, xəta qeydə alındı; RİM-ə bildirin"
+msgstr ""
+"unerwarteter technischer Fehler — der Versuch wurde nicht geändert, der "
+"Fehler wurde protokolliert; bitte das RİM informieren"
+
+#, python-format
+msgctxt "exams.attempt_reset"
+msgid "Sıfırlanmayan cəhdlər: %(ids)s."
+msgstr "Nicht zurückgesetzte Versuche: %(ids)s."
