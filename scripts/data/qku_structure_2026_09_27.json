@@ -47,7 +47,7 @@
      "from": [{"type": "faculty", "name": "Magistratura və doktorantura"}]},
 
     {"key": "sch_engineering", "name": "İnnovativ mühəndislik və təbiət elmləri məktəbi", "type": "faculty", "aliases": ["İnnovativ mühəndislik və təbiət elmləri Məktəbi"],
-     "from": [{"type": "faculty", "name": "Yüksək texnologiyalar və innovativ mühəndislik"}]},
+     "from": [{"type": "faculty", "name": "Yüksək texnologiyalar və innovativ mühəndislik"}], "specialties": ["Biologiya", "Su bioehtiyatları və akvakultura", "Su bioehtiyyatları və akvakultura", "Biotexnologiya", "Qida mühəndisliyi", "Cihaz mühəndisliyi", "Mexatronika və robototexnika mühəndisliyi"]},
     {"key": "ch_nature", "name": "Təbiət elmləri kafedrası", "type": "chair", "parent": "sch_engineering", "aliases": ["Təbiət elmləri kafedrası"],
      "from": [{"type": "chair", "name": "Təbiət elmləri"}]},
     {"key": "ch_food", "name": "Qida təhlükəsizliyi və biotexnologiya kafedrası", "type": "chair", "parent": "sch_engineering", "aliases": ["Qida təhlükəsizliyi və biotexnologiya kafedrası"]},
@@ -62,7 +62,7 @@
      "from": [{"type": "chair", "name": "Proqramlaşdırma və informasiya təhlükəsizliyi"}]},
 
     {"key": "sch_ecology", "name": "Ekologiya məktəbi", "type": "faculty", "aliases": ["Ekologiya Məktəbi"],
-     "specialties": ["Ekologiya", "Ekologiya mühəndisliyi", "Meşəçilik", "Yerquruluşu və daşınmaz əmlakın kadastrı"]},
+     "specialties": ["Ekologiya", "Ekologiya mühəndisliyi", "Meşəçilik", "Yerquruluşu və daşınmaz əmlakın kadastrı", "Yer quruluşu və kadastr", "Yerquruluşu və kadastr"]},
     {"key": "ch_cadastre", "name": "Yer kadastrı və meşəçilik kafedrası", "type": "chair", "parent": "sch_ecology", "aliases": ["Yerkadastırı və meşəçilik"],
      "from": [{"type": "chair", "name": "Ekologiya"}]},
 
