@@ -3405,3 +3405,21 @@ msgid ""
 msgstr ""
 "Распределено больше часов, чем итог строки: %(groups)s. Уменьшите часы или "
 "сначала увеличьте итог строки через «Строки задания» → «Редактировать»."
+
+msgid "%(label)s %(hours)s s"
+msgstr "%(label)s %(hours)s ч"
+
+msgid "müəllim yoxdur"
+msgstr "нет преподавателя"
+
+msgid "qismən bölünüb"
+msgstr "распределено частично"
+
+msgid "artıq: %(hours)s"
+msgstr "лишнее: %(hours)s"
+
+msgid "%(count)s sətirdə %(hours)s saat müəllimə bölünməyib:"
+msgstr "В %(count)s строк(ах) %(hours)s ч не распределены преподавателям:"
+
+msgid "«Vakant» saxlanıldı: %(hours)s saat (%(rows)s sətir)."
+msgstr "Оставлено «Вакансия»: %(hours)s ч (%(rows)s строк)."

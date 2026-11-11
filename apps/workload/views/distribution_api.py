@@ -23,7 +23,6 @@ from ..services import (
     WorkloadDenied,
     amend_from_payload,
     assign_amended,
-    confirm_distribution,
     curriculum_row_suggestions,
     delete_row_amended,
     distribution_readiness,
@@ -513,39 +512,6 @@ def unassign_view(request) -> JsonResponse:
 @never_cache
 @login_required
 @require_POST
-def confirm(request) -> JsonResponse:
-    organization = active_organization(request)
-    if organization is None:
-        return no_org()
-    payload = json_body(request)
-    actor = actor_for(request)
-    try:
-        instance = _resolve_task(request, actor, task_id=payload.get("task_id"))
-        result = confirm_distribution(
-            task=instance,
-            actor=actor,
-            allow_vacant=str(payload.get("allow_vacant") or "1").lower() not in ("0", "false", "no"),
-            request=request,
-        )
-    except WorkloadDenied as exc:
-        return denied(exc)
-    return JsonResponse(
-        {
-            "ok": True,
-            "status": result["status"],
-            "status_label": STATUS_LABELS.get(result["status"], result["status"]),
-            # QA-2 F-09: id siyahıları (``offering_ids``, ``group_offering_ids`` — yüzlərlə UUID) UI-a lazım deyil.
-            "sync": {
-                key: value for key, value in result["sync"].items() if key not in ("offering_ids", "group_offering_ids")
-            },
-            "notified": result["notified"],
-        }
-    )
-
-
-@never_cache
-@login_required
-@require_POST
 def amend(request) -> JsonResponse:
     organization = active_organization(request)
     if organization is None:
@@ -580,7 +546,6 @@ def amend(request) -> JsonResponse:
 __all__ = [
     "amend",
     "assign",
-    "confirm",
     "curriculum",
     "options",
     "row_delete",
