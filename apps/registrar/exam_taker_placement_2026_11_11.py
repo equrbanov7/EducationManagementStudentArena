@@ -99,6 +99,8 @@ def place(*, organization, student, offering_ids, actor) -> tuple:
             result = place_in_subgroup(student=student, offering=offering, document=None, actor=actor, reason=REASON)
     except SubgroupPlacementError as exc:
         return f"taker_refused_{_slug(exc.code)}", None, None
+    except IntegrityError:  # DB qoruyucusu (məs. aktiv tələbə üzvlüyü yoxdur) — say, qaçışı dayandırma
+        return "taker_subgroup_blocked_integrity", None, None
     row = result["enrollment"]
     receipt_row = {"enrollment": str(row.pk), "event": str(result["event"].pk), "offering": str(offering.pk)}
     return "taker_placed_as_subgroup", row, receipt_row

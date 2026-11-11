@@ -21,6 +21,8 @@ from __future__ import annotations
 from collections import defaultdict
 from itertools import chain
 
+from django.db import IntegrityError, transaction
+
 #: Bir imtahanda bundan ÇOX itkin tələbə varsa imtahan atlanır (planda açıq sadalanmayıbsa).
 MAX_MISSING_STUDENTS = 5
 #: … və ya itkinlər yoxlanan rəsmi iştirakçıların bu payından çoxdursa.
@@ -94,9 +96,22 @@ def run(*, organization, actor, counts, period, batch, lines=None, allowed_exams
         placed = refused = 0
         offering_ids = _offering_ids(missing[0].exam)
         for attempt in missing:
-            code, enrollment, receipt_row = placement.place(
-                organization=organization, student=attempt.user, offering_ids=offering_ids, actor=actor
-            )
+            # 2026-11-11 prod dry-run: aktiv üzvlüyü olmayan tələbədə DB qoruyucusu (registrar_guard_active_member)
+            # IntegrityError verir — bütün qaçış dayanırdı. Hər tələbə öz savepoint-indədir: yerləşdirmə + nəticə
+            # sinxronu birlikdə ya yazılır, ya da geri qayıdır və sayılır.
+            try:
+                with transaction.atomic():
+                    code, enrollment, receipt_row = placement.place(
+                        organization=organization, student=attempt.user, offering_ids=offering_ids, actor=actor
+                    )
+                    resolved = None
+                    if enrollment is not None:
+                        journal_sync.sync_attempt_to_journal(attempt)
+                        resolved = target_identity(attempt) is not None
+            except IntegrityError:
+                counts["taker_write_blocked_integrity"] += 1
+                refused += 1
+                continue
             counts[code] += 1
             if receipt_row is not None:
                 placements.append({**receipt_row, "exam": str(exam_id), "student": attempt.user_id})
@@ -104,8 +119,6 @@ def run(*, organization, actor, counts, period, batch, lines=None, allowed_exams
                 refused += 1
                 continue
             placed += 1
-            journal_sync.sync_attempt_to_journal(attempt)
-            resolved = target_identity(attempt) is not None
             counts["takers_result_synced" if resolved else "takers_result_still_unresolved"] += 1
         lines.append(f"exam={exam_id} checked={checked} missing={len(missing)} placed={placed} refused={refused}")
     placement.receipt(organization=organization, actor=actor, batch=batch, placements=placements)
