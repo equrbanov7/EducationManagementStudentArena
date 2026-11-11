@@ -17,6 +17,13 @@ hər addım ayrıca yazılır, ayrıca paket id-si alır və ayrıca geri qaytar
 catalogue → doubles → journals). ``--undo --batch <id>`` paketi TAM geri qaytarır və ya heç nə yazmır (``takers`` paketində
 yalnız toxunulmamış yerləşdirmələr azad olunur). Kataloqun avtomatik (eyni ad + kredit + növ + kafedra) qrupları
 yalnız ``--auto-catalogue`` ilə; defolt — yalnız plandakı açıq qruplar.
+
+``--current-only`` (sahib 2026-11-11: «köhnə illərin jurnalını ciddiyə alma … əsas indi və bundan sonra olandır»):
+kataloq addımında mənbənin KEÇMİŞ dövr sətirləri arxivlənən mənbə kartda qalır, keçmiş dövrdəki toqquşma bloklamır
+(:mod:`apps.registrar.subject_merge_scope`). Kataloqda cari dövr imtahanları qrupun YALNIZ bir kartındadırsa o kart
+saxlanılandır («hansı fənnə bağlı imtahan verilibsə o formada saxla»). Birləşmədən sonra saxlanılan kartın cari dövr
+imtahanlarının jurnal bağı yenilənir və rəsmi cəhdləri yenidən yazılır (``catalogue_exams_relinked`` /
+``catalogue_exams_resynced``).
 Stdout-a YALNIZ saylar (``twin_merge: açar=say …``; açarlarda rəqəm yoxdur); gözlənilməz xəta
 ``CommandError: duplicate_subjects_failed_<sinif>_<mətn>``.
 """
@@ -60,6 +67,11 @@ class Command(BaseCommand):
             action="store_true",
             help="catalogue: planda olmayan eyni adlı (kredit + növ + kafedra eyni) kartları da birləşdir",
         )
+        parser.add_argument(
+            "--current-only",
+            action="store_true",
+            help="catalogue: yalnız cari + gələcək dövr köçür; keçmiş dövr sətirləri mənbə kartda qalır, bloklamır",
+        )
 
     def _undo(self, organization, actor, counts, batch) -> None:
         found = journal_missing_takers.undo(organization=organization, actor=actor, counts=counts, batch=batch)
@@ -70,14 +82,41 @@ class Command(BaseCommand):
             raise CommandError("duplicate_subjects_batch_unknown")
 
     @staticmethod
-    def _resync(exam_ids, counts) -> None:
-        """Jurnal bağı geri qayıdan imtahanların rəsmi cəhdləri yenidən sinxronlaşır (köhnəlmiş avtomatik bal qalmasın)."""
+    def _resync(exam_ids, counts, prefix="undo", relink=False) -> dict:
+        """Jurnal bağı dəyişən imtahanların rəsmi cəhdləri yenidən sinxronlaşır (köhnəlmiş avtomatik bal qalmasın).
+
+        ``relink`` — əvvəlcə bağ yenidən hesablanır (kataloq birləşməsi: jurnal saxlanılan karta keçib). Geri qaytarmada
+        bağ jurnal birləşməsinin manifestindən bərpa olunur — orada yenidən hesablanmır."""
         from apps.exams.models import Exam
         from apps.exams.services import exam_journal_link
 
-        for exam in Exam.objects.filter(pk__in=[int(value) for value in exam_ids], is_deleted=False):
+        changed = {}
+        for exam in Exam.objects.filter(pk__in=[int(value) for value in exam_ids], is_deleted=False).order_by("pk"):
+            if relink:
+                old_ids, new_ids = exam_journal_link.refresh_links(exam)
+                changed[exam.pk] = int(old_ids != new_ids)
+                counts[f"{prefix}_exams_relinked"] += changed[exam.pk]
             exam_journal_link.resync_exam_journal(exam, notify=False)
-            counts["undo_exams_resynced"] += 1
+            counts[f"{prefix}_exams_resynced"] += 1
+        return changed
+
+    def _relink_merged(self, organization, merged, counts, lines) -> None:
+        """Kataloq birləşməsindən sonra saxlanılan kartların cari dövr imtahanları (nəticə jurnala düşsün)."""
+        from django.db.models import Q
+
+        from apps.exams.models import Exam
+
+        keepers = {item["keeper"] for item in merged}
+        if not keepers:
+            return
+        rows = Exam.objects.filter(organization=organization, subject_id__in=keepers, is_deleted=False)
+        period = duplicates.current_period(organization)
+        if period is not None:
+            rows = rows.filter(Q(start_datetime__isnull=True) | Q(start_datetime__date__gte=period.start_date))
+        exam_ids = sorted(rows.values_list("pk", flat=True))
+        changed = self._resync(exam_ids, counts, prefix="catalogue", relink=True)
+        for exam_id, value in sorted(changed.items()):
+            lines.append(f"catalogue_exam={exam_id} links_changed={value}")
 
     def _run(self, options, counts, lines) -> str:
         actor = get_user_model().objects.filter(username=options["actor"], is_active=True, is_superuser=True).first()
@@ -98,6 +137,7 @@ class Command(BaseCommand):
                 else:
                     batch = batch or duplicates.new_batch_id()
                     registrar_ops = tuple(op for op in ops if op in duplicates.OPS)
+                    merged = []
                     if registrar_ops:
                         duplicates.run(
                             organization=organization,
@@ -107,7 +147,10 @@ class Command(BaseCommand):
                             batch=batch,
                             lines=lines,
                             auto_catalogue=bool(options["auto_catalogue"]),
+                            current_only=bool(options["current_only"]),
+                            merged=merged,
                         )
+                        self._relink_merged(organization, merged, counts, lines)
                     else:
                         duplicates.report(organization=organization, counts=counts)
                     if "takers" in ops:
