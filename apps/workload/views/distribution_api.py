@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from django.utils.translation import pgettext
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
 
@@ -48,6 +47,7 @@ from ..services.patok_streams import STREAM_ERRORS
 from ..services.tasks import ROW_HAS_OBJECTIONS, TOTAL_BELOW_ASSIGNED
 from ._base import active_organization, actor_for, denied, error, json_body, no_org
 from .all_chairs_api import all_chairs_rows
+from .distribution_outcome import assign_response
 
 # Backend auditi 2026-09-13, F-01: gövdədən gələn qeyri-UUID ``row_id`` /
 # ``task_id`` / ``assignment_id`` ``filter(pk=...)``-də ValidationError → 500
@@ -474,19 +474,11 @@ def assign(request) -> JsonResponse:
             # Sahib 2026-11-09: bölgünün qrupu + lab/seminar alt qrupu nömrəsi («bir fənn = bir kart» seçicisi).
             group_id=payload.get("group_id") or None,
             sub_number=payload.get("sub_number") or None,
+            live_edit=True,  # canlı kafedra redaktəsi — jurnal da köçür (2026-11-11)
         )
     except WorkloadDenied as exc:
         return _write_denied(exc)
-    body = {"ok": True, "assignment_id": str(saved.pk)}
-    conflicts = int((getattr(saved, "offering_sync", None) or {}).get("schedule_conflicts") or 0)
-    if conflicts:
-        # Audit 2026-09-28 W4: müəllim dəyişikliyi cədvəldə toqquşma yaradıb — səssiz keçmir.
-        body["schedule_conflicts"] = conflicts
-        body["warning"] = pgettext(
-            "workload",
-            "Diqqət: yeni müəllimin cədvəldə eyni saatda başqa dərsi var (%(count)s toqquşma). "
-            "Dərs cədvəlini yoxlayın.",
-        ) % {"count": conflicts}
+    body = assign_response(saved)
     return JsonResponse(body)
 
 
@@ -510,7 +502,9 @@ def unassign_view(request) -> JsonResponse:
     if assignment is None:
         return error("workload.assignment_not_found", "Bölgü tapılmadı.", status=404)
     try:
-        unassign_amended(assignment=assignment, actor=actor, amend=amend_from_payload(payload), request=request)
+        unassign_amended(
+            assignment=assignment, actor=actor, amend=amend_from_payload(payload), request=request, live_edit=True
+        )
     except WorkloadDenied as exc:
         return _write_denied(exc)
     return JsonResponse({"ok": True})

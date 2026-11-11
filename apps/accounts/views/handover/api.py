@@ -295,8 +295,11 @@ def _revert_context(records, *, organization) -> dict:
     """
     from django.utils import timezone
 
+    from apps.registrar.public import journal_transfer
+
     offering_ids = [record.offering_id for record in records if not record.is_reverted]
     return {
+        "states": journal_transfer.record_states(records),
         "closed_ids": handover_read.closed_offering_ids(offering_ids),
         "today": timezone.localdate(),
         "labels": blocker_labels(action=REVERT),
@@ -304,7 +307,7 @@ def _revert_context(records, *, organization) -> dict:
     }
 
 
-def _revert_blocker_codes(record, *, closed_ids, today, organization) -> list:
+def _revert_blocker_codes(record, *, closed_ids, today, organization, state=None) -> list:
     """Bu sətrin geri qaytarılmasına mane olan kodlar (boş = düymə aktivdir).
 
     ⚠️ Bu funksiya OLMADIĞI üçün müqavilə pozulurdu: ``can_revert`` yalnız
@@ -335,19 +338,23 @@ def _revert_blocker_codes(record, *, closed_ids, today, organization) -> list:
     ]
     # Zəncir irəli getdikdə server ``chain_moved`` ilə 409 verir; bu da sətrin
     # geri qaytarıla bilməmə SƏBƏBİDİR və istifadəçiyə deyilməlidir.
-    if offering.instructor_id != record.to_instructor_id:
+    state = state or {"owner_move": True, "intact": True}
+    if (state["owner_move"] and offering.instructor_id != record.to_instructor_id) or not state["intact"]:
         codes.append("chain_moved")
     return codes
 
 
-def _history_row(record, *, closed_ids, today, labels, organization) -> dict:
+def _history_row(record, *, states, closed_ids, today, labels, organization) -> dict:
+    from .labels import kinds_text
+
     offering = record.offering
+    state = states.get(record.pk)
     # Geri qaytarılmış sətirdə bloker sorğulamağın mənası yoxdur (düymə onsuz da
     # yoxdur) — «geri qaytarılıb» etiketi göstərilir.
     codes = (
         []
         if record.is_reverted
-        else _revert_blocker_codes(record, closed_ids=closed_ids, today=today, organization=organization)
+        else _revert_blocker_codes(record, closed_ids=closed_ids, today=today, organization=organization, state=state)
     )
     return {
         "id": str(record.pk),
@@ -357,6 +364,8 @@ def _history_row(record, *, closed_ids, today, labels, organization) -> dict:
         "period": period_label(offering.period),
         "from_name": record.from_instructor_name or "—",
         "to_name": record.to_instructor_name or "—",
+        "kinds": sorted((state or {}).get("kinds") or ()),
+        "what": kinds_text((state or {}).get("kinds")),
         "performed_by": person_name(record.performed_by),
         "created_at": record.created_at.isoformat(),
         "reason": record.reason,

@@ -8,6 +8,7 @@
  *   2. GÖSTƏRİCİ  — sabit zolaq, KPI kartları və mərhələ zolağı seçimlə yenilənir;
  *   3. XÜLASƏ     — təsdiqdən əvvəl NƏ KÖÇÜR / NƏ DƏYİŞMİR açıq yazılır;
  *   4. ÇEKMECƏ    — sətir detalı (paylaşılan tək çekmecə sətirlə doldurulur).
+ *   5. NÖV        — bütün jurnal və ya bir növ; önizləmə «Seminar: indiki → yeni» (2026-11-11).
  *
  * GÖNDƏRİŞ BU FAYLDA DEYİL: təsdiq forması ortaq `teaching_office.js`
  * mexanizmindədir (`form[data-tof-form]` → JSON POST → bölməni yenidən yüklə).
@@ -139,6 +140,14 @@
         }
     }
 
+    function parseJSON(text, fallback) {
+        try {
+            return JSON.parse(text || "") || fallback;
+        } catch (err) {
+            return fallback;
+        }
+    }
+
     function rowInfo(box) {
         return {
             name: box.getAttribute("data-thx-name") || "",
@@ -146,7 +155,78 @@
             students: num(box.getAttribute("data-thx-students")),
             lessons: num(box.getAttribute("data-thx-lessons")),
             marks: num(box.getAttribute("data-thx-marks")),
+            holders: parseJSON(box.getAttribute("data-thx-holders"), []),
         };
+    }
+
+    /* ---- Dərs növü + önizləmə (2026-11-11) -------------------------------- */
+
+    /* Seçilmiş növlər: [{value, label}] (təsdiq pəncərəsinin qutuları). */
+    function pickedKinds(form) {
+        var boxes = form.querySelectorAll("[data-thx-kind]");
+        var picked = [];
+        for (var i = 0; i < boxes.length; i += 1) {
+            if (boxes[i].checked) {
+                var label = boxes[i].parentNode.querySelector(".thx-kind__label");
+                picked.push({ value: boxes[i].value, label: label ? label.textContent.trim() : boxes[i].value });
+            }
+        }
+        return { list: picked, all: picked.length === boxes.length, count: boxes.length };
+    }
+
+    function targetName(form, text) {
+        var select = form.querySelector("[data-thx-target]");
+        if (!select || !select.value) {
+            return text.pickTarget || "?";
+        }
+        var option = select.options[select.selectedIndex];
+        return option ? option.textContent.trim() : select.value;
+    }
+
+    function holderNames(row, kind) {
+        var holders = row.holders || [];
+        for (var i = 0; i < holders.length; i += 1) {
+            if (holders[i].kind === kind) {
+                return (holders[i].names || []).join(", ");
+            }
+        }
+        return "";
+    }
+
+    /** Bir fənnin önizləmə sətirləri: «Seminar: Əliyev → Məmmədov». */
+    function previewLines(row, kinds, target, text) {
+        if (kinds.all) {
+            var owner = holderNames(row, "lecture") || (text.none || "—");
+            return [{ label: "", from: owner, to: target, note: text.ownerMoves || "" }];
+        }
+        var ownerMoves = kinds.list.some(function (kind) { return kind.value === "lecture"; });
+        return kinds.list.map(function (kind) {
+            return {
+                label: kind.label,
+                from: holderNames(row, kind.value) || "—",
+                to: target,
+                note: kind.value === "lecture" || ownerMoves ? (text.ownerMoves || "") : (text.ownerStays || ""),
+            };
+        });
+    }
+
+    function syncKindGuard(form, host) {
+        var kinds = pickedKinds(form);
+        var submit = form.querySelector('[type="submit"]');
+        var hint = form.querySelector("[data-thx-kinds-hint]");
+        if (submit) {
+            submit.disabled = kinds.list.length === 0;
+        }
+        if (hint) {
+            hint.classList.toggle("is-error", kinds.list.length === 0);
+            if (kinds.list.length === 0) {
+                hint.setAttribute("data-thx-default", hint.getAttribute("data-thx-default") || hint.textContent);
+                hint.textContent = labels(host).noKind || "";
+            } else if (hint.getAttribute("data-thx-default")) {
+                hint.textContent = hint.getAttribute("data-thx-default");
+            }
+        }
+        return kinds;
     }
 
     function maxBulk(host) {
@@ -210,6 +290,8 @@
         var total = form.querySelector("[data-thx-summary-total]");
         var text = labels(host);
         var sum = totals(store);
+        var kinds = syncKindGuard(form, host);
+        var target = targetName(form, text);
         if (list) {
             list.textContent = "";
             Object.keys(store).forEach(function (id) {
@@ -218,15 +300,30 @@
                 var name = document.createElement("b");
                 name.textContent = row.name || id;
                 li.appendChild(name);
-                li.appendChild(
-                    document.createTextNode(
-                        (row.group ? " · " + row.group : "") +
-                            " — " +
-                            num(row.students) + " " + (text.students || "") + " · " +
-                            num(row.lessons) + " " + (text.lessons || "") + " · " +
-                            num(row.marks) + " " + (text.marks || "")
-                    )
-                );
+                li.appendChild(document.createTextNode(row.group ? " · " + row.group : ""));
+                var moves = document.createElement("ul");
+                moves.className = "thx-preview__moves";
+                previewLines(row, kinds, target, text).forEach(function (line) {
+                    var item = document.createElement("li");
+                    if (line.label) {
+                        var kind = document.createElement("span");
+                        kind.className = "thx-kind-chip";
+                        kind.textContent = line.label;
+                        item.appendChild(kind);
+                    }
+                    var move = document.createElement("span");
+                    move.className = "thx-move";
+                    move.textContent = line.from + " → " + line.to;
+                    item.appendChild(move);
+                    if (line.note) {
+                        var note = document.createElement("span");
+                        note.className = "thx-why";
+                        note.textContent = "(" + line.note + ")";
+                        item.appendChild(note);
+                    }
+                    moves.appendChild(item);
+                });
+                li.appendChild(moves);
                 list.appendChild(li);
             });
         }
@@ -236,6 +333,15 @@
                 sum.students + " " + (text.students || "") + " · " +
                 sum.lessons + " " + (text.lessons || "") + " · " +
                 sum.marks + " " + (text.marks || "");
+        }
+    }
+
+    /* «Kimdən» = süzgəcdəki müəllim (Lab-1/Lab-2 — yalnız onunku köçür; yoxsa server 409 «hansı müəllimdən?»). */
+    function fillSource(host, form) {
+        var field = form.querySelector('[name="from_teacher_id"]');
+        var filter = host.querySelector('[name="th_teacher"]');
+        if (field && filter) {
+            field.value = /^[0-9]+$/.test(filter.value || "") ? filter.value : "";
         }
     }
 
@@ -256,6 +362,7 @@
             error.textContent = "";
         }
         fillForm(form, store);
+        fillSource(host, form);
         paintSummary(host, form, store);
         if (window.EMSOverlay) {
             window.EMSOverlay.open(dialog);
@@ -284,6 +391,23 @@
                 node.textContent = String(map[key] === undefined || map[key] === "" ? "—" : map[key]);
             }
         });
+        var holdersList = drawer.querySelector("[data-thx-d-holders]");
+        if (holdersList) {
+            holdersList.textContent = "";
+            (payload.holders || []).forEach(function (item) {
+                var li = document.createElement("li");
+                li.className = "thx-holders__row";
+                var kind = document.createElement("span");
+                kind.className = "thx-holders__kind";
+                kind.textContent = item.label || item.kind || "";
+                var who = document.createElement("span");
+                who.className = "thx-person";
+                who.textContent = (item.names || []).join(", ") || "—";
+                li.appendChild(kind);
+                li.appendChild(who);
+                holdersList.appendChild(li);
+            });
+        }
         var why = drawer.querySelector("[data-thx-d-why]");
         var whyText = drawer.querySelector("[data-thx-d-why-text]");
         if (why && whyText) {
@@ -353,6 +477,23 @@
             toast(text.blockedSkip, "info");
         }
         refresh(host);
+    });
+
+    /* Növ və ya hədəf dəyişəndə önizləmə dərhal yenilənir — «nə köçür» sualı təsdiqdən ƏVVƏL cavablanır. */
+    function repaintFromDialog(el) {
+        var form = el.closest("form");
+        var host = root();
+        if (form && host) {
+            paintSummary(host, form, readStore());
+        }
+    }
+
+    window.EMSDelegate.on("change", "#thxConfirmDialog [data-thx-kind]", function (event, box) {
+        repaintFromDialog(box);
+    });
+
+    window.EMSDelegate.on("change", "#thxConfirmDialog [data-thx-target]", function (event, select) {
+        repaintFromDialog(select);
     });
 
     window.EMSDelegate.on("click", "[data-thx-clear-selection]", function (event, btn) {

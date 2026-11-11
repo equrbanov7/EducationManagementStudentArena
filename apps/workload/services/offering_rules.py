@@ -38,6 +38,10 @@ ondan əvvəl fənn orada olsun» (cədvəlin avtomatlaşdırılması üçün).
    * başqa hər hansı müəllim (cədvəl redaktoru, admin forması) → TOXUNULMUR
      (``preserved_foreign``). Təsdiq/bölgü-təsdiqi keçidlərində ``previous``
      bilinmir (:data:`UNKNOWN`), ona görə orada fərqli müəllim HEÇ VAXT əzilmir.
+   * İSTİSNA (sahib 2026-11-11): kafedra yükdə müəllimi AÇIQ dəyişibsə (əvvəlki yük sahibi REAL müəllim idi və
+     yeni sahib fərqlidir, bal yaza bilir) — bu, «Fənn təhvili»dir: cari müəllim kim olursa olsun yeni sahib
+     yazılır (``replaced``; yazı ortaq ``journal_transfer`` servisindən keçir). Əvvəl təhvil/«yad» qoruması bu
+     dəyişikliyi də udurdu: ekran «köçürüldü» deyirdi, jurnal isə yeni müəllimə heç çatmırdı.
    Provenans ayrıca sütunsuz saxlanılır: təhvil jurnalı + dəyişiklik anındakı
    əvvəlki yük sahibi kifayətdir; hər yazı ``workload.offering_instructor_synced``
    audit qeydi buraxır.
@@ -123,7 +127,9 @@ def owner_for_rows(rows):
     return fallback
 
 
-def decide_instructor(current_id, *, desired_id, eligible: bool, previous_id=UNKNOWN, handover_owned=False):
+def decide_instructor(
+    current_id, *, desired_id, eligible: bool, previous_id=UNKNOWN, handover_owned=False, chair_edit=False
+):
     """``(nəticə, yeni_müəllim_id)`` — bax başlıq §4. Baza oxunmur, yazılmır."""
     target = desired_id if (desired_id is not None and eligible) else None
     if current_id is None:
@@ -132,6 +138,10 @@ def decide_instructor(current_id, *, desired_id, eligible: bool, previous_id=UNK
         return ("blocked", None) if desired_id is not None else ("keep", None)
     if current_id == desired_id:
         return "keep", current_id
+    # ``chair_edit`` — canlı «Yük bölgüsü» yazısı (assign/unassign snapshot-u); təmir paketləri köhnə qaydada qalır.
+    explicit = chair_edit and previous_id is not UNKNOWN and previous_id is not None and previous_id != desired_id
+    if explicit and target is not None:
+        return "replaced", target  # kafedranın açıq dəyişikliyi qorumalardan üstündür (başlıq §4 istisnası)
     if handover_owned:
         return ("preserved_handover" if desired_id is not None else "keep"), current_id
     if previous_id is not UNKNOWN and current_id == previous_id:

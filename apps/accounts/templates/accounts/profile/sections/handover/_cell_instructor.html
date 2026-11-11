@@ -1,6 +1,16 @@
 {% load i18n %}
-{% comment %}Cari müəllim — boşdursa «təyin edilməyib» (boş xana yox).{% endcomment %}
-{% if row.data.instructor %}
+{% comment %}Kim aparır — jurnalın sahibi + növ üzrə müəllimlər (2026-11-11: seminar/lab ayrıca təhvil olunur).
+Sahib boşdursa «təyin edilməyib» (boş xana yox).{% endcomment %}
+{% if row.data.holders %}
+<ul class="thx-holders">
+    {% for item in row.data.holders %}
+    <li class="thx-holders__row">
+        <span class="thx-holders__kind">{{ item.label }}</span>
+        <span class="thx-person">{{ item.names|join:", " }}</span>
+    </li>
+    {% endfor %}
+</ul>
+{% elif row.data.instructor %}
     <span class="thx-person">{{ row.data.instructor }}</span>
 {% else %}
     <span class="thx-person thx-person--none">{% trans "Müəllim təyin edilməyib" context "accounts.handover" %}</span>

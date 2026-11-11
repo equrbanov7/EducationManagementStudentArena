@@ -126,6 +126,93 @@
     font-variant-numeric: tabular-nums;
 }
 
+/* ---- Növ üzrə müəllimlər + dərs növü seçimi (2026-11-11) --------------- */
+
+.thx-holders {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.thx-holders__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--ems-sp-1);
+}
+
+.thx-holders__kind,
+.thx-kind-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--ems-sp-2);
+    border: 1px solid var(--ems-primary-200);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-700);
+    font-size: var(--ems-fs-xs);
+    white-space: nowrap;
+}
+
+.thx-kind-chip {
+    margin-inline-end: var(--ems-sp-1);
+}
+
+.thx-kinds {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-2);
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.thx-kinds__options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-2);
+}
+
+.thx-kind {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    min-height: 32px;
+    padding: 0 var(--ems-sp-3);
+    border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-50);
+    cursor: pointer;
+}
+
+.thx-kind:has(.thx-kind__box:checked) {
+    border-color: var(--ems-primary-400);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+}
+
+.thx-kinds .ems-field__hint.is-error {
+    color: var(--ems-danger-600);
+}
+
+.thx-preview__moves {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 4px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--ems-fs-sm);
+}
+
+.thx-preview__moves .thx-why {
+    display: inline;
+    margin: 0 0 0 var(--ems-sp-1);
+}
+
 /* ---- «Niyə olmaz» ------------------------------------------------------ */
 
 /* Səbəb sətrin YANINDA, badge-in altında — divar şəklində qırmızı mətn yox.
