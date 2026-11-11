@@ -501,6 +501,7 @@
             if (activity) activitySelect.value = activity;
             if (window.EMSBootstrapSelect) window.EMSBootstrapSelect.refresh(activitySelect);
         }
+        if (!assignment && forms().defaultHours) forms().defaultHours(form, row, activitySelect); // qalıq (2026-11-11)
         var save = q("[data-wl-save-assign]");
         if (save) save.textContent = assignment ? gettext("Yadda saxla") : gettext("Əlavə et");
         showError(q("[data-wl-assign-error]"), "");

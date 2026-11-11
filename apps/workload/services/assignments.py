@@ -13,6 +13,7 @@ import logging
 
 from django.db import transaction
 from django.db.models import Sum
+from django.utils.translation import pgettext
 
 from core.audit import log_action
 from core.constants import AuditAction
@@ -200,9 +201,23 @@ def assign_teacher(
     create_offerings = plan_reached_chair(task)
     available = remaining_hours(locked, activity, exclude_assignment_id=getattr(assignment, "pk", None))
     if hours > available:
+        # Sahib 2026-11-11: mesaj nə etməli olduğunu deyir — cəm, digər bölgülər, maksimum, cəmi artırmaq yolu.
+        total = locked.activity_total(activity)
         raise WorkloadDenied(
             "workload.hours_exceeded",
-            f"Bu fəaliyyət üzrə yalnız {available} saat qalıb.",
+            pgettext(
+                "workload",
+                "«%(activity)s» cəmi %(total)s saatdır, digər bölgülərdə %(used)s saat var — bu bölgüyə ən çox "
+                "%(available)s saat yazmaq olar (siz %(hours)s yazdınız). Daha çox lazımdırsa, əvvəlcə sətrin "
+                "«%(activity)s (cəmi)» saatını «Redaktə» ilə artırın və ya digər bölgünü azaldın.",
+            )
+            % {
+                "activity": dict(Activity.choices).get(activity, activity),
+                "total": total,
+                "used": max(total - available, 0),
+                "available": available,
+                "hours": hours,
+            },
         )
 
     teacher = None

@@ -447,6 +447,16 @@
   font-size: 0.82rem;
 }
 
+/* 2026-11-11: axında mühazirə saatları fərqlidir — birləşdirmədən əvvəl xəbərdarlıq */
+.wl-sp__warn {
+  margin: 8px 0 0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  color: #8a5a00;
+  background: var(--ems-warning-bg, #fdf6e3);
+}
+
 .wl-modal__section-title {
   margin: 14px 0 6px;
   font-size: 0.82rem;

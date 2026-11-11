@@ -79,6 +79,16 @@
         });
     }
 
+    /**
+     * Yeni bölgünün saatı — fəaliyyətin QALIĞI (yoxdursa 1). 2026-11-11 («Tədqiqat analitikası»): defolt 1 idi,
+     * tələsik «Əlavə et» seminara 1 s yazırdı (qalıq 14 s qalırdı).
+     */
+    Forms.defaultHours = function defaultHours(form, row, activitySelect) {
+        if (!form || !form.elements.hours || !row || !activitySelect) return;
+        var info = (row.activities || {})[activitySelect.value];
+        form.elements.hours.value = info && info.remaining > 0 ? info.remaining : 1;
+    };
+
     /** Sətir modalını sətrin CARİ dəyərləri ilə doldurur (`row=null` — boş forma). */
     Forms.fillRow = function fillRow(form, row) {
         if (!form) return;

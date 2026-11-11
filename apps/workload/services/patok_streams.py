@@ -24,6 +24,7 @@ dəyişəndə dəyişir — məhz sahibin istədiyi «bir dəfə sayılma».
 from __future__ import annotations
 
 from django.db import transaction
+from django.utils.translation import pgettext
 
 from core.audit import log_action
 from core.constants import AuditAction
@@ -43,6 +44,7 @@ STREAM_ERRORS = {
     "workload.stream_rows_mismatch": "Axın sətirləri eyni fənn, mövsüm və semestrdə olmalıdır.",
     "workload.stream_no_lecture": "Mühazirə saatı olmayan sətir axına salına bilmir.",
     "workload.stream_teacher_invalid": "Axının mühazirəçisi düzgün göstərilməyib.",
+    "workload.stream_plan_mismatch": "Bir axındakı qrupların mühazirə saatı eyni olmalıdır.",
 }
 VACANT = "vacant"
 
@@ -123,6 +125,35 @@ def _per_group_plan(row) -> int:
     return int(row.lecture_total or 0) // max(int(row.union_count or 1), 1)
 
 
+def _row_label(row) -> str:
+    return " · ".join(group.name for group in row.groups.all()) or row.groups_text or row.subject_label
+
+
+def _ensure_same_plan(stream) -> None:
+    """Sahib 2026-11-11 («Tədqiqat analitikası»): YENİ birləşən axında qrupların mühazirə saatı eyni olmalıdır.
+
+    Əks halda aparıcının saatı (məs. 45) yükə düşür, tərəfdaşın jurnalında isə öz planı (30) görünür — axın
+    «birləşir», amma saatlar uyğunsuz qalır. Artıq mövcud (dəyişməyən) axın yenidən saxlananda yoxlanmır.
+    """
+    lead, rows = stream["lead"], stream["rows"]
+    joining = [row for row in rows if row.pk != lead.pk and row.patok_lead_id != lead.pk]
+    if lead.patok_lead_id or int(lead.lecture_total or 0) <= 0:
+        joining.append(lead)
+    if not joining or len({_per_group_plan(row) for row in rows}) <= 1:
+        return
+    hours = ", ".join(f"{_row_label(row)} — {_per_group_plan(row)} s" for row in rows)
+    raise WorkloadDenied(
+        "workload.stream_plan_mismatch",
+        pgettext(
+            "workload",
+            "Bir axında qrupların mühazirə saatı eyni olmalıdır, burada fərqlidir: %(hours)s. Əvvəlcə «Tapşırıq "
+            "sətirləri»ndə hər sətri «Redaktə» ilə düzəldin (məs. 45 saatlıq fənn: «Mühazirə» 30, «Seminar» 15), "
+            "sonra axınları birləşdirin.",
+        )
+        % {"hours": hours},
+    )
+
+
 def _save(task, actor, row, data, amend, request, *, shrink=False):
     return save_row_amended(
         task=task, actor=actor, data=data, row=row, amend=amend, shrink=shrink, request=request, sync_offerings=False
@@ -165,6 +196,7 @@ def apply_streams(*, task, actor, streams, amend=None, request=None) -> dict:
     leads: dict = {}
     for stream in parsed:
         stream["lead"] = _pick_lead(stream["rows"], stream["teacher"])
+        _ensure_same_plan(stream)
         leads[stream["lead"].pk] = stream
     partner_target = {
         row.pk: stream["lead"] for stream in parsed for row in stream["rows"] if row.pk != stream["lead"].pk
