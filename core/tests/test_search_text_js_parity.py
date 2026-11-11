@@ -69,6 +69,22 @@ CASES = [
     ("234 kin g", "234 K ing", False),
     ("ismayil", "İsmayıl".lower(), False),
     ("ismayil", "İsmayıl".lower(), True),
+    ("Aqşin", "aqsin quliyev", False),
+    ("AQŞİN QULİYEV", "aqsin quliyev", True),
+    ("quliyev aqsin", "aqsin quliyev", False),
+    ("aqsin", "Aqşin Quliyev", False),
+    ("Aqshin", "Aqşin Quliyev", False),
+    ("AQSIN", "Aqşin Quliyev", True),
+    ("ismayilov", "İsmayılov", False),
+    ("ISMAYILOV", "İsmayılov", True),
+    ("534t", "534 T az", True),
+    ("534 t az", "534 T az", True),
+    ("Aqşin", "Rəşad Əliyev", True),
+    ("Әliyev", "Əliyev", False),
+    ("Əliyev", "Әliyev", True),
+    ("Șahin", "Şahin", False),
+    ("Aq\u200bşin", "aqsin", False),
+    ("Aqs\u0327in", "Aqşin", True),
 ]
 
 

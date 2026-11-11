@@ -49,7 +49,16 @@ rəqəm var, ya da ən azı ``COMPACT_MIN_CHARS`` (4) simvoldur. Qısa hərf tok
 yoxlanır («234 kin g» → «234king» → «234 K ing»).
 
 Yaddaşda (``tolerant_match``/JS) mətndəki birləşən nöqtə U+0307 atılır:
-``"İ".lower()`` → «i̇» olur və əks halda «ismayil» «i̇smayıl»ı tapmazdı.
+``"İ".lower()`` → «i̇» olur və əks halda «ismayil» «i̇smayıl»ı tapmazdı. DB-də
+belə saxlanmış ad üçün (Python ``lower()`` ilə yazılmış idxal) ``i`` sinfindən
+sonra ``\u0307?`` gəlir (2026-11-11).
+
+Sorğu təmizliyi (2026-11-11, sahib: «böyük-kiçik hərfə və az/eng əlifbasına görə
+problem olmasın»): sorğu NFC-yə gətirilir (parçalanmış «s + U+0327» → «ş»),
+görünməz simvollar (sıfır enli boşluq, BOM, yumşaq defis, U+0307) atılır; kiril
+«ә» və rumın «ș» az «ə»/«ş»-yə endirilir, ``ə``/``e``/``a`` sinifləri DB-dəki
+kiril «ә»ni də tutur. Registr: «İ»/«I» heç vaxt ``str.lower``/``ILIKE``-a
+etibar edilmir — siniflər açıqdır (PG ``'İ' ~* 'i'`` → false!).
 
 Təhlükəsizlik: regex metasimvolları qaçırılır; sorğu ``MAX_QUERY_LENGTH``,
 token ``MAX_TOKEN_LENGTH`` ilə kəsilir; şablonda iç-içə kəmiyyət yoxdur (yalnız
@@ -61,6 +70,7 @@ dəstəkləyir (ayrıca miqrasiya qərarı).
 from __future__ import annotations
 
 import re
+import unicodedata
 
 from django.db.models import Q
 
@@ -75,11 +85,11 @@ _SEPARATORS = frozenset(" \t\r\n\f\v._/-")
 
 # Tək hərf → sinif (açıq, hər iki registr).
 _SINGLE = {
-    "a": "[aAəƏ]",
-    "ə": "[əƏeEaA]",
-    "e": "[eEəƏ]",
-    "i": "[iıİI]",
-    "ı": "[iıİI]",
+    "a": "[aAəƏәӘ]",
+    "ə": "[əƏәӘeEaA]",
+    "e": "[eEəƏәӘ]",
+    "i": "[iıİI]\u0307?",
+    "ı": "[iıİI]\u0307?",
     "s": "[sSşŞ]",
     "ş": "(?:[sS][hH]|[sSşŞ])",
     "c": "[cCçÇ]",
@@ -99,7 +109,35 @@ _DIGRAPHS = {
     "gh": "(?:[gG][hH]|[ğĞ])",
     "kh": "(?:[kK][hH]|[xX])",
 }
-_LOWER = {"İ": "i", "I": "i", "Ə": "ə", "Ş": "ş", "Ç": "ç", "Ğ": "ğ", "Ö": "ö", "Ü": "ü"}
+_LOWER = {
+    "İ": "i",
+    "I": "i",
+    "Ə": "ə",
+    "Ş": "ş",
+    "Ç": "ç",
+    "Ğ": "ğ",
+    "Ö": "ö",
+    "Ü": "ü",
+    # Oxşar simvollar (2026-11-11): kiril «ә» (U+04D9) az klaviaturalarında «ə» əvəzinə çıxır,
+    # rumın «ș» (U+0219, vergüllü) «ş» kimi görünür — sorğuda az hərfinə endirilir.
+    "ә": "ə",
+    "Ә": "ə",
+    "ș": "ş",
+    "Ș": "ş",
+}
+#: Sorğudan atılan görünməz simvollar: sıfır enli boşluq/birləşdirici, BOM, yumşaq defis və birləşən nöqtə
+#: U+0307 (``"İ".lower()`` → «i̇»; NFC-dən sonra qalırsa sadəcə «i»dir).
+_INVISIBLE = dict.fromkeys(map(ord, "\u200b\u200c\u200d\u2060\ufeff\u00ad\u0307"))
+
+
+def clean_query(text) -> str:
+    """Sorğunu NFC-yə gətirir və görünməz simvolları atır (parçalanmış «s\u0327» → «ş», «I\u0307» → «İ»)."""
+    return unicodedata.normalize("NFC", str(text or "")).translate(_INVISIBLE)
+
+
+def clean_text(text) -> str:
+    """Yaddaşdakı mətn üçün eyni təmizlik (``tolerant_match``/JS əkizi)."""
+    return clean_query(text)
 
 
 def _low(ch: str) -> str:
@@ -119,13 +157,13 @@ def _char_pattern(ch: str) -> str:
 
 def tokens_of(query: str) -> list[str]:
     """Boşluqla bölünmüş, boş olmayan tokenlər (ən çoxu ``MAX_TOKENS``, hər biri ``MAX_TOKEN_LENGTH``)."""
-    text = str(query or "").strip()[:MAX_QUERY_LENGTH]
+    text = clean_query(query).strip()[:MAX_QUERY_LENGTH]
     return [token[:MAX_TOKEN_LENGTH] for token in text.split() if token][:MAX_TOKENS]
 
 
 def fold_regex(token: str, *, compact: bool = False) -> str:
     """Bir token üçün dözümlü şablon: «is» → ``[iıİI][sSşŞ]``; ``compact`` ilə simvollar arası ``[ayırıcı]*``."""
-    chars = [ch for ch in str(token or "")[:MAX_TOKEN_LENGTH] if not (compact and ch in _SEPARATORS)]
+    chars = [ch for ch in clean_query(token)[:MAX_TOKEN_LENGTH] if not (compact and ch in _SEPARATORS)]
     parts: list[str] = []
     index = 0
     while index < len(chars):
@@ -238,7 +276,7 @@ def word_prefix_match(query: str, *texts) -> bool:
     tokens = tokens_of(query)
     if not tokens:
         return True
-    haystack = [str(text).replace("̇", "") for text in texts if text not in (None, "")]
+    haystack = [clean_text(text) for text in texts if text not in (None, "")]
     return all(any(re.search(word_prefix_regex(token), text, re.IGNORECASE) for text in haystack) for token in tokens)
 
 
@@ -256,7 +294,7 @@ def tolerant_matcher(query: str, *, compact: bool = False):
     glued_rx = re.compile(glued, re.IGNORECASE) if glued else None
 
     def _matcher(*texts) -> bool:
-        haystack = [str(text).replace("\u0307", "") for text in texts if text not in (None, "")]
+        haystack = [clean_text(text) for text in texts if text not in (None, "")]
         if all(any(rx.search(text) for text in haystack) for rx in token_rx):
             return True
         return glued_rx is not None and any(glued_rx.search(text) for text in haystack)

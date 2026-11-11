@@ -77,8 +77,12 @@
 
     function filter(ws, query) {
         var wanted = normalize(query);
+        // Kanonik qatlama (EMSSearch, search_fold.js): registr, az↔ing hərfləri («aqsin» ↔ «Aqşin»), söz sırası.
+        var match = window.EMSSearch ? window.EMSSearch.matcher(query, { compact: false }) : null;
         ws.querySelectorAll("[data-lgx-row]").forEach(function (row) {
-            row.hidden = wanted !== "" && normalize(attr(row, "data-lgx-name")).indexOf(wanted) === -1;
+            var name = attr(row, "data-lgx-name");
+            var ok = match ? match(name) : normalize(name).indexOf(wanted) !== -1;
+            row.hidden = wanted !== "" && !ok;
         });
         refresh(ws);
     }

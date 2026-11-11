@@ -31,7 +31,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 (function (root) {
   "use strict";
-  if (root.EMSSearch && root.EMSSearch.__v === 1) return;
+  if (root.EMSSearch && root.EMSSearch.__v === 2) return;
 
   var MAX_TOKENS = 4;
   var MAX_QUERY_LENGTH = 120;
@@ -41,11 +41,11 @@
   var SEPARATORS = " \t\r\n\f\v._/-";
 
   var SINGLE = {
-    "a": "[aAəƏ]",
-    "ə": "[əƏeEaA]",
-    "e": "[eEəƏ]",
-    "i": "[iıİI]",
-    "ı": "[iıİI]",
+    "a": "[aAəƏәӘ]",
+    "ə": "[əƏәӘeEaA]",
+    "e": "[eEəƏәӘ]",
+    "i": "[iıİI]\u0307?",
+    "ı": "[iıİI]\u0307?",
     "s": "[sSşŞ]",
     "ş": "(?:[sS][hH]|[sSşŞ])",
     "c": "[cCçÇ]",
@@ -64,7 +64,19 @@
     "gh": "(?:[gG][hH]|[ğĞ])",
     "kh": "(?:[kK][hH]|[xX])"
   };
-  var LOWER = { "İ": "i", "I": "i", "Ə": "ə", "Ş": "ş", "Ç": "ç", "Ğ": "ğ", "Ö": "ö", "Ü": "ü" };
+  // Kiril «ә» və rumın «ș» az hərfinə endirilir (2026-11-11, server əkizi ilə eyni).
+  var LOWER = {
+    "İ": "i", "I": "i", "Ə": "ə", "Ş": "ş", "Ç": "ç", "Ğ": "ğ", "Ö": "ö", "Ü": "ü",
+    "ә": "ə", "Ә": "ə", "ș": "ş", "Ș": "ş"
+  };
+  // Görünməz simvollar + birləşən nöqtə U+0307 (NFC-dən sonra atılır).
+  var INVISIBLE = /[\u200b\u200c\u200d\u2060\ufeff\u00ad\u0307]/g;
+
+  function clean(text) {
+    var value = String(text == null ? "" : text);
+    if (value.normalize) value = value.normalize("NFC");
+    return value.replace(INVISIBLE, "");
+  }
   var FOLD = { "ı": "i", "ə": "e", "ş": "s", "ç": "c", "ğ": "g", "ö": "o", "ü": "u" };
 
   function low(ch) {
@@ -86,7 +98,7 @@
   }
 
   function tokens(query) {
-    var text = String(query == null ? "" : query).trim().slice(0, MAX_QUERY_LENGTH);
+    var text = clean(query).trim().slice(0, MAX_QUERY_LENGTH);
     if (!text) return [];
     return text.split(/\s+/).filter(Boolean).slice(0, MAX_TOKENS).map(function (t) {
       return t.slice(0, MAX_TOKEN_LENGTH);
@@ -95,7 +107,7 @@
 
   function pattern(token, opts) {
     var compact = !!(opts && opts.compact);
-    var chars = Array.from(String(token == null ? "" : token)).slice(0, MAX_TOKEN_LENGTH);
+    var chars = Array.from(clean(token)).slice(0, MAX_TOKEN_LENGTH);
     if (compact) chars = chars.filter(function (ch) { return SEPARATORS.indexOf(ch) === -1; });
     var parts = [];
     var i = 0;
@@ -140,7 +152,7 @@
       if (!regexes.length) return true;
       var hay = [];
       for (var a = 0; a < arguments.length; a += 1) {
-        if (arguments[a] != null && arguments[a] !== "") hay.push(String(arguments[a]).replace(/\u0307/g, ""));
+        if (arguments[a] != null && arguments[a] !== "") hay.push(clean(arguments[a]));
       }
       var hitAny = function (rx) {
         return hay.some(function (text) { return rx.test(text); });
@@ -154,14 +166,14 @@
   }
 
   function fold(text) {
-    return Array.from(String(text == null ? "" : text)).map(function (ch) {
+    return Array.from(clean(text)).map(function (ch) {
       var l = low(ch);
       return FOLD[l] || l;
     }).join("");
   }
 
   root.EMSSearch = {
-    __v: 1,
+    __v: 2,
     tokens: tokens,
     pattern: pattern,
     codePattern: codePattern,

@@ -20,7 +20,7 @@ import { mountSoundDock } from './sound_dock.js?v=lx20261110p';
 import { mountTypedDrawer } from './typed_drawer.js?v=lx20261110p';
 import { bindCopyGuard } from './copy_guard.js?v=lx20261110p';
 import { bindTimeSettingEvents, renderTimeSettings } from './time_setting.js?v=lx20261110p';
-import { bindPlayersDrawer } from './players_drawer.js?v=lx20261110p';
+import { bindPlayersDrawer } from './players_drawer.js?v=lx20261111f';
 import { applyStyleToDocument, setPresentationStyle } from './style_mode.js?v=lx20261110p';
 import { mountPowerControls } from './powerups.js?v=lx20261110p';
 

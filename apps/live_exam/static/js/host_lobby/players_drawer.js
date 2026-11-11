@@ -61,7 +61,11 @@ export function renderPlayersDrawer() {
     const { list, search } = dom();
     if (!list || !isOpen()) return;
     const needle = String(search?.value || "").trim().toLocaleLowerCase();
-    const rows = playerRows().filter((player) => !needle || String(player.nickname || "").toLocaleLowerCase().includes(needle));
+    // Kanonik qatlama (EMSSearch, search_fold.js): registr və az↔ing hərfləri («Aysel» ↔ «AYSƏL»).
+    const fold = window.EMSSearch ? window.EMSSearch.matcher(needle, { compact: false }) : null;
+    const rows = playerRows().filter(
+        (player) => !needle || (fold ? fold(player.nickname || "") : String(player.nickname || "").toLocaleLowerCase().includes(needle))
+    );
     const signature = `${presentationStyle()}|${needle}|${state.sessionState}|${state.currentQuestion?.index || 0}|${[...removing].join(",")}|${rows
         .map((player) => `${player.id}:${player.nickname}:${player.avatar_key}:${player.active_from_index || 0}`)
         .join(",")}`;

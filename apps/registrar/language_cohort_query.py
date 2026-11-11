@@ -4,6 +4,8 @@ from types import SimpleNamespace
 
 from django.db.models import Q
 
+from core.search_text import tolerant_q
+
 from . import guest_roster, language_cohorts
 from .journal_access import can_edit_journal, can_observe_journal
 from .journal_list_scope import journal_list_base
@@ -77,13 +79,14 @@ def candidate_records(*, cohort, actor, query=""):
         student__memberships__role__organization=cohort.organization,
         student__memberships__role__is_active=True,
     ).filter(Q(group__in=guest_roster.scoped_group_queryset(actor, cohort.organization)) | Q(student_id__in=source_ids))
-    for word in str(query or "").split()[:5]:
-        records = records.filter(
-            Q(student__first_name__icontains=word)
-            | Q(student__last_name__icontains=word)
-            | Q(student__profile__patronymic__icontains=word)
-            | Q(group__name__icontains=word)
-        )
+    # Dözümlü axtarış (core.search_text, sahib 2026-11-11): registr, az↔ing hərfləri, söz sırası; qrup kod rejimində.
+    search_q = tolerant_q(
+        query,
+        ("student__first_name", "student__last_name", "student__profile__patronymic"),
+        compact_fields=("group__name",),
+    )
+    if search_q is not None:
+        records = records.filter(search_q)
     records = records.exclude(
         student_id__in=Enrollment.objects.filter(
             organization=cohort.organization, offering=cohort.offering, status=Enrollment.Status.ENROLLED

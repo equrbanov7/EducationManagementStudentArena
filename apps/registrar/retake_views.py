@@ -20,6 +20,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET, require_POST
 
 from core import superadmin_waiver
+from core.search_text import tolerant_q
 from core.tenancy import get_request_organization, request_has_active_organization_context
 
 from . import retake_access, retake_decisions, retake_rules, retake_services
@@ -365,8 +366,9 @@ def subgroup_offerings(request, application_id):
         .select_related("group", "period", "instructor")
         .order_by("group__name")
     )
-    if query:
-        rows = rows.filter(group__name__icontains=query)
+    group_q = tolerant_q(query, ("group__name",), compact=True)  # «534t» → «534 T az» (core.search_text)
+    if group_q is not None:
+        rows = rows.filter(group_q)
     results = []
     for offering in rows[:50]:
         teacher = getattr(offering, "instructor", None)

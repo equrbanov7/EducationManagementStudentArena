@@ -28,11 +28,11 @@ GROUP = "234 K ing"
 
 class FoldRegexUnitTest(SimpleTestCase):
     def test_letter_classes_are_explicit(self):
-        self.assertEqual(fold_regex("is"), "[iıİI][sSşŞ]")
-        self.assertEqual(fold_regex("İ"), "[iıİI]")
-        self.assertEqual(fold_regex("a"), "[aAəƏ]")
-        self.assertEqual(fold_regex("ə"), "[əƏeEaA]")
-        self.assertEqual(fold_regex("e"), "[eEəƏ]")
+        self.assertEqual(fold_regex("is"), "[iıİI]\u0307?[sSşŞ]")
+        self.assertEqual(fold_regex("İ"), "[iıİI]\u0307?")
+        self.assertEqual(fold_regex("a"), "[aAəƏәӘ]")
+        self.assertEqual(fold_regex("ə"), "[əƏәӘeEaA]")
+        self.assertEqual(fold_regex("e"), "[eEəƏәӘ]")
         self.assertEqual(fold_regex("K"), "[kK]")
         self.assertEqual(fold_regex("7"), "7")
 
@@ -103,6 +103,25 @@ class FoldRegexUnitTest(SimpleTestCase):
             ("234 kin g", GROUP, False, False),
             # «İ».lower() → «i̇» (U+0307) — yaddaşda nöqtə atılır.
             ("ismayil", "İsmayıl".lower(), False, True),
+            # Sahib 2026-11-11: bərpa olunmuş tələbə «aqsin quliyev» (kiçik, ASCII) saxlanıb.
+            ("Aqşin", "aqsin quliyev", False, True),
+            ("AQŞİN QULİYEV", "aqsin quliyev", False, True),
+            ("quliyev aqsin", "aqsin quliyev", False, True),
+            ("aqsin", "Aqşin Quliyev", False, True),
+            ("Aqshin", "Aqşin Quliyev", False, True),
+            ("AQSIN", "Aqşin Quliyev", False, True),
+            ("ismayilov", "İsmayılov", False, True),
+            ("ISMAYILOV", "İsmayılov", False, True),
+            ("534t", "534 T az", True, True),
+            ("534 t az", "534 T az", True, True),
+            ("Aqşin", "Rəşad Əliyev", False, False),
+            # Oxşar/görünməz simvollar: kiril «ә», rumın «ș», sıfır enli boşluq, parçalanmış «ş».
+            ("Әliyev", "Əliyev", False, True),
+            ("Əliyev", "Әliyev", False, True),
+            ("Șahin", "Şahin", False, True),
+            ("Aq\u200bşin", "aqsin", False, True),
+            ("Aqs\u0327in", "Aqşin", False, True),
+            ("Aqşin", "Aqs\u0327in", False, True),
         )
         for query, text, compact, expected in cases:
             with self.subTest(query=query, text=text, compact=compact):
@@ -128,12 +147,12 @@ class FoldRegexUnitTest(SimpleTestCase):
         self.assertEqual(plain_only.connector, "AND")
         self.assertEqual(len(plain_only.children), 2)  # iki token VƏ ilə, bitişik alternativ YOX
         mixed = list(leaves(tolerant_q("ab cd", ("first_name",), compact_fields=("last_name",))))
-        self.assertIn(("first_name__iregex", "[aAəƏ][bB]"), mixed)
+        self.assertIn(("first_name__iregex", "[aAəƏәӘ][bB]"), mixed)
         # «ab» qısa hərf tokenidir → kod sahəsində də bitişik; bitişdirilmiş «abcd» → kod rejimi.
-        self.assertIn(("last_name__iregex", "[aAəƏ][bB]"), mixed)
-        self.assertIn(("last_name__iregex", r"[aAəƏ][\s._/-]*[bB][\s._/-]*[cCçÇ][\s._/-]*[dD]"), mixed)
+        self.assertIn(("last_name__iregex", "[aAəƏәӘ][bB]"), mixed)
+        self.assertIn(("last_name__iregex", r"[aAəƏәӘ][\s._/-]*[bB][\s._/-]*[cCçÇ][\s._/-]*[dD]"), mixed)
         coded = tolerant_q("ab12", (), compact_fields=("last_name",))
-        self.assertEqual(list(leaves(coded)), [("last_name__iregex", r"[aAəƏ][\s._/-]*[bB][\s._/-]*1[\s._/-]*2")])
+        self.assertEqual(list(leaves(coded)), [("last_name__iregex", r"[aAəƏәӘ][\s._/-]*[bB][\s._/-]*1[\s._/-]*2")])
 
 
 class TolerantQPostgresTest(TestCase):
@@ -193,6 +212,37 @@ class TolerantQPostgresTest(TestCase):
             with self.subTest(raw=raw):
                 self.assertEqual(self._find(raw, fields=("first_name",)), set())
                 self.assertEqual(self._find(raw, fields=("first_name",), compact=True), set())
+
+    def test_owner_cases_2026_11_11(self):
+        """Sahib 2026-11-11: registr/hərf fərqi və az↔ing yazılış heç bir istiqamətdə nəticəni sıfırlamasın."""
+        User = get_user_model()
+        for key, first, last in (
+            ("ascii_aqsin", "aqsin", "quliyev"),
+            ("az_aqsin", "Aqşin", "Quliyev"),
+            ("ismayilov", "Elvin", "İsmayılov"),
+            # Python ``lower()`` ilə yazılmış «İ» → «i̇» (U+0307) DB-də qalıb.
+            ("dotted", "Nigar", "İsmayılova".lower()),
+            ("cyr", "Aynur", "Әliyeva"),
+        ):
+            User.objects.create_user(username=key, email=f"{key}@example.com", first_name=first, last_name=last)
+        fields = ("first_name", "last_name")
+        both = {"ascii_aqsin", "az_aqsin"}
+        for query, expected in (
+            ("Aqşin", both),
+            ("AQŞİN QULİYEV", both),
+            ("quliyev aqsin", both),
+            ("aqsin", both),
+            ("AQSIN", both),
+            ("Aqshin", {"az_aqsin"}),
+            ("ismayilov", {"ismayilov", "dotted"}),
+            ("ISMAYILOV", {"ismayilov", "dotted"}),
+            ("ismayılova", {"dotted"}),
+            ("Əliyeva", {"cyr"}),
+            ("aliyeva", {"cyr"}),
+            ("Aqşin Məmmədov", set()),
+        ):
+            with self.subTest(query=query):
+                self.assertEqual(self._find(query, fields=fields) & (both | {"ismayilov", "dotted", "cyr"}), expected)
 
     def test_longest_allowed_query_is_not_too_complex_for_postgres(self):
         """Ən uzun icazəli sorğu (4 × 40 simvol, ən «ağır» siniflər) ARE limitinə düşmür."""

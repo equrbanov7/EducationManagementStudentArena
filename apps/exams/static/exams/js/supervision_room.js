@@ -133,10 +133,12 @@
     function matchesFilter(row) {
         var q = (document.getElementById("svr-filter") || {}).value || "";
         var st = (document.getElementById("svr-state-filter") || {}).value || "";
-        q = q.trim().toLowerCase();
+        q = q.trim();
         if (st && row.state !== st) return false;
         if (!q) return true;
-        return (row.name + " " + row.username + " " + (row.group || "")).toLowerCase().indexOf(q) !== -1;
+        // Kanonik qatlama (EMSSearch): «aqsin» ↔ «Aqşin», «QULİYEV» ↔ «quliyev», söz sırası, «534t» → «534 T az».
+        if (window.EMSSearch) return window.EMSSearch.matches(q, row.name + " " + row.username + " " + (row.group || ""));
+        return (row.name + " " + row.username + " " + (row.group || "")).toLowerCase().indexOf(q.toLowerCase()) !== -1;
     }
 
     function render() {
