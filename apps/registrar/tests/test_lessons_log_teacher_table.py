@@ -257,6 +257,21 @@ class TeacherTableTest(TestCase):
         self.assertEqual(by_sector, {"az": (26, 52), "ing": (3, 6)})
         self.assertEqual(totals["by_sector"][1]["text"], "6 saat (3 dərs)")
 
+    def test_mixed_az_ing_patok_counts_as_ing(self):
+        """Sahib 2026-11-11: az + ing qrupların birgə patoku İngilis bölməsinə sayılır."""
+        from types import SimpleNamespace
+        from unittest import mock
+
+        def lesson(lang):
+            return SimpleNamespace(offering=SimpleNamespace(group_id=1, group=lang))
+
+        with mock.patch("apps.registrar.syllabus_carry.group_language", side_effect=lambda group: group):
+            self.assertEqual(table_service._event_sector({"lessons": [lesson("az"), lesson("ing")]}), "ing")
+            self.assertEqual(table_service._event_sector({"lessons": [lesson("az"), lesson("az")]}), "az")
+            self.assertEqual(
+                table_service._event_sector({"lessons": [lesson("az"), lesson("rus")]}), table_service.SECTOR_MIXED
+            )
+
     def test_group_filter_keeps_the_full_patok_name(self):
         payload = self._table(ll_group="234 K")
         row = self._row(payload, "234 İT, 234 K", "lecture")
