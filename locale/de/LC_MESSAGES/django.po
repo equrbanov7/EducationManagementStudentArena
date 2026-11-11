@@ -120392,3 +120392,13 @@ msgstr ""
 msgctxt "exams.model.question.field"
 msgid "replaces"
 msgstr "Ersetzt Frage"
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(period)s · %(group)s: birləşdirilmiş (passiv) dublikat jurnal arxivlənən fənn kartında tarixçə kimi qalır — xanaları əsas jurnala kopyalanıb."
+msgstr "%(period)s · %(group)s: Das zusammengeführte (inaktive) doppelte Journal bleibt als Verlauf auf der archivierten Fachkarte — seine Zellen wurden ins Hauptjournal kopiert."
+
+#, python-format
+msgctxt "accounts.catalog"
+msgid "Fənn kodu QKU-N formasında olmalıdır. Növbəti boş kod: %(code)s."
+msgstr "Der Fachcode muss die Form QKU-N haben. Nächster freier Code: %(code)s."

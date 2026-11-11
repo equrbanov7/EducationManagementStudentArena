@@ -137,7 +137,8 @@ def link_offering_ids(organization, *, subject_id, group_ids=(), teacher=None, p
 
 
 def enrollment_coverage(organization, subject_id, student_ids, period=None, *, offering_ids=()) -> dict:
-    """Tələbələrin fənn üzrə CARİ dövr jurnalı → ``{"ok": n, "none": [id], "multiple": [id]}`` (≤ 2 sorğu).
+    """Tələbələrin fənn üzrə CARİ dövr jurnalı → ``{"ok": n, "none": [id], "multiple": [id]}`` (≤ 2 sorğu; jurnalsız
+    tələbə varsa dublikat fənn kartı axtarışı üçün +2 … +4 — ``exam_journal_scope.family_enrollments``).
 
     Sahib 2026-10-26: «tələbənin imtahan nəticəsi sistemə düşəcəkmi?» — imtahan yaradılanda / saxlananda /
     aktivləşdiriləndə müəllimə bloklamayan xəbərdarlıq: ``none`` — bu fənn üzrə cari semestr jurnalında
@@ -165,6 +166,10 @@ def enrollment_coverage(organization, subject_id, student_ids, period=None, *, o
             status=Enrollment.Status.ENROLLED,
         ).values_list("student_id", flat=True)
     )
+    missing = [sid for sid in student_ids if not counts.get(sid)]
+    if missing:  # körpünün son ehtiyatı ilə EYNİ: dublikat fənn kartındakı jurnal da jurnaldır (sahib 2026-11-11)
+        for sid in exam_journal_scope.family_enrollments(organization, subject_id, missing, period):
+            counts[sid] = 1
     return {
         "ok": sum(1 for sid in student_ids if counts.get(sid) == 1),
         "none": [sid for sid in student_ids if not counts.get(sid)],
@@ -257,8 +262,15 @@ def _is_stale(row, *, subject_id, offering_ids) -> bool:
     offering = row.enrollment.offering
     if subject_id and offering.pk in offering_ids:
         return False  # bağlı jurnal (əkiz fənn kartı da — ``exam_journal_scope``)
-    if not subject_id or offering.subject_id != subject_id:
-        return True  # imtahanın fənni dəyişib — bal köhnə fənnin jurnalındadır
+    if not subject_id:
+        return True
+    if offering.subject_id != subject_id:
+        # İmtahanın fənni dəyişib — bal köhnə fənnin jurnalındadır. İSTİSNA (sahib 2026-11-11): körpünün son ehtiyatı ilə
+        # yazılmış dublikat fənn kartının jurnalı (``exam_journal_scope.family_enrollments``) köhnəlmiş deyil.
+        family = exam_journal_scope.family_enrollments(
+            offering.organization, subject_id, [row.enrollment.student_id], current_period(offering.organization)
+        )
+        return row.enrollment_id not in {item.pk for item in family.get(row.enrollment.student_id, ())}
     if not offering_ids:
         return False
     # Eyni fənnin BAŞQA jurnalı: tələbə bağlı jurnalda qeydiyyatdadırsa bal oraya köçür.

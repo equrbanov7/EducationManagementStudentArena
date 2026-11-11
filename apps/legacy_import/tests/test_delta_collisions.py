@@ -14,6 +14,7 @@ from django.test import TestCase
 from apps.audit.models import AuditLog
 from apps.legacy_import.services.delta.apply import BATCH_RESOURCE, execute
 from apps.legacy_import.services.delta.resolve import COLLISION_RESOURCE, Catalog
+from apps.registrar import subject_codes, subject_recode
 from apps.registrar.models import CourseOffering, Enrollment, Lesson, Subject
 from apps.syllabus.models import Syllabus
 from apps.workload.models import TeachingTask, TeachingTaskRow
@@ -102,7 +103,7 @@ class DeltaSubjectCollisionTests(TestCase):
         with bypass_rls():
             offering.refresh_from_db()
             self.assertEqual(offering.subject_id, self.wrong.pk)
-            self.assertFalse(Subject.objects.filter(organization=self.org, code="QKU-L5").exists())
+            self.assertFalse(Subject.objects.filter(organization=self.org, name="Riyaziyyat").exists())
             self.assertFalse(AuditLog.objects.filter(resource_type=COLLISION_RESOURCE).exists())
 
     def test_wrong_offering_moves_to_new_subject_and_rerun_is_noop(self):
@@ -111,7 +112,9 @@ class DeltaSubjectCollisionTests(TestCase):
         for key in ("offerings", "syllabi", "load_rows", "mappings", "subjects"):
             self.assertEqual(run.counters[f"written.collision_{key}"], 1, key)
         with bypass_rls():
-            target = Subject.objects.get(organization=self.org, code="QKU-L5")
+            # Sahib 2026-11-11: yeni kart növbəti boş standart ``QKU-N`` alır; köhnə ``QKU-L5`` açarı audit-dədir.
+            target = Subject.objects.get(pk=subject_recode.old_code_index(self.org)["QKU-L5"])
+            self.assertTrue(subject_codes.is_standard_code(target.code))
             self.assertEqual((target.name, target.ects, target.chair_unit_id), ("Riyaziyyat", 5, None))
             offering.refresh_from_db()
             self.assertEqual(offering.subject_id, target.pk)

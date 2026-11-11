@@ -143,8 +143,13 @@ def record_midterm_result(
     offering = enrollment.offering
     if not interim_assessment.is_midterm_offering(offering):
         return NOT_MIDTERM_PERIOD, None
+    # Dublikat kart ehtiyatı ilə (bağlantısız, fənni fərqli jurnal — 2026-11-11) tapılan jurnalda müəllimin ƏL İLƏ
+    # yazdığı Midterm balının üstünə yazılmır (``overridden``); boş xana və ya avtomatik bal adi qayda ilə yazılır.
+    linked = {str(value) for value in offering_ids or ()}
+    via_family = str(offering.subject_id) != str(subject_id) and str(offering.pk) not in linked
     with transaction.atomic():
         return _write(
+            protect_manual=via_family,
             offering=offering,
             enrollment=enrollment,
             score_percent=score_percent,
@@ -164,7 +169,17 @@ def record_midterm_result(
 
 
 def _write(
-    *, offering, enrollment, score_percent, source, attempt_finished_at, is_expelled, by_user, appeal_id, notify
+    *,
+    offering,
+    enrollment,
+    score_percent,
+    source,
+    attempt_finished_at,
+    is_expelled,
+    by_user,
+    appeal_id,
+    notify,
+    protect_manual=False,
 ):
     from core.rls import journal_unlock
 
@@ -177,6 +192,8 @@ def _write(
     component = interim_components.ensure_kollokviums(offering)[0]
     component, enrollment, existing = lock_component(component, enrollment)
     if _overridden(component, enrollment, attempt_finished_at, existing):
+        return OVERRIDDEN, existing
+    if protect_manual and existing is not None and not existing.exam_source:
         return OVERRIDDEN, existing
     from .language_level_grading import MIDTERM_MAX, is_level
 

@@ -30,6 +30,7 @@ from django.views.decorators.http import require_GET, require_POST
 from core.audit import log_action
 from core.constants import AuditAction
 
+from . import subject_codes
 from .catalog_registry import can_manage_catalog, can_view_catalog
 from .catalog_scope import program_visible
 from .models import Program, Subject
@@ -185,6 +186,18 @@ def _save_subject(request, organization):
 
     code = (request.POST.get("code") or "").strip()[:32]
     name = (request.POST.get("name") or "").strip()[:255]
+    # Sahib 2026-11-11 («standart olsun bir»): QKU-N fəzasındakı təşkilatda yeni / dəyişən kod YALNIZ ``QKU-N`` ola
+    # bilər; yeni kartda boş kod növbəti boş ``QKU-N``-i alır. Köhnə kartın dəyişməyən (qeyri-standart) kodu qalır.
+    if subject_codes.uses_standard(organization):
+        if not code and instance is None:
+            code = subject_codes.allocate_code(organization)
+        elif not subject_codes.is_standard_code(code) and (instance is None or instance.code != code):
+            return _error(
+                pgettext(_CTX, "Fənn kodu QKU-N formasında olmalıdır. Növbəti boş kod: %(code)s.")
+                % {"code": subject_codes.allocate_code(organization)},
+                code="nonstandard_code",
+                field="code",
+            )
     if not code:
         return _error(pgettext(_CTX, "Fənn kodu boş ola bilməz."), code="code_required", field="code")
     if not name:

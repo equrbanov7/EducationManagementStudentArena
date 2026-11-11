@@ -1,0 +1,23 @@
+{
+  "format": "duplicate-subjects/1",
+  "auto_catalogue": false,
+  "groups": [
+    {
+      "name": "kompdiaq",
+      "keeper": "76baf791-53e9-43dc-a10f-958be2c9b5d9",
+      "sources": ["7589f20a-b921-4d30-8a40-065252999840"],
+      "pairs": [
+        {"source": "5202619f-d4cb-49b4-b840-775163fa75df", "target": "740322bb-94f2-4733-a543-86178ab4fd23"}
+      ]
+    },
+    {
+      "name": "tedqiqat-metodlari",
+      "keeper": "a1782ff2-5c52-4d64-839e-722863e14b01",
+      "sources": ["a4eb1b36-a1a7-4b2d-bf75-d9f501f58537"],
+      "pairs": [
+        {"source": "b1ed79dd-af82-406c-a249-319faffff98f", "target": "8b9a95c8-e44f-4e6f-9571-311328ce8410"},
+        {"source": "d2155273-ef42-4edc-b167-6a33158ea205", "target": "1aa0b8af-0aa9-43a1-a530-177d5a0bfda6"}
+      ]
+    }
+  ]
+}

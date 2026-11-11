@@ -214,8 +214,9 @@ class CoverageTests(_FinalSetup):
                 coverage = registrar_link.enrollment_coverage(
                     self.org, self.subject.pk, [self.student.pk, lonely.pk, single.pk]
                 )
-            self.assertLessEqual(len(ctx.captured_queries), 2)
-            with self.assertNumQueries(1):
+            # +2 (sahib 2026-11-11): jurnalsız tələbə üçün dublikat fənn kartı axtarışı (fənnin adı + əkiz kartlar).
+            self.assertLessEqual(len(ctx.captured_queries), 4)
+            with self.assertNumQueries(3):
                 registrar_link.enrollment_coverage(self.org, self.subject.pk, [lonely.pk], period=self.period)
         self.assertEqual(coverage, {"ok": 1, "none": [lonely.pk], "multiple": [self.student.pk]})
         self.assertEqual(registrar_link.enrollment_coverage(self.org, None, [lonely.pk])["none"], [])

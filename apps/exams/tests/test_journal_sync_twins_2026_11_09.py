@@ -38,11 +38,13 @@ class CanonicalTwinSyncTests(_MidtermSetup):
             self.assertEqual(target_identity(attempt), ("enrollment", self.enrollment.pk))
         self.assertEqual(self._final_grade().exam_score, Decimal("50"))
 
-    def test_twin_without_explicit_link_is_not_inferred(self):
+    def test_twin_without_explicit_link_resolves_to_duplicate_card_journal_since_2026_11_11(self):
+        # Sahib 2026-11-11 («Fənnin jurnalında olmayan tələbə: 35 / 35»): əvvəl bağlantısız əkiz QƏSDƏN tapılmırdı;
+        # indi son ehtiyat tələbənin cari dövrdə EYNİ adlı kartdakı jurnalıdır — YALNIZ qrupun ailəsində imtahanın öz
+        # fənninin açılışı yoxdursa (növbəti test həmin fail-closed qaydanı saxlayır).
         with bypass_rls():
-            self.assertIsNone(
-                exam_bridge.resolve_enrollment(student=self.student, subject_id=self.twin.pk, organization=self.org)
-            )
+            found = exam_bridge.resolve_enrollment(student=self.student, subject_id=self.twin.pk, organization=self.org)
+        self.assertEqual(found.pk, self.enrollment.pk)
 
     def test_exact_family_offering_blocks_stale_twin_link_even_without_enrollment(self):
         with bypass_rls():
