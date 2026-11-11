@@ -45,6 +45,7 @@ class RecodeAllTest(SubjectMergeBase):
             self.legacy = Subject.objects.create(organization=self.org, code="QKU-L2670", name="Beta")
             self.site = Subject.objects.create(organization=self.org, code="SAYT-0007", name="Qamma")
             self.twin = Subject.objects.create(organization=self.org, code="QKU-MR085", name="alfa")  # QKU dublikatı
+            self.zero = Subject.objects.create(organization=self.org, code="QKU-053", name="Zeta")  # başında sıfır
             self.archived = Subject.objects.create(
                 organization=self.org, code="SAYT-0001", name="Delta", is_archived=True, is_active=False
             )
@@ -57,6 +58,7 @@ class RecodeAllTest(SubjectMergeBase):
             self.assertRegex(new["QKU-L2670"], r"^QKU-30[2-9]$")
             self.assertTrue(all(subject_codes.is_standard_code(code) for code in new.values()))
             self.assertEqual(len(set(new.values())), len(new))
+            self.assertIn("QKU-053", new)  # qeyri-standart kart ÖZÜNÜN «QKU dublikatı» sayılmır
             self.assertEqual(plan["has_qku_duplicate"], ["QKU-MR085"])
             self.assertEqual(plan["counts"]["archived_skipped"], 1)
             subject_recode.apply_recode(self.org, plan["items"], batch=BATCH)

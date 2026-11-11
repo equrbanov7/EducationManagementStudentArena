@@ -1,6 +1,6 @@
 {
   "format": "duplicate-subjects/1",
-  "auto_catalogue": true,
+  "auto_catalogue": false,
   "groups": [
     {
       "name": "kompdiaq",

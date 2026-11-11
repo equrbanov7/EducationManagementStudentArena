@@ -229,6 +229,10 @@ class JournalMerge(ScoreSteps):
         mark_ids = list(LessonMark.objects.filter(lesson__offering=source).values_list("pk", flat=True))
         if corrected_lesson_ids(list(lessons.values_list("pk", flat=True))) or corrected_mark_ids(mark_ids):
             raise Blocked("source_corrected")
+        # Bitmiş semestrin jurnalına toxunulmur: hədəfdə yekun nəticə varsa qayıb saatı / giriş balı dəyişə bilməz.
+        finished = Enrollment.objects.filter(offering=target)
+        if any(_model(name).objects.filter(enrollment__in=finished).exists() for name in ("FinalGrade", "ResitRecord")):
+            raise Blocked("target_has_final_results")
         blocked = _policy_block(OFFERING_POLICY, type(source), [source.pk]) or _policy_block(
             ENROLLMENT_POLICY, Enrollment, list(enrollments.values_list("pk", flat=True))
         )
@@ -300,18 +304,21 @@ class JournalMerge(ScoreSteps):
 
     # ── köçürmə ───────────────────────────────────────────────────────────
     def _enrollments(self, source, target, manifest) -> dict:
-        """``{tələbə id → T qeydiyyatı}`` — W-də aktiv və ya datalı (xana / bal) hər tələbə üçün."""
+        """``{tələbə id → T qeydiyyatı}`` — W-də ``dropped`` OLMAYAN və ya datalı (xana / bal) hər tələbə üçün.
+
+        Dondurulmuş (``suspended`` …) sətir də T-yə EYNİ statusla keçir — passiv W-də qalsaydı tələbə ikinci kartı
+        görməyə davam edərdi. ``legacy_qb_fail`` (köhnə sistemin q/b kəsilməsi) T sətrinə daşınır."""
         Enrollment = _model("Enrollment")
         existing = {row.student_id: row for row in Enrollment.objects.select_for_update().filter(offering=target)}
         out = {}
         rows = Enrollment.objects.select_for_update().filter(offering=source).order_by("created_at", "pk")
         for row in rows:
-            active = row.status == "enrolled"
-            if not active and not (row.lesson_marks.exists() or row.component_scores.exists()):
+            live = row.status != "dropped"
+            if not live and not (row.lesson_marks.exists() or row.component_scores.exists()):
                 continue
             found = existing.get(row.student_id)
             if found is None:
-                if not active:  # W-dən çıxmış tələbənin datası W-də qalır — T-yə yeni tələbə əlavə olunmur
+                if not live:  # W-dən çıxmış tələbənin datası W-də qalır — T-yə yeni tələbə əlavə olunmur
                     self.counts["departed_students_left_on_source"] += 1
                     continue
                 guest = row.source_group_id is not None and row.source_group_id != target.group_id
@@ -322,7 +329,8 @@ class JournalMerge(ScoreSteps):
                             student_id=row.student_id,
                             offering=target,
                             kind=row.kind,
-                            status="enrolled",
+                            status=row.status,
+                            legacy_qb_fail=row.legacy_qb_fail,
                             source_group_id=row.source_group_id if guest else None,
                             added_by=self.actor if guest else None,
                             added_at=timezone.now() if guest else None,
@@ -332,15 +340,20 @@ class JournalMerge(ScoreSteps):
                 existing[row.student_id] = found
                 manifest["enrollments_created"].append(str(found.pk))
                 self.counts["enrollments_created"] += 1
-            elif found.status == "dropped" and active:
+            elif found.status == "dropped" and live:
                 manifest["enrollments_reactivated"].append([str(found.pk), str(found.superseded_by_id or "")])
                 Enrollment.objects.filter(pk=found.pk).update(
-                    status="enrolled", superseded_by=None, updated_at=timezone.now()
+                    status=row.status, superseded_by=None, updated_at=timezone.now()
                 )
-                found.status, found.superseded_by_id = "enrolled", None
+                found.status, found.superseded_by_id = row.status, None
                 self.counts["enrollments_reactivated"] += 1
-            elif found.status != "enrolled" and active:
+            elif found.status != "enrolled" and row.status == "enrolled":
                 raise Blocked("target_enrollment_not_active")
+            if row.legacy_qb_fail and not found.legacy_qb_fail:
+                Enrollment.objects.filter(pk=found.pk).update(legacy_qb_fail=True, updated_at=timezone.now())
+                found.legacy_qb_fail = True
+                manifest["qb_fail_set"].append(str(found.pk))
+                self.counts["legacy_qb_fail_carried"] += 1
             out[row.student_id] = found
         return out
 
@@ -368,6 +381,16 @@ class JournalMerge(ScoreSteps):
             _model("Lesson").objects.filter(pk=twin.pk).update(**filled, updated_at=timezone.now())
             manifest["lesson_fields_filled"].append([str(twin.pk), sorted(filled)])
             self.counts["lesson_fields_filled"] += 1
+
+    def _fill_score(self, mark_id, mark, manifest) -> None:
+        from core.rls import journal_unlock
+
+        with journal_unlock():
+            _model("LessonMark").objects.filter(pk=mark_id, score__isnull=True).update(
+                score=mark.score, updated_at=timezone.now()
+            )
+        manifest["marks_score_filled"].append([str(mark_id), str(mark.score)])
+        self.counts["marks_score_filled"] += 1
 
     def _lessons(self, source, target, by_student, manifest, conflicts) -> None:
         Lesson, LessonMark = _model("Lesson"), _model("LessonMark")
@@ -413,6 +436,12 @@ class JournalMerge(ScoreSteps):
                     self.counts["marks_copied"] += 1
                 elif current[1:] == (mark.status, mark.score):
                     self.counts["marks_identical"] += 1
+                elif current[1] == mark.status and mark.score is None:
+                    self.counts["marks_target_has_score_source_none"] += 1  # hədəf daha doludur — itki yoxdur
+                elif current[1] == mark.status and current[2] is None:
+                    # Balsız «iştirak» açıq xanadır (DB trigger-i də belə sayır) — mənbənin balı hədəfə YAZILIR.
+                    self._fill_score(current[0], mark, manifest)
+                    kept[(twin.pk, enrollment.pk)] = (current[0], mark.status, mark.score)
                 else:
                     conflicts.append(
                         {
@@ -496,10 +525,12 @@ class JournalMerge(ScoreSteps):
 
     def _retire(self, source, manifest) -> None:
         Enrollment = _model("Enrollment")
-        ids = list(Enrollment.objects.filter(offering=source, status="enrolled").values_list("pk", flat=True))
-        Enrollment.objects.filter(pk__in=ids).update(status="dropped", updated_at=timezone.now())
-        manifest["source_enrollments_dropped"].extend(str(pk) for pk in ids)
-        self.counts["source_enrollments_dropped"] += len(ids)
+        rows = list(Enrollment.objects.filter(offering=source).exclude(status="dropped").values_list("pk", "status"))
+        Enrollment.objects.filter(pk__in=[pk for pk, _status in rows]).update(
+            status="dropped", updated_at=timezone.now()
+        )
+        manifest["source_enrollments_dropped"].extend([str(pk), status] for pk, status in rows)
+        self.counts["source_enrollments_dropped"] += len(rows)
         source.is_active = False
         source.save(update_fields=["is_active", "updated_at"])
         self.counts["sources_retired"] += 1

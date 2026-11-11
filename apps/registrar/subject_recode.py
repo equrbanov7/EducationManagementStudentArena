@@ -26,7 +26,7 @@ from django.utils import timezone
 from core.audit import log_action
 from core.constants import AuditAction
 
-from .subject_codes import QKU_CODE_RE, SITE_CODE_RE, is_standard_code, next_qku_number, qku_code
+from .subject_codes import SITE_CODE_RE, is_standard_code, next_qku_number, qku_code
 from .subject_duplicates import normalized_subject_key
 
 AUDIT_RESOURCE = "registrar.subject_recode"
@@ -71,6 +71,21 @@ def old_code_index(organization) -> dict:
     return index
 
 
+def register_alias(organization, subject, old_code) -> None:
+    """Kart birbaşa standart ``QKU-N`` ilə yaradılıb, amma köhnə axtarış açarı (``old_code``, məs. legacy delta-nın
+    ``QKU-L<id>``-si) ilə də tapılmalıdır — :func:`old_code_index` üçün audit sətri (kod dəyişmir)."""
+    item = {"id": str(subject.pk), "old": old_code, "new": subject.code, "name": subject.name}
+    log_action(
+        action=AuditAction.CREATE,
+        organization=organization,
+        resource_type=AUDIT_RESOURCE,
+        resource_id=f"alias-{subject.pk}",
+        resource_repr=f"{old_code} → {subject.code}",
+        changes={"kind": "subject_recode", "batch": f"alias-{subject.pk}", "items": [item]},
+        reason="Köhnə açar kodu standart QKU-N kartına bağlandı (sahib 2026-11-11: «standart olsun bir»)",
+    )
+
+
 def plan(organization, *, exclude=(), scope="site") -> dict:
     """``{"items": [{id, old, new, name}], "has_qku_duplicate": [kod], "excluded": [kod], "counts": Counter}``.
 
@@ -98,7 +113,7 @@ def _plan_rows(organization, rows, exclude) -> dict:
         for code, name in Subject._base_manager.filter(
             organization=organization, code__startswith="QKU-", is_archived=False
         ).values_list("code", "name")
-        if QKU_CODE_RE.match(code or "")
+        if is_standard_code(code)  # ``QKU-053`` kimi qeyri-standart kart ÖZÜNÜN «QKU dublikatı» sayılmasın
     }
     excluded = {code.strip() for code in exclude if code.strip()}
     counts = Counter()
@@ -192,5 +207,6 @@ __all__ = [
     "new_batch_id",
     "old_code_index",
     "plan",
+    "register_alias",
     "undo_recode",
 ]

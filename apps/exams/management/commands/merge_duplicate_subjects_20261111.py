@@ -11,8 +11,12 @@ düşənləri də, standart olsun bir; imtahan verən hər kəs nəticəsini jur
 
 Əmr exams app-ındadır, çünki registrar imtahan modellərini import etmir (modul sərhədi). Bütün DB işi
 ``rls_worker_atomic()`` + ``bypass_rls()`` + RLS konteksti altındadır; dry-run EYNİ kodu icra edib geri qaytarır.
-Hər qaçışın paket id-si var; ``--undo --batch <id>`` jurnal + kataloq + kod addımlarını geri qaytarır (``takers``
-yerləşdirmələri rəsmi tarixçə sətirləridir — «Alt qrup yerləşdirməsi» tarixçəsindən geri götürülür).
+
+TƏHLÜKƏSİZLİK: ``--apply`` YALNIZ açıq addımla (``--only journals|catalogue|codes|takers``) və ya ``--undo`` ilə işləyir —
+hər addım ayrıca yazılır, ayrıca paket id-si alır və ayrıca geri qaytarılır (tərs sıra ilə: takers → codes →
+catalogue → journals). ``--undo --batch <id>`` paketi TAM geri qaytarır və ya heç nə yazmır (``takers`` paketində
+yalnız toxunulmamış yerləşdirmələr azad olunur). Kataloqun avtomatik (eyni ad + kredit + növ + kafedra) qrupları
+yalnız ``--auto-catalogue`` ilə; defolt — yalnız plandakı açıq qruplar.
 Stdout-a YALNIZ saylar (``twin_merge: açar=say …``; açarlarda rəqəm yoxdur); gözlənilməz xəta
 ``CommandError: duplicate_subjects_failed_<sinif>_<mətn>``.
 """
@@ -51,6 +55,29 @@ class Command(BaseCommand):
         parser.add_argument("--only", choices=(*OPS, "report"), help="Yalnız bir əməliyyat (defolt: hamısı)")
         parser.add_argument("--batch", default="", help="Paket id-si (dupsubj-…); --undo üçün məcburi")
         parser.add_argument("--undo", action="store_true", help="--batch paketini geri qaytar")
+        parser.add_argument(
+            "--auto-catalogue",
+            action="store_true",
+            help="catalogue: planda olmayan eyni adlı (kredit + növ + kafedra eyni) kartları da birləşdir",
+        )
+
+    def _undo(self, organization, actor, counts, batch) -> None:
+        found = journal_missing_takers.undo(organization=organization, actor=actor, counts=counts, batch=batch)
+        if duplicates.has_batch(organization, batch):
+            exam_ids = duplicates.undo(organization=organization, actor=actor, counts=counts, batch=batch)
+            self._resync(exam_ids, counts)
+        elif not found:
+            raise CommandError("duplicate_subjects_batch_unknown")
+
+    @staticmethod
+    def _resync(exam_ids, counts) -> None:
+        """Jurnal bağı geri qayıdan imtahanların rəsmi cəhdləri yenidən sinxronlaşır (köhnəlmiş avtomatik bal qalmasın)."""
+        from apps.exams.models import Exam
+        from apps.exams.services import exam_journal_link
+
+        for exam in Exam.objects.filter(pk__in=[int(value) for value in exam_ids], is_deleted=False):
+            exam_journal_link.resync_exam_journal(exam, notify=False)
+            counts["undo_exams_resynced"] += 1
 
     def _run(self, options, counts, lines) -> str:
         actor = get_user_model().objects.filter(username=options["actor"], is_active=True, is_superuser=True).first()
@@ -67,17 +94,19 @@ class Command(BaseCommand):
             apply_rls_request_context(user_id=actor.pk, org_id=organization.pk)
             with transaction.atomic():
                 if options["undo"]:
-                    duplicates.undo(organization=organization, actor=actor, counts=counts, batch=batch)
+                    self._undo(organization, actor, counts, batch)
                 else:
+                    batch = batch or duplicates.new_batch_id()
                     registrar_ops = tuple(op for op in ops if op in duplicates.OPS)
                     if registrar_ops:
-                        batch = duplicates.run(
+                        duplicates.run(
                             organization=organization,
                             actor=actor,
                             counts=counts,
                             ops=registrar_ops,
                             batch=batch,
                             lines=lines,
+                            auto_catalogue=bool(options["auto_catalogue"]),
                         )
                     else:
                         duplicates.report(organization=organization, counts=counts)
@@ -87,6 +116,9 @@ class Command(BaseCommand):
                             actor=actor,
                             counts=counts,
                             period=duplicates.current_period(organization),
+                            batch=batch,
+                            lines=lines,
+                            allowed_exams=duplicates.PLAN.get("takers_exams") or (),
                         )
                 if not options["apply"]:
                     transaction.set_rollback(True)
@@ -98,6 +130,9 @@ class Command(BaseCommand):
             raise CommandError("duplicate_subjects_batch_invalid")
         if options["undo"] and not batch:
             raise CommandError("duplicate_subjects_undo_needs_batch")
+        if options["apply"] and not options["undo"] and options["only"] not in OPS:
+            # Dörd addımı birdən yazmaq olmaz: hər addımın dry-run-u oxunmalı, hər biri ayrıca geri qaytarıla bilməlidir.
+            raise CommandError("duplicate_subjects_apply_needs_explicit_step")
         counts, lines = Counter(), []
         try:
             batch = self._run(options, counts, lines)

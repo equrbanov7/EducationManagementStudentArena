@@ -137,7 +137,7 @@ def linked_enrollment(student, organization, offering_ids, *, subject_id, exam_i
     return pick_enrollment([row for row in candidates if row.offering_id in twins], offering_ids)
 
 
-def resolve_enrollment(*, student, subject_id, organization, offering_ids=(), exam_id=None):
+def resolve_enrollment(*, student, subject_id, organization, offering_ids=(), exam_id=None, family=True):
     """Tələbənin bu fənn üzrə aktiv qeydiyyatını tap.
 
     ``offering_ids`` — imtahanın AÇIQ bağlandığı jurnallar (``Exam.journal_offerings``, 2026-10-24): tələbə
@@ -163,7 +163,7 @@ def resolve_enrollment(*, student, subject_id, organization, offering_ids=(), ex
     ).select_related("offering", "offering__period", "offering__subject")
     period = _current_period(organization)
     chosen = choose_enrollment(candidates, period, offering_ids)
-    if chosen is None:  # son ehtiyat (sahib 2026-11-11): dublikat fənn kartındakı jurnal — ``exam_journal_scope``
+    if chosen is None and family:  # son ehtiyat (sahib 2026-11-11): dublikat fənn kartı — ``exam_journal_scope``
         from .exam_journal_scope import family_enrollment
 
         chosen = family_enrollment(student, subject_id, organization, period)
@@ -200,7 +200,9 @@ def exam_eligibility(*, student, subject_id, organization):
     ``{"linked": bool, "barred": bool, "reason": str, "absence_hours", ...}``.
     ``linked=False`` → imtahan jurnal fənninə bağlı deyil (qapı tətbiq olunmur).
     """
-    enrollment = resolve_enrollment(student=student, subject_id=subject_id, organization=organization)
+    # Buraxılış qapısı dublikat kart ehtiyatını İŞLƏTMİR (``family=False``): bağlantısız əkiz jurnalın qayıbı tələbəni
+    # imtahandan kəsməsin — qapının davranışı 2026-11-11 dəyişikliyindən əvvəlki kimidir (toplu variantla birə-bir).
+    enrollment = resolve_enrollment(student=student, subject_id=subject_id, organization=organization, family=False)
     if enrollment is None:
         return {"linked": False, "barred": False, "reason": ""}
     # F-06 (2026-09-13): hədd tələbənin ÖZ proqramından — kabinetlə EYNİ mənbə
@@ -277,12 +279,6 @@ def _resolve_enrollments_batch(*, student, subject_ids, organization):
     resolved = {}
     for subject_id, candidates in by_subject.items():
         chosen = choose_enrollment(candidates, period)
-        if chosen is not None:
-            resolved[subject_id] = chosen
-    from .exam_journal_scope import family_enrollment
-
-    for subject_id in set(subject_ids) - set(resolved):  # tək variantın son ehtiyatı ilə birə-bir (dublikat kart)
-        chosen = family_enrollment(student, subject_id, organization, period)
         if chosen is not None:
             resolved[subject_id] = chosen
     return resolved

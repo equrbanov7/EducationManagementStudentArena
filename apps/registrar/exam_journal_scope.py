@@ -43,21 +43,28 @@ def unit_families(organization, group_ids) -> tuple[list, dict, dict]:
     return units, own, linked
 
 
-def twin_subject_ids(organization, subject_id, period) -> set:
-    """Dövrdə açılışı olan, adı (normallaşdırılmış) imtahanın fənni ilə EYNİ olan BAŞQA fənn kartları."""
+def twin_subject_ids(organization, subject_id, period, *, strict=False) -> set:
+    """Dövrdə açılışı olan, adı (normallaşdırılmış) imtahanın fənni ilə EYNİ olan BAŞQA fənn kartları.
+
+    ``strict`` (körpünün bağlantısız son ehtiyatı, 2026-11-11): kredit (ECTS) və növ də EYNİ olmalıdır — kataloq
+    birləşməsinin avtomatik qaydası ilə eyni; eyni adlı, amma fərqli kreditli kart ayrı fənn ola bilər."""
     if organization is None or not subject_id or period is None:
         return set()
-    name = Subject.objects.filter(organization=organization, pk=subject_id).values_list("name", flat=True).first()
-    key = normalized_subject_key(name or "")
+    own = Subject.objects.filter(organization=organization, pk=subject_id).values_list("name", "ects", "kind").first()
+    key = normalized_subject_key(own[0] if own else "")
     if not key:
         return set()
     rows = (
         Subject.objects.filter(organization=organization, offerings__period=period, offerings__is_active=True)
         .exclude(pk=subject_id)
-        .values_list("pk", "name")
+        .values_list("pk", "name", "ects", "kind")
         .distinct()
     )
-    return {pk for pk, other in rows if normalized_subject_key(other) == key}
+    return {
+        pk
+        for pk, other, ects, kind in rows
+        if normalized_subject_key(other) == key and (not strict or (ects, kind) == own[1:])
+    }
 
 
 def journal_offerings_by_unit(organization, period, subject_id, linked) -> dict:
@@ -112,14 +119,14 @@ def family_enrollments(organization, subject_id, student_ids, period) -> dict:
     Sahib 2026-11-11 («Fənnin jurnalında olmayan tələbə: 35 / 35»): imtahan dublikat kartın BİRİ ilə yaradılıb, qrupun
     jurnalı isə o biri kartın altındadır və imtahan jurnala açıq bağlanmayıb — körpü ``offering.subject == exam.subject``
     axtarıb heç nə tapmırdı. Qayda (``linked_twin_offering_ids`` ilə EYNİ, fail-closed): CARİ dövr, aktiv jurnal,
-    ``enrolled`` qeydiyyat, fənnin normallaşdırılmış adı imtahanın fənni ilə EYNİ, və jurnalın qrup ailəsində imtahanın
+    ``enrolled`` qeydiyyat, fənnin normallaşdırılmış adı + krediti + növü imtahanın fənni ilə EYNİ, jurnalın qrup ailəsində imtahanın
     öz fənninin aktiv açılışı YOXDUR. Tələbənin belə jurnalları İKİ fərqli kartdadırsa (qeyri-müəyyən) — heç nə."""
     from apps.registrar.models import Enrollment
 
     ids = [value for value in student_ids or () if value is not None]
     if organization is None or not subject_id or period is None or not ids:
         return {}
-    twins = twin_subject_ids(organization, subject_id, period)
+    twins = twin_subject_ids(organization, subject_id, period, strict=True)
     if not twins:
         return {}
     rows = list(

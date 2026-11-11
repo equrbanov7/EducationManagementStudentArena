@@ -135,24 +135,34 @@ def _auto_groups(organization, taken, period, counts) -> list:
         if len({(subject.ects, subject.kind) for subject in subjects}) > 1:
             counts["same_name_review_credit_or_kind_differs"] += 1
             continue
+        if len({subject.chair_unit_id for subject in subjects}) > 1:
+            # Fərqli kafedraların eyni adlı kartları ayrı fənlər ola bilər (kataloq əhatəsi kafedraya görədir) —
+            # avtomatik birləşdirilmir, sahibin baxışı üçün sayılır.
+            counts["same_name_review_chair_differs"] += 1
+            continue
         keeper = choose_keeper(organization, subjects, period)
         out.append((keeper, [subject for subject in subjects if subject.pk != keeper.pk], []))
     return out
 
 
-def _auto_pairs(organization, keeper, sources, explicit) -> list:
-    """Qrupun kartları üzrə İKİ aktiv jurnalı olan (dövr, qrup) qutuları — planda olmayanlar."""
+def _auto_pairs(organization, keeper, sources, explicit, period) -> list:
+    """Qrupun kartları üzrə CARİ dövrdə İKİ aktiv jurnalı olan qrup qutuları — planda olmayanlar.
+
+    Keçmiş dövrlərə QƏSDƏN toxunulmur (bitmiş semestrin jurnalı, yekun nəticələri dəyişməməlidir) — keçmiş dövrün
+    əkiz qutusu kataloq addımında toqquşma kimi görünür və sahibin qərarına qalır."""
+    if period is None:
+        return []
     CourseOffering = _model("CourseOffering")
     known = {str(pair.get("source")) for pair in explicit}
     targets = {
         (period_id, group_id): pk
         for pk, period_id, group_id in CourseOffering._base_manager.filter(
-            organization=organization, subject=keeper, is_active=True, group__isnull=False
+            organization=organization, subject=keeper, is_active=True, group__isnull=False, period=period
         ).values_list("pk", "period_id", "group_id")
     }
     rows = CourseOffering._base_manager.filter(
-        organization=organization, subject__in=sources, is_active=True, group__isnull=False
-    ).order_by("period__start_date", "pk")
+        organization=organization, subject__in=sources, is_active=True, group__isnull=False, period=period
+    ).order_by("pk")
     return [
         {"source": str(pk), "target": str(targets[(period_id, group_id)]), "auto": True}
         for pk, period_id, group_id in rows.values_list("pk", "period_id", "group_id")
@@ -182,11 +192,11 @@ def _check_pairs(keeper, sources, pairs, counts) -> list:
     return good
 
 
-def _journals(organization, actor, counts, batch, groups, lines) -> None:
+def _journals(organization, actor, counts, batch, groups, lines, period) -> None:
     merger = JournalMerge(organization=organization, actor=actor, counts=counts, batch=batch)
     for keeper, sources, pairs in groups:
         explicit = _check_pairs(keeper, sources, pairs, counts)
-        merger.run(explicit + _auto_pairs(organization, keeper, sources, explicit))
+        merger.run(explicit + _auto_pairs(organization, keeper, sources, explicit, period))
     for index, delta in merger.report:
         if delta:
             lines.append(f"pair={index} " + " ".join(f"{key}={value}" for key, value in sorted(delta.items())))
@@ -246,7 +256,7 @@ def _codes(organization, counts, batch) -> bool:
     return True
 
 
-def run(*, organization, actor, counts, ops=OPS, batch="", plan=None, lines=None) -> str:
+def run(*, organization, actor, counts, ops=OPS, batch="", plan=None, lines=None, auto_catalogue=False) -> str:
     plan = PLAN if plan is None else plan
     if plan.get("format") != FORMAT:
         raise Stop("duplicate_subjects_plan_format_unknown")
@@ -255,12 +265,12 @@ def run(*, organization, actor, counts, ops=OPS, batch="", plan=None, lines=None
     period = current_period(organization)
     groups = _plan_groups(organization, plan, counts)
     if "journals" in ops:
-        _journals(organization, actor, counts, batch, groups, lines)
+        _journals(organization, actor, counts, batch, groups, lines, period)
     audits, recoded = [], False
     if "catalogue" in ops:
         # Jurnal addımı kartları dəyişmir, amma kataloq birləşməsi arxiv bayrağını oxuyur — kartlar təzədən oxunur.
         groups = _plan_groups(organization, plan, Counter())
-        if plan.get("auto_catalogue"):
+        if auto_catalogue or plan.get("auto_catalogue"):
             taken = {subject.pk for keeper, sources, _pairs in groups for subject in (keeper, *sources)}
             groups = groups + _auto_groups(organization, taken, period, counts)
         audits = _catalogue(organization, actor, counts, groups)
@@ -280,28 +290,40 @@ def run(*, organization, actor, counts, ops=OPS, batch="", plan=None, lines=None
     return batch
 
 
-def undo(*, organization, actor, counts, batch) -> None:
+def has_batch(organization, batch) -> bool:
+    rows = _model("AuditLog", "audit").objects.filter(organization=organization, resource_type=RESOURCE)
+    return rows.filter(resource_id=batch, changes__kind=KIND).exists()
+
+
+def undo(*, organization, actor, counts, batch) -> list:
+    """Paketi TAM geri qaytarır və ya HEÇ NƏ yazmır (:class:`Stop` — çağıranın tranzaksiyası geri qaytarılır).
+
+    Qaytarır: jurnal bağı geri qayıdan imtahanların id-ləri (çağıran onları yenidən sinxronlaşdırır)."""
     from .subject_merge_undo import undo as undo_catalogue
 
     AuditLog = _model("AuditLog", "audit")
     rows = AuditLog.objects.filter(organization=organization, resource_type=RESOURCE, resource_id=batch)
-    entry = rows.filter(changes__kind=KIND).order_by("-created_at").first()
-    if entry is None:
+    entries = list(rows.filter(changes__kind=KIND).order_by("-created_at", "-pk"))
+    if not entries:
         raise Stop("duplicate_subjects_batch_unknown")
     if rows.filter(changes__kind=f"{KIND}_undo").exists():
         raise Stop("duplicate_subjects_batch_already_undone")
-    changes = entry.changes or {}
-    if changes.get("recoded"):
+    if any((entry.changes or {}).get("recoded") for entry in entries):
         try:
             counts["undo_codes"] += len(subject_recode.undo_recode(organization, batch))
         except subject_recode.RecodeError as exc:
             raise Stop(f"duplicate_subjects_undo_recode_{exc}") from None
-    for audit_id in reversed(changes.get("catalogue_audits") or []):
-        outcome = undo_catalogue(audit_id=audit_id, actor=actor, apply=True, reason=f"Geri qaytarma — {REASON}")
-        if not outcome.get("applied"):
-            raise Stop("duplicate_subjects_undo_catalogue_changed_after_merge")
-        counts["undo_catalogue_groups"] += 1
-    undo_journals(organization=organization, actor=actor, counts=counts, batch=batch)
+    for entry in entries:
+        for audit_id in reversed((entry.changes or {}).get("catalogue_audits") or []):
+            outcome = undo_catalogue(audit_id=audit_id, actor=actor, apply=True, reason=f"Geri qaytarma — {REASON}")
+            if not outcome.get("applied"):
+                raise Stop("duplicate_subjects_undo_catalogue_changed_after_merge")
+            counts["undo_catalogue_groups"] += 1
+    exams = undo_journals(organization=organization, actor=actor, counts=counts, batch=batch)
+    # Qismən geri qaytarma paketi «geri qaytarılıb» kimi işarələməsin: bir cüt belə dayanıbsa HEÇ NƏ yazılmır.
+    for key in ("undo_blocked_post_merge_data", "undo_blocked_source_card_archived", "undo_empty_twin_not_restored"):
+        if counts[key]:
+            raise Stop(f"duplicate_subjects_{key}")
     log_action(
         AuditAction.UPDATE,
         user=actor,
@@ -311,6 +333,7 @@ def undo(*, organization, actor, counts, batch) -> None:
         resource_type=RESOURCE,
         resource_id=batch,
     )
+    return sorted(exams)
 
 
 # ── hesabat / qoruyucu ────────────────────────────────────────────────────
@@ -374,6 +397,7 @@ __all__ = [
     "choose_keeper",
     "current_period",
     "duplicate_cards",
+    "has_batch",
     "new_batch_id",
     "report",
     "run",

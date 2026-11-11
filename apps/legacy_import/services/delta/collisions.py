@@ -160,14 +160,21 @@ class _LegacySubject:
             int(j.get("kredit") or 0) for j in self.journals if 0 < int(j.get("kredit") or 0) <= _MAX_CREDITS
         )
         fields = {"ects": credits.most_common(1)[0][0]} if credits else {}
+        from apps.registrar.public import subject_codes, subject_recode
+
+        # Sahib 2026-11-11 («standart olsun bir»): yeni kart ``QKU-L<id>`` YOX, növbəti boş ``QKU-N`` alır; köhnə
+        # açar (``QKU-L<id>``) audit-də qalır və ``collision_target`` kartı onunla da tapır (``Catalog.recoded``).
+        alias = f"{SUBJECT_ALT_CODE_PREFIX}{self.legacy['id']}"
         subject = Subject.objects.create(
             organization=self.run.organization,
-            code=f"{SUBJECT_ALT_CODE_PREFIX}{self.legacy['id']}",
+            code=subject_codes.allocate_code(self.run.organization),
             name=text(self.legacy.get("name")),
             chair_unit=chair if chair is not None and chair.unit_type == "chair" else None,
             is_active=True,
             **fields,
         )
+        subject_recode.register_alias(self.run.organization, subject, alias)
+        self.run.catalog.recoded[alias] = str(subject.pk)
         self.run.catalog.index_subject(subject)
         self.run.created("subjects", subject.pk)
         self.run.count("written.collision_subjects")

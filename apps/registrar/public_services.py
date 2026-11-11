@@ -60,6 +60,7 @@ from . import subgroup_rollup  # noqa: F401
 from . import subgroup_students_journals  # noqa: F401 — «Alt qrup tələbələri» hədəf jurnal axtarışı (2026-11-05)
 from . import subgroup_students_read  # noqa: F401 — «Alt qrup tələbələri» reyestri (2026-11-05)
 from . import subgroup_students_stats  # noqa: F401 — «Alt qrup tələbələri» statistikası (2026-11-05)
+from . import subject_codes  # noqa: F401 — vahid QKU-N kod ayırıcısı (legacy delta, 2026-11-11)
 from . import subject_merge_apply  # noqa: F401 — açılışın fənn düzəlişi icazəsi (legacy kod toqquşması, 2026-10-26)
 from . import subject_recode  # noqa: F401 — köhnə fənn kodu → kart (legacy delta, 2026-11-11)
 from . import teacher_journal_list  # noqa: F401
@@ -241,6 +242,7 @@ __all__ = [
     "twins_repair_2026_11_05b",
     "duplicate_subjects_2026_11_11",
     "exam_taker_placement_2026_11_11",
+    "subject_codes",
     "subject_recode",
 ]
 

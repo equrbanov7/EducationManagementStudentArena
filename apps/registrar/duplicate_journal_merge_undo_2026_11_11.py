@@ -50,7 +50,9 @@ def _post_merge_data(target_id, since, manifest) -> bool:
     return _model("ComponentScore").objects.filter(pk__in=touched, updated_at__gt=since).exists()
 
 
-def undo(*, organization, actor, counts, batch) -> None:
+def undo(*, organization, actor, counts, batch) -> set:
+    """Qaytarır: geri qaytarılan cütlərin imtahan bağlarındakı imtahan id-ləri (yenidən sinxron üçün)."""
+    exams = set()
     AuditLog = _model("AuditLog", "audit")
     rows = AuditLog.objects.filter(
         organization=organization, resource_type=RESOURCE, changes__kind=KIND, changes__batch=batch
@@ -77,12 +79,18 @@ def undo(*, organization, actor, counts, batch) -> None:
             elif _model("CourseOffering").objects.filter(pk=source_id, is_active=True).exists():
                 counts["undo_already_done"] += 1
                 continue
+            elif _model("CourseOffering").objects.filter(pk=source_id, subject__is_archived=True).exists():
+                # Mənbə kart ayrıca kataloq paketi ilə arxivlənib — əvvəl o paket geri qaytarılmalıdır, yoxsa
+                # arxiv kartın altında AKTİV jurnal yaranardı.
+                counts["undo_blocked_source_card_archived"] += 1
+                continue
             elif _post_merge_data(target_id, row.created_at, manifest):
                 counts["undo_blocked_post_merge_data"] += 1
                 continue
             else:
                 _undo_pair(counts, manifest, source_id, target_id)
             counts["undo_pairs"] += 1
+            exams.update(str(link["exam"]) for link in manifest.get("exam_links") or [])
             log_action(
                 AuditAction.UPDATE,
                 user=actor,
@@ -93,6 +101,7 @@ def undo(*, organization, actor, counts, batch) -> None:
                 resource_type=RESOURCE,
                 resource_id=str(source_id),
             )
+    return exams
 
 
 def _undo_shares(manifest, source_id) -> None:
@@ -121,6 +130,15 @@ def _undo_pair(counts, manifest, source_id, target_id) -> None:
             )
             counts["undo_scores_restored"] += 1
     counts["undo_marks_deleted"] += LessonMark.objects.filter(pk__in=get("marks_created", [])).delete()[0]
+    with journal_unlock():
+        for mark_id, score in get("marks_score_filled", []):  # yalnız hələ də bizim yazdığımız bal silinir
+            counts["undo_mark_scores_cleared"] += LessonMark.objects.filter(pk=mark_id, score=Decimal(score)).update(
+                score=None, updated_at=timezone.now()
+            )
+    blank = {"topic": "", "room_id": None, "instructor_id": None, "end_time": None}
+    for lesson_id, fields in get("lesson_fields_filled", []):
+        Lesson.objects.filter(pk=lesson_id).update(**{name: blank[name] for name in fields if name in blank})
+    Enrollment.objects.filter(pk__in=get("qb_fail_set", [])).update(legacy_qb_fail=False)
     counts["undo_lessons_deleted"] += Lesson.objects.filter(
         pk__in=get("lessons_created", []), marks__isnull=True
     ).delete()[0]
@@ -145,12 +163,12 @@ def _undo_pair(counts, manifest, source_id, target_id) -> None:
         if link.get("target_added"):
             through.objects.filter(exam_id=link["exam"], courseoffering_id=target_id).delete()
         through.objects.get_or_create(exam_id=link["exam"], courseoffering_id=source_id)
-    Enrollment.objects.filter(pk__in=get("source_enrollments_dropped", []), status="dropped").update(
-        status="enrolled", updated_at=timezone.now()
-    )
+    dropped = [item if isinstance(item, list) else [item, "enrolled"] for item in get("source_enrollments_dropped", [])]
+    for enrollment_id, status in dropped:
+        Enrollment.objects.filter(pk=enrollment_id, status="dropped").update(status=status, updated_at=timezone.now())
     _model("CourseOffering").objects.filter(pk=source_id).update(is_active=True, updated_at=timezone.now())
     recompute_absences(
-        list(Enrollment.objects.filter(pk__in=get("source_enrollments_dropped", [])))
+        list(Enrollment.objects.filter(pk__in=[enrollment_id for enrollment_id, _status in dropped]))
         + list(Enrollment.objects.filter(offering_id=target_id, status="enrolled"))
     )
 

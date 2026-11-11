@@ -1724,14 +1724,17 @@ jobs:
               ;;
             merge_duplicate_subjects_20261111)
               # Sahib 2026-11-11: dublikat fənlər — jurnal (heç bir xana/bal itmir) + kataloq kartı + QKU-N kod standartı
-              # + imtahan verib jurnalda olmayan tələbələr. batch boş = hamısı; batch=journals|catalogue|codes|takers =
-              # yalnız biri; batch=report = yalnız qoruyucu saylar (yazı yoxdur); batch=dupsubj-… = həmin paketi geri qaytar.
+              # + imtahan verib jurnalda olmayan tələbələr. batch boş = hamısının DRY-RUN-u; batch=journals|catalogue|codes|
+              # takers = yalnız biri; batch=report = yalnız qoruyucu saylar (yazı yoxdur); batch=dupsubj-… = həmin paketi
+              # geri qaytar. APPLY yalnız AÇIQ addımla (boş batch + apply rədd olunur) — hər addım ayrıca paket alır.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor")
               case "$BATCH" in
-                "") ;;
-                journals|catalogue|codes|takers|report) args+=(--only "$BATCH") ;;
+                "") test "$APPLY" != "true" || { echo "apply üçün açıq addım verin: batch=journals|catalogue|codes|takers" >&2; exit 2; } ;;
+                report) test "$APPLY" != "true" || { echo "report yazmır — apply=false olmalıdır" >&2; exit 2; }
+                  args+=(--only "$BATCH") ;;
+                journals|catalogue|codes|takers) args+=(--only "$BATCH") ;;
                 dupsubj-*)
                   test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }
                   args+=(--undo --batch "$BATCH") ;;
