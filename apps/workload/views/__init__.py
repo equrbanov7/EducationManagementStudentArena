@@ -1,9 +1,9 @@
 """Dərs yükü JSON səthi (profil bölmələri buradan data alır)."""
 
+from .confirm_api import confirm
 from .distribution_api import (
     amend,
     assign,
-    confirm,
     curriculum,
     options,
     row_delete,

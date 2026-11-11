@@ -3405,3 +3405,21 @@ msgid ""
 msgstr ""
 "More hours assigned than the row total: %(groups)s. Reduce the hours or "
 "first raise the row total via “Task rows” → “Edit”."
+
+msgid "%(label)s %(hours)s s"
+msgstr "%(label)s %(hours)s h"
+
+msgid "müəllim yoxdur"
+msgstr "no teacher"
+
+msgid "qismən bölünüb"
+msgstr "partly assigned"
+
+msgid "artıq: %(hours)s"
+msgstr "extra: %(hours)s"
+
+msgid "%(count)s sətirdə %(hours)s saat müəllimə bölünməyib:"
+msgstr "In %(count)s row(s) %(hours)s hours are not assigned to a teacher:"
+
+msgid "«Vakant» saxlanıldı: %(hours)s saat (%(rows)s sətir)."
+msgstr "Kept “Vacant”: %(hours)s hours (%(rows)s rows)."

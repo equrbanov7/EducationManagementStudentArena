@@ -3391,3 +3391,21 @@ msgid ""
 msgstr ""
 "Satır toplamından fazla saat dağıtılmış: %(groups)s. Saati azaltın veya önce"
 " satır toplamını «Görev satırları» → «Düzenle» ile artırın."
+
+msgid "%(label)s %(hours)s s"
+msgstr "%(label)s %(hours)s sa"
+
+msgid "müəllim yoxdur"
+msgstr "öğretim elemanı yok"
+
+msgid "qismən bölünüb"
+msgstr "kısmen dağıtıldı"
+
+msgid "artıq: %(hours)s"
+msgstr "fazla: %(hours)s"
+
+msgid "%(count)s sətirdə %(hours)s saat müəllimə bölünməyib:"
+msgstr "%(count)s satırda %(hours)s saat öğretim elemanına dağıtılmamış:"
+
+msgid "«Vakant» saxlanıldı: %(hours)s saat (%(rows)s sətir)."
+msgstr "«Boş» bırakıldı: %(hours)s saat (%(rows)s satır)."

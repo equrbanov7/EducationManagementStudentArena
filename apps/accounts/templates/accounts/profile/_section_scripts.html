@@ -107,7 +107,9 @@ xülasə və çekmecə məntiqi qalır. Göndəriş ortaq `teaching_office.js`-d
 {# 2026-10-25: tənbəl yükləmə + müəllimə görə süzgəc — əsas moduldan ƏVVƏL (o, `EMSWorkloadList`-i null-safe oxuyur). #}
 <script src="{% static 'accounts/js/profile/workload_distribution_list.js' %}?v=20261109-cards"></script>
 <script src="{% static 'accounts/js/profile/workload_distribution_forms.js' %}?v=20261030-transfer"></script>
-<script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20261109-cards"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20261112-vacant"></script>
+{# 2026-11-12: «Bölgünü təsdiqlə» dialoqu — natamam sətirlər + «Aydındır, Vakant saxla və təsdiqlə» (əsas moduldan SONRA). #}
+<script src="{% static 'accounts/js/profile/workload_distribution_confirm.js' %}?v=20261112-vacant"></script>
 <script src="{% static 'accounts/js/profile/workload_row_transfer.js' %}?v=20261030-transfer"></script>
 {% comment %}2026-10-15: təsdiqlənmiş bölgünün redaktəsi (düzəliş dialoqu + təkrar sorğu), fəaliyyətin
 çıxarılması, bölgünün redaktəsi, «Redaktə et» keçidinin sətir fokusu — əsas moduldan SONRA.{% endcomment %}

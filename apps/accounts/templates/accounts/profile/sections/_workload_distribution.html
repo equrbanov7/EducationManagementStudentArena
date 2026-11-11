@@ -424,11 +424,29 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
             <li>{% trans "sonrakı dəyişikliklər yalnız səbəbli düzəliş (amendment) ilə mümkün olacaq." context "accounts.workload" %}</li>
           </ul>
           <div class="wl-confirm__stats" data-wl-confirm-stats></div>
+          {% comment %}Sahib 2026-11-12: natamam sətirlər fənnə görə siyahıdır; açıq razılıqdan («Aydındır») sonra
+          qalan saatlar «Vakant» yazılıb təsdiqlənir (`workload_distribution_confirm.js`, `fill_vacant=1`).{% endcomment %}
+          <div class="wl-confirm__gaps" data-wl-confirm-gaps hidden>
+            <p class="wl-confirm__gaps-title" data-wl-confirm-gaps-title></p>
+            <p class="wl-confirm__explain">{% trans "Bu saatlar heç kimə bölünməyib. Təsdiqləsəniz «Vakant» kimi qalacaq — sonra müəllim təyin edə bilərsiniz." context "accounts.workload" %}</p>
+            <p class="wl-confirm__hint">{% trans "Fənnin adına klikləsəniz, siyahı həmin fənnə görə süzülür." context "accounts.workload" %}</p>
+            <ul class="wl-confirm__rows" data-wl-confirm-rows></ul>
+            <label class="wl-confirm__ack">
+              <input type="checkbox" data-wl-confirm-ack>
+              <span>{% trans "Aydındır: bölünməmiş saatlar «Vakant» qalsın" context "accounts.workload" %}</span>
+            </label>
+          </div>
+          <div class="wl-confirm__blocker" data-wl-confirm-blocker role="alert" hidden>
+            <p class="wl-confirm__gaps-title">{% trans "Bu sətirlərdə bölünmüş saat sətrin cəmindən çoxdur. Əvvəlcə artıq bölgünü azaldın və ya cəmi artırın — «Vakant» bunu düzəltmir." context "accounts.workload" %}</p>
+            <ul class="wl-confirm__rows" data-wl-confirm-over></ul>
+          </div>
           <p class="wl-form__error" data-wl-confirm-error role="alert" hidden></p>
         </div>
         <div class="modal-footer">
           <button type="button" class="wl-btn wl-btn--ghost" data-bs-dismiss="modal">{% trans "İmtina" context "accounts.workload" %}</button>
-          <button type="button" class="wl-btn wl-btn--primary" data-wl-do-confirm>{% trans "Təsdiqlə" context "accounts.workload" %}</button>
+          <button type="button" class="wl-btn wl-btn--primary" data-wl-do-confirm
+                  data-label-plain="{% trans 'Təsdiqlə' context 'accounts.workload' %}"
+                  data-label-vacant="{% trans 'Aydındır, Vakant saxla və təsdiqlə' context 'accounts.workload' %}">{% trans "Təsdiqlə" context "accounts.workload" %}</button>
         </div>
       </div>
     </div>
