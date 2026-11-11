@@ -477,7 +477,7 @@ class SlotPathPostTest(LessonPrefillBase):
     def test_duplicate_slot_lesson_is_refused(self):
         self._add()
         resp = self._add()
-        self.assertContains(resp, "eyni dərs saatına artıq dərs var")
+        self.assertContains(resp, "üçün dərs artıq yazılıb")  # 2026-11-11: patok izahlı mesaj
         self.assertEqual(len(self._lessons()), 1)
 
     def test_editing_a_slot_lesson_keeps_its_own_bell_time(self):

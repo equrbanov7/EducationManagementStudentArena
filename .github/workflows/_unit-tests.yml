@@ -110,6 +110,7 @@ jobs:
           nohup bash -c '
             # 2026-11-11: runner DNS (security.ubuntu.com) kəsintisi — 3 cəhd, aralarında fasilə.
             rc=1
+            getent hosts security.ubuntu.com >/dev/null 2>&1 || { echo "DNS yoxdur — apt atlanır" >>"$TESS_LOG"; echo 1 >"$TESS_RC.tmp"; mv "$TESS_RC.tmp" "$TESS_RC"; exit 0; }
             for attempt in 1 2 3; do
               { sudo apt-get update -qq \
                 && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends --fix-missing \

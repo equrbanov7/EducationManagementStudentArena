@@ -232,6 +232,9 @@ def _audit(*, organization, actor, request, target, sources, plan, snapshots, re
         "archive_reason": archive_reason_for(target),
         "digest": digest,
     }
+    if plan.get("current_only"):  # sahib 2026-11-11: keçmiş dövr sətirləri arxiv mənbə kartda qalıb
+        changes["current_only"] = True
+        changes["left_past"] = plan.get("past_stay", {})
     entry = log_action(
         action=AuditAction.UPDATE,
         user=actor if getattr(actor, "pk", None) else None,
@@ -280,8 +283,12 @@ def apply(
     request=None,
     by_code=False,
     drop_attendance_only=False,
+    current_only=False,
 ):
-    """Önizlənmiş birləşdirməni yazır. Qaytarır: ``{"audit_id", "counts", ...}``."""
+    """Önizlənmiş birləşdirməni yazır. Qaytarır: ``{"audit_id", "counts", ...}``.
+
+    ``current_only`` — keçmiş dövr sətirləri mənbə kartda qalır (:mod:`.subject_merge_scope`); önizləmə də eyni bayraqla
+    alınmalıdır (iz bayrağı daşıyır)."""
     reason = clean_reason(reason)
     expected = str(expected_digest or "").strip()
     if not expected:
@@ -298,7 +305,9 @@ def apply(
             raise _drift()
         target, sources = resolve_subjects(organization, target_ref, source_refs, by_code=by_code)
         lock_offerings([target.pk, *(source.pk for source in sources)])
-        plan = collect(organization, target, sources, drop_attendance_only=drop_attendance_only)
+        plan = collect(
+            organization, target, sources, drop_attendance_only=drop_attendance_only, current_only=current_only
+        )
         digest = plan_digest(plan)
         if digest != expected:
             raise _drift()

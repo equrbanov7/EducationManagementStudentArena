@@ -46,6 +46,12 @@ def normalized_subject_key(name: str) -> str:
     return "".join(ch for ch in text if ch.isalnum())
 
 
+def same_subject_name(left, right) -> bool:
+    """İki fənn adı dublikatdır (boş ad heç nəyə bərabər deyil) — patok qaydası (``schedule.is_joint_lecture``)."""
+    key = normalized_subject_key(left)
+    return bool(key) and key == normalized_subject_key(right)
+
+
 @dataclass
 class DuplicateGroup:
     organization: object

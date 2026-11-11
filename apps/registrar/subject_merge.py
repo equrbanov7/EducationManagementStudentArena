@@ -29,6 +29,7 @@ from django.apps import apps as django_apps
 from django.utils.translation import pgettext
 
 from . import subject_merge_conflicts as conflicts_service
+from . import subject_merge_scope as merge_scope
 from .models import CurriculumSubject, Subject
 from .models.catalog_meta import ARCHIVE_REASON_MIN_LENGTH
 from .subject_duplicates import normalized_subject_key
@@ -196,10 +197,16 @@ def _syllabi_of(offering_ids) -> set:
     return {str(pk) for pk in rows.values_list("pk", flat=True)}
 
 
-def collect(organization, target, sources, *, drop_attendance_only=False) -> dict:
-    """Birləşmənin tam planı — həm önizləmə, həm tətbiq, həm də iz bundan qurulur."""
+def collect(organization, target, sources, *, drop_attendance_only=False, current_only=False) -> dict:
+    """Birləşmənin tam planı — həm önizləmə, həm tətbiq, həm də iz bundan qurulur.
+
+    ``current_only`` (sahib 2026-11-11, :mod:`.subject_merge_scope`): mənbənin keçmiş dövr sətirləri mənbə kartda qalır,
+    onların toqquşması bloklamır."""
     source_ids = [source.pk for source in sources]
-    found = conflicts_service.detect(organization, target, sources, drop_attendance_only=drop_attendance_only)
+    past = merge_scope.staying_rows(organization, sources) if current_only else {}
+    found = conflicts_service.detect(
+        organization, target, sources, drop_attendance_only=drop_attendance_only, stay=past
+    )
     resolvable = found["resolvable"]
     dropped_rows = set(conflicts_service.resolved_ids(resolvable, conflicts_service.CURRICULUM_ROW))
     deleted_offerings = conflicts_service.resolved_ids(resolvable, conflicts_service.OFFERING_TWIN)
@@ -212,6 +219,8 @@ def collect(organization, target, sources, *, drop_attendance_only=False) -> dic
     # K4: birləşdirilmiş passiv dublikat jurnal (və onun sillabusu) arxivlənən mənbə kartda QALIR — köçürülmür.
     stay_offerings = conflicts_service.resolved_ids(resolvable, conflicts_service.OFFERING_RETIRED)
     stay = {OFFERING_KEY: set(stay_offerings), SYLLABUS_KEY: _syllabi_of(stay_offerings)}
+    for key, ids in past.items():
+        stay[key] = stay.get(key, set()) | set(ids)
     moved, kept = {}, {}
     m2m = {"move": [], "drop": []}
     for relation in RELATIONS:
@@ -221,7 +230,7 @@ def collect(organization, target, sources, *, drop_attendance_only=False) -> dic
         rows = _rows_by_source(relation, source_ids)
         gone = dropped_rows if relation.key == CURRICULUM_KEY else set(deleted_offerings)
         gone = gone | stay.get(relation.key, set())
-        if relation.key in (CURRICULUM_KEY, OFFERING_KEY, SYLLABUS_KEY):
+        if relation.key in (CURRICULUM_KEY, OFFERING_KEY, SYLLABUS_KEY) or relation.key in past:
             rows = {sid: [pk for pk in ids if pk not in gone] for sid, ids in rows.items()}
             rows = {sid: ids for sid, ids in rows.items() if ids}
         if relation.strategy == KEEP:
@@ -259,6 +268,8 @@ def collect(organization, target, sources, *, drop_attendance_only=False) -> dic
         "locked_plans": locked_plans,
         "evidence_offerings": evidence_offerings,
         "conflicts": found,
+        "current_only": bool(current_only),
+        "past_stay": past,
     }
 
 
@@ -277,6 +288,8 @@ def plan_digest(plan) -> str:
         "dropped_enrollments": plan["dropped_enrollments"],
         "blocking": [(item["code"], sorted(item["ids"])) for item in plan["conflicts"]["blocking"]],
     }
+    if plan.get("current_only"):  # köhnə izlər dəyişməsin — açar yalnız yeni rejimdə
+        payload["current_only"] = plan.get("past_stay", {})
     text = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False, default=str)
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
@@ -290,6 +303,8 @@ def counts(plan) -> dict:
     result["soft_json"] = len(plan["json_refs"])
     result["registrar.CourseOffering:deleted_empty_twins"] = len(plan.get("deleted_offerings", []))
     result["registrar.Enrollment:dropped_ungraded"] = len(plan.get("dropped_enrollments", []))
+    for key, ids in (plan.get("past_stay") or {}).items():
+        result[f"{key}:left_past"] = len(ids)
     return result
 
 
@@ -396,10 +411,13 @@ def _limited(items) -> list:
     return items[: conflicts_service.LIST_LIMIT]
 
 
-def preview(organization, target_ref, source_refs, *, by_code=False, drop_attendance_only=False) -> dict:
-    """Dry-run: heç nə yazmır. ``drop_attendance_only`` — K3 bayrağı (:mod:`.subject_merge_conflicts`)."""
+def preview(
+    organization, target_ref, source_refs, *, by_code=False, drop_attendance_only=False, current_only=False
+) -> dict:
+    """Dry-run: heç nə yazmır. ``drop_attendance_only`` — K3 bayrağı (:mod:`.subject_merge_conflicts`);
+    ``current_only`` — keçmiş dövr sətirləri mənbə kartda qalır (:mod:`.subject_merge_scope`)."""
     target, sources = resolve_subjects(organization, target_ref, source_refs, by_code=by_code)
-    plan = collect(organization, target, sources, drop_attendance_only=drop_attendance_only)
+    plan = collect(organization, target, sources, drop_attendance_only=drop_attendance_only, current_only=current_only)
     found = plan["conflicts"]
     tables = _tables(plan)
     return {
@@ -416,6 +434,9 @@ def preview(organization, target_ref, source_refs, *, by_code=False, drop_attend
         "archive_reason": archive_reason_for(target),
         "digest": plan_digest(plan),
         "can_apply": not found["blocking"],
+        "current_only": plan["current_only"],
+        "left_past": {key: len(ids) for key, ids in plan["past_stay"].items()},
+        "moved_counts": counts(plan),
     }
 
 

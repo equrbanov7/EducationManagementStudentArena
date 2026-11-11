@@ -32,12 +32,12 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 from django.apps import apps as django_apps
-from django.db import transaction
 from django.utils import timezone
 
 from core.audit import log_action
 from core.constants import AuditAction
 
+from . import duplicate_subjects_catalogue_2026_11_11 as catalogue_step
 from . import duplicate_subjects_rules_2026_11_11 as rules
 from . import subject_recode
 from .duplicate_journal_merge_2026_11_11 import JournalMerge
@@ -49,7 +49,7 @@ FORMAT = "duplicate-subjects/1"
 OPS = ("journals", "doubles", "catalogue", "codes")
 RESOURCE = "registrar.duplicate_subjects"
 KIND = "duplicate_subjects"
-REASON = "Sahib 2026-11-11: dublikat fənn kartları birləşdirildi, fənn kodları vahid QKU-N standartına keçirildi"
+REASON = catalogue_step.REASON
 BATCH_RE = re.compile(r"^dupsubj-\d{8}-\d{6}-[0-9a-f]{4}$")
 #: ``{"format", "auto_catalogue", "groups": [{"name", "keeper", "sources", "pairs": [{"source", "target"}]}]}`` —
 #: YALNIZ id-lər (prod inventarı 2026-11-10 23:34 UTC; şəxsi məlumat yoxdur).
@@ -217,68 +217,6 @@ def _journals(organization, actor, counts, batch, groups, lines, period) -> None
             lines.append(f"pair={index} " + " ".join(f"{key}={value}" for key, value in sorted(delta.items())))
 
 
-def _catalogue(organization, actor, counts, groups, lines, renames, merged) -> list:
-    """Kataloq birləşməsi (``merge_subjects`` mexanizmi). Hər qrup üçün sətir: ``group=<ad> catalogue=<nəticə>``.
-
-    Tədris planında İKİ kart da varsa (həqiqətən fərqli fənlər) qrup BİRLƏŞDİRİLMİR — ``refused_curriculum_both``."""
-    from .subject_merge import MergeError, preview
-    from .subject_merge_apply import apply
-
-    audits = []
-    for keeper, sources, _pairs, meta in groups:
-        name = re.sub(r"[^0-9a-z_-]", "_", str(meta.get("name") or "auto").lower())[:60]
-        live = [source for source in sources if not source.is_archived]
-        if not live:
-            counts["catalogue_already_merged"] += 1
-            lines.append(f"group={name} catalogue=already_merged")
-            continue
-        if rules.shared_curricula([keeper.pk, *(source.pk for source in live)]):
-            counts["catalogue_refused_curriculum_both"] += 1
-            lines.append(f"group={name} catalogue=refused_curriculum_both")
-            continue
-        try:
-            with transaction.atomic():
-                payload = preview(organization, str(keeper.pk), [str(source.pk) for source in live])
-                if payload["blocking_total"]:
-                    counts["catalogue_blocked"] += 1
-                    codes = sorted({item["code"] for item in payload["blocking"]})
-                    for code in codes:
-                        counts[f"catalogue_blocked_{code}"] += 1
-                    lines.append(f"group={name} catalogue=blocked reason={'-'.join(codes)}")
-                    continue
-                result = apply(
-                    organization=organization,
-                    actor=actor,
-                    target_ref=str(keeper.pk),
-                    source_refs=[str(source.pk) for source in live],
-                    reason=REASON,
-                    expected_digest=payload["digest"],
-                )
-                rules.rename_keeper(keeper, meta.get("keeper_name"), renames, counts)
-        except MergeError as exc:
-            code = re.sub(r"[^a-z_]", "_", str(exc.code).lower())
-            counts["catalogue_refused"] += 1
-            counts[f"catalogue_refused_{code}"] += 1
-            lines.append(f"group={name} catalogue=refused reason={code}")
-            continue
-        audits.append(result["audit_id"])
-        merged.append(
-            {
-                "group": name,
-                "keeper": str(keeper.pk),
-                "keeper_ects": keeper.ects,
-                "sources": [{"id": str(source.pk), "code": source.code, "ects": source.ects} for source in live],
-            }
-        )
-        counts["catalogue_groups_merged"] += 1
-        counts["catalogue_cards_archived"] += len(live)
-        counts["catalogue_rows_repointed"] += sum(
-            value for key, value in result["counts"].items() if ":" not in key and key != "soft_json"
-        )
-        lines.append(f"group={name} catalogue=merged archived={len(live)}")
-    return audits
-
-
 def _codes(organization, counts, batch) -> bool:
     result = subject_recode.plan(organization, scope="all")
     counts["codes_nonstandard_seen"] += result["counts"]["site_cards"]
@@ -294,7 +232,21 @@ def _codes(organization, counts, batch) -> bool:
     return True
 
 
-def run(*, organization, actor, counts, ops=OPS, batch="", plan=None, lines=None, auto_catalogue=False) -> str:
+def run(
+    *,
+    organization,
+    actor,
+    counts,
+    ops=OPS,
+    batch="",
+    plan=None,
+    lines=None,
+    auto_catalogue=False,
+    current_only=False,
+    merged=None,
+) -> str:
+    """``current_only`` — kataloq addımında keçmiş dövr sətirləri mənbə kartda qalır (:mod:`.subject_merge_scope`);
+    ``merged`` — (çağıranın siyahısı) birləşdirilmiş qruplar: saxlanılan kart + mənbələr (imtahan bağı yenilənsin)."""
     plan = PLAN if plan is None else plan
     if plan.get("format") != FORMAT:
         raise Stop("duplicate_subjects_plan_format_unknown")
@@ -310,14 +262,17 @@ def run(*, organization, actor, counts, ops=OPS, batch="", plan=None, lines=None
         Doubles(organization=organization, actor=actor, counts=counts, batch=batch, period=period).run(
             plan.get("doubles") or [], groups, lines
         )
-    audits, recoded, renames, merged = [], False, [], []
+    audits, recoded, renames = [], False, []
+    merged = [] if merged is None else merged
     if "catalogue" in ops:
         # Jurnal addımı kartları dəyişmir, amma kataloq birləşməsi arxiv bayrağını oxuyur — kartlar təzədən oxunur.
         groups = _plan_groups(organization, plan, Counter())
         if auto_catalogue or plan.get("auto_catalogue"):
             taken = {subject.pk for keeper, sources, _pairs, _meta in groups for subject in (keeper, *sources)}
             groups = groups + _auto_groups(organization, taken, period, counts)
-        audits = _catalogue(organization, actor, counts, groups, lines, renames, merged)
+        audits = catalogue_step.catalogue(
+            organization, actor, counts, groups, lines, renames, merged, period=period, current_only=current_only
+        )
     if "codes" in ops:
         recoded = _codes(organization, counts, batch)
     report(organization=organization, counts=counts)
@@ -332,6 +287,7 @@ def run(*, organization, actor, counts, ops=OPS, batch="", plan=None, lines=None
             "ops": list(ops),
             "catalogue_audits": audits,
             "catalogue_groups": merged,  # saxlanılan kart + mənbələrin köhnə ECTS-i (sahib 2026-11-11)
+            "current_only": bool(current_only),
             "renames": renames,
             "recoded": recoded,
         },
@@ -350,7 +306,8 @@ def has_batch(organization, batch) -> bool:
 def undo(*, organization, actor, counts, batch) -> list:
     """Paketi TAM geri qaytarır və ya HEÇ NƏ yazmır (:class:`Stop` — çağıranın tranzaksiyası geri qaytarılır).
 
-    Qaytarır: jurnal bağı geri qayıdan imtahanların id-ləri (çağıran onları yenidən sinxronlaşdırır)."""
+    Qaytarır: jurnal bağı geri qayıdan imtahanların id-ləri (çağıran onları yenidən sinxronlaşdırır) — jurnal
+    birləşməsinin imtahanları + kataloq birləşməsinin kartlarının cari dövr imtahanları."""
     from .subject_merge_undo import undo as undo_catalogue
 
     AuditLog = _model("AuditLog", "audit")
@@ -375,7 +332,10 @@ def undo(*, organization, actor, counts, batch) -> list:
     from .duplicate_student_doubles_2026_11_11 import undo as undo_doubles
 
     undo_doubles(organization=organization, actor=actor, counts=counts, batch=batch)
-    exams = undo_journals(organization=organization, actor=actor, counts=counts, batch=batch)
+    exams = set(undo_journals(organization=organization, actor=actor, counts=counts, batch=batch))
+    subjects = catalogue_step.catalogue_exam_subjects(entries)
+    if subjects:
+        exams |= catalogue_step.current_exam_ids(subjects, current_period(organization))
     # Qismən geri qaytarma paketi «geri qaytarılıb» kimi işarələməsin: bir cüt belə dayanıbsa HEÇ NƏ yazılmır.
     for key in (
         "undo_blocked_post_merge_data",
@@ -394,7 +354,7 @@ def undo(*, organization, actor, counts, batch) -> list:
         resource_type=RESOURCE,
         resource_id=batch,
     )
-    return sorted(exams)
+    return sorted(exams, key=str)
 
 
 # ── hesabat / qoruyucu ────────────────────────────────────────────────────
