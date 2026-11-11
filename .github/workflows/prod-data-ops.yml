@@ -1731,14 +1731,14 @@ jobs:
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor")
               case "$BATCH" in
-                "") test "$APPLY" != "true" || { echo "apply üçün açıq addım verin: batch=journals|catalogue|codes|takers" >&2; exit 2; } ;;
+                "") test "$APPLY" != "true" || { echo "apply üçün açıq addım verin: batch=journals|doubles|catalogue|codes|takers" >&2; exit 2; } ;;
                 report) test "$APPLY" != "true" || { echo "report yazmır — apply=false olmalıdır" >&2; exit 2; }
                   args+=(--only "$BATCH") ;;
-                journals|catalogue|codes|takers) args+=(--only "$BATCH") ;;
+                journals|doubles|catalogue|codes|takers) args+=(--only "$BATCH") ;;
                 dupsubj-*)
                   test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }
                   args+=(--undo --batch "$BATCH") ;;
-                *) echo "batch: boş, journals, catalogue, codes, takers, report və ya dupsubj-… olmalıdır" >&2; exit 2 ;;
+                *) echo "batch: boş, journals, doubles, catalogue, codes, takers, report və ya dupsubj-… olmalıdır" >&2; exit 2 ;;
               esac
               ;;
             fill_empty_cells_20261110)

@@ -38,6 +38,7 @@ from django.utils import timezone
 from core.audit import log_action
 from core.constants import AuditAction
 
+from . import duplicate_subjects_rules_2026_11_11 as rules
 from . import subject_recode
 from .duplicate_journal_merge_2026_11_11 import JournalMerge
 from .duplicate_journal_merge_undo_2026_11_11 import undo as undo_journals
@@ -45,7 +46,7 @@ from .subject_codes import QKU_CODE_RE, code_shape, is_standard_code
 from .subject_duplicates import normalized_subject_key
 
 FORMAT = "duplicate-subjects/1"
-OPS = ("journals", "catalogue", "codes")
+OPS = ("journals", "doubles", "catalogue", "codes")
 RESOURCE = "registrar.duplicate_subjects"
 KIND = "duplicate_subjects"
 REASON = "Sahib 2026-11-11: dublikat fənn kartları birləşdirildi, fənn kodları vahid QKU-N standartına keçirildi"
@@ -123,7 +124,8 @@ def _plan_groups(organization, plan, counts) -> list:
         if len(rows) != len(ids) or len(set(ids)) != len(ids):
             counts["group_subject_missing"] += 1
             continue
-        out.append((rows[ids[0]], [rows[pk] for pk in ids[1:]], list(group.get("pairs") or [])))
+        meta = {key: group.get(key) for key in ("name", "reviewed", "keeper_name")}
+        out.append((rows[ids[0]], [rows[pk] for pk in ids[1:]], list(group.get("pairs") or []), meta))
     return out
 
 
@@ -141,42 +143,53 @@ def _auto_groups(organization, taken, period, counts) -> list:
             counts["same_name_review_chair_differs"] += 1
             continue
         keeper = choose_keeper(organization, subjects, period)
-        out.append((keeper, [subject for subject in subjects if subject.pk != keeper.pk], []))
+        out.append((keeper, [subject for subject in subjects if subject.pk != keeper.pk], [], {"name": "auto"}))
     return out
 
 
-def _auto_pairs(organization, keeper, sources, explicit, period) -> list:
-    """Qrupun kartları üzrə CARİ dövrdə İKİ aktiv jurnalı olan qrup qutuları — planda olmayanlar.
+def _auto_pairs(organization, keeper, sources, explicit, period, reviewed=False) -> list:
+    """Qrupun kartları üzrə İKİ aktiv jurnalı olan qrup qutuları — planda olmayanlar.
 
-    Keçmiş dövrlərə QƏSDƏN toxunulmur (bitmiş semestrin jurnalı, yekun nəticələri dəyişməməlidir) — keçmiş dövrün
-    əkiz qutusu kataloq addımında toqquşma kimi görünür və sahibin qərarına qalır."""
+    * CARİ dövr — hər qutu (jurnal birləşməsinin bütün qoruyucuları ilə);
+    * KEÇMİŞ dövr — YALNIZ qutunun bir tərəfi boş qabıqdırsa (:func:`.duplicate_subjects_rules_2026_11_11.past_shell`):
+      qabıq passiv olur, datalı jurnala TOXUNULMUR (bitmiş semestrin nəticələri dəyişmir). Hər iki tərəfi datalı keçmiş
+      qutu kataloq addımında toqquşma kimi görünür və sahibin qərarına qalır."""
     if period is None:
         return []
     CourseOffering = _model("CourseOffering")
-    known = {str(pair.get("source")) for pair in explicit}
-    targets = {
-        (period_id, group_id): pk
-        for pk, period_id, group_id in CourseOffering._base_manager.filter(
-            organization=organization, subject=keeper, is_active=True, group__isnull=False, period=period
-        ).values_list("pk", "period_id", "group_id")
-    }
+    known = {str(pair.get("source")) for pair in explicit} | {str(pair.get("target")) for pair in explicit}
+    boxes = defaultdict(list)
     rows = CourseOffering._base_manager.filter(
-        organization=organization, subject__in=sources, is_active=True, group__isnull=False, period=period
-    ).order_by("pk")
-    return [
-        {"source": str(pk), "target": str(targets[(period_id, group_id)]), "auto": True}
-        for pk, period_id, group_id in rows.values_list("pk", "period_id", "group_id")
-        if (period_id, group_id) in targets and str(pk) not in known
-    ]
+        organization=organization, subject__in=[keeper, *sources], is_active=True, group__isnull=False
+    ).select_related("period")
+    for offering in rows.order_by("pk"):
+        if str(offering.pk) not in known:
+            boxes[(offering.period_id, offering.group_id)].append(offering)
+    out = []
+    for (period_id, _group), items in sorted(boxes.items(), key=lambda kv: str(kv[0])):
+        mine = [row for row in items if row.subject_id == keeper.pk]
+        others = [row for row in items if row.subject_id != keeper.pk]
+        if len(mine) != 1 or len(others) != 1:
+            continue
+        target, source = mine[0], others[0]
+        if period_id != period.pk:
+            if rules.past_shell(target, period) and not rules.past_shell(source, period):
+                target, source = source, target  # boş qabıq passiv olur, datalı jurnal kataloqda keçir
+            elif not rules.past_shell(source, period):
+                continue
+        out.append({"source": str(source.pk), "target": str(target.pk), "auto": True, "reviewed": bool(reviewed)})
+    return out
 
 
 # ── əməliyyatlar ──────────────────────────────────────────────────────────
 
 
-def _check_pairs(keeper, sources, pairs, counts) -> list:
-    """Açıq cütün jurnalları qrupun kartlarına aid olmalıdır (saxlanılan jurnal — saxlanılan kartın jurnalı)."""
+def _check_pairs(keeper, sources, pairs, counts, reviewed=False) -> list:
+    """Açıq cütün HƏR İKİ jurnalı qrupun (fərqli) kartlarına aid olmalıdır. Data saxlanılan kartın boş jurnalının
+    əksinə mənbə kartdadırsa cüt «boş → datalı» istiqamətindədir (kataloq addımı datalı jurnalı saxlanılan karta keçirir).
+    """
     CourseOffering = _model("CourseOffering")
-    allowed = {source.pk for source in sources}
+    allowed = {keeper.pk, *(source.pk for source in sources)}
     good = []
     for pair in pairs:
         rows = dict(
@@ -185,40 +198,53 @@ def _check_pairs(keeper, sources, pairs, counts) -> list:
             )
         )
         rows = {str(pk): subject for pk, subject in rows.items()}
-        if rows.get(str(pair.get("target"))) != keeper.pk or rows.get(str(pair.get("source"))) not in allowed:
+        source, target = rows.get(str(pair.get("source"))), rows.get(str(pair.get("target")))
+        if source not in allowed or target not in allowed or source == target:
             counts["pair_not_in_group"] += 1
             continue
-        good.append(pair)
+        good.append({**pair, "reviewed": bool(pair.get("reviewed") or reviewed)})
     return good
 
 
 def _journals(organization, actor, counts, batch, groups, lines, period) -> None:
     merger = JournalMerge(organization=organization, actor=actor, counts=counts, batch=batch)
-    for keeper, sources, pairs in groups:
-        explicit = _check_pairs(keeper, sources, pairs, counts)
-        merger.run(explicit + _auto_pairs(organization, keeper, sources, explicit, period))
+    for keeper, sources, pairs, meta in groups:
+        reviewed = bool(meta.get("reviewed"))
+        explicit = _check_pairs(keeper, sources, pairs, counts, reviewed)
+        merger.run(explicit + _auto_pairs(organization, keeper, sources, explicit, period, reviewed))
     for index, delta in merger.report:
         if delta:
             lines.append(f"pair={index} " + " ".join(f"{key}={value}" for key, value in sorted(delta.items())))
 
 
-def _catalogue(organization, actor, counts, groups) -> list:
+def _catalogue(organization, actor, counts, groups, lines, renames, merged) -> list:
+    """Kataloq birləşməsi (``merge_subjects`` mexanizmi). Hər qrup üçün sətir: ``group=<ad> catalogue=<nəticə>``.
+
+    Tədris planında İKİ kart da varsa (həqiqətən fərqli fənlər) qrup BİRLƏŞDİRİLMİR — ``refused_curriculum_both``."""
     from .subject_merge import MergeError, preview
     from .subject_merge_apply import apply
 
     audits = []
-    for keeper, sources, _pairs in groups:
+    for keeper, sources, _pairs, meta in groups:
+        name = re.sub(r"[^0-9a-z_-]", "_", str(meta.get("name") or "auto").lower())[:60]
         live = [source for source in sources if not source.is_archived]
         if not live:
             counts["catalogue_already_merged"] += 1
+            lines.append(f"group={name} catalogue=already_merged")
+            continue
+        if rules.shared_curricula([keeper.pk, *(source.pk for source in live)]):
+            counts["catalogue_refused_curriculum_both"] += 1
+            lines.append(f"group={name} catalogue=refused_curriculum_both")
             continue
         try:
             with transaction.atomic():
                 payload = preview(organization, str(keeper.pk), [str(source.pk) for source in live])
                 if payload["blocking_total"]:
                     counts["catalogue_blocked"] += 1
-                    for code in sorted({item["code"] for item in payload["blocking"]}):
+                    codes = sorted({item["code"] for item in payload["blocking"]})
+                    for code in codes:
                         counts[f"catalogue_blocked_{code}"] += 1
+                    lines.append(f"group={name} catalogue=blocked reason={'-'.join(codes)}")
                     continue
                 result = apply(
                     organization=organization,
@@ -228,16 +254,28 @@ def _catalogue(organization, actor, counts, groups) -> list:
                     reason=REASON,
                     expected_digest=payload["digest"],
                 )
+                rules.rename_keeper(keeper, meta.get("keeper_name"), renames, counts)
         except MergeError as exc:
+            code = re.sub(r"[^a-z_]", "_", str(exc.code).lower())
             counts["catalogue_refused"] += 1
-            counts[f"catalogue_refused_{re.sub(r'[^a-z_]', '_', str(exc.code).lower())}"] += 1
+            counts[f"catalogue_refused_{code}"] += 1
+            lines.append(f"group={name} catalogue=refused reason={code}")
             continue
         audits.append(result["audit_id"])
+        merged.append(
+            {
+                "group": name,
+                "keeper": str(keeper.pk),
+                "keeper_ects": keeper.ects,
+                "sources": [{"id": str(source.pk), "code": source.code, "ects": source.ects} for source in live],
+            }
+        )
         counts["catalogue_groups_merged"] += 1
         counts["catalogue_cards_archived"] += len(live)
         counts["catalogue_rows_repointed"] += sum(
             value for key, value in result["counts"].items() if ":" not in key and key != "soft_json"
         )
+        lines.append(f"group={name} catalogue=merged archived={len(live)}")
     return audits
 
 
@@ -266,14 +304,20 @@ def run(*, organization, actor, counts, ops=OPS, batch="", plan=None, lines=None
     groups = _plan_groups(organization, plan, counts)
     if "journals" in ops:
         _journals(organization, actor, counts, batch, groups, lines, period)
-    audits, recoded = [], False
+    if "doubles" in ops:
+        from .duplicate_student_doubles_2026_11_11 import Doubles
+
+        Doubles(organization=organization, actor=actor, counts=counts, batch=batch, period=period).run(
+            plan.get("doubles") or [], groups, lines
+        )
+    audits, recoded, renames, merged = [], False, [], []
     if "catalogue" in ops:
         # Jurnal addımı kartları dəyişmir, amma kataloq birləşməsi arxiv bayrağını oxuyur — kartlar təzədən oxunur.
         groups = _plan_groups(organization, plan, Counter())
         if auto_catalogue or plan.get("auto_catalogue"):
-            taken = {subject.pk for keeper, sources, _pairs in groups for subject in (keeper, *sources)}
+            taken = {subject.pk for keeper, sources, _pairs, _meta in groups for subject in (keeper, *sources)}
             groups = groups + _auto_groups(organization, taken, period, counts)
-        audits = _catalogue(organization, actor, counts, groups)
+        audits = _catalogue(organization, actor, counts, groups, lines, renames, merged)
     if "codes" in ops:
         recoded = _codes(organization, counts, batch)
     report(organization=organization, counts=counts)
@@ -282,7 +326,15 @@ def run(*, organization, actor, counts, ops=OPS, batch="", plan=None, lines=None
         user=actor,
         organization=organization,
         new_values={"ops": list(ops), "catalogue_merges": len(audits), "recoded": recoded},
-        changes={"kind": KIND, "batch": batch, "ops": list(ops), "catalogue_audits": audits, "recoded": recoded},
+        changes={
+            "kind": KIND,
+            "batch": batch,
+            "ops": list(ops),
+            "catalogue_audits": audits,
+            "catalogue_groups": merged,  # saxlanılan kart + mənbələrin köhnə ECTS-i (sahib 2026-11-11)
+            "renames": renames,
+            "recoded": recoded,
+        },
         reason=REASON,
         resource_type=RESOURCE,
         resource_id=batch,
@@ -314,14 +366,23 @@ def undo(*, organization, actor, counts, batch) -> list:
         except subject_recode.RecodeError as exc:
             raise Stop(f"duplicate_subjects_undo_recode_{exc}") from None
     for entry in entries:
+        rules.restore_names((entry.changes or {}).get("renames"), counts)
         for audit_id in reversed((entry.changes or {}).get("catalogue_audits") or []):
             outcome = undo_catalogue(audit_id=audit_id, actor=actor, apply=True, reason=f"Geri qaytarma — {REASON}")
             if not outcome.get("applied"):
                 raise Stop("duplicate_subjects_undo_catalogue_changed_after_merge")
             counts["undo_catalogue_groups"] += 1
+    from .duplicate_student_doubles_2026_11_11 import undo as undo_doubles
+
+    undo_doubles(organization=organization, actor=actor, counts=counts, batch=batch)
     exams = undo_journals(organization=organization, actor=actor, counts=counts, batch=batch)
     # Qismən geri qaytarma paketi «geri qaytarılıb» kimi işarələməsin: bir cüt belə dayanıbsa HEÇ NƏ yazılmır.
-    for key in ("undo_blocked_post_merge_data", "undo_blocked_source_card_archived", "undo_empty_twin_not_restored"):
+    for key in (
+        "undo_blocked_post_merge_data",
+        "undo_blocked_source_card_archived",
+        "undo_empty_twin_not_restored",
+        "undo_doubles_blocked_post_merge_data",
+    ):
         if counts[key]:
             raise Stop(f"duplicate_subjects_{key}")
     log_action(

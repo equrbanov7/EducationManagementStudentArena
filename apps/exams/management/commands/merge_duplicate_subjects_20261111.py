@@ -12,9 +12,9 @@ düşənləri də, standart olsun bir; imtahan verən hər kəs nəticəsini jur
 Əmr exams app-ındadır, çünki registrar imtahan modellərini import etmir (modul sərhədi). Bütün DB işi
 ``rls_worker_atomic()`` + ``bypass_rls()`` + RLS konteksti altındadır; dry-run EYNİ kodu icra edib geri qaytarır.
 
-TƏHLÜKƏSİZLİK: ``--apply`` YALNIZ açıq addımla (``--only journals|catalogue|codes|takers``) və ya ``--undo`` ilə işləyir —
+TƏHLÜKƏSİZLİK: ``--apply`` YALNIZ açıq addımla (``--only journals|doubles|catalogue|codes|takers``) və ya ``--undo`` ilə işləyir —
 hər addım ayrıca yazılır, ayrıca paket id-si alır və ayrıca geri qaytarılır (tərs sıra ilə: takers → codes →
-catalogue → journals). ``--undo --batch <id>`` paketi TAM geri qaytarır və ya heç nə yazmır (``takers`` paketində
+catalogue → doubles → journals). ``--undo --batch <id>`` paketi TAM geri qaytarır və ya heç nə yazmır (``takers`` paketində
 yalnız toxunulmamış yerləşdirmələr azad olunur). Kataloqun avtomatik (eyni ad + kredit + növ + kafedra) qrupları
 yalnız ``--auto-catalogue`` ilə; defolt — yalnız plandakı açıq qruplar.
 Stdout-a YALNIZ saylar (``twin_merge: açar=say …``; açarlarda rəqəm yoxdur); gözlənilməz xəta

@@ -18,6 +18,179 @@
         {"source": "b1ed79dd-af82-406c-a249-319faffff98f", "target": "8b9a95c8-e44f-4e6f-9571-311328ce8410"},
         {"source": "d2155273-ef42-4edc-b167-6a33158ea205", "target": "1aa0b8af-0aa9-43a1-a530-177d5a0bfda6"}
       ]
+    },
+    {
+      "name": "beynelxalq-huquq",
+      "keeper": "b47c5c33-d3f5-45b2-8530-995a7bd2b8c8",
+      "sources": ["3945fd34-74dc-4331-abec-ba80d934ce91"],
+      "keeper_name": "Beynəlxalq hüquq"
+    },
+    {
+      "name": "beynelxalq-qht",
+      "keeper": "db6e899e-91dd-4dee-b721-fc12efdc8010",
+      "sources": ["262dc8bb-4bcb-4b6a-8afc-ae17a2acf157"],
+      "keeper_name": "Beynəlxalq qeyri-hökümət təşkilatları"
+    },
+    {
+      "name": "turizm-sirketleri",
+      "keeper": "5e79d900-6d9e-4458-afcc-135310ec3af5",
+      "sources": ["8cb026ed-74d6-43b9-a190-ed1f3ea30ddd"],
+      "keeper_name": "Beynəlxalq turizm şirkətlərinin fəaliyyət mexanizmi"
+    },
+    {
+      "name": "biznes-plan",
+      "keeper": "dd5e1da2-c32e-4d8e-bc00-3f869761610f",
+      "sources": ["21b26952-0f47-424f-96c2-0ea907ad90fd"],
+      "keeper_name": "Biznes-plan"
+    },
+    {
+      "name": "resm-4",
+      "keeper": "d5903d19-6ad1-41e1-b6bc-2c6dec082d06",
+      "sources": ["be5f87c3-5c29-4866-a815-611c1211b8f3"],
+      "keeper_name": "Rəsm-4"
+    },
+    {
+      "name": "xususi-rengkarliq",
+      "keeper": "fdb276eb-037c-4700-bf10-d0e385135679",
+      "sources": ["e336908e-fb7e-4567-9a69-27a32d9d21ca"]
+    },
+    {
+      "name": "beynelxalq-teskilatlar-sosial",
+      "keeper": "ca61f6d8-d5fb-46a0-b7fd-8e30beb2a056",
+      "sources": ["d8cc56d4-7c12-4e6f-b07f-916d6ee17f9d"],
+      "keeper_name": "Beynəlxalq təşkilatlar və sosial siyasət"
+    },
+    {
+      "name": "insan-komputer-interfeysi",
+      "keeper": "82212f3a-1583-4404-ad18-e8629994d172",
+      "sources": ["1b37b424-fcd3-429f-8928-cfb27c21cb92"],
+      "keeper_name": "İnsan kompüter interfeysi"
+    },
+    {
+      "name": "milli-tehlukesizlik",
+      "keeper": "f83664b8-cff4-416d-85a1-325acc02ae52",
+      "sources": ["8aa27518-6a76-4766-812c-5d17dc364c08"],
+      "keeper_name": "Milli təhlükəsizliyin beynəlxalq aspektləri"
+    },
+    {
+      "name": "suni-intellekt",
+      "keeper": "958e49aa-eccd-4076-8f1c-3e5f768c7313",
+      "sources": ["dbef5033-7383-4c11-aac1-0cd592affcae"]
+    },
+    {
+      "name": "konfliktler",
+      "keeper": "a27e5624-2306-4dc0-8678-8644a6d85c5b",
+      "sources": ["e1375f57-ca66-48db-9c9c-79ea7c9bea49"],
+      "keeper_name": "XXI əsrdə beynəlxalq konfliktlər",
+      "reviewed": true,
+      "pairs": [
+        {"source": "7814a4c3-904b-4f40-9f83-654caaee8767", "target": "e5fbf624-840a-4ce5-8ed3-7cd84179f1ca"}
+      ]
+    },
+    {
+      "name": "verilenler-bazasi",
+      "keeper": "1c6d0916-c680-45a2-aa8a-fe2720be032f",
+      "sources": ["4034f137-1081-4336-ad63-5a56705075d2"],
+      "reviewed": true,
+      "pairs": [
+        {"source": "3716fe6f-b021-4b82-9924-f5b31c7c9316", "target": "de997b24-77c3-4007-9457-0bfec299d9e9"},
+        {"source": "2ec2ada3-ab0c-4e0b-a66c-293aaa087f55", "target": "4e32c5a9-d065-4da8-9000-d91747939620"}
+      ]
+    },
+    {
+      "name": "zererverici",
+      "keeper": "b7e2b8b9-6de9-459b-b505-97cee35a9461",
+      "sources": ["b5cb7489-372b-482b-b0a9-1a377c92ddd1"],
+      "reviewed": true,
+      "pairs": [
+        {"source": "07cbecc2-6f7e-4207-adb6-53932d960d57", "target": "670324f8-13e4-4011-854a-0f873e30bf38"},
+        {"source": "c52bc071-f4de-468a-8fd4-56e51d55dde0", "target": "bad814fd-a7a5-4e24-8722-6e0d33e9ee13"},
+        {"source": "de38874f-45b4-4dbd-be9a-1df00e3e8730", "target": "6c94d08d-f70f-441f-abad-bfbe8a842c33"}
+      ]
+    },
+    {
+      "name": "it-tarixi-metodologiyasi",
+      "keeper": "da30fa4a-56d1-4f7c-8ef4-95df17929933",
+      "sources": ["fc16288a-a363-4a56-aeab-73d329ebc749"],
+      "reviewed": true,
+      "pairs": [
+        {"source": "5a684c41-b63b-4178-95fe-8df33c7b1167", "target": "856b6b2f-84ff-41d8-8afd-b98de3e18e1b"}
+      ]
+    },
+    {
+      "name": "sosial-is-ferdler",
+      "keeper": "7c8694f4-2d41-42d4-9ed1-1b67a95ffa26",
+      "sources": ["d7fb4e89-d147-4720-82c9-eee97e4d56a3"],
+      "keeper_name": "Fərdlər, qruplar və ailələrlə sosial iş",
+      "reviewed": true,
+      "pairs": [
+        {"source": "7d2e1aa3-0fd5-43f7-b377-b5b5ed379cdc", "target": "a88e570b-480f-4c8f-a5ae-803de1c056c9"}
+      ]
+    },
+    {
+      "name": "internet-proqramlasdirma",
+      "keeper": "ce454e09-32be-45ec-bdea-5728bd5e041e",
+      "sources": ["08fd493e-a243-443b-a39c-151ddcb1e0ec"],
+      "reviewed": true,
+      "pairs": [
+        {"source": "fb29c947-5c1d-479c-8631-5215923a6e47", "target": "95e04e28-923a-4423-a343-735becf5ba13"}
+      ]
+    },
+    {
+      "name": "veb-texnologiyalar",
+      "keeper": "5852fe4f-bc4a-49ae-9e75-5fe671a18dfa",
+      "sources": ["43fd5448-5d75-4d1f-841d-cacb1a47dfd5"],
+      "keeper_name": "Veb texnologiyalar",
+      "reviewed": true,
+      "pairs": [
+        {"source": "2974dbec-ef79-40ac-8465-08efd52a708d", "target": "8ebdadee-c42d-4aa3-a104-e1858f641842"}
+      ]
+    },
+    {
+      "name": "ikt",
+      "keeper": "698585d2-2eb5-4a63-a299-94880fed19c1",
+      "sources": ["09c52e60-96fa-48f7-b2ac-91efe1435a65"],
+      "keeper_name": "İnformasiya və kommunikasiya texnologiyaları",
+      "reviewed": true,
+      "pairs": [
+        {"source": "b1a6317a-eddf-4e4e-8340-9b69acb69ec2", "target": "36046244-e8c2-48ff-a807-409828a83814"}
+      ]
+    },
+    {
+      "name": "insan-komputer-ui-ux",
+      "keeper": "c91fb839-1887-4f93-8a63-c4dd349f3c11",
+      "sources": ["72066950-6200-411d-a686-c6c375595007"],
+      "reviewed": true,
+      "pairs": [
+        {"source": "a5f59989-7483-434f-bfa0-e494f061714e", "target": "802a6dbf-1ff3-4309-9aa4-a9067d5f9d4c"}
+      ]
+    },
+    {
+      "name": "aqroiqlim",
+      "keeper": "0081ceca-f270-44df-af3c-da1fe2b1ac0a",
+      "sources": ["ac53d96a-97d6-4402-b45a-6bc2da5088da"],
+      "reviewed": true,
+      "pairs": [
+        {"source": "2241fd3f-735a-4a78-a2c2-14ec7a7edf92", "target": "0858f3cf-76eb-47b3-8842-4098e32c17a2"}
+      ]
     }
+  ],
+  "doubles": [
+    {"name": "optimallasdirma-233ke", "offerings": ["2e4c743b-f5b1-4ca0-bbbe-84cfebf0c580", "d8648176-3f07-4ebb-a4ae-254b00f8a5b4"]},
+    {"name": "ecnebiler-2295", "offerings": ["7182d9c2-4bbf-4475-9603-97eb59f4e6e7", "73d33235-e875-4100-8ce4-4ae4b42a9a8a"]},
+    {"name": "psixologiya-136", "offerings": ["0f6cc835-f2ee-432e-9992-8bebbe8980da", "e2a4155d-8e96-41e8-bc92-d635eb306429"]},
+    {"name": "turizme-giris-536", "offerings": ["11ab4575-0c09-4ca6-a576-00d9eaf91d50", "6954a200-1dbb-4be2-ae84-9697665ffad2"]},
+    {"name": "mikroiqtisadiyyat-536", "offerings": ["378373bb-02d0-434a-8a86-c1bc22c029a5", "3ec09db9-a76d-4855-b335-6e873c6fc5e5"]},
+    {"name": "tedqiqat-403", "offerings": ["5c5bea5e-b94f-4256-a935-d927cd7b5543", "b54d5291-8be0-428a-a6b6-2c19f23dc97b"]}
+  ],
+  "refused": [
+    {"name": "senaye-ekologiyasi", "subjects": ["8c150b6f-cee9-402f-9f95-47e965ef1e73", "afdf2c0f-7d5b-4157-8608-1c7e96d35564"], "reason": "curriculum_both", "evidence": "curriculum 3601728d lists both in semester 4"},
+    {"name": "beynelxalq-iqtisadi", "subjects": ["8ef60d58-c349-4dea-bfa7-065c6116ce39", "f3f72d46-42bb-4813-8638-fe40119670b4"], "reason": "curriculum_both", "evidence": "curriculum a3aed953 lists both in semester 1"},
+    {"name": "huquq-psixologiyasi", "subjects": ["978a61b6-928c-481c-b510-0091758c3ddb", "4c19af0e-4c9b-4fb5-8754-d9b01826e413"], "reason": "credit_mismatch", "evidence": "6 vs 5 ECTS, graded students on both cards"},
+    {"name": "komputer-qrafikasi-2", "subjects": ["f43d17f5-3456-42d2-bf3b-6406f4dbeb56", "a8de390e-8fce-4dc7-84c7-c92290423be8"], "reason": "credit_mismatch", "evidence": "5 vs 3 ECTS, graded students on both cards"},
+    {"name": "muhasibat-ucotu", "subjects": ["ab4556d1-03db-468d-9ebc-f6aa50c4efd5", "a5a0054e-3f9f-4f56-b2f6-975041801d94"], "reason": "credit_mismatch", "evidence": "5 vs 3 ECTS, graded students on both cards"},
+    {"name": "olkesunasliq", "subjects": ["69e6e769-3dd9-4a39-a783-8c7bc07b6448", "38049c55-e935-4295-9328-3439d5dd8a3a"], "reason": "credit_mismatch", "evidence": "4 vs 5 ECTS, graded students on both cards"},
+    {"name": "informasiya-texnologiyalari", "subjects": ["e4b373bc-d83b-4bd8-a815-93076800ebcf", "e3c1f643-dade-4c3e-b1bd-8fe692784676"], "reason": "different_subject", "evidence": "3 vs 5 ECTS, graded on both; '(ixtisas üzrə)' is a separate course; 533 Bi ing has two independently taught journals"},
+    {"name": "maliyye-riskleri", "subjects": ["32b85c41-8a90-4571-9f05-ebdc06bcb1e5", "4df639f3-4e1f-458c-b7d1-ff63c18a992c"], "reason": "instructors_differ", "evidence": "403/5 MN ing: lessons by 7810 under QKU-L2670, load assigns 11591 under QKU-2714"}
   ]
 }
