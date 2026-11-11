@@ -84,7 +84,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install --require-hashes -r requirements/test.lock
           pip install pytest-playwright playwright
-          playwright install chromium --with-deps
+          # 2026-11-11: runner DNS (security.ubuntu.com) kəsintisi — apt hissəsi 3 cəhd.
+          for attempt in 1 2 3; do
+            playwright install chromium --with-deps && break
+            [ "$attempt" = 3 ] && exit 1
+            echo "playwright install cəhd $attempt uğursuz — 30 s sonra təkrar"; sleep 30
+          done
           SH
           # shellcheck disable=SC2016  # tək dırnaq qəsdəndir: dəyişənlər fon bash-da açılır
           nohup bash -c '
