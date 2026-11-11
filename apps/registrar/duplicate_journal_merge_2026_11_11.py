@@ -210,6 +210,10 @@ class JournalMerge(ScoreSteps):
         same_name = normalized_subject_key(source.subject.name) == normalized_subject_key(target.subject.name)
         if not same_name and not pair.get("reviewed"):
             raise Blocked("pair_names_differ")
+        from .duplicate_subjects_rules_2026_11_11 import shared_curricula
+
+        if shared_curricula([source.subject_id, target.subject_id]):
+            raise Blocked("pair_curriculum_both")  # eyni tədris planında iki ayrı sətir — həqiqətən fərqli fənlər
         return source, target
 
     def _check(self, source, target) -> None:

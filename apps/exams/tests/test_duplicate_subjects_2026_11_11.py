@@ -374,7 +374,8 @@ class DuplicateSubjectsTest(_MidtermSetup):
             self.assertTrue(CourseOffering.objects.get(pk=self.source.pk).is_active)
             self.assertEqual(LessonMark.objects.filter(lesson__offering=self.offering).count(), 3)
 
-    def test_auto_pairs_only_in_the_current_period(self):
+    def test_auto_pairs_touch_past_periods_only_for_empty_shells(self):
+        """Cari dövr qutusu tam birləşir; keçmiş dövrdə YALNIZ boş qabıq passiv olur (2-ci dövrə, 2026-11-11)."""
         with bypass_rls():
             past = type(self.period).objects.create(
                 organization=self.org,
@@ -384,12 +385,32 @@ class DuplicateSubjectsTest(_MidtermSetup):
                 start_date=datetime.date(2025, 9, 1),
                 end_date=datetime.date(2026, 1, 31),
             )
-            for subject in (self.subject, self.twin):
+            shells = [
                 CourseOffering.objects.create(organization=self.org, subject=subject, group=self.group, period=past)
+                for subject in (self.subject, self.twin)
+            ]
+            other = OrgUnit.objects.create(
+                organization=self.org, name="JBGP", slug="jb-gp", unit_type=OrgUnitType.GROUP
+            )
+            busy = []
+            for subject in (self.subject, self.twin):  # keçmiş dövrdə HƏR İKİ tərəfi datalı qutu
+                offering = CourseOffering.objects.create(
+                    organization=self.org, subject=subject, group=other, period=past
+                )
+                Lesson.objects.create(
+                    organization=self.org, offering=offering, date=datetime.date(2025, 10, 1), kind="lecture", hours=2
+                )
+                busy.append(offering)
             self.plan["groups"][0]["pairs"] = []
         counts, _ = self._call("--only", "journals")
-        self.assertEqual(counts["pairs_merged"], "1")  # yalnız cari dövrün qutusu (avtomatik aşkarlanıb)
-        self.assertEqual(sum(1 for line in self.lines if line.startswith("twin_merge: pair=")), 1)
+        self.assertEqual(counts["pairs_merged"], "2")  # cari qutu + keçmiş boş qabıq
+        self.assertEqual(sum(1 for line in self.lines if line.startswith("twin_merge: pair=")), 2)
+        self._call("--only", "journals", "--apply")
+        with bypass_rls():
+            self.assertEqual(
+                [CourseOffering.objects.get(pk=row.pk).is_active for row in shells], [True, False]
+            )  # mənbə kartın qabığı passiv
+            self.assertEqual(CourseOffering.objects.filter(pk__in=[row.pk for row in busy], is_active=True).count(), 2)
 
     def test_auto_catalogue_is_opt_in_and_never_merges_across_chairs(self):
         with bypass_rls():
