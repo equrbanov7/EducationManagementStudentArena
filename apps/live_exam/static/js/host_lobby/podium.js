@@ -1,7 +1,7 @@
-import { UI } from './dom.js?v=lx20261110p';
-import { state } from './state.js?v=lx20261110p';
-import { renderStage } from './stage.js?v=lx20261110p';
-import { safeDisplay, topSignature } from './utils.js?v=lx20261110p';
+import { UI } from './dom.js?v=lx20261111f';
+import { state } from './state.js?v=lx20261111f';
+import { renderStage } from './stage.js?v=lx20261111f';
+import { safeDisplay, topSignature } from './utils.js?v=lx20261111f';
 
 /* Köhnə «podium» API-si səhnəyə (stage.js) ötürülür. Sıra — serverin `top` sırası. */
 export function renderPodium(top, payload = {}) {

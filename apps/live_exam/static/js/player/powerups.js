@@ -5,11 +5,11 @@
 //    (body.lxp-bomb-armed, data-bomb-urgency); vaxt azaldıqca sürətlənir.
 //  * `question_modifiers` WS hadisəsi: aparıcı rejimi cavabsız cari suala tətbiq etdi → bayraqlar
 //    dəyişir, görünüş açarı (modsKey) dəyişdiyi üçün faza yenidən çəkilir.
-import { PHASES } from './config.js?v=lx20261110p';
-import { startHeartbeat, stopHeartbeat } from './audio.js?v=lx20261110p';
-import { state } from './state.js?v=lx20261110p';
-import { esc, nowMs, toInt, tr, ts } from './utils.js?v=lx20261110p';
-import { BOMB_SVG } from '../host_lobby/power_art.js?v=lx20261110p';
+import { PHASES } from './config.js?v=lx20261111f';
+import { startHeartbeat, stopHeartbeat } from './audio.js?v=lx20261111f';
+import { state } from './state.js?v=lx20261111f';
+import { esc, nowMs, toInt, tr, ts } from './utils.js?v=lx20261111f';
+import { BOMB_SVG } from '../host_lobby/power_art.js?v=lx20261111f';
 
 const BOMB_ICON =
     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="14" r="7" fill="currentColor"/><path d="M14.5 7.5l2.2-2.2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M16.7 5.3c1.4-1.3 2.9-.9 3.6.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="21" cy="4.5" r="1.3" fill="currentColor"/></svg>';

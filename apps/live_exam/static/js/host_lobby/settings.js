@@ -1,7 +1,7 @@
-import { UI } from './dom.js?v=lx20261110p';
-import { state } from './state.js?v=lx20261110p';
-import { applyServerVolume, stopAllLoops, syncLobbyMusic } from './audio.js?v=lx20261110p';
-import { applyStyleToDocument, isFormal, setPresentationStyle } from './style_mode.js?v=lx20261110p';
+import { UI } from './dom.js?v=lx20261111f';
+import { state } from './state.js?v=lx20261111f';
+import { applyServerVolume, stopAllLoops, syncLobbyMusic } from './audio.js?v=lx20261111f';
+import { applyStyleToDocument, isFormal, setPresentationStyle } from './style_mode.js?v=lx20261111f';
 
 export function applySessionSettings(nextSettings) {
     const previousLobbyMusic = state.sessionSettings.lobby_music;

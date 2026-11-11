@@ -6,7 +6,7 @@
  * 2026-10-19: «Rəsmi» üslubda oyunbaz ikonlar (şimşək, alov, tac, kubok, ulduz, parıltı) sakit xətti
  * qarşılıqları ilə əvəzlənir (FORMAL_SWAP) — çağıranlar dəyişmir.
  */
-import { isFormal } from './style_mode.js?v=lx20261110p';
+import { isFormal } from './style_mode.js?v=lx20261111f';
 
 const STROKE = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
 

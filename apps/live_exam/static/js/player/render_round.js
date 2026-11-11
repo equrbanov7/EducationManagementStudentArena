@@ -1,12 +1,12 @@
 // LX-FE-PLAYER (2026-09-29): raund görünüşləri — «Hazır ol», giriş (sual oxunur), cavab plitələri
 // (tək/çox seçim, yazılı cavab), «cavab qəbul edildi» və «vaxt bitdi». Hər görünüş açarla qurulur
 // (views.js) — eyni açarla təkrar çağırış yalnız dinamik hissələri (saniyə, sayğac) yeniləyir.
-import { PHASES, TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20261110p';
-import { playSound } from './audio.js?v=lx20261110p';
-import { state } from './state.js?v=lx20261110p';
-import { optionLabel, optionMark, toneIndex } from './shapes.js?v=lx20261110p';
-import { isFormal } from '../host_lobby/style_mode.js?v=lx20261110p';
-import { announce, setQuestionChip, setTimer, startTimeBar, stopTimeBar } from './ui.js?v=lx20261110p';
+import { PHASES, TEXT_ANSWER_MAX_LENGTH } from './config.js?v=lx20261111f';
+import { playSound } from './audio.js?v=lx20261111f';
+import { state } from './state.js?v=lx20261111f';
+import { optionLabel, optionMark, toneIndex } from './shapes.js?v=lx20261111f';
+import { isFormal } from '../host_lobby/style_mode.js?v=lx20261111f';
+import { announce, setQuestionChip, setTimer, startTimeBar, stopTimeBar } from './ui.js?v=lx20261111f';
 import {
     esc,
     fmt,
@@ -18,10 +18,10 @@ import {
     toInt,
     tr,
     ts,
-} from './utils.js?v=lx20261110p';
-import { currentViewEl, mountView } from './views.js?v=lx20261110p';
-import { hasCodeBlock } from '../host_lobby/code_text.js?v=lx20261110p';
-import { modsKey, powerArtMarkup, powerBadgesMarkup, powerClass, powerKickerMarkup } from './powerups.js?v=lx20261110p';
+} from './utils.js?v=lx20261111f';
+import { currentViewEl, mountView } from './views.js?v=lx20261111f';
+import { hasCodeBlock } from '../host_lobby/code_text.js?v=lx20261111f';
+import { modsKey, powerArtMarkup, powerBadgesMarkup, powerClass, powerKickerMarkup } from './powerups.js?v=lx20261111f';
 
 export const CHECK_SVG =
     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';

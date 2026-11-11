@@ -1,7 +1,7 @@
 // LX-FE-PLAYER (2026-09-29): host sessiya parametrləri (tema, yüksək kontrast) telefonda da tətbiq olunur.
 // 2026-10-19: təqdimat üslubu (Rəsmi / Qeyri-rəsmi) — `body[data-lx-style]` + baş hərf avatarları.
-import { SESSION_SETTINGS } from './config.js?v=lx20261110p';
-import { applyStyleToDocument, setPresentationStyle } from '../host_lobby/style_mode.js?v=lx20261110p';
+import { SESSION_SETTINGS } from './config.js?v=lx20261111f';
+import { applyStyleToDocument, setPresentationStyle } from '../host_lobby/style_mode.js?v=lx20261111f';
 
 export function applySessionSettings(nextSettings) {
     Object.assign(SESSION_SETTINGS, nextSettings || {});

@@ -8,10 +8,10 @@
  *    bomba; ×2-də qızıl aura. Reveal-də bomba partlayıbsa (`bomb_count > 0`) partlayış effekti + səs.
  *  • `question_modifiers` WS hadisəsi: cari sualın bayraqları dəyişir → səhnə yenidən çəkilir.
  *  Qayda yalnız serverdədir — bu modul heç bir bal hesablamır. */
-import { UI } from './dom.js?v=lx20261110p';
-import { PHASES } from './constants.js?v=lx20261110p';
-import { state } from './state.js?v=lx20261110p';
-import { postJson } from './api.js?v=lx20261110p';
+import { UI } from './dom.js?v=lx20261111f';
+import { PHASES } from './constants.js?v=lx20261111f';
+import { state } from './state.js?v=lx20261111f';
+import { postJson } from './api.js?v=lx20261111f';
 import {
     playDoubleUp,
     playExplosion,
@@ -19,12 +19,12 @@ import {
     playPowerArm,
     startHeartbeat,
     stopHeartbeat,
-} from './audio.js?v=lx20261110p';
-import { icon } from './icons.js?v=lx20261110p';
-import { EXPLOSION_SHARDS, explosionMarkup, isBombQuestion, isDoubleQuestion, shardVars } from './power_markup.js?v=lx20261110p';
-import { BOMB_SVG } from './power_art.js?v=lx20261110p';
-import { showToast } from './toast.js?v=lx20261110p';
-import { controlsEnabled, esc, nowMs, reducedMotion, tr } from './utils.js?v=lx20261110p';
+} from './audio.js?v=lx20261111f';
+import { icon } from './icons.js?v=lx20261111f';
+import { EXPLOSION_SHARDS, explosionMarkup, isBombQuestion, isDoubleQuestion, shardVars } from './power_markup.js?v=lx20261111f';
+import { BOMB_SVG } from './power_art.js?v=lx20261111f';
+import { showToast } from './toast.js?v=lx20261111f';
+import { controlsEnabled, esc, nowMs, reducedMotion, tr } from './utils.js?v=lx20261111f';
 
 const KEYS = ["bomb_mode", "double_mode"];
 const pending = new Set();

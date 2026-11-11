@@ -1,7 +1,7 @@
 // LX-FE-PLAYER (2026-09-29): telefon səsləri — WebAudio sintezi (xarici fayl yoxdur).
 // Musiqili, yumşaq zərf (attack/decay), low-pass süzgəc və kompressor; susdurma localStorage-da.
 // Brauzerin autoplay siyasətinə görə kontekst ilk toxunuşda açılır (unlockAudio).
-import { isFormal } from '../host_lobby/style_mode.js?v=lx20261110p';
+import { isFormal } from '../host_lobby/style_mode.js?v=lx20261111f';
 
 const AudioCtor = window.AudioContext || window.webkitAudioContext;
 const STORE_KEY = "lx.player.sound";

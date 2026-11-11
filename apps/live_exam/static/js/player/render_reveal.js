@@ -2,14 +2,14 @@
 // Yalnız serverin göndərdiyi məlumat göstərilir: şəxsi nəticə (`player_answer`), `rank`,
 // `gap_to_next`, `next_nickname`, `streak`, multi üçün `correct_selected/total_correct`,
 // yazılı cavab üçün `your_text`/`accepted_answers`. Sahə yoxdursa — o hissə sadəcə göstərilmir.
-import { LEADERBOARD_LIMIT, PHASES, prefersReducedMotion } from './config.js?v=lx20261110p';
-import { playSound } from './audio.js?v=lx20261110p';
-import { buzz, HAPTIC } from './haptics.js?v=lx20261110p';
-import { optionLabel, optionMark, toneIndex } from './shapes.js?v=lx20261110p';
-import { isFormal } from '../host_lobby/style_mode.js?v=lx20261110p';
-import { state } from './state.js?v=lx20261110p';
-import { previousRank, rememberRank } from './stats.js?v=lx20261110p';
-import { announce, setQuestionChip, setRank, setScore, setTimer, stopTimeBar } from './ui.js?v=lx20261110p';
+import { LEADERBOARD_LIMIT, PHASES, prefersReducedMotion } from './config.js?v=lx20261111f';
+import { playSound } from './audio.js?v=lx20261111f';
+import { buzz, HAPTIC } from './haptics.js?v=lx20261111f';
+import { optionLabel, optionMark, toneIndex } from './shapes.js?v=lx20261111f';
+import { isFormal } from '../host_lobby/style_mode.js?v=lx20261111f';
+import { state } from './state.js?v=lx20261111f';
+import { previousRank, rememberRank } from './stats.js?v=lx20261111f';
+import { announce, setQuestionChip, setRank, setScore, setTimer, stopTimeBar } from './ui.js?v=lx20261111f';
 import {
     esc,
     fmt,
@@ -26,10 +26,10 @@ import {
     showQuestionsOnDevices,
     toInt,
     tr,
-} from './utils.js?v=lx20261110p';
-import { mountView } from './views.js?v=lx20261110p';
-import { CHECK_SVG } from './render_round.js?v=lx20261110p';
-import { doubleChipMarkup, resultIsDouble } from './powerups.js?v=lx20261110p';
+} from './utils.js?v=lx20261111f';
+import { mountView } from './views.js?v=lx20261111f';
+import { CHECK_SVG } from './render_round.js?v=lx20261111f';
+import { doubleChipMarkup, resultIsDouble } from './powerups.js?v=lx20261111f';
 
 const CROSS_SVG =
     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/></svg>';

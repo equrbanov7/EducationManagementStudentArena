@@ -1,12 +1,12 @@
-import { UI } from './dom.js?v=lx20261110p';
-import { state } from './state.js?v=lx20261110p';
-import { stopAllLoops, stopDanceBeat, stopLobbyMusic, syncLobbyMusic } from './audio.js?v=lx20261110p';
-import { stopStatePolling } from './api.js?v=lx20261110p';
-import { renderIdleStage, resetLobbyStage } from './lobby.js?v=lx20261110p';
-import { teardownStage } from './stage.js?v=lx20261110p';
-import { cancelWipe } from './transitions.js?v=lx20261110p';
-import { fmt, log, markStateMutation, notifyHostShell, safeDisplay, tr } from './utils.js?v=lx20261110p';
-import { hydrateCodeText } from './code_text.js?v=lx20261110p';
+import { UI } from './dom.js?v=lx20261111f';
+import { state } from './state.js?v=lx20261111f';
+import { stopAllLoops, stopDanceBeat, stopLobbyMusic, syncLobbyMusic } from './audio.js?v=lx20261111f';
+import { stopStatePolling } from './api.js?v=lx20261111f';
+import { renderIdleStage, resetLobbyStage } from './lobby.js?v=lx20261111f';
+import { teardownStage } from './stage.js?v=lx20261111f';
+import { cancelWipe } from './transitions.js?v=lx20261111f';
+import { fmt, log, markStateMutation, notifyHostShell, safeDisplay, tr } from './utils.js?v=lx20261111f';
+import { hydrateCodeText } from './code_text.js?v=lx20261111f';
 
 let presenterWindowRef = null;
 

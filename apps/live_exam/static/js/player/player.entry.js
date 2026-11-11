@@ -1,19 +1,19 @@
-import { bombText } from '../host_lobby/bomb_text.js?v=lx20261110p';
-import { installBombUI } from './bombs.js?v=lx20261110p';
-import { state } from './state.js?v=lx20261110p';
+import { bombText } from '../host_lobby/bomb_text.js?v=lx20261111f';
+import { installBombUI } from './bombs.js?v=lx20261111f';
+import { state } from './state.js?v=lx20261111f';
 // LX-FE-PLAYER (2026-09-29): iştirakçı ekranının giriş nöqtəsi.
-import { BOOTSTRAP, SESSION_SETTINGS, prefersReducedMotion } from './config.js?v=lx20261110p';
-import { fetchState, setSnapshotHandlers } from './api.js?v=lx20261110p';
-import { bindPlayerEvents } from './events.js?v=lx20261110p';
-import { bindCopyGuard } from './guard.js?v=lx20261110p';
-import { handleAuthLost, handleSnapshot, handleSocketMessage } from './flow.js?v=lx20261110p';
-import { resetWatchdog, startStatePolling } from './polling.js?v=lx20261110p';
-import { renderBoot } from './render_status.js?v=lx20261110p';
-import { applySessionSettings } from './settings.js?v=lx20261110p';
-import { openPlayerSocket } from './sockets.js?v=lx20261110p';
-import { renderPlayerIdentity, renderSoundToggle, setNetSignal, setNetStatus } from './ui.js?v=lx20261110p';
-import { playSound } from './audio.js?v=lx20261110p';
-import { buzz, HAPTIC } from './haptics.js?v=lx20261110p';
+import { BOOTSTRAP, SESSION_SETTINGS, prefersReducedMotion } from './config.js?v=lx20261111f';
+import { fetchState, setSnapshotHandlers } from './api.js?v=lx20261111f';
+import { bindPlayerEvents } from './events.js?v=lx20261111f';
+import { bindCopyGuard } from './guard.js?v=lx20261111f';
+import { handleAuthLost, handleSnapshot, handleSocketMessage } from './flow.js?v=lx20261111f';
+import { resetWatchdog, startStatePolling } from './polling.js?v=lx20261111f';
+import { renderBoot } from './render_status.js?v=lx20261111f';
+import { applySessionSettings } from './settings.js?v=lx20261111f';
+import { openPlayerSocket } from './sockets.js?v=lx20261111f';
+import { renderPlayerIdentity, renderSoundToggle, setNetSignal, setNetStatus } from './ui.js?v=lx20261111f';
+import { playSound } from './audio.js?v=lx20261111f';
+import { buzz, HAPTIC } from './haptics.js?v=lx20261111f';
 
 applySessionSettings(SESSION_SETTINGS);
 renderPlayerIdentity();

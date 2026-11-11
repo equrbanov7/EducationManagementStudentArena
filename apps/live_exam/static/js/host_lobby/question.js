@@ -1,12 +1,12 @@
-import { $, UI } from './dom.js?v=lx20261110p';
-import { PHASES } from './constants.js?v=lx20261110p';
-import { state } from './state.js?v=lx20261110p';
-import { playAllAnswered, playCountdownSound, playIntroSound, playTick, playTimeUp, playWhoosh } from './audio.js?v=lx20261110p';
-import { icon } from './icons.js?v=lx20261110p';
-import { answerTileMarkup, optionsLengthClass, tilesGridClass } from './options.js?v=lx20261110p';
-import { revealQuestion } from './api.js?v=lx20261110p';
-import { playWipe } from './transitions.js?v=lx20261110p';
-import { secondsLabel } from './time_setting.js?v=lx20261110p';
+import { $, UI } from './dom.js?v=lx20261111f';
+import { PHASES } from './constants.js?v=lx20261111f';
+import { state } from './state.js?v=lx20261111f';
+import { playAllAnswered, playCountdownSound, playIntroSound, playTick, playTimeUp, playWhoosh } from './audio.js?v=lx20261111f';
+import { icon } from './icons.js?v=lx20261111f';
+import { answerTileMarkup, optionsLengthClass, tilesGridClass } from './options.js?v=lx20261111f';
+import { revealQuestion } from './api.js?v=lx20261111f';
+import { playWipe } from './transitions.js?v=lx20261111f';
+import { secondsLabel } from './time_setting.js?v=lx20261111f';
 import {
     controlsEnabled,
     esc,
@@ -19,10 +19,10 @@ import {
     questionKey,
     toMs,
     tr,
-} from './utils.js?v=lx20261110p';
-import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261110p';
-import { bombSceneMarkup, doubleSceneMarkup, powerBadgesMarkup, powerSceneClass } from './power_markup.js?v=lx20261110p';
-import { setQuestionRerenderHook, syncPowerAmbience } from './powerups.js?v=lx20261110p';
+} from './utils.js?v=lx20261111f';
+import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261111f';
+import { bombSceneMarkup, doubleSceneMarkup, powerBadgesMarkup, powerSceneClass } from './power_markup.js?v=lx20261111f';
+import { setQuestionRerenderHook, syncPowerAmbience } from './powerups.js?v=lx20261111f';
 
 const isTextQuestion = (question) => String(question?.answer_input || "choice") === "text";
 
