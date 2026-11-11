@@ -169,7 +169,7 @@ class CurrentOnlyCatalogueTest(_MidtermSetup):
         counts, batch = self._call("--only", "catalogue", "--current-only", "--apply")
         self.assertEqual(counts["catalogue_keeper_switched_by_exam"], "1")
         self.assertIn("keeper=qku-77", self._detail())
-        self.assertIn("keeper_rule=exam exams_kept=1 exams_moved=0", self._detail())
+        self.assertIn("keeper_rule=exam exams_kept=1 exams_source=0", self._detail())
         self.assertEqual(counts["catalogue_exams_resynced"], "1")
         with bypass_rls():
             self.assertTrue(Subject.objects.get(pk=self.subject.pk).is_archived)
@@ -190,33 +190,35 @@ class CurrentOnlyCatalogueTest(_MidtermSetup):
             self.assertEqual(exam.subject_id, self.typo.pk)
         self.assertEqual(self._subject_of(self.offering), self.subject.pk)
 
-    def test_exam_card_whose_journal_was_already_merged_falls_back_to_plan_keeper(self):
+    def test_exam_card_whose_journal_was_already_merged_is_skipped(self):
         """Jurnal addımı imtahan kartının cari jurnalını planın kartına birləşdiribsə (K4) imtahan kartı saxlanıla
-        bilmir — planın kartı saxlanılır, imtahan ona keçir və birləşdirilmiş jurnala bağlanır (nəticə itmir)."""
+        bilmir; planın kartı imtahanın fənnini dəyişərdi — qrup ATLANIR, imtahan öz fənnində qalır."""
         exam, _options = self._midterm_on(self.typo)
         self._call("--only", "journals", "--apply")
         counts, _ = self._call("--only", "catalogue", "--current-only", "--apply")
-        self.assertEqual(counts["catalogue_groups_merged"], "1")
-        self.assertEqual(counts["catalogue_keeper_rule_exam_journal_merged"], "1")
-        self.assertIn("keeper=cs101", self._detail())
-        self.assertIn("keeper_rule=exam_journal_merged", self._detail())
+        self.assertNotIn("catalogue_groups_merged", counts)
+        self.assertEqual(counts["catalogue_skipped_exam_journal_merged"], "1")
+        self.assertIn("twin_merge: group=typo catalogue=skipped reason=exam_journal_merged", self.lines)
+        self.assertIn("keeper=qku-77", self._detail())
         with bypass_rls():
-            exam.refresh_from_db()
-            self.assertEqual(exam.subject_id, self.subject.pk)
-            self.assertIn(self.offering.pk, set(exam.journal_offerings.values_list("pk", flat=True)))
+            self.assertEqual(Exam.objects.get(pk=exam.pk).subject_id, self.typo.pk)
+            self.assertFalse(Subject.objects.get(pk=self.typo.pk).is_archived)
+            self.assertFalse(Subject.objects.get(pk=self.subject.pk).is_archived)
 
-    def test_exams_on_both_cards_keep_plan_keeper_and_move_source_exam(self):
+    def test_exams_on_both_cards_are_skipped(self):
         self._no_journal_conflict()
-        kept, _ = self._midterm_on(self.subject)
-        moved, _ = self._midterm_on(self.typo)
+        on_keeper, _ = self._midterm_on(self.subject)
+        on_source, _ = self._midterm_on(self.typo)
         counts, _ = self._call("--only", "catalogue", "--current-only", "--apply")
-        self.assertEqual(counts["catalogue_groups_merged"], "1")
-        self.assertIn("keeper=cs101", self._detail())
-        self.assertIn("keeper_rule=exams_both exams_kept=1 exams_moved=1", self._detail())
-        self.assertEqual(counts["catalogue_exams_moved"], "1")
+        self.assertNotIn("catalogue_groups_merged", counts)
+        self.assertEqual(counts["catalogue_skipped_exams_on_both_cards"], "1")
+        self.assertIn("twin_merge: group=typo catalogue=skipped reason=exams_on_both_cards", self.lines)
+        self.assertIn("keeper_rule=exams_both exams_kept=1 exams_source=1", self._detail())
         with bypass_rls():
-            self.assertEqual(Exam.objects.get(pk=kept.pk).subject_id, self.subject.pk)
-            self.assertEqual(Exam.objects.get(pk=moved.pk).subject_id, self.subject.pk)
+            self.assertEqual(Exam.objects.get(pk=on_keeper.pk).subject_id, self.subject.pk)
+            self.assertEqual(Exam.objects.get(pk=on_source.pk).subject_id, self.typo.pk)
+            self.assertFalse(Subject.objects.get(pk=self.typo.pk).is_archived)
+            self.assertEqual(self._subject_of(self.source), self.typo.pk)
 
     def test_guard_report_still_counts(self):
         counts, _ = self._call("--only", "report")

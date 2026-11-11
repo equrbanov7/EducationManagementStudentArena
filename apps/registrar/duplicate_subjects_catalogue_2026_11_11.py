@@ -9,9 +9,11 @@ savepoint-ində işləyir. Bu modul iki sahib qərarını əlavə edir:
 * **İmtahan qaydası**: «Hansı fənnə bağlı imtahan verilibsə o formada saxla … Səhv olmasın.» CARİ dövrün imtahanları
   (silinməmiş, ``start_datetime`` cari dövrün başlanğıcından sonra və ya tarixsiz) qrupun YALNIZ BİR kartındadırsa o kart
   saxlanılan olur — planın açıq ``keeper``-ini və :func:`.duplicate_subjects_2026_11_11.choose_keeper` qaydasını üstələyir.
-  İmtahanlar hər iki kartdadırsa saxlanılan kart dəyişmir; mənbə kartın imtahanları ``merge_subjects``-in adi
-  ``exams.Exam.subject`` köçürməsi ilə saxlanılan karta keçir (geri qaytarılır). Hər iki halda imtahanların jurnal bağı
-  əmrdə (exams tərəfi) ``exam_journal_link.refresh_links`` + ``resync_exam_journal`` ilə yenilənir.
+  Cari imtahanın fənni HEÇ VAXT dəyişmir, ona görə qrup ATLANIR (hesabatda səbəblə):
+  ``exams_on_both_cards`` — cari imtahanlar hər iki kartdadır; ``exam_journal_merged`` — jurnal addımı imtahan kartının
+  cari jurnalını artıq digər karta birləşdirib (K4), imtahan kartı saxlanıla bilmir. Birləşən qrupda saxlanılan kartın
+  cari imtahanlarının jurnal bağı əmrdə (exams tərəfi) ``exam_journal_link.refresh_links`` + ``resync_exam_journal`` ilə
+  yenilənir.
 
 Hər qrup üçün bir hesabat sətri: saxlanılan / mənbə kartların kodu və adı, köçən (cari + gələcək) və qalan (keçmiş)
 açılışlar, saxlanılan və köçən imtahanlar, atlanma səbəbi.
@@ -82,7 +84,7 @@ def _line(name, keeper, live, rule, exams, result=None, left=None) -> str:
         "source_name=" + "__".join(_slug(source.name) for source in live),
         f"keeper_rule={rule}",
         f"exams_kept={kept}",
-        f"exams_moved={moved_exams}",
+        f"exams_source={moved_exams}",
     ]
     if result is not None:
         counts = result.get("counts") or {}
@@ -113,6 +115,10 @@ def catalogue(organization, actor, counts, groups, lines, renames, merged, *, pe
             lines.append(f"group={name} catalogue=already_merged")
             continue
         head = _line(name, keeper, live, rule, exams)
+        if rule == "exams_both":  # imtahanın fənni dəyişməsin (sahib 2026-11-11)
+            counts["catalogue_skipped_exams_on_both_cards"] += 1
+            lines.extend([f"group={name} catalogue=skipped reason=exams_on_both_cards", head])
+            continue
         if keeper.is_archived or not keeper.is_active:
             counts["catalogue_skipped_exam_keeper_archived"] += 1
             lines.extend([f"group={name} catalogue=skipped reason=exam_keeper_archived", head])
@@ -128,18 +134,16 @@ def catalogue(organization, actor, counts, groups, lines, renames, merged, *, pe
                 )
                 if payload["blocking_total"] and keeper.pk != plan_keeper.pk:
                     # Jurnal addımı imtahan kartının cari jurnalını artıq planın kartının jurnalına birləşdiribsə (K4:
-                    # passiv datalı jurnal) imtahan kartı saxlanıla bilmir — planın kartı keçirsə o saxlanılır, imtahan
-                    # adi ``exams.Exam.subject`` köçürməsi ilə ona keçir və bağı birləşdirilmiş jurnala yenilənir.
+                    # passiv datalı jurnal) imtahan kartı saxlanıla bilmir; planın kartını saxlamaq imtahanın fənnini
+                    # dəyişərdi — qrup ATLANIR.
                     others = [card for card in (keeper, *live) if card.pk != plan_keeper.pk]
                     fallback = preview(
                         organization, str(plan_keeper.pk), [str(card.pk) for card in others], current_only=current_only
                     )
                     if not fallback["blocking_total"]:
-                        keeper, live, rule, payload = plan_keeper, others, "exam_journal_merged", fallback
-                        counts["catalogue_keeper_rule_exam"] -= 1
-                        counts["catalogue_keeper_switched_by_exam"] -= 1
-                        counts["catalogue_keeper_rule_exam_journal_merged"] += 1
-                        head = _line(name, keeper, live, rule, exams)
+                        counts["catalogue_skipped_exam_journal_merged"] += 1
+                        lines.extend([f"group={name} catalogue=skipped reason=exam_journal_merged", head])
+                        continue
                 if payload["blocking_total"]:
                     counts["catalogue_blocked"] += 1
                     codes = sorted({item["code"] for item in payload["blocking"]})
