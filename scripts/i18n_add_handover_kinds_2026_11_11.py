@@ -24,6 +24,20 @@ STRINGS = {
         "Seçilen öğretmen bu ders türünü yürütmüyor",
         "Die ausgewählte Lehrkraft unterrichtet diese Unterrichtsart nicht",
     ),
+    (
+        _H,
+        "Bu dərs növünü bir neçə müəllim aparır — hansı müəllimdən? «Hansı müəllimin fənləri?» süzgəcində "
+        "həmin müəllimi seçib yenidən təhvil verin",
+    ): (
+        "Several teachers teach this lesson type — from which teacher? Pick that teacher in the “Whose courses?” "
+        "filter and hand over again",
+        "Этот вид занятий ведут несколько преподавателей — от кого передать? Выберите преподавателя в фильтре "
+        "«Чьи предметы?» и повторите передачу",
+        "Bu ders türünü birden fazla öğretmen yürütüyor — hangi öğretmenden? «Hangi öğretmenin dersleri?» "
+        "filtresinde o öğretmeni seçip yeniden devredin",
+        "Mehrere Lehrkräfte unterrichten diese Unterrichtsart — von welcher Lehrkraft? Wählen Sie sie im Filter "
+        "„Wessen Fächer?“ und übergeben Sie erneut",
+    ),
     (_H, "Dərs növü yanlışdır"): (
         "Invalid lesson type",
         "Неверный вид занятия",

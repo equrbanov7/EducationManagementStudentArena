@@ -26,4 +26,20 @@ def journal_outcome(sync: dict) -> dict:
     return {}
 
 
-__all__ = ["journal_outcome"]
+def assign_response(saved) -> dict:
+    """``bolgu/`` cavabı: id + jurnalın taleyi + cədvəl toqquşması xəbərdarlığı (Audit 2026-09-28 W4)."""
+    sync = getattr(saved, "offering_sync", None) or {}
+    body = {"ok": True, "assignment_id": str(saved.pk)}
+    body.update(journal_outcome(sync))
+    conflicts = int(sync.get("schedule_conflicts") or 0)
+    if conflicts:
+        body["schedule_conflicts"] = conflicts
+        body["warning"] = pgettext(
+            "workload",
+            "Diqqət: yeni müəllimin cədvəldə eyni saatda başqa dərsi var (%(count)s toqquşma). "
+            "Dərs cədvəlini yoxlayın.",
+        ) % {"count": conflicts}
+    return body
+
+
+__all__ = ["assign_response", "journal_outcome"]

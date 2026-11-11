@@ -43,7 +43,7 @@ from .offering_reviewed_electives import reviewed_options
 from .offering_rules import UNKNOWN, merge_hours, owner_for_rows, plan_reached_chair
 from .offering_shares import SHARE_COUNTER_KEYS, sync_target_shares
 from .offering_sync_writes import SyncWrites
-from .offering_transfer import TRANSFER_COUNTER_KEYS, Snapshot, kind_teachers, transfer_kinds
+from .offering_transfer import TRANSFER_COUNTER_KEYS, Snapshot, chair_moves, kind_teachers, transfer_kinds
 from .plan_calendar import PeriodResolver, ensure_row_periods
 
 logger = logging.getLogger(__name__)
@@ -382,21 +382,28 @@ class _Sync(SyncWrites, ElectiveFlow):
                 continue
             self.offering_ids.append(str(offering.pk))
             previous_id = UNKNOWN if self.previous is UNKNOWN else self.previous.get(key)
-            if isinstance(self.previous, Snapshot) and not self._is_closed(offering, existing):
-                transfer_kinds(
-                    self,
-                    offering,
-                    key,
-                    entry,
-                    owner_id=desired_id,
-                    eligible_ids=lambda user_id: eligible_instructor_ids(self.org_id, {user_id}),
-                )
+            moves = chair_moves(self, key, entry) if not self._is_closed(offering, existing) else {}
+            if "lecture" in moves:
+                # Bu QRUPUN mühazirəçisi açıq dəyişib — yalnız bu açılış köçür (başqa qrupun jurnalı yox).
+                previous_id, lecturer = moves["lecture"]
+                decision = {
+                    "desired_id": lecturer,
+                    "eligible": bool(eligible_instructor_ids(self.org_id, {lecturer})),
+                }
+            transfer_kinds(
+                self,
+                offering,
+                moves,
+                owner_moves="lecture" in moves,
+                eligible_ids=lambda user_id: eligible_instructor_ids(self.org_id, {user_id}),
+            )
             handover_owned = (offering.pk, offering.instructor_id) in handover_pairs
             self._update(
                 offering,
                 entry,
                 existing=existing,
                 lesson_hours=lesson_hours,
+                chair_edit="lecture" in moves,
                 previous_id=previous_id,
                 handover_owned=handover_owned,
                 **decision,

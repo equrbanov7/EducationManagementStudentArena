@@ -138,3 +138,81 @@ class KindHandoverTests(HandoverBase):
             seminar.refresh_from_db()
             self.assertTrue(seminar.is_active)
             self.assertTrue(result["moved"][0]["owner_move"])
+
+
+class KindHandoverReviewTests(KindHandoverTests):
+    """Review 2026-11-11 (PR #324) — #2 slotlar, #3 bir neçə növ sahibi, #5 qalıq payı iddia deyil."""
+
+    def test_2_lecture_only_transfer_keeps_seminar_slots_with_the_old_owner(self):
+        import datetime
+
+        from django.db.models.functions import Coalesce
+
+        from apps.registrar.models import ScheduleSlot
+
+        with bypass_rls():
+            slot = ScheduleSlot.objects.create(
+                organization=self.org,
+                offering=self.offering_a,
+                kind="seminar",
+                weekday=1,
+                start_time=datetime.time(9),
+                end_time=datetime.time(10),
+            )
+            self._give(["lecture"])
+            effective = (
+                ScheduleSlot.objects.filter(pk=slot.pk)
+                .annotate(teacher=Coalesce("instructor_id", "offering__instructor_id"))
+                .values_list("teacher", flat=True)[0]
+            )
+            self.assertEqual(self._fresh().instructor_id, self.new_teacher.pk)
+            self.assertEqual(effective, self.old_teacher.pk)
+
+    def _two_lab_holders(self):
+        from apps.registrar.models import Enrollment
+
+        student = Enrollment.objects.filter(offering=self.offering_a).first()
+        x = JournalShare.objects.create(
+            organization=self.org,
+            offering=self.offering_a,
+            teacher=self.other_teacher,
+            source="workload",
+            kinds=["lab"],
+        )
+        x.enrollments.set([student])
+        # Lab-2 — ikinci müəllim (eyni növ, başqa alt qrup kimi).
+        y = JournalShare.objects.create(
+            organization=self.org, offering=self.offering_a, teacher=self.dean, source="workload", kinds=["lab"]
+        )
+        y.enrollments.set([student])
+        return x
+
+    def test_3_two_lab_holders_require_choosing_the_source(self):
+        with bypass_rls():
+            self._two_lab_holders()  # Lab-1 «other», Lab-2 «dean»
+            with self.assertRaises(handover_actions.HandoverError) as error:
+                self._give(["lab"])
+            self.assertEqual(error.exception.codes, ("kind_ambiguous",))
+            self.assertEqual(self._fresh().instructor_id, self.old_teacher.pk)
+
+    def test_3_from_teacher_moves_only_that_holders_lab(self):
+        with bypass_rls():
+            x = self._two_lab_holders()
+            self._give(["lab"], from_teacher_id=self.other_teacher.pk)
+            x.refresh_from_db()
+            self.assertFalse(x.is_active)
+            target = self._active(self.new_teacher)
+            self.assertEqual(target.kinds, ["lab"])
+            self.assertEqual(
+                set(target.enrollments.values_list("pk", flat=True)), set(x.enrollments.values_list("pk", flat=True))
+            )
+            self.assertEqual(self._fresh().instructor_id, self.old_teacher.pk)
+            self.assertIsNotNone(self._active(self.dean))  # Lab-2 müəllimi toxunulmur
+
+    def test_5_only_the_target_share_is_a_handover_claim(self):
+        with bypass_rls():
+            self._give(["seminar"])
+            owner_rest = self._active(self.old_teacher)
+            target = self._active(self.new_teacher)
+            self.assertFalse(journal_transfer.is_handover_share(owner_rest))
+            self.assertTrue(journal_transfer.is_handover_share(target))

@@ -67,11 +67,22 @@ class SyncWrites:
         self.offering_ids.append(str(offering.pk))
         return offering
 
-    def _update(self, offering, entry, *, existing, lesson_hours, desired_id, eligible, previous_id, handover_owned):
-        from .offering_transfer import Snapshot, hand_over_owner
+    def _update(
+        self,
+        offering,
+        entry,
+        *,
+        existing,
+        lesson_hours,
+        desired_id,
+        eligible,
+        previous_id,
+        handover_owned,
+        chair_edit=False,
+    ):
+        from .offering_transfer import hand_over_owner
 
         old_id = offering.instructor_id
-        chair_edit = isinstance(self.previous, Snapshot)
         outcome, new_id = decide_instructor(
             old_id,
             desired_id=desired_id,

@@ -502,6 +502,7 @@ BLOCKER_MESSAGES = {
     "actor_is_current_instructor": "Öz fənninizi özünüz təhvil verə bilməzsiniz — bunu rəhbərlik edir.",
     "no_target": "Yeni müəllim seçilməyib.",
     "kind_not_held": "Seçilmiş müəllim bu dərs növünü aparmır.",
+    "kind_ambiguous": "Bu dərs növünü bir neçə müəllim aparır — hansı müəllimdən təhvil verildiyini seçin.",
     "invalid_kind": "Dərs növü yanlışdır.",
 }
 

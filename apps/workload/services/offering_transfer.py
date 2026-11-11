@@ -68,7 +68,7 @@ def _user(user_id):
     return get_user_model().objects.filter(pk=user_id, is_active=True).first()
 
 
-def _run(sync, offering, target_id, kinds):
+def _run(sync, offering, target_id, kinds, *, from_teacher_id=None):
     """Ortaq servis savepoint içində; uğurda qeyd, xətada ``None``."""
     from apps.registrar.public import journal_transfer
 
@@ -85,6 +85,7 @@ def _run(sync, offering, target_id, kinds):
                 actor=sync.actor_user,
                 reason=journal_transfer.WORKLOAD_REASON,
                 origin=journal_transfer.ORIGIN_WORKLOAD,
+                from_teacher_id=from_teacher_id,
             )
     except (IntegrityError, journal_transfer.TransferRejected) as exc:
         logger.warning("workload: journal transfer to %s blocked on %s (%s)", target_id, offering.pk, exc)
@@ -104,40 +105,46 @@ def hand_over_owner(sync, offering, new_id) -> bool:
     return True
 
 
-def transfer_kinds(sync, offering, key, entry, *, owner_id, eligible_ids) -> None:
-    """Seminar / lab müəllimi açıq dəyişibsə həmin növü ortaq servislə köçür (bax modul başlığı)."""
+def chair_moves(sync, key, entry) -> dict:
+    """``{növ: (köhnə müəllim, yeni müəllim)}`` — canlı kafedra redaktəsində BU QRUPUN (``TeacherAssignment.group``
+    nəzərə alınır) növ müəllimi açıq dəyişibsə. Vakant → müəllim (ilk bölgü) dəyişiklik sayılmır; köhnə tərəf
+    birmənalı deyilsə (bir neçə müəllim — alt qruplar) köçürmə yükün öz pay sinxronuna qalır."""
+    before = getattr(sync.previous, "kinds", {}).get(key) if isinstance(sync.previous, Snapshot) else None
+    if before is None:
+        return {}
+    after = kind_teachers(entry["rows"], entry["group"])
+    moves = {}
+    for kind, new_id in kind_moves(before, after).items():
+        old = before.get(kind) or frozenset()
+        if len(old) == 1:
+            moves[kind] = (next(iter(old)), new_id)
+    return moves
+
+
+def transfer_kinds(sync, offering, moves, *, owner_moves: bool, eligible_ids) -> None:
+    """Seminar / lab müəllimi açıq dəyişibsə həmin növü ortaq servislə köçür — yalnız köhnə müəllimin payından."""
     from apps.registrar.public import journal_transfer
 
-    before = getattr(sync.previous, "kinds", {}).get(key)
-    if before is None:
-        return
-    after = kind_teachers(entry["rows"], entry["group"])
-    moves = {kind: teacher for kind, teacher in kind_moves(before, after).items() if kind != "lecture"}
-    claimed = _handover_claimed(offering)
-    for kind in KINDS - {"lecture"}:
-        new = after.get(kind) or frozenset()
-        if kind not in moves and not before.get(kind) and len(new) == 1 and kind in claimed:
-            moves[kind] = next(iter(new))  # vakant → müəllim, amma növ «Fənn təhvili» payındadır
-    for kind, teacher_id in sorted(moves.items()):
-        if teacher_id == owner_id and owner_id != sync.previous.get(key):
-            continue  # yeni sahib — sahiblik köçürməsi onsuz da gəlir
-        if teacher_id not in eligible_ids(teacher_id):
+    for kind, (old_id, new_id) in sorted(moves.items()):
+        if kind == "lecture" or (owner_moves and new_id == moves.get("lecture", (None, None))[1]):
+            continue  # sahiblik köçürməsi (``_update``) onsuz da gəlir
+        if new_id not in eligible_ids(new_id):
             continue
-        if journal_transfer.current_holders(offering).get(kind) == {teacher_id}:
+        holders = (journal_transfer.current_holders(offering).get(kind) or set()) - {new_id}
+        # Köhnə yük müəllimi; o artıq aparmırsa (əvvəlki «Fənn təhvili») — TƏK cari sahibi. Birmənalı deyilsə toxunma.
+        source = old_id if old_id in holders else (next(iter(holders)) if len(holders) == 1 else None)
+        if source is None:
             continue
-        if _run(sync, offering, teacher_id, {kind}) is not None:
+        if _run(sync, offering, new_id, {kind}, from_teacher_id=source) is not None:
             sync.counters["kind_transferred"] += 1
 
 
-def _handover_claimed(offering) -> set:
-    from apps.registrar.public import journal_transfer
-
-    model = offering.shares.model
-    kinds = set()
-    for share in model.objects.filter(offering_id=offering.pk, is_active=True):
-        if journal_transfer.is_handover_share(share):
-            kinds |= set(share.kinds or ()) or set(KINDS)
-    return kinds
-
-
-__all__ = ["TRANSFER_COUNTER_KEYS", "Snapshot", "hand_over_owner", "kind_moves", "kind_teachers", "transfer_kinds"]
+__all__ = [
+    "TRANSFER_COUNTER_KEYS",
+    "Snapshot",
+    "chair_moves",
+    "hand_over_owner",
+    "kind_moves",
+    "kind_teachers",
+    "transfer_kinds",
+]

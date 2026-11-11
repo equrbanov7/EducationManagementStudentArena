@@ -75,10 +75,16 @@ def ordered(kinds) -> list:
     return [kind for kind in KIND_ORDER if kind in (kinds or ())]
 
 
-def marker(record_pk, kinds, owner_move: bool) -> str:
+#: Payın təhvildəki rolu: ``t`` — HƏDƏF (növ ona verildi, «Fənn təhvili» iddiası), ``r`` — mənbənin QALIQ payı
+#: (qalan növləri; iddia deyil — yük həmin növləri sonra başqasına verə bilər).
+ROLE_TARGET = "t"
+ROLE_REMAINDER = "r"
+
+
+def marker(record_pk, kinds, owner_move: bool, role: str = ROLE_TARGET) -> str:
     codes = "".join(_KIND_CODES[kind] for kind in ordered(kinds))
-    head = f"{MARKER_PREFIX}{'o' if owner_move else 'k'}{codes}:"
-    return head + record_pk.hex[: 32 - len(head)]
+    head = f"{MARKER_PREFIX}{'o' if owner_move else 'k'}{role}{codes}:"
+    return head + record_pk.hex[:24]
 
 
 def parse_marker(batch):
@@ -87,14 +93,22 @@ def parse_marker(batch):
     if not value.startswith(MARKER_PREFIX) or ":" not in value:
         return None
     head = value[len(MARKER_PREFIX) :].split(":", 1)[0]
-    if not head or head[0] not in "ok":
+    if len(head) < 2 or head[0] not in "ok" or head[1] not in (ROLE_TARGET, ROLE_REMAINDER):
         return None
-    return head[0] == "o", frozenset(kind for kind, code in _KIND_CODES.items() if code in head[1:])
+    return head[0] == "o", frozenset(kind for kind, code in _KIND_CODES.items() if code in head[2:])
+
+
+def marker_role(batch) -> str:
+    """``t`` / ``r`` və ya boş (təhvil payı deyil)."""
+    if parse_marker(batch) is None:
+        return ""
+    return str(batch)[len(MARKER_PREFIX) + 1]
 
 
 def is_handover_share(share) -> bool:
-    """«Fənn təhvili» ilə verilmiş (əl ilə) növ payı — yük sinxronu onun növünü əzmir."""
-    return share.source == JournalShareSource.MANUAL and parse_marker(share.batch) is not None
+    """«Fənn təhvili» ilə HƏDƏFƏ verilmiş (əl ilə) növ payı — yük sinxronu onun növünü əzmir. Mənbənin qalıq payı
+    iddia deyil (review 2026-11-11 #5): yükün sonrakı müəllimi həmin növləri ala bilməlidir."""
+    return share.source == JournalShareSource.MANUAL and marker_role(share.batch) == ROLE_TARGET
 
 
 def _share_kinds(share) -> set:
@@ -283,6 +297,9 @@ def transfer(
         return record
 
     sources = {teacher for kind in kinds for teacher in holders[kind]} - {target.pk}
+    if not from_teacher_id and any(len(holders[kind] - {target.pk}) > 1 for kind in kinds):
+        # Review 2026-11-11 #3: Lab-1 X, Lab-2 Y — «lab → Z» X-i də silməsin; kimdən olduğu SEÇİLMƏLİDİR.
+        raise TransferRejected("kind_ambiguous")
     if from_teacher_id:
         sources &= {int(from_teacher_id)} if str(from_teacher_id).isdigit() else set()
         if not sources:
@@ -312,7 +329,7 @@ def transfer(
             moved_full = True
         remaining = held - kinds
         if remaining:  # başqa növü qalır — jurnal ondan getmir, yalnız həmin növlərlə
-            creates.append((teacher_id, remaining, rows))
+            creates.append((teacher_id, remaining, rows, ROLE_REMAINDER))
     target_share = by_teacher.get(target.pk)
     target_kinds = {kind for kind in KIND_ORDER if target.pk in holders[kind]} | set(kinds)
     if target_share is not None:
@@ -321,7 +338,7 @@ def transfer(
     target_rows = set() if target_full else moved_rows | set(getattr(target_share, "enrollment_id_set", ()) or ())
     becomes_owner = owner_move or owner_id == target.pk
     if not (becomes_owner and target_kinds >= ALL_KINDS and not target_rows):
-        creates.append((target.pk, target_kinds, target_rows))
+        creates.append((target.pk, target_kinds, target_rows, ROLE_TARGET))
 
     if deactivated:
         JournalShare.objects.filter(pk__in=[share.pk for share in deactivated]).update(
@@ -329,11 +346,14 @@ def transfer(
         )
     now = timezone.now()
     if owner_move:
-        _move_owner(offering, target, owner_id)
         if owner_id is not None:
-            ScheduleSlot.objects.filter(offering_id=offering.pk, instructor_id=owner_id, kind__in=kinds).update(
-                instructor=None, updated_at=now
-            )
+            slots = ScheduleSlot.objects.filter(offering_id=offering.pk)
+            # Review 2026-11-11 #2: slotun effektiv müəllimi ``instructor`` boşdursa jurnal SAHİBİDİR — köçməyən
+            # növlərin (məs. seminar) boş slotları köhnə sahibdə qalsın, yeni sahibə «sürüşməsin».
+            kept = owner_kinds - set(kinds)
+            slots.filter(kind__in=kept, instructor__isnull=True).update(instructor_id=owner_id, updated_at=now)
+            slots.filter(instructor_id=owner_id, kind__in=kinds).update(instructor=None, updated_at=now)
+        _move_owner(offering, target, owner_id)
     else:
         slots = ScheduleSlot.objects.filter(offering_id=offering.pk, kind__in=kinds)
         slots.filter(instructor_id__in=sources - {owner_id}).update(instructor=target, updated_at=now)
@@ -351,9 +371,9 @@ def transfer(
         reason=reason,
         deactivated=[str(share.pk) for share in deactivated],
     )
-    batch = marker(record.pk, kinds, owner_move)
     source_value = JournalShareSource.WORKLOAD if origin == ORIGIN_WORKLOAD else JournalShareSource.MANUAL
-    for teacher_id, share_kinds, rows in creates:
+    for teacher_id, share_kinds, rows, role in creates:
+        batch = marker(record.pk, kinds, owner_move, role)
         share = JournalShare.objects.create(
             organization=offering.organization,
             offering=offering,

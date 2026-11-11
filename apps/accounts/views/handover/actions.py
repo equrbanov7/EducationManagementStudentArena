@@ -159,15 +159,16 @@ def _normalize_items(payload) -> list:
                 )
         return rows
 
-    # 2026-11-11: dərs növü seçimi (boş = bütün jurnal) — bütün seçilmiş fənlərə eyni.
+    # 2026-11-11: dərs növü seçimi (boş = bütün jurnal) + «kimdən» (süzgəcdəki müəllim) — bütün seçilmiş fənlərə eyni.
     kinds = _as_list(payload.get("kinds"))
+    source = str(payload.get("from_teacher_id") or "").strip()
     target = str(payload.get("new_instructor_id") or "").strip()
     bulk = payload.get("offering_ids")
     if isinstance(bulk, str):
         bulk = [bulk]
     if isinstance(bulk, (list, tuple)):
         rows = [
-            {"offering_id": str(value).strip(), "new_instructor_id": target, "kinds": kinds}
+            {"offering_id": str(value).strip(), "new_instructor_id": target, "kinds": kinds, "from_teacher_id": source}
             for value in bulk
             if str(value or "").strip()
         ]
@@ -176,7 +177,7 @@ def _normalize_items(payload) -> list:
 
     offering_id = str(payload.get("offering_id") or "").strip()
     if offering_id:
-        return [{"offering_id": offering_id, "new_instructor_id": target, "kinds": kinds}]
+        return [{"offering_id": offering_id, "new_instructor_id": target, "kinds": kinds, "from_teacher_id": source}]
     return []
 
 

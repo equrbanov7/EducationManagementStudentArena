@@ -44,6 +44,11 @@ def blocker_labels(*, action: str = "reassign") -> dict:
         "actor_is_current_instructor": pgettext(_CTX, "Öz fənninizi özünüz təhvil verə bilməzsiniz"),
         "no_target": pgettext(_CTX, "Yeni müəllim seçilməyib"),
         "kind_not_held": pgettext(_CTX, "Seçilmiş müəllim bu dərs növünü aparmır"),
+        "kind_ambiguous": pgettext(
+            _CTX,
+            "Bu dərs növünü bir neçə müəllim aparır — hansı müəllimdən? «Hansı müəllimin fənləri?» süzgəcində "
+            "həmin müəllimi seçib yenidən təhvil verin",
+        ),
         "invalid_kind": pgettext(_CTX, "Dərs növü yanlışdır"),
     }
     if action == REVERT:

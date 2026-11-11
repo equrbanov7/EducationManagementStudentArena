@@ -116,8 +116,8 @@ class ImmediateInstructorTest(_TeacherBase):
         self.assertEqual(self.offering().instructor_id, self.teacher_b.pk)
         self.assertEqual(changed.offering_sync["instructor_replaced"], 1)
 
-    def test_explicit_chair_change_overrides_an_earlier_handover(self):
-        """Sahib 2026-11-11: kafedranın AÇIQ dəyişikliyi «Fənn təhvili»dir — əvvəlki təhvil onu udmur."""
+    def test_handover_instructor_is_never_overwritten_by_bulk_paths(self):
+        """Toplu yollar (canlı ``bolgu/`` redaktəsi deyil) əvvəlki qaydanı saxlayır — review 2026-11-11 #4."""
         _task, row = self.approved_row()
         assignment = self.assign(row, self.teacher_a)
         offering = self.offering()
@@ -133,8 +133,8 @@ class ImmediateInstructorTest(_TeacherBase):
         )
         CourseOffering.objects.filter(pk=offering.pk).update(instructor=self.teacher_c)
         changed = self.assign(row, self.teacher_b, assignment=assignment)
-        self.assertEqual(self.offering().instructor_id, self.teacher_b.pk)
-        self.assertEqual(changed.offering_sync["instructor_replaced"], 1)
+        self.assertEqual(self.offering().instructor_id, self.teacher_c.pk)
+        self.assertEqual(changed.offering_sync["preserved_handover"], 1)
 
     def test_handover_instructor_survives_a_change_of_another_kind(self):
         _task, row = self.approved_row()

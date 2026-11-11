@@ -8,8 +8,7 @@
  *   2. GÖSTƏRİCİ  — sabit zolaq, KPI kartları və mərhələ zolağı seçimlə yenilənir;
  *   3. XÜLASƏ     — təsdiqdən əvvəl NƏ KÖÇÜR / NƏ DƏYİŞMİR açıq yazılır;
  *   4. ÇEKMECƏ    — sətir detalı (paylaşılan tək çekmecə sətirlə doldurulur).
- *   5. NÖV        — 2026-11-11: bütün jurnal və ya yalnız mühazirə / seminar / lab;
- *                   önizləmə «Seminar: indiki müəllim → yeni müəllim» yazır.
+ *   5. NÖV        — bütün jurnal və ya bir növ; önizləmə «Seminar: indiki → yeni» (2026-11-11).
  *
  * GÖNDƏRİŞ BU FAYLDA DEYİL: təsdiq forması ortaq `teaching_office.js`
  * mexanizmindədir (`form[data-tof-form]` → JSON POST → bölməni yenidən yüklə).
@@ -162,7 +161,7 @@
 
     /* ---- Dərs növü + önizləmə (2026-11-11) -------------------------------- */
 
-    /** Seçilmiş növlər: [{value, label}] (təsdiq pəncərəsinin qutuları). */
+    /* Seçilmiş növlər: [{value, label}] (təsdiq pəncərəsinin qutuları). */
     function pickedKinds(form) {
         var boxes = form.querySelectorAll("[data-thx-kind]");
         var picked = [];
@@ -337,6 +336,15 @@
         }
     }
 
+    /* «Kimdən» = süzgəcdəki müəllim (Lab-1/Lab-2 — yalnız onunku köçür; yoxsa server 409 «hansı müəllimdən?»). */
+    function fillSource(host, form) {
+        var field = form.querySelector('[name="from_teacher_id"]');
+        var filter = host.querySelector('[name="th_teacher"]');
+        if (field && filter) {
+            field.value = /^[0-9]+$/.test(filter.value || "") ? filter.value : "";
+        }
+    }
+
     function openConfirm(host) {
         var dialog = document.getElementById("thxConfirmDialog");
         var form = dialog ? dialog.querySelector("form") : null;
@@ -354,6 +362,7 @@
             error.textContent = "";
         }
         fillForm(form, store);
+        fillSource(host, form);
         paintSummary(host, form, store);
         if (window.EMSOverlay) {
             window.EMSOverlay.open(dialog);
