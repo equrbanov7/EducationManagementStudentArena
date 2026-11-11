@@ -226,6 +226,10 @@ class ExamQuestionCreateForm(forms.ModelForm):
         if instance and instance.pk:
             options = list(instance.options.all().order_by("id"))
             for idx, opt in enumerate(options, start=1):
+                # 2026-11-11: göndərilən formada variant sayı azaldılıbsa (5 → 3) artıq sahə yoxdur — əvvəl
+                # burada KeyError (500) olurdu; bağlı formada ilkin dəyər onsuz da lazım deyil.
+                if f"option{idx}_text" not in self.fields:
+                    continue
                 self.fields[f"option{idx}_text"].initial = opt.text
                 self.fields[f"option{idx}_is_correct"].initial = opt.is_correct
 

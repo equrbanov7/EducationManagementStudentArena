@@ -17,6 +17,7 @@ Səbəb MƏCBURİDİR (min uzunluq server-də də yoxlanılır). JS: teacher_exa
             <div class="modal-body">
                 <p class="mb-2" data-reset-one>{% trans "Tələbə" context "exams.attempt_reset" %}: <strong data-reset-name></strong></p>
                 <p class="mb-2" data-reset-many hidden>{% trans "Seçilmiş cəhd sayı" context "exams.attempt_reset" %}: <strong data-reset-count></strong></p>
+                <p class="etr-reset-allnote" data-reset-all-note hidden><i class="fas fa-layer-group" aria-hidden="true"></i> {% trans "Seçim cari süzgəcə uyğun BÜTÜN nəticələri əhatə edir (bütün səhifələr) — yalnız bu səhifədə görünənləri yox." context "exams.attempt_reset" %}</p>
                 <p class="etp-hint">{{ reset_warning }}</p>
                 <label class="etp-label" for="resetAttemptsReason">{% trans "Səbəb (məcburi)" context "exams.attempt_reset" %}</label>
                 <textarea id="resetAttemptsReason" name="reason" class="ems-input etr-reset-reason" rows="3" required

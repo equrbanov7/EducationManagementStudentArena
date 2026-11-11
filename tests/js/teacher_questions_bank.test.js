@@ -26,12 +26,17 @@ const HTML = `
       <button type="button" class="js-open-delete-modal" data-question-id="1" data-question-text="2 + 2 = ?">Sil</button></article>
     <article class="eqb-card qb-card" id="qcard-2"><input type="checkbox" class="question-checkbox" name="selected_question_ids" value="2"></article>
     <span id="selectedCountLabel"></span>
+    <input type="hidden" name="select_scope" id="qbSelectScope" value="">
     <button type="button" id="selectAllPageBtn">Hamısını seç</button>
+    <button type="button" id="selectAllMatchingBtn" data-total="731" aria-pressed="false">Bütün 731 sualı seç</button>
     <button type="button" id="clearSelectionBtn">Təmizlə</button>
     <button type="submit" name="bulk_action" value="activate" class="js-bulk-action-btn" disabled>Aktiv et</button>
     <button type="submit" name="bulk_action" value="delete" class="js-bulk-action-btn" disabled>Sil</button>
   </form>
   <button type="button" class="js-delete-all-questions" data-count="42">Bütün sual bankını sil</button>
+  <button type="button" class="js-bulk-all" data-bulk-all="deactivate_all" data-count="731">Bütün sualları deaktiv et</button>
+  <button type="button" class="js-bulk-all" data-bulk-all="activate_all" data-count="731">Bütün sualları aktiv et</button>
+  <form method="post" id="questionBankBulkAllForm" hidden><input type="hidden" name="bulk_action" id="questionBankBulkAllValue"></form>
   <form method="post" id="singleDeleteForm" hidden><input type="hidden" name="selected_question_ids" id="singleDeleteQuestionId"></form>
   <form method="post" id="singleQuestionActionForm" hidden>
     <input type="hidden" name="bulk_action" id="singleQuestionActionValue">
@@ -166,14 +171,80 @@ test("selection drives the counter and the bulk buttons; bulk delete asks EMSCon
     assert.equal(log.submitted[0].fields.bulk_action, "delete");
 });
 
-test("bulk activate is not a danger dialog and never goes through the guarded flow", async () => {
+test("bulk activate is not a danger dialog; on the exam page it is sent without a page reload (2026-11-11)", async () => {
     const { log, $ } = page({ guarded: true });
     $("#selectAllPageBtn").click();
     $('button[value="activate"]').click();
     await flush();
     assert.equal(log.confirms[0].danger, false);
-    assert.equal(log.guarded.length, 0);
+    assert.deepEqual(log.guarded, [{ id: "bulkForm", fields: { bulk_action: "activate" } }]);
+    assert.equal(log.submitted.length, 0);
+});
+
+test("bulk activate falls back to a plain form post where the AJAX helper is absent (library bank)", async () => {
+    const { log, $ } = page();
+    $("#selectAllPageBtn").click();
+    $('button[value="activate"]').click();
+    await flush();
     assert.equal(log.submitted[0].fields.bulk_action, "activate");
+});
+
+test("«Bütün N sualı seç» sends a scope flag instead of ids and shows the full count (2026-11-11)", async () => {
+    const { window, log, $ } = page();
+    const label = $("#selectedCountLabel");
+    const all = $("#selectAllMatchingBtn");
+    all.click();
+    assert.equal($("#qbSelectScope").value, "all_matching");
+    assert.equal(all.getAttribute("aria-pressed"), "true");
+    assert.match(label.textContent, /731/);
+    assert.equal($('button[value="delete"]').disabled, false);
+    $('button[value="delete"]').click();
+    await flush();
+    assert.match(log.confirms[0].body, /731/);
+    assert.equal(log.submitted[0].fields.select_scope, "all_matching");
+
+    // Bir sətir əl ilə dəyişən kimi «hamısı» rejimi bitir — yalnız işarəlilər qalır.
+    const box = $("#qcard-2 .question-checkbox");
+    box.checked = false;
+    box.dispatchEvent(new window.Event("change", { bubbles: true }));
+    assert.equal($("#qbSelectScope").value, "");
+    assert.equal(all.getAttribute("aria-pressed"), "false");
+    assert.equal(label.textContent, "1 sual seçilib");
+    $("#clearSelectionBtn").click();
+    assert.equal(label.textContent, "0 sual seçilib");
+});
+
+test("«Bütün sualları deaktiv et / aktiv et» ask for confirmation and post the whole-bank action", async () => {
+    const { log, $ } = page();
+    $('[data-bulk-all="deactivate_all"]').click();
+    await flush();
+    assert.equal(log.confirms[0].danger, true);
+    assert.match(log.confirms[0].body, /731/);
+    assert.equal(log.submitted[0].id, "questionBankBulkAllForm");
+    assert.equal(log.submitted[0].fields.bulk_action, "deactivate_all");
+    $('[data-bulk-all="activate_all"]').click();
+    await flush();
+    assert.equal(log.confirms[1].danger, false);
+    assert.equal(log.submitted[1].fields.bulk_action, "activate_all");
+});
+
+test("handlers are delegated: a swapped-in list (live refresh) works without rebinding", async () => {
+    const { window, log, $ } = page();
+    $("#selectAllPageBtn").click();
+    const form = $("#bulkForm");
+    form.querySelectorAll(".qb-card").forEach((card) => card.remove());
+    form.insertAdjacentHTML("afterbegin", `
+      <article class="eqb-card qb-card" id="qcard-9"><input type="checkbox" class="question-checkbox" name="selected_question_ids" value="9">
+        <button type="button" class="js-open-delete-modal" data-question-id="9" data-question-text="Yeni sual">Sil</button></article>`);
+    $(".eqb-page").dispatchEvent(new window.Event("qb:live:updated", { bubbles: true }));
+    assert.equal($("#selectedCountLabel").textContent, "0 sual seçilib");
+    assert.equal($('button[value="delete"]').disabled, true);
+    $("#qcard-9").click();
+    assert.equal($("#selectedCountLabel").textContent, "1 sual seçilib");
+    $("#qcard-9 .js-open-delete-modal").click();
+    await flush();
+    assert.match(log.confirms[0].body, /Yeni sual/);
+    assert.equal($("#singleDeleteQuestionId").value, "9");
 });
 
 test("cancelling a row action keeps the form unsent and returns focus to the button", async () => {

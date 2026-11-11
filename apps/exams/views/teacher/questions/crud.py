@@ -2,6 +2,7 @@
 
 import logging
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.http import JsonResponse
@@ -15,9 +16,10 @@ from apps.exams.services.access_policy import _ensure_teacher, ensure_can_manage
 from apps.exams.services.coding_definition import ensure_coding_question_for_exam_question
 from apps.exams.services.language_variants import ensure_default_variant
 from apps.exams.services.question_invariants import MODE_DELETE
+from apps.exams.services.question_versioning import save_question_as_new_version, versioning_applies
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 
-from ._mutations import finish_mutation_request, run_question_mutation
+from ._mutations import finish_mutation_request, run_question_mutation, wants_partial
 from ._shared import (
     _append_navigation_query,
     _is_question_modal_request,
@@ -28,6 +30,16 @@ from ._shared import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _invalidate_question_ids_cache(exam):
+    """Canlı sessiyalar sual ID siyahısını keşdən oxuyur — dəyişiklikdən sonra köhnəlsin (best-effort)."""
+    try:
+        from core.cache import invalidate_exam_question_ids_cache
+
+        invalidate_exam_question_ids_cache(exam.pk)
+    except Exception:
+        logger.warning("Exam question-ids cache invalidation failed for exam %s", exam.pk, exc_info=True)
 
 
 def _detail_url_with_question_modal(exam, navigation_query, mode, question_id=None):
@@ -187,6 +199,13 @@ def edit_exam_question(request, slug, question_id):
     _, _, navigation_query = _resolve_question_bank_navigation(request)
 
     blocks, created_default_block = _question_form_blocks(exam)
+    # Sahib 2026-11-11: cavablanmış sual YERİNDƏ dəyişmir — forma «yeni versiya» yaradır, köhnə sual
+    # deaktiv olunub keçmiş cəhdlər üçün olduğu kimi qalır (bax services/question_versioning.py).
+    creates_version = versioning_applies(exam, question)
+    version_context = {
+        "creates_version": creates_version,
+        "key_correction_url": reverse("appeals:manage_appeals") if creates_version else "",
+    }
 
     if request.method == "POST":
         form = ExamQuestionCreateForm(
@@ -198,30 +217,57 @@ def edit_exam_question(request, slug, question_id):
             subject_blocks=blocks,  # <--- Vacib: Blokları formaya ötürürük
         )
         if form.is_valid():
-            q = form.save(commit=False)
-            q.exam = exam
 
-            # Seçilmiş dilin variantını təmin et (çoxdilli imtahan).
-            q.language_variant = ensure_default_variant(exam, q.language)
+            def prepare(q):
+                # Seçilmiş dilin variantını təmin et (çoxdilli imtahan).
+                q.language_variant = ensure_default_variant(exam, q.language)
+                if exam.exam_type in {"written", "coding"}:
+                    q.answer_mode = "single"
+                    if exam.exam_type == "written":
+                        q.set_paint_enabled(form.cleaned_data.get("enable_paint"))
 
-            if exam.exam_type in {"written", "coding"}:
-                q.answer_mode = "single"
-                if exam.exam_type == "written":
-                    q.set_paint_enabled(form.cleaned_data.get("enable_paint"))
-
-            with transaction.atomic():  # F-07 (2026-09-14) — bax `add_exam_question`
-                q.save()
-                if exam.exam_type == "coding":
-                    ensure_coding_question_for_exam_question(q, sync_existing=True)
-                if exam.exam_type == "test":
-                    form.save_options(q)
+            replaced_id = None
+            if creates_version:
+                q, replaced_id = save_question_as_new_version(
+                    exam, form, by_user=request.user, request=request, prepare=prepare
+                )
+                _invalidate_question_ids_cache(exam)
+            else:
+                q = form.save(commit=False)
+                q.exam = exam
+                prepare(q)
+                with transaction.atomic():  # F-07 (2026-09-14) — bax `add_exam_question`
+                    q.save()
+                    if exam.exam_type == "coding":
+                        ensure_coding_question_for_exam_question(q, sync_existing=True)
+                    if exam.exam_type == "test":
+                        form.save_options(q)
 
             from apps.exams.services.difficulty import schedule_ai_question_difficulty_warmup
 
             schedule_ai_question_difficulty_warmup(exam, force=True)
 
+            version_message = ""
+            if replaced_id is not None:
+                version_message = pgettext(
+                    "exams.view.questions.version",
+                    "Sualın yeni versiyası yaradıldı. Köhnə sual deaktiv edildi — keçmiş cəhdlərdə olduğu "
+                    "kimi qalır, ballar dəyişmədi.",
+                )
+                # Səhifəni yeniləməyən klient (sual bankı, X-QB-Partial) mesajı JSON-dan toast edir; qalanları
+                # növbəti səhifə yüklənişində Django mesajı kimi görür.
+                if not (is_modal_request and wants_partial(request)):
+                    messages.success(request, version_message)
             if is_modal_request:
-                return JsonResponse({"success": True, "question_id": q.id})
+                return JsonResponse(
+                    {
+                        "success": True,
+                        "question_id": q.id,
+                        "new_version": replaced_id is not None,
+                        "replaced_id": replaced_id,
+                        "message": version_message,
+                    }
+                )
 
             if "save_and_continue" in request.POST:
                 return redirect(
@@ -236,6 +282,9 @@ def edit_exam_question(request, slug, question_id):
                     navigation_query,
                 )
             )
+        if creates_version:
+            # Forma yoxlaması yaddaşdakı instansı dəyişib — xəta formasında köhnə sualın bazadakı halı lazımdır.
+            question = ExamQuestion.objects.get(pk=question.pk)
         if is_modal_request:
             return JsonResponse(
                 {
@@ -247,6 +296,7 @@ def edit_exam_question(request, slug, question_id):
                         editing=True,
                         question=question,
                         navigation_query=navigation_query,
+                        extra_context=version_context,
                     ),
                 },
                 status=400,
@@ -273,6 +323,7 @@ def edit_exam_question(request, slug, question_id):
                 "question": question,
                 "is_modal": True,
                 "question_navigation_query": navigation_query,
+                **version_context,
             },
         )
 
@@ -286,6 +337,7 @@ def edit_exam_question(request, slug, question_id):
             "question": question,
             "is_modal": False,
             "question_navigation_query": navigation_query,
+            **version_context,
         },
     )
 

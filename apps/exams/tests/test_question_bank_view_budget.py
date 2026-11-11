@@ -115,7 +115,12 @@ class _QuestionBankViewBase(TestCase):
 
     @staticmethod
     def _question_row_loads(ctx):
-        return [q["sql"] for q in ctx.captured_queries if q["sql"].startswith('SELECT "exams_examquestion"."id"')]
+        # Tam sual SƏTİRLƏRİ (mətn sütunu ilə); «cavablanıb?» yoxlaması yalnız ID qaytarır — sətir yükü deyil.
+        return [
+            q["sql"]
+            for q in ctx.captured_queries
+            if q["sql"].startswith('SELECT "exams_examquestion"."id"') and '"exams_examquestion"."text"' in q["sql"]
+        ]
 
 
 class QuestionBankViewQueryBudgetTest(_QuestionBankViewBase):
@@ -140,10 +145,11 @@ class QuestionBankViewQueryBudgetTest(_QuestionBankViewBase):
         #   2 məzmun digest-i (barmaq izi; sətir daşımır)
         #   3 analiz üçün sualların yüklənməsi   ┐ yalnız miss-də
         #   4 analiz üçün variantların prefetch-i ┘
-        #   5 Paginator COUNT (filtrlənmiş siyahı)
+        #   5 stat kartları — tək şərti aqreqat (əvvəl 3 ayrı COUNT idi); 2026-11-11: süzgəcsiz siyahıda
+        #     Paginator-un sayı da buradan gəlir (ayrıca COUNT getmir)
         #   6 səhifə sətirləri (block select_related ilə)
         #   7 səhifə variantlarının prefetch-i
-        #   8 stat kartları — tək şərti aqreqat (əvvəl 3 ayrı COUNT idi)
+        #   8 səhifədəki sualların «cavablanıb?» yoxlaması — tək EXISTS sorğusu (2026-11-11, «yeni versiya»)
         self.assertEqual(len(self._exam_queries(large)), 8, self._exam_queries(large))
         self.assertEqual(len(self._question_row_loads(large)), 2)
         self.assertEqual(len(self._option_row_loads(large)), 2)
@@ -181,8 +187,8 @@ class QuestionBankAnalysisCacheInvalidationTest(_QuestionBankViewBase):
         second, second_ctx, second_run = self._get_with_analysis_spy(page="1", sort="az")
         second_run.assert_not_called()
 
-        # Keş hit büdcəsi — imtahan cədvəlləri üzrə 6 sorğu: imtahan, digest,
-        # Paginator COUNT, səhifə sətirləri, səhifə variantları, stat aqreqatı.
+        # Keş hit büdcəsi — imtahan cədvəlləri üzrə 6 sorğu: imtahan, digest, stat aqreqatı (Paginator sayı
+        # da ondan), səhifə sətirləri, səhifə variantları, «cavablanıb?» EXISTS yoxlaması.
         # Bankın tamı yüklənmir: sual/variant sətirlərini yalnız səhifə sorğuları daşıyır.
         self.assertEqual(len(self._exam_queries(second_ctx)), 6, self._exam_queries(second_ctx))
         self.assertEqual(len(self._question_row_loads(second_ctx)), 1)

@@ -1,0 +1,41 @@
+/* =========================================================================
+   Sual bankı — canlı bölgələr və «bütün uyğun sualları seç»
+   (sahib 2026-11-11). JS: teacher_questions_bank/live.js + teacher_questions_bank.js.
+   ========================================================================= */
+
+/* Canlı bölgə sarğıları düzülüşə qarışmır: uşaqlar əvvəlki valideynin (stack / toolbar) uşağı kimi qalır. */
+[data-qb-live] {
+    display: contents;
+}
+
+/* Fraqment yüklənərkən siyahı solğunlaşır, kliklər udulur (ikiqat sorğu olmasın). */
+.eqb-page--busy .eqb-bulk,
+.eqb-page--busy .pagination-wrapper {
+    opacity: 0.55;
+    pointer-events: none;
+    transition: opacity 0.12s ease;
+}
+
+/* Siyahı başlığının seçim düymələri («Səhifədəkiləri seç» + «Bütün N sualı seç») bir qrupda, sağda. */
+.eqb-list__tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ems-sp-3, 8px);
+}
+
+/* «Bütün N sualı seç» aktiv olanda düymə və sayğac vurğulanır. */
+#selectAllMatchingBtn[aria-pressed="true"] {
+    background: var(--ems-primary-50);
+    border-color: var(--ems-primary-200);
+    color: var(--ems-primary-800);
+}
+
+.etp-actionbar__count.is-all-matching {
+    color: var(--ems-primary-800);
+    font-weight: 700;
+}
+
+.eqb-bulkall .ems-card__title i {
+    color: var(--ems-primary-600);
+}

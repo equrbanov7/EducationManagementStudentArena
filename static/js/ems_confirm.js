@@ -90,6 +90,18 @@
             return Promise.resolve(window.confirm(opts.body || opts.title || ""));
         }
 
+        // 2026-11-11: ZƏNCİRVARİ təsdiq (birinci dialoqun «Bəli»sindən dərhal sonra ikinci sual — məs. «imtahan
+        // da deaktiv ediləcək, davam?»). Birinci dialoq hələ bağlanma animasiyasındadırsa Bootstrap `show()`-u
+        // udur, onun `hidden.bs.modal`-ı isə YENİ sorğunu «ləğv» kimi bağlayırdı — ikinci dialoq heç görünmürdü
+        // (server cavabı animasiyadan tez gələndə). İndi yeni sorğu dialoq tam bağlanandan sonra açılır.
+        if (!pendingResolve && modalEl.style.display === "block" && !modalEl.classList.contains("show")) {
+            return new Promise(function (resolve) {
+                modalEl.addEventListener("hidden.bs.modal", function () {
+                    window.setTimeout(function () { open(opts).then(resolve); }, 0);
+                }, { once: true });
+            });
+        }
+
         // Əvvəlki açıq sorğu (nəzəri) ləğv sayılır.
         settle(false);
 

@@ -1,0 +1,11 @@
+{% load i18n %}
+{# Keyfiyyət çipləri (sayğaclı) — canlı hissə `data-qb-live="quality"`. #}
+{% if analysis_enabled %}
+<nav class="eqb-quality" aria-label="{% trans 'Keyfiyyət süzgəci' context 'exams.template.teacher_questions_bank' %}">
+    <span class="eqb-quality__label">{% trans "Keyfiyyət" context "exams.template.teacher_questions_bank" %}:</span>
+    {% include "exams/teacher/partials/qm/_quality_chips.html" %}
+</nav>
+{% if qm_show_language_filter and not language_filter %}
+<p class="etp-hint eqb-lang-hint"><i class="fas fa-globe" aria-hidden="true"></i> {% trans "Bütün dillər göstərilir. Konkret dilin vəziyyətini (dublikat, xəbərdarlıq) görmək üçün yuxarıdan dil seçin." context "exams.template.teacher_questions_bank" %}</p>
+{% endif %}
+{% endif %}

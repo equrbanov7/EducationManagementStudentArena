@@ -14,7 +14,7 @@ import re
 from decimal import Decimal, InvalidOperation
 
 from django.apps import apps as django_apps
-from django.db.models import Case, Count, IntegerField, OuterRef, Q, Subquery, Value, When
+from django.db.models import Case, Count, IntegerField, OuterRef, Prefetch, Q, Subquery, Value, When
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 
@@ -26,6 +26,8 @@ FIN_RE = re.compile(r"^[A-Za-z0-9]{7}$")
 STATUS_VALUES = ("all", "draft", "in_progress", "submitted", "expired")
 APPEAL_VALUES = ("open", "closed", "any", "none")
 NO_ROOM_VALUE = "none"
+# Nəticə siyahısının göstərmədiyi ağır cavab sütunları (yazılı cavab mətni, müəllim rəyi, rəsmin base64 data-URL-i).
+HEAVY_ANSWER_FIELDS = ("text_answer", "teacher_feedback", "paint_data_url")
 FILTER_KEYS = (
     "q",
     "group",
@@ -171,10 +173,14 @@ def apply_results_filters_from_params(exam, params, *, parse_date):
     _expire_overdue_attempts(exam)
 
     # ``exam`` select_related-də YOXDUR: ``exam.attempts`` hər sətrə eyni ``exam`` instansını qoyur.
+    # 2026-11-11 (sahib «ləngdir»): siyahı cavabın MƏTNİNİ göstərmir — yazılı imtahanda hər sətir üçün bütün
+    # cavab mətnləri, müəllim rəyləri və rəsm data-URL-ləri (base64 PNG) yüklənirdi. Bu sütunlar təxirə salınır
+    # (lazım olan yer onu yenə oxuya bilər — düzgünlük dəyişmir, yalnız yük azalır).
+    slim_answers = django_apps.get_model("exams", "ExamAnswer").objects.defer(*HEAVY_ANSWER_FIELDS)
     attempts = (
         exam.attempts.exclude(is_trial=True).select_related("user", "room")
         # `answers__selected_options` QƏSDƏN yoxdur — bax `_test_scores.attach_legacy_selected_options`.
-        .prefetch_related("answers__question__options")
+        .prefetch_related(Prefetch("answers", queryset=slim_answers), "answers__question__options")
     )
     is_test = exam.exam_type == "test"
 

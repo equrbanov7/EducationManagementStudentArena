@@ -133,7 +133,9 @@ def _question_post_data_with_default_block(request, created_default_block):
     return post_data
 
 
-def _render_question_form_html(request, *, exam, form, editing=False, question=None, navigation_query=""):
+def _render_question_form_html(
+    request, *, exam, form, editing=False, question=None, navigation_query="", extra_context=None
+):
     return render_to_string(
         "exams/teacher/partials/_question_form.html",
         {
@@ -143,6 +145,7 @@ def _render_question_form_html(request, *, exam, form, editing=False, question=N
             "question": question,
             "is_modal": True,
             "question_navigation_query": navigation_query,
+            **(extra_context or {}),
         },
         request=request,
     )

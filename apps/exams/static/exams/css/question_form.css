@@ -252,6 +252,22 @@
     font-weight: 600;
 }
 
+/* Sual formu: «bu suala artıq cavab verilib — yeni versiya yaranacaq» məlumat qeydi. */
+.qf-alert--info {
+    border-color: var(--ems-primary-200);
+    background: var(--ems-primary-50);
+    color: var(--ems-primary-800);
+    font-weight: 500;
+}
+
+.qf-alert--info a {
+    display: block;
+    margin-top: 4px;
+    color: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
 .qf-warning {
     margin-top: 8px;
     padding: 8px 12px;

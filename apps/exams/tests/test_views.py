@@ -5163,9 +5163,15 @@ class WrittenExamPaintInheritanceTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 302)
+        # 2026-11-11: bu suala cavab verilib — redaktə YENİ VERSİYA yaradır; köhnə sual toxunulmaz qalıb deaktiv
+        # olunur (bax services/question_versioning.py). Ayar yeni versiyaya düşür.
         self.visible_question.refresh_from_db()
-        self.assertTrue(self.visible_question.disable_paint)
-        self.assertFalse(self.visible_question.paint_enabled_effective)
+        self.assertFalse(self.visible_question.is_active)
+        self.assertFalse(self.visible_question.disable_paint)
+        new_version = ExamQuestion.objects.get(replaces=self.visible_question)
+        self.assertTrue(new_version.is_active)
+        self.assertTrue(new_version.disable_paint)
+        self.assertFalse(new_version.paint_enabled_effective)
 
     def test_edit_question_form_shows_checked_paint_checkbox_when_state_comes_from_block(self):
         _login_with_org(self.client, self.teacher, self.organization)
