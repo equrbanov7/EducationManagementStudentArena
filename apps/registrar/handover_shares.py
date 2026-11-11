@@ -35,10 +35,10 @@ def restore_for_revert(record, offering):
     ids = record.deactivated_share_ids or []
     if not ids:
         return  # Köhnə təhvil qeydlərinin davranışı dəyişmir.
-    teachers = {pk for pk in (record.from_instructor_id, record.to_instructor_id) if pk is not None}
+    # Növ təhvili (2026-11-11) bir neçə mənbə müəllimin payını söndürə bilər — qeyddəki id-lər həlledicidir.
     shares = list(
         JournalShare.objects.select_for_update()
-        .filter(pk__in=ids, organization=record.organization, offering=offering, teacher_id__in=teachers)
+        .filter(pk__in=ids, organization=record.organization, offering=offering)
         .order_by("pk")
     )
     if len(shares) != len(set(ids)) or any(share.is_active for share in shares):

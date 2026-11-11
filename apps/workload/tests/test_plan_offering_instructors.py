@@ -116,7 +116,8 @@ class ImmediateInstructorTest(_TeacherBase):
         self.assertEqual(self.offering().instructor_id, self.teacher_b.pk)
         self.assertEqual(changed.offering_sync["instructor_replaced"], 1)
 
-    def test_handover_instructor_is_never_overwritten(self):
+    def test_explicit_chair_change_overrides_an_earlier_handover(self):
+        """Sahib 2026-11-11: kafedranın AÇIQ dəyişikliyi «Fənn təhvili»dir — əvvəlki təhvil onu udmur."""
         _task, row = self.approved_row()
         assignment = self.assign(row, self.teacher_a)
         offering = self.offering()
@@ -132,8 +133,26 @@ class ImmediateInstructorTest(_TeacherBase):
         )
         CourseOffering.objects.filter(pk=offering.pk).update(instructor=self.teacher_c)
         changed = self.assign(row, self.teacher_b, assignment=assignment)
+        self.assertEqual(self.offering().instructor_id, self.teacher_b.pk)
+        self.assertEqual(changed.offering_sync["instructor_replaced"], 1)
+
+    def test_handover_instructor_survives_a_change_of_another_kind(self):
+        _task, row = self.approved_row()
+        self.assign(row, self.teacher_a)
+        offering = self.offering()
+        TeachingHandover.objects.create(
+            organization=self.org,
+            offering=offering,
+            from_instructor=self.teacher_a,
+            to_instructor=self.teacher_c,
+            from_instructor_name="A",
+            to_instructor_name="C",
+            reason="Müəllim işdən çıxdı — fənn təhvil verildi",
+            performed_by=self.chair_head,
+        )
+        CourseOffering.objects.filter(pk=offering.pk).update(instructor=self.teacher_c)
+        self.assign(row, self.teacher_b, activity=Activity.SEMINAR, hours=30)  # mühazirəçi dəyişmir
         self.assertEqual(self.offering().instructor_id, self.teacher_c.pk)
-        self.assertEqual(changed.offering_sync["preserved_handover"], 1)
 
     def test_schedule_editor_instructor_is_preserved(self):
         _task, row = self.approved_row()

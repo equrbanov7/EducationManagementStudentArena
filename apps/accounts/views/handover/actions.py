@@ -16,12 +16,13 @@ import logging
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
+from django.utils.translation import pgettext
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_POST
 
 from apps.registrar.public import handover_actions as handover_write
 
-from .labels import error_message
+from .labels import error_message, moved_message
 from .policy import resolve_actor
 
 logger = logging.getLogger(__name__)
@@ -77,10 +78,13 @@ def handover_action(request):
     reason = payload.get("reason") or ""
     try:
         if action == "reassign":
+            items = _normalize_items(payload)
+            if payload.get("kinds_mode") == "pick" and not _as_list(payload.get("kinds")):
+                return _error("no_kind", error_message("no_kind"))
             result = handover_write.bulk_reassign(
                 actor=actor.user,
                 organization=actor.organization,
-                items=_normalize_items(payload),
+                items=items,
                 reason=reason,
                 request=request,
             )
@@ -103,7 +107,19 @@ def handover_action(request):
         message = error_message(exc.code, exc.message, codes=codes, action=action)
         return _error(exc.code, message, status=exc.status, codes=codes)
 
+    if action == "reassign":
+        result["message"] = moved_message(result.get("moved"))
+    else:
+        result["message"] = pgettext("accounts.handover", "Təhvil geri qaytarıldı — jurnal %(name)s adına qayıtdı.") % {
+            "name": result.get("restored_to") or "—"
+        }
     return JsonResponse({"ok": True, **result})
+
+
+def _as_list(value) -> list:
+    if value in (None, ""):
+        return []
+    return [value] if isinstance(value, str) else list(value)
 
 
 def _normalize_items(payload) -> list:
@@ -133,16 +149,25 @@ def _normalize_items(payload) -> list:
             offering_id = str(row.get("offering_id") or "").strip()
             target_id = str(row.get("new_instructor_id") or "").strip()
             if offering_id:
-                rows.append({"offering_id": offering_id, "new_instructor_id": target_id})
+                rows.append(
+                    {
+                        "offering_id": offering_id,
+                        "new_instructor_id": target_id,
+                        "kinds": _as_list(row.get("kinds")),
+                        "from_teacher_id": str(row.get("from_teacher_id") or "").strip(),
+                    }
+                )
         return rows
 
+    # 2026-11-11: dərs növü seçimi (boş = bütün jurnal) — bütün seçilmiş fənlərə eyni.
+    kinds = _as_list(payload.get("kinds"))
     target = str(payload.get("new_instructor_id") or "").strip()
     bulk = payload.get("offering_ids")
     if isinstance(bulk, str):
         bulk = [bulk]
     if isinstance(bulk, (list, tuple)):
         rows = [
-            {"offering_id": str(value).strip(), "new_instructor_id": target}
+            {"offering_id": str(value).strip(), "new_instructor_id": target, "kinds": kinds}
             for value in bulk
             if str(value or "").strip()
         ]
@@ -151,7 +176,7 @@ def _normalize_items(payload) -> list:
 
     offering_id = str(payload.get("offering_id") or "").strip()
     if offering_id:
-        return [{"offering_id": offering_id, "new_instructor_id": target}]
+        return [{"offering_id": offering_id, "new_instructor_id": target, "kinds": kinds}]
     return []
 
 

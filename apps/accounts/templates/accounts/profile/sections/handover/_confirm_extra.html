@@ -26,9 +26,27 @@ komponenti + daxili axtarış.{% endcomment %}
     <p class="ems-field__hint">{% trans "Siyahıda yalnız bu təşkilatda bal yazma səlahiyyəti olan aktiv müəllimlər var." context "accounts.handover" %}</p>
 </div>
 
+{% comment %}2026-11-11 (sahib: «yalnız seminarı təhvil vermək işləsin»): dərs növü seçimi. Üçü də seçilibsə jurnal
+TAM köçür (sahiblik daxil); yalnız «Seminar» seçilsə mühazirəçi və jurnalın sahibi yerində qalır. Qutular
+`data-tof-list` ilə SİYAHI kimi göndərilir; `kinds_mode=pick` serverə «növ seçimi təklif olunub» deyir — hamısı
+boşaldılsa tam təhvilə səssizcə çevrilmir (400).{% endcomment %}
+<fieldset class="thx-kinds" data-thx-kinds>
+    <legend class="ems-field__label">{% trans "Hansı dərslər təhvil verilir?" context "accounts.handover" %}</legend>
+    <input type="hidden" name="kinds_mode" value="pick">
+    <div class="thx-kinds__options">
+        {% for kind in handover_section.kind_options %}
+        <label class="thx-kind">
+            <input type="checkbox" class="thx-kind__box" name="kinds" value="{{ kind.value }}" data-tof-list data-thx-kind checked>
+            <span class="thx-kind__label">{{ kind.label }}</span>
+        </label>
+        {% endfor %}
+    </div>
+    <p class="ems-field__hint" data-thx-kinds-hint>{% trans "Hamısı seçilibsə jurnal tam köçür. Yalnız «Seminar» seçsəniz mühazirəçi və jurnalın sahibi yerində qalır — seminarı aparan müəllimin payı yeni müəllimə keçir." context "accounts.handover" %}</p>
+</fieldset>
+
 <div class="thx-summary" data-thx-summary>
-    <h3 class="thx-h3">{% trans "Nə köçür" context "accounts.handover" %}</h3>
-    <ul class="thx-list thx-list--move" data-thx-summary-list></ul>
+    <h3 class="thx-h3">{% trans "Nə köçür — indiki → yeni" context "accounts.handover" %}</h3>
+    <ul class="thx-list thx-list--move thx-preview" data-thx-summary-list></ul>
     <p class="thx-summary__total" data-thx-summary-total role="status" aria-live="polite"></p>
 
     <div class="thx-keep">

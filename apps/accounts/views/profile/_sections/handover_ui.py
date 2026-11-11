@@ -64,12 +64,20 @@ def source_teacher_options(scoped_queryset, selected: str) -> list:
     Siyahı QƏSDƏN bütün müəllimlərdən deyil, məhz açılışı olanlardan qurulur:
     dekan yalnız öz fakültəsində dərs deyən adamı seçə bilməlidir.
     """
+    from django.apps import apps as django_apps
     from django.contrib.auth import get_user_model
+    from django.db.models import Q
 
     instructor_ids = scoped_queryset.filter(instructor_id__isnull=False).values("instructor_id")
+    # 2026-11-11: seminar/lab müəllimləri də (aktiv jurnal payı) — onların növü ayrıca təhvil olunur.
+    share_ids = (
+        django_apps.get_model("registrar", "JournalShare")
+        .objects.filter(is_active=True, offering_id__in=scoped_queryset.values("pk"))
+        .values("teacher_id")
+    )
     rows = (
         get_user_model()
-        .objects.filter(pk__in=instructor_ids)
+        .objects.filter(Q(pk__in=instructor_ids) | Q(pk__in=share_ids))
         .order_by("last_name", "first_name", "username")
         .values_list("pk", "first_name", "last_name", "username")[:OPTION_CAP]
     )
@@ -135,6 +143,14 @@ def unit_options(organization, scope, unit_types, selected: str) -> list:
     return options
 
 
+def kind_options() -> list:
+    """Təsdiq pəncərəsinin dərs növü qutuları (2026-11-11) — sıra: mühazirə, seminar, laboratoriya."""
+    from apps.accounts.views.handover.labels import kind_labels
+
+    labels = kind_labels()
+    return [_option(kind, labels[kind]) for kind in ("lecture", "seminar", "lab")]
+
+
 def state_options() -> list:
     return [
         _option("", pgettext(_CTX, "Hamısı")),
@@ -155,7 +171,7 @@ def filter_fields(values, *, sources, periods, faculties, kafedras) -> list:
             "kind": "search",
             "value": values["q"],
             "wide": True,
-            "placeholder": pgettext(_CTX, "fənn adı, kodu və ya qrup"),
+            "placeholder": pgettext(_CTX, "fənn, kod, qrup və ya müəllim"),
         },
         {
             "name": PREFIX + "teacher",
@@ -284,8 +300,8 @@ def steps(values: dict, facets: dict) -> list:
             "state": "current" if picked_source else "todo",
         },
         {
-            "label": pgettext(_CTX, "Yeni müəllimi təyin edin"),
-            "note": pgettext(_CTX, "təsdiq pəncərəsində seçilir"),
+            "label": pgettext(_CTX, "Yeni müəllim və dərs növü"),
+            "note": pgettext(_CTX, "bütün jurnal və ya yalnız seminar / lab / mühazirə"),
             "state": "todo",
         },
         {
@@ -308,6 +324,7 @@ __all__ = [
     "blocker_breakdown",
     "filter_fields",
     "filter_values",
+    "kind_options",
     "kpi_tiles",
     "param",
     "period_options",

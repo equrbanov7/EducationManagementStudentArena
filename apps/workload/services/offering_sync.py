@@ -33,25 +33,17 @@ from __future__ import annotations
 import logging
 
 from django.apps import apps as django_apps
-from django.db import IntegrityError, transaction
+from django.db import transaction
 from django.db.models import Prefetch
-
-from core.audit import log_action
-from core.constants import AuditAction
 
 from ..models import TeacherAssignment, TeachingTaskRow
 from .offering_elective_flow import ElectiveFlow
 from .offering_electives import BlockIndex, is_official_choice
 from .offering_reviewed_electives import reviewed_options
-from .offering_rules import (
-    OUTCOME_COUNTERS,
-    UNKNOWN,
-    decide_instructor,
-    merge_hours,
-    owner_for_rows,
-    plan_reached_chair,
-)
+from .offering_rules import UNKNOWN, merge_hours, owner_for_rows, plan_reached_chair
 from .offering_shares import SHARE_COUNTER_KEYS, sync_target_shares
+from .offering_sync_writes import SyncWrites
+from .offering_transfer import TRANSFER_COUNTER_KEYS, Snapshot, kind_teachers, transfer_kinds
 from .plan_calendar import PeriodResolver, ensure_row_periods
 
 logger = logging.getLogger(__name__)
@@ -61,6 +53,8 @@ INSTRUCTOR_PERMISSION = "grade.input"
 
 COUNTER_KEYS = (
     *SHARE_COUNTER_KEYS,
+    # 2026-11-11: kafedranın açıq müəllim dəyişikliyi «Fənn təhvili» servisi ilə (bax :mod:`.offering_transfer`).
+    *TRANSFER_COUNTER_KEYS,
     "rows",
     "rows_skipped",
     "period_set",
@@ -97,17 +91,6 @@ COUNTER_KEYS = (
     # 2026-11-05: jurnalı/yükü qalmayan slot müəllimi boşaldıldı (registrar ``schedule_stale_teachers``).
     "slot_teachers_released",
 )
-
-_ENROLL_KEYS = {
-    "created": "enrolled",
-    "existing": "enroll_existing",
-    "conflict": "enroll_conflict",
-    "not_member": "enroll_not_member",
-    "guest_added": "guest_added",
-    "guest_present": "guest_present",
-    "guest_deferred": "guest_deferred",
-    "guest_failed": "guest_failed",
-}
 
 
 def assignments_prefetch() -> Prefetch:
@@ -198,17 +181,22 @@ def _sibling_rows(row) -> list:
 
 
 def owner_snapshot(row) -> dict:
-    """``assign``/``unassign``-dən ƏVVƏL: sətrin açılışlarının yük sahibi — ``{açar: user_id|None}``."""
+    """``assign``/``unassign``-dən ƏVVƏL: sətrin açılışlarının yük sahibi — ``{açar: user_id|None}``.
+
+    ``.kinds`` — həmin anın növ üzrə müəllimləri (seminar/lab dəyişikliyini təhvil kimi tanımaq üçün)."""
     rows = _sibling_rows(row)
     ensure_row_periods(rows, task=row.task, apply=False)
     only_groups, only_period = _anchor_scope(rows, row.pk)
     if only_period is None:
-        return {}
+        return Snapshot()
     targets = group_targets(rows, only_groups=only_groups, only_period=only_period)
-    return {key: getattr(owner_for_rows(entry["rows"]), "pk", None) for key, entry in targets.items()}
+    return Snapshot(
+        {key: getattr(owner_for_rows(entry["rows"]), "pk", None) for key, entry in targets.items()},
+        kinds={key: kind_teachers(entry["rows"], entry["group"]) for key, entry in targets.items()},
+    )
 
 
-class _Sync(ElectiveFlow):
+class _Sync(SyncWrites, ElectiveFlow):
     """Bir keçid: sətirlər → hədəflər → açılış yaz/yenilə → qeydiyyat → hesabat."""
 
     def __init__(self, task, *, actor, request, create, previous, reviewed_choices=None):
@@ -394,6 +382,15 @@ class _Sync(ElectiveFlow):
                 continue
             self.offering_ids.append(str(offering.pk))
             previous_id = UNKNOWN if self.previous is UNKNOWN else self.previous.get(key)
+            if isinstance(self.previous, Snapshot) and not self._is_closed(offering, existing):
+                transfer_kinds(
+                    self,
+                    offering,
+                    key,
+                    entry,
+                    owner_id=desired_id,
+                    eligible_ids=lambda user_id: eligible_instructor_ids(self.org_id, {user_id}),
+                )
             handover_owned = (offering.pk, offering.instructor_id) in handover_pairs
             self._update(
                 offering,
@@ -432,113 +429,6 @@ class _Sync(ElectiveFlow):
         self.counters["slot_teachers_released"] += schedule_stale_teachers.release(
             offering_ids=self.offering_ids, by_user=self.actor_user, request=self.request
         )
-
-    def _own(self, offering, kind) -> None:
-        if offering is not None:
-            self.group_offering_ids[kind].append(str(offering.pk))
-
-    def _count(self, outcome) -> None:
-        for counter in OUTCOME_COUNTERS[outcome]:
-            self.counters[counter] += 1
-
-    def _create(self, key, *, desired_id, eligible, lesson_hours):
-        CourseOffering = django_apps.get_model("registrar", "CourseOffering")
-        outcome, instructor_id = decide_instructor(None, desired_id=desired_id, eligible=eligible)
-        lookup = {"organization_id": self.org_id, "subject_id": key[0], "period_id": key[1], "group_id": key[2]}
-        for candidate in (instructor_id, None) if instructor_id else (None,):
-            try:
-                with transaction.atomic():
-                    offering = CourseOffering.objects.create(
-                        **lookup, instructor_id=candidate, lesson_hours=lesson_hours, is_active=True
-                    )
-                break
-            except IntegrityError:
-                if candidate is None:
-                    # Paralel yaradılma (unikal açar) — növbəti keçid mövcud sətri yeniləyəcək.
-                    logger.warning("workload: offering create race %s", lookup)
-                    self.counters["skipped"] += 1
-                    return None
-                logger.warning("workload: instructor %s rejected by registrar guard (%s)", candidate, lookup)
-                outcome = "blocked"
-        self.counters["created"] += 1
-        self._count(outcome)
-        self.offering_ids.append(str(offering.pk))
-        return offering
-
-    def _update(self, offering, entry, *, existing, lesson_hours, desired_id, eligible, previous_id, handover_owned):
-        old_id = offering.instructor_id
-        outcome, new_id = decide_instructor(
-            old_id, desired_id=desired_id, eligible=eligible, previous_id=previous_id, handover_owned=handover_owned
-        )
-        fields = ["instructor"] if new_id != old_id else []
-        if lesson_hours and offering.lesson_hours != lesson_hours and not self._is_closed(offering, existing):
-            offering.lesson_hours = lesson_hours
-            fields.append("lesson_hours")
-        if not fields:
-            self.counters["skipped"] += 1
-            self._count(outcome)
-            return
-        offering.instructor_id = new_id
-        try:
-            with transaction.atomic():
-                offering.save(update_fields=fields + ["updated_at"])
-        except IntegrityError:
-            offering.instructor_id = old_id
-            fields = [field for field in fields if field != "instructor"]
-            outcome = "blocked"
-            if fields:
-                with transaction.atomic():
-                    offering.save(update_fields=fields + ["updated_at"])
-        self._count(outcome)
-        if not fields:
-            return
-        self.counters["updated"] += 1
-        self.counters["hours_updated"] += int("lesson_hours" in fields)
-        if "instructor" in fields:
-            conflicts = self._timetable_conflicts(offering, new_id)
-            self._audit_instructor(offering, old_id, new_id, outcome, entry["rows"], conflicts=conflicts)
-
-    def _timetable_conflicts(self, offering, new_id) -> list:
-        """Audit 2026-09-28 W4: yeni müəllim açılışın slotlarında başqa dərslə toqquşurmu."""
-        from .offering_timetable import instructor_change_conflicts
-
-        conflicts = instructor_change_conflicts(offering, new_id)
-        self.counters["schedule_conflicts"] += len(conflicts)
-        self.schedule_conflicts.extend(conflicts)
-        return conflicts
-
-    def _audit_instructor(self, offering, old_id, new_id, outcome, rows, *, conflicts=()) -> None:
-        log_action(
-            AuditAction.UPDATE,
-            user=self.actor_user,
-            organization=self.task.organization,
-            obj=offering,
-            old_values={"instructor": str(old_id or "")},
-            new_values={
-                "instructor": str(new_id or ""),
-                "outcome": outcome,
-                "task": str(self.task.pk),
-                "rows": [str(row.pk) for row in rows],
-                "schedule_conflicts": [item.get("message", "") for item in conflicts],
-            },
-            reason="workload.offering_instructor_synced",
-            request=self.request,
-            resource_type="registrar.CourseOffering",
-            resource_id=str(offering.pk),
-            resource_repr=f"{offering.subject_id} · {offering.group_id}",
-        )
-
-    def _enroll(self, offerings, *, kind="mandatory") -> None:
-        from apps.registrar.public import services as registrar_services
-
-        report = registrar_services.enroll_group_students(
-            offerings=offerings,
-            kind=kind,
-            by_user=self.actor_user,
-            reason=f"Tədris tapşırığı {self.task.academic_year}: plan qruplara düşdü — birləşik qrupun açılışı",
-        )
-        for key, value in report.items():
-            self.counters[_ENROLL_KEYS[key]] += int(value)
 
 
 def sync_task_offerings(

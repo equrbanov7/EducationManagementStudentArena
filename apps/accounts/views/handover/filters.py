@@ -52,8 +52,11 @@ def apply_filters(queryset, values, *, organization, actor, today=None):
     teacher = (values.get("teacher") or "").strip()
     if teacher == "__none__":
         queryset = queryset.filter(instructor__isnull=True)
+    elif teacher.isdigit():
+        # 2026-11-11: seminar/lab müəllimi də (aktiv jurnal payı) — onun növünü ayrıca təhvil vermək üçün.
+        queryset = queryset.filter(Q(instructor_id=teacher) | Q(pk__in=_shared_with(teacher)))
     elif teacher:
-        queryset = queryset.filter(instructor_id=teacher)
+        queryset = queryset.none()
 
     period = (values.get("period") or "").strip()
     if period:
@@ -64,9 +67,18 @@ def apply_filters(queryset, values, *, organization, actor, today=None):
         if unit_id:
             queryset = queryset.filter(group__in=unit_subtree_ids(organization, unit_id))
 
-    # Az/ing dözümlü; fənn kodu və qrup adı kod rejimində («234king» → «234 K ing»).
-    search = tolerant_q(values.get("q") or "", ("subject__name",), compact_fields=("subject__code", "group__name"))
+    # Az/ing dözümlü; fənn kodu və qrup adı kod rejimində («234king» → «234 K ing»). 2026-11-11: müəllim adı da
+    # (sahib və ya seminar/lab payı olan müəllim).
+    term = values.get("q") or ""
+    search = tolerant_q(
+        term,
+        ("subject__name", "instructor__first_name", "instructor__last_name"),
+        compact_fields=("subject__code", "group__name"),
+    )
     if search is not None:
+        teachers = tolerant_q(term, ("teacher__first_name", "teacher__last_name", "teacher__username"))
+        if teachers is not None:
+            search |= Q(pk__in=_share_model().objects.filter(is_active=True).filter(teachers).values("offering_id"))
         queryset = queryset.filter(search)
 
     state = (values.get("state") or "").strip()
@@ -75,6 +87,17 @@ def apply_filters(queryset, values, *, organization, actor, today=None):
         queryset = queryset.annotate(**annotations)
         queryset = queryset.filter(condition) if state == STATE_BLOCKED else queryset.exclude(condition)
     return queryset
+
+
+def _share_model():
+    from django.apps import apps as django_apps
+
+    return django_apps.get_model("registrar", "JournalShare")
+
+
+def _shared_with(teacher_id):
+    """Müəllimin aktiv jurnal payı olan açılışlar (subquery)."""
+    return _share_model().objects.filter(teacher_id=teacher_id, is_active=True).values("offering_id")
 
 
 def unit_subtree_ids(organization, unit_id):

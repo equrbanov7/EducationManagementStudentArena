@@ -118220,10 +118220,148 @@ msgstr "Əvəz etdiyi sual"
 
 #, python-format
 msgctxt "registrar.subject_merge"
-msgid "%(period)s · %(group)s: birləşdirilmiş (passiv) dublikat jurnal arxivlənən fənn kartında tarixçə kimi qalır — xanaları əsas jurnala kopyalanıb."
-msgstr "%(period)s · %(group)s: birləşdirilmiş (passiv) dublikat jurnal arxivlənən fənn kartında tarixçə kimi qalır — xanaları əsas jurnala kopyalanıb."
+msgid ""
+"%(period)s · %(group)s: birləşdirilmiş (passiv) dublikat jurnal arxivlənən "
+"fənn kartında tarixçə kimi qalır — xanaları əsas jurnala kopyalanıb."
+msgstr ""
+"%(period)s · %(group)s: birləşdirilmiş (passiv) dublikat jurnal arxivlənən "
+"fənn kartında tarixçə kimi qalır — xanaları əsas jurnala kopyalanıb."
 
 #, python-format
 msgctxt "accounts.catalog"
 msgid "Fənn kodu QKU-N formasında olmalıdır. Növbəti boş kod: %(code)s."
 msgstr "Fənn kodu QKU-N formasında olmalıdır. Növbəti boş kod: %(code)s."
+
+msgctxt "accounts.handover"
+msgid "Seçilmiş müəllim bu dərs növünü aparmır"
+msgstr "Seçilmiş müəllim bu dərs növünü aparmır"
+
+msgctxt "accounts.handover"
+msgid "Dərs növü yanlışdır"
+msgstr "Dərs növü yanlışdır"
+
+msgctxt "accounts.handover"
+msgid "Dərs növü yanlışdır."
+msgstr "Dərs növü yanlışdır."
+
+msgctxt "accounts.handover"
+msgid "Ən azı bir dərs növü seçin."
+msgstr "Ən azı bir dərs növü seçin."
+
+msgctxt "accounts.handover"
+msgid "Mühazirə"
+msgstr "Mühazirə"
+
+msgctxt "accounts.handover"
+msgid "Seminar"
+msgstr "Seminar"
+
+msgctxt "accounts.handover"
+msgid "Laboratoriya"
+msgstr "Laboratoriya"
+
+msgctxt "accounts.handover"
+msgid "Bütün jurnal"
+msgstr "Bütün jurnal"
+
+msgctxt "accounts.handover"
+msgid "%(count)d fənn: %(what)s → %(to)s."
+msgstr "%(count)d fənn: %(what)s → %(to)s."
+
+msgctxt "accounts.handover"
+msgid "seçilmiş müəllimlər"
+msgstr "seçilmiş müəllimlər"
+
+msgctxt "accounts.handover"
+msgid "Jurnalın sahibi dəyişmədi — yalnız seçilmiş dərs növü köçdü."
+msgstr "Jurnalın sahibi dəyişmədi — yalnız seçilmiş dərs növü köçdü."
+
+msgctxt "accounts.handover"
+msgid "Bal və davamiyyət olduğu kimi qaldı."
+msgstr "Bal və davamiyyət olduğu kimi qaldı."
+
+msgctxt "accounts.handover"
+msgid "Təhvil geri qaytarıldı — jurnal %(name)s adına qayıtdı."
+msgstr "Təhvil geri qaytarıldı — jurnal %(name)s adına qayıtdı."
+
+msgctxt "accounts.handover"
+msgid "Kim aparır (növ üzrə)"
+msgstr "Kim aparır (növ üzrə)"
+
+msgctxt "accounts.handover"
+msgid "Yeni müəllim və dərs növü"
+msgstr "Yeni müəllim və dərs növü"
+
+msgctxt "accounts.handover"
+msgid "bütün jurnal və ya yalnız seminar / lab / mühazirə"
+msgstr "bütün jurnal və ya yalnız seminar / lab / mühazirə"
+
+msgctxt "accounts.handover"
+msgid "fənn, kod, qrup və ya müəllim"
+msgstr "fənn, kod, qrup və ya müəllim"
+
+msgctxt "accounts.handover"
+msgid "Hansı dərslər təhvil verilir?"
+msgstr "Hansı dərslər təhvil verilir?"
+
+msgctxt "accounts.handover"
+msgid ""
+"Hamısı seçilibsə jurnal tam köçür. Yalnız «Seminar» seçsəniz mühazirəçi və "
+"jurnalın sahibi yerində qalır — seminarı aparan müəllimin payı yeni müəllimə"
+" keçir."
+msgstr ""
+"Hamısı seçilibsə jurnal tam köçür. Yalnız «Seminar» seçsəniz mühazirəçi və "
+"jurnalın sahibi yerində qalır — seminarı aparan müəllimin payı yeni müəllimə"
+" keçir."
+
+msgctxt "accounts.handover"
+msgid "Nə köçür — indiki → yeni"
+msgstr "Nə köçür — indiki → yeni"
+
+msgctxt "accounts.handover"
+msgid ""
+"Yalnız seminar / lab seçilsə — yalnız həmin dərs növünün yazma hüququ keçir,"
+" sahib dəyişmir."
+msgstr ""
+"Yalnız seminar / lab seçilsə — yalnız həmin dərs növünün yazma hüququ keçir,"
+" sahib dəyişmir."
+
+msgctxt "accounts.handover"
+msgid ""
+"Bütün jurnalı və ya yalnız bir dərs növünü (məs. seminarı) yeni müəllimə "
+"verin. Yazılmış bal və davamiyyət olduğu kimi qalır."
+msgstr ""
+"Bütün jurnalı və ya yalnız bir dərs növünü (məs. seminarı) yeni müəllimə "
+"verin. Yazılmış bal və davamiyyət olduğu kimi qalır."
+
+msgctxt "accounts.handover"
+msgid "yeni müəllim"
+msgstr "yeni müəllim"
+
+msgctxt "accounts.handover"
+msgid "jurnalın sahibi dəyişmir"
+msgstr "jurnalın sahibi dəyişmir"
+
+msgctxt "accounts.handover"
+msgid "jurnalın sahibi olur"
+msgstr "jurnalın sahibi olur"
+
+msgctxt "workload"
+msgid ""
+"Bölgü saxlanıldı, amma jurnal yeni müəllimə köçmədi (bal yazma səlahiyyəti "
+"yoxdur və ya jurnal dəyişib). «Fənn təhvili» bölməsindən yoxlayın."
+msgstr ""
+"Bölgü saxlanıldı, amma jurnal yeni müəllimə köçmədi (bal yazma səlahiyyəti "
+"yoxdur və ya jurnal dəyişib). «Fənn təhvili» bölməsindən yoxlayın."
+
+msgctxt "workload"
+msgid "Bölgü saxlanıldı — jurnal bütün balları ilə yeni müəllimə keçdi."
+msgstr "Bölgü saxlanıldı — jurnal bütün balları ilə yeni müəllimə keçdi."
+
+msgctxt "workload"
+msgid ""
+"Bölgü saxlanıldı — bu dərs növünün jurnal payı yeni müəllimə keçdi (bal "
+"itmir)."
+msgstr ""
+"Bölgü saxlanıldı — bu dərs növünün jurnal payı yeni müəllimə keçdi (bal "
+"itmir)."

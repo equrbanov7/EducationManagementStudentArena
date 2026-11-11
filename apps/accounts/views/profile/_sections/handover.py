@@ -152,6 +152,7 @@ def _build_transfer(request, section, *, actor, organization, scope):
     section["page_obj"] = page_obj
     section["pagination_query"] = _pagination_query(values, ui.TAB_TRANSFER)
     section["target_options"] = ui.target_teacher_options(organization)
+    section["kind_options"] = ui.kind_options()
     section["has_blocked"] = bool(facets["blocked"])
     # AQREQAT lent: «3 fənn təhvil verilə bilməz: 2 bağlı jurnal, 1 keçmiş
     # semestr» — qırmızı mətn divarı əvəzinə bir cümlə (sətrin öz səbəbi

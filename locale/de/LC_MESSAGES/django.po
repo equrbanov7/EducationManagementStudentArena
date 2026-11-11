@@ -120395,10 +120395,156 @@ msgstr "Ersetzt Frage"
 
 #, python-format
 msgctxt "registrar.subject_merge"
-msgid "%(period)s · %(group)s: birləşdirilmiş (passiv) dublikat jurnal arxivlənən fənn kartında tarixçə kimi qalır — xanaları əsas jurnala kopyalanıb."
-msgstr "%(period)s · %(group)s: Das zusammengeführte (inaktive) doppelte Journal bleibt als Verlauf auf der archivierten Fachkarte — seine Zellen wurden ins Hauptjournal kopiert."
+msgid ""
+"%(period)s · %(group)s: birləşdirilmiş (passiv) dublikat jurnal arxivlənən "
+"fənn kartında tarixçə kimi qalır — xanaları əsas jurnala kopyalanıb."
+msgstr ""
+"%(period)s · %(group)s: Das zusammengeführte (inaktive) doppelte Journal "
+"bleibt als Verlauf auf der archivierten Fachkarte — seine Zellen wurden ins "
+"Hauptjournal kopiert."
 
 #, python-format
 msgctxt "accounts.catalog"
 msgid "Fənn kodu QKU-N formasında olmalıdır. Növbəti boş kod: %(code)s."
-msgstr "Der Fachcode muss die Form QKU-N haben. Nächster freier Code: %(code)s."
+msgstr ""
+"Der Fachcode muss die Form QKU-N haben. Nächster freier Code: %(code)s."
+
+msgctxt "accounts.handover"
+msgid "Seçilmiş müəllim bu dərs növünü aparmır"
+msgstr "Die ausgewählte Lehrkraft unterrichtet diese Unterrichtsart nicht"
+
+msgctxt "accounts.handover"
+msgid "Dərs növü yanlışdır"
+msgstr "Ungültige Unterrichtsart"
+
+msgctxt "accounts.handover"
+msgid "Dərs növü yanlışdır."
+msgstr "Ungültige Unterrichtsart."
+
+msgctxt "accounts.handover"
+msgid "Ən azı bir dərs növü seçin."
+msgstr "Wählen Sie mindestens eine Unterrichtsart."
+
+msgctxt "accounts.handover"
+msgid "Mühazirə"
+msgstr "Vorlesung"
+
+msgctxt "accounts.handover"
+msgid "Seminar"
+msgstr "Seminar"
+
+msgctxt "accounts.handover"
+msgid "Laboratoriya"
+msgstr "Labor"
+
+msgctxt "accounts.handover"
+msgid "Bütün jurnal"
+msgstr "Gesamtes Journal"
+
+msgctxt "accounts.handover"
+msgid "%(count)d fənn: %(what)s → %(to)s."
+msgstr "%(count)d Fach/Fächer: %(what)s → %(to)s."
+
+msgctxt "accounts.handover"
+msgid "seçilmiş müəllimlər"
+msgstr "die ausgewählten Lehrkräfte"
+
+msgctxt "accounts.handover"
+msgid "Jurnalın sahibi dəyişmədi — yalnız seçilmiş dərs növü köçdü."
+msgstr ""
+"Der Journalinhaber bleibt — nur die gewählte Unterrichtsart wurde "
+"übertragen."
+
+msgctxt "accounts.handover"
+msgid "Bal və davamiyyət olduğu kimi qaldı."
+msgstr "Noten und Anwesenheit bleiben unverändert."
+
+msgctxt "accounts.handover"
+msgid "Təhvil geri qaytarıldı — jurnal %(name)s adına qayıtdı."
+msgstr "Übergabe rückgängig gemacht — das Journal liegt wieder bei %(name)s."
+
+msgctxt "accounts.handover"
+msgid "Kim aparır (növ üzrə)"
+msgstr "Wer unterrichtet (nach Unterrichtsart)"
+
+msgctxt "accounts.handover"
+msgid "Yeni müəllim və dərs növü"
+msgstr "Neue Lehrkraft und Unterrichtsart"
+
+msgctxt "accounts.handover"
+msgid "bütün jurnal və ya yalnız seminar / lab / mühazirə"
+msgstr "gesamtes Journal oder nur Seminar / Labor / Vorlesung"
+
+msgctxt "accounts.handover"
+msgid "fənn, kod, qrup və ya müəllim"
+msgstr "Fach, Code, Gruppe oder Lehrkraft"
+
+msgctxt "accounts.handover"
+msgid "Hansı dərslər təhvil verilir?"
+msgstr "Welche Stunden werden übergeben?"
+
+msgctxt "accounts.handover"
+msgid ""
+"Hamısı seçilibsə jurnal tam köçür. Yalnız «Seminar» seçsəniz mühazirəçi və "
+"jurnalın sahibi yerində qalır — seminarı aparan müəllimin payı yeni müəllimə"
+" keçir."
+msgstr ""
+"Ist alles ausgewählt, wird das ganze Journal übertragen. Wählen Sie nur "
+"„Seminar“, bleiben Dozent und Journalinhaber — nur der Anteil der "
+"Seminarlehrkraft geht an die neue Lehrkraft."
+
+msgctxt "accounts.handover"
+msgid "Nə köçür — indiki → yeni"
+msgstr "Was übertragen wird — aktuell → neu"
+
+msgctxt "accounts.handover"
+msgid ""
+"Yalnız seminar / lab seçilsə — yalnız həmin dərs növünün yazma hüququ keçir,"
+" sahib dəyişmir."
+msgstr ""
+"Ist nur Seminar / Labor gewählt, wird nur das Schreibrecht dieser "
+"Unterrichtsart übertragen; der Inhaber bleibt."
+
+msgctxt "accounts.handover"
+msgid ""
+"Bütün jurnalı və ya yalnız bir dərs növünü (məs. seminarı) yeni müəllimə "
+"verin. Yazılmış bal və davamiyyət olduğu kimi qalır."
+msgstr ""
+"Übergeben Sie das ganze Journal oder nur eine Unterrichtsart (z. B. das "
+"Seminar) an die neue Lehrkraft. Eingetragene Noten und Anwesenheit bleiben "
+"erhalten."
+
+msgctxt "accounts.handover"
+msgid "yeni müəllim"
+msgstr "neue Lehrkraft"
+
+msgctxt "accounts.handover"
+msgid "jurnalın sahibi dəyişmir"
+msgstr "Journalinhaber bleibt"
+
+msgctxt "accounts.handover"
+msgid "jurnalın sahibi olur"
+msgstr "wird Journalinhaber"
+
+msgctxt "workload"
+msgid ""
+"Bölgü saxlanıldı, amma jurnal yeni müəllimə köçmədi (bal yazma səlahiyyəti "
+"yoxdur və ya jurnal dəyişib). «Fənn təhvili» bölməsindən yoxlayın."
+msgstr ""
+"Die Zuteilung wurde gespeichert, aber das Journal ging nicht an die neue "
+"Lehrkraft (keine Benotungsrechte oder das Journal wurde geändert). Prüfen "
+"Sie den Bereich „Fachübergabe“."
+
+msgctxt "workload"
+msgid "Bölgü saxlanıldı — jurnal bütün balları ilə yeni müəllimə keçdi."
+msgstr ""
+"Zuteilung gespeichert — das Journal ging mit allen Noten an die neue "
+"Lehrkraft."
+
+msgctxt "workload"
+msgid ""
+"Bölgü saxlanıldı — bu dərs növünün jurnal payı yeni müəllimə keçdi (bal "
+"itmir)."
+msgstr ""
+"Zuteilung gespeichert — der Journalanteil dieser Unterrichtsart ging an die "
+"neue Lehrkraft (keine Noten gehen verloren)."

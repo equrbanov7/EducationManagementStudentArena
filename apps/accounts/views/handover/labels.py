@@ -43,6 +43,8 @@ def blocker_labels(*, action: str = "reassign") -> dict:
         "target_not_eligible": pgettext(_CTX, "Seçilmiş müəllim bal yazma səlahiyyətinə malik deyil"),
         "actor_is_current_instructor": pgettext(_CTX, "Öz fənninizi özünüz təhvil verə bilməzsiniz"),
         "no_target": pgettext(_CTX, "Yeni müəllim seçilməyib"),
+        "kind_not_held": pgettext(_CTX, "Seçilmiş müəllim bu dərs növünü aparmır"),
+        "invalid_kind": pgettext(_CTX, "Dərs növü yanlışdır"),
     }
     if action == REVERT:
         labels.update(
@@ -106,12 +108,58 @@ def error_message(code: str, fallback: str = "", *, codes=(), action: str = "rea
         "journal_closed": pgettext(_CTX, "Jurnal bağlanıb — əvvəlcə RİM jurnalı açmalıdır."),
         "permission_denied": pgettext(_CTX, "Bu əməliyyat üçün icazəniz yoxdur."),
         "unknown_action": pgettext(_CTX, "Naməlum əməliyyat."),
+        "invalid_kind": pgettext(_CTX, "Dərs növü yanlışdır."),
+        "no_kind": pgettext(_CTX, "Ən azı bir dərs növü seçin."),
     }
     return messages.get(code) or blocker_labels(action=action).get(code) or fallback or _generic_failure()
+
+
+def kind_labels() -> dict:
+    """Dərs növünün qısa adı (təhvil ekranı, tarixçə, nəticə mesajı)."""
+    return {
+        "lecture": pgettext(_CTX, "Mühazirə"),
+        "seminar": pgettext(_CTX, "Seminar"),
+        "lab": pgettext(_CTX, "Laboratoriya"),
+    }
+
+
+def kinds_text(kinds, *, owner_move=True) -> str:
+    """«Bütün jurnal» və ya «Seminar, Laboratoriya» — nə köçdüyünün adı."""
+    names = kind_labels()
+    picked = [names[kind] for kind in ("lecture", "seminar", "lab") if kind in (kinds or ())]
+    if not picked or len(picked) == 3:
+        return pgettext(_CTX, "Bütün jurnal")
+    return ", ".join(picked)
+
+
+def moved_message(moved) -> str:
+    """Təhvilin NƏTİCƏSİ — nə köçdü, kimə və sahiblik dəyişdimi (uğur tostu)."""
+    moved = [item for item in (moved or []) if item]
+    if not moved:
+        return pgettext(_CTX, "Təhvil tamamlandı.")
+    first = moved[0]
+    targets = {item.get("to") or "—" for item in moved}
+    target = (first.get("to") or "—") if len(targets) == 1 else pgettext(_CTX, "seçilmiş müəllimlər")
+    text = pgettext(_CTX, "%(count)d fənn: %(what)s → %(to)s.") % {
+        "count": len(moved),
+        "what": kinds_text(first.get("kinds")),
+        "to": target,
+    }
+    if not any(item.get("owner_move") for item in moved):
+        text += " " + pgettext(_CTX, "Jurnalın sahibi dəyişmədi — yalnız seçilmiş dərs növü köçdü.")
+    return text + " " + pgettext(_CTX, "Bal və davamiyyət olduğu kimi qaldı.")
 
 
 def _generic_failure() -> str:
     return pgettext(_CTX, "Əməliyyat yerinə yetirilmədi.")
 
 
-__all__ = ["REVERT", "blocked_message", "blocker_labels", "error_message"]
+__all__ = [
+    "REVERT",
+    "blocked_message",
+    "blocker_labels",
+    "error_message",
+    "kind_labels",
+    "kinds_text",
+    "moved_message",
+]

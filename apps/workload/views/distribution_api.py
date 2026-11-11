@@ -48,6 +48,7 @@ from ..services.patok_streams import STREAM_ERRORS
 from ..services.tasks import ROW_HAS_OBJECTIONS, TOTAL_BELOW_ASSIGNED
 from ._base import active_organization, actor_for, denied, error, json_body, no_org
 from .all_chairs_api import all_chairs_rows
+from .distribution_outcome import journal_outcome
 
 # Backend auditi 2026-09-13, F-01: gövdədən gələn qeyri-UUID ``row_id`` /
 # ``task_id`` / ``assignment_id`` ``filter(pk=...)``-də ValidationError → 500
@@ -478,6 +479,7 @@ def assign(request) -> JsonResponse:
     except WorkloadDenied as exc:
         return _write_denied(exc)
     body = {"ok": True, "assignment_id": str(saved.pk)}
+    body.update(journal_outcome(getattr(saved, "offering_sync", None) or {}))
     conflicts = int((getattr(saved, "offering_sync", None) or {}).get("schedule_conflicts") or 0)
     if conflicts:
         # Audit 2026-09-28 W4: müəllim dəyişikliyi cədvəldə toqquşma yaradıb — səssiz keçmir.
