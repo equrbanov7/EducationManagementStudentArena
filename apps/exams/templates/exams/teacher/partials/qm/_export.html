@@ -1,0 +1,20 @@
+{% load i18n %}
+{# «Yüklə ▾» (hesabat / Word) — linklər cari süzgəci daşıyır: canlı hissə `data-qb-live="export"`. #}
+{% if analysis_enabled and qm_show_report or qm_word_export_url %}
+<div class="etp-toolbar__actions">
+    <div class="dropdown">
+        <button type="button" class="ems-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-download" aria-hidden="true"></i>{% trans "Yüklə" context "exams.template.teacher_questions_bank" %}
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end etp-menu">
+            {% if analysis_enabled and qm_show_report %}
+            <li><a class="dropdown-item" href="{{ qm_base_url }}?{% if filters_query %}{{ filters_query }}&{% endif %}export=report"><i class="fas fa-file-excel" aria-hidden="true"></i>{% trans "Keyfiyyət hesabatı (Excel)" context "exams.template.teacher_questions_bank" %}</a></li>
+            {% endif %}
+            {% if qm_word_export_url %}
+            {# Word — import formatına uyğun; aktiv dil filtri tətbiq olunur. #}
+            <li><a class="dropdown-item" href="{{ qm_word_export_url }}{% if language_filter %}?language={{ language_filter }}{% endif %}"><i class="fas fa-file-word" aria-hidden="true"></i>{% trans "Suallar (Word)" context "exams.template.teacher_questions_bank" %}</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+{% endif %}

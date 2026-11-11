@@ -101,14 +101,46 @@ def _report(request, summary) -> None:
         )
 
 
+def _all_matching_attempt_ids(exam, post):
+    """«Bütün N nəticəni seç»: cari süzgəcə uyğun cəhdləri SERVER özü müəyyən edir (bu imtahan daxilində).
+
+    Klient ID siyahısı göndərmir — yalnız nəticələr səhifəsinin süzgəc sorğusunu (``filter_query``); eyni
+    süzgəc funksiyası (``_apply_results_filters_from_params``) tətbiq olunur, ona görə seçim heç vaxt
+    imtahanın və süzgəcin əhatəsindən kənara çıxa bilməz. Sınaq cəhdləri siyahıda yoxdur (səhifədəki kimi).
+    """
+    from django.http import QueryDict
+
+    from ._helpers import _apply_results_filters_from_params
+
+    params = QueryDict((post.get("filter_query") or "")[:4000])
+    attempts, _state = _apply_results_filters_from_params(exam, params)
+    return list(attempts.order_by().values_list("pk", flat=True))
+
+
 @login_required
 @require_POST
 def reset_exam_attempts(request, slug):
-    """Tək cəhd (``attempt_id``) və ya seçilmişlər (``attempt_ids``) — səbəblə sıfırla."""
+    """Tək cəhd (``attempt_id``), seçilmişlər (``attempt_ids``) və ya süzgəcə uyğun hamısı — səbəblə sıfırla."""
     exam = _resettable_exam(request, slug)
     redirect_url = _redirect_url(request, exam)
-    raw_ids = request.POST.getlist("attempt_ids") + [request.POST.get("attempt_id") or ""]
-    attempt_ids = sorted({int(raw) for raw in raw_ids if str(raw).strip().isdigit()})
+    if (request.POST.get("select_scope") or "").strip() == "all_matching":
+        attempt_ids = _all_matching_attempt_ids(exam, request.POST)
+        expected = (request.POST.get("expected_count") or "").strip()
+        # Təsdiq modalında göstərilən say ilə server sayı fərqlidirsə (siyahı arada dəyişib) — heç nə silinmir.
+        if expected.isdigit() and int(expected) != len(attempt_ids):
+            messages.error(
+                request,
+                pgettext(
+                    _CTX,
+                    "Siyahı dəyişib: təsdiqlədiyiniz %(expected)s nəticə əvəzinə indi %(actual)s nəticə uyğundur. "
+                    "Heç nə silinmədi — səhifəni yoxlayıb yenidən cəhd edin.",
+                )
+                % {"expected": expected, "actual": len(attempt_ids)},
+            )
+            return redirect(redirect_url)
+    else:
+        raw_ids = request.POST.getlist("attempt_ids") + [request.POST.get("attempt_id") or ""]
+        attempt_ids = sorted({int(raw) for raw in raw_ids if str(raw).strip().isdigit()})
     if not attempt_ids:
         messages.warning(request, pgettext(_CTX, "Sıfırlamaq üçün cəhd seçin."))
         return redirect(redirect_url)

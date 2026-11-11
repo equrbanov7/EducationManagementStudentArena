@@ -341,6 +341,16 @@ class ExamQuestion(models.Model):
         auto_now_add=True,
         verbose_name=pgettext_lazy("exams.model.question.field", "created_at"),
     )
+    # Sahib 2026-11-11: cavablanmış sual YERİNDƏ dəyişdirilmir — «yeni versiya» yaradılır, köhnəsi deaktiv
+    # olunub keçmiş cəhdlər üçün olduğu kimi qalır (bax ``services/question_versioning.py``).
+    replaces = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="newer_versions",
+        verbose_name=pgettext_lazy("exams.model.question.field", "replaces"),
+    )
 
     class Meta:
         verbose_name = pgettext_lazy("exams.model.question.meta", "singular")

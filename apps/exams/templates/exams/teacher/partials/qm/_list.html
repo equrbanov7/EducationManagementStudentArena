@@ -1,0 +1,54 @@
+{% load i18n %}
+{# Sual siyahısı + seçim zolağı + səhifələmə — canlı hissə `data-qb-live="list"`. #}
+<form method="post" id="bulkForm" class="eqb-bulk">
+    {% csrf_token %}
+    {% include "exams/teacher/partials/qm/_state_fields.html" %}
+    <input type="hidden" name="select_scope" id="qbSelectScope" value="">
+    <section class="ems-tablewrap eqb-list" aria-labelledby="eqbListTitle">
+        <div class="eqb-list__head">
+            <h2 class="eqb-list__title" id="eqbListTitle">{% trans "Suallar" context "exams.template.teacher_questions_bank" %}
+                <span class="ems-badge ems-badge--neutral etp-num">{{ page_obj.paginator.count }}</span></h2>
+            {% if page_obj.object_list %}
+            <div class="eqb-list__tools">
+            {% comment %}Filtr-şüurlu seçim: aktiv süzgəcə görə «bütün xətalıları… seç» (yalnız cari səhifə).{% endcomment %}
+            <button type="button" id="selectAllPageBtn" class="ems-btn ems-btn--ghost" data-active-flag="{{ active_flag }}">
+                <i class="fas fa-check-double" aria-hidden="true"></i>
+                {% if active_flag == 'has-error' %}{% trans "Bütün xətalıları seç" context "exams.template.teacher_questions_bank" %}
+                {% elif active_flag == 'has-warning' %}{% trans "Bütün xəbərdarlıqları seç" context "exams.template.teacher_questions_bank" %}
+                {% elif active_flag == 'has-dup' %}{% trans "Bütün dublikatları seç" context "exams.template.teacher_questions_bank" %}
+                {% elif active_flag == 'has-structure' %}{% trans "Variant problemlilərini seç" context "exams.template.teacher_questions_bank" %}
+                {% elif active_flag == 'has-balance' %}{% trans "Balans problemlilərini seç" context "exams.template.teacher_questions_bank" %}
+                {% elif active_flag == 'is-clean' %}{% trans "Təmizləri seç" context "exams.template.teacher_questions_bank" %}
+                {% else %}{% trans "action_select_all_page" context "exams.template.teacher_questions_bank" %}{% endif %}
+            </button>
+            {% if qm_show_bulk_all and page_obj.paginator.num_pages > 1 %}
+            {# Sahib 2026-11-11: səhifələmədən asılı olmayan seçim — server süzgəci özü tətbiq edir (ID göndərilmir). #}
+            <button type="button" id="selectAllMatchingBtn" class="ems-btn ems-btn--ghost" data-total="{{ page_obj.paginator.count }}" aria-pressed="false">
+                <i class="fas fa-layer-group" aria-hidden="true"></i>{% blocktrans with total=page_obj.paginator.count context "exams.template.teacher_questions_bank" %}Bütün {{ total }} sualı seç{% endblocktrans %}
+            </button>
+            {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% if page_obj.object_list %}
+            <div class="eqb-cards" data-ems-math>
+                {% for q in page_obj.object_list %}{% include "exams/teacher/partials/qm/_card.html" %}{% endfor %}
+            </div>
+        {% else %}
+            {% include "exams/teacher/partials/qm/_empty.html" %}
+        {% endif %}
+    </section>
+    {% if page_obj.object_list %}
+    <div class="etp-actionbar eqb-actionbar" role="region" aria-label="{% trans 'Seçilmiş suallar' context 'exams.template.teacher_questions_bank' %}">
+        <span id="selectedCountLabel" class="etp-actionbar__count" aria-live="polite" data-total="{{ page_obj.paginator.count }}">{% trans "selected_count_zero" context "exams.template.teacher_questions_bank" %}</span>
+        <div class="etp-actionbar__actions">
+            <button type="button" id="clearSelectionBtn" class="ems-btn ems-btn--ghost">{% trans "action_clear_selection" context "exams.template.teacher_questions_bank" %}</button>
+            <button type="submit" name="bulk_action" value="activate" class="ems-btn js-bulk-action-btn" disabled><i class="fas fa-circle-play" aria-hidden="true"></i>{% trans "action_activate_selected" context "exams.template.teacher_questions_bank" %}</button>
+            <button type="submit" name="bulk_action" value="deactivate" class="ems-btn js-bulk-action-btn" disabled><i class="fas fa-circle-pause" aria-hidden="true"></i>{% trans "action_deactivate_selected" context "exams.template.teacher_questions_bank" %}</button>
+            <button type="submit" name="bulk_action" value="delete" class="ems-btn etp-btn--danger-soft js-bulk-action-btn" disabled><i class="fas fa-trash" aria-hidden="true"></i>{% trans "action_delete_selected" context "exams.template.teacher_questions_bank" %}</button>
+        </div>
+    </div>
+    {% endif %}
+</form>
+
+{% include "partials/_pagination.html" with page_obj=page_obj extra_query=pagination_query %}
