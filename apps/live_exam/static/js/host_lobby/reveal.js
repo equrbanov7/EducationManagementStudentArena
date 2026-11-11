@@ -1,12 +1,12 @@
-import { UI } from './dom.js?v=lx20261110p';
-import { PHASES } from './constants.js?v=lx20261110p';
-import { state } from './state.js?v=lx20261110p';
-import { playRevealSound } from './audio.js?v=lx20261110p';
-import { icon } from './icons.js?v=lx20261110p';
-import { answerTileMarkup, distributionBarsMarkup, optionsLengthClass, tilesGridClass } from './options.js?v=lx20261110p';
-import { nextQuestion } from './api.js?v=lx20261110p';
-import { renderScoreboardStage } from './scoreboard.js?v=lx20261110p';
-import { isFinalReveal, renderFinalSuspenseStage } from './finale_suspense.js?v=lx20261110p';
+import { UI } from './dom.js?v=lx20261111f';
+import { PHASES } from './constants.js?v=lx20261111f';
+import { state } from './state.js?v=lx20261111f';
+import { playRevealSound } from './audio.js?v=lx20261111f';
+import { icon } from './icons.js?v=lx20261111f';
+import { answerTileMarkup, distributionBarsMarkup, optionsLengthClass, tilesGridClass } from './options.js?v=lx20261111f';
+import { nextQuestion } from './api.js?v=lx20261111f';
+import { renderScoreboardStage } from './scoreboard.js?v=lx20261111f';
+import { isFinalReveal, renderFinalSuspenseStage } from './finale_suspense.js?v=lx20261111f';
 import {
     avatarImageMarkup,
     controlsEnabled,
@@ -22,10 +22,10 @@ import {
     revealKey,
     toMs,
     tr,
-} from './utils.js?v=lx20261110p';
-import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261110p';
-import { powerBadgesMarkup, powerSceneClass } from './power_markup.js?v=lx20261110p';
-import { bombCountStatMarkup, handleRevealPower } from './powerups.js?v=lx20261110p';
+} from './utils.js?v=lx20261111f';
+import { clearPhaseLoop, isCurrentPhase, schedulePhaseLoop, setPresentationMarkup, setSessionState } from './presentation.js?v=lx20261111f';
+import { powerBadgesMarkup, powerSceneClass } from './power_markup.js?v=lx20261111f';
+import { bombCountStatMarkup, handleRevealPower } from './powerups.js?v=lx20261111f';
 
 export function destroyRevealChart() {
     /* Chart.js artıq işlədilmir (xüsusi CSS sütunları) — köhnə çağırışlar üçün no-op. */

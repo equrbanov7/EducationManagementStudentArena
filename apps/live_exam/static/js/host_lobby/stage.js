@@ -1,10 +1,10 @@
-import { UI } from './dom.js?v=lx20261110p';
-import { icon } from './icons.js?v=lx20261110p';
-import { createFx } from './fx.js?v=lx20261110p';
-import { formalStageMarkup } from './formal_stage.js?v=lx20261110p';
-import { isFormal } from './style_mode.js?v=lx20261110p';
-import { audienceDance, audienceDelay, buildStageModel, danceFor, stageTimeline } from './stage_logic.js?v=lx20261110p';
-import { state } from './state.js?v=lx20261110p';
+import { UI } from './dom.js?v=lx20261111f';
+import { icon } from './icons.js?v=lx20261111f';
+import { createFx } from './fx.js?v=lx20261111f';
+import { formalStageMarkup } from './formal_stage.js?v=lx20261111f';
+import { isFormal } from './style_mode.js?v=lx20261111f';
+import { audienceDance, audienceDelay, buildStageModel, danceFor, stageTimeline } from './stage_logic.js?v=lx20261111f';
+import { state } from './state.js?v=lx20261111f';
 import {
     playCheer,
     playFanfare,
@@ -13,8 +13,8 @@ import {
     startDanceBeat,
     startDrumroll,
     stopDanceBeat,
-} from './audio.js?v=lx20261110p';
-import { avatarMarkup, countUp, esc, fmt, formatNumber, formatSeconds, reducedMotion, tr } from './utils.js?v=lx20261110p';
+} from './audio.js?v=lx20261111f';
+import { avatarMarkup, countUp, esc, fmt, formatNumber, formatSeconds, reducedMotion, tr } from './utils.js?v=lx20261111f';
 
 /* FİNAL SƏHNƏSİ — qaranlıq zal, açılan pərdələr, süpürən projektorlar, qalxan
  * 3 pilləli podium; 3-cü → 2-ci → barabam → 1-ci (tac, fanfar, sol+sağ konfetti

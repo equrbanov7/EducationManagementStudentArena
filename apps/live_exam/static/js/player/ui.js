@@ -1,10 +1,10 @@
 // LX-FE-PLAYER (2026-09-29): başlıq (sual sayğacı, taymer, səs), alt panel (avatar, xal, yer),
 // bağlantı zolağı, toast və ekran oxuyucusu üçün aria-live elanları.
-import { BOOTSTRAP, prefersReducedMotion } from './config.js?v=lx20261110p';
-import { UI } from './dom.js?v=lx20261110p';
-import { audioState, isMuted } from './audio.js?v=lx20261110p';
-import { state } from './state.js?v=lx20261110p';
-import { fmt, formatNumber, miniAvatar, tr } from './utils.js?v=lx20261110p';
+import { BOOTSTRAP, prefersReducedMotion } from './config.js?v=lx20261111f';
+import { UI } from './dom.js?v=lx20261111f';
+import { audioState, isMuted } from './audio.js?v=lx20261111f';
+import { state } from './state.js?v=lx20261111f';
+import { fmt, formatNumber, miniAvatar, tr } from './utils.js?v=lx20261111f';
 
 let toastTimer = null;
 let netTimer = null;

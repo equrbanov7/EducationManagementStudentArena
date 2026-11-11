@@ -22,6 +22,8 @@ from django.utils.translation import pgettext
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
 
+from core.search_text import tolerant_q
+
 from . import access, codes, services
 from .lookup import STATUS_REVOKED, STATUS_VALID
 
@@ -44,15 +46,9 @@ def _search(queryset, raw: str):
     if code is not None:
         return queryset.filter(code=code)
     condition = Q(code__icontains=text)
-    tokens = text.split()
-    name_q = Q()
-    for token in tokens[:4]:
-        name_q &= (
-            Q(subject_user__first_name__icontains=token)
-            | Q(subject_user__last_name__icontains=token)
-            | Q(subject_user__username__icontains=token)
-        )
-    return queryset.filter(condition | name_q)
+    # Ad/soyad/istifadəçi adı dözümlü (core.search_text): «aqsin» ↔ «Aqşin», «QULİYEV» ↔ «quliyev».
+    name_q = tolerant_q(text, ("subject_user__first_name", "subject_user__last_name", "subject_user__username"))
+    return queryset.filter(condition | name_q) if name_q is not None else queryset.filter(condition)
 
 
 def _filter_status(queryset, status: str):

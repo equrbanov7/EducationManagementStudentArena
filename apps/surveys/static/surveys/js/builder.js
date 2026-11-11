@@ -73,10 +73,13 @@
             return;
         }
         var query = (input.value || "").trim().toLocaleLowerCase();
+        // Kanonik qatlama (EMSSearch): registr, az↔ing hərfləri, «534t» → «534 t az».
+        var matcher = window.EMSSearch ? window.EMSSearch.matcher(query) : null;
         var items = list.querySelectorAll("[data-svb-label]");
         for (var i = 0; i < items.length; i += 1) {
             var checked = items[i].querySelector("input:checked");
-            var match = !query || (items[i].getAttribute("data-svb-label") || "").indexOf(query) !== -1;
+            var label = items[i].getAttribute("data-svb-label") || "";
+            var match = !query || (matcher ? matcher(label) : label.indexOf(query) !== -1);
             items[i].hidden = !match && !checked;
         }
     }

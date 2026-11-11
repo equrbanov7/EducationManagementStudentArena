@@ -1,6 +1,6 @@
 /* toast.js — aparıcı ekranında qısa bildiriş (2026-10-08). `alert()` əvəzinə: proyektorda
  * brauzerin modal dialoqu tam ekranı qırır. Bir konteyner, ən çox 3 bildiriş, avtomatik itir. */
-import { esc } from './utils.js?v=lx20261110p';
+import { esc } from './utils.js?v=lx20261111f';
 
 const MAX_TOASTS = 3;
 

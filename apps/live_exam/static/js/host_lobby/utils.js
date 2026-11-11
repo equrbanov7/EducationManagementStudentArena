@@ -1,6 +1,6 @@
-import { UI } from './dom.js?v=lx20261110p';
-import { state } from './state.js?v=lx20261110p';
-import { plainText } from './style_mode.js?v=lx20261110p';
+import { UI } from './dom.js?v=lx20261111f';
+import { state } from './state.js?v=lx20261111f';
+import { plainText } from './style_mode.js?v=lx20261111f';
 
 export const I18N = window.LIVE_EXAM_HOST_I18N || {};
 export const hostShellSubscribers = new Set();

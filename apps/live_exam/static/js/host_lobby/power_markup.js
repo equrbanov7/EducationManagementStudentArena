@@ -1,9 +1,9 @@
 /* power_markup.js — güc rejimlərinin (💣 bomba, ×2 xal) SAF markup köməkçiləri (2026-11-10).
  * DOM-a toxunmur; question.js / reveal.js / powerups.js istifadə edir (dövri import yoxdur).
  * Qayda serverdədir: `question.is_bomb` / `question.is_double` nəşrdə dondurulmuş bayraqlardır. */
-import { icon } from './icons.js?v=lx20261110p';
-import { esc, tr } from './utils.js?v=lx20261110p';
-import { BOMB_SVG } from './power_art.js?v=lx20261110p';
+import { icon } from './icons.js?v=lx20261111f';
+import { esc, tr } from './utils.js?v=lx20261111f';
+import { BOMB_SVG } from './power_art.js?v=lx20261111f';
 
 export const isBombQuestion = (question) => Boolean(question?.is_bomb);
 export const isDoubleQuestion = (question) => Boolean(question?.is_double);

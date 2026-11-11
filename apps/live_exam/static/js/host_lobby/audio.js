@@ -1,5 +1,5 @@
-import { state } from './state.js?v=lx20261110p';
-import { isFormal } from './style_mode.js?v=lx20261110p';
+import { state } from './state.js?v=lx20261111f';
+import { isFormal } from './style_mode.js?v=lx20261111f';
 
 /* ═══════════════════════════════════════════════════════════════════
  *  SƏS MÜHƏRRİKİ (2026-09-29 LX-FE-STAGE) — yalnız WebAudio sintezi, fayl yoxdur.

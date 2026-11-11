@@ -4,13 +4,13 @@
 //  * köhnə mesaj yenisini geri qaytarmır (zaman xətti müqayisəsi, utils.js);
 //  * hər faza açarla render olunur → təkrar mesaj ikiqat animasiya/səs vermir;
 //  * faza dəyişəndə bütün taymerlər təmizlənir.
-import { BOOTSTRAP, PHASES } from './config.js?v=lx20261110p';
-import { handleAnswerError, handleAnswerSaved, setAnswerHooks } from './answer.js?v=lx20261110p';
-import { fetchState } from './api.js?v=lx20261110p';
-import { renderFinal } from './finale.js?v=lx20261110p';
-import { isFinalReveal, renderFinalSuspense, stageRevealOffsetMs } from './final_gate.js?v=lx20261110p';
-import { stopStatePolling } from './polling.js?v=lx20261110p';
-import { renderPlayerIdentity, setRank } from './ui.js?v=lx20261110p';
+import { BOOTSTRAP, PHASES } from './config.js?v=lx20261111f';
+import { handleAnswerError, handleAnswerSaved, setAnswerHooks } from './answer.js?v=lx20261111f';
+import { fetchState } from './api.js?v=lx20261111f';
+import { renderFinal } from './finale.js?v=lx20261111f';
+import { isFinalReveal, renderFinalSuspense, stageRevealOffsetMs } from './final_gate.js?v=lx20261111f';
+import { stopStatePolling } from './polling.js?v=lx20261111f';
+import { renderPlayerIdentity, setRank } from './ui.js?v=lx20261111f';
 import {
     questionKeyOf,
     renderGetReady,
@@ -19,13 +19,13 @@ import {
     renderQuestion,
     renderTimeUp,
     updateSelectionUI,
-} from './render_round.js?v=lx20261110p';
-import { answeredButUnknown, renderLeaderboard, renderResult } from './render_reveal.js?v=lx20261110p';
-import { renderIdle, renderLateJoin, renderRemoved } from './render_status.js?v=lx20261110p';
-import { applySessionSettings } from './settings.js?v=lx20261110p';
-import { applyQuestionModifiers, syncBombAmbience } from './powerups.js?v=lx20261110p';
-import { closePlayerSocket, sendJson } from './sockets.js?v=lx20261110p';
-import { state } from './state.js?v=lx20261110p';
+} from './render_round.js?v=lx20261111f';
+import { answeredButUnknown, renderLeaderboard, renderResult } from './render_reveal.js?v=lx20261111f';
+import { renderIdle, renderLateJoin, renderRemoved } from './render_status.js?v=lx20261111f';
+import { applySessionSettings } from './settings.js?v=lx20261111f';
+import { applyQuestionModifiers, syncBombAmbience } from './powerups.js?v=lx20261111f';
+import { closePlayerSocket, sendJson } from './sockets.js?v=lx20261111f';
+import { state } from './state.js?v=lx20261111f';
 import {
     clearAckTimer,
     clearAllTimers,
@@ -34,7 +34,7 @@ import {
     queuePhaseTransition,
     scheduleBoundary,
     startTicker,
-} from './timers.js?v=lx20261110p';
+} from './timers.js?v=lx20261111f';
 import {
     getRevealKey,
     getRevealTimings,
@@ -43,8 +43,8 @@ import {
     shouldApplyTimelinePayload,
     ts,
     updateServerTimeOffset,
-} from './utils.js?v=lx20261110p';
-import { currentViewEl } from './views.js?v=lx20261110p';
+} from './utils.js?v=lx20261111f';
+import { currentViewEl } from './views.js?v=lx20261111f';
 
 let revealRefetchKey = "";
 let finalRefetchDone = false;

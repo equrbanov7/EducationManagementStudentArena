@@ -165,9 +165,13 @@
         var root = input.closest("[data-annm-audience]");
         if (!root) { return; }
         var needle = fold(input.value.trim());
+        // Kanonik qatlama (EMSSearch): «534t» → «534 T az», «aqsin» ↔ «Aqşin»; yoxdursa köhnə fold.
+        var match = window.EMSSearch ? window.EMSSearch.matcher(input.value) : null;
         root.querySelectorAll("[data-annm-unit]").forEach(function (row) {
             var checked = row.querySelector("input:checked");
-            row.hidden = Boolean(needle) && !checked && fold(row.getAttribute("data-label")).indexOf(needle) === -1;
+            var label = row.getAttribute("data-label") || "";
+            var ok = match ? match(label) : fold(label).indexOf(needle) !== -1;
+            row.hidden = Boolean(needle) && !checked && !ok;
         });
     });
 

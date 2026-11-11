@@ -5,12 +5,12 @@
  * qayıtmır, balı liderlər lövhəsində görünmür). Lobbi baloncuqlarındakı «×» də eyni dialoqdan keçir.
  * Siyahı: lobbi roster-i (WS `lobby_state`) + açılışda HTTP snapshot. Hadisələr document-də delegasiya.
  */
-import { state } from './state.js?v=lx20261110p';
-import { post, syncState } from './api.js?v=lx20261110p';
-import { showToast } from './toast.js?v=lx20261110p';
-import { presentationStyle } from './style_mode.js?v=lx20261110p';
-import { avatarImageMarkup, controlsEnabled, esc, fmt, formatNumber, tr } from './utils.js?v=lx20261110p';
-import { icon } from './icons.js?v=lx20261110p';
+import { state } from './state.js?v=lx20261111f';
+import { post, syncState } from './api.js?v=lx20261111f';
+import { showToast } from './toast.js?v=lx20261111f';
+import { presentationStyle } from './style_mode.js?v=lx20261111f';
+import { avatarImageMarkup, controlsEnabled, esc, fmt, formatNumber, tr } from './utils.js?v=lx20261111f';
+import { icon } from './icons.js?v=lx20261111f';
 
 const $ = (id) => document.getElementById(id);
 let bound = false;
@@ -61,7 +61,11 @@ export function renderPlayersDrawer() {
     const { list, search } = dom();
     if (!list || !isOpen()) return;
     const needle = String(search?.value || "").trim().toLocaleLowerCase();
-    const rows = playerRows().filter((player) => !needle || String(player.nickname || "").toLocaleLowerCase().includes(needle));
+    // Kanonik qatlama (EMSSearch, search_fold.js): registr və az↔ing hərfləri («Aysel» ↔ «AYSƏL»).
+    const fold = window.EMSSearch ? window.EMSSearch.matcher(needle, { compact: false }) : null;
+    const rows = playerRows().filter(
+        (player) => !needle || (fold ? fold(player.nickname || "") : String(player.nickname || "").toLocaleLowerCase().includes(needle))
+    );
     const signature = `${presentationStyle()}|${needle}|${state.sessionState}|${state.currentQuestion?.index || 0}|${[...removing].join(",")}|${rows
         .map((player) => `${player.id}:${player.nickname}:${player.avatar_key}:${player.active_from_index || 0}`)
         .join(",")}`;

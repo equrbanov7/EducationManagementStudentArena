@@ -1,14 +1,14 @@
-import { UI } from './dom.js?v=lx20261110p';
-import { state } from './state.js?v=lx20261110p';
-import { applySessionSettings } from './settings.js?v=lx20261110p';
-import { isFormal } from './style_mode.js?v=lx20261110p';
-import { renderLobbyPlayers } from './lobby.js?v=lx20261110p';
-import { applyQuestionState, updateAnsweredCounter, updateReceivedCounter } from './question.js?v=lx20261110p';
-import { applyRevealState } from './reveal.js?v=lx20261110p';
-import { renderPodium } from './podium.js?v=lx20261110p';
-import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20261110p';
-import { clearPendingStateSync, setPlaySocket, stopStatePolling, syncState } from './api.js?v=lx20261110p';
-import { handleQuestionModifiers } from './powerups.js?v=lx20261110p';
+import { UI } from './dom.js?v=lx20261111f';
+import { state } from './state.js?v=lx20261111f';
+import { applySessionSettings } from './settings.js?v=lx20261111f';
+import { isFormal } from './style_mode.js?v=lx20261111f';
+import { renderLobbyPlayers } from './lobby.js?v=lx20261111f';
+import { applyQuestionState, updateAnsweredCounter, updateReceivedCounter } from './question.js?v=lx20261111f';
+import { applyRevealState } from './reveal.js?v=lx20261111f';
+import { renderPodium } from './podium.js?v=lx20261111f';
+import { clearAutoTimers, clearPhaseLoop, setSessionState } from './presentation.js?v=lx20261111f';
+import { clearPendingStateSync, setPlaySocket, stopStatePolling, syncState } from './api.js?v=lx20261111f';
+import { handleQuestionModifiers } from './powerups.js?v=lx20261111f';
 import {
     esc,
     fmt,
@@ -20,7 +20,7 @@ import {
     tr,
     updateServerTimeOffset,
     wsUrl,
-} from './utils.js?v=lx20261110p';
+} from './utils.js?v=lx20261111f';
 
 /* WS: lobbi + oyun kanalları. Bağlantı qopanda eksponensial gözləmə ilə yenidən
  * qoşulur (1 → 2 → 4 … ≤ 15 s + titrəmə); açılanda HTTP snapshot ilə vəziyyət
