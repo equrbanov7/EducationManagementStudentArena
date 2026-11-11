@@ -536,6 +536,7 @@ on:
           - hide_college_journals_20261110
           - fill_empty_cells_20261110
           - merge_duplicate_subjects_20261111
+          - move_groups_to_program_specialty
           - repair_applications_20261107b
           - fix_ydk236_subject_20261106
           - sync_student_group_journals
@@ -605,7 +606,7 @@ on:
         required: false
         default: ""
       batch:
-        description: "recover_workload_syllabi (Bilal legacy8430; workload-syllabi-…) · recover_mr46_syllabus: plaintext SHA256 və ya mr46-… undo paketi · repair_repeated_sections_workload / repair_owner_activity_batch / repair_balanced_workload_pairs / repair_sbio235_workload: baselineSHA, undoID(dry) və ya undoID:baselineSHA(apply) · reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…) / apply_journal_shares (shares-…) / relocate_superseded_marks (supmarks-…) / merge_duplicate_student (stmerge-…) / merge_level_journals (lvlmerge-…) / merge_duplicate_teacher (tmerge-…): geri qaytarılacaq paket id-si (undo) · merge_duplicate_teacher: MƏNBƏ:HƏDƏF hesab id-ləri (məs. 7794:8170) · recover_mr27_journal: fayl üçün məcburi plaintext sha256 və ya undo üçün mr27-YYYYMMDD-HHMMSS-xxxx · legacy_delta_apply / share_legacy_syllabi: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd) · undo_subject_merge: birləşmənin audit id-si (UUID) · merge_subjects: mənbə kod(lar)ı və ya PLAN «QKU-K:SAYT-N;…» · recode_site_subjects: boş / SAYT-N,… (istisna) / sitecode-… (undo) · fix_offering_subject: jurnalın UUID-i · clear_stale_off_schedule_flags: yalnız bu jurnal (UUID, boş = hamısı)"
+        description: "recover_workload_syllabi (Bilal legacy8430; workload-syllabi-…) · recover_mr46_syllabus: plaintext SHA256 və ya mr46-… undo paketi · repair_repeated_sections_workload / repair_owner_activity_batch / repair_balanced_workload_pairs / repair_sbio235_workload: baselineSHA, undoID(dry) və ya undoID:baselineSHA(apply) · reconcile_teacher_roster / audit_staff_placement (placement-…) / freeze_duplicate_accounts (dupacct-…) / fix_workload_overcount (overcount-…) / fill_vacant_from_journals (vacantfill-…) / apply_journal_shares (shares-…) / relocate_superseded_marks (supmarks-…) / merge_duplicate_student (stmerge-…) / merge_level_journals (lvlmerge-…) / merge_duplicate_teacher (tmerge-…): geri qaytarılacaq paket id-si (undo) · merge_duplicate_teacher: MƏNBƏ:HƏDƏF hesab id-ləri (məs. 7794:8170) · recover_mr27_journal: fayl üçün məcburi plaintext sha256 və ya undo üçün mr27-YYYYMMDD-HHMMSS-xxxx · legacy_delta_apply / share_legacy_syllabi: paketin gözlənilən sha256-sı · purge_exam_attempt: cəhdin id-si (boş = ən son cəhd) · undo_subject_merge: birləşmənin audit id-si (UUID) · merge_subjects: mənbə kod(lar)ı və ya PLAN «QKU-K:SAYT-N;…» · recode_site_subjects: boş / SAYT-N,… (istisna) / sitecode-… (undo) · fix_offering_subject: jurnalın UUID-i · clear_stale_off_schedule_flags: yalnız bu jurnal (UUID, boş = hamısı) · move_groups_to_program_specialty: groupmove-… (undo)"
         required: false
         default: ""
       create_missing:
@@ -676,7 +677,7 @@ on:
         type: boolean
         default: false
       teacher:
-        description: "backfill_teacher_lessons / infer_timetable_from_lessons (boş = hamı): müəllimin istifadəçi adı (ad.soyad) · purge_trial_exam / sync_midterm_scores: imtahanın slug-ı · fix_exam_journal_gaps: imtahanın id-si / slug-ı · purge_exam_attempt: tələbənin istifadəçi adı · share_legacy_syllabi: yalnız bu müəllim (boş = hamı)"
+        description: "backfill_teacher_lessons / infer_timetable_from_lessons (boş = hamı): müəllimin istifadəçi adı (ad.soyad) · purge_trial_exam / sync_midterm_scores: imtahanın slug-ı · fix_exam_journal_gaps: imtahanın id-si / slug-ı · purge_exam_attempt: tələbənin istifadəçi adı · share_legacy_syllabi: yalnız bu müəllim (boş = hamı) · move_groups_to_program_specialty: yalnız bu qrup (dəqiq ad, boş = hamısı)"
         required: false
         default: ""
       date_from:
@@ -1730,6 +1731,24 @@ jobs:
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor")
               ;;
+            move_groups_to_program_specialty)
+              # Sahib 2026-11-12: qrup tələbələrinin proqram ixtisasının (və məktəbinin) altına — müraciət düzgün
+              # dekanlığa getsin. teacher = yalnız bu qrup (dəqiq ad, boş = hamısı); batch=groupmove-… = həmin
+              # paketi geri qaytar (apply=false — önizləmə). apply + confirm=APPLY yazır.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [ -n "$TEACHER" ]; then
+                { [ "${#TEACHER}" -le 80 ] && match "$TEACHER" '^[[:alnum:]ƏəIıİiĞğŞşÇçÖöÜü ()/.-]+$'; } \
+                  || { echo "teacher: qrupun adı (hərf, rəqəm, boşluq, ()/.-; ≤80)" >&2; exit 2; }
+                args+=(--group "$TEACHER")
+              fi
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^groupmove-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || { echo "batch formatı: groupmove-…" >&2; exit 2; }
+                test -z "$TEACHER" || { echo "undo bütün paketi qaytarır — teacher boş olmalıdır" >&2; exit 2; }
+                args+=(--undo --batch "$BATCH")
+              fi
+              ;;
             merge_duplicate_subjects_20261111)
               # Sahib 2026-11-11: dublikat fənlər — jurnal (heç bir xana/bal itmir) + kataloq kartı + QKU-N kod standartı
               # + imtahan verib jurnalda olmayan tələbələr. batch boş = hamısının DRY-RUN-u; batch=journals|catalogue|codes|
@@ -2491,6 +2510,18 @@ jobs:
             # Loga YALNIZ «master_groups: / master_students: açar=say …» sətirləri və rədd kodu.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^(master_groups|master_students): [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "move_groups_to_program_specialty" ]; then
+            # Loga YALNIZ «group_move: açar=dəyər …» sətirləri (ascii-qatlanmış qrup / ixtisas adları, saylar, paket
+            # id) və rədd kodu. Şəxs adı çap olunmur.
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^group_move: (skipped )?[a-z_]+=[0-9a-z_-]*( [a-z_]+=[0-9a-z_-]*)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
