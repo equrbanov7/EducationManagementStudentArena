@@ -1,14 +1,32 @@
-"""Parallel level lessons are allowed only for proven disjoint student shares."""
+"""Parallel level lessons are allowed only for proven disjoint student shares.
+
+Bir jurnal daxilində eyni gün + eyni başlanğıc saatı İKİNCİ dərs ancaq tələbə dəstləri SÜBUTLA ayrı olanda
+yazılır: (1) bölünmüş jurnalın ayrı payları (``JournalShare``); (2) sahib 2026-11-11 (patok — «eyni saatda ikinci
+qrupun dərsi yazılmır»): FƏRQLİ alt qrupların dərsi — Lab-1 / Lab-2 (``lab_group``) və ya seminar alt qrupları
+(``seminar_group``); müəllim eyni ola da bilər (alt qruplar birgə oturur). Qrupsuz (bütün qrup) dərs hər alt
+qrupla toqquşur. Patokun BAŞQA qrupunun dərsi öz jurnalındadır (başqa açılış) — bura heç vaxt düşmür.
+"""
 
 from .journal_shares import visible_lessons
-from .models import JournalShare, LessonMark
+from .models import JournalShare, LessonKind, LessonMark
 
 
-def has_slot_collision(*, offering, date, start_time, instructor_id, kind, exclude=None):
+def _other_subgroup(lesson, kind, lab_group, seminar_group) -> bool:
+    """``lesson`` başqa alt qrupun dərsidir (tələbələri kəsişmir)."""
+    if kind == LessonKind.LAB and lesson.kind == LessonKind.LAB:
+        return bool(lab_group and lesson.lab_group and lab_group != lesson.lab_group)
+    if kind == LessonKind.SEMINAR and lesson.kind == LessonKind.SEMINAR:
+        return bool(seminar_group and lesson.seminar_group and seminar_group != lesson.seminar_group)
+    return False
+
+
+def has_slot_collision(
+    *, offering, date, start_time, instructor_id, kind, exclude=None, lab_group=None, seminar_group=None
+):
     candidates = offering.lessons.filter(date=date, start_time=start_time)
     if exclude is not None:
         candidates = candidates.exclude(pk=exclude)
-    lessons = list(candidates)
+    lessons = [lesson for lesson in candidates if not _other_subgroup(lesson, kind, lab_group, seminar_group)]
     if not lessons:
         return False
     if not instructor_id or any(

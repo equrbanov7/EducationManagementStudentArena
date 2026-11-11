@@ -219,8 +219,10 @@ def create_lesson(
         start_time=start_time,
         instructor_id=getattr(instructor, "pk", None) or offering.instructor_id,
         kind=kind,
+        lab_group=lab_group,
+        seminar_group=seminar_group,
     ):
-        raise LessonRuleError("Eyni gündə eyni dərs saatına artıq dərs var — üst-üstə düşür.")
+        raise LessonRuleError(_slot_taken_message(parsed, start_time))
     from .language_cohort_journal import validate_lesson
 
     validate_lesson(offering=offering, kind=kind, hours=new_hours)
@@ -357,7 +359,7 @@ def update_lesson(
     if lesson.seminar_group is not None and lesson.kind != LessonKind.SEMINAR and "kind" in fields:
         lesson.seminar_group = None  # növ seminardan dəyişibsə alt qrup bağı düşür
         fields.append("seminar_group")
-    if lesson.start_time and ({"date", "start_time", "instructor", "kind"} & set(fields)):
+    if lesson.start_time and ({"date", "start_time", "instructor", "kind", "lab_group", "seminar_group"} & set(fields)):
         from .lesson_share_scope import has_slot_collision
 
         CourseOffering.objects.select_for_update().get(pk=offering.pk)
@@ -368,8 +370,10 @@ def update_lesson(
             instructor_id=lesson.instructor_id,
             kind=lesson.kind,
             exclude=lesson.pk,
+            lab_group=lesson.lab_group,
+            seminar_group=lesson.seminar_group,
         ):
-            raise LessonRuleError("Eyni gündə eyni dərs saatına artıq dərs var — üst-üstə düşür.")
+            raise LessonRuleError(_slot_taken_message(lesson.date, lesson.start_time))
     if fields:
         from .language_cohort_journal import validate_lesson
 
@@ -393,6 +397,18 @@ def update_lesson(
 
             reevaluate_lesson(lesson, by_user=by_user)
     return True
+
+
+def _slot_taken_message(day, start_time) -> str:
+    """Eyni jurnalda eyni gün + saat — nə edilməli olduğu açıq (sahib 2026-11-11, patok)."""
+    return pgettext(
+        _CTX,
+        "Bu jurnalda %(date)s, saat %(time)s üçün dərs artıq yazılıb. Patok dərsində hər qrupun dərsi öz "
+        "jurnalına yazılır; alt qrupların (Lab / seminar) dərsi üçün alt qrupu seçin.",
+    ) % {
+        "date": day.strftime("%d.%m.%Y") if hasattr(day, "strftime") else str(day),
+        "time": start_time.strftime("%H:%M") if hasattr(start_time, "strftime") else str(start_time)[:5],
+    }
 
 
 def _validate_lab_group(offering, *, kind, lab_group, lesson=None) -> None:
