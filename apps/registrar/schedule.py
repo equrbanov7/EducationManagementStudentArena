@@ -180,17 +180,13 @@ def find_conflict(
 ):
     """Return the first clashing slot (same group / instructor / room), or None.
 
-    PARKLANMIŞ slotlar (``is_parked``) cədvəldə DEYİL — onlar məcburi
-    dəyişiklikdə yerindən çıxarılıb yenidən yerləşdirilməyi gözləyir, ona görə
-    heç kimin vaxtını tutmurlar. Yumşaq silinmişlər onsuz da default menecerdən
-    kənardadır (``SoftDeleteModel``).
+    PARKLANMIŞ slotlar (``is_parked``) cədvəldə DEYİL — heç kimin vaxtını tutmurlar; yumşaq silinmişlər
+    onsuz da default menecerdən kənardadır (``SoftDeleteModel``).
 
     2026-09-25: (1) yalnız EYNİ semestrin slotları — keçən semestrin silinməmiş cədvəli yeni
     semestrin eyni saatını bloklayırdı (açılışın dövrü yoxdursa köhnə davranış);
-    (2) birləşmiş mühazirə (axın): eyni müəllim, eyni fənn, hər ikisi mühazirə, eyni otaq (və ya
-    otaq boş) — müəllim eyni anda iki yerdə deyil, qruplar birlikdə oturur; bu, toqquşma deyil
-    (generatorun dərc etdiyi axınlar redaktorda «müəllim toqquşması» görünürdü). Qrup toqquşması
-    həmişə toqquşmadır.
+    (2) birləşmiş mühazirə (axın, :func:`is_joint_lecture`) toqquşma deyil — qruplar birlikdə oturur;
+    qrup toqquşması həmişə toqquşmadır.
     (3) müəllim = EFFEKTİV müəllim (hər iki tərəfdə): mövcud slotda :func:`effective_instructor_id`,
     yoxlanan slotda ``instructor_id`` (slotun öz müəllimi), verilməyibsə açılışın müəllimi."""
     teacher_id = instructor_id or offering.instructor_id
@@ -198,7 +194,8 @@ def find_conflict(
     candidates = ScheduleSlot.objects.filter(organization=organization, weekday=weekday, is_parked=False)
     if offering.period_id:
         candidates = candidates.filter(offering__period_id=offering.period_id)
-    candidates = candidates.exclude(pk=exclude_id).select_related("offering")
+    candidates = candidates.exclude(pk=exclude_id).select_related("offering", "offering__subject")
+    subject_name = (lambda: offering.subject.name) if offering.subject_id else ""  # noqa: E731 — yalnız lazım olanda
     for slot in candidates:
         if not _time_ranges_overlap(start_time, end_time, slot.start_time, slot.end_time):
             continue
@@ -209,7 +206,12 @@ def find_conflict(
         slot_room = (slot.room or "").strip().lower()
         same_room = room_norm and room_norm == slot_room
         if not same_group and is_joint_lecture(
-            kind=kind, subject_id=offering.subject_id, teacher_id=teacher_id, room=room_norm, slot=slot
+            kind=kind,
+            subject_id=offering.subject_id,
+            teacher_id=teacher_id,
+            room=room_norm,
+            slot=slot,
+            subject_name=subject_name,
         ):
             continue
         if same_group or same_instructor or same_room:
@@ -222,23 +224,26 @@ def same_id(left, right) -> bool:
     return bool(left) and bool(right) and str(left) == str(right)
 
 
-def is_joint_lecture(*, kind, subject_id, teacher_id, room, slot) -> bool:
-    """Axın: eyni (effektiv) müəllim + eyni fənn + EYNİ dərs növü + eyni (və ya boş) otaq.
+def is_joint_lecture(*, kind, subject_id, teacher_id, room, slot, subject_name="") -> bool:
+    """Axın (patok): eyni (effektiv) müəllim + eyni fənn + EYNİ növ (2026-10-25: məşğələ də) + eyni/boş otaq.
 
-    2026-10-25 (sahib: «müəllimin dərsi bir neçə qrupa birgə (patok)»): əvvəl yalnız mühazirə idi; jurnallar
-    göstərdi ki, birgə MƏŞĞƏLƏ də realdır (xarici dil səviyyə qrupları, kiçik qrupların birləşmiş seminarı —
-    payız 2026: 871 qrup-sətri, hər biri 6 həftə ərzində eyni tarixlərdə birlikdə). Növlər fərqlidirsə
-    (mühazirə + seminar) axın deyil — müəllim eyni anda iki fərqli dərs keçə bilməz.
+    2026-11-11 (sahib: patokun 2-ci qrupu eyni saata yazılmırdı): «eyni fənn» = eyni id VƏ YA adı eyni dublikat
+    (``subject_name`` mətn/callable). TƏK qayda (``find_conflict``, ``detect``); eyni qrup HƏMİŞƏ toqquşmadır."""
+    from .subject_duplicates import same_subject_name
 
-    TƏK qayda — ``find_conflict`` və redaktorun ``schedule_conflicts.detect``-i bunu işlədir.
-    Qrup toqquşması bundan ƏVVƏL ayrıca yoxlanır: eyni qrup HƏMİŞƏ toqquşmadır."""
     room_norm = (room or "").strip().lower()
     slot_room = (slot.room or "").strip().lower()
     return bool(
         kind
         and kind == slot.kind
         and same_id(teacher_id, effective_instructor_id(slot))
-        and same_id(subject_id, slot.offering.subject_id)
+        and (
+            same_id(subject_id, slot.offering.subject_id)
+            or bool(subject_name)
+            and same_subject_name(
+                subject_name() if callable(subject_name) else subject_name, slot.offering.subject.name
+            )
+        )
         and (not room_norm or not slot_room or room_norm == slot_room)
     )
 

@@ -236,6 +236,9 @@ class _Plan:
         self.teacher_id = teacher_id or None
         self.period_id = period_id
         self.subject_id = subject_id or None
+        # Patok (dublikat fənn adı): bir sorğu, slot sayından asılı olmayaraq (sorğu büdcəsi sabit qalsın).
+        self.subject_name = schedule_conflicts.subject_name_lookup(self.subject_id)
+        self.subject_name()
         self.kind = kind if kind in dict(SlotKind.choices) else SlotKind.LECTURE
         self.week_type = week_type if week_type in dict(WeekType.choices) else WeekType.ALL
         self.offering_id = offering_id
@@ -277,6 +280,7 @@ class _Plan:
             kind=self.kind,
             offering_id=self.offering_id,
             visible=visible,
+            subject_name=self.subject_name,
         )
 
     def partners(self, weekday, start, end):
@@ -287,7 +291,12 @@ class _Plan:
             if not self.is_group(slot)
             and _overlaps(slot, weekday, start, end, self.week_type)
             and is_joint_lecture(
-                kind=self.kind, subject_id=self.subject_id, teacher_id=self.teacher_id, room="", slot=slot
+                kind=self.kind,
+                subject_id=self.subject_id,
+                teacher_id=self.teacher_id,
+                room="",
+                slot=slot,
+                subject_name=self.subject_name,
             )
         ]
 

@@ -299,8 +299,11 @@ def detect(
     kind=None,
     offering_id=None,
     visible=None,
+    subject_name=None,
 ) -> list[dict]:
     """Bu yerləşdirmənin BÜTÜN toqquşmaları — növ + açıq mətn ilə.
+
+    ``subject_name`` — :func:`subject_name_lookup` nəticəsi (çoxlu xana üçün TƏK sorğu); verilməyibsə yaradılır.
 
     ``candidates`` verilsə baza sorğusu təkrarlanmır (tövsiyə mühərriki eyni
     slot dəstini onlarla hüceyrə üçün yenidən istifadə edir).
@@ -314,15 +317,11 @@ def detect(
     room_norm = (room or "").strip().lower()
     rows = candidates if candidates is not None else live_slots(organization, weekday=weekday, period_id=period_id)
 
-    memo: dict = {}
+    if subject_name is None:
+        subject_name = subject_name_lookup(subject_id)
 
     def family() -> str:
-        if "family" not in memo:
-            from apps.registrar.models import Subject
-
-            name = Subject.objects.filter(pk=subject_id).values_list("name", flat=True).first() if subject_id else ""
-            memo["family"] = subject_family(name)
-        return memo["family"]
+        return subject_family(subject_name())
 
     found: dict = {}
     for slot in rows:
@@ -338,7 +337,12 @@ def detect(
             offering_id=offering_id, kind=kind, teacher_id=instructor_id, slot=slot, family=family
         )
         if not same_group and is_joint_lecture(
-            kind=kind, subject_id=subject_id, teacher_id=instructor_id, room=room_norm, slot=slot
+            kind=kind,
+            subject_id=subject_id,
+            teacher_id=instructor_id,
+            room=room_norm,
+            slot=slot,
+            subject_name=subject_name,
         ):
             continue
         if same_id(instructor_id, effective_instructor_id(slot)):
@@ -347,11 +351,61 @@ def detect(
             found.setdefault(KIND_GROUP, slot)
         if room_norm and room_norm == (slot.room or "").strip().lower():
             found.setdefault(KIND_ROOM, slot)
-    return [
+    result = [
         describe(found[key], key, in_scope=visible is None or bool(visible(found[key])))
         for key in KIND_ORDER
         if key in found
     ]
+    for row in result:
+        if row["kind"] == KIND_TEACHER:
+            hint = patok_hint(
+                found[KIND_TEACHER],
+                kind=kind,
+                subject_id=subject_id,
+                name=subject_name,
+                room=room_norm if row["in_scope"] else "",
+            )
+            row["message"] = f"{row['message']} {hint}".strip()
+    return result
+
+
+def subject_name_lookup(subject_id):
+    """Yerləşdirilən fənnin adı — callable, ilk çağırışda bir sorğu, sonra yaddaşdan (patok/ailə qaydası)."""
+    memo: dict = {}
+
+    def lookup() -> str:
+        if "name" not in memo:
+            from apps.registrar.models import Subject
+
+            name = Subject.objects.filter(pk=subject_id).values_list("name", flat=True).first() if subject_id else ""
+            memo["name"] = name or ""
+        return memo["name"]
+
+    return lookup
+
+
+def patok_hint(slot, *, kind, subject_id, name, room) -> str:
+    """Müəllim toqquşması patoka (axına) NİYƏ çevrilmədi — istifadəçiyə açıq səbəb (sahib 2026-11-11).
+
+    Patok = eyni müəllim + eyni fənn (və ya adı eyni dublikat) + eyni növ + eyni/boş otaq, qruplar fərqli
+    (``schedule.is_joint_lecture``). Fənn fərqlidirsə izah yoxdur — bu, həqiqi toqquşmadır. ``room`` boşdursa
+    otaq izahı verilmir (əhatədən kənar slotun otağı açılmır)."""
+    from apps.registrar.subject_duplicates import same_subject_name
+
+    if not kind or not (
+        same_id(subject_id, slot.offering.subject_id) or same_subject_name(name(), slot.offering.subject.name)
+    ):
+        return ""
+    if kind != slot.kind:
+        return pgettext(_CTX, "Patok (birgə dərs) yalnız eyni dərs növü üçündür: orada %(kind)s keçirilir.") % {
+            "kind": slot.get_kind_display()
+        }
+    if room and (slot.room or "").strip() and room != (slot.room or "").strip().lower():
+        return pgettext(
+            _CTX,
+            "Bu, eyni fənnin patokudursa auditoriya eyni olmalıdır (%(room)s) və ya auditoriyanı boş saxlayın.",
+        ) % {"room": slot.room.strip()}
+    return ""
 
 
 # ── Tövsiyə: hara boşdur ─────────────────────────────────────────────────────
@@ -413,6 +467,7 @@ def suggest(
     )
     periods = [row for row in schedule_grid.lesson_periods(organization) if not shift or row["shift"] == shift]
 
+    name = subject_name_lookup(subject_id)
     out = []
     for weekday, day_label in weekdays:
         load = _day_load(rows, weekday, group_id, instructor_id)
@@ -441,6 +496,7 @@ def suggest(
                 subject_id=subject_id,
                 kind=kind,
                 offering_id=offering_id,
+                subject_name=name,
             )
             if clashes:
                 continue
