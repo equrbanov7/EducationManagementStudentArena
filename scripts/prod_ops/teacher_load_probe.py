@@ -6,6 +6,7 @@ açılışları — jurnal sahibi (instructor) və aktiv JournalShare-lər (mü�
 """
 
 import os
+import re
 import unicodedata
 
 from django.apps import apps
@@ -21,6 +22,10 @@ _MAP = str.maketrans({"ə": "e", "ı": "i", "ş": "s", "ç": "c", "ğ": "g", "ö
 def _fold(text):
     text = (text or "").lower().translate(_MAP)
     return "".join(c for c in unicodedata.normalize("NFKD", text) if not unicodedata.combining(c))
+
+
+def _re_escape(ch):
+    return "[iİı]" if _fold(ch) == "i" else re.escape(ch)
 
 
 def _name(user):
@@ -77,6 +82,19 @@ def main():
             owned = Offering.objects.filter(instructor=teacher, period__is_current=True, is_active=True).count()
             shared = Share.objects.filter(teacher=teacher, is_active=True, offering__period__is_current=True).count()
             print(f"  cəmi: sahib olduğu jurnal={owned} pay={shared}")
+    Subject = apps.get_model("registrar", "Subject")
+    for code in [
+        c.strip() for c in (os.environ.get("PROBE_SUBJECTS") or "").replace(",", "\n").splitlines() if c.strip()
+    ]:
+        for subj in Subject.objects.filter(code__iexact=code):
+            n = Offering.objects.filter(subject=subj, period__is_current=True, is_active=True).count()
+            print(f"=== fənn {subj.code} «{subj.name}» ects={getattr(subj, 'ects', '')} cari_jurnal={n}")
+    for name in [ln.strip() for ln in (os.environ.get("PROBE_GROUPS") or "").splitlines() if ln.strip()]:
+        pattern = r"^\s*" + r"\s*".join(map(_re_escape, name.replace(" ", ""))) + r"\s*$"
+        offs = Offering.objects.filter(group__name__iregex=pattern, period__is_current=True, is_active=True)
+        print(f"=== qrup {name!r}: cari jurnal {offs.count()}")
+        for o in offs.select_related("subject", "group", "instructor"):
+            print(f"    {o.pk} {o.group.name} | {o.subject.code} {o.subject.name} | sahib={_name(o.instructor)}")
 
 
 main()
