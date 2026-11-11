@@ -5,7 +5,6 @@ from __future__ import annotations
 from django.apps import apps as django_apps
 from django.db import transaction
 from django.db.models import Sum
-from django.utils.translation import pgettext
 
 from core.audit import log_action
 from core.constants import AuditAction, OrgUnitType
@@ -324,14 +323,12 @@ def _ensure_totals_cover_assigned(row) -> None:
         used = assigned.get(str(activity), 0)
         total = int(getattr(row, field, 0) or 0)
         if used > total:
+            # Sahib 2026-11-11: mesaj HANSI bölgünün neçəyə enəcəyini adı ilə deyir (``assigned_floor``).
+            from .assigned_floor import below_assigned_message
+
             raise WorkloadDenied(
                 TOTAL_BELOW_ASSIGNED,
-                pgettext(
-                    "workload",
-                    "Bu fəaliyyət üzrə artıq %(assigned)s saat bölünüb — cəmi %(total)s saata endirmək olmaz. "
-                    "Əvvəlcə bölgünü azaldın.",
-                )
-                % {"assigned": used, "total": total},
+                below_assigned_message(row.pk, str(activity), assigned=used, total=total),
             )
 
 

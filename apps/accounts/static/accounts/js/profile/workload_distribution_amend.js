@@ -6,8 +6,9 @@
  * şablonda VAR idi, amma onu açan heç nə yox idi. İndi hər yazı əvvəl adi sorğu ilə gedir; server
  * `workload.amendment_required` (409) qaytarsa — sənəd təsdiqlənib — açıq modal bağlanır, düzəliş
  * dialoqu (səbəb + qeyd) açılır və EYNİ sorğu `amend_reason` / `amend_note` ilə təkrarlanır.
- * `workload.total_below_assigned` (409) — təsdiq soruşulur və sorğu `shrink_assignments=1` ilə
- * təkrarlanır (bölgü yeni cəmə sığdırılır). Bitəndə «Bölgünü təsdiqlə» sənədi yenidən bağlayır.
+ * `workload.total_below_assigned` (409) — serverin dəqiq mesajı (hansı bölgü neçəyə enəcək) açıq dialoqda
+ * göstərilir, eyni düymənin təkrarı sorğunu `shrink_assignments=1` ilə göndərir (2026-11-11; dialoqsuz
+ * çağırışda — EMSConfirm). Bitəndə «Bölgünü təsdiqlə» sənədi yenidən bağlayır.
  *
  * Əsas vəziyyət `window.EMSWorkloadDist`-dən oxunur (əsas modul); burada fetch yalnız yazı üçündür.
  * AJAX-safe: `EMSDelegate.on` (bir dəfə) + DOM hər çağırışda yenidən axtarılır.
@@ -17,6 +18,7 @@
 
     var gettext = window.gettext || function (value) { return value; };
     var PENDING = null;
+    var ARMED = {}; // `url|row_id` → sətir modalında azaltma mesajı göstərilib; növbəti saxlama razılıqdır
 
     function dist() {
         return window.EMSWorkloadDist || null;
@@ -72,10 +74,17 @@
      * Yazı: `{url, data, modal?, error?, done}`. Səhv mesajı — düzəliş dialoqu açıqdırsa orada,
      * yoxsa `error` seçicisində, o da yoxdursa `alert`.
      */
+    function armKey(opts) {
+        return opts.data && opts.data.row_id ? String(opts.url) + "|" + opts.data.row_id : "";
+    }
+
     function write(opts) {
         var D = dist();
+        var key = armKey(opts);
+        if (key && ARMED[key] && !opts.data.shrink_assignments) opts.data.shrink_assignments = "1";
         return window.EMSCore.fetchJSON(opts.url, { method: "POST", data: opts.data })
             .then(function (result) {
+                if (key) delete ARMED[key];
                 if (PENDING === opts) {
                     PENDING = null;
                     hideAmend();
@@ -87,6 +96,21 @@
                 if (payload.error === "workload.amendment_required" && PENDING !== opts) {
                     PENDING = opts;
                     showAmend(opts.modal);
+                    return;
+                }
+                // 2026-11-11 («Tədqiqat analitikası»): bölünmüş saatdan az cəm. Əvvəl açıq düzəliş dialoqunun
+                // ÜSTÜNDƏ ikinci (EMSConfirm) modal açılırdı və mesaj «əvvəlcə bölgünü azaldın» deyirdi. İndi
+                // serverin dəqiq mesajı (hansı bölgü neçəyə enəcək) açıq dialoqda göstərilir; eyni düymənin
+                // təkrarı razılıqdır — sorğu `shrink_assignments=1` ilə gedir.
+                var inline = PENDING === opts ? q("[data-wl-amend-error]") : opts.error ? q(opts.error) : null;
+                if (payload.error === "workload.total_below_assigned" && !opts.data.shrink_assignments && inline) {
+                    if (PENDING === opts) {
+                        opts.data.shrink_assignments = "1";
+                    } else if (key) {
+                        ARMED[key] = true;
+                    }
+                    D.showError(inline, (payload.message || "") + " " +
+                        gettext("Razısınızsa, eyni düyməni yenidən basın — bölgü yuxarıdakı kimi azaldılacaq."));
                     return;
                 }
                 if (payload.error === "workload.total_below_assigned" && !opts.data.shrink_assignments) {
@@ -176,6 +200,11 @@
 
         EMSDelegate.on("hidden.bs.modal", "[data-wl-amend-modal]", function () {
             PENDING = null; // dialoq səbəbsiz bağlandı — gözləyən sorğu atılır
+        });
+
+        // Sətir modalı bağlandı — azaltma razılığı yalnız həmin redaktə üçün idi.
+        EMSDelegate.on("hidden.bs.modal", "[data-wl-row-modal]", function () {
+            ARMED = {};
         });
 
         EMSDelegate.on("click", "[data-wl-activity-remove]", function (event, btn) {

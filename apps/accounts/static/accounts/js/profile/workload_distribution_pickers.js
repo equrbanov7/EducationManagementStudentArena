@@ -168,6 +168,15 @@
             .map(function (stream, n) {
                 var current = S.lecturers[stream.index] || "";
                 var extra = ((S.originals[stream.index] || {}).entries || []).map(function (e) { return { id: e.teacher_id, name: e.teacher_name }; });
+                // 2026-11-11: bir axında mühazirə saatları fərqlidirsə (45 / 30) server birləşdirməni rədd edir —
+                // səbəb əvvəlcədən burada görünür.
+                var plans = {};
+                stream.units.forEach(function (u) { plans[u.plan] = true; });
+                var mismatch = Object.keys(plans).length > 1
+                    ? '<p class="wl-sp__warn" role="note">' + esc(fmt(gettext("Mühazirə saatları fərqlidir: %(list)s — bir axında eyni olmalıdır. Əvvəlcə sətirləri «Redaktə» ilə düzəldin."), {
+                        list: stream.units.map(function (u) { return u.label + " " + hours(u.plan); }).join(", "),
+                    })) + "</p>"
+                    : "";
                 // Nəticədə axınlar ardıcıl nömrələnir (seçicidəki «Axın N» boşluq buraxa bilər — birləşəndə).
                 return (
                     '<div class="wl-sp" data-stream="' + stream.index + '">' +
@@ -177,6 +186,7 @@
                     '<label class="wl-sp__teacher"><span>' + esc(gettext("Mühazirəçi")) + "</span>" +
                     select('data-wl-stream-teacher data-stream="' + stream.index + '"', teacherOptions(current, extra), true) +
                     "</label>" +
+                    mismatch +
                     "</div>"
                 );
             })
@@ -349,7 +359,7 @@
         }
         var plan = kindOps();
         if (plan.over.length) {
-            showError("[data-wl-kind-error]", fmt(gettext("Sətrin cəmindən çox saat bölünüb: %(groups)s"), { groups: plan.over.join(", ") }));
+            showError("[data-wl-kind-error]", fmt(gettext("Sətrin cəmindən çox saat bölünüb: %(groups)s. Saatı azaldın və ya əvvəlcə sətrin cəmini «Tapşırıq sətirləri» → «Redaktə» ilə artırın."), { groups: plan.over.join(", ") }));
             return;
         }
         if (!plan.ops.length) {
