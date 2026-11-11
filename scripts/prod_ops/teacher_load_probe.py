@@ -89,6 +89,9 @@ def main():
         for subj in Subject.objects.filter(code__iexact=code):
             n = Offering.objects.filter(subject=subj, period__is_current=True, is_active=True).count()
             print(f"=== fənn {subj.code} «{subj.name}» ects={getattr(subj, 'ects', '')} cari_jurnal={n}")
+            Exam = apps.get_model("exams", "Exam")
+            for ex in Exam.objects.filter(subject=subj).order_by("-pk")[:10]:
+                print(f"    imtahan {ex.pk} slug={ex.slug} kateqoriya={getattr(ex, 'category', '')}")
     for name in [ln.strip() for ln in (os.environ.get("PROBE_GROUPS") or "").splitlines() if ln.strip()]:
         pattern = r"^\s*" + r"\s*".join(map(_re_escape, name.replace(" ", ""))) + r"\s*$"
         offs = Offering.objects.filter(group__name__iregex=pattern, period__is_current=True, is_active=True)
