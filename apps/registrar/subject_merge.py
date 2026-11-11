@@ -43,6 +43,7 @@ CHANGES_VERSION = 1
 REASON_MIN_LENGTH = ARCHIVE_REASON_MIN_LENGTH
 CURRICULUM_KEY = "registrar.CurriculumSubject.subject"
 OFFERING_KEY = "registrar.CourseOffering.subject"
+SYLLABUS_KEY = "syllabus.Syllabus.subject"
 
 
 class MergeError(Exception):
@@ -188,6 +189,13 @@ def _subject_card(subject) -> dict:
     }
 
 
+def _syllabi_of(offering_ids) -> set:
+    if not offering_ids:
+        return set()
+    rows = django_apps.get_model("syllabus", "Syllabus")._base_manager.filter(offering_id__in=offering_ids)
+    return {str(pk) for pk in rows.values_list("pk", flat=True)}
+
+
 def collect(organization, target, sources, *, drop_attendance_only=False) -> dict:
     """Birləşmənin tam planı — həm önizləmə, həm tətbiq, həm də iz bundan qurulur."""
     source_ids = [source.pk for source in sources]
@@ -201,6 +209,9 @@ def collect(organization, target, sources, *, drop_attendance_only=False) -> dic
         if item["code"] == conflicts_service.OFFERING_TWIN
         for pk in item["drop"]
     }
+    # K4: birləşdirilmiş passiv dublikat jurnal (və onun sillabusu) arxivlənən mənbə kartda QALIR — köçürülmür.
+    stay_offerings = conflicts_service.resolved_ids(resolvable, conflicts_service.OFFERING_RETIRED)
+    stay = {OFFERING_KEY: set(stay_offerings), SYLLABUS_KEY: _syllabi_of(stay_offerings)}
     moved, kept = {}, {}
     m2m = {"move": [], "drop": []}
     for relation in RELATIONS:
@@ -209,7 +220,8 @@ def collect(organization, target, sources, *, drop_attendance_only=False) -> dic
             continue
         rows = _rows_by_source(relation, source_ids)
         gone = dropped_rows if relation.key == CURRICULUM_KEY else set(deleted_offerings)
-        if relation.key in (CURRICULUM_KEY, OFFERING_KEY):
+        gone = gone | stay.get(relation.key, set())
+        if relation.key in (CURRICULUM_KEY, OFFERING_KEY, SYLLABUS_KEY):
             rows = {sid: [pk for pk in ids if pk not in gone] for sid, ids in rows.items()}
             rows = {sid: ids for sid, ids in rows.items() if ids}
         if relation.strategy == KEEP:
@@ -242,6 +254,7 @@ def collect(organization, target, sources, *, drop_attendance_only=False) -> dic
         "dropped_plan_rows": sorted(dropped_rows),
         "deleted_offerings": deleted_offerings,
         "twin_keep": twin_keep,
+        "stay": {key: sorted(ids) for key, ids in stay.items() if ids},
         "dropped_enrollments": conflicts_service.resolved_ids(resolvable, conflicts_service.ENROLLMENT_UNGRADED),
         "locked_plans": locked_plans,
         "evidence_offerings": evidence_offerings,
@@ -260,6 +273,7 @@ def plan_digest(plan) -> str:
         "json_refs": plan["json_refs"],
         "dropped": plan["dropped_plan_rows"],
         "deleted_offerings": plan["twin_keep"],
+        "stay": plan.get("stay", {}),
         "dropped_enrollments": plan["dropped_enrollments"],
         "blocking": [(item["code"], sorted(item["ids"])) for item in plan["conflicts"]["blocking"]],
     }

@@ -161,7 +161,13 @@ def resolve_enrollment(*, student, subject_id, organization, offering_ids=(), ex
         offering__organization=organization,
         status=Enrollment.Status.ENROLLED,
     ).select_related("offering", "offering__period", "offering__subject")
-    return choose_enrollment(candidates, _current_period(organization), offering_ids)
+    period = _current_period(organization)
+    chosen = choose_enrollment(candidates, period, offering_ids)
+    if chosen is None:  # son ehtiyat (sahib 2026-11-11): dublikat fənn kartındakı jurnal — ``exam_journal_scope``
+        from .exam_journal_scope import family_enrollment
+
+        chosen = family_enrollment(student, subject_id, organization, period)
+    return chosen
 
 
 def resolve_exam_result_target(*, student, subject_id, organization, offering_ids=(), attempt=None, exam_id=None):
@@ -271,6 +277,12 @@ def _resolve_enrollments_batch(*, student, subject_ids, organization):
     resolved = {}
     for subject_id, candidates in by_subject.items():
         chosen = choose_enrollment(candidates, period)
+        if chosen is not None:
+            resolved[subject_id] = chosen
+    from .exam_journal_scope import family_enrollment
+
+    for subject_id in set(subject_ids) - set(resolved):  # tək variantın son ehtiyatı ilə birə-bir (dublikat kart)
+        chosen = family_enrollment(student, subject_id, organization, period)
         if chosen is not None:
             resolved[subject_id] = chosen
     return resolved

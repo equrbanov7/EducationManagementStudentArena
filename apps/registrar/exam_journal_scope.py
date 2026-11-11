@@ -106,4 +106,79 @@ def linked_twin_offering_ids(organization, subject_id, offerings) -> set:
     return accepted
 
 
-__all__ = ["journal_offerings_by_unit", "linked_twin_offering_ids", "twin_subject_ids", "unit_families"]
+def family_enrollments(organization, subject_id, student_ids, period) -> dict:
+    """``{tələbə id: [Enrollment]}`` — imtahanın fənni üzrə qeydiyyatı OLMAYAN tələbənin əkiz kartdakı jurnalı.
+
+    Sahib 2026-11-11 («Fənnin jurnalında olmayan tələbə: 35 / 35»): imtahan dublikat kartın BİRİ ilə yaradılıb, qrupun
+    jurnalı isə o biri kartın altındadır və imtahan jurnala açıq bağlanmayıb — körpü ``offering.subject == exam.subject``
+    axtarıb heç nə tapmırdı. Qayda (``linked_twin_offering_ids`` ilə EYNİ, fail-closed): CARİ dövr, aktiv jurnal,
+    ``enrolled`` qeydiyyat, fənnin normallaşdırılmış adı imtahanın fənni ilə EYNİ, və jurnalın qrup ailəsində imtahanın
+    öz fənninin aktiv açılışı YOXDUR. Tələbənin belə jurnalları İKİ fərqli kartdadırsa (qeyri-müəyyən) — heç nə."""
+    from apps.registrar.models import Enrollment
+
+    ids = [value for value in student_ids or () if value is not None]
+    if organization is None or not subject_id or period is None or not ids:
+        return {}
+    twins = twin_subject_ids(organization, subject_id, period)
+    if not twins:
+        return {}
+    rows = list(
+        Enrollment.objects.filter(
+            organization=organization,
+            student_id__in=ids,
+            offering__period=period,
+            offering__is_active=True,
+            offering__subject_id__in=twins,
+            status=Enrollment.Status.ENROLLED,
+        ).select_related("offering", "offering__period", "offering__subject")
+    )
+    if not rows:
+        return {}
+    exact = set(  # fənnin ÖZ kartında (istənilən dövr) aktiv qeydiyyatı olan tələbə üçün əkiz axtarılmır
+        Enrollment.objects.filter(
+            organization=organization,
+            student_id__in={row.student_id for row in rows},
+            offering__subject_id=subject_id,
+            status=Enrollment.Status.ENROLLED,
+        ).values_list("student_id", flat=True)
+    )
+    rows = [row for row in rows if row.student_id not in exact]
+    if not rows:
+        return {}
+    accepted = linked_twin_offering_ids(
+        organization, subject_id, {row.offering_id: row.offering for row in rows}.values()
+    )
+    out: dict = {}
+    for row in rows:
+        if row.offering_id in accepted:
+            out.setdefault(row.student_id, []).append(row)
+    return {student: items for student, items in out.items() if len({item.offering.subject_id for item in items}) == 1}
+
+
+def family_enrollment(student, subject_id, organization, period):
+    """Körpünün son ehtiyatı: fənn üzrə qeydiyyat YOXDURSA tələbənin dublikat kartdakı jurnal qeydiyyatı (və ya ``None``)."""
+    import logging
+
+    from .exam_bridge import pick_enrollment
+
+    found = family_enrollments(organization, subject_id, [student.pk], period).get(student.pk)
+    if not found:
+        return None
+    chosen = pick_enrollment(found)
+    logging.getLogger("apps.registrar.exam_bridge").warning(
+        "exam_bridge: subject %s has no enrollment for student %s — duplicate subject card journal %s used",
+        subject_id,
+        student.pk,
+        chosen.offering_id,
+    )
+    return chosen
+
+
+__all__ = [
+    "family_enrollment",
+    "family_enrollments",
+    "journal_offerings_by_unit",
+    "linked_twin_offering_ids",
+    "twin_subject_ids",
+    "unit_families",
+]

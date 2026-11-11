@@ -47,6 +47,8 @@ _CTX = "registrar.subject_merge"
 #: Həll olunan toqquşma kodları (``resolvable[*].code``).
 CURRICULUM_ROW = "curriculum_row"
 OFFERING_TWIN = "offering_twin"
+#: K4 (sahib 2026-11-11): ``duplicate_journal_merge`` ilə passiv edilmiş DATALI əkiz — arxiv kartda (mənbə fənndə) QALIR.
+OFFERING_RETIRED = "offering_retired"
 ENROLLMENT_UNGRADED = "enrollment_ungraded"
 
 #: Planın sətri çıxarıla bilən statusları (təsdiq zəncirindən kənar).
@@ -113,6 +115,17 @@ def _inert_twins(items, target_id):
     return others[0], inert
 
 
+def _retired_twins(organization, items, target_id):
+    """K4: qutuda dublikat jurnal birləşməsi ilə passiv edilmiş MƏNBƏ-fənn jurnalları + qalan tək jurnal."""
+    from .duplicate_journal_merge_2026_11_11 import retired_source_ids
+
+    candidates = [row for row in items if not row.is_active and row.subject_id != target_id]
+    retired_ids = retired_source_ids(organization, [row.pk for row in candidates]) if candidates else set()
+    retired = [row for row in candidates if str(row.pk) in retired_ids]
+    others = [row for row in items if row not in retired]
+    return (others[0], retired) if retired and len(others) == 1 else (None, [])
+
+
 def _offerings(organization, subject_ids, target_id, blocking, resolvable, warnings):
     rows = list(
         CourseOffering._base_manager.filter(organization=organization, subject_id__in=subject_ids)
@@ -121,6 +134,23 @@ def _offerings(organization, subject_ids, target_id, blocking, resolvable, warni
     )
     for (_period_id, group_id), items in _buckets(rows, lambda row: (row.period_id, row.group_id)).items():
         first = items[0]
+        keep, stay = _retired_twins(organization, items, target_id) if group_id is not None else (None, [])
+        if keep is not None:
+            resolvable.append(
+                {
+                    "code": OFFERING_RETIRED,
+                    "message": pgettext(
+                        _CTX,
+                        "%(period)s · %(group)s: birləşdirilmiş (passiv) dublikat jurnal arxivlənən fənn kartında "
+                        "tarixçə kimi qalır — xanaları əsas jurnala kopyalanıb.",
+                    )
+                    % {"period": period_label(first.period), "group": group_label(first.group)},
+                    "keep": str(keep.pk),
+                    "drop": [str(row.pk) for row in stay],
+                    "links": [_journal_link(row) for row in items],
+                }
+            )
+            continue
         if group_id is None:
             warnings.append(
                 pgettext(_CTX, "%(period)s: hər iki fənn üzrə qrupsuz açılış var — birləşmədən sonra ikisi qalır.")
@@ -475,6 +505,7 @@ __all__ = [
     "EDITABLE_PLAN_STATUSES",
     "ENROLLMENT_UNGRADED",
     "LIST_LIMIT",
+    "OFFERING_RETIRED",
     "OFFERING_TWIN",
     "detect",
     "group_label",

@@ -26,7 +26,7 @@ from django.utils import timezone
 from core.audit import log_action
 from core.constants import AuditAction
 
-from .subject_codes import QKU_CODE_RE, SITE_CODE_RE, next_qku_number, qku_code
+from .subject_codes import QKU_CODE_RE, SITE_CODE_RE, is_standard_code, next_qku_number, qku_code
 from .subject_duplicates import normalized_subject_key
 
 AUDIT_RESOURCE = "registrar.subject_recode"
@@ -50,11 +50,49 @@ def _site_number(code: str) -> int:
     return int(match.group(1)) if match else 0
 
 
-def plan(organization, *, exclude=()) -> dict:
-    """``{"items": [{id, old, new, name}], "has_qku_duplicate": [kod], "excluded": [kod], "counts": Counter}``."""
+def old_code_index(organization) -> dict:
+    """``{KÖHNƏ KOD (böyük hərf): fənn id}`` — geri qaytarılmamış yenidən-kodlaşdırma paketlərindən.
+
+    Köhnə kodu açar kimi işlədən yerlər (legacy delta ``QKU-L<id>`` axtarışı) kartı yeni koda keçəndən sonra da tapır.
+    """
+    AuditLog = django_apps.get_model("audit", "AuditLog")
+    undone = set(
+        AuditLog.objects.filter(organization=organization, resource_type=f"{AUDIT_RESOURCE}.undo").values_list(
+            "resource_id", flat=True
+        )
+    )
+    index = {}
+    rows = AuditLog.objects.filter(organization=organization, resource_type=AUDIT_RESOURCE).order_by("created_at")
+    for batch, changes in rows.values_list("resource_id", "changes"):
+        if batch in undone or (changes or {}).get("kind") != "subject_recode":
+            continue
+        for item in changes.get("items") or []:
+            index[str(item["old"]).upper()] = item["id"]
+    return index
+
+
+def plan(organization, *, exclude=(), scope="site") -> dict:
+    """``{"items": [{id, old, new, name}], "has_qku_duplicate": [kod], "excluded": [kod], "counts": Counter}``.
+
+    ``scope="all"`` (sahib 2026-11-11: «standart olsun bir») — standart ``QKU-N`` olmayan HƏR kart (``SAYT-N``,
+    ``QKU-L…``, ``QKU-MR…``, ``QKU-SRC-…``, boş / boşluqlu / kiçik hərfli); qaydalar eynidir."""
 
     Subject = _subject_model()
+    if scope == "all":
+        rows = [
+            row
+            for row in Subject._base_manager.filter(organization=organization).order_by("code")
+            if not is_standard_code(row.code)
+        ]
+        rows.sort(key=lambda row: (not SITE_CODE_RE.match(row.code or ""), _site_number(row.code), row.code or ""))
+        return _plan_rows(organization, rows, exclude)
     rows = list(Subject._base_manager.filter(organization=organization, code__startswith="SAYT-").order_by("code"))
+    rows = sorted((row for row in rows if SITE_CODE_RE.match(row.code)), key=lambda row: _site_number(row.code))
+    return _plan_rows(organization, rows, exclude)
+
+
+def _plan_rows(organization, rows, exclude) -> dict:
+    Subject = _subject_model()
     qku_keys = {
         normalized_subject_key(name)
         for code, name in Subject._base_manager.filter(
@@ -66,7 +104,7 @@ def plan(organization, *, exclude=()) -> dict:
     counts = Counter()
     items, duplicates, skipped = [], [], []
     number = next_qku_number(organization)
-    for row in sorted((row for row in rows if SITE_CODE_RE.match(row.code)), key=lambda row: _site_number(row.code)):
+    for row in rows:
         counts["site_cards"] += 1
         if row.is_archived:
             counts["archived_skipped"] += 1
@@ -109,7 +147,7 @@ def apply_recode(organization, items, *, batch) -> None:
         organization=organization,
         resource_type=AUDIT_RESOURCE,
         resource_id=batch,
-        resource_repr=f"SAYT → QKU: {len(items)} kart",
+        resource_repr=f"kod → QKU-N: {len(items)} kart",
         changes={"kind": "subject_recode", "batch": batch, "items": items},
         reason=REASON,
     )
@@ -147,4 +185,12 @@ def undo_recode(organization, batch) -> list:
     return items
 
 
-__all__ = ["AUDIT_RESOURCE", "RecodeError", "apply_recode", "new_batch_id", "plan", "undo_recode"]
+__all__ = [
+    "AUDIT_RESOURCE",
+    "RecodeError",
+    "apply_recode",
+    "new_batch_id",
+    "old_code_index",
+    "plan",
+    "undo_recode",
+]

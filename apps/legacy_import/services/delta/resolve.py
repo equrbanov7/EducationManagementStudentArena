@@ -134,6 +134,12 @@ def ledger_map(organization, entity_type: str, legacy_pks=None) -> dict:
     return found
 
 
+def _recoded_codes(organization) -> dict:
+    from apps.registrar.public import subject_recode
+
+    return subject_recode.old_code_index(organization)
+
+
 def collision_map(organization) -> dict:
     """``legacy lessons.id`` (str) → düzgün fənnin pk-si (str) — ``subject_collisions`` fazasının audit xəritəsi."""
 
@@ -165,6 +171,7 @@ class Catalog:
                 self.index_group(unit)
         self.subjects = {subject.pk: subject for subject in Subject.objects.filter(organization=organization)}
         self.subject_by_code = {subject.code.upper(): subject for subject in self.subjects.values()}
+        self.recoded = _recoded_codes(organization)
         self.subjects_by_key: dict = defaultdict(list)
         for subject in self.subjects.values():
             self.subjects_by_key[subject_key(subject.name)].append(subject)
@@ -251,6 +258,8 @@ class Catalog:
         if mapped is not None:
             return mapped
         alt = self.subject_by_code.get(f"{SUBJECT_ALT_CODE_PREFIX}{legacy['id']}")
+        if alt is None:  # kart vahid ``QKU-N`` standartına keçirilib (sahib 2026-11-11) — köhnə kod audit-dədir
+            alt = self.subjects.get(_uuid(self.recoded.get(f"{SUBJECT_ALT_CODE_PREFIX}{legacy['id']}", "")))
         if alt is not None:
             return alt
         same = [

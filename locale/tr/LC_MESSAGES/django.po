@@ -117927,3 +117927,13 @@ msgstr "Özet"
 msgctxt "registrar.lessons_log"
 msgid "İcmal"
 msgstr "Özet"
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(period)s · %(group)s: birləşdirilmiş (passiv) dublikat jurnal arxivlənən fənn kartında tarixçə kimi qalır — xanaları əsas jurnala kopyalanıb."
+msgstr "%(period)s · %(group)s: birleştirilmiş (pasif) yinelenen yoklama defteri arşivlenen ders kartında geçmiş olarak kalır — hücreleri ana deftere kopyalandı."
+
+#, python-format
+msgctxt "accounts.catalog"
+msgid "Fənn kodu QKU-N formasında olmalıdır. Növbəti boş kod: %(code)s."
+msgstr "Ders kodu QKU-N biçiminde olmalıdır. Sıradaki boş kod: %(code)s."

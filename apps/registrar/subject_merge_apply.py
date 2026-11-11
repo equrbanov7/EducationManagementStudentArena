@@ -110,8 +110,10 @@ def repoint_rows(rel, ids, subject_id, now) -> int:
     return model._base_manager.filter(pk__in=ids).update(**_update_values(model, attname, subject_id, now))
 
 
-def _remaining_references(source_ids) -> list:
+def _remaining_references(source_ids, stay=None) -> list:
+    """Mənbə kartlara qalan istinadlar. ``stay`` (K4) — arxiv kartda QƏSDƏN qalan passiv dublikat jurnal + sillabusu."""
     leftovers = []
+    stay = stay or {}
     for rel in RELATIONS:
         model = rel.model()
         field = model._meta.get_field(rel.field)
@@ -119,7 +121,11 @@ def _remaining_references(source_ids) -> list:
             through = field.remote_field.through
             if through.objects.filter(subject_id__in=source_ids).exists():
                 leftovers.append(rel.key)
-        elif rel.strategy == REPOINT and model._base_manager.filter(**{f"{field.attname}__in": source_ids}).exists():
+        elif rel.strategy == REPOINT and (
+            model._base_manager.filter(**{f"{field.attname}__in": source_ids})
+            .exclude(pk__in=stay.get(rel.key, []))
+            .exists()
+        ):
             leftovers.append(rel.key)
     return leftovers
 
@@ -311,7 +317,7 @@ def apply(
         _repoint_all(plan, target, sources, now)
         _apply_m2m(plan)
         _apply_json(plan)
-        leftovers = _remaining_references([source.pk for source in sources])
+        leftovers = _remaining_references([source.pk for source in sources], plan.get("stay"))
         if leftovers:
             raise _drift()
         try:

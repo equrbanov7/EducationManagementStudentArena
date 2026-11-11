@@ -118938,3 +118938,13 @@ msgstr "Итог"
 msgctxt "registrar.lessons_log"
 msgid "İcmal"
 msgstr "Сводка"
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(period)s · %(group)s: birləşdirilmiş (passiv) dublikat jurnal arxivlənən fənn kartında tarixçə kimi qalır — xanaları əsas jurnala kopyalanıb."
+msgstr "%(period)s · %(group)s: объединённый (неактивный) журнал-дубликат остаётся на архивируемой карточке дисциплины как история — его ячейки скопированы в основной журнал."
+
+#, python-format
+msgctxt "accounts.catalog"
+msgid "Fənn kodu QKU-N formasında olmalıdır. Növbəti boş kod: %(code)s."
+msgstr "Код дисциплины должен иметь вид QKU-N. Следующий свободный код: %(code)s."

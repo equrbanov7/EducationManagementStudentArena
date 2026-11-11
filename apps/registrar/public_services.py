@@ -8,6 +8,7 @@ from . import credit_recognition_read  # noqa: F401 — «Xarici nəticənin tan
 from . import credit_source  # noqa: F401 — tələbənin fənn krediti: plan (fənn + semestr) → kataloq (R01, 2026-10-21)
 from . import dashboard_data  # noqa: F401
 from . import entry_standard  # noqa: F401
+from . import exam_taker_placement_2026_11_11  # noqa: F401 — imtahan verib jurnalda olmayan tələbə (2026-11-11)
 from . import gradebook  # noqa: F401
 from . import grading_scale  # noqa: F401
 from . import handover  # noqa: F401
@@ -60,10 +61,14 @@ from . import subgroup_students_journals  # noqa: F401 — «Alt qrup tələbəl
 from . import subgroup_students_read  # noqa: F401 — «Alt qrup tələbələri» reyestri (2026-11-05)
 from . import subgroup_students_stats  # noqa: F401 — «Alt qrup tələbələri» statistikası (2026-11-05)
 from . import subject_merge_apply  # noqa: F401 — açılışın fənn düzəlişi icazəsi (legacy kod toqquşması, 2026-10-26)
+from . import subject_recode  # noqa: F401 — köhnə fənn kodu → kart (legacy delta, 2026-11-11)
 from . import teacher_journal_list  # noqa: F401
 from . import transcript  # noqa: F401
 from . import transfer  # noqa: F401
 from . import twins_repair_2026_11_05b  # noqa: F401 — əkiz jurnallar MR-190/MR-161 (2026-11-05, workload əmri)
+from . import (  # noqa: F401 — dublikat fənlər: jurnal + kataloq + kod (2026-11-11, exams əmri)
+    duplicate_subjects_2026_11_11,
+)
 from . import exam_eligibility as eligibility_rules  # noqa: F401
 from .absence_credit_read import credit_hours_map, effective_hours  # noqa: F401
 from .absence_evidence import absence_counter_preview  # noqa: F401
@@ -234,6 +239,9 @@ __all__ = [
     "transcript_policy",
     "transfer",
     "twins_repair_2026_11_05b",
+    "duplicate_subjects_2026_11_11",
+    "exam_taker_placement_2026_11_11",
+    "subject_recode",
 ]
 
 from .practical_label import offering_is_practical  # noqa: E402,F401

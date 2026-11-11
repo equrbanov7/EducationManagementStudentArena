@@ -160,7 +160,7 @@ class CoverageEndpointTests(_CoverageSetup):
                     self.org, self.history.pk, [unit.pk for unit in groups], period=self.period
                 )
         self.assertEqual(len(one), len(many))
-        self.assertLessEqual(len(many), 6)
+        self.assertLessEqual(len(many), 8)  # +2 (sahib 2026-11-11): jurnalsızlar üçün dublikat fənn kartı axtarışı
         self.assertEqual(len(result[self.other_group.pk]["students"]), 0)
 
 

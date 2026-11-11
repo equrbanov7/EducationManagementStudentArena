@@ -118733,3 +118733,13 @@ msgstr "Summary"
 msgctxt "registrar.lessons_log"
 msgid "İcmal"
 msgstr "Summary"
+
+#, python-format
+msgctxt "registrar.subject_merge"
+msgid "%(period)s · %(group)s: birləşdirilmiş (passiv) dublikat jurnal arxivlənən fənn kartında tarixçə kimi qalır — xanaları əsas jurnala kopyalanıb."
+msgstr "%(period)s · %(group)s: the merged (inactive) duplicate journal stays on the archived subject card as history — its cells were copied to the main journal."
+
+#, python-format
+msgctxt "accounts.catalog"
+msgid "Fənn kodu QKU-N formasında olmalıdır. Növbəti boş kod: %(code)s."
+msgstr "The subject code must have the form QKU-N. Next free code: %(code)s."
