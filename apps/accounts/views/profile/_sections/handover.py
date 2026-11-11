@@ -101,7 +101,12 @@ def build_handover_section(request, section, *, active_organization, allowed_sec
     section["form_data"] = {"data-tof-form": "handover"}
     # Seçilmiş sətirlər dialoq açılanda GİZLİ `offering_ids` sahələri kimi
     # yazılır (teaching_handover.js) — burada yalnız sabit əməl açarı var.
-    section["confirm_hidden"] = [{"name": "action", "value": "reassign", "keep": True}]
+    # «Kimdən» (review 2026-11-11 #3): süzgəcdə seçilmiş müəllim — növü bir neçə müəllim aparanda yalnız onunku köçür.
+    picked = ui.param(request, "teacher")
+    section["confirm_hidden"] = [
+        {"name": "action", "value": "reassign", "keep": True},
+        {"name": "from_teacher_id", "value": picked if picked.isdigit() else "", "keep": True},
+    ]
     section["revert_hidden"] = [
         {"name": "action", "value": "revert", "keep": True},
         {"name": "handover_id", "value": ""},
@@ -152,6 +157,7 @@ def _build_transfer(request, section, *, actor, organization, scope):
     section["page_obj"] = page_obj
     section["pagination_query"] = _pagination_query(values, ui.TAB_TRANSFER)
     section["target_options"] = ui.target_teacher_options(organization)
+    section["kind_options"] = ui.kind_options()
     section["has_blocked"] = bool(facets["blocked"])
     # AQREQAT lent: «3 fənn təhvil verilə bilməz: 2 bağlı jurnal, 1 keçmiş
     # semestr» — qırmızı mətn divarı əvəzinə bir cümlə (sətrin öz səbəbi

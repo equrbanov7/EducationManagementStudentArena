@@ -15,14 +15,21 @@ PLAN rejimi (sahib 2026-11-04, ~95 dublikat kart — BİR backup): ``--plan "QKU
 
 K2/K3 (sahib 2026-11-04): ləğv olunmuş BOŞ əkiz jurnal snapshot-la silinir, qiymətsiz təkrar qeydiyyat bağlanır
 («Həll olunur» sətirləri). ``--drop-attendance-only`` — «yalnız davamiyyət» qeydiyyatını da bağlamaq (açıq qərar).
+
+``--current-only`` (sahib 2026-11-11: «köhnə illərin jurnalını ciddiyə alma … əsas indi və bundan sonra olandır»):
+mənbənin KEÇMİŞ dövr açılışları (+ sillabus, tapşırıq sətri, qovluq, imtahan) arxivlənən mənbə kartda qalır, keçmiş
+dövrdəki toqquşma bloklamır; cari / gələcək olanlar köçür (:mod:`apps.registrar.subject_merge_scope`). Birləşmədən sonra
+imtahanın jurnal bağı: ``sync_midterm_scores --exam <id> --apply``.
 """
 
 from __future__ import annotations
 
 import json
+import re
 from contextlib import contextmanager
 
 from django.core.management.base import BaseCommand, CommandError
+from django.db import DatabaseError
 
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
@@ -37,6 +44,12 @@ def _pair_scope():
     """Plan rejimində HƏR cütün öz DB konteksti (öz tranzaksiyası; RLS bypass yalnız idarə əmrində)."""
     with rls_worker_atomic(), bypass_rls():
         yield
+
+
+def failure_code(exc: Exception) -> str:
+    """prod-data-ops traceback-i gizlədir — yalnız ``CommandError`` kodu görünür."""
+    slug = re.sub(r"[^a-z0-9_]+", "_", f"{type(exc).__name__}_{exc}".lower()).strip("_")
+    return f"merge_subjects_failed_{slug}"[:160]
 
 
 def _organization(value):
@@ -70,6 +83,11 @@ class Command(BaseCommand):
             help="K3: «yalnız davamiyyət» (balsız xanalar) olan təkrar qeydiyyatı da bağla — qalan qeydiyyatın yekun "
             "qiyməti varsa (xanalar silinmir)",
         )
+        parser.add_argument(
+            "--current-only",
+            action="store_true",
+            help="yalnız cari + gələcək dövr: mənbənin keçmiş dövr sətirləri mənbə kartda qalır, keçmiş toqquşma bloklamır",
+        )
 
     def _plan(self, options):
         pairs = parse_plan(options["plan"])
@@ -83,6 +101,7 @@ class Command(BaseCommand):
             do_apply=options["apply"],
             reason=options["reason"],
             drop_attendance_only=options["drop_attendance_only"],
+            current_only=options["current_only"],
         )
         if not options["apply"]:
             self.stdout.write('DRY-RUN: heç nə yazılmadı. Yazmaq üçün --apply --reason "…".')
@@ -103,11 +122,34 @@ class Command(BaseCommand):
             self.stdout.write(f"Həll olunur: {item['message']}")
         if payload["resolvable_total"] > len(payload["resolvable"]):
             self.stdout.write(f"Həll olunur: … və daha {payload['resolvable_total'] - len(payload['resolvable'])}")
+        if payload.get("current_only"):
+            self._print_current_only(payload)
         for item in payload["blocking"]:
             self.stdout.write(self.style.ERROR(f"TOQQUŞMA: {item['message']}"))
         self.stdout.write(f"\nİz: {payload['digest']}")
 
+    def _print_current_only(self, payload):
+        moved = payload.get("moved_counts") or {}
+        left = payload.get("left_past") or {}
+        self.stdout.write(
+            "Yalnız cari + gələcək: "
+            f"offerings_moved={moved.get('registrar.CourseOffering.subject', 0)} "
+            f"offerings_left_past={left.get('registrar.CourseOffering.subject', 0)} "
+            f"exams_moved={moved.get('exams.Exam.subject', 0)} "
+            f"exams_left_past={left.get('exams.Exam.subject', 0)}"
+        )
+        for key, count in sorted(left.items()):
+            self.stdout.write(f"  Keçmiş dövr — mənbə kartda qalır: {key}: {count}")
+
     def handle(self, *args, **options):
+        try:
+            self._handle(options)
+        except CommandError:
+            raise
+        except DatabaseError as exc:  # noqa: BLE001 — prod-data-ops yalnız CommandError kodunu göstərir
+            raise CommandError(failure_code(exc)) from None
+
+    def _handle(self, options):
         if options["apply"] and len((options["reason"] or "").strip()) < 20:
             raise CommandError("--apply üçün --reason ən azı 20 simvol olmalıdır.")
         if options["plan"]:
@@ -126,6 +168,7 @@ class Command(BaseCommand):
                     options["source"],
                     by_code=True,
                     drop_attendance_only=options["drop_attendance_only"],
+                    current_only=options["current_only"],
                 )
             except MergeError as exc:
                 raise CommandError(exc.message) from exc
@@ -148,6 +191,7 @@ class Command(BaseCommand):
                     expected_digest=payload["digest"],
                     by_code=True,
                     drop_attendance_only=options["drop_attendance_only"],
+                    current_only=options["current_only"],
                 )
             except MergeError as exc:
                 raise CommandError(exc.message) from exc

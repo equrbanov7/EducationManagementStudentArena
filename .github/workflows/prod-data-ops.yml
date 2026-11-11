@@ -100,6 +100,8 @@
 #       K2/K3 (sahib 2026-11-04): ləğv olunmuş BOŞ əkiz jurnal snapshot-la silinir, qiymətsiz təkrar qeydiyyat bağlanır
 #       («Həll olunur» sətirləri). `create_missing=true` → `--drop-attendance-only` («yalnız davamiyyət» qeydiyyatını da
 #       bağla — qalan qeydiyyatın yekun qiyməti varsa; xanalar silinmir). Açıq qərardır, defolt YOX.
+#       `choices=current-only` → `--current-only` (sahib 2026-11-11: «köhnə illərin jurnalını ciddiyə alma»): mənbənin
+#       KEÇMİŞ dövr sətirləri arxivlənən mənbə kartda qalır, keçmiş dövrdəki toqquşma bloklamır; cari/gələcək köçür.
 #   undo_subject_merge — merge_subjects-in geri qaytarılması (sahib 2026-11-04, K4): `batch` = birləşmənin audit id-si
 #       (merge_subjects apply çıxışındakı «Audit id: <uuid>»). apply-siz yoxlama + geri alınan sınaq yazısı; apply =
 #       backup + `--apply --reason`. Silinmiş boş əkiz jurnallar eyni id ilə, bağlanmış qeydiyyatların statusu bərpa olunur.
@@ -652,7 +654,7 @@ on:
         type: boolean
         default: false
       choices:
-        description: "import_teaching_*: işarəsiz seçmə bloku — SƏTİR=BƏND, vergüllə (məs. 144=1,145=1) · fix_offering_subject: detach=<sillabus UUID>,attach=<sillabus UUID>"
+        description: "import_teaching_*: işarəsiz seçmə bloku — SƏTİR=BƏND, vergüllə (məs. 144=1,145=1) · fix_offering_subject: detach=<sillabus UUID>,attach=<sillabus UUID> · merge_subjects: current-only (keçmiş dövr sətirləri mənbə kartda qalır)"
         required: false
         default: ""
       teacher_map:
@@ -1281,6 +1283,12 @@ jobs:
               if [ "$CREATE_MISSING" = "true" ]; then
                 args+=(--drop-attendance-only)
               fi
+              # Sahib 2026-11-11: `choices=current-only` — keçmiş dövr sətirləri mənbə kartda qalır (bloklamır).
+              case "${CHOICES:-}" in
+                "") ;;
+                current-only) args+=(--current-only) ;;
+                *) echo "merge_subjects: choices boş və ya current-only olmalıdır" >&2; exit 2 ;;
+              esac
               if [ "$APPLY" = "true" ]; then
                 args+=(--apply --reason "Dublikat fənn kartı — sahibin 2026-11-04 təsdiqi (SYS-1 yoxlaması)")
               fi
@@ -1727,6 +1735,8 @@ jobs:
               # + imtahan verib jurnalda olmayan tələbələr. batch boş = hamısının DRY-RUN-u; batch=journals|catalogue|codes|
               # takers = yalnız biri; batch=report = yalnız qoruyucu saylar (yazı yoxdur); batch=dupsubj-… = həmin paketi
               # geri qaytar. APPLY yalnız AÇIQ addımla (boş batch + apply rədd olunur) — hər addım ayrıca paket alır.
+              # batch=catalogue-current (sahib 2026-11-11) = kataloq addımı `--current-only` ilə: keçmiş dövr sətirləri
+              # mənbə kartda qalır, keçmiş toqquşma bloklamır; cari imtahanı olan kart saxlanılandır.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor")
@@ -1735,10 +1745,11 @@ jobs:
                 report) test "$APPLY" != "true" || { echo "report yazmır — apply=false olmalıdır" >&2; exit 2; }
                   args+=(--only "$BATCH") ;;
                 journals|doubles|catalogue|codes|takers) args+=(--only "$BATCH") ;;
+                catalogue-current) args+=(--only catalogue --current-only) ;;
                 dupsubj-*)
                   test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }
                   args+=(--undo --batch "$BATCH") ;;
-                *) echo "batch: boş, journals, doubles, catalogue, codes, takers, report və ya dupsubj-… olmalıdır" >&2; exit 2 ;;
+                *) echo "batch: boş, journals, doubles, catalogue, catalogue-current, codes, takers, report və ya dupsubj-… olmalıdır" >&2; exit 2 ;;
               esac
               ;;
             fill_empty_cells_20261110)

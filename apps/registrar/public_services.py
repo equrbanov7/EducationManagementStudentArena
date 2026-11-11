@@ -21,6 +21,7 @@ from . import journal_hygiene_actions  # noqa: F401
 from . import journal_hygiene_rows  # noqa: F401
 from . import journal_removal_read  # noqa: F401 — «Jurnaldan çıxarılmalar» mərkəzi siyahısı (2026-11-04)
 from . import journal_scope  # noqa: F401
+from . import journal_transfer  # noqa: F401 — jurnal/növ köçürməsi: «Fənn təhvili» + «Yük bölgüsü» (2026-11-11)
 from . import kollokvium_notifications  # noqa: F401
 from . import kollokvium_windows  # noqa: F401
 from . import lab_groups_manage  # noqa: F401 — «Lab qrupları» bölməsi: qrup paneli + qapı (2026-11-07)
@@ -160,6 +161,7 @@ __all__ = [
     "handover",
     "handover_actions",
     "handover_query",
+    "journal_transfer",
     "instructor_activity",
     "instructor_offering",
     "instructor_offerings",

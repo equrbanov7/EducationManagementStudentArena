@@ -227,7 +227,9 @@ def assign_amended(*, row, actor, amend=None, request=None, assignment=None, **k
 
 
 @transaction.atomic
-def unassign_amended(*, assignment, actor, amend=None, request=None, sync_offerings: bool = True) -> dict:
+def unassign_amended(
+    *, assignment, actor, amend=None, request=None, sync_offerings: bool = True, live_edit: bool = False
+) -> dict:
     """Bölgünü sil; təsdiqlənmiş sənəddə — düzəliş ilə."""
     row = assignment.row
     task = row.task
@@ -237,7 +239,9 @@ def unassign_amended(*, assignment, actor, amend=None, request=None, sync_offeri
         _open_for_row(task, actor, row, amend, "assignment_removed", details, request)
     row.task = task
     assignment.row = row
-    return unassign(assignment=assignment, actor=actor, request=request, sync_offerings=sync_offerings)
+    return unassign(
+        assignment=assignment, actor=actor, request=request, sync_offerings=sync_offerings, live_edit=live_edit
+    )
 
 
 @transaction.atomic

@@ -16,6 +16,7 @@ onu oxuyur (xarici JS Django şablonundan keçmir, CLAUDE.md).{% endcomment %}
            data-thx-marks="{{ row.data.marks }}"
            data-thx-name="{{ row.data.subject_name }}"
            data-thx-group="{{ row.data.group }}"
+           data-thx-holders="{{ row.data.holders_json }}"
            {% if not row.data.can_transfer %}disabled aria-describedby="thx-b-{{ row.data.id }}"{% endif %}
            aria-label="{% blocktrans context 'accounts.handover' with name=row.data.subject_name %}{{ name }} — seç{% endblocktrans %}">
     <span class="thx-subject">

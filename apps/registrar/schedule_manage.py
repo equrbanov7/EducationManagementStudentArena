@@ -414,10 +414,22 @@ def check_slot(*, offering, cleaned, exclude_id=None) -> dict:
         instructor_id=instructor_id,
     )
     if conflict is not None:
+        reason = conflict_reason(offering=offering, conflict=conflict, instructor_id=instructor_id)
         errors["conflict"] = pgettext(_CTX, "Bu vaxt %(subject)s ilə üst-üstə düşür (%(reason)s).") % {
             "subject": getattr(conflict.offering.subject, "code", "") or "",
-            "reason": conflict_reason(offering=offering, conflict=conflict, instructor_id=instructor_id),
+            "reason": reason,
         }
+        if reason == pgettext(_CTX, "müəllim"):  # patoka niyə çevrilmədi (sahib 2026-11-11)
+            from apps.registrar.schedule_conflicts import patok_hint
+
+            hint = patok_hint(
+                conflict,
+                kind=cleaned.get("kind"),
+                subject_id=offering.subject_id,
+                name=lambda: offering.subject.name,
+                room=(cleaned["room"] or "").strip().lower(),
+            )
+            errors["conflict"] = f"{errors['conflict']} {hint}".strip()
         errors["_conflict"] = describe_conflict(conflict, offering=offering, instructor_id=instructor_id)
     return errors
 

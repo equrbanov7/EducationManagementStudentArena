@@ -352,9 +352,9 @@
                 error: "[data-wl-assign-error]",
                 done: function (result) {
                     hideModal("[data-wl-assign-modal]");
-                    // Audit 2026-09-28 W4: müəllim dəyişikliyi cədvəldə toqquşma yaradıbsa xəbərdarlıq.
-                    if (result && result.warning && window.EMSToast) {
-                        window.EMSToast.show(result.warning, "warning");
+                    // W4 (2026-09-28): cədvəl toqquşması / jurnal köçmədisə xəbərdarlıq.
+                    if (result && (result.warning || result.message) && window.EMSToast) {
+                        window.EMSToast.show(result.warning || result.message, result.warning ? "warning" : "success");
                     }
                     loadRows();
                 },

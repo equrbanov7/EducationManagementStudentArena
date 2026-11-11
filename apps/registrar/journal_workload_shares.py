@@ -15,7 +15,7 @@ from core.constants import AuditAction
 
 from .handover import closed_offering_ids
 from .integrity import eligible_instructor_user_ids
-from .models import CourseOffering, Enrollment, JournalShare, JournalShareSource, LessonKind, TeachingHandover
+from .models import CourseOffering, Enrollment, JournalShare, JournalShareSource, LessonKind
 
 #: Sahib 2026-11-09: alt qrup (Lab-1 / Lab-2, seminar alt qrupu) payının tələbə siyahısını BU sinxron yazır —
 #: ``batch`` işarəsi onu əl ilə məhdudlaşdırılmış paydan ayırır (o, əvvəlki kimi qorunur).
@@ -38,11 +38,6 @@ def sync_workload_journal_shares(
         return counts
     ids = [offering.pk for offering in offerings]
     closed = closed_offering_ids(ids)
-    handed = set(
-        TeachingHandover.objects.filter(
-            organization_id=organization_id, offering_id__in=ids, reverted_at__isnull=True
-        ).values_list("offering_id", flat=True)
-    )
     eligible = eligible_instructor_user_ids(organization=offerings[0].organization)
     shares_by_offering = defaultdict(dict)
     for share in JournalShare.objects.select_for_update().filter(
@@ -71,26 +66,32 @@ def sync_workload_journal_shares(
             or not offering.is_active
             or offering.period.locked_at is not None
             or offering.pk in closed
-            or offering.pk in handed
+            # 2026-11-11: açılışda təhvil olub-olmaması artıq payları DONDURMUR (əvvəl seminarçının dəyişməsi
+            # jurnala heç çatmırdı). Tam təhvil sahibi yükdən fərqləndirir → aşağıdakı şərt onsuz da ötürür;
+            # «Fənn təhvili»nin növ payları isə ``_handover_claims`` ilə qorunur.
             or (plan and offering.instructor_id != plan["owner_id"])
         ):
             counts["skipped"] += 1
             continue
+        current = shares_by_offering[offering.pk]
+        claims = _handover_claims(current.values())
         desired = {
-            teacher: sorted(set(kinds) & set(LessonKind.values))
+            teacher: sorted((set(kinds) & set(LessonKind.values)) - _claimed_by_others(claims, teacher))
             for teacher, kinds in (plan or {}).get("teachers", {}).items()
             if teacher in eligible and kinds
         }
+        desired = {teacher: kinds for teacher, kinds in desired.items() if kinds}
         # Tək sahibin əlavə paya ehtiyacı yoxdur. Sahib də ayrıca növ payı alır ki,
-        # seminar/lab həmkarının bütün-roster sütunlarını öz payı kimi göstərməsin.
-        if len(desired) < 2 or offering.instructor_id not in desired:
+        # seminar/lab həmkarının bütün-roster sütunlarını öz payı kimi göstərməsin — «Fənn təhvili»nin
+        # növ payı (başqa müəllimdə) da həmkar sayılır.
+        partners = len(desired) + len({t for teachers in claims.values() for t in teachers} - set(desired))
+        if partners < 2 or offering.instructor_id not in desired:
             desired = {}
         sections = {
             teacher: {kind: set(numbers) for kind, numbers in (kinds or {}).items() if numbers}
             for teacher, kinds in ((plan or {}).get("sections") or {}).items()
             if teacher in desired
         }
-        current = shares_by_offering[offering.pk]
         for teacher_id, share in current.items():
             if share.source != JournalShareSource.WORKLOAD:
                 counts["preserved"] += 1
@@ -123,6 +124,25 @@ def sync_workload_journal_shares(
             _audit(share, offering, by_user, {}, {"kinds": kinds, "is_active": True}, request)
             _sync_sections(share, offering, sections.get(teacher_id), by_user, request)
     return counts
+
+
+def _handover_claims(shares) -> dict:
+    """«Fənn təhvili» ilə verilmiş aktiv növ payları: ``{növ: {müəllim}}`` — yük həmin növü başqasına vermir.
+
+    Kafedranın HƏMİN növdəki açıq dəyişikliyi bu payı əvvəlcə ortaq servislə əvəzləyir
+    (``apps.workload.services.offering_transfer`` → :func:`apps.registrar.journal_transfer.transfer`)."""
+    from .journal_transfer import is_handover_share
+
+    claims = defaultdict(set)
+    for share in shares:
+        if is_handover_share(share):
+            for kind in (set(share.kinds or ()) & set(LessonKind.values)) or set(LessonKind.values):
+                claims[kind].add(share.teacher_id)
+    return claims
+
+
+def _claimed_by_others(claims, teacher_id) -> set:
+    return {kind for kind, teachers in claims.items() if teacher_id not in teachers}
 
 
 def _section_enrollment_ids(offering, kinds_numbers) -> set:

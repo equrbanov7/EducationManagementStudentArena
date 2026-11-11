@@ -20,7 +20,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.registrar import handover as handover_read
-from apps.registrar.models import CourseOffering, ScheduleSlot, TeachingHandover
+from apps.registrar.models import CourseOffering, TeachingHandover
 from core.audit import log_action
 from core.constants import AuditAction
 
@@ -120,7 +120,25 @@ def _locked_offering(offering_id, organization):
 # ── Tək təhvil (toplu axının da vahididir) ───────────────────────────────────
 
 
-def _apply_one(*, offering, target, actor, organization, reason, request, closed_ids, today, eligible_ids=None):
+def _apply_one(
+    *,
+    offering,
+    target,
+    actor,
+    organization,
+    reason,
+    request,
+    closed_ids,
+    today,
+    eligible_ids=None,
+    kinds=None,
+    from_teacher_id=None,
+):
+    """Bir açılışın təhvili — yazı ORTAQ servisdədir (:mod:`apps.registrar.journal_transfer`, «Yük bölgüsü» də onu
+    çağırır). ``kinds`` boş = tam jurnal; ``["seminar"]`` = yalnız seminar (sahib 2026-11-11)."""
+    from .journal_transfer import TransferRejected, transfer
+
+    partial = bool(kinds) and set(kinds) != {"lecture", "seminar", "lab"}
     codes = handover_read.blockers(
         offering,
         actor=actor,
@@ -130,41 +148,29 @@ def _apply_one(*, offering, target, actor, organization, reason, request, closed
         new_instructor_id=getattr(target, "pk", None),
         eligible_ids=eligible_ids,
     )
+    if partial:
+        # Növ təhvilində hədəf jurnalın sahibi ola bilər (seminarı mühazirəçiyə qaytarmaq) — «eyni müəllim»
+        # yoxlaması növ səviyyəsində servisdədir.
+        codes = [code for code in codes if code != "same_instructor"]
     if codes:
         raise HandoverError("blocked", blocker_message(codes), status=409, codes=codes)
-
-    previous = offering.instructor
-    expected_id = offering.instructor_id
-    updated = CourseOffering.objects.filter(pk=offering.pk, instructor_id=expected_id).update(instructor=target)
-    if not updated:
-        raise HandoverError(
-            "concurrent_change",
-            "Bu fənnin müəllimi az öncə başqası tərəfindən dəyişdirilib — səhifəni yeniləyin.",
-            status=409,
+    try:
+        record = transfer(
+            offering=offering,
+            target=target,
+            kinds=kinds,
+            actor=actor,
+            reason=reason,
+            from_teacher_id=from_teacher_id,
         )
-    offering.instructor = target
-    # 2026-11-05 (sahib: «jurnalında və dərs yükündə o fənn olmasa da dərs cədvəlində qalıb»): köhnə sahibə
-    # YAZILMIŞ slot (o, sahib olmamışdan əvvəl təyin edilib) jurnal sahibinin slotudur — tam təhvildə yeni
-    # sahibi izləsin (NULL). Geri qaytarmada slot NULL qalır və yenə köhnə sahibə düşür (simmetrik).
-    if expected_id is not None:
-        ScheduleSlot.objects.filter(offering_id=offering.pk, instructor_id=expected_id).update(
-            instructor=None, updated_at=timezone.now()
-        )
-
-    from .handover_shares import deactivate_for_handover
-
-    deactivated_share_ids = deactivate_for_handover(offering, previous, target)
-    record = TeachingHandover.objects.create(
-        organization=organization,
-        offering=offering,
-        from_instructor=previous,
-        to_instructor=target,
-        from_instructor_name=_display_name(previous),
-        to_instructor_name=_display_name(target),
-        reason=reason,
-        performed_by=actor,
-        deactivated_share_ids=deactivated_share_ids,
-    )
+    except TransferRejected as exc:
+        if exc.code == "concurrent_change":
+            raise HandoverError(
+                "concurrent_change",
+                "Bu fənnin müəllimi az öncə başqası tərəfindən dəyişdirilib — səhifəni yeniləyin.",
+                status=409,
+            ) from None
+        raise HandoverError("blocked", blocker_message([exc.code]), status=409, codes=[exc.code]) from None
     _audit(
         record=record,
         actor=actor,
@@ -176,15 +182,35 @@ def _apply_one(*, offering, target, actor, organization, reason, request, closed
     return record
 
 
-def reassign(*, actor, organization, offering_id, new_instructor_id, reason, request=None) -> dict:
-    """Bir fənni başqa müəllimə təhvil ver (atomik + auditli + bildirişli)."""
+def reassign(
+    *, actor, organization, offering_id, new_instructor_id, reason, request=None, kinds=None, from_teacher_id=None
+) -> dict:
+    """Bir fənni (və ya onun dərs növünü) başqa müəllimə təhvil ver (atomik + auditli + bildirişli)."""
     return bulk_reassign(
         actor=actor,
         organization=organization,
-        items=[{"offering_id": offering_id, "new_instructor_id": new_instructor_id}],
+        items=[
+            {
+                "offering_id": offering_id,
+                "new_instructor_id": new_instructor_id,
+                "kinds": kinds,
+                "from_teacher_id": from_teacher_id,
+            }
+        ],
         reason=reason,
         request=request,
     )
+
+
+def _item_kinds(row):
+    """Sətrin növləri (boş = tam jurnal); naməlum növ 400."""
+    from .journal_transfer import normalize_kinds
+
+    try:
+        kinds = normalize_kinds(row.get("kinds"))
+    except ValueError:
+        raise HandoverError("invalid_kind", "Dərs növü yanlışdır.", status=400) from None
+    return None if len(kinds) == 3 else sorted(kinds)
 
 
 def bulk_reassign(*, actor, organization, items, reason, request=None) -> dict:
@@ -228,6 +254,8 @@ def bulk_reassign(*, actor, organization, items, reason, request=None) -> dict:
                 closed_ids=closed_ids,
                 today=today,
                 eligible_ids=eligible_ids,
+                kinds=_item_kinds(row),
+                from_teacher_id=row.get("from_teacher_id") or None,
             )
             results.append(record)
 
@@ -236,6 +264,7 @@ def bulk_reassign(*, actor, organization, items, reason, request=None) -> dict:
         "count": len(results),
         "notified": notified,
         "handover_ids": [str(record.pk) for record in results],
+        "moved": [getattr(record, "transfer_summary", {}) | {"to": record.to_instructor_name} for record in results],
     }
 
 
@@ -288,7 +317,10 @@ def revert(*, actor, organization, handover_id, reason, request=None) -> dict:
         offering = _locked_offering(record.offering_id, organization)
         if not handover_read.offering_in_scope(actor, organization, offering):
             raise PermissionDenied("Bu fənn sizin səlahiyyət sahənizə düşmür.")
-        if offering.instructor_id != record.to_instructor_id:
+        from .journal_transfer import record_owner_move, revert_shares
+
+        owner_move = record_owner_move(record)
+        if owner_move and offering.instructor_id != record.to_instructor_id:
             raise HandoverError(
                 "chain_moved",
                 "Bu fənn təhvildən sonra yenidən başqasına verilib — əvvəlcə sonuncu təhvili geri qaytarın.",
@@ -306,18 +338,19 @@ def revert(*, actor, organization, handover_id, reason, request=None) -> dict:
         if codes:
             raise HandoverError("blocked", blocker_message(codes), status=409, codes=codes)
 
-        from .handover_shares import HandoverShareConflict, restore_for_revert
+        from .handover_shares import HandoverShareConflict
 
         try:
-            restore_for_revert(record, offering)
+            revert_shares(record, offering)
         except HandoverShareConflict:
             raise HandoverError(
                 "share_state_changed", "Jurnal payları təhvildən sonra dəyişib — əvvəlcə payları yoxlayın."
             ) from None
 
-        CourseOffering.objects.filter(pk=offering.pk, instructor_id=record.to_instructor_id).update(
-            instructor_id=record.from_instructor_id
-        )
+        if owner_move:
+            CourseOffering.objects.filter(pk=offering.pk, instructor_id=record.to_instructor_id).update(
+                instructor_id=record.from_instructor_id
+            )
         record.reverted_at = timezone.now()
         record.reverted_by = actor
         record.revert_reason = reason
@@ -468,6 +501,9 @@ BLOCKER_MESSAGES = {
     "target_not_eligible": "Seçilmiş müəllim bal yazma səlahiyyətinə malik aktiv üzv deyil.",
     "actor_is_current_instructor": "Öz fənninizi özünüz təhvil verə bilməzsiniz — bunu rəhbərlik edir.",
     "no_target": "Yeni müəllim seçilməyib.",
+    "kind_not_held": "Seçilmiş müəllim bu dərs növünü aparmır.",
+    "kind_ambiguous": "Bu dərs növünü bir neçə müəllim aparır — hansı müəllimdən təhvil verildiyini seçin.",
+    "invalid_kind": "Dərs növü yanlışdır.",
 }
 
 

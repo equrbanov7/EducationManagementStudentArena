@@ -36,11 +36,15 @@ logger = logging.getLogger(__name__)
 _ACTIVITY_VALUES = {value for value, _ in Activity.choices}
 
 
-def _owner_snapshot(row):
-    """Dəyişiklikdən ƏVVƏLKİ yük sahibi; oxu alınmasa ``UNKNOWN`` (heç nə əzilmir)."""
+def _owner_snapshot(row, *, live_edit=False):
+    """Dəyişiklikdən ƏVVƏLKİ yük sahibi; oxu alınmasa ``UNKNOWN`` (heç nə əzilmir).
+
+    Yalnız canlı kafedra redaktəsində ``Snapshot`` (növ/qrup məlumatı ilə) qalır — o, jurnal köçürməsini açır;
+    digər yollarda adi lüğət (köhnə provenans qaydası)."""
     try:
         with transaction.atomic():
-            return owner_snapshot(row)
+            snapshot = owner_snapshot(row)
+            return snapshot if live_edit else dict(snapshot)
     except Exception:  # noqa: BLE001 — təyinat dayanmamalıdır
         logger.exception("workload: owner snapshot failed for row %s", row.pk)
         return UNKNOWN
@@ -163,11 +167,16 @@ def assign_teacher(
     existing_owner_authority=None,
     group_id=None,
     sub_number=None,
+    live_edit: bool = False,
 ) -> TeacherAssignment:
     """Bir fəaliyyət üzrə saatı müəllimə (və ya «Vakant»a) bağlayır.
 
     ``group_id`` — bölgünün qrupu (sətrin qruplarından biri; boş = sətrin bütün qrupları), ``sub_number`` —
     jurnalın lab qrupu / seminar alt qrupu nömrəsi (yalnız seminar/lab; sahib 2026-11-09, «bir fənn = bir kart»).
+
+    ``live_edit`` — kafedranın «Yük bölgüsü» ekranındakı CANLI dəyişikliyi (``bolgu/``): müəllim dəyişməsi
+    «Fənn təhvili» kimi jurnalı da köçürür (sahib 2026-11-11). Toplu yollar (Forma 1, vakant doldurma, cədvəldən
+    təyinat) bayrağı vermir — köhnə qoruma qaydası qalır.
     """
     task = row.task
     ensure_can_distribute(actor, task.chair_id)
@@ -234,7 +243,7 @@ def assign_teacher(
         if assignment.pk
         else None
     )
-    before = _owner_snapshot(locked)
+    before = _owner_snapshot(locked, live_edit=live_edit)
     assignment.activity = activity
     assignment.hours = hours
     assignment.teacher = teacher
@@ -281,7 +290,9 @@ def assign_teacher(
 
 
 @transaction.atomic
-def unassign(*, assignment: TeacherAssignment, actor, request=None, sync_offerings: bool = True) -> dict:
+def unassign(
+    *, assignment: TeacherAssignment, actor, request=None, sync_offerings: bool = True, live_edit: bool = False
+) -> dict:
     """Bölgü sətrini silir; sətrin açılışlarının jurnal sahibi DƏRHAL yenilənir.
 
     Qaytarır: açılış sinxronunun hesabatı (``offering_sync.compact`` — ``assign_teacher``-in
@@ -300,7 +311,7 @@ def unassign(*, assignment: TeacherAssignment, actor, request=None, sync_offerin
     assignment_id = str(assignment.pk)
     label = f"{row.subject_label} · {assignment.activity}"
     create_offerings = plan_reached_chair(task)
-    before = _owner_snapshot(row)
+    before = _owner_snapshot(row, live_edit=live_edit)
     assignment.delete()
     # Mühazirəçi silinibsə jurnal növbəti yük sahibinə və ya BOŞ qalır (vakant).
     offerings = (

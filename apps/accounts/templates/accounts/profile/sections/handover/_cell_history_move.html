@@ -1,6 +1,7 @@
-{% comment %}«Kimdən → kimə» — istiqamət açıq görünsün deyə ox işarəsi saxlanılır.{% endcomment %}
+{% comment %}«Kimdən → kimə» + NƏ köçdü (bütün jurnal / yalnız seminar …, 2026-11-11).{% endcomment %}
 <span class="thx-move">
     <span class="thx-move__from">{{ row.data.from_name }}</span>
     <span class="thx-move__arrow" aria-hidden="true">→</span>
     <span class="thx-move__to">{{ row.data.to_name }}</span>
 </span>
+{% if row.data.what %}<span class="thx-kind-chip">{{ row.data.what }}</span>{% endif %}

@@ -40,7 +40,7 @@ def columns() -> list:
         {"key": "subject", "label": pgettext(_CTX, "Fənn")},
         {"key": "group", "label": pgettext(_CTX, "Qrup")},
         {"key": "period", "label": pgettext(_CTX, "Semestr")},
-        {"key": "instructor", "label": pgettext(_CTX, "Cari müəllim")},
+        {"key": "instructor", "label": pgettext(_CTX, "Kim aparır (növ üzrə)")},
         {"key": "impact", "label": pgettext(_CTX, "Təsir")},
         {"key": "state", "label": pgettext(_CTX, "Vəziyyət")},
         {"key": "actions", "label": pgettext(_CTX, "Əməliyyat")},
@@ -55,6 +55,7 @@ def offering_rows(offerings, *, actor, organization) -> list:
     labels = blocker_labels()
     codes_by_id = handover_query.bulk_blockers(offerings, actor=actor, organization=organization)
     counts = handover_query.impact_counts([offering.pk for offering in offerings])
+    holders = _holders(offerings)
 
     rows = []
     for offering in offerings:
@@ -68,6 +69,8 @@ def offering_rows(offerings, *, actor, organization) -> list:
             "group": getattr(offering.group, "name", "") or "",
             "period": period_label(offering.period),
             "instructor": person_name(offering.instructor),
+            # 2026-11-11: növ üzrə kim aparır — seminar/lab təhvilinin «kimdən» tərəfi və önizləmə üçün.
+            "holders": holders.get(offering.pk, []),
             "students": stats.get("students", 0),
             "lessons": stats.get("lessons", 0),
             "marks": stats.get("marks", 0),
@@ -76,6 +79,7 @@ def offering_rows(offerings, *, actor, organization) -> list:
             "blockers": [{"code": code, "label": str(labels.get(code, code))} for code in codes],
         }
         data["blocker_text"] = " · ".join(item["label"] for item in data["blockers"])
+        data["holders_json"] = json.dumps(data["holders"], ensure_ascii=False)
         data["payload"] = json.dumps(data, ensure_ascii=False)
         data["status"] = (
             _badge("success", pgettext(_CTX, "Təhvil verilə bilər"))
@@ -98,6 +102,27 @@ def offering_rows(offerings, *, actor, organization) -> list:
             }
         )
     return rows
+
+
+def _holders(offerings) -> dict:
+    """``{açılış: [{kind, label, names}]}`` — TOPLU (paylar + adlar, iki sorğu)."""
+    from django.contrib.auth import get_user_model
+
+    from apps.accounts.views.handover.labels import kind_labels
+    from apps.registrar.public import journal_transfer
+
+    by_offering = journal_transfer.bulk_holders(offerings)
+    ids = {teacher for holders in by_offering.values() for teachers in holders.values() for teacher in teachers}
+    names = {user.pk: person_name(user) for user in get_user_model().objects.filter(pk__in=ids)}
+    labels = kind_labels()
+    result = {}
+    for offering_id, holders in by_offering.items():
+        result[offering_id] = [
+            {"kind": kind, "label": str(labels[kind]), "names": [names.get(t, "—") for t in holders[kind]]}
+            for kind in journal_transfer.KIND_ORDER
+            if holders[kind]
+        ]
+    return result
 
 
 # ── Tarixçə ──────────────────────────────────────────────────────────────────
@@ -124,14 +149,17 @@ def history_rows(records, *, organization) -> list:
     """
     from django.utils import timezone
 
+    from apps.accounts.views.handover.labels import kinds_text
     from apps.registrar.public import REVERT_BLOCKER_CODES
     from apps.registrar.public import handover as handover_read
+    from apps.registrar.public import journal_transfer
 
     records = list(records)
     if not records:
         return []
     today = timezone.localdate()
     labels = blocker_labels(action=REVERT)
+    states = journal_transfer.record_states(records)
     live = [record for record in records if not record.is_reverted]
     closed_ids = handover_read.closed_offering_ids([record.offering_id for record in live])
 
@@ -147,7 +175,10 @@ def history_rows(records, *, organization) -> list:
                 )
                 if code in REVERT_BLOCKER_CODES
             ]
-            if offering.instructor_id != record.to_instructor_id:
+            state = states[record.pk]
+            # Növ təhvili sahibi dəyişmir — zəncir onun YARATDIĞI paylarla yoxlanır (2026-11-11).
+            moved_on = state["owner_move"] and offering.instructor_id != record.to_instructor_id
+            if moved_on or not state["intact"]:
                 codes.append("chain_moved")
         data = {
             "id": str(record.pk),
@@ -157,6 +188,7 @@ def history_rows(records, *, organization) -> list:
             "period": period_label(offering.period),
             "from_name": record.from_instructor_name or "—",
             "to_name": record.to_instructor_name or "—",
+            "what": kinds_text(states[record.pk]["kinds"]),
             "performed_by": person_name(record.performed_by),
             "created_at": record.created_at,
             "reason": record.reason,

@@ -56,10 +56,13 @@ def _moved(payload) -> str:
     parts = [f"{table['key']}={table['count']}" for table in payload["tables"] if table["count"]]
     if payload["resolvable_total"]:
         parts.append(f"resolvable={payload['resolvable_total']}")
+    parts.extend(f"{key}:left_past={count}" for key, count in sorted((payload.get("left_past") or {}).items()))
     return " ".join(parts) or "—"
 
 
-def run_plan(command, organization, pairs, *, scope, do_apply, reason, drop_attendance_only) -> dict:
+def run_plan(
+    command, organization, pairs, *, scope, do_apply, reason, drop_attendance_only, current_only=False
+) -> dict:
     """Hər cüt üçün önizləmə (+ apply). Qaytarır: ``{"ok", "conflict", "error"}`` sayları.
 
     ``scope`` — cüt başına DB konteksti (``rls_worker_atomic`` + ``bypass_rls``): onu İDARƏ ƏMRİ verir ki, RLS
@@ -73,7 +76,12 @@ def run_plan(command, organization, pairs, *, scope, do_apply, reason, drop_atte
         try:
             with scope():
                 payload = preview(
-                    organization, keeper, sources, by_code=True, drop_attendance_only=drop_attendance_only
+                    organization,
+                    keeper,
+                    sources,
+                    by_code=True,
+                    drop_attendance_only=drop_attendance_only,
+                    current_only=current_only,
                 )
                 if payload["blocking_total"]:
                     totals["conflict"] += 1
@@ -94,6 +102,7 @@ def run_plan(command, organization, pairs, *, scope, do_apply, reason, drop_atte
                     expected_digest=payload["digest"],
                     by_code=True,
                     drop_attendance_only=drop_attendance_only,
+                    current_only=current_only,
                 )
         except MergeError as exc:
             totals["error"] += 1
@@ -106,7 +115,8 @@ def run_plan(command, organization, pairs, *, scope, do_apply, reason, drop_atte
         totals["ok"] += 1
         write(f"{label}: BİRLƏŞDİRİLDİ {_moved(payload)} audit={result['audit_id']}")
     write(
-        f"merge_plan: mode={'apply' if do_apply else 'dry_run'} pairs={len(pairs)} ok={totals['ok']} "
+        f"merge_plan: mode={'apply' if do_apply else 'dry_run'}{' current_only=1' if current_only else ''} "
+        f"pairs={len(pairs)} ok={totals['ok']} "
         f"conflict={totals['conflict']} error={totals['error']}"
     )
     return totals
