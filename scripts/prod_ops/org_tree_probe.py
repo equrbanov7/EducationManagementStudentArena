@@ -71,5 +71,27 @@ def main():
             fac = faculty_of(g)
             print(f"    qrup {g.name} tələbə={n} məktəb={getattr(fac, 'name', 'YOX')} zəncir={'>'.join(chain)}")
 
+    print("=== PATH UYĞUNSUZLUĞU (saxlanan path ≠ valideyn zənciri)")
+    all_units = {u.pk: u for u in OrgUnit.objects.filter(organization=org)}
+    bad = Counter()
+    for u in all_units.values():
+        chain, cur, seen = [], u, set()
+        while cur is not None and cur.pk not in seen:
+            seen.add(cur.pk)
+            chain.append(str(cur.pk))
+            cur = all_units.get(cur.parent_id)
+        expected = "/".join(reversed(chain))
+        if (u.path or "") != expected:
+            bad[u.unit_type] += 1
+            if bad[u.unit_type] <= 8:
+                fac_now = faculty_of(u) if u.is_active else None
+                stored = [all_units.get(p) for p in (u.path or "").split("/") if p]
+                fac_path = next((x for x in stored if x is not None and x.unit_type == "faculty"), None)
+                print(
+                    f"    {u.unit_type} {u.name} aktiv={u.is_active} məktəb(ağac)={getattr(fac_now, 'name', '—')} "
+                    f"məktəb(path)={getattr(fac_path, 'name', '—')} tələbə={students.get(u.pk, 0)}"
+                )
+    print(f"    cəmi uyğunsuz: {dict(bad)}")
+
 
 main()
