@@ -3463,3 +3463,21 @@ msgstr ""
 "Mehr Stunden verteilt als die Zeilensumme: %(groups)s. Kürzen Sie die "
 "Stunden oder erhöhen Sie zuerst die Zeilensumme über „Auftragszeilen“ → "
 "„Bearbeiten“."
+
+msgid "%(label)s %(hours)s s"
+msgstr "%(label)s %(hours)s Std."
+
+msgid "müəllim yoxdur"
+msgstr "keine Lehrkraft"
+
+msgid "qismən bölünüb"
+msgstr "teilweise zugeteilt"
+
+msgid "artıq: %(hours)s"
+msgstr "zu viel: %(hours)s"
+
+msgid "%(count)s sətirdə %(hours)s saat müəllimə bölünməyib:"
+msgstr "In %(count)s Zeile(n) sind %(hours)s Std. keiner Lehrkraft zugeteilt:"
+
+msgid "«Vakant» saxlanıldı: %(hours)s saat (%(rows)s sətir)."
+msgstr "„Unbesetzt“ belassen: %(hours)s Std. (%(rows)s Zeilen)."

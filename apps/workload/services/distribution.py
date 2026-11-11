@@ -14,11 +14,12 @@ import logging
 from django.db import transaction
 from django.db.models import Sum
 from django.utils import timezone
+from django.utils.translation import pgettext
 
 from core.audit import log_action
 from core.constants import AuditAction
 
-from ..constants import TaskStatus
+from ..constants import Activity, TaskStatus
 from ..models import TeacherAssignment
 from . import offering_sync
 from .assignments import balance_for_rows
@@ -29,31 +30,72 @@ logger = logging.getLogger(__name__)
 _NOTIFY_CTX = "workload.notify"
 
 
+#: Bölünmüş saatı cəmdən çox olan sətir — «Vakant» doldurması bunu düzəltmir (sahib 2026-11-12).
+OVER_ASSIGNED = "workload.distribution_over_assigned"
+#: Natamam sətirlər — 409 cavabında sətir siyahısı (``readiness``) gəlir; UI «Vakant saxla» təklif edir.
+INCOMPLETE = "workload.distribution_incomplete"
+
+
+def _specialty_names(rows) -> dict:
+    """``specialty_id → ad`` — natamam sətirlər üçün TƏK sorğu (sətir sayından asılı deyil)."""
+    ids = {row.specialty_id for row in rows if row.specialty_id}
+    if not ids:
+        return {}
+    from django.apps import apps as django_apps
+
+    OrgUnit = django_apps.get_model("organizations", "OrgUnit")
+    return dict(OrgUnit.objects.filter(pk__in=ids).values_list("pk", "name"))
+
+
+def _incomplete_entry(row, info: dict, specialties: dict) -> dict:
+    """Natamam sətrin təsdiq dialoqu üçün xülasəsi: fənn, qruplar, ixtisas, fəaliyyət-fəaliyyət qalıq/artıq."""
+    labels = dict(Activity.choices)
+    activities = {key: value for key, value in (info.get("activities") or {}).items() if not value["is_complete"]}
+    gaps = [
+        {
+            "activity": key,
+            "label": str(labels.get(key, key)),
+            "remaining": int(value["remaining"]),
+            "over": max(int(value["assigned"]) - int(value["total"]), 0),
+        }
+        for key, value in activities.items()
+    ]
+    return {
+        "row_id": str(row.pk),
+        "subject": row.subject_label,
+        "groups": row.groups_label,
+        "specialty": specialties.get(row.specialty_id) or row.specialty_text or "",
+        "season": row.season,
+        "is_over": any(gap["over"] for gap in gaps),
+        "is_intensive": row.is_intensive,
+        "remaining_hours": sum(gap["remaining"] for gap in gaps),
+        "activities": activities,
+        "gaps": gaps,
+    }
+
+
 def distribution_readiness(task, *, rows=None, balance=None) -> dict:
     """Bölgü təsdiqə hazırdırmı — sətir-sətir qalıq xülasəsi.
 
     ``rows``/``balance`` — çağıran tapşırığın BÜTÜN sətirlərini (süzgəcsiz, ``groups`` prefetch ilə) artıq
     yükləyibsə ötürür (PERF-1 F-09: `rows` endpoint-i eyni sətirləri iki dəfə oxuyurdu). ``subject``
     select_related — natamam sətrin `subject_label`-i sətir başına sorğu açmasın.
+
+    Sahib 2026-11-12: natamam sətir fənn, qruplar, ixtisas və fəaliyyət üzrə qalıq saatla gəlir (``gaps``) —
+    təsdiq dialoqu hansı sətrin mane olduğunu göstərir; ``is_over`` — artıq bölgü (sərt maneə).
     """
     if rows is None:
         rows = list(task.rows.all().select_related("subject").prefetch_related("groups"))
         balance = None
     if balance is None:
         balance = balance_for_rows(rows)
-    incomplete = []
+    pending = []
     for row in rows:
         info = balance.get(str(row.pk), {})
         if info.get("has_teaching") and not info.get("teaching_complete"):
-            incomplete.append(
-                {
-                    "row_id": str(row.pk),
-                    "subject": row.subject_label,
-                    "activities": {
-                        key: value for key, value in (info.get("activities") or {}).items() if not value["is_complete"]
-                    },
-                }
-            )
+            pending.append((row, info))
+    specialties = _specialty_names([row for row, _info in pending])
+    incomplete = [_incomplete_entry(row, info, specialties) for row, info in pending]
     vacant_hours = int(
         TeacherAssignment.objects.filter(row__task=task, teacher__isnull=True).aggregate(total=Sum("hours"))["total"]
         or 0
@@ -61,10 +103,48 @@ def distribution_readiness(task, *, rows=None, balance=None) -> dict:
     return {
         "is_ready": not incomplete,
         "incomplete_rows": incomplete,
+        "over_rows": sum(1 for item in incomplete if item["is_over"]),
+        "unassigned_hours": sum(item["remaining_hours"] for item in incomplete if not item["is_over"]),
         "row_count": len(rows),
         "vacant_hours": vacant_hours,
         "sync_candidates": len(_syncable_rows(rows)),
     }
+
+
+def ensure_confirmable(task, actor) -> None:
+    """Təsdiqin icazə + zəncir + status qapısı (``confirm_distribution`` və «Vakant saxla və təsdiqlə» ortaq)."""
+    ensure_can_distribute(actor, task.chair_id)
+    # Audit 2026-09-13 tests F-T1: təsdiq də eyni zəncir qapısından keçir —
+    # göndərilməmiş TŞ qaralaması burada da «distributed» ola bilməz.
+    from .workflow import ensure_distribution_stage
+
+    ensure_distribution_stage(task)
+    # `APPROVED` — F2 zəncirinin çıxışı: dekanlıq təsdiqindən sonra kafedra
+    # bölgüyə başlayır; heç bir təyinat edilməyibsə status hələ `approved`-dur.
+    if task.status not in (
+        TaskStatus.DRAFT,
+        TaskStatus.APPROVED,
+        TaskStatus.DISTRIBUTING,
+        TaskStatus.AMENDED,
+    ):
+        raise WorkloadDenied("workload.not_confirmable", "Bu statusda bölgü təsdiqlənə bilməz.")
+
+
+def ensure_not_over_assigned(readiness: dict) -> None:
+    """Artıq bölgü (bölünmüş saat > cəm) — sərt maneə; «Vakant» doldurması bunu düzəltmir."""
+    over = [item for item in readiness["incomplete_rows"] if item["is_over"]]
+    if not over:
+        return
+    names = ", ".join(dict.fromkeys(f"{item['subject']} ({item['groups'] or '—'})" for item in over[:3]))
+    raise WorkloadDenied(
+        OVER_ASSIGNED,
+        pgettext(
+            "workload",
+            "%(count)s sətirdə bölünmüş saat sətrin cəmindən çoxdur: %(names)s. Artıq bölgünü azaldın və ya "
+            "sətrin cəmini «Redaktə» ilə artırın — «Vakant» bunu düzəltmir.",
+        )
+        % {"count": len(over), "names": names},
+    )
 
 
 def _syncable_rows(rows) -> list:
@@ -194,27 +274,19 @@ def confirm_distribution(
     əmr/idxal yolu: əvvəl bölünmüş sənədin yenidən təsdiqində kafedranın bütün müəllimlərinə təkrar «Dərs yükü
     təyin edildi» GETMİR, yalnız bölgüsü yeni yaranan / dəyişən müəllimə bir dəfə gedir (sahib 2026-10-17);
     ilk təsdiq (``distributed_at`` boş) hamıya bildirir. UI yolu defoltla hamıya bildirir."""
-    ensure_can_distribute(actor, task.chair_id)
-    # Audit 2026-09-13 tests F-T1: təsdiq də eyni zəncir qapısından keçir —
-    # göndərilməmiş TŞ qaralaması burada da «distributed» ola bilməz.
-    from .workflow import ensure_distribution_stage
-
-    ensure_distribution_stage(task)
-    # `APPROVED` — F2 zəncirinin çıxışı: dekanlıq təsdiqindən sonra kafedra
-    # bölgüyə başlayır; heç bir təyinat edilməyibsə status hələ `approved`-dur.
-    if task.status not in (
-        TaskStatus.DRAFT,
-        TaskStatus.APPROVED,
-        TaskStatus.DISTRIBUTING,
-        TaskStatus.AMENDED,
-    ):
-        raise WorkloadDenied("workload.not_confirmable", "Bu statusda bölgü təsdiqlənə bilməz.")
+    ensure_confirmable(task, actor)
 
     readiness = distribution_readiness(task)
+    ensure_not_over_assigned(readiness)
     if not readiness["is_ready"]:
         raise WorkloadDenied(
-            "workload.distribution_incomplete",
-            "Bütün dərs sətirləri tam bölünməlidir (qalan saatlar «Vakant» kimi də yazıla bilər).",
+            INCOMPLETE,
+            pgettext(
+                "workload",
+                "%(count)s sətirdə %(hours)s saat heç kimə bölünməyib. Bu saatları «Vakant» saxlayıb təsdiqləyə "
+                "və ya əvvəlcə müəllim təyin edə bilərsiniz.",
+            )
+            % {"count": len(readiness["incomplete_rows"]), "hours": readiness["unassigned_hours"]},
         )
     if not allow_vacant and readiness["vacant_hours"]:
         raise WorkloadDenied("workload.vacant_not_allowed", "Vakant saatlar qalıb.")
@@ -253,4 +325,14 @@ def confirm_distribution(
     return {"status": task.status, "sync": sync, "notified": notified, "readiness": readiness}
 
 
-__all__ = ["changed_teacher_ids", "confirm_distribution", "distribution_readiness", "sync_offerings", "teacher_loads"]
+__all__ = [
+    "INCOMPLETE",
+    "OVER_ASSIGNED",
+    "changed_teacher_ids",
+    "confirm_distribution",
+    "distribution_readiness",
+    "ensure_confirmable",
+    "ensure_not_over_assigned",
+    "sync_offerings",
+    "teacher_loads",
+]

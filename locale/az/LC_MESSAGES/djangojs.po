@@ -3385,3 +3385,21 @@ msgid ""
 msgstr ""
 "Sətrin cəmindən çox saat bölünüb: %(groups)s. Saatı azaldın və ya əvvəlcə "
 "sətrin cəmini «Tapşırıq sətirləri» → «Redaktə» ilə artırın."
+
+msgid "%(label)s %(hours)s s"
+msgstr "%(label)s %(hours)s s"
+
+msgid "müəllim yoxdur"
+msgstr "müəllim yoxdur"
+
+msgid "qismən bölünüb"
+msgstr "qismən bölünüb"
+
+msgid "artıq: %(hours)s"
+msgstr "artıq: %(hours)s"
+
+msgid "%(count)s sətirdə %(hours)s saat müəllimə bölünməyib:"
+msgstr "%(count)s sətirdə %(hours)s saat müəllimə bölünməyib:"
+
+msgid "«Vakant» saxlanıldı: %(hours)s saat (%(rows)s sətir)."
+msgstr "«Vakant» saxlanıldı: %(hours)s saat (%(rows)s sətir)."

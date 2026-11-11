@@ -374,53 +374,7 @@
             });
         });
 
-        // ── Təsdiq ─────────────────────────────────────────────────────────
-        EMSDelegate.on("click", "[data-wl-open-confirm]", function () {
-            var Render = window.EMSWorkloadRender;
-            var host = root();
-            var stats = q("[data-wl-confirm-stats]");
-            if (Render && stats) Render.readiness(stats, null);
-            // Sətirlər dilimlə gəldiyi üçün hazırlıq xülasəsi tapşırığın HAMISI üzrə ayrıca soruşulur.
-            if (Render && host && window.EMSWorkloadList) {
-                window.EMSWorkloadList.loadReadiness(host.dataset.rowsUrl, filters()).then(function (readiness) {
-                    STATE.readiness = readiness;
-                    Render.readiness(q("[data-wl-confirm-stats]"), readiness);
-                });
-            }
-            showError(q("[data-wl-confirm-error]"), "");
-            var instance = modal("[data-wl-confirm-modal]");
-            if (instance) instance.show();
-        });
-
-        EMSDelegate.on("click", "[data-wl-do-confirm]", function () {
-            var host = root();
-            if (!host || !STATE.task) return;
-            window.EMSCore.fetchJSON(host.dataset.confirmUrl, {
-                method: "POST",
-                data: { task_id: STATE.task.id, allow_vacant: "1" },
-            })
-                .then(function (payload) {
-                    var instance = modal("[data-wl-confirm-modal]");
-                    if (instance) instance.hide();
-                    var sync = payload.sync || {};
-                    window.alert(
-                        fmt(
-                            gettext(
-                                "Bölgü təsdiqləndi. Jurnal açılışı: %(created)s yeni, %(updated)s yeniləndi. Bildiriş: %(notified)s"
-                            ),
-                            {
-                                created: sync.created || 0,
-                                updated: sync.updated || 0,
-                                notified: payload.notified || 0,
-                            }
-                        )
-                    );
-                    loadRows();
-                })
-                .catch(function (err) {
-                    showError(q("[data-wl-confirm-error]"), messageFor(err && err.payload));
-                });
-        });
+        // ── Təsdiq: dialoq, natamam sətirlər və «Vakant saxla» `workload_distribution_confirm.js`-dədir ──
 
         // ── Düzəliş (amendment): dialoq və təkrar sorğu `workload_distribution_amend.js`-dədir ──
 
