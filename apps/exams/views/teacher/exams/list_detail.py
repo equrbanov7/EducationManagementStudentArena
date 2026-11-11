@@ -5,6 +5,7 @@ import logging
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
@@ -414,6 +415,8 @@ def teacher_exam_detail(request, slug):
             auto_modal_url = reverse("exams:edit_exam_question", kwargs={"slug": exam.slug, "question_id": question_id})
     if auto_modal_url and nav_query:
         auto_modal_url = f"{auto_modal_url}?{nav_query}"
+    # 2026-11-11: iki ayrı COUNT (cəmi / aktiv) əvəzinə tək şərti aqreqat.
+    question_counts = exam.questions.aggregate(total=Count("id"), active=Count("id", filter=Q(is_active=True)))
     history_rows = _exam_subject_change.audit_rows(
         exam,
         (
@@ -435,10 +438,10 @@ def teacher_exam_detail(request, slug):
             "questions_has_more": question_page["has_more"],
             "questions_next_offset": question_page["next_offset"],
             "questions_page_size": question_page["page_size"],
-            "questions_total_count": exam.questions.count(),
+            "questions_total_count": question_counts["total"] or 0,
             # Publish qapısı aktiv sual tələb edir — "aktivləşdirmək üçün sual əlavə et"
             # qeydini göstərmək üçün.
-            "active_questions_count": exam.questions.filter(is_active=True).count(),
+            "active_questions_count": question_counts["active"] or 0,
             "profile_return_url": profile_return_url,
             "exam_navigation_query": nav_query,
             "exam_back_label": exam_back_label,

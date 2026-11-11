@@ -12,26 +12,16 @@ Kontekst (view-dən): qm_context ("exam"|"bank"), qm_base_url, qm_title, qm_subt
 qm_back_url, qm_back_label, qm_bulk_add_url/label, qm_add_single_url,
 qm_show_language_filter, language_choices, language_filter, analysis_enabled və sayğaclar.
 JS qarmaqları (id/class) teacher_questions_bank.js + bankManagement.js ilə uyğundur.
+2026-11-11: dəyişən hissələr `data-qb-live` bölgələrindədir (kpis · quality · list · danger) — imtahan
+səhifəsində süzgəc / səhifələmə / toplu əməl yalnız onları yeniləyir (`X-QB-Partial`, qm/_live.html,
+teacher_questions_bank/live.js); bölgə sarğıları `display: contents`-dir (düzülüş dəyişmir).
 ================================================================================
 {% endcomment %}
 <div class="etp-page eqb-page" data-qm-context="{{ qm_context }}">
     {% include "exams/teacher/partials/_page_head.html" with head_title=qm_title head_subtitle=qm_subtitle head_back_url=qm_back_url head_back_label=qm_back_label head_actions_include="exams/teacher/partials/qm/_head_actions.html" %}
 
     <div class="etp-stack">
-        <section class="etp-kpis eqb-kpis" aria-label="{% trans 'Xülasə' context 'exams.template.teacher_questions_bank' %}">
-            <div class="etp-kpi etp-kpi--primary">
-                <span class="etp-kpi__icon"><i class="fas fa-database" aria-hidden="true"></i></span>
-                <span class="etp-kpi__body"><span class="etp-kpi__value">{{ total_questions }}</span><span class="etp-kpi__label">{% trans "Cəmi" context "exams.template.teacher_questions_bank" %}</span></span>
-            </div>
-            <div class="etp-kpi etp-kpi--success">
-                <span class="etp-kpi__icon"><i class="fas fa-circle-check" aria-hidden="true"></i></span>
-                <span class="etp-kpi__body"><span class="etp-kpi__value">{{ active_questions }}</span><span class="etp-kpi__label">{% trans "Aktiv" context "exams.template.teacher_questions_bank" %}</span></span>
-            </div>
-            <div class="etp-kpi">
-                <span class="etp-kpi__icon"><i class="fas fa-circle-pause" aria-hidden="true"></i></span>
-                <span class="etp-kpi__body"><span class="etp-kpi__value">{{ inactive_questions }}</span><span class="etp-kpi__label">{% trans "Deaktiv" context "exams.template.teacher_questions_bank" %}</span></span>
-            </div>
-        </section>
+        <div data-qb-live="kpis">{% include "exams/teacher/partials/qm/_kpis.html" %}</div>
 
         <section class="ems-card eqb-filters" aria-label="{% trans 'Axtarış və süzgəclər' context 'exams.template.teacher_questions_bank' %}">
             <form id="questionSearchForm" method="get" class="etp-toolbar" role="search">
@@ -79,84 +69,18 @@ JS qarmaqları (id/class) teacher_questions_bank.js + bankManagement.js ilə uy�
                         </select>
                     </div>
                 </div>
-                {% if analysis_enabled and qm_show_report or qm_word_export_url %}
-                <div class="etp-toolbar__actions">
-                    <div class="dropdown">
-                        <button type="button" class="ems-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-download" aria-hidden="true"></i>{% trans "Yüklə" context "exams.template.teacher_questions_bank" %}
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end etp-menu">
-                            {% if analysis_enabled and qm_show_report %}
-                            <li><a class="dropdown-item" href="{{ qm_base_url }}?{% if filters_query %}{{ filters_query }}&{% endif %}export=report"><i class="fas fa-file-excel" aria-hidden="true"></i>{% trans "Keyfiyyət hesabatı (Excel)" context "exams.template.teacher_questions_bank" %}</a></li>
-                            {% endif %}
-                            {% if qm_word_export_url %}
-                            {# Word — import formatına uyğun; aktiv dil filtri tətbiq olunur. #}
-                            <li><a class="dropdown-item" href="{{ qm_word_export_url }}{% if language_filter %}?language={{ language_filter }}{% endif %}"><i class="fas fa-file-word" aria-hidden="true"></i>{% trans "Suallar (Word)" context "exams.template.teacher_questions_bank" %}</a></li>
-                            {% endif %}
-                        </ul>
-                    </div>
-                </div>
-                {% endif %}
+                <div data-qb-live="export">{% include "exams/teacher/partials/qm/_export.html" %}</div>
             </form>
-            {% if analysis_enabled %}
-            <nav class="eqb-quality" aria-label="{% trans 'Keyfiyyət süzgəci' context 'exams.template.teacher_questions_bank' %}">
-                <span class="eqb-quality__label">{% trans "Keyfiyyət" context "exams.template.teacher_questions_bank" %}:</span>
-                {% include "exams/teacher/partials/qm/_quality_chips.html" %}
-            </nav>
-            {% if qm_show_language_filter and not language_filter %}
-            <p class="etp-hint eqb-lang-hint"><i class="fas fa-globe" aria-hidden="true"></i> {% trans "Bütün dillər göstərilir. Konkret dilin vəziyyətini (dublikat, xəbərdarlıq) görmək üçün yuxarıdan dil seçin." context "exams.template.teacher_questions_bank" %}</p>
-            {% endif %}
-            {% endif %}
+            <div data-qb-live="quality">{% include "exams/teacher/partials/qm/_quality.html" %}</div>
         </section>
 
-        <form method="post" id="bulkForm" class="eqb-bulk">
-            {% csrf_token %}
-            {% include "exams/teacher/partials/qm/_state_fields.html" %}
-            <section class="ems-tablewrap eqb-list" aria-labelledby="eqbListTitle">
-                <div class="eqb-list__head">
-                    <h2 class="eqb-list__title" id="eqbListTitle">{% trans "Suallar" context "exams.template.teacher_questions_bank" %}
-                        <span class="ems-badge ems-badge--neutral etp-num">{{ page_obj.paginator.count }}</span></h2>
-                    {% if page_obj.object_list %}
-                    {% comment %}Filtr-şüurlu seçim: aktiv süzgəcə görə «bütün xətalıları… seç» (yalnız cari səhifə).{% endcomment %}
-                    <button type="button" id="selectAllPageBtn" class="ems-btn ems-btn--ghost" data-active-flag="{{ active_flag }}">
-                        <i class="fas fa-check-double" aria-hidden="true"></i>
-                        {% if active_flag == 'has-error' %}{% trans "Bütün xətalıları seç" context "exams.template.teacher_questions_bank" %}
-                        {% elif active_flag == 'has-warning' %}{% trans "Bütün xəbərdarlıqları seç" context "exams.template.teacher_questions_bank" %}
-                        {% elif active_flag == 'has-dup' %}{% trans "Bütün dublikatları seç" context "exams.template.teacher_questions_bank" %}
-                        {% elif active_flag == 'has-structure' %}{% trans "Variant problemlilərini seç" context "exams.template.teacher_questions_bank" %}
-                        {% elif active_flag == 'has-balance' %}{% trans "Balans problemlilərini seç" context "exams.template.teacher_questions_bank" %}
-                        {% elif active_flag == 'is-clean' %}{% trans "Təmizləri seç" context "exams.template.teacher_questions_bank" %}
-                        {% else %}{% trans "action_select_all_page" context "exams.template.teacher_questions_bank" %}{% endif %}
-                    </button>
-                    {% endif %}
-                </div>
-                {% if page_obj.object_list %}
-                    {# W3 2026-09-14: düsturlar KaTeX ilə (data-ems-math) #}
-                    {% include "partials/ems_ui/_math_assets.html" %}
-                    <div class="eqb-cards" data-ems-math>
-                        {% for q in page_obj.object_list %}{% include "exams/teacher/partials/qm/_card.html" %}{% endfor %}
-                    </div>
-                {% else %}
-                    {% include "exams/teacher/partials/qm/_empty.html" %}
-                {% endif %}
-            </section>
-            {% if page_obj.object_list %}
-            <div class="etp-actionbar eqb-actionbar" role="region" aria-label="{% trans 'Seçilmiş suallar' context 'exams.template.teacher_questions_bank' %}">
-                <span id="selectedCountLabel" class="etp-actionbar__count" aria-live="polite">{% trans "selected_count_zero" context "exams.template.teacher_questions_bank" %}</span>
-                <div class="etp-actionbar__actions">
-                    <button type="button" id="clearSelectionBtn" class="ems-btn ems-btn--ghost">{% trans "action_clear_selection" context "exams.template.teacher_questions_bank" %}</button>
-                    <button type="submit" name="bulk_action" value="activate" class="ems-btn js-bulk-action-btn" disabled><i class="fas fa-circle-play" aria-hidden="true"></i>{% trans "action_activate_selected" context "exams.template.teacher_questions_bank" %}</button>
-                    <button type="submit" name="bulk_action" value="deactivate" class="ems-btn js-bulk-action-btn" disabled><i class="fas fa-circle-pause" aria-hidden="true"></i>{% trans "action_deactivate_selected" context "exams.template.teacher_questions_bank" %}</button>
-                    <button type="submit" name="bulk_action" value="delete" class="ems-btn etp-btn--danger-soft js-bulk-action-btn" disabled><i class="fas fa-trash" aria-hidden="true"></i>{% trans "action_delete_selected" context "exams.template.teacher_questions_bank" %}</button>
-                </div>
-            </div>
-            {% endif %}
-        </form>
+        <div data-qb-live="list">{% include "exams/teacher/partials/qm/_list.html" %}</div>
 
-        {% include "partials/_pagination.html" with page_obj=page_obj extra_query=pagination_query %}
-
-        {% include "exams/teacher/partials/qm/_danger.html" %}
+        <div data-qb-live="danger">{% include "exams/teacher/partials/qm/_danger.html" %}</div>
+        {% include "exams/teacher/partials/qm/_danger_modals.html" %}
     </div>
 </div>
 
+{# W3 2026-09-14: düsturlar KaTeX ilə (data-ems-math) — tənbəl yükləyici; canlı bölgədən kənarda (bir dəfə). #}
+{% include "partials/ems_ui/_math_assets.html" %}
 {% include "exams/teacher/partials/_question_form_bs_modal.html" %}

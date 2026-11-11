@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{% static 'css/ems_ui/table.css' %}?v=20261018-pkga">
     <link rel="stylesheet" href="{% static 'exams/css/teacher_page_shell.css' %}?v=20261010-wp3exams">
     <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results_page.css' %}?v=20261025-filters">
-    {% if can_reset_attempts %}<link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results_reset.css' %}?v=20261104-reset">{% endif %}
+    {% if can_reset_attempts %}<link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results_reset.css' %}?v=20261111-all">{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -207,6 +207,13 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
                 {% if can_reset_attempts %}
                 <div class="etr-bulk etr-bulk--reset" role="group" aria-label="{% trans 'Nəticəni sil (cəhdi sıfırla)' context 'exams.attempt_reset' %}">
                     <span class="etr-bulk__count">{% trans "Sıfırlamaq üçün seçilib" context "exams.attempt_reset" %}: <strong data-reset-selected-count>0</strong></span>
+                    {% if page_obj and page_obj.paginator.num_pages > 1 %}
+                    {# Sahib 2026-11-11: cari süzgəcə uyğun BÜTÜN nəticələr (bütün səhifələr) — siyahını server özü müəyyən edir. #}
+                    <button type="button" class="ems-btn" data-reset-all-matching aria-pressed="false"
+                            data-total="{{ page_obj.paginator.count }}" data-filter-query="{{ export_query }}">
+                        <i class="fas fa-layer-group" aria-hidden="true"></i>{% blocktrans with total=page_obj.paginator.count context "exams.attempt_reset" %}Bütün {{ total }} nəticəni seç{% endblocktrans %}
+                    </button>
+                    {% endif %}
                     <button type="button" class="ems-btn etp-btn--danger-soft" data-reset-selected disabled><i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Seçilmişlərin nəticəsini sil" context "exams.attempt_reset" %}</button>
                 </div>
                 {% endif %}
@@ -234,7 +241,14 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
                     <table class="ems-table ems-table--stack etr-table">
                         <thead>
                             <tr>
-                                {% if can_delete_attempts or can_reset_attempts %}<th scope="col" class="etr-col-check"><span class="visually-hidden">{% trans "Seçim" context "exams.template.teacher_exam_results" %}</span></th>{% endif %}
+                                {% if can_reset_attempts %}
+                                {# Sahib 2026-11-11: başlıq qutusu — səhifədəki bütün cəhdləri seçir / seçimi götürür. #}
+                                <th scope="col" class="etr-col-check">
+                                    <input type="checkbox" class="etr-check" data-reset-page-all
+                                           title="{% trans 'Səhifədəkilərin hamısını seç' context 'exams.attempt_reset' %}"
+                                           aria-label="{% trans 'Səhifədəkilərin hamısını seç' context 'exams.attempt_reset' %}">
+                                </th>
+                                {% elif can_delete_attempts %}<th scope="col" class="etr-col-check"><span class="visually-hidden">{% trans "Seçim" context "exams.template.teacher_exam_results" %}</span></th>{% endif %}
                                 <th scope="col">#</th>
                                 {% include "exams/teacher/partials/results/_sort_th.html" with sort_key="user" sort_label=l_name sort_title="" %}
                                 {% include "exams/teacher/partials/results/_sort_th.html" with sort_key="group" sort_label=l_group sort_title="" %}
@@ -317,5 +331,5 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
 <script src="{% static 'js/results_filter_ui.js' %}?v=20261014-searchux"></script>
 <script src="{% static 'js/results_bulk_actions.js' %}"></script>
 <script src="{% static 'exams/js/teacher_exam_results.js' %}?v=20261025-filters"></script>
-{% if can_reset_attempts %}<script src="{% static 'exams/js/teacher_exam_results_reset.js' %}?v=20261104-reset"></script>{% endif %}
+{% if can_reset_attempts %}<script src="{% static 'exams/js/teacher_exam_results_reset.js' %}?v=20261111-all"></script>{% endif %}
 {% endblock %}

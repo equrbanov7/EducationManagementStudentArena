@@ -3,6 +3,9 @@
  *
  *  - Sətir düyməsi `.js-reset-attempt` → #resetAttemptsModal (tək cəhd, tələbənin adı ilə).
  *  - Seçilmişlər: `.js-reset-checkbox` + `[data-reset-selected]` → eyni modal (say ilə).
+ *  - 2026-11-11: başlıq qutusu `[data-reset-page-all]` (səhifədəkilərin hamısı) və
+ *    `[data-reset-all-matching]` («Bütün N nəticəni seç» — süzgəcə uyğun bütün səhifələr; modalda say +
+ *    xəbərdarlıq; forma ID yox, `select_scope=all_matching` + süzgəc sorğusu + gözlənilən say daşıyır).
  *  - Qrup: `[data-reset-group-select]` + `[data-reset-group-open]` → ön baxış (JSON, EMSCore.fetchJSON)
  *    → #resetGroupModal; təsdiq düyməsi yalnız sıfırlanacaq cəhd varsa aktivdir.
  *  - Səbəb məcburidir (textarea `required` + `minlength`; server də yoxlayır).
@@ -22,27 +25,71 @@
         return window.bootstrap.Modal.getOrCreateInstance(element);
     }
 
+    /* Sahib 2026-11-11: «Bütün N nəticəni seç» — cari süzgəcə uyğun bütün səhifələr. ID göndərilmir:
+       forma `select_scope=all_matching` + süzgəc sorğusu + gözlənilən say daşıyır, siyahını server qurur. */
+    var allMatching = false;
+
+    function boxes() {
+        return Array.prototype.slice.call(document.querySelectorAll(CHECKBOX));
+    }
+
     function selectedIds() {
-        return Array.prototype.slice.call(document.querySelectorAll(CHECKBOX))
+        return boxes()
             .filter(function (box) { return box.checked; })
             .map(function (box) { return box.value; });
     }
 
+    function allButton() {
+        return document.querySelector("[data-reset-all-matching]");
+    }
+
+    function matchingTotal() {
+        var button = allButton();
+        var total = parseInt(button ? button.getAttribute("data-total") : "", 10);
+        return isFinite(total) ? total : 0;
+    }
+
     function syncSelection() {
-        var count = selectedIds().length;
+        var all = boxes();
+        var checked = selectedIds().length;
+        if (allMatching && (!allButton() || checked !== all.length)) {
+            allMatching = false; // düymə yoxdur və ya sətir əl ilə dəyişib — yalnız işarəlilər qalır
+        }
+        var count = allMatching ? matchingTotal() : checked;
         var counter = document.querySelector("[data-reset-selected-count]");
         var button = document.querySelector("[data-reset-selected]");
+        var header = document.querySelector("[data-reset-page-all]");
+        var allBtn = allButton();
         if (counter) {
             counter.textContent = String(count);
         }
         if (button) {
             button.disabled = count === 0;
         }
+        if (header) {
+            header.checked = all.length > 0 && checked === all.length;
+            header.indeterminate = checked > 0 && checked < all.length;
+        }
+        if (allBtn) {
+            allBtn.setAttribute("aria-pressed", allMatching ? "true" : "false");
+        }
     }
 
-    function openAttemptsModal(ids, studentLabel) {
+    function setPage(value) {
+        boxes().forEach(function (box) { box.checked = value; });
+    }
+
+    function hiddenInput(name, value) {
+        var input = document.createElement("input");
+        input.type = "hidden";
+        input.name = name;
+        input.value = value;
+        return input;
+    }
+
+    function openAttemptsModal(ids, studentLabel, everything) {
         var modalEl = document.getElementById("resetAttemptsModal");
-        if (!modalEl || !ids.length) {
+        if (!modalEl || (!everything && !ids.length)) {
             return;
         }
         var inputs = modalEl.querySelector("[data-reset-inputs]");
@@ -50,18 +97,23 @@
         var many = modalEl.querySelector("[data-reset-many]");
         var name = modalEl.querySelector("[data-reset-name]");
         var count = modalEl.querySelector("[data-reset-count]");
+        var note = modalEl.querySelector("[data-reset-all-note]");
         var reason = modalEl.querySelector("textarea[name='reason']");
+        var total = everything ? matchingTotal() : ids.length;
         if (inputs) {
             inputs.textContent = "";
-            ids.forEach(function (id) {
-                var input = document.createElement("input");
-                input.type = "hidden";
-                input.name = "attempt_ids";
-                input.value = id;
-                inputs.appendChild(input);
-            });
+            if (everything) {
+                var source = allButton();
+                inputs.appendChild(hiddenInput("select_scope", "all_matching"));
+                inputs.appendChild(hiddenInput("filter_query", source ? source.getAttribute("data-filter-query") || "" : ""));
+                inputs.appendChild(hiddenInput("expected_count", String(total)));
+            } else {
+                ids.forEach(function (id) {
+                    inputs.appendChild(hiddenInput("attempt_ids", id));
+                });
+            }
         }
-        var single = ids.length === 1 && studentLabel;
+        var single = !everything && ids.length === 1 && studentLabel;
         if (one) {
             one.hidden = !single;
         }
@@ -72,7 +124,10 @@
             many.hidden = !!single;
         }
         if (count) {
-            count.textContent = String(ids.length);
+            count.textContent = String(total);
+        }
+        if (note) {
+            note.hidden = !everything;
         }
         if (reason) {
             reason.value = "";
@@ -183,9 +238,21 @@
         window.EMSDelegate.on("click", "#selectAllAttemptsBtn, #clearAttemptsBtn", function () {
             window.setTimeout(syncSelection, 0);
         });
+        window.EMSDelegate.on("change", "[data-reset-page-all]", function (event, header) {
+            allMatching = false;
+            setPage(!!header.checked);
+            syncSelection();
+        });
+        window.EMSDelegate.on("click", "[data-reset-all-matching]", function (event) {
+            event.preventDefault();
+            var enable = !allMatching;
+            setPage(enable);
+            allMatching = enable;
+            syncSelection();
+        });
         window.EMSDelegate.on("click", "[data-reset-selected]", function (event) {
             event.preventDefault();
-            openAttemptsModal(selectedIds(), "");
+            openAttemptsModal(selectedIds(), "", allMatching);
         });
         window.EMSDelegate.on("change", "[data-reset-group-select]", function (event, select) {
             var card = select.closest("[data-reset-group-card]");

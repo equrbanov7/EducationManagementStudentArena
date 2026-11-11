@@ -73,3 +73,21 @@
     white-space: normal;
     overflow-wrap: anywhere;
 }
+
+/* Sahib 2026-11-11: «Bütün N nəticəni seç» (bütün səhifələr) — aktiv vəziyyət və modal qeydi. */
+[data-reset-all-matching][aria-pressed="true"] {
+    background: var(--ems-primary-50);
+    border-color: var(--ems-primary-200);
+    color: var(--ems-primary-800);
+}
+
+.etr-reset-allnote {
+    margin: 0 0 8px;
+    padding: 8px 12px;
+    border: 1px solid var(--ems-warning-bd);
+    border-radius: var(--ems-r-lg);
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+}

@@ -133,15 +133,20 @@ def bank_teacher_search(request):
         return JsonResponse({"results": [], "has_more": False})
 
     query = (request.GET.get("q") or "").strip()
-    qs = organization_role_user_queryset(
+    role_users = organization_role_user_queryset(
         organization,
         {ProfileRole.TEACHER, ProfileRole.ASSISTANT_TEACHER},
         queryset=User.objects.filter(is_active=True),
     )
+    # 2026-11-11 (sahib «ləngdir» — sehrbazın müəllim seçicisi): üzvlük JOIN-u + bütün istifadəçi sütunları
+    # üzərində DISTINCT əvəzinə yarım-birləşmə (``pk IN (…)``) və yalnız etiketə lazım olan 4 sütun.
+    qs = User.objects.filter(pk__in=role_users.order_by().values("pk")).only(
+        "id", "username", "first_name", "last_name"
+    )
     search_q = tolerant_q(query, ("username", "first_name", "last_name"))
     if search_q is not None:
         qs = qs.filter(search_q)
-    qs = qs.distinct().order_by("first_name", "last_name", "username")
+    qs = qs.order_by("first_name", "last_name", "username")
 
     offset, limit = _page_bounds(request)
     results, has_more = _paginate(

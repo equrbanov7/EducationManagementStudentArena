@@ -30,6 +30,16 @@ CSS: exams/css/question_form{,_media,_answers}.css (+ teacher_page_shell.css eti
         {% csrf_token %}
         {% if is_modal %}<input type="hidden" name="modal" value="1">{% endif %}
 
+        {% if creates_version %}
+        {# Sahib 2026-11-11: cavablanmış sual yerində dəyişmir — yeni versiya yaranır (bax services/question_versioning.py). #}
+        <div class="qf-alert qf-alert--info" role="note" data-qf-version-note>
+            <i class="fas fa-code-branch" aria-hidden="true"></i>
+            <div>
+                {% trans "Bu suala artıq cavab verilib: dəyişikliyiniz YENİ VERSİYA kimi saxlanacaq — köhnə sual deaktiv olunur və keçmiş cəhdlərdə olduğu kimi qalır (ballar dəyişmir)." context "exams.template.question_form" %}
+                {% if key_correction_url %}<a href="{{ key_correction_url }}" target="_blank" rel="noopener">{% trans "Keçmiş cəhdlərdə düzgün cavabı dəyişmək üçün — «Cavab açarı düzəlişi» (apellyasiyalar)." context "exams.template.question_form" %}</a>{% endif %}
+            </div>
+        </div>
+        {% endif %}
         {% if form.non_field_errors %}
         <div class="qf-alert" role="alert"><i class="fas fa-circle-exclamation" aria-hidden="true"></i><div>{{ form.non_field_errors }}</div></div>
         {% endif %}
@@ -182,7 +192,7 @@ CSS: exams/css/question_form{,_media,_answers}.css (+ teacher_page_shell.css eti
         <div class="qf-actions">
             {% if is_modal %}
             <button type="button" class="ems-btn js-close-question-form-modal">{% trans "action_cancel" context "exams.template.add_exam_question" %}</button>
-            <button type="submit" name="save" class="ems-btn ems-btn--primary"><i class="fas fa-check" aria-hidden="true"></i>{% trans "action_save" context "exams.template.add_exam_question" %}</button>
+            <button type="submit" name="save" class="ems-btn ems-btn--primary">{% if creates_version %}<i class="fas fa-code-branch" aria-hidden="true"></i>{% trans "Dəyiş (yeni versiya)" context "exams.template.teacher_questions_bank" %}{% else %}<i class="fas fa-check" aria-hidden="true"></i>{% trans "action_save" context "exams.template.add_exam_question" %}{% endif %}</button>
             {% else %}
             <a href="{% url 'exams:teacher_exam_detail' exam.slug %}{% if question_navigation_query %}?{{ question_navigation_query }}{% endif %}" class="ems-btn ems-btn--ghost">{% trans "action_cancel" context "exams.template.add_exam_question" %}</a>
             <button type="submit" name="save_and_continue" class="ems-btn">{% trans "action_save_and_add_new_question" context "exams.template.add_exam_question" %}</button>

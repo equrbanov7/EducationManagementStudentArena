@@ -13,6 +13,11 @@ müəllim dalana dirənmir:
 
 İmtahanı deaktiv etmək ``exam.edit`` icazəsi tələb edir (``toggle_exam_active``
 ilə eyni siyasət) — icazə yoxdursa təsdiq təklif olunmur.
+
+Sahib 2026-11-11: silinəcək sualların bir hissəsi istifadə olunubsa (tələbə cavabı / apellyasiya) AJAX
+sorğusu 409 ``questions_have_answers`` + say və təsdiq mətni alır; razılıqda ``on_used=deactivate`` ilə
+təkrar göndərilir — istifadə olunmuşlar deaktiv edilir, qalanları silinir. ``X-QB-Partial: 1`` başlıqlı
+sorğuya (sual bankının səhifəni yenidən yükləməyən axını) mesajlar JSON-da qaytarılır.
 """
 
 import logging
@@ -26,6 +31,8 @@ from django.utils.translation import pgettext
 
 from apps.exams.services.question_invariants import (
     MODE_DELETE,
+    ON_USED_DEACTIVATE,
+    ON_USED_REFUSE,
     ActiveExamRequiresQuestion,
     ExamInUse,
     QuestionsHaveAnswers,
@@ -38,6 +45,8 @@ from ._shared import _resequence_exam_questions
 logger = logging.getLogger(__name__)
 
 CONFIRM_FIELD = "confirm_exam_deactivation"
+ON_USED_FIELD = "on_used"
+PARTIAL_HEADER = "X-QB-Partial"
 _GUARD_CTX = "exams.view.questions_bank.guard"
 _NOT_REPLAYED_FIELDS = {"csrfmiddlewaretoken", CONFIRM_FIELD}
 
@@ -46,10 +55,22 @@ def wants_json(request) -> bool:
     return request.headers.get("x-requested-with") == "XMLHttpRequest"
 
 
+def wants_partial(request) -> bool:
+    return request.headers.get(PARTIAL_HEADER) == "1"
+
+
+def _drained_messages(request) -> list:
+    """Növbədəki Django mesajları (oxunmaqla tükənir) — səhifəni yeniləməyən klient toast kimi göstərir."""
+    return [{"level": message.level_tag or "info", "text": str(message)} for message in messages.get_messages(request)]
+
+
 def finish_mutation_request(request, redirect_url):
     """Uğurlu (və ya adi mesajlı) POST-un sonu: AJAX-a JSON, adi formaya yönləndirmə."""
     if wants_json(request):
-        return JsonResponse({"ok": True, "redirect_url": redirect_url})
+        payload = {"ok": True, "redirect_url": redirect_url}
+        if wants_partial(request):
+            payload["messages"] = _drained_messages(request)
+        return JsonResponse(payload)
     return redirect(redirect_url)
 
 
@@ -80,6 +101,43 @@ def _confirmation_texts(mode) -> dict:
         "body": body,
         "confirm_label": pgettext(_GUARD_CTX, "Bəli, davam et"),
     }
+
+
+def _used_questions_response(request, exc, redirect_url):
+    """Silinəcək suallardan bəziləri istifadə olunub: AJAX-a «deaktiv edilsin?» təklifi, adi formaya izah."""
+    message = _error_text(exc)
+    if not wants_json(request):
+        messages.error(request, message)
+        return redirect(redirect_url)
+    used, unused = exc.used_count, exc.unused_count
+    if unused:
+        body = pgettext(
+            _GUARD_CTX,
+            "Seçilmiş suallardan {used}-i istifadə olunub (tələbə cavabı var) və silinə bilməz. "
+            "Onlar deaktiv edilsin, qalan {unused} sual silinsin?",
+        ).format(used=used, unused=unused)
+    else:
+        body = pgettext(
+            _GUARD_CTX,
+            "İstifadə olunmuş {used} sual silinə bilməz — deaktiv edilsin? Cavablar və nəticələr qalır.",
+        ).format(used=used)
+    return JsonResponse(
+        {
+            "ok": False,
+            "code": "questions_have_answers",
+            "message": message,
+            "used_count": used,
+            "unused_count": unused,
+            "fallback_field": ON_USED_FIELD,
+            "fallback_value": ON_USED_DEACTIVATE,
+            "confirm": {
+                "title": pgettext(_GUARD_CTX, "İstifadə olunmuş suallar silinmir"),
+                "body": body,
+                "confirm_label": pgettext(_GUARD_CTX, "Bəli, deaktiv et"),
+            },
+        },
+        status=409,
+    )
 
 
 def _ask_confirmation(request, *, mode, cancel_url):
@@ -118,7 +176,7 @@ def _ask_confirmation(request, *, mode, cancel_url):
     )
 
 
-def run_question_mutation(request, exam, *, mode, question_ids, redirect_url, success_message=""):
+def run_question_mutation(request, exam, *, mode, question_ids, redirect_url, success_message="", audit_extra=None):
     """Sualları sil/deaktiv et. Axın dayanmalıdırsa ``HttpResponse``, əks halda ``None``.
 
     ``None`` qayıdanda uğur mesajları artıq növbəyə qoyulub — çağıran
@@ -127,6 +185,7 @@ def run_question_mutation(request, exam, *, mode, question_ids, redirect_url, su
     # İcazə yoxlaması yalnız lazım olanda (superadmin cross-org yoxlaması audit yazır).
     confirm_requested = request.POST.get(CONFIRM_FIELD) == "1"
     confirmed = confirm_requested and request_has_permission(request, "exam.edit")
+    on_used = ON_USED_DEACTIVATE if request.POST.get(ON_USED_FIELD) == ON_USED_DEACTIVATE else ON_USED_REFUSE
     try:
         outcome = remove_exam_questions(
             exam,
@@ -135,11 +194,13 @@ def run_question_mutation(request, exam, *, mode, question_ids, redirect_url, su
             deactivate_exam=confirmed,
             by_user=request.user,
             request=request,
+            on_used=on_used,
+            audit_extra=audit_extra,
         )
     except ExamInUse as exc:
         return _refuse(request, _error_text(exc), redirect_url, code="exam_in_use")
     except QuestionsHaveAnswers as exc:
-        return _refuse(request, _error_text(exc), redirect_url, code="questions_have_answers")
+        return _used_questions_response(request, exc, redirect_url)
     except ActiveExamRequiresQuestion as exc:
         # Təsdiq gəlib, amma icazə yoxdur — və ya icazəsizə təsdiq təklif etmirik.
         if confirm_requested or not request_has_permission(request, "exam.edit"):
@@ -160,8 +221,16 @@ def run_question_mutation(request, exam, *, mode, question_ids, redirect_url, su
 
     if mode == MODE_DELETE:
         _resequence_exam_questions(exam)
-    if success_message:
+    if success_message and (outcome.count or not outcome.deactivated_used):
         messages.success(request, success_message.format(count=outcome.count))
+    if outcome.deactivated_used:
+        messages.info(
+            request,
+            pgettext(
+                _GUARD_CTX,
+                "İstifadə olunmuş {count} sual silinmədi — deaktiv edildi (cavablar və nəticələr qalır).",
+            ).format(count=outcome.deactivated_used),
+        )
     if outcome.exam_deactivated:
         messages.info(
             request,
@@ -173,4 +242,12 @@ def run_question_mutation(request, exam, *, mode, question_ids, redirect_url, su
     return None
 
 
-__all__ = ["CONFIRM_FIELD", "finish_mutation_request", "run_question_mutation", "wants_json"]
+__all__ = [
+    "CONFIRM_FIELD",
+    "ON_USED_FIELD",
+    "PARTIAL_HEADER",
+    "finish_mutation_request",
+    "run_question_mutation",
+    "wants_json",
+    "wants_partial",
+]

@@ -1,0 +1,16 @@
+{% load i18n %}
+{# KPI xülasəsi (Cəmi · Aktiv · Deaktiv) — canlı hissə `data-qb-live="kpis"`. #}
+<section class="etp-kpis eqb-kpis" aria-label="{% trans 'Xülasə' context 'exams.template.teacher_questions_bank' %}">
+    <div class="etp-kpi etp-kpi--primary">
+        <span class="etp-kpi__icon"><i class="fas fa-database" aria-hidden="true"></i></span>
+        <span class="etp-kpi__body"><span class="etp-kpi__value">{{ total_questions }}</span><span class="etp-kpi__label">{% trans "Cəmi" context "exams.template.teacher_questions_bank" %}</span></span>
+    </div>
+    <div class="etp-kpi etp-kpi--success">
+        <span class="etp-kpi__icon"><i class="fas fa-circle-check" aria-hidden="true"></i></span>
+        <span class="etp-kpi__body"><span class="etp-kpi__value">{{ active_questions }}</span><span class="etp-kpi__label">{% trans "Aktiv" context "exams.template.teacher_questions_bank" %}</span></span>
+    </div>
+    <div class="etp-kpi">
+        <span class="etp-kpi__icon"><i class="fas fa-circle-pause" aria-hidden="true"></i></span>
+        <span class="etp-kpi__body"><span class="etp-kpi__value">{{ inactive_questions }}</span><span class="etp-kpi__label">{% trans "Deaktiv" context "exams.template.teacher_questions_bank" %}</span></span>
+    </div>
+</section>

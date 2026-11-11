@@ -1,0 +1,8 @@
+{% comment %}Sual bankı — YALNIZ canlı hissələr (başlıq `X-QB-Partial: 1`; sahib 2026-11-11 «ləngdir»).
+Tam səhifə ilə EYNİ partial-lar; JS (teacher_questions_bank/live.js) `data-qb-live` adına görə uyğun
+hissəni əvəz edir — süzgəc, səhifələmə və toplu əməldən sonra səhifə yenidən yüklənmir.{% endcomment %}
+<div data-qb-live="kpis">{% include "exams/teacher/partials/qm/_kpis.html" %}</div>
+<div data-qb-live="export">{% include "exams/teacher/partials/qm/_export.html" %}</div>
+<div data-qb-live="quality">{% include "exams/teacher/partials/qm/_quality.html" %}</div>
+<div data-qb-live="list">{% include "exams/teacher/partials/qm/_list.html" %}</div>
+<div data-qb-live="danger">{% include "exams/teacher/partials/qm/_danger.html" %}</div>

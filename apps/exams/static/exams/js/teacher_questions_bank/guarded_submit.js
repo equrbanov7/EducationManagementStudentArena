@@ -10,6 +10,10 @@
    digər imtinalar EMSToast ilə göstərilir. Uğurda server `redirect_url` verir
    (Django mesajları orada toast kimi görünür).
 
+   2026-11-11: (a) `questions_have_answers` + təsdiq mətni → «istifadə olunmuş N sual silinə bilməz —
+   deaktiv edilsin?»; razılıqda `on_used=deactivate` ilə təkrar; (b) QBLive (live.js) varsa sorğu
+   `X-QB-Partial: 1` ilə gedir, cavabdakı mesajlar toast olur və yalnız canlı bölgələr yenilənir.
+
    Yalnız `[data-qm-context="exam"]` səhifəsində işləyir (2026-10-10 redizaynda
    kök `.etp-page` oldu — sinif yox, data-atribut yoxlanır) (müstəqil
    sual bankı səhifəsi adi form göndərişində qalır). Gözlənilməz cavabda
@@ -60,15 +64,47 @@
     }
   }
 
+  function live() {
+    var api = window.QBLive;
+    return api && typeof api.enabled === "function" && api.enabled() ? api : null;
+  }
+
+  function confirmAndResend(form, fields, payload, extraName, extraValue) {
+    if (!window.EMSConfirm || typeof window.EMSConfirm.open !== "function") {
+      plainSubmit(form, fields); // server tərəfi təsdiq səhifəsi / izah göstərir
+      return;
+    }
+    return window.EMSConfirm.open({
+      title: payload.confirm.title || "",
+      body: payload.confirm.body || "",
+      confirmLabel: payload.confirm.confirm_label || "",
+      danger: true,
+    }).then(function (ok) {
+      if (!ok) return;
+      var next = Object.assign({}, fields || {});
+      next[extraName] = extraValue;
+      return send(form, next);
+    });
+  }
+
   function send(form, fields) {
     var data = new window.FormData(form);
     Object.keys(fields || {}).forEach(function (name) {
       data.set(name, fields[name]);
     });
     inFlight = true;
-    return window.EMSCore.fetchJSON(form.action || window.location.href, { method: "POST", body: data })
+    var liveApi = live();
+    var headers = {};
+    if (liveApi) headers[liveApi.PARTIAL_HEADER || "X-QB-Partial"] = "1";
+    return window.EMSCore.fetchJSON(form.action || window.location.href, { method: "POST", body: data, headers: headers })
       .then(function (payload) {
         inFlight = false;
+        // 2026-11-11: səhifə yenidən yüklənmir — mesajlar toast, siyahı fraqmentlə yenilənir.
+        if (liveApi && payload && payload.redirect_url && Array.isArray(payload.messages)) {
+          liveApi.showMessages(payload.messages);
+          liveApi.refresh(payload.redirect_url, { push: false });
+          return;
+        }
         if (payload && payload.redirect_url) {
           window.location.assign(payload.redirect_url);
           return;
@@ -80,21 +116,11 @@
         var payload = error && error.payload;
         if (payload && typeof payload === "object") {
           if (payload.code === "exam_deactivation_required" && payload.confirm) {
-            if (!window.EMSConfirm || typeof window.EMSConfirm.open !== "function") {
-              plainSubmit(form, fields); // server tərəfi təsdiq səhifəsi göstərir
-              return;
-            }
-            return window.EMSConfirm.open({
-              title: payload.confirm.title || "",
-              body: payload.confirm.body || "",
-              confirmLabel: payload.confirm.confirm_label || "",
-              danger: true,
-            }).then(function (ok) {
-              if (!ok) return;
-              var next = Object.assign({}, fields || {});
-              next[payload.confirm_field || DEFAULT_CONFIRM_FIELD] = "1";
-              return send(form, next);
-            });
+            return confirmAndResend(form, fields, payload, payload.confirm_field || DEFAULT_CONFIRM_FIELD, "1");
+          }
+          // 2026-11-11: istifadə olunmuş suallar silinmir — «deaktiv edilsin?» təklifi.
+          if (payload.code === "questions_have_answers" && payload.confirm && payload.fallback_field) {
+            return confirmAndResend(form, fields, payload, payload.fallback_field, payload.fallback_value || "deactivate");
           }
           if (payload.message) {
             showError(payload.message);

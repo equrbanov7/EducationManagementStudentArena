@@ -10,6 +10,11 @@
    POST müqaviləsi dəyişməyib: bulk_action = activate|deactivate|delete|
    delete_language|delete_all (+ guarded_submit.js «son aktiv suallar» axını).
 
+   2026-11-11 (sahib «ləngdir» + toplu əməllər): dinləyicilər kökə DELEGASİYA ilə bağlanır — siyahı
+   canlı yenilənəndə (teacher_questions_bank/live.js) yenidən bağlamaq lazım deyil; süzgəc / əməl /
+   sual modalı səhifəni yenidən yükləmir; «Bütün N sualı seç» (select_scope=all_matching) və
+   «Bütün sualları deaktiv et / aktiv et» əlavə olundu.
+
    AJAX-safe: EMSReady + kök bayrağı (`data-qb-bound`) — document/window-a
    dinləyici yığılmır. Qarmaqlar: partials/_question_management.html,
    qm/_card.html, qm/_danger.html.
@@ -71,8 +76,9 @@
     });
   }
 
-  /* QB 2026-09-30: imtahan səhifəsində sil/deaktiv AJAX ilə gedir (guarded_submit.js);
-     köməkçi yoxdursa (kitabxana bankı) false → adi form göndərişi. */
+  /* QB 2026-09-30: imtahan səhifəsində əməllər AJAX ilə gedir (guarded_submit.js);
+     köməkçi yoxdursa (kitabxana bankı) false → adi form göndərişi.
+     2026-11-11: «aktiv et» də eyni yoldadır — səhifə yenidən yüklənmir (live.js). */
   function guardedSubmit(form, fields) {
     var guard = window.QBGuardedSubmit;
     if (!form || !guard || !guard.enabled()) return false;
@@ -80,9 +86,9 @@
     return true;
   }
 
-  function submitWith(form, fields, guarded) {
+  function submitWith(form, fields) {
     if (!form) return;
-    if (guarded && guardedSubmit(form, fields)) return;
+    if (guardedSubmit(form, fields)) return;
     Object.keys(fields || {}).forEach(function (name) {
       var hidden = document.createElement("input");
       hidden.type = "hidden";
@@ -91,6 +97,15 @@
       form.appendChild(hidden);
     });
     form.submit();
+  }
+
+  function liveApi() {
+    var api = window.QBLive;
+    return api && typeof api.enabled === "function" && api.enabled() ? api : null;
+  }
+
+  function closest(target, selector) {
+    return target && typeof target.closest === "function" ? target.closest(selector) : null;
   }
 
   /* ── Axtarış + süzgəclər (dərhal tətbiq) + səhifələmə ─────────────────── */
@@ -107,13 +122,26 @@
       input.value = value;
     }
 
+    /* 2026-11-11: süzgəc dəyişəndə yalnız canlı bölgələr yenilənir (fokus axtarış sahəsində qalır). */
+    function applyLive() {
+      var api = liveApi();
+      if (!api) return false;
+      normalizeInput();
+      api.refresh(api.urlFromFilterForm(form), { push: true });
+      return true;
+    }
+
     function submitSearch() {
       normalizeInput();
+      if (applyLive()) return;
       if (typeof form.requestSubmit === "function") form.requestSubmit();
       else form.submit();
     }
 
-    form.addEventListener("submit", normalizeInput);
+    form.addEventListener("submit", function (event) {
+      normalizeInput();
+      if (applyLive()) event.preventDefault();
+    });
     form.addEventListener("change", function (event) {
       if (event.target && event.target.tagName === "SELECT") submitSearch();
     });
@@ -123,15 +151,16 @@
       window.EMSSearchInput.bind(input, {
         onSearch: function () {
           normalizeInput();
+          if (applyLive()) return;
           window.EMSSearchInput.submitForm(form, { input: input });
         }
       });
     }
 
-    root.querySelectorAll(".pagination-wrapper .page-link[href]").forEach(function (link) {
-      link.addEventListener("click", function () {
-        try { window.sessionStorage.setItem(SCROLL_FLAG, "1"); } catch (e) { /* storage bağlıdır */ }
-      });
+    // Tam səhifə keçidi (canlı rejim yoxdursa): yeni səhifə yuxarıdan açılsın.
+    root.addEventListener("click", function (event) {
+      if (liveApi() || !closest(event.target, ".pagination-wrapper .page-link[href]")) return;
+      try { window.sessionStorage.setItem(SCROLL_FLAG, "1"); } catch (e) { /* storage bağlıdır */ }
     });
     try {
       if ("scrollRestoration" in window.history) window.history.scrollRestoration = "manual";
@@ -142,148 +171,208 @@
     } catch (e) { /* storage bağlıdır */ }
   }
 
-  /* ── Seçim + toplu əməllər ────────────────────────────────────────────── */
+  /* ── Seçim + toplu əməllər ──────────────────────────────────────────────
+     Delegasiya ilə (kökə bir dinləyici) — siyahı canlı yenilənəndə yenidən bağlamaq lazım deyil;
+     DOM hər dəfə oxunur. 2026-11-11: «Bütün N sualı seç» — `select_scope=all_matching` gizli sahəsi;
+     ID göndərilmir, server cari süzgəci özü tətbiq edir. */
   function bindSelection(root) {
-    var bulkForm = document.getElementById("bulkForm");
-    var countLabel = document.getElementById("selectedCountLabel");
-    var checkboxes = Array.prototype.slice.call(root.querySelectorAll(".question-checkbox"));
-    var bulkButtons = Array.prototype.slice.call(root.querySelectorAll(".js-bulk-action-btn"));
+    function boxes() {
+      return Array.prototype.slice.call(root.querySelectorAll(".question-checkbox"));
+    }
+
+    function scopeInput() { return document.getElementById("qbSelectScope"); }
+
+    function allMatching() {
+      var field = scopeInput();
+      return !!field && field.value === "all_matching";
+    }
+
+    function matchingTotal() {
+      var button = document.getElementById("selectAllMatchingBtn");
+      var total = parseInt(button ? button.getAttribute("data-total") : "", 10);
+      return Number.isFinite(total) ? total : 0;
+    }
 
     function selectedCount() {
-      return checkboxes.filter(function (box) { return box.checked; }).length;
+      if (allMatching()) return matchingTotal();
+      return boxes().filter(function (box) { return box.checked; }).length;
+    }
+
+    function setScope(all) {
+      var field = scopeInput();
+      var button = document.getElementById("selectAllMatchingBtn");
+      if (field) field.value = all ? "all_matching" : "";
+      if (button) button.setAttribute("aria-pressed", all ? "true" : "false");
     }
 
     function refresh() {
       var count = selectedCount();
-      checkboxes.forEach(function (box) {
+      var countLabel = document.getElementById("selectedCountLabel");
+      boxes().forEach(function (box) {
         var card = box.closest(".qb-card");
         if (card) card.classList.toggle("is-selected", box.checked);
       });
       if (countLabel) {
-        countLabel.textContent = count === 0
-          ? t("selectedCountZero", "0 seçilib")
-          : fill(t("selectedCount", "{count} seçilib"), { count: count });
+        countLabel.classList.toggle("is-all-matching", allMatching());
+        if (allMatching()) {
+          countLabel.textContent = fill(t("selectedAllMatching", "Süzgəcə uyğun bütün {count} sual seçilib"), { count: count });
+        } else {
+          countLabel.textContent = count === 0
+            ? t("selectedCountZero", "0 seçilib")
+            : fill(t("selectedCount", "{count} seçilib"), { count: count });
+        }
       }
-      bulkButtons.forEach(function (button) {
+      Array.prototype.forEach.call(root.querySelectorAll(".js-bulk-action-btn"), function (button) {
         button.disabled = count === 0;
         button.setAttribute("aria-disabled", count === 0 ? "true" : "false");
       });
     }
 
-    function setAll(value) {
-      checkboxes.forEach(function (box) { box.checked = value; });
+    function setAll(value, all) {
+      setScope(!!all);
+      boxes().forEach(function (box) { box.checked = value; });
       refresh();
     }
 
-    var selectAllBtn = document.getElementById("selectAllPageBtn");
-    var clearBtn = document.getElementById("clearSelectionBtn");
-    if (selectAllBtn) selectAllBtn.addEventListener("click", function () { setAll(true); });
-    if (clearBtn) clearBtn.addEventListener("click", function () { setAll(false); });
-    checkboxes.forEach(function (box) { box.addEventListener("change", refresh); });
-
-    // Kartın boş yerinə klik onu seçir (düymə/keçid/sahə klikləri istisna).
-    root.querySelectorAll(".qb-card").forEach(function (card) {
-      card.addEventListener("click", function (event) {
-        if (event.target.closest(INTERACTIVE_SELECTOR)) return;
-        var box = card.querySelector(".question-checkbox");
-        if (!box) return;
-        box.checked = !box.checked;
-        refresh();
-      });
+    root.addEventListener("change", function (event) {
+      if (!closest(event.target, ".question-checkbox")) return;
+      setScope(false); // əl ilə dəyişiklik «hamısı» rejimindən çıxarır — yalnız işarəlilər qalır
+      refresh();
     });
 
-    if (bulkForm) {
-      bulkForm.addEventListener("submit", function (event) {
-        var submitter = event.submitter;
-        if (!submitter || submitter.name !== "bulk_action") return;
-        event.preventDefault();
-        var count = selectedCount();
-        if (count === 0) {
-          if (window.EMSToast) window.EMSToast.show(t("selectAtLeastOne", "Ən azı bir sual seçin."), "warning");
-          return;
-        }
-        var action = submitter.value;
-        var cfg = {
-          delete: { title: t("confirmDeleteTitle", "Silməyi təsdiqlə"), body: t("bulkDeleteBody", "Seçilmiş {count} sual həmişəlik silinəcək. Davam edək?"), confirmLabel: t("okDelete", "Bəli, sil"), danger: true },
-          deactivate: { title: t("confirmDeactivateTitle", "Deaktiv etməyi təsdiqlə"), body: t("bulkDeactivateBody", "Seçilmiş {count} sual deaktiv ediləcək. Davam edək?"), confirmLabel: t("okDeactivate", "Bəli, deaktiv et"), danger: true },
-          activate: { title: t("confirmActivateTitle", "Aktiv etməyi təsdiqlə"), body: t("bulkActivateBody", "Seçilmiş {count} sual aktiv ediləcək. Davam edək?"), confirmLabel: t("okActivate", "Bəli, aktiv et"), danger: false },
-        }[action];
-        if (!cfg) return;
-        cfg.body = fill(cfg.body, { count: count });
-        confirmThen(cfg, function () {
-          submitWith(bulkForm, { bulk_action: action }, action !== "activate");
-        }, submitter);
-      });
-    }
+    root.addEventListener("click", function (event) {
+      if (closest(event.target, "#selectAllMatchingBtn")) { setAll(true, true); return; }
+      if (closest(event.target, "#selectAllPageBtn")) { setAll(true, false); return; }
+      if (closest(event.target, "#clearSelectionBtn")) { setAll(false, false); return; }
+      // Kartın boş yerinə klik onu seçir (düymə/keçid/sahə klikləri istisna).
+      var card = closest(event.target, ".qb-card");
+      if (!card || closest(event.target, INTERACTIVE_SELECTOR)) return;
+      var box = card.querySelector(".question-checkbox");
+      if (!box) return;
+      box.checked = !box.checked;
+      setScope(false);
+      refresh();
+    });
 
+    root.addEventListener("submit", function (event) {
+      var bulkForm = closest(event.target, "#bulkForm");
+      if (!bulkForm) return;
+      var submitter = event.submitter;
+      if (!submitter || submitter.name !== "bulk_action") return;
+      event.preventDefault();
+      var count = selectedCount();
+      if (count === 0) {
+        if (window.EMSToast) window.EMSToast.show(t("selectAtLeastOne", "Ən azı bir sual seçin."), "warning");
+        return;
+      }
+      var action = submitter.value;
+      var cfg = {
+        delete: { title: t("confirmDeleteTitle", "Silməyi təsdiqlə"), body: t("bulkDeleteBody", "Seçilmiş {count} sual həmişəlik silinəcək. Davam edək?"), confirmLabel: t("okDelete", "Bəli, sil"), danger: true },
+        deactivate: { title: t("confirmDeactivateTitle", "Deaktiv etməyi təsdiqlə"), body: t("bulkDeactivateBody", "Seçilmiş {count} sual deaktiv ediləcək. Davam edək?"), confirmLabel: t("okDeactivate", "Bəli, deaktiv et"), danger: true },
+        activate: { title: t("confirmActivateTitle", "Aktiv etməyi təsdiqlə"), body: t("bulkActivateBody", "Seçilmiş {count} sual aktiv ediləcək. Davam edək?"), confirmLabel: t("okActivate", "Bəli, aktiv et"), danger: false },
+      }[action];
+      if (!cfg) return;
+      cfg.body = fill(cfg.body, { count: count });
+      if (allMatching()) cfg.body += " " + t("allMatchingNote", "Seçim bütün səhifələri əhatə edir.");
+      confirmThen(cfg, function () {
+        submitWith(bulkForm, { bulk_action: action });
+      }, submitter);
+    });
+
+    // Canlı yeniləmədən sonra siyahı təzədir — seçim sıfırdan.
+    root.addEventListener("qb:live:updated", refresh);
     refresh();
   }
 
-  /* ── Tək sual: aktiv/deaktiv/sil; dil üzrə sil ─────────────────────────── */
+  /* ── Tək sual: aktiv/deaktiv/sil; dil üzrə sil; bütün suallar üzrə aktiv/deaktiv ── */
   function bindRowActions(root) {
-    var deleteForm = document.getElementById("singleDeleteForm");
-    var deleteId = document.getElementById("singleDeleteQuestionId");
-    var actionForm = document.getElementById("singleQuestionActionForm");
-    var actionValue = document.getElementById("singleQuestionActionValue");
-    var actionId = document.getElementById("singleQuestionActionQuestionId");
-    var langForm = document.getElementById("questionLangDeleteForm");
-    var langValue = document.getElementById("questionLangDeleteValue");
+    function onDelete(button) {
+      var deleteForm = document.getElementById("singleDeleteForm");
+      var deleteId = document.getElementById("singleDeleteQuestionId");
+      var qid = button.getAttribute("data-question-id");
+      if (!deleteForm || !deleteId || !qid) return;
+      confirmThen({
+        title: t("confirmDeleteTitle", "Silməyi təsdiqlə"),
+        body: fill(t("deleteQuestionBody", "Bu sual silinəcək: {question}"), { question: button.getAttribute("data-question-text") || "" }),
+        confirmLabel: t("okDelete", "Bəli, sil"),
+        danger: true,
+      }, function () {
+        deleteId.value = qid;
+        submitWith(deleteForm, null);
+      }, button);
+    }
 
-    root.querySelectorAll(".js-open-delete-modal").forEach(function (button) {
-      button.addEventListener("click", function () {
-        var qid = button.getAttribute("data-question-id");
-        if (!deleteForm || !deleteId || !qid) return;
-        confirmThen({
-          title: t("confirmDeleteTitle", "Silməyi təsdiqlə"),
-          body: fill(t("deleteQuestionBody", "Bu sual silinəcək: {question}"), { question: button.getAttribute("data-question-text") || "" }),
-          confirmLabel: t("okDelete", "Bəli, sil"),
-          danger: true,
-        }, function () {
-          deleteId.value = qid;
-          submitWith(deleteForm, null, true);
-        }, button);
-      });
-    });
+    function onSingle(button) {
+      var actionForm = document.getElementById("singleQuestionActionForm");
+      var actionValue = document.getElementById("singleQuestionActionValue");
+      var actionId = document.getElementById("singleQuestionActionQuestionId");
+      var action = button.getAttribute("data-action-value") || "";
+      var qid = button.getAttribute("data-question-id") || "";
+      if (!actionForm || !actionValue || !actionId || !qid) return;
+      var activate = action === "activate";
+      confirmThen({
+        title: activate ? t("confirmActivateTitle", "Aktiv etməyi təsdiqlə") : t("confirmDeactivateTitle", "Deaktiv etməyi təsdiqlə"),
+        body: activate ? t("singleActivateBody", "Bu sual aktiv ediləcək. Davam edək?") : t("singleDeactivateBody", "Bu sual deaktiv ediləcək. Davam edək?"),
+        confirmLabel: activate ? t("okActivate", "Bəli, aktiv et") : t("okDeactivate", "Bəli, deaktiv et"),
+        danger: !activate,
+      }, function () {
+        actionValue.value = action;
+        actionId.value = qid;
+        submitWith(actionForm, null);
+      }, button);
+    }
 
-    root.querySelectorAll(".js-single-question-action").forEach(function (button) {
-      button.addEventListener("click", function () {
-        var action = button.getAttribute("data-action-value") || "";
-        var qid = button.getAttribute("data-question-id") || "";
-        if (!actionForm || !actionValue || !actionId || !qid) return;
-        var activate = action === "activate";
-        confirmThen({
-          title: activate ? t("confirmActivateTitle", "Aktiv etməyi təsdiqlə") : t("confirmDeactivateTitle", "Deaktiv etməyi təsdiqlə"),
-          body: activate ? t("singleActivateBody", "Bu sual aktiv ediləcək. Davam edək?") : t("singleDeactivateBody", "Bu sual deaktiv ediləcək. Davam edək?"),
-          confirmLabel: activate ? t("okActivate", "Bəli, aktiv et") : t("okDeactivate", "Bəli, deaktiv et"),
-          danger: !activate,
-        }, function () {
-          actionValue.value = action;
-          actionId.value = qid;
-          submitWith(actionForm, null, !activate);
-        }, button);
-      });
-    });
+    function onLanguage(button) {
+      var langForm = document.getElementById("questionLangDeleteForm");
+      var langValue = document.getElementById("questionLangDeleteValue");
+      var lang = button.getAttribute("data-language") || "";
+      if (!langForm || !langValue || !lang) return;
+      confirmThen({
+        title: t("languageDeleteTitle", "Dil üzrə sil"),
+        body: fill(t("languageDeleteBody", "Seçilmiş dildəki {count} sual həmişəlik silinəcək. Davam edək?"), { count: button.getAttribute("data-count") || "0" }),
+        confirmLabel: t("okDelete", "Bəli, sil"),
+        danger: true,
+      }, function () {
+        langValue.value = lang;
+        submitWith(langForm, null);
+      }, button);
+    }
 
-    root.querySelectorAll(".js-delete-language").forEach(function (button) {
-      button.addEventListener("click", function () {
-        var lang = button.getAttribute("data-language") || "";
-        if (!langForm || !langValue || !lang) return;
-        confirmThen({
-          title: t("languageDeleteTitle", "Dil üzrə sil"),
-          body: fill(t("languageDeleteBody", "Seçilmiş dildəki {count} sual həmişəlik silinəcək. Davam edək?"), { count: button.getAttribute("data-count") || "0" }),
-          confirmLabel: t("okDelete", "Bəli, sil"),
-          danger: true,
-        }, function () {
-          langValue.value = lang;
-          submitWith(langForm, null, true);
-        }, button);
-      });
+    /* Sahib 2026-11-11: «Bütün sualları deaktiv et / aktiv et» — silmədən, təsdiqlə. */
+    function onBulkAll(button) {
+      var form = document.getElementById("questionBankBulkAllForm");
+      var value = document.getElementById("questionBankBulkAllValue");
+      var action = button.getAttribute("data-bulk-all") || "";
+      if (!form || !value || (action !== "deactivate_all" && action !== "activate_all")) return;
+      var activate = action === "activate_all";
+      var count = button.getAttribute("data-count") || "0";
+      confirmThen({
+        title: activate ? t("activateAllTitle", "Bütün sualları aktiv et") : t("deactivateAllTitle", "Bütün sualları deaktiv et"),
+        body: fill(activate
+          ? t("activateAllBody", "İmtahanın bütün {count} sualı aktiv ediləcək. Davam edək?")
+          : t("deactivateAllBody", "İmtahanın bütün {count} sualı deaktiv ediləcək (silinmir — cavablar və nəticələr qalır). Davam edək?"), { count: count }),
+        confirmLabel: activate ? t("okActivate", "Bəli, aktiv et") : t("okDeactivate", "Bəli, deaktiv et"),
+        danger: !activate,
+      }, function () {
+        value.value = action;
+        submitWith(form, null);
+      }, button);
+    }
+
+    root.addEventListener("click", function (event) {
+      var button = closest(event.target, ".js-open-delete-modal");
+      if (button) { onDelete(button); return; }
+      button = closest(event.target, ".js-single-question-action");
+      if (button) { onSingle(button); return; }
+      button = closest(event.target, ".js-delete-language");
+      if (button) { onLanguage(button); return; }
+      button = closest(event.target, ".js-bulk-all");
+      if (button) onBulkAll(button);
     });
   }
 
   /* ── «Bütün sual bankını sil» — yazılı təsdiq ─────────────────────────── */
   function bindDeleteAll(root) {
-    var form = document.getElementById("questionBankDeleteAllForm");
     var modal = document.getElementById("qbTypedConfirmModal");
     var typedForm = modal && modal.querySelector("[data-qb-typed-form]");
     var input = modal && modal.querySelector("[data-qb-typed-input]");
@@ -291,7 +380,9 @@
     var body = modal && modal.querySelector("[data-qb-typed-body]");
     var trigger = null;
     var confirmed = false;
-    if (!form) return;
+
+    // Forma canlı bölgədədir (süzgəc sahələri ilə) — hər dəfə DOM-dan oxunur.
+    function form() { return document.getElementById("questionBankDeleteAllForm"); }
 
     function phrase() {
       return typedForm ? typedForm.getAttribute("data-phrase") || "" : "";
@@ -308,11 +399,11 @@
       input.addEventListener("input", sync);
       typedForm.addEventListener("submit", function (event) {
         event.preventDefault();
-        if (!sync()) return;
+        if (!sync() || !form()) return;
         confirmed = true;
         var api = modalApi(modal);
         if (api) api.hide();
-        submitWith(form, null, true);
+        submitWith(form(), null);
       });
       modal.addEventListener("shown.bs.modal", function () { input.focus(); });
       modal.addEventListener("hidden.bs.modal", function () {
@@ -321,27 +412,27 @@
       });
     }
 
-    root.querySelectorAll(".js-delete-all-questions").forEach(function (button) {
-      button.addEventListener("click", function () {
-        var count = button.getAttribute("data-count") || "0";
-        var api = modalApi(modal);
-        if (!api || !typedForm || !input || !okBtn) {
-          // Bootstrap/dialoq yoxdursa — adi təhlükə təsdiqi (heç vaxt sınmır).
-          confirmThen({
-            title: t("deleteAllTitle", "Sual bankını sil"),
-            body: fill(t("deleteAllBody", "Bütün sual bankı və içindəki {count} sual həmişəlik silinəcək. Davam edək?"), { count: count }),
-            confirmLabel: t("okDelete", "Bəli, sil"),
-            danger: true,
-          }, function () { submitWith(form, null, true); }, button);
-          return;
-        }
-        trigger = button;
-        confirmed = false;
-        if (body) body.textContent = fill(body.getAttribute("data-template"), { count: count });
-        input.value = "";
-        sync();
-        api.show();
-      });
+    root.addEventListener("click", function (event) {
+      var button = closest(event.target, ".js-delete-all-questions");
+      if (!button || !form()) return;
+      var count = button.getAttribute("data-count") || "0";
+      var api = modalApi(modal);
+      if (!api || !typedForm || !input || !okBtn) {
+        // Bootstrap/dialoq yoxdursa — adi təhlükə təsdiqi (heç vaxt sınmır).
+        confirmThen({
+          title: t("deleteAllTitle", "Sual bankını sil"),
+          body: fill(t("deleteAllBody", "Bütün sual bankı və içindəki {count} sual həmişəlik silinəcək. Davam edək?"), { count: count }),
+          confirmLabel: t("okDelete", "Bəli, sil"),
+          danger: true,
+        }, function () { submitWith(form(), null); }, button);
+        return;
+      }
+      trigger = button;
+      confirmed = false;
+      if (body) body.textContent = fill(body.getAttribute("data-template"), { count: count });
+      input.value = "";
+      sync();
+      api.show();
     });
   }
 
@@ -394,14 +485,23 @@
         var submitButton = form.querySelector('button[type="submit"]');
         if (submitButton) submitButton.disabled = true;
         try {
+          var live = liveApi();
+          var headers = { "X-Requested-With": "XMLHttpRequest" };
+          if (live) headers[live.PARTIAL_HEADER || "X-QB-Partial"] = "1";
           var response = await fetch(form.getAttribute("action"), {
-            method: "POST", body: new FormData(form), headers: { "X-Requested-With": "XMLHttpRequest" },
+            method: "POST", body: new FormData(form), headers: headers,
           });
           var contentType = response.headers.get("content-type") || "";
           if (contentType.indexOf("application/json") !== -1) {
             var payload = await response.json();
             if (response.ok && payload.success) {
               modal.hide();
+              // 2026-11-11: səhifə yenidən yüklənmir — yalnız siyahı yenilənir; «yeni versiya» qeydi toast.
+              if (live) {
+                if (payload.message) live.showMessages([{ level: "success", text: payload.message }]);
+                live.refresh(window.location.href, { keepUrl: true });
+                return;
+              }
               window.location.reload();
               return;
             }
@@ -436,14 +536,14 @@
       }
     }
 
-    root.querySelectorAll(".js-open-question-form-modal").forEach(function (link) {
-      link.addEventListener("click", function (event) {
-        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-        var url = link.getAttribute("data-question-modal-url") || link.getAttribute("href");
-        if (!url) return;
-        event.preventDefault();
-        open(url, link.getAttribute("data-question-modal-mode") || "edit");
-      });
+    root.addEventListener("click", function (event) {
+      var link = closest(event.target, ".js-open-question-form-modal");
+      if (!link) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      var url = link.getAttribute("data-question-modal-url") || link.getAttribute("href");
+      if (!url) return;
+      event.preventDefault();
+      open(url, link.getAttribute("data-question-modal-mode") || "edit");
     });
 
     element.addEventListener("hidden.bs.modal", function () {

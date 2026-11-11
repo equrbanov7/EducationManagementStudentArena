@@ -19,6 +19,8 @@ Keyfiyyət nişanları ikon + MƏTN (yalnız rəng/ikon yox).{% endcomment %}
                 {% else %}
                 <span class="ems-badge ems-badge--muted"><i class="fas fa-circle-pause" aria-hidden="true"></i>{% trans "status_inactive" context "exams.template.teacher_questions_bank" %}</span>
                 {% endif %}
+                {% if q.has_history %}<span class="ems-badge ems-badge--info" title="{% trans 'Bu suala tələbə cavabı və ya apellyasiya bağlıdır — silinmir, yalnız deaktiv edilir və ya yeni versiya ilə əvəzlənir.' context 'exams.template.teacher_questions_bank' %}"><i class="fas fa-user-check" aria-hidden="true"></i>{% trans "Cavablanıb" context "exams.template.teacher_questions_bank" %}</span>{% endif %}
+                {% if q.replaces_id %}<span class="ems-badge ems-badge--neutral" title="{% trans 'Bu sual əvvəlki (deaktiv) sualın redaktə olunmuş yeni versiyasıdır.' context 'exams.template.teacher_questions_bank' %}"><i class="fas fa-code-branch" aria-hidden="true"></i>{% trans "Yeni versiya" context "exams.template.teacher_questions_bank" %}</span>{% endif %}
                 {% if analysis_enabled and meta %}
                     {% if meta.total_count %}
                         {% if meta.error_count %}<span class="ems-badge ems-badge--danger"><i class="fas fa-circle-xmark" aria-hidden="true"></i>{{ meta.error_count }}<span class="visually-hidden"> {% trans "Xətalı" context "exams.template.teacher_questions_bank" %}</span></span>{% endif %}
@@ -88,7 +90,7 @@ Keyfiyyət nişanları ikon + MƏTN (yalnız rəng/ikon yox).{% endcomment %}
             {% if qm_context == 'exam' %}
             <a href="{% url 'exams:edit_exam_question' exam.slug q.id %}" class="ems-btn js-open-question-form-modal"
                data-question-modal-mode="edit" data-question-modal-url="{% url 'exams:edit_exam_question' exam.slug q.id %}">
-                <i class="fas fa-pen-to-square" aria-hidden="true"></i>{% trans "action_edit" context "exams.template.teacher_questions_bank" %}
+                {% if q.edit_creates_version %}<i class="fas fa-code-branch" aria-hidden="true"></i>{% trans "Dəyiş (yeni versiya)" context "exams.template.teacher_questions_bank" %}{% else %}<i class="fas fa-pen-to-square" aria-hidden="true"></i>{% trans "action_edit" context "exams.template.teacher_questions_bank" %}{% endif %}
             </a>
             {% else %}
             <a href="{% url 'exams:bank_question_edit' bank.id q.id %}" class="ems-btn js-open-question-form-modal"

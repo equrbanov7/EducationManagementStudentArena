@@ -1,0 +1,64 @@
+{% load i18n %}
+{% comment %}Təhlükəli əməllərin modalları — canlı bölgədən KƏNARDA (dinləyicilər bir dəfə bağlanır; məzmun
+süzgəcdən asılı deyil). Sayğaclar JS ilə düymənin `data-count`-undan doldurulur.{% endcomment %}
+{% if qm_show_delete_all %}
+{# Yazılı təsdiq: düymə yalnız imtahanın adı düz yazılanda aktivləşir. #}
+<div class="modal fade etp-modal" id="qbTypedConfirmModal" tabindex="-1" aria-hidden="true" aria-labelledby="qbTypedConfirmTitle">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" data-qb-typed-form data-phrase="{{ exam.title }}" novalidate>
+            <div class="modal-header">
+                <h2 class="modal-title etp-modal__title" id="qbTypedConfirmTitle"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> {% trans "Bütün sual bankını sil" context "exams.template.teacher_questions_bank" %}</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'ui.dialog' %}"></button>
+            </div>
+            <div class="modal-body">
+                <p data-qb-typed-body data-template="{% trans 'İmtahanın {count} sualı həmişəlik silinəcək. Bu əməliyyat geri qaytarılmır.' context 'exams.template.teacher_questions_bank' %}"></p>
+                <label class="etp-label" for="qbTypedConfirmInput">{% trans "Təsdiq üçün imtahanın adını yazın" context "exams.template.teacher_questions_bank" %}: <strong class="eqb-phrase">{{ exam.title }}</strong></label>
+                <input type="text" class="ems-input" id="qbTypedConfirmInput" autocomplete="off" spellcheck="false" data-qb-typed-input>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="ems-btn" data-bs-dismiss="modal">{% trans "action_cancel" context "exams.template.teacher_questions_bank" %}</button>
+                <button type="submit" class="ems-btn ems-btn--danger" data-qb-typed-ok disabled>{% trans "Hamısını sil" context "exams.template.teacher_questions_bank" %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% if qm_context == 'bank' and qm_is_owner %}
+<div class="modal fade etp-modal" id="bankEditModal" tabindex="-1" aria-hidden="true" aria-labelledby="bankEditTitle">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="post" action="{{ qm_update_url }}" class="modal-content">
+            {% csrf_token %}
+            <div class="modal-header">
+                <h2 class="modal-title etp-modal__title" id="bankEditTitle">{% trans "Bankı redaktə et" %}</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'ui.dialog' %}"></button>
+            </div>
+            <div class="modal-body eqb-edit">
+                <div><label class="etp-label" for="editBankName">{% trans "Bankın adı" %}<span class="etp-req" aria-hidden="true">*</span></label>
+                    <input type="text" class="ems-input" id="editBankName" name="name" value="{{ bank.name }}" required></div>
+                <div><label class="etp-label" for="editBankSubject">{% trans "Fənn / Mövzu" %}</label>
+                    <input type="text" class="ems-input" id="editBankSubject" name="subject" value="{{ bank.subject }}"></div>
+                <div class="eqb-edit__row">
+                    <div><label class="etp-label" for="editBankLanguage">{% trans "Əsas dil" %}</label>
+                        <div class="bootstrap-single-select bootstrap-single-select--ems">
+                            <select id="editBankLanguage" name="language" class="ems-select bootstrap-single-select__native" data-bootstrap-select>
+                                {% for code, label in language_choices %}<option value="{{ code }}" {% if bank.language == code %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                            </select>
+                        </div></div>
+                    <div><label class="etp-label" for="editBankFormat">{% trans "Standart format" %}</label>
+                        <div class="bootstrap-single-select bootstrap-single-select--ems">
+                            <select id="editBankFormat" name="default_question_type" class="ems-select bootstrap-single-select__native" data-bootstrap-select>
+                                {% for value, label in qm_default_type_choices %}<option value="{{ value }}" {% if bank.default_question_type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                            </select>
+                        </div></div>
+                </div>
+                <label class="eqb-edit__switch"><input type="checkbox" name="is_shared" value="1" {% if bank.is_shared %}checked{% endif %}> <span>{% trans "Təşkilatda paylaş" %}</span></label>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="ems-btn" data-bs-dismiss="modal">{% trans "İmtina" %}</button>
+                <button type="submit" class="ems-btn ems-btn--primary">{% trans "Yadda saxla" %}</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
