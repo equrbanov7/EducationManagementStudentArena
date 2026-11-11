@@ -175,7 +175,12 @@ def _event_sector(event) -> str:
     } - {""}
     if not sectors:
         return ""
-    return next(iter(sectors)) if len(sectors) == 1 else SECTOR_MIXED
+    if len(sectors) == 1:
+        return next(iter(sectors))
+    # Sahib 2026-11-11: az + ing qrupların birgə patoku İNGİLİS bölməsinə sayılır («ing sayılsın»).
+    if "ing" in sectors:
+        return "ing"
+    return SECTOR_MIXED
 
 
 def sector_label(code: str) -> str:
