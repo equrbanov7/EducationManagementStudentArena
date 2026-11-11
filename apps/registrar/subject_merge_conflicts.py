@@ -37,6 +37,7 @@ from django.urls import reverse
 from django.utils.http import urlencode
 from django.utils.translation import pgettext
 
+from . import subject_merge_scope as scope
 from .models import CourseOffering, CurriculumSubject, Enrollment, RetakeApplication
 from .models.curriculum_meta import PlanStatus
 from .models.retake import ACTIVE_STATUSES
@@ -126,9 +127,10 @@ def _retired_twins(organization, items, target_id):
     return (others[0], retired) if retired and len(others) == 1 else (None, [])
 
 
-def _offerings(organization, subject_ids, target_id, blocking, resolvable, warnings):
+def _offerings(organization, subject_ids, target_id, blocking, resolvable, warnings, skip=()):
     rows = list(
         CourseOffering._base_manager.filter(organization=organization, subject_id__in=subject_ids)
+        .exclude(pk__in=list(skip))
         .select_related("subject", "period", "group")
         .order_by("period__start_date", "group__name", "subject__code")
     )
@@ -318,10 +320,11 @@ def _enrollments(organization, subject_ids, blocking, resolvable, *, excluded_of
     blocking.extend(found)
 
 
-def _syllabi(organization, subject_ids, blocking):
+def _syllabi(organization, subject_ids, blocking, skip=()):
     Syllabus = django_apps.get_model("syllabus", "Syllabus")
     rows = list(
         Syllabus._base_manager.filter(organization=organization, subject_id__in=subject_ids, offering__isnull=True)
+        .exclude(pk__in=list(skip))
         .select_related("period", "author", "subject")
         .order_by("pk")
     )
@@ -352,10 +355,11 @@ def _syllabi(organization, subject_ids, blocking):
         )
 
 
-def _folders(organization, subject_ids, blocking):
+def _folders(organization, subject_ids, blocking, skip=()):
     SubjectFolder = django_apps.get_model("subject_folder", "SubjectFolder")
     rows = list(
         SubjectFolder._base_manager.filter(organization=organization, subject_id__in=subject_ids)
+        .exclude(pk__in=list(skip))
         .select_related("owner", "period")
         .order_by("pk")
     )
@@ -373,13 +377,14 @@ def _folders(organization, subject_ids, blocking):
         )
 
 
-def _retakes(organization, subject_ids, blocking):
+def _retakes(organization, subject_ids, blocking, skip=()):
     rows = list(
         RetakeApplication.objects.filter(
             organization=organization,
             subject_id__in=subject_ids,
             status__in=[status.value for status in ACTIVE_STATUSES],
         )
+        .exclude(pk__in=list(skip))
         .select_related("student")
         .order_by("pk")
     )
@@ -397,10 +402,11 @@ def _retakes(organization, subject_ids, blocking):
         )
 
 
-def _task_rows(organization, subject_ids, blocking):
+def _task_rows(organization, subject_ids, blocking, skip=()):
     TeachingTaskRow = django_apps.get_model("workload", "TeachingTaskRow")
     rows = list(
         TeachingTaskRow._base_manager.filter(organization=organization, subject_id__in=subject_ids)
+        .exclude(pk__in=list(skip))
         .select_related("task", "specialty")
         .prefetch_related("groups")
         .order_by("pk")
@@ -428,7 +434,7 @@ def _task_rows(organization, subject_ids, blocking):
         )
 
 
-def _credits(organization, target, sources, blocking):
+def _credits(organization, target, sources, blocking, skip_offerings=()):
     """Kredit fərqi + QİYMƏTLƏNMİŞ sətir → blok (review 2026-10-19).
 
     Transkript krediti ``offering.subject.ects``-dən oxunur (``transcript._credit_for``): fərqli ECTS-li
@@ -440,7 +446,9 @@ def _credits(organization, target, sources, blocking):
     for source in sources:
         if source.ects == target.ects:
             continue
-        graded = Enrollment.objects.filter(organization=organization, offering__subject_id=source.pk)
+        graded = Enrollment.objects.filter(organization=organization, offering__subject_id=source.pk).exclude(
+            offering_id__in=list(skip_offerings)
+        )
         graded_ids = FinalGrade.objects.filter(enrollment__in=graded).values("enrollment_id")
         students = (
             graded.filter(Q(pk__in=graded_ids) | Q(status=Enrollment.Status.COMPLETED))
@@ -476,27 +484,31 @@ def resolved_ids(resolvable, code) -> list:
     return sorted({pk for item in resolvable if item["code"] == code for pk in item["drop"]})
 
 
-def detect(organization, target, sources, *, drop_attendance_only=False) -> dict:
+def detect(organization, target, sources, *, drop_attendance_only=False, stay=None) -> dict:
     """Toqquşmalar: ``blocking`` (yazı yoxdur), ``resolvable`` (plan sətri, boş əkiz, qiymətsiz qeydiyyat),
-    ``warnings`` (məlumat)."""
+    ``warnings`` (məlumat). ``stay`` — «yalnız cari» rejimində mənbə kartda QALAN (keçmiş dövr) sətirlər
+    (:mod:`.subject_merge_scope`): onlar yerindən tərpənmədiyi üçün toqquşma yaratmır."""
+    stay = stay or {}
+    skip = {key: list(ids) for key, ids in stay.items()}
+    offering_skip = skip.get(scope.OFFERING_KEY, [])
     subject_ids = [target.pk] + [source.pk for source in sources]
     source_order = {source.pk: index for index, source in enumerate(sources)}
     blocking, resolvable, warnings = [], [], []
-    _credits(organization, target, sources, blocking)
-    _offerings(organization, subject_ids, target.pk, blocking, resolvable, warnings)
+    _credits(organization, target, sources, blocking, offering_skip)
+    _offerings(organization, subject_ids, target.pk, blocking, resolvable, warnings, offering_skip)
     _curriculum(organization, target.pk, subject_ids, source_order, blocking, resolvable, warnings)
     _enrollments(
         organization,
         subject_ids,
         blocking,
         resolvable,
-        excluded_offerings=resolved_ids(resolvable, OFFERING_TWIN),
+        excluded_offerings=[*resolved_ids(resolvable, OFFERING_TWIN), *offering_skip],
         attendance_ok=drop_attendance_only,
     )
-    _syllabi(organization, subject_ids, blocking)
-    _folders(organization, subject_ids, blocking)
-    _retakes(organization, subject_ids, blocking)
-    _task_rows(organization, subject_ids, blocking)
+    _syllabi(organization, subject_ids, blocking, skip.get(scope.SYLLABUS_KEY, ()))
+    _folders(organization, subject_ids, blocking, skip.get(scope.FOLDER_KEY, ()))
+    _retakes(organization, subject_ids, blocking, skip.get(scope.RETAKE_KEY, ()))
+    _task_rows(organization, subject_ids, blocking, skip.get(scope.TASK_ROW_KEY, ()))
     return {"blocking": blocking, "resolvable": resolvable, "warnings": warnings}
 
 

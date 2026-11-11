@@ -15,9 +15,10 @@ from unittest import mock
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.core.management.base import CommandError
+from django.utils import timezone
 
 from apps.audit.models import AuditLog
-from apps.exams.models import ExamAnswer, ExamAttempt
+from apps.exams.models import Exam, ExamAnswer, ExamAttempt
 from apps.exams.services import journal_missing_takers
 from apps.exams.tests.test_midterm_journal_sync_2026_10_21 import _MidtermSetup
 from apps.organizations.models import Membership, OrgUnit
@@ -298,6 +299,16 @@ class DuplicateSubjectsTest(_MidtermSetup):
             )
         counts, journals = self._call("--only", "journals", "--apply")
         self.assertEqual(counts["syllabi_moved"], "1")
+        # Sahib 2026-11-11: cari imtahan dublikat kartdadır, onun jurnalı artıq birləşdirilib — imtahanın fənni
+        # dəyişməsin deyə qrup atlanır.
+        counts, _ = self._call("--only", "catalogue", "--apply")
+        self.assertEqual(counts["catalogue_skipped_exam_journal_merged"], "1")
+        with bypass_rls():
+            self.assertFalse(Subject.objects.get(pk=self.twin.pk).is_archived)
+            # Keçmiş dövrün imtahanı imtahan qaydasına düşmür — adi birləşmə onu saxlanılan karta köçürür.
+            Exam.objects.filter(pk=self.exam.pk).update(
+                start_datetime=timezone.make_aware(datetime.datetime(2025, 1, 10))
+            )
         counts, catalogue = self._call("--only", "catalogue", "--apply")
         self.assertEqual(counts["catalogue_groups_merged"], "1")
         counts, codes = self._call("--only", "codes", "--apply")
