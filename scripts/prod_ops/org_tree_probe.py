@@ -92,6 +92,36 @@ def main():
                     f"məktəb(path)={getattr(fac_path, 'name', '—')} tələbə={students.get(u.pk, 0)}"
                 )
     print(f"    cəmi uyğunsuz: {dict(bad)}")
+    print("=== QRUPUN MƏKTƏBİ ≠ PROQRAMIN İXTİSASININ MƏKTƏBİ (aktiv tələbələr)")
+    mism = Counter()
+    rows = SAR.objects.filter(organization=org, is_active=True, group__isnull=False).values_list(
+        "group_id", "program__specialty_unit_id", "program__name"
+    )
+    for gid, spec_id, _prog in rows:
+        g, spec = units.get(gid), all_units.get(spec_id)
+        fg = faculty_of(g) if g else None
+        fs = faculty_of(spec) if spec and spec.is_active else None
+        spec_g = g
+        while spec_g is not None and spec_g.unit_type != "specialty":
+            spec_g = units.get(spec_g.parent_id)
+        if (
+            (fg is not None and fs is not None and fg.pk != fs.pk)
+            or spec is None
+            or (spec_g and spec and spec_g.pk != spec.pk)
+        ):
+            mism[
+                (
+                    getattr(fg, "name", "—"),
+                    getattr(spec_g, "name", "—"),
+                    getattr(fs, "name", "—"),
+                    getattr(spec, "name", "YOX"),
+                    getattr(g, "name", "?") if fg is None or fs is None or fg.pk != fs.pk else "",
+                )
+            ] += 1
+    for (fg, sg, fs, sp, gname), n in sorted(mism.items(), key=lambda x: -x[1])[:60]:
+        flag = "MƏKTƏB FƏRQLİ" if fg != fs else "ixtisas fərqli"
+        print(f"    {flag}: qrup məktəbi={fg} / qrup ixtisası={sg} ← proqram: {fs} / {sp} {gname} tələbə={n}")
+    print(f"    cəmi: {sum(mism.values())} tələbə, {len(mism)} kombinasiya")
 
 
 main()
