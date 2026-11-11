@@ -545,6 +545,27 @@ class DuplicateSubjectsTest(_MidtermSetup):
         with bypass_rls():
             self.assertEqual(Enrollment.objects.get(pk=row.pk).status, "dropped")
 
+    def test_db_guard_error_for_one_taker_is_counted_not_fatal(self):
+        """2026-11-11 prod dry-run: DB qoruyucusu (aktiv üzvlük yoxdur) bütün qaçışı dayandırırdı."""
+        from unittest import mock
+
+        from django.db import IntegrityError
+
+        with bypass_rls():
+            student, exam, _attempt, _other = self._missing_taker()
+        self.plan["takers_exams"] = [exam.pk]
+        with (
+            mock.patch("apps.registrar.subgroup_placement.place_in_subgroup", side_effect=IntegrityError("guard")),
+            mock.patch(
+                "apps.registrar.exam_taker_placement_2026_11_11.place_in_subgroup", side_effect=IntegrityError("guard")
+            ),
+        ):
+            counts, _ = self._call("--only", "takers", "--apply")
+        self.assertEqual(counts["taker_subgroup_blocked_integrity"], "1")
+        self.assertIn(f"twin_merge: exam={exam.pk} checked=1 missing=1 placed=0 refused=1", self.lines)
+        with bypass_rls():
+            self.assertFalse(Enrollment.objects.filter(student=student, offering=self.offering).exists())
+
     def test_touched_taker_placement_is_not_undone(self):
         with bypass_rls():
             student, exam, _attempt, _other = self._missing_taker()
