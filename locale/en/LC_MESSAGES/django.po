@@ -119134,3 +119134,15 @@ msgstr ""
 "All groups in one stream must have the same lecture hours; here they differ:"
 " %(hours)s. First fix each row under “Task rows” with “Edit” (e.g. a 45-hour"
 " course: “Lecture” 30, “Seminar” 15), then merge the streams."
+
+msgctxt "exams.attempt_reset"
+msgid ""
+"gözlənilməz texniki xəta — cəhd dəyişmədi, xəta qeydə alındı; RİM-ə bildirin"
+msgstr ""
+"unexpected technical error — the attempt was not changed, the error was "
+"logged; please inform the RIM"
+
+#, python-format
+msgctxt "exams.attempt_reset"
+msgid "Sıfırlanmayan cəhdlər: %(ids)s."
+msgstr "Attempts not reset: %(ids)s."

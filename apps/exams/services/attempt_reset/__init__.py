@@ -8,7 +8,9 @@
 from .history import HISTORY_LIMIT, exam_reset_history
 from .policy import REASON_MAX_LENGTH, REASON_MIN_LENGTH, ResetReasonError, can_reset_exam_attempts, clean_reason
 from .service import (
+    FAILED_BLOCKER,
     RESET_VERB,
+    STATUS_FAILED,
     STATUS_MISSING,
     STATUS_REFUSED,
     STATUS_RESET,
@@ -21,10 +23,12 @@ from .service import (
 )
 
 __all__ = [
+    "FAILED_BLOCKER",
     "HISTORY_LIMIT",
     "REASON_MAX_LENGTH",
     "REASON_MIN_LENGTH",
     "RESET_VERB",
+    "STATUS_FAILED",
     "STATUS_MISSING",
     "STATUS_REFUSED",
     "STATUS_RESET",

@@ -118322,3 +118322,14 @@ msgstr ""
 "Bir akıştaki grupların teorik ders saatleri aynı olmalıdır, burada farklı: "
 "%(hours)s. Önce «Görev satırları»nda her satırı «Düzenle» ile düzeltin (örn."
 " 45 saatlik ders: «Teorik» 30, «Seminer» 15), sonra akışları birleştirin."
+
+msgctxt "exams.attempt_reset"
+msgid ""
+"gözlənilməz texniki xəta — cəhd dəyişmədi, xəta qeydə alındı; RİM-ə bildirin"
+msgstr ""
+"beklenmeyen teknik hata — deneme değişmedi, hata kaydedildi; RİM'e bildirin"
+
+#, python-format
+msgctxt "exams.attempt_reset"
+msgid "Sıfırlanmayan cəhdlər: %(ids)s."
+msgstr "Sıfırlanmayan denemeler: %(ids)s."

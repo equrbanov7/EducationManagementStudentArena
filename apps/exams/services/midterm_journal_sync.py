@@ -30,6 +30,8 @@ from __future__ import annotations
 
 import logging
 
+from django.db import transaction
+
 logger = logging.getLogger(__name__)
 
 #: Jurnala avtomatik düşən midterm formatları (2026-10-24: yazılı və kodlaşdırma da — yoxlanılandan sonra).
@@ -156,7 +158,8 @@ def sync_midterm_attempt(attempt, *, actor=None, appeal_id=None, notify=True):
     if getattr(exam, "results_hidden_from_students", False):
         return _status(RESULTS_HIDDEN, attempt)
     try:
-        superseded = superseded_by_later_midterm(attempt, subject_id)
+        with transaction.atomic():  # savepoint: DB xətası çağıranın tranzaksiyasını «aborted» qoymasın
+            superseded = superseded_by_later_midterm(attempt, subject_id)
     except Exception:  # hədəf yoxlanmadan rəsmi balı dəyişmə
         logger.exception("midterm_journal_sync: target resolution failed for attempt %s", attempt.pk)
         return _status(WRITE_FAILED, attempt)
@@ -214,7 +217,8 @@ def grading_complete(attempt) -> bool:
     from apps.exams.services.manual_grading import grading_complete as _complete
 
     try:
-        return _complete(attempt)
+        with transaction.atomic():  # savepoint (yuxarıdakı kimi)
+            return _complete(attempt)
     except Exception:  # noqa: BLE001 — yoxlanış xətası jurnala qismən bal yazdırmasın (fail-closed)
         logger.exception("midterm_journal_sync: grading state failed for attempt %s", getattr(attempt, "id", "?"))
         return False
