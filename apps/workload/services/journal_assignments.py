@@ -74,6 +74,7 @@ def _assignment_map(*, organization, teacher_id, include_hours=False):
     aliases = canonical_aliases(groups)
     result = defaultdict(lambda: defaultdict(int)) if include_hours else defaultdict(set)
     caps: dict = {}
+    per_row = defaultdict(lambda: defaultdict(int))
     for row in rows:
         if row.row_kind == RowKind.INTENSIVE:
             offering = row.intensive_offering
@@ -112,10 +113,19 @@ def _assignment_map(*, organization, teacher_id, include_hours=False):
                     if applies is True:
                         key = (row.subject_id, row.period_id, canonical.pk)
                         if include_hours:
-                            result[key][assignment.activity] += assignment.hours
-                            _cap(caps, key, row, assignment.activity)
+                            per_row[(key, row.pk)][assignment.activity] += assignment.hours
+                            _cap(caps, (key, row.pk), row, assignment, len(row_groups))
                         else:
                             result[key].add(assignment.activity)
+    if include_hours:
+        # Sahib 2026-11-08: jurnal BİR qrupundur — başlıqda fənnin qrup başına saatı (L30 + S10 + Lab5 = 45), müəllimin
+        # bütün axınlar üzrə yükü (30 + 2×10 + 3×5 = 65) yox. Bölgü saatı HƏR SƏTRİN ``*_plan``-ı ilə məhdudlaşır,
+        # sonra sətirlər toplanır: 2026-11-12 (135 TSPX) seminar iki sətirdə (TSPX-1 30 + TSPX-2 30) → 60, 30 yox.
+        for (key, _row_pk), kinds in per_row.items():
+            limits = caps.get((key, _row_pk), {})
+            for activity, hours in kinds.items():
+                limit = limits.get(activity)
+                result[key][activity] += min(hours, limit) if limit else hours
     for row in partners:
         for parent in row.groups.all():
             if parent.organization_id != organization.pk:
@@ -126,26 +136,34 @@ def _assignment_map(*, organization, teacher_id, include_hours=False):
                     result[key]["lecture"] = max(result[key]["lecture"], int(row.lecture_plan))
                 else:
                     result[key].add("lecture")
-    if include_hours:
-        # Sahib 2026-11-08: jurnal BİR qrupundur — başlıqda fənnin qrup başına saatı (L30 + S10 + Lab5 = 45), müəllimin
-        # bütün axınlar üzrə yükü (30 + 2×10 + 3×5 = 65) yox. Bölgü saatı sətrin ``*_plan``-ı ilə məhdudlaşır.
-        for key, kinds in result.items():
-            for activity, limit in caps.get(key, {}).items():
-                if limit and kinds.get(activity, 0) > limit:
-                    kinds[activity] = limit
     return dict(result)
 
 
 _PLAN_FIELDS = {Activity.LECTURE: "lecture_plan", Activity.SEMINAR: "seminar_plan", Activity.LAB: "lab_plan"}
 
 
-def _cap(caps, key, row, activity) -> None:
-    """Açar + fəaliyyət üzrə qrup başına plan saatı (bir neçə sətir varsa ən böyüyü)."""
+def _cap(caps, key, row, assignment, group_count) -> None:
+    """Açar + fəaliyyət üzrə plan saatı: qrup başına plan × müəllimin bu qrupda apardığı alt qrup sayı.
+
+    Sahib 2026-11-12 (135 TSPX): mühazirə 30 + seminar iki alt qrupa bölünür (30 + 30) → başlıq 90, 60 yox.
+    Alt qrup sayı: müəllimin bölgülərindəki fərqli ``sub_number``-lar; yoxdursa sətrin ``subgroup_count``-u
+    qrup sayına bölünür (çox qruplu axında hər qrup öz payını alır — 2026-11-08 qaydası qalır).
+    """
+    activity = assignment.activity
     field = _PLAN_FIELDS.get(activity)
     plan = int(getattr(row, field, 0) or 0) if field else 0
-    if plan:
-        bucket = caps.setdefault(key, {})
+    if not plan:
+        return
+    bucket = caps.setdefault(key, {})
+    if activity == Activity.LECTURE:
         bucket[activity] = max(bucket.get(activity, 0), plan)
+        return
+    subs = bucket.setdefault(("subs", activity), set())
+    if assignment.sub_number:
+        subs.add(assignment.sub_number)
+    per_group = -(-int(row.subgroup_count or 1) // max(1, group_count))
+    multiplier = max(1, len(subs), per_group if not assignment.sub_number else 1)
+    bucket[activity] = max(bucket.get(activity, 0), plan * multiplier)
 
 
 def teacher_journal_assignments(*, organization, teacher_id):

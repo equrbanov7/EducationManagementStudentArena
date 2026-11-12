@@ -2,9 +2,15 @@
         {% if teaching_summary.kinds or teaching_summary.others %}
         <div class="jd2-teach-summary">
             {% for k in teaching_summary.kinds %}
+            {% if k.parts %}{% for p in k.parts %}
+            <span class="jd2-teach-kind jd2-teach-kind--{{ k.kind }}">
+                <b>{{ k.label }} · {{ p.label }}</b> · {{ p.held }}{% if p.planned %} / {{ p.planned }}{% endif %} {% trans "saat" context "registrar.journal" %}{% if forloop.first and k.teachers %} · {{ k.teachers|join:", " }}{% endif %}
+            </span>
+            {% endfor %}{% else %}
             <span class="jd2-teach-kind jd2-teach-kind--{{ k.kind }}">
                 <b>{{ k.label }}</b> · {{ k.held }}{% if k.planned %} / {{ k.planned }}{% endif %} {% trans "saat" context "registrar.journal" %}{% if k.teachers %} · {{ k.teachers|join:", " }}{% endif %}
             </span>
+            {% endif %}
             {% endfor %}
             {% for k in teaching_summary.others %}
             <span class="jd2-teach-kind jd2-teach-kind--{{ k.kind }} jd2-teach-kind--other" title="{% trans "Bu növ başqa müəllimin payıdır — yalnız məlumat üçün" context "registrar.journal" %}">

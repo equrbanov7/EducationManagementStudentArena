@@ -60,6 +60,7 @@ def summarize(offering, *, personal_actor=None, scope=None):
                 result["kinds"].append(row)
             row["planned"] = hours
         result["kinds"].sort(key=lambda row: ("lecture", "seminar", "lab").index(row["kind"]))
+    _split_parts(offering, result["kinds"], visible)
     if personal_actor is not None:
         result["history"] = _summary(offering, permitted, total=None)
         result["others"] = _other_shares(offering, plan, lessons) if plan else []
@@ -74,6 +75,34 @@ def summarize(offering, *, personal_actor=None, scope=None):
             enrollment_ids={offering.pk: getattr(scope, "enrollment_ids", None)},
         )
     return result
+
+
+def _split_parts(offering, kinds, lessons):
+    """Sahib 2026-11-12 (135 TSPX): seminar alt qruplara / lab qruplarına bölünürsə, başlıqda hər biri ayrıca
+    görünsün — «Seminar · 135TSPX-1 · 18 / 30», «Seminar · 135TSPX-2 · 14 / 30». Planlı saat bərabər bölünür."""
+    from . import lab_groups, seminar_groups
+
+    today = timezone.localdate()
+    fields = {"seminar": ("seminar_group", seminar_groups.label), "lab": ("lab_group", lab_groups.label)}
+    for row in kinds:
+        spec = fields.get(row["kind"])
+        if spec is None:
+            continue
+        field, label = spec
+        held: dict = {}
+        for lesson in lessons:
+            number = getattr(lesson, field, None) if lesson.kind == row["kind"] else None
+            if number:
+                hours = int(lesson.hours or 0) if lesson.date is None or lesson.date <= today else 0
+                held[number] = held.get(number, 0) + hours
+        if len(held) < 2:
+            continue
+        planned = row.get("planned")
+        share = int(planned) // len(held) if planned else None
+        row["parts"] = [
+            {"label": label(number, offering), "held": hours, "planned": share}
+            for number, hours in sorted(held.items())
+        ]
 
 
 def _other_shares(offering, plan, lessons):
