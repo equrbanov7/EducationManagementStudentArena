@@ -182,7 +182,9 @@ def scoped_lessons(user, organization, *, supervisor: bool):
     kafedraya aid açılışlar da — :func:`supervision_q`); org-genişli əhatə varsa
     bütün təşkilat. Əhatəsiz nəzarətçi BOŞ nəticə alır.
     """
-    queryset = Lesson.objects.filter(organization=organization)
+    # Sahib 2026-11-12: birləşdirilmiş / ləğv olunmuş (deaktiv) jurnalın dərsləri sayılmır — dublikat jurnal
+    # birləşməsindən sonra eyni dərslər əsas jurnalda var və iki dəfə görünməməlidir.
+    queryset = Lesson.objects.filter(organization=organization, offering__is_active=True)
     if not supervisor:
         return queryset.filter(Q(instructor=user) | Q(instructor__isnull=True, offering__instructor=user))
     scope_q = supervision_q(user, organization)

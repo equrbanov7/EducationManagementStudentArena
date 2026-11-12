@@ -219,6 +219,18 @@ class TeacherTableTest(TestCase):
         lecture_groups = sorted(r["groups"] for r in payload["rows"] if r["kind"] == "lecture")
         self.assertEqual(lecture_groups, ["234 E", "234 İT, 234 K"])
 
+    def test_retired_journal_lessons_are_not_counted(self):
+        """Sahib 2026-11-12: birləşdirilib deaktiv edilmiş jurnalın dərsləri ikinci dəfə sayılmır."""
+        before = self._row(self._table(), "234 İT, 234 K", "lecture")["lessons"]
+        CourseOffering.objects.filter(pk=self.o_it.pk).update(is_active=False)
+        CourseOffering.objects.filter(pk=self.o_k.pk).update(is_active=False)
+        try:
+            rows = [row for row in self._table()["rows"] if row["kind"] == "lecture" and "234 K" in row["groups"]]
+            self.assertEqual([], rows)
+        finally:
+            CourseOffering.objects.filter(pk__in=[self.o_it.pk, self.o_k.pk]).update(is_active=True)
+        self.assertEqual(before, self._row(self._table(), "234 İT, 234 K", "lecture")["lessons"])
+
     def test_split_seminars_and_lab_subgroups_are_separate_rows(self):
         payload = self._table()
         for groups in ("234 K", "234 İT"):
