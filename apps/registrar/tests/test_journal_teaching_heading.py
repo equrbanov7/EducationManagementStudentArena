@@ -133,3 +133,71 @@ class JournalTeachingHeadingTests(TestCase):
             summary = journal_teaching_summary(self.course, personal_actor=self.seminar, scope=FULL)
         self.assertEqual((75, 6), (summary["total"], summary["held_total"]))
         self.assertEqual(["seminar"], [kind["kind"] for kind in summary["kinds"]])
+
+
+class SubgroupPlanHoursTests(TestCase):
+    """Sahib 2026-11-12 (135 TSPX): mühazirə 30 + seminar iki alt qrup (30 + 30) → başlıq 90, 60 yox."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.org = make_org("heading-subgroups")
+        cls.stack = make_structure(cls.org, code="HSUB")
+        cls.task = make_task(cls.org, cls.stack["chair"], status="amended")
+        cls.teacher = get_user_model().objects.create_user("heading-sub", first_name="Sub", last_name="Teacher")
+        activate_member(cls.org, cls.teacher, "teacher", permissions=TEACHER_PERMS)
+
+    def plan(self):
+        hours = teacher_journal_plan_hours(organization=self.org, teacher_id=self.teacher.pk)
+        key = (self.stack["subject"].pk, self.stack["period"].pk, self.stack["group"].pk)
+        return dict(hours[key])
+
+    def row(self, seminar_total, subgroups=1):
+        row = make_row(self.task, self.stack, lecture_total=30, seminar_total=seminar_total)
+        row.seminar_plan, row.subgroup_count = 30, subgroups
+        row.save(update_fields=["seminar_plan", "subgroup_count"])
+        return row
+
+    def assign(self, row, activity, hours, sub_number=None):
+        TeacherAssignment.objects.create(
+            organization=self.org, row=row, teacher=self.teacher, activity=activity, hours=hours, sub_number=sub_number
+        )
+
+    def test_two_numbered_seminar_subgroups_sum_in_one_journal(self):
+        row = self.row(60)
+        self.assign(row, "lecture", 30)
+        self.assign(row, "seminar", 30, sub_number=1)
+        self.assign(row, "seminar", 30, sub_number=2)
+        self.assertEqual({"lecture": 30, "seminar": 60}, self.plan())
+
+    def test_unnumbered_seminar_uses_row_subgroup_count(self):
+        row = self.row(60, subgroups=2)
+        self.assign(row, "lecture", 30)
+        self.assign(row, "seminar", 60)
+        self.assertEqual({"lecture": 30, "seminar": 60}, self.plan())
+
+    def test_single_subgroup_is_still_capped_at_the_group_plan(self):
+        row = self.row(45)
+        self.assign(row, "seminar", 45)
+        self.assertEqual({"seminar": 30}, self.plan())
+
+    def test_seminar_split_across_two_rows_of_one_group_sums(self):
+        lead = self.row(30)
+        self.assign(lead, "lecture", 30)
+        self.assign(lead, "seminar", 30)
+        second = make_row(self.task, self.stack, lecture_total=0, seminar_total=30)
+        self.assign(second, "seminar", 30)
+        self.assertEqual({"lecture": 30, "seminar": 60}, self.plan())
+
+    def test_heading_shows_each_seminar_subgroup_separately(self):
+        from apps.registrar.journal_teaching_heading import _split_parts
+
+        kinds = [{"kind": "seminar", "label": "Seminar", "held": 10, "planned": 60, "teachers": []}]
+        today = timezone.localdate()
+        lessons = [
+            Lesson(kind="seminar", hours=2, date=today, seminar_group=1),
+            Lesson(kind="seminar", hours=4, date=today, seminar_group=2),
+            Lesson(kind="lecture", hours=2, date=today),
+        ]
+        _split_parts(None, kinds, lessons)
+        self.assertEqual([2, 4], [part["held"] for part in kinds[0]["parts"]])
+        self.assertEqual([30, 30], [part["planned"] for part in kinds[0]["parts"]])
