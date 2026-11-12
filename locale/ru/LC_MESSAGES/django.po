@@ -113845,6 +113845,10 @@ msgctxt "applications.content"
 msgid "Məktəbə aid kafedranı seçin"
 msgstr "Выберите кафедру школы"
 
+msgctxt "applications.content"
+msgid "Kafedranı seçin"
+msgstr "Выберите кафедру"
+
 msgctxt "workload.recorded"
 msgid "Jurnalda qeydə alınmış dərs saatlarım"
 msgstr "Мои учебные часы по журналу"
