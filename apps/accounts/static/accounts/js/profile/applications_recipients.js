@@ -8,19 +8,37 @@
         var previousScope = box.querySelector("[data-apx-scope-field]");
         if (previousScope) { previousScope.remove(); }
         if (destination && destination.resolve_by === "chair" && box.__app) {
+            // MR-000302 (sahib 2026-11-12): RİM bütün kafedraları görür (məktəbinkilər əvvəldə) —
+            // siyahı uzundur, ona görə layihənin axtarışlı stilli select komponenti.
+            var scopes = box.__app.forward_scopes || [];
+            var anySchool = scopes.some(function (scope) { return scope.own_school === false; });
+            var scopeField = document.createElement("div");
+            scopeField.className = "apx-field";
+            scopeField.setAttribute("data-apx-scope-field", "");
             var scopeLabel = document.createElement("label");
-            scopeLabel.className = "apx-field";
-            scopeLabel.setAttribute("data-apx-scope-field", "");
-            scopeLabel.textContent = NS.t("selectChair");
+            scopeLabel.className = "apx-field__label";
+            scopeLabel.htmlFor = "apx-scope-select";
+            scopeLabel.textContent = NS.t(anySchool ? "selectAnyChair" : "selectChair");
+            var scopeWrap = document.createElement("div");
+            scopeWrap.className = "bootstrap-single-select bootstrap-single-select--ems";
             var scopeSelect = document.createElement("select");
-            scopeSelect.className = "apx-input";
+            scopeSelect.id = "apx-scope-select";
+            scopeSelect.className = "apx-select bootstrap-single-select__native";
             scopeSelect.setAttribute("data-apx-scope", "");
+            scopeSelect.setAttribute("data-bootstrap-select", "");
             scopeSelect.required = true;
-            scopeSelect.add(new Option(NS.t("selectChair"), ""));
-            (box.__app.forward_scopes || []).forEach(function (scope) { scopeSelect.add(new Option(scope.name, scope.id)); });
-            scopeLabel.appendChild(scopeSelect);
+            scopeSelect.add(new Option(NS.t(anySchool ? "selectAnyChair" : "selectChair"), ""));
+            scopes.forEach(function (scope) {
+                var option = new Option(scope.name, scope.id);
+                if (scope.school) { option.setAttribute("data-subtext", scope.school); }
+                option.setAttribute("data-search", scope.name + " " + (scope.school || ""));
+                scopeSelect.add(option);
+            });
+            scopeWrap.appendChild(scopeSelect);
+            scopeField.appendChild(scopeLabel);
+            scopeField.appendChild(scopeWrap);
             var scopeAnchor = box.querySelector("[data-apx-unit-list]");
-            scopeAnchor.parentNode.insertBefore(scopeLabel, scopeAnchor.nextSibling);
+            scopeAnchor.parentNode.insertBefore(scopeField, scopeAnchor.nextSibling);
         }
         if (!destination || !destination.requires_recipient) { return; }
         // 2026-11-10 (sahib): prorektor seçimi növün ALTINDA açılan dropdown kimi — layihənin stilli
