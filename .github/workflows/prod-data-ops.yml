@@ -614,7 +614,7 @@ on:
         required: false
         default: ""
       create_missing:
-        description: "recover_mr27_journal: müəllimin 22Oct 10/10/9 bəyanatını ayrıca daxil et (--include-teacher-assertion) · reconcile_teacher_roster: «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı yarat · audit_staff_placement (apply ilə): aktiv olmayanları blokla (--block-inactive) · blocked_accounts_report (apply ilə): yükü olan bloklanmış müəllimlərin blokunu aç · assign_task_rows_from_timetable: dərs yükündə olmayan dərsə yeni tapşırıq sətri (--create-missing-rows) · fix_syllabus_plan_hours: plan saatı BOŞ olan təsdiqlənmiş versiyaları da doldur (--fill-empty) · fill_vacant_from_journals: bildiriş GÖNDƏRMƏ (--no-notify) · unblock_legacy_journal_teachers: boş köhnə jurnalı olanı da aç (--include-empty) · fix_legacy_lesson_kinds: plan HƏM seminar, HƏM lab daşıyan açılışlarda da (--include-mixed) · merge_subjects: «yalnız davamiyyət» təkrar qeydiyyatını da bağla (--drop-attendance-only) · legacy_delta_apply: official_entry yekununu rəsmi vərəqə məcburi bərabərləşdir (--force-official-total) · dedupe_notifications: «Bildiriş göndər» (system) təkrarını yumşaq SİL (--type system --delete, pəncərə 600 dəq)"
+        description: "recover_mr27_journal: müəllimin 22Oct 10/10/9 bəyanatını ayrıca daxil et (--include-teacher-assertion) · reconcile_teacher_roster: «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı yarat · audit_staff_placement (apply ilə): aktiv olmayanları blokla (--block-inactive) · blocked_accounts_report (apply ilə): yükü olan bloklanmış müəllimlərin blokunu aç · assign_task_rows_from_timetable: dərs yükündə olmayan dərsə yeni tapşırıq sətri (--create-missing-rows) · fix_syllabus_plan_hours: plan saatı BOŞ olan təsdiqlənmiş versiyaları da doldur (--fill-empty) · fill_vacant_from_journals: bildiriş GÖNDƏRMƏ (--no-notify) · unblock_legacy_journal_teachers: boş köhnə jurnalı olanı da aç (--include-empty) · fix_legacy_lesson_kinds: plan HƏM seminar, HƏM lab daşıyan açılışlarda da (--include-mixed) · merge_subjects: «yalnız davamiyyət» təkrar qeydiyyatını da bağla (--drop-attendance-only) · legacy_delta_apply: official_entry yekununu rəsmi vərəqə məcburi bərabərləşdir (--force-official-total) · dedupe_notifications: «Bildiriş göndər» (system) təkrarını yumşaq SİL (--type system --delete, pəncərə 600 dəq) · restore_intensive_results_20261112: uyğun açılış yoxdursa bağlı intensiv arxiv açılışı yarat (--create-missing-offerings)"
         required: false
         type: boolean
         default: false
@@ -1943,7 +1943,9 @@ jobs:
               case "$BATCH" in
                 "")
                   test -n "$ROSTER_TAG" || { echo "roster_tag (intensive-results-…) lazımdır" >&2; exit 2; }
-                  args+=(--file "/tmp/intensive_results_${GITHUB_RUN_ID}.json") ;;
+                  args+=(--file "/tmp/intensive_results_${GITHUB_RUN_ID}.json")
+                  # MR-000288 (2026-11-12 axşam): create_missing=true → uyğun açılış yoxdursa bağlı intensiv ARXİV açılışı.
+                  if [ "$CREATE_MISSING" = "true" ]; then args+=(--create-missing-offerings); fi ;;
                 intensive-*)
                   test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }
                   args+=(--undo --batch "$BATCH") ;;

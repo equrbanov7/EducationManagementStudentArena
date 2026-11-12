@@ -32,7 +32,7 @@ User = get_user_model()
 D = Decimal
 
 
-class IntensiveResultsRestoreTests(TestCase):
+class _IntensiveBase(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.actor = User.objects.create_superuser("ir_actor", "ir@example.test", "x")
@@ -135,9 +135,9 @@ class IntensiveResultsRestoreTests(TestCase):
             return {key: value for key, value in found.items() if key in wanted}
         return found
 
-    def _call(self, items=None, *, apply=False, undo="", student=""):
+    def _call(self, items=None, *, apply=False, undo="", student="", **extra):
         out = StringIO()
-        options = {"org": self.org.slug, "actor": self.actor.username, "apply": apply, "stdout": out}
+        options = {"org": self.org.slug, "actor": self.actor.username, "apply": apply, "stdout": out, **extra}
         if undo:
             options.update(undo=True, batch=undo)
         else:
@@ -157,6 +157,8 @@ class IntensiveResultsRestoreTests(TestCase):
         with bypass_rls():
             return Enrollment.objects.filter(offering=self.intensive, student=self.users[523]).first()
 
+
+class IntensiveResultsRestoreTests(_IntensiveBase):
     def test_dry_run_counts_without_writing(self):
         counts = self._call()
         self.assertEqual(counts["mode"], "dry_run")
@@ -222,3 +224,110 @@ class IntensiveResultsRestoreTests(TestCase):
         with self.assertRaisesMessage(CommandError, "intensive_results_batch_invalid"):
             self._call(undo="nope")
         self.assertEqual(failure_code(ValueError("Boom X")), "intensive_results_failed_valueerror_boom_x")
+
+
+class IntensiveArchiveOfferingTests(_IntensiveBase):
+    """``--create-missing-offerings``: uyğun açılış yoxdursa köhnə jurnal ailəsinin bağlı intensiv arxiv açılışı."""
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        with bypass_rls():
+            cls.teacher = User.objects.create_user("ir_teacher", "ir_teacher@example.test", "x")
+            Membership.objects.create(
+                user=cls.teacher,
+                organization=cls.org,
+                role=cls.org.roles.get(name="teacher"),
+                is_primary=True,
+                is_active=True,
+            )
+            cls.missing = Subject.objects.create(
+                organization=cls.org, code="QKU-777", name="Ardıcıl tərcümə və qeydgötürmə texnikası"
+            )
+
+    def _plan(self, items):
+        path = super()._plan(items)
+        data = json.loads(Path(path).read_text())
+        data["subjects"].append({"id": 777, "name": "Ardıcıl tərcümə və qeydgötürmə texnikası"})
+        Path(path).write_text(json.dumps(data, ensure_ascii=False))
+        return path
+
+    def _ledger(self, entity_type, keys=None):
+        if entity_type == "worker":
+            return {"23": str(self.teacher.pk)}
+        return super()._ledger(entity_type, keys)
+
+    def _missing_item(self, sid=700, **extra):
+        item = self._item(sid=sid, journals=["CnbUmerDlP"], lesson_id=777, siblings=[], teacher=23)
+        item.update(extra)
+        return item
+
+    def _create(self, items, **kwargs):
+        return self._call(items, create_missing_offerings=True, **kwargs)
+
+    def _archive(self):
+        with bypass_rls():
+            return CourseOffering.objects.filter(subject=self.missing).first()
+
+    def test_without_flag_row_is_skipped(self):
+        counts = self._call([self._missing_item()], apply=True)
+        self.assertEqual(counts["skip_offering_no_sibling"], "1")
+        self.assertIsNone(self._archive())
+
+    def test_creates_closed_intensive_archive_and_undo_removes_it(self):
+        from apps.registrar import finals
+        from apps.registrar.models import AssessmentScheme
+
+        items = [self._missing_item(), self._missing_item(sid=994, total="70", exam="22")]
+        counts = self._create(items, apply=True)
+        self.assertEqual(counts["offerings_created"], "1")
+        self.assertEqual(counts["offering_by_archive_new"], "1")
+        self.assertEqual(counts["offering_by_archive_existing"], "1")
+        self.assertEqual(counts["restored"], "2")
+        offering = self._archive()
+        with bypass_rls():
+            self.assertEqual(
+                (offering.course_format, offering.group_id, offering.instructor_id, offering.period_id),
+                ("intensive", None, self.teacher.pk, self.spring.pk),
+            )
+            self.assertEqual((offering.starts_on, offering.ends_on), (self.spring.start_date, self.spring.end_date))
+            scheme = AssessmentScheme.objects.get(offering=offering)
+            self.assertEqual((scheme.approval_status, scheme.is_published), ("approved", True))
+            rows = Enrollment.objects.filter(offering=offering)
+            self.assertEqual(rows.count(), 2)
+            mine = rows.select_related("offering", "student").get(student=self.users[700])
+            result = finals.compute_final_result(enrollment=mine, organization=self.org)
+            self.assertEqual((result["total"], result["passed"]), (D(82), True))
+        again = self._create([self._missing_item()], apply=True)
+        self.assertEqual((again.get("offerings_created", "0"), again["skip_existing"]), ("0", "1"))
+        undone = self._call(apply=True, undo=counts["batch"])
+        self.assertEqual((undone["undo_enrollment_deleted"], undone["undo_offering_deleted"]), ("2", "1"))
+        self.assertIsNone(self._archive())
+
+    def test_dry_run_and_failed_row_leave_no_archive(self):
+        counts = self._create([self._missing_item()])
+        self.assertEqual((counts["mode"], counts["offerings_created"]), ("dry_run", "1"))
+        self.assertIsNone(self._archive())
+        counts = self._create([self._missing_item(entry="30", exam="10", total="40")], apply=True)
+        self.assertEqual(counts["skip_official_not_passed"], "1")
+        self.assertEqual(counts.get("offerings_created", "0"), "0")
+        self.assertIsNone(self._archive())
+
+    def test_current_period_and_ambiguous_rows_are_never_created(self):
+        with bypass_rls():
+            AcademicPeriod.objects.filter(pk=self.spring.pk).update(is_current=True)
+        counts = self._create([self._missing_item()], apply=True)
+        self.assertEqual(counts["skip_offering_period_not_past"], "1")
+        self.assertIsNone(self._archive())
+        with bypass_rls():
+            AcademicPeriod.objects.filter(pk=self.spring.pk).update(is_current=False)
+            twin = CourseOffering.objects.create(
+                organization=self.org,
+                subject=self.subject,
+                period=self.spring,
+                group=OrgUnit.objects.create(organization=self.org, name="G", slug="ir-g", unit_type="group"),
+            )
+            Enrollment.objects.create(organization=self.org, student=self.users[994], offering=twin)
+        counts = self._create([self._item(siblings=[994])], apply=True)
+        self.assertEqual(counts["skip_offering_ambiguous"], "1")
+        self.assertEqual(counts.get("offerings_created", "0"), "0")
