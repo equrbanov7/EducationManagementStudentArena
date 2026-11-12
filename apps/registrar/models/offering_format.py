@@ -50,6 +50,12 @@ class OfferingFormatFields(models.Model):
         max_length=255, blank=True, db_default="", help_text="İntensiv kursun açılma səbəbi (sərbəst mətn)."
     )
 
+    passive_hours_enabled = models.BooleanField(
+        default=False,
+        db_default=False,
+        help_text="Adi açılışda «Passiv saat» qeydi açıqdır (intensiv tədris olunan qrup; intensiv kursda həmişə açıq).",
+    )
+
     seminar_is_practical = models.BooleanField(
         default=False,
         db_default=False,

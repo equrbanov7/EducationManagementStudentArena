@@ -1,6 +1,8 @@
 .apx-msg__text, .apx-step__note, .apx-modal__title { overflow-wrap: anywhere; white-space: pre-wrap; }
 .apx-msg__main, .apx-step__text { min-width: 0; }
 [data-apx-recipient-field] { display: grid; gap: .5rem; margin-block: 1rem; }
+[data-apx-scope-field] { display: grid; gap: .25rem; margin-block: 1rem; }
+[data-apx-scope-field] .bootstrap-single-select { width: 100%; min-width: 0; }
 /* 2026-11-10: prorektor seçimi seçilmiş növün ALTINDA, ona bağlı «açılan» panel kimi. */
 .apx-options > .apx-recipient {
     margin: -5px 0 0;

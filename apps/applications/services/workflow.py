@@ -271,7 +271,7 @@ def forward(
     old = application.status
     application.status = rule.target
     application.current_unit = target_unit
-    application.current_scope_unit = forward_scope(application, target_unit, scope_id)
+    application.current_scope_unit = forward_scope(application, target_unit, scope_id, user=user)
     from .recipients import validate_destination
 
     application.assigned_to = validate_destination(target_unit, user, application.organization, "staff", recipient_id)

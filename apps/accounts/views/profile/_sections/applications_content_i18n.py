@@ -6,6 +6,7 @@ from django.utils.translation import pgettext
 def content_i18n():
     return {
         "selectChair": pgettext("applications.content", "Məktəbə aid kafedranı seçin"),
+        "selectAnyChair": pgettext("applications.content", "Kafedranı seçin"),
         "editApplication": pgettext("applications.content", "Müraciəti redaktə et"),
         "deleteApplication": pgettext("applications.content", "Müraciəti sil"),
         "restoreApplication": pgettext("applications.content", "Müraciəti bərpa et"),

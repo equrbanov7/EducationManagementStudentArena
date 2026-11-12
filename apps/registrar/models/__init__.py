@@ -111,6 +111,7 @@ from .movement import (
     movement_document_path,
 )
 from .offering_format import CourseFormat
+from .passive_hours import PassiveHour
 from .retake import ACTIVE_STATUSES as RETAKE_ACTIVE_STATUSES
 from .retake import CONSUMED_STATUSES as RETAKE_CONSUMED_STATUSES
 from .retake import RetakeApplication, RetakeKind, RetakeRefundState, RetakeResultSource, RetakeStatus
@@ -241,6 +242,7 @@ __all__ = [
     "JournalShareSource",
     "LAB_GROUP_NAME_MAX_LENGTH",
     "LabGroup",
+    "PassiveHour",
     "SeminarGroup",
     "SlotKind",
     "StudentAcademicRecord",

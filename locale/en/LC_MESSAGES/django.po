@@ -113655,6 +113655,10 @@ msgctxt "applications.content"
 msgid "Məktəbə aid kafedranı seçin"
 msgstr "Select a department in the school"
 
+msgctxt "applications.content"
+msgid "Kafedranı seçin"
+msgstr "Select a department"
+
 msgctxt "workload.recorded"
 msgid "Jurnalda qeydə alınmış dərs saatlarım"
 msgstr "My recorded teaching hours"
@@ -119207,3 +119211,103 @@ msgid ""
 "sil)"
 msgstr ""
 "Edit another teacher's journal directly (add / change / delete lesson days)"
+
+msgctxt "profile.rim"
+msgid ""
+"Bilinmirsə boş qala bilər — FİN-i sonradan RİM-də hesabı redaktə edərək və "
+"ya tələbə ilk girişdə özü yazır."
+msgstr ""
+"May be left empty if unknown — the FIN can be added later by editing the "
+"account in RİM, or the student enters it at first login."
+
+msgctxt "registrar.passive_hours"
+msgid "Passiv saat"
+msgstr "Passive hours"
+
+msgctxt "registrar.passive_hours"
+msgid "Passiv saat əlavə et"
+msgstr "Add passive hours"
+
+msgctxt "registrar.passive_hours"
+msgid "Hələ passiv saat qeyd olunmayıb."
+msgstr "No passive hours recorded yet."
+
+msgctxt "registrar.passive_hours"
+msgid "Qeyd / mövzu"
+msgstr "Note / topic"
+
+msgctxt "registrar.passive_hours"
+msgid "Saat"
+msgstr "Hours"
+
+msgctxt "registrar.passive_hours"
+msgid "Tarix"
+msgstr "Date"
+
+msgctxt "registrar.passive_hours"
+msgid "Sil"
+msgstr "Delete"
+
+msgctxt "registrar.passive_hours"
+msgid "auditoriyadan kənar (müstəqil) saatlar — davamiyyətə və keçirilmiş dərs saatına daxil deyil"
+msgstr "out-of-class (independent) hours — not part of attendance or held class hours"
+
+msgctxt "registrar.passive_hours"
+msgid "İntensiv tədris: passiv saat"
+msgstr "Intensive teaching: passive hours"
+
+msgctxt "registrar.passive_hours"
+msgid "Adi jurnalda passiv saat qeydini açır və ya bağlayır (intensiv tədris olunan qrup). Yazılmış qeydlər silinmir."
+msgstr "Turns passive-hour recording on or off in a regular journal (group taught intensively). Recorded entries are not deleted."
+
+msgctxt "registrar.passive_hours"
+msgid "Bu jurnalda passiv saat qeydi açıq deyil."
+msgstr "Passive-hour recording is not enabled in this journal."
+
+msgctxt "registrar.passive_hours"
+msgid "Bu jurnalda «Passiv saat» qeydi açıldı."
+msgstr "«Passive hours» recording is now on in this journal."
+
+msgctxt "registrar.passive_hours"
+msgid "Bu jurnalda «Passiv saat» qeydi bağlandı."
+msgstr "«Passive hours» recording is now off in this journal."
+
+msgctxt "registrar.passive_hours"
+msgid "Passiv saat qeydi silindi."
+msgstr "Passive-hour entry deleted."
+
+#, python-format
+msgctxt "registrar.passive_hours"
+msgid "Passiv saat əlavə olundu: %(date)s · %(hours)s saat."
+msgstr "Passive hours added: %(date)s · %(hours)s h."
+
+#, python-format
+msgctxt "registrar.passive_hours"
+msgid "Passiv saatın tarixi %(lo)s – %(hi)s aralığında olmalıdır."
+msgstr "The passive-hour date must be between %(lo)s and %(hi)s."
+
+msgctxt "registrar.passive_hours"
+msgid "Qeyd tapılmadı."
+msgstr "Entry not found."
+
+#, python-format
+msgctxt "registrar.passive_hours"
+msgid "Qeyd ən çox %(max)s simvol ola bilər."
+msgstr "The note can be at most %(max)s characters."
+
+#, python-format
+msgctxt "registrar.passive_hours"
+msgid "Saat 1 ilə %(max)s arasında olmalıdır."
+msgstr "Hours must be between 1 and %(max)s."
+
+msgctxt "registrar.passive_hours"
+msgid "Tarixi seçin."
+msgstr "Choose a date."
+
+msgctxt "registrar.model.passive_hour.meta"
+msgid "passiv saat"
+msgstr "passive hours entry"
+
+msgctxt "registrar.model.passive_hour.meta"
+msgid "passiv saatlar"
+msgstr "passive hours entries"

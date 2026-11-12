@@ -29,9 +29,16 @@ _CTX = "registrar.practical"
 
 
 def can_toggle(user, offering) -> bool:
-    """Mərkəzi ``workload.distribute`` icazəsi və açılışın kafedra əhatəsi."""
+    """Mərkəzi ``workload.distribute`` icazəsi və açılışın kafedra əhatəsi (yalnız dizayn fənni)."""
     from .design_practical_scope import is_design_offering
 
+    return chair_distribute_scope(user, offering, extra=is_design_offering)
+
+
+def chair_distribute_scope(user, offering, *, extra=None) -> bool:
+    """``workload.distribute`` org-wide və ya açılışın kafedrası aktorun alt-ağacında; ``extra`` — əlavə ucuz şərt.
+
+    «Passiv saat» bayrağı da (:mod:`apps.registrar.passive_hours`) eyni qapını işlədir."""
     if offering is None or not getattr(user, "is_authenticated", False):
         return False
     from .journal_scope import permission_scope_for
@@ -41,7 +48,7 @@ def can_toggle(user, offering) -> bool:
     # İcazə ƏVVƏL: kafedra yoxlaması (kafedrasız dil fənnində rəsmi yük kafedrası — əlavə sorğular) yalnız
     # düyməni görə biləcək aktor üçün işləsin; adi müəllimin jurnal səhifəsinə sorğu əlavə olunmasın.
     scope = permission_scope_for(user, offering.organization, "workload.distribute")
-    if not scope.has_structure_access or not is_design_offering(offering):
+    if not scope.has_structure_access or (extra is not None and not extra(offering)):
         return False
     if scope.is_org_wide:
         return True
@@ -102,4 +109,4 @@ def toggle(request, offering_id):
     return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
 
-__all__ = ["can_toggle", "context", "toggle"]
+__all__ = ["can_toggle", "chair_distribute_scope", "context", "toggle"]
