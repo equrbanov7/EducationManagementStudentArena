@@ -50,6 +50,11 @@ class Command(BaseCommand):
         parser.add_argument("--apply", action="store_true", help="Faktiki yaz (defolt: dry-run)")
         parser.add_argument("--batch", default="", help="Qaçış id-si (intensive-…); --undo üçün məcburi")
         parser.add_argument("--undo", action="store_true", help="--batch qaçışını geri qaytar")
+        parser.add_argument(
+            "--create-missing-offerings",
+            action="store_true",
+            help="Uyğun açılış yoxdursa (no_sibling / unresolved) bağlı intensiv arxiv açılışı yarat",
+        )
         parser.add_argument("--student", default="", help="Yalnız bu legacy tələbə id-ləri (vergüllə; sınaq üçün)")
 
     def handle(self, *args, **options):
@@ -67,7 +72,13 @@ class Command(BaseCommand):
                 restore.undo(organization=organization, actor=actor, counts=counts, batch=batch)
             else:
                 used["batch"] = restore.run(
-                    organization=organization, actor=actor, plan=plan, counts=counts, batch=batch, only_students=only
+                    organization=organization,
+                    actor=actor,
+                    plan=plan,
+                    counts=counts,
+                    batch=batch,
+                    only_students=only,
+                    create_missing=bool(options.get("create_missing_offerings")),
                 )
 
         try:

@@ -15,7 +15,9 @@ Sətir başına (hər biri öz savepoint-i; yarımçıq yazı qalmır):
 1. tələbə — cutover ledger-i (``student``); aktiv üzvlüyü olmalıdır;
 2. dövr / fənn — ledger (``academic_period`` / ``lesson_subject``), yoxdursa dövr adı / ``QKU-<id>`` kodu;
 3. açılış — ledger (``course_offering``, ``uniqid:…``) və ya HƏMİN legacy jurnalın digər (artıq köçmüş)
-   tələbələrinin həmin dövr + fənn üzrə yazılışı olan TƏK açılış (intensiv formatlı üstündür). Açılış YARADILMIR;
+   tələbələrinin həmin dövr + fənn üzrə yazılışı olan TƏK açılış (intensiv formatlı üstündür). Defolt olaraq açılış
+   YARADILMIR; ``--create-missing-offerings`` ilə ``no_sibling`` / ``unresolved`` sətir üçün köhnə jurnal ailəsinin
+   BAĞLI intensiv arxiv açılışı yaradılır (:mod:`.intensive_archive_offerings_2026_11_12`; ``ambiguous`` toxunulmur);
 4. tələbənin həmin açılışda yazılışı varsa — toxunulmur (``skip_existing``); eyni dövrdə eyni fənnin BAŞQA
    açılışında yazılışı varsa — əkiz, toxunulmur; fənni hansısa dövrdə artıq KEÇİBSƏ — toxunulmur (kredit iki dəfə
    sayılmasın);
@@ -43,6 +45,14 @@ from django.utils import timezone
 
 from core.audit import log_action
 from core.constants import AuditAction
+
+from .intensive_archive_offerings_2026_11_12 import (
+    CREATABLE,
+    ArchiveOfferings,
+    drop_created,
+    family_key,
+    resolve_teachers,
+)
 
 FORMAT = "intensive-results/1"
 RESOURCE = "registrar.intensive_results_restore"
@@ -334,8 +344,12 @@ def _prior_attempt(organization, user_id, subject, period) -> bool:
     )
 
 
-def run(*, organization, actor, plan, counts, batch=None, only_students=None) -> str:
-    """Planı tətbiq et (çağıranın tranzaksiyasında; dry-run onu geri qaytarır). ``batch`` id-sini qaytarır."""
+def run(*, organization, actor, plan, counts, batch=None, only_students=None, create_missing=False) -> str:
+    """Planı tətbiq et (çağıranın tranzaksiyasında; dry-run onu geri qaytarır). ``batch`` id-sini qaytarır.
+
+    ``create_missing`` — uyğun açılış tapılmayan (``no_sibling`` / ``unresolved``) sətir üçün köhnə jurnal ailəsinin
+    bağlı intensiv ARXİV açılışı yaradılır (:mod:`.intensive_archive_offerings_2026_11_12`); ``ambiguous`` toxunulmur.
+    """
     from .models import Enrollment, EnrollmentKind
 
     batch = batch or new_batch()
@@ -343,8 +357,12 @@ def run(*, organization, actor, plan, counts, batch=None, only_students=None) ->
     if only_students:
         items = [item for item in items if int(item["student"]) in only_students]
     resolver = Resolver(organization, plan, items)
+    archive = None
+    if create_missing:
+        teachers = resolve_teachers(resolver.ledger, organization, items)
+        archive = ArchiveOfferings(organization=organization, items=items, teachers=teachers)
     counts["items"] += len(items)
-    manifest = []
+    manifest, offerings_created = [], []
     seen = set()
     for item in items:
         period = resolver.periods.get(int(item.get("semestr") or 0))
@@ -357,16 +375,21 @@ def run(*, organization, actor, plan, counts, batch=None, only_students=None) ->
             counts["skip_student_unresolved"] += 1
             continue
         offering, how = resolver.offering_for(item, period, subject)
-        if offering is None:
+        if offering is None and archive is not None and how in CREATABLE:
+            offering = archive.find(item, period, subject)
+            how = "archive_existing" if offering is not None else "archive_new"
+        elif offering is None:
             counts[f"skip_{how}"] += 1
             continue
-        counts[f"offering_by_{how}"] += 1
-        if (offering.pk, user_id) in seen:
+        if offering is not None:
+            counts[f"offering_by_{how}"] += 1
+        key = (offering.pk if offering is not None else ("new", family_key(item), period.pk), user_id)
+        if key in seen:
             counts["skip_duplicate_item"] += 1
             continue
-        seen.add((offering.pk, user_id))
+        seen.add(key)
         same = Enrollment.objects.filter(organization=organization, student_id=user_id, offering__period=period)
-        if same.filter(offering=offering).exists():
+        if offering is not None and same.filter(offering=offering).exists():
             counts["skip_existing"] += 1
             continue
         if same.exclude(status="dropped").filter(offering__subject=subject).exists():
@@ -383,8 +406,11 @@ def run(*, organization, actor, plan, counts, batch=None, only_students=None) ->
             if _prior_attempt(organization, user_id, subject, period)
             else EnrollmentKind.MANDATORY
         )
+        created = None
         try:
             with transaction.atomic():
+                if offering is None:
+                    offering = created = archive.create(item, period, subject, counts)
                 manifest.append(
                     _restore_one(
                         organization=organization,
@@ -397,8 +423,14 @@ def run(*, organization, actor, plan, counts, batch=None, only_students=None) ->
                     )
                 )
         except RuntimeError as exc:
+            if created is not None:
+                archive.forget(created)
             counts["skip_" + str(exc).removeprefix("skip_")] += 1
             continue
+        if created is not None:
+            counts["offering_by_archive_new"] += 1
+            offerings_created.append(str(created.pk))
+            counts["offerings_created"] += 1
         counts["restored"] += 1
         counts[f"restored_{kind}"] += 1
     counts["offerings_touched"] += len({row["offering"] for row in manifest})
@@ -407,8 +439,8 @@ def run(*, organization, actor, plan, counts, batch=None, only_students=None) ->
             AuditAction.CREATE,
             user=actor,
             organization=organization,
-            new_values={"enrollments": len(manifest)},
-            changes={"created": manifest},
+            new_values={"enrollments": len(manifest), "offerings_created": len(offerings_created)},
+            changes={"created": manifest, "offerings_created": offerings_created},
             reason=REASON,
             resource_type=RESOURCE,
             resource_id=batch,
@@ -444,6 +476,7 @@ def undo(*, organization, actor, counts, batch) -> None:
             with journal_unlock(local=True):
                 enrollment.delete()
             counts["undo_enrollment_deleted"] += 1
+        drop_created(organization, (row.changes or {}).get("offerings_created") or [], counts)
     log_action(
         AuditAction.UPDATE,
         user=actor,
