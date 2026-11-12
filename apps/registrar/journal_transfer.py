@@ -240,6 +240,10 @@ def _user(user_id):
 
 
 def _move_owner(offering, target, expected_id) -> None:
+    from .lesson_author_freeze import freeze
+
+    # Sahib 2026-11-13: köhnə sahibin keçdiyi (müəllimi boş) dərslər onda qalır — yeni sahibə «sürüşmür».
+    freeze(offering.pk, expected_id)
     updated = CourseOffering.objects.filter(pk=offering.pk, instructor_id=expected_id).update(instructor=target)
     if not updated:
         raise TransferRejected("concurrent_change")

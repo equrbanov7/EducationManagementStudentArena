@@ -88,7 +88,28 @@ def slot_teacher(offering, slot, last_instructor):
     sonra jurnal sahibi (2026-09-25 — bölünmüş tədrisdə seminarı aparan assistent)."""
     if slot.instructor_id:
         return slot.instructor
-    return last_instructor.get(slot.kind) or offering.instructor
+    return current_last_instructor(offering, slot.kind, last_instructor) or offering.instructor
+
+
+def current_last_instructor(offering, kind, last_instructor):
+    """Bu növün SON müəllimi — jurnaldan TƏHVİL ilə çıxarılıbsa (və növü hazırda aparmırsa) ``None``.
+
+    Sahib 2026-11-13: təhvil / yük bölgüsündən sonra keçilmiş dərslər köhnə müəllimin adında qalır
+    (``lesson_author_freeze``) — yeni sütun ona «son müəllim» kimi yazılmamalıdır. Payı olmayan assistent
+    (2026-09-25 bölünmüş tədris: seminarı aparır, amma pay / slot müəllimi deyil) əvvəlki kimi qalır.
+    """
+    teacher = last_instructor.get(kind)
+    if teacher is None:
+        return None
+    from .journal_transfer import kind_holders
+    from .models import TeachingHandover
+
+    if teacher.pk in kind_holders(offering).get(kind, ()):
+        return teacher
+    handed_away = TeachingHandover.objects.filter(
+        offering_id=offering.pk, from_instructor_id=teacher.pk, reverted_at__isnull=True
+    ).exists()
+    return None if handed_away else teacher
 
 
 def slots_on(offering, day) -> list:
@@ -281,7 +302,11 @@ def slot_lesson_fields(offering, slot, day, *, last_instructor=None) -> dict:
         "room": resolve_slot_room(offering, slot) or lesson_rooms.remembered_room(offering, kind, day),
         # Fənn iki müəllim arasında bölünübsə (mühazirə/seminar): slotun öz müəllimi (cədvəldə
         # təyin olunubsa), yoxdursa bu növün son müəllimi, o da yoxdursa jurnal sahibi.
-        "instructor": slot.instructor if slot.instructor_id else (last_instructor.get(kind) or offering.instructor),
+        "instructor": (
+            slot.instructor
+            if slot.instructor_id
+            else (current_last_instructor(offering, kind, last_instructor) or offering.instructor)
+        ),
     }
 
 
