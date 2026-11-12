@@ -31,6 +31,7 @@ from . import legacy_grade_review  # noqa: F401
 from . import legacy_grade_review_actions  # noqa: F401
 from . import legacy_grade_review_counts  # noqa: F401
 from . import legacy_grade_review_rows  # noqa: F401
+from . import lesson_author_freeze  # noqa: F401 — tarixi reviewed_* bərpaları üçün suspended() (2026-11-13)
 from . import lessons_log  # noqa: F401
 from . import movements  # noqa: F401
 from . import offering_chairs  # noqa: F401 — açılışın kafedrası (kafedra jurnal sağlamlığı hesabatı, 2026-10-27)
@@ -163,6 +164,7 @@ __all__ = [
     "handover_actions",
     "handover_query",
     "journal_transfer",
+    "lesson_author_freeze",
     "instructor_activity",
     "instructor_offering",
     "instructor_offerings",
