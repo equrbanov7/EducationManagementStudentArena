@@ -31,13 +31,17 @@ def _model(name, app="registrar"):
     return django_apps.get_model(app, name)
 
 
-def shared_curricula(subject_ids) -> list:
-    """Fənlərdən ən azı İKİSİNİ birlikdə daşıyan tədris planlarının id-ləri (sabit sıra)."""
+def shared_curricula(subject_ids, only=None) -> list:
+    """Fənlərdən ən azı İKİSİNİ birlikdə daşıyan tədris planlarının id-ləri (sabit sıra).
+
+    ``only`` (2026-11-12, oxşar adlı cütlər) — yalnız bu planlar (qrupun öz planları) yoxlanılır."""
     ids = [value for value in subject_ids if value]
     if len(set(ids)) < 2:
         return []
     by_plan = defaultdict(set)
     rows = _model("CurriculumSubject")._base_manager.filter(subject_id__in=ids)
+    if only is not None:
+        rows = rows.filter(curriculum_id__in=list(only))
     for curriculum_id, subject_id in rows.values_list("curriculum_id", "subject_id"):
         by_plan[str(curriculum_id)].add(subject_id)
     return sorted(plan for plan, subjects in by_plan.items() if len(subjects) > 1)

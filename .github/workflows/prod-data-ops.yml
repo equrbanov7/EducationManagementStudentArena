@@ -1763,6 +1763,7 @@ jobs:
               # geri qaytar. APPLY yalnız AÇIQ addımla (boş batch + apply rədd olunur) — hər addım ayrıca paket alır.
               # batch=catalogue-current (sahib 2026-11-11) = kataloq addımı `--current-only` ilə: keçmiş dövr sətirləri
               # mənbə kartda qalır, keçmiş toqquşma bloklamır; cari imtahanı olan kart saxlanılandır.
+              # batch=similar (sahib 2026-11-12) = eyni qrupun OXŞAR adlı iki aktiv jurnalı → bir jurnal (kartlara toxunulmur).
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor")
@@ -1770,12 +1771,12 @@ jobs:
                 "") test "$APPLY" != "true" || { echo "apply üçün açıq addım verin: batch=journals|doubles|catalogue|codes|takers" >&2; exit 2; } ;;
                 report) test "$APPLY" != "true" || { echo "report yazmır — apply=false olmalıdır" >&2; exit 2; }
                   args+=(--only "$BATCH") ;;
-                journals|doubles|catalogue|codes|takers) args+=(--only "$BATCH") ;;
+                journals|doubles|catalogue|codes|takers|similar) args+=(--only "$BATCH") ;;
                 catalogue-current) args+=(--only catalogue --current-only) ;;
                 dupsubj-*)
                   test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }
                   args+=(--undo --batch "$BATCH") ;;
-                *) echo "batch: boş, journals, doubles, catalogue, catalogue-current, codes, takers, report və ya dupsubj-… olmalıdır" >&2; exit 2 ;;
+                *) echo "batch: boş, journals, doubles, catalogue, catalogue-current, codes, takers, similar, report və ya dupsubj-… olmalıdır" >&2; exit 2 ;;
               esac
               ;;
             fill_empty_cells_20261110)

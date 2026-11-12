@@ -70,6 +70,7 @@ from . import transfer  # noqa: F401
 from . import twins_repair_2026_11_05b  # noqa: F401 — əkiz jurnallar MR-190/MR-161 (2026-11-05, workload əmri)
 from . import (  # noqa: F401 — dublikat fənlər: jurnal + kataloq + kod (2026-11-11, exams əmri)
     duplicate_subjects_2026_11_11,
+    duplicate_subjects_similar_2026_11_12,
 )
 from . import exam_eligibility as eligibility_rules  # noqa: F401
 from .absence_credit_read import credit_hours_map, effective_hours  # noqa: F401
@@ -243,6 +244,7 @@ __all__ = [
     "transfer",
     "twins_repair_2026_11_05b",
     "duplicate_subjects_2026_11_11",
+    "duplicate_subjects_similar_2026_11_12",
     "exam_taker_placement_2026_11_11",
     "subject_codes",
     "subject_recode",
