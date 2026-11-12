@@ -213,7 +213,8 @@ class JournalMerge(ScoreSteps):
             raise Blocked("pair_names_differ")
         from .duplicate_subjects_rules_2026_11_11 import shared_curricula
 
-        if shared_curricula([source.subject_id, target.subject_id]):
+        # Oxşar adlı cüt (2026-11-12): kartlar başqa qruplarda ayrı fənlər ola bilər — yalnız QRUPUN planları yoxlanılır.
+        if shared_curricula([source.subject_id, target.subject_id], only=pair.get("curricula")):
             raise Blocked("pair_curriculum_both")  # eyni tədris planında iki ayrı sətir — həqiqətən fərqli fənlər
         return source, target
 

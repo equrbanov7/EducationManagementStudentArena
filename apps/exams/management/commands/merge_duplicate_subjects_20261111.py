@@ -40,11 +40,12 @@ from django.db import transaction
 
 from apps.exams.services import journal_missing_takers
 from apps.registrar.public import duplicate_subjects_2026_11_11 as duplicates
+from apps.registrar.public import duplicate_subjects_similar_2026_11_12 as similar
 from core.rls import apply_rls_request_context, bypass_rls
 from core.rls_pooling import rls_worker_atomic
 
 PREFIX = "twin_merge:"
-OPS = (*duplicates.OPS, "takers")
+OPS = (*duplicates.OPS, "takers", "similar")
 
 
 def failure_code(exc: Exception) -> str:
@@ -118,6 +119,21 @@ class Command(BaseCommand):
         for exam_id, value in sorted(changed.items()):
             lines.append(f"catalogue_exam={exam_id} links_changed={value}")
 
+    @staticmethod
+    def _similar(organization, actor, counts, batch, lines) -> None:
+        """3-cü dövrə (sahib 2026-11-12): eyni qrupun OXŞAR adlı iki aktiv jurnalı (kartlara toxunulmur)."""
+        similar.run(
+            organization=organization,
+            actor=actor,
+            counts=counts,
+            batch=batch,
+            lines=lines,
+            period=duplicates.current_period(organization),
+            resource=duplicates.RESOURCE,
+            kind=duplicates.KIND,
+            reason=duplicates.REASON,
+        )
+
     def _run(self, options, counts, lines) -> str:
         actor = get_user_model().objects.filter(username=options["actor"], is_active=True, is_superuser=True).first()
         if actor is None:
@@ -138,7 +154,9 @@ class Command(BaseCommand):
                     batch = batch or duplicates.new_batch_id()
                     registrar_ops = tuple(op for op in ops if op in duplicates.OPS)
                     merged = []
-                    if registrar_ops:
+                    if only == "similar":
+                        self._similar(organization, actor, counts, batch, lines)
+                    elif registrar_ops:
                         duplicates.run(
                             organization=organization,
                             actor=actor,
