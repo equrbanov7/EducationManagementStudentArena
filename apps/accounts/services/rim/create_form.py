@@ -98,13 +98,11 @@ class AccountDraft:
         return not self.errors
 
 
-def _strict(draft: AccountDraft) -> bool:
-    """FİN və doğum tarixi məcburidirmi — YALNIZ tələbədə (toplu idxalla eyni qayda).
-
-    Sahib 2026-10-23: müəllim / əməkdaş hesabı FİN-siz açıla bilər; FİN-i istifadəçi ilk girişdə
-    «Məcburi profil məlumatları» qapısında (``profile_completion``) özü yazır.
-    """
-    return draft.kind == intake_create.KIND_STUDENT
+#: FİN və doğum tarixi formda HEÇ BİR növdə məcburi deyil (toplu idxaldan QƏSDƏN fərqli):
+#: sahib 2026-10-23 — müəllim / əməkdaş; sahib 2026-11-12 (MR-000277, bərpa olunan tələbənin FİN-i və doğum
+#: tarixi məlum deyil, «FİN olmadan əlavə et») — tələbə də. FİN-i RİM sonradan redaktə formasında yazır, ya da
+#: istifadəçi ilk girişdə «Məcburi profil məlumatları» qapısında (``profile_completion`` — tələbə rolunda da FİN
+#: istəyir) özü yazır. Toplu idxal (rəsmi ATİS / kadr faylı) tələbə FİN-ini məcburi saxlayır.
 
 
 def _fail(draft: AccountDraft, name: str, message: str) -> None:
@@ -129,12 +127,9 @@ def _validate_identity(draft: AccountDraft, data: dict, context: IntakeContext) 
     patronymic = normalize_text(data.get("patronymic"))
 
     if not fin:
-        if _strict(draft):
-            _fail(draft, "fin", pgettext(_CTX, "FİN boşdur."))
-        else:
-            draft.warnings.append(
-                pgettext(_CTX, "FİN yoxdur — istifadəçi ilk girişdə «Məcburi profil məlumatları»nda özü yazacaq.")
-            )
+        draft.warnings.append(
+            pgettext(_CTX, "FİN yoxdur — istifadəçi ilk girişdə «Məcburi profil məlumatları»nda özü yazacaq.")
+        )
     else:
         try:
             validate_fin(fin)
@@ -176,22 +171,12 @@ def _validate_identity(draft: AccountDraft, data: dict, context: IntakeContext) 
 
 
 def _validate_person(draft: AccountDraft, data: dict) -> None:
-    # DOĞUM TARİXİ MƏCBURİDİR — toplu idxalla eyni qayda. `spec.py` sütunu
-    # «məcburi» işarələmir, LAKİN `validate._validate_academic` boş tarixi
-    # `birth_date_invalid` kimi rədd edir. Formda onu opsional saysaydıq iki
-    # səth arasında məhz qaçındığımız drift yaranardı; ona görə burada da
-    # məcburidir və şablonda `*` ilə işarələnib. Boş dəyər üçün mesaj
-    # AYRIDIR — «format tanınmadı» boş sahə üçün yanıltıcıdır.
-    #
-    # Sahib 2026-10-23: müəllim / əməkdaş hesabında doğum tarixi də FİN kimi OPSİONALDIR (``_strict``).
+    # Doğum tarixi OPSİONALDIR (FİN kimi — yuxarıdakı qeydə bax); yazılıbsa format və məntiq yoxlanır.
     raw = normalize_text(data.get("birth_date"))
     birth_date, ok = parse_birth_date(raw)
-    if not raw:
-        if _strict(draft):
-            _fail(draft, "birth_date", pgettext(_CTX, "Doğum tarixi məcburidir."))
-    elif not ok:
+    if raw and not ok:
         _fail(draft, "birth_date", pgettext(_CTX, "Doğum tarixi tanınmadı (gg.aa.iiii formatını işlədin)."))
-    elif birth_date is not None and not (date(1900, 1, 1) <= birth_date <= date.today()):
+    elif raw and birth_date is not None and not (date(1900, 1, 1) <= birth_date <= date.today()):
         _fail(draft, "birth_date", pgettext(_CTX, "Doğum tarixi məntiqsizdir."))
 
     gender, known = parse_gender(data.get("gender"))
@@ -367,13 +352,16 @@ def _validate_credentials(draft: AccountDraft, data: dict, context: IntakeContex
         draft.values["username"] = intake_create.claim_username(
             intake_create.username_base(draft.kind, code=code, fin=fin)
         )
-    elif not _strict(draft) and (draft.values.get("first_name") or draft.values.get("last_name")):
-        # FİN-siz müəllim: ``ad.soyad`` (``ad.soyad2`` …) — «Müəllim əlavəsi (toplu)»nun FİN-siz yolu ilə eyni.
+    elif draft.values.get("first_name") or draft.values.get("last_name"):
+        # FİN-siz hesab: ``ad.soyad`` (``ad.soyad2`` …) — «Müəllim əlavəsi (toplu)»nun FİN-siz yolu və köhnə
+        # sistem delta tələbəsi (``legacy_accounts.create_legacy_student``) ilə eyni qayda. Tələbə kodu (N)
+        # yazılıbsa belə ad ondan QURULMUR — kod ``institutional_identifier``-ə əvvəlki kimi düşür.
         from ..teacher_roster.create import claim_name_username
         from ..username_repair import name_base
 
+        fallback = "telebe" if draft.kind == intake_create.KIND_STUDENT else "isci"
         draft.values["username"] = claim_name_username(
-            name_base(draft.values.get("first_name"), draft.values.get("last_name")) or "isci"
+            name_base(draft.values.get("first_name"), draft.values.get("last_name")) or fallback
         )
 
     email = normalize_text(data.get("email"))

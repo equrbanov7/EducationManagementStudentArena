@@ -170,7 +170,9 @@ def test_forward_scope_picker_and_endpoint_restrict_choices_to_applicant_school(
 
     app = create(world, "sikayet")
     payload = detail_payload(app, user=world["deputy"])
-    assert payload["forward_scopes"] == [{"id": str(world["tree"]["chair"].pk), "name": world["tree"]["chair"].name}]
+    assert payload["forward_scopes"] == [
+        {"id": str(world["tree"]["chair"].pk), "name": world["tree"]["chair"].name, "own_school": True, "school": ""}
+    ]
     client = client_for(world["deputy"], app.organization)
     url = reverse("applications:action", args=[app.pk])
     response = client.post(
@@ -193,6 +195,63 @@ def test_forward_scope_picker_and_endpoint_restrict_choices_to_applicant_school(
         },
     )
     assert response.status_code == 200
+
+
+def test_rim_forward_picker_lists_every_chair_with_own_school_first(world):
+    """MR-000302: RİM başqa məktəbin kafedrasını da seçə bilir; öz məktəbinkilər əvvəldə."""
+    from apps.applications.payloads import detail_payload
+
+    app = create(world, "sikayet")
+    scopes = detail_payload(app, user=world["rim"])["forward_scopes"]
+    ids = [scope["id"] for scope in scopes]
+    own, other = str(world["tree"]["chair"].pk), str(world["other_tree"]["chair"].pk)
+    assert ids.index(own) < ids.index(other)
+    assert scopes[ids.index(own)]["own_school"] is True
+    other_row = scopes[ids.index(other)]
+    assert other_row["own_school"] is False
+    assert other_row["school"] == world["other_tree"]["faculty"].name
+
+
+def test_rim_forwards_to_other_school_chair_and_its_head_sees_it(world):
+    from django.urls import reverse
+
+    from apps.applications.tests.test_endpoints import client_for
+
+    app = create(world, "sikayet")
+    other_head = make_user("other-school-chair-head")
+    add_member(app.organization, other_head, "chair_head", scope_unit=world["other_tree"]["chair"], permissions=HANDLE)
+    response = client_for(world["rim"], app.organization).post(
+        reverse("applications:action", args=[app.pk]),
+        {
+            "action": "forward",
+            "target_unit": "kafedra",
+            "scope": str(world["other_tree"]["chair"].pk),
+            "text": "Mühasibat uçotu kafedrasının araşdırması üçün.",
+        },
+    )
+    assert response.status_code == 200
+    app.refresh_from_db()
+    assert app.current_scope_unit_id == world["other_tree"]["chair"].pk
+    assert access.can_act(other_head, app)
+    assert (
+        queries.list_applications(organization=app.organization, user=other_head, tab="inbox")
+        .filter(pk=app.pk)
+        .exists()
+    )
+    assert other_head.pk in {user.pk for user in notify.handler_recipients(app)}
+    assert not access.can_view(world["chair_head"], app)
+
+
+def test_regular_handler_still_cannot_forward_to_other_school_chair(world):
+    app = create(world, "sikayet")
+    with pytest.raises(TransitionDenied):
+        workflow.forward(
+            application=app,
+            user=world["deputy"],
+            target_unit=world["units"]["kafedra"],
+            note="Başqa məktəbin kafedrasına yönləndirmə cəhdi.",
+            scope_id=world["other_tree"]["chair"].pk,
+        )
 
 
 def test_academic_scope_migration_backfills_legacy_queue_and_is_reversible(world):

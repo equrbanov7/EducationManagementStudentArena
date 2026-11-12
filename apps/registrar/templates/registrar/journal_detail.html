@@ -35,6 +35,7 @@
     <link rel="stylesheet" href="{% static 'registrar/css/journal_lesson_modal.css' %}?v=20261025-1">
     {% if journal_share_chip %}<link rel="stylesheet" href="{% static 'registrar/css/journal_share.css' %}?v=20261026-share">{% endif %}
     {% if full_edit_active %}<link rel="stylesheet" href="{% static 'registrar/css/journal_full_edit.css' %}?v=20261027-fe">{% endif %}
+    {% if passive_hours %}<link rel="stylesheet" href="{% static 'registrar/css/journal_passive_hours.css' %}?v=20261112-passive">{% endif %}
     {% if practical_toggle %}<link rel="stylesheet" href="{% static 'registrar/css/journal_practical.css' %}?v=20261028-pm">{% endif %}
 {% endblock %}
 
@@ -127,6 +128,7 @@
         {% comment %}#7/#8/#9 — keçirilmiş dərs saatı (növ üzrə) + hər növün müəllim(lər)i
         (mühazirə göy, seminar yaşıl, lab narıncı) + qalan saat. Yalnız MÖVCUD növlər.{% endcomment %}
         {% include "registrar/partials/_journal_teaching_heading.html" %}
+        {% include "registrar/partials/_jd_passive_hours.html" %}{# «Passiv saat» (sahib 2026-11-12, MR-000303) #}
 
         <nav class="jd2-tabsbar" role="tablist" aria-label="{% trans 'Jurnal bölmələri' context 'registrar.journal' %}" data-journal-tabs>
             <button type="button" class="jd2-tab{% if active_tab == "grid" %} is-active{% endif %}" role="tab" aria-selected="{% if active_tab == "grid" %}true{% else %}false{% endif %}" data-jt-url="?jt=grid" data-jtab="grid" data-jd-step-of="2" id="jd-tab-grid" aria-controls="jd-panel-grid">
