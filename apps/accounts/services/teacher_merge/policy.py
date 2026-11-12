@@ -152,6 +152,7 @@ _REPOINT = (
     "registrar.Lesson.created_by",
     "registrar.Lesson.instructor",
     "registrar.LessonMark.entered_by",
+    "registrar.PassiveHour.created_by",
     "registrar.Program.archived_by",
     "registrar.ResitRecord.decided_by",
     "registrar.RetakeApplication.decided_by",

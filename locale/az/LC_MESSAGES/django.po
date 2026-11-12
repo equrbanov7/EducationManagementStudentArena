@@ -118510,3 +118510,95 @@ msgstr ""
 msgctxt "accounts.workload"
 msgid "Aydındır, Vakant saxla və təsdiqlə"
 msgstr "Aydındır, Vakant saxla və təsdiqlə"
+
+msgctxt "registrar.passive_hours"
+msgid "Passiv saat"
+msgstr "Passiv saat"
+
+msgctxt "registrar.passive_hours"
+msgid "Passiv saat əlavə et"
+msgstr "Passiv saat əlavə et"
+
+msgctxt "registrar.passive_hours"
+msgid "Hələ passiv saat qeyd olunmayıb."
+msgstr "Hələ passiv saat qeyd olunmayıb."
+
+msgctxt "registrar.passive_hours"
+msgid "Qeyd / mövzu"
+msgstr "Qeyd / mövzu"
+
+msgctxt "registrar.passive_hours"
+msgid "Saat"
+msgstr "Saat"
+
+msgctxt "registrar.passive_hours"
+msgid "Tarix"
+msgstr "Tarix"
+
+msgctxt "registrar.passive_hours"
+msgid "Sil"
+msgstr "Sil"
+
+msgctxt "registrar.passive_hours"
+msgid "auditoriyadan kənar (müstəqil) saatlar — davamiyyətə və keçirilmiş dərs saatına daxil deyil"
+msgstr "auditoriyadan kənar (müstəqil) saatlar — davamiyyətə və keçirilmiş dərs saatına daxil deyil"
+
+msgctxt "registrar.passive_hours"
+msgid "İntensiv tədris: passiv saat"
+msgstr "İntensiv tədris: passiv saat"
+
+msgctxt "registrar.passive_hours"
+msgid "Adi jurnalda passiv saat qeydini açır və ya bağlayır (intensiv tədris olunan qrup). Yazılmış qeydlər silinmir."
+msgstr "Adi jurnalda passiv saat qeydini açır və ya bağlayır (intensiv tədris olunan qrup). Yazılmış qeydlər silinmir."
+
+msgctxt "registrar.passive_hours"
+msgid "Bu jurnalda passiv saat qeydi açıq deyil."
+msgstr "Bu jurnalda passiv saat qeydi açıq deyil."
+
+msgctxt "registrar.passive_hours"
+msgid "Bu jurnalda «Passiv saat» qeydi açıldı."
+msgstr "Bu jurnalda «Passiv saat» qeydi açıldı."
+
+msgctxt "registrar.passive_hours"
+msgid "Bu jurnalda «Passiv saat» qeydi bağlandı."
+msgstr "Bu jurnalda «Passiv saat» qeydi bağlandı."
+
+msgctxt "registrar.passive_hours"
+msgid "Passiv saat qeydi silindi."
+msgstr "Passiv saat qeydi silindi."
+
+#, python-format
+msgctxt "registrar.passive_hours"
+msgid "Passiv saat əlavə olundu: %(date)s · %(hours)s saat."
+msgstr "Passiv saat əlavə olundu: %(date)s · %(hours)s saat."
+
+#, python-format
+msgctxt "registrar.passive_hours"
+msgid "Passiv saatın tarixi %(lo)s – %(hi)s aralığında olmalıdır."
+msgstr "Passiv saatın tarixi %(lo)s – %(hi)s aralığında olmalıdır."
+
+msgctxt "registrar.passive_hours"
+msgid "Qeyd tapılmadı."
+msgstr "Qeyd tapılmadı."
+
+#, python-format
+msgctxt "registrar.passive_hours"
+msgid "Qeyd ən çox %(max)s simvol ola bilər."
+msgstr "Qeyd ən çox %(max)s simvol ola bilər."
+
+#, python-format
+msgctxt "registrar.passive_hours"
+msgid "Saat 1 ilə %(max)s arasında olmalıdır."
+msgstr "Saat 1 ilə %(max)s arasında olmalıdır."
+
+msgctxt "registrar.passive_hours"
+msgid "Tarixi seçin."
+msgstr "Tarixi seçin."
+
+msgctxt "registrar.model.passive_hour.meta"
+msgid "passiv saat"
+msgstr "passiv saat"
+
+msgctxt "registrar.model.passive_hour.meta"
+msgid "passiv saatlar"
+msgstr "passiv saatlar"

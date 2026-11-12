@@ -359,6 +359,9 @@ def journal_detail(request, offering_id):
     from .lab_groups_views import link_context as lab_groups_link  # «Lab qrupları» ekranı (sahib 2026-11-06)
 
     context.update(lab_groups_link(request.user, offering))
+    from .passive_hours import page_context as passive_context  # «Passiv saat» (sahib 2026-11-12, MR-000303)
+
+    context.update(passive_context(request.user, offering, can_edit_journal=context["can_edit"]))
     return render(request, "registrar/journal_detail.html", context)
 
 
