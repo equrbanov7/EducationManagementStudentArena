@@ -28,16 +28,20 @@ T1 = datetime.time(16, 55)
 
 
 class SimilarKindTest(SimpleTestCase):
-    def test_qualifier_same_typo_and_numbered(self):
+    def test_qualifier_same_and_lookalikes(self):
         self.assertEqual(
             similar.similar_kind("İnformasiya texnologiyaları", "İnformasiya texnologiyaları (ixtisas üzrə)"),
             "qualifier",
         )
         self.assertEqual(similar.similar_kind("Verilənlər bazası", "Verilenler  bazasi"), "same")
-        self.assertEqual(similar.similar_kind("Kompüter şəbəkələri", "Kompüter şəbəkləri"), "typo")
+        self.assertEqual(similar.similar_kind("Kompüter şəbəkələri", "Kompüter şəbəkləri"), "")
         self.assertEqual(similar.similar_kind("Kompüter qrafikası-1", "Kompüter qrafikası-2"), "")
         self.assertEqual(similar.similar_kind("Xarici dil-1", "Xarici dil-2"), "")
         self.assertEqual(similar.similar_kind("Fizika", "Kimya"), "")
+        # prod dry-run 2026-11-12: iki hərf fərqi, amma FƏRQLİ fənlər
+        self.assertEqual(
+            similar.similar_kind("Kəmiyyət əsaslı tədqiqat metodları", "Keyfiyyət əsaslı tədqiqat metodları"), ""
+        )
 
 
 class SimilarJournalsTest(_MidtermSetup):

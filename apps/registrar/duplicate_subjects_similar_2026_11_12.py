@@ -10,8 +10,9 @@ yalnız konkret qrupun cari dövrdəki iki jurnalı :class:`.duplicate_journal_m
 birləşir (heç bir xana / bal itmir, fərqli dəyərlər manifestdə, geri qaytarma paketlə).
 
 **Namizəd cüt** — cari dövr, eyni qrup, ikisi də aktiv, fənn kartları FƏRQLİ və adlar :func:`similar_kind` üzrə
-oxşardır: ``same`` (normallaşdırılmış ad eyni), ``qualifier`` (biri digərinin «(ixtisas üzrə)» kimi izahlı forması),
-``typo`` (≤ 2 hərf fərqi, fərqdə RƏQƏM YOXDUR — «-1» / «-2» heç vaxt birləşmir).
+oxşardır: ``same`` (normallaşdırılmış ad eyni) və ya ``qualifier`` (biri digərinin «(ixtisas üzrə)» kimi izahlı
+forması). Hərf fərqi («typo») qaydası YOXDUR: prod dry-run-u «Kəmiyyət əsaslı …» / «Keyfiyyət əsaslı tədqiqat
+metodları» (iki hərf fərqi, FƏRQLİ fənlər) cütünü tutdu — «-1» / «-2», «I» / «II» kimi hissələr də birləşmir.
 
 **Saxlanılan jurnal** (hədəf): qrupun tədris planında (qrup tələbələrinin akademik qeydlərinin planları) YALNIZ bir
 kart varsa — o; ikisi də plandadırsa cüt toxunulmur (``similar_skip_both_in_plan`` — həqiqətən fərqli fənlər); heç
@@ -21,7 +22,6 @@ biri plandadırsa — dərs yükündə (bu dövr + qrup) saatı çox olan kart; 
 
 from __future__ import annotations
 
-import difflib
 from collections import defaultdict
 
 from django.apps import apps as django_apps
@@ -36,7 +36,6 @@ from .subject_duplicates import normalized_subject_key
 QUALIFIERS = ("ixtisasuzre",)
 #: Birləşdirilməyəcək cütlər: ``frozenset({jurnal_a, jurnal_b})``.
 EXCLUDED: frozenset = frozenset()
-MIN_TYPO_LENGTH = 10
 
 
 def _model(name, app="registrar"):
@@ -51,7 +50,7 @@ def _base(key: str) -> str:
 
 
 def similar_kind(left: str, right: str) -> str:
-    """``same`` / ``qualifier`` / ``typo`` və ya ``""`` (oxşar deyil)."""
+    """``same`` / ``qualifier`` və ya ``""`` (oxşar deyil)."""
     a, b = normalized_subject_key(left), normalized_subject_key(right)
     if not a or not b:
         return ""
@@ -59,17 +58,7 @@ def similar_kind(left: str, right: str) -> str:
         return "same"
     if _base(a) == _base(b):
         return "qualifier"
-    if min(len(a), len(b)) < MIN_TYPO_LENGTH:
-        return ""
-    changed = 0
-    for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes():
-        if tag == "equal":
-            continue
-        piece = a[i1:i2] + b[j1:j2]
-        if any(ch.isdigit() for ch in piece):
-            return ""
-        changed += max(i2 - i1, j2 - j1)
-    return "typo" if changed <= 2 else ""
+    return ""
 
 
 def group_plans(group_id) -> list:
