@@ -149,6 +149,8 @@ INTENTIONAL_EXEMPTIONS = {
     "apps/registrar/management/commands/retire_uiux_syllabus_20261112.py",
     # 2026-11-12 MR-000188 434 R payı ayrıca alt qrup jurnalına: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/split_share_journal_20261112.py",
+    # 2026-11-12 MR-000317 635 Q/İ birləşmiş jurnalı qruplara: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
+    "apps/registrar/management/commands/split_group_journal_20261112.py",
     "apps/registrar/management/commands/repair_applications_20261107b.py",
     # rehearse öz RLS kontekstini (set_rls_tenant, session-scoped, bypass-sız)
     # və öz transaction sərhədlərini (ledger advisory-lock atomic-ləri, batch
