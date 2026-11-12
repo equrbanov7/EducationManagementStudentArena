@@ -25,8 +25,9 @@ from .corrections import ImmutableCorrectionEvidence
 #: Sənədin ölçü limiti — jurnal düzəliş sənədləri ilə EYNİ (10 MB).
 _MAX_DOCUMENT_MB = 10
 
-#: İcazəli uzantılar: təqdimat/sərəncamın skanı (PDF) və ya fotosu.
-GUEST_DOCUMENT_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"}
+#: İcazəli uzantılar: təqdimat/sərəncamın skanı (PDF), fotosu və ya Word faylı (sahib 2026-11-12: dekanlıq
+#: təqdimatları docx gəlir).
+GUEST_DOCUMENT_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif", ".doc", ".docx"}
 
 
 def guest_document_path(instance, filename: str) -> str:
