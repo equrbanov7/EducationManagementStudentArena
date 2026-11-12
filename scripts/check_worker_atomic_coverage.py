@@ -145,6 +145,8 @@ INTENTIONAL_EXEMPTIONS = {
     "apps/registrar/management/commands/repair_applications_20261107.py",
     # 2026-11-10 Kollec jurnalları gizlədilir: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/hide_college_journals_20261110.py",
+    # 2026-11-12 artıq «UI/UX» sillabusu passiv: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
+    "apps/registrar/management/commands/retire_uiux_syllabus_20261112.py",
     "apps/registrar/management/commands/repair_applications_20261107b.py",
     # rehearse öz RLS kontekstini (set_rls_tenant, session-scoped, bypass-sız)
     # və öz transaction sərhədlərini (ledger advisory-lock atomic-ləri, batch
