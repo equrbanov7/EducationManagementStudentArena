@@ -132,7 +132,7 @@ render olunmur. Bütün URL-lər data-atributla ötürülür (CSP: inline JS yox
                     <span class="jgs-step-dot">3</span>
                     {% if superadmin_doc_waiver %}{% trans "SƏNƏD — TƏQDİMAT / SƏRƏNCAM (İSTƏYƏ BAĞLI)" context "registrar.guest_roster" %}{% else %}{% trans "SƏNƏD — TƏQDİMAT / SƏRƏNCAM (MƏCBURİ)" context "registrar.guest_roster" %}{% endif %}
                 </span>
-                <input type="file" data-jgs-document accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif"
+                <input type="file" data-jgs-document accept=".pdf,.jpg,.jpeg,.png,.webp,.heic,.heif,.doc,.docx"
                        aria-label="{% trans 'Təqdimat və ya sərəncamın skanı (PDF/şəkil, 10 MB-dək)' context 'registrar.guest_roster' %}">
                 <small class="jd-field-hint">{% trans "PDF və ya şəkil, 10 MB-dək. Sənəd əlavə qeydiyyatı ilə birlikdə saxlanılır və silinmir." context "registrar.guest_roster" %}</small>
                 {% include "partials/ems_ui/_superadmin_waiver_hint.html" %}

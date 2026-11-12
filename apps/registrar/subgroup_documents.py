@@ -29,7 +29,7 @@ from core.upload_security import randomize_uploaded_filename, validate_uploaded_
 
 from . import subgroup_placement_errors as errors
 
-ALLOWED_EXTENSIONS = (".pdf", ".jpg", ".jpeg", ".png")
+ALLOWED_EXTENSIONS = (".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx")  # sahib 2026-11-12: docx təqdimatlar
 #: Brauzer bəzən ``application/octet-stream`` göndərir — məzmun imzası (``%PDF`` / JPEG / PNG) onsuz da yoxlanılır.
 ALLOWED_MIME_TYPES = ("application/pdf", "image/jpeg", "image/pjpeg", "image/png", "application/octet-stream")
 MAX_DOCUMENT_MB = 10
