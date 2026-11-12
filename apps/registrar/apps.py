@@ -13,6 +13,7 @@ class RegistrarConfig(AppConfig):
         _register_self_conflict()
         _register_retake_media()
         _register_off_schedule_reevaluation()
+        _register_lesson_author_freeze()
         _register_syllabus_carry()
 
 
@@ -36,6 +37,16 @@ def _register_syllabus_carry():
 
     register_approval_hook(carry_for_syllabus)
     post_save.connect(offering_saved, sender=CourseOffering, dispatch_uid="registrar_syllabus_carry_offering_saved")
+
+
+def _register_lesson_author_freeze():
+    """Sahib 2026-11-13: jurnal sahibi ``save()`` ilə dəyişəndə keçilmiş dərslər köhnə müəllimdə qalır."""
+    from django.db.models.signals import pre_save
+
+    from .lesson_author_freeze import offering_pre_save
+    from .models import CourseOffering
+
+    pre_save.connect(offering_pre_save, sender=CourseOffering, dispatch_uid="registrar_lesson_author_freeze")
 
 
 def _register_off_schedule_reevaluation():

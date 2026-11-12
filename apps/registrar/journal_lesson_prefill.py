@@ -84,6 +84,10 @@ def build(offering, context, *, now=None, scope=None) -> dict:
             labels[str(user.pk)] = (user.get_full_name() or "").strip() or user.username
         return str(user.pk)
 
+    # Sahib 2026-11-13: «son müəllim» yalnız növü HAZIRDA aparırsa — təhvildən sonra köhnə müəllimə yazılmasın.
+    last_instructor = {
+        kind: journal_activation.current_last_instructor(offering, kind, last_instructor) for kind in last_instructor
+    }
     for lesson in lessons:  # redaktə modalının çipi də (slot müəllimi ilə açılmış dərs) — sorğusuz
         if lesson.instructor_id:
             teacher_id(lesson.instructor)
