@@ -28,6 +28,7 @@ from .permissions_announcements import merge_announcement_permissions
 from .permissions_document_seal import merge_document_seal_permissions
 from .permissions_hr import merge_hr_permissions
 from .permissions_hr_contracts import merge_hr_contract_permissions
+from .permissions_rim_staff import merge_rim_staff_permissions
 from .permissions_role_audit import merge_role_audit_permissions
 from .permissions_stage2 import merge_stage2
 from .permissions_stage3 import merge_stage3
@@ -465,10 +466,8 @@ merge_stage2(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABEL
 merge_stage3(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
 # «Parol sıfırlama» (2026-09-30) — `account.password_reset` «users» kateqoriyasına.
 merge_account_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
-# «Sistem monitorinqi» (2026-10-01) — `system.monitoring.view` (RİM rəhbəri, oxu-only).
-merge_system_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
-# «Elanlar» (2026-10-06) — `announcement.manage` (struktur əhatəsinə tabe).
-merge_announcement_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
+merge_system_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)  # 2026-10-01 monitorinq
+merge_announcement_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)  # 2026-10-06
 # «Kadr analitikası» (2026-10-11) — `people.hr_analytics` («people» kateqoriyasına, HR).
 merge_hr_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)
 # Rol auditi (2026-10-13) — `exam_center.decide`, `student.records_view`, `user.import_staff`.
@@ -480,6 +479,7 @@ merge_hr_contract_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS,
 merge_transcript_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)  # 2026-10-19
 merge_workload_load_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)  # 2026-10-23
 merge_unit_view_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)  # 2026-10-27
+merge_rim_staff_permissions(PERMISSION_CATEGORIES, PERMISSION_CATEGORY_LABELS, PERMISSION_LABELS)  # 2026-11-12
 
 
 def get_permission_label(permission: str) -> str:

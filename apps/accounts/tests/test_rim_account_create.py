@@ -108,7 +108,8 @@ class RimCreatePermissionTest(RimCreateBase):
     def test_rim_staff_carries_account_keys_but_not_import(self):
         permissions = self.org.roles.get(name="rim_staff").permissions
         self.assertNotIn("user.import", permissions)
-        self.assertNotIn("user.credentials", permissions)
+        # 2026-11-12 (sahib): parol / hesab əməlləri gündəlik işdir — hesab YARATMAQ (`user.import`) yox.
+        self.assertIn("user.credentials", permissions)
 
     def test_rim_staff_cannot_create(self):
         actor = self.actor_for(self.rim_staff)

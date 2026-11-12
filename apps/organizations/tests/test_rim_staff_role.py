@@ -28,14 +28,12 @@ class RimStaffTemplateTest(SimpleTestCase):
         for forbidden in (
             "role.*",
             "role.assign",
-            "user.credentials",
-            "user.block",
+            "role.edit",
             "user.soft_delete",
             "user.import",
+            "user.import_staff",
             "journal.correct",
             "journal.close",
-            "journal.roster",
-            "journal.reassign",
             "member.invite",
             "unit.tree_manage",
             "people.manage_status",
@@ -69,4 +67,7 @@ class RimStaffSeedTest(TestCase):
         self.assertEqual(role.level, 60)
         self.assertTrue(role.is_system)
         self.assertIn("exam.view", role.permissions)
-        self.assertNotIn("user.credentials", role.permissions)
+        # 2026-11-12 (sahib): gündəlik iş — RİM mərkəzi / parol, yük bölgüsü, fənn təhvili, jurnal redaktəsi.
+        for key in ("user.credentials", "account.password_reset", "workload.distribute", "journal.direct_edit"):
+            self.assertIn(key, role.permissions, key)
+        self.assertNotIn("user.soft_delete", role.permissions)

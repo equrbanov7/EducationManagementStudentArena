@@ -96,6 +96,13 @@ def _snapshot_grade_input(user, organization) -> bool | None:
     )
 
 
+def _has_direct_edit_key(user, offering) -> bool:
+    """RİM əməkdaşı (sahib 2026-11-12): rolunda DƏQİQ ``journal.direct_edit`` — açılışın təşkilatında, wildcard yox."""
+    from apps.organizations.public import journal_direct_edit_key
+
+    return journal_direct_edit_key(user, offering.organization)
+
+
 def staff_self_conflict(user, offering) -> bool:
     """Tələbə + heyət rolu (sahib 2026-11-08): öz qrup ailəsinin / özünün yazıldığı jurnala heyət girişi YOXDUR.
 
@@ -129,7 +136,7 @@ def can_edit_journal(user, offering) -> bool:
         return False
     if getattr(user, "is_superuser", False) or getattr(user, "is_ikt_rehber", False):
         return True
-    if _is_live_assigned_instructor(user, offering):
+    if _is_live_assigned_instructor(user, offering) or _has_direct_edit_key(user, offering):
         return True
     if offering.organization.owner_id == user.id:
         return True
@@ -202,7 +209,7 @@ def is_direct_editor(user, offering) -> bool:
         return False
     if getattr(user, "is_superuser", False) or getattr(user, "is_ikt_rehber", False):
         return True
-    if _is_live_assigned_instructor(user, offering):
+    if _is_live_assigned_instructor(user, offering) or _has_direct_edit_key(user, offering):
         return True
     if offering.organization.owner_id == user.id:
         return True
