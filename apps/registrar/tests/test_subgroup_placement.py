@@ -203,8 +203,9 @@ class PlacementFailureCodesTest(_Base):
     def test_document_invalid(self):
         fake = SimpleUploadedFile("teqdimat.pdf", b"hello world", content_type="application/pdf")
         self.assertCode("document_invalid", document=fake)
-        docx = SimpleUploadedFile("teqdimat.docx", b"PK\x03\x04data", content_type="application/octet-stream")
-        self.assertCode("document_invalid", document=docx)
+        # 2026-11-12: docx artıq icazəlidir (dekanlıq təqdimatları) — icazəsiz uzantı (.zip) rədd olunur.
+        archive = SimpleUploadedFile("teqdimat.zip", b"PK\x03\x04data", content_type="application/octet-stream")
+        self.assertCode("document_invalid", document=archive)
         self.assertCode("document_invalid", document={"number": "12", "date": "2999-01-01"})
 
     def test_reason_required(self):
