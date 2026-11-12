@@ -16,10 +16,12 @@ Səlahiyyət ayrılığı (sahib qərarı, 2026-09-06 — «dəstək operatoru»
   cədvəl, sillabus, dərs yükü), imtahan əməlləri (`exam.*`), analitika və audit
   izi (ixrac daxil), şəxs kataloqunun oxu dəsti (əlaqə daxil). Köhnə `qa.*`
   dəsti 2026-09-14-də kataloqdan çıxarıldı (audit F-06: keyfiyyət modulu yoxdur).
-* **YOXDUR** — `role.*` (rol vermə), `RIM_ACCOUNT_PERMISSIONS` (parol
-  sıfırlama / blok / soft-delete), `user.import`, `journal.correct` /
-  `journal.close` / `journal.roster` / `journal.reassign`, `member.*` əməlləri,
-  `unit.tree_manage`, `people.manage_*`.
+* **YOXDUR** — `role.*` (rol vermə), `user.soft_delete`, `user.import`,
+  `journal.correct` / `journal.close`, `member.*` əməlləri, `unit.tree_manage`,
+  `people.manage_*`.
+* **2026-11-12 (sahib «gündəlik lazım olan hamısı»)** — RİM mərkəzi + parol
+  sıfırlama, yük bölgüsü, fənn təhvili, qruplar / alt qrup, jurnal siyahısı və
+  birbaşa redaktə, cədvəl redaktoru: ``permissions_rim_staff.RIM_STAFF_DAILY_PERMISSIONS``.
 
 Əlavə səlahiyyət lazım olarsa hər universitet onu permission-editordan verir —
 rol şablonu YALNIZ təhlükəsiz başlanğıc dəstidir.
@@ -28,6 +30,7 @@ rol şablonu YALNIZ təhlükəsiz başlanğıc dəstidir.
 from core.constants import RoleScopeType
 
 from .default_roles_shared import PEOPLE_DIRECTORY_READ
+from .permissions_rim_staff import RIM_STAFF_DAILY_PERMISSIONS
 
 #: RİM əməkdaşının səthi — «görür və köməklik edir», «dəyişdirmir».
 _RIM_STAFF_PERMISSIONS = [
@@ -61,6 +64,9 @@ _RIM_STAFF_PERMISSIONS = [
     # HƏR açıq müraciətə cavab verir (`applications.services.access.is_universal_responder`).
     # Kataloq açarı (`application.manage`) VERİLMİR. Mövcud tenantlar: `applications 0007`.
     "application.handle",
+    # 2026-11-12 (sahib): GÜNDƏLİK iş — RİM mərkəzi + parol sıfırlama, yük bölgüsü, fənn təhvili, qruplar / alt qrup,
+    # jurnalda dərs günü əlavə et / sil, cədvəl redaktoru. Siyahı və QƏSDƏN verilməyənlər: ``permissions_rim_staff``.
+    *RIM_STAFF_DAILY_PERMISSIONS,
 ]
 
 RIM_STAFF_ROLES = [
@@ -70,6 +76,6 @@ RIM_STAFF_ROLES = [
         "level": 60,
         "scope_type": RoleScopeType.ORGANIZATION,
         "permissions": list(_RIM_STAFF_PERMISSIONS),
-        "description": "RİM staff — read-only academic surfaces plus exam operations (no account or role actions)",
+        "description": "RİM staff — daily operations (accounts, workload, handover, groups, journals); no role actions",
     },
 ]

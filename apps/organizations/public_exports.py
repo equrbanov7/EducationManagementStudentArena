@@ -29,6 +29,7 @@ from .holidays import academic_year_bounds as holiday_academic_year_bounds  # no
 from .holidays import academic_year_label as holiday_academic_year_label  # noqa: F401
 from .holidays import academic_year_start as holiday_academic_year_start  # noqa: F401
 from .holidays import current_academic_year_start as holiday_current_academic_year  # noqa: F401
+from .journal_direct_edit import has_direct_edit_key as journal_direct_edit_key  # noqa: F401
 from .kafedra_units import is_kafedra_type  # noqa: F401
 from .kafedra_units import is_kafedra_unit  # noqa: F401
 from .kafedra_units import kafedra_q  # noqa: F401
@@ -108,6 +109,7 @@ __all__ = [
     "is_mixed_student_staff",
     "is_self_conflict",
     "offering_self_conflict",
+    "journal_direct_edit_key",
     "own_scope",
     "register_own_scope_resolver",
     "self_conflict_message",

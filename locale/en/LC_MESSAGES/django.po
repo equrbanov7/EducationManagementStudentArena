@@ -119205,6 +119205,13 @@ msgctxt "accounts.workload"
 msgid "Aydındır, Vakant saxla və təsdiqlə"
 msgstr "Understood, keep Vacant and confirm"
 
+msgctxt "organizations.permission.label"
+msgid ""
+"Başqa müəllimin jurnalında birbaşa redaktə (dərs günü əlavə et / dəyiş / "
+"sil)"
+msgstr ""
+"Edit another teacher's journal directly (add / change / delete lesson days)"
+
 msgctxt "profile.rim"
 msgid ""
 "Bilinmirsə boş qala bilər — FİN-i sonradan RİM-də hesabı redaktə edərək və "

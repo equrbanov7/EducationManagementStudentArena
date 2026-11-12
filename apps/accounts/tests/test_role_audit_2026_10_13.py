@@ -189,6 +189,6 @@ class FollowupTemplateGrantsTest(TestCase):
         for key in ("workload.report", "plan.view", "semester.view"):
             self.assertTrue(has_permission(roles["rim_staff"], key), key)
         self.assertTrue(has_permission(roles["trustee"], "workload.report"))
-        # Yazı açarları VERİLMİR.
-        for key in ("workload.manage", "plan.edit", "semester.open"):
+        # Yazı açarları VERİLMİR (2026-11-12: `workload.manage` sahibin qərarı ilə gündəlik işə verildi).
+        for key in ("plan.edit", "semester.open"):
             self.assertFalse(has_permission(roles["rim_staff"], key), key)
