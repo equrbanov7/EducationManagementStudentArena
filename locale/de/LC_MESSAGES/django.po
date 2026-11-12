@@ -120715,3 +120715,95 @@ msgstr ""
 "Kann leer bleiben, falls unbekannt — die FIN wird später beim Bearbeiten des"
 " Kontos im RİM ergänzt oder der Studierende gibt sie bei der ersten "
 "Anmeldung selbst ein."
+
+msgctxt "registrar.passive_hours"
+msgid "Passiv saat"
+msgstr "Passive Stunden"
+
+msgctxt "registrar.passive_hours"
+msgid "Passiv saat əlavə et"
+msgstr "Passive Stunden hinzufügen"
+
+msgctxt "registrar.passive_hours"
+msgid "Hələ passiv saat qeyd olunmayıb."
+msgstr "Noch keine passiven Stunden erfasst."
+
+msgctxt "registrar.passive_hours"
+msgid "Qeyd / mövzu"
+msgstr "Notiz / Thema"
+
+msgctxt "registrar.passive_hours"
+msgid "Saat"
+msgstr "Stunden"
+
+msgctxt "registrar.passive_hours"
+msgid "Tarix"
+msgstr "Datum"
+
+msgctxt "registrar.passive_hours"
+msgid "Sil"
+msgstr "Löschen"
+
+msgctxt "registrar.passive_hours"
+msgid "auditoriyadan kənar (müstəqil) saatlar — davamiyyətə və keçirilmiş dərs saatına daxil deyil"
+msgstr "Stunden außerhalb des Unterrichts (Selbststudium) — zählen nicht zur Anwesenheit oder zu gehaltenen Stunden"
+
+msgctxt "registrar.passive_hours"
+msgid "İntensiv tədris: passiv saat"
+msgstr "Intensivunterricht: passive Stunden"
+
+msgctxt "registrar.passive_hours"
+msgid "Adi jurnalda passiv saat qeydini açır və ya bağlayır (intensiv tədris olunan qrup). Yazılmış qeydlər silinmir."
+msgstr "Schaltet die Erfassung passiver Stunden in einem regulären Journal ein oder aus (intensiv unterrichtete Gruppe). Erfasste Einträge werden nicht gelöscht."
+
+msgctxt "registrar.passive_hours"
+msgid "Bu jurnalda passiv saat qeydi açıq deyil."
+msgstr "In diesem Journal ist die Erfassung passiver Stunden nicht aktiviert."
+
+msgctxt "registrar.passive_hours"
+msgid "Bu jurnalda «Passiv saat» qeydi açıldı."
+msgstr "In diesem Journal ist die Erfassung «Passive Stunden» jetzt aktiviert."
+
+msgctxt "registrar.passive_hours"
+msgid "Bu jurnalda «Passiv saat» qeydi bağlandı."
+msgstr "In diesem Journal ist die Erfassung «Passive Stunden» jetzt deaktiviert."
+
+msgctxt "registrar.passive_hours"
+msgid "Passiv saat qeydi silindi."
+msgstr "Eintrag für passive Stunden gelöscht."
+
+#, python-format
+msgctxt "registrar.passive_hours"
+msgid "Passiv saat əlavə olundu: %(date)s · %(hours)s saat."
+msgstr "Passive Stunden hinzugefügt: %(date)s · %(hours)s Std."
+
+#, python-format
+msgctxt "registrar.passive_hours"
+msgid "Passiv saatın tarixi %(lo)s – %(hi)s aralığında olmalıdır."
+msgstr "Das Datum der passiven Stunden muss zwischen %(lo)s und %(hi)s liegen."
+
+msgctxt "registrar.passive_hours"
+msgid "Qeyd tapılmadı."
+msgstr "Eintrag nicht gefunden."
+
+#, python-format
+msgctxt "registrar.passive_hours"
+msgid "Qeyd ən çox %(max)s simvol ola bilər."
+msgstr "Die Notiz darf höchstens %(max)s Zeichen lang sein."
+
+#, python-format
+msgctxt "registrar.passive_hours"
+msgid "Saat 1 ilə %(max)s arasında olmalıdır."
+msgstr "Die Stunden müssen zwischen 1 und %(max)s liegen."
+
+msgctxt "registrar.passive_hours"
+msgid "Tarixi seçin."
+msgstr "Wählen Sie ein Datum."
+
+msgctxt "registrar.model.passive_hour.meta"
+msgid "passiv saat"
+msgstr "passive Stunden"
+
+msgctxt "registrar.model.passive_hour.meta"
+msgid "passiv saatlar"
+msgstr "passive Stunden"

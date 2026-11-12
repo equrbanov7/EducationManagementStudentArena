@@ -119419,3 +119419,95 @@ msgstr ""
 "Если неизвестен, можно оставить пустым — ФИН позже вносится при "
 "редактировании учётной записи в RİM или студент вводит его сам при первом "
 "входе."
+
+msgctxt "registrar.passive_hours"
+msgid "Passiv saat"
+msgstr "Пассивные часы"
+
+msgctxt "registrar.passive_hours"
+msgid "Passiv saat əlavə et"
+msgstr "Добавить пассивные часы"
+
+msgctxt "registrar.passive_hours"
+msgid "Hələ passiv saat qeyd olunmayıb."
+msgstr "Пассивные часы пока не записаны."
+
+msgctxt "registrar.passive_hours"
+msgid "Qeyd / mövzu"
+msgstr "Заметка / тема"
+
+msgctxt "registrar.passive_hours"
+msgid "Saat"
+msgstr "Часы"
+
+msgctxt "registrar.passive_hours"
+msgid "Tarix"
+msgstr "Дата"
+
+msgctxt "registrar.passive_hours"
+msgid "Sil"
+msgstr "Удалить"
+
+msgctxt "registrar.passive_hours"
+msgid "auditoriyadan kənar (müstəqil) saatlar — davamiyyətə və keçirilmiş dərs saatına daxil deyil"
+msgstr "внеаудиторные (самостоятельные) часы — не входят в посещаемость и проведённые часы"
+
+msgctxt "registrar.passive_hours"
+msgid "İntensiv tədris: passiv saat"
+msgstr "Интенсивное обучение: пассивные часы"
+
+msgctxt "registrar.passive_hours"
+msgid "Adi jurnalda passiv saat qeydini açır və ya bağlayır (intensiv tədris olunan qrup). Yazılmış qeydlər silinmir."
+msgstr "Включает или выключает учёт пассивных часов в обычном журнале (группа обучается интенсивно). Записанные данные не удаляются."
+
+msgctxt "registrar.passive_hours"
+msgid "Bu jurnalda passiv saat qeydi açıq deyil."
+msgstr "В этом журнале учёт пассивных часов не включён."
+
+msgctxt "registrar.passive_hours"
+msgid "Bu jurnalda «Passiv saat» qeydi açıldı."
+msgstr "В этом журнале включён учёт «Пассивных часов»."
+
+msgctxt "registrar.passive_hours"
+msgid "Bu jurnalda «Passiv saat» qeydi bağlandı."
+msgstr "В этом журнале учёт «Пассивных часов» выключен."
+
+msgctxt "registrar.passive_hours"
+msgid "Passiv saat qeydi silindi."
+msgstr "Запись пассивных часов удалена."
+
+#, python-format
+msgctxt "registrar.passive_hours"
+msgid "Passiv saat əlavə olundu: %(date)s · %(hours)s saat."
+msgstr "Пассивные часы добавлены: %(date)s · %(hours)s ч."
+
+#, python-format
+msgctxt "registrar.passive_hours"
+msgid "Passiv saatın tarixi %(lo)s – %(hi)s aralığında olmalıdır."
+msgstr "Дата пассивных часов должна быть в диапазоне %(lo)s – %(hi)s."
+
+msgctxt "registrar.passive_hours"
+msgid "Qeyd tapılmadı."
+msgstr "Запись не найдена."
+
+#, python-format
+msgctxt "registrar.passive_hours"
+msgid "Qeyd ən çox %(max)s simvol ola bilər."
+msgstr "Заметка может содержать не более %(max)s символов."
+
+#, python-format
+msgctxt "registrar.passive_hours"
+msgid "Saat 1 ilə %(max)s arasında olmalıdır."
+msgstr "Часы должны быть от 1 до %(max)s."
+
+msgctxt "registrar.passive_hours"
+msgid "Tarixi seçin."
+msgstr "Выберите дату."
+
+msgctxt "registrar.model.passive_hour.meta"
+msgid "passiv saat"
+msgstr "пассивные часы"
+
+msgctxt "registrar.model.passive_hour.meta"
+msgid "passiv saatlar"
+msgstr "пассивные часы"

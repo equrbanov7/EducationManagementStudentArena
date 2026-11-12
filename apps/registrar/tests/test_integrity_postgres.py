@@ -509,7 +509,8 @@ class RegistrarMigrationTargetGuardTests(TestCase):
         # + 0115 jurnaldan çıxarılma qeydi: 2 FK (`registrar_journalremoval`), 2026-11-04.
         # + 0117 jurnalın laboratoriya qrupu: 1 FK (`registrar_labgroup.offering_id`), 2026-11-06.
         # + 0118 jurnalın seminar alt qrupu: 1 FK (`registrar_seminargroup.offering_id`), 2026-11-07.
-        self.assertEqual(same_org_trigger_count, 68)
+        # + 0122 «Passiv saat»: 1 FK (`registrar_passivehour.offering_id`), 2026-11-12.
+        self.assertEqual(same_org_trigger_count, 69)
 
     def test_precheck_stops_instead_of_rewriting_existing_violation(self):
         with self.assertRaises(IntegrityError):

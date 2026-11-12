@@ -1,0 +1,68 @@
+{% load i18n %}
+{% comment %}«Passiv saat» (sahib 2026-11-12, MR-000303) — intensiv tədrisin auditoriyadan kənar saatları.
+Dərs deyil: davamiyyət / bal / «Keçirilmiş X / Y» dəyişmir, ayrıca sayılır (`passive_hours.page_context`).
+İntensiv kursda həmişə açıqdır; adi jurnalda kafedra müdiri / RİM açarla açır (`switch_url`).
+Adi POST formları — JS yoxdur; üslub xarici `journal_passive_hours.css`-dədir.{% endcomment %}
+{% if passive_hours %}
+{% if passive_hours.switch_url %}
+<form class="jd2-passive-switch" method="post" action="{{ passive_hours.switch_url }}">
+    {% csrf_token %}
+    <input type="hidden" name="on" value="{% if passive_hours.enabled %}0{% else %}1{% endif %}">
+    <button type="submit" class="jd2-passive-switch__btn{% if passive_hours.enabled %} is-on{% endif %}"
+            aria-pressed="{% if passive_hours.enabled %}true{% else %}false{% endif %}"
+            title="{% trans 'Adi jurnalda passiv saat qeydini açır və ya bağlayır (intensiv tədris olunan qrup). Yazılmış qeydlər silinmir.' context 'registrar.passive_hours' %}">
+        <i class="fas {% if passive_hours.enabled %}fa-square-check{% else %}fa-square{% endif %}" aria-hidden="true"></i>
+        {% trans "İntensiv tədris: passiv saat" context "registrar.passive_hours" %}
+    </button>
+</form>
+{% endif %}
+{% if passive_hours.enabled %}
+<details class="jd2-passive"{% if passive_hours.can_edit and not passive_hours.rows %} open{% endif %}>
+    <summary class="jd2-passive__summary">
+        <span class="jd2-passive__chip"><i class="fas fa-hourglass-half" aria-hidden="true"></i>
+            {% trans "Passiv saat" context "registrar.passive_hours" %}: <b>{{ passive_hours.total }}</b> {% trans "saat" context "registrar.journal" %}</span>
+        <span class="jd2-passive__hint">{% trans "auditoriyadan kənar (müstəqil) saatlar — davamiyyətə və keçirilmiş dərs saatına daxil deyil" context "registrar.passive_hours" %}</span>
+    </summary>
+    <div class="jd2-passive__body">
+        {% if passive_hours.rows %}
+        <ul class="jd2-passive__list">
+            {% for row in passive_hours.rows %}
+            <li class="jd2-passive__row">
+                <span class="jd2-passive__date">{{ row.date|date:"d.m.Y" }}</span>
+                <span class="jd2-passive__hours">{{ row.hours }} {% trans "saat" context "registrar.journal" %}</span>
+                {% if row.note %}<span class="jd2-passive__note">{{ row.note }}</span>{% endif %}
+                {% if passive_hours.can_edit %}
+                <form class="jd2-passive__del" method="post" action="{{ passive_hours.delete_url }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="entry" value="{{ row.pk }}">
+                    <button type="submit" class="jd2-passive__del-btn" aria-label="{% trans 'Sil' context 'registrar.passive_hours' %}" title="{% trans 'Sil' context 'registrar.passive_hours' %}"><i class="fas fa-trash-can" aria-hidden="true"></i></button>
+                </form>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="jd2-passive__empty">{% trans "Hələ passiv saat qeyd olunmayıb." context "registrar.passive_hours" %}</p>
+        {% endif %}
+        {% if passive_hours.can_edit %}
+        <form class="jd2-passive__form" method="post" action="{{ passive_hours.add_url }}">
+            {% csrf_token %}
+            <label class="jd2-passive__field">
+                <span>{% trans "Tarix" context "registrar.passive_hours" %}</span>
+                <input class="ems-input ems-input--date" type="date" name="date" required{% if passive_hours.min_date %} min="{{ passive_hours.min_date|date:'Y-m-d' }}"{% endif %} max="{{ passive_hours.max_date|date:'Y-m-d' }}" value="{{ passive_hours.max_date|date:'Y-m-d' }}">
+            </label>
+            <label class="jd2-passive__field jd2-passive__field--hours">
+                <span>{% trans "Saat" context "registrar.passive_hours" %}</span>
+                <input class="ems-input" type="number" name="hours" min="1" max="{{ passive_hours.max_hours }}" step="1" value="2" required inputmode="numeric">
+            </label>
+            <label class="jd2-passive__field jd2-passive__field--note">
+                <span>{% trans "Qeyd / mövzu" context "registrar.passive_hours" %}</span>
+                <input class="ems-input" type="text" name="note" maxlength="{{ passive_hours.note_max }}" autocomplete="off">
+            </label>
+            <button type="submit" class="ems-btn ems-btn--primary ems-btn--sm jd2-passive__submit"><i class="fas fa-plus" aria-hidden="true"></i> {% trans "Passiv saat əlavə et" context "registrar.passive_hours" %}</button>
+        </form>
+        {% endif %}
+    </div>
+</details>
+{% endif %}
+{% endif %}
