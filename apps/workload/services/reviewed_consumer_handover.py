@@ -17,8 +17,16 @@ from .reviewed_leyla_catalog_graph import digest, model, require
 from .scoping import resolve_actor
 
 
-@transaction.atomic
 def run(*, organization, actor, apply=False, expected_baseline="", undo=""):
+    """Tarixi dəqiq-qraf bərpası: sahib dəyişəndə keçilmiş dərslərin dondurulması (sahib 2026-11-13) burada SÖNÜKDÜR."""
+    from apps.registrar.public import lesson_author_freeze
+
+    with lesson_author_freeze.suspended():
+        return _run(organization=organization, actor=actor, apply=apply, expected_baseline=expected_baseline, undo=undo)
+
+
+@transaction.atomic
+def _run(*, organization, actor, apply=False, expected_baseline="", undo=""):
     state.actor_scope(organization, actor)
     receipts = (
         model("audit.AuditLog")

@@ -11,12 +11,28 @@ siqnalı (``save()`` ilə sahib dəyişən bütün yollar: yük sinxronu, vakant
 
 from __future__ import annotations
 
+import contextlib
+import contextvars
+
 from django.utils import timezone
+
+_SUSPENDED = contextvars.ContextVar("registrar_lesson_author_freeze_suspended", default=False)
+
+
+@contextlib.contextmanager
+def suspended():
+    """Tarixi, «akademik məzmun dəyişməz» zəmanətli birdəfəlik bərpa əmrləri üçün (``workload.reviewed_*``):
+    onların öz dəqiq qraf yoxlaması dərsə toxunulmamasını tələb edir — dondurma bu blokda işləmir."""
+    token = _SUSPENDED.set(True)
+    try:
+        yield
+    finally:
+        _SUSPENDED.reset(token)
 
 
 def freeze(offering_id, owner_id) -> int:
     """Açılışın boş-müəllimli keçilmiş dərsləri ``owner_id``-yə; yazılan dərs sayı."""
-    if not offering_id or not owner_id:
+    if not offering_id or not owner_id or _SUSPENDED.get():
         return 0
     from .models import Lesson
 
@@ -36,4 +52,4 @@ def offering_pre_save(sender, instance, raw=False, update_fields=None, **kwargs)
         freeze(instance.pk, old_id)
 
 
-__all__ = ["freeze", "offering_pre_save"]
+__all__ = ["freeze", "offering_pre_save", "suspended"]

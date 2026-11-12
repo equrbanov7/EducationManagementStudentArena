@@ -108,8 +108,18 @@ def _undo(plan, *, receipt, current, actor, user, batch):
     }
 
 
-@transaction.atomic
 def run(*, plan, organization, user, expected_baseline="", undo="", apply=False):
+    """Tarixi dəqiq-qraf bərpası: sahib dəyişəndə keçilmiş dərslərin dondurulması (sahib 2026-11-13) burada SÖNÜKDÜR."""
+    from apps.registrar.public import lesson_author_freeze
+
+    with lesson_author_freeze.suspended():
+        return _run(
+            plan=plan, organization=organization, user=user, expected_baseline=expected_baseline, undo=undo, apply=apply
+        )
+
+
+@transaction.atomic
+def _run(*, plan, organization, user, expected_baseline="", undo="", apply=False):
     if str(organization.pk) != ORG or not user.is_active or not user.is_superuser:
         raise RepairError("fixed_tenant_active_superadmin_required")
     if expected_baseline and not re.fullmatch(r"[a-f0-9]{64}", expected_baseline):
