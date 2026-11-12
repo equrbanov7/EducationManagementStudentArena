@@ -172,13 +172,7 @@
     }
 
     function toggleKindFields(kind) {
-        var strict = kind === "student";
-        document.querySelectorAll("[data-rimc-student-required]").forEach(function (input) {
-            input.required = strict;
-        });
-        document.querySelectorAll("[data-rimc-student-mark]").forEach(function (mark) {
-            mark.hidden = !strict;
-        });
+        // FİN / doğum tarixi heç bir növdə məcburi deyil (sahib 2026-10-23 + 2026-11-12, MR-000277).
         var blocks = document.querySelectorAll("[data-rimc-only]");
         Array.prototype.forEach.call(blocks, function (block) {
             var visible = block.getAttribute("data-rimc-only").split(" ").indexOf(kind) !== -1;

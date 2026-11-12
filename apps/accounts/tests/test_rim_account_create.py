@@ -240,12 +240,12 @@ class RimCreateCollisionTest(RimCreateBase):
 
     def test_missing_names_collect_all_field_errors_at_once(self):
         with self.assertRaises(rim_create.RimCreateError) as caught:
-            self.create(self.rim, "student", fin="", first_name="", last_name="", group=str(self.group.pk))
+            self.create(self.rim, "student", fin="bad", first_name="", last_name="", group=str(self.group.pk))
         self.assertEqual(set(caught.exception.fields), {"fin", "first_name", "last_name"})
 
 
 class RimCreateTeacherWithoutFinTest(RimCreateBase):
-    """Sahib 2026-10-23: müəllim / əməkdaş hesabı FİN-siz və doğum tarixsiz açılır; tələbə yox."""
+    """Sahib 2026-10-23: müəllim / əməkdaş hesabı FİN-siz və doğum tarixsiz açılır (2026-11-12-dən tələbə də)."""
 
     def test_teacher_without_fin_and_birth_date_is_created(self):
         result = self.create(
@@ -268,11 +268,6 @@ class RimCreateTeacherWithoutFinTest(RimCreateBase):
             ["aysel.quliyeva", "aysel.quliyeva2"],
         )
 
-    def test_student_still_requires_fin_and_birth_date(self):
-        with self.assertRaises(rim_create.RimCreateError) as caught:
-            self.create(self.rim, "student", fin="", birth_date="", group=str(self.group.pk))
-        self.assertTrue({"fin", "birth_date"} <= set(caught.exception.fields))
-
     def test_invalid_fin_is_still_rejected_for_teachers(self):
         with self.assertRaises(rim_create.RimCreateError) as caught:
             self.create(self.rim, "teacher", fin="short", birth_date="")
@@ -294,6 +289,70 @@ class RimCreateTeacherWithoutFinTest(RimCreateBase):
         User.objects.create_user("mu.emp-9", "taken@qku.edu.az", "pw")
         result = self.create(self.rim, "teacher", fin="1JJJJJ1", code="EMP-9")
         self.assertEqual(result["username"], "mu.emp-9.2")
+
+
+class RimCreateStudentWithoutFinTest(RimCreateBase):
+    """Sahib 2026-11-12 (MR-000277): bərpa olunan tələbə FİN-siz və doğum tarixsiz açılır, qrupa düşür."""
+
+    def create_student(self, **overrides):
+        values = {"fin": "", "birth_date": "", "first_name": "Sübhan", "last_name": "Rəsulov", "patronymic": "Rauf"}
+        values.update(overrides)
+        return self.create(self.rim, "student", group=str(self.group.pk), **values)
+
+    def test_student_without_fin_and_birth_date_is_created_in_the_group(self):
+        result = self.create_student(code="9001")
+        created = User.objects.get(pk=result["user_id"])
+        profile = UserProfile.objects.get(user=created)
+        self.assertIsNone(profile.fin)
+        self.assertIsNone(profile.birth_date)
+        self.assertEqual(created.username, "subhan.resulov")
+        self.assertTrue(created.email.startswith("intake.subhan.resulov@"), created.email)
+        self.assertEqual(profile.institutional_identifier, "9001")
+        self.assertEqual(profile.student_group_number, self.group.name)
+        self.assertTrue(profile.password_change_required)
+        self.assertTrue(any("FİN yoxdur" in text for text in result["warnings"]))
+
+        membership = Membership.objects.get(user=created, organization=self.org)
+        self.assertEqual(membership.role.name, "student")
+        record = StudentAcademicRecord.objects.get(student=created, organization=self.org)
+        self.assertEqual(record.group_id, self.group.pk)
+        self.assertEqual(record.program_id, self.program.pk)
+        self.assertEqual(record.status, "enrolled")
+
+    def test_two_fin_less_students_do_not_collide(self):
+        first = self.create_student()
+        second = self.create_student()
+        self.assertEqual([first["username"], second["username"]], ["subhan.resulov", "subhan.resulov2"])
+        self.assertEqual(
+            UserProfile.objects.filter(user_id__in=[first["user_id"], second["user_id"]], fin__isnull=True).count(),
+            2,
+        )
+
+    def test_student_code_rule_still_applies_without_fin(self):
+        self.create_student(code="9002")
+        with self.assertRaises(rim_create.RimCreateError) as caught:
+            self.create_student(code="9002")
+        self.assertIn("code", caught.exception.fields)
+
+    def test_student_with_fin_keeps_the_old_checks(self):
+        result = self.create(self.rim, "student", fin="2RRRRR2", group=str(self.group.pk))
+        self.assertTrue(result["username"].startswith("st."), result["username"])
+        with self.assertRaises(rim_create.RimCreateError) as caught:
+            self.create(self.rim, "student", fin="2RRRRR2", first_name="Başqa", group=str(self.group.pk))
+        self.assertIn("fin", caught.exception.fields)
+        with self.assertRaises(rim_create.RimCreateError) as caught:
+            self.create(self.rim, "student", fin="short", group=str(self.group.pk))
+        self.assertIn("fin", caught.exception.fields)
+
+    def test_bad_birth_date_is_still_a_field_error(self):
+        with self.assertRaises(rim_create.RimCreateError) as caught:
+            self.create_student(birth_date="31.31.2031")
+        self.assertIn("birth_date", caught.exception.fields)
+
+    def test_group_is_still_required(self):
+        with self.assertRaises(rim_create.RimCreateError) as caught:
+            self.create(self.rim, "student", fin="", birth_date="", group="")
+        self.assertEqual(set(caught.exception.fields), {"group"})
 
 
 @override_settings(RATELIMIT_ENABLE=False)
