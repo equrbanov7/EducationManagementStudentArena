@@ -147,6 +147,12 @@ CATEGORY_RULES = (
         "C",
         "idarə əmri (yalnız oxu; müəllim id-ləri)",
     ),
+    # 2026-11-13: keçilmiş dərsin müəllimi bərpası — repodakı adsız sübut faylı, yalnız boş instructor, audit + undo.
+    (
+        "apps/legacy_import/management/commands/restore_lesson_authors_20261113.py",
+        "C",
+        "idarə əmri (superadmin; boş Lesson.instructor doldurulur, auditli, dry-run defolt)",
+    ),
     # 2026-10-08: WS qapısı — tenant GUC-suz ASGI scope; yalnız qoşulan istifadəçinin öz
     # profil/üzvlük oxusu (pk süzgəcli) + rədd audit sətri.
     ("apps/accounts/ws_gate.py", "D", "WebSocket giriş qapısı (istifadəçinin öz sətirləri + audit)"),
