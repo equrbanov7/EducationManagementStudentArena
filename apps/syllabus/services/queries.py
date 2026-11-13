@@ -7,7 +7,7 @@ görür. Tenant izolyasiyası əlavə olaraq RLS ilə DB səviyyəsində qorunur
 
 from __future__ import annotations
 
-from django.db.models import Case, IntegerField, Q, When
+from django.db.models import Case, Exists, IntegerField, OuterRef, Q, When
 
 from core.program_codes import PROGRAM_CODE_SEARCH_FIELDS
 from core.search_text import tolerant_q
@@ -20,7 +20,7 @@ from ..constants import (
     STATUS_SORT_INDEX,
     SyllabusStatus,
 )
-from ..models import Syllabus, SyllabusReview, SyllabusVersion
+from ..models import Syllabus, SyllabusReview, SyllabusShare, SyllabusVersion
 
 #: Siyahının icazə verilən sıralama açarları (README §3.1 — 4 variant).
 SORT_KEYS = {
@@ -112,6 +112,16 @@ def _scope_filter(queryset, actor):
     return queryset.filter(own | unit_q)
 
 
+def _hidden_journal_q() -> Q:
+    """Jurnalı GİZLƏDİLMİŞ dosye (sahib 2026-11-13, Aytən Heydərli müraciəti).
+
+    Açılışı deaktiv olan (məs. ``hide_college_journals_20261110`` — «Kollec yazılmır») və heç bir AKTİV jurnala
+    paylaşılmayan dosye siyahıda «Təsdiqlənib» kimi qalırdı: müəllim təsdiqlənmiş sillabusunun jurnala gəlmədiyini
+    düşünürdü. Paylaşılan dosye (birləşdirilmiş ikiz jurnalın sillabusu yaşayan jurnalda görünür) siyahıda qalır."""
+    active_share = SyllabusShare.objects.filter(syllabus_id=OuterRef("pk"), offering__is_active=True)
+    return Q(offering__isnull=False, offering__is_active=False) & ~Exists(active_share)
+
+
 def list_syllabi(
     *,
     organization,
@@ -137,6 +147,7 @@ def list_syllabi(
         "subject", "period", "program", "offering", "current_version", "approved_version"
     )
     queryset = _scope_filter(queryset, actor)
+    queryset = queryset.exclude(_hidden_journal_q())
     if mine:
         queryset = queryset.filter(own_q(actor))
 
