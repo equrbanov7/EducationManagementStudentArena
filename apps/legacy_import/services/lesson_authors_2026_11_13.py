@@ -75,6 +75,12 @@ def _period(organization, spec: dict):
     return found[0] if len(found) == 1 else None
 
 
+def _eligible(organization) -> set:
+    from apps.registrar.public import eligible_instructor_user_ids
+
+    return eligible_instructor_user_ids(organization=organization)
+
+
 def _slot(text: str):
     try:
         day, clock = str(text).split(" ", 1)
@@ -141,6 +147,9 @@ def _claims(organization, data, index, counts) -> dict:
     # Ledger-siz müəllim (köçürmədə adla tapılıb): fayldakı ``user`` — prod nüsxəsində ledger → ad resolveri ilə
     # (hesab YARATMADAN) həll olunmuş id. Ledger üstündür; bloklanmış / birləşdirilmiş (passiv) hesaba yazılmır.
     existing = set(User.objects.filter(pk__in=teacher_pks, is_active=True).values_list("pk", flat=True))
+    # DB qoruyucusu (registrar user reference): dərsin müəllimi təşkilatda AKTİV, qiymət yazma hüquqlu üzv olmalıdır —
+    # işdən çıxmış / bloklanmış müəllimin köhnə dərsi boş qalır (``journal_teacher_ineligible``).
+    eligible = _eligible(organization)
     claims = defaultdict(dict)  # dərs → {müəllim: dəqiqlik} (0 — jurnalın öz qrupu, 1 — onun alt qrupu)
     for entry in journals:
         counts["journals"] += 1
@@ -149,6 +158,10 @@ def _claims(organization, data, index, counts) -> dict:
         if teacher_id is None:
             counts["journal_teacher_unresolved"] += 1
             counts["slot_teacher_unresolved"] += len(entry.get("slots") or [])
+            continue
+        if teacher_id not in eligible:
+            counts["journal_teacher_ineligible"] += 1
+            counts["slot_teacher_ineligible"] += len(entry.get("slots") or [])
             continue
         legacy_subject = entry.get("subject") or {}
         subject, _how = catalog.subject_for(legacy_subject) if legacy_subject.get("id") else (None, "missing")
@@ -240,9 +253,12 @@ def _new_system_plan(organization, period, plan, counts) -> dict:
         day = timezone.localdate(created)
         last[offering_id] = max(last.get(offering_id, day), day)
     out = {}
+    eligible = _eligible(organization)
     for pk, offering_id, owner_id, date in rows:
         if owner_id is None:
             counts["new_no_owner"] += 1
+        elif owner_id not in eligible:
+            counts["new_owner_ineligible"] += 1
         elif offering_id in last and last[offering_id] > date:
             counts["new_after_handover"] += 1
         else:
