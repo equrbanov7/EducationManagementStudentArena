@@ -437,7 +437,8 @@ def _offering_links(organization, assignments) -> dict:
     for subject_id, period_id in pairs:
         lookup |= Q(subject_id=subject_id, period_id=period_id)
     rows = (
-        CourseOffering.objects.filter(organization=organization)
+        # Deaktiv (gizlədilmiş, məs. Kollec — sahib 2026-11-10) jurnala «Aç» keçidi verilmir (sahib 2026-11-13).
+        CourseOffering.objects.filter(organization=organization, is_active=True)
         .filter(lookup)
         .exclude(course_format="intensive")  # intensiv jurnal öz sətrinə bağlıdır (intensive_offering)
         .values("id", "subject_id", "period_id", "group_id")
