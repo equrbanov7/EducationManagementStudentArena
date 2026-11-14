@@ -1,4 +1,4 @@
-{% load i18n static %}
+{% load i18n static ems_ui %}
 {% comment %}Yeni dərs / dərs redaktəsi modalı (mockup: navy başlıq + tarixin yanında
 həftə pariteti). Dərs saatı 8 STANDART zəngdən seçilir; mövzu TƏSDİQLƏNMİŞ
 sillabusun həftəlik planından gəlir (README §6.5) — sillabus yoxdursa LMS
@@ -53,27 +53,34 @@ varsa dərs tipi kilidlidir.
                 {{ lesson_prefill|json_script:"jdLessonPrefill" }}
                 {% endif %}
                 <div class="jd2-field">
-                    <span class="jd2-field-label">{% trans "TARİX" context "registrar.journal" %}</span>
-                    <span class="jd2-date-row">
-                        {# İKT Rəhbəri istənilən (keçmiş) tarixə dərs aça bilər — min qoyulmur. #}
-                        {# Müəllim üçün min = earliest_entry_date (bu gün − journal.late_entry_days və ya journal.backdate_since), max = bu gün (servis eyni həddi yoxlayır). #}
-                        <input type="date" name="lesson_date" required
-                               {% if not request.user.is_ikt_rehber %}min="{{ lesson_date_min|default:journal.today|date:'Y-m-d' }}" max="{{ lesson_date_max|default:journal.today|date:'Y-m-d' }}"{% endif %}
-                               value="{{ journal.today|date:'Y-m-d' }}" data-jd-lesson-date>
+                    <label class="jd2-field-label" for="jd-lesson-date">{% trans "TARİX" context "registrar.journal" %}</label>
+                    {% comment %}2026-11-14 (sahib: «Azərbaycanda standart tarix gün ay il»): native type="date" brauzer
+                    dilinə tabe idi (en-US → mm/dd/yyyy). Görünən sahə HƏMİŞƏ «gg.aa.iiii» (EMSDateTime date rejimi);
+                    forma dəyəri gizli `name="lesson_date"` ISO sahəsindədir — `data-jd-lesson-date` ONDADIR, JS-lər
+                    (prefill/cədvəl/otaq/aktivləşdirmə/paritet/Data bərpası) əvvəlki kimi ISO oxuyub-yazır.
+                    İKT Rəhbəri istənilən (keçmiş) tarixə dərs aça bilər — min/max qoyulmur. Müəllim üçün min =
+                    earliest_entry_date (bu gün − journal.late_entry_days və ya journal.backdate_since), max = bu gün
+                    (servis eyni həddi yoxlayır).{% endcomment %}
+                    <span class="jd2-date-row" data-ems-dt-row>
+                        {% if request.user.is_ikt_rehber %}
+                        {% ems_date_input "lesson_date" journal.today input_id="jd-lesson-date" required=True css_class="jd2-date-input" iso_attrs="data-jd-lesson-date" describedby="jd-lesson-date-hint" %}
+                        {% else %}
+                        {% ems_date_input "lesson_date" journal.today input_id="jd-lesson-date" required=True min_date=lesson_date_min|default:journal.today max_date=lesson_date_max|default:journal.today css_class="jd2-date-input" iso_attrs="data-jd-lesson-date" describedby="jd-lesson-date-hint" %}
+                        {% endif %}
                         <span class="jd2-parity-badge" data-jd-parity-badge hidden></span>
                     </span>
                     {% if full_edit_active %}
-                    <small class="jd-field-hint">{% trans "Data bərpası rejimi: semestr ərzində istənilən keçmiş tarix seçilə bilər — yazma müddətindən köhnə tarix üçün səbəb yazılır." context "registrar.journal_full_edit" %}</small>
+                    <small class="jd-field-hint" id="jd-lesson-date-hint">{% trans "Data bərpası rejimi: semestr ərzində istənilən keçmiş tarix seçilə bilər — yazma müddətindən köhnə tarix üçün səbəb yazılır." context "registrar.journal_full_edit" %}</small>
                     {% elif not request.user.is_ikt_rehber %}
                     {% if lesson_backdate_since %}
-                    <small class="jd-field-hint">{% blocktrans with date=lesson_backdate_since|date:"d.m.Y" context "registrar.journal" %}Keçmiş tarixə dərs {{ date }} tarixindən bu günədək açmaq olar.{% endblocktrans %}</small>
+                    <small class="jd-field-hint" id="jd-lesson-date-hint">{% blocktrans with date=lesson_backdate_since|date:"d.m.Y" context "registrar.journal" %}Keçmiş tarixə dərs {{ date }} tarixindən bu günədək açmaq olar.{% endblocktrans %}</small>
                     {% elif late_entry_days %}
-                    <small class="jd-field-hint">{% blocktrans with d=late_entry_days context "registrar.journal" %}Keçmiş tarixə dərs ən çox {{ d }} gün geriyə açmaq olar.{% endblocktrans %}</small>
+                    <small class="jd-field-hint" id="jd-lesson-date-hint">{% blocktrans with d=late_entry_days date=lesson_date_min|date:"d.m.Y" context "registrar.journal" %}Keçmiş tarixə dərs ən çox {{ d }} gün geriyə — {{ date }} tarixindən bu günədək açmaq olar.{% endblocktrans %}</small>
                     {% else %}
-                    <small class="jd-field-hint">{% trans "Keçmiş tarixə dərs açmaq olmaz." context "registrar.journal" %}</small>
+                    <small class="jd-field-hint" id="jd-lesson-date-hint">{% trans "Keçmiş tarixə dərs açmaq olmaz." context "registrar.journal" %}</small>
                     {% endif %}
                     {% else %}
-                    <small class="jd-field-hint">{% trans "RİM rəhbəri: istənilən tarix/saat seçilə bilər." context "registrar.journal" %}</small>
+                    <small class="jd-field-hint" id="jd-lesson-date-hint">{% trans "RİM rəhbəri: istənilən tarix/saat seçilə bilər." context "registrar.journal" %}</small>
                     {% endif %}
                 </div>
                 <div class="jd2-field">

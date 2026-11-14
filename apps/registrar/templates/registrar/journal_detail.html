@@ -4,6 +4,7 @@
 {% block title %}{{ offering.subject.name }} — {% trans "Jurnal" context "registrar.journal" %} - {{ site_brand_name }}{% endblock %}
 
 {% block extraCss %}
+    <link rel="stylesheet" href="{% static 'css/ems_datetime.css' %}?v=20261114-date">{# tarix sahələri «gg.aa.iiii» (sahib 2026-11-14) #}
     <link rel="stylesheet" href="{% static 'registrar/css/journal.css' %}?v=20260712-3">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_detail.css' %}?v=20260928-1">
     <link rel="stylesheet" href="{% static 'registrar/css/jd2.css' %}?v=20261025-topic">
@@ -333,6 +334,9 @@
 {% endblock %}
 
 {% block extraJs %}
+    {# Tarix sahələri «gg.aa.iiii» (EMSDateTime date rejimi, sahib 2026-11-14) — jurnal skriptlərindən ƏVVƏL. #}
+    <script src="{% static 'js/ems_datetime.js' %}?v=20261114-date"></script>
+    <script src="{% static 'js/ems_datetime_picker.js' %}?v=20261114-date"></script>
     <script src="{% static 'registrar/js/journal_detail.js' %}?v=20260715-jbatch2"></script>
     {% if excused_management_url %}<script src="{% static 'registrar/js/excused_management.js' %}?v=20261101"></script>{% endif %}
     <script src="{% static 'registrar/js/syllabus_view.js' %}?v=20261025-weeks"></script>
