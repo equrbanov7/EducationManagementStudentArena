@@ -55,6 +55,15 @@ def summarize(offering, *, personal_actor=None, scope=None):
         per_student=personal_actor is None,
     )
     result["personal"] = personal_actor is not None
+    # Cari journal sahibinə təhvil verildikdən sonra əsas başlıq cari sahibin
+    # adını göstərsin. Keçmiş dərslərin real müəllifləri ayrıca tarixçədə qalır.
+    if personal_actor is not None and plan:
+        current_name = (personal_actor.get_full_name() or "").strip() or personal_actor.username
+        unknown = gettext("Müəllifi göstərilməyən tarixçə")
+        for row in result["kinds"]:
+            if row["kind"] in plan:
+                # Müəllifsiz köhnə dərs heç vaxt cari sahibə yazılmır — işarə qalır.
+                row["teachers"] = [current_name] + [name for name in row["teachers"] if name == unknown]
     today = timezone.localdate()
     result["passive_total"] = sum(
         int(lesson.hours or 0)

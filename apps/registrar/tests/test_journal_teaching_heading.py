@@ -53,6 +53,9 @@ class JournalTeachingHeadingTests(TestCase):
         return journal_teaching_summary(self.course, personal_actor=teacher, scope=journal_scope(teacher, self.course))
 
     def test_lecture_only_heading_uses_own30_plan_and_restricted_history(self):
+        former = get_user_model().objects.create_user("heading-former", first_name="Former", last_name="Owner")
+        activate_member(self.org, former, "teacher", permissions=TEACHER_PERMS)
+        Lesson.objects.filter(offering=self.course, kind="lecture", instructor=self.lecture).update(instructor=former)
         summary = self.own(self.lecture)
         self.assertEqual(30, summary["total"])
         self.assertEqual(6, summary["held_total"])
@@ -68,6 +71,9 @@ class JournalTeachingHeadingTests(TestCase):
             [{"kind": "seminar", "label": "Seminar", "planned": 30, "held": 6, "teachers": ["Seminar Teacher"]}],
         )
         self.assertIn("Seminar Teacher", html)
+        self.assertEqual("Lecture Teacher", summary["kinds"][0]["teachers"][0])
+        self.assertNotIn("Former Owner", summary["kinds"][0]["teachers"])
+        self.assertIn("Former Owner", summary["history"]["kinds"][0]["teachers"])
         self.assertIn("jd2-teach-kind--other", html)
         self.assertNotIn("/ 60", html)
         self.assertIn("/ 30", html)
