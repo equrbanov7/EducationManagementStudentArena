@@ -201,6 +201,9 @@ def build_lessons_and_marks(run, slices: dict, enrollments: dict, *, until: date
         if date > until:
             run.count("lesson.future_skipped")
             continue
+        if date < period.start_date:  # sahib 2026-11-14: semestrin başlanğıcından əvvəlki dərs köçürülmür
+            run.count("lesson.pre_semester_skipped")
+            continue
         slot = (entry.journal["uniqid"], _int(row["month"]), _int(row["day"]), str(row["time"])[:5])
         dated_slots.add(slot)
         for offering in entry.offerings:
@@ -241,6 +244,9 @@ def build_lessons_and_marks(run, slices: dict, enrollments: dict, *, until: date
             continue
         if date > until:
             run.count("cell.future_skipped")
+            continue
+        if date < period.start_date:  # sahib 2026-11-14: semestrin başlanğıcından əvvəlki xana köçürülmür
+            run.count("cell.pre_semester_skipped")
             continue
         slot = (uniqid, int(month), _int(row["day_number"]), str(row["time"])[:5])
         if (uniqid, legacy_sid) in cross:

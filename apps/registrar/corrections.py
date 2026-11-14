@@ -149,6 +149,10 @@ def apply_correction(
     from .correction_target_locks import lock_grade_for_apply
 
     mark, lesson, enrollment = lock_grade_for_apply(mark, expected_empty=was_empty)
+    from .semester_start import before_start, mark_message
+
+    if start := before_start(lesson.offering, lesson.date):  # sahib 2026-11-14: semestrdən əvvəlki dərsə qeyd yoxdur
+        raise ValidationError(mark_message(start))
     # lesson_mark QƏSDƏN indi təyin edilmir: boş xanada mark hələ saxlanmayıb.
     # Onu validasiyadan SONRA, bu atomik blokda yaradırıq ki, düzəliş rədd olunsa
     # (məs. PDF yox/yanlış) savepoint geri alsın — audit olunmamış iz qalmasın.

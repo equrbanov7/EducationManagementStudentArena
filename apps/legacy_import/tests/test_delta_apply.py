@@ -363,6 +363,20 @@ class DeltaApplyTests(TestCase):
         again = self._run(apply=True, bundle=bundle)
         self.assertEqual({k: v for k, v in again.counters.items() if k.startswith("written.")}, {})
 
+    def test_pre_semester_legacy_lesson_and_cell_are_not_migrated(self):
+        """Sahib 2026-11-14: semestrin başlanğıcından (15.09) əvvəlki köhnə sistem dərsi / xanası köçürülmür."""
+        bundle = _bundle()
+        bundle["lesson_dates"].append(
+            {"id": 25, "journal_id": 11, "month": 9, "day": 10, "time": "09:00", "sem_muh": 0}
+        )
+        bundle["points"].append(_point(8, "1", "10", "09:00", "7", month="09"))
+        run = self._run(apply=True, bundle=bundle)
+        with bypass_rls():
+            offering = CourseOffering.objects.get(organization=self.org, group=self.group, period=self.period)
+            self.assertFalse(Lesson.objects.filter(offering=offering, date__lt=self.period.start_date).exists())
+        self.assertEqual(run.counters["lesson.pre_semester_skipped"], 1)
+        self.assertEqual(run.counters["cell.pre_semester_skipped"], 1)
+
     def test_same_name_with_other_patronymic_is_another_person_and_is_created(self):
         """Sistemdə eyni ad-soyadlı, amma ata adı fərqli (başqa qrupda) tələbə var — legacy tələbə ayrıca yaradılır."""
         with bypass_rls():

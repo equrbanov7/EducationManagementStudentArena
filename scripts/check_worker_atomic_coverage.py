@@ -133,6 +133,7 @@ INTENTIONAL_EXEMPTIONS = {
     "apps/registrar/management/commands/merge_subgroup_journals_20261108.py",
     "apps/registrar/management/commands/resolve_subgroup_families_20261108.py",
     "apps/registrar/management/commands/remove_pre_semester_lessons_20261108.py",
+    "apps/registrar/management/commands/remove_pre_semester_lessons_20261114.py",
     "apps/registrar/management/commands/single_seminar_stream_20261108.py",
     "apps/registrar/management/commands/apply_lab_splits_20261108.py",
     "apps/registrar/management/commands/recompute_carried_absences_20261108.py",
