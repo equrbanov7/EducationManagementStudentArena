@@ -119311,3 +119311,11 @@ msgstr "passive hours entry"
 msgctxt "registrar.model.passive_hour.meta"
 msgid "passiv saatlar"
 msgstr "passive hours entries"
+
+msgctxt "core.runtime_settings"
+msgid "«Cədvəldən kənar» işarəsi"
+msgstr "“Off-timetable” mark"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılıbsa tarixi və saatı dərs cədvəlinə uyğun gəlməyən yeni dərs üçün səbəb soruşulur və dərs «cədvəldən kənar» kimi işarələnir. Söndürülüdə müəllim istənilən tarix və saatda dərs aça bilər — səbəb soruşulmur, heç nə işarələnmir və «cədvəldən kənar» yazısı heç yerdə göstərilmir."
+msgstr "When on, a new lesson whose date and time do not match the timetable needs a reason and is marked “off-timetable”. When off, the teacher may open a lesson at any date and time — no reason is asked, nothing is marked and the “off-timetable” label is not shown anywhere."

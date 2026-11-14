@@ -61,8 +61,10 @@ def stale_lessons(offering, lessons=None) -> list:
     return [lesson for lesson in flagged if is_on_schedule(offering, lesson)]
 
 
-def clear(offering, lessons, *, by_user=None, source="") -> int:
-    """İşarəni təmizlə + açılışın tarixçəsinə bir audit sətri. Yarış: yalnız səbəb DƏYİŞMƏYİBSƏ yazılır."""
+def clear(offering, lessons, *, by_user=None, source="", note="cədvələ uyğundur — işarə təmizləndi") -> int:
+    """İşarəni təmizlə + açılışın tarixçəsinə bir audit sətri. Yarış: yalnız səbəb DƏYİŞMƏYİBSƏ yazılır.
+
+    ``note`` — tarixçədə «yeni» dəyər (işarənin söndürülməsi ilə təmizlənmə öz mətnini yazır, 2026-11-14)."""
     changes = []
     for lesson in lessons:
         old = lesson.off_schedule_reason
@@ -74,7 +76,7 @@ def clear(offering, lessons, *, by_user=None, source="") -> int:
                 "student": "—",
                 "item": f"{lesson.date} · {lesson.get_kind_display()}",
                 "old": f"cədvəldən kənar dərs — {old}",
-                "new": "cədvələ uyğundur — işarə təmizləndi",
+                "new": note,
             }
         )
     if changes:

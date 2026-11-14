@@ -13,7 +13,7 @@ kollokvium, sərbəst iş) hesabı və görüntüsü DƏYİŞMİR — dövr qər
 
 Testlər ``RUNTIME_SETTINGS_ENABLED=False`` ilə işləyir (defolt oxunur); köhnə qaydanı yoxlamaq üçün
 ``@override_settings(ACADEMIC_SELFWORK_ENABLED=True)`` / ``ACADEMIC_ACTIVITY_SPLIT=False`` /
-``JOURNAL_LESSON_ACTIVATION=True`` / ``AI_ASSISTANT_BUTTON=False`` / ``EXAM_AVAILABLE_PAGE=True`` /
+``JOURNAL_LESSON_ACTIVATION=True`` / ``JOURNAL_OFF_SCHEDULE_FLAG=True`` / ``AI_ASSISTANT_BUTTON=False`` / ``EXAM_AVAILABLE_PAGE=True`` /
 ``ACADEMIC_COURSEWORK_ENABLED=True``.
 """
 
@@ -69,6 +69,12 @@ def syllabus_hours_from_load() -> bool:
 def lesson_activation_enabled() -> bool:
     """Jurnalda cədvəl dərsinin «Aktivləşdir» düyməsi (söndürülüdə yalnız «Yeni dərs»)."""
     return runtime_settings.get_bool("journal.lesson_activation")
+
+
+def off_schedule_flag_enabled() -> bool:
+    """«Cədvəldən kənar» işarəsi (sahib 2026-11-14): söndürülüdə cədvələ uyğun olmayan dərs səbəbsiz açılır,
+    ``Lesson.off_schedule_reason`` yazılmır və işarə heç yerdə göstərilmir."""
+    return runtime_settings.get_bool("journal.off_schedule_flag")
 
 
 def ai_assistant_button_enabled() -> bool:
@@ -165,6 +171,7 @@ def snapshot() -> dict:
         "activity_split": activity_split(),
         "coursework": coursework_enabled(),
         "lesson_activation": lesson_activation_enabled(),
+        "off_schedule_flag": off_schedule_flag_enabled(),
         "ai_button": ai_assistant_button_enabled(),
         "available_exams": available_exams_page_enabled(),
         "contact_page": contact_page_enabled(),
@@ -187,6 +194,7 @@ __all__ = [
     "contact_page_enabled",
     "lesson_activation_enabled",
     "midterm_from_year",
+    "off_schedule_flag_enabled",
     "midterm_max",
     "period_start_year",
     "period_uses_new_rules",

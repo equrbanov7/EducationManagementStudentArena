@@ -46,6 +46,7 @@ from django.utils.dates import WEEKDAYS
 from django.utils.translation import pgettext
 
 from apps.registrar.models import LessonKind
+from core import academic_rules
 
 _CTX = "registrar.lessons_log"
 
@@ -324,6 +325,7 @@ def event_details(row_or_rows) -> list:
     lessons = [lesson for row in rows for event in row["events"] for lesson in event["lessons"]]
     attach_syllabus_topics(lessons)
     stats = marks_by_lesson([lesson.pk for lesson in lessons])
+    show_off_schedule = academic_rules.off_schedule_flag_enabled()
     out = []
     for row in rows:
         for event in row["events"]:
@@ -361,8 +363,11 @@ def event_details(row_or_rows) -> list:
                     "present": present,
                     "marked": marked,
                     "attendance": f"{present} / {marked}" if marked else "",
-                    "off_schedule": next(
-                        (lesson.off_schedule_reason for lesson in members if lesson.off_schedule_reason), ""
+                    # Sahib 2026-11-14: işarə söndürülüdə boş.
+                    "off_schedule": (
+                        next((lesson.off_schedule_reason for lesson in members if lesson.off_schedule_reason), "")
+                        if show_off_schedule
+                        else ""
                     ),
                 }
             )

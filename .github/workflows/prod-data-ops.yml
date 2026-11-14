@@ -337,6 +337,10 @@
 #       yazılır; cədvəl SONRA düzəlibsə (dərsin tarixində açılışın duran slotu dərsin saatındadır) işarə təmizlənir
 #       (jurnalın tarixçəsinə köhnə səbəblə sətir + yekun audit). `period` (məcburi), `batch` = yalnız bu jurnalın UUID-i
 #       (boş = semestrin hamısı). Yalnız təmizləyir; dərs/xana toxunulmur. Loga YALNIZ saylar. İdempotent.
+#   clear_off_schedule_flags_20261114 — «cədvəldən kənar» işarəsi yığışdırıldı (sahib 2026-11-14, MR-356): kod tərəfi
+#       «Sistem tənzimləmələri» → `journal.off_schedule_flag` (defolt söndürülü); bu əmr təşkilatın BÜTÜN dərslərinin
+#       səbəbini boşaldır (jurnalın tarixçəsinə köhnə səbəblə sətir + paket id-li audit). `batch` boş — təmizləmə
+#       (apply `batch=offsched-…` çap edir); `batch` = offsched-… — həmin paketi geri qaytarır. Loga YALNIZ saylar.
 #   release_stale_slot_teachers — jurnalı və dərs yükü olmayan müəllimin cədvəlində qalan dərs (2026-11-05): slota yazılmış
 #       müəllim sahib/pay sahibi deyil, jurnalda dərs aparmayıb və fənn+semestr+qrup üzrə yükü yoxdursa slotun müəllimi
 #       boşaldılır (jurnal sahibini izləyir); deaktiv jurnalın cədvəldə qalan slotu parklanır. `period` (boş = hamısı).
@@ -572,6 +576,7 @@ on:
           - set_practical_offerings
           - fix_slot_week_parity
           - clear_stale_off_schedule_flags
+          - clear_off_schedule_flags_20261114
           - release_stale_slot_teachers
           - fix_offering_subject
           - restore_archived_students
@@ -2003,6 +2008,17 @@ jobs:
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor" --period "$PERIOD")
               ;;
+            clear_off_schedule_flags_20261114)
+              # Sahib 2026-11-14 (MR-356): «cədvəldən kənar» işarəsi BÜTÜN dərslərdən təmizlənir. batch boş — təmizləmə
+              # (apply paket id-sini çap edir); batch=offsched-… — həmin paketi audit izinə görə geri qaytarır.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^offsched-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || { echo "batch = boş və ya offsched-…" >&2; exit 2; }
+                args+=(--undo "--batch=$BATCH")
+              fi
+              ;;
             clear_stale_off_schedule_flags)
               # 2026-11-03: cədvələ uyğun dərslərin köhnəlmiş «cədvəldən kənar» işarəsi; `batch` = yalnız bu jurnal (UUID).
               match "$PERIOD" '^(Payız|Yaz|Yay) 20[0-9]{2}/20[0-9]{2}$' || { echo "period formatı: «Payız 2026/2027»" >&2; exit 2; }
@@ -2556,7 +2572,7 @@ jobs:
               exit "$status"
             fi
             rm -f "$RUNNER_TEMP/out.log"
-          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "release_stale_slot_teachers" ] || [ "$COMMAND" = "fix_offering_subject" ] || [ "$COMMAND" = "repair_twins_20261105b" ] || [ "$COMMAND" = "repair_applications_20261105" ] || [ "$COMMAND" = "repair_applications_20261105c" ] || [ "$COMMAND" = "fix_ydk236_subject_20261106" ] || [ "$COMMAND" = "sync_student_group_journals" ] || [ "$COMMAND" = "rebuild_language_cohorts_20261106" ] || [ "$COMMAND" = "apply_lab_groups_20261106" ] || [ "$COMMAND" = "apply_first_year_splits_20261107" ] || [ "$COMMAND" = "restore_subgroup_parent_enrollments" ] || [ "$COMMAND" = "apply_seminar_groups" ] || [ "$COMMAND" = "bind_lab_lessons_20261108" ] || [ "$COMMAND" = "merge_duplicate_teacher" ] || [ "$COMMAND" = "freeze_inactive_students_20261108" ] || [ "$COMMAND" = "merge_subgroup_journals_20261108" ] || [ "$COMMAND" = "fill_legacy_cells_20261108" ] || [ "$COMMAND" = "repair_applications_20261106" ] || [ "$COMMAND" = "repair_applications_20261107" ] || [ "$COMMAND" = "hide_college_journals_20261110" ] || [ "$COMMAND" = "restore_lesson_authors_20261113" ] || [ "$COMMAND" = "retire_uiux_syllabus_20261112" ] || [ "$COMMAND" = "split_share_journal_20261112" ] || [ "$COMMAND" = "split_group_journal_20261112" ] || [ "$COMMAND" = "fill_empty_cells_20261110" ] || [ "$COMMAND" = "merge_duplicate_subjects_20261111" ] || [ "$COMMAND" = "repair_applications_20261107b" ] || [ "$COMMAND" = "fix_mexanika_lessons_20261108" ] || [ "$COMMAND" = "carry_approved_syllabi_20261108" ] || [ "$COMMAND" = "resolve_subgroup_families_20261108" ] || [ "$COMMAND" = "remove_pre_semester_lessons_20261108" ] || [ "$COMMAND" = "single_seminar_stream_20261108" ] || [ "$COMMAND" = "apply_lab_splits_20261108" ] || [ "$COMMAND" = "recompute_carried_absences_20261108" ] || [ "$COMMAND" = "link_patok_leads_20261108" ] || [ "$COMMAND" = "repair_legacy_identity_20261108" ] || [ "$COMMAND" = "add_legacy_guest_students_20261109" ] || [ "$COMMAND" = "split_shared_fin_identity_20261109" ] || [ "$COMMAND" = "move_politologiya_rows_20261109" ] || [ "$COMMAND" = "fix_azdili_journals_20261110" ] || [ "$COMMAND" = "publish_reviewed_syllabi_20261110" ] || [ "$COMMAND" = "restore_intensive_results_20261112" ] || [ "$COMMAND" = "recover_mr230_lessons" ]; then
+          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "clear_off_schedule_flags_20261114" ] || [ "$COMMAND" = "release_stale_slot_teachers" ] || [ "$COMMAND" = "fix_offering_subject" ] || [ "$COMMAND" = "repair_twins_20261105b" ] || [ "$COMMAND" = "repair_applications_20261105" ] || [ "$COMMAND" = "repair_applications_20261105c" ] || [ "$COMMAND" = "fix_ydk236_subject_20261106" ] || [ "$COMMAND" = "sync_student_group_journals" ] || [ "$COMMAND" = "rebuild_language_cohorts_20261106" ] || [ "$COMMAND" = "apply_lab_groups_20261106" ] || [ "$COMMAND" = "apply_first_year_splits_20261107" ] || [ "$COMMAND" = "restore_subgroup_parent_enrollments" ] || [ "$COMMAND" = "apply_seminar_groups" ] || [ "$COMMAND" = "bind_lab_lessons_20261108" ] || [ "$COMMAND" = "merge_duplicate_teacher" ] || [ "$COMMAND" = "freeze_inactive_students_20261108" ] || [ "$COMMAND" = "merge_subgroup_journals_20261108" ] || [ "$COMMAND" = "fill_legacy_cells_20261108" ] || [ "$COMMAND" = "repair_applications_20261106" ] || [ "$COMMAND" = "repair_applications_20261107" ] || [ "$COMMAND" = "hide_college_journals_20261110" ] || [ "$COMMAND" = "restore_lesson_authors_20261113" ] || [ "$COMMAND" = "retire_uiux_syllabus_20261112" ] || [ "$COMMAND" = "split_share_journal_20261112" ] || [ "$COMMAND" = "split_group_journal_20261112" ] || [ "$COMMAND" = "fill_empty_cells_20261110" ] || [ "$COMMAND" = "merge_duplicate_subjects_20261111" ] || [ "$COMMAND" = "repair_applications_20261107b" ] || [ "$COMMAND" = "fix_mexanika_lessons_20261108" ] || [ "$COMMAND" = "carry_approved_syllabi_20261108" ] || [ "$COMMAND" = "resolve_subgroup_families_20261108" ] || [ "$COMMAND" = "remove_pre_semester_lessons_20261108" ] || [ "$COMMAND" = "single_seminar_stream_20261108" ] || [ "$COMMAND" = "apply_lab_splits_20261108" ] || [ "$COMMAND" = "recompute_carried_absences_20261108" ] || [ "$COMMAND" = "link_patok_leads_20261108" ] || [ "$COMMAND" = "repair_legacy_identity_20261108" ] || [ "$COMMAND" = "add_legacy_guest_students_20261109" ] || [ "$COMMAND" = "split_shared_fin_identity_20261109" ] || [ "$COMMAND" = "move_politologiya_rows_20261109" ] || [ "$COMMAND" = "fix_azdili_journals_20261110" ] || [ "$COMMAND" = "publish_reviewed_syllabi_20261110" ] || [ "$COMMAND" = "restore_intensive_results_20261112" ] || [ "$COMMAND" = "recover_mr230_lessons" ]; then
             # Loga YALNIZ «twin_relocate: / twin_merge: / lesson_kinds: / slot_parity: / practical_flag: / off_schedule_flags: / slot_teachers: /
             # offering_subject_fix: açar=say …» sətirləri və rədd kodu.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?

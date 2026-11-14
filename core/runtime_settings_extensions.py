@@ -25,6 +25,7 @@ _MODULES = (
     "core.runtime_settings_journal_full_edit",  # «journal»: müəllimin keçmiş tarixli tam redaktəsi (2026-10-27)
     "core.runtime_settings_journal_backdate",  # «journal»: müəyyən tarixdən bu günə dərs əlavə etmək (2026-11-04)
     "core.runtime_settings_applications",  # «Müraciətlər» — bir istifadəçinin gündəlik müraciət limiti (2026-11-04)
+    "core.runtime_settings_journal_off_schedule",  # «journal»: «cədvəldən kənar» işarəsi açarı (2026-11-14)
 )
 
 

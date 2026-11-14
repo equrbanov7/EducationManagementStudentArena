@@ -6,6 +6,7 @@
  *    Uyğunluq backend (`journal_activation.slot_matches` → `dashboard_data.lessons_on`) ilə
  *    EYNİ qaydadır: həftə günü + üst/alt paritet (semestrin ilk həftəsi = ÜST) + dövr sərhədi.
  *    Server qaydası həlledicidir — bu yalnız UX-dir (səbəbsiz göndəriş serverdə rədd olunur).
+ *    «Cədvəldən kənar» işarəsi söndürülüdə (sahib 2026-11-14, modalın `data-offsched-flag="0"`) sahə açılmır.
  *
  * CSP/AJAX-safe: inline yoxdur; hadisələr `EMSDelegate.on` ilə document-ə delegasiya olunur.
  * Slot naxışı `#jdSlotPattern` JSON adasından HƏR dəfə təzə oxunur.
@@ -103,7 +104,10 @@
         var slots = slotPattern();
         var action = modal.querySelector("[data-jd-lesson-action]");
         var adding = !action || action.value === "add_lesson";
-        var needed = slots.length > 0 && adding && !onSchedule(modal, slots);
+        // Sahib 2026-11-14: «Cədvəldən kənar» işarəsi söndürülüdə (modalın `data-offsched-flag="0"`) sahə
+        // heç vaxt açılmır və məcburi deyil — cədvəl müəllimi heç nəyə məcbur etmir.
+        var flagOn = modal.getAttribute("data-offsched-flag") !== "0";
+        var needed = flagOn && slots.length > 0 && adding && !onSchedule(modal, slots);
         box.hidden = !needed;
         var reason = box.querySelector("[data-jd-offsched-reason]");
         if (reason) {

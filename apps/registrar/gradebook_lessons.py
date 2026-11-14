@@ -21,6 +21,7 @@ from django.utils.translation import pgettext
 
 from apps.registrar import grade_audit, journal_edit_windows
 from apps.registrar.models import CourseOffering, Lesson, LessonKind, LessonMark
+from core import academic_rules
 
 from .gradebook import (  # noqa: F401
     DEFAULT_LESSON_HOURS,
@@ -244,7 +245,10 @@ def create_lesson(
         created_by=created_by,
         instructor=instructor or offering.instructor,
         room=room,
-        off_schedule_reason=(off_schedule_reason or "").strip()[:255],
+        # «Cədvəldən kənar» işarəsi söndürülüdə (sahib 2026-11-14) səbəb yazılmır — heç kimə düşmür.
+        off_schedule_reason=(
+            (off_schedule_reason or "").strip()[:255] if academic_rules.off_schedule_flag_enabled() else ""
+        ),
         lab_group=lab_group,
         seminar_group=seminar_group,
     )
