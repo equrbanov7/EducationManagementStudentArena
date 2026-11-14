@@ -264,3 +264,31 @@ def test_named_handler_cannot_soft_delete_or_restore_another_persons_request(wor
             deleted=True,
             expected_updated_at=application.updated_at.isoformat(),
         )
+
+
+def test_forward_note_can_be_edited_and_hidden_by_its_author(world):
+    """Sahib 2026-11-14: yönləndirmə qeydi də düzəldilə / gizlədilə bilir (tələbədən sənəd istəyən köhnə mətnlər)."""
+    from apps.applications.constants import EventKind
+    from apps.applications.models import ApplicationEvent
+
+    application = create(world, recipient_id=world["vice_a"].pk)
+    event = ApplicationEvent.objects.create(
+        organization=application.organization,
+        application=application,
+        kind=EventKind.FORWARDED,
+        actor=world["vice_a"],
+        text="FORWARD-ORIGINAL-NOTE",
+    )
+    edit_reply(
+        application=application,
+        user=world["vice_a"],
+        event_id=event.pk,
+        text="FORWARD-NEUTRAL-NOTE",
+        expected_revision="",
+    )
+    payload = detail_payload(application, user=world["teacher"])
+    row = next(item for item in payload["events"] if item["id"] == str(event.pk))
+    assert row["text"] == "FORWARD-NEUTRAL-NOTE"
+    set_reply_visibility(application=application, user=world["vice_a"], event_id=event.pk, hidden=True)
+    event.refresh_from_db()
+    assert event.hidden_at is not None
