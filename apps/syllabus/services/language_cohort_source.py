@@ -35,8 +35,12 @@ def rules(*, organization, offering_id):
 
 
 def valid_result(syllabus, offering_id):
-    if getattr(syllabus, "_lc_period", None) is None or syllabus.offering_id == offering_id:
-        return True
+    if (
+        getattr(syllabus, "_lc_period", None) is None
+        or syllabus.offering_id == offering_id
+        or getattr(syllabus, "_lc_shared", False)
+    ):
+        return True  # kohort deyil / öz dosyesi / paylaşım (qapısı ``offerings._share_applies``)
     version = syllabus.approved_version
     if (
         version is None
