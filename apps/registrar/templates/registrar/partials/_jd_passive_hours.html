@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n ems_ui %}
 {% comment %}«Passiv saat» (sahib 2026-11-12, MR-000303) — intensiv tədrisin auditoriyadan kənar saatları.
 Dərs deyil: davamiyyət / bal / «Keçirilmiş X / Y» dəyişmir, ayrıca sayılır (`passive_hours.page_context`).
 İntensiv kursda həmişə açıqdır; adi jurnalda kafedra müdiri / RİM açarla açır (`switch_url`).
@@ -49,7 +49,7 @@ Adi POST formları — JS yoxdur; üslub xarici `journal_passive_hours.css`-dəd
             {% csrf_token %}
             <label class="jd2-passive__field">
                 <span>{% trans "Tarix" context "registrar.passive_hours" %}</span>
-                <input class="ems-input ems-input--date" type="date" name="date" required{% if passive_hours.min_date %} min="{{ passive_hours.min_date|date:'Y-m-d' }}"{% endif %} max="{{ passive_hours.max_date|date:'Y-m-d' }}" value="{{ passive_hours.max_date|date:'Y-m-d' }}">
+                {% ems_date_input "date" passive_hours.max_date input_id="jd-passive-date" required=True min_date=passive_hours.min_date max_date=passive_hours.max_date %}
             </label>
             <label class="jd2-passive__field jd2-passive__field--hours">
                 <span>{% trans "Saat" context "registrar.passive_hours" %}</span>

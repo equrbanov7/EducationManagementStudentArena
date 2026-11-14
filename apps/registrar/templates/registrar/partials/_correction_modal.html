@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n ems_ui %}
 {% comment %}
 Jurnal düzəliş (audited) modalı — YERİNDƏ düzəliş rejimində (journal_detail ?correct=1)
 normal grid-in xanasına klik edildikdə açılır. Ayrı editor grid YOXDUR; xanalar
@@ -77,7 +77,7 @@ correction_reasons.
                 </label>
                 <label class="corr-field">
                     <span class="corr-field-label">{% trans "Təhvil tarixi" context "registrar.correction" %}</span>
-                    <input type="date" name="new_date" class="corr-input" data-corr-cw-date>
+                    {% ems_date_input "new_date" input_id="corr-cw-date" css_class="corr-input" iso_attrs="data-corr-cw-date" %}
                 </label>
             </div>
 

@@ -79,6 +79,7 @@ from apps.registrar.lessons_log_units import offering_option_rows, teacher_optio
 from apps.registrar.lessons_log_unrecorded import unrecorded_slots  # noqa: F401 — «Cədvəldə var, qeydə alınmayıb»
 from apps.registrar.models import AttendanceStatus, Lesson, LessonKind, LessonMark
 from apps.registrar.models.catalog_meta import EducationForm
+from core import academic_rules
 from core.search_text import tolerant_q
 
 _CTX = "registrar.lessons_log"
@@ -379,6 +380,9 @@ def build_rows(lessons_qs, *, limit=ROW_CAP, offset=0) -> list:
     # əvvəl hər seminar sətri üçün 5 sorğu gedirdi (prod surətində 90 sətirdə 65). İndi səhifə üçün toplu.
     from apps.registrar import design_practical_scope
 
+    # Sahib 2026-11-14: «Cədvəldən kənar» işarəsi söndürülüdə nişan da, səbəb də göstərilmir.
+    show_off_schedule = academic_rules.off_schedule_flag_enabled()
+
     design_practical_scope.prime(lesson.offering for lesson in lessons if lesson.kind == LessonKind.SEMINAR)
     stats = marks_by_lesson([lesson.id for lesson in lessons])
     # Mövzusuz, sillabus sətrinə bağlı (köçürülmüş) dərsin mövzusu sətirdən — toplu, ≤ 3 sorğu (2026-10-25).
@@ -422,8 +426,8 @@ def build_rows(lessons_qs, *, limit=ROW_CAP, offset=0) -> list:
                 ),
                 "is_legacy": bool(lesson.is_legacy_synthesised),
                 # «Cədvəldən kənar» (UNEC P1-1): dərs cədvəl slotuna uyğun gəlmədən, səbəblə açılıb.
-                "off_schedule": bool(lesson.off_schedule_reason),
-                "off_schedule_reason": lesson.off_schedule_reason,
+                "off_schedule": show_off_schedule and bool(lesson.off_schedule_reason),
+                "off_schedule_reason": lesson.off_schedule_reason if show_off_schedule else "",
             }
         )
     return rows
@@ -447,8 +451,11 @@ def csv_rows(rows) -> list:
         pgettext(_CTX, "Qiymətləndirilib"),
         pgettext(_CTX, "Akademik saat"),
         pgettext(_CTX, "Jurnal qeydi"),
-        pgettext(_CTX, "Cədvəldən kənar (səbəb)"),
     ]
+    # «Cədvəldən kənar» sütunu yalnız işarə yandırılıbsa (sahib 2026-11-14).
+    off_schedule = academic_rules.off_schedule_flag_enabled()
+    if off_schedule:
+        header.append(pgettext(_CTX, "Cədvəldən kənar (səbəb)"))
     note_labels = {
         NOTE_ON_TIME: pgettext(_CTX, "Vaxtında yazılıb"),
         NOTE_LATE: pgettext(_CTX, "Gec yazılıb"),
@@ -473,8 +480,8 @@ def csv_rows(rows) -> list:
                 row["graded"],
                 row["hours"],
                 note_labels.get(row["note"], row["note"]),
-                row.get("off_schedule_reason", ""),
             ]
+            + ([row.get("off_schedule_reason", "")] if off_schedule else [])
         )
     return out
 

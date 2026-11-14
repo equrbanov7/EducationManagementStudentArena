@@ -119519,3 +119519,44 @@ msgstr "пассивные часы"
 msgctxt "registrar.model.passive_hour.meta"
 msgid "passiv saatlar"
 msgstr "пассивные часы"
+
+msgctxt "core.datetime_input"
+msgid "Tarixi gg.aa.iiii formatında yazın (məsələn, 06.10.2026)."
+msgstr "Введите дату в формате дд.мм.гггг (например, 06.10.2026)."
+
+msgctxt "core.datetime_input"
+msgid "Tarix {min} ilə {max} arasında olmalıdır."
+msgstr "Дата должна быть в промежутке с {min} по {max}."
+
+msgctxt "core.datetime_input"
+msgid "Tarix {min} və ya daha sonra olmalıdır."
+msgstr "Дата должна быть не раньше {min}."
+
+msgctxt "core.datetime_input"
+msgid "Tarix {max} və ya daha əvvəl olmalıdır."
+msgstr "Дата должна быть не позже {max}."
+
+msgctxt "core.datetime_input"
+msgid "Tarixi seçin"
+msgstr "Выберите дату"
+
+msgctxt "core.datetime_input"
+msgid "Bağla"
+msgstr "Закрыть"
+
+msgctxt "core.datetime_input"
+msgid "gg.aa.iiii"
+msgstr "дд.мм.гггг"
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Keçmiş tarixə dərs ən çox %(d)s gün geriyə — %(date)s tarixindən bu günədək açmaq olar."
+msgstr "Занятие можно открыть на прошедшую дату не более чем на %(d)s дн. назад — с %(date)s по сегодня."
+
+msgctxt "core.runtime_settings"
+msgid "«Cədvəldən kənar» işarəsi"
+msgstr "Отметка «вне расписания»"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılıbsa tarixi və saatı dərs cədvəlinə uyğun gəlməyən yeni dərs üçün səbəb soruşulur və dərs «cədvəldən kənar» kimi işarələnir. Söndürülüdə müəllim istənilən tarix və saatda dərs aça bilər — səbəb soruşulmur, heç nə işarələnmir və «cədvəldən kənar» yazısı heç yerdə göstərilmir."
+msgstr "Если включено, для нового занятия, дата и время которого не совпадают с расписанием, требуется причина, и занятие отмечается как «вне расписания». Если выключено, преподаватель может открыть занятие в любую дату и время — причина не запрашивается, ничего не отмечается и надпись «вне расписания» нигде не показывается."

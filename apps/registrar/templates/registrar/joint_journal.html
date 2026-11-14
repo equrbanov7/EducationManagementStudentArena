@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="{% static 'registrar/css/jd2_theme.css' %}?v=20260926-close">
 <link rel="stylesheet" href="{% static 'registrar/css/journal_layout.css' %}?v=20261019-head">
 <link rel="stylesheet" href="{% static 'registrar/css/joint_journal.css' %}?v=20261101-layout1">
+<link rel="stylesheet" href="{% static 'css/ems_datetime.css' %}?v=20261114-date">
 {% endblock %}
 {% block content %}
 <div class="journal-page jd-page jd2 joint-journal" data-joint-journal>
@@ -56,4 +57,10 @@
     {% if not joint_read_only and not joint_locked %}{% include "registrar/partials/_joint_journal_lesson.html" %}{% endif %}
 </div>
 {% endblock %}
-{% block extraJs %}<script src="{% static 'registrar/js/joint_journal.js' %}?v=20261101-layout1" defer></script>{% endblock %}
+{% block extraJs %}
+{% if not joint_read_only and not joint_locked %}{# «Yeni dərs» tarixi «gg.aa.iiii» (sahib 2026-11-14) #}
+<script src="{% static 'js/ems_datetime.js' %}?v=20261114-date"></script>
+<script src="{% static 'js/ems_datetime_picker.js' %}?v=20261114-date"></script>
+{% endif %}
+<script src="{% static 'registrar/js/joint_journal.js' %}?v=20261101-layout1" defer></script>
+{% endblock %}

@@ -346,10 +346,15 @@ def check_manual_lesson(offering, *, date, start_time, hours, raw_reason, lab_gr
 
     Cədvəli olan açılışda seçilmiş tarix + saat heç bir slota uyğun gəlmirsə dərs
     «cədvəldən kənar»dır və səbəb məcburidir; uyğun gəlirsə (və ya cədvəl yoxdursa)
-    göndərilmiş səbəb nəzərə alınmır."""
+    göndərilmiş səbəb nəzərə alınmır.
+
+    Sahib 2026-11-14 (MR-356): «Cədvəldən kənar» işarəsi söndürülüdə (``journal.off_schedule_flag``, defolt)
+    cədvəl heç nəyə məcbur etmir — səbəb soruşulmur, göndərilsə də yazılmır; saat həddi qalır."""
     error = hours_cap_error(offering, hours, lab_group=lab_group, seminar_group=seminar_group)
     if error:
         return "", error
+    if not academic_rules.off_schedule_flag_enabled():
+        return "", ""
     from .gradebook_lessons import _coerce_date
 
     day = _coerce_date(date)
@@ -448,11 +453,16 @@ def strip_context(offering, context) -> dict:
         "can_activate": bool(context.get("can_edit")),
         "next_day": next_day,
         "next_times": ", ".join(slot.start_time.strftime("%H:%M") for slot in next_slots),
-        "extra_lessons": [
-            {"id": str(lesson.pk), "start": lesson.start_time, "kind_label": lesson.get_kind_display()}
-            for lesson in todays_lessons
-            if lesson.pk not in matched
-        ],
+        # «Cədvəldən kənar» işarəsi söndürülüdə (sahib 2026-11-14) bu sətir də göstərilmir.
+        "extra_lessons": (
+            [
+                {"id": str(lesson.pk), "start": lesson.start_time, "kind_label": lesson.get_kind_display()}
+                for lesson in todays_lessons
+                if lesson.pk not in matched
+            ]
+            if academic_rules.off_schedule_flag_enabled()
+            else []
+        ),
     }
     return extra
 

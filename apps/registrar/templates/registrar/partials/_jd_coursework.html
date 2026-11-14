@@ -1,4 +1,4 @@
-{% load journal_names i18n %}
+{% load journal_names i18n ems_ui %}
 {% comment %}Kurs işi tabı (mockup): solda qeydiyyat siyahısı, sağda "Yeni kurs işi"
 formu. Sətirdəki ✎ formu doldurur (yalnız mark_edit_window içində, defolt 15 dəq.); bal 0-100
 server tərəfdə clamp olunur, qeyd pəncərədən sonra dondurulur.{% endcomment %}
@@ -103,7 +103,7 @@ server tərəfdə clamp olunur, qeyd pəncərədən sonra dondurulur.{% endcomme
                 </div>
                 <div class="jd2-field">
                     <span class="jd2-field-label">{% trans "TƏHVİL TARİXİ" context "registrar.journal" %}</span>
-                    <input type="date" name="cw_date" data-jd-cw-date>
+                    {% ems_date_input "cw_date" input_id="jd-cw-date" css_class="jd2-date-input" iso_attrs="data-jd-cw-date" %}
                 </div>
             </div>
             <div class="jd2-cw-btns">

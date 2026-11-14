@@ -44,7 +44,7 @@ from django.db import transaction
 from django.db.models import Q, Sum
 from django.utils import timezone
 
-from apps.registrar import grade_audit, journal_edit_windows, lab_groups
+from apps.registrar import grade_audit, journal_edit_windows, lab_groups, semester_start
 from apps.registrar.models import AttendanceStatus, Enrollment, Lesson, LessonMark
 from core.rls import journal_unlock
 
@@ -201,6 +201,15 @@ def save_marks(
         clearing = entry.get("status") == CLEAR
         if clearing and (mark is None or not full_edit):
             continue  # «təmizlə» yalnız data bərpası rejimində və yalnız mövcud xanada
+        if (
+            not clearing
+            and semester_start.before_start(offering, lesson.date)
+            and (mark is None or _differs(mark, entry, lesson))
+        ):
+            # Sahib 2026-11-14: semestrin başlanğıcından əvvəlki dərsə xana yazılmır (data bərpası da keçmir).
+            blocked += 1
+            blocked_reason = blocked_reason or semester_start.mark_message(semester_start.period_start(offering))
+            continue
         if not clearing and not lab_groups.applies(lesson, enrollment):
             rejected += 1  # başqa laboratoriya qrupunun dərsi — bu tələbəyə xana yazılmır (sahib 2026-11-06)
             continue

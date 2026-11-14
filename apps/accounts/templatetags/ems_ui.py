@@ -197,3 +197,38 @@ def ems_filter_datetime_input(field):
         attrs["data-ems-range-select"] = field["range_select"]
         attrs["data-ems-range-custom"] = field.get("range_custom") or "custom"
     return DayFirstDateTimeInput(attrs={"class": "ems-input"}).render(name, field.get("value") or "", attrs=attrs)
+
+
+@register.simple_tag(name="ems_date_input")
+def ems_date_input(
+    name: str,
+    value=None,
+    *,
+    input_id: str = "",
+    required: bool = False,
+    min_date=None,
+    max_date=None,
+    css_class: str = "ems-input",
+    iso_attrs: str = "",
+    describedby: str = "",
+):
+    """Locale-dən asılı OLMAYAN yalnız-tarix sahəsi «gg.aa.iiii» (2026-11-14, sahib: «gün ay il»).
+
+    Native ``<input type="date">`` əvəzi (en-US brauzerdə mm/dd/yyyy idi). Forma dəyəri gizli ISO sahəsindədir
+    (``name``; server parseri dəyişmir); ``iso_attrs`` — o sahənin köhnə JS qarmaqları (``data-jd-lesson-date``).
+    ``min_date`` / ``max_date`` — ``date`` və ya ISO. Seçicini (``static/js/ems_datetime*.js`` +
+    ``css/ems_datetime.css``) səhifə özü yükləyir. Bax ``core.date_input.render_day_first_date_input``.
+    """
+    from core.date_input import render_day_first_date_input
+
+    return render_day_first_date_input(
+        name,
+        value,
+        input_id=input_id or f"id_{name}",
+        required=required,
+        min_value=min_date,
+        max_value=max_date,
+        css_class=css_class,
+        iso_attrs=iso_attrs,
+        describedby=describedby,
+    )

@@ -10,7 +10,16 @@ from ..state_machine import TransitionDenied
 from . import access, notify
 from .action_lock import refresh_for_action
 
-REPLY_KINDS = {EventKind.COMMENT, EventKind.RESOLVED, EventKind.INFO_REQUESTED, EventKind.RETURNED, EventKind.REJECTED}
+#: Sahib 2026-11-14: yönləndirmə qeydi (``FORWARDED``) də müraciət sahibinə görünür — köhnə qeydlərdə tələbədən
+#: sənəd istəyən / «yaxınlaşın» deyən mətnlər oldu, onları da düzəltmək və gizlətmək mümkün olmalıdır.
+REPLY_KINDS = {
+    EventKind.COMMENT,
+    EventKind.RESOLVED,
+    EventKind.INFO_REQUESTED,
+    EventKind.RETURNED,
+    EventKind.REJECTED,
+    EventKind.FORWARDED,
+}
 
 
 def can_moderate(user, application, event):

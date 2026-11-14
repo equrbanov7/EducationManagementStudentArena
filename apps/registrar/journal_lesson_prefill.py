@@ -38,6 +38,8 @@ import datetime as _dt
 
 from django.utils import timezone
 
+from core import academic_rules
+
 from . import dashboard_data, journal_activation, journal_topics, lesson_rooms, schedule
 from .journal_list_schedule import GRACE
 from .lesson_share_scope import scoped_lessons
@@ -166,8 +168,13 @@ def _fallback(offering, context, data, held, last_by_kind, memory, today) -> dic
     reference = last_by_kind.get(kind) or last
     return {
         "kind": kind,
-        # Cədvəli olan açılışda saatı müəllim özü seçir (səhv saat «cədvəldən kənar» səbəb istəyir).
-        "time": "" if journal_activation.offering_slots(offering) else _standard_time(reference),
+        # Cədvəli olan açılışda saatı müəllim özü seçir (səhv saat «cədvəldən kənar» səbəb istəyir); işarə
+        # söndürülüdə (sahib 2026-11-14) səhv saatın cəzası yoxdur — son dərsin saatı təklif olunur.
+        "time": (
+            ""
+            if academic_rules.off_schedule_flag_enabled() and journal_activation.offering_slots(offering)
+            else _standard_time(reference)
+        ),
         "hours": data["hours_by_kind"][kind],
         "room": _memory_room(memory, kind, today),
         "instructor": data["instructor_by_kind"][kind],
@@ -260,17 +267,25 @@ def posted_slot(offering, data, *, date, kind):
     * Slot bu açılışın deyil, parklanıb/silinib və ya seçilmiş tarixdə keçirilmir → ``LessonRuleError``
       (saxta və ya köhnəlmiş id səssizcə qəbul olunmur).
     * Göndərilən dərs saatı və ya tip slotdan fərqlidirsə → ``None``: əl ilə dərs qaydaları (standart saat,
-      cədvəldən kənar səbəb) tətbiq olunur — müəllimin seçimi slotu üstələyir."""
+      cədvəldən kənar səbəb) tətbiq olunur — müəllimin seçimi slotu üstələyir.
+    * «Cədvəldən kənar» işarəsi söndürülüdə (sahib 2026-11-14: «heç nəyə məcbur etməsin») köhnəlmiş / başqa günün
+      slot bağı dərsi RƏDD ETMİR — bağ atılır və dərs müəllimin seçdiyi tarix + saatla əl ilə açılır."""
     raw = (data.get("slot_id") or "").strip()
     if not raw:
         return None
+    from .gradebook import LessonRuleError
     from .gradebook_lessons import _coerce_date
 
     day = _coerce_date(date)
     if day is None:
         return None  # tarix xətasını create_lesson göstərir
-    slot = journal_activation.offering_slot(offering, raw)
-    journal_activation.check_slot_day(offering, slot, day)
+    try:
+        slot = journal_activation.offering_slot(offering, raw)
+        journal_activation.check_slot_day(offering, slot, day)
+    except LessonRuleError:
+        if academic_rules.off_schedule_flag_enabled():
+            raise
+        return None
     if (data.get("lesson_time") or "").strip() != journal_activation.slot_time_key(slot):
         return None
     if kind != journal_activation.slot_kind(slot):
