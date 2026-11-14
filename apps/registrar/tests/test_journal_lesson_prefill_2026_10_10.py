@@ -431,6 +431,8 @@ class PrefillBuildTest(LessonPrefillBase):
         self.assertEqual(journal_lesson_prefill.modal_context(offering, self._context(offering, can_edit=False)), {})
 
 
+# Sahib 2026-11-14: «cədvəldən kənar» qaydası yalnız işarə yandırılanda (defolt söndürülü) — bu testlər o rejimdir.
+@override_settings(JOURNAL_OFF_SCHEDULE_FLAG=True)
 class SlotPathPostTest(LessonPrefillBase):
     def test_slot_lesson_keeps_the_own_bell_time_and_needs_no_reason(self):
         self._add()
@@ -503,6 +505,7 @@ class SlotPathPostTest(LessonPrefillBase):
         self.assertEqual((lesson.start_time, lesson.end_time), (_t("13:35"), _t("15:05")))
 
 
+@override_settings(JOURNAL_OFF_SCHEDULE_FLAG=True)
 class ActivationFlagTest(LessonPrefillBase):
     def _activate(self, slot):
         return self._client().post(reverse("registrar:journal_activate_slot", args=[self.offering.id, slot.id]))

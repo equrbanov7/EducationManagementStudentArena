@@ -120848,3 +120848,11 @@ msgstr "TT.MM.JJJJ"
 msgctxt "registrar.journal"
 msgid "Keçmiş tarixə dərs ən çox %(d)s gün geriyə — %(date)s tarixindən bu günədək açmaq olar."
 msgstr "Eine Stunde kann höchstens %(d)s Tag(e) rückwirkend angelegt werden — vom %(date)s bis heute."
+
+msgctxt "core.runtime_settings"
+msgid "«Cədvəldən kənar» işarəsi"
+msgstr "Markierung „außerhalb des Stundenplans“"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılıbsa tarixi və saatı dərs cədvəlinə uyğun gəlməyən yeni dərs üçün səbəb soruşulur və dərs «cədvəldən kənar» kimi işarələnir. Söndürülüdə müəllim istənilən tarix və saatda dərs aça bilər — səbəb soruşulmur, heç nə işarələnmir və «cədvəldən kənar» yazısı heç yerdə göstərilmir."
+msgstr "Wenn aktiviert, braucht eine neue Lehrveranstaltung, deren Datum und Uhrzeit nicht zum Stundenplan passen, eine Begründung und wird als „außerhalb des Stundenplans“ markiert. Wenn deaktiviert, kann die Lehrkraft eine Lehrveranstaltung zu jedem Datum und jeder Uhrzeit anlegen — es wird keine Begründung verlangt, nichts markiert und die Markierung nirgends angezeigt."

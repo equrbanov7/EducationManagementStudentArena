@@ -119552,3 +119552,11 @@ msgstr "дд.мм.гггг"
 msgctxt "registrar.journal"
 msgid "Keçmiş tarixə dərs ən çox %(d)s gün geriyə — %(date)s tarixindən bu günədək açmaq olar."
 msgstr "Занятие можно открыть на прошедшую дату не более чем на %(d)s дн. назад — с %(date)s по сегодня."
+
+msgctxt "core.runtime_settings"
+msgid "«Cədvəldən kənar» işarəsi"
+msgstr "Отметка «вне расписания»"
+
+msgctxt "core.runtime_settings"
+msgid "Yandırılıbsa tarixi və saatı dərs cədvəlinə uyğun gəlməyən yeni dərs üçün səbəb soruşulur və dərs «cədvəldən kənar» kimi işarələnir. Söndürülüdə müəllim istənilən tarix və saatda dərs aça bilər — səbəb soruşulmur, heç nə işarələnmir və «cədvəldən kənar» yazısı heç yerdə göstərilmir."
+msgstr "Если включено, для нового занятия, дата и время которого не совпадают с расписанием, требуется причина, и занятие отмечается как «вне расписания». Если выключено, преподаватель может открыть занятие в любую дату и время — причина не запрашивается, ничего не отмечается и надпись «вне расписания» нигде не показывается."

@@ -26,7 +26,7 @@ TODAY = dt.date(2025, 10, 20)
 AUGUST = timezone.make_aware(dt.datetime(2025, 8, 1, 12, 0))
 
 
-@override_settings(UNIVERSITY_MODE=True)
+@override_settings(UNIVERSITY_MODE=True, JOURNAL_OFF_SCHEDULE_FLAG=True)
 class UnrecordedSlotsTest(TestCase):
     @classmethod
     def setUpTestData(cls):

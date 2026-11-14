@@ -29,7 +29,7 @@ def _other(parity):
     return WeekType.EVEN if parity == WeekType.ODD else WeekType.ODD
 
 
-@override_settings(JOURNAL_LESSON_ACTIVATION=True)
+@override_settings(JOURNAL_LESSON_ACTIVATION=True, JOURNAL_OFF_SCHEDULE_FLAG=True)
 class JournalActivationTest(TestCase):
     @classmethod
     def setUpTestData(cls):
