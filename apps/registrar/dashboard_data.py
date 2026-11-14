@@ -362,8 +362,9 @@ def teacher_offerings(*, organization, teacher, period, today=None) -> dict:
         visible.select_related("subject", "group")
         .annotate(
             dash_students=_per_offering(Enrollment.objects.filter(status=Enrollment.Status.ENROLLED), Count("id")),
-            dash_held_hours=_per_offering(Lesson.objects.filter(date__lte=today), Sum("hours")),
-            dash_lessons=_per_offering(Lesson.objects.filter(date__lte=today), Count("id")),
+            # «Passiv» dərs (sahib 2026-11-14) keçirilmiş saat / dərs sayına düşmür.
+            dash_held_hours=_per_offering(Lesson.objects.filter(date__lte=today, is_passive=False), Sum("hours")),
+            dash_lessons=_per_offering(Lesson.objects.filter(date__lte=today, is_passive=False), Count("id")),
         )
         .order_by("subject__name", "group__name", "pk")
     )

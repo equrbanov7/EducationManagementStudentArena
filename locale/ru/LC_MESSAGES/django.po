@@ -119560,3 +119560,86 @@ msgstr "Отметка «вне расписания»"
 msgctxt "core.runtime_settings"
 msgid "Yandırılıbsa tarixi və saatı dərs cədvəlinə uyğun gəlməyən yeni dərs üçün səbəb soruşulur və dərs «cədvəldən kənar» kimi işarələnir. Söndürülüdə müəllim istənilən tarix və saatda dərs aça bilər — səbəb soruşulmur, heç nə işarələnmir və «cədvəldən kənar» yazısı heç yerdə göstərilmir."
 msgstr "Если включено, для нового занятия, дата и время которого не совпадают с расписанием, требуется причина, и занятие отмечается как «вне расписания». Если выключено, преподаватель может открыть занятие в любую дату и время — причина не запрашивается, ничего не отмечается и надпись «вне расписания» нигде не показывается."
+
+msgctxt "registrar.passive_lessons"
+msgid "Passiv"
+msgstr "Пассивный"
+
+#, python-format
+msgctxt "registrar.passive_lessons"
+msgid "Passiv: %(hours)s saat"
+msgstr "Пассивные: %(hours)s ч"
+
+msgctxt "registrar.passive_lessons"
+msgid "keçirilmiş saata daxil deyil"
+msgstr "не входит в проведённые часы"
+
+msgctxt "registrar.passive_lessons"
+msgid "«Passiv» — saat yazılır, amma keçirilmiş saata, həddə və dərs yükünə daxil deyil; xana yazılmır."
+msgstr "«Пассивный» — часы записываются, но не входят в проведённые часы, лимит и учебную нагрузку; отметки не ставятся."
+
+msgctxt "registrar.passive_lessons"
+msgid "Passiv dərs — müəllimin keçirilmiş saatına, həddə və dərs yükünə daxil deyil; xana yazılmır"
+msgstr "Пассивное занятие — не входит в проведённые часы преподавателя, лимит и учебную нагрузку; отметки не ставятся"
+
+msgctxt "registrar.passive_lessons"
+msgid "Passiv dərs — davamiyyət və bal yazılmır"
+msgstr "Пассивное занятие — посещаемость и баллы не ставятся"
+
+msgctxt "registrar.passive_lessons"
+msgid "Passiv dərslərin saatı — keçirilmiş saata, dərs saatı həddinə və dərs yükünə daxil deyil"
+msgstr "Часы пассивных занятий — не входят в проведённые часы, лимит часов и учебную нагрузку"
+
+msgctxt "registrar.passive_lessons"
+msgid "Bu dərsdə qeyd (i/e, q/b, bal) var — passiv edilə bilməz. Əvvəl qeydləri təmizləyin."
+msgstr "В этом занятии есть отметки (присутствие, пропуск, балл) — его нельзя сделать пассивным. Сначала удалите отметки."
+
+msgctxt "registrar.passive_lessons"
+msgid "Bu jurnalda passiv dərs açmaq olmaz (dil səviyyə qrupunun saatı sabitdir)."
+msgstr "В этом журнале нельзя создать пассивное занятие (часы языковой группы фиксированы)."
+
+msgctxt "registrar.passive_lessons"
+msgid "Dərsin «Passiv» seçimi yalnız redaktə pəncərəsində dəyişir — sənədli düzəlişdə dəyişmir."
+msgstr "Отметку «Пассивный» можно изменить только в окне редактирования — не через документированное исправление."
+
+msgctxt "registrar.lessons_log"
+msgid "Passiv"
+msgstr "Пассивный"
+
+msgctxt "registrar.lessons_log"
+msgid "Passiv dərs"
+msgstr "Пассивное занятие"
+
+msgctxt "registrar.lessons_log"
+msgid "Bəli"
+msgstr "Да"
+
+msgctxt "registrar.lessons_log"
+msgid "Passiv saat (cəmə daxil deyil)"
+msgstr "Пассивные часы (не входят в итог)"
+
+msgctxt "accounts.lessons_log"
+msgid "Passiv"
+msgstr "Пассивный"
+
+#, python-format
+msgctxt "accounts.lessons_log"
+msgid "Passiv: %(n)s saat"
+msgstr "Пассивные: %(n)s ч"
+
+msgctxt "accounts.lessons_log"
+msgid "Passiv dərs — cəmə daxil deyil"
+msgstr "Пассивное занятие — не входит в итог"
+
+msgctxt "accounts.lessons_log"
+msgid "Passiv dərs — müəllimin keçirilmiş saatına daxil deyil"
+msgstr "Пассивное занятие — не входит в проведённые часы преподавателя"
+
+msgctxt "accounts.lessons_log"
+msgid "Passiv dərslər cəmə daxil deyil"
+msgstr "Пассивные занятия не входят в итог"
+
+#, python-format
+msgctxt "accounts.lessons_log"
+msgid "akademik saat cəmi · passiv %(hours)s saat ayrıca"
+msgstr "сумма академических часов · пассивные %(hours)s ч отдельно"

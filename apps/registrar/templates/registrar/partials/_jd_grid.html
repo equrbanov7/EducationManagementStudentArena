@@ -71,10 +71,10 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                         <tr>
                             <th class="jd2-th-student">{% trans "№ · SOYAD AD ATA ADI" context "registrar.journal" %}</th>
                             {% for lm in journal.lesson_meta %}
-                            <th class="jd2-th-lesson {% if lm.is_today %}is-today{% endif %}{% if not lm.editable %} jd2-th-lesson--locked{% endif %}{% if academic_rules.off_schedule_flag and lm.lesson.off_schedule_reason %} is-offsched{% endif %}"
+                            <th class="jd2-th-lesson {% if lm.is_today %}is-today{% endif %}{% if not lm.editable %} jd2-th-lesson--locked{% endif %}{% if academic_rules.off_schedule_flag and lm.lesson.off_schedule_reason %} is-offsched{% endif %}{% if lm.passive %} is-passive{% endif %}"
                                 id="jd-lesson-{{ lm.lesson.id }}"
                                 data-jd-hint-col="{{ lm.lesson.date|date:'d.m.Y' }} · {{ lm.lesson.get_kind_display }}"
-                                title="{{ lm.lesson.get_kind_display }}{% if lm.lesson.display_topic %} — {{ lm.lesson.display_topic }}{% endif %}{% if lm.lesson.start_time %} · {{ lm.lesson.start_time|time:'H:i' }}{% endif %}{% if academic_rules.off_schedule_flag and lm.lesson.off_schedule_reason %} · {% trans 'cədvəldən kənar' context 'registrar.journal_activation' %}: {{ lm.lesson.off_schedule_reason }}{% endif %}">
+                                title="{% if lm.passive %}{% trans 'Passiv dərs — müəllimin keçirilmiş saatına, həddə və dərs yükünə daxil deyil; xana yazılmır' context 'registrar.passive_lessons' %} · {% endif %}{{ lm.lesson.get_kind_display }}{% if lm.lesson.display_topic %} — {{ lm.lesson.display_topic }}{% endif %}{% if lm.lesson.start_time %} · {{ lm.lesson.start_time|time:'H:i' }}{% endif %}{% if academic_rules.off_schedule_flag and lm.lesson.off_schedule_reason %} · {% trans 'cədvəldən kənar' context 'registrar.journal_activation' %}: {{ lm.lesson.off_schedule_reason }}{% endif %}">
                                 {% if not lm.editable %}
                                 {# Redaktə pəncərəsi keçib → tarixə klik oxu-rejimi GÜN ÖZƏTİ modalını açır. #}
                                 <button type="button" class="jd2-th-date-btn" data-jd-day-summary
@@ -89,6 +89,7 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                                 {% else %}
                                 {{ lm.lesson.date|date:"d.m" }}
                                 {% endif %}
+                                {% if lm.passive %}<div class="jd2-th-passive">{% trans "Passiv" context "registrar.passive_lessons" %} · {{ lm.lesson.hours }} {% trans "saat" context "registrar.journal" %}</div>{% endif %}
                                 {% if lm.is_today %}<div class="jd2-th-today">{% trans "BU GÜN" context "registrar.journal" %}</div>{% endif %}
                                 {% if lm.seminar_group_label %}<div class="jd2-th-labgroup jd2-th-labgroup--seminar" title="{% trans 'Bu seminar dərsi yalnız bu alt qrupun tələbələrinindir' context 'registrar.seminar_groups' %}: {{ lm.seminar_group_label }}">{{ lm.seminar_group_label }}</div>{% endif %}
                                 {% if lm.lab_group_label %}<div class="jd2-th-labgroup" title="{% trans 'Bu laboratoriya dərsi yalnız bu qrupun tələbələrinindir' context 'registrar.lab_groups' %}: {{ lm.lab_group_label }}">{{ lm.lab_group_label }}</div>{% endif %}
@@ -101,7 +102,7 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                                         data-lesson-lab-group="{{ lm.lesson.lab_group|default:'' }}"
                                         data-lesson-seminar-group="{{ lm.lesson.seminar_group|default:'' }}"
                                         data-lesson-topic="{{ lm.lesson.display_topic }}"
-                                        data-lesson-hours="{{ lm.lesson.hours }}"
+                                        data-lesson-hours="{% if lm.passive %}p{% endif %}{{ lm.lesson.hours }}"
                                         data-lesson-locked="{% if not lm.editable %}1{% endif %}"
                                         {% if full_edit_active %}data-lesson-fe="{% if lm.full_edit_needed %}1{% endif %}" data-lesson-marks="{{ lm.full_edit_marks|default:0 }}"{% endif %}
                                         data-lesson-instructor="{{ lm.lesson.instructor_id|default:'' }}"
@@ -189,8 +190,11 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                                 </div>
                             </td>
                             {% for cell in row.cells %}
-                            <td class="jd2-cell {% if cell.lesson.date == journal.today %}is-today{% endif %}{% if cell.corrected %} corr-fixed{% endif %}{% if cell.legacy_excuse %} corr-excuse{% endif %}{% if cell.off_group %} jd2-cell--offgroup{% endif %}">
-                                {% if cell.off_group and cell.mark %}
+                            <td class="jd2-cell {% if cell.lesson.date == journal.today %}is-today{% endif %}{% if cell.corrected %} corr-fixed{% endif %}{% if cell.legacy_excuse %} corr-excuse{% endif %}{% if cell.off_group %} jd2-cell--offgroup{% endif %}{% if cell.passive %} is-passive{% endif %}">
+                                {% if cell.passive %}
+                                {# «Passiv» dərs (sahib 2026-11-14) — xana yazılmır, sütun rənglidir. #}
+                                <span class="jd2-ro jd2-ro--passive" title="{% trans 'Passiv dərs — davamiyyət və bal yazılmır' context 'registrar.passive_lessons' %}">P</span>
+                                {% elif cell.off_group and cell.mark %}
                                 {# Tələbə başqa lab qrupuna köçürülüb (sahib 2026-11-07) — əvvəlki qrupun dərsindəki qeyd qalır, oxunur. #}
                                 {% trans 'Əvvəlki laboratoriya qrupunun dərsi — qeyd saxlanılıb' context 'registrar.lab_groups' as prev_title %}
                                 {% if cell.mark.status == 'absent' %}<span class="jd2-ro jd2-ro--qb jd2-ro--prevgroup" title="{{ prev_title }}">q/b</span>

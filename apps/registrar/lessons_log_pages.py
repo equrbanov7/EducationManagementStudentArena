@@ -11,7 +11,7 @@ mövcud gün kartına əlavə edir (``lessons_log.js``). Sıra ``build_rows`` il
 
 from __future__ import annotations
 
-from django.db.models import Count, Sum
+from django.db.models import Count, Q, Sum
 
 #: Bir səhifədəki dərs sayı.
 PAGE_SIZE = 30
@@ -28,12 +28,29 @@ def parse_offset(raw) -> int:
 
 
 def day_totals(lessons_qs, dates) -> dict:
-    """``{tarix: {"lessons", "hours"}}`` — verilmiş günlərin TAM cəmi (səhifədən asılı deyil), TƏK sorğu."""
+    """``{tarix: {"lessons", "hours", "passive_hours"}}`` — verilmiş günlərin TAM cəmi (səhifədən asılı deyil), TƏK
+    sorğu. «Passiv» dərs (sahib 2026-11-14) əsas cəmə daxil deyil — ayrıca ``passive_hours``."""
     dates = sorted(set(dates))
     if not dates:
         return {}
-    rows = lessons_qs.order_by().filter(date__in=dates).values("date").annotate(lessons=Count("id"), hours=Sum("hours"))
-    return {row["date"]: {"lessons": int(row["lessons"] or 0), "hours": int(row["hours"] or 0)} for row in rows}
+    rows = (
+        lessons_qs.order_by()
+        .filter(date__in=dates)
+        .values("date")
+        .annotate(  # ləqəblər sahə adı («hours») ilə toqquşmasın — ikinci Sum("hours") FieldError verir
+            n_lessons=Count("id", filter=Q(is_passive=False)),
+            n_hours=Sum("hours", filter=Q(is_passive=False)),
+            n_phours=Sum("hours", filter=Q(is_passive=True)),
+        )
+    )
+    return {
+        row["date"]: {
+            "lessons": int(row["n_lessons"] or 0),
+            "hours": int(row["n_hours"] or 0),
+            "passive_hours": int(row["n_phours"] or 0),
+        }
+        for row in rows
+    }
 
 
 def page_rows(lessons_qs, *, offset: int = 0, size: int = PAGE_SIZE) -> dict:

@@ -55,7 +55,7 @@ def recorded_teaching_hours(*, actor, teacher_id=None, academic_year="", as_of=N
     ids = [row.pk for row in offerings]
     cutoff = min(as_of or timezone.localdate(), timezone.localdate())
     cells = (
-        Lesson.objects.filter(organization=organization, offering_id__in=ids, date__lte=cutoff)
+        Lesson.objects.filter(organization=organization, offering_id__in=ids, date__lte=cutoff, is_passive=False)
         .filter(Q(instructor_id=teacher_id) | Q(instructor_id__isnull=True))
         .values("offering_id", "kind", "instructor_id")
         .annotate(recorded_hours=Sum("hours"), recorded_lessons=Count("pk"))

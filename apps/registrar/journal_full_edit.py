@@ -259,12 +259,13 @@ def _unlock_grid(journal, *, journal_locked) -> None:
     for meta in journal.get("lesson_meta", []):
         meta["full_edit_needed"] = journal_locked or not meta["editable"]
         meta["full_edit_marks"] = counts.get(meta["lesson"].id, 0)
-        meta["editable"] = meta["markable"] = True
+        meta["editable"] = True
+        meta["markable"] = not meta.get("passive")  # «Passiv» dərsə xana yazılmır (sahib 2026-11-14)
     for row in journal.get("rows", []):
         for cell in row["cells"]:
             mark = cell["mark"]
-            if cell.get("off_group"):
-                continue  # başqa laboratoriya qrupunun dərsi — bərpa rejimində də bu tələbənin xanası deyil
+            if cell.get("off_group") or cell.get("passive"):
+                continue  # başqa laboratoriya qrupunun / passiv dərs — bərpa rejimində də xana deyil
             if cell["corrected"] or (mark is not None and mark.status == AttendanceStatus.EXCUSED):
                 continue
             cell.update(locked=False, lock_reason="", writable=True)

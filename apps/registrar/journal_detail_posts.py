@@ -55,13 +55,14 @@ def handle_add_lesson(request, offering):
         messages.error(request, _("Dərs tarixi tələb olunur."))
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
-    hours_raw = (request.POST.get("lesson_hours") or "").strip()
     # QA 2026-09-05 (P3-9): «-5» / «abc» səssizcə standart saata çevrilirdi.
-    # Boş dəyər normaldır (standart saat), amma YAZILMIŞ yanlış dəyər rədd olunur.
-    if hours_raw and not (hours_raw.isdigit() and int(hours_raw) > 0):
+    # Boş dəyər normaldır (standart saat), amma YAZILMIŞ yanlış dəyər rədd olunur. «p2» = passiv dərs (sahib 2026-11-14).
+    from apps.registrar.passive_lessons import parse_hours_choice
+
+    hours, passive, hours_ok = parse_hours_choice(request.POST.get("lesson_hours"))
+    if not hours_ok:
         messages.error(request, _("Dərs saatı müsbət tam ədəd olmalıdır."))
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
-    hours = int(hours_raw) if hours_raw.isdigit() and int(hours_raw) > 0 else None
     start_time, end_time = schedule.parse_time_slot(request.POST.get("lesson_time"))
     # Modal bu günün cədvəl slotundan doldurulubsa (gizli slot_id, sahib 2026-10-10) saat slotdandır — təşkilatın
     # öz zəng saatı da keçir, səbəb tələb olunmur; yad / başqa günün slotu rədd olunur (journal_lesson_prefill).
@@ -109,6 +110,7 @@ def handle_add_lesson(request, offering):
         raw_reason=raw_off_reason,
         lab_group=lab_group,
         seminar_group=seminar_group,
+        passive=passive,
     )
     if rule_error:
         messages.error(request, rule_error)
@@ -163,6 +165,7 @@ def handle_add_lesson(request, offering):
                 off_schedule_reason=off_reason,
                 lab_group=lab_group,
                 seminar_group=seminar_group,
+                passive=passive,
             )
         messages.success(request, _("Dərs əlavə edildi."))
     except gradebook.LessonRuleError as exc:

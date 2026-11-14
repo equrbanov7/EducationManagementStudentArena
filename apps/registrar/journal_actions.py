@@ -208,11 +208,15 @@ def lesson_action(request, offering_id, lesson_id):
 
             start_time, end_time = own_lesson_time(lesson, request.POST.get("lesson_time"))
         # J-02 (audit 2026-09-28): «0»/«-5»/«abc» səssizcə qəbul/ignor olunmur — aralıq servisdə yoxlanır.
+        # «p2» = passiv dərs (sahib 2026-11-14); sahə göndərilməyibsə passivlik dəyişmir.
+        from apps.registrar.passive_lessons import parse_hours_choice
+
         hours_raw = (request.POST.get("lesson_hours") or "").strip()
-        if hours_raw and not hours_raw.isdigit():
+        hours, passive, hours_ok = parse_hours_choice(hours_raw)
+        if not hours_ok:
             messages.error(request, _("Dərs saatı müsbət tam ədəd olmalıdır."))
             return _back(offering)
-        hours = int(hours_raw) if hours_raw else None
+        passive = passive if hours_raw else gradebook.UNSET
         # Dərs tipi: korrektor (İKT) kilidi keçir (mühazirə↔seminar qarışığını
         # düzəldə bilsin); adi müəllim üçün cədvəl tək növü kilidləyir.
         posted_kind = request.POST.get("lesson_kind") or None
@@ -226,6 +230,11 @@ def lesson_action(request, offering_id, lesson_id):
 
             from apps.registrar import corrections as corrections_service
 
+            if passive is not gradebook.UNSET and bool(passive) != lesson.is_passive:
+                from apps.registrar.passive_lessons import locked_message
+
+                messages.error(request, locked_message())
+                return _back(offering)
             try:
                 corrections_service.apply_lesson_correction(
                     lesson=lesson,
@@ -294,6 +303,7 @@ def lesson_action(request, offering_id, lesson_id):
                     room=room,
                     lab_group=lab_group,
                     seminar_group=seminar_group,
+                    passive=passive,
                     allow_past=override,
                     # Pəncərə açıqdır (yuxarıda yoxlanıb) — kilid keçidi lazım deyil; data bərpası öz yolu ilə.
                     allow_locked=False,

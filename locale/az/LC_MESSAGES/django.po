@@ -118663,3 +118663,86 @@ msgstr "«Cədvəldən kənar» işarəsi"
 msgctxt "core.runtime_settings"
 msgid "Yandırılıbsa tarixi və saatı dərs cədvəlinə uyğun gəlməyən yeni dərs üçün səbəb soruşulur və dərs «cədvəldən kənar» kimi işarələnir. Söndürülüdə müəllim istənilən tarix və saatda dərs aça bilər — səbəb soruşulmur, heç nə işarələnmir və «cədvəldən kənar» yazısı heç yerdə göstərilmir."
 msgstr "Yandırılıbsa tarixi və saatı dərs cədvəlinə uyğun gəlməyən yeni dərs üçün səbəb soruşulur və dərs «cədvəldən kənar» kimi işarələnir. Söndürülüdə müəllim istənilən tarix və saatda dərs aça bilər — səbəb soruşulmur, heç nə işarələnmir və «cədvəldən kənar» yazısı heç yerdə göstərilmir."
+
+msgctxt "registrar.passive_lessons"
+msgid "Passiv"
+msgstr "Passiv"
+
+#, python-format
+msgctxt "registrar.passive_lessons"
+msgid "Passiv: %(hours)s saat"
+msgstr "Passiv: %(hours)s saat"
+
+msgctxt "registrar.passive_lessons"
+msgid "keçirilmiş saata daxil deyil"
+msgstr "keçirilmiş saata daxil deyil"
+
+msgctxt "registrar.passive_lessons"
+msgid "«Passiv» — saat yazılır, amma keçirilmiş saata, həddə və dərs yükünə daxil deyil; xana yazılmır."
+msgstr "«Passiv» — saat yazılır, amma keçirilmiş saata, həddə və dərs yükünə daxil deyil; xana yazılmır."
+
+msgctxt "registrar.passive_lessons"
+msgid "Passiv dərs — müəllimin keçirilmiş saatına, həddə və dərs yükünə daxil deyil; xana yazılmır"
+msgstr "Passiv dərs — müəllimin keçirilmiş saatına, həddə və dərs yükünə daxil deyil; xana yazılmır"
+
+msgctxt "registrar.passive_lessons"
+msgid "Passiv dərs — davamiyyət və bal yazılmır"
+msgstr "Passiv dərs — davamiyyət və bal yazılmır"
+
+msgctxt "registrar.passive_lessons"
+msgid "Passiv dərslərin saatı — keçirilmiş saata, dərs saatı həddinə və dərs yükünə daxil deyil"
+msgstr "Passiv dərslərin saatı — keçirilmiş saata, dərs saatı həddinə və dərs yükünə daxil deyil"
+
+msgctxt "registrar.passive_lessons"
+msgid "Bu dərsdə qeyd (i/e, q/b, bal) var — passiv edilə bilməz. Əvvəl qeydləri təmizləyin."
+msgstr "Bu dərsdə qeyd (i/e, q/b, bal) var — passiv edilə bilməz. Əvvəl qeydləri təmizləyin."
+
+msgctxt "registrar.passive_lessons"
+msgid "Bu jurnalda passiv dərs açmaq olmaz (dil səviyyə qrupunun saatı sabitdir)."
+msgstr "Bu jurnalda passiv dərs açmaq olmaz (dil səviyyə qrupunun saatı sabitdir)."
+
+msgctxt "registrar.passive_lessons"
+msgid "Dərsin «Passiv» seçimi yalnız redaktə pəncərəsində dəyişir — sənədli düzəlişdə dəyişmir."
+msgstr "Dərsin «Passiv» seçimi yalnız redaktə pəncərəsində dəyişir — sənədli düzəlişdə dəyişmir."
+
+msgctxt "registrar.lessons_log"
+msgid "Passiv"
+msgstr "Passiv"
+
+msgctxt "registrar.lessons_log"
+msgid "Passiv dərs"
+msgstr "Passiv dərs"
+
+msgctxt "registrar.lessons_log"
+msgid "Bəli"
+msgstr "Bəli"
+
+msgctxt "registrar.lessons_log"
+msgid "Passiv saat (cəmə daxil deyil)"
+msgstr "Passiv saat (cəmə daxil deyil)"
+
+msgctxt "accounts.lessons_log"
+msgid "Passiv"
+msgstr "Passiv"
+
+#, python-format
+msgctxt "accounts.lessons_log"
+msgid "Passiv: %(n)s saat"
+msgstr "Passiv: %(n)s saat"
+
+msgctxt "accounts.lessons_log"
+msgid "Passiv dərs — cəmə daxil deyil"
+msgstr "Passiv dərs — cəmə daxil deyil"
+
+msgctxt "accounts.lessons_log"
+msgid "Passiv dərs — müəllimin keçirilmiş saatına daxil deyil"
+msgstr "Passiv dərs — müəllimin keçirilmiş saatına daxil deyil"
+
+msgctxt "accounts.lessons_log"
+msgid "Passiv dərslər cəmə daxil deyil"
+msgstr "Passiv dərslər cəmə daxil deyil"
+
+#, python-format
+msgctxt "accounts.lessons_log"
+msgid "akademik saat cəmi · passiv %(hours)s saat ayrıca"
+msgstr "akademik saat cəmi · passiv %(hours)s saat ayrıca"

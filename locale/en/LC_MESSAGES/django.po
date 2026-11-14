@@ -119352,3 +119352,86 @@ msgstr "“Off-timetable” mark"
 msgctxt "core.runtime_settings"
 msgid "Yandırılıbsa tarixi və saatı dərs cədvəlinə uyğun gəlməyən yeni dərs üçün səbəb soruşulur və dərs «cədvəldən kənar» kimi işarələnir. Söndürülüdə müəllim istənilən tarix və saatda dərs aça bilər — səbəb soruşulmur, heç nə işarələnmir və «cədvəldən kənar» yazısı heç yerdə göstərilmir."
 msgstr "When on, a new lesson whose date and time do not match the timetable needs a reason and is marked “off-timetable”. When off, the teacher may open a lesson at any date and time — no reason is asked, nothing is marked and the “off-timetable” label is not shown anywhere."
+
+msgctxt "registrar.passive_lessons"
+msgid "Passiv"
+msgstr "Passive"
+
+#, python-format
+msgctxt "registrar.passive_lessons"
+msgid "Passiv: %(hours)s saat"
+msgstr "Passive: %(hours)s h"
+
+msgctxt "registrar.passive_lessons"
+msgid "keçirilmiş saata daxil deyil"
+msgstr "not counted as held hours"
+
+msgctxt "registrar.passive_lessons"
+msgid "«Passiv» — saat yazılır, amma keçirilmiş saata, həddə və dərs yükünə daxil deyil; xana yazılmır."
+msgstr "«Passive» — the hours are recorded but not counted as held hours, in the hour cap or in the teaching load; no marks are entered."
+
+msgctxt "registrar.passive_lessons"
+msgid "Passiv dərs — müəllimin keçirilmiş saatına, həddə və dərs yükünə daxil deyil; xana yazılmır"
+msgstr "Passive lesson — not counted in the teacher's held hours, the hour cap or the teaching load; no marks are entered"
+
+msgctxt "registrar.passive_lessons"
+msgid "Passiv dərs — davamiyyət və bal yazılmır"
+msgstr "Passive lesson — no attendance or score is entered"
+
+msgctxt "registrar.passive_lessons"
+msgid "Passiv dərslərin saatı — keçirilmiş saata, dərs saatı həddinə və dərs yükünə daxil deyil"
+msgstr "Hours of passive lessons — not counted in held hours, the hour cap or the teaching load"
+
+msgctxt "registrar.passive_lessons"
+msgid "Bu dərsdə qeyd (i/e, q/b, bal) var — passiv edilə bilməz. Əvvəl qeydləri təmizləyin."
+msgstr "This lesson already has marks (present, absent, score) — it cannot be made passive. Clear the marks first."
+
+msgctxt "registrar.passive_lessons"
+msgid "Bu jurnalda passiv dərs açmaq olmaz (dil səviyyə qrupunun saatı sabitdir)."
+msgstr "Passive lessons cannot be added to this journal (the language level group has fixed hours)."
+
+msgctxt "registrar.passive_lessons"
+msgid "Dərsin «Passiv» seçimi yalnız redaktə pəncərəsində dəyişir — sənədli düzəlişdə dəyişmir."
+msgstr "The lesson's «Passive» choice can only be changed within the edit window — not through a documented correction."
+
+msgctxt "registrar.lessons_log"
+msgid "Passiv"
+msgstr "Passive"
+
+msgctxt "registrar.lessons_log"
+msgid "Passiv dərs"
+msgstr "Passive lesson"
+
+msgctxt "registrar.lessons_log"
+msgid "Bəli"
+msgstr "Yes"
+
+msgctxt "registrar.lessons_log"
+msgid "Passiv saat (cəmə daxil deyil)"
+msgstr "Passive hours (not in the total)"
+
+msgctxt "accounts.lessons_log"
+msgid "Passiv"
+msgstr "Passive"
+
+#, python-format
+msgctxt "accounts.lessons_log"
+msgid "Passiv: %(n)s saat"
+msgstr "Passive: %(n)s h"
+
+msgctxt "accounts.lessons_log"
+msgid "Passiv dərs — cəmə daxil deyil"
+msgstr "Passive lesson — not in the total"
+
+msgctxt "accounts.lessons_log"
+msgid "Passiv dərs — müəllimin keçirilmiş saatına daxil deyil"
+msgstr "Passive lesson — not counted in the teacher's held hours"
+
+msgctxt "accounts.lessons_log"
+msgid "Passiv dərslər cəmə daxil deyil"
+msgstr "Passive lessons are not in the total"
+
+#, python-format
+msgctxt "accounts.lessons_log"
+msgid "akademik saat cəmi · passiv %(hours)s saat ayrıca"
+msgstr "total academic hours · passive %(hours)s h separately"

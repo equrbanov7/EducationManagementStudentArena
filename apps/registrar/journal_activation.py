@@ -328,9 +328,9 @@ def hours_cap_error(offering, hours, *, lab_group=None, seminar_group=None) -> s
     new_hours = hours or DEFAULT_LESSON_HOURS
     after = summary["scheduled_total"] + new_hours
     if lab_group is not None or seminar_group is not None:
-        lessons = Lesson.objects.filter(organization_id=offering.organization_id, offering=offering).only(
-            "hours", "lab_group", "seminar_group"
-        )
+        lessons = Lesson.objects.filter(
+            organization_id=offering.organization_id, offering=offering, is_passive=False
+        ).only("hours", "lab_group", "seminar_group")
         after = per_student_hours(
             lessons, extra_hours=new_hours, extra_group=lab_group, extra_seminar_group=seminar_group
         )
@@ -341,7 +341,9 @@ def hours_cap_error(offering, hours, *, lab_group=None, seminar_group=None) -> s
     return ""
 
 
-def check_manual_lesson(offering, *, date, start_time, hours, raw_reason, lab_group=None, seminar_group=None):
+def check_manual_lesson(
+    offering, *, date, start_time, hours, raw_reason, lab_group=None, seminar_group=None, passive=False
+):
     """Modal ilə açılan dərs üçün ``(səbəb, xəta)``; xəta boş deyilsə dərs AÇILMIR.
 
     Cədvəli olan açılışda seçilmiş tarix + saat heç bir slota uyğun gəlmirsə dərs
@@ -349,7 +351,12 @@ def check_manual_lesson(offering, *, date, start_time, hours, raw_reason, lab_gr
     göndərilmiş səbəb nəzərə alınmır.
 
     Sahib 2026-11-14 (MR-356): «Cədvəldən kənar» işarəsi söndürülüdə (``journal.off_schedule_flag``, defolt)
-    cədvəl heç nəyə məcbur etmir — səbəb soruşulmur, göndərilsə də yazılmır; saat həddi qalır."""
+    cədvəl heç nəyə məcbur etmir — səbəb soruşulmur, göndərilsə də yazılmır; saat həddi qalır.
+
+    «Passiv» dərs (sahib 2026-11-14, :mod:`apps.registrar.passive_lessons`) saat həddinə düşmür və cədvəl dərsi
+    deyil — nə hədd, nə «cədvəldən kənar» səbəbi yoxlanır."""
+    if passive:
+        return "", ""
     error = hours_cap_error(offering, hours, lab_group=lab_group, seminar_group=seminar_group)
     if error:
         return "", error

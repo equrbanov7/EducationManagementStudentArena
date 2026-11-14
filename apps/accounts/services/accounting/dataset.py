@@ -85,6 +85,7 @@ def held_lessons(organization, semester: Semester):
             organization=organization,
             offering__is_active=True,
             offering__period_id__in=list(semester.period_ids),
+            is_passive=False,  # «Passiv» dərs ödənişə / keçirilmiş saata düşmür (sahib 2026-11-14)
         )
         .filter(Exists(live_enrollment))
         .annotate(teacher=Coalesce("instructor_id", "offering__instructor_id"))

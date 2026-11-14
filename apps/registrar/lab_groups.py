@@ -149,6 +149,8 @@ def per_student_hours(lessons, *, extra_hours=0, extra_group=None, extra_seminar
     by_group: dict = {}
     by_seminar: dict = {}
     for lesson in lessons:
+        if getattr(lesson, "is_passive", False):
+            continue  # «Passiv» dərs (sahib 2026-11-14) saat hesabına düşmür
         hours = int(getattr(lesson, "hours", 0) or 0)
         group = getattr(lesson, "lab_group", None)
         seminar = getattr(lesson, "seminar_group", None)

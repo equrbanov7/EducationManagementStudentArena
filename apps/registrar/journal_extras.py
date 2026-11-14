@@ -206,7 +206,7 @@ def get_final_breakdown(offering):
         else {}
     )
     works = {w.enrollment_id: w for w in CourseWork.objects.filter(enrollment__offering=offering)}
-    lessons_all = list(offering.lessons.all())
+    lessons_all = list(offering.lessons.filter(is_passive=False))  # «Passiv» dərs auditoriya saatı deyil (2026-11-14)
     # Məxrəc də TƏK yerdən (bax :func:`exam_eligibility.lesson_hours_for`); başlıq həddi açılış-
     # səviyyəli, SƏTİR qərarı isə TƏLƏBƏNİN ÖZ həddi ilə (F-06 / 2026-09-14) — tək toplu sorğu.
     allowed = exam_eligibility.lesson_hours_for(offering, lessons_all)

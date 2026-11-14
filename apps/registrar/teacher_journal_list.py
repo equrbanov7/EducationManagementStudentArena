@@ -223,7 +223,9 @@ def attach(user, offerings, *, selected_kind="", links=True):
     }
     taught = {
         (row["offering_id"], row["kind"]): row
-        for row in Lesson.objects.filter(offering_id__in=ids, instructor=user, date__lte=timezone.localdate())
+        for row in Lesson.objects.filter(
+            offering_id__in=ids, instructor=user, date__lte=timezone.localdate(), is_passive=False
+        )
         .values("offering_id", "kind")
         .annotate(count=Count("pk"), hours=Sum("hours"))
     }
