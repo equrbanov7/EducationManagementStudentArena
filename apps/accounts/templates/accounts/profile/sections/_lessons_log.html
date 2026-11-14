@@ -24,7 +24,7 @@ Dinamik dəyər yalnız `data-*` atributları ilə ötürülür.{% endcomment %}
 <section class="profile-section-panel profile-section--lessons-log {% if active_section == 'lessons-log' %}is-active{% endif %}"
          data-profile-section-panel="lessons-log"
          data-source-url="{{ profile_base_url }}?section=lessons-log">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/lessons_log.css' %}?v=20261111-table">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/lessons_log.css' %}?v=20261114-passive">
     {% if sec.teacher_table.show %}<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/lessons_log_table.css' %}?v=20261111-1">{% endif %}
 
     {% if not sec.has_access %}
@@ -73,7 +73,7 @@ Dinamik dəyər yalnız `data-*` atributları ilə ötürülür.{% endcomment %}
 
     {% if sec.teacher_table.show %}{% include "accounts/profile/sections/_lessons_log_teacher_table.html" with tt=sec.teacher_table %}{% endif %}
     </div>
-    <script src="{% static 'accounts/js/profile/sections/lessons_log.js' %}?v=20261111-1" defer></script>
+    <script src="{% static 'accounts/js/profile/sections/lessons_log.js' %}?v=20261114-passive" defer></script>
     {% endif %}
 </section>
 {% endwith %}

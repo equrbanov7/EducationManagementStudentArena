@@ -4,7 +4,10 @@ MR-000303: «… fənni intensiv keçirilir. Jurnalda passiv günləri qeyd etm�
 əlavə etmək olsun». Köhnə sistemdə ayrıca sahə YOX idi (müəllim adi dərs tarixinin xanasına «passiv» yazırdı), ona
 görə qayda yenidir və dar saxlanılır: sətir = tarix + saat + qısa qeyd. Dərs (``Lesson``) DEYİL — davamiyyət, bal,
 saat həddi (#6), yük və mühasibat dəyişmir; jurnal başlığında ayrıca «Passiv» sayı kimi görünür.
-Qaydalar: :mod:`apps.registrar.passive_hours`.
+
+ARXİV (sahib 2026-11-14): ayrıca qutu yığışdırıldı — passiv saat indi dərs saatı seçimindədir
+(``Lesson.is_passive``, :mod:`apps.registrar.passive_lessons`). Bu cədvəlin sətirləri miqrasiya ``0124`` ilə passiv
+DƏRSƏ çevrilib; cədvəl silinmir (geri dönüş üçün), kod onu oxumur və yazmır.
 """
 
 from __future__ import annotations

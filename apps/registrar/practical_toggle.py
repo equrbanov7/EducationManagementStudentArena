@@ -38,7 +38,7 @@ def can_toggle(user, offering) -> bool:
 def chair_distribute_scope(user, offering, *, extra=None) -> bool:
     """``workload.distribute`` org-wide və ya açılışın kafedrası aktorun alt-ağacında; ``extra`` — əlavə ucuz şərt.
 
-    «Passiv saat» bayrağı da (:mod:`apps.registrar.passive_hours`) eyni qapını işlədir."""
+    (2026-11-12 «Passiv saat» açarı da bunu işlədirdi — 2026-11-14 yığışdırıldı, bax :mod:`.passive_lessons`)."""
     if offering is None or not getattr(user, "is_authenticated", False):
         return False
     from .journal_scope import permission_scope_for

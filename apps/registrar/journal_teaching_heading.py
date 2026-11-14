@@ -34,11 +34,15 @@ def summarize(offering, *, personal_actor=None, scope=None):
             "date",
             "lab_group",
             "seminar_group",
+            "is_passive",
             "instructor__first_name",
             "instructor__last_name",
             "instructor__username",
         )
     )
+    # «Passiv» dərs (sahib 2026-11-14): keçirilmiş / planlı saata, həddə düşmür — başlıqda ayrıca «Passiv: N saat».
+    passive = [lesson for lesson in lessons if lesson.is_passive]
+    lessons = [lesson for lesson in lessons if not lesson.is_passive]
     plan = current_plan(offering, personal_actor) if personal_actor is not None else None
     allowed = set(plan) if plan else (getattr(scope, "kinds", None) if personal_actor is not None else None)
     permitted = [lesson for lesson in lessons if scope is None or scope.allows_lesson(lesson)]
@@ -51,6 +55,14 @@ def summarize(offering, *, personal_actor=None, scope=None):
         per_student=personal_actor is None,
     )
     result["personal"] = personal_actor is not None
+    today = timezone.localdate()
+    result["passive_total"] = sum(
+        int(lesson.hours or 0)
+        for lesson in passive
+        if (scope is None or scope.allows_lesson(lesson))
+        and (allowed is None or lesson.kind in allowed)
+        and (lesson.date is None or lesson.date <= today)
+    )
     if plan:
         by_kind = {row["kind"]: row for row in result["kinds"]}
         for kind, hours in plan.items():

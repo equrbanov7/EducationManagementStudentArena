@@ -309,7 +309,7 @@
             date.appendChild(el("span", "llog-submeta", item.weekday));
             tr.appendChild(date);
             tr.appendChild(el("td", "llog-time", item.time || "—"));
-            tr.appendChild(el("td", "ems-table__num", item.hours));
+            tr.appendChild(el("td", "ems-table__num", item.hours_label || item.hours)); // «2 · Passiv» (2026-11-14)
             var topic = el("td");
             if (item.topic) {
                 topic.textContent = item.topic;

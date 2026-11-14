@@ -102,7 +102,12 @@ def build_journal_workbook(*, offering, journal, finals) -> bytes:
     # Sütun başlıqları.
     # Sahib 2026-10-10: jurnaldakı kimi «Soyad Ad Ata adı» (adı-soyadı eyni tələbələr ayrılsın).
     head = [pgettext("registrar.journal", "Soyad, ad, ata adı")]
-    head += [f"{i + 1}\n{lesson.date.strftime('%d.%m')}" for i, lesson in enumerate(lessons)]
+    # «Passiv» dərs (sahib 2026-11-14): başlıqda «P», xanası «P» — saat hesabına düşmür.
+    passive = pgettext("registrar.passive_lessons", "Passiv")
+    head += [
+        f"{i + 1}\n{lesson.date.strftime('%d.%m')}" + (f"\n{passive}" if getattr(lesson, "is_passive", False) else "")
+        for i, lesson in enumerate(lessons)
+    ]
     head += [pgettext("registrar.journal", "Qayıb (q/b)"), pgettext("registrar.journal", "Giriş balı")]
     sheet_append(ws, head)
     header_row = ws.max_row
@@ -120,7 +125,9 @@ def build_journal_workbook(*, offering, journal, finals) -> bytes:
         values = [names[row["student"].pk]]
         for cell_data in row["cells"]:
             mark = cell_data["mark"]
-            if mark is None:
+            if cell_data.get("passive"):
+                values.append("P")
+            elif mark is None:
                 values.append("—")
             elif mark.status == "absent":
                 values.append("q/b")

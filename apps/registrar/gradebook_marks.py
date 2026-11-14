@@ -89,7 +89,10 @@ def _load_targets(offering, cells):
     lesson_ids = {key[0] for key in cells}
     enrollment_ids = {key[1] for key in cells}
     # Açılışa aidlik eyni süzgəcdədir — başqa açılışın / təşkilatın id-si tapılmır.
-    lessons = {lesson.id: lesson for lesson in Lesson.objects.filter(offering=offering, id__in=lesson_ids)}
+    # «Passiv» dərsə (sahib 2026-11-14) xana yazılmır — tapılmır, ötürülür.
+    lessons = {
+        lesson.id: lesson for lesson in Lesson.objects.filter(offering=offering, id__in=lesson_ids, is_passive=False)
+    }
     enrollments = {
         enrollment.id: enrollment
         for enrollment in Enrollment.objects.filter(

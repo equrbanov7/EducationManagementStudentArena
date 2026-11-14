@@ -201,7 +201,7 @@ def _resolve_grade_mark(request, offering):
             lesson__offering=offering,
         )
         return mark, False
-    lesson = get_object_or_404(Lesson, pk=_post_uuid(request, "lesson_id"), offering=offering)
+    lesson = get_object_or_404(Lesson, pk=_post_uuid(request, "lesson_id"), offering=offering, is_passive=False)
     enrollment = get_object_or_404(Enrollment, pk=_post_uuid(request, "enrollment_id"), offering=offering)
     existing = LessonMark.objects.filter(lesson=lesson, enrollment=enrollment).select_related("lesson").first()
     if existing is not None:
