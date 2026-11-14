@@ -227,3 +227,31 @@
     transform: translateX(-50%);
   }
 }
+
+/* ── yalnız-tarix rejimi (data-ems-dt-mode="date", 2026-11-14) ──
+   Jurnal və kabinet formalarının öz `input` üslubları (padding) təqvim düyməsinin
+   altına mətn salmasın; sahə «gg.aa.iiii» üçün dar kifayətdir. */
+.ems-dt--date input.ems-dt__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-right: 44px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+.ems-dt__day.is-disabled {
+  color: var(--ems-neutral-400);
+  background: transparent;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+.ems-dt__day.is-disabled:hover { background: transparent; }
+
+.ems-dt__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Gizli ISO sahəsi (forma dəyəri) — modulların `input { display: … }` qaydaları onu göstərməsin. */
+.ems-dt input.ems-dt__iso { display: none; }

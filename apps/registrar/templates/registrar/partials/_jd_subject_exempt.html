@@ -1,4 +1,4 @@
-{% load journal_names i18n %}
+{% load journal_names i18n ems_ui %}
 {% comment %}«Fəndən azad et» + «Azad edilənlər» (sahib 2026-10-15): tələbə qrupda qalır, yalnız BU fənnin
 jurnalından çıxır. Siyahını jurnalı açan hər kəs görür; «Bərpa et» və modal yalnız səlahiyyətliyə
 (`can_exempt` — journal.correct org-wide və ya əhatəli journal.roster, açıq siyahı). URL-lər data-atributla
@@ -57,7 +57,7 @@ jurnalından çıxır. Siyahını jurnalı açan hər kəs görür; «Bərpa et�
                 </label>
                 <label class="jd2-field jse-field">
                     <span class="jd2-field-label">{% trans "Sənəd tarixi" context "registrar.subject_exempt" %}</span>
-                    <input type="date" name="doc_date" data-jse-doc-date>
+                    {% ems_date_input "doc_date" input_id="jse-doc-date" css_class="jse-date-input" iso_attrs="data-jse-doc-date" %}
                 </label>
             </div>
             <p class="jse-error" data-jse-error hidden role="alert"></p>

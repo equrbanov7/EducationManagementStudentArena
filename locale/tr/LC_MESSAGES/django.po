@@ -118499,3 +118499,36 @@ msgstr "pasif saat"
 msgctxt "registrar.model.passive_hour.meta"
 msgid "passiv saatlar"
 msgstr "pasif saatler"
+
+msgctxt "core.datetime_input"
+msgid "Tarixi gg.aa.iiii formatında yazın (məsələn, 06.10.2026)."
+msgstr "Tarihi gg.aa.yyyy biçiminde yazın (örneğin, 06.10.2026)."
+
+msgctxt "core.datetime_input"
+msgid "Tarix {min} ilə {max} arasında olmalıdır."
+msgstr "Tarih {min} ile {max} arasında olmalıdır."
+
+msgctxt "core.datetime_input"
+msgid "Tarix {min} və ya daha sonra olmalıdır."
+msgstr "Tarih {min} veya daha sonra olmalıdır."
+
+msgctxt "core.datetime_input"
+msgid "Tarix {max} və ya daha əvvəl olmalıdır."
+msgstr "Tarih {max} veya daha önce olmalıdır."
+
+msgctxt "core.datetime_input"
+msgid "Tarixi seçin"
+msgstr "Tarih seçin"
+
+msgctxt "core.datetime_input"
+msgid "Bağla"
+msgstr "Kapat"
+
+msgctxt "core.datetime_input"
+msgid "gg.aa.iiii"
+msgstr "gg.aa.yyyy"
+
+#, python-format
+msgctxt "registrar.journal"
+msgid "Keçmiş tarixə dərs ən çox %(d)s gün geriyə — %(date)s tarixindən bu günədək açmaq olar."
+msgstr "Geçmiş bir tarihe en fazla %(d)s gün geriye — %(date)s tarihinden bugüne kadar ders açılabilir."

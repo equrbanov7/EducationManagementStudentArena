@@ -1,10 +1,10 @@
-{% load i18n %}
+{% load i18n ems_ui %}
 <dialog class="joint-lesson-dialog" data-joint-lesson-dialog aria-labelledby="joint-lesson-title">
     <div class="jd-modal-head jd2-modal-head"><div class="jd2-modal-head__text"><h3 id="joint-lesson-title">{% trans "Yeni dərs əlavə et" context "registrar.journal" %}</h3><span class="jd2-modal-head__sub">{{ joint.group_label }} · {{ kind_label }}</span></div><button type="button" class="jd-modal-close jd2-modal-close" data-joint-close-lesson aria-label="{% trans 'Bağla' context 'registrar.journal' %}">✕</button></div>
     <form method="post" class="jd-modal-form joint-create">
         {% csrf_token %}<input type="hidden" name="action" value="add_lesson">
         <div class="jd-modal-body">
-            <div class="jd2-field"><label class="jd2-field-label" for="joint-date">{% trans "TARİX" context "registrar.journal" %}</label><input id="joint-date" type="date" name="date" value="{{ today|date:'Y-m-d' }}" max="{{ today|date:'Y-m-d' }}" required></div>
+            <div class="jd2-field"><label class="jd2-field-label" for="joint-date">{% trans "TARİX" context "registrar.journal" %}</label>{% ems_date_input "date" today input_id="joint-date" required=True max_date=today css_class="jd2-date-input" %}</div>
             <div class="jd2-field"><label class="jd2-field-label" for="joint-slot">Cədvəl dərsi</label><div class="bootstrap-single-select bootstrap-single-select--ems"><select id="joint-slot" name="slot_id" required class="bootstrap-single-select__native" data-bootstrap-select>{% for slot in slots %}<option value="{{ slot.pk }}">{{ slot.weekday_label }} · {{ slot.start_time|time:'H:i' }}–{{ slot.end_time|time:'H:i' }} · {{ slot.get_week_type_display }}{% if slot.room %} · {{ slot.room }}{% endif %}</option>{% endfor %}</select></div></div>
             <div class="jd2-field"><label class="jd2-field-label" for="joint-topic">{% trans "Mövzu" context "registrar.journal" %}</label><input id="joint-topic" type="text" name="topic" required></div>
         </div>

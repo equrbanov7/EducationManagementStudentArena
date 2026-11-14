@@ -6,6 +6,9 @@
    Enter/Space (seç), Esc (bağla, fokus düyməyə qayıdır).
    AJAX-safe: dinləyicilər `document`-ə bir dəfə bağlanır — modal-a sonradan
    inject olunan forma da işləyir.
+   Yalnız-tarix rejimi (`data-ems-dt-mode="date"`, 2026-11-14): saat bölməsi yoxdur,
+   gün seçilən kimi dialoq bağlanır; `data-ems-dt-min/max` aralığından kənar günlər
+   (və «Bu gün») bağlıdır.
    ========================================================================= */
 (function (window, document) {
     "use strict";
@@ -21,6 +24,9 @@
     var wrapperOf = api._internal.wrapperOf;
     var writeValue = api._internal.writeValue;
     var DEFAULT_HOUR = api._internal.defaultHour;
+    var isDateMode = api._internal.isDateMode;
+    var rangeOf = api._internal.rangeOf;
+    var dayKey = api._internal.dayKey;
 
     /* ── seçici dialoqu ── */
     var openState = null; // { wrapper, input, toggle, pop, view: {year, month}, focus: {y,m,d} }
@@ -38,11 +44,24 @@
     }
 
     function currentParts(state) {
-        var res = parse(state.input.value);
+        var res = parse(state.input.value, { requireTime: !state.dateOnly });
         return res.ok ? res.parts : null;
     }
 
+    /* Yalnız-tarix: gün `data-ems-dt-min/max` aralığındadırmı. */
+    function dayAllowed(state, year, month, day) {
+        var range = state.range;
+        if (!range) {
+            return true;
+        }
+        var key = dayKey({ year: year, month: month, day: day });
+        return !(range.min && key < dayKey(range.min)) && !(range.max && key > dayKey(range.max));
+    }
+
     function timeFromFields(state) {
+        if (state.dateOnly) {
+            return { hour: 0, minute: 0 };
+        }
         var h = parseInt(state.hourInput.value, 10);
         var mi = parseInt(state.minuteInput.value, 10);
         return {
@@ -107,6 +126,10 @@
         var foot = el("div", "ems-dt__foot");
         var today = el("button", "ems-dt__btn", { type: "button", "data-ems-dt-today": "" });
         today.textContent = t.today;
+        var now = new Date();
+        if (state.dateOnly && !dayAllowed(state, now.getFullYear(), now.getMonth() + 1, now.getDate())) {
+            today.disabled = true;
+        }
         var done = el("button", "ems-dt__btn ems-dt__btn--primary", { type: "button", "data-ems-dt-done": "" });
         done.textContent = t.done;
         foot.appendChild(today);
@@ -114,7 +137,9 @@
 
         pop.appendChild(head);
         pop.appendChild(grid);
-        pop.appendChild(time);
+        if (!state.dateOnly) {
+            pop.appendChild(time);
+        }
         pop.appendChild(foot);
 
         state.pop = pop;
@@ -165,6 +190,11 @@
                         btn.classList.add("is-today");
                         btn.setAttribute("aria-current", "date");
                     }
+                    // Aralıqdan kənar gün fokuslana bilir (klaviatura ilə keçid), amma seçilmir.
+                    if (state.dateOnly && !dayAllowed(state, year, month, dayNum)) {
+                        btn.classList.add("is-disabled");
+                        btn.setAttribute("aria-disabled", "true");
+                    }
                     td.appendChild(btn);
                 }
                 tr.appendChild(td);
@@ -199,22 +229,37 @@
         focusDay(state);
     }
 
+    /* Seçim olubsa true. Yalnız-tarix rejimində aralıqdan kənar gün seçilmir; seçim dialoqu bağlayır. */
     function pickDay(state, day) {
+        if (state.dateOnly && !dayAllowed(state, state.view.year, state.view.month, day)) {
+            return false;
+        }
         var time = timeFromFields(state);
         state.focus = { day: day };
         writeValue(state.input, {
             year: state.view.year, month: state.view.month, day: day, hour: time.hour, minute: time.minute
         });
+        if (state.dateOnly) {
+            close(true);
+            return true;
+        }
         renderGrid(state);
+        return true;
     }
 
     function syncTimeFields(state) {
+        if (state.dateOnly) {
+            return;
+        }
         var parts = currentParts(state);
         state.hourInput.value = pad(parts ? parts.hour : DEFAULT_HOUR);
         state.minuteInput.value = pad(parts ? parts.minute : 0);
     }
 
     function commitTime(state) {
+        if (state.dateOnly) {
+            return;
+        }
         var parts = currentParts(state);
         var time = timeFromFields(state);
         state.hourInput.value = pad(time.hour);
@@ -263,12 +308,20 @@
             return;
         }
         close(false);
-        var state = { wrapper: wrapper, input: input, toggle: toggle };
+        var dateOnly = isDateMode(wrapper);
+        var state = {
+            wrapper: wrapper, input: input, toggle: toggle, dateOnly: dateOnly, range: dateOnly ? rangeOf(wrapper) : null
+        };
         var parts = currentParts(state);
         var now = new Date();
-        state.view = parts ? { year: parts.year, month: parts.month } :
-            { year: now.getFullYear(), month: now.getMonth() + 1 };
-        state.focus = { day: parts ? parts.day : now.getDate() };
+        var start = { year: now.getFullYear(), month: now.getMonth() + 1, day: now.getDate() };
+        if (!parts && state.range && !dayAllowed(state, start.year, start.month, start.day)) {
+            // Boş sahə + bu gün aralıqdan kənardır → təqvim aralığın yaxın ucunda açılsın.
+            start = state.range.max && dayKey(start) > dayKey(state.range.max) ? state.range.max : (state.range.min || start);
+        }
+        var base = parts || start;
+        state.view = { year: base.year, month: base.month };
+        state.focus = { day: base.day };
         var pop = buildPopup(state);
         wrapper.appendChild(pop);
         wrapper.classList.add("is-open");
@@ -316,7 +369,9 @@
         }
         var dayBtn = target.closest("[data-ems-dt-day]");
         if (dayBtn) {
-            pickDay(state, parseInt(dayBtn.getAttribute("data-ems-dt-day"), 10));
+            if (pickDay(state, parseInt(dayBtn.getAttribute("data-ems-dt-day"), 10)) && state.dateOnly) {
+                return;
+            }
             dayBtn = state.tbody.querySelector('[data-ems-dt-day="' + state.focus.day + '"]');
             if (dayBtn) {
                 dayBtn.focus();
@@ -326,8 +381,9 @@
         if (target.closest("[data-ems-dt-today]")) {
             var now = new Date();
             state.view = { year: now.getFullYear(), month: now.getMonth() + 1 };
-            pickDay(state, now.getDate());
-            focusDay(state);
+            if (!(pickDay(state, now.getDate()) && state.dateOnly)) {
+                focusDay(state);
+            }
             return;
         }
         if (target.closest("[data-ems-dt-done]")) {
@@ -384,8 +440,9 @@
             var step = event.key === "PageUp" ? -1 : 1;
             moveFocus(state, 0, event.shiftKey ? step * 12 : step);
         } else if (event.key === "Enter" || event.key === " ") {
-            pickDay(state, state.focus.day);
-            focusDay(state);
+            if (!(pickDay(state, state.focus.day) && state.dateOnly)) {
+                focusDay(state);
+            }
         } else {
             handled = false;
         }
