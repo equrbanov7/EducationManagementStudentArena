@@ -6,7 +6,10 @@ axtarılır (bax :class:`apps.syllabus.models.Syllabus` docstring-i):
 
 1. ``offering`` üzrə — normal axın (qrup + müəllim konkretdir);
 1a. PAYLAŞIM (sahib 2026-10-27, ``SyllabusShare``) — açılış başqa qrupun sillabusunu ÖZ YERİNDƏ istifadə edir
-   (bir sillabus — bir neçə jurnal; yalnız eyni müəllim, bax ``services/sharing.py``);
+   (bir sillabus — bir neçə jurnal; yalnız eyni müəllim, bax ``services/sharing.py``); dil səviyyə kohortunda da
+   eynidir (2026-11-14, MR-337);
+1b. dil səviyyə KOHORTU — kohortun mənbə açılışının təsdiqlənmiş dosyesi (saat bölgüsü eyni olmalıdır,
+   ``services/language_cohort_source.py``); kohort jurnalı yalnız 1 / 1a / 1b pillələrini görür;
 2. ``(subject, period)`` üzrə — semestr səviyyəli dosye, açılış hələ
    bağlanmayıb;
 3. ``(subject, author)`` üzrə — köhnə sistemdən köçürülmüş SEMESTRSİZ «baza
@@ -20,7 +23,7 @@ açılmır (``scripts/module_deps.py``).
 from __future__ import annotations
 
 from django.apps import apps
-from django.db.models import Case, IntegerField, Q, Subquery, Value, When
+from django.db.models import Case, Exists, IntegerField, OuterRef, Q, Subquery, Value, When
 
 from ..constants import OPEN_STATUSES, SyllabusStatus
 from ..models import Syllabus
@@ -67,8 +70,10 @@ def _share_applies(syllabus, offering_id, instructor_id) -> bool:
     if syllabus.offering_id is None or syllabus.offering_id == offering_id:
         return True  # öz / fənn+semestr / baza pilləsi — paylaşım deyil
     source = syllabus.offering
+    # Kohort mənbə pilləsi bağlı nüsxəni (``reused_from``) də qəbul edir; paylaşım isə həmişə kök dosyedir.
+    cohort_source = getattr(syllabus, "_lc_period", None) is not None and not getattr(syllabus, "_lc_shared", False)
     if (
-        (syllabus.reused_from_id is not None and getattr(syllabus, "_lc_period", None) is None)
+        (syllabus.reused_from_id is not None and not cohort_source)
         or syllabus.period_id is None
         or source.organization_id != syllabus.organization_id
         or source.subject_id != syllabus.subject_id
@@ -107,6 +112,7 @@ def syllabus_for_offering(
     from ..models import SyllabusShare
 
     cohort_rules = None
+    share_tier = None
     tiers = []
     if offering_id is not None:
         target = apps.get_model("registrar", "CourseOffering").objects.filter(organization=organization, pk=offering_id)
@@ -118,14 +124,19 @@ def syllabus_for_offering(
         from .language_cohort_source import rules
 
         cohort_rules = rules(organization=organization, offering_id=offering_id)
-        tiers.append(cohort_rules[2])
         if _with_share:
             shared = (
                 SyllabusShare.objects.filter(organization=organization, offering_id=offering_id)
                 .order_by()
                 .values("syllabus_id")
             )
-            tiers.append(Q(pk__in=Subquery(shared), subject_id=target_subject, period_id=target_period))
+            # MR-337/330/355/356 (2026-11-14): paylaşım səviyyə (dil kohortu) jurnalında da normal jurnaldakı kimi
+            # sayılır — öz → paylaşım → kohort mənbəyi.  Əvvəl kohort süzgəci paylaşılan dosyeni kəsirdi və jurnal
+            # «sillabus yazılmayıb» göstərirdi, «istifadə et» dialoqu isə paylaşım artıq olduğu üçün heç nə təklif
+            # etmirdi.
+            share_tier = Q(pk__in=Subquery(shared), subject_id=target_subject, period_id=target_period)
+            tiers.append(share_tier)
+        tiers.append(cohort_rules[2])
     if subject_id is not None and period_id is not None:
         tiers.append(Q(subject_id=subject_id, period_id=period_id, offering__isnull=True))
     if subject_id is not None and instructor_id is not None:
@@ -148,9 +159,10 @@ def syllabus_for_offering(
     # Planlaşdırma ~6 → ~3 ms (icra 0,3 ms); round-trip yenə BİRDİR (jurnal / sərbəst iş sorğu büdcələri dəyişmir).
     candidates = Syllabus.objects.filter(organization=organization, is_active=True)
     if cohort_rules is not None:
-        candidates = candidates.alias(_language_cohort=cohort_rules[0]).filter(
-            Q(_language_cohort=False) | cohort_rules[1]
-        )
+        cohort_allowed = Q(_language_cohort=False) | cohort_rules[1]
+        if share_tier is not None:
+            cohort_allowed |= share_tier
+        candidates = candidates.alias(_language_cohort=cohort_rules[0]).filter(cohort_allowed)
     tier_pick = (
         candidates.filter(combined).annotate(_tier=rank).order_by("_tier", "subject__code", "pk").values("pk")[:1]
     )
@@ -158,6 +170,16 @@ def syllabus_for_offering(
     chosen = Syllabus.objects.select_related(*related).filter(pk=Subquery(tier_pick))
     if cohort_rules is not None:
         chosen = chosen.annotate(**cohort_rules[3])
+        if share_tier is not None:
+            # Seçilən dosye bu jurnala PAYLAŞILIBMI — kohort saat yoxlaması (``valid_result``) yalnız mənbə pilləsinə
+            # aiddir; paylaşımın qapısı ``_share_applies``-dir (normal jurnaldakı kimi).
+            chosen = chosen.annotate(
+                _lc_shared=Exists(
+                    SyllabusShare.objects.filter(
+                        organization=organization, offering_id=offering_id, syllabus_id=OuterRef("pk")
+                    )
+                )
+            )
     found = chosen.first()
     if found is not None and cohort_rules is not None:
         from .language_cohort_source import valid_result
