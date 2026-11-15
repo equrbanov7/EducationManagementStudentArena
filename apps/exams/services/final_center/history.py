@@ -27,6 +27,8 @@ _TICKET_EVENTS = {
     "final_student_suspended": (_l("Tələbə müvəqqəti dayandırıldı"), "fa-pause", "danger"),
     "final_student_removed": (_l("Tələbə imtahandan çıxarıldı"), "fa-user-slash", "danger"),
     "final_student_readmitted": (_l("Tələbə yenidən buraxıldı"), "fa-user-check", "success"),
+    # Sahib 2026-11-16: «gəlməyib» bilet tələbə PIN ilə gələndə avtomatik açılır.
+    "final_ticket_absent_reopened": (_l("«Gəlməyib» bileti yenidən açıldı"), "fa-rotate-left", "info"),
     # Sahib 2026-11-04: «Nəticəni sil (cəhdi sıfırla)» — cəhd silindi, bilet yeni PIN ilə yenidən açıldı.
     "final_ticket_reset_after_attempt_purge": (
         _l("Cəhd sıfırlandı — bilet yeni PIN ilə yenidən açıldı"),

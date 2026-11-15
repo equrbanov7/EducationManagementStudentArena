@@ -79,7 +79,8 @@
             </td>
             {% if can_manage %}
             <td class="fxc-row-actions">
-              {% if t.status == "removed" %}
+              {% if t.status == "removed" or t.status == "absent" %}
+              {# Sahib 2026-11-16: «gəlməyib» bilet də yenidən buraxılır (oturum bağlananda başlamamışdı). #}
               <form method="post" action="{% url 'exams:exam_center_ticket_readmit' session_id=session.pk ticket_id=t.pk %}" class="fxc-inline-form">
                 {% csrf_token %}
                 <button type="submit" class="fxc-btn fxc-btn-sm fxc-btn-ghost">

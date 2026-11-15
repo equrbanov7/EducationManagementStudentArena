@@ -435,6 +435,13 @@ def ensure_pin_ticket(exam, student, room, computer=None, *, move_attempt=True):
         )
     if ticket.status == TICKET_STATUS_COMPLETED:
         return None, pgettext("exams.final_center.entry", "Bu imtahanı artıq bitirmisiniz.")
+    if ticket.status == TICKET_STATUS_ABSENT:
+        # Sahib 2026-11-16: «gəlməyib» (oturum bağlananda başlamamışdı) — PIN ilə gələndə bilet yenidən açılır.
+        from .ticket_reopen import reopen_absent_ticket
+
+        with bypass_rls():
+            reopen_absent_ticket(ticket, student)
+            ticket.refresh_from_db()
     if ticket.status in (TICKET_STATUS_REMOVED, TICKET_STATUS_ABSENT):
         return None, pgettext(
             "exams.final_center.entry",
