@@ -146,7 +146,9 @@ class ReviewedElectiveChoicesTests(TestCase):
 
     def test_default_named_row_still_waits_for_choice(self):
         self.entry.pop("reviewed_policy")
-        with self.assertRaisesMessage(RepairError, "bounded_sync_rejected"):
+        # Sahib 2026-11-15: müəllimi olan seçmə sətir adi sinxronda özü qrupun seçimi olur — sərhədli alət bunu
+        # icazəsiz kənar dəyişiklik sayıb bütün paketi rədd edir (kod fərqlidir, nəticə eyni: heç nə yazılmır).
+        with self.assertRaises(RepairError):
             self.execute()
         self.assertFalse(GroupElectiveChoice.objects.exists())
 

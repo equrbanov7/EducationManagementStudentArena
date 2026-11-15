@@ -193,3 +193,47 @@ class ResyncCommandTest(_ElectiveBase):
                 self.office.username,
                 stdout=StringIO(),
             )
+
+
+class TeacherAssignedElectiveTest(_ElectiveBase):
+    """Sahib 2026-11-15: seçmə fənn sətrində müəllimin yükü varsa jurnal avtomatik açılır (qrupun seçimi)."""
+
+    code = "TAE"
+
+    @classmethod
+    def setUpTestData(cls):
+        from apps.workload.tests.factories import TEACHER_PERMS, activate_member
+        from core.constants import RoleScopeType
+
+        super().setUpTestData()
+        cls.teacher = User.objects.create_user("tae.teacher", "tae.teacher@x.test", "pw")
+        activate_member(
+            cls.org,
+            cls.teacher,
+            "teacher",
+            permissions=TEACHER_PERMS,
+            scope_unit=cls.stack["chair"],
+            scope_type=RoleScopeType.COURSE,
+        )
+
+    def test_assigned_teacher_opens_pending_elective_journal(self):
+        from apps.workload.constants import Activity
+        from apps.workload.services import assign_teacher
+
+        task, _row = self.office_task()
+        row = self.block_row(task, self.virus, text="")
+        self.approve(task)
+        self.assertFalse(self.offerings(subject=self.virus).exists())
+
+        assign_teacher(
+            row=TeachingTaskRow.objects.select_related("task", "task__chair").get(pk=row.pk),
+            actor=self.actor(self.chair_head),
+            activity=Activity.LECTURE,
+            teacher_id=self.teacher.pk,
+            hours=30,
+        )
+        offering = self.offerings(subject=self.virus).get()
+        self.assertEqual(offering.instructor_id, self.teacher.pk)
+        self.assertEqual(self.choice().chosen_subject_id, self.virus.pk)
+        self.assertEqual(Enrollment.objects.get(offering=offering, student=self.student).kind, "elective")
+        self.assertFalse(self.offerings(subject=self.photo).exists())

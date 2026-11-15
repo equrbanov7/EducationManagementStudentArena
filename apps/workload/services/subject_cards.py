@@ -63,9 +63,12 @@ def cards_page(
     offset: int = 0,
     limit: int = 0,
     focus_row=None,
+    form: str = "",
 ) -> dict:
     """Süzgəcə uyğun sətirlərin AİLƏ üzrə ``offset`` / ``limit`` dilimi — ``rows_page`` ilə eyni müqavilə + ``cards``."""
-    queryset = task_rows(task, season=season, search=search, teacher=teacher, status=status, activity=activity)
+    queryset = task_rows(
+        task, season=season, search=search, teacher=teacher, status=status, activity=activity, form=form
+    )
     light = queryset.values(
         "pk", "task_id", "row_kind", "subject_id", "subject_text", "season", "period_id", "credits_value", "credits"
     )

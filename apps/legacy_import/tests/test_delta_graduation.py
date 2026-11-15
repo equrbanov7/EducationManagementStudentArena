@@ -76,6 +76,10 @@ class GraduationPhaseTests(TestCase):
                 is_active=True,
             )
             group = OrgUnit.objects.create(organization=cls.org, name="222 A", slug="g-222a", unit_type="group")
+            # Qiyabi qrup (adında 4 rəqəm — sahibin 2026-10-25 qaydası); qeyd özü defolt «əyani» qalıb.
+            part_time_group = OrgUnit.objects.create(
+                organization=cls.org, name="2032P", slug="g-2032p", unit_type="group"
+            )
             bachelor = Program.objects.create(organization=cls.org, code="BAK", name="Bakalavr", ects_total=240)
             master = Program.objects.create(
                 organization=cls.org, code="MAG", name="Magistr", degree_level="master", ects_total=120
@@ -107,6 +111,9 @@ class GraduationPhaseTests(TestCase):
                 6: (bachelor, 2022, early),  # son kursdan əvvəl kəsilib
                 7: (bachelor, 2022, final),  # köhnə sistemdə azad edilib
                 8: (master, 2024, final),  # magistr — məzun
+                # Sahib 2026-11-15: qiyabi 5 il (+1 il uzadılma) — 2021 və 2022 qəbulu MƏZUN EDİLMİR
+                11: (bachelor, 2021, final),  # qeyd özü qiyabi
+                12: (bachelor, 2022, final),  # qrup adı qiyabi (2032P)
             }
             for number, (program, year, last) in plan.items():
                 user = User.objects.create_user(
@@ -116,7 +123,7 @@ class GraduationPhaseTests(TestCase):
                     first_name=f"Ad{number}",
                     last_name=f"Soyad{number}",
                 )
-                UserProfile.objects.filter(user=user).update(fin=f"FIN000{number}")
+                UserProfile.objects.filter(user=user).update(fin=f"FIN{number:04d}")
                 Membership.objects.create(user=user, organization=cls.org, role=role, is_primary=True, is_active=True)
                 curriculum, _ = Curriculum.objects.get_or_create(
                     organization=cls.org, program=program, admission_year=year
@@ -126,8 +133,9 @@ class GraduationPhaseTests(TestCase):
                     student=user,
                     program=program,
                     curriculum=curriculum,
-                    group=group,
+                    group=part_time_group if number == 12 else group,
                     admission_year=year,
+                    education_form="part_time" if number == 11 else "full_time",
                     status="enrolled",
                     is_active=True,
                 )
@@ -160,6 +168,8 @@ class GraduationPhaseTests(TestCase):
         self.assertEqual(study_years(Program(ects_total=240)), 4)
         self.assertEqual(study_years(Program(ects_total=120, degree_level="master")), 2)
         self.assertEqual(study_years(Program(ects_total=0, degree_level="master")), 2)
+        self.assertEqual(study_years(Program(ects_total=240), "part_time"), 5)
+        self.assertEqual(study_years(Program(ects_total=120, degree_level="master"), "part_time"), 2)
 
     def test_dry_run_writes_nothing(self):
         run = self._run(apply=False)
@@ -175,11 +185,11 @@ class GraduationPhaseTests(TestCase):
         self.assertEqual(counters["graduation.untouched.in_legacy_journal"], 1)
         self.assertEqual(counters["graduation.untouched.legacy_expelled"], 1)
         self.assertEqual(counters["graduation.fin_name_mismatch"], 1)
-        self.assertEqual(counters["graduation.review.period_not_ended"], 1)
+        self.assertEqual(counters["graduation.review.period_not_ended"], 3)
         self.assertEqual(counters["graduation.review.year_unknown"], 1)
         self.assertEqual(counters["graduation.review.left_before_final_year"], 1)
         expected = {1: "graduated", 2: "enrolled", 3: "enrolled", 4: "enrolled", 5: "enrolled"}
-        expected.update({6: "enrolled", 7: "enrolled", 8: "graduated"})
+        expected.update({6: "enrolled", 7: "enrolled", 8: "graduated", 11: "enrolled", 12: "enrolled"})
         self.assertEqual({number: self._status(number) for number in self.records}, expected)
         with bypass_rls():
             movement = StudentMovement.objects.get(record=self.records[1])

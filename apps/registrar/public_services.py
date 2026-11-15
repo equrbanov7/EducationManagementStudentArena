@@ -57,6 +57,7 @@ from . import schedule_suggest  # noqa: F401 — «Uyğun vaxtlar» + otaq tövs
 from . import selfwork_points  # noqa: F401
 from . import services  # noqa: F401
 from . import status  # noqa: F401
+from . import student_group_journals  # noqa: F401 — tələbəni öz qrupunun cari jurnallarına (2026-11-15 bərpa)
 from . import student_group_names  # noqa: F401 — tələbənin cari reyestr qrupunun adı (süzgəclər, 2026-10-25)
 from . import subgroup_rollup  # noqa: F401
 from . import subgroup_students_journals  # noqa: F401 — «Alt qrup tələbələri» hədəf jurnal axtarışı (2026-11-05)
@@ -200,6 +201,7 @@ __all__ = [
     "legacy_grade_review_rows",
     "lessons_log",
     "movements",
+    "student_group_journals",
     "offering_chairs",
     "offering_counts_by_chair",
     "plan_hours_by_offering",

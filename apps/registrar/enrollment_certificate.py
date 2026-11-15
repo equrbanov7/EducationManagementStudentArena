@@ -69,9 +69,16 @@ def _academic_year_start(today: dt.date) -> int:
     return today.year if today.month >= 9 else today.year - 1
 
 
-def _study_years(program) -> int:
+#: Sahib 2026-11-15: qiyabi bakalavr 5 il oxuyur, uzadılma ilə 6 il — arayış 6-cı kursa qədər verilir.
+PART_TIME_EXTRA_YEARS = 2
+
+
+def _study_years(program, education_form: str = "") -> int:
     ects = int(getattr(program, "ects_total", 0) or 0) or 240
-    return (ects + 59) // 60
+    years = (ects + 59) // 60
+    if education_form == "part_time" and getattr(program, "degree_level", "") != "master":
+        years += PART_TIME_EXTRA_YEARS
+    return years
 
 
 def course_number(record, *, today=None) -> int:
@@ -98,7 +105,7 @@ def refusal_for(record, *, today=None):
             "year_unknown", pgettext(_CTX, "Tələbənin qəbul ili məlum deyil — əvvəlcə akademik qeydi düzəldin.")
         )
     course = course_number(record, today=today)
-    if course < 1 or course > _study_years(record.program):
+    if course < 1 or course > _study_years(record.program, getattr(record, "education_form", "")):
         return CertificateRefused(
             "period_ended",
             pgettext(_CTX, "Tələbənin oxu müddəti bitib — əvvəlcə statusunu rəsmiləşdirin (məzun, xaric və ya bərpa)."),

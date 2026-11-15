@@ -16,7 +16,8 @@ Burada əlavə olaraq:
   kimi yazır. Açılış artıq varsa (qərar verilib) sinxron yalnız müəllim/saatı
   yeniləyir, qeydiyyata toxunmur. Planda izi olmayan fənn məcburi sayılır.
   ISTISNA (2026-10-15, :mod:`.offering_electives`): sətir RƏSMİ seçmə blok sətridir
-  (blok mətni + sənəddən seçilmiş fənn) → bu, qrupun qərarıdır: qərar yazılır,
+  (blok mətni + sənəddən seçilmiş fənn) və ya (sahib 2026-11-15) sətirdə MÜƏLLİM təyin
+  olunub (yük bölünüb) → bu, qrupun qərarıdır: qərar yazılır,
   açılış yaranır, qrup ``elective`` kimi yazılır (``elective_from_task``); qrupun
   həmin blok üçün BAŞQA qərarı əzilmir (``elective_choice_conflict``).
 * LƏĞV edilmiş (``is_active=False``) açılışa və KİLİDLİ semestrə toxunulmur;
@@ -339,8 +340,11 @@ class _Sync(SyncWrites, ElectiveFlow):
         ]
         handover_pairs = self._handover_pairs(differing)
         populated = self._populated([offering for key, offering in existing.items() if key in targets])
-        official = {key for key, entry in targets.items() if is_official_choice(entry["rows"])} | set(
-            self._reviewed_options
+        # Sahib 2026-11-15: seçmə fənn sətrində müəllim (yük) varsa — bu, qrupun seçimidir, jurnal avtomatik açılır.
+        official = (
+            {key for key, entry in targets.items() if is_official_choice(entry["rows"])}
+            | set(self._reviewed_options)
+            | {key for key in targets if owners[key] is not None}
         )
         official_electives = {key for key in official if (targets[key]["group"].parent_id, key[0]) in electives}
         blocks = (

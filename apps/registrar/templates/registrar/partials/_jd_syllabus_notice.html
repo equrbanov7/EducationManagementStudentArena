@@ -26,7 +26,7 @@ Rəng birbaşa yazılmır: ton adı (`is-danger`/`is-warning`/`is-info`) CSS-də
             {% trans "Tələbələr bu müddətdə əvvəlki təsdiqlənmiş versiyanı görməyə davam edir." context "registrar.syllabus" %}
         </span>
         {% endif %}
-        {% if syllabus_notice.state == 'missing' and offering.instructor_id != request.user.pk %}
+        {% if syllabus_notice.state == 'missing' and offering.instructor_id != request.user.pk and not request.user.is_superuser %}
         <span class="jd2-sylbar__hint">
             {% trans "Sillabusu bu jurnalın müəllimi yaradır." context "registrar.syllabus" %}
         </span>
@@ -35,8 +35,11 @@ Rəng birbaşa yazılmır: ton adı (`is-danger`/`is-warning`/`is-info`) CSS-də
     {% comment %}«Sillabus yarat» yalnız jurnalın müəllimində — başqasının açılışına sillabus yaratmaq əməli yoxdur
     (``accounts`` «create» əməli ``instructor=request.user`` tələb edir). Müəllimdə bu keçid əvvəlcə «dəyişmədən
     tətbiq et» təklifini açır (journal_syllabus_peers.js); JS olmasa keçid əvvəlki kimi işləyir.{% endcomment %}
-    {% if syllabus_notice.state != 'missing' or offering.instructor_id == request.user.pk %}
-    <a class="jd2-sylbar__cta" href="{{ syllabus_notice.action_url }}" data-jd-syl-cta>
+    {% if syllabus_notice.state != 'missing' or offering.instructor_id == request.user.pk or request.user.is_superuser %}
+    {# Sahib 2026-11-15: «yoxdusa klikdə avtomatik sillabusun içinə keçməliydi» — missing-də keçid dosyeni yaradır. #}
+    <a class="jd2-sylbar__cta" href="{{ syllabus_notice.action_url }}" data-jd-syl-cta
+       {% if syllabus_notice.state == 'missing' %}data-jd-syl-create="{% url 'accounts:syllabus_action' %}"
+       data-offering="{{ offering.id }}" data-editor-base="{{ syllabus_notice.editor_base }}"{% endif %}>
         {{ syllabus_notice.action_label }} <i class="fas fa-arrow-right" aria-hidden="true"></i>
     </a>
     {% endif %}
