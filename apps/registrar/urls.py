@@ -25,6 +25,7 @@ from . import (
     journal_list_unit_lookup,
     journal_master_history,
     journal_reviewed_history,
+    journal_roster_restore_views,
     lab_groups_views,
     language_cohort_history,
     language_cohort_views,
@@ -170,6 +171,17 @@ urlpatterns = [
         "<uuid:offering_id>/fenden-azad/berpa/",
         subject_exempt_views.subject_exempt_restore,
         name="journal_subject_exempt_restore",
+    ),
+    # «Tələbəni bərpa et» — səhvən çıxarılmış / dondurulmuş tələbəni jurnala qaytarmaq (sahib 2026-11-15).
+    path(
+        "<uuid:offering_id>/telebe-berpa/",
+        journal_roster_restore_views.roster_restore_list,
+        name="journal_roster_restore_list",
+    ),
+    path(
+        "<uuid:offering_id>/telebe-berpa/emel/",
+        journal_roster_restore_views.roster_restore_apply,
+        name="journal_roster_restore_apply",
     ),
     # «Lab qrupları» — jurnalda laboratoriya qruplarını yaratmaq / adlandırmaq / tələbə yerləşdirmək (sahib 2026-11-06).
     # 2026-11-07: ekran kabinetin «Lab qrupları» bölməsinə köçdü — köhnə ünvan oraya yönləndirir, yazı JSON-dadır.

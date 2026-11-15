@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static i18n language_cohort_links %}
+{% load static i18n language_cohort_links registrar_roster_restore %}
 
 {% block title %}{{ offering.subject.name }} — {% trans "Jurnal" context "registrar.journal" %} - {{ site_brand_name }}{% endblock %}
 
@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="{% static 'registrar/css/journal_guest.css' %}?v=20261104-divider">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_subject_exempt.css' %}?v=20261104-reason">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_removal_reason.css' %}?v=20261104-reason">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_roster_restore.css' %}?v=20261115-restore">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_history.css' %}?v=20261104-roster">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_history_card.css' %}?v=20261029-card">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_activation.css' %}?v=20261017-room">
@@ -163,6 +164,9 @@
                     <i class="fas fa-lock"></i> {% trans "Siyahı dondurulub" context "registrar.guest_roster" %}
                 </span>
                 {% endif %}
+                {# «Tələbəni bərpa et» — səhvən çıxarılmış / dondurulmuş tələbə (sahib 2026-11-15). #}
+                {% journal_roster_restore_state offering request.user as rrs %}
+                {% include "registrar/partials/_jd_roster_restore_button.html" %}
                 {% comment %}«Xarici dil səviyyə qrupları» — yalnız heyət (sahib 2026-11-10: müəllimə görünmür).{% endcomment %}
                 {% language_cohort_manage_entry offering request.user %}
                 {% if can_edit %}
@@ -267,6 +271,8 @@
         </button>
     </div>
     {% endif %}
+    {% journal_roster_restore_state offering request.user as rrs %}
+    {% if rrs.show %}<div class="jgs-empty-action">{% include "registrar/partials/_jd_roster_restore_button.html" %}</div>{% endif %}
     {% endif %}
     {% if active_tab == "grid" or not journal.rows %}{% include "registrar/partials/_jd_subject_exempt.html" %}{% endif %}
 
@@ -296,6 +302,8 @@
     {% endif %}
 
     {% if can_manage_roster %}{% include "registrar/partials/_jd_guest_modal.html" %}{% endif %}
+    {% journal_roster_restore_state offering request.user as rrs %}
+    {% if rrs.show %}{% include "registrar/partials/_jd_roster_restore_modal.html" %}{% endif %}
 
     {% include "registrar/partials/_correction_history_modal.html" %}
 
@@ -381,6 +389,8 @@
     {% if can_exempt %}
     <script src="{% static 'registrar/js/journal_subject_exempt.js' %}?v=20261104-reason"></script>
     {% endif %}
+    {% journal_roster_restore_state offering request.user as rrs %}
+    {% if rrs.show %}<script src="{% static 'registrar/js/journal_roster_restore.js' %}?v=20261115-restore"></script>{% endif %}
     {% if correction_mode %}
     <script src="{% static 'registrar/js/correction.js' %}?v=CORR5-midterm" nonce="{{ request.csp_nonce }}"></script>
     {% endif %}

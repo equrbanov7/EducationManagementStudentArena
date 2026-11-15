@@ -30,6 +30,10 @@ _CTX = "registrar.journal_removal"
 HISTORY_KIND = "roster-removal"
 HISTORY_RESTORE_KIND = "roster-restore"
 
+#: «Jurnal təmizliyi» qərarının jurnaldan bərpası (sahib 2026-11-15) — YALNIZ tarixçə izinin «əməl» kodu;
+#: ``JournalRemoval.action`` deyil (o cədvəlin CHECK siyahısı dəyişmir).
+HISTORY_ACTION_HYGIENE = "hygiene"
+
 #: HTTP sahə adları (modal ``journal_subject_exempt.js`` / ``journal_guest.js`` bunları göndərir).
 REASON_FIELD = "removal_reason"
 NOTE_FIELD = "removal_note"
@@ -57,6 +61,8 @@ def reason_label(value) -> str:
 
 
 def action_label(value) -> str:
+    if value == HISTORY_ACTION_HYGIENE:
+        return pgettext(_CTX, "Jurnal təmizliyi")
     try:
         return str(RemovalAction(value).label)
     except ValueError:
@@ -139,8 +145,11 @@ def record(*, enrollment, action, cleaned, actor=None, hygiene_decision_id=None,
     return removal
 
 
-def record_restore(*, enrollment, actor=None, note="", request=None):
-    """«Bərpa et» — jurnal tarixçəsində çıxarılmanın geri alınması da görünsün."""
+def record_restore(*, enrollment, actor=None, note="", request=None, action=RemovalAction.SUBJECT_EXEMPT.value):
+    """«Bərpa et» — jurnal tarixçəsində çıxarılmanın geri alınması da görünsün.
+
+    ``action`` — nəyin geri alındığı: «Fəndən azad» (defolt), alt qrup «Çıxar»-ı (``guest_remove``) və ya
+    «Jurnal təmizliyi» qərarı (:data:`HISTORY_ACTION_HYGIENE`; «Tələbəni bərpa et», sahib 2026-11-15)."""
     _history(
         enrollment=enrollment,
         offering=enrollment.offering,
@@ -148,7 +157,7 @@ def record_restore(*, enrollment, actor=None, note="", request=None):
         kind=HISTORY_RESTORE_KIND,
         reason="",
         note=clean_note(note),
-        action=RemovalAction.SUBJECT_EXEMPT.value,
+        action=str(action),
         request=request,
     )
 
@@ -166,6 +175,7 @@ def latest_by_decision(decision_ids) -> dict:
 
 
 __all__ = [
+    "HISTORY_ACTION_HYGIENE",
     "HISTORY_KIND",
     "HISTORY_RESTORE_KIND",
     "NOTE_FIELD",
