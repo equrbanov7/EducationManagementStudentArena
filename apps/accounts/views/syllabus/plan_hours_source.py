@@ -62,7 +62,8 @@ def ensure_plan_hours(syllabus, context, *, write) -> tuple[dict, bool]:
         or getattr(context.get("version"), "status", "") == SyllabusStatus.APPROVED
     ):
         return plan_hours, False
-    author = bool(context.get("is_author"))
+    # Sahib 2026-11-15: müəllif VƏ YA bağlı jurnalın cari müəllimi (redaktorun «normal» rejimi ilə eyni).
+    author = bool(context.get("is_author") or context.get("can_edit"))
     found = official_plan_hours(syllabus)
     if found:
         if dict(found) != plan_hours:

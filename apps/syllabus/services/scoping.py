@@ -111,6 +111,48 @@ def is_author(actor: SyllabusActor, syllabus) -> bool:
     return bool(offering and offering.instructor_id == user_id)
 
 
+#: Sahib 2026-11-15 («müəllim redaktə edə bilmir»): jurnalın HƏQİQİ cari müəllimi (açılışın müəllimi, bölünmüş
+#: jurnalın pay sahibi, dərs yükü bölgüsü olan müəllim) dosyenin bağlı olduğu açılışın sillabusunu redaktə edir.
+#: ``apps.syllabus`` registrar-ı İDXAL ETMİR — açılış tərəfi resolver-i ``AppConfig.ready``-də qeyd edir
+#: (``registrar.syllabus_journal_teacher``); resolver yoxdursa yalnız ``offering.instructor`` sayılır.
+_JOURNAL_TEACHER_RESOLVERS: list = []
+_JOURNAL_TEACHER_MEMO = "_syllabus_journal_teacher_memo"
+
+
+def register_journal_teacher_resolver(resolver) -> None:
+    """``resolver(user, offering) -> bool`` — təkrar qeyd edilmir."""
+    if resolver not in _JOURNAL_TEACHER_RESOLVERS:
+        _JOURNAL_TEACHER_RESOLVERS.append(resolver)
+
+
+def is_journal_teacher(actor: SyllabusActor, offering) -> bool:
+    """Aktor bu açılışın (jurnalın) cari müəllimidirmi — nəticə açılış obyektində istifadəçi üzrə memo-lanır."""
+    user_id = actor.user_id
+    if offering is None or user_id is None:
+        return False
+    if offering.instructor_id == user_id:
+        return True
+    memo = getattr(offering, _JOURNAL_TEACHER_MEMO, None)
+    if memo is None:
+        memo = {}
+        setattr(offering, _JOURNAL_TEACHER_MEMO, memo)
+    if user_id not in memo:
+        memo[user_id] = any(resolver(actor.user, offering) for resolver in _JOURNAL_TEACHER_RESOLVERS)
+    return memo[user_id]
+
+
+def is_editor(actor: SyllabusActor, syllabus) -> bool:
+    """Məzmun redaktoru: müəllif VƏ YA dosyenin BAĞLI olduğu açılışın cari müəllimi (pay / yük bölgüsü daxil).
+
+    ⚠️ Qərar qaydası (``forbid_author``) buna BAXMIR — orada yalnız :func:`is_author` işləyir. Başqa qrupdan
+    paylaşılan / semestr dosyesi bu jurnalın müəllimi üçün redaktə olunmur (bütün qruplar üçün ortaqdır) — orada
+    redaktor «öz sillabusunu yarat» təklif edir.
+    """
+    if is_author(actor, syllabus):
+        return True
+    return bool(syllabus.offering_id and is_journal_teacher(actor, syllabus.offering))
+
+
 def _author_users(syllabus) -> list:
     """Sillabusun müəllif sayılan istifadəçiləri (``is_author`` ilə eyni qayda)."""
     users = [getattr(syllabus, "author", None)]
@@ -154,8 +196,8 @@ def has_escalated_decision_scope(actor: SyllabusActor, permission: str = PERM_AP
 
 
 def can_view(actor: SyllabusActor, syllabus) -> bool:
-    """Baxış hüququ: müəllif HƏMİŞƏ, digərləri icazə + kafedra əhatəsi ilə."""
-    if is_author(actor, syllabus):
+    """Baxış hüququ: müəllif / jurnalın cari müəllimi HƏMİŞƏ, digərləri icazə + kafedra əhatəsi ilə."""
+    if is_editor(actor, syllabus):
         return True
     if not actor.has(PERM_VIEW):
         return False
@@ -189,6 +231,9 @@ __all__ = [
     "has_decision_scope",
     "has_escalated_decision_scope",
     "is_author",
+    "is_editor",
+    "is_journal_teacher",
     "is_self_authored_by_decider",
+    "register_journal_teacher_resolver",
     "resolve_actor",
 ]

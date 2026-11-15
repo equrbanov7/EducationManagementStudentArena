@@ -152,6 +152,11 @@
         }
         editTarget = edit && edit.mode ? edit : null;
         button.disabled = false;
+        var label = q(root, "edit-label");
+        if (label) {
+            var create = editTarget && editTarget.mode === "create";
+            label.textContent = label.getAttribute(create ? "data-t-create" : "data-t-edit") || label.textContent;
+        }
         show(row, Boolean(editTarget));
     }
 
@@ -180,15 +185,19 @@
             window.location.assign(editorUrl(button, target.version));
             return;
         }
-        if (target.mode !== "new_version" || !window.EMSCore || !window.EMSCore.fetchJSON) {
+        /* Təsdiqlənmiş nüsxə toxunulmur: əvvəl yeni QARALAMA versiya («kiçik dəyişiklik»), sonra redaktor.
+           `create`: jurnal ortaq (başqa qrupun) dosyesini göstərir — bu jurnalın ÖZ qaralaması yaradılır. */
+        var payload =
+            target.mode === "new_version"
+                ? { action: "new_version", syllabus: target.syllabus, kind: "minor" }
+                : target.mode === "create"
+                  ? { action: "create", offering: target.offering }
+                  : null;
+        if (!payload || !window.EMSCore || !window.EMSCore.fetchJSON) {
             return;
         }
-        /* Təsdiqlənmiş nüsxə toxunulmur: əvvəl yeni QARALAMA versiya («kiçik dəyişiklik»), sonra redaktor. */
         button.disabled = true;
-        window.EMSCore.fetchJSON(button.getAttribute("data-action-url"), {
-            method: "POST",
-            data: { action: "new_version", syllabus: target.syllabus, kind: "minor" }
-        })
+        window.EMSCore.fetchJSON(button.getAttribute("data-action-url"), { method: "POST", data: payload })
             .then(function (data) {
                 if (data && data.ok && data.version) {
                     window.location.assign(editorUrl(button, data.version));

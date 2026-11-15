@@ -26,12 +26,12 @@ from ..constants import (
     SyllabusStatus,
 )
 from ..models import ApprovalSource, ReviewDecision, Syllabus, SyllabusReview, SyllabusVersion
-from ..state_machine import Transition, TransitionDenied, check
+from ..state_machine import TRANSITIONS, Transition, TransitionDenied, check
 from . import approval_hooks
 from . import notifications as syllabus_notifications
 from . import versioning
 from .drafts import recompute_completion, refresh_pointers
-from .scoping import is_author, is_self_authored_by_decider
+from .scoping import is_author, is_editor, is_self_authored_by_decider
 
 #: Keçid → domen qeydinin qərar dəyəri.
 _DECISION_BY_TRANSITION = {
@@ -72,7 +72,7 @@ def _in_scope(actor, syllabus, name: str) -> bool:
     """Müəllif öz sillabusunda həmişə «əhatədədir»; kafedra tərəfi scope ilə."""
     permission = _SCOPE_PERMISSION.get(name)
     if permission is None:
-        return is_author(actor, syllabus)
+        return _author_flag(actor, syllabus, name)
     if name in _CHAIR_LEVEL_TRANSITIONS:
         if actor.covers_chair_unit(syllabus.chair_unit_id, permission):
             return True
@@ -88,6 +88,15 @@ def _in_scope(actor, syllabus, name: str) -> bool:
     return actor.covers_unit(syllabus.chair_unit_id, permission)
 
 
+def _author_flag(actor, syllabus, name: str) -> bool:
+    """Müəllif əməlləri (göndər / geri çağır / düzəlişə başla) — müəllif VƏ YA bağlı açılışın cari müəllimi
+    (sahib 2026-11-15). ``forbid_author`` qərar qaydası isə DƏYİŞMİR: orada yalnız dosyenin müəllifi sayılır."""
+    rule = TRANSITIONS.get(name)
+    if rule is not None and rule.author_only:
+        return is_editor(actor, syllabus)
+    return is_author(actor, syllabus)
+
+
 def _guard(*, version, actor, name: str, reason: str = ""):
     syllabus = version.syllabus
     return check(
@@ -95,7 +104,7 @@ def _guard(*, version, actor, name: str, reason: str = ""):
         status=version.status,
         permissions=actor.permissions if not actor.is_superadmin else ["*"],
         reason=reason,
-        is_author=is_author(actor, syllabus),
+        is_author=_author_flag(actor, syllabus, name),
         completion_percent=version.completion_percent,
         in_scope=_in_scope(actor, syllabus, name),
     )
@@ -219,7 +228,7 @@ def submit(*, version, actor, request=None):
             name=Transition.SUBMIT,
             status=locked.status,
             permissions=actor.permissions if not actor.is_superadmin else ["*"],
-            is_author=is_author(actor, syllabus),
+            is_author=_author_flag(actor, syllabus, Transition.SUBMIT),
             # Tamamlanma qaldırma/yenidən hesablamadan SONRA `_apply`-da yoxlanılır.
             completion_percent=100,
             in_scope=_in_scope(actor, syllabus, Transition.SUBMIT),

@@ -1,6 +1,7 @@
 /* Redaktorun kilid banneri — «Yeni versiya yarat» (sahib 2026-11-15).
  *
  * Banner təsdiqlənmiş / rədd edilmiş / arxiv versiyada «yeni versiya yaradın» deyirdi, düyməsi yox idi.
+ * Başqasının / ortaq dosyesində isə «Öz sillabusunu yarat» (siyahının `create` əməli) — eyni axın.
  * Düymə siyahının «Yeni versiya» əməlini (`syllabus_action` → `new_version`, «kiçik dəyişiklik») çağırır və
  * redaktoru yeni QARALAMADA açır — təsdiqlənmiş versiya toxunulmur. Düyməni server yalnız redaktə hüququ
  * olana render edir; son sözü yenə servis deyir.
@@ -39,18 +40,14 @@
         }
     }
 
-    window.EMSDelegate.on("click", "[data-syllabus-editor] [data-syl-new-version]", function (event, button) {
-        event.preventDefault();
+    function run(button, payload) {
         var root = button.closest("[data-syllabus-editor]");
         var http = window.EMSCore && window.EMSCore.fetchJSON;
         if (!root || !http || button.disabled) {
             return;
         }
         button.disabled = true;
-        http(root.getAttribute("data-action-url"), {
-            method: "POST",
-            data: { action: "new_version", syllabus: button.getAttribute("data-syllabus"), kind: "minor" }
-        })
+        http(root.getAttribute("data-action-url"), { method: "POST", data: payload })
             .then(function (data) {
                 if (data && data.ok && data.version) {
                     openVersion(root, data.version);
@@ -61,5 +58,16 @@
             .catch(function (error) {
                 fail(button, error);
             });
+    }
+
+    window.EMSDelegate.on("click", "[data-syllabus-editor] [data-syl-new-version]", function (event, button) {
+        event.preventDefault();
+        run(button, { action: "new_version", syllabus: button.getAttribute("data-syllabus"), kind: "minor" });
+    });
+
+    /* Başqasının / ortaq dosye (sahib 2026-11-15): müəllimin sillabussuz jurnalı üçün öz qaralaması. */
+    window.EMSDelegate.on("click", "[data-syllabus-editor] [data-syl-create-own]", function (event, button) {
+        event.preventDefault();
+        run(button, { action: "create", offering: button.getAttribute("data-offering") });
     });
 })();

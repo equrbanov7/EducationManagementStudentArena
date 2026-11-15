@@ -35,7 +35,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
-from apps.registrar.models import CourseOffering
+from apps.registrar.models import CourseOffering, JournalShare
 from apps.syllabus.public import (
     QUEUE_STATUSES,
     STATUS_SORT_INDEX,
@@ -118,7 +118,13 @@ def _missing_rows(*, organization, user, syllabi, academic_year: str, semester: 
     ``values_list`` ilə oxunur, açılış yoxdursa heç sorğu getmir.
     """
     queryset = (
-        CourseOffering.objects.filter(organization=organization, is_active=True, instructor=user)
+        # Sahib 2026-11-15: bölünmüş jurnalın pay sahibi də «Sillabus yarat» sətrini görür (yaratma qapısı ilə eyni).
+        CourseOffering.objects.filter(
+            Q(instructor=user)
+            | Q(pk__in=JournalShare.objects.filter(teacher=user, is_active=True).values("offering_id")),
+            organization=organization,
+            is_active=True,
+        )
         .select_related("subject", "period", "instructor__profile")
         .order_by("subject__code", "pk")
     )
@@ -474,6 +480,12 @@ def build_syllabus_list_section(request, *, organization) -> dict:
         "user_id": getattr(request.user, "pk", None),
         "can_edit": context["can_create"],
         "actor": context["actor"],
+        # Sahib 2026-11-15: bölünmüş jurnalın payı — o açılışın sillabusu «öz» sətirdir (``is_editor`` ilə eyni).
+        "shared_offering_ids": set(
+            JournalShare.objects.filter(teacher_id=getattr(request.user, "pk", None), is_active=True).values_list(
+                "offering_id", flat=True
+            )
+        ),
     }
     scope = scope if context["mine"] else ""
     switch = _scope_switch(context, visible, scope=scope, organization=organization, user=request.user)

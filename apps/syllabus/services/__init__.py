@@ -73,6 +73,8 @@ from .scoping import (  # noqa: F401
     has_decision_scope,
     has_escalated_decision_scope,
     is_author,
+    is_editor,
+    is_journal_teacher,
     is_self_authored_by_decider,
     resolve_actor,
 )

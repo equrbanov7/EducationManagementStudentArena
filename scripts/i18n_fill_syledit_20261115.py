@@ -21,6 +21,12 @@ def quote(text):
 ENTRIES = {
     "django": {
         "registrar.syllabus": {
+            "Öz sillabusunu yarat": t(
+                "Create your own syllabus",
+                "Создать свой силлабус",
+                "Kendi müfredatını oluştur",
+                "Eigenen Syllabus erstellen",
+            ),
             "Sillabusu redaktə et": t(
                 "Edit the syllabus", "Редактировать силлабус", "Müfredatı düzenle", "Syllabus bearbeiten"
             ),
@@ -32,6 +38,35 @@ ENTRIES = {
             ),
         },
         "accounts.syllabus": {
+            "Bu sillabusa yalnız baxa bilərsiniz": t(
+                "You can only view this syllabus",
+                "Этот силлабус доступен вам только для просмотра",
+                "Bu müfredatı yalnızca görüntüleyebilirsiniz",
+                "Diesen Syllabus können Sie nur ansehen",
+            ),
+            "Sillabusu onun müəllifi və bağlı olduğu jurnalın müəllimləri redaktə edir. Başqa qrupla ortaq istifadə "
+            "olunan sillabus bütün qruplar üçün eynidir.": t(
+                "The syllabus is edited by its author and the teachers of the journal it belongs to. A syllabus "
+                "shared with another group is the same for all groups.",
+                "Силлабус редактируют его автор и преподаватели журнала, к которому он привязан. Силлабус, общий "
+                "с другой группой, одинаков для всех групп.",
+                "Müfredatı yazarı ve bağlı olduğu defterin öğretmenleri düzenler. Başka bir grupla ortak kullanılan "
+                "müfredat tüm gruplar için aynıdır.",
+                "Den Syllabus bearbeiten sein Autor und die Lehrenden des zugehörigen Journals. Ein mit einer "
+                "anderen Gruppe geteilter Syllabus ist für alle Gruppen gleich.",
+            ),
+            "Öz sillabusunu yarat": t(
+                "Create your own syllabus",
+                "Создать свой силлабус",
+                "Kendi müfredatını oluştur",
+                "Eigenen Syllabus erstellen",
+            ),
+            "Sillabus yaradıla bilmədi. Səhifəni yeniləyib yenidən cəhd edin.": t(
+                "Could not create the syllabus. Refresh the page and try again.",
+                "Не удалось создать силлабус. Обновите страницу и попробуйте ещё раз.",
+                "Müfredat oluşturulamadı. Sayfayı yenileyip tekrar deneyin.",
+                "Der Syllabus konnte nicht erstellt werden. Laden Sie die Seite neu und versuchen Sie es erneut.",
+            ),
             "Versiya kafedra müdirinin baxışındadır. Dəyişiklik etmək üçün «Sillabuslar» siyahısında təqdimatı "
             "geri çağırın — sonra redaktə yenidən açılır.": t(
                 "This version is being reviewed by the head of department. To make changes, withdraw the "

@@ -411,7 +411,7 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
     if (
         plan_hours
         and context.get("view_state") == "normal"
-        and context.get("is_author")
+        and context.get("can_edit", context.get("is_author"))
         and seed_week_hours(context["version"], plan_hours)
     ):
         context = build_syllabus_editor_context(request, organization=organization, version=version)
@@ -563,6 +563,8 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
             "actions": list(context["actions"]),
             # Kilid banneri «Yeni versiya yarat» (sahib 2026-11-15) — `syllabus_new_version.js`.
             "can_new_version": bool(context.get("can_new_version")),
+            "foreign": not context.get("can_edit", True),
+            "own_offering_id": str(context["own_offering"].pk) if context.get("own_offering") else "",
             # Təkrar istifadə banneri (bağlı / mənbə / «artıq sillabusu var») — bax `reuse_context`.
             "reuse": editor_reuse_state(
                 request, organization, syllabus=syllabus, version=version_row, is_author=bool(context["is_author"])
