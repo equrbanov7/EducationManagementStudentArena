@@ -140,3 +140,51 @@ class ReinstatePartTimeGraduatesTest(TestCase):
         self.assertIn("reinstated=3", output)
         self.assertEqual(self.status("unknown"), "enrolled")
         self.assertEqual(self.status("old"), "graduated")
+
+    def test_unknown_year_uses_group_code_and_reopens_archived_group(self):
+        with bypass_rls():
+            role = self.org.roles.get(name="student")
+            program = self.records["target"].program
+            groups = {}
+            for name in ("2131 P", "2130 P"):
+                groups[name] = OrgUnit.objects.create(
+                    organization=self.org,
+                    name=name,
+                    slug=f"ptg-{name.replace(' ', '').lower()}",
+                    unit_type="group",
+                    is_active=False,
+                    settings={"graduation_archived": {"tag": "test"}},
+                )
+            for key, name in (("y2021", "2131 P"), ("y2020", "2130 P")):
+                user = User.objects.create_user(f"ptg.{key}", f"ptg.{key}@example.test", "pw")
+                Membership.objects.create(user=user, organization=self.org, role=role, is_primary=True, is_active=True)
+                curriculum, _ = Curriculum.objects.get_or_create(
+                    organization=self.org, program=program, admission_year=1950
+                )
+                record = StudentAcademicRecord.objects.create(
+                    organization=self.org,
+                    student=user,
+                    program=program,
+                    curriculum=curriculum,
+                    group=groups[name],
+                    admission_year=1950,
+                    education_form="part_time",
+                    status="enrolled",
+                    is_active=True,
+                )
+                movements.create_movement(
+                    record=record,
+                    kind="graduation",
+                    order_number="MZN-SINX-2026",
+                    order_date=dt.date(2026, 7, 1),
+                    reason="test",
+                    actor=self.admin,
+                )
+                self.records[key] = record
+        output = self.run_cmd("--include-unknown-year", "--apply")
+        self.assertIn("groups_reopened=1", output)
+        self.assertIn("skip_unknown_code_year_2020=1", output)
+        self.assertEqual((self.status("y2021"), self.status("y2020")), ("enrolled", "graduated"))
+        with bypass_rls():
+            self.assertTrue(OrgUnit.objects.get(pk=groups["2131 P"].pk).is_active)
+            self.assertFalse(OrgUnit.objects.get(pk=groups["2130 P"].pk).is_active)

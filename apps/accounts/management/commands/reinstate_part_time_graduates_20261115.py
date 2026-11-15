@@ -46,6 +46,20 @@ SYNC_ORDER = "MZN-SINX-2026"
 SYNC_ORDER_DATE = datetime.date(2026, 7, 1)
 #: Köçürmənin «qəbul ili bilinmir» sentineli (``legacy_import`` ``UNKNOWN_ADMISSION_YEAR``).
 UNKNOWN_ADMISSION_YEAR = 1950
+#: Köçürmənin «boşalan qrupu arxivlə» izi (``legacy_import`` ``graduation_owner.GROUP_SETTING``).
+GROUP_ARCHIVE_SETTING = "graduation_archived"
+GROUP_REOPEN_REASON = "groups: restored from archive — qiyabi tələbələr səhvən məzun edilmişdi (sahib 2026-11-15)"
+_CODE_YEAR_RE = re.compile(r"^\s*[1-9][0-9]([0-9]{2})")
+
+
+def group_code_year(name) -> int | None:
+    """Qiyabi qrup kodunun son iki rəqəmi qəbul ilidir: «2032P» → 2022, «2131 P» → 2021 (1990 + NN).
+
+    Prod-da qəbul ili məlum olan qiyabilər bu qaydaya uyğundur (2032P / 2132P / 2532 … → 2022)."""
+    match = _CODE_YEAR_RE.match(str(name or ""))
+    return 1990 + int(match.group(1)) if match else None
+
+
 ORDER_NUMBER = "BRP-SINX-2026"
 REASON = "Bərpa — köçürmədə qiyabi tələbə səhvən məzun edilmişdi (qiyabi təhsil 5–6 ildir; sahibin 2026-11-15 qərarı)"
 UNDO_REASON = "reinstate_part_time_graduates_20261115 geri qaytarma — yenidən məzun"
@@ -71,7 +85,13 @@ def _last_graduation(movement_model, organization, record_ids) -> dict:
 
 
 def candidates(
-    organization, *, min_year: int, counts: Counter, skipped_groups: Counter, include_unknown: bool = False
+    organization,
+    *,
+    min_year: int,
+    counts: Counter,
+    skipped_groups: Counter,
+    include_unknown: bool = False,
+    reopen_groups: dict | None = None,
 ) -> list:
     from apps.organizations.public import group_rule_form
 
@@ -94,6 +114,7 @@ def candidates(
     )
     last = _last_graduation(movement_model, organization, [record.pk for record in records])
     chosen = []
+    reopen_groups = {} if reopen_groups is None else reopen_groups
     for record in records:
         movement = last.get(record.pk)
         if movement is None or movement.order_number != SYNC_ORDER:
@@ -104,20 +125,52 @@ def candidates(
             continue
         counts["part_time_sync_graduated"] += 1
         year = int(record.admission_year or 0)
-        # Sahib 2026-11-15: qəbul ili bilinməyən (köçürmə sentineli 1950 və ya boş) qiyabilər də məzun deyil — bərpa.
+        # Sahib 2026-11-15: qəbul ili bilinməyən (köçürmə sentineli 1950) qiyabilər — qəbul ili qrup kodundan
+        # (``group_code_year``: «2131 P» → 2021); yalnız ``min_year``-dən (2021) sonrakılar bərpa olunur, onların
+        # köçürmədə arxivlənmiş qrupu da arxivdən qaytarılır.
         unknown = year <= UNKNOWN_ADMISSION_YEAR
-        if year < min_year and not (include_unknown and unknown):
+        if unknown and include_unknown:
+            inferred = group_code_year(getattr(record.group, "name", ""))
+            if inferred is None or inferred < min_year:
+                counts[f"skip_unknown_code_year_{inferred or 'none'}"] += 1
+                continue
+            counts[f"unknown_code_year_{inferred}"] += 1
+        elif year < min_year:
             counts[f"skip_year_{year or 'unknown'}"] += 1
             continue
         if record.group is None:
             counts["skip_no_group"] += 1
             continue
         if not record.group.is_active:
-            counts["skip_group_inactive"] += 1
-            skipped_groups[record.group.name] += 1
-            continue
+            if not (unknown and include_unknown and GROUP_ARCHIVE_SETTING in (record.group.settings or {})):
+                counts["skip_group_inactive"] += 1
+                skipped_groups[record.group.name] += 1
+                continue
+            reopen_groups[record.group.pk] = record.group
         chosen.append(record)
     return chosen
+
+
+def reopen_archived_groups(organization, units, *, actor, batch: str) -> list[str]:
+    """Köçürmənin arxivlədiyi qrupu «arxivdən qaytar» (reyestr əməli ilə eyni iz: ``is_active`` + audit)."""
+    reopened = []
+    for unit in units:
+        blob = dict(unit.settings) if isinstance(unit.settings, dict) else {}
+        blob["graduation_reopened"] = {"at": timezone.now().isoformat(), "batch": batch}
+        unit.settings = blob
+        unit.is_active = True
+        unit.save(update_fields=["is_active", "settings", "updated_at"])
+        log_action(
+            action=AuditAction.UPDATE,
+            user=actor,
+            organization=organization,
+            obj=unit,
+            reason=GROUP_REOPEN_REASON,
+            old_values={"is_active": False},
+            new_values={"is_active": True, "batch": batch},
+        )
+        reopened.append(str(unit.pk))
+    return reopened
 
 
 def reinstate(
@@ -139,9 +192,18 @@ def reinstate(
     period = student_group_journals.current_period(organization)
     today = timezone.localdate()
     done = []
-    for record in candidates(
-        organization, min_year=min_year, counts=counts, skipped_groups=skipped_groups, include_unknown=include_unknown
-    ):
+    reopen_groups: dict = {}
+    chosen = candidates(
+        organization,
+        min_year=min_year,
+        counts=counts,
+        skipped_groups=skipped_groups,
+        include_unknown=include_unknown,
+        reopen_groups=reopen_groups,
+    )
+    reopened = reopen_archived_groups(organization, list(reopen_groups.values()), actor=actor, batch=batch)
+    counts["groups_reopened"] = len(reopened)
+    for record in chosen:
         try:
             with transaction.atomic():
                 movement = domain.create_movement(
@@ -181,7 +243,7 @@ def reinstate(
             AuditAction.UPDATE,
             user=actor,
             organization=organization,
-            new_values={"records": done},
+            new_values={"records": done, "groups": reopened},
             reason=f"reinstate_part_time_graduates_20261115 {batch}",
             resource_type=RESOURCE,
             resource_id=batch,
@@ -218,6 +280,17 @@ def undo(organization, batch, *, actor) -> Counter:
     counts["skipped_not_enrolled"] = (
         len(ids) - counts["regraduated"] - sum(value for key, value in counts.items() if key.startswith("failed_"))
     )
+    # Arxivdən qaytarılan qruplar yenidən arxivlənir — yalnız aktiv qeyd qalmayıbsa.
+    unit_model = django_apps.get_model("organizations", "OrgUnit")
+    for unit in unit_model.objects.filter(
+        organization=organization, pk__in=(entry.new_values or {}).get("groups", []), is_active=True
+    ):
+        if record_model.objects.filter(organization=organization, group=unit, is_active=True).exists():
+            counts["groups_kept_active"] += 1
+            continue
+        unit.is_active = False
+        unit.save(update_fields=["is_active", "updated_at"])
+        counts["groups_rearchived"] += 1
     log_action(
         AuditAction.UPDATE,
         user=actor,
