@@ -244,6 +244,9 @@
 #       (434 R paylarına alt qrup tələbə siyahısı). Sabit id-lər, defolt dry-run. Loga YALNIZ saylar.
 #   bind_lab_lessons_20261108 — sahib 2026-11-08: 236 EM 03.11 qrupsuz lab dərsi → Lab-1 (qeydlər silinmir). Sabit
 #       id-lər, defolt dry-run; `batch=undo` (apply) geri qaytarır. Loga YALNIZ saylar.
+#   reinstate_part_time_graduates_20261115 — sahib 2026-11-15: köçürmədə səhvən «Məzun» (MZN-SINX-2026) edilmiş qiyabi
+#       bakalavrlar (qəbul 2021+) rəsmi «Bərpa» əmri ilə eyni qrupa qaytarılır, giriş açılır, cari jurnallara salınır.
+#       Defolt dry-run; `ptgrad-…` + apply geri qaytarır. Loga saylar və qrup adları (`pt_grad:`).
 #   move_merged_fin_20261115 — sahib 2026-11-15: birləşmiş dublikatın FİN-i FİN-i boş əsas hesaba keçir
 #       (`batch` = MƏNBƏ:HƏDƏF[,…]; `finmove-…` + apply geri qaytarır). Defolt dry-run; loga YALNIZ saylar (`fin_move:`).
 #   merge_duplicate_teacher — sahib 2026-11-08: müəllimin dublikat hesabı (mənbə) → əsas hesab (hədəf). `batch` =
@@ -531,6 +534,7 @@ on:
           - merge_duplicate_student
           - merge_duplicate_teacher
           - move_merged_fin_20261115
+          - reinstate_part_time_graduates_20261115
           - merge_psychology_duplicates_20261105
           - merge_psychology_duplicates_20261106
           - relocate_twin_enrollment
@@ -1720,6 +1724,17 @@ jobs:
                 args=(--org "$ORG" --actor "$actor" --source "${BATCH%%:*}" --target "${BATCH##*:}")
               fi
               ;;
+            reinstate_part_time_graduates_20261115)
+              # Sahib 2026-11-15: səhvən məzun edilmiş qiyabilər → Bərpa. batch = ptgrad-… (undo, apply) və ya boş.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^ptgrad-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || { echo "batch formatı: ptgrad-…" >&2; exit 2; }
+                test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }
+                args+=(--undo "$BATCH")
+              fi
+              ;;
             move_merged_fin_20261115)
               # Sahib 2026-11-15: birləşmiş dublikatın FİN-i → FİN-i boş əsas hesab. batch = MƏNBƏ:HƏDƏF[,…] və ya finmove-… (undo, apply).
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
@@ -2614,6 +2629,17 @@ jobs:
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "reinstate_part_time_graduates_20261115" ]; then
+            # Loga YALNIZ «pt_grad:» sətirləri (saylar, qrup adları, paket id — tələbə adı yoxdur) və rədd kodu.
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^pt_grad: [a-z_]+=[^[:cntrl:]]{0,4000}$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_0-9]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
               rm -f "$RUNNER_TEMP/out.log"
               exit "$status"
             fi

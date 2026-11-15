@@ -56,6 +56,11 @@ UNKNOWN_ADMISSION_YEAR = 1950
 #: Bu ildən əvvəlki qəbul ili etibarsız sayılır (sentinel / «Silinməlidir» qabındakı 2000) — yoxlanmalı.
 MIN_PLAUSIBLE_YEAR = 2001
 _DEFAULT_ECTS = {"master": 120}
+#: Sahib 2026-11-15: «qiyabilər 5 il, bəlkə 6 il təhsil ala bilər (uzanaraq)» — qiyabi bakalavrın nominal müddəti
+#: bir il artıqdır, üstəlik bir il uzadılma payı; bu müddət bitməyibsə avtomatik MƏZUN EDİLMİR (2021 qəbulu daxil).
+PART_TIME_EXTRA_YEARS = 1
+PART_TIME_GRACE_YEARS = 1
+PART_TIME = "part_time"
 
 
 def sync_graduation(run) -> None:
@@ -64,11 +69,34 @@ def sync_graduation(run) -> None:
     GraduationSync(run).execute()
 
 
-def study_years(program) -> int:
-    """Proqramın müddəti (il): ceil(ECTS / 60); ECTS yoxdursa dərəcəyə görə (bakalavr 4, magistr 2)."""
+def study_years(program, education_form: str = "") -> int:
+    """Proqramın müddəti (il): ceil(ECTS / 60); ECTS yoxdursa dərəcəyə görə (bakalavr 4, magistr 2).
+
+    Qiyabi bakalavr (``education_form=part_time``) bir il uzundur (sahib 2026-11-15).
+    """
 
     ects = int(getattr(program, "ects_total", 0) or 0) or _DEFAULT_ECTS.get(getattr(program, "degree_level", ""), 240)
-    return (ects + 59) // 60
+    years = (ects + 59) // 60
+    if education_form == PART_TIME and getattr(program, "degree_level", "") != "master":
+        years += PART_TIME_EXTRA_YEARS
+    return years
+
+
+def record_education_form(record) -> str:
+    """Tələbənin forması: qeydin öz forması, ya da qrup adının qaydası («4 rəqəm → qiyabi», sahib 2026-10-25).
+
+    Köçürmədə qeydlərin çoxu defolt ``full_time`` qaldı — ona görə qrup adı qiyabi deyirsə qiyabi sayılır.
+    """
+
+    from apps.organizations.public import group_rule_form
+
+    form = str(getattr(record, "education_form", "") or "")
+    if form == PART_TIME:
+        return PART_TIME
+    group = getattr(record, "group", None)
+    if group is not None and group_rule_form(group)[0] == PART_TIME:
+        return PART_TIME
+    return form
 
 
 def academic_year_start(period, today=None) -> int:
@@ -236,9 +264,12 @@ class GraduationSync:
         year = int(record.admission_year or 0)
         if year <= UNKNOWN_ADMISSION_YEAR or year < MIN_PLAUSIBLE_YEAR:
             return "review.year_unknown"
-        if year + study_years(record.program) > self.cutoff_year:
+        form = record_education_form(record)
+        years = study_years(record.program, form)
+        grace = PART_TIME_GRACE_YEARS if form == PART_TIME else 0
+        if year + years + grace > self.cutoff_year:
             return "review.period_not_ended"
-        final_year = year + study_years(record.program) - 1
+        final_year = year + years - 1
         last = _year_start(record.last_year)
         if last is None and final_year >= self.history_start:
             return "review.no_journal_history"
@@ -282,7 +313,7 @@ class GraduationSync:
 
     def _label(self, record) -> str:
         group = getattr(record.group, "name", "") or "—"
-        years = study_years(record.program)
+        years = study_years(record.program, record_education_form(record))
         last = " ".join(part for part in (record.last_year or "", record.last_name_period or "") if part) or "—"
         return (
             f"{group} · qəbul {record.admission_year} · {record.program.degree_level} {years} il"
@@ -321,6 +352,7 @@ __all__ = [
     "REASON",
     "GraduationSync",
     "academic_year_start",
+    "record_education_form",
     "study_years",
     "sync_graduation",
 ]
