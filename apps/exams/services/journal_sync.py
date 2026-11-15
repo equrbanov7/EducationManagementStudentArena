@@ -338,6 +338,35 @@ def sync_final_attempt(attempt, *, actor=None, appeal_id=None):
     return status, row
 
 
+def official_final_attempts(queryset):
+    """Bitmiş final cəhdlərindən hər jurnal qeydiyyatı üzrə ən son başlamış rəsmi cəhdi seç (bərpa yolları üçün)."""
+    from django.db.models import F
+
+    from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
+    from apps.exams.services.access_policy import FINAL_EXAM_CATEGORY
+    from apps.exams.services.journal_sync_scope import target_key
+
+    rows = (
+        queryset.filter(
+            exam__subject__isnull=False,
+            exam__exam_type_extended=FINAL_EXAM_CATEGORY,
+            exam__is_deleted=False,
+            is_trial=False,
+            status__in=ATTEMPT_FINISHED_STATUSES,
+        )
+        .select_related("exam", "exam__organization", "user")
+        .prefetch_related("exam__journal_offerings")
+        .order_by("user_id", F("started_at").desc(nulls_last=True), "-pk")
+    )
+    seen = set()
+    for attempt in rows.iterator(chunk_size=500):
+        key = target_key(attempt)
+        if key in seen:
+            continue
+        seen.add(key)
+        yield attempt
+
+
 def schedule_journal_sync(attempt, *, actor=None, appeal_id=None):
     """Jurnal yazısını TRANZAKSİYA TƏSDİQİNDƏN SONRAYA planla.
 

@@ -29,7 +29,7 @@ from apps.registrar.journal_access_diagnostics import journal_access_diagnostics
 from apps.registrar.midterm_bridge import record_midterm_result, student_interim_rows
 from apps.registrar.models import StudentAcademicRecord
 from apps.registrar.services import enroll_student_in_subject
-from apps.registrar.signals import student_group_changed
+from apps.registrar.signals import enrollments_activated, student_group_changed
 from apps.registrar.teaching_hours import recorded_teaching_hours
 
 from . import student_display_policy as student_policy
@@ -58,6 +58,7 @@ __all__ = [
     "record_final_result",
     "resolve_exam_result_target",
     "record_midterm_result",
+    "enrollments_activated",
     "student_group_changed",
 ]
 #: Tələbənin kabinetdən ÖZ transkriptini görməsi/yükləməsi.
@@ -79,8 +80,7 @@ __all__ = [
 #: Müraciət axını hazır olanda: burada ``True`` + müraciət təsdiqi yoxlaması.
 STUDENT_TRANSCRIPT_SELF_SERVICE = False
 
-# ``AcademicPeriod`` (organizations) is resolved via the app registry — registrar never imports organizations
-# statically, which keeps the module-dependency graph acyclic.
+# ``AcademicPeriod`` (organizations) via the app registry — registrar never imports organizations statically.
 
 
 def _academic_period_model():

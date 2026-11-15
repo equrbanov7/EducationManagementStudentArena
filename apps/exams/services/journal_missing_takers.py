@@ -1,7 +1,7 @@
 """İmtahan vermiş, nəticəsi olan, amma jurnalda olmayan tələbələr — tap, jurnala əlavə et, nəticəni yaz (sahib 2026-11-11).
 
 Sahib: «İmtahana girən və nəticəsi olan hər kəs həmin fənni jurnalında görsün, balını görsün.» Rəsmi cəhdlər
-(midterm: :func:`.midterm_journal_sync.official_attempts`; final: ``sync_final_scores.official_final_attempts``) cari
+(midterm: :func:`.midterm_journal_sync.official_attempts`; final: :func:`.journal_sync.official_final_attempts`) cari
 dövrdə başlamış cəhdlərdir; körpünün hədəfi tapılmayan (``target_identity is None``) cəhd «itkin»dir — 25% müraciətinə
 bağlı cəhd İSTİSNADIR (onun hədəfi jurnal qeydiyyatı deyil; bağlanmış müraciət də ``None`` qaytarır).
 
@@ -30,8 +30,8 @@ MAX_MISSING_SHARE = 0.20
 
 
 def _attempts(organization, period):
-    from apps.exams.management.commands.sync_final_scores import official_final_attempts
     from apps.exams.models import ExamAttempt
+    from apps.exams.services.journal_sync import official_final_attempts
     from apps.exams.services.midterm_journal_sync import official_attempts
 
     rows = ExamAttempt.objects.filter(exam__organization=organization, started_at__date__gte=period.start_date)
