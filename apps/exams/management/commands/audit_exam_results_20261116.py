@@ -62,6 +62,7 @@ class Command(BaseCommand):
         parser.add_argument("--org", required=True, help="təşkilatın slug-ı (məs. qku)")
         parser.add_argument("--actor", required=True, help="aktiv superadmin istifadəçi adı (audit müəllifi)")
         parser.add_argument("--apply", action="store_true", help="həqiqətən yaz (defolt: dry-run)")
+        parser.add_argument("--detail", action="store_true", help="jurnalsız hallar: fənn kodu + qrup adı (şəxssiz)")
 
     def handle(self, *args, **options):
         apply = bool(options["apply"])
@@ -71,6 +72,8 @@ class Command(BaseCommand):
         self.paper: Counter = Counter()
         self.cleanup: Counter = Counter()
         self.gap_rows: Counter = Counter()
+        self.details: Counter = Counter()
+        self.detail = bool(options.get("detail"))
         self.relinked = 0
         try:
             with rls_worker_atomic(), bypass_rls():
@@ -187,6 +190,11 @@ class Command(BaseCommand):
             )
             self.gaps[kind][gap.reason] += 1
             self.gap_rows[(kind, exam.pk, gap.reason)] += 1
+            if self.detail:
+                code, group, hint = student_gaps.describe(
+                    ctx, gap, student_id=attempt.user_id, subject_id=exam.subject_id, exam_group_ids=units[exam.pk]
+                )
+                self.details[(exam.pk, gap.reason, code, group, hint)] += 1
 
     def _paper(self, organization, period) -> None:
         """İmtahan Mərkəzinin kağız nəticəsi tələbənin GÖRMƏDİYİ (``dropped``) qeydiyyatdadırmı."""
@@ -225,3 +233,6 @@ class Command(BaseCommand):
         self.stdout.write(f"{PREFIX} links relinked={self.relinked}")
         for (kind, exam_id, reason), count in sorted(self.gap_rows.items(), key=lambda item: (-item[1], item[0])):
             self.stdout.write(f"{PREFIX} gap kind={kind} exam={exam_id} reason={reason} n={count}")
+        for (exam_id, reason, code, group, hint), count in sorted(self.details.items(), key=lambda item: item[0]):
+            line = f"{PREFIX} detail exam={exam_id} reason={reason} subject={code} group={group} n={count} | {hint}"
+            self.stdout.write(line[:400])

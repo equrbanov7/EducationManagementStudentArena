@@ -206,3 +206,16 @@ class ClassifyStudentTests(_AuditSetup):
             gap = exam_result_gaps.classify_student(ctx, student_id=twin.pk, subject_id=self.subject.pk)
         self.assertEqual(gap.reason, exam_result_gaps.DUPLICATE_ACCOUNT)
         self.assertIsNone(gap.offering_id)
+
+
+class DetailTests(_AuditSetup):
+    def test_detail_names_subject_code_and_group_but_no_student(self):
+        with bypass_rls():
+            Enrollment.objects.filter(pk=self.enrollment.pk).update(status="dropped")
+        exam, options = self._exam_for([self.group], title="Detail")
+        self._finish(exam, options, correct=2)
+        out = self._run("--detail")
+        line = next(row for row in out.splitlines() if " detail " in row)
+        self.assertIn(f"exam={exam.pk} reason=dropped subject={self.subject.code} group={self.group.name}", line)
+        self.assertIn("dropped journal=", line)
+        self.assertNotIn(self.student.username, out)

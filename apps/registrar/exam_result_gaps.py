@@ -168,6 +168,10 @@ def classify_student(ctx, *, student_id, subject_id, exam_group_ids=()) -> Stude
     if family:
         target, count = _single(family)
         return StudentGap(FAMILY_JOURNAL, target) if count == 1 else StudentGap(FAMILY_AMBIGUOUS)
+    from apps.registrar.exam_journal_gaps import _variant_codes
+
+    if _variant_codes(ctx.organization, ctx.period, subject_id, [student_id]):
+        return StudentGap(VARIANT_SUBJECT)  # öz qrupunda fənn ADI OXŞAR başqa kartdadır — yerləşdirmədən əvvəl
     exam_groups = [gid for gid in exam_group_ids or () if gid]
     if exam_groups:
         by_unit = ctx.family_offerings(subject_id, exam_groups)
@@ -176,11 +180,53 @@ def classify_student(ctx, *, student_id, subject_id, exam_group_ids=()) -> Stude
             return StudentGap(OTHER_GROUP_JOURNAL, target)
         if count > 1:
             return StudentGap(OTHER_GROUP_AMBIGUOUS)
-    from apps.registrar.exam_journal_gaps import _variant_codes
-
-    if _variant_codes(ctx.organization, ctx.period, subject_id, [student_id]):
-        return StudentGap(VARIANT_SUBJECT)
     return StudentGap(NO_JOURNAL)
+
+
+def _unit_names(ids) -> list:
+    from django.apps import apps as django_apps
+
+    OrgUnit = django_apps.get_model("organizations", "OrgUnit")
+    return sorted(OrgUnit.objects.filter(pk__in=list(ids)).values_list("name", flat=True))
+
+
+def describe(ctx, gap: StudentGap, *, student_id, subject_id, exam_group_ids=()) -> tuple:
+    """Hesabat üçün ŞƏXSSİZ izah → ``(fənn kodu, tələbənin qrupu, ipucu)`` (qrup adı + kodlar, ad yoxdur)."""
+    from apps.registrar.models import Subject
+
+    code = Subject.objects.filter(pk=subject_id).values_list("code", flat=True).first() or "-"
+    record = _record(ctx.organization, student_id)
+    group = _unit_names([record.group_id])[0] if record is not None and record.group_id else "-"
+    hint = "-"
+    if gap.reason == DROPPED:
+        row = (
+            Enrollment.objects.filter(
+                organization=ctx.organization,
+                student_id=student_id,
+                offering__period=ctx.period,
+                offering__subject_id__in=ctx.subject_ids(subject_id),
+            )
+            .exclude(status=Enrollment.Status.ENROLLED)
+            .select_related("offering__group")
+            .order_by("-updated_at")
+            .first()
+        )
+        if row is not None:
+            journal = getattr(row.offering.group, "name", "-")
+            hint = f"{row.status}{'+superseded' if row.superseded_by_id else ''} journal={journal}"
+    elif gap.reason in (OTHER_GROUP_JOURNAL, OTHER_GROUP_AMBIGUOUS, NO_JOURNAL):
+        in_exam = record is not None and str(record.group_id) in {str(g) for g in exam_group_ids or ()}
+        by_unit = ctx.family_offerings(subject_id, [g for g in exam_group_ids or () if g]) if exam_group_ids else {}
+        journal_groups = {gid for rows in by_unit.values() for _pk, gid in rows}
+        names = _unit_names(journal_groups)
+        hint = f"own_group_in_exam={int(in_exam)} journals={len(journal_groups)} [{', '.join(names[:4])}]"
+    elif gap.reason == VARIANT_SUBJECT:
+        from apps.registrar.exam_journal_gaps import _variant_codes
+
+        hint = ",".join(
+            sorted(_variant_codes(ctx.organization, ctx.period, subject_id, [student_id]).get(student_id, ()))
+        )
+    return code, group, hint
 
 
 __all__ = [
@@ -189,4 +235,5 @@ __all__ = [
     "StudentGap",
     "classify_student",
     "context",
+    "describe",
 ]
