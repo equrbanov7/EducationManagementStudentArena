@@ -33,6 +33,7 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 
 from core.constants import OrgUnitType
+from core.person_names import person_label
 from core.search_text import tokens_of, tolerant_match
 
 from . import status as academic_status
@@ -382,14 +383,15 @@ def instructor_options(organization):
             user__is_active=True,
             role__name__in=("teacher", "assistant", "assistant_teacher", "instructor", "collaborator"),
         )
-        .select_related("user")
-        .order_by("user__first_name", "user__last_name", "user__username")
+        .select_related("user__profile")
+        .order_by("user__last_name", "user__first_name", "user__username")
     )
     for membership in rows:
         if membership.user_id in seen:
             continue
         seen.add(membership.user_id)
-        out.append({"value": str(membership.user_id), "label": _person(membership.user)})
+        # Seçici: «Soyad Ad Ata adı» (sahib 2026-11-15).
+        out.append({"value": str(membership.user_id), "label": person_label(membership.user)})
     return out
 
 

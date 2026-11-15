@@ -101,7 +101,7 @@ class JournalLessonTeacherLookupTest(TestCase):
         )
         self.assertEqual(resp.status_code, 200)
         payload = resp.json()
-        self.assertEqual([row["text"] for row in payload["results"]], ["Ada1 Named"])
+        self.assertEqual([row["text"] for row in payload["results"]], ["Named Ada1"])
         self.assertFalse(payload["has_more"])
 
     def test_search_endpoint_paginates(self):
@@ -125,7 +125,7 @@ class JournalLessonTeacherLookupTest(TestCase):
             {"resolve": str(self.teachers[1].id)},
         )
         payload = resp.json()
-        self.assertEqual(payload["results"], [{"id": str(self.teachers[1].id), "text": "Ada1 Named"}])
+        self.assertEqual(payload["results"], [{"id": str(self.teachers[1].id), "text": "Named Ada1"}])
 
     def test_resolve_unknown_id_returns_empty(self):
         resp = self._client(self.teachers[0]).get(

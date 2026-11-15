@@ -13,6 +13,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.cache import never_cache
 
+from core.person_names import person_label
 from core.search_text import tolerant_match
 
 from ..constants import (
@@ -85,7 +86,7 @@ def availability_page(request):
             {
                 "selected": {
                     "id": teacher.pk,
-                    "name": (teacher.get_full_name() or "").strip() or teacher.username,
+                    "name": person_label(teacher),  # siyahıdakı kimi «Soyad Ad Ata adı»
                     "max_pairs_per_day": getattr(row, "max_pairs_per_day", None) or "",
                     "max_days_per_week": getattr(row, "max_days_per_week", None) or "",
                     "priority": getattr(row, "priority", 1) or 1,

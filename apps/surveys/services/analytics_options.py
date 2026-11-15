@@ -17,6 +17,7 @@ from dataclasses import replace
 
 from django.db.models import Count
 
+from core.person_names import person_label_from_parts
 from core.search_text import tolerant_q
 
 from . import filters as flt
@@ -124,10 +125,6 @@ def _teacher_base(organization, scope, filters, campaign_ids):
     return flt.responses(organization, scope, unit_filters, campaign_ids).exclude(teacher__isnull=True)
 
 
-def _display_name(first, last, username) -> str:
-    return f"{first or ''} {last or ''}".strip() or (username or "")
-
-
 def teacher_choices(organization, scope, filters, campaign_ids, *, query="", limit=20, offset=0) -> dict:
     """``{"results": [{"id", "text", "n"}], "has_more"}`` — ``EMSSearchableSelect`` müqaviləsi.
 
@@ -140,19 +137,32 @@ def teacher_choices(organization, scope, filters, campaign_ids, *, query="", lim
     limit = max(1, min(int(limit or 20), 50))
     offset = max(0, int(offset or 0))
     base = _teacher_base(organization, scope, filters, campaign_ids)
-    name_q = tolerant_q(query, ("teacher__first_name", "teacher__last_name", "teacher__username"))
+    name_q = tolerant_q(
+        query, ("teacher__first_name", "teacher__last_name", "teacher__username", "teacher__profile__patronymic")
+    )
     if name_q is not None:
         base = base.filter(name_q)
     rows = list(
-        base.values("teacher_id", "teacher__first_name", "teacher__last_name", "teacher__username")
+        base.values(
+            "teacher_id",
+            "teacher__first_name",
+            "teacher__last_name",
+            "teacher__profile__patronymic",
+            "teacher__username",
+        )
         .annotate(n=Count("id"))
-        .order_by("teacher__first_name", "teacher__last_name", "teacher_id")[offset : offset + limit + 1]
+        .order_by("teacher__last_name", "teacher__first_name", "teacher_id")[offset : offset + limit + 1]
     )
     return {
         "results": [
             {
                 "id": row["teacher_id"],
-                "text": _display_name(row["teacher__first_name"], row["teacher__last_name"], row["teacher__username"]),
+                "text": person_label_from_parts(
+                    row["teacher__last_name"],
+                    row["teacher__first_name"],
+                    row["teacher__profile__patronymic"],
+                    row["teacher__username"],
+                ),
                 "n": row["n"],
             }
             for row in rows[:limit]
@@ -169,7 +179,8 @@ def teacher_label(organization, scope, filters, campaign_ids, teacher_id) -> str
     row = (
         _teacher_base(organization, scope, filters or flt.ResultFilters(), campaign_ids)
         .filter(teacher_id=teacher_id)
-        .values_list("teacher__first_name", "teacher__last_name", "teacher__username")
+        .values_list("teacher__last_name", "teacher__first_name", "teacher__profile__patronymic", "teacher__username")
         .first()
     )
-    return _display_name(*row) if row else ""
+    # Seçilmiş çip axtarış nəticəsi ilə eyni sırada: «Soyad Ad Ata adı» (sahib 2026-11-15).
+    return person_label_from_parts(*row) if row else ""

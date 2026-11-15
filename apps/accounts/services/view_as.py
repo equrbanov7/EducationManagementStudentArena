@@ -387,8 +387,9 @@ def build_target_queryset(
 
     # Perf: siyahı üçün yalnız lazım olan sütunlar (serializer başqa heç nəyə
     # toxunmur → deferred-field əlavə sorğusu yaranmır).
+    # Sıra seçicinin «Soyad Ad Ata adı» etiketi ilə uyğun (sahib 2026-11-15).
     return users.only("id", "username", "first_name", "last_name", "email").order_by(
-        "first_name", "last_name", "username", "id"
+        "last_name", "first_name", "username", "id"
     )
 
 

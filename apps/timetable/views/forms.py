@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from apps.registrar.public import schedule, schedule_manage
+from core.person_names import person_label
 
 from ..constants import ScopeKind
 from ..services import runs
@@ -80,7 +81,8 @@ def new_run_form(request, organization, period, *, options, source, defaults, st
         scope.update(source.scope or {})
         seed = source.seed
         order = (source.priorities or {}).get("teachers") or []
-        names = {user.pk: _name(user) for user in get_user_model().objects.filter(pk__in=order)}
+        users = get_user_model().objects.filter(pk__in=order).select_related("profile")
+        names = {user.pk: person_label(user) for user in users}  # müəllim seçicisi ilə eyni sıra
         priorities = [{"id": pk, "name": names.get(pk, str(pk))} for pk in order if pk in names]
     if not scope.get("unit_ids"):
         first = (options["faculties"] or options["programs"] or [{}])[0].get("id")

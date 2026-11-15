@@ -56,6 +56,7 @@ from apps.registrar.selfwork_marks import (  # noqa: F401
     set_selfwork_marks,
 )
 from apps.registrar.selfwork_structure import ensure_selfwork_component  # noqa: F401
+from core.person_names import person_label
 
 COURSE_WORK_MAX = Decimal("100")
 
@@ -419,5 +420,11 @@ def lesson_teacher_choices(offering):
     )
     if offering.instructor_id:
         ids.add(offering.instructor_id)
-    users = get_user_model().objects.filter(pk__in=ids).order_by("last_name", "first_name", "username")
-    return [{"id": str(u.id), "name": (u.get_full_name() or "").strip() or u.username} for u in users]
+    users = (
+        get_user_model()
+        .objects.filter(pk__in=ids)
+        .select_related("profile")
+        .order_by("last_name", "first_name", "username")
+    )
+    # Sahib 2026-11-15: «Soyad Ad Ata adı» — eyni adlı müəllimlər ata adı ilə seçilir (axtarış da ona görə tapır).
+    return [{"id": str(u.id), "name": person_label(u)} for u in users]

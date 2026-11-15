@@ -6,6 +6,7 @@ from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
 from django.db.models import Prefetch, Q, Sum
 
+from core.person_names import person_label
 from core.search_text import tolerant_q
 
 from ..constants import (
@@ -69,7 +70,9 @@ def _teacher_q(task, teacher: str, activity: str = "") -> Q:
 
 def base_rows_queryset(task):
     """Tapşırığın sətirləri — kart/sətir serializasiyasının prefetch dəsti (qruplar, bölgülər + müəllim + qrup)."""
-    assignments = TeacherAssignment.objects.select_related("teacher", "group").order_by("activity", "created_at")
+    assignments = TeacherAssignment.objects.select_related("teacher__profile", "group").order_by(
+        "activity", "created_at"
+    )
     return (
         TeachingTaskRow.objects.filter(task=task)
         .select_related("subject", "specialty", "period", "intensive_offering")
@@ -106,6 +109,7 @@ def row_search_q(search: str):
             "assignments__teacher__first_name",
             "assignments__teacher__last_name",
             "assignments__teacher__username",
+            "assignments__teacher__profile__patronymic",
         ),
         compact_fields=("subject__code", "groups_text"),
     )
@@ -270,11 +274,8 @@ def _serialize(task, rows: list, *, amend_targets=None) -> tuple[list[dict], lis
                         "activity_label": _label(_ACTIVITY_LABELS, assignment.activity),
                         "hours": assignment.hours,
                         "teacher_id": str(assignment.teacher_id) if assignment.teacher_id else "",
-                        "teacher_name": (
-                            (assignment.teacher.get_full_name() or assignment.teacher.username)
-                            if assignment.teacher_id
-                            else "Vakant"
-                        ),
+                        # Sahib 2026-11-15: seçicidəki kimi «Soyad Ad Ata adı».
+                        "teacher_name": person_label(assignment.teacher) if assignment.teacher_id else "Vakant",
                         "is_vacant": assignment.teacher_id is None,
                         "is_hourly_paid": assignment.is_hourly_paid,
                         "groups_note": assignment.groups_note,
@@ -293,7 +294,9 @@ def _serialize(task, rows: list, *, amend_targets=None) -> tuple[list[dict], lis
 def teacher_load_panel(task) -> list[dict]:
     """Sağ paneldəki müəllim kartları: cəmi saat / norma / doluluq %."""
     assignments = (
-        TeacherAssignment.objects.filter(row__task=task).select_related("teacher", "row").order_by("teacher__last_name")
+        TeacherAssignment.objects.filter(row__task=task)
+        .select_related("teacher__profile", "row")
+        .order_by("teacher__last_name", "teacher__first_name")
     )
     profiles = {
         profile.teacher_id: profile
@@ -308,7 +311,7 @@ def teacher_load_panel(task) -> list[dict]:
             key,
             {
                 "teacher_id": str(key) if key else "",
-                "name": ((assignment.teacher.get_full_name() or assignment.teacher.username) if key else "Vakant"),
+                "name": person_label(assignment.teacher) if key else "Vakant",
                 "is_vacant": key is None,
                 "hours": 0,
                 "fall_hours": 0,

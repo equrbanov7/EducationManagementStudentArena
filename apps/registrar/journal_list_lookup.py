@@ -23,13 +23,14 @@ from django.http import JsonResponse
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
+from core.person_names import person_label
 from core.search_text import tolerant_q
 
 from .journal_list_scope import journal_list_base
 
 _PAGE_SIZE = 10
 _MAX_PAGE = 50
-_NAME_FIELDS = ("first_name", "last_name", "username")
+_NAME_FIELDS = ("first_name", "last_name", "username", "profile__patronymic")
 
 
 def _bounds(request):
@@ -57,14 +58,14 @@ def teacher_search(request):
         return empty  # adi müəllimin seçicisi yoxdur — öz adı statik göstərilir
     from .journal_teacher_filters import teachers_for
 
-    users = teachers_for(base_qs)
+    users = teachers_for(base_qs).select_related("profile")
     search = tolerant_q(request.GET.get("q") or "", _NAME_FIELDS)
     if search is not None:
         users = users.filter(search)
     users = users.order_by("last_name", "first_name", "username", "pk")
     offset, limit = _bounds(request)
     window = list(users[offset : offset + limit + 1])
-    results = [{"id": str(u.pk), "text": (u.get_full_name() or "").strip() or u.username} for u in window[:limit]]
+    results = [{"id": str(u.pk), "text": person_label(u)} for u in window[:limit]]
     return JsonResponse({"results": results, "has_more": len(window) > limit})
 
 

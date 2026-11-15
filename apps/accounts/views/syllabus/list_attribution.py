@@ -5,7 +5,7 @@ from django.db.models.functions import Coalesce
 from django.utils.translation import pgettext_lazy
 
 from apps.syllabus.public import STATUS_SORT_INDEX, SyllabusStatus
-from core.person_names import clean_name_part
+from core.person_names import person_label, person_label_from_parts
 
 _CTX = "accounts.syllabus"
 
@@ -68,7 +68,8 @@ def published_sort(queryset, sort):
 
 
 def teacher_options(queryset, user):
-    people = {str(user.pk): full_name(user)}
+    # Seçici: «Soyad Ad Ata adı» (sahib 2026-11-15) — göstərmə (``full_name``) dəyişmir.
+    people = {str(user.pk): person_label(user)}
     fields = ("id", "first_name", "last_name", "profile__patronymic", "username")
     values = (
         queryset.order_by()
@@ -79,9 +80,7 @@ def teacher_options(queryset, user):
         for person in (row[:5], row[5:]):
             pk, first, last, patronymic, username = person
             if pk is not None:
-                people[str(pk)] = (
-                    " ".join(value for value in (first, last, clean_name_part(patronymic)) if value).strip() or username
-                )
+                people[str(pk)] = person_label_from_parts(last, first, patronymic, username)
     return [{"key": pk, "label": label} for pk, label in sorted(people.items(), key=lambda pair: pair[1])]
 
 

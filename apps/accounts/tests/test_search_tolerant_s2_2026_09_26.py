@@ -190,10 +190,10 @@ class GlobalSearchTolerantTest(TestCase):
 
     def test_students_found_by_latin_spelling(self):
         for query, expected in (
-            ("Aliyev", "Rauf Əliyev"),
-            ("Eliyev", "Rauf Əliyev"),
-            ("Sahzad", "Şahzad Quliyev"),
-            ("Shahzad", "Şahzad Quliyev"),
+            ("Aliyev", "Əliyev Rauf"),
+            ("Eliyev", "Əliyev Rauf"),
+            ("Sahzad", "Quliyev Şahzad"),
+            ("Shahzad", "Quliyev Şahzad"),
         ):
             with self.subTest(query=query):
                 self.assertEqual(self._titles(self.dean, query, "students"), [expected])
@@ -202,8 +202,8 @@ class GlobalSearchTolerantTest(TestCase):
         """Alt sətirdə görünən qrup adı da axtarılır: «234king» → «234 K ing» qrupunun tələbəsi."""
         for query in ("234king", "234k ing", "234-K-ing", "Shahzad 234k"):
             with self.subTest(query=query):
-                self.assertEqual(self._titles(self.dean, query, "students"), ["Şahzad Quliyev"])
-        self.assertEqual(self._titles(self.dean, "ke101", "students"), ["Rauf Əliyev"])
+                self.assertEqual(self._titles(self.dean, query, "students"), ["Quliyev Şahzad"])
+        self.assertEqual(self._titles(self.dean, "ke101", "students"), ["Əliyev Rauf"])
 
     def test_subject_and_journal_by_latin_spelling_and_compact_code(self):
         for query in ("Verilenler", "verilənlər baza", "VB101", "vb 101"):

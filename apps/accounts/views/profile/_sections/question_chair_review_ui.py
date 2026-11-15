@@ -12,6 +12,8 @@ from django.utils import timezone
 from django.utils.formats import date_format
 from django.utils.translation import pgettext
 
+from core.person_names import person_label
+
 CELL_DIR = "exams/teacher/partials/question_submissions/"
 
 #: Status → (etiket, badge tonu). Etiketlər bölmənin mövcud msgid-ləridir.
@@ -82,7 +84,8 @@ def filter_fields(*, filters, teachers, exam_kinds, status_values):
     kind_options = [{"value": "", "label": pgettext("accounts.profile.question_chair_review", "Bütün imtahan növləri")}]
     kind_options += [{"value": code, "label": label} for code, label in exam_kinds]
     teacher_options = [{"value": "", "label": pgettext("accounts.profile.question_chair_review", "Bütün müəllimlər")}]
-    teacher_options += [{"value": str(t.id), "label": t.get_full_name() or t.username} for t in teachers]
+    # Seçici: «Soyad Ad Ata adı» (sahib 2026-11-15).
+    teacher_options += [{"value": str(t.id), "label": person_label(t)} for t in teachers]
     return [
         {
             "name": "qchair_q",

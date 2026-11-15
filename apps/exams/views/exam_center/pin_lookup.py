@@ -27,7 +27,7 @@ from apps.exams.services.student_pins import decrypt_student_pin_row
 from apps.organizations.public import organization_role_user_queryset
 from core.audit import log_action
 from core.constants import AuditAction
-from core.person_names import user_display_name_with_patronymic
+from core.person_names import person_label
 from core.roles import ProfileRole
 from core.search_text import tolerant_q
 
@@ -99,7 +99,7 @@ def exam_center_pin_search(request):
     if search_q is not None:
         qs = qs.filter(search_q)
     qs = qs.select_related("profile")
-    window = list(qs.order_by("first_name", "last_name", "username")[offset : offset + limit + 1])
+    window = list(qs.order_by("last_name", "first_name", "username")[offset : offset + limit + 1])
     has_more = len(window) > limit
     students = window[:limit]
     student_ids = [student.id for student in students]
@@ -116,7 +116,7 @@ def exam_center_pin_search(request):
     results = [
         {
             "id": u.id,
-            "name": user_display_name_with_patronymic(u),
+            "name": person_label(u),  # «Soyad Ad Ata adı» (sahib 2026-11-15)
             "patronymic": _patronymic(u),
             "username": u.username,
             "kafedra": getattr(u, "kafedra", "") or "",
@@ -286,7 +286,7 @@ def exam_center_student_pins(request, student_id):
     return JsonResponse(
         {
             "student": {
-                "name": user_display_name_with_patronymic(student),
+                "name": person_label(student),
                 "patronymic": _patronymic(student),
                 "username": student.username,
             },

@@ -14,6 +14,7 @@ from __future__ import annotations
 from django.utils.translation import pgettext
 
 from apps.registrar.public import handover as handover_read
+from core.person_names import person_label_from_parts
 
 _CTX = "accounts.handover"
 
@@ -79,10 +80,13 @@ def source_teacher_options(scoped_queryset, selected: str) -> list:
         get_user_model()
         .objects.filter(Q(pk__in=instructor_ids) | Q(pk__in=share_ids))
         .order_by("last_name", "first_name", "username")
-        .values_list("pk", "first_name", "last_name", "username")[:OPTION_CAP]
+        .values_list("pk", "first_name", "last_name", "profile__patronymic", "username")[:OPTION_CAP]
     )
     options = [_option("", pgettext(_CTX, "Hamısı"))]
-    options += [_option(str(pk), _person_label(first, last, username)) for pk, first, last, username in rows]
+    options += [
+        _option(str(pk), person_label_from_parts(last, first, patronymic, username))
+        for pk, first, last, patronymic, username in rows
+    ]
     options.append(_option("__none__", pgettext(_CTX, "Müəllim təyin edilməyib")))
     if selected and selected not in {option["value"] for option in options}:
         options.append(_option(selected, selected))
@@ -97,15 +101,15 @@ def target_teacher_options(organization, *, blank_label=None) -> list:
     """
     # Menyunun daxili axtarışı yalnız yüklənmiş seçimlərdə işləyir. Süzgəc
     # tavanı burada uyğun müəllimləri (məsələn, Ə ilə başlayan soyadları) gizlətməməlidir.
-    rows = handover_read.target_queryset(organization).values_list("pk", "first_name", "last_name", "username")
+    rows = handover_read.target_queryset(organization).values_list(
+        "pk", "first_name", "last_name", "profile__patronymic", "username"
+    )
     options = [_option("", blank_label or pgettext(_CTX, "Müəllim seçin…"))]
-    options += [_option(str(pk), _person_label(first, last, username)) for pk, first, last, username in rows]
+    options += [
+        _option(str(pk), person_label_from_parts(last, first, patronymic, username))
+        for pk, first, last, patronymic, username in rows
+    ]
     return options
-
-
-def _person_label(first, last, username) -> str:
-    full = f"{first or ''} {last or ''}".strip()
-    return full or str(username or "")
 
 
 def period_options(organization, selected: str) -> list:

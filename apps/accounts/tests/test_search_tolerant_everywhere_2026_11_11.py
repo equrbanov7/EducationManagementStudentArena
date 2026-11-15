@@ -187,7 +187,7 @@ class GlobalSearchCourseGroupsAndVerificationOwnerCasesTest(TestCase):
                     group=cls.group if key == "ascii" else cls.other_group,
                     admission_year=2026,
                 )
-                cls.names[key] = f"{first} {last}"
+                cls.names[key] = f"{last} {first}"  # qlobal axtarış: «Soyad Ad» (2026-11-15)
                 cls.users[key] = user
                 DocumentSeal.objects.create(
                     organization=cls.org,

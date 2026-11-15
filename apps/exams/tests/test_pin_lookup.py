@@ -177,7 +177,7 @@ class PinLookupTests(TestCase):
         self.assertEqual(response.status_code, 200)
         rows = {r["id"]: r for r in response.json()["results"]}
         self.assertIn(self.student.id, rows)
-        self.assertEqual(rows[self.student.id]["name"], "Aynur Məmmədova Şahin")
+        self.assertEqual(rows[self.student.id]["name"], "Məmmədova Aynur Şahin")
         self.assertEqual(rows[self.student.id]["patronymic"], "Şahin")
 
         miss = client.get(reverse("exams:exam_center_pin_search"), {"q": "Aynur Nizami"}).json()["results"]
@@ -185,7 +185,7 @@ class PinLookupTests(TestCase):
 
         url = reverse("exams:exam_center_student_pins", kwargs={"student_id": self.student.id})
         student = client.get(url).json()["student"]
-        self.assertEqual(student["name"], "Aynur Məmmədova Şahin")
+        self.assertEqual(student["name"], "Məmmədova Aynur Şahin")
         self.assertEqual(student["patronymic"], "Şahin")
 
     def test_search_list_has_no_per_row_profile_queries(self):

@@ -16,6 +16,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET
 
 from core.constants import OrgUnitType
+from core.person_names import person_label
 from core.search_text import tolerant_q
 from core.staff_position import visible_role_label
 
@@ -200,8 +201,11 @@ def structure_role_candidates(request, slug):
     term = (request.GET.get("q") or "").strip()[:80]
 
     if kind == "teacher":
-        queryset = _teacher_memberships_qs(organization)
-        term_q = tolerant_q(term, ("user__first_name", "user__last_name", "user__username"))
+        queryset = _teacher_memberships_qs(organization).select_related("user__profile")
+        queryset = queryset.order_by("user__last_name", "user__first_name", "user__username")
+        term_q = tolerant_q(
+            term, ("user__first_name", "user__last_name", "user__username", "user__profile__patronymic")
+        )
         if term_q is not None:
             queryset = queryset.filter(term_q)
         unit_id = (request.GET.get("unit") or "").strip()
@@ -212,7 +216,7 @@ def structure_role_candidates(request, slug):
         results = [
             {
                 "id": str(m.id),
-                "text": f"{_display_name(m.user)} — {m.scope_unit.name if m.scope_unit_id else no_chair}",
+                "text": f"{person_label(m.user)} — {m.scope_unit.name if m.scope_unit_id else no_chair}",
             }
             for m in page[:limit]
         ]

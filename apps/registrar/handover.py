@@ -274,10 +274,11 @@ def target_queryset(organization, *, search="", exclude_ids=()):
     queryset = get_user_model().objects.filter(pk__in=eligible_target_ids(organization), is_active=True)
     if exclude_ids:
         queryset = queryset.exclude(pk__in=[pk for pk in exclude_ids if pk])
-    search_q = tolerant_q(search, ("first_name", "last_name", "username", "email"))
+    search_q = tolerant_q(search, ("first_name", "last_name", "username", "email", "profile__patronymic"))
     if search_q is not None:
         queryset = queryset.filter(search_q)
-    return queryset.order_by("last_name", "first_name", "username")
+    # Seçici «Soyad Ad Ata adı» göstərir (sahib 2026-11-15) — ata adı üçün profil eyni sorğuda.
+    return queryset.select_related("profile").order_by("last_name", "first_name", "username")
 
 
 # ── Köhnə müəllimin YALNIZ-OXU görünüşü ──────────────────────────────────────

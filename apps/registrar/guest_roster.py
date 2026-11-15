@@ -75,6 +75,7 @@ from django.utils.translation import pgettext
 
 from core.audit import log_action
 from core.constants import AuditAction, OrgUnitType
+from core.person_names import person_label
 
 from . import guest_merge
 from .models import AcademicStatus, Enrollment, EnrollmentKind, StudentAcademicRecord
@@ -304,14 +305,14 @@ def candidate_records(*, offering, group):
             is_active=True,
             status=AcademicStatus.ENROLLED,
         )
-        .select_related("student", "group")
+        .select_related("student__profile", "group")
         .order_by("student__last_name", "student__first_name", "student__username")
     )
 
 
 def student_label(record) -> str:
-    student = record.student
-    return (student.get_full_name() or "").strip() or student.username
+    """Axtarış nəticəsi: «Soyad Ad Ata adı» (sahib 2026-11-15) — eyni adlı tələbələr ata adı ilə ayrılır."""
+    return person_label(record.student)
 
 
 # ── Əlavə etmə ───────────────────────────────────────────────────────────────

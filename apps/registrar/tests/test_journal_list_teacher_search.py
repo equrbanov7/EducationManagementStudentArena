@@ -103,18 +103,18 @@ class JournalListTeacherSearchTest(TestCase):
 
     def test_partial_case_and_azerbaijani_letters_find_the_teacher(self):
         cases = {
-            "fir": "Firuzə Əliyeva",
-            "FİR": "Firuzə Əliyeva",
-            "aida": "Aidə İsmayılova",
-            "AİDƏ": "Aidə İsmayılova",
-            "isma": "Aidə İsmayılova",
-            "İSMA": "Aidə İsmayılova",
-            "şəh": "Şəhla Çələbi",
-            "seh": "Şəhla Çələbi",
-            "cele": "Şəhla Çələbi",
-            "ulvi": "Ülvi Öztürk",
-            "Firuzə Əli": "Firuzə Əliyeva",
-            "əliyeva firuzə": "Firuzə Əliyeva",
+            "fir": "Əliyeva Firuzə",
+            "FİR": "Əliyeva Firuzə",
+            "aida": "İsmayılova Aidə",
+            "AİDƏ": "İsmayılova Aidə",
+            "isma": "İsmayılova Aidə",
+            "İSMA": "İsmayılova Aidə",
+            "şəh": "Çələbi Şəhla",
+            "seh": "Çələbi Şəhla",
+            "cele": "Çələbi Şəhla",
+            "ulvi": "Öztürk Ülvi",
+            "Firuzə Əli": "Əliyeva Firuzə",
+            "əliyeva firuzə": "Əliyeva Firuzə",
         }
         for query, expected in cases.items():
             with self.subTest(query=query):
@@ -125,7 +125,7 @@ class JournalListTeacherSearchTest(TestCase):
         self.client.force_login(self.coordinator)
         legacy = self.client.get(reverse("accounts:journal_teacher_search"), {"q": "fir"}).json()
         self.assertEqual(legacy["results"], [])
-        self.assertEqual(self._names(self.coordinator, "fir"), ["Firuzə Əliyeva"])
+        self.assertEqual(self._names(self.coordinator, "fir"), ["Əliyeva Firuzə"])
         # Əhatə siyahı ilə eynidir: başqa fakültənin müəllimi çıxmır.
         self.assertEqual(self._names(self.coordinator, "ulvi"), [])
         request = RequestFactory().get("/jurnal/")

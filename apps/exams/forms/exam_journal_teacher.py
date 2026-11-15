@@ -12,6 +12,7 @@ from django.db.models import Q
 from django.utils.translation import pgettext_lazy
 
 from apps.organizations.public import organization_role_user_queryset
+from core.person_names import person_label
 from core.roles import ProfileRole
 
 User = get_user_model()
@@ -60,10 +61,10 @@ class JournalTeacherFieldMixin(forms.Form):
         value = self["journal_teacher"].value() if field is not None else None
         if not value or not str(value).isdigit():
             return None
-        user = field.queryset.filter(pk=int(value)).first()
+        user = field.queryset.filter(pk=int(value)).select_related("profile").first()
         if user is None:
             return None
-        return {"id": user.pk, "text": user.get_full_name() or user.username}
+        return {"id": user.pk, "text": person_label(user)}  # axtarış nəticəsi ilə eyni «Soyad Ad Ata adı»
 
     def _clean_journal_link(self, cleaned_data):
         teacher = cleaned_data.get("journal_teacher")

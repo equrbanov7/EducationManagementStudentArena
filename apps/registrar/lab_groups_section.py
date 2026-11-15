@@ -29,6 +29,7 @@ from django.db.models.functions import Coalesce, Greatest
 from django.utils.translation import pgettext, pgettext_lazy
 
 from core.constants import OrgUnitType
+from core.person_names import person_label_from_parts
 from core.search_text import tolerant_q
 
 from . import activity_kinds
@@ -424,12 +425,19 @@ def teacher_options(base) -> list:
     rows = (
         base.exclude(instructor__isnull=True)
         .order_by("instructor__last_name", "instructor__first_name")
-        .values_list("instructor_id", "instructor__first_name", "instructor__last_name", "instructor__username")
+        .values_list(
+            "instructor_id",
+            "instructor__first_name",
+            "instructor__last_name",
+            "instructor__profile__patronymic",
+            "instructor__username",
+        )
         .distinct()
     )
+    # Seçici: «Soyad Ad Ata adı» (sahib 2026-11-15).
     return [
-        {"value": str(pk), "label": " ".join(part for part in (first, last) if part).strip() or username}
-        for pk, first, last, username in rows
+        {"value": str(pk), "label": person_label_from_parts(last, first, patronymic, username)}
+        for pk, first, last, patronymic, username in rows
     ]
 
 

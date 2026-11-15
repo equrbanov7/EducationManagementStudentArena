@@ -21,6 +21,7 @@ from __future__ import annotations
 from django.urls import reverse
 
 from core import phone as phone_lib
+from core.person_names import person_label
 from core.staff_position import visible_role_label
 
 from .policy import RimActor, target_level
@@ -118,7 +119,8 @@ def serialize_row(user, actor: RimActor):
         "id": user.pk,
         # Operator username-i BİLMİR — axtarışın bütün mənası onu tapmaqdır.
         "username": user.username,
-        "full_name": profile.full_name_with_patronymic if profile is not None else user.get_full_name(),
+        # Sahib 2026-11-15: axtarış nəticəsində «Soyad Ad Ata adı» (jurnal qridi ilə eyni sıra).
+        "full_name": person_label(user),
         "first_name": user.first_name or "",
         "last_name": user.last_name or "",
         "patronymic": getattr(profile, "patronymic", "") or "",

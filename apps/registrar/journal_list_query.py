@@ -14,6 +14,7 @@ from __future__ import annotations
 from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
 
+from core.person_names import person_label, person_label_from_parts
 from core.search_text import tolerant_q
 
 #: `schedule.season_label` ilə EYNİ ay-bölgüsü (SQL tərəfə güzgülənir).
@@ -99,8 +100,8 @@ def label_for_selection(kind: str, value: str) -> str:
             return unit.name if unit else ""
         if kind == "teacher":
             user_model = django_apps.get_model("auth", "User")
-            user = user_model.objects.filter(pk=value).only("first_name", "last_name", "username").first()
-            return (user.get_full_name() or user.username).strip() if user else ""
+            user = user_model.objects.filter(pk=value).select_related("profile").first()
+            return person_label(user)  # seçicinin «Soyad Ad Ata adı» sırası
     except (ValueError, TypeError, ValidationError):
         return ""
     return ""
@@ -144,12 +145,12 @@ def teacher_choices_for(base_qs) -> list[dict]:
     """Müəllim dropdown-u — offering-lərin təkrarsız müəllimləri (yüngül sorğu)."""
     from .journal_teacher_filters import teachers_for
 
-    rows = teachers_for(base_qs).values_list("pk", "first_name", "last_name", "username")
-    choices = []
-    for uid, first, last, username in rows:
-        full = f"{first or ''} {last or ''}".strip()
-        label = full or username
-        choices.append({"value": str(uid), "label": label})
+    rows = teachers_for(base_qs).values_list("pk", "first_name", "last_name", "profile__patronymic", "username")
+    # Sahib 2026-11-15: «Soyad Ad Ata adı» — axtarışlı seçici (``journal_list_lookup``) ilə eyni sıra.
+    choices = [
+        {"value": str(uid), "label": person_label_from_parts(last, first, patronymic, username)}
+        for uid, first, last, patronymic, username in rows
+    ]
     # `value` ikinci açardır: eyni adlı İKİ müəllim (ad toqquşması) arasında
     # `SELECT DISTINCT`-in özü sıra ZƏMANƏTİ vermir — yalnız etiketə görə sort
     # (Python-un stabil sort-u ilə belə) sorğu planına görə dəyişən sıra verərdi.

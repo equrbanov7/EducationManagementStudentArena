@@ -123,7 +123,11 @@ def build_question_chair_review_context(request, *, allowed_sections, active_sec
 
     User = get_user_model()
     teacher_ids = list(scoped.values_list("teacher_id", flat=True).distinct())
-    teachers = list(User.objects.filter(id__in=teacher_ids).order_by("first_name", "last_name", "username"))
+    teachers = list(
+        User.objects.filter(id__in=teacher_ids)
+        .select_related("profile")
+        .order_by("last_name", "first_name", "username")
+    )
     subjects = sorted({name for name in scoped.values_list("subject", flat=True) if name})
 
     filtered = scoped

@@ -138,7 +138,7 @@ class PickerChoicesTest(_EditorBase):
                 subject_id=str(self.subject.pk),
                 instructor_id="",
             )
-        self.assertEqual(options["owner"], {"id": str(self.teacher_a.pk), "name": "Aytən Əliyeva"})
+        self.assertEqual(options["owner"], {"id": str(self.teacher_a.pk), "name": "Əliyeva Aytən"})
         self.assertEqual([row["id"] for row in options["teachers"]], [str(self.teacher_b.pk), str(self.teacher_d.pk)])
 
     def test_new_cell_is_computed_in_memory_without_creating_an_offering(self):

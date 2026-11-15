@@ -29,6 +29,7 @@ from django.apps import apps as django_apps
 from django.db.models import Q
 
 from core.constants import OrgUnitType
+from core.person_names import person_label
 from core.search_text import tolerant_q
 
 from ..constants import TEACHER_ROLE_NAMES
@@ -38,6 +39,8 @@ CHAIR_TYPES = (OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT)
 #: Seçicidəki kənar müəllim siyahısının tavanı (bütün təşkilat ~10³ müəllimdir).
 OUTSIDE_POOL_LIMIT = 1500
 _LATEST = "9999"
+#: Seçici axtarışı ata adı ilə də tapır (sahib 2026-11-15).
+_PERSON_SEARCH_FIELDS = ("user__username", "user__first_name", "user__last_name", "user__profile__patronymic")
 
 
 def _membership_model():
@@ -138,8 +141,8 @@ def teacher_pool(
     ``include_outside`` — sonda başqa kafedraların müəllimləri (``is_outside``, ``home_chair`` — ştat kafedrası).
     ``limit=None`` — lokal axtarışlı modal üçün kafedranın tam hovuzu; səhifələnən seçici öz limitini verir.
     """
-    memberships = chair_teacher_memberships(organization, chair)
-    search_q = tolerant_q(search, ("user__username", "user__first_name", "user__last_name"))
+    memberships = chair_teacher_memberships(organization, chair).select_related("user__profile")
+    search_q = tolerant_q(search, _PERSON_SEARCH_FIELDS)
     if search_q is not None:
         memberships = memberships.filter(search_q)
     seen: dict = {}
@@ -152,7 +155,7 @@ def teacher_pool(
         seen[user.pk] = {
             "id": str(user.pk),
             "username": user.username,
-            "full_name": (user.get_full_name() or user.username).strip(),
+            "full_name": person_label(user),  # «Soyad Ad Ata adı» (sahib 2026-11-15)
             "role": membership.role.name if membership.role else "",
             "is_chair_member": is_chair_member,
             "is_outside": False,
@@ -184,9 +187,9 @@ def outside_teachers(organization, chair, *, exclude_ids=(), search: str = "", l
         .filter(scope_unit__isnull=False)
         .exclude(_chair_subtree_q(chair))
         .exclude(user_id__in=in_chair)
-        .select_related("user")
+        .select_related("user__profile")
     )
-    search_q = tolerant_q(search, ("user__username", "user__first_name", "user__last_name"))
+    search_q = tolerant_q(search, _PERSON_SEARCH_FIELDS)
     if search_q is not None:
         memberships = memberships.filter(search_q)
     excluded = {str(pk) for pk in exclude_ids}
@@ -199,7 +202,7 @@ def outside_teachers(organization, chair, *, exclude_ids=(), search: str = "", l
         {
             "id": str(user.pk),
             "username": user.username,
-            "full_name": (user.get_full_name() or user.username).strip(),
+            "full_name": person_label(user),  # «Soyad Ad Ata adı» (sahib 2026-11-15)
             "role": "teacher",
             "is_chair_member": False,
             "is_outside": True,

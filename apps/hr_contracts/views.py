@@ -19,6 +19,7 @@ from django.views.decorators.http import require_GET, require_POST
 
 from core.audit import log_action
 from core.constants import AuditAction
+from core.person_names import person_label
 from core.search_text import tolerant_q
 
 from .constants import CTX, ContractStatus, ContractType
@@ -198,10 +199,10 @@ def staff(request):
         limit = min(STAFF_PAGE_MAX, max(1, int(request.GET.get("limit") or 20)))
     except ValueError:
         offset, limit = 0, 20
-    rows = staff_in_scope(actor.organization, actor.manage_scope).select_related("user", "role", "scope_unit")
+    rows = staff_in_scope(actor.organization, actor.manage_scope).select_related("user__profile", "role", "scope_unit")
     query = tolerant_q(
         request.GET.get("q", ""),
-        fields=("user__first_name", "user__last_name", "user__username", "title"),
+        fields=("user__first_name", "user__last_name", "user__username", "user__profile__patronymic", "title"),
     )
     if query is not None:
         rows = rows.filter(query)
@@ -215,8 +216,9 @@ def staff(request):
         results.append(
             {
                 "id": str(membership.user_id),
-                "text": person_name(membership.user),
-                "label": person_name(membership.user),
+                # Seçici: «Soyad Ad Ata adı» (sahib 2026-11-15).
+                "text": person_label(membership.user),
+                "label": person_label(membership.user),
                 "meta": hint or membership.role.display_name,
             }
         )
