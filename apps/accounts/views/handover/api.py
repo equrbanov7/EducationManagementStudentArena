@@ -22,6 +22,7 @@ from django.views.decorators.http import require_GET
 
 from apps.registrar.public import handover as handover_read
 from apps.registrar.public import handover_query
+from core.person_names import person_label
 from core.search_text import tolerant_q
 
 from . import filters
@@ -121,7 +122,7 @@ def handover_teachers(request):
         {
             "has_access": True,
             "results": [
-                {"id": str(user.pk), "text": person_name(user), "hint": _teacher_subtitle(user)} for user in rows
+                {"id": str(user.pk), "text": person_label(user), "hint": _teacher_subtitle(user)} for user in rows
             ],
             "has_more": offset + len(rows) < total,
             "total": total,
@@ -139,8 +140,8 @@ def _source_teachers(actor, search):
         .values_list("instructor_id", flat=True)
         .distinct()
     )
-    queryset = get_user_model().objects.filter(pk__in=list(instructor_ids))
-    term = tolerant_q(search or "", ("first_name", "last_name", "username", "email"))
+    queryset = get_user_model().objects.filter(pk__in=list(instructor_ids)).select_related("profile")
+    term = tolerant_q(search or "", ("first_name", "last_name", "username", "email", "profile__patronymic"))
     if term is not None:
         queryset = queryset.filter(term)
     return queryset.order_by("last_name", "first_name", "username")

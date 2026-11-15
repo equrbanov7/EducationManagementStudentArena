@@ -160,7 +160,7 @@ class AvailableStudentsEndpointTest(_MembersFixtureMixin, TestCase):
                 {
                     "id": User.objects.get(username="p14_st_001").id,
                     "username": "p14_st_001",
-                    "full_name": "Aysel Məmmədova",
+                    "full_name": "Məmmədova Aysel",
                 }
             ],
         )

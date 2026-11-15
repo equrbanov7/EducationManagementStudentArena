@@ -26,6 +26,8 @@ from collections import defaultdict
 
 from django.db.models import Prefetch, Q
 
+from core.person_names import person_label
+
 from ..constants import Activity, RowKind
 from ..models import TeacherAssignment, TeachingTaskRow
 from .scoping import WorkloadDenied
@@ -126,7 +128,8 @@ def _candidates(partners) -> tuple[dict, dict]:
     rows = (
         TeachingTaskRow.objects.filter(condition)
         .prefetch_related(
-            "groups", Prefetch("assignments", queryset=lectures.select_related("teacher"), to_attr="patok_lectures")
+            "groups",
+            Prefetch("assignments", queryset=lectures.select_related("teacher__profile"), to_attr="patok_lectures"),
         )
         .order_by("order", "created_at", "pk")
     )
@@ -178,7 +181,7 @@ def partner_lectures(rows, *, assigned=None) -> dict:
         result[row.pk] = {
             "hours": int(row.lecture_plan),
             "teacher_id": str(teacher.pk) if teacher is not None else "",
-            "teacher_name": (teacher.get_full_name() or teacher.username) if teacher is not None else "",
+            "teacher_name": person_label(teacher),  # «Soyad Ad Ata adı» — bölgü çipləri ilə eyni
             "groups": " / ".join(group.name for group in lead.groups.all()) if lead is not None else "",
             "lead_id": str(lead.pk) if lead is not None else "",
             "linked": linked,

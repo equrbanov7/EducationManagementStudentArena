@@ -15,7 +15,7 @@ from apps.exams.views.shared.tenant import get_active_organization, tenant_scope
 from apps.organizations.models import Organization
 from core.helpers import _tenant_scoped_courses
 from core.permissions import request_has_permission
-from core.person_names import user_display_name_with_patronymic
+from core.person_names import person_label
 from core.tenancy import request_has_active_organization_context, restore_request_organization_from_profile
 
 from .constants import (
@@ -281,8 +281,8 @@ def _selected_access_entities(form):
 
 
 def student_access_label(user, group_name: str = "") -> str:
-    """«Ad Soyad Ata adı · qrup» — eyni adlı tələbələri ayırmaq üçün (sahib 2026-10-26)."""
-    name = user_display_name_with_patronymic(user)
+    """«Soyad Ad Ata adı · qrup» — eyni adlı tələbələri ayırmaq üçün (sahib 2026-10-26; sıra 2026-11-15)."""
+    name = person_label(user)
     return f"{name} · {group_name}" if group_name else name
 
 

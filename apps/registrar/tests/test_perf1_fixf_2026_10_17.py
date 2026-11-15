@@ -117,7 +117,7 @@ class ScheduleTeacherChoicesTest(TestCase):
         self.assertEqual({row["id"] for row in choices}, {str(pk) for pk in eligible})
         self.assertNotIn(str(self.tenant["student"].pk), {row["id"] for row in choices})  # tələbə rolu
         self.assertIn({"id": str(get_user_model().objects.get(username="pf1f16_b").pk), "name": "pf1f16_b"}, choices)
-        self.assertIn("Zərifə Ağayeva", [row["name"] for row in choices])
+        self.assertIn("Ağayeva Zərifə", [row["name"] for row in choices])
 
     def test_no_silent_cap_450_teachers_all_present(self):
         # 2026-10-17: əvvəl siyahı ad üzrə 400-də kəsilirdi — əlifbanın sonundakılar redaktorda yox idi.
@@ -140,8 +140,8 @@ class ScheduleTeacherChoicesTest(TestCase):
         self.assertTrue({str(user.pk) for user in users} <= ids)
         self.assertGreaterEqual(len(choices), 451)
         self.assertEqual(len(ctx.captured_queries), 2)  # rollar + istifadəçilər (sətir sayından asılı deyil)
-        bulk = [row["name"] for row in choices if row["name"].startswith("Ad")]
-        self.assertEqual(bulk, [f"Ad{i:03d} Soyad{i:03d}" for i in range(450)])  # soyad → ad sırası
+        bulk = [row["name"] for row in choices if row["name"].startswith("Soyad")]
+        self.assertEqual(bulk, [f"Soyad{i:03d} Ad{i:03d}" for i in range(450)])  # «Soyad Ad» (2026-11-15)
 
     def test_cached_per_org_and_constant_in_teacher_count(self):
         with bypass_rls(), CaptureQueriesContext(connection) as cold:

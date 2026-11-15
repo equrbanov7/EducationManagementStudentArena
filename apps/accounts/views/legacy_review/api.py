@@ -21,6 +21,7 @@ from django.views.decorators.http import require_GET
 from apps.registrar.public import legacy_grade_review as review_read
 from apps.registrar.public import legacy_grade_review_counts as counts_read
 from apps.registrar.public import legacy_grade_review_rows as rows_read
+from core.person_names import person_label
 from core.search_text import tolerant_q
 
 from .policy import resolve_actor
@@ -337,12 +338,12 @@ def legacy_review_teachers(request):
         .exclude(enrollment__offering__instructor__isnull=True)
         .values("enrollment__offering__instructor_id")
     )
-    queryset = get_user_model().objects.filter(pk__in=teacher_ids)
-    queryset = _search(queryset, request, ("first_name", "last_name", "username"))
+    queryset = get_user_model().objects.filter(pk__in=teacher_ids).select_related("profile")
+    queryset = _search(queryset, request, ("first_name", "last_name", "username", "profile__patronymic"))
     return _lookup_payload(
         queryset.order_by("last_name", "first_name", "username"),
         request,
-        lambda user: {"id": str(user.pk), "text": user.get_full_name() or user.get_username()},
+        lambda user: {"id": str(user.pk), "text": person_label(user)},  # «Soyad Ad Ata adı»
     )
 
 

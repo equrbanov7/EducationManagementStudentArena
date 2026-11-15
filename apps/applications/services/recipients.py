@@ -1,5 +1,7 @@
 """Kataloq əsasında konkret ünvan və tələbə göndərişi yoxlaması."""
 
+from core.person_names import person_label
+
 from ..state_machine import TransitionDenied
 
 
@@ -56,7 +58,7 @@ def _recipient_titles(unit, user_ids):
 def destination_payload(unit):
     if not unit.requires_recipient:
         return []
-    users = list(recipient_users(unit))
+    users = list(recipient_users(unit).select_related("profile"))
     titles = _recipient_titles(unit, [user.pk for user in users])
     if "vice_rector" in unit.role_names:
         # Heyət siyahısında vəzifə bölmə başlığı ilə yazılıb («Elmi işlər üzrə») — «… üzrə prorektor» oxunsun.
@@ -64,7 +66,8 @@ def destination_payload(unit):
             pk: title if "prorektor" in title.casefold() else f"{title} prorektor" for pk, title in titles.items()
         }
     return [
-        {"id": str(user.pk), "name": user.get_full_name() or user.username, "title": titles.get(user.pk, "")}
+        # Seçici: «Soyad Ad Ata adı» (sahib 2026-11-15).
+        {"id": str(user.pk), "name": person_label(user), "title": titles.get(user.pk, "")}
         for user in users
     ]
 

@@ -164,7 +164,24 @@ def assignable_handlers(user, organization, application_id) -> list:
     )
     if application is None or not access.can_act(user, application):
         return []
-    return [person(candidate) for candidate in handler_recipients(application)]
+    candidates = handler_recipients(application)
+    if not candidates:
+        return []
+    # Seçici: «Soyad Ad Ata adı», soyad sırası (sahib 2026-11-15) — ata adları BİR sorğu ilə.
+    from django.contrib.auth import get_user_model
+
+    from core.person_names import PATRONYMIC_LOOKUP, person_label
+
+    patronymics = dict(
+        get_user_model()
+        .objects.filter(pk__in=[candidate.pk for candidate in candidates])
+        .values_list("pk", PATRONYMIC_LOOKUP)
+    )
+    rows = [
+        {**person(candidate), "name": person_label(candidate, patronymic=patronymics.get(candidate.pk) or "")}
+        for candidate in candidates
+    ]
+    return sorted(rows, key=lambda row: row["name"].casefold())
 
 
 def submit_linked_application(*, organization, user, kind, subject, body, unit=None, request=None):

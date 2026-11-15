@@ -23,7 +23,7 @@ from django.contrib.auth import get_user_model
 
 from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.domain.unit_assignment import unit_assigned_student_ids
-from core.person_names import user_display_name_with_patronymic
+from core.person_names import person_label
 from core.search_text import tolerant_matcher
 
 SOURCE_GROUP = "group"
@@ -173,7 +173,7 @@ def build_roster(exam) -> list:
         rows.append(
             AssigneeRow(
                 user=user,
-                name=user_display_name_with_patronymic(user) or user.username,
+                name=person_label(user),  # «Soyad Ad Ata adı» — soyad sırası ilə uyğun (sahib 2026-11-15)
                 group_name=groups.get(user.pk, ""),
                 code=(getattr(profile, "institutional_identifier", "") or "") if profile is not None else "",
                 is_individual=is_individual,

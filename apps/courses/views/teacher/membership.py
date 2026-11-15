@@ -29,6 +29,7 @@ from apps.courses.models import CourseMembership
 from apps.exams.models import Exam
 from apps.exams.public import without_disabled_practical_exams
 from core.permissions import request_has_permission
+from core.person_names import person_label
 from core.search_text import tolerant_q
 from core.tenancy import get_request_organization, scoped_by_organization
 
@@ -163,19 +164,23 @@ class AvailableStudentsView(LoginRequiredMixin, UserPassesTestMixin, View):
         page = _clamp_int(request.GET.get("page"), default=1, low=1, high=AVAILABLE_STUDENTS_MAX_PAGE)
 
         qs = _available_students_queryset(request, course)
-        search_q = tolerant_q(q, ("username", "first_name", "last_name"))
+        search_q = tolerant_q(q, ("username", "first_name", "last_name", "profile__patronymic"))
         if search_q is not None:
             qs = qs.filter(search_q)
 
         offset = (page - 1) * limit
-        rows = list(qs.only("id", "username", "first_name", "last_name")[offset : offset + limit + 1])
+        rows = list(
+            qs.select_related("profile").only("id", "username", "first_name", "last_name", "profile__patronymic")[
+                offset : offset + limit + 1
+            ]
+        )
         has_more = len(rows) > limit
 
         data = [
             {
                 "id": u.id,
                 "username": u.username,
-                "full_name": u.get_full_name() or u.username,
+                "full_name": person_label(u),  # «Soyad Ad Ata adı» (sahib 2026-11-15)
             }
             for u in rows[:limit]
         ]

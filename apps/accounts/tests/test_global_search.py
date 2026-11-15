@@ -119,7 +119,7 @@ class GlobalSearchTest(TestCase):
     def test_staff_can_search_students_and_subjects(self):
         groups = self._search(self.dean, "Məmmədov")
         self.assertIn("students", groups)
-        self.assertEqual(groups["students"]["items"][0]["title"], "Elvin Məmmədov")
+        self.assertEqual(groups["students"]["items"][0]["title"], "Məmmədov Elvin")
 
         subj_groups = self._search(self.dean, "CS101")
         self.assertIn("subjects", subj_groups)
@@ -168,11 +168,11 @@ class GlobalSearchTest(TestCase):
 
         UserProfile.objects.filter(user=self.student).update(patronymic="Rauf")
         groups = self._search(self.dean, "Məmmədov")
-        self.assertEqual(groups["students"]["items"][0]["title"], "Elvin Məmmədov Rauf")
+        self.assertEqual(groups["students"]["items"][0]["title"], "Məmmədov Elvin Rauf")
 
         by_patronymic = self._search(self.dean, "Elvin Rauf")
         self.assertIn("students", by_patronymic)
-        self.assertEqual(by_patronymic["students"]["items"][0]["title"], "Elvin Məmmədov Rauf")
+        self.assertEqual(by_patronymic["students"]["items"][0]["title"], "Məmmədov Elvin Rauf")
         self.assertNotIn("students", self._search(self.dean, "Elvin Nizami"))
 
     def test_placeholder_patronymic_not_shown(self):
@@ -180,4 +180,4 @@ class GlobalSearchTest(TestCase):
 
         UserProfile.objects.filter(user=self.student).update(patronymic="-")
         groups = self._search(self.dean, "Məmmədov")
-        self.assertEqual(groups["students"]["items"][0]["title"], "Elvin Məmmədov")
+        self.assertEqual(groups["students"]["items"][0]["title"], "Məmmədov Elvin")

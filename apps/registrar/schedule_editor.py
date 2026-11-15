@@ -37,6 +37,7 @@ from django.utils.translation import pgettext
 from apps.registrar import schedule as schedule_service
 from apps.registrar import schedule_conflicts, schedule_grid, schedule_manage, schedule_slot_teachers
 from apps.registrar.models import CourseOffering, SlotKind, Subject, WeekType
+from core.person_names import person_label, person_label_from_parts
 
 _CTX = "registrar.schedule_editor"
 
@@ -199,12 +200,12 @@ def _teacher_choices(organization) -> list[dict]:
     rows = (
         User.objects.filter(pk__in=member_ids, is_active=True)
         .order_by("last_name", "first_name", "username", "pk")
-        .values_list("pk", "first_name", "last_name", "username")
+        .values_list("pk", "first_name", "last_name", "profile__patronymic", "username")
     )
-    # Ad `User.get_full_name()` ilə eyni (``_person_name``): «ad soyad», boşdursa istifadəçi adı.
+    # Sahib 2026-11-15: seçicidə «Soyad Ad Ata adı» (boşdursa istifadəçi adı) — sıralama ilə uyğun.
     return [
-        {"id": str(pk), "name": f"{first_name or ''} {last_name or ''}".strip() or str(username or "")}
-        for pk, first_name, last_name, username in rows
+        {"id": str(pk), "name": person_label_from_parts(last_name, first_name, patronymic, username)}
+        for pk, first_name, last_name, patronymic, username in rows
     ]
 
 
@@ -375,11 +376,15 @@ def slot_teacher_options(*, organization, group, period, subject_id, instructor_
         return {"owner": None, "teachers": []}
     offering = (
         CourseOffering.objects.filter(organization=organization, subject_id=subject_pk, period=period, group=group)
-        .select_related("instructor")
+        .select_related("instructor__profile")
         .first()
     )
     chosen_pk = schedule_slot_teachers.user_pk(instructor_id)
-    chosen = get_user_model().objects.filter(pk=chosen_pk).first() if chosen_pk is not None else None
+    chosen = (
+        get_user_model().objects.filter(pk=chosen_pk).select_related("profile").first()
+        if chosen_pk is not None
+        else None
+    )
     if offering is None:
         offering = CourseOffering(
             organization=organization, subject_id=subject_pk, period=period, group=group, instructor=chosen
@@ -388,7 +393,7 @@ def slot_teacher_options(*, organization, group, period, subject_id, instructor_
         offering.instructor = chosen  # yalnız yaddaşda — `resolve_offering` qayda 2 ilə eyni
     owner = offering.instructor
     return {
-        "owner": {"id": str(owner.pk), "name": _person_name(owner)} if owner is not None else None,
+        "owner": {"id": str(owner.pk), "name": person_label(owner)} if owner is not None else None,
         "teachers": schedule_slot_teachers.choices(offering),
     }
 

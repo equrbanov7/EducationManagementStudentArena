@@ -103,7 +103,7 @@ class GlobalSearchStudentScopeTest(TestCase):
         return [item["title"] for item in groups.get("students", {}).get("items", [])]
 
     def test_student_inside_scope_is_found(self):
-        self.assertIn("Qorxmaz Doğmaoğlu", self._search("Doğmaoğlu"))
+        self.assertIn("Doğmaoğlu Qorxmaz", self._search("Doğmaoğlu"))
 
     def test_student_outside_scope_is_not_found(self):
         self.assertEqual(self._search("Uzaqbəyli"), [])

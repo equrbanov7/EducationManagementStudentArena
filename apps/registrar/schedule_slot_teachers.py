@@ -26,6 +26,8 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 
+from core.person_names import person_label
+
 #: ``workload.constants.TaskStatus.CANCELLED`` / ``Activity`` dəyərləri (import YOX — bax modul şərhi).
 _CANCELLED_TASK = "cancelled"
 _TEACHING_ACTIVITIES = ("lecture", "seminar", "lab")
@@ -39,10 +41,6 @@ def user_pk(value):
         return get_user_model()._meta.pk.to_python(str(value).strip())
     except (TypeError, ValueError, ValidationError):
         return None
-
-
-def _person_name(user) -> str:
-    return (user.get_full_name() or "").strip() or user.username
 
 
 def _lesson_teacher_ids(offering) -> set:
@@ -159,8 +157,8 @@ def choices(offering) -> list[dict]:
     ids = allowed_teacher_ids(offering) - {offering.instructor_id if offering is not None else None}
     if not ids:
         return []
-    users = get_user_model().objects.filter(pk__in=ids)
-    rows = [{"id": str(user.pk), "name": _person_name(user)} for user in users]
+    users = get_user_model().objects.filter(pk__in=ids).select_related("profile")
+    rows = [{"id": str(user.pk), "name": person_label(user)} for user in users]  # «Soyad Ad Ata adı»
     return sorted(rows, key=lambda row: row["name"].lower())
 
 

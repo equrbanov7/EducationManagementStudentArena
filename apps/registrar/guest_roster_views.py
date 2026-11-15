@@ -128,7 +128,9 @@ def guest_student_search(request, offering_id):
 
     records = guest_roster.candidate_records(offering=offering, group=group)
     query = (request.GET.get("q") or "").strip()
-    search_q = tolerant_q(query, ("student__first_name", "student__last_name", "student__username"))
+    search_q = tolerant_q(
+        query, ("student__first_name", "student__last_name", "student__username", "student__profile__patronymic")
+    )
     if search_q is not None:
         records = records.filter(search_q)
     # Artıq jurnalda olanlar siyahıdan ÇIXARILMIR — görünür, amma `disabled`

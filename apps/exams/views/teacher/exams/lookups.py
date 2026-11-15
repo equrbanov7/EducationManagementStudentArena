@@ -16,6 +16,7 @@ from apps.exams.services import exam_journal_coverage, subject_picker_hints
 from apps.exams.services.access_policy import _ensure_teacher
 from apps.exams.services.lookup_search import legacy_group_lookup_q, subject_lookup_q, unit_lookup_q
 from apps.organizations.public import organization_role_user_queryset
+from core.person_names import person_label
 from core.roles import ProfileRole
 from core.search_text import starts_with_q, tolerant_q, word_prefix_q
 
@@ -140,18 +141,19 @@ def bank_teacher_search(request):
     )
     # 2026-11-11 (sahib «ləngdir» — sehrbazın müəllim seçicisi): üzvlük JOIN-u + bütün istifadəçi sütunları
     # üzərində DISTINCT əvəzinə yarım-birləşmə (``pk IN (…)``) və yalnız etiketə lazım olan 4 sütun.
-    qs = User.objects.filter(pk__in=role_users.order_by().values("pk")).only(
-        "id", "username", "first_name", "last_name"
+    # Sahib 2026-11-15: etiket «Soyad Ad Ata adı» — ata adı eyni JOIN-dan (profil), axtarış da onu tapır.
+    qs = (
+        User.objects.filter(pk__in=role_users.order_by().values("pk"))
+        .select_related("profile")
+        .only("id", "username", "first_name", "last_name", "profile__patronymic")
     )
-    search_q = tolerant_q(query, ("username", "first_name", "last_name"))
+    search_q = tolerant_q(query, ("username", "first_name", "last_name", "profile__patronymic"))
     if search_q is not None:
         qs = qs.filter(search_q)
-    qs = qs.order_by("first_name", "last_name", "username")
+    qs = qs.order_by("last_name", "first_name", "username")
 
     offset, limit = _page_bounds(request)
-    results, has_more = _paginate(
-        qs, offset, limit, lambda u: {"id": str(u.id), "text": u.get_full_name() or u.username}
-    )
+    results, has_more = _paginate(qs, offset, limit, lambda u: {"id": str(u.id), "text": person_label(u)})
     return JsonResponse({"results": results, "has_more": has_more})
 
 
@@ -371,10 +373,15 @@ def invigilator_search(request):
         .order_by("-role__level")
         .values("scope_unit__name")[:1]
     )
-    qs = center_staff_queryset(organization).annotate(kafedra=Subquery(kafedra_sq))
+    qs = (
+        center_staff_queryset(organization)
+        .select_related("profile")
+        .annotate(kafedra=Subquery(kafedra_sq))
+        .order_by("last_name", "first_name", "username")
+    )
 
     query = (request.GET.get("q") or "").strip()
-    search_q = tolerant_q(query, ("username", "first_name", "last_name", "email"))
+    search_q = tolerant_q(query, ("username", "first_name", "last_name", "email", "profile__patronymic"))
     if search_q is not None:
         qs = qs.filter(search_q)
 
@@ -385,7 +392,7 @@ def invigilator_search(request):
         limit,
         lambda u: {
             "id": str(u.id),
-            "text": (u.get_full_name() or u.username),
+            "text": person_label(u),
             "username": u.username,
             "kafedra": getattr(u, "kafedra", "") or "",
         },

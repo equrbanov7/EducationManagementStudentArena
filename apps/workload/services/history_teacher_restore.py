@@ -217,7 +217,7 @@ class _Context:
             .exclude(task__status=TaskStatus.CANCELLED)
             .distinct()
             .select_related("task")
-            .prefetch_related("groups", "assignments__teacher")
+            .prefetch_related("groups", "assignments__teacher__profile")
         )
         self.rows = {
             course.pk: [

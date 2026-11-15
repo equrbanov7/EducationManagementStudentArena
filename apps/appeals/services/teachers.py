@@ -25,6 +25,8 @@ from __future__ import annotations
 from django.apps import apps as django_apps
 from django.contrib.auth import get_user_model
 
+from core.person_names import PATRONYMIC_LOOKUP, person_label
+
 _DROPPED = "dropped"
 
 
@@ -145,11 +147,20 @@ def decision_teacher_options(appeal) -> dict:
     others = list(
         get_user_model()
         .objects.filter(pk__in=other_ids, is_active=True)
+        .select_related("profile")
         .order_by("last_name", "first_name", "username")
     )
+    # Seçici: «Soyad Ad Ata adı» (sahib 2026-11-15); fənn müəllimlərinin ata adı bir sorğu ilə.
+    patronymics = (
+        dict(get_user_model().objects.filter(pk__in=subject_ids).values_list("pk", PATRONYMIC_LOOKUP))
+        if subject_ids
+        else {}
+    )
     return {
-        "subject": [{"id": user.pk, "label": _person(user)} for user in subject],
-        "others": [{"id": user.pk, "label": _person(user)} for user in others],
+        "subject": [
+            {"id": user.pk, "label": person_label(user, patronymic=patronymics.get(user.pk) or "")} for user in subject
+        ],
+        "others": [{"id": user.pk, "label": person_label(user)} for user in others],
         "default_id": subject[0].pk if len(subject) == 1 else None,
     }
 

@@ -21,6 +21,7 @@ from django.db.models import Case, IntegerField, Value, When
 from django.utils import timezone
 from django.utils.translation import pgettext
 
+from core.person_names import person_label
 from core.search_text import fold_regex, tokens_of, tolerant_q
 from core.staff_position import visible_role_label
 
@@ -139,7 +140,7 @@ def serialize_candidates(actor, users) -> list:
             except UsernameAdminError as exc:
                 can_rename, rename_reason = False, exc.message
         status = status_code_of(user)
-        full_name = profile.full_name_with_patronymic if profile is not None else user.get_full_name()
+        full_name = person_label(user)
         # Sahib 2026-10-27: arxivdə, amma hələ oxuyan tələbə — dalan yox, «Arxivdən çıxar» ipucu / düyməsi.
         archive = None
         if status == "login_closed" and getattr(profile, "access_state", "") == "archived":
@@ -240,14 +241,13 @@ def suggest(actor, raw_query) -> list:
     groups = _student_groups(users, organization)
     rows = []
     for user in users:
-        profile = getattr(user, "profile", None)
         hint = groups.get(user.pk, "")
         if not hint:
             for membership in memberships.get(user.pk, []):
                 hint = visible_role_label(membership.role.name, membership.role.display_name) or ""
                 if hint:
                     break
-        full_name = profile.full_name_with_patronymic if profile is not None else user.get_full_name()
+        full_name = person_label(user)
         rows.append({"id": user.pk, "username": user.username, "full_name": full_name or user.username, "hint": hint})
     return rows
 

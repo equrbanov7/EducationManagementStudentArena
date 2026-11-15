@@ -22,6 +22,8 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET
 
+from core.person_names import person_label
+
 from .group_actions import _error, _visible_group
 from .group_roster_union import roster_group_ids
 from .groups_registry import (
@@ -66,7 +68,7 @@ def _candidate_row(record, *, group_specialty_id) -> dict:
     student = record.student
     program = record.program
     code = getattr(program, "display_code", "") or ""
-    name = (student.get_full_name() or "").strip() or student.username
+    name = person_label(student)  # «Soyad Ad Ata adı» (sahib 2026-11-15)
     meta = ["@" + student.username]
     if code:
         meta.append(code)
@@ -226,13 +228,19 @@ def group_student_candidates(request, slug, unit_id):
         .filter(eligible)
         # Audit 2026-09-28 S3: başqa fakültənin qrupsuz tələbələri görünmür.
         .filter(student_record_scope_q(scope))
-        .select_related("student", "program", "group")
+        .select_related("student__profile", "program", "group")
     )
     query = (request.GET.get("q") or "").strip()[:MAX_QUERY_LENGTH]
     # Dözümlü axtarış (sahib 2026-09-26): ad/ixtisas adı az/ing hərfinə, şifr ayırıcıya dözümlü.
     search_q = tolerant_q(
         query,
-        ("student__first_name", "student__last_name", "student__username", "program__name"),
+        (
+            "student__first_name",
+            "student__last_name",
+            "student__username",
+            "student__profile__patronymic",
+            "program__name",
+        ),
         compact_fields=tuple(f"program__{field}" for field in PROGRAM_CODE_SEARCH_FIELDS),
     )
     if search_q is not None:

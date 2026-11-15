@@ -97,7 +97,7 @@ class LookupTest(PasswordResetTestBase):
         self.assertEqual(payload["mode"], "exact")
         [card] = payload["results"]
         self.assertEqual(card["username"], "aysel.quliyeva")
-        self.assertEqual(card["full_name"], "Aysel Quliyeva")
+        self.assertEqual(card["full_name"], "Quliyeva Aysel")
         self.assertTrue(card["can_reset"])
         self.assertEqual(card["status"], "active")
         self.assertTrue(card["roles"])

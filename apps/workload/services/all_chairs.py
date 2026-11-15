@@ -111,7 +111,7 @@ def all_chairs_rows_page(
             queryset.select_related(
                 "subject", "specialty", "period", "intensive_offering", "task", "task__chair", "task__chair__parent"
             )
-            .prefetch_related("groups", "assignments__teacher")
+            .prefetch_related("groups", "assignments__teacher__profile")
             .order_by("task__chair__name", "season", "order", "created_at", "pk")[offset : offset + limit]
         )
     payload, _rows, _balance = _serialize(None, rows, amend_targets=_amend_targets(row.task for row in rows))

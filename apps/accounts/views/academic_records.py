@@ -25,6 +25,7 @@ from apps.organizations.public import get_permission_scope, kafedra_unit_types, 
 from apps.registrar.models import Program, StudentAcademicRecord
 from apps.registrar.public import transcript
 from core.http_ids import parse_uuid
+from core.person_names import person_label
 from core.program_codes import PROGRAM_CODE_SEARCH_FIELDS
 from core.search_text import tolerant_q
 
@@ -348,7 +349,9 @@ def student_search(request):
     organization, scope = _scope(request)
     if organization is None or not scope.has_structure_access:
         return JsonResponse({"results": [], "has_more": False})
-    records = StudentAcademicRecord.objects.filter(organization=organization, is_active=True).select_related("student")
+    records = StudentAcademicRecord.objects.filter(organization=organization, is_active=True).select_related(
+        "student__profile"
+    )
     records = records.filter(scope.unit_subtree_q(path_field="group__path", id_field="group_id"))
     group = (request.GET.get("group") or "").strip()
     if group:
@@ -356,7 +359,11 @@ def student_search(request):
     program = (request.GET.get("program") or "").strip()
     if program:
         records = records.filter(program_id=program)
-    records = _search(records, request, ("student__first_name", "student__last_name", "student__username"))
+    records = _search(
+        records,
+        request,
+        ("student__first_name", "student__last_name", "student__username", "student__profile__patronymic"),
+    )
     records = records.order_by("student__last_name", "student__first_name", "student__username")
 
     offset, limit = _bounds(request)
@@ -367,7 +374,7 @@ def student_search(request):
             continue
         seen.add(sid)
         student = record.student
-        results.append({"id": sid, "text": (student.get_full_name() or "").strip() or student.username})
+        results.append({"id": sid, "text": person_label(student)})  # «Soyad Ad Ata adı»
         if len(results) > limit:
             break
     return JsonResponse({"results": results[:limit], "has_more": len(results) > limit})
@@ -393,11 +400,11 @@ def journal_teacher_search(request):
     if not teacher_ids:
         return JsonResponse({"results": [], "has_more": False})
 
-    users = get_user_model().objects.filter(pk__in=teacher_ids)
-    users = _search(users, request, ("first_name", "last_name", "username"))
+    users = get_user_model().objects.filter(pk__in=teacher_ids).select_related("profile")
+    users = _search(users, request, ("first_name", "last_name", "username", "profile__patronymic"))
     users = users.order_by("last_name", "first_name", "username")
     return _page(
         users,
         request,
-        lambda u: {"id": str(u.id), "text": (u.get_full_name() or "").strip() or u.username},
+        lambda u: {"id": str(u.id), "text": person_label(u)},
     )

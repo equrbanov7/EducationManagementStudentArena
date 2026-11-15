@@ -80,7 +80,7 @@ def teacher_or_404(user, organization, period, raw):
         raise Http404 from None
     if pk not in scoped_teacher_ids(user, organization, period):
         raise Http404
-    teacher = get_user_model().objects.filter(pk=pk).first()
+    teacher = get_user_model().objects.filter(pk=pk).select_related("profile").first()
     if teacher is None:
         raise Http404
     return teacher

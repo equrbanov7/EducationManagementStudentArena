@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 
 from core.constants import OrgUnitType
+from core.person_names import person_label
 from core.search_text import tolerant_q
 from core.staff_position import visible_role_label
 
@@ -163,10 +164,10 @@ def head_candidate_memberships(organization, *, search: str = ""):
             user__is_active=True,
             role__level__gte=HEAD_CANDIDATE_MIN_LEVEL,
         )
-        .select_related("user", "role")
-        .order_by("-role__level", "user__first_name", "user__username")
+        .select_related("user__profile", "role")
+        .order_by("-role__level", "user__last_name", "user__first_name", "user__username")
     )
-    term_q = tolerant_q(search, ("user__first_name", "user__last_name", "user__username"))
+    term_q = tolerant_q(search, ("user__first_name", "user__last_name", "user__username", "user__profile__patronymic"))
     if term_q is not None:
         memberships = memberships.filter(term_q)
     return memberships
@@ -183,7 +184,7 @@ def head_candidate_rows(memberships):
         candidates.append(
             {
                 "user_id": membership.user_id,
-                "full_name": membership.user.get_full_name() or membership.user.username,
+                "full_name": person_label(membership.user),  # «Soyad Ad Ata adı» (sahib 2026-11-15)
                 "role_label": visible_role_label(membership.role.name, membership.role.display_name),
             }
         )

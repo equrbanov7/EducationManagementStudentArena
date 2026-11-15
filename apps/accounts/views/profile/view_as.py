@@ -14,6 +14,7 @@ from django.urls import reverse
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET, require_POST
 
+from core.person_names import person_label
 from core.rls import bypass_rls
 from core.search_text import tolerant_q
 
@@ -95,11 +96,11 @@ def _serialize_users(page_users, organization):
 
     results = []
     for user in page_users:
-        full_name = (f"{user.first_name} {user.last_name}").strip() or user.username
         results.append(
             {
                 "id": user.pk,
-                "name": full_name,
+                # Sahib 2026-11-15: «Soyad Ad Ata adı» — eyni adlı hədəflər ata adı ilə ayrılır.
+                "name": person_label(user, patronymic=getattr(user, "_ems_patronymic", "") or ""),
                 "username": user.username,
                 "email": user.email,
                 "roles": role_map.get(user.pk, [])[:2],
@@ -163,7 +164,7 @@ def view_as_search(request):
         q=q,
         role_filter=request.GET.get("role") or "",
         include_archived=actor_can_view_archived(request.user, memberships),
-    ).annotate(_ems_access_state=F("profile__access_state"))
+    ).annotate(_ems_access_state=F("profile__access_state"), _ems_patronymic=F("profile__patronymic"))
 
     def _fetch():
         # +1 → has_more üçün; COUNT(*) sorğusuna ehtiyac qalmır.

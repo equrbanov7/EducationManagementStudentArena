@@ -7,20 +7,26 @@ from django.contrib.auth import get_user_model
 from django.db.models import Count
 
 from apps.registrar.public import schedule_grid, schedule_manage
+from core.person_names import person_label
 from core.search_text import tolerant_match
 
 from . import access, availability
 
 
 def _name(user) -> str:
-    full = (user.get_full_name() or "").strip()
-    return full or user.username
+    """Siyahı/axtarış etiketi: «Soyad Ad Ata adı» (sahib 2026-11-15) — ``select_related("profile")`` ilə."""
+    return person_label(user)
 
 
 def teacher_rows(actor, organization, period, *, query="") -> list:
     """Müəllim siyahısı: ad, açılış sayı, əlçatanlıq xülasəsi (sorğu sayı sabitdir)."""
     ids = access.scoped_teacher_ids(actor, organization, period)
-    users = get_user_model().objects.filter(pk__in=ids).order_by("first_name", "last_name", "username")
+    users = (
+        get_user_model()
+        .objects.filter(pk__in=ids)
+        .select_related("profile")
+        .order_by("last_name", "first_name", "username")
+    )
     offerings = schedule_manage.scoped_offerings(actor, organization, period=period)
     counts = dict(
         offerings.filter(instructor_id__in=ids)

@@ -146,4 +146,4 @@ class SelectedFilterLabelTest(TestCase):
         teacher = User.objects.create_user("sf_teacher", "sf_teacher@qku.edu.az", "pw")
         teacher.first_name, teacher.last_name = "Adıgözəl", "Dosiyev"
         teacher.save(update_fields=["first_name", "last_name"])
-        self.assertEqual(jlq.label_for_selection("teacher", str(teacher.pk)), "Adıgözəl Dosiyev")
+        self.assertEqual(jlq.label_for_selection("teacher", str(teacher.pk)), "Dosiyev Adıgözəl")
