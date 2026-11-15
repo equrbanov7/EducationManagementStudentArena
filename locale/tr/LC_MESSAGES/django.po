@@ -118623,3 +118623,182 @@ msgstr "Pasif dersler toplama dahil değil"
 msgctxt "accounts.lessons_log"
 msgid "akademik saat cəmi · passiv %(hours)s saat ayrıca"
 msgstr "akademik saat toplamı · pasif %(hours)s saat ayrıca"
+
+#, python-format
+msgctxt "registrar.journal_lessons"
+msgid "Bu jurnalda %(date)s, saat %(time)s üçün dərs artıq var — qeydləri həmin dərsin sütununa yazın. Patok dərsində hər qrupun dərsi öz jurnalına yazılır; alt qrupların (Lab / seminar) dərsi üçün alt qrupu seçin."
+msgstr "Bu dergide %(date)s, saat %(time)s için zaten bir ders var — kayıtları o dersin sütununa girin. Ortak (akış) derste her grubun dersi kendi dergisine yazılır; alt grup dersi (Lab / seminer) için alt grubu seçin."
+
+msgctxt "registrar.roster_restore"
+msgid "Tələbəni bərpa et"
+msgstr "Öğrenciyi geri al"
+
+msgctxt "registrar.roster_restore"
+msgid "Səhvən çıxarılmış və ya dondurulmuş tələbəni jurnala qaytarın"
+msgstr "Yanlışlıkla çıkarılan veya dondurulan öğrenciyi deftere geri alın"
+
+msgctxt "registrar.roster_restore"
+msgid "Səhvən çıxarılmış və ya dondurulmuş tələbəni bu jurnala qaytarın. Tələbənin əvvəlki balları və davamiyyəti yerində qalır — yeni sətir yaradılmır."
+msgstr "Yanlışlıkla çıkarılan veya dondurulan öğrenciyi bu deftere geri alın. Öğrencinin önceki puanları ve devamı yerinde kalır — yeni satır oluşturulmaz."
+
+msgctxt "registrar.roster_restore"
+msgid "Siyahı yüklənir…"
+msgstr "Liste yükleniyor…"
+
+msgctxt "registrar.roster_restore"
+msgid "Bu jurnaldan çıxarılmış tələbə yoxdur."
+msgstr "Bu defterden çıkarılmış öğrenci yok."
+
+msgctxt "registrar.roster_restore"
+msgid "Bərpa ediləcək tələbəni seçin."
+msgstr "Geri alınacak öğrenciyi seçin."
+
+msgctxt "registrar.roster_restore"
+msgid "Əməliyyat alınmadı — yenidən cəhd edin."
+msgstr "İşlem başarısız — tekrar deneyin."
+
+msgctxt "registrar.roster_restore"
+msgid "Qrup"
+msgstr "Grup"
+
+msgctxt "registrar.roster_restore"
+msgid "alt qrupdan"
+msgstr "alt gruptan"
+
+msgctxt "registrar.roster_restore"
+msgid "Kim"
+msgstr "Kim"
+
+msgctxt "registrar.roster_restore"
+msgid "Səbəb"
+msgstr "Neden"
+
+msgctxt "registrar.roster_restore"
+msgid "Bağla"
+msgstr "Kapat"
+
+msgctxt "registrar.roster_restore"
+msgid "Qeyd"
+msgstr "Not"
+
+msgctxt "registrar.roster_restore"
+msgid "(istəyə bağlı)"
+msgstr "(isteğe bağlı)"
+
+msgctxt "registrar.roster_restore"
+msgid "Məs.: səhvən çıxarılmışdı, dekanlığın tələbi ilə qaytarıldı"
+msgstr "Örn.: yanlışlıkla çıkarılmıştı, dekanlığın talebiyle geri alındı"
+
+msgctxt "registrar.roster_restore"
+msgid "Ləğv et"
+msgstr "İptal"
+
+msgctxt "registrar.roster_restore"
+msgid "Bərpa et"
+msgstr "Geri al"
+
+msgctxt "registrar.roster_restore"
+msgid "Xarici nəticə tanınıb — «Xarici nəticələrin tanınması» bölməsində ləğv olunur."
+msgstr "Dış sonuç tanınmış — «Dış sonuçların tanınması» bölümünde iptal edilir."
+
+msgctxt "registrar.roster_restore"
+msgid "Əvvəl də jurnalda aktiv deyildi — bərpa onu qaytarmır."
+msgstr "Öğrenci daha önce de defterde aktif değildi — geri alma onu döndürmez."
+
+msgctxt "registrar.roster_restore"
+msgid "Rəsmi qrup köçürməsi ilə başqa jurnala keçib — qrup yalnız köçürmə əmri ilə dəyişir."
+msgstr "Resmi grup nakli ile başka deftere geçti — grup yalnızca nakil emriyle değişir."
+
+msgctxt "registrar.roster_restore"
+msgid "Akademik statusa görə dondurulub (məzuniyyət / xaric / məzun) — qrup reyestrində «Bərpa et» əmri ilə qayıdır."
+msgstr "Akademik durum nedeniyle donduruldu (izin / kayıt silme / mezun) — grup sicilinde «Geri al» emriyle döner."
+
+msgctxt "registrar.roster_restore"
+msgid "Sistem tərəfindən çıxarılıb — bu pəncərədən bərpa olunmur."
+msgstr "Sistem tarafından çıkarıldı — bu pencereden geri alınamaz."
+
+#, python-format
+msgctxt "registrar.roster_restore"
+msgid "Tələbə bu fənn üzrə «%(group)s» qrupunun jurnalında aktivdir. Bu jurnala qaytarmaq üçün «Alt qrupdan tələbə əlavə et» pəncərəsində «öz jurnalından azad et» seçin."
+msgstr "Öğrenci bu derste «%(group)s» grubunun defterinde aktif. Buraya geri almak için «Alt gruptan öğrenci ekle» penceresinde «kendi defterinden serbest bırak» seçin."
+
+#, python-format
+msgctxt "registrar.roster_restore"
+msgid "Tələbə bu fənn üzrə «%(group)s» qrupunun jurnalında aktivdir — əvvəlcə oradan çıxarın, sonra bərpa edin."
+msgstr "Öğrenci bu derste «%(group)s» grubunun defterinde aktif — önce oradan çıkarın, sonra geri alın."
+
+msgctxt "registrar.roster_restore"
+msgid "Dondurulub"
+msgstr "Donduruldu"
+
+msgctxt "registrar.roster_restore"
+msgid "Çıxarılıb"
+msgstr "Çıkarıldı"
+
+msgctxt "registrar.roster_restore"
+msgid "Bu qərarı yalnız RİM geri qaytara bilər."
+msgstr "Bu kararı yalnızca RİM geri alabilir."
+
+msgctxt "registrar.roster_restore"
+msgid "Jurnala bərpa edildi"
+msgstr "Deftere geri alındı"
+
+msgctxt "registrar.roster_restore"
+msgid "Qeydiyyat tapılmadı."
+msgstr "Kayıt bulunamadı."
+
+msgctxt "registrar.roster_restore"
+msgid "Tələbə artıq jurnaldadır."
+msgstr "Öğrenci zaten defterde."
+
+msgctxt "registrar.roster_restore"
+msgid "Qərar artıq geri qaytarılıb."
+msgstr "Karar zaten geri alındı."
+
+msgctxt "registrar.roster_restore"
+msgid "Tələbəni jurnala bərpa etmək üçün səlahiyyətiniz yoxdur."
+msgstr "Öğrenciyi deftere geri almak için yetkiniz yok."
+
+msgctxt "registrar.roster_restore"
+msgid "Tələbə jurnala qaytarıldı — əvvəlki balları və davamiyyəti yerindədir."
+msgstr "Öğrenci deftere geri alındı — önceki puanları ve devamı yerinde."
+
+msgctxt "registrar.journal_removal"
+msgid "Jurnal təmizliyi"
+msgstr "Defter temizliği"
+
+msgctxt "registrar.syllabus"
+msgid "Öz sillabusunu yarat"
+msgstr "Kendi müfredatını oluştur"
+
+msgctxt "registrar.syllabus"
+msgid "Sillabusu redaktə et"
+msgstr "Müfredatı düzenle"
+
+msgctxt "registrar.syllabus"
+msgid "Redaktəyə keçmək alınmadı. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Düzenleyici açılamadı. Sayfayı yenileyip tekrar deneyin."
+
+msgctxt "accounts.syllabus"
+msgid "Bu sillabusa yalnız baxa bilərsiniz"
+msgstr "Bu müfredatı yalnızca görüntüleyebilirsiniz"
+
+msgctxt "accounts.syllabus"
+msgid "Sillabusu onun müəllifi və bağlı olduğu jurnalın müəllimləri redaktə edir. Başqa qrupla ortaq istifadə olunan sillabus bütün qruplar üçün eynidir."
+msgstr "Müfredatı yazarı ve bağlı olduğu defterin öğretmenleri düzenler. Başka bir grupla ortak kullanılan müfredat tüm gruplar için aynıdır."
+
+msgctxt "accounts.syllabus"
+msgid "Öz sillabusunu yarat"
+msgstr "Kendi müfredatını oluştur"
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus yaradıla bilmədi. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Müfredat oluşturulamadı. Sayfayı yenileyip tekrar deneyin."
+
+msgctxt "accounts.syllabus"
+msgid "Versiya kafedra müdirinin baxışındadır. Dəyişiklik etmək üçün «Sillabuslar» siyahısında təqdimatı geri çağırın — sonra redaktə yenidən açılır."
+msgstr "Sürüm bölüm başkanının incelemesinde. Değişiklik yapmak için «Müfredatlar» listesinde gönderimi geri çekin — ardından düzenleme yeniden açılır."
+
+msgctxt "accounts.syllabus"
+msgid "Yeni versiya yaradıla bilmədi. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Yeni sürüm oluşturulamadı. Sayfayı yenileyip tekrar deneyin."
