@@ -79,6 +79,36 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
      data-text-distributed="{% trans 'Bölgü təsdiqlənib. Sətri, saatı və ya müəllimi dəyişə, fəaliyyəti çıxara, sətir əlavə edə bilərsiniz — hər dəyişiklikdə düzəliş səbəbi və qeydi soruşulur, tarixçə saxlanılır.' context 'accounts.workload' %}"
      data-text-amended="{% trans 'Düzəliş açıqdır: dəyişikliklər müəllimə və jurnala dərhal düşür. Bitirəndə «Bölgünü təsdiqlə» ilə sənədi yenidən təsdiqləyin.' context 'accounts.workload' %}"></p>
 
+  {# ══ MÜƏLLİM ETİRAZLARI (ekran 16 → 14 zənciri) ═════════════════════ #}
+  {% comment %}Sahib 2026-11-16: etirazlar səhifənin sonunda itirdi — süzgəclərdən ƏVVƏL göstərilir; açıqlar
+  yuxarıda, bağlanmışlar yığılmış «Bağlanmış etirazlar» siyahısında.{% endcomment %}
+  {% if workload_distribution_section.objections %}
+  <section class="wl-panel wl-objections-panel{% if workload_distribution_section.objections_open %} wl-objections-panel--open{% endif %}" aria-labelledby="wl-objections-title">
+    <h3 class="wl-panel__title" id="wl-objections-title">
+      {% trans "Müəllim etirazları" context "accounts.workload" %}
+      {% if workload_distribution_section.objections_open %}<span class="wl-objections__count">{% blocktrans with n=workload_distribution_section.objections_open context "accounts.workload" %}{{ n }} açıq{% endblocktrans %}</span>{% endif %}
+    </h3>
+    <p class="wl-amend__hint">{% trans "Etiraz bölgünü dayandırmır — sətri yenidən bölün və ya etirazı qərarla bağlayın (qərar audit jurnalına yazılır)." context "accounts.workload" %}</p>
+    {% if workload_distribution_section.objections_open %}
+    <ul class="wl-objections">
+      {% for item in workload_distribution_section.objections %}{% if item.is_open %}
+      {% include "accounts/profile/sections/_workload_objection_item.html" %}
+      {% endif %}{% endfor %}
+    </ul>
+    {% endif %}
+    {% if workload_distribution_section.objections_closed %}
+    <details class="wl-objections__closed">
+      <summary>{% trans "Bağlanmış etirazlar" context "accounts.workload" %} ({{ workload_distribution_section.objections_closed }})</summary>
+      <ul class="wl-objections">
+        {% for item in workload_distribution_section.objections %}{% if not item.is_open %}
+        {% include "accounts/profile/sections/_workload_objection_item.html" %}
+        {% endif %}{% endfor %}
+      </ul>
+    </details>
+    {% endif %}
+  </section>
+  {% endif %}
+
   {# ── Süzgəc zolağı: kafedra + il + fəsil + axtarış ──────────────────── #}
   <form class="wl-filters" data-wl-filters novalidate>
     <div class="wl-field">
@@ -462,39 +492,6 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
       </div>
     </div>
   </div>
-
-  {# ══ MÜƏLLİM ETİRAZLARI (ekran 16 → 14 zənciri) ═════════════════════ #}
-  {% if workload_distribution_section.objections %}
-  <section class="wl-panel" aria-labelledby="wl-objections-title">
-    <h3 class="wl-panel__title" id="wl-objections-title">{% trans "Müəllim etirazları" context "accounts.workload" %}</h3>
-    <p class="wl-amend__hint">{% trans "Etiraz bölgünü dayandırmır — sətri yenidən bölün və ya etirazı qərarla bağlayın (qərar audit jurnalına yazılır)." context "accounts.workload" %}</p>
-    <ul class="wl-objections">
-      {% for item in workload_distribution_section.objections %}
-      <li class="wl-objection {% if not item.is_open %}wl-objection--closed{% endif %}">
-        <div class="wl-objection__head">
-          <span>{{ item.teacher }} — {{ item.subject }}</span>
-          <span>{{ item.status_label }}</span>
-        </div>
-        <div>{{ item.reason_label }}: {{ item.text }}</div>
-        {% if item.is_open and workload_distribution_section.can_distribute %}
-        <div class="wl-actions">
-          <button type="button" class="wl-btn wl-btn--ghost"
-                  data-tof-submit='{"action": "resolve_objection", "objection": "{{ item.id }}", "state": "rejected"}'
-                  data-tof-confirm="{% trans 'Etiraz rədd edilsin?' context 'accounts.workload' %}">
-            {% trans "Rədd et" context "accounts.workload" %}
-          </button>
-          <button type="button" class="wl-btn wl-btn--primary"
-                  data-tof-submit='{"action": "resolve_objection", "objection": "{{ item.id }}", "state": "accepted"}'
-                  data-tof-confirm="{% trans 'Etiraz qəbul edilsin? Sətri yenidən bölməyi unutmayın.' context 'accounts.workload' %}">
-            {% trans "Qəbul et" context "accounts.workload" %}
-          </button>
-        </div>
-        {% endif %}
-      </li>
-      {% endfor %}
-    </ul>
-  </section>
-  {% endif %}
 
   {# ══ MODAL — təsdiqdən sonrakı düzəliş ══════════════════════════════ #}
   <div class="modal fade wl-modal" id="wlAmendModal" tabindex="-1" aria-hidden="true" data-wl-amend-modal>

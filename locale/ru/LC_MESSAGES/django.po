@@ -119920,3 +119920,11 @@ msgstr "Очная"
 msgctxt "accounts.workload"
 msgid "Qiyabi"
 msgstr "Заочная"
+
+msgctxt "accounts.workload"
+msgid "%(n)s açıq"
+msgstr "%(n)s открыто"
+
+msgctxt "accounts.workload"
+msgid "Bağlanmış etirazlar"
+msgstr "Закрытые возражения"

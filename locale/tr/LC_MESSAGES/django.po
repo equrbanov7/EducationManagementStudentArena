@@ -118892,3 +118892,11 @@ msgstr "Örgün"
 msgctxt "accounts.workload"
 msgid "Qiyabi"
 msgstr "Uzaktan (yarı zamanlı)"
+
+msgctxt "accounts.workload"
+msgid "%(n)s açıq"
+msgstr "%(n)s açık"
+
+msgctxt "accounts.workload"
+msgid "Bağlanmış etirazlar"
+msgstr "Kapatılmış itirazlar"

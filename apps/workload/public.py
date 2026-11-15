@@ -235,6 +235,8 @@ def build_distribution_context(
                 "is_chain_blocked": task.status in ("submitted", "returned", "pending_final_approval"),
             }
             base["objections"] = _chair_objection_payload(task)
+            base["objections_open"] = sum(1 for item in base["objections"] if item["is_open"])
+            base["objections_closed"] = len(base["objections"]) - base["objections_open"]
     return base
 
 
