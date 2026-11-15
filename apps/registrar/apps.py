@@ -15,6 +15,17 @@ class RegistrarConfig(AppConfig):
         _register_off_schedule_reevaluation()
         _register_lesson_author_freeze()
         _register_syllabus_carry()
+        _register_enrollment_events()
+
+
+def _register_enrollment_events():
+    """Sahib 2026-11-16: tələbə jurnala yazılanda bitmiş imtahan nəticəsi ora da düşsün (``enrollment_events``)."""
+    from django.db.models.signals import post_save
+
+    from .enrollment_events import enrollment_saved
+    from .models import Enrollment
+
+    post_save.connect(enrollment_saved, sender=Enrollment, dispatch_uid="registrar_enrollment_events_saved")
 
 
 def _register_self_conflict():

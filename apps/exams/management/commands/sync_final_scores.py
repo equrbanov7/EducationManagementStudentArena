@@ -28,13 +28,12 @@ from collections import Counter
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
-from django.db.models import F, Q
+from django.db.models import Q
 
-from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.models import Exam, ExamAttempt
 from apps.exams.services import exam_journal_link, journal_sync
 from apps.exams.services.access_policy import FINAL_EXAM_CATEGORY
-from apps.exams.services.journal_sync_scope import target_key
+from apps.exams.services.journal_sync import official_final_attempts
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
 
@@ -51,29 +50,6 @@ def _exam_filter(values) -> Q:
         if value.isdigit():
             query |= Q(pk=int(value))
     return query
-
-
-def official_final_attempts(queryset):
-    """Bitmiş final cəhdlərindən hər jurnal qeydiyyatı üzrə ən son başlamış rəsmi cəhdi seç."""
-    rows = (
-        queryset.filter(
-            exam__subject__isnull=False,
-            exam__exam_type_extended=FINAL_EXAM_CATEGORY,
-            exam__is_deleted=False,
-            is_trial=False,
-            status__in=ATTEMPT_FINISHED_STATUSES,
-        )
-        .select_related("exam", "exam__organization", "user")
-        .prefetch_related("exam__journal_offerings")
-        .order_by("user_id", F("started_at").desc(nulls_last=True), "-pk")
-    )
-    seen = set()
-    for attempt in rows.iterator(chunk_size=500):
-        key = target_key(attempt)
-        if key in seen:
-            continue
-        seen.add(key)
-        yield attempt
 
 
 class Command(BaseCommand):

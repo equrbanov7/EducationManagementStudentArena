@@ -29,4 +29,10 @@ student_group_changed = Signal()
 #: ``apps.registrar.public.journal_close.journal_closed`` ilə (public səth).
 journal_closed = Signal()
 
-__all__ = ["journal_closed", "student_group_changed"]
+#: Tələbə jurnala yazıldı / jurnalda yenidən aktivləşdi (sahib 2026-11-16: «qiymətləndirilmiş nəticə tələbənin
+#: səhifəsində görünsün» — yeni jurnal da). Tranzaksiya commit olunduqdan SONRA göndərilir.
+#: kwargs: ``organization_id``, ``rows`` — ``[(student_id, offering_id, subject_id)]`` (sətirlər, str).
+#: Abunəçi: ``apps.exams.services.enrollment_result_sync`` (tələbənin bitmiş imtahan nəticəsini yeni jurnala yazır).
+enrollments_activated = Signal()
+
+__all__ = ["enrollments_activated", "journal_closed", "student_group_changed"]

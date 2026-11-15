@@ -247,6 +247,11 @@
 #   reinstate_part_time_graduates_20261115 — sahib 2026-11-15: köçürmədə səhvən «Məzun» (MZN-SINX-2026) edilmiş qiyabi
 #       bakalavrlar (qəbul 2021+) rəsmi «Bərpa» əmri ilə eyni qrupa qaytarılır, giriş açılır, cari jurnallara salınır.
 #       Defolt dry-run; `ptgrad-…` + apply geri qaytarır. Loga saylar və qrup adları (`pt_grad:`).
+#   audit_exam_results_20261116 — sahib 2026-11-16: hər qiymətləndirilmiş (rəsmi) midterm / final cəhdinin balı
+#       tələbənin jurnalında (öz səhifəsində) varmı — canlı körpü ilə EYNİ yolla yazılır (yoxdursa / fərqlidirsə);
+#       fənnin jurnalında olmayan tələbə səbəbə görə sayılır (yerləşdirmə: merge_duplicate_subjects_20261111
+#       batch=takers). Qeydiyyat yaradılmır; defolt dry-run; bildiriş yoxdur.
+#       Loga YALNIZ «exam_results:» sətirləri (saylar, imtahan id-si).
 #   move_merged_fin_20261115 — sahib 2026-11-15: birləşmiş dublikatın FİN-i FİN-i boş əsas hesaba keçir
 #       (`batch` = MƏNBƏ:HƏDƏF[,…]; `finmove-…` + apply geri qaytarır). Defolt dry-run; loga YALNIZ saylar (`fin_move:`).
 #   merge_duplicate_teacher — sahib 2026-11-08: müəllimin dublikat hesabı (mənbə) → əsas hesab (hədəf). `batch` =
@@ -535,6 +540,7 @@ on:
           - merge_duplicate_teacher
           - move_merged_fin_20261115
           - reinstate_part_time_graduates_20261115
+          - audit_exam_results_20261116
           - merge_psychology_duplicates_20261105
           - merge_psychology_duplicates_20261106
           - relocate_twin_enrollment
@@ -1738,6 +1744,12 @@ jobs:
               # create_missing=true → qəbul ili bilinməyən (1950) qiyabilər də (sahib 2026-11-15 «Restore them»).
               test "$CREATE_MISSING" != "true" || args+=(--include-unknown-year)
               ;;
+            audit_exam_results_20261116)
+              # Sahib 2026-11-16: qiymətləndirilmiş nəticə jurnalda / tələbə səhifəsində (saylar + çatışmayan balın yazısı).
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              ;;
             move_merged_fin_20261115)
               # Sahib 2026-11-15: birləşmiş dublikatın FİN-i → FİN-i boş əsas hesab. batch = MƏNBƏ:HƏDƏF[,…] və ya finmove-… (undo, apply).
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
@@ -2644,6 +2656,17 @@ jobs:
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "audit_exam_results_20261116" ]; then
+            # Loga YALNIZ «exam_results:» sətirləri (saylar, imtahan id-si — ad yoxdur) və rədd kodu.
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^exam_results: [a-z_]+( [a-z0-9_]+=[0-9a-z_]+)*$' "$RUNNER_TEMP/out.log" | head -n 400 > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_0-9]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
               rm -f "$RUNNER_TEMP/out.log"
               exit "$status"
             fi

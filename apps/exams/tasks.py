@@ -113,6 +113,14 @@ def resync_exam_journal(exam_id, by_user_id=None, change_log_id=None, relink=Tru
     )
 
 
+@shared_task(name="exams.sync_enrolled_student_results", time_limit=900, soft_time_limit=840)
+def sync_enrolled_student_results(organization_id, rows):
+    """Tələbə jurnala yazılıb — bitmiş imtahan nəticəsi o jurnala da (sahib 2026-11-16, ``enrollment_result_sync``)."""
+    from apps.exams.services.enrollment_result_sync import sync_rows
+
+    return dict(sync_rows(organization_id, rows, scope=_worker_bypass_scope))
+
+
 @shared_task(name="exams.expire_stale_resumed_attempts")
 def expire_stale_resumed_attempts():
     """

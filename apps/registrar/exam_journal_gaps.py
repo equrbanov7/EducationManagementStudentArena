@@ -34,6 +34,7 @@ from dataclasses import dataclass, field
 from django.apps import apps as django_apps
 
 from apps.registrar import exam_journal_link, exam_journal_scope
+from apps.registrar import exam_result_gaps as student_gaps  # cəhd üzrə səbəb (sahib 2026-11-16)
 from apps.registrar.models import AcademicStatus, CourseOffering, Enrollment, StudentAcademicRecord, Subject
 from apps.registrar.subject_duplicates import normalized_subject_key
 
@@ -232,4 +233,5 @@ __all__ = [
     "classify",
     "fill_rosters",
     "is_variant_name",
+    "student_gaps",
 ]

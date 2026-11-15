@@ -411,6 +411,9 @@ def _insert_enrollments(rows, report) -> None:
         with transaction.atomic():
             Enrollment.objects.bulk_create(rows, batch_size=500)
         report["created"] += len(rows)
+        from .enrollment_events import announce
+
+        announce(rows)  # bulk_create post_save vermir — imtahan nəticəsi yeni jurnala (sahib 2026-11-16)
         return
     except IntegrityError:
         pass
