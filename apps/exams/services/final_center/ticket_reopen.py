@@ -8,7 +8,7 @@ from django.db import transaction
 from django.utils import timezone
 from django.utils.translation import pgettext
 
-from apps.exams.domain.final_center import TICKET_STATUS_ASSIGNED, TICKET_STATUS_COMPLETED
+from apps.exams.domain.final_center import TICKET_STATUS_ABSENT, TICKET_STATUS_ASSIGNED, TICKET_STATUS_COMPLETED
 from apps.exams.models import FinalExamTicket
 from core.constants import AuditAction
 
@@ -51,6 +51,33 @@ def reopen_completed_ticket(ticket, by, *, request=None) -> bool:
     broadcast_to_staff(
         ticket.session_id,
         {"event": "student_readmitted", "ticket_id": ticket.pk, "status": TICKET_STATUS_ASSIGNED},
+    )
+    return True
+
+
+def reopen_absent_ticket(ticket, by=None) -> bool:
+    """«Gəlməyib» bilet → giriş gözləyir (sahib 2026-11-16, ugur.memmedli: «sabah imtahana girəndə problem olmaz ki?»).
+
+    Zal oturumu bitəndə imtahana BAŞLAMAMIŞ biletlər ``absent`` olur (``sessions.end_room``) və bu son status idi —
+    eyni zalda iki imtahanı olan tələbə birincini bitirib ikinciyə başlamamış oturum bağlananda, sonra həmin imtahana
+    gələndə «girişiniz bağlanıb» alırdı. ``absent`` cəza deyil (``removed`` — nəzarətçinin çıxarması — bloklu qalır):
+    cəhdi olmayan bilet təzə başlanğıca qayıdır, PIN dəyişmir (tələbə öz PIN-i ilə girib). Audit izi qalır.
+    """
+    if ticket.status != TICKET_STATUS_ABSENT or ticket.attempt_id:
+        return False
+    updates = _startable_updates()
+    if not FinalExamTicket.objects.filter(pk=ticket.pk, status=TICKET_STATUS_ABSENT, attempt__isnull=True).update(
+        **updates
+    ):
+        return False
+    for field, value in updates.items():
+        setattr(ticket, field, value)
+    _audit_ticket(
+        ticket,
+        action=AuditAction.UPDATE,
+        user=by,
+        reason="final_ticket_absent_reopened",
+        changes={"status": [TICKET_STATUS_ABSENT, TICKET_STATUS_ASSIGNED]},
     )
     return True
 

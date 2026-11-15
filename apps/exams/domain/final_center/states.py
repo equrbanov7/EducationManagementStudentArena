@@ -70,7 +70,9 @@ TICKET_TRANSITIONS = {
     TICKET_STATUS_COMPLETED: set(),
     # Yenidən buraxılma yalnız imtahan mərkəzi qərarı ilə (re-admit).
     TICKET_STATUS_REMOVED: {TICKET_STATUS_ASSIGNED},
-    TICKET_STATUS_ABSENT: set(),
+    # Sahib 2026-11-16: «gəlməyib» cəza deyil — zal oturumu bitəndə başlamayan tələbə həmin imtahana yenidən
+    # gələ bilir (PIN ilə avtomatik və ya mərkəzin «yenidən burax» düyməsi ilə).
+    TICKET_STATUS_ABSENT: {TICKET_STATUS_ASSIGNED},
 }
 
 # Gözləmə otağında "canlı" sayılan ticket statusları (monitor sayğacları üçün).
