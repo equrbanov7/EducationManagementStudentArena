@@ -61,6 +61,7 @@ class ReinstatePartTimeGraduatesTest(TestCase):
                 "full_time": (eyani, 2022, "full_time", "MZN-SINX-2026"),  # əyani → toxunulmur
                 "old": (qiyabi, 2019, "part_time", "MZN-SINX-2026"),  # 2021-dən əvvəl → toxunulmur
                 "manual": (qiyabi, 2022, "part_time", "MZN-77"),  # əl ilə məzun → toxunulmur
+                "unknown": (qiyabi, 1950, "part_time", "MZN-SINX-2026"),  # qəbul ili bilinmir → yalnız bayraqla
             }
             cls.records = {}
             for key, (group, year, form, order) in plan.items():
@@ -115,7 +116,7 @@ class ReinstatePartTimeGraduatesTest(TestCase):
         self.assertIn("reinstated=2", output)
         self.assertIn("groups=2032P:1,232 P:1", output)
         expected = {"target": "enrolled", "form": "enrolled", "full_time": "graduated", "old": "graduated"}
-        expected["manual"] = "graduated"
+        expected.update({"manual": "graduated", "unknown": "graduated"})
         self.assertEqual(self.statuses(), expected)
         with bypass_rls():
             target = self.records["target"]
@@ -133,3 +134,9 @@ class ReinstatePartTimeGraduatesTest(TestCase):
         undo = self.run_cmd("--undo", batch, "--apply")
         self.assertIn("regraduated=2", undo)
         self.assertEqual(set(self.statuses().values()), {"graduated"})
+
+    def test_unknown_admission_year_only_with_flag(self):
+        output = self.run_cmd("--include-unknown-year", "--apply")
+        self.assertIn("reinstated=3", output)
+        self.assertEqual(self.status("unknown"), "enrolled")
+        self.assertEqual(self.status("old"), "graduated")
