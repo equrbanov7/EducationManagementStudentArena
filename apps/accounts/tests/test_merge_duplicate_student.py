@@ -138,6 +138,22 @@ class MergeDuplicateStudentTest(_ShareBase):
         counts = self._run("--file", path)
         self.assertEqual((counts["pairs_merged"], counts.get("skip_duplicate_has_login", "0")), ("1", "0"))
 
+    def test_owner_approved_pair_merges_when_duplicate_not_import_created(self):
+        # Sahib 2026-11-16: ATİS-dən iki dəfə idxal olunmuş dublikat — «allow_source» ilə birləşir.
+        with bypass_rls():
+            other = _add_student(self, "stm_twin").student
+            keep = User.objects.get(pk=self.student.pk)
+            User.objects.filter(pk=other.pk).update(
+                first_name=keep.first_name, last_name=keep.last_name, last_login=None
+            )
+        handle, path = tempfile.mkstemp(suffix=".json")
+        with os.fdopen(handle, "w", encoding="utf-8") as stream:
+            row = {"duplicate": other.pk, "keep": self.student.pk, "allow_source": True}
+            json.dump({"format": "student-merge/1", "pairs": [row]}, stream)
+        self.addCleanup(os.unlink, path)
+        counts = self._run("--file", path)
+        self.assertEqual((counts["pairs_merged"], counts.get("skip_duplicate_not_import_created", "0")), ("1", "0"))
+
     def test_bad_plan_fails_closed(self):
         handle, path = tempfile.mkstemp(suffix=".json")
         with os.fdopen(handle, "w") as stream:

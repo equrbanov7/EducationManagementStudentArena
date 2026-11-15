@@ -268,7 +268,14 @@ def _freeze(organization, duplicate, keep, *, actor, manifest, counts) -> None:
 
 
 def execute(
-    organization, pairs, *, actor, batch: str, allow_login: frozenset = frozenset(), allow_name: frozenset = frozenset()
+    organization,
+    pairs,
+    *,
+    actor,
+    batch: str,
+    allow_login: frozenset = frozenset(),
+    allow_name: frozenset = frozenset(),
+    allow_source: frozenset = frozenset(),
 ) -> Counter:
     """Planın cütlərini tətbiq et (çağıranın tranzaksiyasında). Saylar qaytarılır."""
     from apps.registrar.public import gradebook
@@ -286,6 +293,7 @@ def execute(
             created=created,
             allow_login=duplicate_id in allow_login,
             allow_name=duplicate_id in allow_name,
+            allow_source=duplicate_id in allow_source,
         )
         if verdict:
             counts["pairs_skipped"] += 1

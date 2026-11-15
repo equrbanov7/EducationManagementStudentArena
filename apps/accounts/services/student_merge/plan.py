@@ -78,6 +78,17 @@ def load_allow_login(path: str) -> frozenset:
     )
 
 
+def load_allow_source(path: str) -> frozenset:
+    """Dublikat köhnə sistem deltasının yaratdığı hesab DEYİL (məs. ATİS-dən iki dəfə idxal), amma sahibin birləşdirməni
+    açıq təsdiqlədiyi cütlər (``"allow_source": true``). Sahib 2026-11-16: «dublikatları birləşdir, jurnalı olanı saxla».
+    """
+    with open(path, encoding="utf-8") as handle:
+        data = json.load(handle)
+    return frozenset(
+        row["duplicate"] for row in data.get("pairs") or [] if isinstance(row, dict) and row.get("allow_source") is True
+    )
+
+
 def _norm(value) -> str:
     text = unicodedata.normalize("NFKC", str(value or "")).strip().casefold().replace("i̇", "i").replace("ı", "i")
     return " ".join(text.split())
@@ -103,7 +114,14 @@ def delta_created_ids(organization) -> set:
 
 
 def check_pair(
-    organization, duplicate, keep, *, created: set, allow_login: bool = False, allow_name: bool = False
+    organization,
+    duplicate,
+    keep,
+    *,
+    created: set,
+    allow_login: bool = False,
+    allow_name: bool = False,
+    allow_source: bool = False,
 ) -> str:
     """``""`` — cüt keçdi; yoxsa səbəb kodu."""
     membership_model = django_apps.get_model("organizations", "Membership")
@@ -120,7 +138,7 @@ def check_pair(
     )
     if students != {duplicate.pk, keep.pk}:
         return "not_students"
-    if duplicate.pk not in created:
+    if duplicate.pk not in created and not allow_source:
         return "duplicate_not_import_created"
     names_differ = (_norm(duplicate.first_name), _norm(duplicate.last_name)) != (
         _norm(keep.first_name),
@@ -154,5 +172,6 @@ __all__ = [
     "fin_like",
     "load",
     "load_allow_login",
+    "load_allow_source",
     "users",
 ]
