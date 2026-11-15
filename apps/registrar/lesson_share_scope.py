@@ -60,6 +60,35 @@ def has_slot_collision(
     ).exists()
 
 
+def match_slots(slots, lessons) -> dict:
+    """``{slot.pk: dərs}`` — günün cədvəl slotlarını həmin günün dərsləri ilə TƏK-TƏK cütləşdirir (sahib 2026-11-15).
+
+    Əvvəl slot «başlanğıc saatında dərs varmı» ilə yoxlanırdı: bir jurnalda EYNİ saatda iki slot (patok / birləşmiş
+    qrup, Lab-1 + Lab-2, mühazirə + lab) olanda birinci dərs açılan kimi ikinci slot da «açılıb» sayılırdı — «Yeni
+    dərs» başqa saatın (məs. 13:35) slotunu doldurur, «Aktivləşdir» ikinci dərsi «artıq aktivləşdirilib» deyə rədd
+    edirdi. İndi hər dərs yalnız BİR slotu bağlayır: əvvəl eyni saat + eyni növ, sonra eyni saat (növü dəyişmiş dərs).
+    """
+    free = [lesson for lesson in lessons if getattr(lesson, "start_time", None) is not None]
+    matched: dict = {}
+    for same_kind in (True, False):
+        for slot in slots:
+            if slot.pk in matched:
+                continue
+            kind = slot.kind if slot.kind in LessonKind.values else LessonKind.LECTURE
+            hit = next(
+                (
+                    lesson
+                    for lesson in free
+                    if lesson.start_time == slot.start_time and (not same_kind or lesson.kind == kind)
+                ),
+                None,
+            )
+            if hit is not None:
+                free.remove(hit)
+                matched[slot.pk] = hit
+    return matched
+
+
 def scoped_lessons(offering, lessons, scope=None):
     if scope is None or scope.full:
         return lessons

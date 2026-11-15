@@ -300,7 +300,7 @@ def update_lesson(
     """Səhv açılmış dərsi düzəlt (``lesson_edit_window`` içində, defolt 120 dəqiqə). ``allow_locked``/``allow_past``
     pəncərəni + keçmiş-tarixi keçir (İKT/superuser); yayımlanmış jurnal yenə kilidli.
 
-    Audit 2026-09-28 J-02: ``create_lesson`` ilə EYNİ qaydalar — saat 1..``MAX_SLOT_HOURS``
+    Audit 2026-09-28 J-02: ``create_lesson`` ilə EYNİ qaydalar — saat 1..``MAX_LESSON_HOURS`` (dəyişəndə)
     və fənnin saat həddi (``hours_cap_error``), eyni gün + eyni başlanğıc saatında ikinci
     dərs yoxdur (açılış sətri kilidi altında); tarix/saat/növ dəyişikliyi qiymət audit
     izinə yazılır (``by_user``; öz auditini yazan sənədli düzəliş yolları ``audit=False``
@@ -417,11 +417,15 @@ def update_lesson(
 
 
 def _slot_taken_message(day, start_time) -> str:
-    """Eyni jurnalda eyni gün + saat — nə edilməli olduğu açıq (sahib 2026-11-11, patok)."""
+    """Eyni jurnalda eyni gün + saat — nə edilməli olduğu açıq (sahib 2026-11-11 / 2026-11-15, patok).
+
+    «Yeni dərs» bu xətadan sonra jurnalı HƏMİN dərsin sütununda açır (``journal_detail_posts``) — müəllim xanaları
+    oraya yazır (köçürülmüş və ya əvvəl açılmış dərs görünən pəncərədən kənarda ola bilərdi, MR-000125)."""
     return pgettext(
         _CTX,
-        "Bu jurnalda %(date)s, saat %(time)s üçün dərs artıq yazılıb. Patok dərsində hər qrupun dərsi öz "
-        "jurnalına yazılır; alt qrupların (Lab / seminar) dərsi üçün alt qrupu seçin.",
+        "Bu jurnalda %(date)s, saat %(time)s üçün dərs artıq var — qeydləri həmin dərsin sütununa yazın. "
+        "Patok dərsində hər qrupun dərsi öz jurnalına yazılır; alt qrupların (Lab / seminar) dərsi üçün alt "
+        "qrupu seçin.",
     ) % {
         "date": day.strftime("%d.%m.%Y") if hasattr(day, "strftime") else str(day),
         "time": start_time.strftime("%H:%M") if hasattr(start_time, "strftime") else str(start_time)[:5],
@@ -467,10 +471,12 @@ def _validate_seminar_group(offering, *, kind, seminar_group, lesson=None) -> No
 
 
 def _validated_hours(offering, lesson, hours, *, before=None) -> int:
-    """J-02: dərs saatı 1..``MAX_SLOT_HOURS`` tam ədəddir və fənnin saat həddini keçmir.
+    """J-02: dərs saatı 1..``MAX_LESSON_HOURS`` (2 — sahib 2026-11-15) tam ədəddir və fənnin saat həddini keçmir.
 
+    Saatı DƏYİŞMƏYƏN redaktə yoxlanmır — köhnə 3–4 saatlıq dərsin mövzusu / tipi düzəldiləndə xəta olmur.
     Passiv dərs həddə düşmür (yoxlanmır); passivdən adi dərsə qayıdanda bütün saatı həddə əlavə olunur."""
-    from apps.registrar.journal_activation import MAX_SLOT_HOURS, hours_cap_error
+    from apps.registrar.journal_activation import MAX_LESSON_HOURS, hours_cap_error
+    from apps.registrar.journal_lesson_prefill import hours_range_message
 
     try:
         value = int(hours)
@@ -479,8 +485,8 @@ def _validated_hours(offering, lesson, hours, *, before=None) -> int:
     was_passive = bool((before or {}).get("is_passive", lesson.is_passive))
     if value == lesson.hours and (lesson.is_passive or not was_passive):
         return value  # dəyişməyib (köhnə dərsin saatı tavandan böyük olsa belə toxunulmur)
-    if value < 1 or value > MAX_SLOT_HOURS:
-        raise LessonRuleError(pgettext(_CTX, "Dərs saatı 1 ilə %(max)s arasında olmalıdır.") % {"max": MAX_SLOT_HOURS})
+    if value < 1 or value > MAX_LESSON_HOURS:
+        raise LessonRuleError(hours_range_message())
     extra = value - (0 if was_passive else int((before or {}).get("hours", lesson.hours) or 0))
     if extra > 0 and not lesson.is_passive:
         error = hours_cap_error(offering, extra, lab_group=lesson.lab_group, seminar_group=lesson.seminar_group)

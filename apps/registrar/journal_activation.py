@@ -48,6 +48,7 @@ from core import academic_rules
 
 from . import dashboard_data, journal_topics, lesson_rooms
 from .journal_access import is_direct_editor, offering_or_404
+from .lesson_share_scope import match_slots
 
 _CTX = "registrar.journal_activation"
 _SLOTS_ATTR = "_ems_activation_slots"
@@ -57,6 +58,9 @@ _LESSONS_ATTR = "_ems_activation_lessons"
 REASON_MIN_LENGTH = 3
 #: Slotun müddətindən hesablanan akademik saatın tavanı (1 akademik saat = 45 dəqiqə).
 MAX_SLOT_HOURS = 4
+#: YENİ (və saatı dəyişən) dərsin akademik saatı 1..2 (sahib 2026-11-15: «SAAT: yalnız 1, 2 və passiv»). Mövcud 3–4
+#: saatlıq dərs olduğu kimi qalır (saatı dəyişməyən redaktə yoxlanmır — ``gradebook_lessons._validated_hours``).
+MAX_LESSON_HOURS = 2
 
 
 # --------------------------------------------------------------------------- #
@@ -161,6 +165,11 @@ def slot_hours(slot) -> int:
     if minutes <= 0:
         return DEFAULT_LESSON_HOURS
     return max(1, min(MAX_SLOT_HOURS, round(minutes / 45)))
+
+
+def lesson_hours_for_slot(slot) -> int:
+    """Slotdan açılan YENİ dərsin saatı: :func:`slot_hours` 3–4 versə də ən çox :data:`MAX_LESSON_HOURS`."""
+    return min(slot_hours(slot), MAX_LESSON_HOURS)
 
 
 def slot_kind(slot) -> str:
@@ -297,7 +306,7 @@ def slot_lesson_fields(offering, slot, day, *, last_instructor=None) -> dict:
         "kind": kind,
         "start_time": slot.start_time,
         "end_time": slot.end_time,
-        "hours": slot_hours(slot),
+        "hours": lesson_hours_for_slot(slot),
         # Slotun otağı reyestrdə tapılmasa — müəllimin bu növ + gün üçün əvvəl seçdiyi otaq.
         "room": resolve_slot_room(offering, slot) or lesson_rooms.remembered_room(offering, kind, day),
         # Fənn iki müəllim arasında bölünübsə (mühazirə/seminar): slotun öz müəllimi (cədvəldə
@@ -419,15 +428,12 @@ def strip_context(offering, context) -> dict:
     now = timezone.localtime().time()
     todays_slots = slots_on(offering, today)
     covered, last_instructor, todays_lessons = lesson_facts(offering, today, memo=True)
-    by_start = {}
-    for lesson in todays_lessons:
-        if lesson.start_time is not None:
-            by_start.setdefault(lesson.start_time, lesson)
+    by_slot = match_slots(todays_slots, todays_lessons)  # eyni saatlı iki slot — hər biri öz dərsi ilə (patok)
     topic_rows = context.get("topic_choices_meta") or []
     items = []
     matched = set()
     for slot in todays_slots:
-        lesson = by_start.get(slot.start_time)
+        lesson = by_slot.get(slot.pk)
         if lesson is not None:
             matched.add(lesson.pk)
         teacher = slot_teacher(offering, slot, last_instructor)
@@ -517,11 +523,12 @@ def activate_slot(request, offering_id, slot_id):
         return redirect(back)
 
     today = timezone.localdate()
-    existing = offering.lessons.filter(date=today, start_time=slot.start_time).first()
+    # Eyni saatlı ikinci slot (patok / Lab-1 + Lab-2) birincinin dərsi ilə «aktivləşdirilib» sayılmır (2026-11-15).
+    existing = match_slots(slots_on(offering, today), list(offering.lessons.filter(date=today))).get(slot.pk)
     if existing is not None:
         messages.info(request, pgettext(_CTX, "Bu cədvəl dərsi bu gün artıq aktivləşdirilib."))
         return redirect(f"{back}#jd-lesson-{existing.pk}")
-    error = hours_cap_error(offering, slot_hours(slot))
+    error = hours_cap_error(offering, lesson_hours_for_slot(slot))
     if error:
         messages.error(request, error)
         return redirect(back)
@@ -553,6 +560,7 @@ def activate_slot(request, offering_id, slot_id):
 
 
 __all__ = [
+    "MAX_LESSON_HOURS",
     "MAX_SLOT_HOURS",
     "REASON_MIN_LENGTH",
     "activate_slot",
@@ -560,7 +568,9 @@ __all__ = [
     "check_slot_day",
     "hours_cap_error",
     "lesson_facts",
+    "lesson_hours_for_slot",
     "lesson_rows",
+    "match_slots",
     "next_topic",
     "offering_slot",
     "offering_slots",

@@ -3,7 +3,7 @@
 həftə pariteti). Dərs saatı 8 STANDART zəngdən seçilir; mövzu TƏSDİQLƏNMİŞ
 sillabusun həftəlik planından gəlir (README §6.5) — sillabus yoxdursa LMS
 kursunun mövzularına geri çəkilir, o da yoxdursa sərbəst mətn; cədvəldə tək növ slot
-varsa dərs tipi kilidlidir.
+varsa o növ yalnız DEFOLTDUR (sahib 2026-11-15 — tip kilidi yoxdur).
 
 «Yeni dərs» ƏVVƏLCƏDƏN DOLU açılır (sahib 2026-10-10): `lesson_prefill` JSON adası
 (apps/registrar/journal_lesson_prefill.py) → journal_lesson_prefill.js — bu günün cədvəl dərsi
@@ -116,34 +116,30 @@ varsa dərs tipi kilidlidir.
                 <div class="jd2-field-pair">
                     <div class="jd2-field">
                         <span class="jd2-field-label">{% trans "DƏRS TİPİ" context "registrar.journal" %}</span>
-                        {% if locked_lesson_kind and not can_override_lessons %}
-                        {% comment %}Cədvəldə tək növ slot var — tip kilidlidir (server də məcbur edir).
-                        İKT rəhbəri kilidi keçir (mühazirə↔seminar qarışığını düzəldə bilsin).{% endcomment %}
-                        <input type="hidden" name="lesson_kind" value="{{ locked_lesson_kind }}">
-                        <span class="jd2-locked-kind" data-jd-lesson-kind-locked>
-                            {% for value, label in lesson_kinds %}{% if value == locked_lesson_kind %}{{ label }}{% endif %}{% endfor %}
-                            <i class="fas fa-lock"></i>
-                        </span>
-                        {% else %}
+                        {% comment %}Sahib 2026-11-15: tip KİLİDLİ DEYİL — müəllim də mühazirə / seminar / laboratoriya seçir;
+                        cədvəlin tək növü yalnız defoltdur (default_lesson_kind). Bölünmüş jurnalda siyahı payın
+                        növlərinə qədər daralır (journal_share_guard), server də yoxlayır.{% endcomment %}
                         <div class="bootstrap-single-select bootstrap-single-select--ems">
                             <select name="lesson_kind" class="ems-select bootstrap-single-select__native" data-jd-lesson-kind data-bootstrap-select>
-                                {% for value, label in lesson_kinds %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                                {% for value, label in lesson_kinds %}<option value="{{ value }}"{% if value == default_lesson_kind %} selected{% endif %}>{{ label }}</option>{% endfor %}
                             </select>
                         </div>
-                        {% endif %}
                     </div>
                     <div class="jd2-field">
                         <span class="jd2-field-label">{% trans "SAAT" context "registrar.journal" %}</span>
                         <div class="bootstrap-single-select bootstrap-single-select--ems">
                             <select name="lesson_hours" class="ems-select bootstrap-single-select__native" data-jd-lesson-hours data-bootstrap-select>
-                                {# 1..4 — server tavanı ilə eyni (journal_activation.MAX_SLOT_HOURS; 3–4 saatlıq cədvəl dərsi). #}
+                                {% comment %}Sahib 2026-11-15: yalnız 1, 2 və «Passiv · 1/2» (server: journal_activation.MAX_LESSON_HOURS).
+                                3 / 4 GİZLİ qalır — yalnız mövcud 3–4 saatlıq dərsin redaktəsində həmin dəyər görünür
+                                (journal_lesson_hours.js); saat dəyişmirsə server yoxlamır.{% endcomment %}
                                 <option value="1">1</option>
                                 <option value="2" selected>2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
+                                <option value="3" hidden data-jd-hours-legacy>3</option>
+                                <option value="4" hidden data-jd-hours-legacy>4</option>
                                 {% if passive_lessons_available %}
                                 {# «Passiv» (sahib 2026-11-14): «p<N>» — dərs saat hesabına düşmür (apps/registrar/passive_lessons.py). #}
-                                {% for n in "1234" %}<option value="p{{ n }}" class="jd2-hours-passive"{% if forloop.first %} data-subtext="{% trans 'keçirilmiş saata daxil deyil' context 'registrar.passive_lessons' %}"{% endif %}>{% trans "Passiv" context "registrar.passive_lessons" %} · {{ n }}</option>{% endfor %}
+                                {% for n in "12" %}<option value="p{{ n }}" class="jd2-hours-passive"{% if forloop.first %} data-subtext="{% trans 'keçirilmiş saata daxil deyil' context 'registrar.passive_lessons' %}"{% endif %}>{% trans "Passiv" context "registrar.passive_lessons" %} · {{ n }}</option>{% endfor %}
+                                {% for n in "34" %}<option value="p{{ n }}" class="jd2-hours-passive" hidden data-jd-hours-legacy>{% trans "Passiv" context "registrar.passive_lessons" %} · {{ n }}</option>{% endfor %}
                                 {% endif %}
                             </select>
                         </div>
@@ -340,3 +336,4 @@ varsa dərs tipi kilidlidir.
 {% if lesson_teacher_choices %}
 <script src="{% static 'registrar/js/journal_lesson_teacher_picker.js' %}"></script>
 {% endif %}
+<script src="{% static 'registrar/js/journal_lesson_hours.js' %}?v=20261115-hours"></script>

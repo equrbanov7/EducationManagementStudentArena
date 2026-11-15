@@ -27,7 +27,7 @@ from .audit_write import AuditWriteFailed, audit_failure_message
 from .journal_access import offering_or_404 as scoped_offering_or_404
 from .journal_access import writable_offering_or_404
 from .journal_topics import posted_topic
-from .models import Lesson, SelfWorkTopic
+from .models import Lesson, LessonKind, SelfWorkTopic
 from .views import _can_edit_journal, _is_direct_editor
 
 _FE_CTX = "registrar.journal_full_edit"
@@ -200,7 +200,6 @@ def lesson_action(request, offering_id, lesson_id):
 
     if action == "update_lesson":
         from apps.registrar import schedule as schedule_service
-        from apps.registrar.journal_extras import locked_lesson_kind as _locked_lesson_kind
 
         start_time, end_time = schedule_service.parse_time_slot(request.POST.get("lesson_time"))
         if start_time is None:  # cədvəl slotunun öz (standart olmayan) zəng saatı redaktədə silinmir (2026-10-10)
@@ -217,10 +216,11 @@ def lesson_action(request, offering_id, lesson_id):
             messages.error(request, _("Dərs saatı müsbət tam ədəd olmalıdır."))
             return _back(offering)
         passive = passive if hours_raw else gradebook.UNSET
-        # Dərs tipi: korrektor (İKT) kilidi keçir (mühazirə↔seminar qarışığını
-        # düzəldə bilsin); adi müəllim üçün cədvəl tək növü kilidləyir.
+        # Dərs tipi (sahib 2026-11-15): kilid yoxdur — müəllim də mühazirə / seminar / laboratoriya arasında dəyişir.
+        # Bölünmüş jurnalda yeni növ pay əhatəsindədir (``lesson_post_guard`` yuxarıda); naməlum dəyər nəzərə alınmır;
+        # lab / seminar alt qrupu və qeydli dərsin qaydaları ``update_lesson``-da qalır.
         posted_kind = request.POST.get("lesson_kind") or None
-        kind = posted_kind if override else (_locked_lesson_kind(offering) or posted_kind)
+        kind = posted_kind if posted_kind in dict(LessonKind.choices) else None
         instructor = _resolve_instructor(offering, request.POST.get("lesson_instructor"))
 
         # Korrektor (İKT): tarix/tip/saat/mövzu/müəllim dəyişikliyi — HƏR lock

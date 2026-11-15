@@ -11,7 +11,8 @@ sətirlər miqrasiya ``0124`` ilə passiv DƏRSƏ çevrildi (cədvəl arxiv kimi
 
 QAYDALAR
 ────────
-* Saxlama: ``Lesson.is_passive`` + adi ``hours`` (göstəriş və ayrıca cəm üçün). Modalda «SAAT» seçimi ``1..4`` və
+* Saxlama: ``Lesson.is_passive`` + adi ``hours`` (göstəriş və ayrıca cəm üçün). Modalda «SAAT» seçimi ``1..2``
+  (sahib 2026-11-15; köhnə 3–4 yalnız redaktədə) və
   altında «Passiv · N» (POST dəyəri ``p<N>``, :func:`parse_hours_choice`).
 * Kim: dərs aça / redaktə edə bilən hər kəs, HƏR jurnalda (açar yığışdırıldı — sahib «dərs saatı seçilərkən»).
   İstisna: dil səviyyə kohortu (``LanguageLevelCohort`` — kontakt saatı DB trigger-i ilə qorunur).

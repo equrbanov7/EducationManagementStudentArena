@@ -37,20 +37,15 @@ def handle_add_lesson(request, offering):
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
 
     date = request.POST.get("lesson_date") or None
-    # Dərs tipi kilidi: cədvəldə tək növ slot varsa POST nə deyirsə desin o növ.
+    # Dərs tipi (sahib 2026-11-15): kilid YOXDUR — müəllim mühazirə / seminar / laboratoriya seçir; cədvəlin tək
+    # növü yalnız modalın defoltudur. Bölünmüş jurnalda növ pay əhatəsi ilə ``journal_share_guard``-da yoxlanıb.
     from apps.registrar import journal_extras as _je
 
-    locked_kind = _je.locked_lesson_kind(offering)
-    kind = locked_kind or request.POST.get("lesson_kind")
+    kind = request.POST.get("lesson_kind")
     if kind not in dict(LessonKind.choices):
-        # QA 2026-09-05 (P3-9): naməlum dərs tipi səssizcə «mühazirə»yə çevrilirdi —
-        # müəllim yanlış tipdə dərs açdığını görmürdü. Kilidli tipdə (cədvəl tək
-        # növ verir) POST-a baxılmır, orada susmaq düzgündür.
-        if locked_kind:
-            kind = locked_kind
-        else:
-            messages.error(request, _("Dərs tipi düzgün seçilməyib."))
-            return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
+        # QA 2026-09-05 (P3-9): naməlum dərs tipi səssizcə «mühazirə»yə çevrilmir.
+        messages.error(request, _("Dərs tipi düzgün seçilməyib."))
+        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
     if not date:
         messages.error(request, _("Dərs tarixi tələb olunur."))
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
@@ -62,6 +57,10 @@ def handle_add_lesson(request, offering):
     hours, passive, hours_ok = parse_hours_choice(request.POST.get("lesson_hours"))
     if not hours_ok:
         messages.error(request, _("Dərs saatı müsbət tam ədəd olmalıdır."))
+        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
+    # Sahib 2026-11-15: yeni dərsin saatı yalnız 1 və ya 2 (passiv də) — 3/4 seçimi yığışdırıldı.
+    if hours is not None and hours > journal_activation.MAX_LESSON_HOURS:
+        messages.error(request, journal_lesson_prefill.hours_range_message())
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
     start_time, end_time = schedule.parse_time_slot(request.POST.get("lesson_time"))
     # Modal bu günün cədvəl slotundan doldurulubsa (gizli slot_id, sahib 2026-10-10) saat slotdandır — təşkilatın
@@ -147,7 +146,7 @@ def handle_add_lesson(request, offering):
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
     try:
         with transaction.atomic():  # dərs + data bərpası audit sətri birlikdə (audit yazılmasa dərs də yoxdur)
-            _create(
+            lesson = _create(
                 request,
                 offering,
                 bypass,
@@ -170,9 +169,23 @@ def handle_add_lesson(request, offering):
         messages.success(request, _("Dərs əlavə edildi."))
     except gradebook.LessonRuleError as exc:
         messages.error(request, str(exc))
+        # Eyni saatda dərs artıq var (köçürülmüş və ya əvvəl açılmış): jurnal HƏMİN sütunda açılır — xanalar oraya yazılır.
+        return redirect(journal_lesson_prefill.lesson_url(offering, _same_slot_lesson(offering, date, start_time)))
     except AuditWriteFailed:
         messages.error(request, audit_failure_message())
-    return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
+        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
+    # Keçmiş tarixli sütun jurnalın görünən «son 20 dərs» pəncərəsindən kənarda qala bilər (sahib 2026-11-15:
+    # «əlavə etdim, görünmür») — jurnal yeni dərsin pəncərəsində və sütununda açılır.
+    return redirect(journal_lesson_prefill.lesson_url(offering, lesson))
+
+
+def _same_slot_lesson(offering, date, start_time):
+    from .gradebook_lessons import _coerce_date
+
+    day = _coerce_date(date)
+    if day is None or not start_time:
+        return None
+    return offering.lessons.filter(date=day, start_time=start_time).order_by("created_at").first()
 
 
 def _create(request, offering, bypass, full_reason, *, allow_past, **fields):
