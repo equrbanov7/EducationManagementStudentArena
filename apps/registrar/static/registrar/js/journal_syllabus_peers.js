@@ -188,14 +188,48 @@
             });
     }
 
+    /* Sahib 2026-11-15: sillabus yoxdursa «Sillabus yarat» siyahıya deyil, dosyeni YARADIB birbaşa redaktora
+       aparır (`accounts:syllabus_action` `{action: "create", offering}`); artıq varsa (409) — onun redaktoruna.
+       Xəta olsa adi keçid (siyahı) qalır. */
+    function go(link) {
+        var cta = document.querySelector("[data-jd-syl-cta][data-jd-syl-create]");
+        if (!cta || cta.getAttribute("data-busy") === "1" || !window.EMSCore) {
+            window.location.href = link.href;
+            return;
+        }
+        cta.setAttribute("data-busy", "1");
+        cta.setAttribute("aria-busy", "true");
+        var open = function (syllabusId) {
+            if (!syllabusId) {
+                window.location.href = link.href;
+                return;
+            }
+            window.location.href = cta.getAttribute("data-editor-base") + "&syllabus=" + encodeURIComponent(syllabusId);
+        };
+        window.EMSCore.fetchJSON(cta.getAttribute("data-jd-syl-create"), {
+            method: "POST",
+            data: { action: "create", offering: cta.getAttribute("data-offering") }
+        })
+            .then(function (data) {
+                open(data && data.syllabus);
+            })
+            .catch(function (err) {
+                open(err && err.payload && err.payload.syllabus);
+            });
+    }
+
     function onCta(event, link) {
         if (!dialog()) {
-            return; // müəllim deyil — adi keçid
+            if (link.hasAttribute("data-jd-syl-create")) {
+                event.preventDefault();
+                go(link);
+            }
+            return; // dialoq yoxdur — yaratma və ya adi keçid
         }
         var decide = function (data) {
             var sources = (data && data.reuse) || [];
             if (!sources.length || !openDialog(sources)) {
-                window.location.href = link.href;
+                go(link);
             }
         };
         event.preventDefault();
@@ -205,7 +239,7 @@
         }
         var pending = load();
         if (!pending) {
-            window.location.href = link.href;
+            go(link);
             return;
         }
         pending.then(decide);
@@ -218,6 +252,11 @@
         window.__emsJournalSyllabusPeersBound = true;
         var on = window.EMSDelegate.on;
         on("click", "[data-jd-syl-cta]", onCta);
+        // «Xeyr, yeni sillabus yarat» — eyni yaratma axını.
+        on("click", "[data-jd-syl-cta-proxy]", function (event, link) {
+            event.preventDefault();
+            go(link);
+        });
         on("click", "[data-jd-syl-reuse] [data-jd-syl-reuse-apply]", function (event, button) {
             event.preventDefault();
             apply(button);

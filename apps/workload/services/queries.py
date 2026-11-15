@@ -82,14 +82,16 @@ def base_rows_queryset(task):
     )
 
 
-def task_rows(task, *, season: str = "", search: str = "", teacher: str = "", status: str = "", activity: str = ""):
+def task_rows(
+    task, *, season: str = "", search: str = "", teacher: str = "", status: str = "", activity: str = "", form: str = ""
+):
     queryset = base_rows_queryset(task)
     if season:
         queryset = queryset.filter(season=season)
     if teacher:
         queryset = queryset.filter(_teacher_q(task, teacher, activity))
     # 2026-10-25: bölgü vəziyyəti (vakantlı / tam / qismən …) və fəaliyyət növü — `row_filters` (server tərəfi).
-    queryset = apply_row_filters(queryset, task, status=status, activity=activity)
+    queryset = apply_row_filters(queryset, task, status=status, activity=activity, form=form)
     search_q = row_search_q(search)
     if search_q is not None:
         queryset = queryset.filter(search_q).distinct()
@@ -177,6 +179,7 @@ def rows_page(
     limit: int = 0,
     focus_row=None,
     view: str = "",
+    form: str = "",
 ) -> dict:
     """Tənbəl yükləmə (2026-10-25): süzgəcə uyğun sətirlərin ``offset`` / ``limit`` dilimi + cəmi say.
 
@@ -200,8 +203,11 @@ def rows_page(
             offset=offset,
             limit=limit,
             focus_row=focus_row,
+            form=form,
         )
-    queryset = task_rows(task, season=season, search=search, teacher=teacher, status=status, activity=activity)
+    queryset = task_rows(
+        task, season=season, search=search, teacher=teacher, status=status, activity=activity, form=form
+    )
     total = queryset.count()
     offset = max(int(offset or 0), 0)
     limit = min(max(int(limit or 0), 0), MAX_PAGE_LIMIT)

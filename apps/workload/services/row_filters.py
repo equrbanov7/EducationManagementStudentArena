@@ -99,12 +99,31 @@ def activity_q(activity: str) -> Q | None:
     return has_hours | partner_q() if activity == str(Activity.LECTURE) else has_hours
 
 
-def apply_row_filters(queryset, task, *, status: str = "", activity: str = ""):
-    """``status`` / ``activity`` süzgəclərini sətir sorğusuna qoşur (hər ikisi boşdursa — dəyişməz)."""
-    for condition in (status_q(task, status, activity) if status else None, activity_q(activity)):
+#: Sahib 2026-10-25: «qrup nömrəsində 4 rəqəm varsa — qiyabidir» (``organizations.group_education_form``). Köçürmədə
+#: sətirlərin çoxu defolt «əyani» qaldı (məs. 2032P), ona görə qrup adı da nəzərə alınır. «0» ilə başlayan və
+#: şəkilçisiz 4 rəqəmli adlar (kollec / Lifelong) qaydadan kənardır.
+PART_TIME_GROUP_RE = r"^[[:space:]]*[1-9][0-9]{3}[[:space:]]*[A-Za-zƏəİıÖöÜüÇçŞşĞğ]"
+FORMS = ("eyani", "qiyabi")
+
+
+def form_q(form: str) -> Q | None:
+    """Təhsil forması (sahib 2026-11-15): ``qiyabi`` — sətrin forması qiyabidir və ya qruplarından birinin adı
+    qiyabi koddur; ``eyani`` — qalanları."""
+    if form not in FORMS:
+        return None
+    from ..models import TeachingTaskRow
+
+    by_group = TeachingTaskRow.objects.filter(groups__name__regex=PART_TIME_GROUP_RE).values("pk")
+    part_time = Q(education_form="qiyabi") | Q(pk__in=by_group)
+    return part_time if form == "qiyabi" else ~part_time
+
+
+def apply_row_filters(queryset, task, *, status: str = "", activity: str = "", form: str = ""):
+    """``status`` / ``activity`` / ``form`` süzgəclərini sətir sorğusuna qoşur (hamısı boşdursa — dəyişməz)."""
+    for condition in (status_q(task, status, activity) if status else None, activity_q(activity), form_q(form)):
         if condition is not None:
             queryset = queryset.filter(condition)
     return queryset
 
 
-__all__ = ["ROW_STATUSES", "activity_q", "apply_row_filters", "status_q"]
+__all__ = ["FORMS", "ROW_STATUSES", "activity_q", "apply_row_filters", "form_q", "status_q"]

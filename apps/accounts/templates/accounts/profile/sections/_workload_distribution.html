@@ -164,6 +164,17 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
         </select>
       </div>
     </div>
+    <div class="wl-field">
+      <label for="wl-form">{% trans "Təhsil forması" context "accounts.workload" %}</label>
+      <div class="bootstrap-single-select">
+        {# Sahib 2026-11-15: qiyabi = sətrin forması və ya qrup adında 4 rəqəm (bax workload row_filters.form_q). #}
+        <select id="wl-form" name="form" class="form-select bootstrap-single-select__native js-bootstrap-single-select" data-bootstrap-select data-wl-form>
+          <option value="">{% trans "Hamısı" context "accounts.workload" %}</option>
+          <option value="eyani">{% trans "Əyani" context "accounts.workload" %}</option>
+          <option value="qiyabi">{% trans "Qiyabi" context "accounts.workload" %}</option>
+        </select>
+      </div>
+    </div>
     <div class="wl-field wl-field--search">
       <label for="wl-q">{% trans "Axtarış" context "accounts.workload" %}</label>
       <input type="search" id="wl-q" name="q" autocomplete="off"

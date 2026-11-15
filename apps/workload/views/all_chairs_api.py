@@ -24,6 +24,7 @@ def all_chairs_rows(request, actor) -> JsonResponse:
             season=(request.GET.get("season") or "").strip(),
             search=request.GET.get("q") or "",
             activity=(request.GET.get("activity") or "").strip(),
+            form=(request.GET.get("form") or "").strip(),
             offset=parse_int(request.GET.get("offset")) or 0,
             limit=_DEFAULT_PAGE if limit is None else limit,
         )

@@ -159,6 +159,8 @@ def journal_syllabus_notice(offering, *, has_lessons: bool | None = None, journa
             str(version.get_status_display()) if version is not None and hasattr(version, "get_status_display") else ""
         ),
         "has_approved": state["has_approved"],
+        # Sahib 2026-11-15: «Sillabus yarat» klikdə dosyeni yaradıb birbaşa redaktoru açır (journal_syllabus_peers.js).
+        "editor_base": profile_link("syllabus-editor"),
     }
 
 

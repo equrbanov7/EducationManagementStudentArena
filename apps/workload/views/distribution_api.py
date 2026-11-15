@@ -207,6 +207,7 @@ def _rows_paged(request, task, *, season: str, search: str) -> JsonResponse:
         teacher=(request.GET.get("teacher") or "").strip(),
         status=(request.GET.get("status") or "").strip(),
         activity=(request.GET.get("activity") or "").strip(),
+        form=(request.GET.get("form") or "").strip(),
         offset=offset,
         limit=_DEFAULT_PAGE if limit is None else limit,
         focus_row=parse_uuid(request.GET.get("focus")),

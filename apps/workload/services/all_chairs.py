@@ -29,7 +29,7 @@ from ..constants import PERM_DISTRIBUTE, PERM_MANAGE, PERM_VIEW, AmendmentTarget
 from ..models import TeachingTask, TeachingTaskRow, WorkloadAmendment
 from .queries import MAX_PAGE_LIMIT, _serialize, row_search_q
 from .row_edit import distribution_edit_url
-from .row_filters import activity_q
+from .row_filters import activity_q, form_q
 from .scoping import WorkloadDenied, manageable_chairs
 
 #: Kafedra seçicisinin «Bütün kafedralar» dəyəri (``rows?chair=all``).
@@ -69,7 +69,9 @@ def _amend_targets(tasks) -> set:
     )
 
 
-def all_chairs_queryset(actor, *, academic_year: str = "", season: str = "", search: str = "", activity: str = ""):
+def all_chairs_queryset(
+    actor, *, academic_year: str = "", season: str = "", search: str = "", activity: str = "", form: str = ""
+):
     tasks = TeachingTask.objects.filter(
         organization=actor.organization,
         chair__in=searchable_chairs(actor).order_by().values("pk"),
@@ -79,9 +81,9 @@ def all_chairs_queryset(actor, *, academic_year: str = "", season: str = "", sea
     queryset = TeachingTaskRow.objects.filter(task__in=tasks.values("pk"))
     if season:
         queryset = queryset.filter(season=season)
-    condition = activity_q(activity)
-    if condition is not None:
-        queryset = queryset.filter(condition)
+    for condition in (activity_q(activity), form_q(form)):
+        if condition is not None:
+            queryset = queryset.filter(condition)
     search_q = row_search_q(search)
     if search_q is not None:
         queryset = queryset.filter(search_q).distinct()
@@ -97,11 +99,14 @@ def all_chairs_rows_page(
     activity: str = "",
     offset: int = 0,
     limit: int = 0,
+    form: str = "",
 ) -> dict:
     """Bütün (baxış əhatəsindəki) kafedraların sətirləri — ``rows_page`` ilə eyni forma + kafedra sahələri."""
     if not can_search_all_chairs(actor):
         raise WorkloadDenied("workload.view_denied", "Bu tapşırığa baxış səlahiyyətiniz yoxdur.")
-    queryset = all_chairs_queryset(actor, academic_year=academic_year, season=season, search=search, activity=activity)
+    queryset = all_chairs_queryset(
+        actor, academic_year=academic_year, season=season, search=search, activity=activity, form=form
+    )
     total = queryset.count()
     offset = max(int(offset or 0), 0)
     limit = min(max(int(limit or 0), 0), MAX_PAGE_LIMIT)

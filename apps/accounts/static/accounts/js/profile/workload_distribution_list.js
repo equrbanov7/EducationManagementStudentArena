@@ -19,11 +19,11 @@
     var PAGE = 30; // ilk və sonrakı dilimlərin ölçüsü
     // Süzgəc açarı → URL parametri. `teacher` — sağ panel kartı / «Müəllim» seçicisi (SİNXRON), `status` — bölgü
     // vəziyyəti, `activity` — fəaliyyət növü (server tərəfi: `apps/workload/services/row_filters.py`).
-    var URL_KEYS = { teacher: "wl_teacher", status: "wl_status", activity: "wl_activity" };
+    var URL_KEYS = { teacher: "wl_teacher", status: "wl_status", activity: "wl_activity", form: "wl_form" };
 
     var gettext = window.gettext || function (value) { return value; };
 
-    var view = { teacher: "", status: "", activity: "" }; // teacher: "" | "vacant" | müəllim id-si
+    var view = { teacher: "", status: "", activity: "", form: "" }; // teacher: "" | "vacant" | müəllim id-si
     var pool = { key: "", items: [] }; // kafedranın müəllimləri («Müəllim» seçicisi), kafedra/il üzrə bir dəfə
     var observer = null;
     var observed = null;
@@ -50,7 +50,7 @@
     }
 
     function readUrl() {
-        var found = { teacher: "", status: "", activity: "" };
+        var found = { teacher: "", status: "", activity: "", form: "" };
         try {
             var params = new URLSearchParams(window.location.search);
             Object.keys(URL_KEYS).forEach(function (key) {
@@ -124,7 +124,7 @@
     function anyFilter() {
         var d = dist();
         var params = d ? d.filters() : {};
-        return !!(view.teacher || view.status || view.activity || params.season || params.q);
+        return !!(view.teacher || view.status || view.activity || view.form || params.season || params.q);
     }
 
     function syncUi() {
@@ -143,6 +143,7 @@
         setSelect(select, view.teacher);
         setSelect(q("[data-wl-status]"), view.status);
         setSelect(q("[data-wl-activity]"), view.activity);
+        setSelect(q("[data-wl-form]"), view.form);
         var reset = q("[data-wl-reset-filters]");
         if (reset) reset.hidden = !anyFilter();
         var bar = q("[data-wl-teacher-filter]");
@@ -395,6 +396,7 @@
             ["[data-wl-teacher-select]", "teacher"],
             ["[data-wl-status]", "status"],
             ["[data-wl-activity]", "activity"],
+            ["[data-wl-form]", "form"], // sahib 2026-11-15: əyani / qiyabi
         ].forEach(function (pair) {
             EMSDelegate.on("change", pair[0], function (event, field) {
                 if (setView(pair[1], field.value)) reload();
@@ -422,6 +424,7 @@
         teacher: function () { return view.teacher; },
         status: function () { return view.status; },
         activity: function () { return view.activity; },
+        form: function () { return view.form; },
         /** Süzgəci proqramla dəyiş (kafedra/il dəyişəndə təmizlənir) — YENİDƏN YÜKLƏMİR. */
         setTeacher: setTeacher,
         reset: resetAll,

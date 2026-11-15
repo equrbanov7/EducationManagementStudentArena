@@ -163,8 +163,16 @@ def _do_create(request, organization, actor, payload):
         .first()
     )
     # Sahib 2026-11-15: yalnız `instructor` deyil — jurnalın CARİ müəllimi (bölünmüş jurnalın payı, «Vakant»
-    # açılışın yük bölgüsü olan müəllimi) də yaradır. Başqasının açılışı əvvəlki kimi 404 (mövcudluq sızmır).
-    if offering is None or not (offering.instructor_id == request.user.pk or is_journal_teacher(actor, offering)):
+    # açılışın yük bölgüsü olan müəllimi) də yaradır; superadmin də jurnaldakı «Sillabus yarat» ilə yaradır
+    # (müəllim jurnal müəllimi kimi redaktor qalır). Başqasının açılışı əvvəlki kimi 404 (mövcudluq sızmır).
+    from core.permissions import is_superadmin_user
+
+    allowed = offering is not None and (
+        offering.instructor_id == request.user.pk
+        or is_journal_teacher(actor, offering)
+        or is_superadmin_user(request.user)
+    )
+    if not allowed:
         return None, _NOT_FOUND
     existing = Syllabus.objects.filter(organization=organization, offering=offering).only("pk").first()
     if existing is not None:
@@ -330,6 +338,7 @@ def syllabus_action(request):
             "ok": True,
             "message": str(message),
             "version": str(version.pk),
+            "syllabus": str(version.syllabus_id),
             "status": version.status,
             "status_label": str(SyllabusStatus(version.status).label),
         }
