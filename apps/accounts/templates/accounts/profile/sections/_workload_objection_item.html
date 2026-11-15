@@ -1,0 +1,22 @@
+{% load i18n %}
+<li class="wl-objection {% if not item.is_open %}wl-objection--closed{% endif %}">
+  <div class="wl-objection__head">
+    <span>{{ item.teacher }} — {{ item.subject }}</span>
+    <span>{{ item.status_label }}</span>
+  </div>
+  <div>{{ item.reason_label }}: {{ item.text }}</div>
+  {% if item.is_open and workload_distribution_section.can_distribute %}
+  <div class="wl-actions">
+    <button type="button" class="wl-btn wl-btn--ghost"
+            data-tof-submit='{"action": "resolve_objection", "objection": "{{ item.id }}", "state": "rejected"}'
+            data-tof-confirm="{% trans 'Etiraz rədd edilsin?' context 'accounts.workload' %}">
+      {% trans "Rədd et" context "accounts.workload" %}
+    </button>
+    <button type="button" class="wl-btn wl-btn--primary"
+            data-tof-submit='{"action": "resolve_objection", "objection": "{{ item.id }}", "state": "accepted"}'
+            data-tof-confirm="{% trans 'Etiraz qəbul edilsin? Sətri yenidən bölməyi unutmayın.' context 'accounts.workload' %}">
+      {% trans "Qəbul et" context "accounts.workload" %}
+    </button>
+  </div>
+  {% endif %}
+</li>

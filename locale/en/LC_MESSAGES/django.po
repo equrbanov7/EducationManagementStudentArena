@@ -119711,3 +119711,11 @@ msgstr "Full-time"
 msgctxt "accounts.workload"
 msgid "Qiyabi"
 msgstr "Part-time"
+
+msgctxt "accounts.workload"
+msgid "%(n)s açıq"
+msgstr "%(n)s open"
+
+msgctxt "accounts.workload"
+msgid "Bağlanmış etirazlar"
+msgstr "Closed objections"

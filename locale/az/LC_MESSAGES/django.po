@@ -119016,3 +119016,11 @@ msgstr "Əyani"
 msgctxt "accounts.workload"
 msgid "Qiyabi"
 msgstr "Qiyabi"
+
+msgctxt "accounts.workload"
+msgid "%(n)s açıq"
+msgstr "%(n)s açıq"
+
+msgctxt "accounts.workload"
+msgid "Bağlanmış etirazlar"
+msgstr "Bağlanmış etirazlar"

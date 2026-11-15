@@ -121234,3 +121234,11 @@ msgstr "Vollzeit"
 msgctxt "accounts.workload"
 msgid "Qiyabi"
 msgstr "Fernstudium"
+
+msgctxt "accounts.workload"
+msgid "%(n)s açıq"
+msgstr "%(n)s offen"
+
+msgctxt "accounts.workload"
+msgid "Bağlanmış etirazlar"
+msgstr "Geschlossene Einwände"

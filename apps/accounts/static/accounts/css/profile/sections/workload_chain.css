@@ -166,6 +166,27 @@
     color: var(--ems-neutral-700, #334155);
 }
 .wl-objection__head { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; }
+/* Sahib 2026-11-16: etirazlar süzgəclərdən əvvəl — açıq varsa çərçivə vurğulanır, bağlanmışlar yığılır. */
+.wl-objections-panel { margin-bottom: 16px; }
+.wl-objections-panel--open { border-left: 4px solid var(--ems-warning-500, #f59e0b); padding-left: 12px; }
+.wl-objections__count {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--ems-warning-bg, #fef3c7);
+    color: var(--ems-warning-800, #92400e);
+    font-size: var(--ems-fs-xs, 12px);
+    font-weight: 600;
+    vertical-align: middle;
+}
+.wl-objections__closed { margin-top: 10px; }
+.wl-objections__closed > summary {
+    cursor: pointer;
+    color: var(--ems-neutral-600, #475569);
+    font-size: var(--ems-fs-sm, 13px);
+    margin-bottom: 8px;
+}
 
 @media (max-width: 767px) {
     .wl-cards { grid-template-columns: 1fr; }
