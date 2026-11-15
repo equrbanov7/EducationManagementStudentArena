@@ -8,13 +8,29 @@ dördü autosave nəticəsindən asılıdır, ona görə gizli qalır və JS aç
 {% endcomment %}
 {% comment %}Bağlı sillabusda (`se.reuse.mode == 'linked'`) kilidin izahını təkrar istifadə banneri verir —
 «yeni versiya yaradın» məsləhəti orada YANLIŞ olardı (əvvəl «Ayır»).{% endcomment %}
+{% comment %}Sahib 2026-11-15 («redaktə edə bilmir»): banner «yeni versiya yaradın» deyirdi, düyməsi yox idi —
+jurnal paneli və bannerlər kilidli versiyaya gətirəndə müəllim dalana dirənirdi. Düymə yalnız redaktə hüququ
+olana (`se.can_new_version`, servis qapısı `edit_target`) çıxır; davranış `syllabus_new_version.js`-dədir.
+Baxışdakı versiya (göndərilib) üçün ayrıca izah — «təsdiqlənmiş» mətni orada yanlış idi.{% endcomment %}
 {% if se.readonly and se.reuse.mode != 'linked' %}
 <div class="syl-banner syl-banner--neutral" role="status">
   <i class="fas fa-lock syl-banner__icon" aria-hidden="true"></i>
   <div>
     <p class="syl-banner__title">{% trans "Bu versiya kilidlidir və dəyişdirilə bilmir" context "accounts.syllabus" %}</p>
+    {% if se.header.status_key == 'submitted' or se.header.status_key == 'review' %}
+    <p class="syl-banner__body">{% trans "Versiya kafedra müdirinin baxışındadır. Dəyişiklik etmək üçün «Sillabuslar» siyahısında təqdimatı geri çağırın — sonra redaktə yenidən açılır." context "accounts.syllabus" %}</p>
+    {% else %}
     <p class="syl-banner__body">{% trans "Təsdiqlənmiş sillabus jurnalın mənbəyidir, ona görə redaktə bağlıdır. Dəyişiklik üçün yeni versiya yaradın — mövcud jurnal və qiymətlər olduğu kimi qalır." context "accounts.syllabus" %}</p>
+    {% endif %}
   </div>
+  {% if se.can_new_version %}
+  <button type="button" class="syl-btn syl-btn--primary syl-btn--sm" data-syl-new-version
+          data-syllabus="{{ se.syllabus_id }}"
+          data-t-error="{% trans 'Yeni versiya yaradıla bilmədi. Səhifəni yeniləyib yenidən cəhd edin.' context 'accounts.syllabus' %}">
+    <i class="fas fa-code-branch" aria-hidden="true"></i>
+    {% trans "Yeni versiya yarat" context "accounts.syllabus" %}
+  </button>
+  {% endif %}
 </div>
 {% endif %}
 {% if not se.readonly and se.header.status_key == 'approved' %}

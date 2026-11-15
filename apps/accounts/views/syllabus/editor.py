@@ -561,6 +561,8 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
             and version_row.status != SyllabusStatus.APPROVED
             and completion["percent"] >= 100,
             "actions": list(context["actions"]),
+            # Kilid banneri «Yeni versiya yarat» (sahib 2026-11-15) — `syllabus_new_version.js`.
+            "can_new_version": bool(context.get("can_new_version")),
             # Təkrar istifadə banneri (bağlı / mənbə / «artıq sillabusu var») — bax `reuse_context`.
             "reuse": editor_reuse_state(
                 request, organization, syllabus=syllabus, version=version_row, is_author=bool(context["is_author"])

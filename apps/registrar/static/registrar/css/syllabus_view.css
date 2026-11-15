@@ -253,6 +253,55 @@
     color: var(--ems-text-muted);
 }
 
+/* «Sillabusu redaktə et» (sahib 2026-11-15) — başlıqda, yalnız redaktə hüququ olana (JS `edit` açarı ilə açır). */
+.sylv__edit-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.sylv__edit-row[hidden] {
+    display: none;
+}
+
+.sylv__edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 0 16px;
+    border: 1px solid var(--ems-primary-600);
+    border-radius: 9px;
+    background: var(--ems-primary-600);
+    color: var(--ems-neutral-0);
+    font-size: 0.83rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.sylv__edit:hover,
+.sylv__edit:focus-visible {
+    background: var(--ems-primary-700);
+    border-color: var(--ems-primary-700);
+}
+
+.sylv__edit:disabled {
+    opacity: 0.6;
+    cursor: progress;
+}
+
+.sylv__edit-error {
+    margin: 0;
+    font-size: 0.73rem;
+    color: var(--ems-danger-strong);
+}
+
+.sylv__edit-error[hidden] {
+    display: none;
+}
+
 .sylv__x {
     position: absolute;
     top: 14px;

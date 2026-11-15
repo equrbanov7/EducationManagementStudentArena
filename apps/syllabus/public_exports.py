@@ -114,3 +114,13 @@ from .services.reviewed_publication import publish_reviewed_draft  # noqa: E402,
 from .services.reviewed_publication import reviewed_completion_report  # noqa: E402,F401
 
 __all__ += ["publish_reviewed_draft", "reviewed_batch_without_carry", "reviewed_completion_report"]
+
+# Sahib 2026-11-15: «Sillabusu redaktə et» — jurnal paneli və redaktorun kilid banneri eyni qapını soruşur.
+from .services.edit_target import (  # noqa: E402,F401
+    EDIT_MODE_NEW_VERSION,
+    EDIT_MODE_OPEN,
+    can_edit_content,
+    edit_target,
+)
+
+__all__ += ["EDIT_MODE_NEW_VERSION", "EDIT_MODE_OPEN", "can_edit_content", "edit_target"]
