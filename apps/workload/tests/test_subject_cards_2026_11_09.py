@@ -20,6 +20,7 @@ from apps.workload.models import TeacherAssignment, TeachingTaskRow
 from apps.workload.services.queries import rows_page
 from apps.workload.services.subject_cards import cards_page, family_key
 from core.constants import OrgUnitType, RoleScopeType
+from core.person_names import person_label
 
 from .factories import TEACHER_PERMS, activate_member, make_org, make_structure, make_task
 
@@ -168,7 +169,7 @@ class FamilyCardTests(CardsBase):
         mu = by_lead[str(self.row_mu.pk)]
         self.assertEqual(set(mu["row_ids"]), {str(self.row_mu.pk), str(self.row_i_ml.pk)})
         self.assertEqual({g["name"] for g in mu["groups"]}, {"SC 536 MU", "SC 536 İ", "SC 536 ML"})
-        self.assertEqual([e["teacher_name"] for e in mu["entries"]], [self.balayev.get_full_name()])
+        self.assertEqual([e["teacher_name"] for e in mu["entries"]], [person_label(self.balayev)])
         self.assertEqual((mu["hours"], mu["is_complete"], mu["orphan"]), (45, True, False))
         bi = by_lead[str(self.row_bi.pk)]
         self.assertEqual(set(bi["row_ids"]), {str(self.row_bi.pk), str(self.row_mrk_dbi.pk)})
@@ -186,7 +187,7 @@ class FamilyCardTests(CardsBase):
     def test_seminar_lines_per_group(self):
         seminar = self._algebra()["seminar"]
         lines = {(line["label"], line.get("shared", False)): line for line in seminar["lines"]}
-        orucova, habibov = self.orucova.get_full_name(), self.habibov.get_full_name()
+        orucova, habibov = person_label(self.orucova), person_label(self.habibov)
         self.assertEqual([e["teacher_name"] for e in lines[("SC 536 MU", False)]["entries"]], [orucova])
         self.assertEqual([e["teacher_name"] for e in lines[("SC 536 Bİ", False)]["entries"]], [habibov])
         self.assertEqual([e["teacher_name"] for e in lines[("SC 536 MRK", False)]["entries"]], [habibov])  # FK
