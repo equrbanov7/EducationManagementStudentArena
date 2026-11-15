@@ -135,6 +135,8 @@ mühərrik `window.EMSSyllabusFields`-i init anında oxuyur.{% endcomment %}
 <script src="{% static 'accounts/js/profile/syllabus_editor_weeks.js' %}?v=20261023-weekdel"></script>
 {% comment %}Telefon: addım menyusu + «3/9» sayğacı (mühərrikdən SONRA, ona toxunmur).{% endcomment %}
 <script src="{% static 'accounts/js/profile/syllabus_editor_phone.js' %}?v=20261019-1"></script>
+{# Sahib 2026-11-15: kilid bannerindəki «Yeni versiya yarat» (mühərrikə toxunmur). #}
+<script src="{% static 'accounts/js/profile/syllabus_new_version.js' %}?v=20261115-syledit"></script>
 {% endif %}
 {% if 'syllabus-review' in asset_sections %}
 {% comment %}Panel render-i mühərrikdən ƏVVƏL yüklənir — mühərrik init anında
@@ -162,7 +164,7 @@ paketi (STATS_DATA verilmədiyi üçün) heç nə etmirdi və çıxarıldı. İs
 <script src="{% static 'registrar/js/journal_student.js' %}?v=20261018-pkga"></script>
 <script src="{% static 'registrar/js/correction_history.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>
 <script src="{% static 'registrar/js/sjx_journal.js' %}?v=20261018-pkga" nonce="{{ request.csp_nonce }}"></script>
-<script src="{% static 'registrar/js/syllabus_view.js' %}?v=20261025-weeks"></script>
+<script src="{% static 'registrar/js/syllabus_view.js' %}?v=20261115-syledit"></script>
 {% endif %}
 {% comment %}Rol / icazə bölmələri (2026-09-09 redizayn) — dialoq prefill-i,
 təsdiq axını və imzalı əməliyyat tokeni. `EMSDelegate`/`EMSOverlay` üzərində

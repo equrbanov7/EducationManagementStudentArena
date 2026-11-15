@@ -488,3 +488,21 @@
 .llog-table > tbody th {
     vertical-align: top;
 }
+
+/* «Passiv» dərs (sahib 2026-11-14) — saat əsas cəmə daxil deyil; jurnal sütunu ilə eyni bənövşəyi ton. */
+.llog-passive {
+    background: var(--ems-violet-100);
+    color: var(--ems-violet-800);
+    font-weight: 600;
+}
+.llog-row--passive > * {
+    background: var(--ems-violet-50);
+}
+.llog-passive-total {
+    color: var(--ems-violet-800);
+    font-weight: 600;
+}
+.llog-passive-note {
+    color: var(--ems-violet-800);
+    font-size: var(--ems-fs-xs, 0.75rem);
+}

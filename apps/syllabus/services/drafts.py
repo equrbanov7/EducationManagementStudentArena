@@ -30,7 +30,7 @@ from ..rules import for_version as rule_for_version
 from ..state_machine import TransitionDenied
 from .copy_into import copy_from_previous  # noqa: F401 — geriyə-uyğunluq (köhnə idxal yolu)
 from .offering_scope import validate_offering_scope
-from .scoping import is_author
+from .scoping import is_editor
 from .section_shape import normalize_section_data
 from .units import ensure_chair_unit, resolve_syllabus_chair_unit
 
@@ -304,7 +304,7 @@ def create_next_version(*, syllabus, actor, kind: str, applies_to_period=None, p
     """
     if not actor.has(PERM_EDIT):
         raise TransitionDenied("transition.permission_denied", params={"permission": PERM_EDIT})
-    if not is_author(actor, syllabus) and not actor.covers_unit(syllabus.chair_unit_id, PERM_EDIT):
+    if not is_editor(actor, syllabus) and not actor.covers_unit(syllabus.chair_unit_id, PERM_EDIT):
         raise TransitionDenied("transition.out_of_scope", params={"transition": "new_version"})
     if kind not in {ChangeKind.MINOR.value, ChangeKind.MAJOR.value}:
         raise TransitionDenied("version.kind_unknown", params={"kind": kind})
@@ -425,7 +425,8 @@ def save_section(*, version, section_id: str, data: dict, actor, expected_revisi
         raise TransitionDenied("version.locked", params={"status": version.status})
     if not actor.has(PERM_EDIT):
         raise TransitionDenied("transition.permission_denied", params={"permission": PERM_EDIT})
-    if not is_author(actor, syllabus):
+    # Sahib 2026-11-15: müəllif VƏ YA bağlı açılışın cari müəllimi (bölünmüş jurnalın payı, yük bölgüsü).
+    if not is_editor(actor, syllabus):
         raise TransitionDenied("transition.author_only", params={"transition": "save_section"})
     # Sahib 2026-10-10: sərbəst işi söndürülmüş qaydada `self` bölməsi redaktorda YOXDUR — gizli
     # bölməyə yazı da qəbul edilmir (data toxunulmur, tənzimləmə yandırılanda geri qayıdır).

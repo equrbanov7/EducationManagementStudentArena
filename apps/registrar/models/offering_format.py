@@ -50,6 +50,8 @@ class OfferingFormatFields(models.Model):
         max_length=255, blank=True, db_default="", help_text="İntensiv kursun açılma səbəbi (sərbəst mətn)."
     )
 
+    #: ARXİV (2026-11-14): «Passiv saat» açarı yığışdırıldı — passiv dərs hər jurnalda dərs saatı seçimindədir
+    #: (:mod:`apps.registrar.passive_lessons`); sütun geri dönüş üçün qalır, kod oxumur.
     passive_hours_enabled = models.BooleanField(
         default=False,
         db_default=False,

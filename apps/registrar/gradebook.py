@@ -210,7 +210,7 @@ def get_offering_journal(
         lessons = lessons[window_offset : window_offset + window_size]
     # `source_group` — «alt qrupdan əlavə olunub» çipi üçün (bax guest_roster.py).
     enrollments = read_memo.enrolled_roster(offering)  # GET-də tablar arasında bir sorğu (PERF-1 F-06)
-    from . import lab_groups  # laboratoriya qrupu (sahib 2026-11-06): qruplu lab dərsi yalnız öz qrupunun
+    from . import lab_groups, passive_lessons  # lab qrupu (sahib 2026-11-06): qruplu lab dərsi yalnız öz qrupunun
 
     lab_groups.prime(offering, enrollments)
     from . import seminar_groups  # seminar alt qrupu (sahib 2026-11-07)
@@ -278,7 +278,7 @@ def get_offering_journal(
 
     # Yeni işarə: dərs günü (+ gecikmiş yazı günləri) və aktivləşdirmə pəncərəsi — servis qaydası ilə EYNİ.
     entry_rule = EntryRule.current(now=now)
-    markable = {lesson.id: entry_rule.allows(lesson) for lesson in lessons}
+    markable = {lesson.id: entry_rule.allows(lesson) and not lesson.is_passive for lesson in lessons}  # passiv: yox
     lock_window = mark_edit_window()  # xana kilidi — bir dəfə oxunur (xana-xana runtime oxunuşu yox)
     lesson_meta = [
         {
@@ -286,6 +286,7 @@ def get_offering_journal(
             "is_today": lesson.date == today,
             "editable": can_edit_lesson(lesson, now=now),  # sütun redaktə/silmə (lesson_edit_window)
             "markable": markable[lesson.id],
+            "passive": lesson.is_passive,  # «Passiv» dərs (sahib 2026-11-14) — rəngli sütun, xana yoxdur
             # xronoloji nömrə (köhnədən yeniyə) — sıra tərs olsa da nömrə sabitdir
             "seq": (total_lessons - (window_offset + idx)) if newest_first else (window_offset + idx + 1),
             "parity": _lesson_parity(offering, lesson),  # Ü/A başlıq etiketi
@@ -312,6 +313,9 @@ def get_offering_journal(
                 absence_count += 1
         for lesson in lessons:
             mark = mark_map.get((enrollment.id, lesson.id))
+            if lesson.is_passive:
+                cells.append(passive_lessons.grid_cell(lesson, mark))
+                continue
             if not lab_groups.applies(lesson, enrollment):  # başqa lab / seminar qrupunun dərsi — xana yoxdur
                 cells.append(
                     {

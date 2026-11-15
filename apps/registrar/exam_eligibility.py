@@ -291,10 +291,9 @@ def frozen_offering_ids(offering_ids) -> frozenset:
 def lesson_hours_map(offering_ids) -> dict:
     """offering_id → keçirilmiş dərslərin saat cəmi — **tək aqreqat sorğu**.
 
-    :func:`lesson_hours_for`-un toplu fallback mənbəyi.  Döngüdə çağıran hər
-    səth (kabinet, transkript, analitika, cədvəl modalı) bunu BİR dəfə qurub
-    ötürməlidir; əks halda ``lesson_hours=0`` olan 25,314 köçürülmüş yazılışda
-    sətir başına bir sorğu yaranır.
+    :func:`lesson_hours_for`-un toplu fallback mənbəyi.  Döngüdə çağıran hər səth (kabinet, transkript,
+    analitika, cədvəl modalı) bunu BİR dəfə qurub ötürməlidir; əks halda ``lesson_hours=0`` olan 25,314
+    köçürülmüş yazılışda sətir başına bir sorğu yaranır. «Passiv» dərs (sahib 2026-11-14) sayılmır.
     """
     from django.db.models import Sum
 
@@ -309,7 +308,8 @@ def lesson_hours_map(offering_ids) -> dict:
         offering_ids = [oid for oid in offering_ids if oid is not None]
         if not offering_ids:
             return {}
-    rows = Lesson.objects.filter(offering_id__in=offering_ids).values("offering_id").annotate(total=Sum("hours"))
+    counted = Lesson.objects.filter(offering_id__in=offering_ids, is_passive=False)
+    rows = counted.values("offering_id").annotate(total=Sum("hours"))
     return {r["offering_id"]: r["total"] or 0 for r in rows}
 
 
@@ -338,8 +338,8 @@ def lesson_hours_for(offering, lessons=None, *, hours_map=None) -> Decimal:
     hours = _as_decimal(getattr(offering, "lesson_hours", 0) or 0)
     if hours > 0:
         return hours
-    if lessons is not None:
-        return _as_decimal(sum(int(getattr(item, "hours", 0) or 0) for item in lessons))
+    if lessons is not None:  # «Passiv» dərs (sahib 2026-11-14) auditoriya saatı deyil
+        return _as_decimal(sum(int(getattr(i, "hours", 0) or 0) for i in lessons if not getattr(i, "is_passive", 0)))
     offering_id = getattr(offering, "id", None)
     if offering_id is None:
         return hours

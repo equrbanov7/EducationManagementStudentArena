@@ -30,6 +30,23 @@ açan düymənin `data-sylv-open` atributundan gəlir (bir panel, çox düymə).
             </div>
             <h3 class="sylv__title" id="sylv-title" data-sylv-name>{% trans "Sillabus" context "registrar.syllabus" %}</h3>
             <p class="sylv__meta" data-sylv-meta></p>
+            {% comment %}«Sillabusu redaktə et» (sahib 2026-11-15). Server JSON-un `edit` açarı ilə YALNIZ redaktə hüququ
+            olana açılır (servis qapısı `edit_target`; tələbədə həmişə gizli). Qaralama / düzəliş / baxışdakı versiya →
+            redaktor həmin versiyada; təsdiqlənmiş → əvvəl yeni QARALAMA versiya (`syllabus_action` → `new_version`),
+            təsdiqlənmiş nüsxənin üstündən yazılmır; jurnal başqa qrupun ortaq dosyesini göstərirsə və cari müəllim onu redaktə
+            etmirsə — «Öz sillabusunu yarat» (`create`). URL-lər burada (`{% url %}`), davranış syllabus_view.js-də.{% endcomment %}
+            <div class="sylv__edit-row" data-sylv-edit-row hidden>
+                <button type="button" class="sylv__edit" data-sylv-edit
+                        data-editor-url="{% url 'accounts:profile' %}?section=syllabus-editor"
+                        data-action-url="{% url 'accounts:syllabus_action' %}"
+                        data-t-error="{% trans 'Redaktəyə keçmək alınmadı. Səhifəni yeniləyib yenidən cəhd edin.' context 'registrar.syllabus' %}">
+                    <i class="fas fa-pen-to-square" aria-hidden="true"></i>
+                    <span data-sylv-edit-label
+                          data-t-edit="{% trans 'Sillabusu redaktə et' context 'registrar.syllabus' %}"
+                          data-t-create="{% trans 'Öz sillabusunu yarat' context 'registrar.syllabus' %}">{% trans "Sillabusu redaktə et" context "registrar.syllabus" %}</span>
+                </button>
+                <p class="sylv__edit-error" data-sylv-edit-error role="alert" hidden></p>
+            </div>
             <button type="button" class="sylv__x" data-sylv-close
                     aria-label="{% trans 'Paneli bağla' context 'registrar.syllabus' %}">&times;</button>
         </header>

@@ -2,6 +2,8 @@
 
 İki vərəq: «İcmal» (ekrandakı cədvəl + cəmlər) və «Dərslər» (bütün dərslər təfərrüatı ilə). Hər xana
 ``core.export_safety`` ilə yazılır (mövzu / qrup adı istifadəçi mətnidir — formula inyeksiyası neytrallaşdırılır).
+«Passiv» dərs (sahib 2026-11-14): «İcmal»da ayrıca sətir («… · Passiv»), cəm sətrinə daxil deyil, altda «Passiv saat»;
+«Dərslər»də «Passiv» sütunu.
 """
 
 from __future__ import annotations
@@ -88,6 +90,10 @@ def build_xlsx(*, teacher_name: str, window: dict, table: dict, details: list) -
     sheet_append(summary, [])
     sheet_append(summary, ["", pgettext(_CTX, "Cəmi"), "", "", "", totals["hours"], totals["lessons"], totals["text"]])
     _bold(summary, summary.max_row)
+    if totals.get("passive_hours"):
+        sheet_append(
+            summary, ["", pgettext(_CTX, "Passiv saat (cəmə daxil deyil)"), "", "", "", totals["passive_hours"]]
+        )
     for title, items in (
         (pgettext(_CTX, "Dərs növü üzrə"), totals["by_kind"]),
         (pgettext(_CTX, "Bölmə üzrə"), totals["by_sector"]),
@@ -117,6 +123,7 @@ def build_xlsx(*, teacher_name: str, window: dict, table: dict, details: list) -
             pgettext(_CTX, "Otaq"),
             pgettext(_CTX, "İştirak"),
             pgettext(_CTX, "Qeyd olunan"),
+            pgettext(_CTX, "Passiv"),  # sonda — mövcud sütunların yeri dəyişmir
         ],
     )
     header(lessons, 1)
@@ -137,10 +144,11 @@ def build_xlsx(*, teacher_name: str, window: dict, table: dict, details: list) -
                 item["room"],
                 item["present"] if item["marked"] else None,
                 item["marked"] if item["marked"] else None,
+                pgettext(_CTX, "Bəli") if item.get("passive") else "",
             ],
         )
         lessons.cell(row=index + 1, column=2).number_format = "DD.MM.YYYY"
-    _widths(lessons, (6, 12, 16, 14, 30, 36, 16, 12, 60, 18, 10, 12))
+    _widths(lessons, (6, 12, 16, 14, 30, 36, 16, 12, 60, 18, 10, 12, 10))
 
     buffer = BytesIO()
     workbook.save(buffer)

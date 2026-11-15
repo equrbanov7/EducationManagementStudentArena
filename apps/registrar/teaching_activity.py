@@ -43,7 +43,10 @@ def instructor_activity(*, organization, academic_year: str, teacher_ids) -> dic
         entry["planned_hours"] = int(row["planned"] or 0)
     lessons = (
         Lesson.objects.filter(
-            organization=organization, offering__is_active=True, offering__period__academic_year=academic_year
+            organization=organization,
+            offering__is_active=True,
+            offering__period__academic_year=academic_year,
+            is_passive=False,  # «Passiv» dərs keçirilmiş saata düşmür (sahib 2026-11-14)
         )
         .annotate(teacher=Coalesce("instructor_id", "offering__instructor_id"))
         .filter(teacher__in=ids)

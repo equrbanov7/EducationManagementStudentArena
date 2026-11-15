@@ -206,7 +206,7 @@ def get_final_breakdown(offering):
         else {}
     )
     works = {w.enrollment_id: w for w in CourseWork.objects.filter(enrollment__offering=offering)}
-    lessons_all = list(offering.lessons.all())
+    lessons_all = list(offering.lessons.filter(is_passive=False))  # «Passiv» dərs auditoriya saatı deyil (2026-11-14)
     # Məxrəc də TƏK yerdən (bax :func:`exam_eligibility.lesson_hours_for`); başlıq həddi açılış-
     # səviyyəli, SƏTİR qərarı isə TƏLƏBƏNİN ÖZ həddi ilə (F-06 / 2026-09-14) — tək toplu sorğu.
     allowed = exam_eligibility.lesson_hours_for(offering, lessons_all)
@@ -304,13 +304,18 @@ def get_final_breakdown(offering):
 
 
 def locked_lesson_kind(offering):
-    """Jurnalın dərs tipi kilidi: qrupun cədvəlində YALNIZ BİR növ slot varsa
-    (məs. bu jurnal mühazirə jurnalıdır) yeni dərsin növü seçilə bilmir —
-    avtomatik həmin növə düşür (istifadəçi tələbi). RİM 2026-10-27: açılışın başqa
-    növə sübutu (dərs, pay, dərs yükü saatı) varsa kilid yoxdur — bax ``lesson_kind_lock``."""
-    from .lesson_kind_lock import locked_lesson_kind as _locked
+    """Dərs tipi kilidi YOXDUR (sahib 2026-11-15: müəllim mühazirə / seminar / laboratoriya arasında seçə bilsin) —
+    həmişə ``None``. Cədvəlin tək növü yalnız DEFOLT seçimdir: :func:`default_lesson_kind`. Ad köhnə çağıranlar
+    (``journal_share_guard``) üçün qalır — orada POST-un növü pay əhatəsi ilə yoxlanır."""
+    return None
 
-    return _locked(offering)
+
+def default_lesson_kind(offering):
+    """«Yeni dərs» modalının defolt növü: cədvəldə TƏK növ slot varsa (başqa növə sübut yoxdursa) həmin növ —
+    bax ``lesson_kind_lock.default_lesson_kind``."""
+    from .lesson_kind_lock import default_lesson_kind as _default
+
+    return _default(offering)
 
 
 # Mövzu mənbəyi (təsdiqlənmiş sillabus → LMS kursu) ayrıca modula köçürülüb ki,

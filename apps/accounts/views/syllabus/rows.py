@@ -213,6 +213,8 @@ def _is_own(syllabus, viewer) -> bool:
     if syllabus.author_id == user_id:
         return True
     offering = syllabus.offering if syllabus.offering_id else None
+    if offering is not None and syllabus.offering_id in (viewer.get("shared_offering_ids") or ()):
+        return True  # bölünmüş jurnalın pay sahibi (sahib 2026-11-15)
     return bool(offering is not None and offering.instructor_id == user_id)
 
 

@@ -159,8 +159,10 @@ def create_lesson(
     full_edit=False,
     lab_group=None,
     seminar_group=None,
+    passive=False,
 ):
     """Add a held session. ``instructor`` bu dərsin müəllimi (boşdursa açılışınkı);
+    ``passive`` — «Passiv» dərs (saat hesabına düşmür, sahib 2026-11-14; :mod:`apps.registrar.passive_lessons`);
     ``room`` dərsin otağı (opsional — köhnə dərslərdə yoxdur);
     ``allow_past`` İKT rəhbəri/seed/backfill üçün keçmiş tarixi (gecikmiş yazı həddini də) keçir.
 
@@ -225,7 +227,10 @@ def create_lesson(
     ):
         raise LessonRuleError(_slot_taken_message(parsed, start_time))
     from .language_cohort_journal import validate_lesson
+    from .passive_lessons import available, not_available_message
 
+    if passive and not available(offering):
+        raise LessonRuleError(not_available_message())
     validate_lesson(offering=offering, kind=kind, hours=new_hours)
     _validate_lab_group(offering, kind=kind, lab_group=lab_group)
     _validate_seminar_group(offering, kind=kind, seminar_group=seminar_group)
@@ -251,6 +256,7 @@ def create_lesson(
         ),
         lab_group=lab_group,
         seminar_group=seminar_group,
+        is_passive=bool(passive),
     )
     if lesson.off_schedule_reason:
         # «Dəyişiklik tarixçəsi» panelində və audit hesabatlarında görünsün (kim, nə vaxt, niyə).
@@ -289,11 +295,12 @@ def update_lesson(
     full_edit=False,
     lab_group=UNSET,
     seminar_group=UNSET,
+    passive=UNSET,
 ) -> bool:
     """Səhv açılmış dərsi düzəlt (``lesson_edit_window`` içində, defolt 120 dəqiqə). ``allow_locked``/``allow_past``
     pəncərəni + keçmiş-tarixi keçir (İKT/superuser); yayımlanmış jurnal yenə kilidli.
 
-    Audit 2026-09-28 J-02: ``create_lesson`` ilə EYNİ qaydalar — saat 1..``MAX_SLOT_HOURS``
+    Audit 2026-09-28 J-02: ``create_lesson`` ilə EYNİ qaydalar — saat 1..``MAX_LESSON_HOURS`` (dəyişəndə)
     və fənnin saat həddi (``hours_cap_error``), eyni gün + eyni başlanğıc saatında ikinci
     dərs yoxdur (açılış sətri kilidi altında); tarix/saat/növ dəyişikliyi qiymət audit
     izinə yazılır (``by_user``; öz auditini yazan sənədli düzəliş yolları ``audit=False``
@@ -304,8 +311,14 @@ def update_lesson(
     offering = lesson.offering
     # «yoxla → yaz» yarışı: create_lesson ilə eyni kilid (açılış sətri) — dublikat yoxlaması seriyalaşır.
     CourseOffering.objects.select_for_update().filter(pk=offering.pk).values_list("pk", flat=True).first()
-    before = {"date": lesson.date, "hours": lesson.hours, "kind": lesson.kind}
+    before = {"date": lesson.date, "hours": lesson.hours, "kind": lesson.kind, "is_passive": lesson.is_passive}
     fields = []
+    if passive is not UNSET and bool(passive) != lesson.is_passive:
+        from .passive_lessons import ensure_can_switch
+
+        ensure_can_switch(lesson, bool(passive))  # qeydli dərs passiv olmur; adi dərsə qayıdış saat həddindən keçir
+        lesson.is_passive = bool(passive)
+        fields.append("is_passive")
     if date is not None:
         parsed = _coerce_date(date)
         if parsed is None:
@@ -332,8 +345,8 @@ def update_lesson(
             fields.append("syllabus_week")
         lesson.topic = new_topic
         fields.append("topic")
-    if hours is not None:
-        lesson.hours = _validated_hours(offering, lesson, hours)
+    if hours is not None or (passive is not UNSET and "is_passive" in fields and not lesson.is_passive):
+        lesson.hours = _validated_hours(offering, lesson, lesson.hours if hours is None else hours, before=before)
         fields.append("hours")
     if start_time is not None:
         lesson.start_time = start_time or None
@@ -404,11 +417,15 @@ def update_lesson(
 
 
 def _slot_taken_message(day, start_time) -> str:
-    """Eyni jurnalda eyni gün + saat — nə edilməli olduğu açıq (sahib 2026-11-11, patok)."""
+    """Eyni jurnalda eyni gün + saat — nə edilməli olduğu açıq (sahib 2026-11-11 / 2026-11-15, patok).
+
+    «Yeni dərs» bu xətadan sonra jurnalı HƏMİN dərsin sütununda açır (``journal_detail_posts``) — müəllim xanaları
+    oraya yazır (köçürülmüş və ya əvvəl açılmış dərs görünən pəncərədən kənarda ola bilərdi, MR-000125)."""
     return pgettext(
         _CTX,
-        "Bu jurnalda %(date)s, saat %(time)s üçün dərs artıq yazılıb. Patok dərsində hər qrupun dərsi öz "
-        "jurnalına yazılır; alt qrupların (Lab / seminar) dərsi üçün alt qrupu seçin.",
+        "Bu jurnalda %(date)s, saat %(time)s üçün dərs artıq var — qeydləri həmin dərsin sütununa yazın. "
+        "Patok dərsində hər qrupun dərsi öz jurnalına yazılır; alt qrupların (Lab / seminar) dərsi üçün alt "
+        "qrupu seçin.",
     ) % {
         "date": day.strftime("%d.%m.%Y") if hasattr(day, "strftime") else str(day),
         "time": start_time.strftime("%H:%M") if hasattr(start_time, "strftime") else str(start_time)[:5],
@@ -453,20 +470,25 @@ def _validate_seminar_group(offering, *, kind, seminar_group, lesson=None) -> No
             )
 
 
-def _validated_hours(offering, lesson, hours) -> int:
-    """J-02: dərs saatı 1..``MAX_SLOT_HOURS`` tam ədəddir və fənnin saat həddini keçmir."""
-    from apps.registrar.journal_activation import MAX_SLOT_HOURS, hours_cap_error
+def _validated_hours(offering, lesson, hours, *, before=None) -> int:
+    """J-02: dərs saatı 1..``MAX_LESSON_HOURS`` (2 — sahib 2026-11-15) tam ədəddir və fənnin saat həddini keçmir.
+
+    Saatı DƏYİŞMƏYƏN redaktə yoxlanmır — köhnə 3–4 saatlıq dərsin mövzusu / tipi düzəldiləndə xəta olmur.
+    Passiv dərs həddə düşmür (yoxlanmır); passivdən adi dərsə qayıdanda bütün saatı həddə əlavə olunur."""
+    from apps.registrar.journal_activation import MAX_LESSON_HOURS, hours_cap_error
+    from apps.registrar.journal_lesson_prefill import hours_range_message
 
     try:
         value = int(hours)
     except (TypeError, ValueError):
         raise LessonRuleError(pgettext(_CTX, "Dərs saatı müsbət tam ədəd olmalıdır."))
-    if value == lesson.hours:
+    was_passive = bool((before or {}).get("is_passive", lesson.is_passive))
+    if value == lesson.hours and (lesson.is_passive or not was_passive):
         return value  # dəyişməyib (köhnə dərsin saatı tavandan böyük olsa belə toxunulmur)
-    if value < 1 or value > MAX_SLOT_HOURS:
-        raise LessonRuleError(pgettext(_CTX, "Dərs saatı 1 ilə %(max)s arasında olmalıdır.") % {"max": MAX_SLOT_HOURS})
-    extra = value - int(lesson.hours or 0)
-    if extra > 0:
+    if value < 1 or value > MAX_LESSON_HOURS:
+        raise LessonRuleError(hours_range_message())
+    extra = value - (0 if was_passive else int((before or {}).get("hours", lesson.hours) or 0))
+    if extra > 0 and not lesson.is_passive:
         error = hours_cap_error(offering, extra, lab_group=lesson.lab_group, seminar_group=lesson.seminar_group)
         if error:
             raise LessonRuleError(error)
@@ -476,15 +498,17 @@ def _validated_hours(offering, lesson, hours) -> int:
 def _audit_lesson_update(offering, lesson, before, by_user):
     """J-02: tarix / saat / növ dəyişikliyi «Dəyişiklik tarixçəsi»nə düşür (qayıb həddinə təsir edir)."""
     labels = dict(LessonKind.choices)
-    after = {"date": lesson.date, "hours": lesson.hours, "kind": lesson.kind}
+    after = {"date": lesson.date, "hours": lesson.hours, "kind": lesson.kind, "is_passive": lesson.is_passive}
     item = f"{lesson.date} · {lesson.get_kind_display()}"
     changes = []
-    for field, label in (("date", "tarix"), ("hours", "saat"), ("kind", "növ")):
-        old, new = before[field], after[field]
+    for field, label in (("date", "tarix"), ("hours", "saat"), ("kind", "növ"), ("is_passive", "passiv")):
+        old, new = before.get(field), after[field]
         if old == new:
             continue
         if field == "kind":
             old, new = labels.get(old, old), labels.get(new, new)
+        elif field == "is_passive":
+            old, new = ("passiv" if old else "adi"), ("passiv" if new else "adi")
         changes.append({"student": "—", "item": f"{item} · dərs {label}", "old": str(old), "new": str(new)})
     if changes:
         grade_audit.log_grade_changes(offering=offering, by_user=by_user, kind="mark", changes=changes)

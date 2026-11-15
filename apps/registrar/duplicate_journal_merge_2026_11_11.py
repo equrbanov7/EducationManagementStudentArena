@@ -72,7 +72,7 @@ OFFERING_POLICY = {
     "timetable.TimetableDraftSlot.offering": STAY,
     "subject_folder.FolderAssignment.offering": STAY,
     "registrar.LabGroup.offering": BLOCK,
-    "registrar.PassiveHour.offering": BLOCK,  # 2026-11-12: passiv saat — birləşmə əl ilə həll olunur
+    "registrar.PassiveHour.offering": STAY,  # arxiv (2026-11-14: passiv dərsə çevrilib, dərs kimi köçür)
     "registrar.SeminarGroup.offering": BLOCK,
     "registrar.ExamScoreSheet.offering": BLOCK,
     "registrar.LanguageLevelCohort.offering": BLOCK,

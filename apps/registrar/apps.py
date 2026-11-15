@@ -36,6 +36,12 @@ def _register_syllabus_carry():
     from .syllabus_carry import carry_for_syllabus, offering_saved
 
     register_approval_hook(carry_for_syllabus)
+    # Sahib 2026-11-15: jurnalın cari müəllimi (pay / yük bölgüsü) bağlı açılışın sillabusunu redaktə edir.
+    from apps.syllabus.public import register_journal_teacher_resolver
+
+    from .syllabus_journal_teacher import is_current_journal_teacher
+
+    register_journal_teacher_resolver(is_current_journal_teacher)
     post_save.connect(offering_saved, sender=CourseOffering, dispatch_uid="registrar_syllabus_carry_offering_saved")
 
 

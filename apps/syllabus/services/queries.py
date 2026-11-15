@@ -7,6 +7,7 @@ görür. Tenant izolyasiyası əlavə olaraq RLS ilə DB səviyyəsində qorunur
 
 from __future__ import annotations
 
+from django.apps import apps
 from django.db.models import Case, Exists, IntegerField, OuterRef, Q, When
 
 from core.program_codes import PROGRAM_CODE_SEARCH_FIELDS
@@ -42,7 +43,13 @@ def own_q(actor) -> Q:
     Müəllim siyahısının əsas qaydası budur (``is_author`` ilə eyni); rəhbərin
     «Mənim fənlərim» süzgəci də eyni Q-nu işlədir (sahib 2026-10-08).
     """
-    return Q(author_id=actor.user_id) | Q(offering__instructor_id=actor.user_id)
+    # Sahib 2026-11-15: bölünmüş jurnalın pay sahibi də öz jurnalının sillabusunu siyahıda görür (``is_editor``).
+    shares = apps.get_model("registrar", "JournalShare").objects.filter(teacher_id=actor.user_id, is_active=True)
+    return (
+        Q(author_id=actor.user_id)
+        | Q(offering__instructor_id=actor.user_id)
+        | Q(offering_id__in=shares.values("offering_id"))
+    )
 
 
 def has_broad_view_scope(actor) -> bool:

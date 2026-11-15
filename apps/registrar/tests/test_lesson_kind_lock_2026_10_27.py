@@ -1,5 +1,8 @@
-"""Yeni dərsin növ kilidi (RİM 2026-10-27, MR-000054 / MR-000017): cədvəl tək növ verir, amma açılışın başqa
-növə sübutu (dərs, pay, dərs yükü saatı) varsa kilid yoxdur."""
+"""Yeni dərsin növü (RİM 2026-10-27, MR-000054 / MR-000017): cədvəl tək növ verir, amma açılışın başqa
+növə sübutu (dərs, pay, dərs yükü saatı) varsa defolt yoxdur.
+
+Sahib 2026-11-15: KİLİD götürüldü — bu qayda artıq yalnız modalın DEFOLT növüdür (``default_lesson_kind``);
+``locked_lesson_kind`` həmişə ``None``-dur (yeni sınaqlar: ``test_lesson_modal_backdate_patok_2026_11_15``)."""
 
 from __future__ import annotations
 
@@ -10,7 +13,7 @@ from django.utils import timezone
 
 from apps.organizations.models import OrgUnit
 from apps.registrar import gradebook
-from apps.registrar.journal_extras import locked_lesson_kind
+from apps.registrar.journal_extras import default_lesson_kind, locked_lesson_kind
 from apps.registrar.models import JournalShare, JournalShareSource, Lesson, LessonKind, ScheduleSlot
 from apps.registrar.tests.test_journal_rules import _setup_offering
 from apps.registrar.tests.test_journal_shares_2026_10_26 import _ShareBase
@@ -40,8 +43,9 @@ class LockRuleTest(TestCase):
             )
 
     def _lock(self):
+        """Cədvəlin tək növü — indi yalnız DEFOLT (kilid yoxdur, bax ``test_lock_is_gone``)."""
         with bypass_rls():
-            return locked_lesson_kind(self.offering)
+            return default_lesson_kind(self.offering)
 
     def _row(self, **hours):
         task = TeachingTask.objects.create(
@@ -64,6 +68,12 @@ class LockRuleTest(TestCase):
             )
             self._row(lecture_plan=30)
         self.assertEqual(self._lock(), LessonKind.LECTURE)
+
+    def test_lock_is_gone(self):
+        with bypass_rls():
+            _slot(self, LessonKind.LECTURE)
+            self.assertEqual(default_lesson_kind(self.offering), LessonKind.LECTURE)
+            self.assertIsNone(locked_lesson_kind(self.offering))
 
     def test_two_slot_kinds_no_lock(self):
         with bypass_rls():

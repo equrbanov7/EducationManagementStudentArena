@@ -119352,3 +119352,265 @@ msgstr "“Off-timetable” mark"
 msgctxt "core.runtime_settings"
 msgid "Yandırılıbsa tarixi və saatı dərs cədvəlinə uyğun gəlməyən yeni dərs üçün səbəb soruşulur və dərs «cədvəldən kənar» kimi işarələnir. Söndürülüdə müəllim istənilən tarix və saatda dərs aça bilər — səbəb soruşulmur, heç nə işarələnmir və «cədvəldən kənar» yazısı heç yerdə göstərilmir."
 msgstr "When on, a new lesson whose date and time do not match the timetable needs a reason and is marked “off-timetable”. When off, the teacher may open a lesson at any date and time — no reason is asked, nothing is marked and the “off-timetable” label is not shown anywhere."
+
+msgctxt "registrar.passive_lessons"
+msgid "Passiv"
+msgstr "Passive"
+
+#, python-format
+msgctxt "registrar.passive_lessons"
+msgid "Passiv: %(hours)s saat"
+msgstr "Passive: %(hours)s h"
+
+msgctxt "registrar.passive_lessons"
+msgid "keçirilmiş saata daxil deyil"
+msgstr "not counted as held hours"
+
+msgctxt "registrar.passive_lessons"
+msgid "«Passiv» — saat yazılır, amma keçirilmiş saata, həddə və dərs yükünə daxil deyil; xana yazılmır."
+msgstr "«Passive» — the hours are recorded but not counted as held hours, in the hour cap or in the teaching load; no marks are entered."
+
+msgctxt "registrar.passive_lessons"
+msgid "Passiv dərs — müəllimin keçirilmiş saatına, həddə və dərs yükünə daxil deyil; xana yazılmır"
+msgstr "Passive lesson — not counted in the teacher's held hours, the hour cap or the teaching load; no marks are entered"
+
+msgctxt "registrar.passive_lessons"
+msgid "Passiv dərs — davamiyyət və bal yazılmır"
+msgstr "Passive lesson — no attendance or score is entered"
+
+msgctxt "registrar.passive_lessons"
+msgid "Passiv dərslərin saatı — keçirilmiş saata, dərs saatı həddinə və dərs yükünə daxil deyil"
+msgstr "Hours of passive lessons — not counted in held hours, the hour cap or the teaching load"
+
+msgctxt "registrar.passive_lessons"
+msgid "Bu dərsdə qeyd (i/e, q/b, bal) var — passiv edilə bilməz. Əvvəl qeydləri təmizləyin."
+msgstr "This lesson already has marks (present, absent, score) — it cannot be made passive. Clear the marks first."
+
+msgctxt "registrar.passive_lessons"
+msgid "Bu jurnalda passiv dərs açmaq olmaz (dil səviyyə qrupunun saatı sabitdir)."
+msgstr "Passive lessons cannot be added to this journal (the language level group has fixed hours)."
+
+msgctxt "registrar.passive_lessons"
+msgid "Dərsin «Passiv» seçimi yalnız redaktə pəncərəsində dəyişir — sənədli düzəlişdə dəyişmir."
+msgstr "The lesson's «Passive» choice can only be changed within the edit window — not through a documented correction."
+
+msgctxt "registrar.lessons_log"
+msgid "Passiv"
+msgstr "Passive"
+
+msgctxt "registrar.lessons_log"
+msgid "Passiv dərs"
+msgstr "Passive lesson"
+
+msgctxt "registrar.lessons_log"
+msgid "Bəli"
+msgstr "Yes"
+
+msgctxt "registrar.lessons_log"
+msgid "Passiv saat (cəmə daxil deyil)"
+msgstr "Passive hours (not in the total)"
+
+msgctxt "accounts.lessons_log"
+msgid "Passiv"
+msgstr "Passive"
+
+#, python-format
+msgctxt "accounts.lessons_log"
+msgid "Passiv: %(n)s saat"
+msgstr "Passive: %(n)s h"
+
+msgctxt "accounts.lessons_log"
+msgid "Passiv dərs — cəmə daxil deyil"
+msgstr "Passive lesson — not in the total"
+
+msgctxt "accounts.lessons_log"
+msgid "Passiv dərs — müəllimin keçirilmiş saatına daxil deyil"
+msgstr "Passive lesson — not counted in the teacher's held hours"
+
+msgctxt "accounts.lessons_log"
+msgid "Passiv dərslər cəmə daxil deyil"
+msgstr "Passive lessons are not in the total"
+
+#, python-format
+msgctxt "accounts.lessons_log"
+msgid "akademik saat cəmi · passiv %(hours)s saat ayrıca"
+msgstr "total academic hours · passive %(hours)s h separately"
+
+#, python-format
+msgctxt "registrar.journal_lessons"
+msgid "Bu jurnalda %(date)s, saat %(time)s üçün dərs artıq var — qeydləri həmin dərsin sütununa yazın. Patok dərsində hər qrupun dərsi öz jurnalına yazılır; alt qrupların (Lab / seminar) dərsi üçün alt qrupu seçin."
+msgstr "This journal already has a lesson on %(date)s at %(time)s — enter the records in that lesson's column. In a joint (stream) lesson each group's lesson is written in its own journal; for a sub-group lesson (Lab / seminar) choose the sub-group."
+
+msgctxt "registrar.roster_restore"
+msgid "Tələbəni bərpa et"
+msgstr "Restore a student"
+
+msgctxt "registrar.roster_restore"
+msgid "Səhvən çıxarılmış və ya dondurulmuş tələbəni jurnala qaytarın"
+msgstr "Return a student who was removed or frozen by mistake to the journal"
+
+msgctxt "registrar.roster_restore"
+msgid "Səhvən çıxarılmış və ya dondurulmuş tələbəni bu jurnala qaytarın. Tələbənin əvvəlki balları və davamiyyəti yerində qalır — yeni sətir yaradılmır."
+msgstr "Return a student who was removed or frozen by mistake to this journal. The student's earlier scores and attendance stay in place — no new row is created."
+
+msgctxt "registrar.roster_restore"
+msgid "Siyahı yüklənir…"
+msgstr "Loading the list…"
+
+msgctxt "registrar.roster_restore"
+msgid "Bu jurnaldan çıxarılmış tələbə yoxdur."
+msgstr "No students have been removed from this journal."
+
+msgctxt "registrar.roster_restore"
+msgid "Bərpa ediləcək tələbəni seçin."
+msgstr "Select the student to restore."
+
+msgctxt "registrar.roster_restore"
+msgid "Əməliyyat alınmadı — yenidən cəhd edin."
+msgstr "The action failed — please try again."
+
+msgctxt "registrar.roster_restore"
+msgid "Qrup"
+msgstr "Group"
+
+msgctxt "registrar.roster_restore"
+msgid "alt qrupdan"
+msgstr "from subgroup"
+
+msgctxt "registrar.roster_restore"
+msgid "Kim"
+msgstr "By"
+
+msgctxt "registrar.roster_restore"
+msgid "Səbəb"
+msgstr "Reason"
+
+msgctxt "registrar.roster_restore"
+msgid "Bağla"
+msgstr "Close"
+
+msgctxt "registrar.roster_restore"
+msgid "Qeyd"
+msgstr "Note"
+
+msgctxt "registrar.roster_restore"
+msgid "(istəyə bağlı)"
+msgstr "(optional)"
+
+msgctxt "registrar.roster_restore"
+msgid "Məs.: səhvən çıxarılmışdı, dekanlığın tələbi ilə qaytarıldı"
+msgstr "E.g.: removed by mistake, returned at the dean's office request"
+
+msgctxt "registrar.roster_restore"
+msgid "Ləğv et"
+msgstr "Cancel"
+
+msgctxt "registrar.roster_restore"
+msgid "Bərpa et"
+msgstr "Restore"
+
+msgctxt "registrar.roster_restore"
+msgid "Xarici nəticə tanınıb — «Xarici nəticələrin tanınması» bölməsində ləğv olunur."
+msgstr "An external result was recognised — cancel it in «Recognition of external results»."
+
+msgctxt "registrar.roster_restore"
+msgid "Əvvəl də jurnalda aktiv deyildi — bərpa onu qaytarmır."
+msgstr "The student was not active in the journal before either — restoring does not bring them back."
+
+msgctxt "registrar.roster_restore"
+msgid "Rəsmi qrup köçürməsi ilə başqa jurnala keçib — qrup yalnız köçürmə əmri ilə dəyişir."
+msgstr "Moved to another journal by an official group transfer — the group changes only by a transfer order."
+
+msgctxt "registrar.roster_restore"
+msgid "Akademik statusa görə dondurulub (məzuniyyət / xaric / məzun) — qrup reyestrində «Bərpa et» əmri ilə qayıdır."
+msgstr "Frozen because of the academic status (leave / expelled / graduated) — returns with the «Restore» order in the group registry."
+
+msgctxt "registrar.roster_restore"
+msgid "Sistem tərəfindən çıxarılıb — bu pəncərədən bərpa olunmur."
+msgstr "Removed by the system — cannot be restored from this window."
+
+#, python-format
+msgctxt "registrar.roster_restore"
+msgid "Tələbə bu fənn üzrə «%(group)s» qrupunun jurnalında aktivdir. Bu jurnala qaytarmaq üçün «Alt qrupdan tələbə əlavə et» pəncərəsində «öz jurnalından azad et» seçin."
+msgstr "The student is active in the journal of group «%(group)s» for this subject. To bring them back here, choose «release from own journal» in «Add a student from a subgroup»."
+
+#, python-format
+msgctxt "registrar.roster_restore"
+msgid "Tələbə bu fənn üzrə «%(group)s» qrupunun jurnalında aktivdir — əvvəlcə oradan çıxarın, sonra bərpa edin."
+msgstr "The student is active in the journal of group «%(group)s» for this subject — remove them there first, then restore."
+
+msgctxt "registrar.roster_restore"
+msgid "Dondurulub"
+msgstr "Frozen"
+
+msgctxt "registrar.roster_restore"
+msgid "Çıxarılıb"
+msgstr "Removed"
+
+msgctxt "registrar.roster_restore"
+msgid "Bu qərarı yalnız RİM geri qaytara bilər."
+msgstr "Only the registrar's office can reverse this decision."
+
+msgctxt "registrar.roster_restore"
+msgid "Jurnala bərpa edildi"
+msgstr "Restored to the journal"
+
+msgctxt "registrar.roster_restore"
+msgid "Qeydiyyat tapılmadı."
+msgstr "Enrolment not found."
+
+msgctxt "registrar.roster_restore"
+msgid "Tələbə artıq jurnaldadır."
+msgstr "The student is already in the journal."
+
+msgctxt "registrar.roster_restore"
+msgid "Qərar artıq geri qaytarılıb."
+msgstr "The decision has already been reversed."
+
+msgctxt "registrar.roster_restore"
+msgid "Tələbəni jurnala bərpa etmək üçün səlahiyyətiniz yoxdur."
+msgstr "You are not allowed to restore students to the journal."
+
+msgctxt "registrar.roster_restore"
+msgid "Tələbə jurnala qaytarıldı — əvvəlki balları və davamiyyəti yerindədir."
+msgstr "The student is back in the journal — earlier scores and attendance are in place."
+
+msgctxt "registrar.journal_removal"
+msgid "Jurnal təmizliyi"
+msgstr "Journal cleanup"
+
+msgctxt "registrar.syllabus"
+msgid "Öz sillabusunu yarat"
+msgstr "Create your own syllabus"
+
+msgctxt "registrar.syllabus"
+msgid "Sillabusu redaktə et"
+msgstr "Edit the syllabus"
+
+msgctxt "registrar.syllabus"
+msgid "Redaktəyə keçmək alınmadı. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Could not open the editor. Refresh the page and try again."
+
+msgctxt "accounts.syllabus"
+msgid "Bu sillabusa yalnız baxa bilərsiniz"
+msgstr "You can only view this syllabus"
+
+msgctxt "accounts.syllabus"
+msgid "Sillabusu onun müəllifi və bağlı olduğu jurnalın müəllimləri redaktə edir. Başqa qrupla ortaq istifadə olunan sillabus bütün qruplar üçün eynidir."
+msgstr "The syllabus is edited by its author and the teachers of the journal it belongs to. A syllabus shared with another group is the same for all groups."
+
+msgctxt "accounts.syllabus"
+msgid "Öz sillabusunu yarat"
+msgstr "Create your own syllabus"
+
+msgctxt "accounts.syllabus"
+msgid "Sillabus yaradıla bilmədi. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Could not create the syllabus. Refresh the page and try again."
+
+msgctxt "accounts.syllabus"
+msgid "Versiya kafedra müdirinin baxışındadır. Dəyişiklik etmək üçün «Sillabuslar» siyahısında təqdimatı geri çağırın — sonra redaktə yenidən açılır."
+msgstr "This version is being reviewed by the head of department. To make changes, withdraw the submission in the «Syllabi» list — editing then opens again."
+
+msgctxt "accounts.syllabus"
+msgid "Yeni versiya yaradıla bilmədi. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Could not create a new version. Refresh the page and try again."

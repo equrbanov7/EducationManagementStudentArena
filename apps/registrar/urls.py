@@ -25,12 +25,12 @@ from . import (
     journal_list_unit_lookup,
     journal_master_history,
     journal_reviewed_history,
+    journal_roster_restore_views,
     lab_groups_views,
     language_cohort_history,
     language_cohort_views,
     lessons_log_teacher_views,
     lessons_log_views,
-    passive_hours_views,
     pdf_views,
     practical_toggle,
     schedule_views,
@@ -172,6 +172,17 @@ urlpatterns = [
         subject_exempt_views.subject_exempt_restore,
         name="journal_subject_exempt_restore",
     ),
+    # «Tələbəni bərpa et» — səhvən çıxarılmış / dondurulmuş tələbəni jurnala qaytarmaq (sahib 2026-11-15).
+    path(
+        "<uuid:offering_id>/telebe-berpa/",
+        journal_roster_restore_views.roster_restore_list,
+        name="journal_roster_restore_list",
+    ),
+    path(
+        "<uuid:offering_id>/telebe-berpa/emel/",
+        journal_roster_restore_views.roster_restore_apply,
+        name="journal_roster_restore_apply",
+    ),
     # «Lab qrupları» — jurnalda laboratoriya qruplarını yaratmaq / adlandırmaq / tələbə yerləşdirmək (sahib 2026-11-06).
     # 2026-11-07: ekran kabinetin «Lab qrupları» bölməsinə köçdü — köhnə ünvan oraya yönləndirir, yazı JSON-dadır.
     path("<uuid:offering_id>/lab-qruplari/", lab_groups_views.manage, name="journal_lab_groups"),
@@ -198,10 +209,6 @@ urlpatterns = [
     ),
     # «Praktiki məşğələ» görünüşü (sahib 2026-10-28) — kafedra müdiri / RİM, POST.
     path("<uuid:offering_id>/praktiki/", practical_toggle.toggle, name="journal_practical_toggle"),
-    # «Passiv saat» — intensiv tədrisin auditoriyadan kənar saatları (sahib 2026-11-12, MR-000303), POST.
-    path("<uuid:offering_id>/passiv-saat/", passive_hours_views.add, name="journal_passive_hours_add"),
-    path("<uuid:offering_id>/passiv-saat/sil/", passive_hours_views.delete, name="journal_passive_hours_delete"),
-    path("<uuid:offering_id>/passiv-saat/acar/", passive_hours_views.switch, name="journal_passive_hours_switch"),
     path("<uuid:offering_id>/ders/<uuid:lesson_id>/", journal_actions.lesson_action, name="journal_lesson_action"),
     path("<uuid:offering_id>/kollokvium/", journal_actions.kollokvium_save, name="journal_kollokvium_save"),
     path("<uuid:offering_id>/serbest/", journal_actions.selfwork_action, name="journal_selfwork_action"),

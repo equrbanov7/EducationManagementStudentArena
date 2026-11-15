@@ -193,6 +193,9 @@ class Lesson(ReferenceIdentityValidationMixin, UUIDModel, TimeStampedModel):
     seminar_group = models.PositiveSmallIntegerField(
         null=True, blank=True, help_text="Seminar alt qrupu (yalnız seminar dərsi); boş = bütün qrup."
     )
+    #: «Passiv» dərs (sahib 2026-11-14): saat yazılır, amma müəllimin keçirilmiş saatına / həddə / yükə / qayıb
+    #: məxrəcinə DÜŞMÜR, xana yazılmır; «Keçilmiş dərslər»də ayrıca sayılır. Qaydalar: :mod:`apps.registrar.passive_lessons`.
+    is_passive = models.BooleanField(default=False, db_default=False, help_text="Passiv dərs — saat hesabına düşmür.")
 
     objects = models.Manager()
 

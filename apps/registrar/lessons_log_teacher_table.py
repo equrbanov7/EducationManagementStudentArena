@@ -46,6 +46,8 @@ from django.utils.dates import WEEKDAYS
 from django.utils.translation import pgettext
 
 from apps.registrar.models import LessonKind
+from apps.registrar.passive_lessons import hours_note
+from apps.registrar.passive_lessons import label as passive_label
 from core import academic_rules
 
 _CTX = "registrar.lessons_log"
@@ -74,7 +76,8 @@ def _sub_of(lesson):
 
 def _joint_key(lesson) -> tuple:
     """Birgə dərs açarı (modul sənədi «PATOK NECƏ TANINIR»); müəllim girişdə artıq sabitdir."""
-    base = (_subject_key(lesson.offering.subject), lesson.kind, lesson.date)
+    # «Passiv» dərs (sahib 2026-11-14) adi dərslə birləşmir — ayrıca sətir, saatı cəmə düşmür.
+    base = (bool(lesson.is_passive), _subject_key(lesson.offering.subject), lesson.kind, lesson.date)
     if lesson.start_time is not None:
         return (*base, lesson.start_time)
     if lesson.kind == LessonKind.LECTURE:
@@ -109,6 +112,7 @@ def build_events(lessons) -> list:
                     "start_time": first.start_time,
                     "end_time": next((item.end_time for item in members if item.end_time), None),
                     "kind": first.kind,
+                    "passive": bool(first.is_passive),
                     "hours": max(int(item.hours or 0) for item in members),
                     "subject": first.offering.subject,
                     "participants": tuple(
@@ -125,6 +129,7 @@ def build_events(lessons) -> list:
 def _row_key(event) -> str:
     raw = "|".join(
         [_subject_key(event["subject"]), str(event["kind"])]
+        + (["passive"] if event.get("passive") else [])
         + [f"{offering}:{sub[0]}:{sub[1]}" for offering, sub in event["participants"]]
     )
     return hashlib.sha1(raw.encode("utf-8"), usedforsecurity=False).hexdigest()[:20]
@@ -254,6 +259,7 @@ def summarise(events) -> dict:
     by_kind: dict = {}
     by_sector: dict = {}
     total = {"lessons": 0, "hours": 0}
+    passive_total: dict = {}  # «Passiv» dərslər — əsas cəmə daxil deyil
     for event in events:
         key = _row_key(event)
         row = rows.get(key)
@@ -271,7 +277,12 @@ def summarise(events) -> dict:
                 "subject": getattr(event["subject"], "name", "") or "",
                 "subject_code": getattr(event["subject"], "code", "") or "",
                 "kind": str(event["kind"]),
-                "kind_label": str(first.get_kind_display()),
+                "kind_label": (
+                    "%s · %s" % (first.get_kind_display(), passive_label())
+                    if event.get("passive")
+                    else str(first.get_kind_display())
+                ),
+                "passive": bool(event.get("passive")),
                 "sector": sector,
                 "sector_label": sector_label(sector),
                 "lessons": 0,
@@ -282,6 +293,9 @@ def summarise(events) -> dict:
         row["lessons"] += 1
         row["hours"] += event["hours"]
         row["events"].append(event)
+        if event.get("passive"):
+            _bump(passive_total, "all", event["hours"])
+            continue
         total["lessons"] += 1
         total["hours"] += event["hours"]
         _bump(by_kind, str(event["kind"]), event["hours"])
@@ -293,12 +307,17 @@ def summarise(events) -> dict:
     )
     for row in ordered:
         row["text"] = hours_text(row["hours"], row["lessons"])
+        if row["passive"]:
+            row["text"] = "%s · %s" % (passive_label(), row["text"])
+    passive_hours = passive_total.get("all", {}).get("hours", 0)
+    total_text = hours_text(total["hours"], total["lessons"])
     return {
         "rows": ordered,
         "totals": {
             "lessons": total["lessons"],
             "hours": total["hours"],
-            "text": hours_text(total["hours"], total["lessons"]),
+            "passive_hours": passive_hours,
+            "text": "%s · %s" % (total_text, hours_note(passive_hours)) if passive_hours else total_text,
             "by_kind": _totals(by_kind, kind_label, [str(kind) for kind in KIND_ORDER]),
             "by_sector": _totals(by_sector, sector_label, list(SECTOR_ORDER)),
         },
@@ -354,6 +373,10 @@ def event_details(row_or_rows) -> list:
                     "weekday": str(WEEKDAYS[event["date"].weekday()]),
                     "time": time_text,
                     "hours": event["hours"],
+                    "passive": bool(event.get("passive")),
+                    "hours_label": (
+                        "%s · %s" % (event["hours"], passive_label()) if event.get("passive") else str(event["hours"])
+                    ),
                     "kind": row["kind"],
                     "kind_label": row["kind_label"],
                     "groups": row["groups"],

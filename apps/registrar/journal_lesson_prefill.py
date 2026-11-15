@@ -10,7 +10,7 @@ sahələri ``journal_lesson_prefill.js`` doldurur. Qayda:
    Slotdan: tip, dərs saatı (təşkilatın öz zəng saatı da ola bilər), akademik saat, otaq (reyestrdə
    tapılmasa — otaq yaddaşı), müəllim (slotun öz müəllimi → bu tipin son müəllimi → jurnal sahibi) və
    sillabusdakı növbəti keçilməmiş mövzu; ``source="slot"`` + ``slot_id``.
-2. Slot yoxdursa: tip = cədvəl kilidi → son dərsin tipi → tədris planında ən çox QALAN saatı olan tip;
+2. Slot yoxdursa: tip = cədvəlin tək növü (defolt, kilid deyil) → son dərsin tipi → tədris planında ən çox QALAN saatı olan tip;
    akademik saat və müəllim həmin tipin son dərsindən, otaq yaddaşdan (tip + həftə günü, sonra tip);
    dərs saatı son dərsdən YALNIZ açılışın cədvəli ümumiyyətlə yoxdursa (cədvəl varsa saatı müəllim seçir —
    cədvəldən kənar dərs səbəb tələb edir).
@@ -111,7 +111,7 @@ def build(offering, context, *, now=None, scope=None) -> dict:
         data["slots"][str(slot.pk)] = {
             "kind": kind,
             "time": journal_activation.slot_time_key(slot),
-            "hours": journal_activation.slot_hours(slot),
+            "hours": journal_activation.lesson_hours_for_slot(slot),  # 3–4 saatlıq slot da 2 (sahib 2026-11-15)
             "room": rooms.get((slot.room or "").strip()) or _memory_room(memory, kind, today),
             # ``journal_activation.slot_teacher`` qaydası: slotun öz müəllimi → bu tipin son müəllimi → jurnal sahibi.
             "instructor": teacher_id(slot.instructor if slot.instructor_id else last_instructor.get(slot.kind)),
@@ -129,9 +129,14 @@ def build(offering, context, *, now=None, scope=None) -> dict:
 
 
 def open_slots(offering, today, todays_lessons) -> list:
-    """Bu günün cədvəl slotları, başlanğıc saatında hələ dərs açılmayanlar (zolaqdakı «açılmayıb» qaydası)."""
-    taken = {lesson.start_time for lesson in todays_lessons if lesson.start_time is not None}
-    return [slot for slot in journal_activation.slots_on(offering, today) if slot.start_time not in taken]
+    """Bu günün cədvəl slotları, hələ ÖZ dərsi açılmayanlar (zolaqdakı «açılmayıb» qaydası).
+
+    Sahib 2026-11-15 (patok): bir jurnalda eyni saatda iki slot varsa birinci dərs yalnız BİR slotu bağlayır
+    (``journal_activation.match_slots``) — əvvəl ikinci slot da «açılıb» sayılır, modal başqa saatın slotunu doldururdu.
+    """
+    slots = journal_activation.slots_on(offering, today)
+    taken = journal_activation.match_slots(slots, todays_lessons)
+    return [slot for slot in slots if slot.pk not in taken]
 
 
 def pick_slot(slots, now):
@@ -155,7 +160,7 @@ def pick_slot(slots, now):
 
 def _fallback(offering, context, data, held, last_by_kind, memory, today) -> dict:
     """Bu gün açılmamış slot yoxdur: tip kilidi → son dərsin tipi → tədris planı (bax modul sənədi)."""
-    locked = context.get("locked_lesson_kind") or ""
+    locked = context.get("default_lesson_kind") or ""  # cədvəlin tək növü — yalnız DEFOLT (sahib 2026-11-15)
     last = held[0] if held else None
     if locked:
         kind, source = locked, ("last" if last_by_kind.get(locked) else "")
@@ -218,11 +223,11 @@ def _standard_time(lesson) -> str:
 
 
 def _hours(lesson) -> int:
-    """Həmin tipin son dərsinin akademik saatı (modal seçimi 1..4), yoxdursa standart 2."""
+    """Həmin tipin son dərsinin akademik saatı (modal seçimi 1..2 — sahib 2026-11-15), yoxdursa standart 2."""
     from .gradebook import DEFAULT_LESSON_HOURS
 
     hours = int(getattr(lesson, "hours", 0) or 0)
-    return hours if 1 <= hours <= journal_activation.MAX_SLOT_HOURS else DEFAULT_LESSON_HOURS
+    return hours if 1 <= hours <= journal_activation.MAX_LESSON_HOURS else DEFAULT_LESSON_HOURS
 
 
 def topics_covered_by(rows, lessons) -> list:
@@ -337,9 +342,42 @@ def own_lesson_time(lesson, raw):
     return lesson.start_time, lesson.end_time
 
 
+def hours_range_message() -> str:
+    """Yeni / saatı dəyişən dərsin saatı 1..2 (sahib 2026-11-15) — xəta mətni."""
+    from django.utils.translation import pgettext
+
+    return pgettext("registrar.journal_lessons", "Dərs saatı 1 ilə %(max)s arasında olmalıdır.") % {
+        "max": journal_activation.MAX_LESSON_HOURS
+    }
+
+
+def lesson_url(offering, lesson) -> str:
+    """Jurnalın ``lesson`` sütununu GÖSTƏRƏN ünvanı (pəncərə + lövbər); dərs yoxdursa adi jurnal ünvanı.
+
+    Grid default olaraq yalnız ən yeni ``journal_window.DEFAULT_LESSON_WINDOW`` dərsi göstərir (sıra: tarix, sonra
+    yaranma; yenisi solda). Keçmiş tarixə açılmış dərsdən YENİ dərs o qədər və ya çoxdursa, pəncərə həmin dərsdən
+    başlayır (``?lo=``) — əks halda müəllim «Dərs əlavə edildi» görür, amma sütunu tapmır (sahib 2026-11-15)."""
+    from django.db.models import Q
+    from django.urls import reverse
+
+    from .journal_window import DEFAULT_LESSON_WINDOW
+
+    url = reverse("registrar:journal_detail", args=[offering.pk])
+    if lesson is None:
+        return url
+    newer = offering.lessons.filter(
+        Q(date__gt=lesson.date) | Q(date=lesson.date, created_at__gt=lesson.created_at)
+    ).count()
+    if newer >= DEFAULT_LESSON_WINDOW:
+        url = f"{url}?lo={newer}"
+    return f"{url}#jd-lesson-{lesson.pk}"
+
+
 __all__ = [
     "KINDS",
     "build",
+    "hours_range_message",
+    "lesson_url",
     "modal_context",
     "open_slots",
     "own_lesson_time",

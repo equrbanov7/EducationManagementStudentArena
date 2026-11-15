@@ -266,7 +266,7 @@ class LessonPrefillBase(TestCase):
                 "active_tab": "grid",
                 "topic_choices_meta": [dict(row) for row in TOPICS],
                 "lesson_room_memory": lesson_rooms.remembered_rooms(offering),
-                "locked_lesson_kind": journal_extras.locked_lesson_kind(offering),
+                "default_lesson_kind": journal_extras.default_lesson_kind(offering),
             }
         context.update(extra)
         return context
@@ -393,8 +393,8 @@ class PrefillBuildTest(LessonPrefillBase):
         self.assertEqual(data["source"], "last")
         self.assertEqual(data["time"], "")
 
-    def test_locked_kind_and_plan_hours(self):
-        data = self._prefill("10:30", self.plain, locked_lesson_kind=LessonKind.LAB)
+    def test_default_kind_and_plan_hours(self):
+        data = self._prefill("10:30", self.plain, default_lesson_kind=LessonKind.LAB)
         self.assertEqual((data["kind"], data["source"]), (LessonKind.LAB, ""))
         with mock.patch(
             "apps.registrar.plan_hours.plan_hours_for_offering", return_value={"lecture": 30, "seminar": 45}
@@ -479,7 +479,7 @@ class SlotPathPostTest(LessonPrefillBase):
     def test_duplicate_slot_lesson_is_refused(self):
         self._add()
         resp = self._add()
-        self.assertContains(resp, "üçün dərs artıq yazılıb")  # 2026-11-11: patok izahlı mesaj
+        self.assertContains(resp, "üçün dərs artıq var")  # 2026-11-11 / 11-15: patok izahlı mesaj
         self.assertEqual(len(self._lessons()), 1)
 
     def test_editing_a_slot_lesson_keeps_its_own_bell_time(self):
@@ -525,7 +525,8 @@ class ActivationFlagTest(LessonPrefillBase):
         self.assertContains(resp, 'id="jdLessonPrefill"')
         self.assertContains(resp, "registrar/js/journal_lesson_prefill.js")
         self.assertContains(resp, 'name="slot_id"')
-        self.assertContains(resp, '<option value="4">4</option>')  # akademik saat 1..4
+        # Akademik saat: 1..2 (sahib 2026-11-15); 4 yalnız köhnə dərsin redaktəsi üçün gizli variantdır.
+        self.assertContains(resp, '<option value="4" hidden data-jd-hours-legacy>4</option>')
         self.assertNotContains(resp, "«Aktivləşdir» düyməsini işlədin")
         self.assertIn(str(self.seminar.pk), resp.context["lesson_prefill"]["slots"])
         self.assertTrue(resp.context["lesson_prefill"]["slot_id"])

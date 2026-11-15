@@ -247,7 +247,18 @@ def build_syllabus_editor_context(request, *, organization, version) -> dict:
         }
         for section_id in rule.section_order
     ]
-    editable = not version.is_locked and (version.status != SyllabusStatus.APPROVED.value or is_author(actor, syllabus))
+    # Sahib 2026-11-15 («redaktə edə bilmir»): «normal» rejim bölmə yazısının qapısı ilə EYNİDİR (açar + müəllif /
+    # açılışın cari müəllimi). Əvvəl müəllif olmayana qaralama redaktəyə açıq görünürdü, hər autosave isə
+    # «yalnız müəllif» ilə rədd olunurdu — müəllim yazdığını itirirdi.
+    from .services.edit_target import (
+        EDIT_MODE_NEW_VERSION,
+        can_edit_content,
+        edit_target,
+        own_offering_without_syllabus,
+    )
+
+    can_edit = can_edit_content(actor, syllabus)
+    editable = not version.is_locked and can_edit
     view_state = "normal" if editable else "readonly"
     from core.runtime_settings_syllabus import approval_required
 
@@ -262,6 +273,11 @@ def build_syllabus_editor_context(request, *, organization, version) -> dict:
         # Audit 2026-09-28 SYL-7: GET zamanı yalnız MÜƏLLİFİN sessiyası plan
         # saatını/həftəlik bölgünü yazır — kafedranın baxışı heç nə dəyişmir.
         "is_author": is_author(actor, syllabus),
+        # Kilidli (təsdiqlənmiş / rədd / arxiv) versiyada «Yeni versiya yarat» — banner bunu məsləhət görürdü, düyməsi yox idi.
+        "can_new_version": not editable and (edit_target(actor, syllabus) or {}).get("mode") == EDIT_MODE_NEW_VERSION,
+        # Redaktə hüququ yoxdur (başqasının / ortaq dosye): izah + müəllimin sillabussuz jurnalı üçün «Öz sillabusunu yarat».
+        "can_edit": can_edit,
+        "own_offering": None if can_edit else own_offering_without_syllabus(actor, syllabus),
         "rule": rule,
         "selfwork_active": rule.selfwork,
         "selfwork_options": SELFWORK_OPTIONS,

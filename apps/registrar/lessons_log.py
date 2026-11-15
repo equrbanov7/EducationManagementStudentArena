@@ -110,6 +110,7 @@ ROW_CAP = 90
 NOTE_ON_TIME = "on_time"
 NOTE_LATE = "late"
 NOTE_EMPTY = "empty"
+NOTE_PASSIVE = "passive"  # «Passiv» dərs (sahib 2026-11-14) — xanası olmur, «boş» sayılmır
 
 
 # --------------------------------------------------------------------------- #
@@ -418,11 +419,17 @@ def build_rows(lessons_qs, *, limit=ROW_CAP, offset=0) -> list:
                 "graded": int(bucket.get("graded") or 0),
                 "marks_total": marks_total,
                 "attendance_label": "%s / %s" % (int(bucket.get("present") or 0), marks_total),
-                "note": note_state(
-                    lesson_date=lesson.date,
-                    marks_count=marks_total,
-                    # Köçürülmüş dərs heç vaxt «gec» deyil (`lessons_log_totals` «KÖÇÜRMƏ»).
-                    first_mark=None if is_imported_lesson(lesson) else bucket.get("first_mark"),
+                # «Passiv» dərs (sahib 2026-11-14): xanası olmur — «boş» deyil, ayrıca nişan; saat əsas cəmə düşmür.
+                "is_passive": bool(lesson.is_passive),
+                "note": (
+                    NOTE_PASSIVE
+                    if lesson.is_passive
+                    else note_state(
+                        lesson_date=lesson.date,
+                        marks_count=marks_total,
+                        # Köçürülmüş dərs heç vaxt «gec» deyil (`lessons_log_totals` «KÖÇÜRMƏ»).
+                        first_mark=None if is_imported_lesson(lesson) else bucket.get("first_mark"),
+                    )
                 ),
                 "is_legacy": bool(lesson.is_legacy_synthesised),
                 # «Cədvəldən kənar» (UNEC P1-1): dərs cədvəl slotuna uyğun gəlmədən, səbəblə açılıb.
@@ -450,6 +457,7 @@ def csv_rows(rows) -> list:
         pgettext(_CTX, "Üzrlü"),
         pgettext(_CTX, "Qiymətləndirilib"),
         pgettext(_CTX, "Akademik saat"),
+        pgettext(_CTX, "Passiv"),
         pgettext(_CTX, "Jurnal qeydi"),
     ]
     # «Cədvəldən kənar» sütunu yalnız işarə yandırılıbsa (sahib 2026-11-14).
@@ -460,6 +468,7 @@ def csv_rows(rows) -> list:
         NOTE_ON_TIME: pgettext(_CTX, "Vaxtında yazılıb"),
         NOTE_LATE: pgettext(_CTX, "Gec yazılıb"),
         NOTE_EMPTY: pgettext(_CTX, "Jurnal boşdur"),
+        NOTE_PASSIVE: pgettext(_CTX, "Passiv dərs"),
     }
     out = [header]
     for row in rows:
@@ -479,6 +488,7 @@ def csv_rows(rows) -> list:
                 row["excused"],
                 row["graded"],
                 row["hours"],
+                pgettext(_CTX, "Bəli") if row.get("is_passive") else "",
                 note_labels.get(row["note"], row["note"]),
             ]
             + ([row.get("off_schedule_reason", "")] if off_schedule else [])
@@ -490,7 +500,7 @@ def offering_totals(lessons_qs) -> list:
     """Açılış üzrə xülasə — TƏK sorğu (aqreqat), saxlanılmır."""
     return list(
         lessons_qs.values("offering_id", "offering__subject__code", "offering__subject__name", "offering__group__name")
-        .annotate(lessons=Count("id"), hours=Sum("hours"))
+        .annotate(lessons=Count("id", filter=Q(is_passive=False)), hours=Sum("hours", filter=Q(is_passive=False)))
         .order_by("offering__subject__name")
     )
 
@@ -501,6 +511,7 @@ __all__ = [
     "NOTE_EMPTY",
     "NOTE_LATE",
     "NOTE_ON_TIME",
+    "NOTE_PASSIVE",
     "PAGE_SIZE",
     "RANGE_CUSTOM",
     "RANGE_LABELS",

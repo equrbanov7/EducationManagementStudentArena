@@ -213,16 +213,22 @@ def _group_by_day(rows, day_totals=None) -> list:
                 "rows": [],
                 "lessons": 0,
                 "hours": 0,
+                "passive_hours": 0,
             }
             index[key] = bucket
             days.append(bucket)
         bucket["rows"].append(row)
-        bucket["lessons"] += 1
-        bucket["hours"] += row["hours"]
+        # «Passiv» dərs (sahib 2026-11-14) gün cəminə daxil deyil — ayrıca «Passiv: N saat».
+        if row.get("is_passive"):
+            bucket["passive_hours"] += row["hours"]
+        else:
+            bucket["lessons"] += 1
+            bucket["hours"] += row["hours"]
     for bucket in days:
         full = (day_totals or {}).get(bucket["date"])
         if full:
             bucket["lessons"], bucket["hours"] = full["lessons"], full["hours"]
+            bucket["passive_hours"] = full.get("passive_hours", 0)
     return days
 
 
@@ -239,7 +245,13 @@ def _kpi_tiles(totals, *, pending: bool = False) -> list:
             pgettext(_CTX, "Auditoriya saatı"),
             totals["hours"],
             unit=pgettext(_CTX, "saat"),
-            note=pgettext(_CTX, "akademik saat cəmi"),
+            # «Passiv» dərslər (sahib 2026-11-14) cəmə daxil deyil — qeyd sətrində ayrıca.
+            note=(
+                pgettext(_CTX, "akademik saat cəmi · passiv %(hours)s saat ayrıca")
+                % {"hours": totals.get("passive_hours")}
+                if totals.get("passive_hours")
+                else pgettext(_CTX, "akademik saat cəmi")
+            ),
             tone="primary",
         ),
     ]

@@ -20,7 +20,14 @@ from django.utils.translation import pgettext_lazy
 from django.views.decorators.http import require_GET, require_POST
 
 from apps.syllabus.models import Syllabus, SyllabusVersion
-from apps.syllabus.public import PERM_EDIT, SECTION_ORDER, SyllabusStatus, TransitionDenied, services
+from apps.syllabus.public import (
+    PERM_EDIT,
+    SECTION_ORDER,
+    SyllabusStatus,
+    TransitionDenied,
+    is_journal_teacher,
+    services,
+)
 
 from .._helpers import _get_active_organization
 from .labels import transition_text
@@ -151,13 +158,13 @@ def _do_create(request, organization, actor, payload):
     from apps.registrar.models import CourseOffering
 
     offering = (
-        CourseOffering.objects.filter(
-            organization=organization, pk=safe_uuid(payload.get("offering")), instructor=request.user, is_active=True
-        )
-        .select_related("subject", "period", "group")
+        CourseOffering.objects.filter(organization=organization, pk=safe_uuid(payload.get("offering")), is_active=True)
+        .select_related("subject", "period", "group", "organization")
         .first()
     )
-    if offering is None:
+    # Sahib 2026-11-15: yalnız `instructor` deyil — jurnalın CARİ müəllimi (bölünmüş jurnalın payı, «Vakant»
+    # açılışın yük bölgüsü olan müəllimi) də yaradır. Başqasının açılışı əvvəlki kimi 404 (mövcudluq sızmır).
+    if offering is None or not (offering.instructor_id == request.user.pk or is_journal_teacher(actor, offering)):
         return None, _NOT_FOUND
     existing = Syllabus.objects.filter(organization=organization, offering=offering).only("pk").first()
     if existing is not None:
@@ -271,7 +278,7 @@ def syllabus_action(request):
             version = _version(organization, payload.get("version"))
             if version is None:
                 return _fail(_NOT_FOUND, status=404)
-            if not services.is_author(actor, version.syllabus):
+            if not services.is_editor(actor, version.syllabus):
                 return _fail(transition_text("transition.author_only"), status=403)
             # Təhlükəsizlik yoxlaması (2026-09-25): UI rəsmi plan saatı olanda formanı gizlədir, API
             # isə müəllifin RƏSMİ plan saatını üstələməsinə icazə verirdi — bölgünün mənbəyi tədris planıdır.

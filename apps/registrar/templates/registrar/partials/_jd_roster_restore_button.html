@@ -1,0 +1,11 @@
+{% load i18n %}
+{% comment %}«Tələbəni bərpa et» düyməsi — «Alt qrupdan tələbə əlavə et»-in yanında (sahib 2026-11-15). Kontekst: `rrs`
+(`{% journal_roster_restore_state %}`). Jurnal bağlıdırsa / keçmiş dövrdürsə düymə səbəblə deaktiv görünür — klikdə
+siyahı yalnız oxu üçün açılır (kim, nə vaxt, niyə), «Bərpa et» bağlıdır.{% endcomment %}
+{% if rrs.show %}
+<button type="button" class="jd2-guest-btn jrs-open-btn" data-jrs-open aria-haspopup="dialog"
+        {% if rrs.blocked %}aria-disabled="true" data-jrs-blocked-btn title="{{ rrs.blocked }}"{% else %}title="{% trans 'Səhvən çıxarılmış və ya dondurulmuş tələbəni jurnala qaytarın' context 'registrar.roster_restore' %}"{% endif %}>
+    <i class="fas fa-user-check" aria-hidden="true"></i> {% trans "Tələbəni bərpa et" context "registrar.roster_restore" %}
+    <span class="jd2-guest-btn__count jrs-open-btn__count">{{ rrs.count }}</span>
+</button>
+{% endif %}

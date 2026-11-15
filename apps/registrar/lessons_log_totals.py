@@ -36,6 +36,9 @@ Hər iki şərt eyni aqreqat sorğunun içindədir (əlavə sorğu yoxdur).
 BAŞLANĞIC TARİXİ (2026-10-25, sahib: «datanı inteqrasiya etmişik, "Gec yazılıb" gələn həftədən ola bilər»):
 tarixi ``journal.late_check_from``-dan (defolt 2026-10-26) əvvəl olan dərs heç vaxt «gec» deyil —
 qayda :mod:`apps.registrar.lessons_late_rule`-dadır (Python və SQL forması eyni yerdə).
+
+PASSİV DƏRS (sahib 2026-11-14, :mod:`apps.registrar.passive_lessons`): «Keçilmiş dərs» / «Auditoriya saatı»
+cəminə, «boş» / «gec» saylarına DÜŞMÜR (xanası olmur) — ``passive_lessons`` / ``passive_hours`` ayrıca qaytarılır.
 """
 
 from __future__ import annotations
@@ -144,9 +147,27 @@ def cached_range_totals(lessons_qs):
 
 
 def quick_totals(lessons_qs) -> dict:
-    """``{"lessons", "hours"}`` — TƏK yüngül aqreqat (xana cədvəlinə JOIN yoxdur)."""
-    row = lessons_qs.order_by().aggregate(lessons=Count("id"), hours=Sum("hours"))
-    return {"lessons": int(row["lessons"] or 0), "hours": int(row["hours"] or 0)}
+    """``{"lessons", "hours", "passive_lessons", "passive_hours"}`` — TƏK yüngül aqreqat (xana JOIN-i yoxdur)."""
+    return _counts(lessons_qs.order_by().aggregate(**_count_aggregates()))
+
+
+#: Aqreqat ləqəbləri sahə adı ilə TOQQUŞMAMALIDIR (``hours=Sum("hours")`` + ikinci ``Sum("hours")`` → FieldError).
+_COUNT_KEYS = {"lessons": "n_lessons", "hours": "n_hours", "passive_lessons": "n_passive", "passive_hours": "n_phours"}
+
+
+def _count_aggregates() -> dict:
+    """Dərs sayı + saat — passiv dərslər ayrıca (əsas cəmə daxil deyil)."""
+    counted, passive = Q(is_passive=False), Q(is_passive=True)
+    return {
+        "n_lessons": Count("id", filter=counted),
+        "n_hours": Sum("hours", filter=counted),
+        "n_passive": Count("id", filter=passive),
+        "n_phours": Sum("hours", filter=passive),
+    }
+
+
+def _counts(row) -> dict:
+    return {key: int(row[alias] or 0) for key, alias in _COUNT_KEYS.items()}
 
 
 def _compute_range_totals(lessons_qs) -> dict:
@@ -166,14 +187,12 @@ def _compute_range_totals(lessons_qs) -> dict:
         .annotate(marks_total=Count("marks__id"), first_mark=Min("marks__created_at", filter=counted))
         .annotate(first_mark_day=TruncDate("first_mark"), late_from=late_from)
         .aggregate(
-            lessons=Count("id"),
-            hours=Sum("hours"),
-            empty=Count("id", filter=Q(marks_total=0)),
-            late=Count("id", filter=late_q(check_from=check_from)),
+            **_count_aggregates(),
+            empty=Count("id", filter=Q(marks_total=0, is_passive=False)),
+            late=Count("id", filter=late_q(check_from=check_from) & Q(is_passive=False)),
         )
     )
-    total = int(lesson_totals["lessons"] or 0)
-    hours = int(lesson_totals["hours"] or 0)
+    counts = _counts(lesson_totals)
     empty = int(lesson_totals["empty"] or 0)
     late = int(lesson_totals["late"] or 0)
 
@@ -186,8 +205,7 @@ def _compute_range_totals(lessons_qs) -> dict:
     marked = int(attendance["present"] or 0) + int(attendance["absent"] or 0) + int(attendance["excused"] or 0)
     rate = int(round(int(attendance["present"] or 0) * 100 / marked)) if marked else 0
     return {
-        "lessons": total,
-        "hours": hours,
+        **counts,
         "empty": empty,
         "late": late,
         "present": int(attendance["present"] or 0),

@@ -1,4 +1,11 @@
-"""Yeni dərsin növ kilidi — cədvəl TƏK növ verəndə, amma yalnız başqa növə sübut YOXDURSA (RİM 2026-10-27).
+"""Yeni dərsin DEFOLT növü — cədvəl TƏK növ verəndə, amma yalnız başqa növə sübut YOXDURSA (RİM 2026-10-27).
+
+SAHİB 2026-11-15: «müəllim dərs əlavə edəndə mühazirə / seminar / laboratoriya arasında dəyişə bilsin». Kilid
+GÖTÜRÜLDÜ — aşağıdakı qayda artıq yalnız modalın ƏVVƏLCƏDƏN SEÇİLMİŞ növünü verir (:func:`default_lesson_kind`);
+:func:`locked_lesson_kind` həmişə ``None``-dur. Server POST-un növünü qəbul edir; bölünmüş jurnalda pay sahibi
+yenə yalnız öz payının növlərini seçir (``journal_share_guard``, modalın növ siyahısı da əhatəyə qədər daralır).
+Səbəb (prod müraciətləri MR-000017/018/054/218): patokun partnyor qrupunun cədvəlində yalnız seminar slotu olanda
+müəllim həmin jurnala mühazirəni ümumiyyətlə yaza bilmirdi; keçmiş tarixə seminar əlavə etmək də bağlı idi.
 
 Köhnə qayda (``journal_extras.locked_lesson_kind``): açılışın cədvəlində yalnız bir növ slot varsa (məs. yalnız
 mühazirə) yeni dərsin növü seçilmir — həmin növə düşür. Köçürmədən sonra cədvəl çox vaxt NATAMAMDIR: slotlar
@@ -49,12 +56,17 @@ def has_other_kind_evidence(offering, kind) -> bool:
     return any(other != kind and hours for other, hours in workload_hours_for_offering(offering).items())
 
 
-def locked_lesson_kind(offering):
-    """Yeni dərsin məcburi növü və ya ``None`` (seçim sərbəstdir) — bax modul sənədi."""
+def default_lesson_kind(offering):
+    """Yeni dərsin defolt növü və ya ``None`` (defolt yoxdur) — bax modul sənədi. KİLİD DEYİL."""
     kind = single_slot_kind(offering)
     if kind is None or has_other_kind_evidence(offering, kind):
         return None
     return kind
 
 
-__all__ = ["has_other_kind_evidence", "locked_lesson_kind", "single_slot_kind"]
+def locked_lesson_kind(offering):
+    """Kilid götürülüb (sahib 2026-11-15) — həmişə ``None``; köhnə çağıranlar üçün qalır."""
+    return None
+
+
+__all__ = ["default_lesson_kind", "has_other_kind_evidence", "locked_lesson_kind", "single_slot_kind"]

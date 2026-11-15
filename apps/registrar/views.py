@@ -290,7 +290,7 @@ def journal_detail(request, offering_id):
         "journal_seminar_view": seminar_view,  # ?seminar=N — yalnız bir seminar alt qrupu
         "seminar_group_choices": seminar_groups.choices(offering),  # 234 K1 / 234 K2 (sahib 2026-11-07)
         "practical_toggle": _practical_toggle.context(request.user, offering),
-        "locked_lesson_kind": journal_extras.locked_lesson_kind(offering),
+        "default_lesson_kind": journal_extras.default_lesson_kind(offering),  # defolt, kilid deyil (2026-11-15)
         "topic_choices": journal_extras.lesson_topic_choices(offering),
         "topic_choices_meta": journal_extras.lesson_topic_meta(offering, journal["lessons"]),
         "calendar_plan": journal_extras.calendar_plan(offering, journal["lessons"], today),
@@ -359,9 +359,9 @@ def journal_detail(request, offering_id):
     from .lab_groups_views import link_context as lab_groups_link  # «Lab qrupları» ekranı (sahib 2026-11-06)
 
     context.update(lab_groups_link(request.user, offering))
-    from .passive_hours import page_context as passive_context  # «Passiv saat» (sahib 2026-11-12, MR-000303)
+    from .passive_lessons import available as passive_available  # «Passiv» dərs saatı seçimi (sahib 2026-11-14)
 
-    context.update(passive_context(request.user, offering, can_edit_journal=context["can_edit"]))
+    context["passive_lessons_available"] = passive_available(offering)
     return render(request, "registrar/journal_detail.html", context)
 
 

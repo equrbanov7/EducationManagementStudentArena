@@ -1,5 +1,5 @@
 {% load i18n %}
-        {% if teaching_summary.kinds or teaching_summary.others %}
+        {% if teaching_summary.kinds or teaching_summary.others or teaching_summary.passive_total %}
         <div class="jd2-teach-summary">
             {% for k in teaching_summary.kinds %}
             {% if k.parts %}{% for p in k.parts %}
@@ -20,6 +20,12 @@
             <span class="jd2-teach-total{% if teaching_summary.over %} is-over{% endif %}">
                 {% trans "Keçirilmiş" context "registrar.journal" %}: <b>{{ teaching_summary.held_total }}</b>{% if teaching_summary.total %} / {{ teaching_summary.total }} {% trans "saat" context "registrar.journal" %} · {% trans "qalan" context "registrar.journal" %} <b>{{ teaching_summary.remaining }}</b>{% if teaching_summary.over %} — {% trans "hədd keçilib!" context "registrar.journal" %}{% endif %}{% if offering.is_intensive and teaching_summary.completed %} · <b class="jd2-intensive-done"><i class="fas fa-circle-check" aria-hidden="true"></i> {% trans "Kurs tamamlandı" context "registrar.intensive" %}</b>{% endif %}{% else %} {% trans "saat" context "registrar.journal" %}{% endif %}
             </span>
+            {% if teaching_summary.passive_total %}
+            {# «Passiv» dərslər (sahib 2026-11-14) — keçirilmiş saata və həddə daxil deyil, ayrıca göstərilir. #}
+            <span class="jd2-teach-passive" title="{% trans 'Passiv dərslərin saatı — keçirilmiş saata, dərs saatı həddinə və dərs yükünə daxil deyil' context 'registrar.passive_lessons' %}">
+                {% trans "Passiv" context "registrar.passive_lessons" %}: <b>{{ teaching_summary.passive_total }}</b> {% trans "saat" context "registrar.journal" %}
+            </span>
+            {% endif %}
         </div>
         {% endif %}
 

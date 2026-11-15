@@ -16,6 +16,7 @@
     }
 
     var lastTrigger = null;
+    var editTarget = null;
 
     function panel() {
         return document.querySelector("[data-sylv]");
@@ -138,6 +139,75 @@
         }
         renderBlocks(root, data.blocks);
         renderProgress(root, data.week_progress);
+        renderEdit(root, data.edit);
+    }
+
+    /* «Sillabusu redaktə et» (sahib 2026-11-15): server `edit` verməyibsə (hüquq yoxdur / tələbə) düymə gizlidir. */
+    function renderEdit(root, edit) {
+        var row = q(root, "edit-row");
+        var button = q(root, "edit");
+        show(q(root, "edit-error"), false);
+        if (!row || !button) {
+            return;
+        }
+        editTarget = edit && edit.mode ? edit : null;
+        button.disabled = false;
+        var label = q(root, "edit-label");
+        if (label) {
+            var create = editTarget && editTarget.mode === "create";
+            label.textContent = label.getAttribute(create ? "data-t-create" : "data-t-edit") || label.textContent;
+        }
+        show(row, Boolean(editTarget));
+    }
+
+    function editorUrl(button, versionId) {
+        var url = new URL(button.getAttribute("data-editor-url") || "", window.location.origin);
+        url.searchParams.set("version", versionId);
+        return url.pathname + url.search;
+    }
+
+    function editFailed(root, button, error) {
+        button.disabled = false;
+        var node = q(root, "edit-error");
+        if (node) {
+            node.textContent = (error && error.payload && error.payload.error) || button.getAttribute("data-t-error") || "";
+            show(node, true);
+        }
+    }
+
+    function startEdit(button) {
+        var root = panel();
+        var target = editTarget;
+        if (!root || !target || button.disabled) {
+            return;
+        }
+        if (target.mode === "open" && target.version) {
+            window.location.assign(editorUrl(button, target.version));
+            return;
+        }
+        /* Təsdiqlənmiş nüsxə toxunulmur: əvvəl yeni QARALAMA versiya («kiçik dəyişiklik»), sonra redaktor.
+           `create`: jurnal ortaq (başqa qrupun) dosyesini göstərir — bu jurnalın ÖZ qaralaması yaradılır. */
+        var payload =
+            target.mode === "new_version"
+                ? { action: "new_version", syllabus: target.syllabus, kind: "minor" }
+                : target.mode === "create"
+                  ? { action: "create", offering: target.offering }
+                  : null;
+        if (!payload || !window.EMSCore || !window.EMSCore.fetchJSON) {
+            return;
+        }
+        button.disabled = true;
+        window.EMSCore.fetchJSON(button.getAttribute("data-action-url"), { method: "POST", data: payload })
+            .then(function (data) {
+                if (data && data.ok && data.version) {
+                    window.location.assign(editorUrl(button, data.version));
+                } else {
+                    editFailed(root, button, null);
+                }
+            })
+            .catch(function (error) {
+                editFailed(root, button, error);
+            });
     }
 
     function open(url, trigger) {
@@ -152,6 +222,7 @@
         show(q(root, "error"), false);
         renderBlocks(root, []);
         renderProgress(root, null);
+        renderEdit(root, null);
 
         var box = root.querySelector(".sylv__panel");
         if (box) {
@@ -196,6 +267,11 @@
     window.EMSDelegate.on("click", "[data-sylv-open]", function (event, button) {
         event.preventDefault();
         open(button.getAttribute("data-sylv-open") || button.getAttribute("href"), button);
+    });
+
+    window.EMSDelegate.on("click", "[data-sylv-edit]", function (event, button) {
+        event.preventDefault();
+        startEdit(button);
     });
 
     window.EMSDelegate.on("click", "[data-sylv-close]", function (event) {

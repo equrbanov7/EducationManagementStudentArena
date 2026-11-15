@@ -113,9 +113,29 @@ def offering_syllabus_json(request, offering_id):
             "pdf_url": _pdf_url(offering_id),
             # Həftəlik planın hər sətri üçün «keçilib» (tarixlərlə) / «keçilməyib» — sahib 2026-10-25.
             "week_progress": _week_progress(offering),
+            # «Sillabusu redaktə et» (sahib 2026-11-15): yalnız redaktə hüququ olana — URL-lər şablonun data-*-ındadır.
+            "edit": _edit_target(request, offering, syllabus, mode),
             **document,
         }
     )
+
+
+def _edit_target(request, offering, syllabus, mode) -> dict | None:
+    """``{"mode": "open"|"new_version"|"create", "version", "syllabus", "offering"}`` — servis qapısı
+    ``edit_target``; tələbədə ``None``. ``create``: jurnal ortaq (başqa qrupun / semestrin) dosyesini göstərir,
+    cari müəllim onu redaktə etmir, amma bu jurnalın öz sillabusunu yarada bilər."""
+    if mode == MODE_STUDENT:
+        return None
+    actor = syllabus_services.resolve_actor(request.user, offering.organization, request=request)
+    target = syllabus_services.edit_target(actor, syllabus, offering)
+    if target is None:
+        return None
+    return {
+        "mode": target["mode"],
+        "version": str(target["version"]) if target["version"] else "",
+        "syllabus": str(syllabus.pk),
+        "offering": str(target["offering"]) if target["offering"] else "",
+    }
 
 
 def _week_progress(offering) -> dict:

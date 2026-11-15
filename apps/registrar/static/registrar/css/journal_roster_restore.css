@@ -1,0 +1,61 @@
+/* ═══ «Tələbəni bərpa et» (jrs-*, sahib 2026-11-15) ═════════════════════════════
+   Düymə «Alt qrupdan tələbə əlavə et»-in (jd2-guest-btn) yanındadır; modal jgs / jse modallarının dilindədir.
+   Rənglər yalnız mövcud `--ems-*` tokenlərindəndir. */
+
+/* ── Düymə ───────────────────────────────────────────────────────────────── */
+.jrs-open-btn[aria-disabled="true"] { opacity: 0.6; cursor: help; }
+.jrs-open-btn__count { background: var(--ems-neutral-600); }
+
+/* ── Modal ────────────────────────────────────────────────────────────────── */
+.jrs-card { width: min(640px, 100%); max-height: 88vh; display: flex; flex-direction: column; }
+.jrs-head { display: flex; align-items: flex-start; gap: 12px; }
+.jrs-head-main { flex: 1; min-width: 0; }
+.jrs-head-sub { margin: 4px 0 0; font-size: 12px; font-weight: 600; line-height: 1.45; color: var(--ems-neutral-600); }
+.jrs-body { overflow-y: auto; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.jrs-context { display: flex; flex-wrap: wrap; gap: 8px; }
+.jrs-ctx-chip {
+    display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px;
+    background: var(--ems-primary-50); color: var(--ems-primary-800); border: 1px solid var(--ems-primary-200);
+    font-size: 12px;
+}
+.jrs-ctx-chip--muted { background: var(--ems-neutral-100); color: var(--ems-neutral-700); border-color: var(--ems-neutral-200); }
+.jrs-blocked {
+    margin: 0; padding: 8px 10px; border-radius: 8px; font-size: 12.5px; font-weight: 600;
+    background: var(--ems-neutral-100); color: var(--ems-neutral-700); border: 1px solid var(--ems-neutral-200);
+}
+
+/* ── Siyahı ───────────────────────────────────────────────────────────────── */
+.jrs-list { display: flex; flex-direction: column; gap: 8px; }
+.jrs-empty { margin: 0; padding: 14px; text-align: center; font-size: 13px; color: var(--ems-neutral-500); }
+.jrs-row {
+    display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; cursor: pointer;
+    border: 1px solid var(--ems-neutral-200); border-radius: 10px; background: var(--ems-neutral-0);
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+.jrs-row:hover { border-color: var(--ems-primary-300); }
+.jrs-row.is-selected { border-color: var(--ems-primary-500); background: var(--ems-primary-50); }
+.jrs-row.is-disabled { cursor: default; background: var(--ems-neutral-50); }
+.jrs-row.is-disabled:hover { border-color: var(--ems-neutral-200); }
+.jrs-row input[type="radio"] { margin-top: 3px; flex-shrink: 0; accent-color: var(--ems-primary-600); }
+.jrs-row__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.jrs-row__head { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; }
+.jrs-row__name { font-size: 13.5px; color: var(--ems-neutral-800); }
+.jrs-row__status {
+    padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 700;
+    background: var(--ems-danger-100); color: var(--ems-danger-strong);
+}
+.jrs-row__status--suspended { background: var(--ems-neutral-100); color: var(--ems-neutral-700); }
+.jrs-row__meta { font-size: 12px; color: var(--ems-neutral-500); overflow-wrap: anywhere; }
+.jrs-row__reason { font-size: 12px; color: var(--ems-neutral-700); overflow-wrap: anywhere; }
+.jrs-row__info { font-size: 12px; font-weight: 600; color: var(--ems-neutral-600); overflow-wrap: anywhere; }
+
+.jrs-field { display: flex; flex-direction: column; gap: 4px; }
+.jrs-field small { font-weight: 500; text-transform: none; letter-spacing: 0; }
+.jrs-field textarea { width: 100%; resize: vertical; }
+.jrs-error {
+    margin: 0; padding: 8px 10px; border-radius: 8px; font-size: 12.5px;
+    background: var(--ems-danger-100); color: var(--ems-danger-strong); border: 1px solid var(--ems-danger-200);
+}
+.jrs-foot { display: flex; justify-content: flex-end; gap: 10px; }
+.jrs-submit { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.jrs-submit[disabled] { opacity: 0.5; cursor: not-allowed; }

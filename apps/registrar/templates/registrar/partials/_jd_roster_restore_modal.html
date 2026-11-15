@@ -1,0 +1,54 @@
+{% load i18n %}
+{% comment %}«Tələbəni bərpa et» modalı (sahib 2026-11-15: «kimsə səhvən jurnaldan uzaqlaşdırılıb, sonra necə bərpa
+edim bilmirəm»). Bu jurnaldan çıxarılmış / dondurulmuş / azad edilmiş tələbələrin siyahısı modal açılanda
+JSON-dan oxunur (səhifə yüklənəndə yalnız sayğac sorğusu var); seçilən tələbə «Bərpa et» ilə köhnə qeydiyyatı,
+balları və davamiyyəti ilə jurnala qayıdır. Bərpa olunmayan sətir səbəbi ilə görünür, seçilə bilmir.
+
+Kontekst: `rrs` — `{% journal_roster_restore_state %}` nəticəsi. URL-lər və mətnlər data-atributladır
+(CSP: inline JS yoxdur) — məntiq registrar/js/journal_roster_restore.js-dədir.{% endcomment %}
+<div class="jd-modal jrs-modal" data-jrs-modal hidden
+     data-list-url="{% url 'registrar:journal_roster_restore_list' offering.id %}"
+     data-apply-url="{% url 'registrar:journal_roster_restore_apply' offering.id %}"
+     data-msg-loading="{% trans 'Siyahı yüklənir…' context 'registrar.roster_restore' %}"
+     data-msg-empty="{% trans 'Bu jurnaldan çıxarılmış tələbə yoxdur.' context 'registrar.roster_restore' %}"
+     data-msg-pick="{% trans 'Bərpa ediləcək tələbəni seçin.' context 'registrar.roster_restore' %}"
+     data-msg-error="{% trans 'Əməliyyat alınmadı — yenidən cəhd edin.' context 'registrar.roster_restore' %}"
+     data-label-group="{% trans 'Qrup' context 'registrar.roster_restore' %}"
+     data-label-source="{% trans 'alt qrupdan' context 'registrar.roster_restore' %}"
+     data-label-by="{% trans 'Kim' context 'registrar.roster_restore' %}"
+     data-label-reason="{% trans 'Səbəb' context 'registrar.roster_restore' %}">
+    <div class="jd-modal-backdrop" data-jrs-close></div>
+    <div class="jd-modal-card jrs-card" role="dialog" aria-modal="true" aria-labelledby="jrs-title">
+        <div class="jd-modal-head jd2-modal-head jrs-head">
+            <div class="jrs-head-main">
+                <h3 id="jrs-title">{% trans "Tələbəni bərpa et" context "registrar.roster_restore" %}</h3>
+                <p class="jrs-head-sub">{% trans "Səhvən çıxarılmış və ya dondurulmuş tələbəni bu jurnala qaytarın. Tələbənin əvvəlki balları və davamiyyəti yerində qalır — yeni sətir yaradılmır." context "registrar.roster_restore" %}</p>
+            </div>
+            <button type="button" class="jd-modal-close jd2-modal-close" data-jrs-close aria-label="{% trans 'Bağla' context 'registrar.roster_restore' %}">✕</button>
+        </div>
+        <div class="jd-modal-body jrs-body">
+            <div class="jrs-context">
+                <span class="jrs-ctx-chip"><i class="fas fa-book" aria-hidden="true"></i> <b>{{ offering.subject.name }}</b></span>
+                {% if offering.group %}<span class="jrs-ctx-chip jrs-ctx-chip--muted"><i class="fas fa-users" aria-hidden="true"></i> {{ offering.group.name }}</span>{% endif %}
+            </div>
+            <p class="jrs-blocked" data-jrs-blocked {% if not rrs.blocked %}hidden{% endif %} role="status">
+                <i class="fas fa-lock" aria-hidden="true"></i> <span data-jrs-blocked-text>{{ rrs.blocked }}</span>
+            </p>
+            <div class="jrs-list" data-jrs-list role="radiogroup" aria-labelledby="jrs-title" aria-live="polite"></div>
+            <div class="jd2-field jrs-field">
+                <label class="jd2-field-label" for="jrs-note">
+                    {% trans "Qeyd" context "registrar.roster_restore" %} <small>{% trans "(istəyə bağlı)" context "registrar.roster_restore" %}</small>
+                </label>
+                <textarea id="jrs-note" rows="2" maxlength="1000" data-jrs-note
+                          placeholder="{% trans 'Məs.: səhvən çıxarılmışdı, dekanlığın tələbi ilə qaytarıldı' context 'registrar.roster_restore' %}"></textarea>
+            </div>
+            <p class="jrs-error" data-jrs-error hidden role="alert"></p>
+        </div>
+        <div class="jd-modal-foot jrs-foot">
+            <button type="button" class="jd2-cancel-btn" data-jrs-close>{% trans "Ləğv et" context "registrar.roster_restore" %}</button>
+            <button type="button" class="jd2-apply-btn jrs-submit" data-jrs-submit disabled>
+                <i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Bərpa et" context "registrar.roster_restore" %}
+            </button>
+        </div>
+    </div>
+</div>
