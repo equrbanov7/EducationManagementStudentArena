@@ -632,7 +632,7 @@ on:
         required: false
         default: ""
       create_missing:
-        description: "recover_mr27_journal: müəllimin 22Oct 10/10/9 bəyanatını ayrıca daxil et (--include-teacher-assertion) · reconcile_teacher_roster: «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı yarat · audit_staff_placement (apply ilə): aktiv olmayanları blokla (--block-inactive) · blocked_accounts_report (apply ilə): yükü olan bloklanmış müəllimlərin blokunu aç · assign_task_rows_from_timetable: dərs yükündə olmayan dərsə yeni tapşırıq sətri (--create-missing-rows) · fix_syllabus_plan_hours: plan saatı BOŞ olan təsdiqlənmiş versiyaları da doldur (--fill-empty) · fill_vacant_from_journals: bildiriş GÖNDƏRMƏ (--no-notify) · unblock_legacy_journal_teachers: boş köhnə jurnalı olanı da aç (--include-empty) · fix_legacy_lesson_kinds: plan HƏM seminar, HƏM lab daşıyan açılışlarda da (--include-mixed) · merge_subjects: «yalnız davamiyyət» təkrar qeydiyyatını da bağla (--drop-attendance-only) · legacy_delta_apply: official_entry yekununu rəsmi vərəqə məcburi bərabərləşdir (--force-official-total) · dedupe_notifications: «Bildiriş göndər» (system) təkrarını yumşaq SİL (--type system --delete, pəncərə 600 dəq) · restore_intensive_results_20261112: uyğun açılış yoxdursa bağlı intensiv arxiv açılışı yarat (--create-missing-offerings)"
+        description: "recover_mr27_journal: müəllimin 22Oct 10/10/9 bəyanatını ayrıca daxil et (--include-teacher-assertion) · reconcile_teacher_roster: «hesab yoxdur» sətirlərinə FİN-siz müəllim hesabı yarat · audit_staff_placement (apply ilə): aktiv olmayanları blokla (--block-inactive) · blocked_accounts_report (apply ilə): yükü olan bloklanmış müəllimlərin blokunu aç · assign_task_rows_from_timetable: dərs yükündə olmayan dərsə yeni tapşırıq sətri (--create-missing-rows) · fix_syllabus_plan_hours: plan saatı BOŞ olan təsdiqlənmiş versiyaları da doldur (--fill-empty) · fill_vacant_from_journals: bildiriş GÖNDƏRMƏ (--no-notify) · unblock_legacy_journal_teachers: boş köhnə jurnalı olanı da aç (--include-empty) · fix_legacy_lesson_kinds: plan HƏM seminar, HƏM lab daşıyan açılışlarda da (--include-mixed) · merge_subjects: «yalnız davamiyyət» təkrar qeydiyyatını da bağla (--drop-attendance-only) · legacy_delta_apply: official_entry yekununu rəsmi vərəqə məcburi bərabərləşdir (--force-official-total) · dedupe_notifications: «Bildiriş göndər» (system) təkrarını yumşaq SİL (--type system --delete, pəncərə 600 dəq) · restore_intensive_results_20261112: uyğun açılış yoxdursa bağlı intensiv arxiv açılışı yarat (--create-missing-offerings) · reinstate_part_time_graduates_20261115: qəbul ili bilinməyən (1950) qiyabiləri də bərpa et (--include-unknown-year)"
         required: false
         type: boolean
         default: false
@@ -1735,6 +1735,8 @@ jobs:
                 test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }
                 args+=(--undo "$BATCH")
               fi
+              # create_missing=true → qəbul ili bilinməyən (1950) qiyabilər də (sahib 2026-11-15 «Restore them»).
+              test "$CREATE_MISSING" != "true" || args+=(--include-unknown-year)
               ;;
             move_merged_fin_20261115)
               # Sahib 2026-11-15: birləşmiş dublikatın FİN-i → FİN-i boş əsas hesab. batch = MƏNBƏ:HƏDƏF[,…] və ya finmove-… (undo, apply).

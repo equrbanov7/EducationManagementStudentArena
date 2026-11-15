@@ -44,6 +44,8 @@ RESOURCE = "registrar.part_time_reinstate_batch"
 PREFIX = "pt_grad:"
 SYNC_ORDER = "MZN-SINX-2026"
 SYNC_ORDER_DATE = datetime.date(2026, 7, 1)
+#: Köçürmənin «qəbul ili bilinmir» sentineli (``legacy_import`` ``UNKNOWN_ADMISSION_YEAR``).
+UNKNOWN_ADMISSION_YEAR = 1950
 ORDER_NUMBER = "BRP-SINX-2026"
 REASON = "Bərpa — köçürmədə qiyabi tələbə səhvən məzun edilmişdi (qiyabi təhsil 5–6 ildir; sahibin 2026-11-15 qərarı)"
 UNDO_REASON = "reinstate_part_time_graduates_20261115 geri qaytarma — yenidən məzun"
@@ -68,7 +70,9 @@ def _last_graduation(movement_model, organization, record_ids) -> dict:
     return last
 
 
-def candidates(organization, *, min_year: int, counts: Counter, skipped_groups: Counter) -> list:
+def candidates(
+    organization, *, min_year: int, counts: Counter, skipped_groups: Counter, include_unknown: bool = False
+) -> list:
     from apps.organizations.public import group_rule_form
 
     PART_TIME = "part_time"
@@ -100,7 +104,9 @@ def candidates(organization, *, min_year: int, counts: Counter, skipped_groups: 
             continue
         counts["part_time_sync_graduated"] += 1
         year = int(record.admission_year or 0)
-        if year < min_year:
+        # Sahib 2026-11-15: qəbul ili bilinməyən (köçürmə sentineli 1950 və ya boş) qiyabilər də məzun deyil — bərpa.
+        unknown = year <= UNKNOWN_ADMISSION_YEAR
+        if year < min_year and not (include_unknown and unknown):
             counts[f"skip_year_{year or 'unknown'}"] += 1
             continue
         if record.group is None:
@@ -114,7 +120,16 @@ def candidates(organization, *, min_year: int, counts: Counter, skipped_groups: 
     return chosen
 
 
-def reinstate(organization, *, actor, min_year: int, batch: str, groups: Counter, skipped_groups: Counter) -> Counter:
+def reinstate(
+    organization,
+    *,
+    actor,
+    min_year: int,
+    batch: str,
+    groups: Counter,
+    skipped_groups: Counter,
+    include_unknown: bool = False,
+) -> Counter:
     from apps.accounts.services.people.movements import _reopen_access
     from apps.registrar.public import movements as domain
     from apps.registrar.public import student_group_journals
@@ -124,7 +139,9 @@ def reinstate(organization, *, actor, min_year: int, batch: str, groups: Counter
     period = student_group_journals.current_period(organization)
     today = timezone.localdate()
     done = []
-    for record in candidates(organization, min_year=min_year, counts=counts, skipped_groups=skipped_groups):
+    for record in candidates(
+        organization, min_year=min_year, counts=counts, skipped_groups=skipped_groups, include_unknown=include_unknown
+    ):
         try:
             with transaction.atomic():
                 movement = domain.create_movement(
@@ -230,6 +247,11 @@ class Command(BaseCommand):
         parser.add_argument("--org", default="qku")
         parser.add_argument("--actor", required=True, help="Aktiv superadmin istifadəçi adı (audit müəllifi)")
         parser.add_argument("--min-year", type=int, default=2021, help="Bu qəbul ilindən (daxil) bərpa et")
+        parser.add_argument(
+            "--include-unknown-year",
+            action="store_true",
+            help="Qəbul ili bilinməyən (1950 sentineli) qiyabiləri də bərpa et (sahib 2026-11-15)",
+        )
         parser.add_argument("--apply", action="store_true")
         parser.add_argument("--undo", default="")
 
@@ -260,6 +282,7 @@ class Command(BaseCommand):
                         organization,
                         actor=actor,
                         min_year=min_year,
+                        include_unknown=bool(options["include_unknown_year"]),
                         batch=batch,
                         groups=groups,
                         skipped_groups=skipped_groups,
