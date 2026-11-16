@@ -16,7 +16,9 @@ from django.views.decorators.http import require_POST
 from apps.exams.domain.final_center import TICKET_STATUS_COMPLETED
 from apps.exams.models import ExamRoomSession
 from apps.exams.services.final_center import (
+    ANNUL_REASONS,
     TicketStateError,
+    annul_attempt_result,
     can_view_final_history,
     ensure_can_view_final_history,
     readmit_student,
@@ -42,9 +44,21 @@ def exam_center_session_detail(request, session_id):
     bölməsindədir. Nəzarətçi/heyət də görə bilir; idarə düymələri icazəyə görə.
     """
     organization, session = get_center_session_or_404(request, session_id, for_supervision=True)
-    tickets = session.tickets.select_related("student", "attempt", "exam").order_by("seat_number", "id")
+    tickets = list(session.tickets.select_related("student", "attempt", "exam").order_by("seat_number", "id"))
 
+    from apps.exams.models import SupervisionIncident
     from apps.exams.services.final_center import can_manage_final_center
+    from apps.exams.services.final_center.result_annul import ANNUL_ACTION
+
+    attempt_ids = [t.attempt_id for t in tickets if t.attempt_id]
+    annulled = set(
+        SupervisionIncident.objects.filter(attempt_id__in=attempt_ids, teacher_action=ANNUL_ACTION).values_list(
+            "attempt_id", flat=True
+        )
+    )
+    for t in tickets:
+        t.result_annulled = t.attempt_id in annulled
+        t.can_annul = bool(t.attempt_id) and not t.result_annulled and t.status in ("completed", "removed")
 
     return render(
         request,
@@ -55,6 +69,7 @@ def exam_center_session_detail(request, session_id):
             "organization": organization,
             "can_manage": can_manage_final_center(request.user),
             "can_view_history": can_view_final_history(request.user, organization),
+            "annul_reasons": ANNUL_REASONS,
         },
     )
 
@@ -136,8 +151,38 @@ def exam_center_ticket_readmit(request, session_id, ticket_id):
     return redirect("exams:exam_center_session_detail", session_id=session.pk)
 
 
+@login_required
+@require_POST
+def exam_center_ticket_annul(request, session_id, ticket_id):
+    """Sahib 2026-11-16: bitmiş / çıxarılmış biletin nəticəsini izahatla ləğv et (jurnalda 0, tələbəyə qeyd).
+
+    Yalnız imtahan mərkəzi (nəzarətçi yox) — ``get_center_session_or_404`` defolt yoxlaması."""
+    _organization, session = get_center_session_or_404(request, session_id)
+    ticket = get_session_ticket_or_404(session, ticket_id)
+    try:
+        done = annul_attempt_result(
+            ticket.attempt if ticket.attempt_id else None,
+            request.user,
+            reason_key=(request.POST.get("reason") or "").strip(),
+            note=request.POST.get("note") or "",
+            request=request,
+        )
+    except TicketStateError as exc:
+        messages.error(request, str(exc))
+        return redirect("exams:exam_center_session_detail", session_id=session.pk)
+    if done:
+        messages.success(
+            request,
+            pgettext("exams.final_center.message", "Nəticə ləğv edildi: jurnalda 0 bal, tələbəyə qeyd göstərilir."),
+        )
+    else:
+        messages.info(request, pgettext("exams.final_center.message", "Bu nəticə artıq ləğv olunub."))
+    return redirect("exams:exam_center_session_detail", session_id=session.pk)
+
+
 __all__ = [
     "exam_center_session_detail",
+    "exam_center_ticket_annul",
     "exam_center_session_history",
     "exam_center_ticket_readmit",
     "exam_center_ticket_seat",

@@ -85,6 +85,7 @@ from .presence import (
 )
 from .reminders import notify_upcoming_final_exams
 from .reports import filter_sessions, filter_tickets
+from .result_annul import ANNUL_REASONS, annul_attempt_result, annul_incident, is_annulled
 from .room_admin import RoomAdminError, add_computer, bulk_add_computers, delete_room, update_computer
 from .sessions import (
     RoomSessionStateError,
@@ -175,6 +176,10 @@ __all__ = [
     "open_entry",
     "presence_map",
     "readmit_student",
+    "ANNUL_REASONS",
+    "annul_attempt_result",
+    "annul_incident",
+    "is_annulled",
     "reopen_completed_ticket",
     "reset_tickets_after_attempt_purge",
     "regenerate_pin",

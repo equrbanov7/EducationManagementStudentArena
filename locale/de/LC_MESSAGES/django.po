@@ -121242,3 +121242,69 @@ msgstr "%(n)s offen"
 msgctxt "accounts.workload"
 msgid "Bağlanmış etirazlar"
 msgstr "Geschlossene Einwände"
+
+msgctxt "exams.final_center.annul"
+msgid "İmtahandan uzaqlaşdırıldığına görə"
+msgstr "Von der Prüfung ausgeschlossen"
+
+msgctxt "exams.final_center.annul"
+msgid "Köçürmə"
+msgstr "Täuschungsversuch"
+
+msgctxt "exams.final_center.annul"
+msgid "Digər səbəb"
+msgstr "Anderer Grund"
+
+msgctxt "exams.final_center.error"
+msgid "Ləğv səbəbi seçilməyib."
+msgstr "Kein Annullierungsgrund gewählt."
+
+msgctxt "exams.final_center.error"
+msgid "İzahat yazılmadan nəticə ləğv edilə bilməz."
+msgstr "Ein Ergebnis kann ohne Begründung nicht annulliert werden."
+
+msgctxt "exams.final_center.error"
+msgid "Bu biletdə imtahan cəhdi yoxdur."
+msgstr "Zu diesem Ticket gibt es keinen Prüfungsversuch."
+
+msgctxt "exams.final_center.error"
+msgid "Sınaq cəhdinin nəticəsi jurnala düşmür."
+msgstr "Das Ergebnis eines Probeversuchs wird nicht ins Journal übernommen."
+
+msgctxt "exams.final_center.error"
+msgid "İmtahan hələ davam edir — əvvəlcə tələbəni imtahandan çıxarın."
+msgstr "Die Prüfung läuft noch — schließen Sie den Studierenden zuerst aus."
+
+msgctxt "exams.final_center.message"
+msgid "Nəticə ləğv edildi: jurnalda 0 bal, tələbəyə qeyd göstərilir."
+msgstr ""
+"Ergebnis annulliert: 0 Punkte im Journal, der Studierende sieht einen "
+"Hinweis."
+
+msgctxt "exams.final_center.message"
+msgid "Bu nəticə artıq ləğv olunub."
+msgstr "Dieses Ergebnis wurde bereits annulliert."
+
+msgid "Nəticə ləğv olunub"
+msgstr "Ergebnis annulliert"
+
+msgid "Nəticəni ləğv et"
+msgstr "Ergebnis annullieren"
+
+msgid "Nəticə ləğv edilsin? Jurnalda 0 bal yazılacaq."
+msgstr "Ergebnis annullieren? Im Journal werden 0 Punkte eingetragen."
+
+msgid "İzahat"
+msgstr "Begründung"
+
+msgid "Nəticəniz ləğv olunub"
+msgstr "Ihr Ergebnis wurde annulliert"
+
+msgid ""
+"İmtahandan uzaqlaşdırıldığınıza görə nəticəniz ləğv olunub (jurnalda 0 bal)."
+msgstr ""
+"Da Sie von der Prüfung ausgeschlossen wurden, wurde Ihr Ergebnis annulliert "
+"(0 Punkte im Journal)."
+
+msgid "Bu imtahanın nəticəsi ləğv olunub (jurnalda 0 bal)."
+msgstr "Das Ergebnis dieser Prüfung wurde annulliert (0 Punkte im Journal)."

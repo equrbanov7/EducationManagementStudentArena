@@ -132,6 +132,9 @@ Bal xülasəsi view-dakı TOPLU `attach_test_result_summaries`-dən gəlir (səh
                             <span class="xh-status">
                             {% if attempt.exam_intervention.is_terminal %}
                                 {% ems_status_badge "exam_attempt" "removed" nowrap=True %}
+                                {% if attempt.exam_intervention.is_annulled %}
+                                <span class="xh-status__reason">{% trans "Nəticə ləğv olunub" %}</span>
+                                {% endif %}
                                 {% if attempt.exam_intervention.reason %}
                                 <span class="xh-status__reason">{{ attempt.exam_intervention.reason|truncatechars:80 }}</span>
                                 {% endif %}

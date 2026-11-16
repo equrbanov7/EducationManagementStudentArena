@@ -310,6 +310,18 @@
 .fxc-center { text-align: center; padding: 26px 0; }
 .fxc-row-actions { text-align: right; white-space: nowrap; }
 .fxc-row-actions .fxc-inline-form { display: inline-flex; }
+/* Sahib 2026-11-16: «Nəticəni ləğv et» — sətir içində açılan kiçik forma. */
+.fxc-annul { display: inline-block; vertical-align: middle; }
+.fxc-annul > summary { list-style: none; cursor: pointer; }
+.fxc-annul > summary::-webkit-details-marker { display: none; }
+.fxc-annul__form {
+    display: flex; flex-direction: column; gap: 6px; margin-top: 6px; padding: 10px; min-width: 260px;
+    border: 1px solid var(--ems-neutral-300); border-radius: 8px; background: var(--ems-bg); text-align: left;
+}
+.fxc-annul__reasons { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.fxc-annul__reasons legend, .fxc-annul__label { font-size: 12px; font-weight: 600; color: var(--ems-neutral-700); margin: 0; }
+.fxc-annul__reason { font-size: 13px; display: flex; align-items: center; gap: 6px; }
+.fxc-annul__note { width: 100%; font-size: 13px; padding: 6px 8px; border: 1px solid var(--ems-neutral-300); border-radius: 6px; resize: vertical; }
 .fxc-reason { max-width: 260px; }
 
 /* ── Pill-lər ── */
