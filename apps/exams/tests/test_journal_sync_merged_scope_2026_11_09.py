@@ -178,13 +178,16 @@ class ReviewedMergeScopeTests(_MidtermSetup):
             self.assertEqual(target_identity(older), ("enrollment", enrollment.pk))
             self.assertEqual(target_key(older), target_key(newer))
             status, row = sync(older)
-            self.assertEqual(
-                [item.pk for item in official(ExamAttempt.objects.filter(pk__in=[older.pk, newer.pk]))], [newer.pk]
-            )
+            selected = [item.pk for item in official(ExamAttempt.objects.filter(pk__in=[older.pk, newer.pk]))]
             if category == "final":
+                self.assertEqual(selected, [newer.pk])
                 self.assertEqual(FinalGrade.objects.get(enrollment=enrollment).exam_score, Decimal("17"))
-        expected = journal_sync.SKIP_SUPERSEDED_ATTEMPT if category == "final" else midterm_journal_sync.SUPERSEDED
-        self.assertEqual((status, row), (expected, None))
+        if category == "final":
+            self.assertEqual((status, row), (journal_sync.SKIP_SUPERSEDED_ATTEMPT, None))
+        else:
+            # Sahib 2026-11-16: midtermdə 2 nəticədən YÜKSƏK olanı rəsmidir (köhnə 3/3 > yeni 1/3) — eyni hədəf.
+            self.assertEqual(selected, [older.pk])
+            self.assertIn(status, ("unchanged", "written"))
 
     def test_merged_final_uses_same_target_for_writer_and_latest_selection(self):
         self._assert_merged_latest("final")

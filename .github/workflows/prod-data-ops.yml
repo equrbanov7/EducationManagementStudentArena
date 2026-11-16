@@ -255,6 +255,10 @@
 #   annul_removed_exam_results_20261116 — sahib 2026-11-16: imtahandan UZAQLAŞDIRILMIŞ tələbənin rəsmi nəticəsi
 #       jurnalda 0 olsun (texniki dayandırma yox); canlı körpü ilə eyni yol, bildiriş yoxdur. Defolt dry-run;
 #       loga YALNIZ «annul_removed:» sətirləri (saylar).
+#   place_midterm_takers_20261116 — sahib 2026-11-16: midterm nəticəsi olan, jurnalı olmayan tələbə jurnala (çıxarılıbsa
+#       «Bərpa et», başqa qrupdursa alt qrup tələbəsi; bir neçə jurnal → eyni oturumda imtahan verənlərin jurnalı) və
+#       balı yazılır; 2 nəticədə yüksəyi. Uzaqlaşdırılanlar toxunulmur. Defolt dry-run; paket `dupsubj-…` —
+#       geri qaytarma merge_duplicate_subjects_20261111 batch=dupsubj-… (apply). Loga YALNIZ «midterm_takers:» sətirləri.
 #   move_merged_fin_20261115 — sahib 2026-11-15: birləşmiş dublikatın FİN-i FİN-i boş əsas hesaba keçir
 #       (`batch` = MƏNBƏ:HƏDƏF[,…]; `finmove-…` + apply geri qaytarır). Defolt dry-run; loga YALNIZ saylar (`fin_move:`).
 #   merge_duplicate_teacher — sahib 2026-11-08: müəllimin dublikat hesabı (mənbə) → əsas hesab (hədəf). `batch` =
@@ -544,6 +548,7 @@ on:
           - move_merged_fin_20261115
           - reinstate_part_time_graduates_20261115
           - audit_exam_results_20261116
+          - place_midterm_takers_20261116
           - annul_removed_exam_results_20261116
           - merge_psychology_duplicates_20261105
           - merge_psychology_duplicates_20261106
@@ -1760,6 +1765,12 @@ jobs:
               # Sahib 2026-11-16: uzaqlaşdırılmış tələbənin nəticəsi jurnalda 0 (saylar; apply=true + confirm=APPLY yazır).
               args=(--org "$ORG")
               ;;
+            place_midterm_takers_20261116)
+              # Sahib 2026-11-16: midterm nəticəsi olan, jurnalı olmayan tələbə → jurnal + bal. Geri: merge_duplicate_subjects_20261111.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              ;;
             move_merged_fin_20261115)
               # Sahib 2026-11-15: birləşmiş dublikatın FİN-i → FİN-i boş əsas hesab. batch = MƏNBƏ:HƏDƏF[,…] və ya finmove-… (undo, apply).
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
@@ -2685,6 +2696,17 @@ jobs:
             # Loga YALNIZ «exam_results:» sətirləri (saylar, imtahan id-si — ad yoxdur) və rədd kodu.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^exam_results: ([a-z_]+( [a-z0-9_]+=[0-9a-z_]+)*|detail exam=[0-9]+ reason=[a-z_]+ [^[:cntrl:]]{0,360})$' "$RUNNER_TEMP/out.log" | head -n 400 > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_0-9]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "place_midterm_takers_20261116" ]; then
+            # Loga YALNIZ «midterm_takers:» sətirləri (saylar, imtahan id-si, paket id — ad yoxdur) və rədd kodu.
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^midterm_takers: [a-z_]+( [a-z0-9_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" | head -n 300 > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_0-9]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
