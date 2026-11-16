@@ -119784,3 +119784,7 @@ msgstr ""
 
 msgid "Bu imtahanın nəticəsi ləğv olunub (jurnalda 0 bal)."
 msgstr "The result of this exam has been annulled (0 points in the journal)."
+
+msgctxt "applications.content"
+msgid "Dekanlığı (məktəbi) seçin"
+msgstr "Choose the dean's office (school)"

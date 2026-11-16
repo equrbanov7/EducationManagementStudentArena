@@ -329,3 +329,76 @@ def test_known_school_without_program_is_visible_only_to_that_school_office(worl
     assert not access.can_view(world["other_deputy"], app)
     assert not access.can_view(world["coordinator"], app)
     assert {user.pk for user in notify.handler_recipients(app)} == {world["dean"].pk, world["deputy"].pk}
+
+
+# ── Sahib 2026-11-17: dekanlığa yönləndirəndə məktəb (dekanlıq) seçilir ─────────
+
+
+def _staff_app(world):
+    """Məktəbi olmayan göndərən (RİM əməkdaşı) — aidiyyət avtomatik tapılmır."""
+    return submit.submit_application(
+        organization=world["organization"],
+        user=world["rim"],
+        kind=world["kinds"]["diger"],
+        subject="Dekanlığa sorğu",
+        body="Bu qrupun tələbə siyahısının yoxlanılmasını xahiş edirəm.",
+    )
+
+
+def test_rim_school_picker_lists_every_school_own_first(world):
+    from apps.applications.payloads import detail_payload
+
+    app = create(world, "sikayet")
+    schools = detail_payload(app, user=world["rim"])["forward_schools"]
+    ids = [row["id"] for row in schools]
+    own, other = str(world["tree"]["faculty"].pk), str(world["other_tree"]["faculty"].pk)
+    assert ids.index(own) < ids.index(other)
+    assert schools[ids.index(own)]["own_school"] is True and schools[ids.index(other)]["own_school"] is False
+    assert detail_payload(app, user=world["deputy"])["forward_schools"] == [
+        {"id": own, "name": world["tree"]["faculty"].name, "own_school": True}
+    ]
+
+
+def test_rim_forwards_to_chosen_dean_office_and_only_that_school_sees_it(world):
+    from django.urls import reverse
+
+    from apps.applications.tests.test_endpoints import client_for
+
+    app = _staff_app(world)
+    response = client_for(world["rim"], app.organization).post(
+        reverse("applications:action", args=[app.pk]),
+        {
+            "action": "forward",
+            "target_unit": "dekan",
+            "scope": str(world["other_tree"]["faculty"].pk),
+            "text": "Digər məktəbin dekanlığının araşdırması üçün.",
+        },
+    )
+    assert response.status_code == 200, response.content.decode()
+    app.refresh_from_db()
+    assert app.current_scope_unit_id == world["other_tree"]["faculty"].pk
+    assert access.can_act(world["other_deputy"], app)
+    assert not access.can_act(world["deputy"], app)
+
+
+def test_unscoped_applicant_must_pick_a_dean_office(world):
+    app = _staff_app(world)
+    args = dict(application=app, user=world["rim"], target_unit=world["units"]["dekan"], note="Dekanlığa yönləndirmə.")
+    with pytest.raises(TransitionDenied):
+        workflow.forward(**args)
+    workflow.forward(**args, scope_id=world["tree"]["faculty"].pk)
+    app.refresh_from_db()
+    assert app.current_scope_unit_id == world["tree"]["faculty"].pk
+    assert access.can_act(world["deputy"], app) and not access.can_act(world["other_deputy"], app)
+
+
+def test_regular_handler_cannot_pick_other_school_dean_office(world):
+    app = create(world, "sikayet")
+    with pytest.raises(TransitionDenied):
+        workflow.forward(
+            application=app,
+            user=world["deputy"],
+            target_unit=world["units"]["dekan"],
+            note="Başqa məktəbin dekanlığına yönləndirmə cəhdi.",
+            scope_id=world["other_tree"]["faculty"].pk,
+        )

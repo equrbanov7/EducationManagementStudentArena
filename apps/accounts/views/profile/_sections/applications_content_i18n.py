@@ -7,6 +7,7 @@ def content_i18n():
     return {
         "selectChair": pgettext("applications.content", "Məktəbə aid kafedranı seçin"),
         "selectAnyChair": pgettext("applications.content", "Kafedranı seçin"),
+        "selectSchool": pgettext("applications.content", "Dekanlığı (məktəbi) seçin"),
         "editApplication": pgettext("applications.content", "Müraciəti redaktə et"),
         "deleteApplication": pgettext("applications.content", "Müraciəti sil"),
         "restoreApplication": pgettext("applications.content", "Müraciəti bərpa et"),
