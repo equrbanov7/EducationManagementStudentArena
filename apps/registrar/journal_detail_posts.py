@@ -155,6 +155,7 @@ def handle_add_lesson(request, offering):
                 date=date,
                 kind=kind,
                 topic=(_je.posted_topic(request.POST) or "").strip(),  # plan seçimi və ya sərbəst mətn
+                syllabus_week=_je.posted_topic_week(request.POST),  # təkrar başlığın seçilmiş sətri (MR-000377)
                 hours=hours,
                 start_time=start_time,
                 end_time=end_time,

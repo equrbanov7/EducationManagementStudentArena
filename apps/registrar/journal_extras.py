@@ -327,7 +327,9 @@ from .journal_topics import (  # noqa: E402,F401  (modulun sonunda — dövr yox
     attach_syllabus_topics,
     lesson_topic_choices,
     lesson_topic_meta,
+    lesson_topic_rows,
     posted_topic,
+    posted_topic_week,
     syllabus_topic_rows,
 )
 
@@ -338,24 +340,28 @@ from .journal_topics import (  # noqa: E402,F401  (modulun sonunda — dövr yox
 def calendar_plan(offering, lessons, today):
     """Sol panel "TƏQVİM PLANI — MÖVZULAR": kursun mövzu planı + hansının
     keçirildiyi (yanında tarix). Planda olmayan mövzulu/mövzusuz dərslər sona
-    xronoloji əlavə olunur — müəllim nəyi keçdiyini bir baxışda görür."""
-    from .journal_topics import shown_topic
+    xronoloji əlavə olunur — müəllim nəyi keçdiyini bir baxışda görür.
+
+    Plan SƏTİR üzrədir (MR-000377): təkrar başlıq («Test») hər sətri ilə görünür, dərs sətrə
+    ``journal_topics.lesson_row_matcher`` ilə sayılır (``syllabus_week``, bağsız — başlığın ilk sətri)."""
+    from .journal_topics import lesson_row_matcher, row_key, shown_topic
 
     chrono = sorted(lessons, key=lambda item: (item.date, item.created_at))
-    lesson_by_topic = {}
+    rows = lesson_topic_rows(offering)
+    match = lesson_row_matcher(rows)
+    lesson_by_row = {}
     for lesson in chrono:
         # Mövzusu boş, amma sillabus sətrinə bağlı (köçürülmüş) dərs sətrin mövzusu ilə sayılır (2026-10-25).
-        topic = shown_topic(lesson)
-        if topic and topic not in lesson_by_topic:
-            lesson_by_topic[topic] = lesson
+        key = match(lesson)
+        if key is not None and key not in lesson_by_row:
+            lesson_by_row[key] = lesson
 
     plan = []
-    seen = set()
-    for title in lesson_topic_choices(offering):
-        lesson = lesson_by_topic.get(title)
+    for row in rows:
+        lesson = lesson_by_row.get(row_key(row))
         plan.append(
             {
-                "title": title,
+                "title": row["title"],
                 "lesson": lesson,
                 # Gələcək tarixli dərs hələ «keçirilməyib» — yalnız planlaşdırılıb (QA-1 F13).
                 "covered": lesson is not None and lesson.date <= today,
@@ -363,8 +369,10 @@ def calendar_plan(offering, lessons, today):
                 "is_today": bool(lesson and lesson.date == today),
             }
         )
-        seen.add(title)
+    seen = set()
     for lesson in chrono:
+        if match(lesson) is not None:
+            continue
         topic = shown_topic(lesson)
         if topic and topic in seen:
             continue

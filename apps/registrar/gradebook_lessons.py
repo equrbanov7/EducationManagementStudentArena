@@ -83,13 +83,31 @@ def clean_topic(topic) -> str:
     return text
 
 
-def _syllabus_week_for(offering, topic, *, current=None):
-    """Mövzunun təsdiqlənmiş sillabus planındakı sətri (``journal_topics.resolve_syllabus_week``)."""
+def _syllabus_week_for(offering, topic, *, current=None, kind=None, exclude=None):
+    """Mövzunun təsdiqlənmiş sillabus planındakı sətri (``journal_topics.resolve_syllabus_week``).
+
+    Başlıq planda TƏKRARLANIRSA (MR-000377: «Test», «Hauslektüre») bu növün dərsi artıq olan sətirlər
+    keçilir — ikinci «Test» dərsi ikinci «Test» sətrinə bağlanır. Sorğu yalnız təkrar başlıqda işləyir;
+    ``exclude`` — redaktə olunan dərsin özü."""
     if not topic:
         return None
-    from apps.registrar.journal_topics import resolve_syllabus_week
+    from apps.registrar import journal_topics
 
-    return resolve_syllabus_week(offering, topic, current=current)
+    def taken(weeks):
+        first = min(weeks)
+        key = journal_topics.normalize_topic(topic)
+        rows = Lesson.objects.filter(offering=offering, kind=kind).exclude(pk=exclude)
+        busy = set()
+        for week, title in rows.values_list("syllabus_week", "topic"):
+            if week in weeks:
+                busy.add(week)
+            elif not week and journal_topics.normalize_topic(title) == key:
+                busy.add(first)  # bağsız köhnə dərs başlığın İLK sətrinə sayılır (``lesson_row_matcher``)
+        return busy
+
+    return journal_topics.resolve_syllabus_week(
+        offering, topic, current=current, kind=kind, taken=taken if kind else None
+    )
 
 
 #: Dövr bitibsə üst hədd: bu gündən bir tədris ili irəli (sağlamlıq qapısı).
@@ -160,8 +178,10 @@ def create_lesson(
     lab_group=None,
     seminar_group=None,
     passive=False,
+    syllabus_week=None,
 ):
-    """Add a held session. ``instructor`` bu dərsin müəllimi (boşdursa açılışınkı);
+    """Add a held session. ``syllabus_week`` — modalda seçilmiş TƏKRAR başlıqlı plan sətri
+    (``journal_topics.posted_topic_week``); başlığı mövzu ilə uyğun gəlmirsə nəzərə alınmır. ``instructor`` bu dərsin müəllimi (boşdursa açılışınkı);
     ``passive`` — «Passiv» dərs (saat hesabına düşmür, sahib 2026-11-14; :mod:`apps.registrar.passive_lessons`);
     ``room`` dərsin otağı (opsional — köhnə dərslərdə yoxdur);
     ``allow_past`` İKT rəhbəri/seed/backfill üçün keçmiş tarixi (gecikmiş yazı həddini də) keçir.
@@ -243,7 +263,7 @@ def create_lesson(
         kind=kind,
         topic=topic,
         # Plandan seçilmiş (və ya plan başlığı ilə DƏQİQ eyni yazılmış) mövzu sillabus sətrinə bağlanır.
-        syllabus_week=_syllabus_week_for(offering, topic),
+        syllabus_week=_syllabus_week_for(offering, topic, current=syllabus_week, kind=kind),
         hours=new_hours,
         start_time=start_time,
         end_time=end_time,
@@ -296,6 +316,7 @@ def update_lesson(
     lab_group=UNSET,
     seminar_group=UNSET,
     passive=UNSET,
+    syllabus_week=None,
 ) -> bool:
     """Səhv açılmış dərsi düzəlt (``lesson_edit_window`` içində, defolt 120 dəqiqə). ``allow_locked``/``allow_past``
     pəncərəni + keçmiş-tarixi keçir (İKT/superuser); yayımlanmış jurnal yenə kilidli.
@@ -338,10 +359,17 @@ def update_lesson(
         fields.append("kind")
     if topic is not None:
         new_topic = clean_topic(topic)
-        if new_topic != lesson.topic:
-            # Mövzu DƏYİŞİBSƏ bağ yenidən həll olunur (eyni başlıqlı cari sətir saxlanılır); mövzu dəyişməyibsə
-            # köçürülmüş dərsin ``syllabus_week`` bağına toxunulmur (mövzusuz dərsin saatı düzələndə itməsin).
-            lesson.syllabus_week = _syllabus_week_for(offering, new_topic, current=lesson.syllabus_week)
+        if new_topic != lesson.topic or (syllabus_week and syllabus_week != lesson.syllabus_week):
+            # Mövzu DƏYİŞİBSƏ (və ya modalda təkrar başlığın BAŞQA sətri seçilibsə — MR-000377) bağ yenidən həll
+            # olunur (eyni başlıqlı cari sətir saxlanılır); mövzu dəyişməyibsə köçürülmüş dərsin ``syllabus_week``
+            # bağına toxunulmur (mövzusuz dərsin saatı düzələndə itməsin).
+            lesson.syllabus_week = _syllabus_week_for(
+                offering,
+                new_topic,
+                current=syllabus_week or lesson.syllabus_week,
+                kind=lesson.kind,
+                exclude=lesson.pk,
+            )
             fields.append("syllabus_week")
         lesson.topic = new_topic
         fields.append("topic")

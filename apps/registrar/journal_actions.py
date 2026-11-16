@@ -26,7 +26,7 @@ from . import gradebook, journal_extras, journal_full_edit, journal_share_guard
 from .audit_write import AuditWriteFailed, audit_failure_message
 from .journal_access import offering_or_404 as scoped_offering_or_404
 from .journal_access import writable_offering_or_404
-from .journal_topics import posted_topic
+from .journal_topics import posted_topic, posted_topic_week
 from .models import Lesson, LessonKind, SelfWorkTopic
 from .views import _can_edit_journal, _is_direct_editor
 
@@ -296,6 +296,7 @@ def lesson_action(request, offering_id, lesson_id):
                     date=request.POST.get("lesson_date") or None,
                     kind=kind,
                     topic=posted_topic(request.POST),
+                    syllabus_week=posted_topic_week(request.POST),  # təkrar başlığın seçilmiş sətri (MR-000377)
                     hours=hours,
                     start_time=start_time or "",
                     end_time=end_time or "",

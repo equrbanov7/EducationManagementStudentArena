@@ -91,7 +91,7 @@ varsa o növ yalnız DEFOLTDUR (sahib 2026-11-15 — tip kilidi yoxdur).
                         <select name="lesson_topic" class="ems-select bootstrap-single-select__native" data-jd-lesson-topic data-bootstrap-select{% if topic_choices_meta|length > 8 %}
                                 data-live-search="true" data-live-search-placeholder="{% trans 'Mövzu adı ilə axtar…' context 'registrar.journal_topics' %}" data-live-search-empty="{% trans 'Uyğun mövzu tapılmadı' context 'registrar.journal_topics' %}"{% endif %}>
                             <option value="">{% trans "Mövzunu seçin…" context "registrar.journal" %}</option>
-                            {% for t in topic_choices_meta %}<option value="{{ t.title }}" data-kinds="{{ t.kinds_attr }}"{% if t.week %} data-week="{{ t.week }}"{% endif %}{% if t.subtext %} data-subtext="{{ t.subtext }}"{% endif %}{% if t.covered %} class="jd-topic-covered"{% elif t.planned %} class="jd-topic-planned"{% elif t.next %} class="jd-topic-next"{% endif %}>{{ t.title }}</option>
+                            {% for t in topic_choices_meta %}<option value="{{ t.value|default:t.title }}" data-kinds="{{ t.kinds_attr }}"{% if t.week %} data-week="{{ t.week }}"{% endif %}{% if t.subtext %} data-subtext="{{ t.subtext }}"{% endif %}{% if t.covered %} class="jd-topic-covered"{% elif t.planned %} class="jd-topic-planned"{% elif t.next %} class="jd-topic-next"{% endif %}>{{ t.title }}</option>
                             {% endfor %}
                         </select>
                     </div>

@@ -265,8 +265,7 @@ def lesson_facts(offering, today, *, memo: bool = False, lessons=None):
     last_instructor: dict = {}
     todays = []
     for lesson in lesson_rows(offering, memo=memo) if lessons is None else lessons:
-        if lesson.display_topic:
-            covered.setdefault(lesson.display_topic, set()).add(lesson.kind)
+        journal_topics.add_coverage(covered, lesson)  # başlıq + plan sətri üzrə (MR-000377)
         if lesson.instructor_id and lesson.kind not in last_instructor:
             last_instructor[lesson.kind] = lesson.instructor
         if lesson.date == today:
@@ -274,20 +273,34 @@ def lesson_facts(offering, today, *, memo: bool = False, lessons=None):
     return covered, last_instructor, todays
 
 
-def next_topic(topic_rows, covered, kind) -> str:
-    """Sillabus sırası ilə bu NÖV üçün hələ keçilməmiş İLK mövzu.
+def next_topic_row(topic_rows, covered, kind):
+    """Sillabus sırası ilə bu NÖV üçün hələ keçilməmiş İLK plan sətri (yoxdursa ``None``).
 
-    ``topic_rows`` — ``journal_topics.lesson_topic_meta`` sətirləri (``title`` + ``kinds``).
-    Növ məlumatı olmayan mənbədə (LMS kursu) mövzu hər hansı növdə keçilibsə «keçilib» sayılır."""
-    for row in topic_rows or []:
+    ``topic_rows`` — ``journal_topics.lesson_topic_meta`` sətirləri (``title`` + ``kinds`` + ``week``),
+    ``covered`` — ``lesson_facts`` əhatəsi (``journal_topics.add_coverage``). Sətir nömrəsi olan planda
+    əhatə SƏTİR üzrədir: təkrar başlıq («Test») ilk dəfə keçiləndən sonra ikinci sətri hələ növbədədir
+    (MR-000377). Növ məlumatı olmayan mənbədə (LMS kursu) mövzu hər hansı növdə keçilibsə «keçilib» sayılır."""
+    rows = list(topic_rows or [])
+    for row, done in zip(rows, journal_topics.row_done_kinds(rows, covered)):
         kinds = row.get("kinds") or ()
         if kinds and kind not in kinds:
             continue
-        done = covered.get(row["title"], set())
         if (kind in done) if kinds else bool(done):
             continue
-        return row["title"]
-    return ""
+        return row
+    return None
+
+
+def next_topic(topic_rows, covered, kind) -> str:
+    """:func:`next_topic_row`-un başlığı (boş — plan bitib / mövzu yoxdur)."""
+    row = next_topic_row(topic_rows, covered, kind)
+    return row["title"] if row else ""
+
+
+def next_topic_value(topic_rows, covered, kind) -> str:
+    """:func:`next_topic_row`-un modal seçim dəyəri (``value``, yoxdursa başlıq)."""
+    row = next_topic_row(topic_rows, covered, kind)
+    return (row.get("value") or row["title"]) if row else ""
 
 
 def _teacher_name(user) -> str:
@@ -572,6 +585,8 @@ __all__ = [
     "lesson_rows",
     "match_slots",
     "next_topic",
+    "next_topic_row",
+    "next_topic_value",
     "offering_slot",
     "offering_slots",
     "resolve_slot_room",

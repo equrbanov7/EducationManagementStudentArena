@@ -28,7 +28,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit, Role
-from apps.registrar import gradebook, journal_topics
+from apps.registrar import gradebook, journal_extras, journal_topics
 from apps.registrar import lessons_log as lessons_log_service
 from apps.registrar import services as registrar_services
 from apps.registrar.models import Enrollment, Lesson, LessonKind, Subject
@@ -260,10 +260,12 @@ class LessonSyllabusWeekTest(TestCase):
         offering = self._fresh()
         lesson = self._lesson(topic="", week=2)
         journal_topics.attach_syllabus_topics([lesson], offering=offering)
-        meta = {row["title"]: row for row in journal_topics.lesson_topic_meta(offering, [lesson])}
-        self.assertTrue(meta["Massivlər"]["covered"])
-        self.assertEqual(meta["Massivlər"]["week"], 2)
-        self.assertFalse(meta["Giriş və məqsədlər"]["covered"])
+        # Təkrar başlıq («Massivlər» 2 və 5) hər sətri ilə gəlir (MR-000377) — sətir nömrəsi ilə yoxlanır.
+        meta = {row["week"]: row for row in journal_topics.lesson_topic_meta(offering, [lesson])}
+        self.assertEqual(meta[2]["title"], "Massivlər")
+        self.assertTrue(meta[2]["covered"])
+        self.assertFalse(meta[5]["covered"], "ikinci «Massivlər» sətri öz statusunu saxlayır")
+        self.assertFalse(meta[1]["covered"])
 
     # ── plan sətrinin statusu ────────────────────────────────────────────────
     def test_week_progress_marks_each_row_with_its_dates(self):
@@ -357,6 +359,86 @@ class LessonSyllabusWeekTest(TestCase):
         self.assertEqual(rows[1]["subtext"], f"planlaşdırılıb {today:%d.%m}")
         self.assertEqual(rows[2]["subtext"], "laboratoriya · növbəti mövzu")
         self.assertEqual(rows[3]["subtext"], "laboratoriya")
+
+    # ── təkrar başlıq: hər plan sətri ayrıca (MR-000377, 2026-11-16) ─────────
+    def test_repeated_title_appears_once_per_row_with_its_own_status(self):
+        offering = self._fresh()
+        self.assertEqual(journal_topics.lesson_topic_choices(offering).count("Massivlər"), 2)
+        held = self._lesson(topic="Massivlər", week=2, kind=LessonKind.SEMINAR)
+        meta = {row["week"]: row for row in journal_topics.lesson_topic_meta(offering, [held])}
+        self.assertTrue(meta[2]["covered"])
+        self.assertFalse(meta[5]["covered"])
+        self.assertEqual((meta[2]["value"], meta[5]["value"]), ("Massivlər", "§5§Massivlər"))
+        plan = [
+            item for item in journal_extras.calendar_plan(offering, [held], self.today) if item["title"] == "Massivlər"
+        ]
+        self.assertEqual([item["covered"] for item in plan], [True, False])
+
+    def test_next_topic_offers_the_repeated_row_after_the_first_is_held(self):
+        from apps.registrar import journal_activation
+
+        offering = self._fresh()
+        self._lesson(topic="Massivlər", week=2, kind=LessonKind.SEMINAR)
+        covered, _last, _todays = journal_activation.lesson_facts(offering, self.today)
+        rows = journal_topics.lesson_topic_meta(offering, [])
+        self.assertEqual(journal_activation.next_topic(rows, covered, "seminar"), "Massivlər")
+        self.assertEqual(journal_activation.next_topic_row(rows, covered, "seminar")["week"], 5)
+        self.assertEqual(journal_activation.next_topic_value(rows, covered, "seminar"), "§5§Massivlər")
+        self.assertEqual(journal_activation.next_topic_value(rows, covered, "lecture"), "Giriş və məqsədlər")
+
+    def test_an_unlinked_legacy_lesson_counts_for_the_first_row_only(self):
+        from apps.registrar import journal_activation
+
+        offering = self._fresh()
+        self._lesson(topic="massivlər", kind=LessonKind.SEMINAR)  # bağsız, başlıqla
+        covered, _last, _todays = journal_activation.lesson_facts(offering, self.today)
+        row = journal_activation.next_topic_row(journal_topics.lesson_topic_meta(offering, []), covered, "seminar")
+        self.assertEqual(row["week"], 5)
+
+    def test_create_links_the_next_free_row_of_a_repeated_title(self):
+        with bypass_rls():
+            first = gradebook.create_lesson(
+                offering=self._fresh(), date=self.today, kind=LessonKind.SEMINAR, topic="Massivlər", allow_past=True
+            )
+            second = gradebook.create_lesson(
+                offering=self._fresh(),
+                date=self.today - datetime.timedelta(days=1),
+                kind=LessonKind.SEMINAR,
+                topic="Massivlər",
+                allow_past=True,
+            )
+            # Mühazirə saatı yalnız 2-ci sətirdədir — o tutulsa da ora bağlanır (5-ci sətrin mühazirəsi yoxdur).
+            lecture = gradebook.create_lesson(
+                offering=self._fresh(),
+                date=self.today - datetime.timedelta(days=2),
+                kind=LessonKind.LECTURE,
+                topic="Massivlər",
+                allow_past=True,
+            )
+        self.assertEqual((first.syllabus_week, second.syllabus_week, lecture.syllabus_week), (2, 5, 2))
+
+    def test_modal_value_of_a_repeated_row_links_that_row(self):
+        self.assertEqual(journal_topics.posted_topic({"lesson_topic": "§5§Massivlər"}), "Massivlər")
+        self.assertEqual(journal_topics.posted_topic_week({"lesson_topic": "§5§Massivlər"}), 5)
+        self.assertIsNone(journal_topics.posted_topic_week({"lesson_topic": "§5§X", "lesson_topic_custom": "Öz"}))
+        self.assertIsNone(journal_topics.posted_topic_week({"lesson_topic": "Massivlər"}))
+        response = self._client(self.teacher).get(reverse("registrar:journal_detail", args=[self.offering.id]))
+        self.assertContains(response, 'value="§5§Massivlər"')
+        self._post_lesson(lesson_topic="§5§Massivlər", lesson_topic_custom="", lesson_kind=LessonKind.SEMINAR)
+        lesson = Lesson.objects.get(offering=self.offering)
+        self.assertEqual((lesson.topic, lesson.syllabus_week), ("Massivlər", 5))
+
+    def test_edit_can_move_a_lesson_to_the_other_row_of_its_title(self):
+        lesson = self._lesson(topic="Massivlər", week=2, kind=LessonKind.SEMINAR)
+        with bypass_rls():
+            gradebook.update_lesson(lesson=lesson, topic="Massivlər", allow_locked=True, allow_past=True)
+            lesson.refresh_from_db()
+            self.assertEqual(lesson.syllabus_week, 2, "eyni başlıq, sətir seçilməyib — bağ qalır")
+            gradebook.update_lesson(
+                lesson=lesson, topic="Massivlər", syllabus_week=5, allow_locked=True, allow_past=True
+            )
+        lesson.refresh_from_db()
+        self.assertEqual(lesson.syllabus_week, 5)
 
     # ── backfill əmri ────────────────────────────────────────────────────────
     def _run(self, *args):

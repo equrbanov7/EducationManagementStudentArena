@@ -96,7 +96,8 @@ def build(offering, context, *, now=None, scope=None) -> dict:
     data = {
         "date": today.isoformat(),
         "parity": str(dashboard_data.week_parity(offering.period, today)),
-        "topic_by_kind": {kind: journal_activation.next_topic(topic_rows, covered, kind) for kind in KINDS},
+        # Seçimin DƏYƏRİ (təkrar başlıqlı sətir ``§n§başlıq`` — MR-000377), modal onu birbaşa seçir.
+        "topic_by_kind": {kind: journal_activation.next_topic_value(topic_rows, covered, kind) for kind in KINDS},
         "instructor_by_kind": {kind: teacher_id(last_instructor.get(kind)) for kind in KINDS},
         "hours_by_kind": {kind: _hours(last_by_kind.get(kind)) for kind in KINDS},
         "instructor_labels": labels,
@@ -235,35 +236,38 @@ def topics_covered_by(rows, lessons) -> list:
 
     ``journal_topics.lesson_topic_meta`` jurnalın görünən PƏNCƏRƏSİNİN dərslərini alırdı — pəncərədən
     kənarda keçilmiş mövzu «keçirilməyib» görünürdü. İşarənin tarixi keçirilmiş ən son dərsin tarixidir
-    (yalnız gələcək dərs varsa — ən yaxın gələcək tarix)."""
+    (yalnız gələcək dərs varsa — ən yaxın gələcək tarix). Dərs plan SƏTRİNƏ sayılır
+    (``journal_topics.lesson_row_matcher``): təkrar başlığın hər sətri öz statusunu alır (MR-000377)."""
     today = timezone.localdate()
-    held: dict = {}  # mövzu → bu günə qədər (daxil) keçirilmiş ən son dərsin tarixi
-    upcoming: dict = {}  # mövzu → gələcək tarixli ən yaxın dərs
-    kinds: dict = {}  # mövzu → KEÇİRİLMİŞ dərs növləri
+    match = journal_topics.lesson_row_matcher(rows)
+    held: dict = {}  # sətir → bu günə qədər (daxil) keçirilmiş ən son dərsin tarixi
+    upcoming: dict = {}  # sətir → gələcək tarixli ən yaxın dərs
+    kinds: dict = {}  # sətir → KEÇİRİLMİŞ dərs növləri
     for lesson in lessons:
-        topic = journal_topics.shown_topic(lesson)  # sillabus sətrinə bağlı mövzusuz dərs də (2026-10-25)
-        if not topic:
+        key = match(lesson)  # sillabus sətrinə bağlı mövzusuz dərs də (2026-10-25)
+        if key is None:
             continue
         if lesson.date <= today:
-            if topic not in held or lesson.date > held[topic]:
-                held[topic] = lesson.date
-            kinds.setdefault(topic, set()).add(lesson.kind)
-        elif topic not in upcoming or lesson.date < upcoming[topic]:
-            upcoming[topic] = lesson.date
-    # «keçirilib» = mövzunun HƏR HANSI dərsi bu gün və ya əvvəl; «planlaşdırılıb» = keçirilməyib, amma gələcək dərs var
+            if key not in held or lesson.date > held[key]:
+                held[key] = lesson.date
+            kinds.setdefault(key, set()).add(lesson.kind)
+        elif key not in upcoming or lesson.date < upcoming[key]:
+            upcoming[key] = lesson.date
+    # «keçirilib» = sətrin HƏR HANSI dərsi bu gün və ya əvvəl; «planlaşdırılıb» = keçirilməyib, amma gələcək dərs var
     # (QA-1 F13; ``journal_extras.calendar_plan`` ilə eyni qayda). Mühazirəsi keçilmiş, seminarı gələcəkdə olan mövzu keçirilib.
-    return journal_topics.decorate_topic_choices(
-        [
+    out = []
+    for row in rows:
+        key = journal_topics.row_key(row)
+        out.append(
             {
                 **row,
-                "covered": row["title"] in held,
-                "planned": row["title"] not in held and row["title"] in upcoming,
-                "date": held.get(row["title"]) or upcoming.get(row["title"]),
-                "covered_kinds": sorted(kinds.get(row["title"], ())),
+                "covered": key in held,
+                "planned": key not in held and key in upcoming,
+                "date": held.get(key) or upcoming.get(key),
+                "covered_kinds": sorted(kinds.get(key, ())),
             }
-            for row in rows
-        ]
-    )
+        )
+    return journal_topics.decorate_topic_choices(out)
 
 
 def posted_slot(offering, data, *, date, kind):
