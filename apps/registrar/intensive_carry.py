@@ -12,13 +12,17 @@ Qaydalar:
   qısa intensiv kursa tökülmür (orada dərslər qrupundur, tələbənin işi əvvəlki kimi «əvvəlki jurnal» xülasəsi ilə
   görünür, ``guest_merge.carry_over_map``);
 * mənbənin hər dərsi üçün hədəfdə eyni (tarix, başlama saatı, növ) dərs varsa o işlənir, yoxdursa SURƏTİ yaradılır
-  (:data:`LESSON_COPY_FIELDS`; sillabus sətri bağlanmır); tələbənin hər xanası uyğun dərsə yeni sətir kimi yazılır
-  (``created_at`` köhnəsi — redaktə pəncərəsi yenidən açılmır), hədəfdə artıq olan xanaya toxunulmur. Mənbə
-  SİLİNMİR (köhnə jurnal tarixçə kimi qalır);
-* qayıb İKİ DƏFƏ sayılmır: əvəzlənmiş yazılışın qayıbı hədəfə ``guest_merge.carried_absence_hours`` ilə gəlir, amma
-  hədəfdə eyni (tarix, saat, növ) dərsinin xanası olan mənbə xanası o xəritədə sayılmır (``carry_over_map``);
-* hər cüt üçün audit sətri (yaradılan dərs/xana id-ləri, ``batch``); intensiv kurs ləğv olunanda
-  (:func:`undo_for_target`) yalnız bu köçürmənin yaratdığı xanalar və başqa xanası qalmayan dərslər silinir.
+  (:data:`LESSON_COPY_FIELDS`; sillabus sətri bağlanmır); köhnə jurnal tarixçə kimi qalır;
+* tələbənin xanaları KÖÇÜR: hədəf dərsə surət (bal, q/b, yazan, ``created_at`` — redaktə pəncərəsi yenidən açılmır),
+  sonra köhnə jurnaldakı sətir silinir. Surət saxlanmır, çünki əvəzlənmiş yazılışın qayıbı hədəfə
+  ``guest_merge.carried_absence_hours`` ilə onsuz da sayılır (DB qoruyucusu ``registrar_absence_credit_guard`` da eyni
+  düsturu yoxlayır) — iki nüsxə qayıbı İKİ DƏFƏ sayardı. Xananın ``lesson_id``-si DB-də dəyişməzdir
+  (``registrar_guard_reference_identity``), ona görə ``UPDATE`` yox, surət + silmə;
+* köhnə yazılışın qayıb krediti (``AbsenceCredit``) və ya xanalarından birinin rəsmi düzəlişi (``JournalCorrection``)
+  varsa xanalar köçmür (kredit/düzəliş izi həmin sətirlərə bağlıdır); dərslər yenə gəlir, iş əvvəlki kimi «əvvəlki
+  jurnal» xülasəsində görünür;
+* hər cüt üçün audit sətri (yaradılan dərslər, köçən xanalar və onların köhnə dərsi, ``batch``); intensiv kurs ləğv
+  olunanda (:func:`undo_for_target`) xanalar köhnə yerinə qayıdır, başqa xanası qalmayan surət dərslər silinir.
 """
 
 from __future__ import annotations
@@ -69,12 +73,9 @@ def lesson_key(lesson) -> tuple:
     return (lesson.date, lesson.start_time, lesson.kind)
 
 
-def copy_work(*, source, target, src_enrollment, dst_enrollment, counts: Counter) -> tuple[list, list]:
-    """Mənbə açılışın dərsləri (yoxdursa surəti) + tələbənin xanaları hədəfə; ``(dərs_id-lər, xana_id-lər)``.
-
-    Kilid və icazə yoxlaması çağıranındır (tranzaksiya içində). Sayğac açarları PR #371 əmri ilə eynidir."""
+def map_lessons(*, source, target, counts: Counter) -> tuple[dict, list]:
+    """Mənbə dərsi → hədəfdəki eyni dərs (yoxdursa yaradılmış surəti); ``({mənbə_id: hədəf_dərs}, yaradılan_id-lər)``."""
     Lesson = _model("Lesson")
-    LessonMark = _model("LessonMark")
     existing: dict = {}
     for lesson in Lesson.objects.select_for_update().filter(offering=target):
         existing.setdefault(lesson_key(lesson), []).append(lesson)
@@ -97,12 +98,26 @@ def copy_work(*, source, target, src_enrollment, dst_enrollment, counts: Counter
         mapping[lesson.pk] = copy
         created_lessons.append(str(copy.pk))
     counts["lessons_created"] += len(created_lessons)
-    filled = {
+    return mapping, created_lessons
+
+
+def _target_marks(mapping, dst_enrollment) -> set:
+    LessonMark = _model("LessonMark")
+    return {
         str(pk)
         for pk in LessonMark.objects.filter(
             enrollment=dst_enrollment, lesson_id__in=[row.pk for row in mapping.values()]
         ).values_list("lesson_id", flat=True)
     }
+
+
+def copy_work(*, source, target, src_enrollment, dst_enrollment, counts: Counter) -> tuple[list, list]:
+    """PR #371 əmri: dərslər + tələbənin xanalarının SURƏTİ (mənbə xanası qalır); ``(dərs_id-lər, xana_id-lər)``.
+
+    Kilid və icazə yoxlaması çağıranındır (tranzaksiya içində)."""
+    LessonMark = _model("LessonMark")
+    mapping, created_lessons = map_lessons(source=source, target=target, counts=counts)
+    filled = _target_marks(mapping, dst_enrollment)
     created_marks = []
     for mark in LessonMark.objects.filter(enrollment=src_enrollment).order_by("created_at", "pk"):
         lesson = mapping.get(mark.lesson_id)
@@ -117,6 +132,38 @@ def copy_work(*, source, target, src_enrollment, dst_enrollment, counts: Counter
         created_marks.append(str(copied.pk))
     counts["marks_copied"] += len(created_marks)
     return created_lessons, created_marks
+
+
+def move_marks(*, mapping, src_enrollment, dst_enrollment, counts: Counter) -> list:
+    """Tələbənin mənbə xanalarını hədəf dərslərə KÖÇÜR (surət + köhnə sətrin silinməsi);
+    ``[{"mark": yeni_id, "from_lesson": köhnə_dərs_id}]``."""
+    from core.rls import journal_unlock
+
+    LessonMark = _model("LessonMark")
+    filled = _target_marks(mapping, dst_enrollment)
+    moved = []
+    with journal_unlock(local=True):  # 15 dəqiqəlik xana kilidi: rəsmi köçürmə yolu (dəyər dəyişmir)
+        for mark in LessonMark.objects.select_for_update().filter(enrollment=src_enrollment).order_by("created_at"):
+            lesson = mapping.get(mark.lesson_id)
+            if lesson is None:
+                counts["mark_without_target_lesson"] += 1
+                continue
+            if str(lesson.pk) in filled:
+                counts["target_cell_filled_kept"] += 1
+                continue
+            copied = copy_mark(mark, lesson=lesson, enrollment=dst_enrollment)
+            moved.append({"mark": str(copied.pk), "from_lesson": str(mark.lesson_id)})
+            filled.add(str(lesson.pk))
+            mark.delete()
+    counts["marks_moved"] += len(moved)
+    return moved
+
+
+def _marks_pinned(src_enrollment) -> bool:
+    """Köhnə yazılışın xanaları yerində qalmalıdır: qayıb krediti və ya rəsmi xana düzəlişi var."""
+    if _model("AbsenceCredit").objects.filter(enrollment=src_enrollment).exists():
+        return True
+    return _model("JournalCorrection").objects.filter(lesson_mark__enrollment=src_enrollment).exists()
 
 
 def carry_on_move(*, organization, target, moved, by_user, counts: Counter | None = None, batch: str = "") -> dict:
@@ -143,13 +190,18 @@ def carry_on_move(*, organization, target, moved, by_user, counts: Counter | Non
             counts["source_still_has_students"] += 1  # qrup jurnalı — dərslər qrupundur, köçürülmür
             continue
         dst_enrollment = by_target[src_enrollment.superseded_by_id]
-        created_lessons, created_marks = copy_work(
-            source=source, target=target, src_enrollment=src_enrollment, dst_enrollment=dst_enrollment, counts=counts
-        )
-        if not created_lessons and not created_marks:
+        mapping, created_lessons = map_lessons(source=source, target=target, counts=counts)
+        moved_marks = []
+        if _marks_pinned(src_enrollment):
+            counts["source_marks_pinned"] += 1  # kredit / rəsmi düzəliş həmin sətirlərdədir — xanalar yerində qalır
+        else:
+            moved_marks = move_marks(
+                mapping=mapping, src_enrollment=src_enrollment, dst_enrollment=dst_enrollment, counts=counts
+            )
+        if not created_lessons and not moved_marks:
             continue
         lessons += len(created_lessons)
-        marks += len(created_marks)
+        marks += len(moved_marks)
         touched.append(dst_enrollment)
         log_action(
             AuditAction.UPDATE,
@@ -164,7 +216,7 @@ def carry_on_move(*, organization, target, moved, by_user, counts: Counter | Non
                 "batch": batch,
                 "target_offering": str(target.pk),
                 "lessons_created": created_lessons,
-                "marks_created": created_marks,
+                "marks_moved": moved_marks,
             },
         )
     recompute_absences(touched)
@@ -172,7 +224,8 @@ def carry_on_move(*, organization, target, moved, by_user, counts: Counter | Non
 
 
 def undo_for_target(*, offering, by_user, counts: Counter | None = None) -> int:
-    """Bu intensiv jurnala köçürmə ilə gələn xanaları və (başqa xanası qalmayan) dərsləri sil; silinən dərs sayı."""
+    """Bu intensiv jurnala köçən xanaları köhnə dərsinə + köhnə yazılışına qaytar, başqa xanası qalmayan surət
+    dərsləri sil; silinən dərs sayı. Yalnız hələ bu jurnalda olan xanalar qaytarılır (sonradan köçürülməyənlər)."""
     from core.rls import journal_unlock
 
     AuditLog = django_apps.get_model("audit", "AuditLog")
@@ -187,17 +240,29 @@ def undo_for_target(*, offering, by_user, counts: Counter | None = None) -> int:
     with journal_unlock(local=True):
         for row in rows:
             values = row.new_values or {}
-            marks = LessonMark.objects.filter(pk__in=values.get("marks_created") or [], lesson__offering=offering)
-            enrollment_ids = set(marks.values_list("enrollment_id", flat=True))
-            counts["undo_marks_deleted"] += marks.count()
-            marks.delete()
+            source_enrollment = (row.old_values or {}).get("source_enrollment")
+            returned = 0
+            back = Enrollment.objects.filter(pk=source_enrollment).first()
+            for item in values.get("marks_moved") or []:
+                mark = LessonMark.objects.filter(pk=item.get("mark"), lesson__offering=offering).first()
+                home = Lesson.objects.filter(pk=item.get("from_lesson")).first()
+                if mark is None or home is None or back is None:
+                    counts["undo_mark_missing"] += 1
+                    continue
+                if not LessonMark.objects.filter(lesson=home, enrollment=back).exists():
+                    copy_mark(mark, lesson=home, enrollment=back)
+                mark.delete()
+                returned += 1
+            counts["undo_marks_returned"] += returned
             doomed = Lesson.objects.filter(
                 pk__in=values.get("lessons_created") or [], offering=offering, marks__isnull=True
             )
             count = doomed.count()
             doomed.delete()
             deleted += count
-            recompute_absences(list(Enrollment.objects.filter(pk__in=enrollment_ids)))
+            recompute_absences(
+                list(Enrollment.objects.filter(pk__in=[source_enrollment, row.resource_id]).exclude(pk=None))
+            )
             log_action(
                 AuditAction.UPDATE,
                 user=by_user,
@@ -207,10 +272,23 @@ def undo_for_target(*, offering, by_user, counts: Counter | None = None) -> int:
                 resource_id=row.resource_id,
                 resource_repr="İntensiv jurnala köçürmənin geri qaytarılması",
                 old_values={"batch": values.get("batch", "")},
-                new_values={"undone_batch": values.get("batch", ""), "lessons_deleted": count},
+                new_values={
+                    "undone_batch": values.get("batch", ""),
+                    "lessons_deleted": count,
+                    "marks_returned": returned,
+                },
             )
     counts["undo_lessons_deleted"] += deleted
     return deleted
 
 
-__all__ = ["LESSON_COPY_FIELDS", "RESOURCE", "carry_on_move", "copy_work", "lesson_key", "undo_for_target"]
+__all__ = [
+    "LESSON_COPY_FIELDS",
+    "RESOURCE",
+    "carry_on_move",
+    "copy_work",
+    "lesson_key",
+    "map_lessons",
+    "move_marks",
+    "undo_for_target",
+]

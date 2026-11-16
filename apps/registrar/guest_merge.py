@@ -318,22 +318,9 @@ def carry_over_map(target_ids, *, with_entry_score: bool = True) -> dict:
         return {}
     marks_by_enrollment: dict = {}
     per_enrollment: dict = {}
-    # MR-000379 (2026-11-16): intensivə köçürmədə mənbənin dərsi + xanası hədəfə SURƏT kimi gəlir
-    # (:mod:`.intensive_carry`). Hədəfdə eyni (tarix, saat, növ) dərsinin xanası olan mənbə xanası burada
-    # sayılmır — qayıb iki dəfə (həm hədəfin öz xanası, həm köçürülmüş saat kimi) düşməsin. Bir toplu sorğu.
-    copied = {
-        (enrollment_id, (day, start, kind))
-        for enrollment_id, day, start, kind in LessonMark.objects.filter(enrollment_id__in=target_ids).values_list(
-            "enrollment_id", "lesson__date", "lesson__start_time", "lesson__kind"
-        )
-    }
-    target_of = {row.pk: row.superseded_by_id for row in predecessors}
     marks = LessonMark.objects.filter(enrollment_id__in=[row.pk for row in predecessors]).select_related("lesson")
     for mark in marks:
         marks_by_enrollment.setdefault(mark.enrollment_id, []).append(mark)
-        lesson = mark.lesson
-        if (target_of[mark.enrollment_id], (lesson.date, lesson.start_time, lesson.kind)) in copied:
-            continue
         bucket = per_enrollment.setdefault(mark.enrollment_id, {"marks": 0, "scored": 0, "count": 0, "hours": 0})
         bucket["marks"] += 1
         if mark.score is not None:

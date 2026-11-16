@@ -1,6 +1,6 @@
 """MR-000379 (2026-11-16): «Adi jurnaldan intensivə köçür» tələbənin dərslərini və xanalarını da daşıyır.
 
-* köhnə jurnal tələbənin TƏK jurnalı idisə — dərslər (surət) və xanalar intensiv jurnala, audit sətri ilə;
+* köhnə jurnal tələbənin TƏK jurnalı idisə — dərslər (surət) intensiv jurnala, xanalar ora KÖÇÜR (audit sətri ilə);
 * köhnə jurnalda başqa tələbə qalıbsa — qrupun dərsləri qısa kursa tökülmür (əvvəlki davranış);
 * qayıb bir dəfə sayılır (köçürülmüş xana + əvəzlənmiş yazılışın saatı toplanmır);
 * ləğv köçürülmüş dərsləri götürür; müəllim öz dərsini yazıbsa ləğv qadağandır və heç nə dəyişmir.
@@ -62,15 +62,16 @@ class IntensiveMoveCarryTest(_IntensiveBase):
             marks = {mark.lesson.date.day: mark for mark in LessonMark.objects.filter(enrollment=target)}
             self.assertEqual(marks[22].status, AttendanceStatus.ABSENT)
             self.assertEqual(marks[24].score, 8)
-            # Köhnə jurnal tarixçə kimi qalır.
+            # Köhnə jurnalın dərsləri tarixçə kimi qalır; xanalar köçüb (eyni sətirlər).
             self.assertEqual(Lesson.objects.filter(offering=self.other_offering).count(), 3)
-            self.assertEqual(LessonMark.objects.filter(enrollment=self.source).count(), 2)
-            # Qayıb BİR dəfə: hədəfin öz xanası 2 saat, köçürülmüş saat 0 (eyni dərs).
+            self.assertFalse(LessonMark.objects.filter(enrollment=self.source).exists())
+            # Qayıb BİR dəfə: hədəfin öz xanası 2 saat, əvəzlənmiş yazılışdan gələn saat 0.
             self.assertEqual(guest_merge.carried_absence_hours(target), 0)
             target.refresh_from_db()
             self.assertEqual(target.absence_hours, 2)
             audit = AuditLog.objects.get(resource_type=intensive_carry.RESOURCE, resource_id=str(target.pk))
             self.assertEqual(len(audit.new_values["lessons_created"]), 3)
+            self.assertEqual(len(audit.new_values["marks_moved"]), 2)
 
     def test_group_journal_lessons_are_not_poured_into_the_short_course(self):
         classmate = self._make_student("gr_classmate", self.group2)
@@ -101,3 +102,25 @@ class IntensiveMoveCarryTest(_IntensiveBase):
                 intensive.cancel_course(offering=offering, by_user=self.coordinator)
             self.assertEqual(Lesson.objects.filter(offering=offering).count(), 4)
             self.assertEqual(LessonMark.objects.filter(enrollment=self._target(offering)).count(), 2)
+
+    def test_marks_with_an_absence_credit_stay_with_their_enrollment(self):
+        import uuid
+
+        from apps.registrar.models import AbsenceCredit
+
+        with bypass_rls():
+            AbsenceCredit.objects.create(
+                organization=self.org,
+                enrollment=self.source,
+                hours=1,
+                reason="Sənədli üzrlü qayıb güzəşti",
+                request_token=uuid.uuid4(),
+                old_absence_hours=2,
+                new_absence_hours=1,
+                actor=self.coordinator,
+            )
+        result = self._open([self.guest], release_source=True)
+        self.assertEqual((result["carried_lessons"], result["carried_marks"]), (3, 0))
+        with bypass_rls():
+            self.assertEqual(LessonMark.objects.filter(enrollment=self.source).count(), 2)
+            self.assertEqual(guest_merge.carried_absence_hours(self._target(result["offering"])), 1)
