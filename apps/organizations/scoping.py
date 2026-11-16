@@ -444,6 +444,51 @@ def permission_scope_units(user, organization, permission: str) -> tuple:
     return tuple(units.values())
 
 
+#: Fakültəni görən «müşahidə» rolları (sahib 2026-10-14: tyutor və proqram koordinatoru eyni vəzifədir).
+FACULTY_WATCHER_ROLE_NAMES = frozenset({"tutor", "program_coordinator"})
+
+
+def faculty_watcher_paths(user, organization, permission: str) -> tuple:
+    """Tyutor / proqram koordinatoru üzvlüklərinin ən yaxın FAKÜLTƏ ``path``-ləri (``permission`` daşıyanlar).
+
+    Sahib 2026-11-16 (MR-000380): tyutor öz fakültəsinin qruplarının BÜTÜN jurnallarını görməlidir — fənni başqa
+    kafedra tədris etsə də. Kafedra müdirinin «yalnız öz kafedrasının fənləri» qaydası dəyişmir: yalnız bu
+    rollarının üzvlükləri sayılır. Üzvlük sətirləri memoizasiya olunmuşdur; fakültə əcdadı üçün ən çoxu BİR sorğu.
+    """
+    if not permission or organization is None or not getattr(user, "is_authenticated", False):
+        return ()
+    units = {}
+    for membership in _permission_scope_memberships(user, organization):
+        role = membership.role
+        if role.scope_type != RoleScopeType.UNIT or not membership.scope_unit_id:
+            continue
+        if role.name not in FACULTY_WATCHER_ROLE_NAMES or not has_permission(list(role.permissions or []), permission):
+            continue
+        unit = membership.scope_unit
+        if unit is not None and unit.is_active:
+            units.setdefault(unit.pk, unit)
+    if not units:
+        return ()
+    from apps.organizations.models import OrgUnit
+
+    candidates = {str(unit.pk) for unit in units.values()} | {
+        part for unit in units.values() for part in str(unit.path or "").split("/") if part
+    }
+    faculties = dict(
+        OrgUnit.objects.filter(
+            organization=organization, pk__in=list(candidates), unit_type=_FACULTY_UNIT_TYPE, is_active=True
+        ).values_list("pk", "path")
+    )
+    faculties = {str(pk): path for pk, path in faculties.items()}
+    paths = set()
+    for unit in units.values():
+        for part in reversed(str(unit.path or "").split("/")):
+            if part in faculties:
+                paths.add(faculties[part])
+                break
+    return tuple(sorted(paths))
+
+
 def scope_org_units(queryset: QuerySet, scope: UnitScope) -> QuerySet:
     """OrgUnit queryset-ini scope-a görə məhdudlaşdırır."""
     if scope.is_org_wide and not scope.excluded_unit_ids:

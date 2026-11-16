@@ -11911,7 +11911,7 @@
    }
   },
   "7285": {
-   "teacher": 11616,
+   "teacher": 8343,
    "legacy_teacher": 904,
    "legacy_lesson": 2553,
    "hours": {
@@ -12455,7 +12455,10 @@
     },
     "prev": {},
     "send": {}
-   }
+   },
+   "extra_teachers": [
+    11616
+   ]
   },
   "8978": {
    "teacher": 8210,
@@ -16014,7 +16017,7 @@
    "teacher": 7729
   },
   "7112": {
-   "content_sha256": "228a1d0079f39cbdece522fc486cce348c938181dd4908dfb1828522df3afff0",
+   "content_sha256": "896ef6320f5756b24a8457710a486463aaf8bcc231a75e03f0b44fd59dd0b469",
    "excluded": [
     "welcome",
     "research_interests",
@@ -16023,7 +16026,7 @@
     "exam_questions"
    ],
    "hours": {
-    "seminar": 106
+    "seminar": 105
    },
    "legacy_lesson": 2555,
    "legacy_teacher": 904,
@@ -16518,7 +16521,7 @@
       {
        "topic": "Preparation for Final exam",
        "lecture": 0,
-       "seminar": 2,
+       "seminar": 1,
        "lab": 0,
        "outcome": "",
        "practical": 0,
@@ -16559,7 +16562,7 @@
     "prev": {},
     "send": {}
    },
-   "teacher": 11616
+   "teacher": 8343
   },
   "8722": {
    "content_sha256": "25756aa6cb86ad2cbbdf4ddc44f8be6c49708e336df0a4c97343e6126313b477",
@@ -16798,7 +16801,7 @@
     "prev": {},
     "send": {}
    },
-   "teacher": 0
+   "teacher": 8163
   }
  },
  "targets": [
@@ -18255,6 +18258,112 @@
    },
    "action": "restore",
    "source": "8300"
+  },
+  {
+   "key": "rbb99ce5b",
+   "teacher": 9570,
+   "offering_id": "bb99ce5b-12b8-43ee-a30d-7f6a9ff16f71",
+   "group_id": "a48aeda7-bd72-44a8-b2ee-a1405d42756f",
+   "subject_ids": [
+    "850da243-e041-4a77-9e00-43e6935310be"
+   ],
+   "lesson_hours": 60,
+   "plan": {
+    "seminar": 60
+   },
+   "action": "restore",
+   "source": "9010"
+  },
+  {
+   "key": "rd42b23b8",
+   "teacher": 7729,
+   "offering_id": "d42b23b8-bf1e-4117-b47e-1a7546fecd5c",
+   "group_id": "231fa6b4-7313-41d3-9aed-377a6d036c00",
+   "subject_ids": [
+    "9001c218-1cac-4988-8d33-bf342bd3925c"
+   ],
+   "lesson_hours": 105,
+   "plan": {
+    "seminar": 105
+   },
+   "action": "restore",
+   "source": "8974"
+  },
+  {
+   "key": "r11c8b564",
+   "teacher": 7729,
+   "offering_id": "11c8b564-1d50-4db9-a985-d5482737d8c3",
+   "group_id": "e05f65e9-834c-4527-9050-acff11a13d38",
+   "subject_ids": [
+    "779335f1-5f6f-459d-bd1b-fd778381dbe6"
+   ],
+   "lesson_hours": 105,
+   "plan": {
+    "seminar": 105
+   },
+   "action": "restore",
+   "source": "7197"
+  },
+  {
+   "key": "ra9ec0d55",
+   "teacher": 8343,
+   "offering_id": "a9ec0d55-2da4-4471-a94f-6721cbc103d0",
+   "group_id": "406b7f20-c8c5-4ad5-b0e3-0dd3204e218a",
+   "subject_ids": [
+    "779335f1-5f6f-459d-bd1b-fd778381dbe6"
+   ],
+   "lesson_hours": 105,
+   "plan": {
+    "seminar": 105
+   },
+   "action": "restore",
+   "source": "7285"
+  },
+  {
+   "key": "rd9b167be",
+   "teacher": 8343,
+   "offering_id": "d9b167be-9291-4973-88e4-8430e5cf7e48",
+   "group_id": "05f481db-d80f-4b66-8c17-0e314d0a25d8",
+   "subject_ids": [
+    "779335f1-5f6f-459d-bd1b-fd778381dbe6"
+   ],
+   "lesson_hours": 105,
+   "plan": {
+    "seminar": 105
+   },
+   "action": "restore",
+   "source": "7285"
+  },
+  {
+   "key": "rc5334d73",
+   "teacher": 8343,
+   "offering_id": "c5334d73-8fe2-4b4e-932b-fdede673e156",
+   "group_id": "49533274-6450-4cd4-89ad-43512853760d",
+   "subject_ids": [
+    "82caa125-5875-4757-bf68-ca87dc18a2ed"
+   ],
+   "lesson_hours": 105,
+   "plan": {
+    "seminar": 105
+   },
+   "action": "restore",
+   "source": "7112"
+  },
+  {
+   "key": "r44057a0a",
+   "teacher": 8163,
+   "offering_id": "44057a0a-687f-4bad-8993-43bfc9c17c89",
+   "group_id": "25266fd8-38a5-465e-b1d1-79665de0e246",
+   "subject_ids": [
+    "3885c98c-5b88-4b8c-a5f5-563c5ad638e1"
+   ],
+   "lesson_hours": 45,
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "action": "restore",
+   "source": "8722"
   }
  ]
 }
