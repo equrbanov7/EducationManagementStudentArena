@@ -160,7 +160,7 @@ def _match_existing(todays, existing) -> dict:
 
 
 def _create(offering, day, slot, actor, topic_rows, covered) -> tuple[object, str]:
-    from apps.registrar import journal_activation
+    from apps.registrar import journal_activation, journal_topics
     from apps.registrar.gradebook import LessonRuleError
     from apps.registrar.gradebook_lessons import create_lesson
     from apps.registrar.journal_policy import SyllabusGateError
@@ -184,8 +184,7 @@ def _create(offering, day, slot, actor, topic_rows, covered) -> tuple[object, st
         return None, f"syllabus_gate:{getattr(exc, 'reason_code', '')}"
     except LessonRuleError as exc:
         return None, f"lesson_rule:{str(exc)[:120]}"
-    if topic:
-        covered.setdefault(topic, set()).add(lesson.kind)
+    journal_topics.add_coverage(covered, lesson)  # plan sətri üzrə də (MR-000377)
     return lesson, ""
 
 
@@ -281,8 +280,8 @@ def plan_lessons(
         locked = gradebook.journal_is_locked(offering)
         topic_rows = journal_topics.lesson_topic_meta(offering, [])
         covered: dict = {}
-        for topic, kind in offering.lessons.exclude(topic="").values_list("topic", "kind"):
-            covered.setdefault(topic, set()).add(kind)
+        for lesson in offering.lessons.only("topic", "syllabus_week", "kind"):
+            journal_topics.add_coverage(covered, lesson)  # başlıq + plan sətri (təkrar başlıq — MR-000377)
         rows = []
         for day in _days(date_from, date_to):
             todays = dashboard_data.lessons_on(own_slots, day, period=period)

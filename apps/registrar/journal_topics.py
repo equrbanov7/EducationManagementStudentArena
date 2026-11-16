@@ -15,11 +15,20 @@ Asılılıq istiqaməti: ``registrar → syllabus`` (bu istiqamət artıq mövcu
 
 from __future__ import annotations
 
+import re
+
 from django.db.models import prefetch_related_objects
 
 #: Sillabusun həftəlik cədvəlindəki saat növləri — jurnal ``LessonKind`` açarları
 #: ilə EYNİ sətirlərdir (``apps.syllabus.constants.LESSON_HOUR_KINDS``).
 SYLLABUS_HOUR_KINDS = ("lecture", "seminar", "lab")
+
+
+#: Təkrar başlıqlı plan sətrinin seçim dəyəri: ``§<sətir>§<başlıq>`` (MR-000377, 2026-11-16). Başlığın İLK
+#: sətrinin dəyəri təmiz başlıqdır (köhnə formalar, redaktə, «Aktivləşdir» dəyişmir); sonrakı sətirlər
+#: menyuda ayrıca seçim olsun deyə sətir nömrəsi ilə işarələnir. Server ``posted_topic`` ilə başlığı,
+#: ``posted_topic_week`` ilə sətri ayırır.
+_WEEK_VALUE = re.compile(r"^§(\d{1,4})§(.*)$", re.DOTALL)
 
 
 def normalize_topic(text) -> str:
@@ -72,35 +81,128 @@ def syllabus_topic_rows(offering):
     həmin mövzu hər növ üçün ayrı dərs sətri kimi açılır — başlıq eynidir,
     ``kind`` fərqlidir.»
 
-    Nəticə: ``[{"title": str, "kinds": (…), "week": n}]`` — ``week`` başlığın İLK sətrinin nömrəsidir.
+    Nəticə: ``[{"title": str, "kinds": (…), "week": n}]`` — başlığı dolu HƏR plan sətri. Planda təkrarlanan
+    başlıq («Test», «Hauslektüre», «Teil D. Rückblick» — MR-000377, 2026-11-16) hər sətri üçün AYRICA gəlir:
+    əvvəl başlığa görə birləşdirilirdi və ikinci «Test» ilk istifadədən sonra siyahıdan itirdi.
     Yalnız ``APPROVED`` versiya oxunur (§8/9 və §6.5) — qaralama versiyanın mövzuları jurnala sızmır.
     Sillabus yoxdursa BOŞ siyahı (çağıran LMS kursuna geri çəkilir).
     """
-    rows = []
+    return [
+        {"title": entry["title"], "kinds": entry["kinds"], "week": entry["week"]}
+        for entry in syllabus_week_rows(offering)
+        if entry["title"]
+    ]
+
+
+def lesson_topic_rows(offering) -> list:
+    """Modalın mövzu SƏTİRLƏRİ: təsdiqlənmiş plan, yoxdursa ehtiyat mənbə (``journal_topic_fallback``)."""
+    rows = syllabus_topic_rows(offering)
+    if rows:
+        return rows
+    from .journal_topic_fallback import fallback_topic_rows
+
+    return fallback_topic_rows(offering)
+
+
+def row_key(row):
+    """Plan sətrinin açarı: sətir nömrəsi (``week``), nömrəsi olmayan ehtiyat mənbədə başlıq."""
+    week = row.get("week")
+    return ("week", week) if week else ("title", row["title"])
+
+
+def lesson_row_matcher(rows):
+    """Dərs → plan sətrinin açarı (``row_key``) və ya ``None``.
+
+    Qayda ``week_progress`` ilə eynidir: ``Lesson.syllabus_week`` başlığı dolu sətrə bağlıdırsa O sətir;
+    bağsız dərs başlığı (normallaşdırılmış) uyğun gələn İLK sətrə sayılır. Beləliklə təkrar başlığın hər sətri
+    öz statusunu alır — ikinci «Test» birincinin dərsi ilə «keçirilib» görünmür."""
+    weeks = {row["week"] for row in rows if row.get("week")}
+    first: dict = {}
+    for row in rows:
+        first.setdefault(normalize_topic(row["title"]), row_key(row))
+
+    def match(lesson):
+        linked = getattr(lesson, "syllabus_week", None)
+        if linked and linked in weeks:
+            return ("week", linked)
+        topic = shown_topic(lesson)
+        return first.get(normalize_topic(topic)) if topic else None
+
+    return match
+
+
+def topic_choice_value(rows) -> list:
+    """Hər sətrə seçim dəyəri (``value``) qoyur: başlığın ilk sətri — başlıq, təkrarı — ``§n§başlıq``."""
     seen = set()
-    for entry in syllabus_week_rows(offering):
-        title = entry["title"]
-        if not title or title in seen:
-            continue
+    out = []
+    for row in rows:
+        title = row["title"]
+        repeat = title in seen and row.get("week")
         seen.add(title)
-        rows.append({"title": title, "kinds": entry["kinds"], "week": entry["week"]})
-    return rows
+        out.append({**row, "value": f"§{row['week']}§{title}" if repeat else title})
+    return out
 
 
-def resolve_syllabus_week(offering, topic, *, current=None, week_rows=None):
+def add_coverage(covered: dict, lesson) -> None:
+    """``next_topic`` üçün əhatə lüğətinə dərsi əlavə edir (``journal_activation.lesson_facts``).
+
+    Açarlar: başlıq (köhnə, növsüz mənbə üçün), ``("week", n)`` — sətrə bağlı dərs, ``("free", başlıq)`` —
+    bağsız dərs (başlığın İLK sətrinə sayılır). Dəyər — keçirilmiş dərs növləri."""
+    topic = shown_topic(lesson)
+    if topic:
+        covered.setdefault(topic, set()).add(lesson.kind)
+    week = getattr(lesson, "syllabus_week", None)
+    if week:
+        covered.setdefault(("week", week), set()).add(lesson.kind)
+    elif topic:
+        covered.setdefault(("free", normalize_topic(topic)), set()).add(lesson.kind)
+
+
+def row_done_kinds(rows, covered: dict) -> list:
+    """Hər sətrin keçirilmiş növləri (``add_coverage`` lüğətindən), ``rows`` ilə eyni sırada.
+
+    Sətir nömrəsi olan sətir: ona bağlı dərslər + (başlığın İLK sətridirsə) bağsız dərslər. Nömrəsiz (köhnə,
+    ehtiyat mənbə) sətir: başlığın bütün dərsləri."""
+    first_seen: set = set()
+    out = []
+    for row in rows:
+        week = row.get("week")
+        if not week:
+            out.append(set(covered.get(row["title"], ())))
+            continue
+        done = set(covered.get(("week", week), ()))
+        key = normalize_topic(row["title"])
+        if key not in first_seen:
+            first_seen.add(key)
+            done |= covered.get(("free", key), set())
+        out.append(done)
+    return out
+
+
+def resolve_syllabus_week(offering, topic, *, current=None, week_rows=None, kind=None, taken=None):
     """Dərs mövzusunun bağlandığı plan sətri və ya ``None`` (uydurma bağ yoxdur).
 
-    * mövzu ``current`` sətrinin başlığı ilə eynidirsə (normallaşdırılmış) — bağ QALIR (təkrar başlıq);
-    * əks halda başlığı DƏQİQ (boşluq/registr normallaşdırılmış) uyğun gələn İLK sətir;
+    * mövzu ``current`` sətrinin başlığı ilə eynidirsə (normallaşdırılmış) — bağ QALIR (təkrar başlıq,
+      modalda seçilmiş konkret sətir — ``posted_topic_week``);
+    * əks halda başlığı DƏQİQ (boşluq/registr normallaşdırılmış) uyğun gələn sətirlərdən: ``kind`` verilibsə
+      həmin növə saat verən sətirlər üstündür, ``taken`` (bu növün dərsi artıq olan sətirlər — çağırılan
+      funksiya, yalnız başlıq təkrarlananda çağırılır) çıxılır və İLK boş sətir seçilir (MR-000377: ikinci
+      «Test» dərsi ikinci «Test» sətrinə bağlanır); hamısı tutulubsa — uyğun İLK sətir;
     * uyğun sətir yoxdursa (sərbəst mətn) və ya mövzu boşdursa — ``None``."""
     key = normalize_topic(topic)
     if not key:
         return None
     rows = syllabus_week_rows(offering) if week_rows is None else week_rows
-    matches = [row["week"] for row in rows if row["title"] and normalize_topic(row["title"]) == key]
-    if current in matches:
+    matches = [row for row in rows if row["title"] and normalize_topic(row["title"]) == key]
+    weeks = [row["week"] for row in matches]
+    if current in weeks:
         return current
-    return matches[0] if matches else None
+    if len(weeks) <= 1:
+        return weeks[0] if weeks else None
+    preferred = [row["week"] for row in matches if kind and kind in row["kinds"]] or weeks
+    busy = set(taken(weeks)) if callable(taken) else set(taken or ())
+    free = [week for week in preferred if week not in busy]
+    return (free or preferred)[0]
 
 
 def posted_topic(post):
@@ -110,7 +212,17 @@ def posted_topic(post):
     custom = (post.get("lesson_topic_custom") or "").strip()
     if custom:
         return custom
-    return post.get("lesson_topic")
+    value = post.get("lesson_topic")
+    match = _WEEK_VALUE.match(value or "")
+    return match.group(2) if match else value
+
+
+def posted_topic_week(post):
+    """Modalda seçilmiş TƏKRAR başlıqlı plan sətrinin nömrəsi (``§n§başlıq`` dəyəri), yoxdursa ``None``."""
+    if (post.get("lesson_topic_custom") or "").strip():
+        return None
+    match = _WEEK_VALUE.match(post.get("lesson_topic") or "")
+    return int(match.group(1)) if match else None
 
 
 def shown_topic(lesson) -> str:
@@ -214,58 +326,53 @@ def _course_topic_titles(offering):
 
 
 def lesson_topic_choices(offering):
-    """Yeni dərs modalındakı mövzu SİYAHISI.
+    """Yeni dərs modalındakı mövzu SİYAHISI (başlıqlar, plan sırası ilə — təkrar başlıq hər sətri üçün).
 
     MƏNBƏ SIRASI: (1) təsdiqlənmiş sillabusun həftəlik planı — README §6.5
     «Təsdiqlənmiş sillabus → jurnal strukturu yaranır»; (2) sillabus yoxdursa
-    LMS kursunun mövzuları (köhnə davranış); (3) heç biri yoxdursa boş siyahı —
+    ehtiyat mənbə (LMS kursu, ``journal_topic_fallback``); (3) heç biri yoxdursa boş siyahı —
     şablon sərbəst mətn sahəsi göstərir.
     """
-    rows = syllabus_topic_rows(offering)
-    if rows:
-        return [row["title"] for row in rows]
-    from .journal_topic_fallback import fallback_topic_rows
-
-    return [row["title"] for row in fallback_topic_rows(offering)]
+    return [row["title"] for row in lesson_topic_rows(offering)]
 
 
 def lesson_topic_meta(offering, lessons):
-    """Mövzu dropdown-u üçün: hər mövzu + KEÇİRİLİB statusu (+ tarix) + DƏRS NÖVLƏRİ.
+    """Mövzu dropdown-u üçün: hər plan SƏTRİ + KEÇİRİLİB statusu (+ tarix) + DƏRS NÖVLƏRİ.
 
-    ``kinds`` sillabusun həmin mövzu üçün saat verdiyi növlərdir; modal seçilmiş
+    ``kinds`` sillabusun həmin sətir üçün saat verdiyi növlərdir; modal seçilmiş
     dərs tipinə uyğun olmayan mövzuları gizlədir (§8/0).  Sillabus mənbəyi
     yoxdursa ``kinds`` BOŞ qalır və filtr tətbiq olunmur (köhnə davranış).
 
-    «Keçirilib» bayrağı NÖV NƏZƏRƏ ALINMADAN hesablanır (mövzunun ən azı bir
+    «Keçirilib» bayrağı NÖV NƏZƏRƏ ALINMADAN hesablanır (sətrin ən azı bir
     dərsi keçilib), ``covered_kinds`` isə hansı növlərin bağlandığını göstərir.
+    Dərs sətrə ``lesson_row_matcher`` ilə sayılır (``syllabus_week``, bağsız — başlığın ilk sətri);
+    ``value`` — seçimin dəyəri (``topic_choice_value``).
     """
+    rows = lesson_topic_rows(offering)
+    # 2026-11-10 (sahib): təsdiqlənmiş sillabus yoxdursa mövzular ehtiyat mənbədən (LMS kursu → öz
+    # təsdiqlənməmiş sillabusu → eyni fənnin təsdiqlənmiş sillabusu) — bax ``journal_topic_fallback``.
+    match = lesson_row_matcher(rows)
     covered = {}
     covered_kinds = {}
     for lesson in lessons:
-        topic = shown_topic(lesson)  # mövzusuz, sillabus sətrinə bağlı dərs də sayılır (2026-10-25)
-        if not topic:
+        key = match(lesson)  # mövzusuz, sillabus sətrinə bağlı dərs də sayılır (2026-10-25)
+        if key is None:
             continue
-        covered.setdefault(topic, lesson.date)
-        covered_kinds.setdefault(topic, set()).add(lesson.kind)
-    rows = syllabus_topic_rows(offering)
-    if not rows:
-        # 2026-11-10 (sahib): təsdiqlənmiş sillabus yoxdursa mövzular ehtiyat mənbədən (LMS kursu → öz
-        # təsdiqlənməmiş sillabusu → eyni fənnin təsdiqlənmiş sillabusu) — bax ``journal_topic_fallback``.
-        from .journal_topic_fallback import fallback_topic_rows
-
-        rows = fallback_topic_rows(offering)
+        covered.setdefault(key, lesson.date)
+        covered_kinds.setdefault(key, set()).add(lesson.kind)
     meta = [
         {
             "title": row["title"],
-            "covered": row["title"] in covered,
-            "date": covered.get(row["title"]),
+            "value": row["value"],
+            "covered": row_key(row) in covered,
+            "date": covered.get(row_key(row)),
             "kinds": list(row["kinds"]),
             "kinds_attr": " ".join(row["kinds"]),
-            "covered_kinds": sorted(covered_kinds.get(row["title"], ())),
+            "covered_kinds": sorted(covered_kinds.get(row_key(row), ())),
             "week": row.get("week"),
             "fallback": bool(row.get("fallback")),
         }
-        for row in rows
+        for row in topic_choice_value(rows)
     ]
     return decorate_topic_choices(meta)
 
@@ -302,15 +409,22 @@ def decorate_topic_choices(rows) -> list:
 
 __all__ = [
     "SYLLABUS_HOUR_KINDS",
+    "add_coverage",
     "attach_syllabus_topics",
     "decorate_topic_choices",
+    "lesson_row_matcher",
     "lesson_topic_choices",
     "lesson_topic_meta",
+    "lesson_topic_rows",
     "normalize_topic",
     "posted_topic",
+    "posted_topic_week",
     "resolve_syllabus_week",
+    "row_done_kinds",
+    "row_key",
     "shown_topic",
     "syllabus_topic_rows",
     "syllabus_week_rows",
+    "topic_choice_value",
     "week_progress",
 ]

@@ -46,6 +46,11 @@ TOPICS = [
 ]
 
 
+def _rows(*titles):
+    """``journal_extras.lesson_topic_rows`` əvəzi — nömrəsiz (LMS kursu tipli) plan sətirləri."""
+    return [{"title": title, "kinds": (), "week": None} for title in titles]
+
+
 def _t(text):
     return datetime.time.fromisoformat(text)
 
@@ -137,7 +142,7 @@ class TopicsCoveredTest(SimpleTestCase):
             Lesson(topic="Giriş", kind=LessonKind.LECTURE, date=today - datetime.timedelta(days=4)),
             Lesson(topic="Giriş", kind=LessonKind.SEMINAR, date=today + datetime.timedelta(days=3)),
         ]
-        with mock.patch("apps.registrar.journal_extras.lesson_topic_choices", return_value=["Giriş"]):
+        with mock.patch("apps.registrar.journal_extras.lesson_topic_rows", return_value=_rows("Giriş")):
             plan = journal_extras.calendar_plan(object(), lessons, today)
         self.assertTrue(plan[0]["covered"])
         self.assertFalse(plan[0]["planned"])
@@ -146,7 +151,7 @@ class TopicsCoveredTest(SimpleTestCase):
         today = datetime.date(2026, 10, 17)
         held = Lesson(topic="A", kind=LessonKind.LECTURE, date=today)
         future = Lesson(topic="B", kind=LessonKind.LECTURE, date=today + datetime.timedelta(days=3))
-        with mock.patch("apps.registrar.journal_extras.lesson_topic_choices", return_value=["A", "B", "C"]):
+        with mock.patch("apps.registrar.journal_extras.lesson_topic_rows", return_value=_rows("A", "B", "C")):
             plan = {item["title"]: item for item in journal_extras.calendar_plan(object(), [held, future], today)}
         self.assertTrue(plan["A"]["covered"] and not plan["A"]["planned"])
         self.assertTrue(plan["B"]["planned"] and not plan["B"]["covered"])

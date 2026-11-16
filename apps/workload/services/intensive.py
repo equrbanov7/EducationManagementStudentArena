@@ -231,6 +231,7 @@ def create_intensive(
             "seminar": seminar,
             "students": len(students),
             "released": opened["released"],
+            "carried_lessons": opened.get("carried_lessons", 0),
         },
         reason="workload.intensive_created",
         request=request,
@@ -245,6 +246,9 @@ def create_intensive(
         "academic_year": task.academic_year,
         "students": len(students),
         "released": opened["released"],
+        # MR-000379: köhnə jurnaldan intensiv jurnala gələn dərs və xana sayı (registrar.intensive_carry).
+        "carried_lessons": opened.get("carried_lessons", 0),
+        "carried_marks": opened.get("carried_marks", 0),
     }
 
 
