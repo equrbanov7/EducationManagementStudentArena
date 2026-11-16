@@ -73,12 +73,20 @@ təhlili → digər cəhdlər (desktopda cədvəl, telefonda kart). Bütün aça
             <h2 class="ems-banner__title xr-banner__title">
                 {% if exam_intervention.action == "technical" %}
                     {% trans "İmtahanınız texniki səbəblə dayandırılıb" %}
+                {% elif exam_intervention.action == "annulled" %}
+                    {% trans "Nəticəniz ləğv olunub" %}
                 {% else %}
                     {% trans "Siz imtahandan çıxarılmısınız" %}
                 {% endif %}
             </h2>
             {% if exam_intervention.reason %}
             <p class="ems-banner__body"><strong>{% trans "Səbəb" %}:</strong> {{ exam_intervention.reason }}</p>
+            {% endif %}
+            {% comment %}Sahib 2026-11-16: uzaqlaşdırılan / nəticəsi ləğv edilən tələbəyə qeyd — jurnalda 0 bal.{% endcomment %}
+            {% if exam_intervention.action == "removed" %}
+            <p class="ems-banner__body">{% trans "İmtahandan uzaqlaşdırıldığınıza görə nəticəniz ləğv olunub (jurnalda 0 bal)." %}</p>
+            {% elif exam_intervention.action == "annulled" %}
+            <p class="ems-banner__body">{% trans "Bu imtahanın nəticəsi ləğv olunub (jurnalda 0 bal)." %}</p>
             {% endif %}
         </div>
     </div>
@@ -87,7 +95,10 @@ təhlili → digər cəhdlər (desktopda cədvəl, telefonda kart). Bütün aça
     {# ── Bal xülasəsi ─────────────────────────────────────────────────────── #}
     <section class="xr-summary" aria-labelledby="xrSummaryLabel">
         <div class="xr-summary__main">
-            {% if exam.exam_type == 'test' %}
+            {% if exam_intervention.is_annulled %}
+                {# Sahib 2026-11-16: ləğv olunmuş nəticənin balı göstərilmir (jurnalda 0). #}
+                <span class="xr-summary__waiting" aria-hidden="true"><i class="fas fa-ban"></i></span>
+            {% elif exam.exam_type == 'test' %}
                 {% if not answers_release_locked %}
                 {% trans "label_score" context "exams.template.student_exam_result" as score_word %}
                 {% include "partials/ems_ui/_score_ring.html" with ring_pct=test_result.percentage ring_label=test_result.percentage_display|add:"%" ring_tone=test_result.percentage|ems_pct_tone ring_size="lg" ring_aria=score_word|add:": "|add:test_result.score_display|add:" / "|add:test_result.max_score_display %}

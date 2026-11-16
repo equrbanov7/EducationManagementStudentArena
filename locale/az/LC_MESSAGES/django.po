@@ -119024,3 +119024,66 @@ msgstr "%(n)s açıq"
 msgctxt "accounts.workload"
 msgid "Bağlanmış etirazlar"
 msgstr "Bağlanmış etirazlar"
+
+msgctxt "exams.final_center.annul"
+msgid "İmtahandan uzaqlaşdırıldığına görə"
+msgstr "İmtahandan uzaqlaşdırıldığına görə"
+
+msgctxt "exams.final_center.annul"
+msgid "Köçürmə"
+msgstr "Köçürmə"
+
+msgctxt "exams.final_center.annul"
+msgid "Digər səbəb"
+msgstr "Digər səbəb"
+
+msgctxt "exams.final_center.error"
+msgid "Ləğv səbəbi seçilməyib."
+msgstr "Ləğv səbəbi seçilməyib."
+
+msgctxt "exams.final_center.error"
+msgid "İzahat yazılmadan nəticə ləğv edilə bilməz."
+msgstr "İzahat yazılmadan nəticə ləğv edilə bilməz."
+
+msgctxt "exams.final_center.error"
+msgid "Bu biletdə imtahan cəhdi yoxdur."
+msgstr "Bu biletdə imtahan cəhdi yoxdur."
+
+msgctxt "exams.final_center.error"
+msgid "Sınaq cəhdinin nəticəsi jurnala düşmür."
+msgstr "Sınaq cəhdinin nəticəsi jurnala düşmür."
+
+msgctxt "exams.final_center.error"
+msgid "İmtahan hələ davam edir — əvvəlcə tələbəni imtahandan çıxarın."
+msgstr "İmtahan hələ davam edir — əvvəlcə tələbəni imtahandan çıxarın."
+
+msgctxt "exams.final_center.message"
+msgid "Nəticə ləğv edildi: jurnalda 0 bal, tələbəyə qeyd göstərilir."
+msgstr "Nəticə ləğv edildi: jurnalda 0 bal, tələbəyə qeyd göstərilir."
+
+msgctxt "exams.final_center.message"
+msgid "Bu nəticə artıq ləğv olunub."
+msgstr "Bu nəticə artıq ləğv olunub."
+
+msgid "Nəticə ləğv olunub"
+msgstr "Nəticə ləğv olunub"
+
+msgid "Nəticəni ləğv et"
+msgstr "Nəticəni ləğv et"
+
+msgid "Nəticə ləğv edilsin? Jurnalda 0 bal yazılacaq."
+msgstr "Nəticə ləğv edilsin? Jurnalda 0 bal yazılacaq."
+
+msgid "İzahat"
+msgstr "İzahat"
+
+msgid "Nəticəniz ləğv olunub"
+msgstr "Nəticəniz ləğv olunub"
+
+msgid ""
+"İmtahandan uzaqlaşdırıldığınıza görə nəticəniz ləğv olunub (jurnalda 0 bal)."
+msgstr ""
+"İmtahandan uzaqlaşdırıldığınıza görə nəticəniz ləğv olunub (jurnalda 0 bal)."
+
+msgid "Bu imtahanın nəticəsi ləğv olunub (jurnalda 0 bal)."
+msgstr "Bu imtahanın nəticəsi ləğv olunub (jurnalda 0 bal)."

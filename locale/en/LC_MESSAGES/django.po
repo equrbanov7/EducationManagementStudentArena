@@ -119719,3 +119719,68 @@ msgstr "%(n)s open"
 msgctxt "accounts.workload"
 msgid "Bağlanmış etirazlar"
 msgstr "Closed objections"
+
+msgctxt "exams.final_center.annul"
+msgid "İmtahandan uzaqlaşdırıldığına görə"
+msgstr "Removed from the exam"
+
+msgctxt "exams.final_center.annul"
+msgid "Köçürmə"
+msgstr "Cheating"
+
+msgctxt "exams.final_center.annul"
+msgid "Digər səbəb"
+msgstr "Other reason"
+
+msgctxt "exams.final_center.error"
+msgid "Ləğv səbəbi seçilməyib."
+msgstr "No annulment reason selected."
+
+msgctxt "exams.final_center.error"
+msgid "İzahat yazılmadan nəticə ləğv edilə bilməz."
+msgstr "A result cannot be annulled without an explanation."
+
+msgctxt "exams.final_center.error"
+msgid "Bu biletdə imtahan cəhdi yoxdur."
+msgstr "This ticket has no exam attempt."
+
+msgctxt "exams.final_center.error"
+msgid "Sınaq cəhdinin nəticəsi jurnala düşmür."
+msgstr "A trial attempt's result is not written to the journal."
+
+msgctxt "exams.final_center.error"
+msgid "İmtahan hələ davam edir — əvvəlcə tələbəni imtahandan çıxarın."
+msgstr ""
+"The exam is still in progress — remove the student from the exam first."
+
+msgctxt "exams.final_center.message"
+msgid "Nəticə ləğv edildi: jurnalda 0 bal, tələbəyə qeyd göstərilir."
+msgstr "Result annulled: 0 points in the journal, the student sees a note."
+
+msgctxt "exams.final_center.message"
+msgid "Bu nəticə artıq ləğv olunub."
+msgstr "This result has already been annulled."
+
+msgid "Nəticə ləğv olunub"
+msgstr "Result annulled"
+
+msgid "Nəticəni ləğv et"
+msgstr "Annul result"
+
+msgid "Nəticə ləğv edilsin? Jurnalda 0 bal yazılacaq."
+msgstr "Annul the result? 0 points will be written to the journal."
+
+msgid "İzahat"
+msgstr "Explanation"
+
+msgid "Nəticəniz ləğv olunub"
+msgstr "Your result has been annulled"
+
+msgid ""
+"İmtahandan uzaqlaşdırıldığınıza görə nəticəniz ləğv olunub (jurnalda 0 bal)."
+msgstr ""
+"Because you were removed from the exam, your result has been annulled (0 "
+"points in the journal)."
+
+msgid "Bu imtahanın nəticəsi ləğv olunub (jurnalda 0 bal)."
+msgstr "The result of this exam has been annulled (0 points in the journal)."

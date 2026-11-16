@@ -159,6 +159,11 @@ urlpatterns = [
         views.exam_center_ticket_readmit,
         name="exam_center_ticket_readmit",
     ),
+    path(
+        "center/sessions/<int:session_id>/tickets/<int:ticket_id>/annul/",
+        views.exam_center_ticket_annul,
+        name="exam_center_ticket_annul",
+    ),
     path("center/reports/", views.exam_center_reports, name="exam_center_reports"),
     path("center/stats/data/", views.exam_center_stats_data, name="exam_center_stats_data"),
     path("center/stats/export/", views.exam_center_stats_export, name="exam_center_stats_export"),

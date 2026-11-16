@@ -119928,3 +119928,67 @@ msgstr "%(n)s открыто"
 msgctxt "accounts.workload"
 msgid "Bağlanmış etirazlar"
 msgstr "Закрытые возражения"
+
+msgctxt "exams.final_center.annul"
+msgid "İmtahandan uzaqlaşdırıldığına görə"
+msgstr "Удалён с экзамена"
+
+msgctxt "exams.final_center.annul"
+msgid "Köçürmə"
+msgstr "Списывание"
+
+msgctxt "exams.final_center.annul"
+msgid "Digər səbəb"
+msgstr "Другая причина"
+
+msgctxt "exams.final_center.error"
+msgid "Ləğv səbəbi seçilməyib."
+msgstr "Не выбрана причина аннулирования."
+
+msgctxt "exams.final_center.error"
+msgid "İzahat yazılmadan nəticə ləğv edilə bilməz."
+msgstr "Результат нельзя аннулировать без пояснения."
+
+msgctxt "exams.final_center.error"
+msgid "Bu biletdə imtahan cəhdi yoxdur."
+msgstr "У этого билета нет попытки экзамена."
+
+msgctxt "exams.final_center.error"
+msgid "Sınaq cəhdinin nəticəsi jurnala düşmür."
+msgstr "Результат пробной попытки не попадает в журнал."
+
+msgctxt "exams.final_center.error"
+msgid "İmtahan hələ davam edir — əvvəlcə tələbəni imtahandan çıxarın."
+msgstr "Экзамен ещё идёт — сначала удалите студента с экзамена."
+
+msgctxt "exams.final_center.message"
+msgid "Nəticə ləğv edildi: jurnalda 0 bal, tələbəyə qeyd göstərilir."
+msgstr "Результат аннулирован: в журнале 0 баллов, студент видит пометку."
+
+msgctxt "exams.final_center.message"
+msgid "Bu nəticə artıq ləğv olunub."
+msgstr "Этот результат уже аннулирован."
+
+msgid "Nəticə ləğv olunub"
+msgstr "Результат аннулирован"
+
+msgid "Nəticəni ləğv et"
+msgstr "Аннулировать результат"
+
+msgid "Nəticə ləğv edilsin? Jurnalda 0 bal yazılacaq."
+msgstr "Аннулировать результат? В журнал будет записано 0 баллов."
+
+msgid "İzahat"
+msgstr "Пояснение"
+
+msgid "Nəticəniz ləğv olunub"
+msgstr "Ваш результат аннулирован"
+
+msgid ""
+"İmtahandan uzaqlaşdırıldığınıza görə nəticəniz ləğv olunub (jurnalda 0 bal)."
+msgstr ""
+"Так как вы были удалены с экзамена, ваш результат аннулирован (в журнале 0 "
+"баллов)."
+
+msgid "Bu imtahanın nəticəsi ləğv olunub (jurnalda 0 bal)."
+msgstr "Результат этого экзамена аннулирован (в журнале 0 баллов)."

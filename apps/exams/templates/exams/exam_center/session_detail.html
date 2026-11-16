@@ -7,7 +7,7 @@
     {% comment %}ems_ui komponent qatı — müstəqil səhifədir, kabinet qabığı yoxdur
     (süzgəc paneli və boş vəziyyət üçün).{% endcomment %}
     {% include "partials/ems_ui/_assets.html" %}
-    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}?v=20261017-pkgd">
+    <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}?v=20261116-annul">
 {% endblock %}
 
 {% block content %}
@@ -95,6 +95,28 @@
                   <i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Yenidən cəhd ver" %}
                 </button>
               </form>
+              {% endif %}
+              {% comment %}Sahib 2026-11-16: nəticəni izahatla ləğv et (çıxarılmış / «Bitir» vurub balı düşmüş tələbə) —
+              jurnalda 0 bal, tələbəyə «Nəticəniz ləğv olunub» qeydi. Cəhd silinmir.{% endcomment %}
+              {% if t.result_annulled %}
+              <span class="fxc-pill fxc-pill--t-removed">{% trans "Nəticə ləğv olunub" %}</span>
+              {% elif t.can_annul %}
+              <details class="fxc-annul">
+                <summary class="fxc-btn fxc-btn-sm fxc-btn-ghost"><i class="fas fa-ban" aria-hidden="true"></i> {% trans "Nəticəni ləğv et" %}</summary>
+                <form method="post" action="{% url 'exams:exam_center_ticket_annul' session_id=session.pk ticket_id=t.pk %}" class="fxc-annul__form"
+                      data-confirm="{% trans 'Nəticə ləğv edilsin? Jurnalda 0 bal yazılacaq.' %}">
+                  {% csrf_token %}
+                  <fieldset class="fxc-annul__reasons">
+                    <legend>{% trans "Səbəb" %}</legend>
+                    {% for key, label in annul_reasons %}
+                    <label class="fxc-annul__reason"><input type="radio" name="reason" value="{{ key }}" required {% if forloop.first and t.status == "removed" %}checked{% endif %}> {{ label }}</label>
+                    {% endfor %}
+                  </fieldset>
+                  <label class="fxc-annul__label" for="annul-note-{{ t.pk }}">{% trans "İzahat" %}</label>
+                  <textarea id="annul-note-{{ t.pk }}" name="note" rows="2" required maxlength="1000" class="fxc-annul__note"></textarea>
+                  <button type="submit" class="fxc-btn fxc-btn-sm fxc-btn-danger">{% trans "Ləğv et" %}</button>
+                </form>
+              </details>
               {% endif %}
             </td>
             {% endif %}
