@@ -407,9 +407,8 @@ def test_regular_handler_cannot_pick_other_school_dean_office(world):
 def test_staff_creates_dean_application_with_chosen_school(world):
     from django.urls import reverse
 
-    from apps.applications.tests.test_endpoints import client_for
-
     from apps.applications.services import routing
+    from apps.applications.tests.test_endpoints import client_for
 
     kind = world["kinds"]["sikayet"]
     family = routing.sender_family_for(world["rim"], world["organization"])
