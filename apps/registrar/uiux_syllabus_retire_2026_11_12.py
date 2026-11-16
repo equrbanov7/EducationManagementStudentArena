@@ -45,6 +45,8 @@ def _guard(organization, syllabus, target) -> None:
         or Syllabus.objects.filter(organization=organization, reused_from=syllabus).exists()
     ):
         raise CommandError("syllabus_retire_shared")
+    if not target.get("keeper_subject_code"):
+        return  # 2026-11-16 (MR-403): səhv fənnə bağlanmış dosye — saxlanacaq «keeper» yoxdur
     keeper = Syllabus.objects.filter(
         organization=organization,
         author_id=target["author"],
@@ -57,7 +59,7 @@ def _guard(organization, syllabus, target) -> None:
         raise CommandError("syllabus_retire_keeper_missing")
 
 
-def run(*, organization, actor, counts, apply=False, target=None) -> None:
+def run(*, organization, actor, counts, apply=False, target=None, resource_type=RETIRED, reason=REASON) -> None:
     target = target or TARGET
     Syllabus = _model("syllabus", "Syllabus")
     syllabus = (
@@ -80,17 +82,17 @@ def run(*, organization, actor, counts, apply=False, target=None) -> None:
         obj=syllabus,
         old_values={"is_active": True},
         new_values={"is_active": False, "subject_code": target["subject_code"]},
-        reason=REASON,
-        resource_type=RETIRED,
+        reason=reason,
+        resource_type=resource_type,
         resource_id=str(syllabus.pk),
     )
     counts["syllabi_retired"] += 1
 
 
-def undo(*, organization, actor, counts, apply=False, target=None) -> None:
+def undo(*, organization, actor, counts, apply=False, target=None, resource_type=RETIRED) -> None:
     """Bu əmrin söndürdüyü dosye audit izinə görə yenidən aktiv olur."""
     Syllabus, AuditLog = _model("syllabus", "Syllabus"), _model("audit", "AuditLog")
-    for entry in AuditLog.objects.filter(organization=organization, resource_type=RETIRED).order_by("created_at"):
+    for entry in AuditLog.objects.filter(organization=organization, resource_type=resource_type).order_by("created_at"):
         syllabus = Syllabus.objects.filter(organization=organization, pk=entry.resource_id, is_active=False).first()
         if syllabus is None:
             counts["undo_already"] += 1
