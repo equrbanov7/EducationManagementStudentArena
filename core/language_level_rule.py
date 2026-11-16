@@ -56,9 +56,16 @@ def level_family(name) -> str:
     return re.sub(r"\s+", " ", LEVEL_RE.sub("", str(name or ""))).strip().lower()
 
 
+#: Sahib 2026-11-16: «Xarici dil 1, 2, 3 — hamısında praktiki məşğələ yazılmalıdır». Yalnız GÖRÜNÜŞ adıdır —
+#: qiymətləndirmə (10/10/10/70) bu fənlərə şamil OLUNMUR (``is_level_name`` dəyişmir). «Xarici dildə işgüzar …»
+#: tutulmur: ad «Xarici dil» + nömrə ilə başlamalıdır («Xarici dil-1», «Xarici dil 3», «xarici dil – 2 (alman)»).
+FOREIGN_LANGUAGE_COURSE_RE = re.compile(r"^\s*xarici\s+dil\s*[-–—]?\s*[123](?!\d)", re.IGNORECASE)
+
+
 def is_practical_name(name) -> bool:
-    """Bu fənnin seminarı həmişə «Praktiki məşğələ» adlanırmı (sahib 2026-11-08: səviyyə fənləri praktikidir)."""
-    return is_level_name(name)
+    """Bu fənnin seminarı həmişə «Praktiki məşğələ» adlanırmı (sahib 2026-11-08: səviyyə fənləri praktikidir;
+    2026-11-16: «Xarici dil 1/2/3» də)."""
+    return is_level_name(name) or bool(FOREIGN_LANGUAGE_COURSE_RE.match(str(name or "")))
 
 
 __all__ = [
@@ -67,6 +74,7 @@ __all__ = [
     "ATTENDANCE_MAX",
     "ENTRY_MAX",
     "EXAM_MAX",
+    "FOREIGN_LANGUAGE_COURSE_RE",
     "LEVEL_RE",
     "MIDTERM_MAX",
     "is_level_name",

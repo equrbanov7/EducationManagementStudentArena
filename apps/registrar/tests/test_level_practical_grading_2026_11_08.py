@@ -51,6 +51,16 @@ class LevelRuleRegistryTests(SimpleTestCase):
             with self.subTest(name=name):
                 self.assertFalse(levels.is_level_name(name))
 
+    def test_foreign_language_courses_are_practical_but_not_level_graded(self):
+        # Sahib 2026-11-16: «Xarici dil 1, 2, 3 — hamısında praktiki məşğələ»; qiymətləndirmə dəyişmir.
+        for name in ("Xarici dil-1", "Xarici dil 3", "xarici dil – 2 (alman)", "Xarici dil -2"):
+            with self.subTest(name=name):
+                self.assertTrue(levels.is_practical_name(name))
+                self.assertFalse(levels.is_level_name(name))
+        for name in ("Xarici dildə işgüzar və akademik kommunikasiya-1", "Xarici dil 4", "Xarici dil 12", REGULAR_NAME):
+            with self.subTest(name=name):
+                self.assertFalse(levels.is_practical_name(name))
+
     def test_caps_are_10_10_10_and_70(self):
         self.assertEqual(
             (levels.ATTENDANCE_MAX, levels.ACTIVITY_MAX, levels.MIDTERM_MAX, levels.ENTRY_MAX, levels.EXAM_MAX),
