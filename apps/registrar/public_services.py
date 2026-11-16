@@ -8,6 +8,7 @@ from . import credit_recognition_read  # noqa: F401 — «Xarici nəticənin tan
 from . import credit_source  # noqa: F401 — tələbənin fənn krediti: plan (fənn + semestr) → kataloq (R01, 2026-10-21)
 from . import dashboard_data  # noqa: F401
 from . import entry_standard  # noqa: F401
+from . import exam_journal_scope  # noqa: F401 — əkiz fənn kartı + sahibin «eyni fənn» cütləri (2026-11-16)
 from . import exam_taker_placement_2026_11_11  # noqa: F401 — imtahan verib jurnalda olmayan tələbə (2026-11-11)
 from . import gradebook  # noqa: F401
 from . import grading_scale  # noqa: F401
@@ -249,6 +250,7 @@ __all__ = [
     "twins_repair_2026_11_05b",
     "duplicate_subjects_2026_11_11",
     "duplicate_subjects_similar_2026_11_12",
+    "exam_journal_scope",
     "exam_taker_placement_2026_11_11",
     "subject_codes",
     "subject_recode",

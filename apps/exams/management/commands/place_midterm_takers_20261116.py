@@ -29,6 +29,7 @@ from django.apps import apps as django_apps
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.db import IntegrityError, transaction
+from django.db.models import Count, Q
 
 from apps.exams.models import Exam, ExamAttempt
 from apps.exams.services import exam_journal_link, midterm_journal_sync
@@ -37,6 +38,7 @@ from apps.organizations.models import Organization
 from apps.registrar.public import duplicate_subjects_2026_11_11 as duplicates
 from apps.registrar.public import exam_journal_gaps
 from apps.registrar.public import exam_journal_link as registrar_link
+from apps.registrar.public import exam_journal_scope as scope
 from apps.registrar.public import exam_taker_placement_2026_11_11 as placement
 from core.rls import bypass_rls
 from core.rls_pooling import rls_worker_atomic
@@ -44,6 +46,25 @@ from core.rls_pooling import rls_worker_atomic
 PREFIX = "midterm_takers:"
 NO_ENROLLMENT = "no_enrollment"
 WINDOW = timedelta(minutes=60)
+
+
+def _parse_aliases(raw: str) -> list:
+    pairs = []
+    for chunk in (part.strip() for part in raw.split(",")):
+        if not chunk:
+            continue
+        left, sep, right = chunk.partition("=")
+        if not sep or not left.strip() or not right.strip() or left.strip() == right.strip():
+            raise CommandError("alias_format")
+        pairs.append((left.strip(), right.strip()))
+    return pairs
+
+
+def _parse_ids(raw: str) -> set:
+    try:
+        return {int(part) for part in raw.split(",") if part.strip()}
+    except ValueError as exc:
+        raise CommandError("subgroup_exams_format") from exc
 
 
 class _DryRun(Exception):
@@ -57,11 +78,23 @@ class Command(BaseCommand):
         parser.add_argument("--org", required=True)
         parser.add_argument("--actor", required=True, help="aktiv superadmin istifadəçi adı")
         parser.add_argument("--apply", action="store_true", help="həqiqətən yaz (defolt: dry-run)")
+        parser.add_argument(
+            "--alias",
+            default="",
+            help="sahibin «eyni fənn» cütləri: QKU-A=QKU-B[,…] → Organization.settings (əkiz kart kimi)",
+        )
+        parser.add_argument(
+            "--subgroup-exams",
+            default="",
+            help="imtahan id-ləri (vergüllə): qrupunda fənnin jurnalı OLMAYAN iştirakçı fənnin mövcud jurnalına alt qrup",
+        )
 
     def handle(self, *args, **options):
         apply = bool(options["apply"])
         self.counts: Counter = Counter()
         self.by_exam: Counter = Counter()
+        self.hosts: Counter = Counter()
+        self.subgroup_exams: set = set()
         self.batch = ""
         try:
             with rls_worker_atomic(), bypass_rls():
@@ -75,8 +108,12 @@ class Command(BaseCommand):
                 if period is None:
                     raise CommandError("current_period_missing")
                 self.batch = duplicates.new_batch_id()
+                aliases = _parse_aliases(options.get("alias") or "")
+                self.subgroup_exams = _parse_ids(options.get("subgroup_exams") or "")
                 try:
                     with transaction.atomic():
+                        if aliases:
+                            self._save_aliases(organization, aliases)
                         self._run(organization, period, actor)
                         if not apply:
                             raise _DryRun
@@ -130,6 +167,50 @@ class Command(BaseCommand):
                 receipts.append({**receipt, "exam": str(attempt.exam_id), "student": attempt.user_id})
         placement.receipt(organization=organization, actor=actor, batch=self.batch, placements=receipts)
         self.counts["receipts"] = len(receipts)
+
+    def _save_aliases(self, organization, aliases) -> None:
+        """Sahibin cütlərini ``Organization.settings``-ə əlavə et (dry-run-da geri qaytarılır)."""
+        Subject = django_apps.get_model("registrar", "Subject")
+        codes = {code for pair in aliases for code in pair}
+        known = set(Subject.objects.filter(organization=organization, code__in=codes).values_list("code", flat=True))
+        missing = codes - known
+        if missing:
+            raise CommandError("alias_subject_not_found")
+        fresh = Organization.objects.select_for_update().get(pk=organization.pk)
+        current = scope.alias_pairs(fresh)
+        merged = list(current)
+        for pair in aliases:
+            if pair not in merged and pair[::-1] not in merged:
+                merged.append(pair)
+        self.counts["alias_pairs"] = len(merged)
+        self.counts["alias_added"] = len(merged) - len(current)
+        settings = dict(fresh.settings or {})
+        settings[scope.ALIAS_SETTING] = [list(pair) for pair in merged]
+        Organization.objects.filter(pk=fresh.pk).update(settings=settings)
+        organization.settings = settings
+
+    def _host_offering(self, organization, period, exam, student):
+        """Qrupunda jurnal YOXDURSA: fənnin cari dövrdəki aktiv jurnalı (imtahan müəllimininki → dil bölməsi → böyüyü)."""
+        Offering = django_apps.get_model("registrar", "CourseOffering")
+        rows = list(
+            Offering.objects.filter(
+                organization=organization, period=period, subject_id=exam.subject_id, is_active=True
+            )
+            .select_related("group")
+            .annotate(n=Count("enrollments", filter=Q(enrollments__status="enrolled")))
+        )
+        if not rows:
+            return None
+        teachers = {pk for pk in (getattr(exam, "journal_teacher_id", None), getattr(exam, "author_id", None)) if pk}
+        record = placement.credit_load.active_record(student, organization)
+        own_name = str(getattr(getattr(record, "group", None), "name", "") or "").lower()
+        own_ing = " ing" in f" {own_name}"
+
+        def rank(row):
+            name = str(getattr(row.group, "name", "") or "").lower()
+            return (row.instructor_id in teachers, (" ing" in f" {name}") == own_ing, row.n, str(row.pk))
+
+        return max(rows, key=rank)
 
     def _removed(self, attempt) -> bool:
         if getattr(attempt, "supervision_status", "") == "removed":
@@ -199,6 +280,12 @@ class Command(BaseCommand):
             self.counts[how] += 1
             if target is None:
                 return "skip_" + how, None, None
+        if target is None and gap.reason == student_gaps.NO_JOURNAL and exam.pk in self.subgroup_exams:
+            host = self._host_offering(organization, self.ctx.period, exam, attempt.user)
+            if host is not None:
+                self.counts["subgroup_host"] += 1
+                self.hosts[(exam.pk, str(host.pk))] += 1
+                target = host.pk
         if target is None:
             return f"skip_{gap.reason}", None, None
         code, row, receipt = placement.place(
@@ -213,3 +300,5 @@ class Command(BaseCommand):
         self.stdout.write(f"{PREFIX} batch id={self.batch}")
         for (exam_id, code), count in sorted(self.by_exam.items()):
             self.stdout.write(f"{PREFIX} exam id={exam_id} code={code} n={count}")
+        for (exam_id, offering), count in sorted(self.hosts.items()):
+            self.stdout.write(f"{PREFIX} host exam={exam_id} offering={offering} n={count}")
