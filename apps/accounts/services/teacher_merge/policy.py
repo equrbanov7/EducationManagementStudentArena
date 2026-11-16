@@ -94,6 +94,9 @@ _REPOINT = (
     "exams.FinalExamTicket.pin_generated_by",
     "exams.FinalExamTicket.removed_by",
     "exams.InvigilatorDuty.assigned_by",
+    # Sahib 2026-11-17: nəticə ləğvi / bərpası — aktor sahələri (kim ləğv etdi / kim bərpa etdi).
+    "exams.ExamResultAnnulment.annulled_by",
+    "exams.ExamResultAnnulment.restored_by",
     "exams.InvigilatorDuty.revoked_by",
     "exams.InvigilatorDuty.user",
     "exams.QuestionBank.created_by",

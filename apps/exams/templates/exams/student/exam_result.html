@@ -95,9 +95,8 @@ təhlili → digər cəhdlər (desktopda cədvəl, telefonda kart). Bütün aça
     {# ── Bal xülasəsi ─────────────────────────────────────────────────────── #}
     <section class="xr-summary" aria-labelledby="xrSummaryLabel">
         <div class="xr-summary__main">
-            {% if exam_intervention.is_annulled %}
-                {# Sahib 2026-11-16: ləğv olunmuş nəticənin balı göstərilmir (jurnalda 0). #}
-                <span class="xr-summary__waiting" aria-hidden="true"><i class="fas fa-ban"></i></span>
+            {% if exam_intervention.is_annulled %}{# 2026-11-16/17: ləğv (uzaqlaşdırma / köçürmə) = 0 bal, jurnal ilə eyni #}
+                {% include "partials/ems_ui/_score_ring.html" with ring_pct=0 ring_label="0" ring_tone=0|ems_pct_tone ring_size="lg" %}
             {% elif exam.exam_type == 'test' %}
                 {% if not answers_release_locked %}
                 {% trans "label_score" context "exams.template.student_exam_result" as score_word %}
@@ -121,7 +120,10 @@ təhlili → digər cəhdlər (desktopda cədvəl, telefonda kart). Bütün aça
                     {% endif %}
                 </div>
 
-                {% if exam.exam_type == 'test' %}
+                {% if exam_intervention.is_annulled %}
+                    <div class="stat-item main-score"><span class="stat-label" id="xrSummaryLabel">{% trans "label_score" context "exams.template.student_exam_result" %}</span>
+                        <span class="xr-summary__score score-points-value">0</span> <small class="xr-summary__hint">{% trans "Nəticə ləğv olunub" %}</small></div>
+                {% elif exam.exam_type == 'test' %}
                     {% if answers_release_locked %}
                     <p class="xr-inline-note xr-inline-note--info" id="xrSummaryLabel">
                         <i class="fas fa-lock" aria-hidden="true"></i>

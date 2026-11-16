@@ -55,6 +55,10 @@ Object.assign(ExamSupervision, {
                         window.location.replace(data.redirect_url || "/exams/final/");
                         return;
                     }
+                    // 2026-11-17: WS qırıq olsa da əlavə vaxt status sorğusu ilə çatır (cəm, idempotent).
+                    if (data && data.extra_time_seconds !== undefined && self._emitTimeExtended) {
+                        self._emitTimeExtended(data.extra_time_seconds);
+                    }
                     if (callback) callback(data);
                 })
                 .catch(function () {})

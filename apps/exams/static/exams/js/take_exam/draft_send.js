@@ -244,6 +244,10 @@
                     if (ctx.autosaveRevisionField && typeof data.server_revision !== "undefined") {
                         ctx.autosaveRevisionField.value = String(data.server_revision);
                     }
+                    // Sahib 2026-11-17: nəzarətçinin verdiyi əlavə vaxt (cəm) — WS/status sorğusu olmasa da çatır.
+                    if (data && data.extra_time_seconds !== undefined && ns.timers && ns.timers.applyExtraTime) {
+                        ns.timers.applyExtraTime(ctx, data.extra_time_seconds);
+                    }
                     if (ns.resync) ns.resync.confirm(ctx, sentValues);
                     if (sentRevision === ctx.answerRevision) {
                         if (effectiveAction === "autosave" && !ctx.autoSaveBinaryUploadsEnabled) {

@@ -172,6 +172,11 @@ def _collect_my_results(request, filter_type=None, search=None, year=None, seaso
             is_graded_visible = (
                 attempt.checked_by_teacher or score_value is not None or pending_score_attempt is not None
             )
+            # Sahib 2026-11-17: uzaqlaşdırılan / nəticəsi ləğv edilən tələbənin kabinetində bal 0-dır (jurnal ilə
+            # eyni) — xam bal göstərilmir, səbəb kartda qalır.
+            annulled = bool(attempt.exam_intervention.get("is_annulled"))
+            if annulled:
+                score_value, score_percent_value, pending_score_attempt, is_graded_visible = "0", "0%", None, True
             items.append(
                 {
                     "category": "exams",
@@ -187,9 +192,10 @@ def _collect_my_results(request, filter_type=None, search=None, year=None, seaso
                     "status_raw": attempt.get_status_display(),
                     "score": score_value if is_graded_visible else None,
                     "score_percent": score_percent_value if is_graded_visible else "",
-                    "score_pct_value": None,
-                    "feedback": attempt.teacher_feedback if is_graded_visible else "",
+                    "score_pct_value": 0.0 if annulled else None,
+                    "feedback": attempt.teacher_feedback if is_graded_visible and not annulled else "",
                     "removed_from_exam": attempt.exam_intervention["is_terminal"],
+                    "result_annulled": annulled,
                     "attempt_id": attempt.id,
                     "pending_score_attempt": pending_score_attempt,
                     "removal_reason": attempt.exam_intervention["reason"],

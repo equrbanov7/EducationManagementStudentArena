@@ -4,7 +4,10 @@
 # SHARED VIEWS (bütün user-lər üçün ortaq)
 # ═══════════════════════════════════════════════════════════════
 from .exam_center import (
+    exam_center_annulment_document,
+    exam_center_attempt_annul,
     exam_center_attempt_note,
+    exam_center_attempt_restore,
     exam_center_attempt_violations,
     exam_center_final_device_change,
     exam_center_pin_search,
@@ -36,6 +39,7 @@ from .exam_center import (
     exam_center_student_pins,
     exam_center_ticket_annul,
     exam_center_ticket_device_release,
+    exam_center_ticket_extra_time,
     exam_center_ticket_pin_reissue,
     exam_center_ticket_pin_reveal,
     exam_center_ticket_readmit,
@@ -337,6 +341,10 @@ __all__ = [
     "exam_center_session_snapshot",
     "exam_center_session_start",
     "exam_center_ticket_annul",
+    "exam_center_ticket_extra_time",
+    "exam_center_attempt_annul",
+    "exam_center_attempt_restore",
+    "exam_center_annulment_document",
     "exam_center_ticket_readmit",
     "exam_center_ticket_reentry",
     "exam_center_final_device_change",

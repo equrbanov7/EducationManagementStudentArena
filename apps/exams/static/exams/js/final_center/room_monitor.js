@@ -199,7 +199,9 @@
                 '<td><span class="fxc-conn" data-state="' + connCls + '">' + connTxt + "</span></td>" +
                 '<td><span class="fxc-pill fxc-pill--t-' + esc(s.status) + '">' +
                     esc(STATUS_LABELS[s.status] || s.status) + "</span></td>" +
-                '<td class="fxc-num">' + formatRemaining(s.remaining_seconds) + "</td>" +
+                '<td class="fxc-num">' + formatRemaining(s.remaining_seconds) +
+                    (s.extra_minutes ? ' <span class="fxc-extra-badge"><i class="fas fa-clock" aria-hidden="true"></i> +' +
+                        esc(s.extra_minutes) + "</span>" : "") + "</td>" +
                 "<td>" + formatTime(s.last_seen_at) + "</td>" +
                 '<td class="fxc-num">' + esc(s.reconnect_count || 0) + "</td>" +
                 "<td>" + (warn.join(" ") || '<span class="fxc-muted">—</span>') + "</td>" +

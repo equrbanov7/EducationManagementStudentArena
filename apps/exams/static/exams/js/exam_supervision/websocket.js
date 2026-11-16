@@ -60,6 +60,17 @@ Object.assign(ExamSupervision, {
             }
         },
 
+        // Sahib 2026-11-17: nəzarətçinin verdiyi əlavə vaxt — CƏM saniyə imtahan taymerinə (take_exam/timers.js
+        // `ems:exam-time-extended`) ötürülür; taymer yalnız artımı əlavə edir (təkrar xəbər zərərsizdir).
+        _emitTimeExtended: function (totalSeconds) {
+            if (totalSeconds === undefined || totalSeconds === null) return;
+            try {
+                document.dispatchEvent(new CustomEvent("ems:exam-time-extended", {
+                    detail: { extraTimeSeconds: totalSeconds }
+                }));
+            } catch (e) {}
+        },
+
         _handleWsEvent: function (data) {
             if (!data || !data.action) return;
 
@@ -95,6 +106,8 @@ Object.assign(ExamSupervision, {
                 }
                 this._updateBadge();
                 this._showResumeFullscreenOverlay(null);
+            } else if (data.action === "time_extended") {
+                this._emitTimeExtended(data.extra_time_seconds);
             } else if (data.action === "session_revoked") {
                 this._closeWebSocket();
                 // 2026-10-20: midterm mərkəz cəhdi öz giriş səhifəsinə (/exams/midterm/) qayıdır.

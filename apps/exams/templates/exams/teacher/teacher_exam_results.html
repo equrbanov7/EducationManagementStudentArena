@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="{% static 'exams/css/teacher_page_shell.css' %}?v=20261010-wp3exams">
     <link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results_page.css' %}?v=20261025-filters">
     {% if can_reset_attempts %}<link rel="stylesheet" href="{% static 'exams/css/teacher_exam_results_reset.css' %}?v=20261111-all">{% endif %}
+    {% if can_annul_results %}<link rel="stylesheet" href="{% static 'exams/css/result_annul_dialog.css' %}?v=20261117-annul2">{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -294,6 +295,7 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
 </div>
 
 {% if can_reset_attempts %}{% include "exams/teacher/partials/results/_reset_modals.html" %}{% endif %}
+{% if can_annul_results %}{% include "exams/partials/_result_annul_dialogs.html" %}{% endif %}
 
 {% if can_delete_attempts %}
     <form id="deleteAttemptsForm" method="post" action="{% url 'exams:delete_exam_attempts' exam.slug %}" class="d-none">
@@ -332,4 +334,5 @@ sıralama/səhifələmə parametrləri və JS qarmaqları dəyişməyib.{% endco
 <script src="{% static 'js/results_bulk_actions.js' %}"></script>
 <script src="{% static 'exams/js/teacher_exam_results.js' %}?v=20261025-filters"></script>
 {% if can_reset_attempts %}<script src="{% static 'exams/js/teacher_exam_results_reset.js' %}?v=20261111-all"></script>{% endif %}
+{% if can_annul_results %}<script src="{% static 'exams/js/result_annul_dialog.js' %}?v=20261117-annul3"></script>{% endif %}
 {% endblock %}

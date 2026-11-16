@@ -119992,3 +119992,233 @@ msgstr ""
 
 msgid "Bu imtahanın nəticəsi ləğv olunub (jurnalda 0 bal)."
 msgstr "Результат этого экзамена аннулирован (в журнале 0 баллов)."
+
+msgctxt "exams.final_center.annul"
+msgid "Qadağan olunmuş vasitədən istifadə (telefon və s.)"
+msgstr "Использование запрещённых средств (телефон и т. п.)"
+
+msgctxt "exams.final_center.annul"
+msgid "İmtahanı başqası verib"
+msgstr "Экзамен сдавал другой человек"
+
+msgctxt "exams.final_center.annul"
+msgid ""
+"Bu tələbənin nəticəsi ləğv ediləcək: jurnalda 0 bal yazılacaq və tələbəyə "
+"səbəb göstəriləcək. Təsdiq edirsiniz?"
+msgstr ""
+"Результат этого студента будет аннулирован: в журнал запишется 0 баллов, "
+"студенту будет показана причина. Подтверждаете?"
+
+msgctxt "exams.final_center.annul"
+msgid "Bərpa səbəbi"
+msgstr "Причина восстановления"
+
+msgctxt "exams.final_center.annul"
+msgid "Bərpa səbəbi (məcburi)"
+msgstr "Причина восстановления (обязательно)"
+
+msgctxt "exams.final_center.annul"
+msgid "Bərpa səbəbini yazın."
+msgstr "Укажите причину восстановления."
+
+msgctxt "exams.final_center.annul"
+msgid ""
+"Cəhd silinmir. Jurnalda 0 bal yazılır, tələbənin kabinetində «Nəticəniz ləğv"
+" olunub» və səbəb görünür. Səhv olarsa «Ləğvi bərpa et» ilə geri qaytarmaq "
+"olar."
+msgstr ""
+"Попытка не удаляется. В журнал записывается 0 баллов, в кабинете студента "
+"видно «Ваш результат аннулирован» и причина. При ошибке можно вернуть "
+"кнопкой «Восстановить»."
+
+msgctxt "exams.final_center.annul"
+msgid "Davam et"
+msgstr "Далее"
+
+msgctxt "exams.final_center.annul"
+msgid "Geri"
+msgstr "Назад"
+
+msgctxt "exams.final_center.annul"
+msgid "Hadisə tarixi"
+msgstr "Дата инцидента"
+
+msgctxt "exams.final_center.annul"
+msgid ""
+"Ləğv geri qaytarılsın? Tələbənin əvvəlki nəticəsi kabinetdə və jurnalda "
+"bərpa olunacaq."
+msgstr ""
+"Отменить аннулирование? Прежний результат студента будет восстановлен в "
+"кабинете и журнале."
+
+msgctxt "exams.final_center.annul"
+msgid ""
+"Ləğv geri qaytarılır: əvvəlki bal və jurnal dəyəri bərpa olunur. Ləğv qeydi "
+"tarixçədə qalır."
+msgstr ""
+"Аннулирование отменяется: прежний балл и значение в журнале "
+"восстанавливаются. Запись об аннулировании остаётся в истории."
+
+msgctxt "exams.final_center.annul"
+msgid "Ləğvi bərpa et"
+msgstr "Восстановить результат"
+
+msgctxt "exams.final_center.annul"
+msgid "Səbəbi seçin və izahatı yazın."
+msgstr "Выберите причину и напишите пояснение."
+
+msgctxt "exams.final_center.annul"
+msgid "Sənəd"
+msgstr "Документ"
+
+msgctxt "exams.final_center.annul"
+msgid "Sənəd (istəyə görə)"
+msgstr "Документ (необязательно)"
+
+msgctxt "exams.final_center.annul"
+msgid "Təsdiq et və bərpa et"
+msgstr "Подтвердить и восстановить"
+
+msgctxt "exams.final_center.annul"
+msgid "Təsdiq et və ləğv et"
+msgstr "Подтвердить и аннулировать"
+
+msgctxt "exams.final_center.annul"
+msgid "İmtina"
+msgstr "Отмена"
+
+msgctxt "exams.final_center.annul"
+msgid "İzahat (məcburi)"
+msgstr "Пояснение (обязательно)"
+
+msgctxt "exams.final_center.error"
+msgid "Bərpa səbəbi yazılmadan ləğv geri qaytarılmır."
+msgstr "Аннулирование нельзя отменить без указания причины."
+
+msgctxt "exams.final_center.error"
+msgid "Hadisə tarixi gələcəkdə ola bilməz."
+msgstr "Дата инцидента не может быть в будущем."
+
+msgctxt "exams.final_center.error"
+msgid "Sənəd 10 MB-dan böyük ola bilməz."
+msgstr "Документ не может быть больше 10 МБ."
+
+msgctxt "exams.final_center.error"
+msgid "Sənəd PDF, şəkil (PNG/JPG) və ya Word faylı olmalıdır."
+msgstr "Документ должен быть PDF, изображением (PNG/JPG) или файлом Word."
+
+msgctxt "exams.final_center.error"
+msgid "Tarix düzgün deyil."
+msgstr "Неверная дата."
+
+msgctxt "exams.final_center.message"
+msgid "Bu nəticə ləğv olunmayıb — bərpa ediləcək bir şey yoxdur."
+msgstr "Этот результат не аннулирован — восстанавливать нечего."
+
+msgctxt "exams.final_center.message"
+msgid "Ləğv geri qaytarıldı: əvvəlki nəticə bərpa olundu."
+msgstr "Аннулирование отменено: прежний результат восстановлен."
+
+msgctxt "exams.model.result_annulment"
+msgid "İmtahan nəticəsinin ləğvi"
+msgstr "Аннулирование результата экзамена"
+
+msgctxt "exams.model.result_annulment"
+msgid "İmtahan nəticələrinin ləğvi"
+msgstr "Аннулирования результатов экзамена"
+
+msgctxt "exams.time_extension"
+msgid "Artıq verilib: +%%(minutes)s dəq"
+msgstr "Уже добавлено: +%%(minutes)s мин"
+
+#, python-format
+msgctxt "exams.time_extension"
+msgid "Bir dəfəyə %(min)d–%(max)d dəqiqə əlavə etmək olar."
+msgstr "За один раз можно добавить %(min)d–%(max)d минут."
+
+#, python-format
+msgctxt "exams.time_extension"
+msgid ""
+"Bir tələbəyə cəmi %(max)d dəqiqədən çox əlavə vaxt verilə bilməz (artıq "
+"verilib: %(given)d dəq)."
+msgstr ""
+"Студенту нельзя добавить больше %(max)d минут в сумме (уже добавлено: "
+"%(given)d мин)."
+
+msgctxt "exams.time_extension"
+msgid "Bu imtahanda vaxt limiti yoxdur — əlavə vaxt lazım deyil."
+msgstr ""
+"У этого экзамена нет ограничения по времени — дополнительное время не нужно."
+
+msgctxt "exams.time_extension"
+msgid ""
+"Bu tələbəyə %%(minutes)s dəqiqə əlavə vaxt verilsin? Yalnız onun vaxtı "
+"uzanacaq, digər tələbələrə toxunulmur."
+msgstr ""
+"Добавить этому студенту %%(minutes)s минут? Продлится только его время, "
+"других студентов это не затронет."
+
+msgctxt "exams.time_extension"
+msgid "Dəqiqə"
+msgstr "Минуты"
+
+msgctxt "exams.time_extension"
+msgid "Dəqiqə sayını rəqəmlə yazın."
+msgstr "Укажите количество минут числом."
+
+msgctxt "exams.time_extension"
+msgid "Məs.: kompüter dondu, tələbə 7 dəqiqə itirdi"
+msgstr "Напр.: компьютер завис, студент потерял 7 минут"
+
+#, python-format
+msgctxt "exams.time_extension"
+msgid "Sizə %(minutes)s dəqiqə əlavə vaxt verildi."
+msgstr "Вам добавлено %(minutes)s минут."
+
+msgctxt "exams.time_extension"
+msgid "Səbəb (məcburi)"
+msgstr "Причина (обязательно)"
+
+msgctxt "exams.time_extension"
+msgid "Tez seçim"
+msgstr "Быстрый выбор"
+
+msgctxt "exams.time_extension"
+msgid "Tələbə imtahanı artıq bitirib — əlavə vaxt verilə bilməz."
+msgstr "Студент уже завершил экзамен — дополнительное время дать нельзя."
+
+msgctxt "exams.time_extension"
+msgid "Tələbənin davam edən imtahanı yoxdur."
+msgstr "У студента нет текущего экзамена."
+
+#, python-format
+msgctxt "exams.time_extension"
+msgid ""
+"Tələbəyə %(added)d dəqiqə əlavə olundu (cəmi əlavə: %(total)d dəq). Yeni "
+"bitmə vaxtı: %(time)s."
+msgstr ""
+"Студенту добавлено %(added)d мин (всего добавлено: %(total)d мин). Новое "
+"время окончания: %(time)s."
+
+msgctxt "exams.time_extension"
+msgid "Çox tez-tez sorğu — bir az sonra yenidən cəhd edin."
+msgstr "Слишком частые запросы — попробуйте чуть позже."
+
+msgctxt "exams.time_extension"
+msgid ""
+"İmtahan vaxtı artıq bitib — əlavə vaxt yalnız davam edən imtahana verilir."
+msgstr ""
+"Время экзамена уже истекло — дополнительное время даётся только идущему "
+"экзамену."
+
+msgctxt "exams.time_extension"
+msgid "Əlavə vaxt"
+msgstr "Дополнительное время"
+
+msgctxt "exams.time_extension"
+msgid "Əlavə vaxt ver"
+msgstr "Добавить время"
+
+msgctxt "exams.time_extension"
+msgid "Əlavə vaxtın səbəbini yazın."
+msgstr "Укажите причину дополнительного времени."

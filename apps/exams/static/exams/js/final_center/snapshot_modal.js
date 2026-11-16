@@ -360,6 +360,11 @@
     window.FXCSnapshot = {
         open: open,
         close: close,
-        setOnChange: function (fn) { onChange = fn; }
+        setOnChange: function (fn) { onChange = fn; },
+        // 2026-11-17: modalın əlavə modulları (snapshot_time_actions.js) əməldən sonra görüntünü və monitoru yeniləyir.
+        reload: function () {
+            load(true);
+            if (typeof onChange === "function") onChange();
+        }
     };
 })();

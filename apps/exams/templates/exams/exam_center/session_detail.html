@@ -8,6 +8,7 @@
     (süzgəc paneli və boş vəziyyət üçün).{% endcomment %}
     {% include "partials/ems_ui/_assets.html" %}
     <link rel="stylesheet" href="{% static 'exams/css/final_center/center.css' %}?v=20261116-annul">
+    <link rel="stylesheet" href="{% static 'exams/css/result_annul_dialog.css' %}?v=20261117-annul2">
 {% endblock %}
 
 {% block content %}
@@ -96,27 +97,22 @@
                 </button>
               </form>
               {% endif %}
-              {% comment %}Sahib 2026-11-16: nəticəni izahatla ləğv et (çıxarılmış / «Bitir» vurub balı düşmüş tələbə) —
-              jurnalda 0 bal, tələbəyə «Nəticəniz ləğv olunub» qeydi. Cəhd silinmir.{% endcomment %}
+              {% comment %}Sahib 2026-11-16/17: nəticəni izahatla ləğv et (çıxarılmış / «Bitir» vurub balı düşmüş tələbə) —
+              jurnalda 0 bal, tələbəyə «Nəticəniz ləğv olunub» qeydi; səhv olarsa «Ləğvi bərpa et». Cəhd silinmir.
+              İki addımlı pəncərə: _result_annul_dialogs.html.{% endcomment %}
               {% if t.result_annulled %}
               <span class="fxc-pill fxc-pill--t-removed">{% trans "Nəticə ləğv olunub" %}</span>
+              <button type="button" class="fxc-btn fxc-btn-sm fxc-btn-ghost" data-restore-open
+                      data-restore-url="{% url 'exams:exam_center_attempt_restore' attempt_id=t.attempt_id %}"
+                      data-restore-student="{{ t.student.get_full_name|default:t.student.username }} · {{ t.exam.title }}">
+                <i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Ləğvi bərpa et" context "exams.final_center.annul" %}
+              </button>
               {% elif t.can_annul %}
-              <details class="fxc-annul">
-                <summary class="fxc-btn fxc-btn-sm fxc-btn-ghost"><i class="fas fa-ban" aria-hidden="true"></i> {% trans "Nəticəni ləğv et" %}</summary>
-                <form method="post" action="{% url 'exams:exam_center_ticket_annul' session_id=session.pk ticket_id=t.pk %}" class="fxc-annul__form"
-                      data-confirm="{% trans 'Nəticə ləğv edilsin? Jurnalda 0 bal yazılacaq.' %}">
-                  {% csrf_token %}
-                  <fieldset class="fxc-annul__reasons">
-                    <legend>{% trans "Səbəb" %}</legend>
-                    {% for key, label in annul_reasons %}
-                    <label class="fxc-annul__reason"><input type="radio" name="reason" value="{{ key }}" required {% if forloop.first and t.status == "removed" %}checked{% endif %}> {{ label }}</label>
-                    {% endfor %}
-                  </fieldset>
-                  <label class="fxc-annul__label" for="annul-note-{{ t.pk }}">{% trans "İzahat" %}</label>
-                  <textarea id="annul-note-{{ t.pk }}" name="note" rows="2" required maxlength="1000" class="fxc-annul__note"></textarea>
-                  <button type="submit" class="fxc-btn fxc-btn-sm fxc-btn-danger">{% trans "Ləğv et" %}</button>
-                </form>
-              </details>
+              <button type="button" class="fxc-btn fxc-btn-sm fxc-btn-ghost" data-annul-open
+                      data-annul-url="{% url 'exams:exam_center_attempt_annul' attempt_id=t.attempt_id %}"
+                      data-annul-student="{{ t.student.get_full_name|default:t.student.username }} · {{ t.exam.title }}">
+                <i class="fas fa-ban" aria-hidden="true"></i> {% trans "Nəticəni ləğv et" %}
+              </button>
               {% endif %}
             </td>
             {% endif %}
@@ -131,6 +127,8 @@
     {% include "partials/ems_ui/_empty.html" with state_icon="fa-user-clock" state_title=sd_empty state_body=sd_empty_body %}
     {% endif %}
   </section>
+
+  {% if can_manage %}{% include "exams/partials/_result_annul_dialogs.html" %}{% endif %}
 
   {% if can_manage and not session.is_finished and session.state != "active" %}
   <section class="fxc-danger-zone">
@@ -149,4 +147,5 @@
 
 {% block extraJs %}
     <script src="{% static 'exams/js/final_center/confirm_forms.js' %}" defer></script>
+    <script src="{% static 'exams/js/result_annul_dialog.js' %}?v=20261117-annul3" defer></script>
 {% endblock %}

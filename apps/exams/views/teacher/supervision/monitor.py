@@ -219,7 +219,9 @@ def supervision_status_api(request, attempt_id):
             status=403,
         )
     if not exam_supervision_enabled():
-        return _status_json_response(request, disabled_supervision_status(attempt))
+        payload = disabled_supervision_status(attempt)
+        payload["extra_time_seconds"] = attempt.extra_time_seconds
+        return _status_json_response(request, payload)
 
     is_manual_lock = bool(attempt.supervision_manual_lock and attempt.supervision_status == "locked")
     if not is_manual_lock:
@@ -228,4 +230,6 @@ def supervision_status_api(request, attempt_id):
     status = get_attempt_supervision_status(attempt)
     status["is_finished"] = attempt.is_finished
     status["attempt_status"] = attempt.status
+    # Sahib 2026-11-17: fərdi əlavə vaxtın CƏMİ (ETag-sabit) — brauzer artımı öz deadline-ına əlavə edir.
+    status["extra_time_seconds"] = attempt.extra_time_seconds
     return _status_json_response(request, status)

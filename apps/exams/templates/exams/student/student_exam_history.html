@@ -148,7 +148,10 @@ Bal xülasəsi view-dakı TOPLU `attach_test_result_summaries`-dən gəlir (səh
                             </span>
                         </td>
                         <td data-label="{% trans 'Qiymət' %}">
-                            {% if attempt.exam.exam_type == 'test' and attempt.can_view_result %}
+                            {% if attempt.exam_intervention.is_annulled %}
+                                {# Sahib 2026-11-17: uzaqlaşdırma / ləğv — 0 bal (jurnal ilə eyni), xam bal göstərilmir. #}
+                                <span class="xh-score__text"><strong>0</strong> <small>{% trans "Nəticə ləğv olunub" %}</small></span>
+                            {% elif attempt.exam.exam_type == 'test' and attempt.can_view_result %}
                                 <span class="xh-score">
                                     {% include "partials/ems_ui/_score_ring.html" with ring_pct=attempt.test_result.percentage ring_label=attempt.test_result.percentage_display|add:"%" ring_tone=attempt.test_result.percentage|ems_pct_tone ring_size="sm" %}
                                     <span class="xh-score__text">

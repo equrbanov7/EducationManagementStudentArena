@@ -1,0 +1,101 @@
+/* Zal monitoru — tələbə modalında «Əlavə vaxt» bloku (sahib 2026-11-17).
+   Markup: exams/exam_center/_snapshot_modal.html (#fxc-time-tools); JS: snapshot_time_actions.js. */
+
+.fxc-time-tools {
+    background: var(--ems-warning-bg);
+    border: 1px solid var(--ems-warning-bd);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin: 0 0 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fxc-time-tools[hidden],
+.fxc-time-tools [hidden] { display: none; }
+
+.fxc-time-tools__head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: .9rem;
+    font-weight: 600;
+    color: var(--ems-neutral-800);
+}
+
+.fxc-time-tools__head > i { color: var(--ems-warning-600); }
+
+.fxc-time-tools__given {
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--ems-warning-700);
+    background: var(--ems-bg);
+    border: 1px solid var(--ems-warning-bd);
+    border-radius: 999px;
+    padding: 1px 8px;
+}
+
+.fxc-time-tools__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.fxc-time-tools__field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--ems-neutral-700);
+}
+
+.fxc-time-tools__minutes {
+    width: 90px;
+    font-size: .95rem;
+    padding: 6px 8px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 6px;
+    font-variant-numeric: tabular-nums;
+}
+
+.fxc-time-tools__quick { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.fxc-time-tools__reason {
+    width: 100%;
+    font-size: .85rem;
+    font-weight: 400;
+    padding: 6px 8px;
+    border: 1px solid var(--ems-neutral-300);
+    border-radius: 6px;
+    resize: vertical;
+}
+
+.fxc-time-tools__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.fxc-time-tools__note,
+.fxc-time-tools__warn {
+    margin: 0;
+    font-size: .8rem;
+    line-height: 1.45;
+}
+
+.fxc-time-tools__note { color: var(--ems-success-700); font-weight: 600; }
+.fxc-time-tools__warn { color: var(--ems-danger-strong); font-weight: 600; }
+
+/* Monitor sətri / xəritə: əlavə vaxt verilmiş tələbənin nişanı. */
+.fxc-extra-badge {
+    display: inline-block;
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--ems-warning-700);
+    background: var(--ems-warning-bg);
+    border: 1px solid var(--ems-warning-bd);
+    border-radius: 999px;
+    padding: 0 6px;
+    margin-left: 4px;
+    white-space: nowrap;
+}

@@ -335,6 +335,8 @@ def _attempt_effective_duration(attempt, effective_finish):
         effective_duration = max(int((effective_finish - attempt.started_at).total_seconds()), 0)
     if effective_duration is not None:
         limit_seconds = _attempt_time_limit_seconds(attempt)
+        if limit_seconds:
+            limit_seconds += int(getattr(attempt, "extra_time_seconds", 0) or 0)  # 2026-11-17: fərdi əlavə vaxt
         if limit_seconds and effective_duration > limit_seconds:
             effective_duration = limit_seconds
     return effective_duration

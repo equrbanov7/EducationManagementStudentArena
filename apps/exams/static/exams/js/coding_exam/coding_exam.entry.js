@@ -22,6 +22,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (ctx.timerValue && ctx.config.remainingSeconds !== null && ctx.config.remainingSeconds !== undefined) {
         var remaining = parseInt(ctx.config.remainingSeconds, 10) || 0;
+        // Sahib 2026-11-17: nəzarətçinin əlavə vaxtı — serverdəki CƏM gəlir, yalnız artım əlavə olunur.
+        var knownExtra = parseInt(ctx.config.extraTimeSeconds, 10) || 0;
+        var timeUp = false;
+        document.addEventListener("ems:exam-time-extended", function (event) {
+            var total = parseInt(event && event.detail ? event.detail.extraTimeSeconds : "", 10);
+            if (isNaN(total) || total <= knownExtra) {
+                return;
+            }
+            var added = total - knownExtra;
+            knownExtra = total;
+            if (!timeUp) {
+                remaining += added;
+            }
+        });
         var timerId = window.setInterval(function () {
             ctx.timerValue.textContent = formatTime(remaining);
             if (ctx.timerNode) {
@@ -31,6 +45,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 ctx.timeWarning.maybeShow(remaining);
             }
             if (remaining <= 0) {
+                timeUp = true;
                 window.clearInterval(timerId);
                 ctx.setStatus(ctx.i18n.timeOver || "Time is over");
                 ctx.submitCode();

@@ -48,6 +48,13 @@ test balı + `appeal` səhifə üçün `fill_my_results_scores`-dan). Mobil-önc
                 <span><strong>{% trans "Səbəb" %}:</strong> {{ item.removal_reason|truncatechars:180 }}</span>
             </p>
             {% endif %}
+            {% if item.result_annulled %}
+            {# Sahib 2026-11-17: uzaqlaşdırma / köçürmə — nəticə ləğv olunub, jurnalda 0 bal. #}
+            <p class="mr-note mr-note--danger">
+                <i class="fas fa-ban" aria-hidden="true"></i>
+                <span>{% trans "Bu imtahanın nəticəsi ləğv olunub (jurnalda 0 bal)." %}</span>
+            </p>
+            {% endif %}
 
             {% if item.score != None %}
             <div class="mr-score">

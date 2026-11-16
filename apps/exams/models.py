@@ -33,6 +33,7 @@ from apps.exams.domain.question_bank import (
     question_media_path,
     validate_video_size,
 )
+from apps.exams.domain.result_annulment import ExamResultAnnulment
 from apps.exams.domain.student_access import ExamStudentPin, StudentExamAttemptGrant
 from apps.exams.domain.submission_events import QuestionSubmissionEvent
 from apps.exams.domain.submission_inbox import QuestionSubmission
@@ -56,6 +57,7 @@ __all__ = [
     "ExamLanguageVariant",
     "ExamQuestion",
     "ExamQuestionOption",
+    "ExamResultAnnulment",
     "ExamRoom",
     "ExamRoomComputer",
     "ExamRoomSession",

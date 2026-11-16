@@ -498,6 +498,8 @@ def remove_student(ticket, by, *, action="removed", reason="", allow_reentry=Fal
             from apps.exams.services.supervision import teacher_stop_attempt
 
             teacher_stop_attempt(attempt, by, reason=reason, action=action)
+        elif action == "removed":
+            _annul_finished_on_removal(attempt, by, reason=reason, request=request)
 
     if not allow_reentry:
         revoke_ticket_pin(ticket)
@@ -523,6 +525,19 @@ def remove_student(ticket, by, *, action="removed", reason="", allow_reentry=Fal
         },
     )
     return True
+
+
+def _annul_finished_on_removal(attempt, by, *, reason, request=None) -> None:
+    """Sahib 2026-11-17: tələbə «Bitir» vurub cəhd artıq bitibsə, uzaqlaşdırma balı da sıfırlamalıdır.
+
+    Əvvəl bilet ``removed`` olurdu, amma bitmiş cəhdə toxunulmurdu — jurnalda və kabinetdə bal qalırdı.
+    İndi uzaqlaşdırma səbəbi ilə nəticə ləğv edilir (0 bal, tələbəyə qeyd; «Bərpa et» ilə geri qaytarılır)."""
+    from .result_annul import ANNUL_REMOVED, annul_attempt_result
+
+    try:
+        annul_attempt_result(attempt, by, reason_key=ANNUL_REMOVED, note=reason, request=request)
+    except TicketStateError:
+        logger.warning("remove_student: finished attempt %s not annulled", attempt.pk, exc_info=True)
 
 
 def readmit_student(ticket, by, *, request=None) -> bool:

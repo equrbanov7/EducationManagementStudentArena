@@ -94,6 +94,7 @@ imtahana buraxılıram? (status badge — rəng + MƏTN, handoff §7) → sillab
             {{ attempt.label }} {% trans "cəhd" context "profile.subjects" %}{% if attempt.is_retake %} ({% trans "25% təkrar imtahan" context "registrar.retake" %}){% endif %}:
             <strong>{% if attempt.percent is not None %}{{ attempt.percent }}{% else %}—{% endif %}</strong>
             · {% if attempt.is_official %}{% trans "rəsmi" context "profile.subjects" %}{% else %}{% trans "ləğv olundu" context "profile.subjects" %}{% endif %}
+            {% if attempt.is_expelled %}· {% trans "Nəticə ləğv olunub" %}{% endif %}
         </li>
         {% endfor %}
     </ul>

@@ -124,6 +124,8 @@ def _ticket_row(ticket, presence, exam_title=None):
         "remaining_seconds": remaining_seconds,
         # Mütləq son an (ETag-sabit; JS server saatı ilə geri sayır) — 2026-10-13.
         "deadline_at": _deadline_iso(attempt),
+        # Sahib 2026-11-17: nəzarətçinin bu tələbəyə verdiyi əlavə vaxt (dəqiqə) — sətirdə «+N dəq» nişanı.
+        "extra_minutes": (attempt.extra_time_seconds or 0) // 60 if attempt else 0,
         "supervision_status": attempt.supervision_status if attempt else None,
         "violation_count": attempt.supervision_violation_count if attempt else 0,
         "removal_action": ticket.removal_action,

@@ -178,15 +178,15 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         null=True,
         verbose_name=pgettext_lazy("exams.model.attempt.field", "supervision_locked_at"),
     )
-    # True when the *teacher* manually paused the attempt ("Müvəqqəti blokla"),
-    # as opposed to an automatic lock triggered by exceeding the violation
-    # limit.  A manual lock is the teacher's own decision — it must always be
-    # resumable regardless of the exam's recovery_policy, and (unlike an
-    # auto-lock) it does NOT start the auto-finish countdown.
+    # True when the *teacher* manually paused the attempt ("Müvəqqəti blokla"), not an auto-lock: always
+    # resumable regardless of recovery_policy and it does NOT start the auto-finish countdown.
     supervision_manual_lock = models.BooleanField(
         default=False,
         verbose_name=pgettext_lazy("exams.model.attempt.field", "supervision_manual_lock"),
     )
+    # Sahib 2026-11-17: nəzarətçinin BU tələbəyə verdiyi əlavə vaxt (saniyə) — deadline-a əlavə olunur.
+    # db_default: deploy anında köhnə kodun INSERT-i (sütunu bilməyən) NOT NULL-a ilişməsin.
+    extra_time_seconds = models.PositiveIntegerField(default=0, db_default=0)
 
     class Meta:
         verbose_name = pgettext_lazy("exams.model.attempt.meta", "singular")

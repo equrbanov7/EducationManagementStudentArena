@@ -108,6 +108,27 @@ JS qarmaqları: `tr[data-seconds-remaining] .timer-display` (geri sayım),
                     <i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Nəticəni sil (cəhdi sıfırla)" context "exams.attempt_reset" %}
                 </button>
             {% endif %}
+            {% if can_annul_results and not att.is_trial and att.is_finished %}
+                {# Sahib 2026-11-17: köçürmə və s. — nəticəni ləğv et (jurnalda 0) / səhv olarsa ləğvi bərpa et. İki addımlı pəncərə. #}
+                {% if item.intervention.action == "annulled" %}
+                <span class="xan-row-actions">
+                    <button type="button" class="ems-btn ems-btn--ghost" data-restore-open
+                            data-restore-url="{% url 'exams:exam_center_attempt_restore' attempt_id=att.id %}" data-restore-student="{% if item.can_view_name %}{{ item.real_name }}{% else %}{{ item.anonymous_name }}{% endif %} · #{{ att.id }}">
+                        <i class="fas fa-rotate-left" aria-hidden="true"></i>{% trans "Ləğvi bərpa et" context "exams.final_center.annul" %}
+                    </button>
+                    {% if item.intervention.has_document and item.intervention.annulment_id %}
+                    <a class="xan-doc-link" href="{% url 'exams:exam_center_annulment_document' annulment_id=item.intervention.annulment_id %}">
+                        <i class="fas fa-paperclip" aria-hidden="true"></i> {% trans "Sənəd" context "exams.final_center.annul" %}
+                    </a>
+                    {% endif %}
+                </span>
+                {% else %}
+                <button type="button" class="ems-btn etp-btn--danger-soft" data-annul-open
+                        data-annul-url="{% url 'exams:exam_center_attempt_annul' attempt_id=att.id %}" data-annul-student="{% if item.can_view_name %}{{ item.real_name }}{% else %}{{ item.anonymous_name }}{% endif %} · #{{ att.id }}">
+                    <i class="fas fa-ban" aria-hidden="true"></i>{% trans "Nəticəni ləğv et" %}
+                </button>
+                {% endif %}
+            {% endif %}
             {% if item.attempts_left is not None and formal_retake %}
                 {# 2026-10-24 (sahib): midterm / final — birbaşa şans YOXDUR; rəsmi «Yenidən imtahan cəhdi» (əsas, əmr, sənəd). #}
                 {% if formal_retake_open %}

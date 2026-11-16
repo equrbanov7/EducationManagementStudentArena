@@ -34,6 +34,7 @@ from apps.exams.views.shared.breadcrumbs import exam_breadcrumbs
 from apps.exams.views.shared.tenant import get_teacher_exam_or_404
 from core.permissions import request_has_permission
 
+from ._annul_context import annul_page_context
 from ._filter_context import results_filter_context, results_per_page
 from ._helpers import (
     _appeal_bonus_map_for,
@@ -335,6 +336,8 @@ def teacher_exam_results(request, slug):
             "can_delete_attempts": can_delete_attempts,
             # Sahib 2026-11-04: «Nəticəni sil (cəhdi sıfırla)» — yalnız RİM / imtahan mərkəzi rəhbəri.
             **reset_page_context(request, exam),
+            # Sahib 2026-11-17: köçürmə və s. — nəticəni ləğv et / ləğvi bərpa et (yalnız imtahan mərkəzi).
+            **annul_page_context(request, exam),
             "available_groups": group_index.options,
             "grant_groups": group_index.grant_options,
             # Midterm / final: birbaşa əlavə cəhd yoxdur — rəsmi səhifə (yalnız İmtahan Mərkəzi açır).

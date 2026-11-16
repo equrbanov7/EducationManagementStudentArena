@@ -31,6 +31,7 @@ from core.audit import log_action
 from core.constants import AuditAction
 
 from ._shared import get_center_session_or_404, get_session_ticket_or_404
+from .extra_time import ticket_time_actions
 from .ticket_pin import ticket_pin_actions
 
 logger = logging.getLogger(__name__)
@@ -91,6 +92,7 @@ def exam_center_ticket_snapshot(request, session_id, ticket_id):
                 "identity": student_identity(session.organization_id, ticket.student),
                 # Sahib 2026-10-26: imtahan mərkəzinə PIN göstər / yeni PIN düymələri (ticket_pin.py).
                 "pin_actions": ticket_pin_actions(request.user, ticket, session),
+                "time_actions": ticket_time_actions(ticket, session),
             }
         )
 
@@ -107,6 +109,8 @@ def exam_center_ticket_snapshot(request, session_id, ticket_id):
     snapshot["proctor"] = attempt_proctor_detail(ticket.attempt, session.organization_id)
     # Sahib 2026-10-26: «Başqa kompüterdə davam et» + PIN göstər (yalnız imtahan mərkəzi).
     snapshot["pin_actions"] = ticket_pin_actions(request.user, ticket, session)
+    # Sahib 2026-11-17: «Əlavə vaxt» bloku (extra_time.py) — nəzarətçi + imtahan mərkəzi.
+    snapshot["time_actions"] = ticket_time_actions(ticket, session)
     return JsonResponse(snapshot)
 
 
