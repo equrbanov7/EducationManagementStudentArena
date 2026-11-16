@@ -164,6 +164,7 @@ def submit_application(
     request=None,
     unit_override=None,
     recipient_id=None,
+    scope_id=None,
 ) -> Application:
     """Yeni müraciət yaradır və aidiyyəti şöbəyə göndərir.
 
@@ -212,8 +213,11 @@ def submit_application(
         if unit_override.organization_id != organization.pk or not unit_override.is_active:
             raise TransitionDenied("unit.invalid", pgettext(_CTX, "Seçilmiş şöbə bu təşkilatda aktiv deyil."))
         unit, scope_unit = unit_override, resolve_scope_unit(unit_override, sender_unit)
+    from .academic_scope import creation_scope
     from .recipients import validate_destination
 
+    # Sahib 2026-11-17: aidiyyəti tapılmayan göndərən dekanlığı (məktəbi) özü seçir.
+    scope_unit = creation_scope(organization, family, scope_unit, unit, scope_id)
     recipient = validate_destination(unit, user, organization, family, recipient_id)
     # QA 2026-09-05 APPLICATIONS-01: aidiyyət bölməsini ÖRTƏN emalçı yoxdursa (məs. ixtisasın
     # koordinatoru təyin edilməyib) müraciət heç kimin inbox-una düşmür və bildiriş getmirdi.

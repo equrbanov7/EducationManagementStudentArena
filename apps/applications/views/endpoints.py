@@ -97,6 +97,8 @@ def application_detail(request, application_id, *, organization):
 @json_endpoint
 def application_catalog(request, *, organization):
     """Yaratma dialoqu + yönləndirmə dialoqu üçün kataloq."""
+    from ..services.academic_scope import creation_schools
+
     user = request.user
     family = routing.sender_family_for(user, organization)
     can_create = bool(family) and access.has_app_permission(user, organization, PERM_CREATE)
@@ -107,13 +109,17 @@ def application_catalog(request, *, organization):
         # ayrı SAR/üzvlük sorğusu gedərdi (15 növ = 15 sorğu).
         sender_unit = routing.sender_scope_unit_for(user, organization, family)
         for kind in routing.allowed_kinds_for(organization, family):
-            destination, _scope, _family, _unit = routing.route_for(
+            destination, scope, _family, _unit = routing.route_for(
                 kind, user, organization=organization, family=family, sender_unit=sender_unit
             )
             if family == "student" and not destination.accepts_students:
                 continue
             item = kind_payload(kind, destination=destination)
             item["recipients"] = destination_payload(destination)
+            item["schools"] = [
+                {"id": str(school.pk), "name": school.name}
+                for school in creation_schools(organization, family, scope, destination)
+            ]
             kinds.append(item)
 
     # ``access.active_units`` təşkilat üzrə keşlənib (bax P2-26/P2-6) — yuxarıdakı
@@ -154,6 +160,7 @@ def application_create(request, *, organization):
         subject=request.POST.get("subject", ""),
         body=request.POST.get("body", ""),
         recipient_id=request.POST.get("recipient"),
+        scope_id=request.POST.get("scope"),
         files=request.FILES.getlist("files"),
         request=request,
     )

@@ -173,3 +173,24 @@ def forward_school_options(application, user) -> list[dict]:
         {"id": str(unit.pk), "name": unit.name, "own_school": bool(unit.own_school)}
         for unit in school_choices(application, user)
     ]
+
+
+def creation_schools(organization, family, scope_unit, unit) -> list:
+    """Yaratma formasında dekanlıq seçimi — yalnız aidiyyəti tapılmayan (tələbə olmayan) göndərən üçün."""
+    if unit is None or unit.code != DEAN_OFFICE_CODE or scope_unit is not None or family == "student":
+        return []
+    Unit = django_apps.get_model("organizations", "OrgUnit")
+    return list(
+        Unit.objects.filter(organization=organization, is_active=True, unit_type=OrgUnitType.FACULTY).order_by("name")
+    )
+
+
+def creation_scope(organization, family, scope_unit, unit, scope_id):
+    """Yaratmada seçilmiş dekanlıq; seçim tələb olunub verilməyibsə — imtina (heç kimin növbəsinə düşməsin)."""
+    schools = creation_schools(organization, family, scope_unit, unit)
+    if not schools:
+        return scope_unit
+    selected = next((school for school in schools if str(school.pk) == str(scope_id or "").strip()), None)
+    if selected is None:
+        raise TransitionDenied("scope.required", "Dekanlığı (məktəbi) seçin.")
+    return selected

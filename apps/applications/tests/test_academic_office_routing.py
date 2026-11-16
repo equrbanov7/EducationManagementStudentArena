@@ -402,3 +402,39 @@ def test_regular_handler_cannot_pick_other_school_dean_office(world):
             note="Başqa məktəbin dekanlığına yönləndirmə cəhdi.",
             scope_id=world["other_tree"]["faculty"].pk,
         )
+
+
+def test_staff_creates_dean_application_with_chosen_school(world):
+    from django.urls import reverse
+
+    from apps.applications.tests.test_endpoints import client_for
+
+    from apps.applications.services import routing
+
+    kind = world["kinds"]["sikayet"]
+    family = routing.sender_family_for(world["rim"], world["organization"])
+    type(kind).objects.filter(pk=kind.pk).update(
+        allowed_sender_families=sorted({*kind.families, family}),
+        route_overrides={**(kind.route_overrides or {}), family: "dekan"},
+    )
+    kind.refresh_from_db()
+    args = dict(
+        organization=world["organization"],
+        user=world["rim"],
+        kind=kind,
+        subject="Qrupun tələbə siyahısı",
+        body="Bu qiyabi qrupun tələbə siyahısının sistemə göndərilməsini xahiş edirəm.",
+    )
+    with pytest.raises(TransitionDenied, match="Dekanlığı"):
+        submit.submit_application(**args)
+    app = submit.submit_application(**args, scope_id=str(world["other_tree"]["faculty"].pk))
+    assert app.current_scope_unit_id == world["other_tree"]["faculty"].pk
+    assert access.can_act(world["other_deputy"], app) and not access.can_act(world["deputy"], app)
+    catalog = client_for(world["rim"], app.organization).get(reverse("applications:catalog")).json()
+    row = next(item for item in catalog["kinds"] if item["code"] == "sikayet")
+    assert {school["id"] for school in row["schools"]} >= {
+        str(world["tree"]["faculty"].pk),
+        str(world["other_tree"]["faculty"].pk),
+    }
+    student_catalog = client_for(world["student"], app.organization).get(reverse("applications:catalog")).json()
+    assert all(not item.get("schools") for item in student_catalog["kinds"])

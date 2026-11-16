@@ -30,7 +30,7 @@
         scopeWrap.appendChild(scopeSelect);
         scopeField.appendChild(scopeLabel);
         scopeField.appendChild(scopeWrap);
-        var scopeAnchor = box.querySelector("[data-apx-unit-list]");
+        var scopeAnchor = box.querySelector("[data-apx-unit-list]") || box.querySelector("[data-apx-route]");
         scopeAnchor.parentNode.insertBefore(scopeField, scopeAnchor.nextSibling);
     }
     NS.recipientPicker = function (box, item) {
@@ -49,6 +49,10 @@
             } else if (destination.code === "dekan" && (box.__app.forward_schools || []).length) {
                 scopePicker(box, box.__app.forward_schools, "selectSchool");
             }
+        }
+        // Yaratma formasında: aidiyyəti tapılmayan göndərən dekanlığı (məktəbi) özü seçir.
+        if (!box.__app && item && item.schools && item.schools.length) {
+            scopePicker(box, item.schools, "selectSchool");
         }
         if (!destination || !destination.requires_recipient) { return; }
         // 2026-11-10 (sahib): prorektor seçimi növün ALTINDA açılan dropdown kimi — layihənin stilli
