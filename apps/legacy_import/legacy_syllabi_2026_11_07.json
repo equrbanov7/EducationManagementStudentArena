@@ -15139,6 +15139,1666 @@
     "prev": {},
     "send": {}
    }
+  },
+  "9010": {
+   "content_sha256": "56a63b771e97aa2dbd190a75ec590587ea1f86497818769de78e380634239e47",
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "hours": {
+    "seminar": 60
+   },
+   "legacy_lesson": 2570,
+   "legacy_teacher": 1073,
+   "sections": {
+    "info": {
+     "teacher": "",
+     "office_hours": "",
+     "prerequisites": "",
+     "language": "az",
+     "lesson_hours": 60,
+     "welcome": "",
+     "research_interests": [],
+     "certificates": []
+    },
+    "desc": {
+     "description": "• Təklif olunan material 60 tədris vahidində Almaniyada dil,regionşünaslıq və mədəniyyət haqqında əsas bilikləri əks etdirir. Dərsdə əldə edilən biliklər tələbələrə fikirlərini alman dilində aydın, səlis və qüsursuz ifadə etmək imkanı verir. Yəni bu dildə danışa, eşidə, oxuya və yaza bilir. Sonda hər bir tələbə dil daşıyıcılarla ünsiyyət qurmağı bacarmalıdırlar. Alman dili praktik dil olaraq, fakültələrdə qeyri-ixtisas fənni kimi tədris olunur. Kursda əsas məqsəd tələbələrə alman dilinin qrammatikasını, fərqli situasiyalarda danışıq üçün lazımi leksikanı öyrənməyə yönəlmişdir. Praktik vərdiş və bacarıqlar sayəsində tələbələr normal sürətli alman nitqini başa düşməli, məişət və bədii mövzularda fikirlərini ifadə etmək, monoloji şəkildə düzgün və ardıcıllıqla fikirlərini çatdırmağı bacarmalı, düzgün , ifadəli və ucadan oxuma vərdişlərinə yiyələnməli, yazılı şəkildə fikrini düzgün ifadə etmək bacarıqlarını inkişaf etdirməlidirlər.",
+     "goal": ""
+    },
+    "out": {
+     "outcomes": [
+      "1. Kursun sonunda tələbələr: 1.Alman dilinə dair əldə etdikləri bilikləri möhkəmləndirəcək. 2. Öyrənmənin nəticəsində tədris planında verilən mövzulara aid tələbələrin oxu, yazı, dinləmə və danışma inkişaf edəcək. 3. Tələbələr tədris olunan dildə ünsiyyətə girmə bacarıqlarını da nümayiş etdirə biləcəklər."
+     ]
+    },
+    "week": {
+     "rows": [
+      {
+       "topic": "Kapitel 1: Guten Tag! Teil A /C: Das Alphabet / Diphtonge / Sich vorstellen. Grammatik: -Personalpronomen / Das Verb “sein” im Präsens.",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 1: Guten Tag! Teil A/C: Länder / Berufe Grammatik: -Verben im Präsens: heißen/ kommen / wohnen -Satzbau: das Aussagesätze / Fragesätze",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 1: Guten Tag! Teil A/C: Sprachen und Länder / Die Zahlen Grammatik: -Verben im Präsens: sprechen",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 1: Guten Tag! Teil A/C: Personen und Hobbys Grammatik: Verben im Präsens: lesen",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 1 Training: Sprechen",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 1: Guten Tag! Teil B: Wissenswertes (fakultativ)",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 1: Guten Tag! Teil D: Rückblick Test",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 2: Erste Kontakte am Arbeitsplatz Teil A/C: Rund um die Arbeit: Im Büro Grammatik: Nomengruppe im Nominativ: bestimmter und unbestimmter Artikel / Negation: kein",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 2: Erste Kontakte am Arbeitsplatz Teil A/C: Problem im Büro Grammatik: Adjektive / Negation: nicht Nomengruppe im Nominativ: ein(e) /kein(e)+Adjektiv",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 2: Erste Kontakte am Arbeitsplatz Teil A/C: Rund um die Arbeit: An der Universität Grammatik: Modalverb: können / Verben im Präsens",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 2: Erste Kontakte am Arbeitsplatz Teil A/C: Was machen Sie gern? Grammatik: Possessivartikel / Pronomen /Verben im Präsens",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 2: Erste Kontakte am Arbeitsplatz Training: Sprechen Grammatik: Lokale Präpositionen: aus, in, bei, nach",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 2: Erste Kontakte am Arbeitsplatz Teil B: Wissenswertes (fakultativ)",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 2: Erste Kontakte am Arbeitsplatz Teil D: Rückblick Test",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 3: Unterwegs in München Teil A/C: Im Hotel. Grammatik: Verben mit Akkusativ / Modalverb: möchte(n)",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 3: Unterwegs in München Teil A/C: Grammatik: Nomengruppe im Akkusativ / Verben mit Akkusativ",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 3: Unterwegs in München Teil A/C: Der Stadtplan Grammatik: Nomengruppe im Akkusativ / Verben mit Akkusativ",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 3: Unterwegs in München Teil A/C: In München Grammatik: Komposita / Temporale und lokale Präpositionen",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 3: Unterwegs in München Training: Schreiben (eine Email schreiben)",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 3: Teil B: Wissenswertes (fakultativ)",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 3: Teil D: Rückblick Test",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 4: Essen und Trinken Teil A/C: Frühstück im Hotel Grammatik: Verben im Präsens / Nomengruppe: Nominativ und Akkusativ/ Adjektive ohne Artikel",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 4: Essen und Trinken Teil A/C: Geschirr und Besteck Grammatik: Nomen im Plural",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 4: Essen und Trinken Teil A/C: Einkaufen im Supermarkt Grammatik: Modalverb: mögen",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 4: Essen und Trinken Teil A/C: Rezepte zum Kochen Grammatik: Imperativ: Sie -Form",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 4: Essen und Trinken Teil A/C: Im Restaurant Grammatik: Präteritum von sein und haben / Personalpronomen im Akkusativ",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 4: Teil B: Wissenswertes (fakultativ)",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kapitel 4: Teil D: Rückblick Test",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Selbstständige Arbeit",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Selbstständige Arbeit",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      }
+     ]
+    },
+    "method": {
+     "methods": [
+      "1. Kommunikativ-interaktiv tədris metodları. -Məzmun: Mətnlərdə şagirdin şəxsi fikirlər söyləməsini stimullaşdıran ziddiyyətlər göstərilməlidir. - Dil səviyyəsi: Dil istehsalının dilin düzgünlüyündən üstün olması, səhvlərin qəbul edilməsi. -Məşqlər: Tələbədən öz fikrini bildirməsi tələb olunur. - Üstünlük: Tələbələr danışma bacarığı qazanır və səhv etmək qorxusu azalır."
+     ],
+     "note": ""
+    },
+    "assess": {
+     "midterm": 0,
+     "project": 0,
+     "note": ". 1.İmtahandan əvvəl məsləhət saatları təşkil olunur. 2.İmtahanlar şifahi yaxud test şəklində keçirilir və aralıq yoxlamalar (kollokviumlar) test vasitəsilə aparılır. 3.Tələbələrin imtahana və aralıq yoxlamalara buraxılması ilə bağlı məsələlər fakültə dekanı tərəfindən həll edilir.İmtahan və aralıq yoxlamalar Azərbaycan Respublikası Nazirlər Kabinetinin 24 dekabr 2013-cü il tarixli 348 nömrəli qərarı ilə təsdiq edilmiş “Ai təhsil müəssisələrinin bakalavriat və magistratura səviyyələrində kredit sistemi ilə təlimin təşkili Qaydaları”na əsasən aparılır",
+     "exam_questions": []
+    },
+    "self": {
+     "option": "",
+     "topics": [],
+     "archived": []
+    },
+    "lit": {
+     "primary": [
+      "• 1. 1. Begegnungen A1+, Kurs,CD für Hörverstehen zum Arbeitsbuch, Niveau/ Schubert Verlag Leipzig 2013\n• 2. 2. Grammatik aktiv. Niveau A1-B1\n• 3. 3. Begegnungen, A1+ Übungsheft , Niveau 1, Hueber Verlag 2013\n• 4. 4. Deutsch.Aber Hallo! Grammatikübungen A1. Hans Witzlinger"
+     ],
+     "additional": []
+    },
+    "prev": {},
+    "send": {}
+   },
+   "teacher": 9570
+  },
+  "7197": {
+   "content_sha256": "f3dfa776f23199e62a236962114d9746c2cc0d2c880733fb8ab0165900f1f6c3",
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "hours": {
+    "seminar": 105
+   },
+   "legacy_lesson": 2530,
+   "legacy_teacher": 44,
+   "sections": {
+    "info": {
+     "teacher": "",
+     "office_hours": "",
+     "prerequisites": "",
+     "language": "en",
+     "lesson_hours": 105,
+     "welcome": "",
+     "research_interests": [],
+     "certificates": []
+    },
+    "desc": {
+     "description": "",
+     "goal": ""
+    },
+    "out": {
+     "outcomes": []
+    },
+    "week": {
+     "rows": [
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "",
+       "lecture": 0,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      }
+     ]
+    },
+    "method": {
+     "methods": [],
+     "note": ""
+    },
+    "assess": {
+     "midterm": 0,
+     "project": 0,
+     "note": "",
+     "exam_questions": []
+    },
+    "self": {
+     "option": "",
+     "topics": [],
+     "archived": []
+    },
+    "lit": {
+     "primary": [],
+     "additional": []
+    },
+    "prev": {},
+    "send": {}
+   },
+   "teacher": 7729
+  },
+  "7112": {
+   "content_sha256": "228a1d0079f39cbdece522fc486cce348c938181dd4908dfb1828522df3afff0",
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "hours": {
+    "seminar": 106
+   },
+   "legacy_lesson": 2555,
+   "legacy_teacher": 904,
+   "sections": {
+    "info": {
+     "teacher": "",
+     "office_hours": "",
+     "prerequisites": "",
+     "language": "en",
+     "lesson_hours": 105,
+     "welcome": "",
+     "research_interests": [],
+     "certificates": []
+    },
+    "desc": {
+     "description": "The student will grow in their ability to use English to communicate effectively with others in all disciplines.\nWhen listening, the student will be able to understand phrases and the highest frequency vocabulary related to areas of personal relevance such as fundamental personal and family information, shopping, local area, employment. The student will be able to understand the main point in short, clear, simple messages and announcements.\nWhen reading, the student will be able to understand very short, simple texts. They will be able to find specific, predictable information in simple everyday material such as advertisements, menus and timetables. They will be able to read short simple personal letters.\nWhen writing, the student will be able to produce short, simple notes and messages that relate to matters of immediate concern. They will be able to write a simple personal letter such as a thank-you letter.\nWhen speaking, the student will be able to produce a series of phrases and sentences to describe in simple terms things like his/her family, other people, living conditions, educational background or a present or previous job.",
+     "goal": ""
+    },
+    "out": {
+     "outcomes": []
+    },
+    "week": {
+     "rows": [
+      {
+       "topic": "Unit 1. Sociology: Reading 1 We all need a role model; Vocabulary skills Oxford Word Skills U4,U5",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 1. Sociology: Reading 2 Everyday Heroes; Work with video",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 1. Sociology: Writing skills, Grammar: Restrictive relative clauses",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 1. Business: Listening 1 Leadership Isn't Just for the Boss; Listening 2 Myths of Effective Leadership; Work with the video",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 1. Business: Speaking – Checking for understanding",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 2. Behavioral Science: Readıng 1 Your Guide to Generation Z; Vocabulary skills Oxford Word Skills U18",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 2. Behavioral Science: Readıng 2 This Is Why You're Addicted to Your Phone; Work with the video",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 2. Behavioral Science: Writing skills; Grammar: Definite and indefinite articles",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 2. Behavioral Science: Listening 1 A Perfect mess; Listening 2 Color Schemes: How Colors Make You Buy; Work with the video",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 2. Behavioral Science: Speaking skills Confirming understanding",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 3. Developmental Psychology: Reading 1 The Difference Between Fitting in and Belonging, and Why It Matters; Vocabulary skills Oxford Word Skills U14,U15",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 3. Developmental Psychology: Reading 2 Life Lessons I Learned from My Dad in 23 Years; Work with the video",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 3. Developmental Psychology: Writing skills; Grammar: Past perfect and past perfect continuous",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 3. Developmental Psychology: Listening 1 \"Adulting\" 101; Lıstenıng 2 Financial Literacy Among Young People; Work with the video",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 3. Developmental Psychology: Speaking skills Giving a presentation",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Conversation",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Vocabulary Review",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Achievement – 1",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Speaking test",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 4. Science and Technology: Reading 1 Five Innovative Technologies That Bring Energy to the Developing World; Vocabulary skills Oxford Word Skills U31",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 4. Science and Technology: Reading 2 This Device Pulls Water Out of Desert Air; Work with the video",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 4. Science and Technology: Writing skills; Grammar: Subordinators and transitions to compare and contrast",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 4. Science: Listening 1 Gravity at Work; Lıstenıng 2 Moore's Law; Work with the video",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 4. Science: Speaking skills Avoiding answering questions",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 5. Nutritional Science: Reading 1 Eating Well: Less Science, More Common Sense; Vocabulary skills Oxford Word Skills U20",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 5. Nutritional Science: Reading 2 A Personalized Nutrition Company Will Use Your DNA to Tell You What to Eat; Work with the video",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 5. Nutritional Science: Writing skills; Grammar: Agents with the passive voice",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 5. Nutritional Science: Listening 1 Improving Farming with Flying Robots; Listening 2 The Science Behind Food Cravings; Work with the video",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 5. Nutritional Science: Speaking skills Expressing interest during a conversation",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 6. Education: Reading 1 From Student to Employee: A Difficult Transition; Vocabulary skills Oxford Word Skills U44,45",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 6. Education: Reading 2 Making My First Post-College Career Decision; Work with the video",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 6. Education: Writing skills; Grammar: Reported speech with present tense and shifting tenses",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 6. Education: Listening 1 Failure and Success in Startups; Listening 2 Interns in New York; Work with the video",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 6. Education: Speaking skills Changing the topic",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Conversation",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Vocabulary Review",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Achievement – 2",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Speaking test",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 7. Geology: Reading 1 Ocean Discoveries; Vocabulary skills Oxford Word Skills U29",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 7. Geology: Reading 2 Alaska's Pebble Mine: Minerals vs. Nature; Work with the video",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 7. Geology: Writing skills; Grammar: Averb phrases of reason",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 7. Anthropology: Listening 1 The Power of Serendipity; Listening 2 Against All Odds, Twin Girls Reunited; Work with the video",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 7. Anthropology: Speaking skills Using questions to maintain listener interest",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 8. Engineering. Reading 1 The Tacoma Narrows Bridge Collapse and the Lessons Learned; Vocabulary skills Oxford Word Skills U27",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 8. Engineering. Reading 2 How to Design a Student Project That Benefits the Developing World; Work with the video",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 8. Engineering. Writing skills; Grammar: Adverb clauses of consession",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 8. Engineering. Listening 1 Automation and us; Listening 2 Driverless cars; Work with the video",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Unit 8. Engineering. Speaking skills Adding to another speaker’s comments",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Conversation",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Vocabulary Review",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Achievement – 3",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Speaking test",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Preparation for Final exam",
+       "lecture": 0,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      }
+     ]
+    },
+    "method": {
+     "methods": [
+      "For each ten percent of the hours allotted to teaching the subject during the semester, one point is subtracted. A student is not permitted to take the exam if they miss more than 25% of the classes in that topic."
+     ],
+     "note": ""
+    },
+    "assess": {
+     "midterm": 0,
+     "project": 0,
+     "note": "written",
+     "exam_questions": []
+    },
+    "self": {
+     "option": "",
+     "topics": [
+      {
+       "title": "Unit 2. Behavioral Science: Readıng 1 Your Guide to Generation Z; Vocabulary skills Oxford Word Skills U18 Unit 2. Behavioral Science: Readıng 2 This Is Why You're Addicted to Your Phone; Work with the video Unit 2. Behavioral Science: Writing skills; Grammar: Definite and indefinite articles Unit 2. Behavioral Science: Listening 1 A Perfect mess; Listening 2 Color Schemes: How Colors Make You Buy; Work with the video Unit 2. Behavioral Science: Speaking skills Confirming understanding"
+      },
+      {
+       "title": "Unit 2. Behavioral Science: Readıng 1 Your Guide to Generation Z; Vocabulary skills Oxford Word Skills U18 Unit 2. Behavioral Science: Readıng 2 This Is Why You're Addicted to Your Phone; Work with the video Unit 2. Behavioral Science: Writing skills; Grammar: Definite and indefinite articles Unit 2. Behavioral Science: Listening 1 A Perfect mess; Listening 2 Color Schemes: How Colors Make You Buy; Work with the video Unit 2. Behavioral Science: Speaking skills Confirming understanding"
+      }
+     ],
+     "archived": []
+    },
+    "lit": {
+     "primary": [
+      "1. https://www.liveworksheets.com 2. https://english-rooms.com/tests/pre-intermediate3. https://busyteacher.org/4. https://www.eslvideo.com/quizzes_intermediate.php5. https://www.allthingsgrammar.com/5. https://learnenglish.britishcouncil.org/skills/listening/b2-listening"
+     ],
+     "additional": []
+    },
+    "prev": {},
+    "send": {}
+   },
+   "teacher": 11616
+  },
+  "8722": {
+   "content_sha256": "25756aa6cb86ad2cbbdf4ddc44f8be6c49708e336df0a4c97343e6126313b477",
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "hours": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "legacy_lesson": 2190,
+   "legacy_teacher": 713,
+   "sections": {
+    "info": {
+     "teacher": "",
+     "office_hours": "",
+     "prerequisites": "",
+     "language": "az",
+     "lesson_hours": 45,
+     "welcome": "",
+     "research_interests": [],
+     "certificates": []
+    },
+    "desc": {
+     "description": "“Bioekologiyanın müasir problemləri” fənni canlı orqanizmlərin ətraf mühitlə qarşılıqlı əlaqəsini, ekosistemlərdə baş verən müasir dəyişiklikləri və aktual bioekoloji problemləri öyrənir. Fənn çərçivəsində biomüxtəlifliyin azalması, iqlim dəyişmələri, antropogen təsirlər, ekosistemlərin davamlılığı və ətraf mühitin mühafizəsi məsələləri nəzərdən keçirilir.\nFənnin məqsədi tələbələrdə müasir bioekoloji problemlər haqqında sistemli elmi təsəvvür formalaşdırmaq, ekosistemlərə təsir edən əsas amilləri təhlil etmək və ekoloji problemlərin həlli və biomüxtəlifliyin qorunmasına dair elmi əsaslı yanaşmaların mənimsənilməsini təmin etməkdir.",
+     "goal": ""
+    },
+    "out": {
+     "outcomes": [
+      "Fənni mənimsədikdən sonra tələbə:\n• müasir bioekoloji problemləri izah edir və təsnifləndirir;\n• canlı orqanizmlərlə ətraf mühit arasındakı qarşılıqlı əlaqələri təhlil edir;\n• antropogen və təbii amillərin ekosistemlərə təsirini qiymətləndirir;\n• biomüxtəlifliyin qorunması və ekosistemlərin davamlılığı ilə bağlı yanaşmaları tətbiq edir;\n• müasir ekoloji problemlərin həlli istiqamətində elmi əsaslandırılmış təkliflər irəli sürür."
+     ]
+    },
+    "week": {
+     "rows": [
+      {
+       "topic": "müasir dövrün qlobalproblemləri",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Demoqrafik problemlər və bioekoloji nəticələri",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Dünyanın enerji və xammal problemlərinin həllinin ekoloji mahiyyəti",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №4 Urbanizasiyanın yaratdığı bioekoloji prosesinin problemləri",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №5 Süni biosenoz və ya aqrobiosenoz ekosistemi",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №6 Kənd təsərrüfаtı istehsalı və еkоlоji tarazlığın saxlanması.",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №7 Litosferə edilən antropogen təsirlər və onların ekoloji nəticələri",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №8 Bitki aləminin ekologiyası, əhəmiyyəti, tərkibi, yayılma xüsusiyyətləri.",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №9 Heyvanlar aləminin yayılması, növ müxtəlifliyi və mühafizəsi.",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №10 Atmosferin qlobal çirklənməsi, müasir dövrdə ozon problemi",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №11 Qlobal iqlim dəyişmələrinin ekoloji nəticələri",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №12 Hidrosferin çirklənməsinin ekoloji nəticələri, səth və yeraltı sualrının tükənməsi.",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №13 Dünya okeanı bioehtiyatlarından səmərəli istifadə.",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №14 Radioaktiv çirklənmə problemi və proqnozlaşdırma",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Mövzu №15 Ətraf mühitin mühafizəsində xüsusi mühafizə olunan obyektlərin rolu",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      }
+     ]
+    },
+    "method": {
+     "methods": [
+      "Fənnin tədrisi mühazirə, seminar və praktiki məşğələlər formasında həyata keçirilir. Tədris prosesində izah, müzakirə, sual-cavab, problem əsaslı öyrənmə, qrup işi, təqdimat, situasiya təhlili və fərdi tapşırıqlardan istifadə olunur. Tələbələrin müstəqil tədqiqat və analitik düşünmə bacarıqlarının inkişafına xüsusi diqqət yetirilir."
+     ],
+     "note": ""
+    },
+    "assess": {
+     "midterm": 0,
+     "project": 0,
+     "note": "Yekun qiymət cari qiymətləndirməyə - məşğələ (seminar və laboratoriya işi) (0 - 30 bal), sərbəst iş (0 - 10 bal), davamiyyət (0 - 10 bal) və aralıq qiymətləndirməyə - semestr sonu imtahanlara (0 - 50 bal) görə verilən balların cəmidir. Eyni fəndən əlavə olaraq təcrübi və əməli dərslər nəzərdə tutulduğu halda bu dərslərin qiymətləndirilməsi üçün (0 – 10) bal ayrılır.\nYekun qiymət = cari qiymətləndirmə + aralıq qiymətləndirmə",
+     "exam_questions": []
+    },
+    "self": {
+     "option": "",
+     "topics": [
+      {
+       "title": "İqlim dəyişmələrinin biomüxtəlifliyə və ekosistemlərə təsiri"
+      },
+      {
+       "title": "Müasir dövrdə biomüxtəlifliyin azalması və onun əsas səbəbləri"
+      },
+      {
+       "title": "Ekosistemlərin antropogen transformasiyası və ekoloji nəticələri"
+      },
+      {
+       "title": "Atmosferin kimyəvi çirklənməsi və canlı orqanizmlərə təsiri"
+      },
+      {
+       "title": "Su ekosistemlərinin çirklənməsi və bioekoloji problemlər"
+      },
+      {
+       "title": "Torpağın çirklənməsi, deqradasiyası və canlı aləmə təsiri"
+      },
+      {
+       "title": "Ağır metalların ekosistemlərdə toplanması və bioakkumulyasiya prosesi"
+      },
+      {
+       "title": "İnvaziv növlər və onların yerli ekosistemlərə təsiri"
+      },
+      {
+       "title": "Meşələrin qırılması və ekosistemlərin ekoloji davamlılığının pozulması"
+      },
+      {
+       "title": "Müasir şəhərlərin bioekoloji problemləri və yaşıl şəhər konsepsiyası"
+      }
+     ],
+     "archived": []
+    },
+    "lit": {
+     "primary": [
+      "1. R.Ə.Sadıqov. Tətbiqi Ekologiya: Monoqrafiya. Bakı, «Elm», 2019; 318 səh",
+      "2. Abbasov V.M., Əliyeva R.Ə., Səlimova N.Ə. və b. - Ekoloji kimya. Bakı: 2003, 207 s",
+      "3. Davudov N. K. - Ümumi ekologiya. Mühazirə mətnləri. Cəncə, 2010, 159 s.",
+      "4. Dolxanov A.B. - Təbiətdən istifadənin hüquqi əsasları. Bakı: 2008. 495 s.",
+      "5. Əliyev H.Ə. - Həyacan təbili. Bakı, Azərnəşr, 2002, 179 səh.",
+      "6. Əliyeva R.Ə., Mustafayev Q.T. - Ekologiya. Bakı:2004, 432 səh",
+      "1. Əhmədov Ş., T.Muradov. - Ekologiya. Atmosferin çirklənməsi. Bakı 2008, 84 s."
+     ],
+     "additional": []
+    },
+    "prev": {},
+    "send": {}
+   },
+   "teacher": 0
   }
  },
  "targets": [
