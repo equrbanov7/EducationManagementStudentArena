@@ -90,6 +90,8 @@ class JournalViewKafedraScopeTest(TestCase):
 
             cls.chair_head = cls._scoped_viewer("jvks_head", "chair_head", cls.kafedra)
             cls.dean = cls._scoped_viewer("jvks_dean", "dean", cls.school)
+            # MR-000380 (2026-11-16): kafedraya təyin olunmuş tyutor fakültəsinin qruplarının BÜTÜN jurnallarını görür.
+            cls.tutor = cls._scoped_viewer("jvks_tutor", "tutor", cls.kafedra)
 
     @classmethod
     def _scoped_viewer(cls, username, role_name, scope_unit):
@@ -135,6 +137,14 @@ class JournalViewKafedraScopeTest(TestCase):
     def test_faculty_scoped_viewer_unchanged_group_subtree(self):
         # Fakültə əhatəsi qrup alt-ağacıdır: JVKS-IT (qrupu İqtisadiyyatda) DÜŞMÜR, fakültə qruplarının hamısı düşür.
         self.assertEqual(self._codes(self.dean), {"JVKS-MP", "JVKS-AL", "JVKS-XX"})
+
+    def test_chair_scoped_tutor_lists_whole_faculty_groups_plus_own_kafedra(self):
+        # Fakültə qruplarının hamısı (başqa kafedranın JVKS-AL-ı da) + kafedranın başqa fakültədəki fənni (JVKS-IT).
+        self.assertEqual(self._codes(self.tutor), {"JVKS-MP", "JVKS-IT", "JVKS-AL", "JVKS-XX"})
+
+    def test_chair_scoped_tutor_observes_other_chair_journal_of_faculty_group_but_not_other_faculty(self):
+        self.assertEqual(self._detail_status(self.tutor, self.other), 200)
+        self.assertEqual(self._detail_status(self.tutor, self.finance), 404)
 
     # ── Detal (müşahidə) ─────────────────────────────────────────────────────
 

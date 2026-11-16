@@ -47,11 +47,11 @@ from .scoping import UnitScope  # noqa: F401
 from .scoping import faculty_read_scope  # noqa: F401
 from .scoping import get_permission_scope  # noqa: F401
 from .scoping import permission_scope_unit_types  # noqa: F401
-from .scoping import permission_scope_units  # noqa: F401
 from .scoping import scope_memberships_by_unit  # noqa: F401
 from .scoping import scope_org_units  # noqa: F401
 from .scoping import unit_in_scope  # noqa: F401
 from .scoping import user_scope_covers_unit  # noqa: F401
+from .scoping import faculty_watcher_paths, permission_scope_units  # noqa: F401
 from .self_conflict import EMPTY_OWN_SCOPE  # noqa: F401
 from .self_conflict import REASON_CODE  # noqa: F401
 from .self_conflict import OwnScope  # noqa: F401
@@ -167,6 +167,7 @@ __all__ = [
     "merge_chair_unit",
     "module_items",
     "permission_scope_unit_types",
+    "faculty_watcher_paths",
     "permission_scope_units",
     "register_cabinet_section_resolver",
     "register_managed_settings_key",

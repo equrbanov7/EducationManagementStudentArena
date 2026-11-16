@@ -106,6 +106,24 @@ def _unit_view_q(organization, scope, kafedras, within=None):
     return unit_journal_q(organization, scope, kafedras, within=within)
 
 
+def _watcher_faculty_paths(user, organization) -> tuple:
+    """Tyutor / proqram koordinatorunun ``journal.view`` daşıyan üzvlüklərinin fakültə yolları (MR-000380)."""
+    from apps.organizations.public import faculty_watcher_paths
+
+    return faculty_watcher_paths(user, organization, JOURNAL_VIEW_PERMISSION)
+
+
+def _watcher_faculty_q(user, organization):
+    """Sahib 2026-11-16 (MR-000380): tyutor fakültəsinin qruplarının BÜTÜN jurnallarını görür (fənni hansı kafedra
+    tədris etsə də). Kafedra müdirinin kafedra-kökü qaydası toxunulmur. Yol yoxdursa boş (heç nə əlavə etməyən) Q."""
+    from django.db.models import Q
+
+    query = Q(pk__in=[])
+    for path in _watcher_faculty_paths(user, organization):
+        query |= Q(organization=organization, group__path__startswith=f"{path}/")
+    return query
+
+
 def journal_view_q(user, organization):
     """``journal.view`` əhatəsinin :class:`CourseOffering` Q-su; əhatə yoxdursa ``None``.
 
@@ -129,6 +147,7 @@ def journal_view_q(user, organization):
         query = Q(organization=organization)
     else:
         query = _unit_view_q(organization, scope, _kafedra_roots(user, organization, scope))
+        query |= _watcher_faculty_q(user, organization)
     # Tələbə + heyət rolu (sahib 2026-11-08): öz qrup ailəsinin və özünün yazıldığı jurnallar siyahıda yoxdur.
     from apps.organizations.public import own_scope
 
@@ -152,6 +171,11 @@ def offering_in_journal_view_scope(user, organization, offering) -> bool:
         return False
     if scope.is_org_wide:
         return True
+    watcher_paths = _watcher_faculty_paths(user, organization)
+    if watcher_paths:
+        group_path = str(getattr(getattr(offering, "group", None), "path", "") or "")
+        if group_path and any(group_path.startswith(f"{path}/") for path in watcher_paths):
+            return True
     kafedras = _kafedra_roots(user, organization, scope)
     if not kafedras:
         return offering_in_actor_scope(user, organization, offering, permission=JOURNAL_VIEW_PERMISSION)
