@@ -2,7 +2,9 @@
 
 * ``restore``: jurnalın öz dosyesi yoxdursa — yeni dosye (``offering`` = jurnal, müəllif = müəllim); varsa — köçürülmüş
   təsdiqli versiya və BOŞ qaralama ARXİVƏ keçir (silinmir), eyni dosyeyə ``approval_source=migration`` ilə yeni
-  əsas versiya yazılır. Müəllimin yazdığı qaralama / təqdim / insan təsdiqi varsa hədəf KEÇİLİR (üzərinə yazılmır).
+  əsas versiya yazılır. Müəllimin YARIMÇIQ qaralaması (< 100 %, təqdim olunmayıb) toxunulmadan qalır — təsdiqli
+  versiya onun yanına yazılır, qəbzdə ``kept`` (sahib 2026-11-16). Təqdim / baxış / insan təsdiqi / 100 % qaralama
+  varsa hədəf KEÇİLİR (üzərinə yazılmır).
   ``retire_base`` (MR-250): jurnalın əvvəl göstərdiyi səhv baza dosyenin pinlənmiş versiyası da arxivə keçir.
 * ``plan_sync``: jurnalın öz təsdiqli dosyesinin ``plan_hours``-u rəsmi yükə (yalnız sütun; bölmələr toxunulmur).
 
@@ -81,7 +83,7 @@ def _archive_version(org, actor, version, kind, now):
 
 
 def _restore(org, actor, target, source, offering, counts):
-    action, dossier, retire = state.restore_plan(org, target, source, offering)
+    action, dossier, retire, keep = state.restore_plan(org, target, source, offering)
     if action == "already_ok":
         return "already_ok", None
     base = state.base_to_retire(org, target, offering)
@@ -129,8 +131,12 @@ def _restore(org, actor, target, source, offering, counts):
     shown = state.resolved_for(offering)
     if shown is None or shown.pk != syllabus.pk or shown.approved_version_id != version.pk:
         raise RestoreError("journal_resolution_after_restore")
-    if shown.current_version_id != version.pk:
+    # Saxlanan yarımçıq qaralama (sahib 2026-11-16) açıq versiya olaraq qalır; başqa açıq versiya ola bilməz.
+    if shown.current_version_id != (keep[0].pk if keep else version.pk):
         raise RestoreError("journal_open_version_remains")
+    kept = [str(v.pk) for v in keep]
+    if keep:
+        counts["teacher_drafts_kept"] += len(keep)
     base_row = None
     if base is not None:
         services.archive(version=base, actor=resolve_actor(actor, org))
@@ -149,11 +155,12 @@ def _restore(org, actor, target, source, offering, counts):
         "syllabus": str(syllabus.pk),
         "version": str(version.pk),
         "retired": [{"id": str(v.pk), "status": kind} for v, kind in retire],
+        "kept": kept,
         "base": base_row,
         "base_after": state.dossier_state(org, base.syllabus) if base is not None else None,
         "content_hash": source["content_sha256"],
         "source_syllabus": int(target["source"]),
-        "after": state.dossier_state(org, syllabus),
+        "after": state.dossier_state(org, syllabus, kept),
     }
     return ("created" if dossier is None else "replaced"), child
 
@@ -235,7 +242,7 @@ def apply(org, actor, plan):
 
 def _check_child(org, child):
     syllabus = core.model("syllabus.Syllabus").objects.select_for_update().get(pk=child["syllabus"], organization=org)
-    if state.dossier_state(org, syllabus) != child["after"]:
+    if state.dossier_state(org, syllabus, child.get("kept", ())) != child["after"]:
         raise RestoreError("undo_live_state_changed")
     if child["kind"] == "restore":
         version = core.model("syllabus.SyllabusVersion").objects.get(pk=child["version"], syllabus=syllabus)

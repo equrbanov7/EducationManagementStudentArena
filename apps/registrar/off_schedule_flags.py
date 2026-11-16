@@ -61,6 +61,23 @@ def stale_lessons(offering, lessons=None) -> list:
     return [lesson for lesson in flagged if is_on_schedule(offering, lesson)]
 
 
+def has_timetable(offering) -> bool:
+    """Açılışın cədvəldə DURAN slotu varmı (təzə oxunuş) — yoxdursa dərs cədvəllə müqayisə edilə bilməz."""
+    from .journal_activation import offering_slots
+
+    _fresh_slots(offering)
+    return bool(offering_slots(offering))
+
+
+def unflagged_off_schedule(offering, lessons) -> list:
+    """İşarəsiz, amma cədvələ UYĞUN OLMAYAN dərslər (yazmadan) — :func:`stale_lessons`-in tərsi, EYNİ qayda
+    (:func:`is_on_schedule`). Cədvəli olmayan açılışda boşdur (müqayisə ediləcək cədvəl yoxdur; çağıran
+    :func:`has_timetable` ilə ayrıca sayır). Sahib 2026-11-16: işarənin bərpası üçün."""
+    if not has_timetable(offering):
+        return []
+    return [lesson for lesson in lessons if not lesson.off_schedule_reason and not is_on_schedule(offering, lesson)]
+
+
 def clear(offering, lessons, *, by_user=None, source="", note="cədvələ uyğundur — işarə təmizləndi") -> int:
     """İşarəni təmizlə + açılışın tarixçəsinə bir audit sətri. Yarış: yalnız səbəb DƏYİŞMƏYİBSƏ yazılır.
 
@@ -127,10 +144,12 @@ __all__ = [
     "SOURCE_LESSON_EDIT",
     "SOURCE_SCHEDULE",
     "clear",
+    "has_timetable",
     "is_on_schedule",
     "reevaluate",
     "reevaluate_lesson",
     "reevaluate_offerings",
     "slot_saved",
     "stale_lessons",
+    "unflagged_off_schedule",
 ]

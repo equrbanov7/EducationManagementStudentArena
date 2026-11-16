@@ -2,13 +2,17 @@
 
 Prod snapshot-dan fərqlənə bilər (PR #232, 11-07 yük düzəlişləri), ona görə hər qapı hədəfi TƏK-TƏK keçir
 (:class:`Skip` + kod → ``skipped_<kod>`` sayı); qalan hədəflər işlənməyə davam edir.
+
+Sahib 2026-11-16: müəllimin YARIMÇIQ qaralaması (status ``draft``, tamamlanma < 100 %) bərpanı artıq dayandırmır —
+təsdiqli köhnə versiya eyni dosyeyə yazılır, qaralama isə TOXUNULMADAN qalır (``kept``: hələ qaralamadır, redaktə
+olunur, arxivə keçmir). Təqdim olunmuş / baxışdakı / insan təsdiqli versiya və 100 % qaralama — ``teacher_content``.
 """
 
 from django.db.models import Q
 from django.utils import timezone
 
 from apps.registrar.public import plan_hours_for_offering
-from apps.syllabus.public import content_fingerprints, section_data_map, syllabus_for_offering
+from apps.syllabus.public import completion_report, content_fingerprints, section_data_map, syllabus_for_offering
 from apps.workload.public import journal_academic_fingerprint
 
 from . import exact_syllabus_recovery as core
@@ -128,17 +132,31 @@ def _blank_draft(org, version):
     return nonblank <= BLANK_DRAFT_NONBLANK and not query("syllabus.SyllabusReview", org, version=version).exists()
 
 
+def unfinished_draft(org, version):
+    """Müəllimin yarımçıq qaralaması: ``draft`` (təqdim olunmayıb), insan qaralaması, tamamlanma < 100 %."""
+    return (
+        version.status == "draft"
+        and version.approval_source == "human"
+        and completion_report(version, org).percent < 100
+    )
+
+
 def retirable(org, dossier):
-    """Arxivə keçəcək versiyalar: köçürülmüş TƏSDİQLİ + müəllifin BOŞ qaralaması. Başqa hər şey müəllimin işidir."""
-    out = []
+    """``(arxivə keçənlər, saxlananlar)``: köçürülmüş TƏSDİQLİ + BOŞ qaralama arxivə; YARIMÇIQ qaralama saxlanılır.
+
+    Təqdim / baxış / düzəliş / rədd / insan təsdiqi və 100 % qaralama — müəllimin işidir, hədəf keçilir.
+    """
+    retire, keep = [], []
     for version in live_versions(org, dossier):
         if version.status == "approved" and version.approval_source == "migration":
-            out.append((version, "approved"))
+            retire.append((version, "approved"))
         elif _blank_draft(org, version):
-            out.append((version, "draft"))
+            retire.append((version, "draft"))
+        elif unfinished_draft(org, version):
+            keep.append(version)
         else:
             raise Skip("teacher_content")
-    return out
+    return retire, keep
 
 
 def same_content(version, digest, plan):
@@ -150,8 +168,17 @@ def same_content(version, digest, plan):
     )
 
 
+def _restored_in_force(dossier, digest, plan):
+    """Bərpa olunmuş versiya qüvvədədir; açıq göstərici ya onun özü, ya da müəllimin saxlanmış qaralamasıdır."""
+    approved = dossier.approved_version
+    if not same_content(approved, digest, plan):
+        return False
+    current = dossier.current_version
+    return current is not None and (current.pk == approved.pk or current.status == "draft")
+
+
 def restore_plan(org, target, source, offering):
-    """→ ``(action, dossier, retire)``; action ∈ create | replace | already_ok."""
+    """→ ``(action, dossier, retire, keep)``; action ∈ create | replace | already_ok; ``keep`` — saxlanan qaralama."""
     own = list(query("syllabus.Syllabus", org, offering=offering).select_for_update(of=("self",)))
     shown = resolved_for(offering)
     digest = source["content_sha256"]
@@ -161,8 +188,8 @@ def restore_plan(org, target, source, offering):
             and shown.author_id == target["teacher"]
             and same_content(shown.approved_version, digest, target["plan"])
         ):
-            return "already_ok", shown, []
-        return "create", None, []
+            return "already_ok", shown, [], []
+        return "create", None, [], []
     (dossier,) = own
     if not dossier.is_active:
         raise Skip("dossier_inactive")
@@ -170,15 +197,14 @@ def restore_plan(org, target, source, offering):
         raise Skip("dossier_scope")
     if shown is None or shown.pk != dossier.pk:
         raise Skip("dossier_not_shown")
-    if same_content(dossier.approved_version, digest, target["plan"]) and dossier.current_version_id == (
-        dossier.approved_version_id
-    ):
-        return "already_ok", dossier, []
+    if _restored_in_force(dossier, digest, target["plan"]):
+        return "already_ok", dossier, [], []
     if dossier.author_id != target["teacher"]:
         raise Skip("dossier_author")
     if links(org, dossier):
         raise Skip("dossier_shared")
-    return "replace", dossier, retirable(org, dossier)
+    retire, keep = retirable(org, dossier)
+    return "replace", dossier, retire, keep
 
 
 def base_to_retire(org, target, offering):
@@ -243,10 +269,19 @@ def protected(org, offering):
     return journal_academic_fingerprint(organization_id=org.pk, offerings=[offering], exclude=PROTECTED_EXCLUDE)
 
 
-def dossier_state(org, syllabus):
-    versions = query("syllabus.SyllabusVersion", org, syllabus=syllabus).order_by("pk")
+def dossier_state(org, syllabus, kept=()):
+    """Undo qapısının şəkli. ``kept`` — müəllimin saxlanmış qaralaması: onu redaktə etmək undo-nu bağlamamalıdır,
+    ona görə o versiya və dosyenin ``updated_at`` sahəsi (qaralama yazanda dəyişir) şəkildən çıxarılır."""
+    kept = {str(pk) for pk in kept}
+    versions = [
+        v for v in query("syllabus.SyllabusVersion", org, syllabus=syllabus).order_by("pk") if str(v.pk) not in kept
+    ]
+    meta = core.metadata_digest(syllabus)
+    if kept:
+        fields = syllabus._meta.concrete_fields
+        meta = core.digest({f.attname: getattr(syllabus, f.attname) for f in fields if f.attname != "updated_at"})
     return {
-        "syllabus": core.metadata_digest(syllabus),
+        "syllabus": meta,
         "versions": {str(v.pk): core.metadata_digest(v) for v in versions},
         "content": {str(v.pk): core.digest(section_data_map(v)) for v in versions},
         "shares": query("syllabus.SyllabusShare", org).filter(Q(syllabus=syllabus)).count(),
