@@ -44,20 +44,20 @@ def exam_center_session_detail(request, session_id):
     bölməsindədir. Nəzarətçi/heyət də görə bilir; idarə düymələri icazəyə görə.
     """
     organization, session = get_center_session_or_404(request, session_id, for_supervision=True)
-    tickets = list(session.tickets.select_related("student", "attempt", "exam").order_by("seat_number", "id"))
+    from django.db.models import Exists, OuterRef
 
     from apps.exams.models import SupervisionIncident
     from apps.exams.services.final_center import can_manage_final_center
     from apps.exams.services.final_center.result_annul import ANNUL_ACTION
 
-    attempt_ids = [t.attempt_id for t in tickets if t.attempt_id]
-    annulled = set(
-        SupervisionIncident.objects.filter(attempt_id__in=attempt_ids, teacher_action=ANNUL_ACTION).values_list(
-            "attempt_id", flat=True
-        )
+    # Ləğv işarəsi bilet sorğusunun İÇİNDƏ (Exists) — oturum səhifəsinin sorğu büdcəsi dəyişmir.
+    annulled = SupervisionIncident.objects.filter(attempt_id=OuterRef("attempt_id"), teacher_action=ANNUL_ACTION)
+    tickets = list(
+        session.tickets.select_related("student", "attempt", "exam")
+        .annotate(result_annulled=Exists(annulled))
+        .order_by("seat_number", "id")
     )
     for t in tickets:
-        t.result_annulled = t.attempt_id in annulled
         t.can_annul = bool(t.attempt_id) and not t.result_annulled and t.status in ("completed", "removed")
 
     return render(
