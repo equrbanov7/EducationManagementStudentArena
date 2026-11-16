@@ -171,17 +171,23 @@ class MidtermAutoWriteTests(_MidtermSetup):
         self.assertEqual(last.changes[0]["appeal"], "77")
         self.assertEqual(last.changes[0]["source"], f"exam_attempt:{attempt.pk}")
 
-    def test_later_attempt_supersedes_and_old_appeal_does_not_overwrite(self):
+    def test_higher_of_two_attempts_is_official(self):
+        """Sahib 2026-11-16: «2 nəticə varsa onun yuxarı olanını götür» (əvvəl ən son cəhd qalib idi)."""
         exam, options = self._exam()
         now = timezone.now()
         first = self._finish(exam, options, correct=3, started_at=now - datetime.timedelta(hours=2))
         self.assertEqual(self._score_row().score, Decimal("30"))
         second = self._finish(exam, options, correct=0, started_at=now - datetime.timedelta(hours=1), attempt_number=2)
         row = self._score_row()
-        self.assertEqual(row.score, Decimal("0"))
-        self.assertEqual(row.exam_source["attempt_id"], second.pk)
-        self._resync(first)  # köhnə cəhdin gecikmiş apellyasiyası
-        self.assertEqual(self._score_row().score, Decimal("0"))
+        self.assertEqual(row.score, Decimal("30"))  # aşağı yeni nəticə yüksəyi əzmir
+        self.assertEqual(row.exam_source["attempt_id"], first.pk)
+        self._resync(second)
+        self.assertEqual(self._score_row().score, Decimal("30"))
+        third = self._finish(
+            exam, options, correct=3, started_at=now - datetime.timedelta(minutes=30), attempt_number=3
+        )
+        row = self._score_row()
+        self.assertEqual((row.score, row.exam_source["attempt_id"]), (Decimal("30"), third.pk))  # bərabərdə — son
 
     def test_hidden_results_wait_until_published(self):
         exam, options = self._exam(results_hidden_from_students=True)

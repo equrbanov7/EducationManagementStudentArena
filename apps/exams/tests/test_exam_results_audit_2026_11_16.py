@@ -219,3 +219,81 @@ class DetailTests(_AuditSetup):
         self.assertIn(f"exam={exam.pk} reason=dropped subject={self.subject.code} group={self.group.name}", line)
         self.assertIn("dropped journal=", line)
         self.assertNotIn(self.student.username, out)
+
+
+class PlaceTakersTests(_AuditSetup):
+    """``place_midterm_takers_20261116``: jurnalı olmayan midterm iştirakçısı jurnala + balı (sahib 2026-11-16)."""
+
+    def _place(self, *args):
+        out = StringIO()
+        call_command(
+            "place_midterm_takers_20261116", "--org", self.org.slug, "--actor", self.owner.username, *args, stdout=out
+        )
+        return out.getvalue()
+
+    def _batch(self, out):
+        return next(line.split("id=")[1] for line in out.splitlines() if " batch id=" in line).strip()
+
+    def test_system_dropped_row_is_restored_with_score_and_undo_drops_it_again(self):
+        with bypass_rls():
+            Enrollment.objects.filter(pk=self.enrollment.pk).update(status="dropped")
+        exam, options = self._exam_for([self.group], title="Drop")
+        self._finish(exam, options, correct=2)
+        out = self._place()
+        self.assertIn("mode dry_run=1", out)
+        self.assertIn("restored_system_drop=1", out)
+        self.assertIn("after_written=1", out)
+        with bypass_rls():
+            self.assertEqual(Enrollment.objects.get(pk=self.enrollment.pk).status, "dropped")
+        batch = self._batch(self._place("--apply"))
+        with bypass_rls():
+            self.assertEqual(Enrollment.objects.get(pk=self.enrollment.pk).status, "enrolled")
+        self.assertEqual(self._score_in(self.offering, self.enrollment).score, Decimal("20"))
+        self.assertIn("status_unchanged=1", self._place())
+        call_command(
+            "merge_duplicate_subjects_20261111",
+            "--org",
+            self.org.slug,
+            "--actor",
+            self.owner.username,
+            "--undo",
+            "--batch",
+            batch,
+            "--apply",
+            stdout=StringIO(),
+        )
+        with bypass_rls():
+            self.assertEqual(Enrollment.objects.get(pk=self.enrollment.pk).status, "dropped")
+
+    def test_two_journals_pick_the_one_of_students_who_sat_together(self):
+        """Sahib: «verdiyi saatda hansı qrup imtahan veribsə o qrupdadır»."""
+        parent, sub, sub_offering = self._family()
+        with bypass_rls():
+            sub2 = OrgUnit.objects.create(
+                organization=self.org, name="536 MU2", slug="res-mu2", unit_type=OrgUnitType.GROUP, parent=sub.parent
+            )
+            CourseOffering.objects.create(organization=self.org, subject=self.subject, period=self.period, group=sub2)
+        exam, options = self._exam_for([parent, sub, sub2], title="Together")
+        mates = [self._new_student(f"res_mate{i}", sub) for i in range(2)]
+        with bypass_rls():
+            for mate in mates:
+                Enrollment.objects.create(organization=self.org, student=mate, offering=sub_offering)
+        for mate in mates:
+            self._attempt_by(mate, exam, options, correct=1)
+        lone = self._new_student("res_lone", parent)
+        self._attempt_by(lone, exam, options, correct=3)
+        out = self._place("--apply")
+        self.assertIn("cotaker_match=1", out)
+        with bypass_rls():
+            enrollment = Enrollment.objects.get(offering=sub_offering, student=lone, status="enrolled")
+        self.assertEqual(self._score_in(sub_offering, enrollment).score, Decimal("30"))
+
+    def test_removed_attempt_is_not_touched(self):
+        with bypass_rls():
+            Enrollment.objects.filter(pk=self.enrollment.pk).delete()
+        exam, options = self._exam_for([self.group], title="Removed")
+        self._finish(exam, options, correct=2, supervision_status="removed")
+        out = self._place("--apply")
+        self.assertIn("removed_skipped=1", out)
+        with bypass_rls():
+            self.assertFalse(Enrollment.objects.filter(student=self.student, offering=self.offering).exists())

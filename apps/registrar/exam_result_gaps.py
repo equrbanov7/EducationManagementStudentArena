@@ -229,11 +229,129 @@ def describe(ctx, gap: StudentGap, *, student_id, subject_id, exam_group_ids=())
     return code, group, hint
 
 
+RESTORE_NOTE = (
+    "Sahib 2026-11-16: tələbənin bu fəndən midterm nəticəsi var — deməli fənni oxuyur; jurnala qaytarıldı "
+    "(nəticə jurnalda görünsün)."
+)
+
+
+def restore_dropped(ctx, *, student_id, subject_id, actor) -> tuple:
+    """``dropped`` hal: fənnin cari jurnalındakı çıxarılmış sətri jurnal səhifəsinin «Bərpa et» yolu ilə qaytar.
+
+    → ``(kod, Enrollment | None)``; kod: ``restored`` / ``restore_<səbəb>`` (``journal_roster_restore.RestoreError``).
+    """
+    from apps.registrar import journal_roster_restore as roster_restore
+
+    rows = list(
+        Enrollment.objects.filter(
+            organization=ctx.organization,
+            student_id=student_id,
+            offering__period=ctx.period,
+            offering__is_active=True,
+            offering__subject_id__in=ctx.subject_ids(subject_id),
+        )
+        .exclude(status=Enrollment.Status.ENROLLED)
+        .select_related("offering", "offering__period")
+        .order_by("-updated_at")
+    )
+    if not rows:
+        return "restore_no_row", None
+    if len({row.offering_id for row in rows}) > 1:
+        return "restore_ambiguous", None
+    row = rows[0]
+    try:
+        roster_restore.restore(offering=row.offering, enrollment_id=row.pk, actor=actor, note=RESTORE_NOTE)
+    except roster_restore.RestoreError as exc:
+        code = "".join(ch if ch.isalnum() else "_" for ch in str(exc.code).lower())
+        if code != "not_restorable":
+            return f"restore_{code}", None
+        return _reactivate_system_drop(ctx, row, actor=actor)
+    row.refresh_from_db()
+    return ("restored", row) if row.status == Enrollment.Status.ENROLLED else ("restore_not_enrolled", None)
+
+
+def _reactivate_system_drop(ctx, row, *, actor) -> tuple:
+    """«Sistem tərəfindən çıxarılıb» sətri (qərarsız ``dropped``): sahib 2026-11-16 — midterm nəticəsi var, fənni oxuyur.
+
+    Yalnız: ``dropped`` (dondurma / ``suspended`` YOX), rəsmi köçürmə izi yoxdur (``superseded_by``), tələbənin aktiv
+    qeydi var, jurnalın siyahısı açıqdır, həmin fəndən başqa aktiv jurnalı yoxdur. Tarixçəyə «bərpa» sətri yazılır."""
+    from apps.registrar import guest_roster, journal_removal
+
+    if row.status != Enrollment.Status.DROPPED or row.superseded_by_id:
+        return "restore_kept_status", None
+    if _record(ctx.organization, row.student_id) is None:
+        return "restore_no_active_record", None
+    if guest_roster.roster_block_reason(row.offering):
+        return "restore_roster_closed", None
+    elsewhere = Enrollment.objects.filter(
+        organization=ctx.organization,
+        student_id=row.student_id,
+        offering__period=ctx.period,
+        offering__subject_id=row.offering.subject_id,
+        status=Enrollment.Status.ENROLLED,
+    ).exclude(pk=row.pk)
+    if elsewhere.exists():
+        return "restore_active_elsewhere", None
+    row.status = Enrollment.Status.ENROLLED
+    row.save(update_fields=["status", "updated_at"])
+    journal_removal.record_restore(
+        enrollment=row, actor=actor, note=RESTORE_NOTE, action=journal_removal.HISTORY_ACTION_HYGIENE
+    )
+    return "restored_system_drop", row
+
+
+#: Birgə imtahan verənlərin ən azı bu qədəri eyni jurnaldadırsa o jurnal seçilir (sahib 2026-11-16).
+COTAKER_MIN = 2
+COTAKER_SHARE = 0.6
+
+
+def cotaker_offering(ctx, *, subject_id, candidate_offering_ids, cotaker_ids) -> tuple:
+    """Bir neçə uyğun jurnal: tələbə ilə EYNİ imtahanı EYNİ vaxtda verənlərin jurnalı (sahib 2026-11-16:
+    «verdiyi saatda hansı qrup imtahan veribsə o qrupdadır») → ``(açılış id | None, kod)``."""
+    from collections import Counter
+
+    candidates = {str(pk) for pk in candidate_offering_ids or ()}
+    ids = [pk for pk in cotaker_ids or () if pk]
+    if not candidates or not ids:
+        return None, "cotaker_none"
+    counts = Counter(
+        str(offering_id)
+        for offering_id in Enrollment.objects.filter(
+            organization=ctx.organization,
+            student_id__in=ids,
+            offering_id__in=list(candidates),
+            status=Enrollment.Status.ENROLLED,
+        ).values_list("offering_id", flat=True)
+    )
+    if not counts:
+        return None, "cotaker_none"
+    (top, top_n), *rest = counts.most_common()
+    if top_n < COTAKER_MIN or top_n < COTAKER_SHARE * sum(counts.values()) or (rest and rest[0][1] == top_n):
+        return None, "cotaker_split"
+    return top, "cotaker_match"
+
+
+def candidate_offering_ids(ctx, *, student_id, subject_id, exam_group_ids=()) -> set:
+    """Tələbənin qrup ailəsindəki + imtahan qruplarının bu fəndən aktiv jurnalları (seçim üçün namizədlər)."""
+    record = _record(ctx.organization, student_id)
+    found = set()
+    groups = [g for g in exam_group_ids or () if g]
+    if record is not None and record.group_id:
+        groups.append(record.group_id)
+    if groups:
+        for rows in ctx.family_offerings(subject_id, groups).values():
+            found |= {str(pk) for pk, _gid in rows}
+    return found
+
+
 __all__ = [
     "PLACEABLE",
     "STUDENT_REASONS",
     "StudentGap",
     "classify_student",
+    "candidate_offering_ids",
     "context",
+    "cotaker_offering",
     "describe",
+    "restore_dropped",
 ]

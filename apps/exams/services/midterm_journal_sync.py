@@ -12,8 +12,8 @@ Qərar zənciri (hamısı ``sync_midterm_attempt``-də, hər addım sayılan sta
 3. nəticə tələbədən GİZLƏDİLMƏYİB (``results_hidden_from_students``) — gizlidirsə jurnala da düşmür;
    müəllim nəticəni açanda (``lifecycle.set_results_hidden``) ``resync_exam`` bütün rəsmi cəhdləri yazır.
    Nəticə sonradan yenidən gizlədilsə jurnaldakı bal QALIR (artıq rəsmi jurnal qeydidir);
-4. RƏSMİ cəhd — eyni tələbə + fənn üzrə DAHA SONRA başlamış bitmiş midterm cəhdi (istənilən format) yoxdur
-   (yekun körpüsünün ``SKIP_SUPERSEDED_ATTEMPT`` qaydası, ``started_at`` + ``pk``);
+4. RƏSMİ cəhd — eyni tələbə + fənn üzrə balı DAHA YÜKSƏK (bərabərdə sonra başlamış) bitmiş midterm cəhdi yoxdur
+   (sahib 2026-11-16: «2 nəticə varsa onun yuxarı olanını götür»; əvvəl ən son cəhd rəsmi idi — ``attempt_rank``);
 5. yazılı / kodlaşdırma cəhdi TAM yoxlanılıb (``grading_complete``) — qismən yoxlanmış cəhd YAZILMIR
    (``grading_pending``, gözlənilən hal, sayılmır); qovulma → 0 yoxlamadan asılı deyil (yekun körpüsü kimi);
 6. faiz yekun körpüsü ilə EYNİ mənbədən (``journal_sync._attempt_percent`` — test: apellyasiya bonusu
@@ -84,13 +84,6 @@ def is_graded_midterm_exam(exam) -> bool:
     return is_auto_midterm_exam(exam) and getattr(exam, "exam_type", None) in GRADED_MIDTERM_EXAM_TYPES
 
 
-def _later_attempts_q(attempt):
-    from django.db.models import Q
-
-    started_at = attempt.started_at
-    return Q(started_at__gt=started_at) | Q(started_at=started_at, pk__gt=attempt.pk)
-
-
 def _official_filter():
     """Rəsmi midterm formatları; eyni xana aşağıda canonical resolver ilə yoxlanır."""
     from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
@@ -106,16 +99,40 @@ def _official_filter():
     }
 
 
+def attempt_rank(attempt) -> tuple:
+    """Rəsmi midterm seçimi (sahib 2026-11-16: «2 nəticə varsa onun yuxarı olanını götür») → müqayisə açarı.
+
+    ``(faiz, başlama, pk)`` — balı YÜKSƏK olan qalib, bərabərdə SONRAKI. Qovulma → 0; yoxlanmamış yazılı /
+    kodlaşdırma cəhdi və faizi alınmayan cəhd → −1 (yoxlanmış nəticəni əvəz etmir; yoxlanandan sonra yenidən
+    müqayisə olunur — ``manual_grading`` körpünü çağırır)."""
+    from apps.exams.services import journal_sync
+
+    if getattr(attempt, "supervision_status", "") == "removed":
+        percent = 0.0
+    elif is_graded_midterm_exam(attempt.exam) and not grading_complete(attempt):
+        percent = -1.0
+    else:
+        try:
+            with transaction.atomic():
+                value = journal_sync._attempt_percent(attempt)
+        except Exception:  # noqa: BLE001 — sıralama xətası yazını sındırmasın (fail-closed: −1)
+            logger.exception("midterm_journal_sync: rank failed for attempt %s", getattr(attempt, "id", "?"))
+            value = None
+        percent = -1.0 if value is None or value is journal_sync.PERCENT_PENDING else float(value)
+    started = getattr(attempt, "started_at", None)
+    return (percent, started.timestamp() if started is not None else 0.0, attempt.pk)
+
+
 def superseded_by_later_midterm(attempt, subject_id) -> bool:
-    """Eyni jurnal qeydiyyatına yazılan sonrakı bitmiş midterm cəhdi varmı (format fərq etmir)."""
+    """Eyni jurnal qeydiyyatına yazılan DAHA YÜKSƏK (bərabərdə sonrakı) bitmiş midterm cəhdi varmı (format fərq etmir).
+
+    Sahib 2026-11-16: «birdəki 2 nəticə varsa kimdəsə onun yuxarı olanını götür» — əvvəl həmişə ən SON cəhd
+    rəsmi idi (yenidən buraxılan tələbənin aşağı balı yüksəyini əzirdi). Ad tarixə uyğunluq üçün qalıb."""
     from apps.exams.models import ExamAttempt
     from apps.exams.services.journal_sync_scope import has_same_target
 
-    if getattr(attempt, "started_at", None) is None:
-        return False
-    candidates = (
+    candidates = list(
         ExamAttempt.objects.filter(
-            _later_attempts_q(attempt),
             user_id=attempt.user_id,
             exam__organization_id=attempt.exam.organization_id,
             **_official_filter(),
@@ -124,7 +141,11 @@ def superseded_by_later_midterm(attempt, subject_id) -> bool:
         .select_related("exam", "exam__organization", "user")
         .prefetch_related("exam__journal_offerings")
     )
-    return has_same_target(attempt, candidates)
+    if not candidates:
+        return False
+    own = attempt_rank(attempt)
+    better = [row for row in candidates if attempt_rank(row) > own]
+    return bool(better) and has_same_target(attempt, better)
 
 
 def _status(status, attempt, row=None):
@@ -225,9 +246,9 @@ def grading_complete(attempt) -> bool:
 
 
 def official_attempts(queryset):
-    """Bitmiş midterm cəhdlərindən hər jurnal qeydiyyatı üzrə ən son başlamış rəsmi cəhdi seç."""
-    from django.db.models import F
+    """Bitmiş midterm cəhdlərindən hər jurnal qeydiyyatı üzrə RƏSMİ olanı seç: balı ən yüksək, bərabərdə ən son.
 
+    Sahib 2026-11-16: «2 nəticə varsa onun yuxarı olanını götür» (bax :func:`attempt_rank`)."""
     from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
     from apps.exams.services.journal_sync import MIDTERM_EXAM_CATEGORY
     from apps.exams.services.journal_sync_scope import target_key
@@ -243,15 +264,22 @@ def official_attempts(queryset):
         )
         .select_related("exam", "exam__organization", "user")
         .prefetch_related("exam__journal_offerings")
-        .order_by("user_id", F("started_at").desc(nulls_last=True), "-pk")
+        .order_by("user_id", "pk")
     )
-    seen = set()
+    best: dict = {}
+    order: list = []
     for attempt in rows.iterator(chunk_size=500):
         key = target_key(attempt)
-        if key in seen:
+        current = best.get(key)
+        if current is None:
+            order.append(key)
+            best[key] = (attempt_rank(attempt), attempt)
             continue
-        seen.add(key)
-        yield attempt
+        rank = attempt_rank(attempt)
+        if rank > current[0]:
+            best[key] = (rank, attempt)
+    for key in order:
+        yield best[key][1]
 
 
 def resync_exam(exam, *, notify=True, scope=None) -> dict:
@@ -295,6 +323,7 @@ __all__ = [
     "grading_note_state",
     "is_auto_midterm_exam",
     "is_graded_midterm_exam",
+    "attempt_rank",
     "official_attempts",
     "resync_exam",
     "schedule_resync_exam",

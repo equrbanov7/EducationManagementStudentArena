@@ -99,7 +99,8 @@ class CanonicalTwinSyncTests(_MidtermSetup):
         if category == "final":
             self.assertEqual(self._final_grade().exam_score, Decimal("17"))
         else:
-            self.assertEqual(self._score_row().score, Decimal("10"))
+            # Sahib 2026-11-16: midtermdə YÜKSƏK nəticə qalır — yeni (1/3) cəhd köhnə 3/3-ü əzmədi.
+            self.assertEqual(self._score_row().score, Decimal("30"))
 
     def test_new_exact_final_blocks_old_alias_appeal_and_bulk_selects_latest(self):
         self._assert_latest_wins("final", older_alias=True)
