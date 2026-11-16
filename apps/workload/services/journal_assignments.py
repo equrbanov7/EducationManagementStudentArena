@@ -114,7 +114,8 @@ def _assignment_map(*, organization, teacher_id, include_hours=False):
                         key = (row.subject_id, row.period_id, canonical.pk)
                         if include_hours:
                             per_row[(key, row.pk)][assignment.activity] += assignment.hours
-                            _cap(caps, (key, row.pk), row, assignment, len(row_groups))
+                            share = _group_subgroups(row, row_groups, parent, group, children)
+                            _cap(caps, (key, row.pk), row, assignment, share)
                         else:
                             result[key].add(assignment.activity)
     if include_hours:
@@ -142,12 +143,37 @@ def _assignment_map(*, organization, teacher_id, include_hours=False):
 _PLAN_FIELDS = {Activity.LECTURE: "lecture_plan", Activity.SEMINAR: "seminar_plan", Activity.LAB: "lab_plan"}
 
 
-def _cap(caps, key, row, assignment, group_count) -> None:
+def _group_subgroups(row, row_groups, parent, group, children) -> int | None:
+    """Bu qrupun sətirdəki REAL alt qrup sayı; tək qruplu sətirdə ``None`` (sətrin ``subgroup_count``-u keçərlidir).
+
+    MR-000383 (2026-11-16, 234 BİO/SBİO Mikrobiologiya lab): 3 lab alt qrupu 2 qrupa ``ceil(3 ÷ 2) = 2`` ilə
+    bölünürdü — tək alt qruplu qrupun jurnalı da 2 × plan (60, 30 yox) göstərirdi. Sahib 2026-11-08: lab həddi qrup
+    başına plandır, alt qrupa yalnız REAL say qədər vurulur. Mənbə sırası:
+
+    * qrupun özü qeydiyyatlı alt qrupdursa (``parent_group``) — 1;
+    * qrupun qeydiyyatlı alt qrupları varsa — onların sayı;
+    * qalan qruplar sətrin qalan alt qruplarını yalnız BƏRABƏR bölünəndə paylaşır (4 ÷ 2 = 2); bölünmürsə hər
+      qrup 1 sayılır — hansı qrupun ikinci alt qrupu olduğunu bilmədən heç bir jurnala artıq plan yazılmır."""
+    if len(row_groups) <= 1:
+        return 1 if group.pk != parent.pk else None
+    if group.pk != parent.pk:
+        return 1
+    own = len(children.get(parent.pk, ()))
+    if own:
+        return own
+    known = sum(len(children.get(item.pk, ())) for item in row_groups)
+    unknown = sum(1 for item in row_groups if not children.get(item.pk))
+    rest = int(row.subgroup_count or 1) - known
+    return rest // unknown if unknown and rest >= unknown and rest % unknown == 0 else 1
+
+
+def _cap(caps, key, row, assignment, share) -> None:
     """Açar + fəaliyyət üzrə plan saatı: qrup başına plan × müəllimin bu qrupda apardığı alt qrup sayı.
 
     Sahib 2026-11-12 (135 TSPX): mühazirə 30 + seminar iki alt qrupa bölünür (30 + 30) → başlıq 90, 60 yox.
-    Alt qrup sayı: müəllimin bölgülərindəki fərqli ``sub_number``-lar; yoxdursa sətrin ``subgroup_count``-u
-    qrup sayına bölünür (çox qruplu axında hər qrup öz payını alır — 2026-11-08 qaydası qalır).
+    Alt qrup sayı: müəllimin bölgülərindəki fərqli ``sub_number``-lar; yoxdursa tək qruplu sətirdə sətrin
+    ``subgroup_count``-u, çox qruplu axında qrupun REAL alt qrup sayı (``share`` — :func:`_group_subgroups`).
+    Çox qruplu sətirdə qrupa bağlanmamış nömrələr (``group`` boş) da həmin saydan çox ola bilməz (MR-000383).
     """
     activity = assignment.activity
     field = _PLAN_FIELDS.get(activity)
@@ -161,8 +187,12 @@ def _cap(caps, key, row, assignment, group_count) -> None:
     subs = bucket.setdefault(("subs", activity), set())
     if assignment.sub_number:
         subs.add(assignment.sub_number)
-    per_group = -(-int(row.subgroup_count or 1) // max(1, group_count))
-    multiplier = max(1, len(subs), per_group if not assignment.sub_number else 1)
+    if share is None:
+        multiplier = max(1, len(subs), int(row.subgroup_count or 1) if not assignment.sub_number else 1)
+    elif assignment.sub_number and getattr(assignment, "group_id", None) is None:
+        multiplier = max(1, min(len(subs), share))
+    else:
+        multiplier = max(1, len(subs), 1 if assignment.sub_number else share)
     bucket[activity] = max(bucket.get(activity, 0), plan * multiplier)
 
 
