@@ -6,7 +6,9 @@ həmin hissələrdən ƏVVƏL, öz savepoint-ində planı hazırlayır; sonra A 
 * **PA — 2132T:** qrupun cari semestr qərarı «Genderin tarixi»dir (tək); qrup tələbələrinin İSTİFADƏ ETDİYİ hər planda
   həmin seçmə blokun «Genderin tarixi» sətrinin YANINA «Sosial tarix» sətri əlavə olunur (saat/kredit/kafedra/forma —
   «Genderin tarixi» sətrindən; fənn — 2132T + semestr yük sətrinin fənni, tək olmalıdır). Fənn həmin semestrdə planda
-  başqa cür artıq varsa heç nə yazılmır (``pa_new_subject_elsewhere``).
+  başqa cür artıq varsa heç nə yazılmır (``pa_new_subject_elsewhere``). Planda bu blok ÜMUMİYYƏTLƏ yoxdursa (prod-da
+  Tarix 2022 planına yalnız 1–2-ci semestrlər yazılıb) blok qərardakı adla, cari semestrdə (qəbul ilindən hesablanır)
+  iki variantla yaradılır: «Genderin tarixi» + «Sosial tarix», planın qalan sətirləri kimi kredit + ümumi saat.
 * **PB — 505/6 MB:** «Malekulyar biologiya» (magistr) proqramında qrup qeydlərinin qəbul ili üçün plan yoxdursa,
   həmin proqramın ən yaxın ƏVVƏLKİ ilinin aktiv planı (təsdiqlənmiş üstündür, ən yeni versiya) bütün sətirləri ilə
   köçürülür; status mənbədən götürülür, səbəb ``last_reason``-da.
@@ -17,6 +19,9 @@ daha yeni audit sətri olduğu üçün ƏVVƏL işləyir).
 """
 
 from __future__ import annotations
+
+import re
+from collections import Counter
 
 from django.utils import timezone
 
@@ -68,6 +73,31 @@ def _new_subject(organization, group, period):
     return model("registrar", "Subject").objects.get(pk=next(iter(ids)))
 
 
+def _semester(period, admission_year):
+    """Cari semestrin plan nömrəsi: (tədris ilinin başlanğıcı − qəbul ili) × 2 + (payız 1 / yaz 2)."""
+    match = re.match(r"\s*(\d{4})", str(period.academic_year or ""))
+    if not match or not admission_year:
+        return None
+    number = (int(match.group(1)) - int(admission_year)) * 2 + (2 if "yaz" in str(period.name).casefold() else 1)
+    return number if 1 <= number <= 16 else None
+
+
+def _plan_row(organization, plan_id, subject, *, semester, block, template):
+    Row = model("registrar", "CurriculumSubject")
+    row = Row(organization=organization, curriculum_id=plan_id, subject=subject)
+    if template is not None:
+        for field in ROW_FIELDS:
+            setattr(row, field, getattr(template, field))
+    else:
+        # Planın qalan sətirləri kimi: kredit + ümumi saat (kredit × 30), auditoriya saatı yazılmır.
+        credits = int(subject.ects or 0)
+        row.credits, row.total_hours, row.selfwork_hours = credits, credits * 30, credits * 30
+        row.is_elective, row.elective_group, row.required_choices = True, block, 1
+    row.semester_number = semester
+    row.save()
+    return row
+
+
 def prepare_block(*, organization, actor, period, batch, counts) -> None:
     Choice, Row = model("registrar", "GroupElectiveChoice"), model("registrar", "CurriculumSubject")
     Record = model("registrar", "StudentAcademicRecord")
@@ -83,41 +113,49 @@ def prepare_block(*, organization, actor, period, batch, counts) -> None:
         raise Skip("choice_unresolved")
     block, old_subject = old[0].elective_group, old[0].chosen_subject
     new_subject = _new_subject(organization, group, period)
-    plan_ids = set(
-        Record.objects.filter(
-            organization=organization, group=group, is_active=True, curriculum__isnull=False
-        ).values_list("curriculum_id", flat=True)
-    )
-    for source in Row.objects.filter(
-        organization=organization,
-        curriculum_id__in=plan_ids,
-        subject=old_subject,
-        elective_group=block,
-        is_elective=True,
-    ).order_by("pk"):
-        same = Row.objects.filter(curriculum_id=source.curriculum_id, subject=new_subject)
-        if same.filter(elective_group=block, is_elective=True).exists():
+    records = Record.objects.filter(organization=organization, group=group, is_active=True)
+    counts["pa_records_without_plan"] += records.filter(curriculum__isnull=True).count()
+    plan_ids = sorted(set(records.exclude(curriculum__isnull=True).values_list("curriculum_id", flat=True)))
+    if not plan_ids:
+        raise Skip("records_without_plan")
+    years = Counter(records.exclude(admission_year__isnull=True).values_list("admission_year", flat=True))
+    for plan_id in plan_ids:
+        rows = Row.objects.filter(curriculum_id=plan_id)
+        if rows.filter(subject=new_subject, elective_group=block, is_elective=True).exists():
             counts["pa_rows_already"] += 1
             continue
-        if same.filter(semester_number=source.semester_number).exists():
+        source = rows.filter(subject=old_subject, elective_group=block, is_elective=True).order_by("pk").first()
+        semester = source.semester_number if source else _semester(period, years.most_common(1)[0][0] if years else 0)
+        if semester is None:
+            raise Skip("semester_unresolved")
+        if rows.filter(subject=new_subject, semester_number=semester).exists():
             raise Skip("new_subject_elsewhere")
-        row = Row(organization=organization, curriculum_id=source.curriculum_id, subject=new_subject)
-        for field in ROW_FIELDS:
-            setattr(row, field, getattr(source, field))
-        row.save()
-        counts["pa_rows_added"] += 1
-        audit(
-            actor=actor,
-            organization=organization,
-            resource_type=RES_PLAN_ROW,
-            resource_id=row.pk,
-            repr_=f"{A_GROUP} planı: {A_NEW_SUBJECT}",
-            reason=REASON_ROW,
-            old_values={"copied_from_row": str(source.pk)},
-            new_values={"batch": batch, "row": str(row.pk), "curriculum": str(source.curriculum_id), "block": block},
-        )
-    if not counts["pa_rows_added"] and not counts["pa_rows_already"]:
-        raise Skip("block_row_missing")
+        created = []
+        if source is None:
+            # Planda bu semestrin bloku ümumiyyətlə yoxdur (plan natamamdır) — qrupun qərarındakı blok iki variantla.
+            if rows.filter(subject=old_subject, semester_number=semester).exists():
+                raise Skip("old_subject_elsewhere")
+            created.append(_plan_row(organization, plan_id, old_subject, semester=semester, block=block, template=None))
+            counts["pa_blocks_created"] += 1
+        created.append(_plan_row(organization, plan_id, new_subject, semester=semester, block=block, template=source))
+        for row in created:
+            counts["pa_rows_added"] += 1
+            audit(
+                actor=actor,
+                organization=organization,
+                resource_type=RES_PLAN_ROW,
+                resource_id=row.pk,
+                repr_=f"{A_GROUP} planı: {row.subject.name}",
+                reason=REASON_ROW,
+                old_values={"copied_from_row": str(source.pk) if source else ""},
+                new_values={
+                    "batch": batch,
+                    "row": str(row.pk),
+                    "curriculum": str(plan_id),
+                    "block": block,
+                    "semester": semester,
+                },
+            )
 
 
 def _source_plan(program, year):
@@ -193,18 +231,13 @@ def prepare_plans(*, organization, actor, period, batch, counts) -> None:
 
 
 def undo_row(*, organization, actor, row, batch, counts) -> None:
-    Row, Choice = model("registrar", "CurriculumSubject"), model("registrar", "GroupElectiveChoice")
+    Row = model("registrar", "CurriculumSubject")
     entry = row
     row = Row.objects.filter(organization=organization, pk=(entry.new_values or {}).get("row")).first()
     if row is None:
         counts["pa_undo_already"] += 1
         return
-    if Choice.objects.filter(
-        organization=organization, chosen_subject=row.subject, elective_group=row.elective_group
-    ).exists():
-        counts["pa_undo_in_use"] += 1
-        return
-    row.delete()
+    row.delete()  # plan sətrinə FK yoxdur; A undo-su qərarı əvvəl (daha yeni audit sətri) qaytarır
     counts["pa_undo_rows_deleted"] += 1
 
 
