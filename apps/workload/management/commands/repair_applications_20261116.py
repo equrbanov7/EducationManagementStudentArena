@@ -59,7 +59,10 @@ class Command(BaseCommand):
         except Exception as exc:  # noqa: BLE001 — prod-data-ops yalnız CommandError kodunu göstərir
             raise CommandError(failure_code(exc)) from None
         self.stdout.write(f"{PREFIX} mode={'apply' if options['apply'] else 'dry_run'}")
-        self.stdout.write(PREFIX + " " + " ".join(f"{key}={value}" for key, value in sorted(counts.items())))
+        # prod-data-ops yalnız ``[a-z_]+=`` açarlarını buraxır — xəta kodundakı nöqtə/rəqəm sətri gizlətməsin.
+        self.stdout.write(
+            PREFIX + " " + " ".join(f"{re.sub(r'[^a-z_]', '_', key)}={value}" for key, value in sorted(counts.items()))
+        )
         if used.get("batch") and options["apply"]:
             self.stdout.write(f"{PREFIX} batch={used['batch']}")
 

@@ -132,7 +132,7 @@ def run(*, organization, actor, counts, batch) -> None:
         counts["on_schedule"] += len(lessons) - len(targets)
         counts["off_schedule"] += len(targets)
         counts["off_no_time"] += sum(1 for lesson in targets if lesson.start_time is None)
-        counts["off_created_since_1114"] += sum(
+        counts["off_created_since_nov_fourteen"] += sum(
             1 for lesson in targets if lesson.created_at and timezone.localdate(lesson.created_at) >= FLAG_OFF_SINCE
         )
         if not targets:
