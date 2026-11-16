@@ -6,6 +6,9 @@ Plan (``apps/legacy_import/legacy_syllabi_2026_11_07.json``) iki hissədir:
   Saxlanılır: təsvir/məqsəd, həftəlik mövzular + saatlar, ədəbiyyat, yoxlama/qiymətləndirmə forması, nəticələr,
   dərsin keçirilmə forması, sərbəst iş mövzuları. ÇIXARILIR (boş olmalıdır): qarşılama mesajı, elmi maraqlar,
   sertifikatlar, müəllim/qəbul saatı (əlaqə), imtahan sualları. Heç bir mətndə e-poçt / telefon ola bilməz.
+  ``teacher`` — köhnə müəllimin prod hesabı; ``extra_teachers`` (istəyə bağlı) — eyni mənbənin bağlana biləcəyi
+  digər jurnal sahibləri (sahib 2026-11-16: 7285 Xavər Hüseynova 8343-ün E-1/E-6 jurnallarına, eyni zamanda
+  əvvəlki 134 T hədəfində jurnal sahibi 11616).
 * ``targets`` — jurnal (``offering_id``; yoxdursa fənn + qrup + müəllim üzrə axtarılır) → hərəkət:
   ``restore`` (mənbədən TƏSDİQLİ versiya) və ya ``plan_sync`` (təsdiqli dosyenin plan saatı rəsmi yükə).
 
@@ -21,7 +24,7 @@ from . import exact_syllabus_recovery as core
 
 RestoreError = core.RestoreError
 PLAN_PATH = Path(__file__).resolve().parents[1] / "legacy_syllabi_2026_11_07.json"
-PLAN_SHA256 = "daa9399f8c6a9a38380e8b80eae6fb111e1de0a0da20eb1b1bb510d268dd5388"
+PLAN_SHA256 = "e3c94d33f4b4deb4ad8c66634cb7eed9cb52c273909c2057131bc189c5c51bb1"
 FORMAT = "legacy-syllabi/1"
 MAX_PLAN = 8_000_000
 KINDS = ("lecture", "seminar", "practical", "lab")
@@ -58,9 +61,23 @@ def _strings(value):
             yield from _strings(item)
 
 
+def teachers_of(source):
+    """Mənbənin bağlana biləcəyi prod müəllimləri: ``teacher`` + ``extra_teachers``."""
+    return [source["teacher"], *source.get("extra_teachers", [])]
+
+
 def _check_source(source):
     sections = source["sections"]
-    if set(sections) != SECTION_KEYS or not isinstance(source["teacher"], int):
+    teachers = teachers_of(source)
+    extra = source.get("extra_teachers", [])
+    if (
+        set(sections) != SECTION_KEYS
+        or not isinstance(extra, list)
+        or ("extra_teachers" in source and not extra)
+        or not all(isinstance(t, int) and not isinstance(t, bool) and t > 0 for t in teachers[1:])
+        or not isinstance(source["teacher"], int)
+        or len(set(teachers)) != len(teachers)
+    ):
         raise RestoreError("source_shape")
     info = sections["info"]
     if any(info.get(field) != empty for field, empty in PERSONAL_INFO.items()) or sections["assess"].get(
@@ -88,7 +105,7 @@ def _check_target(target, sources):
         raise RestoreError("target_plan_shape")
     if target["action"] == "restore":
         source = sources.get(target.get("source"))
-        if source is None or source["teacher"] != target["teacher"]:
+        if source is None or target["teacher"] not in teachers_of(source):
             raise RestoreError("target_source_mismatch")
         hours = plan_of(source["hours"])
         # Sahib 2026-11-09 (235 EM Tətbiqi riyaziyyat): köhnə sillabusun həftəlik saatı rəsmi plandan AZ ola bilər

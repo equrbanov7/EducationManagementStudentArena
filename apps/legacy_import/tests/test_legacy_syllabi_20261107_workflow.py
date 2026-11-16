@@ -58,7 +58,7 @@ class LegacySyllabiWorkflowTests(SimpleTestCase):
 
     def test_repo_plan_is_pinned_and_has_no_personal_sections(self):
         plan = plan_module.load()
-        self.assertEqual(len(plan["targets"]), 91)
+        self.assertEqual(len(plan["targets"]), 98)
         for source in plan["sources"].values():
             info = source["sections"]["info"]
             self.assertEqual({k: info[k] for k in plan_module.PERSONAL_INFO}, plan_module.PERSONAL_INFO)
@@ -75,7 +75,40 @@ class LegacySyllabiWorkflowTests(SimpleTestCase):
         gap = next(t for t in restores if t["key"] == "em235tr")
         self.assertEqual((gap["plan"], gap["lesson_hours"], gap["teacher"]), ({"lecture": 30, "seminar": 30}, 60, 8114))
         self.assertEqual(plan["sources"]["3953"]["hours"], {"lecture": 30, "seminar": 15})
-        # Sahib 2026-11-16: köhnə sillabuslar mənbə kimi hazırdır (hədəflər prod id-ləri ilə ayrıca əlavə olunur).
-        staged = {"9010": {"seminar": 60}, "7197": {"seminar": 105}, "7112": {"seminar": 106}}
+        # Sahib 2026-11-16: köhnə sillabuslar → cari jurnallar (müraciətlər). 7112: 53 həftə × 2 = 106 saat, rəsmi
+        # plan 105 — son həftə («Preparation for Final exam») 1 saat. 8722: müəllim Leyla Cavadova (8163).
+        staged = {"9010": {"seminar": 60}, "7197": {"seminar": 105}, "7112": {"seminar": 105}}
         staged["8722"] = {"lecture": 30, "seminar": 15}
         self.assertEqual({k: plan["sources"][k]["hours"] for k in staged}, staged)
+        added = {
+            t["key"]: (t["source"], t["teacher"], t["lesson_hours"])
+            for t in restores
+            if t["source"] in {"9010", "8974", "7197", "7285", "7112", "8722"}
+        }
+        self.assertEqual(
+            {key: added[key] for key in added if key not in {"rde688e4d", "rcaa68b59", "r2d5bc7b1"}},
+            {
+                "rbb99ce5b": ("9010", 9570, 60),
+                "rd42b23b8": ("8974", 7729, 105),
+                "r11c8b564": ("7197", 7729, 105),
+                "ra9ec0d55": ("7285", 8343, 105),
+                "rd9b167be": ("7285", 8343, 105),
+                "rc5334d73": ("7112", 8343, 105),
+                "r44057a0a": ("8722", 8163, 45),
+            },
+        )
+        # Köhnə müəllim 904 = Xavər Hüseynova (8343); 134 T hədəfi (jurnal sahibi 11616) extra_teachers ilə qalır.
+        self.assertEqual(plan_module.teachers_of(plan["sources"]["7285"]), [8343, 11616])
+        self.assertEqual(added["r2d5bc7b1"], ("7285", 11616, 120))
+        self.assertEqual((plan["sources"]["7112"]["teacher"], plan["sources"]["8722"]["teacher"]), (8343, 8163))
+
+    def test_source_teacher_must_match_target(self):
+        plan = plan_module.load()
+        target = next(t for t in plan["targets"] if t["key"] == "ra9ec0d55")
+        sources = {"7285": dict(plan["sources"]["7285"], extra_teachers=[])}
+        with self.assertRaises(plan_module.RestoreError):
+            plan_module._check_source(sources["7285"])
+        sources["7285"].pop("extra_teachers")
+        plan_module._check_target(target, sources)
+        with self.assertRaises(plan_module.RestoreError):
+            plan_module._check_target(dict(target, teacher=11617), sources)
