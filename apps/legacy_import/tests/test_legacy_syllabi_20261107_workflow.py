@@ -75,3 +75,7 @@ class LegacySyllabiWorkflowTests(SimpleTestCase):
         gap = next(t for t in restores if t["key"] == "em235tr")
         self.assertEqual((gap["plan"], gap["lesson_hours"], gap["teacher"]), ({"lecture": 30, "seminar": 30}, 60, 8114))
         self.assertEqual(plan["sources"]["3953"]["hours"], {"lecture": 30, "seminar": 15})
+        # Sahib 2026-11-16: köhnə sillabuslar mənbə kimi hazırdır (hədəflər prod id-ləri ilə ayrıca əlavə olunur).
+        staged = {"9010": {"seminar": 60}, "7197": {"seminar": 105}, "7112": {"seminar": 106}}
+        staged["8722"] = {"lecture": 30, "seminar": 15}
+        self.assertEqual({k: plan["sources"][k]["hours"] for k in staged}, staged)
