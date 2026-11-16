@@ -279,7 +279,7 @@ class LegacySyllabiTests(TestCase):
         self.assertEqual(SyllabusVersion.objects.get(pk=self.planned_version.pk).plan_hours, {"lecture": 45})
         self.assertIn("already_undone=1", self.run_cmd(apply=True, undo=batch))
 
-    def test_teacher_draft_and_changed_plan_skip_only_that_target(self):
+    def teacher_draft(self):
         services.create_next_version(
             syllabus=self.own, actor=services.resolve_actor(self.actor, self.org), kind="minor"
         )
@@ -287,14 +287,55 @@ class LegacySyllabiTests(TestCase):
         SyllabusSection.objects.filter(version=draft, section_id="week").update(
             data={"rows": [{"topic": "Müəllimin öz mövzusu", "lecture": 2}]}
         )
+        return draft
+
+    def test_unfinished_teacher_draft_is_kept_next_to_restored_version(self):
+        # Sahib 2026-11-16: «Qaralamanı tamamla» — yarımçıq qaralama bərpanı dayandırmır, toxunulmadan qalır.
+        draft = self.teacher_draft()
+        content = section_data_map(draft)
         self.plans[UUIDS["o_plan"]] = {"lecture": 45}
         output = self.run_cmd(apply=True)
-        self.assertIn("entry=t02 result=skipped_teacher_content", output)
+        batch = output.split("batch=")[1].strip()
+        self.assertIn("entry=t02 result=replaced", output)
+        self.assertIn("teacher_drafts_kept=1", output)
         self.assertIn("entry=t03 result=skipped_plan_changed", output)
+        self.assertIn("entry=t01 result=created", output)
+        kept = SyllabusVersion.objects.get(pk=draft.pk)
+        self.assertEqual((kept.status, kept.archived_at), ("draft", None))
+        self.assertEqual(section_data_map(kept), content)
+        shown = self.shown("replace")
+        self.assertEqual(shown.pk, self.own.pk)
+        self.assertEqual(shown.current_version_id, draft.pk)
+        self.assertEqual(shown.approved_version.approval_source, "migration")
+        self.assertEqual(section_data_map(shown.approved_version), self.plan["sources"]["7584"]["sections"])
+        self.assertEqual(SyllabusVersion.objects.get(pk=self.wrong.pk).status, "archived")
+        self.assertEqual(SyllabusVersion.objects.get(pk=self.planned_version.pk).plan_hours, {"lecture": 45})
+
+        self.assertIn("entry=t02 result=already_ok", self.run_cmd(apply=True))
+        # Müəllim qaralamanı redaktə etməyə davam edir — bu, qəbzin geri qaytarılmasını bağlamır.
+        SyllabusSection.objects.filter(version=draft, section_id="week").update(
+            data={"rows": [{"topic": "Müəllimin yeni mövzusu", "lecture": 2}]}
+        )
+        Syllabus.objects.filter(pk=self.own.pk).update(updated_at=timezone.now())
+        self.run_cmd(apply=True, undo=batch)
+        self.assertEqual(SyllabusVersion.objects.get(pk=draft.pk).status, "draft")
+        self.assertEqual(SyllabusVersion.objects.get(pk=self.wrong.pk).status, "approved")
+        undone = self.shown("replace")
+        self.assertEqual((undone.approved_version_id, undone.current_version_id), (self.wrong.pk, draft.pk))
+
+    def test_complete_or_submitted_teacher_version_skips_only_that_target(self):
+        draft = self.teacher_draft()
+        full = type("Report", (), {"percent": 100})()
+        with patch.object(state, "completion_report", return_value=full):
+            output = self.run_cmd(apply=True)
+        self.assertIn("entry=t02 result=skipped_teacher_content", output)
         self.assertIn("entry=t01 result=created", output)
         self.assertEqual(SyllabusVersion.objects.get(pk=draft.pk).status, "draft")
         self.assertEqual(SyllabusVersion.objects.get(pk=self.wrong.pk).status, "approved")
-        self.assertEqual(SyllabusVersion.objects.get(pk=self.planned_version.pk).plan_hours, {"lecture": 45})
+        SyllabusVersion.objects.filter(pk=draft.pk).update(status="submitted")
+        self.assertIn("entry=t02 result=skipped_teacher_content", self.run_cmd(apply=True))
+        self.assertEqual(SyllabusVersion.objects.get(pk=draft.pk).status, "submitted")
+        self.assertEqual(SyllabusVersion.objects.get(pk=self.wrong.pk).status, "approved")
 
     def test_personal_or_tampered_plan_refuses_without_writes(self):
         plan = copy.deepcopy(self.plan)

@@ -58,7 +58,7 @@ class LegacySyllabiWorkflowTests(SimpleTestCase):
 
     def test_repo_plan_is_pinned_and_has_no_personal_sections(self):
         plan = plan_module.load()
-        self.assertEqual(len(plan["targets"]), 98)
+        self.assertEqual(len(plan["targets"]), 167)
         for source in plan["sources"].values():
             info = source["sections"]["info"]
             self.assertEqual({k: info[k] for k in plan_module.PERSONAL_INFO}, plan_module.PERSONAL_INFO)
@@ -95,12 +95,26 @@ class LegacySyllabiWorkflowTests(SimpleTestCase):
                 "rd9b167be": ("7285", 8343, 105),
                 "rc5334d73": ("7112", 8343, 105),
                 "r44057a0a": ("8722", 8163, 45),
+                # Sahib 2026-11-16: eyni müəllimin 510/6 BE jurnalı (Biologiyanın → Bioekologiyanın müasir problemləri).
+                "r3cc9e365": ("8722", 8163, 45),
             },
         )
         # Köhnə müəllim 904 = Xavər Hüseynova (8343); 134 T hədəfi (jurnal sahibi 11616) extra_teachers ilə qalır.
         self.assertEqual(plan_module.teachers_of(plan["sources"]["7285"]), [8343, 11616])
         self.assertEqual(added["r2d5bc7b1"], ("7285", 11616, 120))
         self.assertEqual((plan["sources"]["7112"]["teacher"], plan["sources"]["8722"]["teacher"]), (8343, 8163))
+        # Sahib 2026-11-16 («Qaralamanı tamamla»): 033 ing İnkişaf və yaş psixologiyası — müəllimin köhnə jurnalındakı
+        # tam sillabus 4869 (15 həftə, L30+S30); 8927 köhnə müəllim 1075-in ikinci hesabına (9522) da bağlanır.
+        by_key = {t["key"]: t for t in restores}
+        self.assertEqual(
+            (by_key["ra773ed18"]["source"], by_key["ra773ed18"]["teacher"], by_key["ra773ed18"]["plan"]),
+            ("4869", 8027, {"lecture": 30, "seminar": 30}),
+        )
+        self.assertEqual(plan_module.teachers_of(plan["sources"]["8927"]), [11610, 9522])
+        self.assertEqual(sum(1 for t in restores if t["key"] == "r2b29a3d8" and t["source"] == "8927"), 1)
+        # Səviyyə jurnalı E-42: müəllimin köhnə E-42 jurnalında istifadə etdiyi ortaq sillabus 5374 (praktiki → seminar).
+        self.assertEqual(plan_module.teachers_of(plan["sources"]["5374"]), [9566, 9568])
+        self.assertEqual((by_key["rc3581d65"]["source"], by_key["rc3581d65"]["plan"]), ("5374", {"seminar": 105}))
 
     def test_source_teacher_must_match_target(self):
         plan = plan_module.load()
