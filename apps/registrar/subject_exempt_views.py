@@ -54,9 +54,23 @@ def _guard(request, offering_id):
     if not subject_exempt.can_exempt(request.user, offering):
         raise Http404
     blocked = subject_exempt.block_reason(offering)
-    if blocked:
+    if blocked and not _rim_restore_override(request.user, offering):
         return None, _error("roster_closed", blocked, status=409)
     return offering, None
+
+
+def _rim_restore_override(user, offering) -> bool:
+    """Bağlı jurnal / keçmiş dövr qapısını YALNIZ RİM rəhbəri (və superadmin) «Data bərpası» rejimində keçir.
+
+    Sahib 2026-11-16 (MR-000327): köhnə sistemdən bağlı semestrə səhvən düşmüş fənn tələbənin «Fənlərim»-indən
+    çıxarılmalıdır; «Fəndən azad et» bağlı jurnalda 409 verirdi. Müəllim (birbaşa redaktor) bu qapını keçmir —
+    əməl yenə səbəb tələb edir, audit olunur və «Bərpa et» ilə geri qaytarılır.
+    """
+    if not (getattr(user, "is_superuser", False) or getattr(user, "is_ikt_rehber", False)):
+        return False
+    from .journal_full_edit import enabled
+
+    return enabled(getattr(offering, "organization", None))
 
 
 @never_cache

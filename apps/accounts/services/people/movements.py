@@ -423,7 +423,24 @@ def create_movement(
             order_date=movement.order_date,
             actor=actor.user,
         )
+        _sync_group_journals(record, actor.user)
     return movement_row(movement)
+
+
+def _sync_group_journals(record, user) -> None:
+    """Bərpa olunan tələbəni ÖZ qrupunun cari semestr jurnallarına salır (sahib 2026-11-16, Psixologiya qiyabi).
+
+    «Bərpa et» əvvəl yalnız status + qrupu dəyişirdi: eyni qrupa qayıdan tələbə jurnallarda görünmürdü. İş
+    ``registrar.student_group_journals.sync_student``-dədir (yalnız ƏLAVƏ edir; səviyyə fənləri, azad olunduğu
+    fən və başqa jurnalda aktiv olduğu fən toxunulmur, hər yeni sətir audit olunur).
+    """
+    from collections import Counter
+
+    from apps.registrar.public import student_group_journals
+
+    student_group_journals.sync_student(
+        organization=record.organization, actor=user, student_id=record.student_id, counts=Counter()
+    )
 
 
 def movement_row(movement) -> dict:

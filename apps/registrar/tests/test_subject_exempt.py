@@ -217,6 +217,20 @@ class SubjectExemptFlowTest(_ExemptBase):
         self.assertEqual(self._exempt().status_code, 409)
         self.assertEqual(self._status(self.enrollment), Enrollment.Status.ENROLLED)
 
+    def test_closed_journal_opens_only_for_rim_head_in_restore_mode(self):
+        # Sahib 2026-11-16 (MR-000327): bağlı semestrin səhv fənnini RİM rəhbəri «Data bərpası» rejimində çıxarır.
+        from django.test import override_settings
+
+        with bypass_rls():
+            scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
+            AssessmentScheme.objects.filter(pk=scheme.pk).update(is_published=True, approval_status="approved")
+            type(self.rim).objects.filter(pk=self.rim.pk).update(is_superuser=True)
+        self.assertEqual(self._exempt(self.rim).status_code, 409)  # rejim söndürülü
+        with override_settings(JOURNAL_TEACHER_FULL_EDIT=True):
+            self.assertEqual(self._exempt(self.coordinator).status_code, 409)  # RİM rəhbəri deyil
+            self.assertEqual(self._exempt(self.rim).status_code, 200)
+        self.assertNotEqual(self._status(self.enrollment), Enrollment.Status.ENROLLED)
+
 
 class SubjectExemptPermissionTest(_ExemptBase):
     def test_teacher_without_key_gets_403(self):

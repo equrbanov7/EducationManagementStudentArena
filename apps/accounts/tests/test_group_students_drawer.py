@@ -297,6 +297,17 @@ class RemovedStudentsReinstateTest(_StudentsBase):
         )
         self.assertEqual(kinds, ["expulsion", "reinstatement"])
 
+    def test_reinstatement_puts_student_into_current_group_journals(self):
+        # Sahib 2026-11-16 (Psixologiya qiyabi): «Bərpa et» tələbəni qrupun cari jurnalına da salır.
+        from apps.registrar.models import Enrollment
+
+        record = self.students[0]
+        self._remove(record)
+        Enrollment.objects.filter(offering=self.offering, student=record.student).delete()
+        response = self._post("teaching_office_head", self._reinstate_payload(record))
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertTrue(Enrollment.objects.filter(offering=self.offering, student=record.student).exists())
+
     def test_reinstatement_needs_order(self):
         record = self.students[0]
         self._remove(record)
