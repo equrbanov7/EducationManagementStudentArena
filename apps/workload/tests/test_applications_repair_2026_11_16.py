@@ -261,6 +261,20 @@ class ElectiveAndProgramTest(PlanOfferingBase):
         self.assertEqual((undone["a_undo_choice_restored"], undone["pa_undo_rows_deleted"]), ("1", "1"))
         self.assertFalse(CurriculumSubject.objects.filter(curriculum=self.curriculum, subject=self.social).exists())
 
+    def test_plan_prep_creates_missing_block_with_both_options(self):
+        """Prod: planda cari semestrin bloku heç yoxdur — qərardakı blok iki variantla yaradılır."""
+        CurriculumSubject.objects.filter(curriculum=self.curriculum, subject__in=[self.gender, self.social]).delete()
+        applied, batch = _call(self.org, self.root, "--apply")
+        self.assertEqual(
+            (applied["pa_blocks_created"], applied["pa_rows_added"], applied["a_choice_switched"]), ("1", "2", "1")
+        )
+        block = CurriculumSubject.objects.filter(curriculum=self.curriculum, elective_group="SB-1", is_elective=True)
+        self.assertEqual(set(block.values_list("subject_id", flat=True)), {self.gender.pk, self.social.pk})
+        self.assertEqual(block.get(subject=self.social).credits, 3)
+        undone, _ = _call(self.org, self.root, "--apply", "--undo", "--batch", batch)
+        self.assertEqual((undone["a_undo_choice_restored"], undone["pa_undo_rows_deleted"]), ("1", "2"))
+        self.assertFalse(block.exists())
+
     def test_plan_prep_clones_previous_year_plan(self):
         """Sahib 2026-11-17: hədəf proqramın qəbul ili planı yoxdursa əvvəlki ilin planı sətirləri ilə köçürülür."""
         Curriculum.objects.filter(program=self.mb_program, admission_year=2026).delete()
