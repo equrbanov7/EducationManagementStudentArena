@@ -241,6 +241,8 @@
         form.append("kind", box.__kind);
         var recipient = box.querySelector("[data-apx-recipient]");
         if (recipient) { form.append("recipient", recipient.value); }
+        var scope = box.querySelector("[data-apx-scope]");
+        if (scope) { form.append("scope", scope.value); }
         form.append("subject", subject.value.trim());
         form.append("body", body.value.trim());
         (box.__files || []).forEach(function (file) {
