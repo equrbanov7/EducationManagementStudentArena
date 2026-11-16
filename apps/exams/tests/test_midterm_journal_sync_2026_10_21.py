@@ -189,6 +189,25 @@ class MidtermAutoWriteTests(_MidtermSetup):
         row = self._score_row()
         self.assertEqual((row.score, row.exam_source["attempt_id"]), (Decimal("30"), third.pk))  # bərabərdə — son
 
+    def test_later_removal_wins_over_higher_and_retake_after_removal_counts(self):
+        """Uzaqlaşdırma cəzadır (0) — köhnə yüksək bal onu əzmir; uzaqlaşdırmadan SONRAKI cəhd yenə sayılır."""
+        exam, options = self._exam()
+        now = timezone.now()
+        self._finish(exam, options, correct=3, started_at=now - datetime.timedelta(hours=3))
+        removed = self._finish(
+            exam,
+            options,
+            correct=2,
+            started_at=now - datetime.timedelta(hours=2),
+            attempt_number=2,
+            supervision_status="removed",
+        )
+        row = self._score_row()
+        self.assertEqual((row.score, row.exam_source["attempt_id"]), (Decimal("0"), removed.pk))
+        after = self._finish(exam, options, correct=1, started_at=now - datetime.timedelta(hours=1), attempt_number=3)
+        row = self._score_row()
+        self.assertEqual((row.score, row.exam_source["attempt_id"]), (Decimal("10"), after.pk))
+
     def test_hidden_results_wait_until_published(self):
         exam, options = self._exam(results_hidden_from_students=True)
         self._finish(exam, options, correct=3)
