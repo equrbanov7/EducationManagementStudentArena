@@ -13,7 +13,8 @@ Qərar zənciri (hamısı ``sync_midterm_attempt``-də, hər addım sayılan sta
    müəllim nəticəni açanda (``lifecycle.set_results_hidden``) ``resync_exam`` bütün rəsmi cəhdləri yazır.
    Nəticə sonradan yenidən gizlədilsə jurnaldakı bal QALIR (artıq rəsmi jurnal qeydidir);
 4. RƏSMİ cəhd — eyni tələbə + fənn üzrə balı DAHA YÜKSƏK (bərabərdə sonra başlamış) bitmiş midterm cəhdi yoxdur
-   (sahib 2026-11-16: «2 nəticə varsa onun yuxarı olanını götür»; əvvəl ən son cəhd rəsmi idi — ``attempt_rank``);
+   (sahib 2026-11-16: «2 nəticə varsa onun yuxarı olanını götür»; əvvəl ən son cəhd rəsmi idi; ən son
+   uzaqlaşdırma isə qalibdir — 0, ``pick_official``);
 5. yazılı / kodlaşdırma cəhdi TAM yoxlanılıb (``grading_complete``) — qismən yoxlanmış cəhd YAZILMIR
    (``grading_pending``, gözlənilən hal, sayılmır); qovulma → 0 yoxlamadan asılı deyil (yekun körpüsü kimi);
 6. faiz yekun körpüsü ilə EYNİ mənbədən (``journal_sync._attempt_percent`` — test: apellyasiya bonusu
@@ -123,11 +124,32 @@ def attempt_rank(attempt) -> tuple:
     return (percent, started.timestamp() if started is not None else 0.0, attempt.pk)
 
 
-def superseded_by_later_midterm(attempt, subject_id) -> bool:
-    """Eyni jurnal qeydiyyatına yazılan DAHA YÜKSƏK (bərabərdə sonrakı) bitmiş midterm cəhdi varmı (format fərq etmir).
+def _started(attempt) -> tuple:
+    started = getattr(attempt, "started_at", None)
+    return (started.timestamp() if started is not None else 0.0, attempt.pk)
 
-    Sahib 2026-11-16: «birdəki 2 nəticə varsa kimdəsə onun yuxarı olanını götür» — əvvəl həmişə ən SON cəhd
-    rəsmi idi (yenidən buraxılan tələbənin aşağı balı yüksəyini əzirdi). Ad tarixə uyğunluq üçün qalıb."""
+
+def pick_official(attempts):
+    """Eyni jurnal xanasına yazılan cəhdlərdən RƏSMİ olanı (sahib 2026-11-16) → cəhd | ``None``.
+
+    * ən son UZAQLAŞDIRMA (``supervision_status=removed``) özündən əvvəlki cəhdləri sıfırlayır — uzaqlaşdırılma
+      cəzadır (jurnalda 0), köhnə yüksək bal onu əzmir; uzaqlaşdırmadan SONRA verilmiş cəhd yenə sayılır;
+    * qalanlar arasında balı YÜKSƏK olan (bərabərdə sonra başlamış) — «2 nəticə varsa yuxarı olanını götür»."""
+    rows = sorted(attempts, key=_started)
+    if not rows:
+        return None
+    if getattr(rows[-1], "supervision_status", "") == "removed":
+        return rows[-1]
+    last_removed = max(
+        (index for index, row in enumerate(rows) if getattr(row, "supervision_status", "") == "removed"), default=-1
+    )
+    return max(rows[last_removed + 1 :], key=attempt_rank)
+
+
+def superseded_by_later_midterm(attempt, subject_id) -> bool:
+    """Eyni jurnal qeydiyyatına yazılan cəhdlər arasında bu cəhd RƏSMİ deyilmi (:func:`pick_official`).
+
+    Ad tarixə uyğunluq üçün qalıb (2026-11-16-dək ən SON cəhd rəsmi idi)."""
     from apps.exams.models import ExamAttempt
     from apps.exams.services.journal_sync_scope import has_same_target
 
@@ -143,9 +165,9 @@ def superseded_by_later_midterm(attempt, subject_id) -> bool:
     )
     if not candidates:
         return False
-    own = attempt_rank(attempt)
-    better = [row for row in candidates if attempt_rank(row) > own]
-    return bool(better) and has_same_target(attempt, better)
+    same = [row for row in candidates if has_same_target(attempt, [row])]
+    official = pick_official([attempt, *same])
+    return official is not None and official.pk != attempt.pk
 
 
 def _status(status, attempt, row=None):
@@ -248,7 +270,7 @@ def grading_complete(attempt) -> bool:
 def official_attempts(queryset):
     """Bitmiş midterm cəhdlərindən hər jurnal qeydiyyatı üzrə RƏSMİ olanı seç: balı ən yüksək, bərabərdə ən son.
 
-    Sahib 2026-11-16: «2 nəticə varsa onun yuxarı olanını götür» (bax :func:`attempt_rank`)."""
+    Sahib 2026-11-16: «2 nəticə varsa onun yuxarı olanını götür»; uzaqlaşdırma qalib (bax :func:`pick_official`)."""
     from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
     from apps.exams.services.journal_sync import MIDTERM_EXAM_CATEGORY
     from apps.exams.services.journal_sync_scope import target_key
@@ -266,20 +288,13 @@ def official_attempts(queryset):
         .prefetch_related("exam__journal_offerings")
         .order_by("user_id", "pk")
     )
-    best: dict = {}
-    order: list = []
+    groups: dict = {}
     for attempt in rows.iterator(chunk_size=500):
-        key = target_key(attempt)
-        current = best.get(key)
-        if current is None:
-            order.append(key)
-            best[key] = (attempt_rank(attempt), attempt)
-            continue
-        rank = attempt_rank(attempt)
-        if rank > current[0]:
-            best[key] = (rank, attempt)
-    for key in order:
-        yield best[key][1]
+        groups.setdefault(target_key(attempt), []).append(attempt)
+    for attempts in groups.values():
+        official = pick_official(attempts)
+        if official is not None:
+            yield official
 
 
 def resync_exam(exam, *, notify=True, scope=None) -> dict:
@@ -325,6 +340,7 @@ __all__ = [
     "is_graded_midterm_exam",
     "attempt_rank",
     "official_attempts",
+    "pick_official",
     "resync_exam",
     "schedule_resync_exam",
     "superseded_by_later_midterm",
