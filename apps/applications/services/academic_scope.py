@@ -73,10 +73,51 @@ def chair_choices(application, user=None):
     return units.filter(own).annotate(own_school=Value(True, output_field=BooleanField())).order_by("name")
 
 
+#: Sahib 2026-11-17: kafedra kimi dekanlığa da yönləndirəndə MƏKTƏB (dekanlıq) seçilir.
+DEAN_OFFICE_CODE = "dekan"
+
+
+def school_choices(application, user=None):
+    """Dekanlıq seçimi: adi emalçıya yalnız müraciət edənin məktəbi, RİM-ə bütün aktiv məktəblər (öz məktəbi əvvəldə)."""
+    Unit = django_apps.get_model("organizations", "OrgUnit")
+    school = _school_of(application)
+    units = Unit.objects.filter(
+        organization_id=application.organization_id, is_active=True, unit_type=OrgUnitType.FACULTY
+    )
+    if _overseer(user, application):
+        flag = (
+            Case(When(pk=school.pk, then=Value(True)), default=Value(False), output_field=BooleanField())
+            if school is not None
+            else Value(False, output_field=BooleanField())
+        )
+        return units.annotate(own_school=flag).order_by("-own_school", "name")
+    if school is None:
+        return Unit.objects.none()
+    return units.filter(pk=school.pk).annotate(own_school=Value(True, output_field=BooleanField()))
+
+
+def _dean_office_scope(application, scope, scope_id, user):
+    """Seçilmiş məktəb; seçilməyibsə müraciət edənin öz aidiyyəti. Aidiyyət yoxdursa seçim MƏCBURİDİR —
+    əks halda müraciət heç bir dekanlığın növbəsinə düşmürdü (``requires_scope``)."""
+    if not scope_id:
+        if scope is None and school_choices(application, user).exists():
+            raise TransitionDenied("scope.required", "Dekanlığı (məktəbi) seçin.")
+        return scope
+    try:
+        selected = school_choices(application, user).filter(pk=scope_id).first()
+    except (ValueError, TypeError, ValidationError):
+        selected = None
+    if selected is None:
+        raise TransitionDenied("scope.required", "Dekanlığı (məktəbi) seçin.")
+    return selected
+
+
 def forward_scope(application, target_unit, scope_id=None, user=None):
     from .routing import resolve_scope_unit
 
     scope = resolve_scope_unit(target_unit, applicant_unit(application))
+    if target_unit.code == DEAN_OFFICE_CODE:
+        return _dean_office_scope(application, scope, scope_id, user)
     if target_unit.resolve_by != "chair":
         if scope_id:
             raise TransitionDenied("scope.invalid", "Bu şöbə üçün kafedra seçimi qəbul edilmir.")
@@ -123,4 +164,12 @@ def forward_scope_options(application, user) -> list[dict]:
             "school": "" if unit.own_school else school_name(unit),
         }
         for unit in units
+    ]
+
+
+def forward_school_options(application, user) -> list[dict]:
+    """Detal payload-ı üçün dekanlıq (məktəb) siyahısı."""
+    return [
+        {"id": str(unit.pk), "name": unit.name, "own_school": bool(unit.own_school)}
+        for unit in school_choices(application, user)
     ]
