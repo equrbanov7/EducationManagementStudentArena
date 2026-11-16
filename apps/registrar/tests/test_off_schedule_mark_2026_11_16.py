@@ -179,3 +179,12 @@ class MarkOffScheduleCommandTest(LessonPrefillBase):
             call_command("mark_off_schedule_lessons_20261116", "--org=yox", f"--actor={self.admin.username}")
         with self.assertRaisesMessage(CommandError, "actor_must_be_active_superuser"):
             call_command("mark_off_schedule_lessons_20261116", "--org=lp-univ", "--actor=lp_teacher")
+
+
+def test_summary_keys_pass_the_workflow_filter():
+    """prod-data-ops ``[a-z_]+=`` açarı tələb edir — rəqəmli açar bütün xülasə sətrini gizlədirdi (2026-11-16)."""
+    import re as _re
+
+    from apps.registrar.management.commands import mark_off_schedule_lessons_20261116 as command
+
+    assert all(_re.fullmatch(r"[a-z_]+", key) for key in command._COUNT_KEYS)

@@ -32,7 +32,7 @@ _COUNT_KEYS = (
     "on_schedule",
     "off_schedule",
     "off_no_time",
-    "off_created_since_1114",
+    "off_created_since_nov_fourteen",
     "offerings_marked",
     "marked",
     "race_skipped",
