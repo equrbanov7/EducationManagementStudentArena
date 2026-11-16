@@ -243,6 +243,52 @@ class ElectiveAndProgramTest(PlanOfferingBase):
         self.assertFalse(journal.is_active)
         self.assertEqual(set(self._programs()), {self.gen_program.pk})
 
+    def test_plan_prep_adds_block_row_and_undo_removes_it(self):
+        """Sahib 2026-11-17: «Sosial tarix» planın blokunda yoxdursa «Genderin tarixi» sətrindən köçürülür."""
+        CurriculumSubject.objects.filter(curriculum=self.curriculum, subject=self.social).delete()
+        CurriculumSubject.objects.filter(curriculum=self.curriculum, subject=self.gender).update(
+            credits=5, lecture_hours=30
+        )
+        applied, batch = _call(self.org, self.root, "--apply")
+        self.assertEqual((applied["pa_rows_added"], applied["a_choice_switched"]), ("1", "1"))
+        added = CurriculumSubject.objects.get(curriculum=self.curriculum, subject=self.social)
+        self.assertEqual(
+            (added.elective_group, added.is_elective, added.credits, added.lecture_hours), ("SB-1", True, 5, 30)
+        )
+        again, _ = _call(self.org, self.root, "--apply")
+        self.assertNotIn("pa_rows_added", again)
+        undone, _ = _call(self.org, self.root, "--apply", "--undo", "--batch", batch)
+        self.assertEqual((undone["a_undo_choice_restored"], undone["pa_undo_rows_deleted"]), ("1", "1"))
+        self.assertFalse(CurriculumSubject.objects.filter(curriculum=self.curriculum, subject=self.social).exists())
+
+    def test_plan_prep_clones_previous_year_plan(self):
+        """Sahib 2026-11-17: hədəf proqramın qəbul ili planı yoxdursa əvvəlki ilin planı sətirləri ilə köçürülür."""
+        Curriculum.objects.filter(program=self.mb_program, admission_year=2026).delete()
+        source = Curriculum.objects.get(program=self.mb_program, admission_year=2025)
+        Curriculum.objects.filter(pk=source.pk).update(status="approved")
+        CurriculumSubject.objects.create(
+            organization=self.org, curriculum=source, subject=self.gender, semester_number=2, credits=4
+        )
+        dry, _ = _call(self.org, self.root)
+        self.assertEqual((dry["pb_plans_cloned"], dry["pb_rows_copied"], dry["b_records_moved"]), ("1", "1", "2"))
+        self.assertEqual(dry["pb_source_plan_missing"], "1")  # 2024 qeydi — mənbə yoxdur, qalanı yenə hazırlanır
+        self.assertFalse(Curriculum.objects.filter(program=self.mb_program, admission_year=2026).exists())
+        applied, batch = _call(self.org, self.root, "--apply")
+        clone = Curriculum.objects.get(program=self.mb_program, admission_year=2026)
+        self.assertEqual(clone.status, "approved")
+        self.assertEqual(
+            list(
+                CurriculumSubject.objects.filter(curriculum=clone).values_list(
+                    "subject_id", "semester_number", "credits"
+                )
+            ),
+            [(self.gender.pk, 2, 4)],
+        )
+        self.assertEqual(StudentAcademicRecord.objects.get(pk=self.moved[0].pk).curriculum_id, clone.pk)
+        undone, _ = _call(self.org, self.root, "--apply", "--undo", "--batch", batch)
+        self.assertEqual((undone["b_undo_restored"], undone["pb_undo_plans_deleted"]), ("2", "1"))
+        self.assertFalse(Curriculum.objects.filter(pk=clone.pk).exists())
+
     def test_old_journal_with_lessons_stays_active(self):
         Lesson.objects.create(
             organization=self.org, offering=self.old_journal, date=datetime.date(2026, 9, 15), kind="lecture"

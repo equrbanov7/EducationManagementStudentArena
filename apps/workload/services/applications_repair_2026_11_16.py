@@ -33,7 +33,9 @@ RESOURCE = "workload.applications_repair_20261116"
 RES_ELECTIVE = f"{RESOURCE}.elective"
 RES_PROGRAM = f"{RESOURCE}.program"
 RES_MOVE = f"{RESOURCE}.move"
-RESOURCES = (RES_ELECTIVE, RES_PROGRAM, RES_MOVE)
+RES_PLAN_ROW = f"{RESOURCE}.plan_row"
+RES_PLAN_CLONE = f"{RESOURCE}.plan_clone"
+RESOURCES = (RES_ELECTIVE, RES_PROGRAM, RES_MOVE, RES_PLAN_ROW, RES_PLAN_CLONE)
 BATCH_PREFIX = "apps16"
 
 #: Cari payız semestri («Payız 2026/2027», ``import_timetable_docx.resolve_period`` formatı).
@@ -172,6 +174,7 @@ def audit(*, actor, organization, resource_type, resource_id, repr_, reason, old
 def run(*, organization, actor, counts: Counter, batch: str = "") -> str:
     from . import applications_repair_2026_11_16_elective as elective
     from . import applications_repair_2026_11_16_people as people
+    from . import applications_repair_2026_11_16_plans as plans
 
     batch = batch or new_batch()
     period = resolve_period(organization)
@@ -179,6 +182,9 @@ def run(*, organization, actor, counts: Counter, batch: str = "") -> str:
         counts["period_unresolved"] += 1
         return batch
     common = {"organization": organization, "actor": actor, "period": period, "batch": batch}
+    # Sahib 2026-11-17 («et»): A / B-dən ƏVVƏL plan hazırlığı (bax ``_plans``) — öz savepoint-ində.
+    guarded("pa", counts, plans.prepare_block, **common)
+    guarded("pb", counts, plans.prepare_plans, **common)
     guarded("a", counts, elective.apply, **common)
     guarded("b", counts, people.apply_programs, **common)
     guarded("c", counts, people.apply_move, **common)
@@ -188,15 +194,23 @@ def run(*, organization, actor, counts: Counter, batch: str = "") -> str:
 def undo(*, organization, actor, counts: Counter, batch: str) -> None:
     from . import applications_repair_2026_11_16_elective as elective
     from . import applications_repair_2026_11_16_people as people
+    from . import applications_repair_2026_11_16_plans as plans
 
     rows = list(
         model("audit", "AuditLog")
         .objects.filter(organization=organization, resource_type__in=RESOURCES, new_values__batch=batch)
         .order_by("-created_at", "-pk")
     )
-    handlers = {RES_ELECTIVE: elective.undo, RES_PROGRAM: people.undo_program, RES_MOVE: people.undo_move}
+    handlers = {
+        RES_ELECTIVE: elective.undo,
+        RES_PROGRAM: people.undo_program,
+        RES_MOVE: people.undo_move,
+        RES_PLAN_ROW: plans.undo_row,
+        RES_PLAN_CLONE: plans.undo_clone,
+    }
+    keys = {RES_ELECTIVE: "a", RES_PROGRAM: "b", RES_MOVE: "c", RES_PLAN_ROW: "pa", RES_PLAN_CLONE: "pb"}
     for row in rows:
-        key = {RES_ELECTIVE: "a", RES_PROGRAM: "b", RES_MOVE: "c"}[row.resource_type]
+        key = keys[row.resource_type]
         counts[f"{key}_undo_rows"] += 1
         guarded(
             f"{key}_undo",
