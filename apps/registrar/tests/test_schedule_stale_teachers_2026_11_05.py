@@ -331,6 +331,6 @@ class ReleaseCommandTest(SlotInstructorBase):
         self.assertIn("          - release_stale_slot_teachers\n", text)
         self.assertIn("            release_stale_slot_teachers)\n", text)
         self.assertIn('[ "$COMMAND" = "release_stale_slot_teachers" ]', text)
-        summary = re.search(r"grep -E '\^\(([a-z_|]+)\): \[a-z_\]\+=", text.split('"release_stale_slot_teachers" ]')[1])
+        summary = re.search(r"grep -E '\^\(([a-z0-9_|]+)\): \[a-z_\]\+=", text.split('"release_stale_slot_teachers" ]')[1])
         self.assertIsNotNone(summary)
         self.assertIn("slot_teachers", summary.group(1).split("|"))
