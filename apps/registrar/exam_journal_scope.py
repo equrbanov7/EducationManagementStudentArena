@@ -43,6 +43,42 @@ def unit_families(organization, group_ids) -> tuple[list, dict, dict]:
     return units, own, linked
 
 
+#: Sahibin «eyni fənn» qərarı (2026-11-16): ``Organization.settings[ALIAS_SETTING] = [["QKU-A", "QKU-B"], …]`` —
+#: adı fərqli iki kart (məs. «İnformasiya texnologiyaları (ixtisas üzrə)» ↔ «İnformasiya texnologiyaları») əkiz
+#: sayılır. Əkizin bütün qaydaları (ailədə öz fənnin açılışı yoxdursa, fail-closed) EYNİDİR; yalnız ad/kredit
+#: yoxlaması bu cütlər üçün sahibin qərarı ilə əvəzlənir.
+ALIAS_SETTING = "subject_journal_aliases"
+
+
+def alias_pairs(organization) -> list:
+    """Təşkilat parametrlərindəki etibarlı ``(kod, kod)`` cütləri."""
+    raw = ((getattr(organization, "settings", None) or {}) if organization is not None else {}).get(ALIAS_SETTING)
+    pairs = []
+    for item in raw if isinstance(raw, list) else ():
+        if isinstance(item, (list, tuple)) and len(item) == 2 and all(isinstance(v, str) and v.strip() for v in item):
+            pairs.append((item[0].strip(), item[1].strip()))
+    return pairs
+
+
+def alias_subject_ids(organization, subject_id) -> set:
+    """Sahibin «eyni fənn» cütlərinə görə ``subject_id``-nin tərəf-müqabil kartları."""
+    pairs = alias_pairs(organization)
+    if not pairs or not subject_id:
+        return set()
+    code = Subject.objects.filter(organization=organization, pk=subject_id).values_list("code", flat=True).first()
+    if not code:
+        return set()
+    partners = {b for a, b in pairs if a == code} | {a for a, b in pairs if b == code}
+    partners.discard(code)
+    if not partners:
+        return set()
+    return set(
+        Subject.objects.filter(organization=organization, code__in=partners)
+        .exclude(pk=subject_id)
+        .values_list("pk", flat=True)
+    )
+
+
 def twin_subject_ids(organization, subject_id, period, *, strict=False) -> set:
     """Dövrdə açılışı olan, adı (normallaşdırılmış) imtahanın fənni ilə EYNİ olan BAŞQA fənn kartları.
 
@@ -50,17 +86,24 @@ def twin_subject_ids(organization, subject_id, period, *, strict=False) -> set:
     birləşməsinin avtomatik qaydası ilə eyni; eyni adlı, amma fərqli kreditli kart ayrı fənn ola bilər."""
     if organization is None or not subject_id or period is None:
         return set()
+    aliases = alias_subject_ids(organization, subject_id)
+    if aliases:  # yalnız dövrdə aktiv açılışı olan kart
+        aliases = set(
+            Subject.objects.filter(pk__in=aliases, offerings__period=period, offerings__is_active=True).values_list(
+                "pk", flat=True
+            )
+        )
     own = Subject.objects.filter(organization=organization, pk=subject_id).values_list("name", "ects", "kind").first()
     key = normalized_subject_key(own[0] if own else "")
     if not key:
-        return set()
+        return aliases
     rows = (
         Subject.objects.filter(organization=organization, offerings__period=period, offerings__is_active=True)
         .exclude(pk=subject_id)
         .values_list("pk", "name", "ects", "kind")
         .distinct()
     )
-    return {
+    return aliases | {
         pk
         for pk, other, ects, kind in rows
         if normalized_subject_key(other) == key and (not strict or (ects, kind) == own[1:])
@@ -182,6 +225,9 @@ def family_enrollment(student, subject_id, organization, period):
 
 
 __all__ = [
+    "ALIAS_SETTING",
+    "alias_pairs",
+    "alias_subject_ids",
     "family_enrollment",
     "family_enrollments",
     "journal_offerings_by_unit",

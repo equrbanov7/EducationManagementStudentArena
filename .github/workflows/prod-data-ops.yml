@@ -259,6 +259,8 @@
 #       «Bərpa et», başqa qrupdursa alt qrup tələbəsi; bir neçə jurnal → eyni oturumda imtahan verənlərin jurnalı) və
 #       balı yazılır; 2 nəticədə yüksəyi. Uzaqlaşdırılanlar toxunulmur. Defolt dry-run; paket `dupsubj-…` —
 #       geri qaytarma merge_duplicate_subjects_20261111 batch=dupsubj-… (apply). Loga YALNIZ «midterm_takers:» sətirləri.
+#       choices = sahibin «eyni fənn» kart cütləri QKU-A=QKU-B[,…] (--alias); row_group = imtahan id-ləri 68,98
+#       (--subgroup-exams: qrupunda jurnal yoxdursa fənnin mövcud jurnalına alt qrup).
 #   move_merged_fin_20261115 — sahib 2026-11-15: birləşmiş dublikatın FİN-i FİN-i boş əsas hesaba keçir
 #       (`batch` = MƏNBƏ:HƏDƏF[,…]; `finmove-…` + apply geri qaytarır). Defolt dry-run; loga YALNIZ saylar (`fin_move:`).
 #   merge_duplicate_teacher — sahib 2026-11-08: müəllimin dublikat hesabı (mənbə) → əsas hesab (hədəf). `batch` =
@@ -1770,6 +1772,15 @@ jobs:
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor")
+              if [ -n "${CHOICES:-}" ]; then
+                match "$CHOICES" '^[A-Za-z0-9-]{1,32}=[A-Za-z0-9-]{1,32}(,[A-Za-z0-9-]{1,32}=[A-Za-z0-9-]{1,32}){0,9}$' \
+                  || { echo "choices formatı: QKU-A=QKU-B[,…]" >&2; exit 2; }
+                args+=(--alias "$CHOICES")
+              fi
+              if [ -n "${ROW_GROUP:-}" ]; then
+                match "$ROW_GROUP" '^[0-9]{1,9}(,[0-9]{1,9}){0,19}$' || { echo "row_group formatı: 68,98" >&2; exit 2; }
+                args+=(--subgroup-exams "$ROW_GROUP")
+              fi
               ;;
             move_merged_fin_20261115)
               # Sahib 2026-11-15: birləşmiş dublikatın FİN-i → FİN-i boş əsas hesab. batch = MƏNBƏ:HƏDƏF[,…] və ya finmove-… (undo, apply).
