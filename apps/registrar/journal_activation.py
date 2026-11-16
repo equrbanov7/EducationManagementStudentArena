@@ -274,12 +274,9 @@ def lesson_facts(offering, today, *, memo: bool = False, lessons=None):
 
 
 def next_topic_row(topic_rows, covered, kind):
-    """Sillabus sırası ilə bu NÖV üçün hələ keçilməmiş İLK plan sətri (yoxdursa ``None``).
-
-    ``topic_rows`` — ``journal_topics.lesson_topic_meta`` sətirləri (``title`` + ``kinds`` + ``week``),
-    ``covered`` — ``lesson_facts`` əhatəsi (``journal_topics.add_coverage``). Sətir nömrəsi olan planda
-    əhatə SƏTİR üzrədir: təkrar başlıq («Test») ilk dəfə keçiləndən sonra ikinci sətri hələ növbədədir
-    (MR-000377). Növ məlumatı olmayan mənbədə (LMS kursu) mövzu hər hansı növdə keçilibsə «keçilib» sayılır."""
+    """Sillabus sırası ilə bu NÖV üçün keçilməmiş İLK plan sətri və ya ``None`` (``topic_rows`` — ``lesson_topic_meta``,
+    ``covered`` — ``lesson_facts``). Əhatə SƏTİR üzrədir: təkrar başlıq («Test») keçiləndən sonra ikinci sətri növbədədir
+    (MR-000377). Növsüz mənbədə (LMS kursu) mövzu hər hansı növdə keçilibsə «keçilib» sayılır."""
     rows = list(topic_rows or [])
     for row, done in zip(rows, journal_topics.row_done_kinds(rows, covered)):
         kinds = row.get("kinds") or ()
