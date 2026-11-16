@@ -41,7 +41,7 @@ from django.utils.translation import pgettext
 from core.audit import log_action
 from core.constants import AuditAction
 
-from . import guest_merge, guest_roster
+from . import guest_merge, guest_roster, intensive_carry
 from . import subgroup_placement_query as placement_query
 from . import subject_exempt
 from .models import (
@@ -296,6 +296,14 @@ def open_course(
             enrollment.save(update_fields=["kind", "updated_at"])
         released += int(item["status"] == CONFLICT)
         enrollments.append(enrollment)
+    # MR-000379 (2026-11-16): köçürülən tələbənin TƏK jurnalı idisə (mənbədə başqa tələbə qalmayıb) dərslər və
+    # xanalar da intensiv jurnala gəlir — müəllim boş jurnal görmür (:mod:`.intensive_carry`).
+    moved = [row for row, item in zip(enrollments, checks) if item["status"] == CONFLICT]
+    carried = (
+        intensive_carry.carry_on_move(organization=organization, target=offering, moved=moved, by_user=by_user)
+        if moved
+        else {"lessons": 0, "marks": 0}
+    )
     log_action(
         AuditAction.CREATE,
         user=by_user,
@@ -310,13 +318,22 @@ def open_course(
             "instructor": str(instructor.pk),
             "students": [str(student.pk) for student in students],
             "released": released,
+            "carried_lessons": carried["lessons"],
+            "carried_marks": carried["marks"],
         },
         reason=note,
         resource_type="registrar.CourseOffering",
         resource_id=str(offering.pk),
         resource_repr=f"{subject.code} · {pgettext(_CTX, 'İntensiv')}",
     )
-    return {"offering": offering, "enrollments": enrollments, "released": released, "checks": checks}
+    return {
+        "offering": offering,
+        "enrollments": enrollments,
+        "released": released,
+        "checks": checks,
+        "carried_lessons": carried["lessons"],
+        "carried_marks": carried["marks"],
+    }
 
 
 @transaction.atomic
@@ -326,6 +343,9 @@ def cancel_course(*, offering, by_user, reason="") -> dict:
         raise IntensiveError("not_intensive", pgettext(_CTX, "Bu açılış intensiv kurs deyil."))
     if not offering.is_active:
         return {"removed": 0}
+    # Köçürmə ilə gələn dərslər (MR-000379) müəllimin dərsi deyil — əvvəlcə onlar geri götürülür; müəllim öz dərsini
+    # yazıbsa ləğv yenə qadağandır (tranzaksiya geri qaytarılır, köçürülmüş dərslər yerində qalır).
+    intensive_carry.undo_for_target(offering=offering, by_user=by_user)
     if Lesson.objects.filter(offering=offering).exists():
         raise IntensiveError("has_lessons", pgettext(_CTX, "Jurnalda dərs yazılıb — intensiv kursu ləğv etmək olmaz."))
     reason = " ".join(str(reason or "").split()) or pgettext(_CTX, "İntensiv kurs ləğv edildi")

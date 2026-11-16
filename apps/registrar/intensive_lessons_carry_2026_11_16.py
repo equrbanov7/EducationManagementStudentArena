@@ -35,7 +35,8 @@ from django.utils import timezone
 from core.audit import log_action
 from core.constants import AuditAction
 
-from .twin_relocate import closed, copy_mark, recompute_absences
+from .intensive_carry import LESSON_COPY_FIELDS, copy_work  # noqa: F401 — köçürmə qaydası bir yerdə (2026-11-16)
+from .twin_relocate import closed, recompute_absences
 
 RESOURCE = "registrar.intensive_lessons_carry"
 REASON = "MR-000379: intensivə köçürülmüş tələbənin dərsləri və xanaları köhnə jurnaldan intensiv jurnala"
@@ -47,22 +48,6 @@ PAIRS = (
     ("580bc433-3178-4c3e-b9e2-5fbee2d639f6", "4ff7d2fd-d970-4922-9ade-f9f9c6c3b280"),  # Tarix elminin müasir probl.
 )
 
-LESSON_COPY_FIELDS = (
-    "date",
-    "kind",
-    "topic",
-    "hours",
-    "start_time",
-    "end_time",
-    "created_by_id",
-    "instructor_id",
-    "room_id",
-    "is_legacy_synthesised",
-    "lab_group",
-    "seminar_group",
-    "is_passive",
-)
-
 
 def _model(name: str):
     return django_apps.get_model("registrar", name)
@@ -70,10 +55,6 @@ def _model(name: str):
 
 def new_batch() -> str:
     return f"icarry-{timezone.localtime():%Y%m%d-%H%M%S}-{secrets.token_hex(2)}"
-
-
-def _lesson_key(lesson) -> tuple:
-    return (lesson.date, lesson.start_time, lesson.kind)
 
 
 def run(*, organization, actor, counts: Counter, batch: str, pairs=None) -> str:
@@ -88,7 +69,6 @@ def run(*, organization, actor, counts: Counter, batch: str, pairs=None) -> str:
 def _pair(organization, actor, counts, batch, source_id, target_id) -> None:
     CourseOffering = _model("CourseOffering")
     Enrollment = _model("Enrollment")
-    Lesson = _model("Lesson")
     LessonMark = _model("LessonMark")
     offerings = {
         str(row.pk): row
@@ -119,47 +99,9 @@ def _pair(organization, actor, counts, batch, source_id, target_id) -> None:
     if src_enrollment.superseded_by_id == dst_enrollment.pk and any(m.status == "absent" for m in source_marks):
         counts["absence_double_risk"] += 1
         return
-    existing = {}
-    for lesson in Lesson.objects.select_for_update().filter(offering=target):
-        existing.setdefault(_lesson_key(lesson), []).append(lesson)
-    mapping, created_lessons = {}, []
-    for lesson in Lesson.objects.filter(offering=source).order_by("date", "start_time", "created_at"):
-        found = existing.get(_lesson_key(lesson)) or []
-        if len(found) > 1:
-            counts["target_lesson_ambiguous"] += 1
-            continue
-        if found:
-            mapping[lesson.pk] = found[0]
-            counts["target_lesson_reused"] += 1
-            continue
-        copy = Lesson.objects.create(
-            organization_id=target.organization_id,
-            offering=target,
-            **{field: getattr(lesson, field) for field in LESSON_COPY_FIELDS},
-        )
-        existing[_lesson_key(copy)] = [copy]
-        mapping[lesson.pk] = copy
-        created_lessons.append(str(copy.pk))
-    counts["lessons_created"] += len(created_lessons)
-    filled = {
-        str(pk)
-        for pk in LessonMark.objects.filter(
-            enrollment=dst_enrollment, lesson_id__in=[row.pk for row in mapping.values()]
-        ).values_list("lesson_id", flat=True)
-    }
-    created_marks = []
-    for mark in source_marks:
-        lesson = mapping.get(mark.lesson_id)
-        if lesson is None:
-            counts["mark_without_target_lesson"] += 1
-            continue
-        if str(lesson.pk) in filled:
-            counts["target_cell_filled_kept"] += 1
-            continue
-        copied = copy_mark(mark, lesson=lesson, enrollment=dst_enrollment)
-        filled.add(str(lesson.pk))
-        created_marks.append(str(copied.pk))
-    counts["marks_copied"] += len(created_marks)
+    created_lessons, created_marks = copy_work(
+        source=source, target=target, src_enrollment=src_enrollment, dst_enrollment=dst_enrollment, counts=counts
+    )
     if not created_lessons and not created_marks:
         counts["pair_already_done"] += 1
         return
