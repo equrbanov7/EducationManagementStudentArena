@@ -79,6 +79,10 @@
                 }
             });
         });
+        // 2026-11-17: «Apellyasiya balı» xanaları da (exam_score_entry_appeal.js) — açar yalnız bu faylda.
+        if (window.EMSExamScoreEntryAppeal) {
+            window.EMSExamScoreEntryAppeal.reset(host);
+        }
         api().syncAll(host);
     });
 
