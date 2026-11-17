@@ -140,6 +140,17 @@ def _attach_question_cells(rows, question_count_max, maxes) -> None:
             row["exam_display"] = row.get("exam_base_display", "")
         else:
             row["exam_display"] = floatformat(row["exam_score"], 0) if row.get("exam_score") is not None else ""
+        _mark_test_result(row, values, question_count)
+
+
+def _mark_test_result(row, values, question_count) -> None:
+    """Sahib 2026-11-18: bal bu ekrandan yox, TESTDƏN gəlibsə (onlayn imtahan körpüsü — ekranda imtahan yazısı yoxdur,
+    müəllimin jurnalda əl ilə yazdığı midterm deyil) S-xanaları KİLİDLİDİR (`from_test`); tək sütunda S1 yekunu
+    göstərir. Düzəliş yalnız «Apellyasiya balı» xanası ilə."""
+    exam_entries = [entry for entry in row.get("entries") or () if entry.get("kind") != "appeal"]
+    row["from_test"] = bool(row.get("has_score") and not exam_entries and not row.get("teacher_written"))
+    if row["from_test"] and question_count == 1 and not values and row["question_cells"]:
+        row["question_cells"][0]["value"] = row["exam_display"]
 
 
 def _steps(*, offering, saved) -> list:

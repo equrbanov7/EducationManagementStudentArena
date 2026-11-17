@@ -7,7 +7,10 @@
  *   · `window.EMSExamScoreEntryAppeal` — təsdiq dialoqu (`exam_score_entry_confirm.js`) dəyişən apellyasiya
  *     xanalarını oxuyur: sayı xülasəyə düşür və apellyasiya SƏNƏDİ tələb olunur.
  *
- * CSP: inline yoxdur. AJAX-safe: `EMSDelegate` (açar `[data-ese-appeal]` — yalnız burada).
+ * Sahib 2026-11-18: xana S-xanaları kimi SEÇİMDİR (0..maks — `exam_score_entry.js` `applyQuestionGrid` qurur);
+ * seçim dəyişəndə sətir sinxronlaşır — yekun xana apellyasiya balını göstərir, hərf/cəm ondan hesablanır.
+ *
+ * CSP: inline yoxdur. AJAX-safe: `EMSDelegate` (açar `change|[data-ese-appeal]` — yalnız burada).
  */
 (function (window, document) {
     "use strict";
@@ -27,16 +30,26 @@
         if (input.disabled || raw === "" || raw === initial) {
             return { dirty: false, invalid: false };
         }
-        var max = Number(input.getAttribute("max") || "0");
+        var max = Number(input.getAttribute("data-appeal-max") || input.getAttribute("max") || "0");
         var value = Number(raw);
         var ok = /^\d+$/.test(raw) && value >= 0 && value <= max;
         return { dirty: true, invalid: !ok };
     }
 
+    function toggleOf(input) {
+        var wrap = input.closest("[data-ese-qwrap]");
+        return wrap ? wrap.querySelector(".bootstrap-single-select__toggle") : null;
+    }
+
     function paint(input) {
         var s = state(input);
-        input.classList.toggle("is-dirty", s.dirty && !s.invalid);
-        input.classList.toggle("is-invalid", s.invalid);
+        var toggle = toggleOf(input);
+        [input, toggle].forEach(function (el) {
+            if (el) {
+                el.classList.toggle("is-dirty", s.dirty && !s.invalid);
+                el.classList.toggle("is-invalid", s.invalid);
+            }
+        });
         if (s.invalid) {
             input.setAttribute("aria-invalid", "true");
         } else {
@@ -45,8 +58,16 @@
         return s;
     }
 
-    DELEGATE.on("input", "[data-ese-appeal]", function (event, input) {
+    function entry() {
+        return window.EMSExamScoreEntry || null;
+    }
+
+    DELEGATE.on("change", "[data-ese-appeal]", function (event, input) {
         paint(input);
+        if (entry()) {
+            entry().syncPlaceholderToggle(input);
+            entry().onRowInput(input);
+        }
     });
 
     window.EMSExamScoreEntryAppeal = {
@@ -78,6 +99,12 @@
         reset: function (host) {
             inputs(host).forEach(function (input) {
                 input.value = input.getAttribute("data-initial") || "";
+                if (entry()) {
+                    entry().syncPlaceholderToggle(input);
+                }
+                if (window.EMSBootstrapSelect && input.dataset.bootstrapSelectReady === "true") {
+                    window.EMSBootstrapSelect.sync(input);
+                }
                 paint(input);
             });
         }

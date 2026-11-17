@@ -220,7 +220,8 @@
             var select = td.querySelector("[data-ese-q]");
             if (select) {
                 // Bitmiş dövr (2026-09-26, `data-locked`) və «Yekun» sətir (2026-10-25, `data-final`).
-                var locked = rowLocked(td.parentNode, host);
+                // 2026-11-18: testdən gələn bal (`data-q-locked`) heç bir rejimdə S-xanasında dəyişmir — apellyasiya ilə.
+                var locked = rowLocked(td.parentNode, host) || td.parentNode.getAttribute("data-q-locked") === "1";
                 select.disabled = off || locked;
                 var toggle = td.querySelector("[data-ese-qtoggle], .bootstrap-single-select__toggle");
                 if (toggle) {
@@ -229,6 +230,12 @@
                 if (String(select.getAttribute("data-max") || "") !== String(max)) {
                     rebuildOptions(select, max);
                 }
+            }
+        });
+        // Sahib 2026-11-18: «Apellyasiya balı» da S-xanaları kimi seçimdir — 0..maks (midterm 30, final imtahan maks).
+        host.querySelectorAll("[data-ese-appeal]").forEach(function (select) {
+            if (String(select.getAttribute("data-max") || "") !== String(appealMax(select))) {
+                rebuildOptions(select, appealMax(select));
             }
         });
         rows(host).forEach(function (row) {
@@ -301,9 +308,7 @@
             return null;
         }
         var state = questionState(row, host);
-        if (state.filled === 0 && !state.dirty) {
-            return state;
-        }
+        // Sahib 2026-11-18: S-xanası silinəndə yekun da DƏRHAL sinxron dəyişir (əvvəl toxunulmamış kimi qalırdı).
         total.value = state.filled === 0 ? total.getAttribute("data-initial") || "" : String(state.sum);
         return state;
     }
@@ -333,6 +338,30 @@
         return { dirty: dirty, invalid: invalid, overCap: overCap, change: change, value: value, questions: q };
     }
 
+    /* ---- Apellyasiya xanası → yekun (sahib 2026-11-18) ------------------------- */
+
+    function appealMax(select) {
+        return Number(select.getAttribute("data-appeal-max") || 0);
+    }
+
+    /* Yekun xana (`[data-ese-final-cell]`) apellyasiya balını göstərir: yeni seçim, yoxdursa serverdəki
+       (boş xana = toxunma) → {value, dirty}. */
+    function syncAppeal(row) {
+        var select = row.querySelector("[data-ese-appeal]");
+        var raw = select ? (select.value || "").trim() : "";
+        var initial = select ? (select.getAttribute("data-initial") || "").trim() : "";
+        var value = isInt(raw) && Number(raw) >= 0 && Number(raw) <= appealMax(select) ? raw : initial;
+        var cell = row.querySelector("[data-ese-final-cell]");
+        var output = row.querySelector("[data-ese-effective]");
+        if (cell) {
+            cell.classList.toggle("has-appeal", value !== "");
+        }
+        if (output) {
+            output.textContent = value;
+        }
+        return { value: value, dirty: value !== "" && value !== initial };
+    }
+
     var BADGE = "ems-badge";
 
     function setBadge(badge, tone, text) {
@@ -351,7 +380,11 @@
         }
         row.classList.toggle("is-dirty", state.dirty);
         row.classList.toggle("is-invalid", state.invalid);
-        if (state.dirty && !state.invalid) {
+        var appeal = syncAppeal(row); // 2026-11-18: yekun xana apellyasiya balını göstərir
+        var appealDirty = appeal.dirty;
+        if (appealDirty) {
+            syncLetter(row, appeal.value, cfg || config()); // apellyasiya balı yekundur — hərf / cəm ondan
+        } else if (state.dirty && !state.invalid) {
             syncLetter(row, state.value, cfg || config());
         } else {
             syncLetter(row, "", cfg || config()); // toxunulmamış və ya xətalı sətir: server dəyəri / «—»
@@ -361,6 +394,8 @@
         }
         if (state.invalid) {
             setBadge(badge, "danger", t("status-error"));
+        } else if (appealDirty) {
+            setBadge(badge, "warning", t("status-dirty")); // 2026-11-18: yeni apellyasiya balı — «dəyişdirilib»
         } else if (state.change) {
             setBadge(badge, "warning", t("status-change"));
         } else if (state.dirty) {
@@ -440,98 +475,10 @@
         }
     }
 
-    /* ---- Klaviatura: sütun üzrə sətir keçidi + rəqəmlə yazma ----------------- */
-
-    function focusTargetOf(row, column) {
-        if (column) {
-            var select = row.querySelector('[data-ese-q="' + column + '"]');
-            if (!select || select.disabled) {
-                return null;
-            }
-            var wrap = select.closest("[data-ese-qwrap]");
-            return wrap ? wrap.querySelector(".bootstrap-single-select__toggle") : null;
-        }
-        var total = scoreInput(row);
-        return total && !total.readOnly ? total : null;
-    }
-
-    function moveFocus(current, column, delta) {
-        var all = rows(root()).map(function (row) {
-            return focusTargetOf(row, column);
-        }).filter(Boolean);
-        var index = all.indexOf(current);
-        if (index < 0) {
-            return;
-        }
-        var target = all[index + delta];
-        if (target) {
-            target.focus();
-            if (typeof target.select === "function" && target.tagName === "INPUT") {
-                target.select();
-            }
-        }
-    }
-
-    function columnOf(element) {
+    function wrapSelect(element) {
         var wrap = element.closest("[data-ese-qwrap]");
-        var select = wrap ? wrap.querySelector("[data-ese-q]") : null;
-        return select ? select.getAttribute("data-ese-q") : "";
+        return wrap ? wrap.querySelector("[data-ese-q], [data-ese-appeal]") : null;
     }
-
-    function handleRowKey(event, element) {
-        if (event.key === "Enter" || event.key === "ArrowDown") {
-            event.preventDefault(); // Enter formanı göndərməsin; ↓ dəyəri azaltmasın.
-            moveFocus(element, columnOf(element), 1);
-        } else if (event.key === "ArrowUp") {
-            event.preventDefault();
-            moveFocus(element, columnOf(element), -1);
-        }
-    }
-
-    var digitBuffer = { select: null, text: "", at: 0 };
-
-    /* Rəqəm düyməsi seçimi birbaşa yazır: «7» → 7; «1» + «0» (400 ms) → 10. */
-    function typeDigit(select, key, host) {
-        var now = Date.now();
-        var text = digitBuffer.select === select && now - digitBuffer.at < 400 ? digitBuffer.text + key : key;
-        var max = questionMax(host, select.getAttribute("data-ese-q"));
-        var value = Number(text);
-        if (value > max) {
-            text = key;
-            value = Number(key);
-        }
-        if (value > max) {
-            return;
-        }
-        digitBuffer = { select: select, text: text, at: now };
-        select.value = String(value);
-        select.dispatchEvent(new Event("change", { bubbles: true }));
-    }
-
-    DELEGATE.on("keydown", "[data-ese-qwrap] .bootstrap-single-select__toggle", function (event, toggle) {
-        var host = root();
-        var wrap = toggle.closest("[data-ese-qwrap]");
-        var select = wrap ? wrap.querySelector("[data-ese-q]") : null;
-        if (!host || !select) {
-            return;
-        }
-        if (/^[0-9]$/.test(event.key)) {
-            event.preventDefault();
-            typeDigit(select, event.key, host);
-            return;
-        }
-        if (event.key === "Backspace" || event.key === "Delete") {
-            event.preventDefault();
-            select.value = "";
-            select.dispatchEvent(new Event("change", { bubbles: true }));
-            return;
-        }
-        handleRowKey(event, toggle);
-    });
-
-    DELEGATE.on("keydown", "[data-ese-score]", function (event, input) {
-        handleRowKey(event, input);
-    });
 
     /* Tənbəl gücləndirmə — hazır toggle-a ilk klik (mousedown: fokus hadisəsindən
        ƏVVƏL, əks halda focusin hazır toggle-u silir və click boşa gedir) / fokus (Tab). */
@@ -540,16 +487,14 @@
             return;
         }
         event.preventDefault();
-        var wrap = toggle.closest("[data-ese-qwrap]");
-        var select = wrap ? wrap.querySelector("[data-ese-q]") : null;
+        var select = wrapSelect(toggle);
         if (select) {
             enhanceQuestionSelect(select, true);
         }
     });
 
     DELEGATE.on("focusin", "[data-ese-qtoggle]", function (event, toggle) {
-        var wrap = toggle.closest("[data-ese-qwrap]");
-        var select = wrap ? wrap.querySelector("[data-ese-q]") : null;
+        var select = wrapSelect(toggle);
         if (select) {
             enhanceQuestionSelect(select, false);
         }
@@ -582,6 +527,8 @@
         rowLocked: rowLocked,
         grade: grade,
         config: config,
+        onRowInput: onRowInput,
+        questionMax: questionMax,
     };
 
     /* ---- İlk render + hər swap ------------------------------------------------ */

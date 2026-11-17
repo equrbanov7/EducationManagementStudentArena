@@ -315,8 +315,18 @@ class ExamAppealCellTest(MidtermPeriodFixture, TestCase):
         self.assertIn("Apellyasiya balı", page)
         self.assertIn(f'name="appeal__{enrollment.pk}"', page)
         appeal_input = page.split(f'name="appeal__{enrollment.pk}"')[1].split(">")[0]
-        self.assertIn('value="41"', appeal_input)
+        self.assertIn('data-initial="41"', appeal_input)  # 2026-11-18: seçim (select), dəyər seçilmiş variantdadır
         self.assertNotIn("disabled", appeal_input)
+        self.assertIn('<option value="41" selected>41</option>', page)
+        # Sahib 2026-11-18: sütun sırası — S… | Apellyasiya balı | İmtahan balı (yekun), yekun xana apellyasiyanı göstərir.
+        head = page.split('class="ems-table ems-table--zebra ese-table"')[1].split("</thead>")[0]
+        self.assertLess(head.index("Apellyasiya balı"), head.index("İmtahan balı"))
+        final_cell = page.split(f'name="score__{enrollment.pk}"')[1].split("</td>")[0]
+        self.assertIn("data-ese-effective", final_cell)
+        self.assertIn(">41</output>", final_cell)
+        self.assertIn(
+            "has-appeal", page.split(f'name="appeal__{enrollment.pk}"')[1].split(f'name="score__{enrollment.pk}"')[0]
+        )
         score_input = page.split(f'name="score__{enrollment.pk}"')[1].split(">")[0]
         self.assertIn('value="30"', score_input)  # imtahan xanası apellyasiyadan əvvəlki bal
         self.assertIn("disabled", score_input)

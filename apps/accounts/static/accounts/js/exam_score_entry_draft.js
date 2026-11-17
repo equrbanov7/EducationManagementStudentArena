@@ -77,8 +77,15 @@
             });
             var score = api().scoreInput(row);
             var sDirty = !!score && !score.disabled && (score.value || "") !== (score.getAttribute("data-initial") || "");
-            if (qDirty || sDirty) {
-                values[row.getAttribute("data-enrollment")] = { q: q, score: score ? score.value || "" : "" };
+            // Sahib 2026-11-18: apellyasiya xanası da qaralamaya düşür (yenilənəndə itirdi).
+            var appeal = row.querySelector("[data-ese-appeal]");
+            var aDirty = !!appeal && !appeal.disabled && (appeal.value || "") !== (appeal.getAttribute("data-initial") || "");
+            if (qDirty || sDirty || aDirty) {
+                values[row.getAttribute("data-enrollment")] = {
+                    q: q,
+                    score: score ? score.value || "" : "",
+                    appeal: appeal ? appeal.value || "" : "",
+                };
             }
         });
         var cols = host.querySelector("[data-ese-question-maxes]");
@@ -178,6 +185,8 @@
         if (!payload || !payload.values || !Object.keys(payload.values).length) {
             return;
         }
+        // Variantlar (0..maks) qurulmamışsa seçim bərpa olunmurdu (S1 «—», yekun köhnə) — əvvəl şəbəkə.
+        api().applyQuestionGrid(host);
         var cols = host.querySelector("[data-ese-question-maxes]");
         if (payload.columns && cols && payload.columns !== cols.value && columns()) {
             columns().setColumns(host, payload.columns.split(",").map(Number));
@@ -187,7 +196,14 @@
         }
         api().rows(host).forEach(function (row) {
             var item = payload.values[row.getAttribute("data-enrollment")];
-            if (!item || api().rowLocked(row, host)) {
+            if (!item) {
+                return;
+            }
+            var appeal = row.querySelector("[data-ese-appeal]");
+            if (appeal && !appeal.disabled && item.appeal !== undefined) {
+                applyValue(appeal, String(item.appeal || "")); // «Yekun» sətirdə də apellyasiya açıqdır
+            }
+            if (api().rowLocked(row, host)) {
                 return;
             }
             row.querySelectorAll("[data-ese-q]").forEach(function (select, index) {
