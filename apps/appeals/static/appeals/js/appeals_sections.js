@@ -153,11 +153,20 @@
 
     /* ── Reviewer: "Apellyasiyalar" — siyahı yeniləmə (AJAX) ───────────── */
 
-    function listQueryFromLocation() {
+    /* Qərardan / «geri»dən sonra siyahı EYNİ səhifədə və süzgəclərlə qalır (sahib 2026-11-17: «5-ci səhifədə
+       nəticəni dəyişəndən sonra 1-ci səhifəyə göndərir»). Süzgəclər URL-dən, səhifə — göstərilən fraqmentin
+       `data-manage-page`-indən (AJAX ilə açılmış səhifə URL-də olmaya bilər). Server həddi aşan səhifəni sonuncuya
+       endirir (`Paginator.get_page`). Süzgəc dəyişəndə səhifə 1-ə qayıdır (`filterParamsFromForm`). */
+    function listQueryFromLocation(panel) {
         try {
             var p = new URLSearchParams(window.location.search);
             p.delete("section");
             p.delete("page");
+            var pageEl = panel ? panel.querySelector("[data-manage-page]") : null;
+            var page = pageEl ? pageEl.getAttribute("data-manage-page") || "" : "";
+            if (/^\d+$/.test(page) && page !== "1") {
+                p.set("page", page);
+            }
             return p.toString();
         } catch (e) { return ""; }
     }
@@ -166,7 +175,7 @@
         var bodyHost = panel.querySelector("[data-manage-body]");
         var manageUrl = panel.getAttribute("data-manage-url");
         if (!bodyHost || !manageUrl || typeof window.fetch !== "function") { return; }
-        var q = typeof queryString === "string" ? queryString : listQueryFromLocation();
+        var q = typeof queryString === "string" ? queryString : listQueryFromLocation(panel);
         if (listFetchAbort) {
             try { listFetchAbort.abort(); } catch (e) { /* ignore */ }
         }

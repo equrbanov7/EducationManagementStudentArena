@@ -177,6 +177,8 @@ def _collect_rows(request):
                 "evidence": request.FILES.get(f"evidence__{enrollment_id}"),
             }
         )
+    # 2026-11-17 (sahib): «Apellyasiya balı» xanası — ``appeal__<enr>``; apellyasiya balı əsas götürülür.
+    rows.extend(service.exam_score_appeal.appeal_rows(request.POST, reason=batch_reason, note=batch_note))
     return rows
 
 

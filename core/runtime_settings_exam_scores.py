@@ -2,8 +2,9 @@
 
 Sahib: «daxil edən təsdiqdən sonra 15 dəqiqə ərzində dəyişə bilər; sonra yalnız təqdimat əsasında RİM
 tərəfindən və ya apellyasiya ilə» və «yazılı/praktiki imtahan nəticəsi tələbə kabinetində 1 gün sonra görünsün».
+Sahib 2026-11-17: «1 saat balları redaktə etmək müddəti» — defolt 60 dəqiqə (accounts 0037 mövcud sətri də 60 edir).
 
-* ``exam.score_edit_minutes`` (defolt 15) — təsdiqdən sonra DAXİL EDƏNİN öz balını sənədsiz dəyişə bildiyi
+* ``exam.score_edit_minutes`` (defolt 60) — təsdiqdən sonra DAXİL EDƏNİN öz balını sənədsiz dəyişə bildiyi
   müddət. Jurnal xanasının ``journal.mark_edit_minutes`` açarı QƏSDƏN təkrar istifadə OLUNMUR: o, müəllimin
   q/b və dərs balı kilididir — RİM onu müəllimlər üçün yumşaltsa (məs. 60 dəq) imtahan nəticəsinin kilidi
   səssizcə uzanmamalıdır (iki fərqli rol, iki fərqli risk). Defolt dəyər və mətn köməkçisi
@@ -25,7 +26,7 @@ _CTX = "core.runtime_settings"
 GROUP_CODE = "exam"
 KEY_EDIT_MINUTES = "exam.score_edit_minutes"
 KEY_RELEASE_HOURS = "exam.score_release_hours"
-DEFAULT_EDIT_MINUTES = 15
+DEFAULT_EDIT_MINUTES = 60  # sahib 2026-11-17: «1 saat» (əvvəl 15)
 DEFAULT_RELEASE_HOURS = 24
 
 

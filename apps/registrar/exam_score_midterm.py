@@ -179,8 +179,9 @@ class _MidtermSave:
         # Müəllimin jurnalda əl ilə yazdığı (mənbəsiz) midterm balı və kağız tarixçəsi yoxdur → bu, kağız
         # nəticənin İLK köçürülməsidir (köhnə bal audit üçün ``old_score``-da qalır, təsdiq sərbəstdir).
         teacher_written = score_row is not None and not score_row.exam_source and not self._has_paper(enrollment)
+        appeal_cell = bool(row.get("appeal_cell"))  # 2026-11-17: apellyasiya xanası müəllim balını da dəyişir
         entry_kind = entry_service.change_decision(
-            old_score=None if teacher_written else old_score,
+            old_score=None if teacher_written and not appeal_cell else old_score,
             new_score=new_score,
             cleaned_questions=cleaned,
             latest_question_scores=lambda: _latest_questions(enrollment),
@@ -193,6 +194,7 @@ class _MidtermSave:
             rules=self.rules,
             enrollment_id=enrollment.pk,
             by_user=self.by_user,
+            appeal_cell=appeal_cell,
         )
         if entry_kind is None or (teacher_written and old_score == new_score and cleaned is None):
             return None

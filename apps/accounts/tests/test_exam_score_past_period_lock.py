@@ -382,7 +382,7 @@ class PastPeriodLockTest(TestCase):
             "kind": "appeal",
             "note": "Apellyasiya",
         }
-        later = timezone.now() + timedelta(minutes=16)
+        later = timezone.now() + timedelta(minutes=61)
         with mock.patch("django.utils.timezone.now", return_value=later):
             self._post(self.center, **change)  # skan yoxdur → rədd
             self.assertEqual(self._score(), Decimal("45"))

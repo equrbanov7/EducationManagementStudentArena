@@ -86,6 +86,9 @@ def _fill_offering(
     section["column_maxes_csv"] = ",".join(str(v) for v in maxes)
     section["question_count"] = len(maxes)
     section["question_max"] = max(maxes) if maxes else service.exam_score_questions.QUESTION_MAX_DEFAULT
+    # 2026-11-17 (sahib): imtahan + apellyasiya xanası — apellyasiya varsa imtahan xanası apellyasiyadan əvvəlki bal.
+    for row in roster["rows"]:
+        service.exam_score_appeal.attach_row(row)
     _attach_question_cells(roster["rows"], service.exam_score_questions.QUESTION_COUNT_MAX, maxes)
     # Təsdiq dialoqu üçün server şkalası (json_script) — hərf/keçid JS-də eyni qayda ilə.
     section["confirm_config"] = {
@@ -133,7 +136,10 @@ def _attach_question_cells(rows, question_count_max, maxes) -> None:
             }
             for index in range(1, question_count_max + 1)
         ]
-        row["exam_display"] = floatformat(row["exam_score"], 0) if row.get("exam_score") is not None else ""
+        if row.get("appeal_set"):
+            row["exam_display"] = row.get("exam_base_display", "")
+        else:
+            row["exam_display"] = floatformat(row["exam_score"], 0) if row.get("exam_score") is not None else ""
 
 
 def _steps(*, offering, saved) -> list:

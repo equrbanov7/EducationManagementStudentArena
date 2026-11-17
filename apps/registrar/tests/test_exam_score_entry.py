@@ -319,7 +319,7 @@ class ExamScoreEntryServiceTest(TestCase):
             service.record_exam_score(enrollment=enrollment_a2, score="20", by_user=self.center)
 
             # 2026-10-25: təsdiqdən 15 dəqiqə SONRA sənədsiz dəyişiklik rədd olunur (pəncərədə sərbəstdir).
-            later = timezone.now() + timedelta(minutes=16)
+            later = timezone.now() + timedelta(minutes=61)
             with mock.patch("django.utils.timezone.now", return_value=later):
                 result = service.save_roster_scores(
                     offering=self.offering_a,

@@ -116,17 +116,33 @@ def _grid_from_params(params, *, defaults=None) -> dict:
         max_raw = _clamp(defaults.get("question_max"), 1, questions.QUESTION_MAX_CEILING)
     if not kind_raw:
         kind_raw = defaults.get("exam_kind")
-    question_count, question_max = questions.clean_question_grid(count_raw, max_raw)
-    # 2026-10-25: vərəq kartının sütun redaktoru (``question_maxes``) üstündür — sütun-sütun tavan.
+    # 2026-10-25: vərəq kartının sütun redaktoru (``question_maxes``) üstündür — sütun-sütun tavan. 2026-11-17:
+    # o varsa köhnə «bir sualın maksimumu ≤ 10» qaydası İŞLƏMİR (midterm tək sütun 30; sütun tavanı cəmlə yoxlanır).
     maxes = service.exam_score_assessment.parse_column_maxes(params.get("question_maxes"))
     if maxes:
         question_count, question_max = len(maxes), max(maxes)
+    else:
+        question_count, question_max = questions.clean_question_grid(count_raw, max_raw)
     return {
         "question_count": question_count,
         "question_max": question_max,
         "question_maxes": maxes,
         "exam_kind": sheets_service.clean_exam_kind(kind_raw),
     }
+
+
+def _roster(params, offering):
+    """İmtahanın siyahısı — midterm (jurnalın «Midterm» xanası, tavan 30) və ya final (tavan 50).
+
+    2026-11-17: şablon və idxal həmişə FİNAL siyahısı ilə qurulurdu — midterm vərəqinin sütun cəmi (30) final
+    tavanı (50) ilə yoxlanıb rədd olunurdu. ``assessment`` kartın gizli sahəsindən gəlir (boş → final).
+    """
+    rules = service.exam_score_assessment
+    assessment = rules.clean_assessment(params.get("assessment"))
+    rules.assert_assessment_allowed(offering, assessment)
+    if assessment == rules.MIDTERM:
+        return service.exam_score_midterm.roster_for_offering(offering=offering)
+    return service.roster_for_offering(offering=offering)
 
 
 def _enforce_column_sum(grid, cap) -> dict:
@@ -154,9 +170,9 @@ def exam_score_import_template(request):
     defaults = sheets_service.latest_sheet_defaults(sheets_service.sheets_for_offering(offering=offering, limit=1))
     try:
         grid = _grid_from_params(request.GET, defaults=defaults)
+        roster = _roster(request.GET, offering)
     except ValidationError as exc:
         return _bad("validation_error", " ".join(exc.messages))
-    roster = service.roster_for_offering(offering=offering)
     grid.pop("question_maxes", None)
     payload, content_type, filename = importer.build_template(roster=roster, fmt=fmt, **grid)
     response = HttpResponse(payload, content_type=content_type)
@@ -179,9 +195,9 @@ def _plan_from_request(request, offering):
         return None, None, _bad(exc.code, exc.message)
     try:
         grid = _grid_from_params(request.POST)
+        roster = _roster(request.POST, offering)
     except ValidationError as exc:
         return None, None, _bad("validation_error", " ".join(exc.messages))
-    roster = service.roster_for_offering(offering=offering)
     try:
         grid = _enforce_column_sum(grid, roster["exam_score_max"])
     except ValidationError as exc:

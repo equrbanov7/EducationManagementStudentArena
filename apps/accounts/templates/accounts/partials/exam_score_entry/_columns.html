@@ -6,7 +6,9 @@ olmalıdır (cəm uyğun gəlməsə saxlamaq olmur, aydın xəbərdarlıq; «bə
 Davranış `exam_score_entry_columns.js`-dədir; server qaydası `exam_score_assessment.clean_column_maxes`
 (sütun 1..10, hər biri 1..tavan, cəm = tavan). Gizli sahələr `form="ese-roster-form"` ilə siyahı formasına
 bağlıdır və `data-ese-meta-field` daşıyır (fayl idxalı da eyni şəbəkəni göndərir); köhnə `question_count` /
-`question_max` sahələri redaktordan sinxronlaşır (geriyə uyğunluq).{% endcomment %}
+`question_max` sahələri redaktordan sinxronlaşır (geriyə uyğunluq).
+Sahib 2026-11-17: «Midterm 1 sütun 30 ballıq» — midterm-də TƏK sütun, maksimumu sabit (oxunan), əlavə/sil/böl
+düymələri yoxdur; server də birdən çox sütunu rədd edir (`assert_midterm_single_column`).{% endcomment %}
 <div class="ems-field ems-field--wide ese-cols" data-ese-columns data-cap="{{ s.exam_score_max }}" data-max-count="{{ s.question_count_max }}">
   <div class="ese-cols__head">
     <span class="ems-field__label" id="ese-cols-label">{% trans "Sütunlar (suallar) və maksimum balları" context "registrar.exam_score_entry" %}</span>
@@ -19,14 +21,14 @@ bağlıdır və `data-ese-meta-field` daşıyır (fayl idxalı da eyni şəbək�
     <div class="ese-cols__item" data-ese-col>
       <span class="ese-cols__name" data-ese-col-name>S{{ forloop.counter }}</span>
       <input type="number" class="ems-input ese-cols__input" min="1" max="{{ s.exam_score_max }}" step="1" inputmode="numeric"
-             value="{{ max }}" aria-label="{% trans 'Sütunun maksimum balı' context 'registrar.exam_score_entry' %} S{{ forloop.counter }}" data-ese-col-max>
-      <button type="button" class="ese-cols__remove" data-ese-col-remove aria-label="{% trans 'Sütunu sil' context 'registrar.exam_score_entry' %} S{{ forloop.counter }}">
+             value="{{ max }}"{% if s.is_midterm %} readonly{% endif %} aria-label="{% trans 'Sütunun maksimum balı' context 'registrar.exam_score_entry' %} S{{ forloop.counter }}" data-ese-col-max>
+      <button type="button" class="ese-cols__remove" data-ese-col-remove{% if s.is_midterm %} hidden{% endif %} aria-label="{% trans 'Sütunu sil' context 'registrar.exam_score_entry' %} S{{ forloop.counter }}">
         <i class="fas fa-xmark" aria-hidden="true"></i>
       </button>
     </div>
     {% endfor %}
   </div>
-  <div class="ese-cols__actions">
+  <div class="ese-cols__actions"{% if s.is_midterm %} hidden{% endif %}>
     <button type="button" class="ems-btn ems-btn--sm" data-ese-col-add>
       <i class="fas fa-plus" aria-hidden="true"></i> {% trans "Sütun əlavə et" context "registrar.exam_score_entry" %}
     </button>
@@ -35,7 +37,11 @@ bağlıdır və `data-ese-meta-field` daşıyır (fayl idxalı da eyni şəbək�
     </button>
   </div>
   <p class="ems-msg ems-msg--warning ese-cols__warn" data-ese-cols-warn role="alert" hidden></p>
+  {% if s.is_midterm %}
+  <span class="ems-field__hint">{% blocktrans with cap=s.exam_score_max context "registrar.exam_score_entry" %}Midterm tək sütundur — hər tələbəyə bir bal, maksimum {{ cap }}.{% endblocktrans %}</span>
+  {% else %}
   <span class="ems-field__hint">{% blocktrans with cap=s.exam_score_max context "registrar.exam_score_entry" %}Sütunların maksimum cəmi həmişə {{ cap }} olmalıdır — uyğun gəlmirsə ballar yadda saxlanmır. «Bərabər böl» balı tam ədədlərlə bölür, qalıq sonuncu sütuna düşür.{% endblocktrans %}</span>
+  {% endif %}
   <input type="hidden" name="question_maxes" form="ese-roster-form" value="{{ s.column_maxes_csv }}" data-ese-meta-field data-ese-question-maxes>
   <input type="hidden" name="question_count" form="ese-roster-form" value="{{ s.question_count }}" data-ese-meta-field data-ese-question-count>
   <input type="hidden" name="question_max" form="ese-roster-form" value="{{ s.question_max }}" data-ese-meta-field data-ese-question-max>

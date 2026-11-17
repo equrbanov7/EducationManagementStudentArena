@@ -43,11 +43,12 @@ from django.utils.translation import pgettext
 from core.audit import log_action
 from core.constants import AuditAction
 
-from . import exam_score_assessment  # noqa: F401 — public fasad (accounts `service.exam_score_assessment.*`)
-from . import exam_score_assessment as assessment_rules
+from . import exam_score_appeal  # public fasad (accounts `service.exam_score_appeal.*`) + apellyasiya xanası
 from . import exam_score_changes  # noqa: F401 — public fasad (`registrar.public`) üzərindən çatım
 from . import exam_score_midterm  # noqa: F401 — eyni səbəb (midterm siyahısı, tələbə gecikməsi)
 from . import exam_score_release  # noqa: F401 — eyni səbəb (tələbəyə görünmə gecikməsi — `registrar.public`)
+from . import exam_score_assessment  # noqa: F401 — public fasad (accounts `service.exam_score_assessment.*`)
+from . import exam_score_assessment as assessment_rules
 from . import exam_score_period_lock  # noqa: F401 — eyni səbəb (accounts `service.exam_score_period_lock.*`)
 from . import exam_score_period_lock as period_lock
 from . import exam_score_questions  # noqa: F401 — eyni səbəb (accounts `service.exam_score_questions.*`)
@@ -407,12 +408,12 @@ def change_decision(
     rules=None,
     enrollment_id=None,
     by_user=None,
+    appeal_cell=False,
 ):
     """Yazı lazımdırmı: ``None`` — eyni bal (toxunma); əks halda yazılacaq sətrin NÖVÜ (``ExamScoreEntryKind``).
 
-    Eyni cəm, amma sual bölgüsü fərqlidirsə bu da DƏYİŞİKLİKDİR (kağız qeydi dəyişir) —
-    ``latest_question_scores()`` yalnız o halda çağırılır. Bitmiş dövr qaydası və
-    təqdimat tələbi (səbəb + qeyd + sənəd) burada yoxlanır (``ValidationError``).
+    Eyni cəm, fərqli sual bölgüsü də DƏYİŞİKLİKDİR (``latest_question_scores()`` yalnız onda); bitmiş dövr
+    qaydası, təqdimat (səbəb + qeyd + sənəd) və apellyasiya xanası (``appeal_cell``) burada yoxlanır.
 
     2026-10-25: cari dövrdə yazılmış balın dəyişdirilməsi ``rules`` ilə — 15 dəqiqə pəncərəsi
     (``window_edit``), sonra apellyasiya (sənəd məcburi) və ya RİM rəhbərinin təqdimatı
@@ -421,6 +422,8 @@ def change_decision(
     if _same_score(old_score, new_score):
         if cleaned_questions is None or questions.same_question_scores(latest_question_scores(), cleaned_questions):
             return None
+    if appeal_cell and old_score is None:  # 2026-11-17: apellyasiya xanası yalnız yazılmış imtahan balına
+        raise ValidationError(exam_score_appeal.no_exam_score_message())
     if old_score is not None and policy.changes_blocked:
         raise period_lock.change_blocked_error()
     if old_score is None and not policy.correction_mode:
@@ -562,9 +565,7 @@ def save_roster_scores(*, offering, rows, by_user, request=None, sheet=None, cor
     RİM rəhbəri / superadmin deyilsə və ``correction_mode`` göndərilibsə; qalan
     qaydalar (dəyişiklik bağlıdır / təqdimat) sətir-sətir ``period_policy`` ilə.
 
-    2026-10-08 (tutum testi — 25 sətir ≈ 1 190 sorğu, p50 1.2 s): yazı TOPLUDUR,
-    sorğu sayı sətir sayından asılı deyil — ``exam_score_bulk`` (qayda və qərarlar
-    ``record_exam_score`` ilə ortaq köməkçilərdən; kilid sırası ``enrollment_id``).
+    2026-10-08 (tutum): yazı TOPLUDUR, sorğu sayı sətir sayından asılı deyil — ``exam_score_bulk``.
 
     2026-10-25: vərəqin ``assessment``-i midterm-dirsə yazı jurnalın «Midterm» xanasına gedir
     (``exam_score_midterm``); dəyişiklik qaydası (15 dəqiqə / RİM / apellyasiya) hər ikisində
@@ -588,8 +589,9 @@ def save_roster_scores(*, offering, rows, by_user, request=None, sheet=None, cor
     else:
         from . import exam_score_bulk as writer
 
-    return writer.save_rows(
-        offering=offering, rows=rows, by_user=by_user, request=request, sheet=sheet, policy=policy, rules=rules
+    # 2026-11-17: imtahan + apellyasiya xanası — apellyasiya üstündür (``exam_score_appeal``).
+    return exam_score_appeal.save_rows(
+        writer, offering=offering, rows=rows, by_user=by_user, request=request, sheet=sheet, policy=policy, rules=rules
     )
 
 

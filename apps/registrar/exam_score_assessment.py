@@ -39,8 +39,9 @@ _CTX = "registrar.exam_score_entry"
 FINAL = ExamAssessment.FINAL
 MIDTERM = ExamAssessment.MIDTERM
 
-#: Defolt sütun sayı (sahib: «midterm-də defolt 3 sütun»; final — köhnə vərəq qaydası 5 sual).
-DEFAULT_COLUMNS = {MIDTERM: 3, FINAL: 5}
+#: Defolt sütun sayı — final: köhnə vərəq qaydası 5 sual. Midterm: sahib 2026-11-17 «Midterm 1 sütun 30 ballıq»
+#: (əvvəl 3 × 10) — midterm vərəqi TƏK sütundur (:func:`assert_midterm_single_column`).
+DEFAULT_COLUMNS = {MIDTERM: 1, FINAL: 5}
 
 #: Final sessiyası təyin olunmayıbsa semestrin son N günü «final dövrü» sayılır.
 FINAL_TAIL_DAYS = 14
@@ -161,6 +162,15 @@ def equal_split(cap: int, count: int) -> list:
 
 def default_columns(assessment, cap: int) -> list:
     return equal_split(cap, DEFAULT_COLUMNS.get(assessment, DEFAULT_COLUMNS[FINAL]))
+
+
+def assert_midterm_single_column(assessment, maxes) -> None:
+    """Sahib 2026-11-17: «Midterm 1 sütun 30 ballıq» — midterm vərəqində birdən çox sütun rədd olunur.
+
+    ``maxes`` boşdursa (tək yekun bal rejimi) qayda işləmir; final sütunları sərbəstdir (cəm = 50).
+    """
+    if assessment == MIDTERM and maxes and len(maxes) > 1:
+        raise ValidationError(pgettext(_CTX, "Midterm tək sütundur — bir bal, maksimum 30."))
 
 
 def _parse_int(raw):
@@ -355,6 +365,7 @@ __all__ = [
     "appeal_document_error",
     "appeal_head_only_error",
     "assert_assessment_allowed",
+    "assert_midterm_single_column",
     "available_assessments",
     "cap_for",
     "clean_assessment",

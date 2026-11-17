@@ -34,6 +34,7 @@ tavan), «Yekun» sətirlər + apellyasiya / RİM rejimi (`_modebar.html`), qara
 <link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry_w2.css' %}?v=20260930-resp">
 <link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry_lock.css' %}?v=20260926-2">
 <link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry_assessment.css' %}?v=20261025-1">
+<link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry_appeal.css' %}?v=20261117-1">
 
 {% trans "Yazılı imtahan kağız üzərində keçir — nəticəni sistemə İmtahan Mərkəzi köçürür. Qrupu və fənni seçin, vərəq məlumatlarını (tarix, müəllim, protokol) yazın, sonra balları siyahıda daxil edin və ya XLSX/CSV faylından yükləyin." context "registrar.exam_score_entry" as ese_subtitle %}
 {% trans "Köçürmə addımları" context "registrar.exam_score_entry" as ese_steps_label %}
@@ -150,6 +151,8 @@ tavan), «Yekun» sətirlər + apellyasiya / RİM rejimi (`_modebar.html`), qara
      data-summary-writes="{% trans 'bal yazılacaq' context 'registrar.exam_score_entry' %}"
      data-summary-changes="{% trans 'dəyişiklik səbəb tələb edir' context 'registrar.exam_score_entry' %}"
      data-summary-untouched="{% trans 'sətir toxunulmur' context 'registrar.exam_score_entry' %}"
+     data-summary-appeals="{% trans 'apellyasiya balı yazılacaq (yekun bal odur)' context 'registrar.exam_score_entry' %}"
+     data-appeal-invalid="{% trans 'Apellyasiya balı 0 ilə maksimum arasında tam ədəd olmalıdır.' context 'registrar.exam_score_entry' %}"
      data-nothing="{% trans 'Dəyişdirilmiş bal yoxdur — yadda saxlamağa ehtiyac yoxdur.' context 'registrar.exam_score_entry' %}"
      data-invalid="{% trans 'Xətalı bal var — 0 ilə maksimum arasında tam ədəd yazın.' context 'registrar.exam_score_entry' %}"
      data-need-justification="{% trans 'Dəyişdirilən bal üçün səbəb, qeyd və skan edilmiş sənəd (vərəq məlumatlarında) tələb olunur.' context 'registrar.exam_score_entry' %}"
@@ -196,8 +199,9 @@ tavan), «Yekun» sətirlər + apellyasiya / RİM rejimi (`_modebar.html`), qara
      data-leave-confirm="{% trans 'Çıx' context 'registrar.exam_score_entry' %}"
      data-leave-cancel="{% trans 'Qal' context 'registrar.exam_score_entry' %}"></div>
 <script defer src="{% static 'accounts/js/exam_score_entry.js' %}?v=20261025-1"></script>
-<script defer src="{% static 'accounts/js/exam_score_entry_columns.js' %}?v=20261025-1"></script>
-<script defer src="{% static 'accounts/js/exam_score_entry_confirm.js' %}?v=20261025-1"></script>
+<script defer src="{% static 'accounts/js/exam_score_entry_columns.js' %}?v=20261117-1"></script>
+<script defer src="{% static 'accounts/js/exam_score_entry_appeal.js' %}?v=20261117-1"></script>
+<script defer src="{% static 'accounts/js/exam_score_entry_confirm.js' %}?v=20261117-1"></script>
 <script defer src="{% static 'accounts/js/exam_score_entry_nav.js' %}?v=20261025-1"></script>
 <script defer src="{% static 'accounts/js/exam_score_entry_draft.js' %}?v=20261025-1"></script>
-<script defer src="{% static 'accounts/js/profile/exam_score_import.js' %}?v=20260926-2"></script>
+<script defer src="{% static 'accounts/js/profile/exam_score_import.js' %}?v=20261117-1"></script>

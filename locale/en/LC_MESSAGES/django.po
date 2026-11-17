@@ -111000,7 +111000,7 @@ msgstr "Midterm"
 
 msgctxt "registrar.exam_score_entry_kind"
 msgid "Edit within 15 minutes"
-msgstr "Edit within 15 minutes"
+msgstr "Edit within the edit window"
 
 msgctxt "registrar.exam_score_entry.state"
 msgid "Yekun"
@@ -120050,3 +120050,58 @@ msgstr "Lesson type"
 msgctxt "registrar.journal"
 msgid "köhnə sistemdən"
 msgstr "from the old system"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya balı"
+msgstr "Appeal score"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Midterm tək sütundur — bir bal, maksimum 30."
+msgstr "The midterm has a single column — one score, maximum 30."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Midterm tək sütundur — hər tələbəyə bir bal, maksimum %(cap)s."
+msgstr ""
+"The midterm has a single column — one score per student, maximum %(cap)s."
+
+msgctxt "registrar.exam_score_entry"
+msgid ""
+"Bu tələbənin apellyasiya balı var — əsas bal apellyasiya balıdır. "
+"Dəyişikliyi «Apellyasiya balı» xanasında edin."
+msgstr ""
+"This student has an appeal score — the appeal score is the score of record. "
+"Make the change in the “Appeal score” cell."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya balı yalnız imtahan balı yazılmış tələbəyə yazılır."
+msgstr ""
+"An appeal score can only be entered for a student who already has an exam "
+"score."
+
+msgctxt "registrar.exam_score_entry"
+msgid ""
+"Apellyasiya balını yalnız İmtahan Mərkəzinin / RİM rəhbəri, imtahan balı "
+"yazılmış tələbəyə yazır."
+msgstr ""
+"Only the head of the Exam Center / Registrar enters an appeal score, and "
+"only for a student who has an exam score."
+
+msgctxt "registrar.exam_score_entry"
+msgid ""
+"Apellyasiya nəticəsini «Apellyasiya balı» xanasına yazın — yekun bal odur."
+msgstr ""
+"Enter the appeal result in the “Appeal score” cell — it becomes the score of"
+" record."
+
+msgctxt "registrar.exam_score_entry"
+msgid "apellyasiya balı yazılacaq (yekun bal odur)"
+msgstr "appeal score(s) will be written (they become the score of record)"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya balı 0 ilə maksimum arasında tam ədəd olmalıdır."
+msgstr "The appeal score must be a whole number between 0 and the maximum."
+
+msgctxt "registrar.exam_score_entry"
+msgid "istəyə bağlı"
+msgstr "optional"

@@ -30,7 +30,11 @@ Vəziyyət çipləri SERVER tərəfdə süzür — göstərilməyən sətir POST
 sahələr `disabled` (POST-a düşmür); düzəliş rejimində forma `correction_mode=1` daşıyır.
 2026-10-25 (sahib): midterm siyahısında giriş/yekun/hərf sütunları yoxdur; sətir «Yekun» (`row.final_locked`, təsdiqdən
 15 dəq keçib) — sahələr kilidli, yalnız «Apellyasiya» / «RİM təqdimatı» rejimində açılır (`_modebar.html`,
-`exam_score_entry_columns.js`); daxil edənin açıq pəncərəsi `data-edit-until` (geri sayım — `_draft.js`).{% endcomment %}
+`exam_score_entry_columns.js`); daxil edənin açıq pəncərəsi `data-edit-until` (geri sayım — `_draft.js`).
+2026-11-17 (sahib): «balın yanında appel xanası da olsun, yəni 2 xana; appelyasiya xanasından gələn bal əsas götürülür».
+«Apellyasiya balı» (`appeal__<enr>`, `exam_score_entry_appeal.js`) — yalnız apellyasiya icazəsi olana (`s.can_appeal`)
+və imtahan balı yazılmış sətirdə açıqdır; apellyasiya balı olan sətirdə (`row.appeal_set`) imtahan xanası kilidlidir və
+apellyasiyadan əvvəlki balı göstərir — yekun bal apellyasiya balıdır (`registrar/exam_score_appeal.py`).{% endcomment %}
 <section class="ems-card ese-card ese-roster">
   <div class="ems-card__head">
     <div>
@@ -78,6 +82,7 @@ sahələr `disabled` (POST-a düşmür); düzəliş rejimində forma `correction
               <th scope="col" class="ese-th--num ese-th--q" data-ese-qcol="{{ forloop.counter }}"{% if forloop.counter > s.question_count %} hidden{% endif %}>{{ label }} <span class="ese-th__max">/ <span data-ese-qmax-label>{{ s.question_max }}</span></span></th>
               {% endfor %}
               <th scope="col" class="ese-th--num">{% if s.is_midterm %}{% trans "Midterm balı" context "registrar.exam_score_entry" %}{% else %}{% trans "İmtahan balı" context "registrar.exam_score_entry" %}{% endif %} <span class="ese-th__max">/ {{ s.exam_score_max }}</span></th>
+              <th scope="col" class="ese-th--num ese-th--appeal">{% trans "Apellyasiya balı" context "registrar.exam_score_entry" %} <span class="ese-th__max">/ {{ s.exam_score_max }}</span></th>
               {% if not s.is_midterm %}
               <th scope="col" class="ese-th--num">{% trans "Yekun" context "registrar.exam_score_entry" %}</th>
               <th scope="col" class="ese-th--num">{% trans "Hərf" context "registrar.exam_score_entry" %}</th>
@@ -89,8 +94,10 @@ sahələr `disabled` (POST-a düşmür); düzəliş rejimində forma `correction
           <tbody>
             {% trans "İmtahan balı" context "registrar.exam_score_entry" as ese_score_aria %}
             {% trans "Bal tarixçəsi" context "registrar.exam_score_entry" as ese_history_aria %}
+            {% trans "Apellyasiya balı" context "registrar.exam_score_entry" as ese_appeal_aria %}
+            {% trans "Apellyasiya balını yalnız İmtahan Mərkəzinin / RİM rəhbəri, imtahan balı yazılmış tələbəyə yazır." context "registrar.exam_score_entry" as ese_appeal_hint %}
             {% for row in s.rows %}
-            <tr class="ese-row {% if row.has_score %}is-recorded{% endif %}{% if row.locked %} is-locked{% endif %}{% if row.final_locked %} is-final{% endif %}" data-ese-row data-locked="{% if row.locked %}1{% else %}0{% endif %}" data-enrollment="{{ row.enrollment.id }}"
+            <tr class="ese-row {% if row.has_score %}is-recorded{% endif %}{% if row.locked %} is-locked{% endif %}{% if row.final_locked %} is-final{% endif %}" data-ese-row data-locked="{% if row.locked or row.appeal_set %}1{% else %}0{% endif %}" data-enrollment="{{ row.enrollment.id }}"
                 data-final="{% if row.final_locked %}1{% else %}0{% endif %}" data-edit-until="{{ row.edit_until }}"
                 data-student="{{ row.name }}"
                 data-has-score="{% if row.has_score %}1{% else %}0{% endif %}" data-is-changed="{% if row.is_changed %}1{% else %}0{% endif %}"
@@ -107,9 +114,17 @@ sahələr `disabled` (POST-a düşmür); düzəliş rejimində forma `correction
                 <input type="number" class="ems-input ese-score ese-total{% if s.question_count %} is-readonly{% endif %}" name="score__{{ row.enrollment.id }}"
                        aria-label="{{ ese_score_aria }} — {{ row.name }}"
                        min="0" max="{{ row.exam_score_max }}" step="1" inputmode="numeric" autocomplete="off"
-                       {% if s.question_count %}readonly tabindex="-1"{% endif %}{% if row.locked or row.final_locked %} disabled{% endif %}
+                       {% if s.question_count %}readonly tabindex="-1"{% endif %}{% if row.locked or row.final_locked or row.appeal_set %} disabled{% endif %}
                        value="{{ row.exam_display }}"
                        data-ese-score data-initial="{{ row.exam_display }}">
+              </td>
+              <td class="ese-td--num ese-td--appeal">
+                <input type="number" class="ems-input ese-appeal{% if row.appeal_set %} is-set{% endif %}" name="appeal__{{ row.enrollment.id }}"
+                       aria-label="{{ ese_appeal_aria }} — {{ row.name }}"
+                       min="0" max="{{ row.exam_score_max }}" step="1" inputmode="numeric" autocomplete="off"
+                       {% if not s.can_appeal or not row.has_score or row.locked %}disabled title="{{ ese_appeal_hint }}"{% endif %}
+                       value="{{ row.appeal_display }}"
+                       data-ese-appeal data-initial="{{ row.appeal_display }}" data-student="{{ row.name }}">
               </td>
               {% if not s.is_midterm %}
               <td class="ems-table__num ese-td--num" data-ese-total-cell>

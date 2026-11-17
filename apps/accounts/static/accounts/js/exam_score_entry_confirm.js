@@ -19,6 +19,9 @@
  *     «RİM təqdimatı» və bitmiş dövr — səbəb + qeyd + sənəd; 15 dəq pəncərəsində heç biri. Sütunların cəmi
  *     tavana bərabər deyilsə dialoq açılmır (`EMSExamScoreEntryColumns.invalid`).
  *
+ *   · 2026-11-17 (sahib): «Apellyasiya balı» xanası (`exam_score_entry_appeal.js`) — dəyişən xana varsa yalnız
+ *     onlar olsa belə dialoq açılır, xülasədə sayı + «köhnə → yeni», apellyasiya SƏNƏDİ tələb olunur.
+ *
  * CSP: inline yoxdur; i18n `#eseI18n`. AJAX-safe: `EMSDelegate` (açarlar
  * `data-ese-save`, `data-ese-meta-file`, `form[data-ese-form]` — yalnız burada).
  */
@@ -63,13 +66,23 @@
         return window.EMSExamScoreEntryColumns ? window.EMSExamScoreEntryColumns.mode(host) : "";
     }
 
+    /* «Apellyasiya balı» xanasının dəyişiklikləri (2026-11-17). */
+    function appealChanges(host) {
+        var appeal = window.EMSExamScoreEntryAppeal;
+        return appeal ? appeal.changes(host) : [];
+    }
+
     /* Hansı təqdimat lazımdır: "period" (bitmiş dövr), "appeal", "correction" və ya "" (heç biri). */
     function justificationNeed(host, summary) {
-        if (submissionRequired(host) && summary.writes) {
+        var appeals = appealChanges(host).length;
+        if (submissionRequired(host) && (summary.writes || appeals)) {
             return "period";
         }
         var mode = changeMode(host);
-        return mode && summary.changes ? mode : "";
+        if (mode && summary.changes) {
+            return mode;
+        }
+        return appeals ? "appeal" : "";
     }
 
     function syncScanStatus(host) {
@@ -135,6 +148,9 @@
             return true;
         }
         var value = input.value || "";
+        if (!value) {
+            return true; // 2026-11-17: istəyə bağlı — boşdursa server bu günü yazır
+        }
         var max = input.getAttribute("max") || "";
         return /^\d{4}-\d{2}-\d{2}$/.test(value) && (!max || value <= max);
     }
@@ -294,7 +310,15 @@
             }
             return;
         }
-        if (!summary.writes) {
+        var appealApi = window.EMSExamScoreEntryAppeal;
+        var badAppeal = appealApi ? appealApi.invalid(host) : null;
+        if (badAppeal) {
+            saveLine(host, t("appeal-invalid"));
+            badAppeal.focus();
+            return;
+        }
+        var appeals = appealChanges(host);
+        if (!summary.writes && !appeals.length) {
             saveLine(host, t("nothing"));
             return;
         }
@@ -305,6 +329,15 @@
             summaryItem(list, summary.writes, t("summary-writes"));
             if (summary.changes) {
                 summaryItem(list, summary.changes, t("summary-changes"), true);
+            }
+            if (appeals.length) {
+                summaryItem(list, appeals.length, t("summary-appeals"), true);
+                appeals.forEach(function (item) {
+                    var li = document.createElement("li");
+                    li.className = "ese-summary__appeal";
+                    li.textContent = item.name + ": " + (item.old || "—") + " → " + item.value;
+                    list.appendChild(li);
+                });
             }
             summaryItem(list, summary.untouched, t("summary-untouched"));
         }

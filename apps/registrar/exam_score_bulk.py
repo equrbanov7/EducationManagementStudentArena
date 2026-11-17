@@ -210,6 +210,7 @@ class _BulkSave:
                     rules=self.rules,
                     enrollment_id=enrollment.pk,
                     by_user=self.by_user,
+                    appeal_cell=bool(row.get("appeal_cell")),
                 )
                 if entry_kind is None:
                     slot["state"] = _SKIPPED  # eyni bal → nə dublikat sətir, nə audit
