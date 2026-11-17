@@ -9,6 +9,7 @@ subject's hours), but student surfaces printed the HOUR total next to a limit th
 """
 
 import datetime
+import pathlib
 from decimal import Decimal
 
 from django.template.loader import render_to_string
@@ -143,3 +144,30 @@ class RegularStudentSurfacesTests(TestCase):
             self.assertEqual(info["eligibility"]["allowed_hours"], Decimal("11.25"))
             self.assertIn('value="4" max="5"', card)
             self.assertEqual(widget["value"], "Q/b 4 / 5")
+
+    def test_teacher_grid_chip_counts_hours_not_rows_for_one_hour_lessons(self):
+        """2026-11-18: köhnə sistemin 1 saatlıq sətirləri (fix_legacy_hour_rows) — çip «8 q/b», limit «3 q/b» idi."""
+        from apps.registrar import gradebook
+
+        with bypass_rls(), translation.override("az"):
+            self.prepare(30)
+            for index in range(8):
+                lesson = Lesson.objects.create(
+                    organization=self.org,
+                    offering=self.offering,
+                    date=datetime.date(2026, 9, 1) + datetime.timedelta(days=index),
+                    kind="lecture",
+                    hours=1,
+                )
+                LessonMark.objects.create(
+                    organization=self.org, lesson=lesson, enrollment=self.enrollment, status="absent"
+                )
+            journal = gradebook.get_offering_journal(offering=self.offering)
+            row = next(r for r in journal["rows"] if r["enrollment"].pk == self.enrollment.pk)
+            self.assertEqual(row["absence_count"], 8)  # sətir sayı (səviyyə jurnalının qaydası)
+            self.assertEqual(row["eligibility"]["absence_count"], 4)  # 8 saat ÷ 2
+            template = (
+                pathlib.Path(__file__).resolve().parents[1] / "templates/registrar/partials/_jd_grid.html"
+            ).read_text(encoding="utf-8")
+            chip = template.split('class="jd2-qchip')[1].split("</span>")[0]
+            self.assertIn("row.eligibility.absence_count|default_if_none:row.absence_count", chip)
