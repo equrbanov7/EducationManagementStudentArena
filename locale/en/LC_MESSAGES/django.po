@@ -120113,3 +120113,133 @@ msgid ""
 msgstr ""
 "Only the head of the Registrar and the Exam Center head / staff enter an "
 "appeal score."
+
+msgctxt "accounts.groups"
+msgid "%%d əlavə üzv (öz qrupu başqadır)"
+msgstr "%%d extra members (home group is different)"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "%d tələbə bu qrupa köçürüldü"
+msgstr "%d students transferred to this group"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "%d tələbə qrupa əlavə olundu"
+msgstr "%d students added to the group"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "%d tələbə öz qrupunda qalaraq bu qrupun jurnallarına əlavə olundu"
+msgstr ""
+"%d students added to this group's journals while staying in their own group"
+
+msgctxt "accounts.groups"
+msgid ""
+"Başqa qrupdakı tələbə üçün seçin: əlavə olaraq (öz qrupunda qalır) və ya "
+"məcburi köçür."
+msgstr ""
+"For a student from another group choose: add as extra (stays in own group) "
+"or force transfer."
+
+msgctxt "accounts.groups"
+msgid "Heç bir tələbə əlavə olunmadı."
+msgstr "No student was added."
+
+msgctxt "accounts.groups"
+msgid "Məcburi köçür"
+msgstr "Force transfer"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "Qrup reyestrindən məcburi köçürmə: %(old)s → %(new)s"
+msgstr "Forced transfer from the group registry: %(old)s → %(new)s"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "Qrup reyestrindən əlavə üzv (öz qrupu: %s)"
+msgstr "Extra member from the group registry (own group: %s)"
+
+msgctxt "accounts.groups"
+msgid ""
+"Qrupsuz tələbələr birbaşa əlavə olunur. Başqa qrupdakı tələbəni ya əlavə "
+"olaraq (öz qrupunda qalır), ya da məcburi köçürə bilərsiniz — tarixçə "
+"silinmir."
+msgstr ""
+"Students without a group are added directly. A student from another group "
+"can be added as extra (stays in own group) or force-transferred — history is"
+" kept."
+
+msgctxt "accounts.groups"
+msgid ""
+"Seçilmiş tələbələr arasında qrupa əlavə edilə bilən (qeydiyyatlı) tələbə "
+"yoxdur."
+msgstr "None of the selected students can be added to the group (enrolled)."
+
+msgctxt "accounts.groups"
+msgid "Seçilənlər arasında başqa qrupda olan tələbə var. Nə edilsin?"
+msgstr "Some selected students are in another group. What should be done?"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "başqa qrupdadır: %s"
+msgstr "in another group: %s"
+
+msgctxt "accounts.groups"
+msgid ""
+"Öz qrupunda qalır, bu qrupun cari jurnallarına da əlavə olunur (məs. əcnəbi "
+"tələbələr)."
+msgstr ""
+"Stays in own group and is also added to this group's current journals (e.g. "
+"international students)."
+
+msgctxt "accounts.groups"
+msgid "Öz qrupundan çıxıb bu qrupa keçir (rəsmi köçürmə, tarixçə qalır)."
+msgstr ""
+"Leaves own group and moves to this group (official transfer, history is "
+"kept)."
+
+msgctxt "accounts.groups"
+msgid "öz qrupu"
+msgstr "own group"
+
+msgctxt "accounts.groups"
+msgid "Əlavə olaraq"
+msgstr "As extra"
+
+msgctxt "accounts.groups"
+msgid "Əlavə üzv"
+msgstr "Extra member"
+
+msgctxt "accounts.groups"
+msgid ""
+"Əvvəl qrupsuz tələbələr göstərilir. Ad yazıb axtaranda başqa qrupdakı "
+"tələbələr də çıxır — yanında hansı qrupda olduğu yazılır."
+msgstr ""
+"Students without a group are shown first. When you search by name, students "
+"of other groups also appear — with their group shown next to them."
+
+msgctxt "registrar.group_extra_member"
+msgid ""
+"Bu qrupun cari semestrdə jurnalı yoxdur. Əvvəl dərs yükündə qrupa fənn "
+"yazılsın (jurnal açılsın), sonra tələbəni əlavə edin."
+msgstr ""
+"This group has no journal in the current semester. First add a subject for "
+"the group in the teaching load (so a journal opens), then add the student."
+
+#, python-format
+msgctxt "registrar.group_extra_member"
+msgid "Qrup reyestrindən əlavə üzv (öz qrupu: %s)"
+msgstr "Extra member from the group registry (own group: %s)"
+
+msgctxt "registrar.group_extra_member"
+msgid "Tələbə onsuz da bu qrupdadır."
+msgstr "The student is already in this group."
+
+msgctxt "registrar.group_extra_member"
+msgid "Tələbənin aktiv akademik qeydi (qrupu) yoxdur."
+msgstr "The student has no active academic record (group)."
+
+msgctxt "registrar.group_extra_member"
+msgid "onsuz da bu jurnaldadır"
+msgstr "already in this journal"

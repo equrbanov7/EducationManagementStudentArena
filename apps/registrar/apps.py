@@ -7,9 +7,10 @@ class RegistrarConfig(AppConfig):
     verbose_name = "Registrar (curriculum)"
 
     def ready(self):
-        from apps.organizations.public import register_student_transfer
+        from apps.organizations.public import register_student_extra_group, register_student_transfer
 
         register_student_transfer(_transfer_student_group)
+        register_student_extra_group(_add_extra_group_member, _extra_group_members)
         _register_self_conflict()
         _register_retake_media()
         _register_off_schedule_reevaluation()
@@ -100,3 +101,16 @@ def _transfer_student_group(**kwargs):
     from .transfer import transfer_student_group
 
     return transfer_student_group(**kwargs)
+
+
+def _add_extra_group_member(**kwargs):
+    """Sahib 2026-11-18: əcnəbi tələbə öz qrupunda qalaraq ikinci qrupun jurnallarına (``group_extra_member``)."""
+    from .group_extra_member import add_extra_group_member
+
+    return add_extra_group_member(**kwargs)
+
+
+def _extra_group_members(**kwargs):
+    from .group_extra_member import extra_group_members
+
+    return extra_group_members(**kwargs)

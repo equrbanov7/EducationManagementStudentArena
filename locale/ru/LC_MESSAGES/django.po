@@ -120319,3 +120319,135 @@ msgid ""
 msgstr ""
 "Балл апелляции вносят только руководитель РИМ и руководитель / сотрудник "
 "Экзаменационного центра."
+
+msgctxt "accounts.groups"
+msgid "%%d əlavə üzv (öz qrupu başqadır)"
+msgstr "%%d доп. участников (основная группа другая)"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "%d tələbə bu qrupa köçürüldü"
+msgstr "%d студентов переведено в эту группу"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "%d tələbə qrupa əlavə olundu"
+msgstr "%d студентов добавлено в группу"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "%d tələbə öz qrupunda qalaraq bu qrupun jurnallarına əlavə olundu"
+msgstr ""
+"%d студентов добавлено в журналы этой группы, оставаясь в своей группе"
+
+msgctxt "accounts.groups"
+msgid ""
+"Başqa qrupdakı tələbə üçün seçin: əlavə olaraq (öz qrupunda qalır) və ya "
+"məcburi köçür."
+msgstr ""
+"Для студента из другой группы выберите: добавить дополнительно (остаётся в "
+"своей группе) или перевести."
+
+msgctxt "accounts.groups"
+msgid "Heç bir tələbə əlavə olunmadı."
+msgstr "Ни один студент не добавлен."
+
+msgctxt "accounts.groups"
+msgid "Məcburi köçür"
+msgstr "Перевести принудительно"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "Qrup reyestrindən məcburi köçürmə: %(old)s → %(new)s"
+msgstr "Принудительный перевод из реестра групп: %(old)s → %(new)s"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "Qrup reyestrindən əlavə üzv (öz qrupu: %s)"
+msgstr "Дополнительный участник из реестра групп (своя группа: %s)"
+
+msgctxt "accounts.groups"
+msgid ""
+"Qrupsuz tələbələr birbaşa əlavə olunur. Başqa qrupdakı tələbəni ya əlavə "
+"olaraq (öz qrupunda qalır), ya da məcburi köçürə bilərsiniz — tarixçə "
+"silinmir."
+msgstr ""
+"Студенты без группы добавляются сразу. Студента из другой группы можно "
+"добавить дополнительно (остаётся в своей группе) или перевести принудительно"
+" — история сохраняется."
+
+msgctxt "accounts.groups"
+msgid ""
+"Seçilmiş tələbələr arasında qrupa əlavə edilə bilən (qeydiyyatlı) tələbə "
+"yoxdur."
+msgstr ""
+"Среди выбранных нет студентов (зачисленных), которых можно добавить в "
+"группу."
+
+msgctxt "accounts.groups"
+msgid "Seçilənlər arasında başqa qrupda olan tələbə var. Nə edilsin?"
+msgstr "Среди выбранных есть студенты из другой группы. Что сделать?"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "başqa qrupdadır: %s"
+msgstr "в другой группе: %s"
+
+msgctxt "accounts.groups"
+msgid ""
+"Öz qrupunda qalır, bu qrupun cari jurnallarına da əlavə olunur (məs. əcnəbi "
+"tələbələr)."
+msgstr ""
+"Остаётся в своей группе и добавляется в текущие журналы этой группы (напр. "
+"иностранные студенты)."
+
+msgctxt "accounts.groups"
+msgid "Öz qrupundan çıxıb bu qrupa keçir (rəsmi köçürmə, tarixçə qalır)."
+msgstr ""
+"Покидает свою группу и переходит в эту (официальный перевод, история "
+"сохраняется)."
+
+msgctxt "accounts.groups"
+msgid "öz qrupu"
+msgstr "своя группа"
+
+msgctxt "accounts.groups"
+msgid "Əlavə olaraq"
+msgstr "Дополнительно"
+
+msgctxt "accounts.groups"
+msgid "Əlavə üzv"
+msgstr "Доп. участник"
+
+msgctxt "accounts.groups"
+msgid ""
+"Əvvəl qrupsuz tələbələr göstərilir. Ad yazıb axtaranda başqa qrupdakı "
+"tələbələr də çıxır — yanında hansı qrupda olduğu yazılır."
+msgstr ""
+"Сначала показываются студенты без группы. При поиске по имени появляются и "
+"студенты других групп — рядом указана их группа."
+
+msgctxt "registrar.group_extra_member"
+msgid ""
+"Bu qrupun cari semestrdə jurnalı yoxdur. Əvvəl dərs yükündə qrupa fənn "
+"yazılsın (jurnal açılsın), sonra tələbəni əlavə edin."
+msgstr ""
+"У этой группы нет журнала в текущем семестре. Сначала добавьте группе "
+"предмет в учебной нагрузке (чтобы открылся журнал), затем добавьте студента."
+
+#, python-format
+msgctxt "registrar.group_extra_member"
+msgid "Qrup reyestrindən əlavə üzv (öz qrupu: %s)"
+msgstr "Дополнительный участник из реестра групп (своя группа: %s)"
+
+msgctxt "registrar.group_extra_member"
+msgid "Tələbə onsuz da bu qrupdadır."
+msgstr "Студент уже в этой группе."
+
+msgctxt "registrar.group_extra_member"
+msgid "Tələbənin aktiv akademik qeydi (qrupu) yoxdur."
+msgstr "У студента нет активной академической записи (группы)."
+
+msgctxt "registrar.group_extra_member"
+msgid "onsuz da bu jurnaldadır"
+msgstr "уже в этом журнале"

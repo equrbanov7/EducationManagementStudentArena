@@ -3,8 +3,9 @@
 (`reason_extra_include`).
 
 Namizədlər SERVER-BACKED axtarışlı seçicidən gəlir (`EMSSearchableSelect`,
-çox-seçim): yalnız hazırda aktiv qrupu OLMAYAN, qeydiyyatlı tələbələr —
-başqa qrupdakı tələbə burada görünmür (sahib, 2026-09-07). Axtarış ad,
+çox-seçim): boş axtarışda yalnız qrupu OLMAYAN qeydiyyatlı tələbələr; axtarış
+yazılanda BAŞQA qrupdakılar da (sahib 2026-11-18) — onların id-si «x:» önəklidir
+və seçiləndə «Əlavə olaraq / Məcburi köçür» bloku açılır (gizli `other_mode`). Axtarış ad,
 istifadəçi adı, ixtisas şifri və ixtisas adı üzrədir; qrupun öz ixtisasındakı
 tələbələr əvvəl gəlir. Seçilmiş qeyd id-ləri gizli `record_ids` sahəsinə
 vergüllə yazılır (`teaching_office_groups.js`). Səbəb TƏLƏB OLUNMUR (sahib,
@@ -28,8 +29,22 @@ vergüllə yazılır (`teaching_office_groups.js`). Səbəb TƏLƏB OLUNMUR (sah
         </div>
     </div>
     <p class="ems-field__hint">
-        {% trans "Yalnız hazırda qrupu olmayan (qeydiyyatlı) tələbələr göstərilir. Başqa qrupdakı tələbəni köçürmək üçün həmin qrupun çekmecəsində tələbənin yanındakı «Qrupu dəyiş» əməlini işlədin." context "accounts.groups" %}
+        {% trans "Əvvəl qrupsuz tələbələr göstərilir. Ad yazıb axtaranda başqa qrupdakı tələbələr də çıxır — yanında hansı qrupda olduğu yazılır." context "accounts.groups" %}
     </p>
+    <div class="tof-add-other" data-tof-add-other hidden>
+        <input type="hidden" name="other_mode" value="extra" data-tof-other-mode-input>
+        <p class="tof-add-other__title">{% trans "Seçilənlər arasında başqa qrupda olan tələbə var. Nə edilsin?" context "accounts.groups" %}</p>
+        <div class="tof-add-other__options" role="radiogroup">
+            <button type="button" class="tof-add-other__opt is-active" role="radio" aria-checked="true" data-tof-other-mode="extra">
+                <strong>{% trans "Əlavə olaraq" context "accounts.groups" %}</strong>
+                <span>{% trans "Öz qrupunda qalır, bu qrupun cari jurnallarına da əlavə olunur (məs. əcnəbi tələbələr)." context "accounts.groups" %}</span>
+            </button>
+            <button type="button" class="tof-add-other__opt" role="radio" aria-checked="false" data-tof-other-mode="transfer">
+                <strong>{% trans "Məcburi köçür" context "accounts.groups" %}</strong>
+                <span>{% trans "Öz qrupundan çıxıb bu qrupa keçir (rəsmi köçürmə, tarixçə qalır)." context "accounts.groups" %}</span>
+            </button>
+        </div>
+    </div>
     <div class="tof-add-picker__summary" data-tof-add-summary aria-live="polite"
          data-t-count="{% trans '%d tələbə seçilib' context 'accounts.groups' %}"
          data-t-none="{% trans 'Hələ tələbə seçilməyib' context 'accounts.groups' %}">{% trans "Hələ tələbə seçilməyib" context "accounts.groups" %}</div>

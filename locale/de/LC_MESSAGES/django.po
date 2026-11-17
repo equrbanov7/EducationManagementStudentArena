@@ -121643,3 +121643,137 @@ msgid ""
 msgstr ""
 "Eine Einspruchspunktzahl tragen nur die RİM-Leitung und die Leitung / "
 "Mitarbeitende des Prüfungszentrums ein."
+
+msgctxt "accounts.groups"
+msgid "%%d əlavə üzv (öz qrupu başqadır)"
+msgstr "%%d zusätzliche Mitglieder (eigene Gruppe ist eine andere)"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "%d tələbə bu qrupa köçürüldü"
+msgstr "%d Studierende in diese Gruppe versetzt"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "%d tələbə qrupa əlavə olundu"
+msgstr "%d Studierende zur Gruppe hinzugefügt"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "%d tələbə öz qrupunda qalaraq bu qrupun jurnallarına əlavə olundu"
+msgstr ""
+"%d Studierende bleiben in ihrer Gruppe und wurden den Journalen dieser "
+"Gruppe hinzugefügt"
+
+msgctxt "accounts.groups"
+msgid ""
+"Başqa qrupdakı tələbə üçün seçin: əlavə olaraq (öz qrupunda qalır) və ya "
+"məcburi köçür."
+msgstr ""
+"Für Studierende einer anderen Gruppe wählen: zusätzlich (bleibt in eigener "
+"Gruppe) oder zwangsweise versetzen."
+
+msgctxt "accounts.groups"
+msgid "Heç bir tələbə əlavə olunmadı."
+msgstr "Es wurde niemand hinzugefügt."
+
+msgctxt "accounts.groups"
+msgid "Məcburi köçür"
+msgstr "Zwangsweise versetzen"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "Qrup reyestrindən məcburi köçürmə: %(old)s → %(new)s"
+msgstr "Zwangsversetzung aus dem Gruppenregister: %(old)s → %(new)s"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "Qrup reyestrindən əlavə üzv (öz qrupu: %s)"
+msgstr "Zusätzliches Mitglied aus dem Gruppenregister (eigene Gruppe: %s)"
+
+msgctxt "accounts.groups"
+msgid ""
+"Qrupsuz tələbələr birbaşa əlavə olunur. Başqa qrupdakı tələbəni ya əlavə "
+"olaraq (öz qrupunda qalır), ya da məcburi köçürə bilərsiniz — tarixçə "
+"silinmir."
+msgstr ""
+"Studierende ohne Gruppe werden direkt hinzugefügt. Studierende einer anderen"
+" Gruppe können zusätzlich (bleiben in eigener Gruppe) aufgenommen oder "
+"zwangsweise versetzt werden — der Verlauf bleibt erhalten."
+
+msgctxt "accounts.groups"
+msgid ""
+"Seçilmiş tələbələr arasında qrupa əlavə edilə bilən (qeydiyyatlı) tələbə "
+"yoxdur."
+msgstr ""
+"Unter den Ausgewählten ist niemand (eingeschrieben), der hinzugefügt werden "
+"kann."
+
+msgctxt "accounts.groups"
+msgid "Seçilənlər arasında başqa qrupda olan tələbə var. Nə edilsin?"
+msgstr "Einige Ausgewählte sind in einer anderen Gruppe. Was soll geschehen?"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "başqa qrupdadır: %s"
+msgstr "in anderer Gruppe: %s"
+
+msgctxt "accounts.groups"
+msgid ""
+"Öz qrupunda qalır, bu qrupun cari jurnallarına da əlavə olunur (məs. əcnəbi "
+"tələbələr)."
+msgstr ""
+"Bleibt in der eigenen Gruppe und kommt zusätzlich in die aktuellen Journale "
+"dieser Gruppe (z. B. internationale Studierende)."
+
+msgctxt "accounts.groups"
+msgid "Öz qrupundan çıxıb bu qrupa keçir (rəsmi köçürmə, tarixçə qalır)."
+msgstr ""
+"Verlässt die eigene Gruppe und wechselt in diese (offizielle Versetzung, "
+"Verlauf bleibt)."
+
+msgctxt "accounts.groups"
+msgid "öz qrupu"
+msgstr "eigene Gruppe"
+
+msgctxt "accounts.groups"
+msgid "Əlavə olaraq"
+msgstr "Zusätzlich"
+
+msgctxt "accounts.groups"
+msgid "Əlavə üzv"
+msgstr "Zusätzliches Mitglied"
+
+msgctxt "accounts.groups"
+msgid ""
+"Əvvəl qrupsuz tələbələr göstərilir. Ad yazıb axtaranda başqa qrupdakı "
+"tələbələr də çıxır — yanında hansı qrupda olduğu yazılır."
+msgstr ""
+"Zuerst werden Studierende ohne Gruppe angezeigt. Bei der Namenssuche "
+"erscheinen auch Studierende anderer Gruppen — mit ihrer Gruppe daneben."
+
+msgctxt "registrar.group_extra_member"
+msgid ""
+"Bu qrupun cari semestrdə jurnalı yoxdur. Əvvəl dərs yükündə qrupa fənn "
+"yazılsın (jurnal açılsın), sonra tələbəni əlavə edin."
+msgstr ""
+"Diese Gruppe hat im aktuellen Semester kein Journal. Zuerst in der "
+"Lehrbelastung ein Fach für die Gruppe anlegen (Journal öffnen), dann die "
+"Person hinzufügen."
+
+#, python-format
+msgctxt "registrar.group_extra_member"
+msgid "Qrup reyestrindən əlavə üzv (öz qrupu: %s)"
+msgstr "Zusätzliches Mitglied aus dem Gruppenregister (eigene Gruppe: %s)"
+
+msgctxt "registrar.group_extra_member"
+msgid "Tələbə onsuz da bu qrupdadır."
+msgstr "Die Person ist bereits in dieser Gruppe."
+
+msgctxt "registrar.group_extra_member"
+msgid "Tələbənin aktiv akademik qeydi (qrupu) yoxdur."
+msgstr "Die Person hat keinen aktiven Studiendatensatz (Gruppe)."
+
+msgctxt "registrar.group_extra_member"
+msgid "onsuz da bu jurnaldadır"
+msgstr "bereits in diesem Journal"

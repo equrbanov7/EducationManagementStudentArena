@@ -308,7 +308,9 @@ def _record_ids(request) -> list:
     raw = []
     for value in request.POST.getlist("record_ids"):
         raw.extend(str(value).split(","))
-    return [value.strip() for value in raw if value and value.strip()][:MAX_BULK]
+    from .group_add_other import clean_record_id  # «x:» — başqa qrupdakı tələbə (sahib 2026-11-18)
+
+    return [clean_record_id(value) for value in raw if value and value.strip()][:MAX_BULK]
 
 
 @transaction.atomic
@@ -319,7 +321,8 @@ def _add_students(request, organization, scope):
     (bax apps/registrar/reference_identity.py); ona görə burada sadə FK yazısı
     YOXDUR — hər tələbə üçün köçürmə çağırılır (audit + jurnal tarixçəsi qorunur).
     Namizədlər qrupsuz/arxiv qruplu tələbələr və hədəf alt qrupun doğrulanmış
-    ana qrupundakı tələbələrdir. Əlaqəsiz aktiv qrupdan bu yolla köçürülmür.
+    ana qrupundakı tələbələrdir. Başqa aktiv qrupdakı tələbə (sahib 2026-11-18) yalnız açıq
+    ``other_mode`` ilə: «əlavə olaraq» (öz qrupu qalır) və ya «məcburi köçür» — bax ``group_add_other``.
     """
     unit = _visible_group(organization, scope, request.POST.get("id"))
     if unit is None:
@@ -339,19 +342,34 @@ def _add_students(request, organization, scope):
     if parent is not None and _visible_group(organization, scope, str(parent.pk)) is None:
         eligible, parent = Q(group__isnull=True) | Q(group__is_active=False), None
     StudentAcademicRecord = django_apps.get_model("registrar", "StudentAcademicRecord")
-    records = list(
+    requested = (
         StudentAcademicRecord.objects.select_for_update(of=("self",))
         .filter(organization=organization, is_active=True, status="enrolled", pk__in=ids)
-        .filter(eligible)
         # Audit 2026-09-28 S3: yalnız aktorun idarə əhatəsindəki tələbələr.
         .filter(student_record_scope_q(scope))
         .select_related("student", "program", "organization", "group")
     )
-    if not records:
+    eligible_ids = set(requested.filter(eligible).values_list("pk", flat=True))
+    records, others = [], []
+    for record in requested:
+        if record.pk in eligible_ids:
+            records.append(record)
+        elif record.group_id != unit.pk:
+            others.append(record)  # sahib 2026-11-18: başqa qrupdakı tələbə — əlavə üzv və ya məcburi köçürmə
+    if not records and not others:
         return _error(
-            pgettext(_CTX, "Seçilmiş tələbələr arasında qrupa əlavə edilə bilən (qrupsuz, qeydiyyatlı) tələbə yoxdur."),
+            pgettext(_CTX, "Seçilmiş tələbələr arasında qrupa əlavə edilə bilən (qeydiyyatlı) tələbə yoxdur."),
             code="no_candidates",
             field="record_ids",
+        )
+    from .group_add_other import OTHER_MODES, add_other_group_students, result_message
+
+    other_mode = (request.POST.get("other_mode") or "").strip()
+    if others and other_mode not in OTHER_MODES:
+        return _error(
+            pgettext(_CTX, "Başqa qrupdakı tələbə üçün seçin: əlavə olaraq (öz qrupunda qalır) və ya məcburi köçür."),
+            code="other_mode_required",
+            field="other_mode",
         )
 
     from django.core.exceptions import ValidationError
@@ -368,6 +386,16 @@ def _add_students(request, organization, scope):
                 record=record, new_group=unit, period=period, by_user=request.user, reason=reason
             )
             added.append(record)
+        other = add_other_group_students(
+            records=others,
+            unit=unit,
+            mode=other_mode,
+            period=period,
+            by_user=request.user,
+            reason=(request.POST.get("reason") or "").strip()[:500],
+        )
+        if others and not (added or other["transferred"] or other["extra"]):
+            raise ValidationError(" ".join(other["warnings"]) or pgettext(_CTX, "Heç bir tələbə əlavə olunmadı."))
     except ValidationError as exc:
         transaction.set_rollback(True)
         messages = getattr(exc, "messages", None) or [str(exc)]
@@ -383,10 +411,25 @@ def _add_students(request, organization, scope):
         new_values={
             "added": [str(record.pk) for record in added],
             "students": [record.student.username for record in added],
+            "transferred": [record.student.username for record in other["transferred"]],
+            "extra": [record.student.username for record in other["extra"]],
             "reason": reason,
         },
     )
-    return JsonResponse({"ok": True, "id": str(unit.id), "added": len(added), "requested": len(ids)})
+    return JsonResponse(
+        {
+            "ok": True,
+            "id": str(unit.id),
+            "added": len(added),
+            "transferred": len(other["transferred"]),
+            "extra": len(other["extra"]),
+            "requested": len(ids),
+            "message": result_message(
+                added=len(added), transferred=len(other["transferred"]), extra=len(other["extra"])
+            ),
+            "warnings": other["warnings"],
+        }
+    )
 
 
 @transaction.atomic
