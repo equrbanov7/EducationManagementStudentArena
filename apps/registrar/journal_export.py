@@ -37,9 +37,12 @@ _ZEBRA_FILL = "F1F5F9"  # növbələnən sətir
 _SUBTLE = "64748B"
 
 
-def build_journal_workbook(*, offering, journal, finals) -> bytes:
+def build_journal_workbook(*, offering, journal, finals, lesson_timing: bool = False) -> bytes:
     """Offering jurnalı → xlsx bytes. ``journal``/`finals`` — mövcud servis
-    strukturları (gradebook.get_offering_journal / finals.get_offering_results)."""
+    strukturları (gradebook.get_offering_journal / finals.get_offering_results).
+
+    ``lesson_timing`` (sahib 2026-11-17, yalnız əməkdaş faylı): dərs başlığında saat aralığı + saat sayı və ayrıca
+    «Dərslər» vərəqi (saat aralığı, akademik saat, passiv, başladılma vaxtı, müəllim, mövzu)."""
     from openpyxl import Workbook
     from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
     from openpyxl.utils import get_column_letter
@@ -105,7 +108,9 @@ def build_journal_workbook(*, offering, journal, finals) -> bytes:
     # «Passiv» dərs (sahib 2026-11-14): başlıqda «P», xanası «P» — saat hesabına düşmür.
     passive = pgettext("registrar.passive_lessons", "Passiv")
     head += [
-        f"{i + 1}\n{lesson.date.strftime('%d.%m')}" + (f"\n{passive}" if getattr(lesson, "is_passive", False) else "")
+        f"{i + 1}\n{lesson.date.strftime('%d.%m')}"
+        + (f"\n{passive}" if getattr(lesson, "is_passive", False) else "")
+        + (_timing_head(lesson) if lesson_timing else "")
         for i, lesson in enumerate(lessons)
     ]
     head += [pgettext("registrar.journal", "Qayıb (q/b)"), pgettext("registrar.journal", "Giriş balı")]
@@ -117,7 +122,7 @@ def build_journal_workbook(*, offering, journal, finals) -> bytes:
         cell.font = header_font
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
         cell.border = border
-    ws.row_dimensions[header_row].height = 30
+    ws.row_dimensions[header_row].height = 58 if lesson_timing else 30
 
     names = {}
     for r_idx, row in enumerate(journal["rows"]):
@@ -163,7 +168,7 @@ def build_journal_workbook(*, offering, journal, finals) -> bytes:
 
     ws.column_dimensions["A"].width = 30
     for col in range(2, len(head) - 1):
-        ws.column_dimensions[get_column_letter(col)].width = 7
+        ws.column_dimensions[get_column_letter(col)].width = 12 if lesson_timing else 7
     ws.column_dimensions[get_column_letter(total_cols - 1)].width = 12
     ws.column_dimensions[get_column_letter(total_cols)].width = 12
     ws.freeze_panes = ws.cell(row=header_row + 1, column=2)
@@ -251,6 +256,9 @@ def build_journal_workbook(*, offering, journal, finals) -> bytes:
         ws2.column_dimensions[get_column_letter(col)].width = 13
     ws2.freeze_panes = f"A{head2_row + 1}"
 
+    if lesson_timing:
+        _lessons_sheet(workbook, lessons, header_fill=header_fill, header_font=header_font, border=border)
+
     stamp = timezone.localtime().strftime("%d.%m.%Y %H:%M")
     ws2.append([])
     footer = ws2.cell(
@@ -264,3 +272,69 @@ def build_journal_workbook(*, offering, journal, finals) -> bytes:
     buffer = BytesIO()
     workbook.save(buffer)
     return buffer.getvalue()
+
+
+def _hours_text(lesson) -> str:
+    return "%s %s" % (lesson.hours, pgettext("registrar.journal", "saat"))
+
+
+def _timing_head(lesson) -> str:
+    """Dərs başlığına əlavə: «10:10–11:40» + «2 saat» (passiv dərsdə saat «Passiv» sətrinin yanındadır)."""
+    from apps.registrar.journal_lesson_timing import time_range
+
+    parts = [time_range(lesson), _hours_text(lesson)]
+    return "".join(f"\n{part}" for part in parts if part)
+
+
+def _lessons_sheet(workbook, lessons, *, header_fill, header_font, border) -> None:
+    """«Dərslər» vərəqi (yalnız əməkdaş faylı): hər dərsin saat aralığı, saat sayı və başladılma vaxtı."""
+    from django.contrib.auth import get_user_model
+
+    from openpyxl.styles import Alignment
+
+    from apps.registrar.journal_lesson_timing import started_at_text, time_range
+
+    teacher_ids = {lesson.instructor_id for lesson in lessons if lesson.instructor_id}
+    teachers = {
+        user.pk: (user.get_full_name() or "").strip() or user.username
+        for user in get_user_model()
+        .objects.filter(pk__in=teacher_ids)
+        .only("id", "username", "first_name", "last_name")
+    }
+    sheet = workbook.create_sheet(pgettext("registrar.journal", "Dərslər")[:31])
+    sheet.sheet_view.showGridLines = False
+    head = [
+        "№",
+        pgettext("registrar.journal", "Tarix"),
+        pgettext("registrar.journal", "Dərs növü"),
+        pgettext("registrar.journal", "Dərs saatı"),
+        pgettext("registrar.journal", "Akademik saat"),
+        pgettext("registrar.passive_lessons", "Passiv"),
+        pgettext("registrar.journal", "Dərs başladılıb"),
+        pgettext("registrar.journal", "Müəllim"),
+        pgettext("registrar.journal", "Mövzu"),
+    ]
+    sheet_append(sheet, head)
+    for cell in sheet[1]:
+        cell.fill, cell.font, cell.border = header_fill, header_font, border
+        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    for index, lesson in enumerate(lessons, start=1):
+        sheet_append(
+            sheet,
+            [
+                index,
+                lesson.date.strftime("%d.%m.%Y"),
+                str(lesson.get_kind_display()),
+                time_range(lesson),
+                int(lesson.hours or 0),
+                pgettext("registrar.journal", "Bəli") if getattr(lesson, "is_passive", False) else "",
+                started_at_text(lesson) or pgettext("registrar.journal", "köhnə sistemdən"),
+                teachers.get(lesson.instructor_id, ""),
+                getattr(lesson, "display_topic", "") or lesson.topic or "",
+            ],
+        )
+        for cell in sheet[sheet.max_row]:
+            cell.border = border
+    for letter, width in zip("ABCDEFGHI", (6, 12, 18, 14, 10, 9, 18, 28, 60)):
+        sheet.column_dimensions[letter].width = width
+    sheet.freeze_panes = "A2"

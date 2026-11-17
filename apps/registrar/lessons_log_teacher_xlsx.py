@@ -34,7 +34,8 @@ def _bold(sheet, row_index) -> None:
         cell.font = Font(bold=True)
 
 
-def build_xlsx(*, teacher_name: str, window: dict, table: dict, details: list) -> bytes:
+def build_xlsx(*, teacher_name: str, window: dict, table: dict, details: list, started: bool = False) -> bytes:
+    """``started`` (nəzarətçi faylı, sahib 2026-11-17): «Dərslər»in sonunda «Dərs başladılıb» sütunu."""
     from openpyxl import Workbook
     from openpyxl.styles import Font, PatternFill
 
@@ -124,7 +125,8 @@ def build_xlsx(*, teacher_name: str, window: dict, table: dict, details: list) -
             pgettext(_CTX, "İştirak"),
             pgettext(_CTX, "Qeyd olunan"),
             pgettext(_CTX, "Passiv"),  # sonda — mövcud sütunların yeri dəyişmir
-        ],
+        ]
+        + ([pgettext(_CTX, "Dərs başladılıb")] if started else []),
     )
     header(lessons, 1)
     lessons.freeze_panes = "A2"
@@ -145,10 +147,11 @@ def build_xlsx(*, teacher_name: str, window: dict, table: dict, details: list) -
                 item["present"] if item["marked"] else None,
                 item["marked"] if item["marked"] else None,
                 pgettext(_CTX, "Bəli") if item.get("passive") else "",
-            ],
+            ]
+            + ([item.get("started", "")] if started else []),
         )
         lessons.cell(row=index + 1, column=2).number_format = "DD.MM.YYYY"
-    _widths(lessons, (6, 12, 16, 14, 30, 36, 16, 12, 60, 18, 10, 12, 10))
+    _widths(lessons, (6, 12, 16, 14, 30, 36, 16, 12, 60, 18, 10, 12, 10, 18))
 
     buffer = BytesIO()
     workbook.save(buffer)

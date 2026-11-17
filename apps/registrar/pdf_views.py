@@ -121,14 +121,14 @@ def my_transcript_pdf(request):
 def journal_xlsx(request, offering_id):
     """Jurnalın xlsx ixracı (U14): davamiyyət+ballar vərəqi + yekun vərəqi.
 
-    Giriş jurnal detalı ilə eynidir: müəllim/org sahibi/superuser + korrektor
-    (İKT/RİM rəhbəri). Təsdiq zənciri ləğv edildiyi üçün ayrıca «rəyçi» yolu
-    YOXDUR — kafedra/dekan jurnal faylını burdan almır."""
-    from apps.registrar import finals, gradebook, journal_access, journal_export
-    from apps.registrar.views import _can_edit_journal
+    Giriş jurnal SƏHİFƏSİ ilə eynidir (``journal_access.can_open_journal``): müəllim/sahib/superuser, korrektor,
+    siyahı idarəçisi (koordinator/dekanlıq) və ``journal.view`` müşahidəçisi (kafedra/tədris işçisi). Sahib
+    2026-11-17: əvvəl yalnız redaktor — jurnalı açan əməkdaş «Export»da 404 alırdı. Əməkdaşın faylında dərsin
+    saat aralığı / saat sayı / başladılma vaxtı da var (``journal_lesson_timing``); müəllimin faylında yox."""
+    from apps.registrar import finals, gradebook, journal_access, journal_export, journal_lesson_timing
 
     offering = journal_access.offering_or_404(request, offering_id)
-    if not _can_edit_journal(request.user, offering):
+    if not journal_access.can_open_journal(request, offering):
         raise Http404
 
     # Bölünmüş jurnal (sahib 2026-10-26): pay sahibinin faylında yalnız öz sətir/sütunları.
@@ -139,6 +139,7 @@ def journal_xlsx(request, offering_id):
         offering=offering,
         journal=gradebook.get_offering_journal(offering=offering, scope=scope),
         finals=journal_share_guard.restrict_export(finals.get_offering_results(offering=offering), scope),
+        lesson_timing=journal_lesson_timing.show_lesson_timing(request.user, offering),
     )
     filename = f"jurnal-{offering.subject.code}.xlsx"
     response = HttpResponse(payload, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")

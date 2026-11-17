@@ -346,6 +346,51 @@ class TeacherTableTest(TestCase):
                 for cell in row:
                     self.assertNotEqual(cell.data_type, "f")
 
+    def test_supervisor_xlsx_has_started_column_teacher_xlsx_does_not(self):
+        """Sahib 2026-11-17: nəzarətçi faylında hər dərsin başladılma anı; müəllimin öz faylında yox."""
+        from openpyxl import load_workbook
+
+        response = self._get(self.rim, "registrar:lessons_log_teacher_xlsx", ll_teacher=str(self.teacher.pk))
+        details = list(load_workbook(BytesIO(response.content))["Dərslər"].iter_rows(values_only=True))
+        self.assertEqual(details[0][-1], "Dərs başladılıb")
+        self.assertRegex(details[1][-1], r"^\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}$")
+
+        own = self._get(self.teacher, "registrar:lessons_log_teacher_xlsx")
+        own_header = next(load_workbook(BytesIO(own.content))["Dərslər"].iter_rows(values_only=True))
+        self.assertNotIn("Dərs başladılıb", own_header)
+
+    def test_csv_rows_show_time_range_and_started_for_supervisor(self):
+        import datetime as _dt
+
+        from apps.registrar.lessons_log import NOTE_ON_TIME, csv_rows
+
+        row = {
+            "date": _dt.date(2026, 11, 13),
+            "start_time": _dt.time(10, 10),
+            "end_time": _dt.time(11, 40),
+            "teacher": "T",
+            "subject_code": "S",
+            "subject_name": "Fənn",
+            "group": "G",
+            "topic": "",
+            "kind_label": "Mühazirə",
+            "room": "",
+            "present": 1,
+            "absent": 0,
+            "excused": 0,
+            "graded": 0,
+            "hours": 2,
+            "note": NOTE_ON_TIME,
+            "started_at": "13.11.2026 10:12",
+        }
+        header, line = csv_rows([row], started=True)
+        self.assertEqual(line[1], "10:10–11:40")
+        self.assertEqual(header[-1], "Dərs başladılıb")
+        self.assertEqual(line[-1], "13.11.2026 10:12")
+        plain_header, plain_line = csv_rows([row])
+        self.assertNotIn("Dərs başladılıb", plain_header)
+        self.assertNotIn("13.11.2026 10:12", plain_line)
+
     # ── 6. Əhatə ────────────────────────────────────────────────────────────
 
     def test_supervisor_outside_scope_is_denied(self):

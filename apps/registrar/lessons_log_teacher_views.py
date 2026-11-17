@@ -118,6 +118,7 @@ def teacher_table_xlsx(request):
         window=ctx["window"],
         table=table,
         details=table_service.event_details(table["rows"]),
+        started=bool(ctx["supervisor"]),  # başladılma anı — yalnız nəzarətçi faylında (sahib 2026-11-17)
     )
     response = HttpResponse(payload, content_type=XLSX_CONTENT_TYPE)
     response["Content-Disposition"] = 'attachment; filename="muellim-dersleri-%s-%s.xlsx"' % (

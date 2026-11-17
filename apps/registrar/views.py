@@ -362,6 +362,9 @@ def journal_detail(request, offering_id):
     from .passive_lessons import available as passive_available  # «Passiv» dərs saatı seçimi (sahib 2026-11-14)
 
     context["passive_lessons_available"] = passive_available(offering)
+    from .journal_lesson_timing import page_context as timing_context  # saat/başladılma — yalnız əməkdaşa (2026-11-17)
+
+    context.update(timing_context(request.user, offering))
     return render(request, "registrar/journal_detail.html", context)
 
 

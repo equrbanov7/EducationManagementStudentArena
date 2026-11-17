@@ -119319,3 +119319,35 @@ msgstr "Əlavə vaxt ver"
 msgctxt "exams.time_extension"
 msgid "Əlavə vaxtın səbəbini yazın."
 msgstr "Əlavə vaxtın səbəbini yazın."
+
+msgctxt "registrar.journal"
+msgid "Dərs başladılıb"
+msgstr "Dərs başladılıb"
+
+msgctxt "registrar.lessons_log"
+msgid "Dərs başladılıb"
+msgstr "Dərs başladılıb"
+
+msgctxt "registrar.journal"
+msgid "Dərs saatı"
+msgstr "Dərs saatı"
+
+msgctxt "registrar.journal"
+msgid "Akademik saat"
+msgstr "Akademik saat"
+
+msgctxt "registrar.journal"
+msgid "Bəli"
+msgstr "Bəli"
+
+msgctxt "registrar.journal"
+msgid "Dərslər"
+msgstr "Dərslər"
+
+msgctxt "registrar.journal"
+msgid "Dərs növü"
+msgstr "Dərs növü"
+
+msgctxt "registrar.journal"
+msgid "köhnə sistemdən"
+msgstr "köhnə sistemdən"

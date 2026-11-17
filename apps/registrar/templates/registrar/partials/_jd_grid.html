@@ -75,9 +75,14 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                                 id="jd-lesson-{{ lm.lesson.id }}"
                                 data-jd-hint-col="{{ lm.lesson.date|date:'d.m.Y' }} · {{ lm.lesson.get_kind_display }}"
                                 title="{% if lm.passive %}{% trans 'Passiv dərs — müəllimin keçirilmiş saatına, həddə və dərs yükünə daxil deyil; xana yazılmır' context 'registrar.passive_lessons' %} · {% endif %}{{ lm.lesson.get_kind_display }}{% if lm.lesson.display_topic %} — {{ lm.lesson.display_topic }}{% endif %}{% if lm.lesson.start_time %} · {{ lm.lesson.start_time|time:'H:i' }}{% endif %}{% if academic_rules.off_schedule_flag and lm.lesson.off_schedule_reason %} · {% trans 'cədvəldən kənar' context 'registrar.journal_activation' %}: {{ lm.lesson.off_schedule_reason }}{% endif %}">
-                                {% if not lm.editable %}
-                                {# Redaktə pəncərəsi keçib → tarixə klik oxu-rejimi GÜN ÖZƏTİ modalını açır. #}
+                                {% if not lm.editable or show_lesson_timing %}
+                                {# Redaktə pəncərəsi keçib → tarixə klik oxu-rejimi GÜN ÖZƏTİ modalını açır. Əməkdaş (sahib #}
+                                {# 2026-11-17) HƏR dərsdə açır — başladılma vaxtı oradadır; müəllimin HTML-ində data-started yoxdur. #}
                                 <button type="button" class="jd2-th-date-btn" data-jd-day-summary
+                                        {% if not lm.editable %}data-locked="1"{% endif %}
+                                        {% if show_lesson_timing %}data-started="{% if lm.lesson.is_legacy_synthesised %}{% trans 'köhnə sistemdən' context 'registrar.journal' %}{% else %}{{ lm.lesson.created_at|date:'d.m.Y H:i' }}{% endif %}"
+                                        data-time="{% if lm.lesson.start_time %}{{ lm.lesson.start_time|time:'H:i' }}{% if lm.lesson.end_time %}–{{ lm.lesson.end_time|time:'H:i' }}{% endif %}{% endif %}"
+                                        data-hours="{% if lm.passive %}{% trans 'Passiv' context 'registrar.passive_lessons' %} · {% endif %}{{ lm.lesson.hours }} {% trans 'saat' context 'registrar.journal' %}"{% endif %}
                                         data-date="{{ lm.lesson.date|date:'d.m.Y' }}"
                                         data-iso="{{ lm.lesson.date|date:'Y-m-d' }}"
                                         data-kind="{{ lm.lesson.get_kind_display }}"
@@ -88,6 +93,9 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                                         title="{% trans 'Gün özəti (redaktə vaxtı keçib)' context 'registrar.journal' %}">{{ lm.lesson.date|date:"d.m" }}</button>
                                 {% else %}
                                 {{ lm.lesson.date|date:"d.m" }}
+                                {% endif %}
+                                {% if show_lesson_timing %}{# Saat aralığı + saat sayı — yalnız əməkdaşa (sahib 2026-11-17) #}
+                                <div class="jd2-th-timing" data-jd-lesson-timing>{% if lm.lesson.start_time %}<span class="jd2-th-time">{{ lm.lesson.start_time|time:"H:i" }}{% if lm.lesson.end_time %}–{{ lm.lesson.end_time|time:"H:i" }}{% endif %}</span>{% endif %}{% if not lm.passive %}<span class="jd2-th-hours">{{ lm.lesson.hours }} {% trans "saat" context "registrar.journal" %}</span>{% endif %}</div>
                                 {% endif %}
                                 {% if lm.passive %}<div class="jd2-th-passive">{% trans "Passiv" context "registrar.passive_lessons" %} · {{ lm.lesson.hours }} {% trans "saat" context "registrar.journal" %}</div>{% endif %}
                                 {% if lm.is_today %}<div class="jd2-th-today">{% trans "BU GÜN" context "registrar.journal" %}</div>{% endif %}

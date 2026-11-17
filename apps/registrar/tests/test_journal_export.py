@@ -176,9 +176,90 @@ class JournalExportTest(TestCase):
         resp = self._client(self.student).get(self._url())
         self.assertEqual(resp.status_code, 404)
 
-    def test_chair_cannot_export(self):
-        """Təsdiq zənciri ləğv edildi — kafedra müdirinin «rəyçi» ixracı da yoxdur."""
-        self.assertEqual(self._client(self.chair).get(self._url()).status_code, 404)
+    def _timed_lesson(self):
+        """Seminar dərsinə cədvəl saatı (10:10–11:40) — vaxt məlumatı testləri üçün."""
+        from apps.registrar.models import Lesson
+
+        lesson = Lesson.objects.get(offering=self.offering)
+        Lesson.objects.filter(pk=lesson.pk).update(start_time=datetime.time(10, 10), end_time=datetime.time(11, 40))
+        lesson.refresh_from_db()
+        return lesson
+
+    def test_chair_who_opens_journal_can_export_with_lesson_timing(self):
+        """Sahib 2026-11-17: jurnalı açan əməkdaş (kafedra/dekanlıq/tədris) «Export»da 404 alırdı.
+
+        İndi ixrac jurnal səhifəsi ilə EYNİ qapıdadır; əməkdaş faylında hər dərsin saat aralığı, saat sayı və
+        başladılma vaxtı var («Dərslər» vərəqi + başlıq)."""
+        from openpyxl import load_workbook
+
+        from apps.registrar.journal_lesson_timing import started_at_text
+
+        lesson = self._timed_lesson()
+        client = self._client(self.chair)
+        self.assertEqual(client.get(reverse("registrar:journal_detail", args=[self.offering.id])).status_code, 200)
+        resp = client.get(self._url())
+        self.assertEqual(resp.status_code, 200)
+        workbook = load_workbook(BytesIO(resp.content))
+        self.assertEqual(workbook.sheetnames[-1], "Dərslər")
+        head = [cell.value for cell in workbook.worksheets[0][4]]
+        self.assertIn("10:10–11:40", head[1])
+        self.assertIn("2 saat", head[1])
+        lessons_sheet = workbook["Dərslər"]
+        header = [cell.value for cell in lessons_sheet[1]]
+        row = dict(zip(header, [cell.value for cell in lessons_sheet[2]]))
+        self.assertEqual(row["Tarix"], "01.10.2024")
+        self.assertEqual(row["Dərs saatı"], "10:10–11:40")
+        self.assertEqual(row["Akademik saat"], 2)
+        self.assertEqual(row["Dərs başladılıb"], started_at_text(lesson))
+        self.assertTrue(row["Dərs başladılıb"])
+
+    def test_teacher_export_has_no_lesson_timing(self):
+        """Jurnalın öz müəllimi vaxt məlumatını görmür (sahib: «qarışıqdır») — faylda da yox."""
+        from openpyxl import load_workbook
+
+        self._timed_lesson()
+        workbook = load_workbook(BytesIO(self._client(self.teacher).get(self._url()).content))
+        self.assertNotIn("Dərslər", workbook.sheetnames)
+        texts = "\n".join(str(c.value) for ws in workbook.worksheets for row in ws.iter_rows() for c in row if c.value)
+        self.assertNotIn("10:10", texts)
+
+    def test_grid_and_day_popover_show_timing_to_staff_only(self):
+        """Sütun başlığında saat aralığı + saat sayı, gün özətində başladılma anı — əməkdaşa bəli, müəllimə yox."""
+        from django.utils import timezone
+
+        lesson = self._timed_lesson()
+        started = timezone.localtime(lesson.created_at).strftime("%d.%m.%Y %H:%M")
+        url = reverse("registrar:journal_detail", args=[self.offering.id])
+
+        staff_html = self._client(self.chair).get(url).content.decode()
+        self.assertIn("data-jd-lesson-timing", staff_html)
+        self.assertIn("10:10–11:40", staff_html)
+        self.assertIn(f'data-started="{started}"', staff_html)
+        self.assertIn("data-jd-day-started", staff_html)
+        self.assertIn("journal_lesson_timing.css", staff_html)
+
+        teacher_html = self._client(self.teacher).get(url).content.decode()
+        self.assertNotIn("data-jd-lesson-timing", teacher_html)
+        self.assertNotIn("data-started=", teacher_html)
+        self.assertNotIn("data-jd-day-started", teacher_html)
+        self.assertNotIn("journal_lesson_timing.css", teacher_html)
+
+    def test_lesson_teacher_counts_as_journal_teacher(self):
+        """Bölünmüş fənnin dərsini keçən müəllim də «öz müəllim»dir; kafedra müdiri deyil."""
+        from apps.registrar.journal_lesson_timing import is_journal_teacher, show_lesson_timing
+        from apps.registrar.models import Lesson
+
+        other = User.objects.create_user("je_other_teacher", "je_ot@qku.edu.az", "pw")
+        with bypass_rls():
+            Membership.objects.create(
+                user=other, organization=self.org, role=self.org.roles.get(name="teacher"), is_active=True
+            )
+        self.assertTrue(is_journal_teacher(self.teacher, self.offering))
+        self.assertFalse(is_journal_teacher(other, self.offering))
+        Lesson.objects.filter(offering=self.offering).update(instructor=other)
+        self.assertTrue(is_journal_teacher(other, self.offering))
+        self.assertFalse(show_lesson_timing(other, self.offering))
+        self.assertTrue(show_lesson_timing(self.chair, self.offering))
 
     def test_export_is_audited(self):
         from apps.audit.models import AuditLog

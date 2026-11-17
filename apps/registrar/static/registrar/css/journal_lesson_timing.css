@@ -1,0 +1,21 @@
+/* ═══ Dərsin vaxt məlumatı — yalnız əməkdaşa (sahib 2026-11-17) ═══════════════════════════════════════════
+   Sütun başlığında tarix ilə «i/e · q/b» arasında saat aralığı + saat sayı; gün özəti pəncərəsində dərsin
+   başladıldığı an. Fayl yalnız `show_lesson_timing` olanda yüklənir (müəllimə gedən səhifədə yoxdur). */
+.jd2-th-timing {
+    display: flex; flex-direction: column; align-items: center; gap: 1px;
+    margin-top: 2px; line-height: 1.15; white-space: nowrap;
+}
+.jd2-th-time {
+    font-size: 0.66rem; font-weight: 700; color: var(--ems-primary-700, #1d4ed8);
+    font-variant-numeric: tabular-nums;
+}
+.jd2-th-hours {
+    font-size: 0.6rem; font-weight: 600; color: var(--ems-neutral-500, #64748b);
+}
+.jd-day-timing {
+    display: grid; gap: 4px; margin-bottom: 0.75rem; padding: 8px 10px; border-radius: 8px;
+    background: var(--ems-primary-50, #eff6ff); border: 1px solid var(--ems-primary-100, #dbeafe);
+    font-size: 0.85rem; color: #33415c;
+}
+.jd-day-timing__row i { width: 14px; color: var(--ems-primary-600, #2563eb); }
+.jd-day-timing__row b { color: #0f2a5e; font-variant-numeric: tabular-nums; }
