@@ -50,9 +50,15 @@ def time_range(lesson) -> str:
     return f"{text}–{end.strftime('%H:%M')}" if end else text
 
 
+def is_imported(lesson) -> bool:
+    """Köhnə sistemdən gələn dərs: bərpa olunmuş (``is_legacy_synthesised``) və ya köçürülmüş — aktoru yoxdur
+    (``created_by`` boş; ``lessons_log_totals.is_imported_lesson`` ilə eyni qayda). ``created_at`` köçürmə anıdır."""
+    return bool(getattr(lesson, "is_legacy_synthesised", False)) or getattr(lesson, "created_by_id", None) is None
+
+
 def started_at(lesson):
-    """Dərsin başladıldığı an (yerli vaxt). Köhnə sistemdən bərpa olunan dərsdə yoxdur (idxal anıdır, mənasızdır)."""
-    if getattr(lesson, "is_legacy_synthesised", False) or not getattr(lesson, "created_at", None):
+    """Dərsin başladıldığı an (yerli vaxt). Köhnə sistemdən gələn dərsdə yoxdur (köçürmə anı mənasızdır)."""
+    if is_imported(lesson) or not getattr(lesson, "created_at", None):
         return None
     return timezone.localtime(lesson.created_at)
 
@@ -66,4 +72,12 @@ def page_context(user, offering) -> dict:
     return {"show_lesson_timing": show_lesson_timing(user, offering)}
 
 
-__all__ = ["is_journal_teacher", "page_context", "show_lesson_timing", "started_at", "started_at_text", "time_range"]
+__all__ = [
+    "is_imported",
+    "is_journal_teacher",
+    "page_context",
+    "show_lesson_timing",
+    "started_at",
+    "started_at_text",
+    "time_range",
+]

@@ -181,7 +181,9 @@ class JournalExportTest(TestCase):
         from apps.registrar.models import Lesson
 
         lesson = Lesson.objects.get(offering=self.offering)
-        Lesson.objects.filter(pk=lesson.pk).update(start_time=datetime.time(10, 10), end_time=datetime.time(11, 40))
+        Lesson.objects.filter(pk=lesson.pk).update(
+            start_time=datetime.time(10, 10), end_time=datetime.time(11, 40), created_by=self.teacher
+        )
         lesson.refresh_from_db()
         return lesson
 
@@ -243,6 +245,15 @@ class JournalExportTest(TestCase):
         self.assertNotIn("data-started=", teacher_html)
         self.assertNotIn("data-jd-day-started", teacher_html)
         self.assertNotIn("journal_lesson_timing.css", teacher_html)
+
+    def test_imported_lesson_shows_old_system_not_import_time(self):
+        """Köçürülmüş dərsin ``created_at``-ı köçürmə anıdır (prod: 24.10.2026 03:35) — «köhnə sistemdən» yazılır."""
+        from apps.registrar.models import Lesson
+
+        lesson = self._timed_lesson()
+        Lesson.objects.filter(pk=lesson.pk).update(created_by=None)
+        html = self._client(self.chair).get(reverse("registrar:journal_detail", args=[self.offering.id])).content
+        self.assertIn('data-started="köhnə sistemdən"', html.decode())
 
     def test_lesson_teacher_counts_as_journal_teacher(self):
         """Bölünmüş fənnin dərsini keçən müəllim də «öz müəllim»dir; kafedra müdiri deyil."""
