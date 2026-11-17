@@ -43,3 +43,34 @@
     font-weight: 400;
     color: var(--ems-text-muted, inherit);
 }
+
+/* Sahib 2026-11-18: yekun xana (midterm / imtahan balı) apellyasiya balını göstərir — imtahan sahəsi
+   (`score__`, POST-a düşür) gizlənir, yerində apellyasiya balı; apellyasiya yoxdursa əksinə. */
+.ese-effective {
+    display: none;
+    width: 5.4rem;
+    margin: 0 auto;
+    text-align: center;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    border-color: var(--ems-success-bd, var(--ems-border));
+    background: var(--ems-success-bg, transparent);
+}
+
+.ese-td--final.has-appeal .ese-total {
+    display: none;
+}
+
+.ese-td--final.has-appeal .ese-effective {
+    display: block;
+}
+
+.ese-appeal-sel .bootstrap-single-select__toggle.is-dirty {
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+}
+
+.ese-appeal-sel .bootstrap-single-select__toggle.is-invalid {
+    border-color: var(--ems-danger);
+    background: var(--ems-danger-bg);
+}

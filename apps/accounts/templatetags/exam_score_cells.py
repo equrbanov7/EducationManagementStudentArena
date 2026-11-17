@@ -59,6 +59,7 @@ def ese_question_cells(row) -> str:
     # 2026-10-25: «Yekun» sətir (təsdiqdən 15 dəqiqə keçib) də kilidli render olunur — JS yalnız
     # «Apellyasiya» / «RİM təqdimatı» rejimində açır (server qaydanı yenə tətbiq edir).
     locked = bool(row.get("locked") or row.get("final_locked") or row.get("appeal_set"))  # 2026-11-17: apellyasiya
+    locked = locked or bool(row.get("from_test"))  # 2026-11-18: testdən gələn bal — yalnız apellyasiya ilə
     parts = []
     for cell in row.get("question_cells") or ():
         value = cell["value"]

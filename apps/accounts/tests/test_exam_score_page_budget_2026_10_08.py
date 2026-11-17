@@ -182,7 +182,8 @@ class ExamScorePageBudgetTest(TestCase):
         self.assertEqual(cell.group(1), '<option value="">—</option><option value="7" selected>7</option>')
         self.assertIn(f'name="q__{enrollment_id}__1" aria-label="S1 — ', html)
         tbody = html[html.index("<tbody>") : html.index("</tbody>")]
-        self.assertEqual(tbody.count("<option"), BIG * 10 + BIG * 2)  # «—» hər xanada + 2 dolu sual
+        # «—» hər xanada (10 sual + 2026-11-18 «Apellyasiya balı» seçimi) + 2 dolu sual — variantlar JS-də qurulur.
+        self.assertEqual(tbody.count("<option"), BIG * 11 + BIG * 2)
         self.assertIn('data-ese-qcell="6" hidden', tbody)
         self.assertIn('data-max=""', tbody)
 
