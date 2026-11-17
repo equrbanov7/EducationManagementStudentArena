@@ -28,7 +28,7 @@ from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET, require_POST
 
 from apps.exams.models import TextExtractionJob
-from apps.exams.services.access_policy import _ensure_teacher
+from apps.exams.services.access_policy import _ensure_teacher, can_view_attempt_results
 from apps.exams.services.parsing import MAX_UPLOAD_BYTES
 from apps.exams.tasks import run_text_extraction_job
 from core.tenancy import get_request_organization
@@ -214,10 +214,19 @@ def text_extraction_status(request, job_id):
     halıdır: job pickup-pəncərəsindən uzun PENDING qalıbsa bu poll onu bir dəfə
     inline icra edir (bax :func:`_take_over_stalled_job`).
     """
-    _ensure_teacher(request.user)
+    _ensure_job_reader(request.user)
     job = get_object_or_404(TextExtractionJob, pk=job_id, user=request.user)
     job = _take_over_stalled_job(job)
     return JsonResponse({"ok": True, **_job_payload(job)})
+
+
+def _ensure_job_reader(user):
+    """Job status / gözləmə / endirmə: müəllim VƏ YA İmtahan Mərkəzi (2026-11-17 — statistika ixracı worker-də).
+
+    Sahiblik ayrıca ``user=request.user`` filtri ilə məcburidir — başqasının job-u 404.
+    """
+    if not can_view_attempt_results(user):
+        _ensure_teacher(user)
 
 
 def start_export_job(request, *, export_name, params):
@@ -282,7 +291,7 @@ def export_job_waiting(request, job_id):
     from django.shortcuts import render
     from django.urls import reverse
 
-    _ensure_teacher(request.user)
+    _ensure_job_reader(request.user)
     job = get_object_or_404(TextExtractionJob, pk=job_id, user=request.user)
     return render(
         request,
@@ -299,6 +308,6 @@ def export_job_waiting(request, job_id):
 @require_GET
 def export_job_download(request, job_id):
     """Hazır export faylını endirir — yalnız sahibi üçün."""
-    _ensure_teacher(request.user)
+    _ensure_job_reader(request.user)
     job = get_object_or_404(TextExtractionJob, pk=job_id, user=request.user)
     return _serve_export_file(job)

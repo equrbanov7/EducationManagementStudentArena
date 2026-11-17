@@ -29,7 +29,6 @@ from apps.exams.models import ExamAttempt
 from apps.exams.services.access_policy import is_exam_center_user
 from apps.exams.services.result_calculation import attach_test_result_summaries
 from apps.exams.services.supervision import attach_attempt_interventions
-from core.export_safety import sheet_cell
 from core.search_text import tolerant_q
 
 from ._shared import supervisor_org_or_403
@@ -126,6 +125,14 @@ def _unit_ids_with_children(organization, unit_ids):
 
 def _filtered_attempts(request, organization):
     """GET filtrlərinə görə bitmiş (real) imtahan cəhdlərinin queryset-i."""
+    return filtered_attempts(request.GET, organization)
+
+
+def filtered_attempts(params, organization):
+    """``params`` (``request.GET`` və ya worker-ə ötürülən lüğət) filtrlərinə görə bitmiş cəhdlər.
+
+    2026-11-17: böyük Excel ixracı worker-də qurulur (``statistics_export``) — filtr məntiqi sorğudan asılı deyil.
+    """
     # 2026-09-14 (W5 `w5left`, tapşırıq 1): reyestr qrupları (`allowed_units`) da
     # sətir sütunları üçün valideyn zənciri ilə prefetch olunur — kohortla eyni
     # sorğu büdcəsi (səhifə başına +1 prefetch, sətir sayından asılı deyil).
@@ -135,12 +142,12 @@ def _filtered_attempts(request, organization):
         .prefetch_related("exam__allowed_groups__org_unit__parent", allowed_units_prefetch())
     )
 
-    q = (request.GET.get("q") or "").strip()
+    q = (params.get("q") or "").strip()
     student_q = tolerant_q(q, ("user__first_name", "user__last_name", "user__username"))
     if student_q is not None:
         qs = qs.filter(student_q)
 
-    subject_ids = _csv_uuids(request.GET.get("subjects"))
+    subject_ids = _csv_uuids(params.get("subjects"))
     if subject_ids:
         qs = qs.filter(exam__subject_id__in=subject_ids)
 
@@ -149,7 +156,7 @@ def _filtered_attempts(request, organization):
     # uyğun gəlir — reyestr qrupuna təyin olunmuş imtahanlar əvvəl bu
     # filtrlərdən düşürdü. `groups=` həm kohort int id-si, həm `unit:<uuid>`
     # (və ya çılpaq UUID) qəbul edir.
-    cohort_ids, unit_group_ids = split_group_filter_values(request.GET.get("groups"))
+    cohort_ids, unit_group_ids = split_group_filter_values(params.get("groups"))
     if cohort_ids or unit_group_ids:
         condition = Q()
         if cohort_ids:
@@ -159,7 +166,7 @@ def _filtered_attempts(request, organization):
         qs = qs.filter(condition)
 
     # Köhnə birləşmiş "units" filtri (geriyə-uyğunluq — bookmarked URL-lər).
-    unit_ids = _csv_uuids(request.GET.get("units"))
+    unit_ids = _csv_uuids(params.get("units"))
     if unit_ids:
         qs = qs.filter(
             Q(exam__allowed_groups__org_unit_id__in=_unit_ids_with_children(organization, unit_ids))
@@ -168,7 +175,7 @@ def _filtered_attempts(request, organization):
 
     # Ayrı FAKÜLTƏ filtri: kohortda qrupun org_unit-inin VALİDEYNİ fakültədir;
     # reyestr qrupu fakültənin alt-ağacındadır (Fakültə → Kafedra → İxtisas → Qrup).
-    faculty_ids = _csv_uuids(request.GET.get("faculties"))
+    faculty_ids = _csv_uuids(params.get("faculties"))
     if faculty_ids:
         qs = qs.filter(
             Q(exam__allowed_groups__org_unit__parent_id__in=faculty_ids)
@@ -177,7 +184,7 @@ def _filtered_attempts(request, organization):
 
     # Ayrı KAFEDRA filtri: kohortda qrupun org_unit-i birbaşa kafedradır;
     # reyestr qrupu kafedranın alt-ağacındadır.
-    department_ids = _csv_uuids(request.GET.get("departments"))
+    department_ids = _csv_uuids(params.get("departments"))
     if department_ids:
         qs = qs.filter(
             Q(exam__allowed_groups__org_unit_id__in=department_ids)
@@ -185,28 +192,28 @@ def _filtered_attempts(request, organization):
         )
 
     # MÜƏLLİM (imtahan müəllifi) filtri.
-    teacher_ids = _csv_ints(request.GET.get("teachers"))
+    teacher_ids = _csv_ints(params.get("teachers"))
     if teacher_ids:
         qs = qs.filter(exam__author_id__in=teacher_ids)
 
-    exam_type = (request.GET.get("type") or "").strip()
+    exam_type = (params.get("type") or "").strip()
     if exam_type:
         qs = qs.filter(exam__exam_type_extended=exam_type)
 
     # İMTAHAN FORMASI (test/yazılı/praktik) — apellyasiya statistikasındakı
     # `format` filtri ilə eyni parametr adı və eyni sahə.
-    exam_format = (request.GET.get("format") or "").strip()
+    exam_format = (params.get("format") or "").strip()
     if exam_format:
         qs = qs.filter(exam__exam_type=exam_format)
 
     # STATUS: burada cəhdin statusudur (apellyasiyada müraciətin statusu idi).
-    status = (request.GET.get("status") or "").strip()
+    status = (params.get("status") or "").strip()
     if status in _ATTEMPT_STATUS_VALUES:
         qs = qs.filter(status=status)
 
     # TƏDRİS İLİ filtri: `year` tədris ilinin başlanğıc təqvim ilidir (məs. 2025 =
     # 2025/2026). Sentyabr–avqust aralığına görə süzülür.
-    year = (request.GET.get("year") or "").strip()
+    year = (params.get("year") or "").strip()
     if year.isdigit():
         from datetime import datetime
 
@@ -216,7 +223,7 @@ def _filtered_attempts(request, organization):
         qs = qs.filter(started_at__gte=lo, started_at__lt=hi)
 
     # SEMESTR: təqvim ayı qruplarına görə (tədris ili filtri ilə birləşə bilir).
-    semester = (request.GET.get("semester") or "").strip()
+    semester = (params.get("semester") or "").strip()
     if semester in _SEMESTERS:
         qs = qs.filter(started_at__month__in=_SEMESTERS[semester])
 
@@ -225,7 +232,11 @@ def _filtered_attempts(request, organization):
 
 def _sorted(qs, request):
     """``?sort=score|-score|...`` → order_by; default ən yeni (-started_at)."""
-    raw = (request.GET.get("sort") or "").strip()
+    return sorted_attempts(qs, request.GET)
+
+
+def sorted_attempts(qs, params):
+    raw = (params.get("sort") or "").strip()
     key = raw[1:] if raw.startswith("-") else raw
     desc = raw.startswith("-")
     fields = _SORT_MAP.get(key)
@@ -351,56 +362,27 @@ def exam_center_stats_data(request):
 @login_required
 @require_GET
 def exam_center_stats_export(request):
-    """Filtrlənmiş bütün nəticələrin Excel (.xlsx) ixracı."""
+    """Filtrlənmiş bütün nəticələrin Excel (.xlsx) ixracı.
+
+    2026-11-17 (sahib: «236 bio excel yüklə — download.htm»): geniş filtrdə (minlərlə test cəhdi) ixrac hər cəhdin
+    cavablarından balı yenidən hesablayır və 2 dəqiqəlik sorğu limitini aşırdı — brauzer serverin HTML xəta
+    səhifəsini «download.htm» kimi endirirdi. İndi kiçik dəst (``EXPORT_SYNC_MAX_ROWS``, defolt 500) dərhal
+    endirilir, böyüyü worker-də qurulur (gözləmə səhifəsi → avtomatik endirmə; ``export_registry``).
+    """
+    from django.conf import settings
+
+    from apps.exams.views.teacher.extract_jobs import start_export_job
+
+    from .statistics_export import EXPORT_NAME, build_stats_xlsx, export_params
+
     organization = _stats_org(request)
-    attempts = list(_sorted(_filtered_attempts(request, organization), request)[:5000])
-    attach_test_result_summaries(attempts)
-    attach_attempt_interventions(attempts)
-
-    try:
-        from openpyxl import Workbook
-        from openpyxl.styles import Font, PatternFill
-        from openpyxl.utils import get_column_letter
-    except ImportError:
-        return HttpResponse("openpyxl not installed", status=500)
-
-    columns = [
-        ("Tələbə", "student"),
-        ("İstifadəçi", "username"),
-        ("Qrup", "group"),
-        ("Kafedra", "kafedra"),
-        ("Fakültə / dekanlıq", "faculty"),
-        ("Müəllim", "teacher"),
-        ("İmtahan", "exam"),
-        ("Fənn", "subject"),
-        ("Tip", "type"),
-        ("Bal", "score"),
-        ("Faiz", "percentage"),
-        ("Status", "status"),
-        ("Uzaqlaşdırma səbəbi", "removal_reason"),
-        ("Tarix", "date"),
-    ]
-    wb = Workbook()
-    ws = wb.active
-    ws.title = "Statistika"
-    for col, (title, _key) in enumerate(columns, start=1):
-        cell = sheet_cell(ws, row=1, column=col, value=title)
-        cell.font = Font(bold=True, color="FFFFFF")
-        cell.fill = PatternFill("solid", fgColor="2563EB")
-    # 2026-09-14 (audit F-07): tələbə/qrup/imtahan adı və uzaqlaşdırma səbəbi
-    # istifadəçi mətnidir → formula neytrallaşdırması (`sheet_cell`).
-    for r, a in enumerate(attempts, start=2):
-        row = _row(a)
-        for c, (_title, key) in enumerate(columns, start=1):
-            sheet_cell(ws, row=r, column=c, value=row[key])
-    for col in range(1, len(columns) + 1):
-        ws.column_dimensions[get_column_letter(col)].width = 22
-
-    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-    stamp = timezone.localtime().strftime("%Y%m%d-%H%M")
-    response["Content-Disposition"] = f'attachment; filename="imtahan-statistika-{stamp}.xlsx"'
-    wb.save(response)
-    return response
+    threshold = getattr(settings, "EXPORT_SYNC_MAX_ROWS", 500)
+    if _filtered_attempts(request, organization).count() <= threshold:
+        filename, content_type, data = build_stats_xlsx(organization, request.GET)
+        response = HttpResponse(data, content_type=content_type)
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
+    return start_export_job(request, export_name=EXPORT_NAME, params={"filters": export_params(request.GET)})
 
 
 def _lookup_bounds(request):
