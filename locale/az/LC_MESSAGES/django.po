@@ -119410,3 +119410,132 @@ msgid ""
 msgstr ""
 "Apellyasiya balını yalnız RİM rəhbəri və İmtahan Mərkəzinin rəhbəri / işçisi"
 " yazır."
+
+msgctxt "accounts.groups"
+msgid "%%d əlavə üzv (öz qrupu başqadır)"
+msgstr "%%d əlavə üzv (öz qrupu başqadır)"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "%d tələbə bu qrupa köçürüldü"
+msgstr "%d tələbə bu qrupa köçürüldü"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "%d tələbə qrupa əlavə olundu"
+msgstr "%d tələbə qrupa əlavə olundu"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "%d tələbə öz qrupunda qalaraq bu qrupun jurnallarına əlavə olundu"
+msgstr "%d tələbə öz qrupunda qalaraq bu qrupun jurnallarına əlavə olundu"
+
+msgctxt "accounts.groups"
+msgid ""
+"Başqa qrupdakı tələbə üçün seçin: əlavə olaraq (öz qrupunda qalır) və ya "
+"məcburi köçür."
+msgstr ""
+"Başqa qrupdakı tələbə üçün seçin: əlavə olaraq (öz qrupunda qalır) və ya "
+"məcburi köçür."
+
+msgctxt "accounts.groups"
+msgid "Heç bir tələbə əlavə olunmadı."
+msgstr "Heç bir tələbə əlavə olunmadı."
+
+msgctxt "accounts.groups"
+msgid "Məcburi köçür"
+msgstr "Məcburi köçür"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "Qrup reyestrindən məcburi köçürmə: %(old)s → %(new)s"
+msgstr "Qrup reyestrindən məcburi köçürmə: %(old)s → %(new)s"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "Qrup reyestrindən əlavə üzv (öz qrupu: %s)"
+msgstr "Qrup reyestrindən əlavə üzv (öz qrupu: %s)"
+
+msgctxt "accounts.groups"
+msgid ""
+"Qrupsuz tələbələr birbaşa əlavə olunur. Başqa qrupdakı tələbəni ya əlavə "
+"olaraq (öz qrupunda qalır), ya da məcburi köçürə bilərsiniz — tarixçə "
+"silinmir."
+msgstr ""
+"Qrupsuz tələbələr birbaşa əlavə olunur. Başqa qrupdakı tələbəni ya əlavə "
+"olaraq (öz qrupunda qalır), ya da məcburi köçürə bilərsiniz — tarixçə "
+"silinmir."
+
+msgctxt "accounts.groups"
+msgid ""
+"Seçilmiş tələbələr arasında qrupa əlavə edilə bilən (qeydiyyatlı) tələbə "
+"yoxdur."
+msgstr ""
+"Seçilmiş tələbələr arasında qrupa əlavə edilə bilən (qeydiyyatlı) tələbə "
+"yoxdur."
+
+msgctxt "accounts.groups"
+msgid "Seçilənlər arasında başqa qrupda olan tələbə var. Nə edilsin?"
+msgstr "Seçilənlər arasında başqa qrupda olan tələbə var. Nə edilsin?"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "başqa qrupdadır: %s"
+msgstr "başqa qrupdadır: %s"
+
+msgctxt "accounts.groups"
+msgid ""
+"Öz qrupunda qalır, bu qrupun cari jurnallarına da əlavə olunur (məs. əcnəbi "
+"tələbələr)."
+msgstr ""
+"Öz qrupunda qalır, bu qrupun cari jurnallarına da əlavə olunur (məs. əcnəbi "
+"tələbələr)."
+
+msgctxt "accounts.groups"
+msgid "Öz qrupundan çıxıb bu qrupa keçir (rəsmi köçürmə, tarixçə qalır)."
+msgstr "Öz qrupundan çıxıb bu qrupa keçir (rəsmi köçürmə, tarixçə qalır)."
+
+msgctxt "accounts.groups"
+msgid "öz qrupu"
+msgstr "öz qrupu"
+
+msgctxt "accounts.groups"
+msgid "Əlavə olaraq"
+msgstr "Əlavə olaraq"
+
+msgctxt "accounts.groups"
+msgid "Əlavə üzv"
+msgstr "Əlavə üzv"
+
+msgctxt "accounts.groups"
+msgid ""
+"Əvvəl qrupsuz tələbələr göstərilir. Ad yazıb axtaranda başqa qrupdakı "
+"tələbələr də çıxır — yanında hansı qrupda olduğu yazılır."
+msgstr ""
+"Əvvəl qrupsuz tələbələr göstərilir. Ad yazıb axtaranda başqa qrupdakı "
+"tələbələr də çıxır — yanında hansı qrupda olduğu yazılır."
+
+msgctxt "registrar.group_extra_member"
+msgid ""
+"Bu qrupun cari semestrdə jurnalı yoxdur. Əvvəl dərs yükündə qrupa fənn "
+"yazılsın (jurnal açılsın), sonra tələbəni əlavə edin."
+msgstr ""
+"Bu qrupun cari semestrdə jurnalı yoxdur. Əvvəl dərs yükündə qrupa fənn "
+"yazılsın (jurnal açılsın), sonra tələbəni əlavə edin."
+
+#, python-format
+msgctxt "registrar.group_extra_member"
+msgid "Qrup reyestrindən əlavə üzv (öz qrupu: %s)"
+msgstr "Qrup reyestrindən əlavə üzv (öz qrupu: %s)"
+
+msgctxt "registrar.group_extra_member"
+msgid "Tələbə onsuz da bu qrupdadır."
+msgstr "Tələbə onsuz da bu qrupdadır."
+
+msgctxt "registrar.group_extra_member"
+msgid "Tələbənin aktiv akademik qeydi (qrupu) yoxdur."
+msgstr "Tələbənin aktiv akademik qeydi (qrupu) yoxdur."
+
+msgctxt "registrar.group_extra_member"
+msgid "onsuz da bu jurnaldadır"
+msgstr "onsuz da bu jurnaldadır"

@@ -38,7 +38,7 @@
     var state = {
         url: "", name: "", planUrl: "", candidatesUrl: "", groupActive: true,
         rowManage: false, rowLead: false,
-        rows: [], removed: [], canManage: false, canMove: false, status: "", reopen: "",
+        rows: [], removed: [], extra: [], canManage: false, canMove: false, status: "", reopen: "",
         lead: { name: "", username: "", warning: "" }
     };
 
@@ -60,6 +60,8 @@
 
     function actionButtons(row) {
         var out = [];
+        // Əlavə üzv (sahib 2026-11-18): öz qrupu başqadır — hərəkətlər öz qrupunun çekmecəsindədir.
+        if (row.extra) { return ""; }
         if (state.planUrl) {
             out.push('<a class="ems-btn ems-btn--sm" href="' + esc(withStudent(state.planUrl, row.id)) + '" download title="' + esc(t("plan")) + '"><i class="fas fa-file-word" aria-hidden="true"></i><span class="tof-students__btn-label">DOCX</span></a>');
         }
@@ -98,15 +100,22 @@
         if (row.order_number) { meta.push(t("order") + " " + row.order_number + (row.order_date ? " (" + row.order_date + ")" : "")); }
         if (row.leave_reason_label) { meta.push(row.leave_reason_label); }
         if (row.until) { meta.push(t("until") + ": " + row.until); }
+        if (row.extra) {
+            meta.push(t("extra-home") + ": " + (row.group_name || "—"));
+            if (row.extra_subjects && row.extra_subjects.length) { meta.push(row.extra_subjects.join(", ")); }
+        }
+        var status = row.extra ? "extra" : row.status;
         return (
-            '<li class="tof-students__row tof-students__row--' + esc(row.status) + '" data-tof-student-row data-status="' + esc(row.status) + '" data-search="' + esc((row.name + " " + row.username).toLowerCase()) + '">' +
+            '<li class="tof-students__row tof-students__row--' + esc(status) + '" data-tof-student-row data-status="' + esc(status) + '" data-search="' + esc((row.name + " " + row.username).toLowerCase()) + '">' +
             '<span class="tof-students__avatar" aria-hidden="true">' + esc(initials(row.name)) + "</span>" +
             '<div class="tof-students__main">' +
             '<div class="tof-students__name">' +
             (row.profile_url
                 ? '<a class="tof-students__link" href="' + esc(row.profile_url) + '" target="_blank" rel="noopener" title="' + esc(t("profile")) + '">' + esc(row.name) + "</a>"
                 : esc(row.name)) +
-            ' <span class="ems-badge ems-badge--' + esc(row.status) + '">' + esc(statusLabel(row.status)) + "</span>" +
+            (row.extra
+                ? ' <span class="ems-badge ems-badge--primary">' + esc(t("extra-badge")) + "</span>"
+                : ' <span class="ems-badge ems-badge--' + esc(row.status) + '">' + esc(statusLabel(row.status)) + "</span>") +
             (isLead(row) ? ' <span class="ems-badge ems-badge--primary tof-lead-badge"><i class="fas fa-user-tie" aria-hidden="true"></i> ' + esc(leadText("badge")) + "</span>" : "") +
             "</div>" +
             '<div class="tof-students__sub">' + esc(meta.join(" · ")) + "</div>" +
@@ -210,16 +219,17 @@
         var empty = r.querySelector("[data-tof-students-empty]");
         var emptyText = r.querySelector("[data-tof-students-empty-text]");
         list.setAttribute("aria-busy", "false");
-        list.innerHTML = state.rows.concat(state.removed).map(rowHtml).join("");
+        list.innerHTML = state.rows.concat(state.extra, state.removed).map(rowHtml).join("");
         if (meta) {
             var text = t("count").replace("%d", String(state.rows.length));
+            if (state.extra.length) { text += " · " + t("extra").replace("%d", String(state.extra.length)); }
             if (state.removed.length) { text += " · " + t("removed").replace("%d", String(state.removed.length)); }
             meta.textContent = text;
         }
         var note = r.querySelector("[data-tof-students-removed-note]");
         if (note) { note.hidden = !state.removed.length; }
         if (empty) {
-            empty.hidden = state.rows.length + state.removed.length > 0;
+            empty.hidden = state.rows.length + state.extra.length + state.removed.length > 0;
             if (emptyText) { emptyText.textContent = t("empty"); }
         }
         renderLead(true);
@@ -307,6 +317,22 @@
         summary.classList.toggle("has-selection", count > 0);
     }
 
+    /* Başqa qrupdakı tələbə (id «x:» önəkli, sahib 2026-11-18) seçiləndə «Əlavə olaraq / Məcburi köçür» bloku. */
+    function syncOther(dialog, ids) {
+        var box = dialog.querySelector("[data-tof-add-other]");
+        if (box) { box.hidden = !ids.some(function (id) { return String(id).indexOf("x:") === 0; }); }
+    }
+
+    function setOtherMode(dialog, mode) {
+        var input = dialog.querySelector("[data-tof-other-mode-input]");
+        if (input) { input.value = mode; }
+        Array.prototype.forEach.call(dialog.querySelectorAll("[data-tof-other-mode]"), function (btn) {
+            var on = btn.getAttribute("data-tof-other-mode") === mode;
+            btn.classList.toggle("is-active", on);
+            btn.setAttribute("aria-checked", on ? "true" : "false");
+        });
+    }
+
     function buildAddPicker(button) {
         var dialog = addDialog();
         var host = pickerHost(dialog);
@@ -318,6 +344,8 @@
         var hidden = dialog.querySelector('input[name="record_ids"]');
         if (hidden) { hidden.value = ""; }
         syncAddSummary(dialog, 0);
+        setOtherMode(dialog, "extra");
+        syncOther(dialog, []);
         var rootEl = freshPickerRoot(host);
         if (!rootEl || !url) { return; }
         var picker = window.EMSSearchableSelect.create(rootEl, {
@@ -331,6 +359,7 @@
                 var ids = picker && typeof picker.ids === "function" ? picker.ids() : [];
                 if (hidden) { hidden.value = ids.join(","); }
                 syncAddSummary(dialog, ids.length);
+                syncOther(dialog, ids);
             }
         });
         host._tofPicker = picker;
@@ -360,6 +389,7 @@
         };
         state.rows = [];
         state.removed = [];
+        state.extra = [];
         state.canManage = false;
         resetDrawer(state.name);
         renderLead(false);
@@ -371,6 +401,7 @@
                 if (state.url !== requestUrl) { return; }
                 state.rows = payload.rows || [];
                 state.removed = payload.removed_rows || [];
+                state.extra = payload.extra_rows || [];
                 if (payload.group && payload.group.id) { state.groupId = String(payload.group.id); }
                 state.canManage = !!payload.can_manage;
                 state.canMove = !!payload.can_move_students;
@@ -433,6 +464,10 @@
         // «Tələbə əlavə et» — ortaq prefill-dən SONRA (bubble sırası) seçici qurulur.
         window.EMSDelegate.on("click", "[data-tof-add-students]", function (event, button) {
             buildAddPicker(button);
+        });
+        window.EMSDelegate.on("click", "[data-tof-other-mode]", function (event, button) {
+            var dialog = button.closest("#" + ADD_DIALOG_ID);
+            if (dialog) { setOtherMode(dialog, button.getAttribute("data-tof-other-mode") || "extra"); }
         });
         // Tələbə seçilməyibsə göndərmə — ortaq handler-dən ƏVVƏL (capture) kəsilir.
         document.addEventListener("submit", function (event) {

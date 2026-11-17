@@ -25,6 +25,7 @@ from django.views.decorators.http import require_GET
 from core.person_names import person_label
 
 from .group_actions import _error, _visible_group
+from .group_add_other import OTHER_ID_PREFIX
 from .group_roster_union import roster_group_ids
 from .groups_registry import (
     can_manage_groups,
@@ -63,8 +64,11 @@ def _row(record) -> dict:
     }
 
 
-def _candidate_row(record, *, group_specialty_id) -> dict:
-    """Namizəd seçicisi (`EMSSearchableSelect`) müqaviləsi: {id, text, hint}."""
+def _candidate_row(record, *, group_specialty_id, other=False) -> dict:
+    """Namizəd seçicisi (`EMSSearchableSelect`) müqaviləsi: {id, text, hint}.
+
+    ``other`` — tələbə BAŞQA aktiv qrupdadır (sahib 2026-11-18): id «x:» önəkli gəlir ki, dialoq «əlavə olaraq /
+    məcburi köçür» seçimini göstərsin (server önəki təmizləyir, uyğunluğu özü yenidən yoxlayır)."""
     student = record.student
     program = record.program
     code = getattr(program, "display_code", "") or ""
@@ -75,10 +79,15 @@ def _candidate_row(record, *, group_specialty_id) -> dict:
     if getattr(program, "name", ""):
         meta.append(program.name)
     if record.group_id and record.group is not None:
-        label = pgettext(_CTX, "ana qrup: %s") if record.group.is_active else pgettext(_CTX, "arxiv qrup: %s")
+        if other:
+            label = pgettext(_CTX, "başqa qrupdadır: %s")
+        elif record.group.is_active:
+            label = pgettext(_CTX, "ana qrup: %s")
+        else:
+            label = pgettext(_CTX, "arxiv qrup: %s")
         meta.append(label % record.group.name)
     return {
-        "id": str(record.pk),
+        "id": (OTHER_ID_PREFIX if other else "") + str(record.pk),
         "text": f"{name} · {' · '.join(meta)}",
         "hint": "",
         "same_specialty": bool(
@@ -117,6 +126,7 @@ def group_students(request, slug, unit_id):
         .order_by("student__last_name", "student__first_name", "student__username")
     )
     removed = _removed_rows(organization, unit, StudentAcademicRecord)
+    extra = _extra_rows(organization, unit, StudentAcademicRecord)
     # Audit 2026-09-28 S4: idarə düymələri yalnız qrup `unit.group_manage`
     # əhatəsindədirsə (server yazıda onsuz da bu əhatəni yoxlayır).
     manage_scope = group_manage_scope(request, organization)
@@ -132,6 +142,8 @@ def group_students(request, slug, unit_id):
             # edilmiş tələbələr qrupun FK-sını saxlayır (status dəyişir, qrup yox); çekmecədə ayrıca
             # görünür və «Bərpa et» (reinstatement əmri) ilə bu qrupa qaytarılır.
             "removed_rows": removed,
+            # Sahib 2026-11-18: öz qrupu başqa olan, amma bu qrupun cari jurnallarında oxuyan tələbələr (əcnəbilər).
+            "extra_rows": extra,
             "subgroups": (
                 [
                     {"id": str(child.pk), "name": child.name, "number": subgroup_number(unit, child)}
@@ -189,10 +201,36 @@ def _removed_rows(organization, unit, record_model) -> list:
     return rows
 
 
+def _extra_rows(organization, unit, record_model) -> list:
+    """«Əlavə üzvlər» — öz qrupunda qalaraq bu qrupun cari semestr jurnallarında olan tələbələr (oxu)."""
+    from .student_transfer import extra_group_members
+
+    period = organization.academic_periods.filter(is_current=True, is_active=True).first()
+    members = {
+        item["student_id"]: item["subjects"]
+        for item in extra_group_members(organization=organization, group=unit, period=period)
+    }
+    if not members:
+        return []
+    rows = []
+    for record in (
+        record_model.objects.filter(organization=organization, student_id__in=list(members), is_active=True)
+        .select_related("student", "program", "group")
+        .order_by("student__last_name", "student__first_name", "student__username")
+    ):
+        row = _row(record)
+        row["extra"] = True
+        row["extra_subjects"] = members.get(record.student_id, [])
+        rows.append(row)
+    return rows
+
+
 #: Namizəd axtarışının səhifə ölçüsü (searchable-select lazy scroll ilə uzanır).
 CANDIDATE_PAGE_DEFAULT = 20
 CANDIDATE_PAGE_MAX = 50
 MAX_QUERY_LENGTH = 80
+#: Bu uzunluqdan axtarışda başqa qrupdakı tələbələr də namizəddir (sahib 2026-11-18).
+OTHER_GROUP_MIN_QUERY = 2
 
 
 @login_required
@@ -223,14 +261,15 @@ def group_student_candidates(request, slug, unit_id):
     if parent is not None and _visible_group(organization, scope, str(parent.pk)) is None:
         eligible = Q(group__isnull=True) | Q(group__is_active=False)
     StudentAcademicRecord = django_apps.get_model("registrar", "StudentAcademicRecord")
-    records = (
-        StudentAcademicRecord.objects.filter(organization=organization, is_active=True, status="enrolled")
-        .filter(eligible)
-        # Audit 2026-09-28 S3: başqa fakültənin qrupsuz tələbələri görünmür.
-        .filter(student_record_scope_q(scope))
-        .select_related("student__profile", "program", "group")
-    )
     query = (request.GET.get("q") or "").strip()[:MAX_QUERY_LENGTH]
+    records = StudentAcademicRecord.objects.filter(organization=organization, is_active=True, status="enrolled")
+    # Sahib 2026-11-18: axtarış yazılanda BÜTÜN tələbələr (başqa qrupdakı da — «əlavə olaraq» və ya «məcburi
+    # köçür» seçimi ilə); boş axtarışda əvvəlki kimi yalnız qrupsuzlar (siyahı nəhəng olmasın).
+    records = records.exclude(group=unit) if len(query) >= OTHER_GROUP_MIN_QUERY else records.filter(eligible)
+    records = (
+        # Audit 2026-09-28 S3: başqa fakültənin tələbələri görünmür.
+        records.filter(student_record_scope_q(scope)).select_related("student__profile", "program", "group")
+    )
     # Dözümlü axtarış (sahib 2026-09-26): ad/ixtisas adı az/ing hərfinə, şifr ayırıcıya dözümlü.
     search_q = tolerant_q(
         query,
@@ -246,12 +285,13 @@ def group_student_candidates(request, slug, unit_id):
     if search_q is not None:
         records = records.filter(search_q)
     records = records.annotate(
+        _free=Case(When(eligible, then=Value(0)), default=Value(1), output_field=IntegerField()),
         _same=Case(
             When(program__specialty_unit_id=unit.parent_id, then=Value(0)),
             default=Value(1),
             output_field=IntegerField(),
-        )
-    ).order_by("_same", "student__last_name", "student__first_name", "student__username")
+        ),
+    ).order_by("_free", "_same", "student__last_name", "student__first_name", "student__username")
 
     try:
         offset = max(0, int(request.GET.get("offset") or 0))
@@ -265,7 +305,10 @@ def group_student_candidates(request, slug, unit_id):
     return JsonResponse(
         {
             "has_access": True,
-            "results": [_candidate_row(record, group_specialty_id=unit.parent_id) for record in window[:limit]],
+            "results": [
+                _candidate_row(record, group_specialty_id=unit.parent_id, other=record._free == 1)
+                for record in window[:limit]
+            ],
             "has_more": len(window) > limit,
         }
     )

@@ -93,6 +93,24 @@
     color: var(--ems-primary-700, #1d4ed8); font-weight: 700;
 }
 
+/* Başqa qrupdakı tələbə: «Əlavə olaraq / Məcburi köçür» (sahib 2026-11-18). */
+.tof-add-other {
+    margin-top: 10px; padding: 10px 12px; border-radius: 10px;
+    background: var(--ems-warning-50, #fffbeb); border: 1px solid var(--ems-warning-200, #fde68a);
+}
+.tof-add-other__title { margin: 0 0 8px; font-size: 13px; font-weight: 600; }
+.tof-add-other__options { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
+.tof-add-other__opt {
+    display: flex; flex-direction: column; gap: 2px; text-align: left; padding: 8px 10px; cursor: pointer;
+    border-radius: 8px; border: 1px solid var(--ems-neutral-300, #cbd5e1); background: var(--ems-surface, #fff);
+    font: inherit; color: inherit;
+}
+.tof-add-other__opt span { font-size: 12px; color: var(--ems-text-muted, #64748b); }
+.tof-add-other__opt.is-active {
+    border-color: var(--ems-primary-600, #2563eb); box-shadow: 0 0 0 1px var(--ems-primary-600, #2563eb);
+}
+.tof-students__row--extra { background: var(--ems-primary-50, #eef4ff); }
+
 /* Qrup formu: Bootstrap tərzli select-lər dialoqun sahə şəbəkəsində tam en tutsun. */
 .tof-form .bootstrap-single-select { width: 100%; }
 

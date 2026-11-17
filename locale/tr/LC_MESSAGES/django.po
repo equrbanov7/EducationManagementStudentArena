@@ -119285,3 +119285,131 @@ msgid ""
 msgstr ""
 "İtiraz puanını yalnızca RİM yöneticisi ve Sınav Merkezi yöneticisi / "
 "çalışanı yazar."
+
+msgctxt "accounts.groups"
+msgid "%%d əlavə üzv (öz qrupu başqadır)"
+msgstr "%%d ek üye (kendi grubu farklı)"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "%d tələbə bu qrupa köçürüldü"
+msgstr "%d öğrenci bu gruba aktarıldı"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "%d tələbə qrupa əlavə olundu"
+msgstr "%d öğrenci gruba eklendi"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "%d tələbə öz qrupunda qalaraq bu qrupun jurnallarına əlavə olundu"
+msgstr "%d öğrenci kendi grubunda kalarak bu grubun dersliklerine eklendi"
+
+msgctxt "accounts.groups"
+msgid ""
+"Başqa qrupdakı tələbə üçün seçin: əlavə olaraq (öz qrupunda qalır) və ya "
+"məcburi köçür."
+msgstr ""
+"Başka gruptaki öğrenci için seçin: ek olarak (kendi grubunda kalır) veya "
+"zorunlu aktar."
+
+msgctxt "accounts.groups"
+msgid "Heç bir tələbə əlavə olunmadı."
+msgstr "Hiçbir öğrenci eklenmedi."
+
+msgctxt "accounts.groups"
+msgid "Məcburi köçür"
+msgstr "Zorunlu aktar"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "Qrup reyestrindən məcburi köçürmə: %(old)s → %(new)s"
+msgstr "Grup kaydından zorunlu aktarma: %(old)s → %(new)s"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "Qrup reyestrindən əlavə üzv (öz qrupu: %s)"
+msgstr "Grup kaydından ek üye (kendi grubu: %s)"
+
+msgctxt "accounts.groups"
+msgid ""
+"Qrupsuz tələbələr birbaşa əlavə olunur. Başqa qrupdakı tələbəni ya əlavə "
+"olaraq (öz qrupunda qalır), ya da məcburi köçürə bilərsiniz — tarixçə "
+"silinmir."
+msgstr ""
+"Grubu olmayan öğrenciler doğrudan eklenir. Başka gruptaki öğrenci ek olarak "
+"(kendi grubunda kalır) eklenebilir veya zorunlu aktarılabilir — geçmiş "
+"silinmez."
+
+msgctxt "accounts.groups"
+msgid ""
+"Seçilmiş tələbələr arasında qrupa əlavə edilə bilən (qeydiyyatlı) tələbə "
+"yoxdur."
+msgstr ""
+"Seçilen öğrenciler arasında gruba eklenebilecek (kayıtlı) öğrenci yok."
+
+msgctxt "accounts.groups"
+msgid "Seçilənlər arasında başqa qrupda olan tələbə var. Nə edilsin?"
+msgstr "Seçilenler arasında başka grupta olan öğrenci var. Ne yapılsın?"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "başqa qrupdadır: %s"
+msgstr "başka grupta: %s"
+
+msgctxt "accounts.groups"
+msgid ""
+"Öz qrupunda qalır, bu qrupun cari jurnallarına da əlavə olunur (məs. əcnəbi "
+"tələbələr)."
+msgstr ""
+"Kendi grubunda kalır, bu grubun mevcut dersliklerine de eklenir (ör. yabancı"
+" öğrenciler)."
+
+msgctxt "accounts.groups"
+msgid "Öz qrupundan çıxıb bu qrupa keçir (rəsmi köçürmə, tarixçə qalır)."
+msgstr "Kendi grubundan çıkıp bu gruba geçer (resmi aktarma, geçmiş kalır)."
+
+msgctxt "accounts.groups"
+msgid "öz qrupu"
+msgstr "kendi grubu"
+
+msgctxt "accounts.groups"
+msgid "Əlavə olaraq"
+msgstr "Ek olarak"
+
+msgctxt "accounts.groups"
+msgid "Əlavə üzv"
+msgstr "Ek üye"
+
+msgctxt "accounts.groups"
+msgid ""
+"Əvvəl qrupsuz tələbələr göstərilir. Ad yazıb axtaranda başqa qrupdakı "
+"tələbələr də çıxır — yanında hansı qrupda olduğu yazılır."
+msgstr ""
+"Önce grubu olmayan öğrenciler gösterilir. Adla arayınca başka gruplardaki "
+"öğrenciler de çıkar — yanında hangi grupta olduğu yazılır."
+
+msgctxt "registrar.group_extra_member"
+msgid ""
+"Bu qrupun cari semestrdə jurnalı yoxdur. Əvvəl dərs yükündə qrupa fənn "
+"yazılsın (jurnal açılsın), sonra tələbəni əlavə edin."
+msgstr ""
+"Bu grubun mevcut dönemde derslik kaydı yok. Önce ders yükünde gruba ders "
+"yazılsın (derslik açılsın), sonra öğrenciyi ekleyin."
+
+#, python-format
+msgctxt "registrar.group_extra_member"
+msgid "Qrup reyestrindən əlavə üzv (öz qrupu: %s)"
+msgstr "Grup kaydından ek üye (kendi grubu: %s)"
+
+msgctxt "registrar.group_extra_member"
+msgid "Tələbə onsuz da bu qrupdadır."
+msgstr "Öğrenci zaten bu grupta."
+
+msgctxt "registrar.group_extra_member"
+msgid "Tələbənin aktiv akademik qeydi (qrupu) yoxdur."
+msgstr "Öğrencinin aktif akademik kaydı (grubu) yok."
+
+msgctxt "registrar.group_extra_member"
+msgid "onsuz da bu jurnaldadır"
+msgstr "zaten bu derslikte"

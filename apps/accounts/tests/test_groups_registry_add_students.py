@@ -1,8 +1,8 @@
 """Ekran 06 «Qruplar» — sahib istəkləri (2026-09-07).
 
 * qrup adı / kodu UNİKALDIR (eyni adda/kodda ikinci qrup yaradılmır);
-* «Tələbə əlavə et»: namizədlər YALNIZ qrupsuz qeydiyyatlı tələbələrdir, əlavə
-  RƏSMİ köçürmə xidməti ilə (səbəb ≥20) aparılır;
+* «Tələbə əlavə et»: boş axtarışda namizədlər qrupsuz qeydiyyatlı tələbələrdir, əlavə
+  RƏSMİ köçürmə xidməti ilə aparılır (başqa qrupdakılar — ``test_groups_add_other_2026_11_18``);
 * təhsil forması (əyani/qiyabi) qrupun metadatasında saxlanılır və filtrlənir;
 * reyestr fraqmenti avto-filtr, Bootstrap select və əlavə dialoqu render edir.
 """
@@ -191,16 +191,26 @@ class AddStudentsActionTest(_AddStudentsBase):
         self.assertIn("program_name", drawer["rows"][0])
         self.assertIn("program_code", drawer["rows"][0])
 
-    def test_student_already_in_group_is_not_added(self):
+    def test_student_of_other_group_needs_explicit_mode(self):
+        """Sahib 2026-11-18: başqa qrupdakı tələbə yalnız açıq seçimlə (əlavə olaraq / məcburi köçür)."""
         record = self.students[0]
         response = self._action(
             "teaching_office_head",
             {"action": "add_students", "id": str(self.group_b.id), "record_ids": str(record.id), "reason": REASON},
         )
         self.assertEqual(response.status_code, 400, response.content)
-        self.assertEqual(response.json()["error"], "no_candidates")
+        self.assertEqual(response.json()["error"], "other_mode_required")
         record.refresh_from_db()
         self.assertEqual(record.group_id, self.group.id)
+
+    def test_student_already_in_this_group_is_not_added(self):
+        record = self.students[0]
+        response = self._action(
+            "teaching_office_head",
+            {"action": "add_students", "id": str(self.group.id), "record_ids": str(record.id), "reason": REASON},
+        )
+        self.assertEqual(response.status_code, 400, response.content)
+        self.assertEqual(response.json()["error"], "no_candidates")
 
     def test_dean_without_manage_is_forbidden(self):
         response = self._action(
