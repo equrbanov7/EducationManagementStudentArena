@@ -118964,6 +118964,10 @@ msgstr ""
 msgid "Bu imtahanın nəticəsi ləğv olunub (jurnalda 0 bal)."
 msgstr "Bu sınavın sonucu iptal edildi (defterde 0 puan)."
 
+msgctxt "applications.content"
+msgid "Dekanlığı (məktəbi) seçin"
+msgstr "Dekanlığı (okulu) seçin"
+
 msgctxt "exams.final_center.annul"
 msgid "Qadağan olunmuş vasitədən istifadə (telefon və s.)"
 msgstr "Yasaklı araç kullanımı (telefon vb.)"

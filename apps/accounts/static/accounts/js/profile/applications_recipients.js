@@ -1,44 +1,58 @@
 (function () {
     "use strict";
     var NS = window.EMSApplications = window.EMSApplications || {};
+    // Uzun siyahı ola bilər — layihənin axtarışlı stilli select komponenti (native select deyil).
+    function scopePicker(box, scopes, labelKey) {
+        var scopeField = document.createElement("div");
+        scopeField.className = "apx-field";
+        scopeField.setAttribute("data-apx-scope-field", "");
+        var scopeLabel = document.createElement("label");
+        scopeLabel.className = "apx-field__label";
+        scopeLabel.htmlFor = "apx-scope-select";
+        scopeLabel.textContent = NS.t(labelKey);
+        var scopeWrap = document.createElement("div");
+        scopeWrap.className = "bootstrap-single-select bootstrap-single-select--ems";
+        var scopeSelect = document.createElement("select");
+        scopeSelect.id = "apx-scope-select";
+        scopeSelect.className = "apx-select bootstrap-single-select__native";
+        scopeSelect.setAttribute("data-apx-scope", "");
+        scopeSelect.setAttribute("data-bootstrap-select", "");
+        scopeSelect.required = true;
+        scopeSelect.add(new Option(NS.t(labelKey), ""));
+        scopes.forEach(function (scope) {
+            var option = new Option(scope.name, scope.id);
+            if (scope.school) { option.setAttribute("data-subtext", scope.school); }
+            option.setAttribute("data-search", scope.name + " " + (scope.school || ""));
+            scopeSelect.add(option);
+        });
+        // Yeganə seçim (adi emalçının öz məktəbi) əvvəlcədən seçilir.
+        if (scopes.length === 1) { scopeSelect.value = scopes[0].id; }
+        scopeWrap.appendChild(scopeSelect);
+        scopeField.appendChild(scopeLabel);
+        scopeField.appendChild(scopeWrap);
+        var scopeAnchor = box.querySelector("[data-apx-unit-list]") || box.querySelector("[data-apx-route]");
+        scopeAnchor.parentNode.insertBefore(scopeField, scopeAnchor.nextSibling);
+    }
     NS.recipientPicker = function (box, item) {
         var old = box.querySelector("[data-apx-recipient-field]");
         if (old) { old.remove(); }
         var destination = item && (item.destination || item);
         var previousScope = box.querySelector("[data-apx-scope-field]");
         if (previousScope) { previousScope.remove(); }
-        if (destination && destination.resolve_by === "chair" && box.__app) {
-            // MR-000302 (sahib 2026-11-12): RİM bütün kafedraları görür (məktəbinkilər əvvəldə) —
-            // siyahı uzundur, ona görə layihənin axtarışlı stilli select komponenti.
-            var scopes = box.__app.forward_scopes || [];
-            var anySchool = scopes.some(function (scope) { return scope.own_school === false; });
-            var scopeField = document.createElement("div");
-            scopeField.className = "apx-field";
-            scopeField.setAttribute("data-apx-scope-field", "");
-            var scopeLabel = document.createElement("label");
-            scopeLabel.className = "apx-field__label";
-            scopeLabel.htmlFor = "apx-scope-select";
-            scopeLabel.textContent = NS.t(anySchool ? "selectAnyChair" : "selectChair");
-            var scopeWrap = document.createElement("div");
-            scopeWrap.className = "bootstrap-single-select bootstrap-single-select--ems";
-            var scopeSelect = document.createElement("select");
-            scopeSelect.id = "apx-scope-select";
-            scopeSelect.className = "apx-select bootstrap-single-select__native";
-            scopeSelect.setAttribute("data-apx-scope", "");
-            scopeSelect.setAttribute("data-bootstrap-select", "");
-            scopeSelect.required = true;
-            scopeSelect.add(new Option(NS.t(anySchool ? "selectAnyChair" : "selectChair"), ""));
-            scopes.forEach(function (scope) {
-                var option = new Option(scope.name, scope.id);
-                if (scope.school) { option.setAttribute("data-subtext", scope.school); }
-                option.setAttribute("data-search", scope.name + " " + (scope.school || ""));
-                scopeSelect.add(option);
-            });
-            scopeWrap.appendChild(scopeSelect);
-            scopeField.appendChild(scopeLabel);
-            scopeField.appendChild(scopeWrap);
-            var scopeAnchor = box.querySelector("[data-apx-unit-list]");
-            scopeAnchor.parentNode.insertBefore(scopeField, scopeAnchor.nextSibling);
+        if (destination && box.__app) {
+            // MR-000302 (sahib 2026-11-12): RİM bütün kafedraları görür (məktəbinkilər əvvəldə).
+            // Sahib 2026-11-17: dekanlığa yönləndirəndə də eyni qaydada MƏKTƏB (dekanlıq) seçilir.
+            if (destination.resolve_by === "chair") {
+                var chairs = box.__app.forward_scopes || [];
+                var anySchool = chairs.some(function (scope) { return scope.own_school === false; });
+                scopePicker(box, chairs, anySchool ? "selectAnyChair" : "selectChair");
+            } else if (destination.code === "dekan" && (box.__app.forward_schools || []).length) {
+                scopePicker(box, box.__app.forward_schools, "selectSchool");
+            }
+        }
+        // Yaratma formasında: aidiyyəti tapılmayan göndərən dekanlığı (məktəbi) özü seçir.
+        if (!box.__app && item && item.schools && item.schools.length) {
+            scopePicker(box, item.schools, "selectSchool");
         }
         if (!destination || !destination.requires_recipient) { return; }
         // 2026-11-10 (sahib): prorektor seçimi növün ALTINDA açılan dropdown kimi — layihənin stilli

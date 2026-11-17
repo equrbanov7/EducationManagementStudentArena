@@ -30852,6 +30852,806 @@
     "send": {}
    },
    "teacher": 8302
+  },
+  "5586": {
+   "teacher": 8135,
+   "legacy_teacher": 654,
+   "legacy_lesson": 2303,
+   "hours": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "content_sha256": "78475819c1fdd2305cedecf0ff4c287fc6a58fe7cd2d555bcc1e7cd833cf729b",
+   "sections": {
+    "info": {
+     "teacher": "",
+     "office_hours": "",
+     "prerequisites": "",
+     "language": "az",
+     "lesson_hours": 45,
+     "welcome": "",
+     "research_interests": [],
+     "certificates": []
+    },
+    "desc": {
+     "description": "“Psixologiya elminin müasir problemləri” kursunun tədris-in¬in məqsədi hər bir magistrin psixo¬logiya¬nın müasir prob¬lem-ləri ilə yaxından tanış olmasına zəmin yaradılmasına, o cümlədən hər bir ix¬ti¬sas sahə¬sin¬in mütəx¬əssisini zəruri psix-oloji bilikləri mən¬imsə¬məklə bağlı istiqa¬mət¬lən¬¬dirməyi nəzə-rdə tutur. Psixoloji biliklərdən istifadə hə¬r ¬¬bir magistrdə insan psixikanın mürəkkəb strukturunda kök salmış əsas ideyaları təhlil etməyə, yeri gəldikcə onları praktikaya tətbiq etməyə kö¬¬-mək edir və psixologiya elminin müasir problemləri ilə yaxı¬n-dan tanış edə¬rək, öz fəaliy¬yət¬lərində ondan bəhrələnmələrinə imkan yaratmış olur. Bununla yanaşı bu kursun tədrisində aşağ-ıdakı məqsədlər önə çıxarılır:\n- magistrlərdə metodoloji aspektdə müasir peşəkar biliklərə yiyələnmə tələbatlarının for¬mal¬aşdı¬rılması;\n- fəlsəfi və psixoloji biliklərin prinsipal birliyini və ya inte¬q¬ra-siyasını peşəkar psixo¬lo¬qun dünyagörüşünün ayrılmaz tərkib hissəsi kimi təqdiminin həyata keçirilməsi;\n- magistrlərdə dünya psixologiyasının müxtəlif konse¬psi¬ya¬lar-ına bələdləşmə bacarı¬ğın¬ı formalaşdırmaq məqsədilə onla¬r¬da peşə¬kar metodoloji mövqeinin möhkəmləndirilməsi;",
+     "goal": ""
+    },
+    "out": {
+     "outcomes": []
+    },
+    "week": {
+     "rows": [
+      {
+       "topic": "Müasir psixologiyanın metodoloji problemləri",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Elmi idrak haqqında müasir təsəvvürlər",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Psixoloji sistemlər nəzəriyyəsi və sinergetika",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Psixologiyanın inkişafının postdeterminist perspektivləri",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Müasir psixologiyada qeyri klassik vektor",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Psixoloji elmdə konstruktivist paradiqma",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Psixologiyada kompleks problemlər",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Müasir psixologiyada elmi tədqiqatlar",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Müasir psixologiyanın metodoloji problemləri",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Elmi idrak haqqında müasir təsəvvürlər",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Psixoloji sistemlər nəzəriyyəsi və sinergetika",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Psixologiyanın inkişafının postdeterminist perspektivləri",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Müasir psixologiyada qeyri klassik vektor",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Psixoloji elmdə konstruktivist paradiqma",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Psixologiyada kompleks problemlər",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      }
+     ]
+    },
+    "method": {
+     "methods": [],
+     "note": ""
+    },
+    "assess": {
+     "midterm": 0,
+     "project": 0,
+     "note": "",
+     "exam_questions": []
+    },
+    "self": {
+     "option": "",
+     "topics": [],
+     "archived": []
+    },
+    "lit": {
+     "primary": [
+      "1.Ə.S.Bayramov, Ə.Ə,Əlizadə. Psixologiya. Bakı, 2002.2.Əlizadə Ə.Ə. Azərbaycan güzəran psixologiyası məsələləri. Bakı, 1994.3.Əliyev R.İ. Psixologiya tarixi. Bakı, 2006.4.Əmrahlı. L. Eksperimental psixologiya. Bakı – 2008.5.АлиевБ.Г. Методология социально-психологического исследования. Баку, 1999.6.Андреева Г. М., Богомолова Н.Н., Петровская Л.А. Зарубежная социальная психология 20 столетия. М., 2001. 7.Аршинов В.И., Данилов Ю.А., Тарасенко В.В. Методология сетевого мышления: феномен самоорганизации // Онтология и эпистемология синергетики. М: ИФРАН, 1997. С. 101-118."
+     ],
+     "additional": []
+    },
+    "prev": {},
+    "send": {}
+   }
+  },
+  "8370": {
+   "teacher": 9510,
+   "legacy_teacher": 1017,
+   "legacy_lesson": 2187,
+   "hours": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "content_sha256": "c0671c583e79c5d8b2658814ef321e8ad3fa0a42b88596dade09f6b3c94c503b",
+   "sections": {
+    "info": {
+     "teacher": "",
+     "office_hours": "",
+     "prerequisites": "",
+     "language": "az",
+     "lesson_hours": 45,
+     "welcome": "",
+     "research_interests": [],
+     "certificates": []
+    },
+    "desc": {
+     "description": "Bu kurs sosial-psixoloji treninqin nəzəri əsaslarından (qrup dinamikası nəzəriyyələri, öyrənmə mexanizmləri, treninq növləri) başlayaraq, treninqin dizaynı, aparılması və qiymətləndirilməsi üzrə praktik bacarıqların formalaşdırılmasına qədər ardıcıl inkişaf edən struktura malikdir. Kurs iştirakçılara həm konkret treninq metodikalarını (rol oyunları, keys-metod, işgüzar oyunlar, fasilitasiya texnikaları) mənimsətməyi, həm də onlara real treninq proqramı hazırlayıb aparmaq təcrübəsi qazandırmağı hədəfləyir.İştirakçılarda sosial-psixoloji treninqin nəzəri əsaslarını və metodoloji alətlərini mənimsətmək, onlara müxtəlif kontingent (uşaq, yeniyetmə, yetkin, təşkilati) üçün treninq proqramı hazırlamaq, aparmaq və effektivliyini qiymətləndirmək bacarığı qazandırmaq.",
+     "goal": ""
+    },
+    "out": {
+     "outcomes": [
+      "Kursu bitirdikdən sonra iştirakçı:\n•sosial-psixoloji treninqin nəzəri əsaslarını (qrup dinamikası, təcrübi öyrənmə nəzəriyyəsi, T-qrup ənənəsi) izah edə bilir;\n•treninqin növlərini (bacarıq, şəxsi inkişaf, komanda qurma, korreksiya-inkişaf) fərqləndirir və məqsədə uyğun növü seçə bilir;\n•treninq proqramının strukturunu (giriş, əsas hissə, yekun) və hər mərhələnin metodoloji tələblərini planlaşdıra bilir;\n•əsas treninq metodikalarını (isinmə məşqləri, rol oyunları, keys-metod, qrup müzakirəsi, fasilitasiya) praktik tətbiq edə bilir;\n•qrup dinamikası ilə bağlı çətin vəziyyətləri (müqavimət, münaqişə, passivlik) diaqnostika edib idarə edə bilir;\n•treninqin effektivliyini qiymətləndirmək üçün müvafiq metodları tətbiq edə bilir;\n•treninq aparıcısının peşə etikası prinsiplərinə əməl edir."
+     ]
+    },
+    "week": {
+     "rows": [
+      {
+       "topic": "Sosial psixoloji treninq haqqında ümumi məlumat",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Treninqin nəzəri əsasları: qrup dinamikası nəzəriyyələri",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Treninqin növləri və təsnifatı",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Treninq qrupunun formalaşdırılması",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Treninq proqramının strukturu və dizaynı",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "İsinmə (warm-up) məşqləri və qrupun \"canlandırılması\"",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "İsinmə (warm-up) məşqləri və qrupun \"canlandırılması\"",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Keys-metod və işgüzar oyunlar",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Qrup müzakirəsi və fasilitasiya texnikaları",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Əks-əlaqə (feedback) vermə və alma texnikası",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Kommunikasiya bacarıqları treninqi",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Emosional intellekt və stresslə idarəetmə treninqi",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Komanda qurma (team-building) treninqi",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Münaqişə həlli və mediasiya treninqi",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Uşaq və yeniyetmələr üçün korreksiya-inkişaf treninqləri",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      }
+     ]
+    },
+    "method": {
+     "methods": [
+      "Mühazirə, seminar, kollokvium"
+     ],
+     "note": ""
+    },
+    "assess": {
+     "midterm": 0,
+     "project": 0,
+     "note": "İmtahan, sərbəst mövzularin araşdırılması və təqdimatı",
+     "exam_questions": []
+    },
+    "self": {
+     "option": "",
+     "topics": [
+      {
+       "title": "1. Treninq növünün əsaslandırılmış seçimi. 2. Qrup profilinin diaqnostikası və dizaynı. 3. Tam treninq sessiya planının tərtibi. 4. İsinmə məşqləri bankının yaradılması. 5. Rol oyunu ssenarisinin hazırlanması və aparılması. 6. Keys-metod: real problem üzrə keysin işlənməsi. 7. Əks-əlaqə (feedback) texnikasının müqayisəli təhlili. 8. Çətin iştirakçı ilə iş strategiyasının işlənməsi. 9. Qiymətləndirilmə alətinin hazırlanması. 10. Mikro - treninqin aparılması və özünütəhlili. lanının tərtibi. 4. İsinmə məşqlərinin banklarının yaranılması. 5. Rol oyunu ssenarisinin hazırlanması və aparılması. 6. Keys-metod: real problem üzrə keysin işlənməsi. 7. Əks-əlaqə (feedback) texnikasının müqayisəli təhlili. 8. Çətin iştirakçı ilə iş strategiyasının işlənməsi. 9. Qimətləndirilmə alətinin"
+      }
+     ],
+     "archived": []
+    },
+    "lit": {
+     "primary": [
+      "•Levin, K. — qrup dinamikası nəzəriyyəsi üzrə əsas işlər •Rogers, C. — təcrübi öyrənmə və klient-mərkəzli yanaşma •Kolb, D.A. Experiential Learning: Experience as the Source of Learning and Development •Moreno, J.L. — psixodrama və rol oyunu metodikası •Bandura, A. — sosial öyrənmə nəzəriyyəsi •Tukman, B.W. — komanda inkişafı mərhələləri modeli •Kirkpatrick, D.L. — təlim effektivliyinin qiymətləndirilməsi modeli •Vaçkov, İ.V. Психологический тренинг: основы теории и практики — treninq metodikası üzrə praktik dərslik •Belbin, R.M. — komanda rolları modeli"
+     ],
+     "additional": []
+    },
+    "prev": {},
+    "send": {}
+   }
+  },
+  "6456": {
+   "teacher": 7736,
+   "legacy_teacher": 60,
+   "legacy_lesson": 2569,
+   "hours": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "content_sha256": "e8356c4d697f830cb173f4bbb2c75392e54b88035fc346a872e28916b22a9364",
+   "sections": {
+    "info": {
+     "teacher": "",
+     "office_hours": "",
+     "prerequisites": "",
+     "language": "az",
+     "lesson_hours": 45,
+     "welcome": "",
+     "research_interests": [],
+     "certificates": []
+    },
+    "desc": {
+     "description": "Bu kursun sonunda tələbələr: • Əsas Avropa İttifaqının əsas xarici siyasət qərarlarını və strategiyalarını təhlil edəcəklər • Beynəlxalq institutların və Avropa İttifaqı (Aİ) kimi regional təşkilatların diplomatiyaya təsirini araşdıracaqlar. • Aİ institutları və Üzv Dövlətlərin Aİ-nin xarici fəaliyyətinin siyasət prosesində hansı rol oynadığına dair bilikləri nümayiş etdirmək; • Ticarət mübahisələri, regional təhlükəsizlik və iqlim dəyişikliyi kimi müasir diplomatik çağırışları müzakirə edin. .",
+     "goal": ""
+    },
+    "out": {
+     "outcomes": [
+      "Əldə olunacaq təcrübə:\n1. Biliklərin mənimsənilməsi və təhlili bacarıqları: o Şagirdlər beynəlxalq münasibətləri aydın şəkildə başa düşmələrini nümayiş etdirə biləcəklər. o Avropa diplomatiyasının konkret aspektlərini təhlil etmək və tənqidi qiymətləndirmək, onların məqsədlərini, strategiyalarını, həyata keçirilməsini və nəticələrini qiymətləndirmək. o Tələbələr Aİ siyasətlərinin daxildə necə qurulduğuna dair əsaslı empirik bilikləri inkişaf etdirəcək və ticarət, inkişaf, genişlənmə, xarici siyasət və təhlükəsizlik siyasəti daxil olmaqla bir sıra xarici siyasətlər üzrə beynəlxalq aktor kimi Aİ-nin müxtəlif səlahiyyətlərini müqayisə edəcəklər.\nDərsin işlənmə forması (Tədrisin forması və metodları)"
+     ]
+    },
+    "week": {
+     "rows": [
+      {
+       "topic": "Aİ xarici siyasətinin konseptuallaşdırılması",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Aİ-nin strateji tərəfdaşlığı",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Aİ-nin inkişaf siyasəti .Avropa İttifaqının yardım proqramlarında iştirak",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Ticarət Diplomatiyası: Avropa Birliyi Qlobal İqtisadiyyatda",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Aİ: İnsan Hüquqları və Qanunun Aliliyinin",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Aİ Qonşuluq Siyasəti",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Şərq Tərəfdaşlığı Proqramı",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Avropa Birliyin təhlükəsizlik siyasəti",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "AB-nin çoxqütblü dünyada rolu",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "AB və Yaxın Şərq",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Şimali Afrikada AB siyasəti",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "AB və Məğrib ölkələri",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Aİ və Mərkəzi Asiya",
+       "lecture": 2,
+       "seminar": 2,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Aİ-nin Cənub-Şərqi Asiya ilə bağlı siyasəti",
+       "lecture": 2,
+       "seminar": 0,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Aİ-Körfəz ikitərəfli əlaqələri",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      }
+     ]
+    },
+    "method": {
+     "methods": [],
+     "note": ""
+    },
+    "assess": {
+     "midterm": 0,
+     "project": 0,
+     "note": "",
+     "exam_questions": []
+    },
+    "self": {
+     "option": "",
+     "topics": [],
+     "archived": []
+    },
+    "lit": {
+     "primary": [
+      "1. 1. Keukeleire, S., & Delreux, T. (2014). The foreign policy of the European Union. 2. Gstöhl, S., & De Bièvre, D. (2018). The trade policy of the European Union. 3. Fredrik Söderbaum and Alberta Sbragia, “EU Studies and the ‘New Regionalism’: What can be Gained from Dialogue?,” European Integration 32, no. 6 (2010): 563-582. 4. Brigid Gavin, “Regional Integration in Europe,” in Global Politics of Regionalism: Theory and Practice, eds. Mary Farrell, Björn Hettne, and Luk Van Langenhove (London: Pluto Press, 2005), 222-236. 5. Milica Uvalic, “Regional Cooperation and the Enlargement of the European Union: Lessons Learned?,” International Political Science Review 23, no. 3 (2002): 319-333 6. Usherwood, S., & Pinder, J. (2018). The European Union: A very short introduction. In Oxford University Press eBooks. 7. Cini, M. M. C., & Borragan, N. P. (2017). European Union Politics. In Oxford University Press eBooks."
+     ],
+     "additional": []
+    },
+    "prev": {},
+    "send": {}
+   }
+  },
+  "8628": {
+   "teacher": 9553,
+   "legacy_teacher": 1019,
+   "legacy_lesson": 2672,
+   "hours": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "excluded": [
+    "welcome",
+    "research_interests",
+    "certificates",
+    "contacts",
+    "exam_questions"
+   ],
+   "content_sha256": "9a5780f2cbc958c1e391aee72b6fa77c2c8834e6183825cfac55576c2e09e764",
+   "sections": {
+    "info": {
+     "teacher": "",
+     "office_hours": "",
+     "prerequisites": "",
+     "language": "az",
+     "lesson_hours": 45,
+     "welcome": "",
+     "research_interests": [],
+     "certificates": []
+    },
+    "desc": {
+     "description": "",
+     "goal": ""
+    },
+    "out": {
+     "outcomes": []
+    },
+    "week": {
+     "rows": [
+      {
+       "topic": "TƏDQİQAT ANLAYIŞI VƏ ONUN ƏHƏMİYYƏTİ",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "ELMİ TƏDQİQATLARIN İNKİŞAFININ NƏZƏRİ-METODOLOJİ ƏSASLARI",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "TƏDQİQATIN MƏRHƏLƏLƏRİ",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "TƏDQİQAT STRATEGİYASI",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "TƏDQİQAT STRATEGİYASI",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Ədəbiyyatın nəzərdən keçirilməsi",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Tədqiqatın aparılmasının seçmə üsulu",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "KƏMİYYƏT METODOLOGİYASI",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "Strukturlaşdırılmış müşahidə",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "KEYFİYYƏTMETODOLOGİYASI",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "FOKUS QRUP",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "TƏDQİQATIN ETİK MƏSƏLƏLƏRİ",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "TƏDQİQATIN NƏTİCƏLƏRİ HAQQINDA HESABAT STRUKTURA DAİR ÜMUMİ MƏSƏLƏLƏR",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "MALİYYƏLƏŞMƏ VƏ XƏRCLƏR",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      },
+      {
+       "topic": "HESABATIN HAZIRLANMASI VƏ QİYMƏTLƏNDİRİLMƏSİ",
+       "lecture": 2,
+       "seminar": 1,
+       "lab": 0,
+       "outcome": "",
+       "practical": 0,
+       "note": ""
+      }
+     ]
+    },
+    "method": {
+     "methods": [],
+     "note": ""
+    },
+    "assess": {
+     "midterm": 0,
+     "project": 0,
+     "note": "",
+     "exam_questions": []
+    },
+    "self": {
+     "option": "",
+     "topics": [],
+     "archived": []
+    },
+    "lit": {
+     "primary": [],
+     "additional": []
+    },
+    "prev": {},
+    "send": {}
+   }
   }
  },
  "targets": [
@@ -31878,14 +32678,13 @@
    "subject_ids": [
     "0b5856c5-206f-4713-aa21-00bd1134d21c"
    ],
-   "lesson_hours": 75,
+   "lesson_hours": 45,
    "plan": {
     "lecture": 30,
-    "seminar": 45
+    "seminar": 15
    },
    "action": "restore",
-   "source": "8682",
-   "week_gap_ok": true
+   "source": "8682"
   },
   {
    "key": "r45985e6b",
@@ -32284,14 +33083,13 @@
    "subject_ids": [
     "a9f60efe-adf5-4835-aea0-e90b6a22d25e"
    ],
-   "lesson_hours": 45,
+   "lesson_hours": 15,
    "plan": {
-    "lecture": 30,
-    "seminar": 15
+    "lecture": 10,
+    "seminar": 5
    },
    "action": "restore",
-   "source": "8926",
-   "week_gap_ok": true
+   "source": "8926"
   },
   {
    "key": "n1047fd2c",
@@ -33493,6 +34291,102 @@
    },
    "action": "restore",
    "source": "8723"
+  },
+  {
+   "action": "restore",
+   "group_id": "7ed5718e-471b-45d3-9a21-31c2ada78a58",
+   "key": "e19459436",
+   "lesson_hours": 45,
+   "offering_id": "19459436-81a3-417b-a3f7-04c32fdec2d7",
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "source": "5586",
+   "subject_ids": [
+    "a1782ff2-5c52-4d64-839e-722863e14b01"
+   ],
+   "teacher": 8135
+  },
+  {
+   "action": "restore",
+   "group_id": "de6fb053-b9e1-4488-80d2-0c4f76f5c933",
+   "key": "e21d53e7e",
+   "lesson_hours": 45,
+   "offering_id": "21d53e7e-c64d-40df-b8b5-99748db77a09",
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "source": "5586",
+   "subject_ids": [
+    "a1782ff2-5c52-4d64-839e-722863e14b01"
+   ],
+   "teacher": 8135
+  },
+  {
+   "action": "restore",
+   "group_id": "20751748-91a6-4c9f-ae3e-1c16fe68b790",
+   "key": "e4213b842",
+   "lesson_hours": 45,
+   "offering_id": "4213b842-a296-4e94-bdcc-f233bfd417da",
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "source": "5586",
+   "subject_ids": [
+    "a1782ff2-5c52-4d64-839e-722863e14b01"
+   ],
+   "teacher": 8135
+  },
+  {
+   "action": "restore",
+   "group_id": "709c17ae-f469-4144-aebd-ae5bc8e3cbef",
+   "key": "e7746c9d2",
+   "lesson_hours": 45,
+   "offering_id": "7746c9d2-0062-46c1-bc3b-66c9896f1d36",
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "source": "8370",
+   "subject_ids": [
+    "ecbbb5ec-91d3-4be8-b9a2-18986850ebe2"
+   ],
+   "teacher": 9510
+  },
+  {
+   "action": "restore",
+   "group_id": "bb57e45d-e218-49ef-93ca-e9a7ad386408",
+   "key": "eb710a034",
+   "lesson_hours": 45,
+   "offering_id": "b710a034-48b7-48c7-84d5-e722fae3003a",
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "source": "6456",
+   "subject_ids": [
+    "5c25425e-1968-4705-b528-eb2f86925887"
+   ],
+   "teacher": 7736
+  },
+  {
+   "action": "restore",
+   "group_id": "12c1ba2a-b7ee-4e2f-a31c-64bccaeb71bf",
+   "key": "eb763b656",
+   "lesson_hours": 45,
+   "offering_id": "b763b656-e6f0-4bbf-a866-db8f162de834",
+   "plan": {
+    "lecture": 30,
+    "seminar": 15
+   },
+   "source": "8628",
+   "subject_ids": [
+    "9f036b0b-86a4-4346-a6cd-657825d76944"
+   ],
+   "teacher": 9553
   }
  ]
 }

@@ -510,6 +510,8 @@ _APPLICATION_HANDLER_ROLES = {
     # «Tələbə Xidmətləri Mərkəzi» şöbəsinin (`telebe`) emalçısı — transkript /
     # arayış / tələbə hərəkəti sorğuları məhz ona düşür.
     "student_services",
+    # Sahib 2026-11-17: kafedra müraciətlərini laborant da görür və cavablandırır (organizations/0083).
+    "lab_assistant",
 }
 
 #: Kataloq konfiqurasiyası + bütün müraciətlərə oxu (rektor `*` ilə əhatəlidir).

@@ -66,12 +66,14 @@ def test_handler_roles_hold_the_handle_key():
         "exam_center_head",
         "exam_center_staff",
         "ikt_rehber",
+        # Sahib 2026-11-17: kafedra müraciətlərini laborant da cavablandırır (organizations/0083).
+        "lab_assistant",
     ):
         assert has_permission(_role(name)["permissions"], PERM_HANDLE), name
 
 
 def test_teachers_and_students_never_decide():
-    for name in ("student", "lead_student", "teacher", "assistant", "lab_assistant"):
+    for name in ("student", "lead_student", "teacher", "assistant"):
         assert not has_permission(_role(name)["permissions"], PERM_HANDLE), name
         assert not has_permission(_role(name)["permissions"], PERM_MANAGE), name
         assert not has_permission(_role(name)["permissions"], PERM_VIEW_ALL), name
@@ -115,3 +117,9 @@ def test_trustee_reads_every_application_read_only():
 def test_department_roles_do_not_read_the_whole_organization():
     for name in ("dean", "chair_head", "program_coordinator", "hr", "exam_center_head", "student_services"):
         assert not has_permission(_role(name)["permissions"], PERM_VIEW_ALL), name
+
+
+def test_lab_assistant_never_manages_or_oversees():
+    """Laborant yalnız öz kafedrasına düşən müraciətə qərar verir — kataloq / bütün müraciətlər YOX."""
+    assert not has_permission(_role("lab_assistant")["permissions"], PERM_MANAGE)
+    assert not has_permission(_role("lab_assistant")["permissions"], PERM_VIEW_ALL)
