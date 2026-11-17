@@ -27,7 +27,7 @@ from core.search_text import tolerant_q
 from ..constants import STATS_DIMENSIONS, STATS_PAGE_SIZE, STATS_STATUSES, Audience
 from ..models import AnnouncementReceipt
 from . import stats_units as su
-from .recipients import family_roles, targeted_users
+from .recipients import _path_q, family_roles, targeted_users
 
 _STUDENTS, _TEACHERS, _STAFF = Audience.STUDENTS.value, Audience.TEACHERS.value, Audience.STAFF.value
 _SEARCH_FIELDS = ("first_name", "last_name", "username")
@@ -71,6 +71,8 @@ def _grouped(queryset) -> list:
     hər FILTER-də təkrarlayırdı (6 000 nəfərdə ~0,45 s). SQL və parametrlər ORM-in özündəndir
     (``sql_with_params``) — sorğuya istifadəçi mətni qoşulmur.
     """
+    if queryset.query.is_empty():  # auditoriyaya uyğun rol yoxdur (``none()``) — SQL qurulmur
+        return []
     fields = ("pk", "ann_family", "ann_unit", "ann_seen", "ann_read", "ann_ack")
     inner, params = queryset.values(*fields).order_by().query.sql_with_params()
     with no_jit() as cursor:
@@ -93,15 +95,20 @@ def base_queryset(announcement, *, family="", unit=""):
     default_family = _STAFF if _STAFF in families else (_TEACHERS if _TEACHERS in families else _STUDENTS)
     family_expr = Case(*whens, default=Value(default_family), output_field=CharField())
     other_roles = [pk for name in sorted(families - {_STUDENTS}) for pk in roles.get(name, [])]
+    target_units = sorted({str(value) for value in announcement.audience_units or ()})
     unit_whens, unit_default = [], Value(None, output_field=UUIDField())
     if _STUDENTS in families and roles.get(_STUDENTS):
         Record = django_apps.get_model("registrar", "StudentAcademicRecord")
         records = Record.objects.filter(
             organization_id=org_id, is_active=True, student_id=OuterRef("pk"), group__isnull=False
         ).order_by("-admission_year", "pk")
+        if target_units:  # daraldılmış elanda — hədəf bölmədəki qrup (targeted_users ilə eyni şərt)
+            records = records.filter(_path_q("group__path", target_units))
         unit_whens.append(When(ann_family=_STUDENTS, then=Subquery(records.values("group_id")[:1])))
     if other_roles:
         posts = active.filter(role_id__in=other_roles, scope_unit__isnull=False).order_by("-is_primary", "pk")
+        if target_units:  # başqa kafedrada da üzvü olan — hədəf bölmədəki üzvlüyü sayılır
+            posts = posts.filter(_path_q("scope_unit__path", target_units))
         unit_default = Subquery(posts.values("scope_unit_id")[:1])
     receipts = _receipts(announcement)
     queryset = users.annotate(ann_family=family_expr).annotate(

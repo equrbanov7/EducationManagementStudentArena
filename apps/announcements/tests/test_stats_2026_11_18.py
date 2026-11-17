@@ -165,3 +165,43 @@ class StatsEndpointsTest(TestCase):
         self.assertIn(stats_url, cabinet)
         student_cabinet = self._client(self.w["s1"]).get("/accounts/profile/api/sections/announcements/").json()["html"]
         self.assertNotIn(stats_url, student_cabinet)
+
+
+class StatsEdgeCasesTest(TestCase):
+    """Review 2026-11-18: çox üzvlüklü müəllim hədəf bölmədə sayılır; boş auditoriya 500 vermir."""
+
+    @classmethod
+    def setUpTestData(cls):
+        from apps.organizations.models import Membership
+
+        cls.w = build_world("annse")
+        with bypass_rls():
+            # t1-in əsas üzvlüyü Kafedra A-dadır; F2-də əlavə (əsas olmayan) üzvlüyü var.
+            Membership.objects.create(
+                user=cls.w["t1"],
+                organization=cls.w["org"],
+                role=cls.w["org"].roles.get(name="teacher"),
+                scope_unit=cls.w["f2"],
+                is_primary=False,
+                is_active=True,
+            )
+        cls.item = make_announcement(cls.w, title="F2 müəllimləri", families=["teachers"], units=[cls.w["f2"].pk])
+
+    def test_secondary_membership_counts_in_targeted_unit(self):
+        with bypass_rls():
+            data = stats.summary(self.item, dimension="faculty")
+            filtered = stats.summary(self.item, unit=str(self.w["f2"].pk))
+        self.assertEqual([(row["label"], row["total"]) for row in data["rows"]], [("Fakulte F2", 1)])
+        self.assertEqual(filtered["totals"]["total"], 1)
+
+    def test_empty_audience_does_not_crash(self):
+        from apps.announcements.models import Announcement
+
+        with bypass_rls():
+            Announcement.objects.filter(pk=self.item.pk).update(audience_families=[])
+            self.item.refresh_from_db()
+        client = client_for(self.w["org"], self.w["owner"])
+        payload = client.get(reverse(SUMMARY), {"elan": self.item.pk}).json()
+        self.assertEqual(payload["totals"]["total"], 0)
+        response = client.get(reverse("announcements:stats_export"), {"elan": self.item.pk})
+        self.assertEqual(response.status_code, 200)
