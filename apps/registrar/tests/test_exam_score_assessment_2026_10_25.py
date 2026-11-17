@@ -135,8 +135,9 @@ class AssessmentRulesTest(MidtermPeriodFixture, TestCase):
             with self.assertRaises(ValidationError, msg=raw):
                 rules.clean_column_maxes(raw, 30)
 
-    def test_default_columns_three_for_midterm_five_for_final(self):
-        self.assertEqual(rules.default_columns(rules.MIDTERM, 30), [10, 10, 10])
+    def test_default_columns_one_for_midterm_five_for_final(self):
+        # Sahib 2026-11-17: «Midterm 1 sütun 30 ballıq» (əvvəl 3 × 10).
+        self.assertEqual(rules.default_columns(rules.MIDTERM, 30), [30])
         self.assertEqual(rules.default_columns(rules.FINAL, 50), [10, 10, 10, 10, 10])
 
     def test_caps_are_30_and_50(self):
@@ -262,11 +263,11 @@ class AssessmentRulesTest(MidtermPeriodFixture, TestCase):
         with bypass_rls():
             self._final("40", self.center)
             self.assertEqual(self._final("41", self.staff)["written"], 0)  # başqa İM işçisi
-            later = timezone.now() + timedelta(minutes=16)
+            later = timezone.now() + timedelta(minutes=61)
             with mock.patch("django.utils.timezone.now", return_value=later):
                 result = self._final("41", self.center)
             self.assertEqual(result["written"], 0)
-            self.assertIn("15", result["errors"][0][1])
+            self.assertIn("1 saat", result["errors"][0][1])  # sahib 2026-11-17: pəncərə 1 saat
             self.assertEqual(self._score(), Decimal("40"))
 
     def test_window_length_comes_from_runtime_setting(self):
@@ -280,7 +281,7 @@ class AssessmentRulesTest(MidtermPeriodFixture, TestCase):
     def test_appeal_after_window_requires_document_and_is_marked(self):
         with bypass_rls():
             self._final("40", self.center)
-            later = timezone.now() + timedelta(minutes=16)
+            later = timezone.now() + timedelta(minutes=61)
             with mock.patch("django.utils.timezone.now", return_value=later):
                 # Sahib 2026-10-25: apellyasiya ilə dəyişiklik — YALNIZ İmtahan Mərkəzinin rəhbəri.
                 staff = self._final("45", self.staff, kind="appeal", sheet_evidence=_pdf())
@@ -301,7 +302,7 @@ class AssessmentRulesTest(MidtermPeriodFixture, TestCase):
     def test_rim_correction_only_for_rim_head_with_full_submission(self):
         with bypass_rls():
             self._final("40", self.center)
-            later = timezone.now() + timedelta(minutes=16)
+            later = timezone.now() + timedelta(minutes=61)
             submission = {"reason": CorrectionReason.TECHNICAL, "note": "Təqdimat №5", "evidence": _pdf()}
             with mock.patch("django.utils.timezone.now", return_value=later):
                 denied = self._final("30", self.center, kind="correction", **submission)

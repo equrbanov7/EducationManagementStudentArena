@@ -8,9 +8,13 @@
     // W6 `w6paper` (2026-09-14): şablon vərəq kartının şəbəkəsi ilə endirilir —
     // sual sayı / bir sualın maksimumu / imtahan növü klik anında URL-ə yazılır
     // (server parametr olmayanda sonuncu vərəqin şəbəkəsinə düşür).
+    // 2026-11-17: sütun-sütun maksimumlar (`question_maxes`) və imtahan (midterm / final) da göndərilir — server
+    // şablonu midterm siyahısı (tavan 30) və tək sütun 30 ilə qurur (əvvəl «max ≤ 10» qaydası ilə rədd edirdi).
     var GRID_FIELDS = {
         question_count: "[data-ese-question-count]",
         question_max: "[data-ese-question-max]",
+        question_maxes: "[data-ese-question-maxes]",
+        assessment: "[data-ese-assessment-field]",
         exam_kind: "[data-ese-exam-kind]"
     };
     function templateHref(link) {

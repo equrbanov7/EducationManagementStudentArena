@@ -227,7 +227,7 @@ class SaveFinalsLedgerTest(_JournalFixture):
         from django.utils import timezone
 
         self._post(self.offering, {f"exam__{self.enrollment.id}": "40"})
-        with mock.patch("django.utils.timezone.now", return_value=timezone.now() + timedelta(minutes=16)):
+        with mock.patch("django.utils.timezone.now", return_value=timezone.now() + timedelta(minutes=61)):
             resp = self._post(self.offering, {f"exam__{self.enrollment.id}": "45"})
         self.assertEqual(resp.status_code, 302)
         with bypass_rls():

@@ -1,0 +1,45 @@
+/*
+ * «İmtahan balının daxil edilməsi» — «Apellyasiya balı» xanası (sahib 2026-11-17: «balın yanında appel xanası,
+ * 2 xana; appelyasiya xanasından gələn bal əsas götürülür»). Davranış `exam_score_entry_appeal.js`-dədir.
+ * Midterm sütun redaktorunun gizli düymələri də buradadır (`[hidden]` komponent `display`-ini üstələsin).
+ */
+.ese-appeal {
+    width: 5.4rem;
+    text-align: center;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.ese-appeal.is-set {
+    border-color: var(--ems-success-bd, var(--ems-border));
+    background: var(--ems-success-bg, transparent);
+}
+
+.ese-appeal.is-dirty {
+    border-color: var(--ems-warning-bd);
+    background: var(--ems-warning-bg);
+}
+
+.ese-appeal.is-invalid {
+    border-color: var(--ems-danger);
+    background: var(--ems-danger-bg);
+}
+
+.ese-appeal:disabled {
+    cursor: not-allowed;
+}
+
+.ese-summary__appeal {
+    font-size: 0.85rem;
+}
+
+.ese-cols__actions[hidden],
+.ese-cols__remove[hidden] {
+    display: none;
+}
+
+/* «İmtahan tarixi» / «Nəzarətçi» — istəyə bağlı qeydi (sahib 2026-11-17). */
+.ese-optional {
+    font-weight: 400;
+    color: var(--ems-text-muted, inherit);
+}

@@ -33,9 +33,10 @@ Skan DİALOQUN öz fayl sahəsində (`justification_evidence`) və ya vərəq ka
     <dd data-ese-confirm-examiner>—</dd>
   </div>
   <div class="ese-confirm__fact">
-    <dt><label for="ese-checked-on">{% trans "İmtahanın yoxlanma tarixi" context "registrar.exam_score_entry" %} <span class="ems-field__req" aria-hidden="true">*</span></label></dt>
+    {# 2026-11-17 (sahib: tarix sahələri istəyə bağlı): boş qalsa server bu günü yazır (`parse_checked_on`). #}
+    <dt><label for="ese-checked-on">{% trans "İmtahanın yoxlanma tarixi" context "registrar.exam_score_entry" %}</label></dt>
     <dd><input type="date" id="ese-checked-on" name="checked_on" class="ems-input ems-input--date ese-confirm__date"
-               value="{{ s.today_iso }}" max="{{ s.today_iso }}" required data-ese-checked-on></dd>
+               value="{{ s.today_iso }}" max="{{ s.today_iso }}" data-ese-checked-on></dd>
   </div>
   <div class="ese-confirm__fact">
     <dt>{% trans "İmtahan tarixi" context "registrar.exam_score_entry" %}</dt>

@@ -51,13 +51,13 @@ class ExamScoreMidtermScreenTest(MidtermPeriodFixture, TestCase):
                 {"section": "exam-score-entry", "ese_offering": str(self.offering.pk), **params},
             )
 
-    def _save_midterm(self, client, scores=("9", "8", "7"), **extra):
+    def _save_midterm(self, client, scores=("24",), **extra):  # sahib 2026-11-17: midterm tək sütun (30)
         enrollment = self.enrollments[0]
         payload = {
             "action": "save_scores",
             "offering_id": str(self.offering.pk),
             "assessment": "midterm",
-            "question_maxes": "10,10,10",
+            "question_maxes": "30",
             "checked_on": timezone.localdate().isoformat(),
             f"score__{enrollment.pk}": "",
         }
@@ -72,7 +72,7 @@ class ExamScoreMidtermScreenTest(MidtermPeriodFixture, TestCase):
         self.assertIn("MİDTERM (maks 30)", html)
         self.assertIn("FİNAL (maks 50)", html)
         self.assertIn('data-ese-assessment="midterm"', html)
-        self.assertIn('name="question_maxes" form="ese-roster-form" value="10,10,10"', html)
+        self.assertIn('name="question_maxes" form="ese-roster-form" value="30"', html)
         self.assertNotIn("Giriş balı", html.split('id="ese-roster-form"')[1].split("</thead>")[0])
         self.assertIn('name="checked_on"', html)
         self.assertIn("data-ese-columns", html)
@@ -92,7 +92,7 @@ class ExamScoreMidtermScreenTest(MidtermPeriodFixture, TestCase):
             self.assertEqual(cell.score, Decimal("24"))
             sheet = ExamScoreSheet.objects.get()
             self.assertEqual(sheet.assessment, ExamAssessment.MIDTERM)
-            self.assertEqual(sheet.question_maxes, [10, 10, 10])
+            self.assertEqual(sheet.question_maxes, [30])
             self.assertEqual(sheet.checked_on, timezone.localdate())
             self.assertFalse(FinalGrade.objects.filter(exam_score__isnull=False).exists())
         self.assertIn("ese_assessment=midterm", response["Location"])
@@ -112,11 +112,13 @@ class ExamScoreMidtermScreenTest(MidtermPeriodFixture, TestCase):
         self._save_midterm(client)
         html = self._page(client, ese_assessment="midterm").content.decode()
         self.assertIn('data-final="0" data-edit-until="20', html)
-        later = timezone.now() + timedelta(minutes=16)
+        later = timezone.now() + timedelta(minutes=61)
         with mock.patch("django.utils.timezone.now", return_value=later):
             html = self._page(client, ese_assessment="midterm").content.decode()
         self.assertIn('data-final="1" data-edit-until=""', html)
-        self.assertIn('data-ese-mode="appeal"', html)
+        # 2026-11-17: apellyasiya rejim deyil — ayrıca «Apellyasiya balı» xanası (İM rəhbəri üçün açıq).
+        self.assertNotIn('data-ese-mode="appeal"', html)
+        self.assertIn(f'name="appeal__{self.enrollments[0].pk}"', html)
         self.assertNotIn('data-ese-mode="correction"', html)  # İM rəhbəri RİM deyil
         rim_html = self._page(self._client(self.rim), ese_assessment="midterm").content.decode()
         self.assertIn('data-ese-mode="correction"', rim_html)

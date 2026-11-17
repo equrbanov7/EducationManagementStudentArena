@@ -203,7 +203,7 @@ class ExamScoreEntrySectionTest(TestCase):
         # 2026-10-25 (sahib): 15 dəqiqə ərzində daxil edən sənədsiz dəyişə bilər — burada pəncərə BİTİB.
         client = self._client(self.center)
         self._post(client)
-        later = timezone.now() + timedelta(minutes=16)
+        later = timezone.now() + timedelta(minutes=61)
         with mock.patch("django.utils.timezone.now", return_value=later):
             resp = self._post(client, **{f"score__{self.enrollment.id}": "30"})
         self.assertEqual(resp.status_code, 302)

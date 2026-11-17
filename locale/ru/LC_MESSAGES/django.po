@@ -111193,7 +111193,7 @@ msgstr "Мидтерм"
 
 msgctxt "registrar.exam_score_entry_kind"
 msgid "Edit within 15 minutes"
-msgstr "Исправление в течение 15 минут"
+msgstr "Исправление в пределах срока"
 
 msgctxt "registrar.exam_score_entry.state"
 msgid "Yekun"
@@ -120258,3 +120258,56 @@ msgstr "Тип занятия"
 msgctxt "registrar.journal"
 msgid "köhnə sistemdən"
 msgstr "из старой системы"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya balı"
+msgstr "Балл апелляции"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Midterm tək sütundur — bir bal, maksimum 30."
+msgstr "Мидтерм — одна колонка: один балл, максимум 30."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Midterm tək sütundur — hər tələbəyə bir bal, maksimum %(cap)s."
+msgstr "Мидтерм — одна колонка: один балл на студента, максимум %(cap)s."
+
+msgctxt "registrar.exam_score_entry"
+msgid ""
+"Bu tələbənin apellyasiya balı var — əsas bal apellyasiya balıdır. "
+"Dəyişikliyi «Apellyasiya balı» xanasında edin."
+msgstr ""
+"У этого студента есть балл апелляции — основным считается он. Вносите "
+"изменение в ячейку «Балл апелляции»."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya balı yalnız imtahan balı yazılmış tələbəyə yazılır."
+msgstr ""
+"Балл апелляции вносится только студенту, у которого уже есть балл за "
+"экзамен."
+
+msgctxt "registrar.exam_score_entry"
+msgid ""
+"Apellyasiya balını yalnız İmtahan Mərkəzinin / RİM rəhbəri, imtahan balı "
+"yazılmış tələbəyə yazır."
+msgstr ""
+"Балл апелляции вносит только руководитель Экзаменационного центра / РИМ и "
+"только студенту с баллом за экзамен."
+
+msgctxt "registrar.exam_score_entry"
+msgid ""
+"Apellyasiya nəticəsini «Apellyasiya balı» xanasına yazın — yekun bal odur."
+msgstr ""
+"Запишите результат апелляции в ячейку «Балл апелляции» — он станет итоговым."
+
+msgctxt "registrar.exam_score_entry"
+msgid "apellyasiya balı yazılacaq (yekun bal odur)"
+msgstr "балл(ов) апелляции будет записано (они станут итоговыми)"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya balı 0 ilə maksimum arasında tam ədəd olmalıdır."
+msgstr "Балл апелляции должен быть целым числом от 0 до максимума."
+
+msgctxt "registrar.exam_score_entry"
+msgid "istəyə bağlı"
+msgstr "необязательно"

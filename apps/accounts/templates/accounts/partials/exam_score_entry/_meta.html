@@ -14,7 +14,10 @@ müəllimlərindən AXTARIŞLI SEÇİMDİR (`examiner` / `invigilator` istifadə
 ad snapshot-u serverdə); defolt yoxlayan = açılışın müəllimi. «İmtahan növü»
 məcburidir; seçilmiş etiket `data-ese-exam-kind-label` + görünən çip ilə server
 tərəfdən də verilir (JS gücləndirməsindən əvvəl də oxunur — sahibin serverindəki
-«boş toggle» şikayəti). Kart iki sütundur (`ese-meta__grid`).{% endcomment %}
+«boş toggle» şikayəti). Kart iki sütundur (`ese-meta__grid`).
+2026-11-17 (sahib: «İmtahan tarixi, Nəzarətçi bunları optional qoymaq»): hər ikisi İSTƏYƏ BAĞLIDIR — boş qalsa
+da ballar yazılır (`exam_score_sheets.sheet_metadata_from_post`); etiketin yanında «istəyə bağlı» yazılır.{% endcomment %}
+{% trans "istəyə bağlı" context "registrar.exam_score_entry" as ese_optional %}
 <section class="ems-card ese-meta" data-ese-meta>
   <div class="ems-card__head">
     <div>
@@ -48,7 +51,7 @@ tərəfdən də verilir (JS gücləndirməsindən əvvəl də oxunur — sahibin
       <span class="ems-field__hint">{% trans "Vərəqin və bütün sətirlərinin növü." context "registrar.exam_score_entry" %}</span>
     </div>
     <div class="ems-field">
-      <label class="ems-field__label" for="ese-exam-date">{% trans "İmtahan tarixi" context "registrar.exam_score_entry" %}</label>
+      <label class="ems-field__label" for="ese-exam-date">{% trans "İmtahan tarixi" context "registrar.exam_score_entry" %} <span class="ese-optional">({{ ese_optional }})</span></label>
       <input type="date" id="ese-exam-date" name="exam_date" form="ese-roster-form" class="ems-input ems-input--date"
              value="{{ s.sheet_defaults.exam_date }}" data-ese-meta-field>
     </div>
@@ -66,7 +69,7 @@ tərəfdən də verilir (JS gücləndirməsindən əvvəl də oxunur — sahibin
       <span class="ems-field__hint">{% trans "Default: açılışın müəllimi; fərqlidirsə dəyişin." context "registrar.exam_score_entry" %}</span>
     </div>
     <div class="ems-field">
-      <label class="ems-field__label" for="ese-invigilator">{% trans "Nəzarətçi" context "registrar.exam_score_entry" %}</label>
+      <label class="ems-field__label" for="ese-invigilator">{% trans "Nəzarətçi" context "registrar.exam_score_entry" %} <span class="ese-optional">({{ ese_optional }})</span></label>
       <div class="bootstrap-single-select bootstrap-single-select--ems ese-selectwrap">
         <select id="ese-invigilator" name="invigilator" form="ese-roster-form" class="ems-select bootstrap-single-select__native"
                 data-bootstrap-select data-live-search="true" data-live-search-placeholder="{% trans 'Axtar…' context 'ui.filters' %}" data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'ui.filters' %}"

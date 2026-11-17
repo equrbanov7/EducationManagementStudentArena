@@ -4,24 +4,23 @@
 apellyasiya sənədi məcburi) ilə dəyişir.
 Rejim düyməsi kilidli sətirləri açır və formaya `kind` (appeal / correction) qoşur — `exam_score_entry_columns.js`;
 server qaydanı yenə tətbiq edir (`exam_score_assessment.decide_after_window`). Bitmiş dövrün düzəliş rejimi
-(`_period_lock.html`) ayrıdır və bu zolaq orada göstərilmir.{% endcomment %}
+(`_period_lock.html`) ayrıdır və bu zolaq orada göstərilmir.
+2026-11-17 (sahib: «balın yanında appel xanası da olsun, 2 xana»): apellyasiya artıq REJİM deyil — ayrıca
+«Apellyasiya balı» sütunudur (`_roster.html`); bu zolaqda yalnız RİM təqdimatı rejimi qalır.{% endcomment %}
 {% if s.final_count and not s.correction_mode %}
 <div class="ese-modebar" data-ese-modebar role="group" aria-label="{% trans 'Dəyişiklik rejimi' context 'registrar.exam_score_entry' %}">
   <p class="ese-modebar__text">
     <i class="fas fa-lock" aria-hidden="true"></i>
     {% blocktrans with n=s.final_count context "registrar.exam_score_entry" %}«Yekun» bal: {{ n }} tələbə.{% endblocktrans %}
-    {% if s.can_appeal or s.can_rim_correct %}
+    {% if s.can_rim_correct %}
     <span data-ese-mode-hint>{% trans "Dəyişmək üçün rejim seçin:" context "registrar.exam_score_entry" %}</span>
+    {% elif s.can_appeal %}
+    <span>{% trans "Apellyasiya nəticəsini «Apellyasiya balı» xanasına yazın — yekun bal odur." context "registrar.exam_score_entry" %}</span>
     {% else %}
     <span>{% trans "Dəyişiklik yalnız apellyasiya ilə — İmtahan Mərkəzinin rəhbərinə müraciət edin." context "registrar.exam_score_entry" %}</span>
     {% endif %}
   </p>
   <div class="ese-modebar__btns">
-    {% if s.can_appeal %}
-    <button type="button" class="ems-btn ems-btn--sm" data-ese-mode="appeal" aria-pressed="false">
-      <i class="fas fa-scale-balanced" aria-hidden="true"></i> {% trans "Apellyasiya ilə dəyiş" context "registrar.exam_score_entry" %}
-    </button>
-    {% endif %}
     {% if s.can_rim_correct %}
     <button type="button" class="ems-btn ems-btn--sm" data-ese-mode="correction" aria-pressed="false">
       <i class="fas fa-file-signature" aria-hidden="true"></i> {% trans "RİM təqdimatı ilə düzəliş" context "registrar.exam_score_entry" %}

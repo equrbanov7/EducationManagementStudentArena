@@ -170,7 +170,8 @@
     </div>
 
     {% if appeal_page_obj.has_other_pages %}
-    <div class="ems-tablefoot appeal-tablefoot">
+    {# `data-manage-page`: qərardan sonra siyahı bu səhifədə yenilənir (appeals_sections.js, sahib 2026-11-17). #}
+    <div class="ems-tablefoot appeal-tablefoot" data-manage-page="{{ appeal_page_obj.number }}">
         <div class="appeal-tablefoot__page">{{ appeal_page_obj.number }} / {{ appeal_page_obj.paginator.num_pages }}</div>
         <nav class="ems-rowactions" aria-label="{% trans 'Səhifələmə' context 'appeals.template' %}">
             {% if appeal_page_obj.has_previous %}

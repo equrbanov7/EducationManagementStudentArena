@@ -202,11 +202,14 @@ def _column_grid(post, *, offering, assessment):
     raw_maxes = post.get("question_maxes")
     if raw_maxes not in (None, ""):
         maxes = assessment_rules.clean_column_maxes(raw_maxes, cap)
+        assessment_rules.assert_midterm_single_column(assessment, maxes)  # sahib 2026-11-17
         return len(maxes), max(maxes), maxes
     count, per_question = questions.clean_question_grid(post.get("question_count"), post.get("question_max"))
     if not count:
         return 0, per_question, None
-    return count, per_question, assessment_rules.clean_column_maxes([per_question] * count, cap)
+    maxes = assessment_rules.clean_column_maxes([per_question] * count, cap)
+    assessment_rules.assert_midterm_single_column(assessment, maxes)
+    return count, per_question, maxes
 
 
 def parse_checked_on(raw):
@@ -439,7 +442,7 @@ def latest_sheet_defaults(sheets, *, assessment=ExamAssessment.FINAL, cap=None) 
     təkrar yazmasın; ``sheets`` ``sheets_for_offering`` nəticəsidir (əlavə sorğu yox).
 
     2026-10-25: ``question_maxes`` — eyni imtahanın sonuncu vərəqinin sütunları (cəmi ``cap``-a
-    bərabərdirsə), yoxsa defolt (midterm 3 × 10, final 5 × 10 — ``exam_score_assessment.default_columns``).
+    bərabərdirsə), yoxsa defolt (midterm HƏMİŞƏ tək sütun 1 × 30 — sahib 2026-11-17, final 5 × 10 — ``exam_score_assessment.default_columns``).
     """
     grid = questions.question_defaults()
     columns = _default_columns(sheets, assessment, cap)
@@ -476,6 +479,9 @@ def latest_sheet_defaults(sheets, *, assessment=ExamAssessment.FINAL, cap=None) 
 def _default_columns(sheets, assessment, cap) -> list:
     if cap is None:
         return []
+    if assessment == ExamAssessment.MIDTERM:
+        # Sahib 2026-11-17: midterm HƏMİŞƏ tək sütun (köhnə 3 × 10 vərəqləri miras qalmır).
+        return assessment_rules.default_columns(assessment, int(cap))
     for row in sheets or ():
         maxes = row.get("question_maxes") or []
         if row.get("assessment", ExamAssessment.FINAL) == assessment and maxes and sum(maxes) == int(cap):

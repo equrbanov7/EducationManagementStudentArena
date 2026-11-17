@@ -110301,7 +110301,7 @@ msgstr "Ara sınav"
 
 msgctxt "registrar.exam_score_entry_kind"
 msgid "Edit within 15 minutes"
-msgstr "15 dakika içinde düzeltme"
+msgstr "Düzeltme süresi içinde düzeltme"
 
 msgctxt "registrar.exam_score_entry.state"
 msgid "Yekun"
@@ -119227,3 +119227,53 @@ msgstr "Ders türü"
 msgctxt "registrar.journal"
 msgid "köhnə sistemdən"
 msgstr "eski sistemden"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya balı"
+msgstr "İtiraz puanı"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Midterm tək sütundur — bir bal, maksimum 30."
+msgstr "Ara sınav tek sütundur — tek puan, en fazla 30."
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "Midterm tək sütundur — hər tələbəyə bir bal, maksimum %(cap)s."
+msgstr "Ara sınav tek sütundur — her öğrenciye tek puan, en fazla %(cap)s."
+
+msgctxt "registrar.exam_score_entry"
+msgid ""
+"Bu tələbənin apellyasiya balı var — əsas bal apellyasiya balıdır. "
+"Dəyişikliyi «Apellyasiya balı» xanasında edin."
+msgstr ""
+"Bu öğrencinin itiraz puanı var — esas puan itiraz puanıdır. Değişikliği "
+"«İtiraz puanı» hücresinde yapın."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya balı yalnız imtahan balı yazılmış tələbəyə yazılır."
+msgstr "İtiraz puanı yalnızca sınav puanı girilmiş öğrenciye yazılır."
+
+msgctxt "registrar.exam_score_entry"
+msgid ""
+"Apellyasiya balını yalnız İmtahan Mərkəzinin / RİM rəhbəri, imtahan balı "
+"yazılmış tələbəyə yazır."
+msgstr ""
+"İtiraz puanını yalnızca Sınav Merkezi / RİM yöneticisi, sınav puanı girilmiş"
+" öğrenciye yazar."
+
+msgctxt "registrar.exam_score_entry"
+msgid ""
+"Apellyasiya nəticəsini «Apellyasiya balı» xanasına yazın — yekun bal odur."
+msgstr "İtiraz sonucunu «İtiraz puanı» hücresine yazın — esas puan odur."
+
+msgctxt "registrar.exam_score_entry"
+msgid "apellyasiya balı yazılacaq (yekun bal odur)"
+msgstr "itiraz puanı yazılacak (esas puan odur)"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya balı 0 ilə maksimum arasında tam ədəd olmalıdır."
+msgstr "İtiraz puanı 0 ile en yüksek değer arasında tam sayı olmalıdır."
+
+msgctxt "registrar.exam_score_entry"
+msgid "istəyə bağlı"
+msgstr "isteğe bağlı"
