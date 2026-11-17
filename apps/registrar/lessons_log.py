@@ -432,6 +432,8 @@ def build_rows(lessons_qs, *, limit=ROW_CAP, offset=0) -> list:
                     )
                 ),
                 "is_legacy": bool(lesson.is_legacy_synthesised),
+                # Dərsin başladıldığı an (sahib 2026-11-17) — yalnız nəzarətçi ixracında sütun olur.
+                "started_at": _started_text(lesson),
                 # «Cədvəldən kənar» (UNEC P1-1): dərs cədvəl slotuna uyğun gəlmədən, səbəblə açılıb.
                 "off_schedule": show_off_schedule and bool(lesson.off_schedule_reason),
                 "off_schedule_reason": lesson.off_schedule_reason if show_off_schedule else "",
@@ -440,8 +442,16 @@ def build_rows(lessons_qs, *, limit=ROW_CAP, offset=0) -> list:
     return rows
 
 
-def csv_rows(rows) -> list:
-    """CSV ixracının sətirləri (başlıq daxil) — Excel üçün ; ayırıcı yox, ',' ."""
+def _started_text(lesson) -> str:
+    from apps.registrar.journal_lesson_timing import started_at_text
+
+    return started_at_text(lesson)
+
+
+def csv_rows(rows, *, started: bool = False) -> list:
+    """CSV ixracının sətirləri (başlıq daxil) — Excel üçün ; ayırıcı yox, ',' .
+
+    «Saat» = dərsin saat aralığı (10:10–11:40). ``started`` (nəzarətçi, sahib 2026-11-17): sonda «Dərs başladılıb»."""
     header = [
         pgettext(_CTX, "Tarix"),
         pgettext(_CTX, "Saat"),
@@ -464,6 +474,8 @@ def csv_rows(rows) -> list:
     off_schedule = academic_rules.off_schedule_flag_enabled()
     if off_schedule:
         header.append(pgettext(_CTX, "Cədvəldən kənar (səbəb)"))
+    if started:
+        header.append(pgettext(_CTX, "Dərs başladılıb"))
     note_labels = {
         NOTE_ON_TIME: pgettext(_CTX, "Vaxtında yazılıb"),
         NOTE_LATE: pgettext(_CTX, "Gec yazılıb"),
@@ -475,7 +487,7 @@ def csv_rows(rows) -> list:
         out.append(
             [
                 row["date"].isoformat(),
-                row["start_time"].strftime("%H:%M") if row["start_time"] else "",
+                _time_text(row),
                 row["teacher"],
                 row["subject_code"],
                 row["subject_name"],
@@ -492,8 +504,16 @@ def csv_rows(rows) -> list:
                 note_labels.get(row["note"], row["note"]),
             ]
             + ([row.get("off_schedule_reason", "")] if off_schedule else [])
+            + ([row.get("started_at", "")] if started else [])
         )
     return out
+
+
+def _time_text(row) -> str:
+    start, end = row["start_time"], row.get("end_time")
+    if not start:
+        return ""
+    return "%s–%s" % (start.strftime("%H:%M"), end.strftime("%H:%M")) if end else start.strftime("%H:%M")
 
 
 def offering_totals(lessons_qs) -> list:

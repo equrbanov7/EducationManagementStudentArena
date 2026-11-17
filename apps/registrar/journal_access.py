@@ -178,6 +178,22 @@ def can_observe_journal(user, offering) -> bool:
     return offering_in_journal_view_scope(user, offering.organization, offering)
 
 
+def can_open_journal(request, offering) -> bool:
+    """Jurnal SƏHİFƏSİNİ açmaq (oxu) — ``views.journal_detail`` ilə EYNİ dörd yol: redaktor, korrektor, siyahı
+    idarəçisi (koordinator/dekanlıq), ``journal.view`` müşahidəçisi / təhvil vermiş köhnə müəllim.
+
+    Sahib 2026-11-17: xlsx «Export» yalnız ``can_edit_journal`` istəyirdi — jurnalı açan əməkdaş (tədris işçisi,
+    kafedra, dekanlıq) düyməni görür, klikləyəndə 404 alırdı. Oxu səthləri (ixrac, tarixçə) bu qapını işlədir."""
+    from . import guest_roster
+
+    return (
+        can_edit_journal(request.user, offering)
+        or can_correct_offering(request, offering)
+        or guest_roster.can_manage_offering_roster(request.user, offering)
+        or can_observe_journal(request.user, offering)
+    )
+
+
 def offering_accepts_writes(offering) -> bool:
     """Ləğv edilmiş açılış (``is_active=False``) jurnalına HEÇ BİR yazı getmir.
 

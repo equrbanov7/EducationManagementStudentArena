@@ -100,7 +100,7 @@ def lessons_log_csv(request):
     response.write("﻿")
     # 2026-09-13 audit F-07: mövzu/qeyd sütunları müəllim mətnidir → formula neytrallaşdırması.
     writer = safe_csv_writer(response)
-    for line in service.csv_rows(rows):
+    for line in service.csv_rows(rows, started=supervisor):
         writer.writerow(line)
     response.write(
         "%s,%s,%s\r\n"

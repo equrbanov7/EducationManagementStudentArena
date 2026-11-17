@@ -373,6 +373,8 @@ def event_details(row_or_rows) -> list:
                     "weekday": str(WEEKDAYS[event["date"].weekday()]),
                     "time": time_text,
                     "hours": event["hours"],
+                    # Dərsin başladıldığı an (sahib 2026-11-17) — birgə dərsdə ən erkən; yalnız nəzarətçi xlsx-ində.
+                    "started": min((item for item in map(_started, members) if item[0]), default=("", ""))[1],
                     "passive": bool(event.get("passive")),
                     "hours_label": (
                         "%s · %s" % (event["hours"], passive_label()) if event.get("passive") else str(event["hours"])
@@ -395,6 +397,14 @@ def event_details(row_or_rows) -> list:
                 }
             )
     return out
+
+
+def _started(lesson) -> tuple:
+    """``(sıralama açarı, «13.11.2026 10:12»)`` — köhnə sistemdən bərpa olunan dərsdə boş."""
+    from apps.registrar.journal_lesson_timing import started_at
+
+    moment = started_at(lesson)
+    return (moment.isoformat(), moment.strftime("%d.%m.%Y %H:%M")) if moment else ("", "")
 
 
 def public_rows(table) -> list:

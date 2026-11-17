@@ -120226,3 +120226,35 @@ msgstr "Добавить время"
 msgctxt "exams.time_extension"
 msgid "Əlavə vaxtın səbəbini yazın."
 msgstr "Укажите причину дополнительного времени."
+
+msgctxt "registrar.journal"
+msgid "Dərs başladılıb"
+msgstr "Занятие начато"
+
+msgctxt "registrar.lessons_log"
+msgid "Dərs başladılıb"
+msgstr "Занятие начато"
+
+msgctxt "registrar.journal"
+msgid "Dərs saatı"
+msgstr "Время занятия"
+
+msgctxt "registrar.journal"
+msgid "Akademik saat"
+msgstr "Академические часы"
+
+msgctxt "registrar.journal"
+msgid "Bəli"
+msgstr "Да"
+
+msgctxt "registrar.journal"
+msgid "Dərslər"
+msgstr "Занятия"
+
+msgctxt "registrar.journal"
+msgid "Dərs növü"
+msgstr "Тип занятия"
+
+msgctxt "registrar.journal"
+msgid "köhnə sistemdən"
+msgstr "из старой системы"

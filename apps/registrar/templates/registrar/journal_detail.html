@@ -38,6 +38,7 @@
     {% if journal_share_chip %}<link rel="stylesheet" href="{% static 'registrar/css/journal_share.css' %}?v=20261026-share">{% endif %}
     {% if full_edit_active %}<link rel="stylesheet" href="{% static 'registrar/css/journal_full_edit.css' %}?v=20261027-fe">{% endif %}
     <link rel="stylesheet" href="{% static 'registrar/css/journal_passive_lessons.css' %}?v=20261114-passive">
+    {% if show_lesson_timing %}<link rel="stylesheet" href="{% static 'registrar/css/journal_lesson_timing.css' %}?v=20261117-timing">{% endif %}
     {% if practical_toggle %}<link rel="stylesheet" href="{% static 'registrar/css/journal_practical.css' %}?v=20261028-pm">{% endif %}
 {% endblock %}
 
@@ -318,6 +319,12 @@
             <div class="jd-day-body">
                 <div class="corr-modal-meta" data-jd-day-kind></div>
                 <div class="jd-day-topic" data-jd-day-topic></div>
+                {% if show_lesson_timing %}{# Yalnız əməkdaşa (sahib 2026-11-17): dərsin başladıldığı an + cədvəl saatı. #}
+                <div class="jd-day-timing">
+                    <div class="jd-day-timing__row"><i class="fas fa-play" aria-hidden="true"></i> {% trans "Dərs başladılıb" context "registrar.journal" %}: <b data-jd-day-started></b></div>
+                    <div class="jd-day-timing__row"><i class="fas fa-clock" aria-hidden="true"></i> {% trans "Dərs saatı" context "registrar.journal" %}: <b data-jd-day-time></b> · <b data-jd-day-hours></b></div>
+                </div>
+                {% endif %}
                 <div class="jd-day-stats">
                     <div class="jd-day-stat"><b data-jd-day-ie></b> <span>{% trans "iştirak (i/e)" context "registrar.journal" %}</span></div>
                     <div class="jd-day-stat"><b data-jd-day-qb></b> <span>{% trans "qayıb (q/b)" context "registrar.journal" %}</span></div>
@@ -325,7 +332,7 @@
                     <div class="jd-day-stat"><b data-jd-day-scored></b> <span>{% trans "bal yazılıb" context "registrar.journal" %}</span></div>
                     <div class="jd-day-stat jd-day-stat--full"><b data-jd-day-marked></b>/<b data-jd-day-total></b> <span>{% trans "qeyd edilib" context "registrar.journal" %}</span></div>
                 </div>
-                <p class="jd-day-note">{% trans "Redaktə vaxtı keçib — bu yalnız oxu üçün özətdir." context "registrar.journal" %}</p>
+                <p class="jd-day-note" data-jd-day-note>{% trans "Redaktə vaxtı keçib — bu yalnız oxu üçün özətdir." context "registrar.journal" %}</p>
                 <button type="button" class="jd-day-history" data-jhist-open data-jd-day-history data-jhist-date="">
                     <i class="fas fa-clock-rotate-left" aria-hidden="true"></i> {% trans "Bu dərsin tarixçəsi" context "registrar.journal_history" %}
                 </button>
@@ -374,7 +381,7 @@
     {# İkiqat göndəriş qapısı — ayrı fayl (QA P3-11). #}
     <script src="{% static 'registrar/js/journal_submit_guard.js' %}?v=20260906-1"></script>
     <script src="{% static 'registrar/js/correction_history.js' %}?v=20260831-excuse" nonce="{{ request.csp_nonce }}"></script>
-    <script src="{% static 'registrar/js/jd_day_summary.js' %}?v=20260925-hist" nonce="{{ request.csp_nonce }}"></script>
+    <script src="{% static 'registrar/js/jd_day_summary.js' %}?v=20261117-timing" nonce="{{ request.csp_nonce }}"></script>
     <script src="{% static 'registrar/js/journal_history.js' %}?v=20260926-search"></script>
     {# «Aktivləşdir» ikiqat göndəriş qapısı + modalda «cədvəldən kənar dərs — səbəb» sahəsi (UNEC P1-1). #}
     <script src="{% static 'registrar/js/journal_activation.js' %}?v=20260925-act"></script>

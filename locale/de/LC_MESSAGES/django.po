@@ -121545,3 +121545,35 @@ msgstr "Zusatzzeit gewähren"
 msgctxt "exams.time_extension"
 msgid "Əlavə vaxtın səbəbini yazın."
 msgstr "Geben Sie den Grund für die Zusatzzeit an."
+
+msgctxt "registrar.journal"
+msgid "Dərs başladılıb"
+msgstr "Unterricht begonnen"
+
+msgctxt "registrar.lessons_log"
+msgid "Dərs başladılıb"
+msgstr "Unterricht begonnen"
+
+msgctxt "registrar.journal"
+msgid "Dərs saatı"
+msgstr "Unterrichtszeit"
+
+msgctxt "registrar.journal"
+msgid "Akademik saat"
+msgstr "Unterrichtsstunden"
+
+msgctxt "registrar.journal"
+msgid "Bəli"
+msgstr "Ja"
+
+msgctxt "registrar.journal"
+msgid "Dərslər"
+msgstr "Unterrichtseinheiten"
+
+msgctxt "registrar.journal"
+msgid "Dərs növü"
+msgstr "Unterrichtsart"
+
+msgctxt "registrar.journal"
+msgid "köhnə sistemdən"
+msgstr "aus dem alten System"

@@ -1,5 +1,6 @@
 /* Müəllim jurnalı: redaktə vaxtı keçmiş sütun başlığındakı tarixə klik →
-   oxu-rejimi GÜN ÖZƏTİ modalı (heç nə dəyişmir; edit deyil). */
+   oxu-rejimi GÜN ÖZƏTİ modalı (heç nə dəyişmir; edit deyil). Əməkdaş (sahib 2026-11-17) hər sütunda açır
+   və orada dərsin başladıldığı an + saat aralığı görünür. */
 (function () {
   "use strict";
   var modal = document.querySelector("[data-jd-day-modal]");
@@ -25,6 +26,13 @@
     set("[data-jd-day-scored]", btn.getAttribute("data-scored"));
     set("[data-jd-day-marked]", btn.getAttribute("data-marked"));
     set("[data-jd-day-total]", btn.getAttribute("data-total"));
+    // Əməkdaş (sahib 2026-11-17): başladılma anı + cədvəl saatı — sahələr yalnız onun HTML-indədir.
+    set("[data-jd-day-started]", btn.getAttribute("data-started"));
+    set("[data-jd-day-time]", btn.getAttribute("data-time"));
+    set("[data-jd-day-hours]", btn.getAttribute("data-hours"));
+    // «Redaktə vaxtı keçib» qeydi yalnız kilidli sütunda (əməkdaş açıq dərsin də özətini açır).
+    var note = modal.querySelector("[data-jd-day-note]");
+    if (note) note.hidden = btn.getAttribute("data-locked") !== "1";
     // «Bu dərsin tarixçəsi» — tarixçə panelini bu dərs tarixi ilə süzülmüş açır (journal_history.js).
     var historyBtn = modal.querySelector("[data-jd-day-history]");
     if (historyBtn) historyBtn.setAttribute("data-jhist-date", btn.getAttribute("data-iso") || "");
