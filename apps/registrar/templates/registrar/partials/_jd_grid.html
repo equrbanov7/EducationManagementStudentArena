@@ -20,7 +20,8 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
             <div class="jd2-topic-scroll">
                 {% for item in calendar_plan %}
                 <div class="jd2-topic-row {% if item.is_today %}is-today{% elif not item.covered %}is-pending{% endif %}">
-                    <span class="jd2-topic-date">{% if item.lesson %}{{ item.lesson.date|date:"d.m" }}{% endif %}</span>
+                    {# Sahib 2026-11-18: sətrə sayılan HƏR dərsin tarixi (mühazirə, seminar, lab) — ilki yox, hamısı. #}
+                    <span class="jd2-topic-date">{% for day in item.days %}<span class="jd2-topic-day{% if day.planned %} is-planned{% endif %}" title="{{ day.kind }} · {{ day.date|date:'d.m.Y' }}">{{ day.date|date:"d.m" }}<abbr class="jd2-topic-kind">{{ day.kind|slice:":1" }}</abbr></span>{% endfor %}</span>
                     <span class="jd2-topic-title">
                         {{ item.title }}
                         {% if item.is_today %}<span class="jd2-today-badge">{% trans "BU GÜN" context "registrar.journal" %}</span>

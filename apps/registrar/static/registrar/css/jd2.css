@@ -136,7 +136,11 @@
    grid ilə yan-yana axır, panel sətir sayına görə uzanır. */
 .jd2-topic-scroll { min-height: 0; }
 .jd2-topic-row { display: flex; gap: 10px; padding: 10px 16px; border-bottom: 1px solid #f1f5fc; }
-.jd2-topic-date { font-size: 11px; font-weight: 700; color: var(--j-soft); width: 38px; flex-shrink: 0; }
+.jd2-topic-date { font-size: 11px; font-weight: 700; color: var(--j-soft); width: 50px; flex-shrink: 0; display: flex; flex-direction: column; gap: 2px; }
+/* Sahib 2026-11-18: mövzunun hər dərsi (tarix + növün ilk hərfi: M / S / L) ayrıca sətirdə. */
+.jd2-topic-day { white-space: nowrap; }
+.jd2-topic-day.is-planned { opacity: .6; }
+.jd2-topic-kind { margin-left: 3px; font-size: 9.5px; font-weight: 700; text-decoration: none; color: var(--j-soft); opacity: .85; }
 .jd2-topic-title { font-size: 12.5px; font-weight: 600; color: var(--j-mid); }
 .jd2-topic-empty { color: var(--j-soft); }
 .jd2-topic-row.is-today { background: #eaf1fe; border-left: 3px solid #2563eb; }
