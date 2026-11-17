@@ -75,6 +75,9 @@ def chair_choices(application, user=None):
 
 #: Sahib 2026-11-17: kafedra kimi dekanlığa da yönləndirəndə MƏKTƏB (dekanlıq) seçilir.
 DEAN_OFFICE_CODE = "dekan"
+#: Sahib 2026-11-17 (gecə): tyutorlara (proqram koordinatoru şöbəsi) da MƏKTƏB seçilərək yönləndirilir — tyutor
+#: üzvlükləri məktəb (fakültə) əhatəlidir, seçilmiş məktəbin tyutorları müraciəti görür.
+SCHOOL_SCOPED_CODES = frozenset({DEAN_OFFICE_CODE, "koordinator"})
 
 
 def school_choices(application, user=None):
@@ -116,7 +119,7 @@ def forward_scope(application, target_unit, scope_id=None, user=None):
     from .routing import resolve_scope_unit
 
     scope = resolve_scope_unit(target_unit, applicant_unit(application))
-    if target_unit.code == DEAN_OFFICE_CODE:
+    if target_unit.code in SCHOOL_SCOPED_CODES:
         return _dean_office_scope(application, scope, scope_id, user)
     if target_unit.resolve_by != "chair":
         if scope_id:

@@ -46,7 +46,7 @@
                 var chairs = box.__app.forward_scopes || [];
                 var anySchool = chairs.some(function (scope) { return scope.own_school === false; });
                 scopePicker(box, chairs, anySchool ? "selectAnyChair" : "selectChair");
-            } else if (destination.code === "dekan" && (box.__app.forward_schools || []).length) {
+            } else if ((destination.code === "dekan" || destination.code === "koordinator") && (box.__app.forward_schools || []).length) {
                 scopePicker(box, box.__app.forward_schools, "selectSchool");
             }
         }

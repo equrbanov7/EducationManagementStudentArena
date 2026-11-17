@@ -437,3 +437,21 @@ def test_staff_creates_dean_application_with_chosen_school(world):
     }
     student_catalog = client_for(world["student"], app.organization).get(reverse("applications:catalog")).json()
     assert all(not item.get("schools") for item in student_catalog["kinds"])
+
+
+def test_rim_forwards_to_chosen_school_tutors(world):
+    """Sahib 2026-11-17: RİM tyutorlara (koordinator şöbəsi) məktəb seçərək yönləndirir; məktəb əhatəli tyutor görür."""
+    tutor = make_user("school_tutor_1117")
+    add_member(world["organization"], tutor, "tutor", scope_unit=world["other_tree"]["faculty"], permissions=HANDLE)
+    app = _staff_app(world)
+    workflow.forward(
+        application=app,
+        user=world["rim"],
+        target_unit=world["units"]["koordinator"],
+        note="Tyutorlara: birinci kurs siyahısı.",
+        scope_id=world["other_tree"]["faculty"].pk,
+    )
+    app.refresh_from_db()
+    assert app.current_scope_unit_id == world["other_tree"]["faculty"].pk
+    assert access.can_act(tutor, app)
+    assert not access.can_act(world["deputy"], app)
