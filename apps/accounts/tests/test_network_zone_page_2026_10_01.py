@@ -31,7 +31,9 @@ class NetworkZonePageTest(TestCase):
     def test_nginx_rewrites_external_journal_to_this_page(self):
         with open("docker/nginx/nginx.conf", encoding="utf-8") as handle:
             conf = handle.read()
-        self.assertIn("rewrite ^ /accounts/sebeke/jurnal/? last;", conf)
+        # Sahib 2026-11-17: kənar jurnal + «İmtahan balı» hesab istisnası yoxlamasından keçir, rədd olunsa bu səhifə.
+        self.assertIn('if ($ems_zone_path ~ "^external:/accounts/imtahan-bali/") { return 418; }', conf)
+        self.assertIn("error_page 401 403 =403 /accounts/sebeke/jurnal/;", conf)
         self.assertIn("rewrite ^ /accounts/sebeke/idareetme/? last;", conf)
         self.assertNotIn('"^external:/(jurnal|manage)/") { return 403; }', conf)
 

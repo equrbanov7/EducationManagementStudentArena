@@ -63,4 +63,11 @@ class JournalRemoteAccessTest(SimpleTestCase):
         middleware._deny = lambda request, **kwargs: HttpResponse(status=403)
         self.assertEqual(middleware(self.request()).status_code, 200)
         self.assertEqual(middleware(self.request(42)).status_code, 403)
-        self.assertEqual(middleware(self.request(path="/accounts/imtahan-bali/")).status_code, 403)
+        # Sahib 2026-11-17: «İmtahan balının daxil edilməsi» də jurnaldır — istisna ona da aiddir, başqa hesaba yox.
+        self.assertEqual(middleware(self.request(path="/accounts/imtahan-bali/")).status_code, 200)
+        self.assertEqual(middleware(self.request(42, path="/accounts/imtahan-bali/")).status_code, 403)
+        section = self.request(path="/accounts/profile/?section=exam-score-entry")
+        self.assertEqual(middleware(section).status_code, 200)
+        self.assertEqual(
+            middleware(self.request(42, path="/accounts/profile/?section=exam-score-entry")).status_code, 403
+        )
