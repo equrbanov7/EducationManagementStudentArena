@@ -26,6 +26,10 @@ HƏR tam səhifədə çıxır, istifadəçi «Elanı oxudum və tanış oldum» 
 
 İDARƏ: ``announcement.manage`` (struktur əhatəsinə tabe; dekan yalnız öz fakültəsinə).
 
+STATİSTİKA (2026-11-18): ``/elanlar/idare/statistika/`` — hədəf auditoriyadan kim popup-u görüb, kim
+oxuyub, kim görməyib; fakültə / kafedra / ixtisas / qrup / rol bölgüsü, şəxs siyahısı, Excel ixracı
+(``services/stats*.py``; SQL aqreqatı, tənbəl JSON, sabit sorğu sayı).
+
 SİLMƏ (2026-10-07): menecer əhatəsindəki İSTƏNİLƏN elanı silə bilər. Qəbzsiz qaralama
 birdəfəlik silinir; qalanı YUMŞAQ (``is_deleted``) — bütün istifadəçi səthlərindən çıxır,
 qəbzlər/sənədlər/yaradılmış müraciətlər saxlanılır, «Silinmişlər» filtrindən bərpa olunur

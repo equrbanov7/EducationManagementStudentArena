@@ -139,3 +139,14 @@ STATE_DELETED = "deleted"
 USER_STATES = ("active", "expired", "all")
 SORTS = ("new", "deadline", "priority")
 MANAGE_STATES = ("all", "draft", "scheduled", "active", "expired", "archived", "deleted")
+
+#: «Elan statistikası» (sahib 2026-11-18): bölgü ölçüləri, şəxs siyahısının vəziyyət filtri, limitlər.
+STATS_DIMENSIONS = ("faculty", "chair", "specialty", "group", "role")
+STATS_STATUSES = ("all", "seen", "read", "unseen")
+STATS_PAGE_SIZE = 25
+#: Bölmə filtri (uzaq axtarış) bir cavabda ən çox neçə bölmə qaytarır.
+STATS_UNIT_SEARCH_LIMIT = 50
+#: Excel ixracında şəxs sətirlərinin yuxarı həddi (bütün universitet ~7 000 nəfərdir).
+STATS_EXPORT_LIMIT = 20000
+#: Seçicidə göstərilən elan sayı (ən yeniləri).
+STATS_PICKER_LIMIT = 100

@@ -95,6 +95,9 @@
 
 .annm-row__actions { display: flex; margin: 0; }
 
+/* 2026-11-18: kartdan elanın statistikasına keçid («Kim görüb»). */
+.annm-row__statlink { flex: 0 0 auto; white-space: nowrap; }
+
 .annm-deleted {
     display: flex;
     flex-wrap: wrap;
@@ -561,6 +564,7 @@
     .annm-card { padding: var(--ems-sp-5, 14px); }
     .annm-row { padding: var(--ems-sp-4, 12px); }
     .annm-stats { width: 100%; justify-content: space-around; }
+    .annm-row__statlink { width: 100%; justify-content: center; min-height: 44px; }
     .annm-head__actions { width: 100%; }
     .annm-head__actions .ems-btn { flex: 1 1 auto; justify-content: center; min-height: 44px; }
 

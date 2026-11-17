@@ -40,7 +40,7 @@ def _org_id(organization):
     return getattr(organization, "pk", organization)
 
 
-def _family_roles(org_id) -> dict:
+def family_roles(org_id) -> dict:
     """``{ailə: [rol id-ləri]}`` — təşkilatın rol cədvəlindən (``family_of`` ilə EYNİ qayda)."""
     Role = django_apps.get_model("organizations", "Role")
     result: dict = {}
@@ -58,13 +58,17 @@ def _path_q(field: str, units) -> Q:
     return query
 
 
-def targeted_users(organization, families, units):
-    """Auditoriyaya düşən AKTİV istifadəçilərin ``QuerySet``-i (təkrarsız — JOIN yoxdur)."""
+def targeted_users(organization, families, units, *, roles=None):
+    """Auditoriyaya düşən AKTİV istifadəçilərin ``QuerySet``-i (təkrarsız — JOIN yoxdur).
+
+    ``roles`` — çağıran artıq ``family_roles`` ilə yükləyibsə (statistika), təkrar sorğu olmasın.
+    """
     User = get_user_model()
     org_id = _org_id(organization)
     families = {str(family) for family in families or ()}
     units = sorted({str(unit) for unit in units or ()})
-    roles = _family_roles(org_id) if families else {}
+    if roles is None:
+        roles = family_roles(org_id) if families else {}
     student_roles = roles.get(_STUDENTS, []) if _STUDENTS in families else []
     other_roles = [pk for family in sorted(families - {_STUDENTS}) for pk in roles.get(family, [])]
     if not student_roles and not other_roles:

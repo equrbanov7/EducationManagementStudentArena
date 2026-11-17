@@ -1,0 +1,113 @@
+{% extends "accounts/profile_embed_base.html" %}
+{% load i18n static %}
+{% comment %}«Elan statistikası» (sahib 2026-11-18): kim popup-u görüb, kim oxuyub, kim görməyib — fakültə / kafedra /
+ixtisas / qrup / rol üzrə bölgü + şəxs siyahısı. Səhifə yüngüldür: bölgü və siyahı `stats.js` ilə AYRI JSON
+uçlarından tənbəl yüklənir (`announcements:stats_summary` / `stats_people`). JS-siz də GET forması işləyir.{% endcomment %}
+
+{% block embed_title %}{% trans "Elan statistikası" context "announcements.stats" %}{% endblock %}
+
+{% block embed_extra_css %}
+    {% include "partials/ems_ui/_assets.html" %}
+    <link rel="stylesheet" href="{% static 'announcements/css/announcements.css' %}?v=20261118-stats">
+    <link rel="stylesheet" href="{% static 'announcements/css/manage.css' %}?v=20261118-stats">
+    <link rel="stylesheet" href="{% static 'announcements/css/stats.css' %}?v=20261118-1">
+{% endblock %}
+
+{% block embed_content %}
+<div class="ann annm annst" data-annst-root
+     data-summary-url="{% url 'announcements:stats_summary' %}"
+     data-people-url="{% url 'announcements:stats_people' %}"
+     data-export-url="{% url 'announcements:stats_export' %}">
+    <nav class="annm-crumbs" aria-label="{% trans 'Naviqasiya' context 'announcements.manage' %}">
+        <a href="{% url 'announcements:manage_list' %}"><i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Elanların idarəsi" context "announcements.manage" %}</a>
+    </nav>
+
+    <header class="ann-head">
+        <p class="ann-head__intro">{% trans "Elanı kimin gördüyü, kimin oxuduğu və kimin hələ görmədiyi. Rəqəmlər elanın hədəf auditoriyasına görədir." context "announcements.stats" %}</p>
+        {% if announcement %}
+        <div class="annm-head__actions">
+            <a class="ems-btn" href="{% url 'announcements:manage_edit' announcement.pk %}"><i class="fas fa-pen-to-square" aria-hidden="true"></i> {% trans "Elanı aç" context "announcements.stats" %}</a>
+            <a class="ems-btn ems-btn--primary" data-annst-export
+               href="{% url 'announcements:stats_export' %}?elan={{ announcement.pk }}&amp;dim={{ params.dim }}{% if params.role %}&amp;role={{ params.role }}{% endif %}{% if params.unit %}&amp;unit={{ params.unit }}{% endif %}">
+                <i class="fas fa-file-excel" aria-hidden="true"></i> {% trans "Excel-ə yüklə" context "announcements.stats" %}
+            </a>
+        </div>
+        {% endif %}
+    </header>
+
+    {% if not announcement %}
+    <div class="ems-empty ann-empty" role="status">
+        <span class="ems-empty-icon"><i class="fas fa-chart-column" aria-hidden="true"></i></span>
+        <p class="ems-empty-title">{% trans "Hələ dərc olunmuş elan yoxdur" context "announcements.stats" %}</p>
+        <p class="ems-empty-hint">{% trans "Elan dərc olunandan sonra burada kimin gördüyü görünəcək." context "announcements.stats" %}</p>
+    </div>
+    {% else %}
+    <form class="ann-filters annst-filters" data-annst-filters method="get" role="search"
+          aria-label="{% trans 'Statistika filtrləri' context 'announcements.stats' %}">
+        <div class="bootstrap-single-select bootstrap-single-select--ems annst-filters__elan">
+            <select name="elan" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-annst-elan
+                    data-live-search="true" data-live-search-placeholder="{% trans 'Elan axtar…' context 'announcements.stats' %}"
+                    aria-label="{% trans 'Elan' context 'announcements.stats' %}">
+                {% for item in picker %}<option value="{{ item.id }}"{% if item.id == params.elan %} selected{% endif %}>{{ item.text }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="bootstrap-single-select bootstrap-single-select--ems ann-filters__select">
+            <select name="dim" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-annst-field
+                    aria-label="{% trans 'Bölgü' context 'announcements.stats' %}">
+                {% for value, label in dimensions %}<option value="{{ value }}"{% if params.dim == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="bootstrap-single-select bootstrap-single-select--ems ann-filters__select">
+            <select name="role" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-annst-field
+                    aria-label="{% trans 'Rol' context 'announcements.stats' %}">
+                <option value="">{% trans "Bütün rollar" context "announcements.stats" %}</option>
+                {% for value, label in families %}<option value="{{ value }}"{% if params.role == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+            </select>
+        </div>
+        <div class="bootstrap-single-select bootstrap-single-select--ems annst-filters__unit">
+            <select name="unit" class="ems-select bootstrap-single-select__native" data-bootstrap-select data-annst-field data-annst-unit
+                    data-live-search="true" data-live-search-url="{% url 'announcements:stats_units' %}"
+                    data-live-search-placeholder="{% trans 'Fakültə, kafedra, ixtisas və ya qrup…' context 'announcements.stats' %}"
+                    data-live-search-empty="{% trans 'Uyğun bölmə yoxdur' context 'announcements.stats' %}"
+                    aria-label="{% trans 'Bölmə' context 'announcements.stats' %}">
+                <option value="">{% trans "Bütün bölmələr" context "announcements.stats" %}</option>
+                {% for item in unit_options %}<option value="{{ item.id }}"{% if item.id == params.unit %} selected{% endif %}>{{ item.text }}</option>{% endfor %}
+            </select>
+        </div>
+        <noscript><button type="submit" class="ems-btn">{% trans "Göstər" context "announcements.manage" %}</button></noscript>
+    </form>
+
+    <section class="annst-summary" data-annst-summary aria-live="polite" aria-busy="true">
+        <p class="annst-loading"><i class="fas fa-spinner fa-spin" aria-hidden="true"></i> {% trans "Statistika hesablanır…" context "announcements.stats" %}</p>
+    </section>
+
+    <section class="annm-card annst-people" aria-labelledby="annst-people-title">
+        <h2 class="annm-card__title" id="annst-people-title">{% trans "Şəxslər" context "announcements.stats" %}</h2>
+        <form class="annm-ack__filters" data-annst-people-filters role="search" novalidate
+              aria-label="{% trans 'Şəxs filtrləri' context 'announcements.stats' %}">
+            <fieldset class="annm-tabs">
+                <legend class="ann-sr-only">{% trans "Vəziyyət" context "announcements.stats" %}</legend>
+                <label class="annm-tab"><input type="radio" name="status" value="all" data-annst-status{% if params.status == "all" %} checked{% endif %}> <span>{% trans "Hamısı" context "announcements.cabinet" %}</span></label>
+                <label class="annm-tab"><input type="radio" name="status" value="seen" data-annst-status{% if params.status == "seen" %} checked{% endif %}> <span>{% trans "Popup görüb" context "announcements.manage" %}</span></label>
+                <label class="annm-tab"><input type="radio" name="status" value="read" data-annst-status{% if params.status == "read" %} checked{% endif %}> <span>{% trans "Oxuyub" context "announcements.manage" %}</span></label>
+                <label class="annm-tab"><input type="radio" name="status" value="unseen" data-annst-status{% if params.status == "unseen" %} checked{% endif %}> <span>{% trans "Görməyib" context "announcements.stats" %}</span></label>
+            </fieldset>
+            <div class="ann-filters__search annm-ack__search">
+                <i class="fas fa-magnifying-glass ann-filters__search-icon" aria-hidden="true"></i>
+                <input type="search" name="q" value="{{ params.q }}" class="ems-input ann-filters__input" maxlength="100" autocomplete="off" data-annst-search
+                       placeholder="{% trans 'Ad, soyad və ya login…' context 'announcements.manage' %}"
+                       aria-label="{% trans 'Şəxslərdə axtar' context 'announcements.stats' %}">
+            </div>
+        </form>
+        <div class="annm-ack__results" data-annst-people aria-live="polite" aria-busy="true">
+            <p class="annst-loading"><i class="fas fa-spinner fa-spin" aria-hidden="true"></i> {% trans "Siyahı yüklənir…" context "announcements.stats" %}</p>
+        </div>
+    </section>
+    <p class="ann-sr-only" data-annst-error hidden>{% trans "Statistikanı yükləmək alınmadı. Bir az sonra yenidən cəhd edin." context "announcements.stats" %}</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block embed_extra_js %}
+    <script src="{% static 'announcements/js/stats.js' %}?v=20261118-1"></script>
+{% endblock %}

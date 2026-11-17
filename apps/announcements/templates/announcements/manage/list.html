@@ -7,8 +7,8 @@
 
 {% block embed_extra_css %}
     {% include "partials/ems_ui/_assets.html" %}
-    <link rel="stylesheet" href="{% static 'announcements/css/announcements.css' %}?v=20261007-5">
-    <link rel="stylesheet" href="{% static 'announcements/css/manage.css' %}?v=20261007-5">
+    <link rel="stylesheet" href="{% static 'announcements/css/announcements.css' %}?v=20261118-stats">
+    <link rel="stylesheet" href="{% static 'announcements/css/manage.css' %}?v=20261118-stats">
 {% endblock %}
 
 {% block embed_content %}
@@ -19,6 +19,7 @@
         </p>
         <div class="annm-head__actions">
             <a class="ems-btn" href="{{ cabinet_url }}"><i class="fas fa-eye" aria-hidden="true"></i> {% trans "Elanlarım" context "announcements.manage" %}</a>
+            <a class="ems-btn" href="{% url 'announcements:stats' %}"><i class="fas fa-chart-column" aria-hidden="true"></i> {% trans "Elan statistikası" context "announcements.stats" %}</a>
             <a class="ems-btn ems-btn--primary" href="{% url 'announcements:manage_create' %}"><i class="fas fa-plus" aria-hidden="true"></i> {% trans "Yeni elan" context "announcements.manage" %}</a>
         </div>
     </header>

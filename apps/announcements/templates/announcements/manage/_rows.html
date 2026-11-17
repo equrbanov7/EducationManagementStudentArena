@@ -32,6 +32,10 @@
             <div><dt>{% trans "Müraciət" context "announcements.manage" %}</dt><dd>{{ row.stats.applied }}</dd></div>
             {% if row.requires_ack %}<div class="annm-stats__ack"><dt>{% trans "Təsdiq" context "announcements.manage" %}</dt><dd>{{ row.stats.acked }}</dd></div>{% endif %}
         </dl>
+        {% if not row.is_deleted and row.state != "draft" %}
+        <a class="ems-btn ems-btn--sm annm-row__statlink" href="{% url 'announcements:stats' %}?elan={{ row.pk }}"
+           aria-label="{% blocktrans trimmed with title=row.title context 'announcements.stats' %}«{{ title }}» elanının statistikası{% endblocktrans %}"><i class="fas fa-chart-column" aria-hidden="true"></i> {% trans "Kim görüb" context "announcements.stats" %}</a>
+        {% endif %}
         {% if row.is_deleted %}
         <form method="post" action="{% url 'announcements:manage_action' row.pk %}" class="annm-row__actions">
             {% csrf_token %}
