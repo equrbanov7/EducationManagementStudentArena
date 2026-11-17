@@ -1930,7 +1930,19 @@ jobs:
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor")
-              if [ "$BATCH" = "undo" ]; then
+              if [ "$COMMAND" = "split_group_journal_20261112" ] && [ -n "$BATCH" ] && [ "$BATCH" != "undo" ]; then
+                # MR-000453 (2026-11-17): batch = mənbə:hədəf:qrup[:merge|:undo] — istənilən cüt; merge = hədəfin dərslərinə birləşdir.
+                uuid='[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+                match "$BATCH" "^${uuid}:${uuid}:${uuid}(:merge|:undo)?\$" || { echo "batch = mənbə:hədəf:qrup[:merge|:undo]" >&2; exit 2; }
+                IFS=: read -r split_src split_tgt split_grp split_mode <<< "$BATCH"
+                args+=(--source "$split_src" --target "$split_tgt" --group "$split_grp")
+                if [ "$split_mode" = "merge" ]; then
+                  args+=(--merge-target-lessons)
+                elif [ "$split_mode" = "undo" ]; then
+                  test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }
+                  args+=(--undo)
+                fi
+              elif [ "$BATCH" = "undo" ]; then
                 test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }
                 args+=(--undo)
               elif [ -n "$BATCH" ]; then

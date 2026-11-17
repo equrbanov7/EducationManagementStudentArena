@@ -232,6 +232,32 @@ class GroupSplitTest(_GuestRosterBase):
             self.assertEqual(busy.exception.code, "target_has_lessons")
             self.assertFalse(AuditLog.objects.filter(resource_type=split.RESOURCE).exists())
 
+    def test_merge_target_lessons_reuses_existing_columns_and_undo_keeps_them(self):
+        """MR-000453: hədəfdə eyni gün/növ dərsi varsa yenisi yaranmır — xanalar ona yazılır; undo onu saxlayır."""
+        with bypass_rls():
+            day = self.own_seminar.date
+            existing = Lesson.objects.create(
+                organization=self.org,
+                offering=self.other_offering,
+                date=day,
+                kind="seminar",
+                hours=2,
+                start_time=datetime.time(9, 0),
+            )
+            with self.assertRaises(split.Blocked):
+                self._run()
+            counts, _ = self._run(merge_target_lessons=True)
+            self.assertEqual(counts["lessons_merged_existing"], 1)
+            self.assertEqual(counts["lessons_moved_created"], 1)  # qarışıq seminar (başqa gün) yeni yaranır
+            self.assertEqual(LessonMark.objects.filter(lesson=existing).count(), 2)
+            self.assertEqual(Lesson.objects.filter(offering=self.other_offering, date=day, kind="seminar").count(), 1)
+            undone = Counter()
+            split_undo.undo(organization=self.org, actor=self.owner, counts=undone, **self.spec)
+            self.assertEqual(undone["undo_splits"], 1)
+            self.assertTrue(Lesson.objects.filter(pk=existing.pk).exists())
+            self.assertFalse(LessonMark.objects.filter(lesson=existing).exists())
+            self.assertEqual(Lesson.objects.filter(offering=self.other_offering).count(), 1)
+
     def test_command_dry_run_writes_nothing(self):
         out = StringIO()
         call_command(

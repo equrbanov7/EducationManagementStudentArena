@@ -29,8 +29,9 @@ def _model(name, app="registrar"):
 
 def _post_split_data(target_id, since, manifest) -> bool:
     Lesson, LessonMark, Score = _model("Lesson"), _model("LessonMark"), _model("ComponentScore")
-    lessons = set(manifest.get("lessons_created", []))
-    marks = set(manifest.get("marks_created", []))
+    # «merge_target_lessons» (MR-000453): hədəfin ayrılmadan ƏVVƏLKİ dərs/xanaları da tanınır — undo onlara toxunmur.
+    lessons = set(manifest.get("lessons_created", [])) | set(manifest.get("target_lessons_preexisting", []))
+    marks = set(manifest.get("marks_created", [])) | set(manifest.get("target_marks_preexisting", []))
     scores = set(manifest.get("scores_created", []))
     rows = Lesson.objects.filter(offering_id=target_id)
     if any(str(pk) not in lessons for pk in rows.values_list("pk", flat=True)):

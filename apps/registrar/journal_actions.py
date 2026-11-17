@@ -202,7 +202,9 @@ def lesson_action(request, offering_id, lesson_id):
         from apps.registrar import schedule as schedule_service
 
         start_time, end_time = schedule_service.parse_time_slot(request.POST.get("lesson_time"))
-        if start_time is None:  # cədvəl slotunun öz (standart olmayan) zəng saatı redaktədə silinmir (2026-10-10)
+        if "lesson_time" not in request.POST:  # sahə heç göndərilməyib → saat dəyişmir (2026-11-17, MR-000450)
+            start_time, end_time = lesson.start_time, lesson.end_time
+        elif start_time is None:  # cədvəl slotunun öz (standart olmayan) zəng saatı redaktədə silinmir (2026-10-10)
             from apps.registrar.journal_lesson_prefill import own_lesson_time
 
             start_time, end_time = own_lesson_time(lesson, request.POST.get("lesson_time"))

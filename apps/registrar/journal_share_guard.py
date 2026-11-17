@@ -68,7 +68,8 @@ def deny(request):
     message = pgettext("registrar.journal_share", "Bu xana bölünmüş jurnalda sizin payınıza aid deyil.")
     if journal_autosave.requested(request):
         return journal_autosave.refused(message, code="share_scope", status=403)
-    return HttpResponseForbidden("share_scope", content_type="text/plain; charset=utf-8")
+    # Adi forma POST-u: xam «share_scope» mətni əvəzinə oxunaqlı mesaj (MR-000459 — müəllim ağ səhifə görürdü).
+    return HttpResponseForbidden(message, content_type="text/plain; charset=utf-8")
 
 
 def _rows_ok(scope_, post) -> bool:
@@ -139,8 +140,27 @@ def lesson_post_guard(request, offering, lesson):
         return deny(request)
     posted_teacher = (request.POST.get("lesson_instructor") or "").strip()
     if not scope_.is_owner and posted_teacher and posted_teacher != str(request.user.pk):
-        return deny(request)
+        if posted_teacher not in _unchanged_teacher_ids(offering, lesson):
+            return deny(request)
+        _keep_teacher(request)
     return None
+
+
+def _unchanged_teacher_ids(offering, lesson) -> set:
+    """Redaktə modalının «dəyişmədən» göndərdiyi müəllim: dərsin öz müəllimi, adsız dərsdə isə açılışın sahibi.
+
+    MR-000459 (2026-11-17): modal gizli sahəni dərsin müəllimi ilə (boşdursa açılışın sahibi ilə) doldurur — pay
+    sahibi yalnız mövzunu düzəldəndə də bu id gəlir və əvvəl «başqa müəllimə keçirmə» sayılıb 403 verirdi."""
+    if lesson.instructor_id is not None:
+        return {str(lesson.instructor_id)}
+    return {str(offering.instructor_id)} if offering.instructor_id else set()
+
+
+def _keep_teacher(request) -> None:
+    """Müəllim sahəsini boşalt — ``lesson_action`` boş dəyəri «dəyişmə» kimi oxuyur (adsız dərs adsız qalır)."""
+    post = request.POST.copy()
+    post["lesson_instructor"] = ""
+    request.POST = post
 
 
 def slot_activation(user, offering, slot):

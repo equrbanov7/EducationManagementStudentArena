@@ -11,7 +11,8 @@ TƏRİF — açılış o kafedraya aiddir ki, FƏNNİN TƏDRİS YÜKÜ ona aiddi
    arasında açılışın qrupu; ləğv edilmiş sənəd xaric) → ``TeachingTask.chair``.
 2. Yoxdursa **fənnin aparıcı kafedrası** (``Subject.chair_unit``).
 3. Yoxdursa **fənnin yükü** başqa semestrlərdə (köçürülmüş açılışlar): fənnin tapşırıq sətirlərinin
-   kafedraları; bir neçədirsə, açılışın müəllimi tədris üzvü olduğu kafedraya daralır (yoxsa hamısı).
+   kafedraları; bir neçədirsə, açılışın müəllimi tədris üzvü olduğu kafedraya daralır, heç biri deyilsə
+   müəllimin ŞTAT kafedrasına (ştatı yoxdursa hamısı).
 4. Heç biri yoxdursa (yükdə izi olmayan köhnə fənn): qrup kafedranın alt-ağacındadırsa həmin kafedra
    (seed quruluşu), yoxsa müəllimin ŞTAT kafedrası — aktiv, TƏDRİS rollu kafedra üzvlüyü; əsas
    (``is_primary``) üzvlük varsa yalnız o.
@@ -151,7 +152,12 @@ def offering_chairs(offerings, organization_id) -> dict:
             found = {str(subject_chair)}
         if not found and subject_id in by_subject:
             candidates = by_subject[subject_id]
-            found = (candidates & every.get(instructor_id, set())) or candidates
+            # Bir neçə kafedra və heç biri müəllimin deyil → müəllimin ştat kafedrası (MR-000445, 2026-11-17:
+            # yüksüz «Tədqiqat metodları» fənnin yükü olan BÜTÜN kafedraların süzgəcinə düşürdü).
+            narrowed = candidates & every.get(instructor_id, set())
+            if not narrowed and len(candidates) > 1:
+                narrowed = set(staff.get(instructor_id, ()))
+            found = narrowed or candidates
         if not found:
             group_chair = _nearest(group_path, chairs)
             found = {group_chair} if group_chair else staff.get(instructor_id, frozenset())
