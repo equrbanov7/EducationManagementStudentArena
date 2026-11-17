@@ -1,0 +1,68 @@
+{% load i18n %}
+{% comment %}Elan statistikasının KPI-ləri + bölgü cədvəli (`stats.summary`) — `stats_summary` JSON cavabı.
+Sətir adı düymədir: bölməyə klik → filtr həmin bölməyə daralır (fakültə → ixtisas → qrup), rola klik → rol filtri.{% endcomment %}
+<div class="ems-kpis {% if data.requires_ack %}ems-kpis--5{% else %}ems-kpis--4{% endif %} annm-kpis">
+    <div class="ems-kpi"><div class="ems-kpi__label">{% trans "Hədəf auditoriya" context "announcements.manage" %}</div><div class="ems-kpi__value">{{ data.totals.total }}</div></div>
+    <div class="ems-kpi"><div class="ems-kpi__label">{% trans "Popup görüb" context "announcements.manage" %}</div><div class="ems-kpi__value">{{ data.totals.seen }}<span class="ems-kpi__unit">{{ data.totals.seen_pct }}%</span></div></div>
+    <div class="ems-kpi"><div class="ems-kpi__label">{% trans "Oxuyub" context "announcements.manage" %}</div><div class="ems-kpi__value">{{ data.totals.read }}<span class="ems-kpi__unit">{{ data.totals.read_pct }}%</span></div></div>
+    <div class="ems-kpi annst-kpi--unseen"><div class="ems-kpi__label">{% trans "Görməyib" context "announcements.stats" %}</div><div class="ems-kpi__value">{{ data.totals.unseen }}<span class="ems-kpi__unit">{{ data.totals.unseen_pct }}%</span></div></div>
+    {% if data.requires_ack %}
+    <div class="ems-kpi annm-kpi--ack"><div class="ems-kpi__label">{% trans "Təsdiq edən" context "announcements.manage" %}</div><div class="ems-kpi__value">{{ data.totals.acked }}</div></div>
+    {% endif %}
+</div>
+
+{% if data.rows %}
+<div class="ems-tablewrap annst-tablewrap">
+    <div class="ems-tablescroll">
+        <table class="ems-table annst-table">
+            <caption class="ann-sr-only">{% trans "Bölgü" context "announcements.stats" %}</caption>
+            <thead>
+                <tr>
+                    <th scope="col">{% if data.dimension == "faculty" %}{% trans "Fakültə" context "announcements.stats" %}{% elif data.dimension == "chair" %}{% trans "Kafedra" context "announcements.stats" %}{% elif data.dimension == "specialty" %}{% trans "İxtisas" context "announcements.stats" %}{% elif data.dimension == "group" %}{% trans "Qrup" context "announcements.stats" %}{% else %}{% trans "Rol" context "announcements.stats" %}{% endif %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Hədəf" context "announcements.stats" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Popup görüb" context "announcements.manage" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Oxuyub" context "announcements.manage" %}</th>
+                    <th scope="col" class="ems-table__num">{% trans "Görməyib" context "announcements.stats" %}</th>
+                    <th scope="col" class="annst-table__bar-col">{% trans "Görənlərin payı" context "announcements.stats" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in data.rows %}
+                <tr>
+                    <th scope="row">
+                        {% if row.key and data.dimension == "role" %}
+                        <button type="button" class="annst-drill" data-annst-drill-role="{{ row.key }}">{{ row.label }}</button>
+                        {% elif row.key %}
+                        <button type="button" class="annst-drill" data-annst-drill-unit="{{ row.key }}" data-annst-drill-label="{{ row.label }}"
+                                data-annst-next-dim="{% if data.dimension == 'faculty' %}specialty{% elif data.dimension == 'specialty' %}group{% else %}{{ data.dimension }}{% endif %}">{{ row.label }}</button>
+                        {% else %}
+                        <span class="annst-missing">{{ row.label }}</span>
+                        {% endif %}
+                    </th>
+                    <td class="ems-table__num">{{ row.total }}</td>
+                    <td class="ems-table__num">{{ row.seen }} <span class="annst-pct">{{ row.seen_pct }}%</span></td>
+                    <td class="ems-table__num">{{ row.read }} <span class="annst-pct">{{ row.read_pct }}%</span></td>
+                    <td class="ems-table__num">{{ row.unseen }} <span class="annst-pct">{{ row.unseen_pct }}%</span></td>
+                    <td class="annst-table__bar-col">
+                        <progress class="annst-bar" value="{{ row.reached }}" max="{% if row.total %}{{ row.total }}{% else %}1{% endif %}"
+                                  aria-label="{% blocktrans trimmed with pct=row.reached_pct context 'announcements.stats' %}Görənlər: {{ pct }}%{% endblocktrans %}"></progress>
+                        <span class="annst-pct">{{ row.reached_pct }}%</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% if data.dimension == "chair" %}
+<p class="annst-hint">{% trans "Tələbələr kafedraya bağlı deyil — onlar «Bölmə göstərilməyib» sətrindədir. Tələbələr üçün fakültə, ixtisas və ya qrup bölgüsünə baxın." context "announcements.stats" %}</p>
+{% elif data.dimension == "specialty" or data.dimension == "group" %}
+<p class="annst-hint">{% trans "Müəllim və əməkdaşlar ixtisasa və qrupa bağlı deyil — onlar «Bölmə göstərilməyib» sətrindədir." context "announcements.stats" %}</p>
+{% endif %}
+<p class="annst-hint">{% trans "«Görənlərin payı» — popup-u görən və ya elanı açıb oxuyanlar." context "announcements.stats" %}</p>
+{% else %}
+<div class="ems-empty ann-empty" role="status">
+    <span class="ems-empty-icon"><i class="fas fa-users" aria-hidden="true"></i></span>
+    <p class="ems-empty-title">{% trans "Bu seçimdə heç kim yoxdur" context "announcements.stats" %}</p>
+</div>
+{% endif %}

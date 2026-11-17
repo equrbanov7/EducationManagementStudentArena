@@ -2,6 +2,7 @@
 
 from .manage import manage_action, manage_create, manage_edit, manage_list, manage_preview, manage_rows
 from .manage_api import manage_audience_count, manage_recipients
+from .stats import stats_export, stats_page, stats_people, stats_summary, stats_units
 from .user import ack, apply, attachment_download, list_fragment, mark_read, popup_seen
 
 __all__ = [
@@ -19,4 +20,9 @@ __all__ = [
     "manage_rows",
     "mark_read",
     "popup_seen",
+    "stats_export",
+    "stats_page",
+    "stats_people",
+    "stats_summary",
+    "stats_units",
 ]

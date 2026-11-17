@@ -43,6 +43,7 @@ def announcements_panel(context):
         "view_as": bool(getattr(request, "is_view_as", False)),
         "can_manage": access.can_manage(user, organization, request=request),
         "manage_url": reverse("announcements:manage_list"),
+        "stats_url": reverse("announcements:stats"),
         "list_url": reverse("announcements:list"),
         "back_url": f"{profile_url}?section={PROFILE_SECTION}",
         "profile_base_url": profile_url,

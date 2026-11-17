@@ -29,6 +29,13 @@
     flex: 1 1 320px;
 }
 
+/* 2026-11-18: «Elan statistikası» + «Elanları idarə et» yan-yana. */
+.ann-head__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-3, 10px);
+}
+
 .ann-sr-only {
     position: absolute;
     width: 1px;
@@ -563,6 +570,7 @@ p.ann-ack { flex-direction: row; align-items: center; gap: 8px; margin: 0; font-
     .ann-detail { padding: var(--ems-sp-5, 14px); }
     .ann-detail__title { font-size: var(--ems-fs-xl, 18px); }
     .ann-deadline-box__left { margin-left: 0; }
+    .ann-head__actions { width: 100%; }
     .ann-head__manage { width: 100%; justify-content: center; }
     .ann-ack__submit { width: 100%; }
     .ann-card__link { padding: var(--ems-sp-4, 12px) var(--ems-sp-5, 14px); }

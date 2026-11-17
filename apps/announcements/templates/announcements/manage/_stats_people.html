@@ -1,0 +1,40 @@
+{% load i18n %}
+{% comment %}Elan statistikasının şəxs siyahısı (`stats.people_page`) — `stats_people` JSON cavabı (server tərəfdə səhifələnir).{% endcomment %}
+<p class="ann-count">{% blocktrans trimmed count n=people.total context "announcements.manage" %}{{ n }} nəfər{% plural %}{{ n }} nəfər{% endblocktrans %}</p>
+{% if people.items %}
+<ul class="annm-people" role="list">
+    {% for person in people.items %}
+    <li class="annm-person annst-person">
+        <span class="annm-person__avatar" aria-hidden="true">{{ person.initials }}</span>
+        <span class="annm-person__who">
+            <span class="annm-person__name">{{ person.name }}</span>
+            <span class="annm-person__login">{{ person.username }}{% if person.family_label %} · {{ person.family_label }}{% endif %}{% if person.unit_label %} · {{ person.unit_label }}{% endif %}{% if person.faculty_label %} · {{ person.faculty_label }}{% endif %}</span>
+        </span>
+        <span class="annst-person__states">
+            {% if person.ann_seen %}<span class="annm-person__state is-acked"><i class="far fa-window-restore" aria-hidden="true"></i> {% blocktrans trimmed with day=person.ann_seen|date:"d.m.Y H:i" context "announcements.stats" %}Popup: {{ day }}{% endblocktrans %}</span>{% endif %}
+            {% if person.ann_read %}<span class="annm-person__state is-acked"><i class="fas fa-book-open" aria-hidden="true"></i> {% blocktrans trimmed with day=person.ann_read|date:"d.m.Y H:i" context "announcements.stats" %}Oxuyub: {{ day }}{% endblocktrans %}</span>{% endif %}
+            {% if announcement.requires_ack and person.ann_ack %}<span class="annm-person__state is-acked"><i class="fas fa-circle-check" aria-hidden="true"></i> {% blocktrans trimmed with day=person.ann_ack|date:"d.m.Y H:i" context "announcements.manage" %}Təsdiq edib: {{ day }}{% endblocktrans %}</span>{% endif %}
+            {% if not person.ann_seen and not person.ann_read %}<span class="annm-person__state is-pending"><i class="fas fa-eye-slash" aria-hidden="true"></i> {% trans "Görməyib" context "announcements.stats" %}</span>{% endif %}
+        </span>
+    </li>
+    {% endfor %}
+</ul>
+{% if people.pages > 1 %}
+<nav class="ann-pager" aria-label="{% trans 'Səhifələr' context 'announcements.cabinet' %}">
+    <button type="button" class="ems-btn ems-btn--sm" data-annst-page="{{ people.page|add:'-1' }}"{% if people.page <= 1 %} disabled{% endif %}><i class="fas fa-chevron-left" aria-hidden="true"></i> {% trans "Əvvəlki" context "announcements.cabinet" %}</button>
+    <span class="ann-pager__info">{% blocktrans trimmed with page=people.page pages=people.pages context "announcements.cabinet" %}{{ page }} / {{ pages }}{% endblocktrans %}</span>
+    <button type="button" class="ems-btn ems-btn--sm" data-annst-page="{{ people.page|add:'1' }}"{% if people.page >= people.pages %} disabled{% endif %}>{% trans "Növbəti" context "announcements.cabinet" %} <i class="fas fa-chevron-right" aria-hidden="true"></i></button>
+</nav>
+{% endif %}
+{% else %}
+<div class="ems-empty ann-empty annm-people__empty" role="status">
+    <span class="ems-empty-icon"><i class="fas fa-users" aria-hidden="true"></i></span>
+    {% if people.q %}
+    <p class="ems-empty-title">{% trans "Axtarışa uyğun şəxs tapılmadı" context "announcements.stats" %}</p>
+    {% elif people.status == "unseen" %}
+    <p class="ems-empty-title">{% trans "Hamı elanı görüb" context "announcements.stats" %}</p>
+    {% else %}
+    <p class="ems-empty-title">{% trans "Bu seçimdə heç kim yoxdur" context "announcements.stats" %}</p>
+    {% endif %}
+</div>
+{% endif %}

@@ -1,0 +1,109 @@
+/* «Elan statistikası» (2026-11-18) — bölgü cədvəli, faiz zolağı, şəxs siyahısı.
+ * Ortaq qat: ems_ui (kpi, table), elanların manage.css-i (annm-card, annm-tabs, annm-people). */
+
+.annst {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-5, 14px);
+}
+
+.annst-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ems-sp-3, 10px);
+}
+
+.annst-filters__elan { flex: 2 1 320px; min-width: 0; }
+.annst-filters__unit { flex: 1 1 240px; min-width: 0; }
+
+.annst-summary {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4, 12px);
+    min-width: 0;
+}
+
+.annst-loading {
+    margin: 0;
+    padding: var(--ems-sp-6, 16px);
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-md, 14px);
+}
+
+.annst-kpi--unseen .ems-kpi__value { color: var(--ems-danger-700); }
+
+.annst-tablewrap { min-width: 0; }
+
+.annst-table th[scope="row"] { font-weight: 600; }
+
+.annst-drill {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ems-primary-700);
+    font: inherit;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+
+.annst-drill:hover { text-decoration: underline; }
+
+.annst-drill:focus-visible {
+    outline: 2px solid var(--ems-primary-300);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.annst-missing { color: var(--ems-neutral-500); font-style: italic; }
+
+.annst-pct {
+    margin-left: 4px;
+    color: var(--ems-neutral-500);
+    font-size: var(--ems-fs-sm, 12px);
+    font-variant-numeric: tabular-nums;
+}
+
+.annst-table__bar-col { min-width: 160px; white-space: nowrap; }
+
+.annst-bar {
+    width: 110px;
+    height: 8px;
+    vertical-align: middle;
+    border: 0;
+    border-radius: var(--ems-r-pill, 999px);
+    background: var(--ems-neutral-100);
+    overflow: hidden;
+    appearance: none;
+}
+
+.annst-bar::-webkit-progress-bar { background: var(--ems-neutral-100); border-radius: var(--ems-r-pill, 999px); }
+.annst-bar::-webkit-progress-value { background: var(--ems-success-600); border-radius: var(--ems-r-pill, 999px); }
+.annst-bar::-moz-progress-bar { background: var(--ems-success-600); border-radius: var(--ems-r-pill, 999px); }
+
+.annst-hint {
+    margin: 0;
+    color: var(--ems-neutral-600);
+    font-size: var(--ems-fs-sm, 12px);
+}
+
+.annst-people {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ems-sp-4, 12px);
+}
+
+.annst-person__states {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-left: auto;
+}
+
+@media (max-width: 640px) {
+    .annst-filters__elan,
+    .annst-filters__unit { flex-basis: 100%; }
+    .annst-person__states { margin-left: 0; width: 100%; }
+    .annst-table__bar-col { min-width: 0; }
+    .annst-bar { width: 70px; }
+}
