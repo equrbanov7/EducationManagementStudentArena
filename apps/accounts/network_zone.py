@@ -336,7 +336,9 @@ class NetworkZoneMiddleware:
         if temporary_superuser_exempt(request):
             return self.get_response(request)
         path = request.path_info
-        if path.startswith("/jurnal/"):
+        # Sahib 2026-11-17: hesab istisnası (``JOURNAL_REMOTE_USER_IDS``) bütün JURNAL yollarına — «İmtahan balının
+        # daxil edilməsi» ekranı və API-ləri də daxil (əvvəl yalnız ``/jurnal/``). Digər zona qaydaları dəyişmir.
+        if _journal_path(path, (request.GET.get("section") or "").strip()):
             from .journal_remote_access import journal_remote_access_allowed
 
             if journal_remote_access_allowed(request):
