@@ -250,7 +250,7 @@ DEFAULT_UNIT_SEED = (
         "code": "kafedra",
         "name": "Kafedra müdirliyi",
         "note": "müəllim, fənn tədrisi, sillabus",
-        "handler_role_names": ["chair_head"],
+        "handler_role_names": ["chair_head", "lab_assistant"],
         "requires_scope": True,
         "resolve_by": ResolveBy.CHAIR.value,
         "default_sla_days": 5,
