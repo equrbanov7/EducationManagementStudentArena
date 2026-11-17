@@ -2,8 +2,9 @@
 
 import importlib
 
-import pytest
 from django.apps import apps as django_apps
+
+import pytest
 
 from apps.applications.constants import DEFAULT_UNIT_SEED
 
