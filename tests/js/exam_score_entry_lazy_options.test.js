@@ -11,6 +11,8 @@
    Göndərilən fayllar OLDUĞU KİMİ icra olunur:
      static/js/ems_ajax_init.js                              — EMSReady / EMSDelegate
      apps/accounts/static/accounts/js/exam_score_entry.js
+     apps/accounts/static/accounts/js/exam_score_entry_keys.js   — klaviatura (2026-11-18 ayrıldı)
+     apps/accounts/static/accounts/js/exam_score_entry_appeal.js — «Apellyasiya balı» seçimi (2026-11-18)
      apps/accounts/static/accounts/js/exam_score_entry_nav.js
    ═══════════════════════════════════════════════════════════════════════════ */
 "use strict";
@@ -26,6 +28,8 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), "utf8");
 const INIT = read("static/js/ems_ajax_init.js");
 const ENTRY = read("apps/accounts/static/accounts/js/exam_score_entry.js");
 const NAV = read("apps/accounts/static/accounts/js/exam_score_entry_nav.js");
+const KEYS = read("apps/accounts/static/accounts/js/exam_score_entry_keys.js");
+const APPEAL = read("apps/accounts/static/accounts/js/exam_score_entry_appeal.js");
 
 /* `ese_question_cells` teqinin çıxışı ilə EYNİ markup (server müqaviləsi). */
 function cell(enrollment, index, value, { off = false, locked = false } = {}) {
@@ -42,15 +46,28 @@ function cell(enrollment, index, value, { off = false, locked = false } = {}) {
     );
 }
 
-function row(enrollment, values, { locked = false, score = "" } = {}) {
+/* 2026-11-18: «Apellyasiya balı» xanası (`_roster.html` ilə eyni markup) — S-xanaları kimi tənbəl seçim. */
+function appealCell(enrollment, value) {
+    const selected = value ? `<option value="${value}" selected>${value}</option>` : "";
+    return (
+        '<td class="ese-td--num ese-td--q ese-td--appeal"><div class="bootstrap-single-select ese-qsel ese-appeal-sel" data-ese-qwrap>' +
+        `<select class="ems-select ese-appeal" data-bootstrap-select-lazy name="appeal__${enrollment}" data-ese-appeal data-initial="${value}" data-appeal-max="50" data-max="" tabindex="-1">` +
+        `<option value=""${value ? "" : " selected"}>—</option>${selected}</select>` +
+        `<button type="button" class="bootstrap-single-select__toggle${value ? "" : " is-placeholder"}" data-ese-qtoggle>` +
+        `<span class="bootstrap-single-select__label-text">${value || "—"}</span></button></div></td>`
+    );
+}
+
+function row(enrollment, values, { locked = false, score = "", appeal = "" } = {}) {
     let cells = "";
     for (let index = 1; index <= 10; index += 1) {
         cells += cell(enrollment, index, values[index - 1] || "", { off: index > 5, locked });
     }
     return (
         `<tr class="ese-row" data-ese-row data-locked="${locked ? 1 : 0}" data-enrollment="${enrollment}" data-has-score="${score ? 1 : 0}" data-is-changed="0" data-barred="0" data-bonus="0">` +
-        `<th scope="row">${enrollment}</th><td data-ese-entry="20">20</td>${cells}` +
-        `<td><input type="number" class="ems-input ese-score" name="score__${enrollment}" max="50" readonly value="${score}" data-ese-score data-initial="${score}"${locked ? " disabled" : ""}></td>` +
+        `<th scope="row">${enrollment}</th><td data-ese-entry="20">20</td>${cells}${appealCell(enrollment, appeal)}` +
+        `<td class="ese-td--final${appeal ? " has-appeal" : ""}" data-ese-final-cell><input type="number" class="ems-input ese-score" name="score__${enrollment}" max="50" readonly value="${score}" data-ese-score data-initial="${score}"${locked ? " disabled" : ""}>` +
+        `<output data-ese-effective>${appeal}</output></td>` +
         '<td><b data-ese-total data-initial="—">—</b></td><td><span data-ese-letter data-initial="">—</span></td><td><span data-ese-status></span></td></tr>'
     );
 }
@@ -75,6 +92,8 @@ async function makeWindow() {
     }
     window.eval(INIT);
     window.eval(ENTRY);
+    window.eval(KEYS);
+    window.eval(APPEAL);
     window.eval(NAV);
     return window;
 }
@@ -140,5 +159,29 @@ test("final (locked) row opens only in a change mode", async () => {
     host.setAttribute("data-change-mode", "appeal");
     window.EMSExamScoreEntry.applyQuestionGrid(host);
     assert.equal(q(window, "e1", 1).disabled, false);
+    window.close();
+});
+
+test("appeal cell: 0..max select, final cell shows the appeal, clearing S restores the total (2026-11-18)", async () => {
+    const window = await makeWindow();
+    const doc = window.document;
+    const appeal = doc.querySelector('[name="appeal__e1"]');
+    assert.equal(appeal.options.length, 52); // «—» + 0..50
+    const finalCell = doc.querySelector('[data-ese-row][data-enrollment="e1"] [data-ese-final-cell]');
+    const toggle = appeal.closest("[data-ese-qwrap]").querySelector("[data-ese-qtoggle]");
+    toggle.dispatchEvent(new window.KeyboardEvent("keydown", { key: "4", bubbles: true }));
+    toggle.dispatchEvent(new window.KeyboardEvent("keydown", { key: "1", bubbles: true }));
+    assert.equal(appeal.value, "41");
+    assert.equal(finalCell.classList.contains("has-appeal"), true);
+    assert.equal(finalCell.querySelector("[data-ese-effective]").textContent, "41");
+    assert.equal(doc.querySelector('[name="score__e1"]').value, "12"); // imtahan balı (POST) dəyişmir
+    toggle.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Delete", bubbles: true }));
+    assert.equal(finalCell.classList.contains("has-appeal"), false);
+    // S-xanası silinəndə yekun sinxron boşalır (yeni sətir, server balı yoxdur).
+    const s1 = q(window, "e2", 1).closest("[data-ese-qwrap]").querySelector("[data-ese-qtoggle]");
+    s1.dispatchEvent(new window.KeyboardEvent("keydown", { key: "6", bubbles: true }));
+    assert.equal(doc.querySelector('[name="score__e2"]').value, "6");
+    s1.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Delete", bubbles: true }));
+    assert.equal(doc.querySelector('[name="score__e2"]').value, "");
     window.close();
 });
