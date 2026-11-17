@@ -44,7 +44,9 @@ def _templates():
 
 class ResponsiveCssStaticTest(SimpleTestCase):
     def test_css_files_exist(self):
-        self.assertEqual({path.name for path in _css_files()}, {"announcements.css", "manage.css", "popup.css", "stats.css"})
+        self.assertEqual(
+            {path.name for path in _css_files()}, {"announcements.css", "manage.css", "popup.css", "stats.css"}
+        )
 
     def test_no_fixed_width_container_wider_than_a_phone(self):
         for path in _css_files():
