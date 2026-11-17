@@ -45,6 +45,11 @@ class Command(BaseCommand):
         parser.add_argument("--group", default=GROUP, help="Köçən tələbələrin akademik qrupu (OrgUnit id)")
         parser.add_argument("--apply", action="store_true", help="Faktiki yaz (defolt: dry-run)")
         parser.add_argument(
+            "--merge-target-lessons",
+            action="store_true",
+            help="Hədəfdə dərs varsa eyni tarix/növ/saat dərsinə birləşdir (MR-000453)",
+        )
+        parser.add_argument(
             "--undo", action="store_true", help="Bu cütün ayrılmasını audit manifestinə görə geri qaytar"
         )
 
@@ -56,7 +61,13 @@ class Command(BaseCommand):
             if options["undo"]:
                 undo(organization=organization, actor=actor, counts=counts, **spec)
                 return
-            splitter = GroupSplitter(organization=organization, actor=actor, counts=counts, **spec)
+            splitter = GroupSplitter(
+                organization=organization,
+                actor=actor,
+                counts=counts,
+                merge_target_lessons=options["merge_target_lessons"],
+                **spec,
+            )
             splitter.run()
             if splitter.batch:
                 batch.append(splitter.batch)

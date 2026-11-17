@@ -8,7 +8,7 @@ Parametrik (``--source`` / ``--target`` / ``--group``; defolt — 635 Q → 635 
 qoruyucu pozularsa ``Blocked`` → heç nə yazılmır):
 
 * mənbə və hədəf aktiv, açıq (bağlı / kilidli dövr deyil), eyni fənn + dövr; hədəfin qrupu ``--group``-dur;
-  hədəfdə hələ dərs yoxdur; köçən tələbələrin yekun qiyməti / kurs işi / təkrar imtahanı / rubrik balı yoxdur;
+  hədəfdə hələ dərs yoxdur (``merge_target_lessons`` ilə — hədəfin öz dərsləri ola bilər, aşağıya bax); köçən tələbələrin yekun qiyməti / kurs işi / təkrar imtahanı / rubrik balı yoxdur;
   köçən xanalarda və silinən dərslərdə rəsmi düzəliş yoxdur;
 * KÖÇƏN tələbələr — mənbədə ``enrolled`` olan və AKADEMİK qrupu ``--group`` olanlar. Hədəfdə yazılışı varsa
   (məs. ``dropped``) ``enrolled`` edilir (əvvəlki status manifestdə), yoxdursa yaradılır;
@@ -22,6 +22,11 @@ qoruyucu pozularsa ``Blocked`` → heç nə yazılmır):
   ``dropped`` (silinmir — tarixçə və sübutlar onlara bağlı qalır);
 * cədvəl: hədəfdə mühazirə slotu YOXDURSA mənbənin (ortaq) mühazirə slotu hədəfə kopyalanır; seminar / lab slotu
   qrupun özünündür — kopyalanmır (hesabatda ``slots_target_kept``); hədəfin öz slotlarına toxunulmur.
+
+``merge_target_lessons`` (MR-000453, 2026-11-17): hədəfdə artıq dərs varsa, eyni tarix + növ (+ başlama saatı, yoxdursa
+həmin gün o növün tək dərsi) olan dərs YENİDƏN yaradılmır — köçən xanalar ona yazılır (hədəfdə həmin tələbənin xanası
+varsa toxunulmur, ``marks_target_kept``). Mövcud dərs manifestin ``lessons_created``-ına düşmür → ``undo`` onu silmir,
+yalnız əlavə olunan xanaları.
 
 Dərs yükü sətirlərinə TOXUNULMUR (hesabatda ayrıca). Paket id-si ``groupsplit-YYYYMMDD-HHMMSS-xxxx`` audit sətrinin
 ``resource_id``-sidir; tam manifest ``changes``-dədir. Geri qaytarma — :mod:`.group_journal_split_undo_2026_11_12`.
@@ -103,8 +108,12 @@ def home_groups(organization, student_ids) -> dict:
 
 
 class GroupSplitter:
-    def __init__(self, *, organization, actor, counts, source=SOURCE, target=TARGET, group=GROUP):
+    def __init__(
+        self, *, organization, actor, counts, source=SOURCE, target=TARGET, group=GROUP, merge_target_lessons=False
+    ):
         self.organization, self.actor, self.counts = organization, actor, counts
+        self.merge_target_lessons = merge_target_lessons
+        self._target_lessons = []
         self.source_id, self.target_id, self.group_id = str(source), str(target), str(group)
         self.manifest = defaultdict(list)
         self.batch = ""
@@ -162,8 +171,15 @@ class GroupSplitter:
             raise Blocked("subject_or_period_differs")
         if str(target.group_id) != self.group_id or str(source.group_id) == self.group_id:
             raise Blocked("target_group_mismatch")
-        if _model("Lesson").objects.filter(offering=target).exists():
+        existing = list(_model("Lesson").objects.filter(offering=target).order_by("date", "start_time", "created_at"))
+        if existing and not self.merge_target_lessons:
             raise Blocked("target_has_lessons")
+        self._target_lessons = existing
+        if existing:  # undo bunları «ayrılmadan sonra yazılmış» saymasın
+            self.manifest["target_lessons_preexisting"] = [str(row.pk) for row in existing]
+            self.manifest["target_marks_preexisting"] = [
+                str(pk) for pk in _model("LessonMark").objects.filter(lesson__in=existing).values_list("pk", flat=True)
+            ]
         Enrollment = _model("Enrollment")
         enrolled = list(
             Enrollment.objects.select_for_update(of=("self",)).filter(offering=source, status="enrolled").order_by("pk")
@@ -255,9 +271,35 @@ class GroupSplitter:
         self.counts["students_moved"] += len(by_source)
         return by_source
 
+    def _existing_twin(self, lesson):
+        """Hədəfdə eyni dərs: tarix + növ + başlama saatı; saat tutmursa həmin gün o növün TƏK (hələ istifadə olunmamış)
+        dərsi. Bir dəfə istifadə olunan dərs siyahıdan çıxır (iki mənbə dərsi bir hədəf sütununa yığılmasın)."""
+        same = [row for row in self._target_lessons if (row.date, row.kind) == (lesson.date, lesson.kind)]
+        exact = [row for row in same if row.start_time == lesson.start_time]
+        found = exact[0] if exact else (same[0] if len(same) == 1 else None)
+        if found is not None:
+            self._target_lessons.remove(found)
+        return found
+
+    def _merge_marks(self, twin, lesson, marks, by_source) -> None:
+        taken = set(_model("LessonMark").objects.filter(lesson=twin).values_list("enrollment_id", flat=True))
+        for mark in marks[lesson.pk]:
+            enrollment = by_source[mark.enrollment_id]
+            if enrollment.pk in taken:
+                self.counts["marks_target_kept"] += 1
+                continue
+            created = copy_mark(mark, lesson=twin, enrollment=enrollment)
+            self.manifest["marks_created"].append(str(created.pk))
+            self.counts["marks_copied"] += 1
+
     def _copy_lessons(self, target, lessons, marks, by_source, key) -> None:
         Lesson = _model("Lesson")
         for lesson in lessons:
+            existing = self._existing_twin(lesson) if self.merge_target_lessons else None
+            if existing is not None:
+                self.counts["lessons_merged_existing"] += 1
+                self._merge_marks(existing, lesson, marks, by_source)
+                continue
             twin = Lesson.objects.create(
                 organization=self.organization,
                 offering=target,
