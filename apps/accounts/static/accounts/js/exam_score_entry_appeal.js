@@ -82,8 +82,4 @@
             });
         }
     };
-
-    DELEGATE.on("click", "[data-ese-reset]", function () {
-        window.EMSExamScoreEntryAppeal.reset(document.querySelector("[data-ese-root]"));
-    });
 })(window, document);
