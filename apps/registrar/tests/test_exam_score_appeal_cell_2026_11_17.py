@@ -190,19 +190,71 @@ class ExamAppealCellTest(MidtermPeriodFixture, TestCase):
             self.assertEqual((same["written"], same["failed"]), (0, 0))  # köhnə forma/idxal: eyni bal səssiz
             self.assertEqual(self._final_score(), Decimal("38"))
 
-    def test_appeal_cell_needs_head_document_and_existing_exam_score(self):
-        second = self.enrollments[1]
+    def test_appeal_cell_needs_appeal_role_and_document(self):
         with bypass_rls():
             self._save(self.center, [self._exam("30")])
             no_doc = self._save(self.center, [self._appeal("38")])
             self.assertIn("apellyasiya sənədi", no_doc["errors"][0][1])
-            staff = self._save(self.staff, [self._appeal("38")], evidence=_pdf())
-            self.assertIn("rəhbəri", staff["errors"][0][1])
-            empty = self._save(self.center, [self._appeal("20", second)], evidence=_pdf())
-            self.assertIn("imtahan balı yazılmış", empty["errors"][0][1])
-            self.assertFalse(FinalGrade.objects.filter(enrollment=second, exam_score__isnull=False).exists())
+            teacher = self._save(self.teacher, [self._appeal("38")], evidence=_pdf())
+            self.assertIn("işçisi yazır", teacher["errors"][0][1])
             self.assertEqual(self._final_score(), Decimal("30"))
             self.assertFalse(ExamScoreEntry.objects.filter(kind=ExamScoreEntryKind.APPEAL).exists())
+            # Sahib 2026-11-18: İmtahan Mərkəzinin işçisi də apellyasiya balını yazır.
+            staff = self._save(self.staff, [self._appeal("38")], evidence=_pdf())
+            self.assertEqual(staff["written"], 1, staff)
+            self.assertEqual(self._final_score(), Decimal("38"))
+
+    def test_appeal_cell_on_student_without_exam_score(self):
+        """Sahib 2026-11-18: imtahan balı yazılmamış tələbəyə də apellyasiya balı yazılır (sənəd yenə məcburi)."""
+        second = self.enrollments[1]
+        with bypass_rls():
+            no_doc = self._save(self.staff, [self._appeal("20", second)])
+            self.assertIn("apellyasiya sənədi", no_doc["errors"][0][1])
+            self.assertFalse(FinalGrade.objects.filter(enrollment=second, exam_score__isnull=False).exists())
+            result = self._save(self.staff, [self._appeal("20", second)], evidence=_pdf())
+            self.assertEqual(result["written"], 1, result)
+            self.assertEqual(self._final_score(second), Decimal("20"))
+            entry = ExamScoreEntry.objects.get(enrollment=second)
+            self.assertEqual(
+                (entry.kind, entry.old_score, entry.new_score), (ExamScoreEntryKind.APPEAL, None, Decimal("20"))
+            )
+            roster = service.roster_for_offering(offering=self.offering)
+            row = next(r for r in roster["rows"] if r["enrollment"].pk == second.pk)
+            appeal_rules.attach_row(row)
+            self.assertTrue(row["appeal_set"])
+            self.assertEqual((row["exam_base_display"], row["appeal_display"]), ("", "20"))
+            # İmtahan xanası sonradan dəyişmir — yekun bal apellyasiyadır.
+            changed = self._save(self.staff, [self._exam("33", second)])
+            self.assertIn("apellyasiya balı var", changed["errors"][0][1])
+
+    def test_midterm_appeal_cell_without_midterm_score(self):
+        second = self.enrollments[1]
+        with bypass_rls():
+            result = self._save(
+                self.rim, [self._appeal("24", second)], assessment=ExamAssessment.MIDTERM, evidence=_pdf()
+            )
+            self.assertEqual(result["written"], 1, result)
+            component = interim_components.ensure_kollokviums(self.offering)[0]
+            cell = ComponentScore.objects.get(component=component, enrollment=second)
+            self.assertEqual(cell.score, Decimal("24"))
+
+    def test_staff_screen_opens_appeal_cell_on_empty_rows(self):
+        from apps.organizations.models import Role
+
+        with bypass_rls():
+            role = Role.objects.get(organization=self.org, name="exam_center_staff")
+            if "final_score.entry" not in role.permissions:
+                role.permissions = list(role.permissions) + ["final_score.entry"]
+                role.save(update_fields=["permissions"])
+        page = self._client(self.staff).get(
+            reverse("accounts:profile"),
+            {"section": "exam-score-entry", "ese_offering": str(self.offering.pk), "ese_assessment": "final"},
+        )
+        self.assertEqual(page.status_code, 200)
+        html = page.content.decode()
+        for enrollment in self.enrollments:
+            cell = html.split(f'name="appeal__{enrollment.pk}"')[1].split(">")[0]
+            self.assertNotIn("disabled", cell)
 
     def test_unchanged_appeal_value_is_not_rewritten(self):
         with bypass_rls():

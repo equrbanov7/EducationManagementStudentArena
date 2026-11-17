@@ -165,8 +165,7 @@ UNIVERSITY_ROLES = [
         "description": "ICT manager — documented journal-correction override (bypasses edit-window & closed semesters), full exam-centre + structure access; every action audited",
     },
     {
-        # İmtahan mərkəzi İŞÇİSİ — monitor / PIN axtarışı / hesabat; zala
-        # nəzarətçi TƏYİN ETMİR (yalnız rəhbər). is_exam_center → giriş var.
+        # İM İŞÇİSİ — monitor/PIN/hesabat, nəzarətçi təyin etmir; bal + apellyasiya (sahib 2026-11-18, org 0084).
         "name": "exam_center_staff",
         "display_name": "Exam Center Staff",
         "level": 60,
@@ -176,6 +175,7 @@ UNIVERSITY_ROLES = [
             "member.view",
             "course.view",
             "exam.*",
+            "final_score.entry",
             "grade.view",
             "analytics.view_all",
             "audit.view",

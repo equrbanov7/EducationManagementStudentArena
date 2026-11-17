@@ -32,8 +32,8 @@ sahələr `disabled` (POST-a düşmür); düzəliş rejimində forma `correction
 15 dəq keçib) — sahələr kilidli, yalnız «Apellyasiya» / «RİM təqdimatı» rejimində açılır (`_modebar.html`,
 `exam_score_entry_columns.js`); daxil edənin açıq pəncərəsi `data-edit-until` (geri sayım — `_draft.js`).
 2026-11-17 (sahib): «balın yanında appel xanası da olsun, yəni 2 xana; appelyasiya xanasından gələn bal əsas götürülür».
-«Apellyasiya balı» (`appeal__<enr>`, `exam_score_entry_appeal.js`) — yalnız apellyasiya icazəsi olana (`s.can_appeal`)
-və imtahan balı yazılmış sətirdə açıqdır; apellyasiya balı olan sətirdə (`row.appeal_set`) imtahan xanası kilidlidir və
+«Apellyasiya balı» (`appeal__<enr>`, `exam_score_entry_appeal.js`) — apellyasiya icazəsi olana (`s.can_appeal`: RİM rəhbəri,
+İmtahan Mərkəzinin rəhbəri və işçisi — sahib 2026-11-18) hər açıq sətirdə, imtahan balı yazılmamış olsa da açıqdır; apellyasiya balı olan sətirdə (`row.appeal_set`) imtahan xanası kilidlidir və
 apellyasiyadan əvvəlki balı göstərir — yekun bal apellyasiya balıdır (`registrar/exam_score_appeal.py`).{% endcomment %}
 <section class="ems-card ese-card ese-roster">
   <div class="ems-card__head">
@@ -95,7 +95,7 @@ apellyasiyadan əvvəlki balı göstərir — yekun bal apellyasiya balıdır (`
             {% trans "İmtahan balı" context "registrar.exam_score_entry" as ese_score_aria %}
             {% trans "Bal tarixçəsi" context "registrar.exam_score_entry" as ese_history_aria %}
             {% trans "Apellyasiya balı" context "registrar.exam_score_entry" as ese_appeal_aria %}
-            {% trans "Apellyasiya balını yalnız İmtahan Mərkəzinin / RİM rəhbəri, imtahan balı yazılmış tələbəyə yazır." context "registrar.exam_score_entry" as ese_appeal_hint %}
+            {% trans "Apellyasiya balını yalnız RİM rəhbəri və İmtahan Mərkəzinin rəhbəri / işçisi yazır." context "registrar.exam_score_entry" as ese_appeal_hint %}
             {% for row in s.rows %}
             <tr class="ese-row {% if row.has_score %}is-recorded{% endif %}{% if row.locked %} is-locked{% endif %}{% if row.final_locked %} is-final{% endif %}" data-ese-row data-locked="{% if row.locked or row.appeal_set %}1{% else %}0{% endif %}" data-enrollment="{{ row.enrollment.id }}"
                 data-final="{% if row.final_locked %}1{% else %}0{% endif %}" data-edit-until="{{ row.edit_until }}"
@@ -122,7 +122,7 @@ apellyasiyadan əvvəlki balı göstərir — yekun bal apellyasiya balıdır (`
                 <input type="number" class="ems-input ese-appeal{% if row.appeal_set %} is-set{% endif %}" name="appeal__{{ row.enrollment.id }}"
                        aria-label="{{ ese_appeal_aria }} — {{ row.name }}"
                        min="0" max="{{ row.exam_score_max }}" step="1" inputmode="numeric" autocomplete="off"
-                       {% if not s.can_appeal or not row.has_score or row.locked %}disabled title="{{ ese_appeal_hint }}"{% endif %}
+                       {% if not s.can_appeal or row.locked %}disabled title="{{ ese_appeal_hint }}"{% endif %}
                        value="{{ row.appeal_display }}"
                        data-ese-appeal data-initial="{{ row.appeal_display }}" data-student="{{ row.name }}">
               </td>

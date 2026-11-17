@@ -16,9 +16,10 @@ yekun bal, transkript, kabinet və jurnal heç nəyi ayrıca hesablamır:
   dəyişikliyi rədd edir — :func:`guard_exam_rows`). Belə olduqda effektiv bal həmişə apellyasiya balıdır:
   «son sətir apellyasiyadırsa effektiv = apellyasiya» invariantı pozulmur.
 * **Yazı** — apellyasiya xanası ``kind=appeal`` sətri kimi MÖVCUD yazıcılardan keçir (``exam_score_bulk`` /
-  ``exam_score_midterm``): icazə (İmtahan Mərkəzinin / RİM rəhbəri, superadmin), apellyasiya SƏNƏDİ və bitmiş dövr
-  qaydası ``exam_score_assessment.decide_after_window`` / ``change_decision`` ilə eynidir. İmtahan balı hələ
-  yazılmayıbsa apellyasiya yazılmır (``appeal_cell`` bayrağı — ilkin daxiletmə apellyasiya kimi düşməsin).
+  ``exam_score_midterm``): icazə (RİM rəhbəri, İmtahan Mərkəzinin rəhbəri və işçisi, superadmin), apellyasiya
+  SƏNƏDİ və bitmiş dövr qaydası ``exam_score_assessment.decide_after_window`` / ``change_decision`` ilə eynidir.
+  Sahib 2026-11-18: imtahan balı hələ yazılmayıbsa da apellyasiya xanası yazılır (``appeal_cell`` sətri yenə
+  ``kind=appeal``-dır, ``old_score`` boşdur — imtahan xanası boş görünür, yekun bal apellyasiya balıdır).
 """
 
 from __future__ import annotations
@@ -171,10 +172,6 @@ def appeal_rows(post, *, reason="", note="") -> list:
     return rows
 
 
-def no_exam_score_message() -> str:
-    return pgettext(_CTX, "Apellyasiya balı yalnız imtahan balı yazılmış tələbəyə yazılır.")
-
-
 def _empty_result() -> dict:
     return {"written": 0, "skipped": 0, "failed": 0, "total": 0, "errors": [], "failed_by_enrollment": {}}
 
@@ -242,7 +239,6 @@ __all__ = [
     "guard_exam_rows",
     "latest_appeals",
     "merge_results",
-    "no_exam_score_message",
     "save_rows",
     "split_entries",
 ]

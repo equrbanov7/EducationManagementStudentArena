@@ -323,7 +323,7 @@ def rim_only_error() -> ValidationError:
 
 def appeal_head_only_error() -> ValidationError:
     return ValidationError(
-        pgettext(_CTX, "Apellyasiya əsasında dəyişiklik yalnız İmtahan Mərkəzinin rəhbəri tərəfindən edilir.")
+        pgettext(_CTX, "Apellyasiya balını yalnız RİM rəhbəri və İmtahan Mərkəzinin rəhbəri / işçisi yazır.")
     )
 
 
@@ -336,7 +336,8 @@ def decide_after_window(
 ):
     """Yazılmış balın dəyişdirilməsi (cari dövr) → yazılacaq sətrin növü; qadağandırsa ``ValidationError``.
 
-    * ``kind=appeal`` — APELLYASİYA: yalnız İmtahan Mərkəzinin rəhbəri / RİM rəhbəri / superadmin, sənəd (sətrin
+    * ``kind=appeal`` — APELLYASİYA: İmtahan Mərkəzinin rəhbəri və işçisi (sahib 2026-11-18) / RİM rəhbəri /
+      superadmin, sənəd (sətrin
       və ya vərəqin faylı) MƏCBURİ;
     * ``kind=correction`` — yalnız RİM rəhbəri / superadmin, tam təqdimatla (səbəb + qeyd + sənəd);
     * növ yoxdursa — daxil edənin öz pəncərəsi açıqdırsa ``window_edit`` (sənədsiz), yoxsa rədd.

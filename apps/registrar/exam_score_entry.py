@@ -422,17 +422,16 @@ def change_decision(
     if _same_score(old_score, new_score):
         if cleaned_questions is None or questions.same_question_scores(latest_question_scores(), cleaned_questions):
             return None
-    if appeal_cell and old_score is None:  # 2026-11-17: apellyasiya xanası yalnız yazılmış imtahan balına
-        raise ValidationError(exam_score_appeal.no_exam_score_message())
+    blank_appeal = appeal_cell and old_score is None  # sahib 2026-11-18: balsız tələbəyə də apellyasiya
     if old_score is not None and policy.changes_blocked:
         raise period_lock.change_blocked_error()
-    if old_score is None and not policy.correction_mode:
+    if old_score is None and not policy.correction_mode and not blank_appeal:
         if policy.every_write_needs_submission and not justification_waived(by_user, evidence=evidence, sheet=sheet):
             period_lock.require_submission(  # «çox köhnə» dövrə ilk köçürmə — sənədlə (superadmin sənədsiz)
                 reason=reason, note=note, evidence=evidence or (sheet.evidence if sheet is not None else None)
             )
         return ExamScoreEntryKind.INITIAL
-    if old_score is None or policy.correction_mode or rules is None:
+    if (old_score is None and not blank_appeal) or policy.correction_mode or rules is None:
         _require_justification(reason=reason, note=note, evidence=evidence, sheet=sheet, by_user=by_user)
         return _change_kind(kind)
     return assessment_rules.decide_after_window(
