@@ -383,3 +383,37 @@ class ZipArchiveValidationTest(TestCase):
         f = SimpleUploadedFile("outer.zip", outer_data, content_type="application/zip")
         # max_nesting_depth=1 allows outer→inner.zip to be inspected.
         self.assertIsNone(self.validate(f, max_nesting_depth=1))
+
+
+class OfficeMimeWithoutContentTypeTest(TestCase):
+    """MR-000473: model FieldFile sarğısında ``content_type`` yoxdur; Python 3.12-nin cədvəlində .docx/.xlsx yoxdur."""
+
+    class _Wrapper:
+        """``FieldFile`` kimi: adı və ölçüsü var, ``content_type`` YOX, əsl fayl ``.file``-da."""
+
+        def __init__(self, inner):
+            self.file, self.name, self.size = inner, inner.name, inner.size
+
+        def __getattr__(self, attr):
+            if attr == "content_type":
+                raise AttributeError(attr)
+            return getattr(self.file, attr)
+
+    def test_office_extensions_are_registered(self):
+        import mimetypes
+
+        import core.upload_markup  # noqa: F401 — qeydiyyat modul yüklənəndə
+
+        for name in ("a.docx", "a.xlsx", "a.pptx"):
+            self.assertTrue(mimetypes.guess_type(name)[0], name)
+
+    def test_wrapped_docx_without_declared_type_passes(self):
+        content = _make_zip({"[Content_Types].xml": b"<Types/>", "word/document.xml": b"<w:document/>"})
+        inner = SimpleUploadedFile("siyahi.docx", content, content_type="")
+        validate_uploaded_file(self._Wrapper(inner))
+
+    def test_inner_content_type_is_read(self):
+        from core.upload_security import _resolve_mime_type
+
+        inner = SimpleUploadedFile("siyahi.qeyri", b"x", content_type="Application/PDF ")
+        self.assertEqual(_resolve_mime_type(self._Wrapper(inner)), "application/pdf")

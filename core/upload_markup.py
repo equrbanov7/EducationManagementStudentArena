@@ -17,6 +17,18 @@ MARKUP_EXTENSIONS = frozenset({".xht", ".xpdl", ".rdf", ".wsdl", ".rss", ".atom"
 
 _MARKUP_TYPES = frozenset({"application/xml", "text/xml", "text/xsl", "text/html", "application/xml-dtd"})
 
+#: MR-000473 (2026-11-17): Python 3.11/3.12-nin daxili cədvəlində Office Open XML YOXDUR (3.13+ var), prod
+#: konteynerində ``/etc/mime.types`` da yoxdur → ``content_type``-sız yoxlamada .docx/.xlsx «tipi müəyyən edilə
+#: bilmədi» alırdı. Modul yüklənəndə qeydiyyat (idempotent) — ``upload_security`` və serve eyni cədvəli görür.
+_OFFICE_TYPES = {
+    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+}
+for _extension, _mime in _OFFICE_TYPES.items():
+    if mimetypes.guess_type(f"x{_extension}")[0] is None:
+        mimetypes.add_type(_mime, _extension)
+
 
 def _is_markup_type(value: str) -> bool:
     value = (value or "").split(";")[0].strip().lower()

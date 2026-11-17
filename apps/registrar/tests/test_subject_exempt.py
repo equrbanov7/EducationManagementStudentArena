@@ -171,6 +171,18 @@ class SubjectExemptFlowTest(_ExemptBase):
                 ).exists()
             )
 
+    def test_exemption_in_cancelled_journal_does_not_block(self):
+        """MR-000465: ləğv olunmuş (is_active=False) jurnaldakı azadolma səviyyə/alt qrup yerləşdirməsini bloklamır."""
+        from apps.registrar.subject_exempt import is_exempt_from_subject
+
+        self.assertEqual(self._exempt().status_code, 200)
+        with bypass_rls():
+            record = StudentAcademicRecord.objects.get(organization=self.org, student=self.student)
+            args = (record, self.offering.period, self.offering.subject_id)
+            self.assertTrue(is_exempt_from_subject(*args))
+            type(self.offering).objects.filter(pk=self.offering.pk).update(is_active=False)
+            self.assertFalse(is_exempt_from_subject(*args))
+
     def test_journal_page_lists_exempted_and_hides_row(self):
         self._exempt()
         page = self._client(self.coordinator).get(reverse("registrar:journal_detail", args=[self.offering.id]))
