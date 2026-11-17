@@ -314,6 +314,38 @@ class PostGuardTest(_ShareBase):
         with bypass_rls():
             self.assertTrue(Lesson.objects.filter(pk=self.lecture.pk).exists())
 
+    def _edit_seminar(self, instructor):
+        url = reverse("registrar:journal_lesson_action", args=[self.offering.id, self.seminar.id])
+        return self._client(self.seminarist).post(
+            url,
+            {
+                "action": "update_lesson",
+                "lesson_date": self.seminar.date.isoformat(),
+                "lesson_kind": "seminar",
+                "lesson_hours": "2",
+                "lesson_time": "10:10|11:40",
+                "lesson_topic_custom": "Yeni mövzu",
+                "lesson_instructor": instructor,
+            },
+        )
+
+    def test_holder_edits_topic_when_modal_sends_unchanged_teacher(self):
+        """MR-000459: modal adsız dərsdə açılışın sahibini göndərir — mövzu düzəlişi 403 deyil, müəllim dəyişmir."""
+        with bypass_rls():
+            before = Lesson.objects.get(pk=self.seminar.pk).instructor_id
+        response = self._edit_seminar(str(before or self.teacher.pk))
+        self.assertEqual(response.status_code, 302, response.content)
+        with bypass_rls():
+            lesson = Lesson.objects.get(pk=self.seminar.pk)
+        self.assertEqual((lesson.topic, lesson.instructor_id), ("Yeni mövzu", before))
+
+    def test_holder_cannot_hand_lesson_to_another_teacher(self):
+        response = self._edit_seminar(str(self.stranger.pk))
+        self.assertEqual(response.status_code, 403)
+        self.assertNotIn(b"share_scope", response.content)
+        with bypass_rls():
+            self.assertNotEqual(Lesson.objects.get(pk=self.seminar.pk).topic, "Yeni mövzu")
+
 
 class ListsTest(_ShareBase):
     def test_journal_list_includes_share_offering_with_scoped_count(self):
