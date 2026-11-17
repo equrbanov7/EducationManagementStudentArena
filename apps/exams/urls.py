@@ -164,6 +164,22 @@ urlpatterns = [
         views.exam_center_ticket_annul,
         name="exam_center_ticket_annul",
     ),
+    path(
+        "center/sessions/<int:session_id>/tickets/<int:ticket_id>/extra-time/",
+        views.exam_center_ticket_extra_time,
+        name="exam_center_ticket_extra_time",
+    ),
+    path("center/attempts/<int:attempt_id>/annul/", views.exam_center_attempt_annul, name="exam_center_attempt_annul"),
+    path(
+        "center/attempts/<int:attempt_id>/restore/",
+        views.exam_center_attempt_restore,
+        name="exam_center_attempt_restore",
+    ),
+    path(
+        "center/annulments/<int:annulment_id>/document/",
+        views.exam_center_annulment_document,
+        name="exam_center_annulment_document",
+    ),
     path("center/reports/", views.exam_center_reports, name="exam_center_reports"),
     path("center/stats/data/", views.exam_center_stats_data, name="exam_center_stats_data"),
     path("center/stats/export/", views.exam_center_stats_export, name="exam_center_stats_export"),

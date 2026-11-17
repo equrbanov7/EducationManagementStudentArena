@@ -400,7 +400,14 @@ def _handle_take_exam_post(request, *, attempt, action, is_ajax, return_to):
     if action == "autosave":
         record_autosave("success")
     if is_ajax:
-        return JsonResponse({"success": True, "finished": False, "server_revision": attempt.autosave_revision})
+        return JsonResponse(
+            {
+                "success": True,
+                "finished": False,
+                "server_revision": attempt.autosave_revision,
+                "extra_time_seconds": attempt.extra_time_seconds,
+            }
+        )
 
     return redirect(
         append_return_to(reverse("exams:take_exam", kwargs={"slug": exam.slug, "attempt_id": attempt.id}), return_to)
@@ -556,6 +563,6 @@ def take_exam(request, slug, attempt_id):
         "autosave_revision": getattr(attempt, "autosave_revision", 0),
         # 2026-10-21: son yazının writer-i (yenilənmədən sonra eyni tabın lokal draft-ı bərpa olunsun).
         "autosave_writer_state": current_writer_state(attempt) or {},
-        "take_exam_script_data": take_exam_script_data(remaining_seconds),
+        "take_exam_script_data": take_exam_script_data(remaining_seconds, attempt.extra_time_seconds),
     }
     return render(request, "exams/student/take_exam.html", context)

@@ -229,6 +229,48 @@
             }
         },
 
+        // Sahib 2026-11-17: nəzarətçi BU tələbəyə əlavə vaxt verib. `totalSeconds` serverdəki CƏMDİR
+        // (WS `time_extended`, nəzarət status sorğusu, autosave cavabı) — yalnız artım (fərq) lokal
+        // deadline-a əlavə olunur, ona görə eyni xəbərin təkrar gəlməsi vaxtı ikiqat uzatmır və brauzer
+        // saatının fərqi rol oynamır. Taymer artıq 00:00-a çatıbsa (avtomatik təhvil başlayıb) heç nə edilmir.
+        applyExtraTime: function (ctx, totalSeconds) {
+            var total = parseInt(totalSeconds, 10);
+            var known = parseInt(ctx.extraTimeSeconds, 10) || 0;
+            if (isNaN(total) || total <= known) {
+                return false;
+            }
+            ctx.extraTimeSeconds = total;
+            if (!ctx.examTimerDeadlineMs || ctx.examTimeUp || typeof ctx.examTimerTick !== "function") {
+                return false;
+            }
+            var added = total - known;
+            ctx.examTimerDeadlineMs += added * 1000;
+            var timerContainer = document.getElementById("exam-timer-container");
+            if (timerContainer && ns.config.getSecondsUntil(ctx.examTimerDeadlineMs) >= 60) {
+                timerContainer.style.backgroundColor = "";
+                timerContainer.style.color = "";
+            }
+            ctx.examTimerTick();
+            var template = (ctx.i18n.timeExtended || "").trim();
+            if (template) {
+                ns.notifications.show(template.replace("%(minutes)s", String(Math.round(added / 60))), "success", 8000);
+            }
+            return true;
+        },
+
+        bindTimeExtension: function (ctx) {
+            if (ctx.timeExtensionBound) {
+                return;
+            }
+            ctx.timeExtensionBound = true;
+            document.addEventListener("ems:exam-time-extended", function (event) {
+                var detail = event && event.detail;
+                if (detail && detail.extraTimeSeconds !== undefined) {
+                    ns.timers.applyExtraTime(ctx, detail.extraTimeSeconds);
+                }
+            });
+        },
+
         initExamTimer: function (ctx) {
             if (ctx.remainingSeconds === null || ctx.remainingSeconds === undefined) {
                 return;
@@ -239,16 +281,19 @@
             if (!isNaN(remainingSeconds) && remainingSeconds > 0) {
                 var timerValueElement = document.getElementById("timer-value");
                 var timerContainer = document.getElementById("exam-timer-container");
-                var examTimerDeadlineMs = Date.now() + (remainingSeconds * 1000);
+                // 2026-11-17: deadline ctx-dədir ki, əlavə vaxt (applyExtraTime) onu yerində uzada bilsin.
+                ctx.examTimerDeadlineMs = Date.now() + (remainingSeconds * 1000);
+                ns.timers.bindTimeExtension(ctx);
 
                 ctx.examTimerTick = function () {
-                    remainingSeconds = ns.config.getSecondsUntil(examTimerDeadlineMs);
+                    remainingSeconds = ns.config.getSecondsUntil(ctx.examTimerDeadlineMs);
                     timerValueElement.textContent = ns.config.formatTime(remainingSeconds);
                     if (ctx.examTimeWarning) {
                         ctx.examTimeWarning.maybeShow(remainingSeconds);
                     }
 
                     if (remainingSeconds <= 0) {
+                        ctx.examTimeUp = true;
                         if (ctx.examTimerInterval) {
                             clearInterval(ctx.examTimerInterval);
                             ctx.examTimerInterval = null;

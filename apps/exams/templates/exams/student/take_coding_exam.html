@@ -408,6 +408,7 @@ KLASSİK skriptdir — deferred `coding_exam.entry.js` modulundan əvvəl
     "allowMultipleFiles": {% if coding_question.allow_multiple_files %}true{% else %}false{% endif %},
     "enableExecution": {% if coding_question.enable_code_execution %}true{% else %}false{% endif %},
     "remainingSeconds": {% if remaining_seconds is not None %}{{ remaining_seconds }}{% else %}null{% endif %},
+    "extraTimeSeconds": {{ attempt.extra_time_seconds|default:0 }},
     "i18n": {
         "autoSaved": "{% filter escapejs %}{% trans 'Auto-saved' context 'exams.template.coding_exam' %}{% endfilter %}",
         "saving": "{% filter escapejs %}{% trans 'Saving...' context 'exams.template.coding_exam' %}{% endfilter %}",
@@ -478,7 +479,7 @@ KLASSİK skriptdir — deferred `coding_exam.entry.js` modulundan əvvəl
     <script src="{% static 'vendor/codemirror/addon/search/searchcursor.js' %}"></script>
     <script src="{% static 'exams/js/exam_time_warning.js' %}"></script>
     <script src="{% static 'exams/js/take_exam/identity_photo.js' %}?v=20261013-idcard"></script>
-    <script type="module" src="{% static 'exams/js/coding_exam/coding_exam.entry.js' %}?v=20260531-result-nav-guard"></script>
+    <script type="module" src="{% static 'exams/js/coding_exam/coding_exam.entry.js' %}?v=20261117-xtime"></script>
     {% if exam_supervision_enabled %}
         {{ supervision.config|json_script:"supervision-config-data" }}
         {% comment %}Nəzarət (supervision) konfiqi/i18n-i inline nonce skriptdən xarici
@@ -530,7 +531,7 @@ KLASSİK skriptdir — deferred `coding_exam.entry.js` modulundan əvvəl
              data-max-violations="{{ supervision.max_violations|default:'3' }}"
              data-supervision-status="{{ supervision.supervision_status|default:'active' }}"></div>
         <script src="{% static 'exams/js/exam_supervision/take_exam_supervision_bootstrap.js' %}?v=20260921-1"></script>
-        <script type="module" src="{% static 'exams/js/exam_supervision/exam_supervision.entry.js' %}?v=20261013-net"></script>
+        <script type="module" src="{% static 'exams/js/exam_supervision/exam_supervision.entry.js' %}?v=20261117-xtime"></script>
         {% include "exams/student/partials/_proctor_signals.html" %}
     {% endif %}
 {% endblock %}

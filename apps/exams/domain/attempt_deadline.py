@@ -16,6 +16,11 @@ Audit 2026-09-28:
   ``end_datetime``-dan SONRA başlamış cəhd (zal gecikməsi) kəsilmir.
   Müddətsiz imtahanda deadline yoxdur (``None``), amma ``end_datetime`` + grace
   keçəndən sonra yazı (POST) qəbul olunmur — ``write_window_closed``.
+
+Sahib 2026-11-17 — fərdi əlavə vaxt: nəzarətçi texniki problemə görə BİR tələbəyə əlavə dəqiqə verə bilir
+(``ExamAttempt.extra_time_seconds``, bax ``services/attempt_time_extension.py``). Əlavə vaxt hesablanmış
+deadline-ın ÜSTÜNƏ gəlir (``end_datetime`` kəsimindən SONRA da) — yalnız həmin cəhdin vaxtı uzanır.
+Bütün yollar (taymer, lazy bağlanma, sweep, POST kilidi) bu funksiyanı oxuyur.
 """
 
 from __future__ import annotations
@@ -48,8 +53,13 @@ def _window_end_applies(attempt) -> bool:
     return end > started
 
 
+def extra_time(attempt) -> timedelta:
+    """Nəzarətçinin bu cəhdə verdiyi əlavə vaxt (sahib 2026-11-17); yoxdursa sıfır."""
+    return timedelta(seconds=max(0, int(getattr(attempt, "extra_time_seconds", 0) or 0)))
+
+
 def attempt_deadline_at(attempt):
-    """Cəhdin deadline-ı: ``min(started_at + müddət, end_datetime)``; müddətsizdə ``None``."""
+    """Cəhdin deadline-ı: ``min(started_at + müddət, end_datetime) + əlavə vaxt``; müddətsizdə ``None``."""
     if not attempt.started_at:
         return None
     duration_minutes = getattr(attempt.exam, "total_duration_minutes", None)
@@ -58,7 +68,7 @@ def attempt_deadline_at(attempt):
     deadline = attempt.started_at + timedelta(minutes=duration_minutes)
     if _window_end_applies(attempt):
         deadline = min(deadline, attempt.exam.end_datetime)
-    return deadline
+    return deadline + extra_time(attempt)
 
 
 def write_window_closed(attempt, *, at_time) -> bool:
@@ -70,11 +80,12 @@ def write_window_closed(attempt, *, at_time) -> bool:
     deadline = attempt.deadline_at
     if deadline is not None:
         return at_time >= deadline
-    return _window_end_applies(attempt) and at_time > attempt.exam.end_datetime
+    return _window_end_applies(attempt) and at_time > attempt.exam.end_datetime + extra_time(attempt)
 
 
 __all__ = [
     "attempt_deadline_at",
+    "extra_time",
     "lazy_expiry_cutoff",
     "submit_grace",
     "write_window_closed",

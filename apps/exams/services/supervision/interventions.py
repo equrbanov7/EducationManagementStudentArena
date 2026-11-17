@@ -24,6 +24,9 @@ def _annulled_intervention(incident):
         "reason": (metadata.get("display_reason") or "").strip(),
         "is_terminal": True,
         "is_annulled": True,
+        # 2026-11-17: nəticələr siyahısında «Ləğvi bərpa et» / sənəd linki üçün (əlavə sorğu yoxdur).
+        "annulment_id": metadata.get("annulment_id"),
+        "has_document": bool(metadata.get("document")),
     }
 
 

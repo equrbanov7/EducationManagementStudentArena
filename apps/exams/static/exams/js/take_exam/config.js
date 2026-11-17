@@ -84,6 +84,7 @@
             return {
                 i18n: Object.assign({}, defaultI18n, scriptData.i18n || {}),
                 remainingSeconds: scriptData.remainingSeconds,
+                extraTimeSeconds: parseInt(scriptData.extraTimeSeconds, 10) || 0,
                 slides: slides,
                 prevBtn: document.getElementById("prev-btn"),
                 nextBtn: document.getElementById("next-btn"),

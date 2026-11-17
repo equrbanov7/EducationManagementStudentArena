@@ -10,6 +10,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_POST
 
@@ -70,6 +71,7 @@ def exam_center_session_detail(request, session_id):
             "can_manage": can_manage_final_center(request.user),
             "can_view_history": can_view_final_history(request.user, organization),
             "annul_reasons": ANNUL_REASONS,
+            "annul_today": timezone.localdate().isoformat(),
         },
     )
 
@@ -165,6 +167,8 @@ def exam_center_ticket_annul(request, session_id, ticket_id):
             request.user,
             reason_key=(request.POST.get("reason") or "").strip(),
             note=request.POST.get("note") or "",
+            incident_date=request.POST.get("incident_date") or None,
+            document=request.FILES.get("document"),
             request=request,
         )
     except TicketStateError as exc:

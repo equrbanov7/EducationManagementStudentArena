@@ -1,0 +1,101 @@
+{% load i18n %}
+{% comment %}
+Sahib 2026-11-17: nəticənin ləğvi (köçürmə və s.) və ləğvin geri qaytarılması — İKİ addımlı pəncərə.
+1-ci addım: səbəb (siyahıdan), izahat, hadisə tarixi, istəyə görə sənəd. 2-ci addım: təsdiq (xülasə + nəticə).
+Nəticələr siyahısı və zal oturumu səhifəsi eyni partial-ı işlədir; açan düymələr:
+  [data-annul-open data-annul-url data-annul-student]   → ləğv pəncərəsi
+  [data-restore-open data-restore-url data-restore-student] → bərpa pəncərəsi
+Kontekst: annul_reasons, annul_today (YYYY-MM-DD). JS: exams/js/result_annul_dialog.js; CSS: result_annul_dialog.css.
+{% endcomment %}
+<dialog class="xan-dialog" id="xanAnnulDialog" aria-labelledby="xanAnnulTitle">
+  <form method="post" action="" enctype="multipart/form-data" class="xan-form" data-xan-form="annul" novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <header class="xan-head">
+      <h2 class="xan-title" id="xanAnnulTitle"><i class="fas fa-ban" aria-hidden="true"></i> {% trans "Nəticəni ləğv et" %}</h2>
+      <button type="button" class="xan-close" data-xan-close aria-label="{% trans 'Bağla' %}"><i class="fas fa-times" aria-hidden="true"></i></button>
+    </header>
+    <p class="xan-student">{% trans "Tələbə" %}: <strong data-xan-student></strong></p>
+
+    <div class="xan-step" data-xan-step="edit">
+      <fieldset class="xan-reasons">
+        <legend class="xan-label">{% trans "Səbəb" %}</legend>
+        {% for key, label in annul_reasons %}
+        <label class="xan-reason"><input type="radio" name="reason" value="{{ key }}" required> <span>{{ label }}</span></label>
+        {% endfor %}
+      </fieldset>
+      <label class="xan-label" for="xanAnnulNote">{% trans "İzahat (məcburi)" context "exams.final_center.annul" %}</label>
+      <textarea id="xanAnnulNote" name="note" rows="3" maxlength="1000" required class="xan-input" data-xan-note></textarea>
+      <div class="xan-row">
+        <label class="xan-field">
+          <span class="xan-label">{% trans "Hadisə tarixi" context "exams.final_center.annul" %}</span>
+          <input type="date" name="incident_date" class="xan-input" value="{{ annul_today }}" max="{{ annul_today }}" required data-xan-date>
+        </label>
+        <label class="xan-field">
+          <span class="xan-label">{% trans "Sənəd (istəyə görə)" context "exams.final_center.annul" %}</span>
+          <input type="file" name="document" class="xan-input" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" data-xan-file>
+        </label>
+      </div>
+      <p class="xan-hint">{% trans "Cəhd silinmir. Jurnalda 0 bal yazılır, tələbənin kabinetində «Nəticəniz ləğv olunub» və səbəb görünür. Səhv olarsa «Ləğvi bərpa et» ilə geri qaytarmaq olar." context "exams.final_center.annul" %}</p>
+      <p class="xan-error" data-xan-error role="alert" hidden>{% trans "Səbəbi seçin və izahatı yazın." context "exams.final_center.annul" %}</p>
+      <footer class="xan-foot">
+        <button type="button" class="ems-btn" data-xan-close>{% trans "İmtina" context "exams.final_center.annul" %}</button>
+        <button type="button" class="ems-btn ems-btn--danger" data-xan-next><i class="fas fa-arrow-right" aria-hidden="true"></i> {% trans "Davam et" context "exams.final_center.annul" %}</button>
+      </footer>
+    </div>
+
+    <div class="xan-step" data-xan-step="confirm" hidden>
+      <div class="xan-confirm" role="alert">
+        <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+        <p>{% trans "Bu tələbənin nəticəsi ləğv ediləcək: jurnalda 0 bal yazılacaq və tələbəyə səbəb göstəriləcək. Təsdiq edirsiniz?" context "exams.final_center.annul" %}</p>
+      </div>
+      <dl class="xan-summary">
+        <div><dt>{% trans "Səbəb" %}</dt><dd data-xan-sum="reason"></dd></div>
+        <div><dt>{% trans "İzahat" %}</dt><dd data-xan-sum="note"></dd></div>
+        <div><dt>{% trans "Hadisə tarixi" context "exams.final_center.annul" %}</dt><dd data-xan-sum="date"></dd></div>
+        <div><dt>{% trans "Sənəd" context "exams.final_center.annul" %}</dt><dd data-xan-sum="file"></dd></div>
+      </dl>
+      <footer class="xan-foot">
+        <button type="button" class="ems-btn" data-xan-back><i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Geri" context "exams.final_center.annul" %}</button>
+        <button type="submit" class="ems-btn ems-btn--danger" data-xan-submit><i class="fas fa-ban" aria-hidden="true"></i> {% trans "Təsdiq et və ləğv et" context "exams.final_center.annul" %}</button>
+      </footer>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="xan-dialog" id="xanRestoreDialog" aria-labelledby="xanRestoreTitle">
+  <form method="post" action="" class="xan-form" data-xan-form="restore" novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <header class="xan-head">
+      <h2 class="xan-title" id="xanRestoreTitle"><i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Ləğvi bərpa et" context "exams.final_center.annul" %}</h2>
+      <button type="button" class="xan-close" data-xan-close aria-label="{% trans 'Bağla' %}"><i class="fas fa-times" aria-hidden="true"></i></button>
+    </header>
+    <p class="xan-student">{% trans "Tələbə" %}: <strong data-xan-student></strong></p>
+
+    <div class="xan-step" data-xan-step="edit">
+      <label class="xan-label" for="xanRestoreNote">{% trans "Bərpa səbəbi (məcburi)" context "exams.final_center.annul" %}</label>
+      <textarea id="xanRestoreNote" name="note" rows="3" maxlength="1000" required class="xan-input" data-xan-note></textarea>
+      <p class="xan-hint">{% trans "Ləğv geri qaytarılır: əvvəlki bal və jurnal dəyəri bərpa olunur. Ləğv qeydi tarixçədə qalır." context "exams.final_center.annul" %}</p>
+      <p class="xan-error" data-xan-error role="alert" hidden>{% trans "Bərpa səbəbini yazın." context "exams.final_center.annul" %}</p>
+      <footer class="xan-foot">
+        <button type="button" class="ems-btn" data-xan-close>{% trans "İmtina" context "exams.final_center.annul" %}</button>
+        <button type="button" class="ems-btn ems-btn--primary" data-xan-next><i class="fas fa-arrow-right" aria-hidden="true"></i> {% trans "Davam et" context "exams.final_center.annul" %}</button>
+      </footer>
+    </div>
+
+    <div class="xan-step" data-xan-step="confirm" hidden>
+      <div class="xan-confirm xan-confirm--info" role="alert">
+        <i class="fas fa-circle-info" aria-hidden="true"></i>
+        <p>{% trans "Ləğv geri qaytarılsın? Tələbənin əvvəlki nəticəsi kabinetdə və jurnalda bərpa olunacaq." context "exams.final_center.annul" %}</p>
+      </div>
+      <dl class="xan-summary">
+        <div><dt>{% trans "Bərpa səbəbi" context "exams.final_center.annul" %}</dt><dd data-xan-sum="note"></dd></div>
+      </dl>
+      <footer class="xan-foot">
+        <button type="button" class="ems-btn" data-xan-back><i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Geri" context "exams.final_center.annul" %}</button>
+        <button type="submit" class="ems-btn ems-btn--primary" data-xan-submit><i class="fas fa-rotate-left" aria-hidden="true"></i> {% trans "Təsdiq et və bərpa et" context "exams.final_center.annul" %}</button>
+      </footer>
+    </div>
+  </form>
+</dialog>

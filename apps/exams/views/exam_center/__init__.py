@@ -2,6 +2,7 @@
 
 from .device_change import exam_center_final_device_change
 from .duties import exam_center_attempt_note, exam_center_room_duty_create, exam_center_room_duty_revoke
+from .extra_time import exam_center_ticket_extra_time
 from .halls import exam_center_room_exam_hall
 from .monitor import (
     exam_center_session_cancel,
@@ -17,6 +18,7 @@ from .monitor import (
 )
 from .pin_lookup import exam_center_pin_search, exam_center_student_pins
 from .reports import exam_center_reports
+from .result_annul import exam_center_annulment_document, exam_center_attempt_annul, exam_center_attempt_restore
 from .room_monitor import (
     exam_center_attempt_violations,
     exam_center_room_assign_invigilators,
@@ -47,6 +49,10 @@ from .statistics_charts import exam_center_stats_ai, exam_center_stats_charts
 from .ticket_pin import exam_center_ticket_device_release, exam_center_ticket_pin_reissue, exam_center_ticket_pin_reveal
 
 __all__ = [
+    "exam_center_annulment_document",
+    "exam_center_attempt_annul",
+    "exam_center_attempt_restore",
+    "exam_center_ticket_extra_time",
     "exam_center_attempt_note",
     "exam_center_room_duty_create",
     "exam_center_room_duty_revoke",

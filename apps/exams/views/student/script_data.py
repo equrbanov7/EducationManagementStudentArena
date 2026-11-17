@@ -3,9 +3,11 @@
 from django.utils.translation import pgettext
 
 
-def take_exam_script_data(remaining_seconds):
+def take_exam_script_data(remaining_seconds, extra_time_seconds=0):
     return {
         "remainingSeconds": remaining_seconds,
+        # Sahib 2026-11-17: nəzarətçinin verdiyi əlavə vaxtın cəmi — sonrakı artım WS/status/autosave ilə gəlir.
+        "extraTimeSeconds": int(extra_time_seconds or 0),
         "i18n": {
             "autosaveSaving": pgettext("exams.template.take_exam", "autosave_saving"),
             "autosaveSaved": pgettext("exams.template.take_exam", "autosave_saved"),
@@ -43,6 +45,7 @@ def take_exam_script_data(remaining_seconds):
             "finishUnansweredCount": pgettext("exams.template.take_exam", "confirm_finish_unanswered_count"),
             "finishAllAnswered": pgettext("exams.template.take_exam", "confirm_finish_all_answered"),
             "timeUpMessage": pgettext("exams.template.take_exam", "time_up_auto_submit"),
+            "timeExtended": pgettext("exams.time_extension", "Sizə %(minutes)s dəqiqə əlavə vaxt verildi."),
             "mark": pgettext("exams.template.take_exam", "Mark"),
             "marked": pgettext("exams.template.take_exam", "Marked"),
         },

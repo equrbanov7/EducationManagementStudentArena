@@ -82,6 +82,47 @@ monitorların HƏR İKİSİ istifadə edir. Render + əməliyyatlar snapshot_mod
       <p class="fxc-pin-tools__warn" data-pin-warning role="alert" hidden></p>
     </div>
     {% endif %}
+    {% comment %}
+      Sahib 2026-11-17: BU tələbəyə əlavə vaxt (məs. texniki problemə görə vaxt itirib) — yalnız onun vaxtı
+      uzanır. Görünmə snapshot-un `time_actions`-ındandır (nəzarətçi + imtahan mərkəzi; server hər əməldə
+      yenidən yoxlayır); render + sorğu + təsdiq snapshot_time_actions.js-dədir.
+    {% endcomment %}
+    <div class="fxc-time-tools" id="fxc-time-tools" hidden
+         data-url-template="{% url 'exams:exam_center_ticket_extra_time' session_id=0 ticket_id=0 %}"
+         data-i18n-confirm="{% trans 'Bu tələbəyə %(minutes)s dəqiqə əlavə vaxt verilsin? Yalnız onun vaxtı uzanacaq, digər tələbələrə toxunulmur.' context 'exams.time_extension' %}"
+         data-i18n-given="{% trans 'Artıq verilib: +%(minutes)s dəq' context 'exams.time_extension' %}"
+         data-i18n-reason-required="{% trans 'Əlavə vaxtın səbəbini yazın.' context 'exams.time_extension' %}"
+         data-i18n-failed="{% trans 'Əməliyyat mümkün olmadı.' context 'exams.final_center.monitor_pin' %}">
+      <div class="fxc-time-tools__head">
+        <i class="fas fa-clock" aria-hidden="true"></i>
+        <span class="fxc-time-tools__label">{% trans "Əlavə vaxt" context "exams.time_extension" %}</span>
+        <span class="fxc-time-tools__given" data-time-given hidden></span>
+      </div>
+      <div class="fxc-time-tools__row">
+        <label class="fxc-time-tools__field" for="fxc-time-minutes">
+          <span>{% trans "Dəqiqə" context "exams.time_extension" %}</span>
+          <input type="number" id="fxc-time-minutes" class="fxc-time-tools__minutes" data-time-minutes
+                 min="1" max="60" step="1" value="5" inputmode="numeric" required>
+        </label>
+        <div class="fxc-time-tools__quick" role="group" aria-label="{% trans 'Tez seçim' context 'exams.time_extension' %}">
+          <button type="button" class="fxc-btn fxc-btn-sm fxc-btn-ghost" data-time-quick="5">+5</button>
+          <button type="button" class="fxc-btn fxc-btn-sm fxc-btn-ghost" data-time-quick="10">+10</button>
+          <button type="button" class="fxc-btn fxc-btn-sm fxc-btn-ghost" data-time-quick="15">+15</button>
+        </div>
+      </div>
+      <label class="fxc-time-tools__field" for="fxc-time-reason">
+        <span>{% trans "Səbəb (məcburi)" context "exams.time_extension" %}</span>
+        <textarea id="fxc-time-reason" class="fxc-time-tools__reason" data-time-reason rows="2" maxlength="500"
+                  placeholder="{% trans 'Məs.: kompüter dondu, tələbə 7 dəqiqə itirdi' context 'exams.time_extension' %}"></textarea>
+      </label>
+      <div class="fxc-time-tools__actions">
+        <button type="button" class="fxc-btn fxc-btn-sm fxc-btn-primary" data-time-action="extend">
+          <i class="fas fa-plus" aria-hidden="true"></i> {% trans "Əlavə vaxt ver" context "exams.time_extension" %}
+        </button>
+      </div>
+      <p class="fxc-time-tools__note" data-time-note aria-live="polite" hidden></p>
+      <p class="fxc-time-tools__warn" data-time-warning role="alert" hidden></p>
+    </div>
     <p class="fxc-modal-error" id="fxc-snapshot-error" hidden></p>
     <div class="fxc-snapshot-body" id="fxc-snapshot-body">
       <div class="fxc-snapshot-answers" aria-hidden="true">
