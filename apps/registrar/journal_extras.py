@@ -337,58 +337,55 @@ from .journal_topics import (  # noqa: E402,F401  (modulun sonunda — dövr yox
 # köhnə slot-əsaslı seçici silinib.
 
 
+def _plan_item(title, lessons, today):
+    """Plan sətri: ``lessons`` — sətrə sayılan BÜTÜN dərslər (xronoloji); ``days`` hər dərsin tarixi + növü.
+
+    Sahib 2026-11-18 (müəllim şikayəti): mövzu mühazirə + seminarla keçilir, panel isə yalnız İLK dərsin tarixini
+    göstərirdi — 03.11 / 12.11 dərsləri solda heç yerdə görünmürdü. İndi sətrin yanında hər dərsin tarixi var."""
+    first = lessons[0] if lessons else None
+    return {
+        "title": title,
+        "lesson": first,
+        "days": [
+            {"date": lesson.date, "kind": lesson.get_kind_display(), "planned": lesson.date > today}
+            for lesson in lessons
+        ],
+        # Gələcək tarixli dərs hələ «keçirilməyib» — yalnız planlaşdırılıb (QA-1 F13).
+        "covered": any(lesson.date <= today for lesson in lessons),
+        "planned": bool(lessons) and all(lesson.date > today for lesson in lessons),
+        "is_today": any(lesson.date == today for lesson in lessons),
+    }
+
+
 def calendar_plan(offering, lessons, today):
     """Sol panel "TƏQVİM PLANI — MÖVZULAR": kursun mövzu planı + hansının
     keçirildiyi (yanında tarix). Planda olmayan mövzulu/mövzusuz dərslər sona
     xronoloji əlavə olunur — müəllim nəyi keçdiyini bir baxışda görür.
 
     Plan SƏTİR üzrədir (MR-000377): təkrar başlıq («Test») hər sətri ilə görünür, dərs sətrə
-    ``journal_topics.lesson_row_matcher`` ilə sayılır (``syllabus_week``, bağsız — başlığın ilk sətri)."""
+    ``journal_topics.lesson_row_matcher`` ilə sayılır (``syllabus_week``, bağsız — başlığın ilk sətri).
+    Sətrə sayılan HƏR dərs (mühazirə, seminar, lab) sətrin yanında tarixi ilə görünür (sahib 2026-11-18)."""
     from .journal_topics import lesson_row_matcher, row_key, shown_topic
 
     chrono = sorted(lessons, key=lambda item: (item.date, item.created_at))
     rows = lesson_topic_rows(offering)
     match = lesson_row_matcher(rows)
-    lesson_by_row = {}
+    lessons_by_row: dict = {}
+    free: dict = {}
     for lesson in chrono:
         # Mövzusu boş, amma sillabus sətrinə bağlı (köçürülmüş) dərs sətrin mövzusu ilə sayılır (2026-10-25).
         key = match(lesson)
-        if key is not None and key not in lesson_by_row:
-            lesson_by_row[key] = lesson
-
-    plan = []
-    for row in rows:
-        lesson = lesson_by_row.get(row_key(row))
-        plan.append(
-            {
-                "title": row["title"],
-                "lesson": lesson,
-                # Gələcək tarixli dərs hələ «keçirilməyib» — yalnız planlaşdırılıb (QA-1 F13).
-                "covered": lesson is not None and lesson.date <= today,
-                "planned": lesson is not None and lesson.date > today,
-                "is_today": bool(lesson and lesson.date == today),
-            }
-        )
-    seen = set()
-    for lesson in chrono:
-        if match(lesson) is not None:
+        if key is not None:
+            lessons_by_row.setdefault(key, []).append(lesson)
             continue
+        # Mövzu qeyd olunmayan dərs: panel MÖVZULAR-dır — dərs tipini (Lecture/Seminar) BAŞLIQ kimi
+        # göstərmirik. Eyni sərbəst mövzunun dərsləri bir sətirdə; mövzusuz dərs öz sətrində.
         topic = shown_topic(lesson)
-        if topic and topic in seen:
-            continue
-        # Mövzu qeyd olunmayan dərs: panel MÖVZULAR-dır — dərs tipini (Lecture/
-        # Seminar) BAŞLIQ kimi göstərmirik. Mövzu yoxdursa neytral etiket.
-        plan.append(
-            {
-                "title": topic or _("Mövzu qeyd olunmayıb"),
-                "lesson": lesson,
-                "covered": lesson.date <= today,
-                "planned": lesson.date > today,
-                "is_today": lesson.date == today,
-            }
-        )
-        if topic:
-            seen.add(topic)
+        free.setdefault(topic or ("lesson", lesson.pk, id(lesson)), []).append(lesson)
+
+    plan = [_plan_item(row["title"], lessons_by_row.get(row_key(row), []), today) for row in rows]
+    for key, group in free.items():
+        plan.append(_plan_item(key if isinstance(key, str) else _("Mövzu qeyd olunmayıb"), group, today))
     return plan
 
 
