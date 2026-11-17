@@ -120243,3 +120243,249 @@ msgstr "The student has no active academic record (group)."
 msgctxt "registrar.group_extra_member"
 msgid "onsuz da bu jurnaldadır"
 msgstr "already in this journal"
+
+msgctxt "announcements.stats"
+msgid "Ad Soyad"
+msgstr "Full name"
+
+msgctxt "announcements.stats"
+msgid "Axtarışa uyğun şəxs tapılmadı"
+msgstr "No people match the search"
+
+msgctxt "announcements.stats"
+msgid "Bu seçimdə heç kim yoxdur"
+msgstr "Nobody matches this selection"
+
+msgctxt "announcements.stats"
+msgid "Bölgü"
+msgstr "Breakdown"
+
+msgctxt "announcements.stats"
+msgid "Bölmə"
+msgstr "Unit"
+
+msgctxt "announcements.stats"
+msgid "Bölmə göstərilməyib"
+msgstr "No unit specified"
+
+msgctxt "announcements.stats"
+msgid "Bütün bölmələr"
+msgstr "All units"
+
+msgctxt "announcements.stats"
+msgid "Bütün rollar"
+msgstr "All roles"
+
+msgctxt "announcements.stats"
+msgid "Cəmi"
+msgstr "Total"
+
+msgctxt "announcements.stats"
+msgid "Elan"
+msgstr "Announcement"
+
+msgctxt "announcements.stats"
+msgid "Elan axtar…"
+msgstr "Search announcements…"
+
+msgctxt "announcements.stats"
+msgid "Elan dərc olunandan sonra burada kimin gördüyü görünəcək."
+msgstr "Once an announcement is published, you will see here who has seen it."
+
+msgctxt "announcements.stats"
+msgid "Elan statistikası"
+msgstr "Announcement statistics"
+
+msgctxt "announcements.stats"
+msgid "Elanı aç"
+msgstr "Open announcement"
+
+msgctxt "announcements.stats"
+msgid ""
+"Elanı kimin gördüyü, kimin oxuduğu və kimin hələ görmədiyi. Rəqəmlər elanın "
+"hədəf auditoriyasına görədir."
+msgstr ""
+"Who has seen the announcement, who has read it and who has not seen it yet. "
+"Figures are relative to the announcement's target audience."
+
+msgctxt "announcements.stats"
+msgid "Excel-ə yüklə"
+msgstr "Download Excel"
+
+msgctxt "announcements.stats"
+msgid "Fakültə"
+msgstr "Faculty"
+
+msgctxt "announcements.stats"
+msgid "Fakültə üzrə"
+msgstr "By faculty"
+
+msgctxt "announcements.stats"
+msgid "Fakültə, kafedra, ixtisas və ya qrup…"
+msgstr "Faculty, department, specialty or group…"
+
+msgctxt "announcements.stats"
+msgid "Görməyib"
+msgstr "Not seen"
+
+msgctxt "announcements.stats"
+msgid "Görməyib, %"
+msgstr "Not seen, %"
+
+#, python-format
+msgctxt "announcements.stats"
+msgid "Görənlər: %(pct)s%%"
+msgstr "Seen: %(pct)s%%"
+
+msgctxt "announcements.stats"
+msgid "Görənlərin payı"
+msgstr "Share who saw it"
+
+msgctxt "announcements.stats"
+msgid "Hamı elanı görüb"
+msgstr "Everyone has seen the announcement"
+
+msgctxt "announcements.stats"
+msgid "Hədəf"
+msgstr "Target"
+
+msgctxt "announcements.stats"
+msgid "Hələ dərc olunmuş elan yoxdur"
+msgstr "No published announcements yet"
+
+msgctxt "announcements.stats"
+msgid "Kafedra"
+msgstr "Department"
+
+msgctxt "announcements.stats"
+msgid "Kafedra üzrə"
+msgstr "By department"
+
+msgctxt "announcements.stats"
+msgid "Kim görüb"
+msgstr "Who saw it"
+
+msgctxt "announcements.stats"
+msgid ""
+"Müəllim və əməkdaşlar ixtisasa və qrupa bağlı deyil — onlar «Bölmə "
+"göstərilməyib» sətrindədir."
+msgstr ""
+"Teachers and staff are not linked to a specialty or group — they are in the "
+"«No unit specified» row."
+
+msgctxt "announcements.stats"
+msgid "Oxuyub"
+msgstr "Read"
+
+msgctxt "announcements.stats"
+msgid "Oxuyub, %"
+msgstr "Read, %"
+
+#, python-format
+msgctxt "announcements.stats"
+msgid "Oxuyub: %(day)s"
+msgstr "Read: %(day)s"
+
+msgctxt "announcements.stats"
+msgid "Popup görüb"
+msgstr "Saw pop-up"
+
+msgctxt "announcements.stats"
+msgid "Popup görüb, %"
+msgstr "Saw pop-up, %"
+
+#, python-format
+msgctxt "announcements.stats"
+msgid "Popup: %(day)s"
+msgstr "Pop-up: %(day)s"
+
+msgctxt "announcements.stats"
+msgid "Qrup"
+msgstr "Group"
+
+msgctxt "announcements.stats"
+msgid "Qrup üzrə"
+msgstr "By group"
+
+msgctxt "announcements.stats"
+msgid "Rol"
+msgstr "Role"
+
+msgctxt "announcements.stats"
+msgid "Rol üzrə"
+msgstr "By role"
+
+msgctxt "announcements.stats"
+msgid "Siyahı yüklənir…"
+msgstr "Loading the list…"
+
+msgctxt "announcements.stats"
+msgid "Statistika filtrləri"
+msgstr "Statistics filters"
+
+msgctxt "announcements.stats"
+msgid "Statistika hesablanır…"
+msgstr "Calculating statistics…"
+
+msgctxt "announcements.stats"
+msgid "Statistikanı yükləmək alınmadı. Bir az sonra yenidən cəhd edin."
+msgstr "Could not load the statistics. Please try again a little later."
+
+msgctxt "announcements.stats"
+msgid "Səlahiyyət yoxdur."
+msgstr "Access denied."
+
+msgctxt "announcements.stats"
+msgid ""
+"Tələbələr kafedraya bağlı deyil — onlar «Bölmə göstərilməyib» sətrindədir. "
+"Tələbələr üçün fakültə, ixtisas və ya qrup bölgüsünə baxın."
+msgstr ""
+"Students are not linked to a department — they are in the «No unit "
+"specified» row. For students, use the faculty, specialty or group breakdown."
+
+msgctxt "announcements.stats"
+msgid "Təsdiq edib"
+msgstr "Confirmed"
+
+msgctxt "announcements.stats"
+msgid "Uyğun bölmə yoxdur"
+msgstr "No matching unit"
+
+msgctxt "announcements.stats"
+msgid "Vəziyyət"
+msgstr "Status"
+
+#, python-format
+msgctxt "announcements.stats"
+msgid "«%(title)s» elanının statistikası"
+msgstr "Statistics for «%(title)s»"
+
+msgctxt "announcements.stats"
+msgid "«Görənlərin payı» — popup-u görən və ya elanı açıb oxuyanlar."
+msgstr ""
+"«Share who saw it» — people who saw the pop-up or opened and read the "
+"announcement."
+
+msgctxt "announcements.stats"
+msgid "İstifadəçi adı"
+msgstr "Username"
+
+msgctxt "announcements.stats"
+msgid "İxtisas"
+msgstr "Specialty"
+
+msgctxt "announcements.stats"
+msgid "İxtisas üzrə"
+msgstr "By specialty"
+
+msgctxt "announcements.stats"
+msgid "Şəxs filtrləri"
+msgstr "People filters"
+
+msgctxt "announcements.stats"
+msgid "Şəxslər"
+msgstr "People"
+
+msgctxt "announcements.stats"
+msgid "Şəxslərdə axtar"
+msgstr "Search people"

@@ -120451,3 +120451,249 @@ msgstr "У студента нет активной академической �
 msgctxt "registrar.group_extra_member"
 msgid "onsuz da bu jurnaldadır"
 msgstr "уже в этом журнале"
+
+msgctxt "announcements.stats"
+msgid "Ad Soyad"
+msgstr "ФИО"
+
+msgctxt "announcements.stats"
+msgid "Axtarışa uyğun şəxs tapılmadı"
+msgstr "По запросу никто не найден"
+
+msgctxt "announcements.stats"
+msgid "Bu seçimdə heç kim yoxdur"
+msgstr "В этой выборке никого нет"
+
+msgctxt "announcements.stats"
+msgid "Bölgü"
+msgstr "Разбивка"
+
+msgctxt "announcements.stats"
+msgid "Bölmə"
+msgstr "Подразделение"
+
+msgctxt "announcements.stats"
+msgid "Bölmə göstərilməyib"
+msgstr "Подразделение не указано"
+
+msgctxt "announcements.stats"
+msgid "Bütün bölmələr"
+msgstr "Все подразделения"
+
+msgctxt "announcements.stats"
+msgid "Bütün rollar"
+msgstr "Все роли"
+
+msgctxt "announcements.stats"
+msgid "Cəmi"
+msgstr "Итого"
+
+msgctxt "announcements.stats"
+msgid "Elan"
+msgstr "Объявление"
+
+msgctxt "announcements.stats"
+msgid "Elan axtar…"
+msgstr "Поиск объявления…"
+
+msgctxt "announcements.stats"
+msgid "Elan dərc olunandan sonra burada kimin gördüyü görünəcək."
+msgstr "После публикации объявления здесь будет видно, кто его увидел."
+
+msgctxt "announcements.stats"
+msgid "Elan statistikası"
+msgstr "Статистика объявлений"
+
+msgctxt "announcements.stats"
+msgid "Elanı aç"
+msgstr "Открыть объявление"
+
+msgctxt "announcements.stats"
+msgid ""
+"Elanı kimin gördüyü, kimin oxuduğu və kimin hələ görmədiyi. Rəqəmlər elanın "
+"hədəf auditoriyasına görədir."
+msgstr ""
+"Кто увидел объявление, кто его прочитал и кто ещё не видел. Цифры — "
+"относительно целевой аудитории объявления."
+
+msgctxt "announcements.stats"
+msgid "Excel-ə yüklə"
+msgstr "Скачать Excel"
+
+msgctxt "announcements.stats"
+msgid "Fakültə"
+msgstr "Факультет"
+
+msgctxt "announcements.stats"
+msgid "Fakültə üzrə"
+msgstr "По факультетам"
+
+msgctxt "announcements.stats"
+msgid "Fakültə, kafedra, ixtisas və ya qrup…"
+msgstr "Факультет, кафедра, специальность или группа…"
+
+msgctxt "announcements.stats"
+msgid "Görməyib"
+msgstr "Не видели"
+
+msgctxt "announcements.stats"
+msgid "Görməyib, %"
+msgstr "Не видели, %"
+
+#, python-format
+msgctxt "announcements.stats"
+msgid "Görənlər: %(pct)s%%"
+msgstr "Увидели: %(pct)s%%"
+
+msgctxt "announcements.stats"
+msgid "Görənlərin payı"
+msgstr "Доля увидевших"
+
+msgctxt "announcements.stats"
+msgid "Hamı elanı görüb"
+msgstr "Все увидели объявление"
+
+msgctxt "announcements.stats"
+msgid "Hədəf"
+msgstr "Цель"
+
+msgctxt "announcements.stats"
+msgid "Hələ dərc olunmuş elan yoxdur"
+msgstr "Пока нет опубликованных объявлений"
+
+msgctxt "announcements.stats"
+msgid "Kafedra"
+msgstr "Кафедра"
+
+msgctxt "announcements.stats"
+msgid "Kafedra üzrə"
+msgstr "По кафедрам"
+
+msgctxt "announcements.stats"
+msgid "Kim görüb"
+msgstr "Кто увидел"
+
+msgctxt "announcements.stats"
+msgid ""
+"Müəllim və əməkdaşlar ixtisasa və qrupa bağlı deyil — onlar «Bölmə "
+"göstərilməyib» sətrindədir."
+msgstr ""
+"Преподаватели и сотрудники не привязаны к специальности и группе — они в "
+"строке «Подразделение не указано»."
+
+msgctxt "announcements.stats"
+msgid "Oxuyub"
+msgstr "Прочитали"
+
+msgctxt "announcements.stats"
+msgid "Oxuyub, %"
+msgstr "Прочитали, %"
+
+#, python-format
+msgctxt "announcements.stats"
+msgid "Oxuyub: %(day)s"
+msgstr "Прочитал(а): %(day)s"
+
+msgctxt "announcements.stats"
+msgid "Popup görüb"
+msgstr "Видели всплывающее окно"
+
+msgctxt "announcements.stats"
+msgid "Popup görüb, %"
+msgstr "Видели всплывающее окно, %"
+
+#, python-format
+msgctxt "announcements.stats"
+msgid "Popup: %(day)s"
+msgstr "Всплывающее окно: %(day)s"
+
+msgctxt "announcements.stats"
+msgid "Qrup"
+msgstr "Группа"
+
+msgctxt "announcements.stats"
+msgid "Qrup üzrə"
+msgstr "По группам"
+
+msgctxt "announcements.stats"
+msgid "Rol"
+msgstr "Роль"
+
+msgctxt "announcements.stats"
+msgid "Rol üzrə"
+msgstr "По ролям"
+
+msgctxt "announcements.stats"
+msgid "Siyahı yüklənir…"
+msgstr "Загрузка списка…"
+
+msgctxt "announcements.stats"
+msgid "Statistika filtrləri"
+msgstr "Фильтры статистики"
+
+msgctxt "announcements.stats"
+msgid "Statistika hesablanır…"
+msgstr "Подсчёт статистики…"
+
+msgctxt "announcements.stats"
+msgid "Statistikanı yükləmək alınmadı. Bir az sonra yenidən cəhd edin."
+msgstr "Не удалось загрузить статистику. Попробуйте чуть позже."
+
+msgctxt "announcements.stats"
+msgid "Səlahiyyət yoxdur."
+msgstr "Нет доступа."
+
+msgctxt "announcements.stats"
+msgid ""
+"Tələbələr kafedraya bağlı deyil — onlar «Bölmə göstərilməyib» sətrindədir. "
+"Tələbələr üçün fakültə, ixtisas və ya qrup bölgüsünə baxın."
+msgstr ""
+"Студенты не привязаны к кафедре — они в строке «Подразделение не указано». "
+"Для студентов смотрите разбивку по факультетам, специальностям или группам."
+
+msgctxt "announcements.stats"
+msgid "Təsdiq edib"
+msgstr "Подтвердили"
+
+msgctxt "announcements.stats"
+msgid "Uyğun bölmə yoxdur"
+msgstr "Подходящих подразделений нет"
+
+msgctxt "announcements.stats"
+msgid "Vəziyyət"
+msgstr "Статус"
+
+#, python-format
+msgctxt "announcements.stats"
+msgid "«%(title)s» elanının statistikası"
+msgstr "Статистика объявления «%(title)s»"
+
+msgctxt "announcements.stats"
+msgid "«Görənlərin payı» — popup-u görən və ya elanı açıb oxuyanlar."
+msgstr ""
+"«Доля увидевших» — те, кто увидел всплывающее окно или открыл и прочитал "
+"объявление."
+
+msgctxt "announcements.stats"
+msgid "İstifadəçi adı"
+msgstr "Имя пользователя"
+
+msgctxt "announcements.stats"
+msgid "İxtisas"
+msgstr "Специальность"
+
+msgctxt "announcements.stats"
+msgid "İxtisas üzrə"
+msgstr "По специальностям"
+
+msgctxt "announcements.stats"
+msgid "Şəxs filtrləri"
+msgstr "Фильтры людей"
+
+msgctxt "announcements.stats"
+msgid "Şəxslər"
+msgstr "Люди"
+
+msgctxt "announcements.stats"
+msgid "Şəxslərdə axtar"
+msgstr "Поиск людей"
