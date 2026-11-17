@@ -120311,3 +120311,11 @@ msgstr "Балл апелляции должен быть целым число�
 msgctxt "registrar.exam_score_entry"
 msgid "istəyə bağlı"
 msgstr "необязательно"
+
+msgctxt "registrar.exam_score_entry"
+msgid ""
+"Apellyasiya balını yalnız RİM rəhbəri və İmtahan Mərkəzinin rəhbəri / işçisi"
+" yazır."
+msgstr ""
+"Балл апелляции вносят только руководитель РИМ и руководитель / сотрудник "
+"Экзаменационного центра."

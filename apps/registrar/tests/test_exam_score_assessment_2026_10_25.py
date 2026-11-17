@@ -283,10 +283,10 @@ class AssessmentRulesTest(MidtermPeriodFixture, TestCase):
             self._final("40", self.center)
             later = timezone.now() + timedelta(minutes=61)
             with mock.patch("django.utils.timezone.now", return_value=later):
-                # Sahib 2026-10-25: apellyasiya ilə dəyişiklik — YALNIZ İmtahan Mərkəzinin rəhbəri.
-                staff = self._final("45", self.staff, kind="appeal", sheet_evidence=_pdf())
-                self.assertEqual(staff["written"], 0)
-                self.assertIn("rəhbəri", staff["errors"][0][1])
+                # Sahib 2026-10-25: apellyasiya — İmtahan Mərkəzinin rəhbəri; 2026-11-18: işçisi də. Müəllim yox.
+                teacher = self._final("45", self.teacher, kind="appeal", sheet_evidence=_pdf())
+                self.assertEqual(teacher["written"], 0)
+                self.assertIn("işçisi yazır", teacher["errors"][0][1])
                 no_doc = self._final("45", self.center, kind="appeal")
                 self.assertEqual(no_doc["written"], 0)
                 self.assertIn("apellyasiya sənədi", no_doc["errors"][0][1])

@@ -161,19 +161,26 @@ def can_unlock_past_period(user, organization) -> bool:
     return ProfileRole.IKT_REHBER in active_role_names(user, organization)
 
 
+#: Apellyasiya balını yazan rollar (RİM rəhbəri ayrıca yoxlanır) — sahib 2026-11-18.
+APPEAL_ROLES = frozenset({ProfileRole.EXAM_CENTER_HEAD, ProfileRole.EXAM_CENTER_STAFF})
+
+
 def change_permissions(user, organization) -> tuple[bool, bool]:
     """``(RİM təqdimatı, apellyasiya ilə dəyişiklik)`` icazələri — BİR sorğu.
 
     Sahib 2026-10-25: «Apellyasiyaya gələni İmtahan Mərkəzi düzəldə bilər, ancaq RƏHBƏR access-i olsun».
     Apellyasiya — ``exam_center_head`` (İmtahan Mərkəzinin rəhbəri), RİM rəhbəri (``ikt_rehber``) və superadmin;
-    təqdimat düzəlişi — yalnız RİM rəhbəri və superadmin."""
+    təqdimat düzəlişi — yalnız RİM rəhbəri və superadmin.
+
+    Sahib 2026-11-18: «RİM rəhbəri, İmtahan Mərkəzinin rəhbəri və İmtahan Mərkəzinin işçisi burada işləyə bilməlidir
+    və əlavə olaraq apellyasiya xanasını da yaza bilməlidir» — ``exam_center_staff`` da apellyasiya yazır."""
     if user is None or not getattr(user, "is_authenticated", False):
         return False, False
     if _is_superadmin(user):
         return True, True
     roles = active_role_names(user, organization)
     rim = ProfileRole.IKT_REHBER in roles
-    return rim, rim or ProfileRole.EXAM_CENTER_HEAD in roles
+    return rim, rim or bool(roles & APPEAL_ROLES)
 
 
 def correction_mode_requested(data) -> bool:
