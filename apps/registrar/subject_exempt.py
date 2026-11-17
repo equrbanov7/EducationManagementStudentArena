@@ -310,6 +310,7 @@ def is_exempt_from_subject(record, period, subject_id) -> bool:
         enrollment__status=Enrollment.Status.DROPPED,
         enrollment__offering__period=period,
         enrollment__offering__subject_id=subject_id,
+        enrollment__offering__is_active=True,  # ləğv olunmuş jurnaldakı azadolma bloklamır (MR-000465)
     ).exists()
 
 
