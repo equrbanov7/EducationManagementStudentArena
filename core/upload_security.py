@@ -229,7 +229,9 @@ def _signature_indicates_blocked_type(uploaded_file) -> bool:
 
 
 def _resolve_mime_type(uploaded_file) -> str:
-    content_type = (getattr(uploaded_file, "content_type", "") or "").strip().lower()
+    inner = getattr(uploaded_file, "file", None)  # model FieldFile sarğısı: content_type içdədir (MR-000473)
+    content_type = (getattr(uploaded_file, "content_type", "") or getattr(inner, "content_type", "") or "").lower()
+    content_type = content_type.strip()
     if content_type:
         return content_type
     guessed_type = mimetypes.guess_type(getattr(uploaded_file, "name", "") or "")[0]
