@@ -191,6 +191,23 @@ class OfferingChairsTest(TestCase):
     def test_legacy_offering_follows_the_subjects_load(self):
         self.assertEqual(self._chairs(self.o_old_it), {str(self.it.pk)})
 
+    def test_legacy_multi_chair_subject_narrows_to_teachers_staff_chair(self):
+        """MR-000445: fənnin yükü iki kafedradadır, müəllim heç birində deyil → hamısı yox, müəllimin ştat kafedrası."""
+        with bypass_rls():
+            subj = Subject.objects.create(organization=self.org, code="OFC-TWO", name="İki kafedralı fənn")
+            for chair, group in ((self.it, self.g_it), (self.land, self.g_eco)):
+                task, _ = TeachingTask.objects.get_or_create(
+                    organization=self.org, chair=chair, academic_year="2026/2027", defaults={"status": "distributed"}
+                )
+                row = TeachingTaskRow.objects.create(
+                    organization=self.org, task=task, period=self.fall, subject=subj, total_hours=30
+                )
+                row.groups.set([group])
+            item = CourseOffering.objects.create(
+                organization=self.org, subject=subj, period=self.old, group=self.g_it, instructor=self.cross
+            )
+        self.assertEqual(self._chairs(item), {str(self.prog.pk)})
+
     def test_legacy_fallback_prefers_the_primary_teaching_membership(self):
         self.assertEqual(self._chairs(self.o_old_multi), {str(self.land.pk)})
         self.assertEqual(self._chairs(self.o_old_member), frozenset())
