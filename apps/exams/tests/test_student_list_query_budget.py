@@ -432,9 +432,9 @@ class StudentListBatchParityTests(_StudentListFixture):
         self.assertEqual(snapshot["P13 Zəngin açıq"]["start"], (True, None))
         self.assertIsNone(snapshot["P13 Kurs üzvlüyü"]["block"])
         self.assertEqual(snapshot["P13 Kodlu təyinatlı"]["start"], (False, code_required))
-        self.assertFalse(snapshot["P13 Parity pozulub"]["start"][0])
-        self.assertTrue(snapshot["P13 Parity pozulub"]["parity"])
-        self.assertEqual(snapshot["P13 Parity pozulub"]["start"][1], snapshot["P13 Parity pozulub"]["parity"])
+        # Sahib 2026-11-19: dil variantlarının sual sayı/balı fərqli ola bilər — başlamağı bağlamır.
+        self.assertEqual(snapshot["P13 Parity pozulub"]["parity"], "")
+        self.assertEqual(snapshot["P13 Parity pozulub"]["start"], (True, None))
         self.assertFalse(snapshot["P13 Hələ başlamayıb"]["start"][0])
         self.assertEqual(snapshot["P13 Tərk edilmiş cəhd"]["left"], 1)  # lazy expire → 1 istifadə olunub
         self.assertEqual(snapshot["P13 Tələbənin öz imtahanı"]["start"], (True, None))
