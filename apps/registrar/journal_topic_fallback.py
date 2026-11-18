@@ -57,6 +57,14 @@ def _own_draft_rows(offering) -> list:
 
 
 def _peer_approved_rows(offering) -> list:
+    return peer_approved_source(offering)[1]
+
+
+def peer_approved_source(offering) -> tuple:
+    """3-cü pillənin MƏNBƏYİ: ``(dosye, sətirlər)`` — mövzulu ilk təsdiqlənmiş sillabus; yoxdursa ``(None, [])``.
+
+    Jurnalın göstərdiyi ehtiyat siyahı ilə EYNİ sıra (``fill_empty_syllabus_weeks_20261119`` bunu mənbə kimi götürür).
+    """
     from django.apps import apps as django_apps
 
     Syllabus = django_apps.get_model("syllabus", "Syllabus")
@@ -79,8 +87,8 @@ def _peer_approved_rows(offering) -> list:
     ):
         rows = _version_rows(syllabus.approved_version)
         if any(str(row.get("topic") or "").strip() for row in rows):
-            return rows
-    return []
+            return syllabus, rows
+    return None, []
 
 
 def fallback_topic_rows(offering) -> list:
