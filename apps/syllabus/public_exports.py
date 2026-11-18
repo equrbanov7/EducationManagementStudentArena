@@ -49,6 +49,8 @@ from .services.week_rows import approved_week_rows_for_offerings  # noqa: F401
 from .services.week_rows import plan_rows as week_plan_rows  # noqa: F401
 from .state_machine import Transition  # noqa: F401
 from .state_machine import TransitionDenied  # noqa: F401
+from .week_plan import expected_week_rows  # noqa: F401
+from .week_plan import fit_rows_to_hours  # noqa: F401
 
 __all__ = [
     "BLOCK_TITLES",
@@ -58,6 +60,8 @@ __all__ = [
     "activity_kinds_for_offering",
     "approved_week_rows_for_offerings",
     "week_plan_rows",
+    "fit_rows_to_hours",
+    "expected_week_rows",
     "current_rule",
     "rule_for_period",
     "rule_for_syllabus",
