@@ -149,6 +149,8 @@ INTENTIONAL_EXEMPTIONS = {
     # 2026-11-12 artıq «UI/UX» sillabusu passiv: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/retire_uiux_syllabus_20261112.py",
     "apps/registrar/management/commands/retire_misattached_syllabus_20261116.py",
+    # 2026-11-18 MR-000537 «colloquium» cümlələri: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
+    "apps/registrar/management/commands/remove_colloquium_note_20261118.py",
     # 2026-11-12 MR-000188 434 R payı ayrıca alt qrup jurnalına: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/split_share_journal_20261112.py",
     # 2026-11-12 MR-000317 635 Q/İ birləşmiş jurnalı qruplara: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
