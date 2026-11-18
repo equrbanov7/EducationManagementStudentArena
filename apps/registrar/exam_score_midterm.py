@@ -379,9 +379,11 @@ def roster_for_offering(*, offering) -> dict:
                 "attempts": [],
             }
         )
+    from .exam_score_roster import mark_subgroup_rows
+
     return {
         "offering": offering,
-        "rows": rows,
+        "rows": mark_subgroup_rows(rows, offering=offering),  # «Alt qrup» — final siyahısı ilə eyni (2026-11-18)
         "exam_score_max": cap,
         "letter_bands": [],
         "pass_threshold": 0,

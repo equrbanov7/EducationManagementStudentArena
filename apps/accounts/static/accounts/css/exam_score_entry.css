@@ -179,6 +179,23 @@
     margin-left: 6px;
 }
 
+/* Sahib 2026-11-18: «Alt qrup» başlığı — jurnalın «Alt qrup tələbələri» ayırıcısının güzgüsü. */
+.ese-guest-divider__cell {
+    padding: 6px 12px;
+    text-align: left;
+    border-top: 2px solid var(--ems-primary-500);
+    background: var(--ems-primary-50, #eef2ff);
+    color: var(--ems-primary-700, #1e40af);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+}
+
+.ese-guest-divider__cell .fas {
+    margin-right: 6px;
+}
+
 .ese-letter {
     font-weight: 700;
     color: var(--ems-primary-700);

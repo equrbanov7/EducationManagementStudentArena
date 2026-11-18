@@ -120489,3 +120489,7 @@ msgstr "People"
 msgctxt "announcements.stats"
 msgid "Şəxslərdə axtar"
 msgstr "Search people"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Alt qrup"
+msgstr "Subgroup"

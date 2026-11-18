@@ -97,6 +97,12 @@ apellyasiyadan əvvəlki balı göstərir — yekun bal apellyasiya balıdır (`
             {% trans "Apellyasiya balı" context "registrar.exam_score_entry" as ese_appeal_aria %}
             {% trans "Apellyasiya balını yalnız RİM rəhbəri və İmtahan Mərkəzinin rəhbəri / işçisi yazır." context "registrar.exam_score_entry" as ese_appeal_hint %}
             {% for row in s.rows %}
+            {% if row.is_subgroup %}{% ifchanged row.is_subgroup %}{% comment %}Sahib 2026-11-18: alt qrup tələbələri jurnaldakı kimi ən aşağıda,
+               ayrıca başlıq altında; balı eyni xanalardan yazılır (sətir quruluşu dəyişmir).{% endcomment %}
+            <tr class="ese-guest-divider" data-ese-guest-divider>
+              <th scope="rowgroup" class="ese-guest-divider__cell" colspan="{% if s.is_midterm %}{{ s.question_labels|length|add:5 }}{% else %}{{ s.question_labels|length|add:8 }}{% endif %}"><i class="fas fa-people-arrows" aria-hidden="true"></i> {% trans "Alt qrup" context "registrar.exam_score_entry" %}</th>
+            </tr>
+            {% endifchanged %}{% endif %}
             <tr class="ese-row {% if row.has_score %}is-recorded{% endif %}{% if row.locked %} is-locked{% endif %}{% if row.final_locked %} is-final{% endif %}" data-ese-row data-locked="{% if row.locked or row.appeal_set %}1{% else %}0{% endif %}"{% if row.from_test %} data-q-locked="1"{% endif %} data-enrollment="{{ row.enrollment.id }}"
                 data-final="{% if row.final_locked %}1{% else %}0{% endif %}" data-edit-until="{{ row.edit_until }}"
                 data-student="{{ row.name }}"
