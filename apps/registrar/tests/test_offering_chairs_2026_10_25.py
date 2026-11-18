@@ -264,3 +264,37 @@ class OfferingChairsTest(TestCase):
             {("OFC-IT", "236 İT"), ("OFC-PR", "236 İT"), ("OFC-MM", "236 İT")},
         )
         self.assertEqual(self._journal(faculty=self.eco.pk, department=self.land.pk), {("OFC-MM", "236 EK")})
+
+    # ── MR-000504: bölünmüş yarım qrup (``settings.parent_group``) ana qrupun yük sətrinin kafedrasını alır ──
+
+    def _official(self, offering):
+        with bypass_rls():
+            found = offering_chairs.official_offering_chairs(CourseOffering.objects.filter(pk=offering.pk), self.org.pk)
+        return found[offering.pk]
+
+    def test_split_half_group_follows_parent_groups_load_row(self):
+        with bypass_rls():
+            half = OrgUnit.objects.create(
+                organization=self.org,
+                name="236 İT-2",
+                slug="ofc-half",
+                unit_type=OrgUnitType.GROUP,
+                parent=self.g_it.parent,
+                settings={"parent_group": str(self.g_it.pk), "share_split": "x"},
+            )
+            other_half = OrgUnit.objects.create(
+                organization=self.org,
+                name="236 X-2",
+                slug="ofc-half-x",
+                unit_type=OrgUnitType.GROUP,
+                parent=self.g_it.parent,
+            )
+            split = CourseOffering.objects.create(
+                organization=self.org, subject=self.s_it, period=self.fall, group=half, instructor=self.cross
+            )
+            plain = CourseOffering.objects.create(
+                organization=self.org, subject=self.s_it, period=self.fall, group=other_half, instructor=self.cross
+            )
+        self.assertEqual(self._official(split), {str(self.it.pk)})
+        self.assertEqual(self._official(plain), set())  # bağ yoxdur → ehtimal edilmir
+        self.assertEqual(self._official(self.o_cross), {str(self.it.pk)})

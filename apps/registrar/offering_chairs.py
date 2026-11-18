@@ -29,6 +29,7 @@ Sorğu sayı sətir sayından asılı deyil (4–5 toplu SELECT); həll Python-d
 
 from __future__ import annotations
 
+import uuid
 from collections import defaultdict
 
 from django.apps import apps as django_apps
@@ -55,6 +56,13 @@ CANCELLED_TASK = "cancelled"
 
 def _model(app_label, name):
     return django_apps.get_model(app_label, name)
+
+
+def _uuid(value):
+    try:
+        return uuid.UUID(str(value))
+    except (TypeError, ValueError, AttributeError):
+        return None
 
 
 def _nearest(path, known) -> str | None:
@@ -189,12 +197,18 @@ def official_offering_chairs(offerings, organization_id) -> dict:
         )
     ):
         exact[(subject_id, period_id, group_id)].add(str(chair_id))
-    return {
-        pk: frozenset(exact.get((subject_id, period_id, group_id)) or ({str(chair)} if chair else set()))
-        for pk, subject_id, period_id, group_id, chair in offerings.values_list(
-            "pk", "subject_id", "period_id", "group_id", "subject__chair_unit_id"
-        )
-    }
+    out = {}
+    for pk, subject_id, period_id, group_id, chair, settings in offerings.values_list(
+        "pk", "subject_id", "period_id", "group_id", "subject__chair_unit_id", "group__settings"
+    ):
+        found = exact.get((subject_id, period_id, group_id))
+        if not found:
+            # MR-000504 (2026-11-18): bölünmə ilə yaradılmış yarım qrupun (``settings.parent_group``) öz yük sətri
+            # yoxdur — saatı ana qrupun sətrindədir. Bu açıq bağdır (ehtimal deyil): ana qrupun DƏQİQ sətri sayılır.
+            parent = (settings or {}).get("parent_group") if isinstance(settings, dict) else None
+            found = exact.get((subject_id, period_id, _uuid(parent))) if parent else None
+        out[pk] = frozenset(found or ({str(chair)} if chair else set()))
+    return out
 
 
 def chair_paths(organization_id, chair_ids) -> dict:
