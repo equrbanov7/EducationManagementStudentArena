@@ -211,7 +211,10 @@ def _real_workflow_run(tmp_path, command, output, **changes):
       esac
     }
     """
-    result = subprocess.run(["bash", "-c", fake + script], cwd=ROOT, env=env, capture_output=True, text=True)
+    # The run step is longer than the kernel's single-argument limit (MAX_ARG_STRLEN, 128 KiB) — pass it as a file.
+    script_file = tmp_path / "workflow-step.sh"
+    script_file.write_text(fake + script, encoding="utf-8")
+    result = subprocess.run(["bash", str(script_file)], cwd=ROOT, env=env, capture_output=True, text=True)
     return result, record.read_text().splitlines() if record.exists() else []
 
 
