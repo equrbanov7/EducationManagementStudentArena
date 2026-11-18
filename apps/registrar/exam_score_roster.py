@@ -224,11 +224,6 @@ def roster_for_offering(*, offering):
         organization=offering.organization,
     )
 
-    # «alt qrupdan» nişanı yalnız sənədli yerləşdirməyə (sahib 2026-10-25).
-    from .subgroup_evidence import documented_subgroup_ids
-
-    documented = documented_subgroup_ids([e.pk for e in enrollments if e.source_group_id is not None])
-
     rows = []
     for enrollment in enrollments:
         result = finals.compute_final_result(enrollment=enrollment, scheme=scheme, batch=batch)
@@ -239,7 +234,6 @@ def roster_for_offering(*, offering):
             {
                 "enrollment": enrollment,
                 "student": student,
-                "is_subgroup": enrollment.pk in documented,
                 # Göstərilən ad BİR dəfə (şablon sətir başına ~25 dəfə işlədir — 2026-10-08 tutum).
                 "name": student.get_full_name() or student.username,
                 "exam_score": result["exam_score"],
@@ -266,7 +260,7 @@ def roster_for_offering(*, offering):
     return {
         "offering": offering,
         "scheme": scheme,
-        "rows": rows,
+        "rows": mark_subgroup_rows(rows, offering=offering),
         "exam_score_max": finals.exam_score_max(scheme),
         # Təsdiq dialoqu hərf qiymətini SERVER şkalası ilə canlı hesablayır
         # (sahibin rəyi 2026-09-14: hədd uydurulmur — `grading_scale.bands_for`).
@@ -274,6 +268,35 @@ def roster_for_offering(*, offering):
         "pass_threshold": int(scheme.pass_threshold),
         "min_final_exam_score": int(scheme.min_final_exam_score),
     }
+
+
+def mark_subgroup_rows(rows, *, offering) -> list:
+    """«Alt qrup» sətirləri — jurnalla EYNİ qayda, siyahının SONUNDA (sahib 2026-11-18).
+
+    Sahib: «imtahan nəticələri yüklənərkən midterm ya da final alt qrup nəticələri də jurnalda nədirsə orada da
+    görünsün … ən aşağıda alt qrup yazısı gəlsin, balını oradan yazmaq olsun». Siyahı onsuz da açılışın BÜTÜN
+    ``enrolled`` qeydiyyatlarıdır (jurnal sətirləri ilə eyni mənbə) — yəni alt qrup tələbəsi artıq buradadır;
+    bu köməkçi yalnız onu jurnaldakı kimi işarələyir və aşağı köçürür (``gradebook.get_offering_journal``):
+    sənədli yerləşdirmə (:mod:`subgroup_evidence`) VƏ tələbənin cari qrupu jurnalın qrupu deyil
+    (:func:`guest_roster.row_is_guest`). Sıralama sabitdir — hər hissədə ad sırası qalır; hər tələbə BİR dəfə.
+    Yazı yolu dəyişmir (eyni ``score__<enrollment>`` sahəsi). Sorğu: sənədli sətir yoxdursa 0, varsa ≤ 3.
+    """
+    from . import guest_roster
+    from .subgroup_evidence import documented_subgroup_ids
+
+    candidates = [row["enrollment"] for row in rows if row["enrollment"].source_group_id is not None]
+    documented = documented_subgroup_ids([enrollment.pk for enrollment in candidates])
+    current_groups = guest_roster.current_group_map(
+        organization_id=offering.organization_id,
+        student_ids=[enrollment.student_id for enrollment in candidates if enrollment.pk in documented],
+    )
+    for row in rows:
+        enrollment = row["enrollment"]
+        row["is_subgroup"] = enrollment.pk in documented and guest_roster.row_is_guest(
+            enrollment, offering=offering, current_group_id=current_groups.get(enrollment.student_id)
+        )
+    rows.sort(key=lambda row: bool(row["is_subgroup"]))
+    return rows
 
 
 def _row_matches_search(row, needle: str) -> bool:
@@ -341,6 +364,7 @@ __all__ = [
     "filter_roster_rows",
     "group_ids_for_instructor",
     "instructors_for_period",
+    "mark_subgroup_rows",
     "offering_label",
     "offerings_for_subject",
     "roster_for_offering",

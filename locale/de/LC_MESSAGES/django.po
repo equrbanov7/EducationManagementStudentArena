@@ -122027,3 +122027,7 @@ msgstr "Personen"
 msgctxt "announcements.stats"
 msgid "Şəxslərdə axtar"
 msgstr "Personen suchen"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Alt qrup"
+msgstr "Untergruppe"

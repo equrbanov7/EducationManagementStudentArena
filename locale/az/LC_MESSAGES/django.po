@@ -119783,3 +119783,7 @@ msgstr "Şəxslər"
 msgctxt "announcements.stats"
 msgid "Şəxslərdə axtar"
 msgstr "Şəxslərdə axtar"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Alt qrup"
+msgstr "Alt qrup"

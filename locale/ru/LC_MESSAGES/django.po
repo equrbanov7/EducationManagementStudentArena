@@ -120697,3 +120697,7 @@ msgstr "Люди"
 msgctxt "announcements.stats"
 msgid "Şəxslərdə axtar"
 msgstr "Поиск людей"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Alt qrup"
+msgstr "Подгруппа"
