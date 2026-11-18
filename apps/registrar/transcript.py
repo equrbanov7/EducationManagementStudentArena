@@ -38,6 +38,7 @@ from apps.registrar import (
     legacy_grade_read,
     record_duplicates,
     retake_queries,
+    student_teacher_names,
 )
 from apps.registrar.models import Enrollment, StudentAcademicRecord
 
@@ -451,6 +452,8 @@ def build_student_overall_record(*, student, organization, student_view=False):
     semesters: list[dict] = []
     year_options: list[str] = []
     season_options: list[str] = []
+    # Bölünmüş jurnalda seminar müəllimi də (tələbənin öz payı) — MR-000490; bütün semestrlər üçün bir dəfə.
+    teacher_names = student_teacher_names.teacher_names([row for sem in data["semesters"] for row in sem["rows"]])
     for sem in data["semesters"]:
         period = sem["period"]
         year_display = period.year_display
@@ -465,10 +468,7 @@ def build_student_overall_record(*, student, organization, student_view=False):
         rows = []
         for row in sem["rows"]:
             result = row["result"]
-            instructor = getattr(row["offering"], "instructor", None)
-            teacher_name = ""
-            if instructor is not None:
-                teacher_name = (instructor.get_full_name() or "").strip() or instructor.username
+            teacher_name = teacher_names.get(row["enrollment_id"], "")
             if row.get("recognition"):  # tanınmış xarici nəticə — «Müəllim» sütununda qurum
                 teacher_name = row["recognition"]["institution"]
             rows.append(
