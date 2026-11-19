@@ -215,10 +215,17 @@ def test_rim_forward_notifies_the_previous_department(world, dean_application, d
 
 def test_too_short_reply_rolls_back_the_implicit_review(world, dean_application):
     with pytest.raises(TransitionDenied):
-        workflow.resolve(application=dean_application, user=world["rim_staff"], text="qısa")
+        workflow.request_info(application=dean_application, user=world["rim_staff"], text="qısa")
     dean_application.refresh_from_db()
     assert dean_application.status == ApplicationStatus.SUBMITTED.value
     assert not ApplicationEvent.objects.filter(application=dean_application, kind=EventKind.SEEN).exists()
+
+
+def test_resolve_without_reply_text_closes(world, dean_application):
+    """Sahib 2026-11-19: müraciət cavab yazmadan da «Həll olunub — bağla» ilə bağlanır."""
+    workflow.resolve(application=dean_application, user=world["rim_staff"], text="")
+    dean_application.refresh_from_db()
+    assert dean_application.status == ApplicationStatus.RESOLVED.value
 
 
 # ── RİM-in öz növbəsi: əməkdaş da «Mənə gələnlər»dədir ─────────────────────

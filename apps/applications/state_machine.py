@@ -143,13 +143,12 @@ RULES = {
         target=ApplicationStatus.SUBMITTED.value,
         actor=ACTOR_SENDER,
     ),
+    #: Sahib 2026-11-19: «müraciəti bağlamaq həmişə aktiv olsun, cavab yazmadan da» — cavab mətni İXTİYARİDİR.
     Action.RESOLVE: ActionRule(
         name=Action.RESOLVE,
         sources=_HANDLER_SOURCES,
         target=ApplicationStatus.RESOLVED.value,
         actor=ACTOR_HANDLER,
-        reason_required=True,
-        min_text_length=10,
     ),
     Action.REJECT: ActionRule(
         name=Action.REJECT,

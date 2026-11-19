@@ -318,7 +318,7 @@
             '<div class="apx-act__buttons">' +
             buttons
                 .map(function (entry) {
-                    var gated = !!inlineActions[entry[0]];
+                    var gated = !!inlineActions[entry[0]] && inlineActions[entry[0]].min !== "none";
                     return (
                         '<button type="button" class="' + entry[2] + '" data-apx-action="' + entry[0] + '"' +
                         (gated ? " disabled" : "") + ">" + NS.esc(NS.t(entry[1])) + "</button>"

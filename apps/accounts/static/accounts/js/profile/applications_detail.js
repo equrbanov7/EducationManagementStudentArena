@@ -18,12 +18,12 @@
     var NS = (window.EMSApplications = window.EMSApplications || {});
 
     //: Cavab qutusunun mətnini İŞLƏDƏN əməllər — qalanları öz dialoqunu açır.
-    //: `min`: mətn həddi ("note" = `rules.note`, "one" = 1 simvol).
+    //: `min`: mətn həddi ("note" = `rules.note`, "one" = 1 simvol, "none" = mətnsiz də olar).
     //: `files`: server həmin əməldə sənəd qəbul edirmi (`views._action_kwargs`).
     //: Rədd/qaytar/ləğv yalnız SƏBƏB alır — fayl seçilibsə istifadəçi xəbərdarlıq
     //: görür, fayl səssizcə İTMİR.
     var INLINE_ACTIONS = {
-        resolve: { min: "note", files: true },
+        resolve: { min: "none", files: true },  // sahib 2026-11-19: cavabsız da bağlanır
         request_info: { min: "note", files: true },
         add_comment: { min: "one", files: true },
         reject: { min: "note", files: false },
@@ -161,7 +161,7 @@
         var length = field ? field.value.trim().length : 0;
         box.querySelectorAll("[data-apx-action]").forEach(function (button) {
             var need = INLINE_ACTIONS[button.getAttribute("data-apx-action")];
-            button.disabled = need ? (need.min === "one" ? length < 1 : length < NS.rules.note) : false;
+            button.disabled = need ? (need.min === "none" ? false : need.min === "one" ? length < 1 : length < NS.rules.note) : false;
         });
     }
 
