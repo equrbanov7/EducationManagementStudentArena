@@ -65,6 +65,11 @@ def history_restore(request, offering_id):
         form.initial["chair"] = str(chairs[0].pk)
     for name, field in form.fields.items():
         field.widget.attrs["class"] = "form-select" if isinstance(field.widget, forms.Select) else "form-control"
+        if isinstance(field.widget, forms.Select):
+            # Sahib 2026-09-09: native select yox — layihənin komponenti (bootstrap_select.js özü sarır).
+            field.widget.attrs["data-bootstrap-select"] = ""
+        elif name in ("lecture", "seminar", "lab"):
+            field.widget.attrs["data-restore-hours"] = ""
         if form.is_bound and form[name].errors:
             field.widget.attrs["aria-describedby"] = "restore-" + name + "-errors"
             field.widget.attrs["aria-invalid"] = "true"

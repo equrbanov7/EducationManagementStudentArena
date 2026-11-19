@@ -28,3 +28,11 @@
 .history-restore__shared strong { display:block; margin-bottom:4px; overflow-wrap:anywhere; }
 .history-restore__shared p { margin:0; color:var(--ems-text); }
 @media(max-width:600px) { .history-restore__actions .btn-primary { width:100%; min-height:46px; } }
+.history-restore__sum { margin:16px 0 0; font-size:var(--ems-fs-sm); color:var(--ems-text-muted); }
+.history-restore__sum b { font-size:var(--ems-fs-md); }
+.history-restore__sum.is-ok b { color:var(--ems-success-700, var(--ems-primary-700)); }
+.history-restore__sum.is-bad b { color:var(--ems-danger-600, currentColor); }
+.history-restore__busy { display:flex; align-items:center; gap:8px; margin:16px 0 0; padding:12px 14px; border-radius:var(--ems-r-lg); background:var(--ems-primary-50); color:var(--ems-primary-700); }
+.history-restore__busy[hidden] { display:none; }
+.history-restore__busy .history-restore__spinner { display:inline-block; margin-right:0; }
+.history-restore .bootstrap-single-select { width:100%; }

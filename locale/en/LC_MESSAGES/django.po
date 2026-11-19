@@ -120666,6 +120666,15 @@ msgctxt "registrar.exam_score_entry"
 msgid "%(group)s ilə birgə"
 msgstr "joint with %(group)s"
 
+msgctxt "workload.history_restore"
+msgid "Cəmi"
+msgstr "Total"
+
+msgctxt "workload.history_restore"
+msgid "Yük bərpa olunur — bu bir az çəkə bilər, səhifəni bağlamayın."
+msgstr ""
+"Restoring the load — this may take a moment, please keep the page open."
+
 msgctxt "organizations.permission.label"
 msgid "Öz qruplarının jurnallarında lab qruplarını idarə etmək"
 msgstr "Manage lab groups in journals of own groups"

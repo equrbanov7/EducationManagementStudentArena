@@ -31,7 +31,12 @@ def rows(query, *, limit=20000):
         return [json.loads(row[0]) if isinstance(row[0], str) else row[0] for row in cursor.fetchall()]
 
 
-def graph(roots, *, organization_id, limit=20000):
+def graph(roots, *, organization_id, limit=20000, app_labels=None):
+    """``app_labels`` verilsə yalnız həmin tətbiqlərin modellərinə enilir (kökdən başlayaraq).
+
+    2026-11-19: «Cari yükə bərpa et» tam qrafı (imtahan cavabları, proktorinq, lab/tapşırıq təhvilləri…)
+    ``FOR UPDATE`` ilə iki dəfə kilidləyirdi — canlı yazılarla toqquşub 160 s+ asılırdı (nginx 504).
+    """
     pending = {label: set(map(str, ids)) for label, ids in roots.items()}
     seen, result = {}, {}
     while pending:
@@ -51,6 +56,8 @@ def graph(roots, *, organization_id, limit=20000):
         for relation in model._meta.get_fields(include_hidden=True):
             child = relation.related_model
             if not relation.auto_created or relation.concrete or child is None:
+                continue
+            if app_labels is not None and child._meta.app_label not in app_labels:
                 continue
             lookup = relation.field.name if relation.many_to_many else relation.field.attname
             child_ids = list(

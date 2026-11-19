@@ -119958,6 +119958,14 @@ msgctxt "registrar.exam_score_entry"
 msgid "%(group)s ilə birgə"
 msgstr "%(group)s ilə birgə"
 
+msgctxt "workload.history_restore"
+msgid "Cəmi"
+msgstr "Cəmi"
+
+msgctxt "workload.history_restore"
+msgid "Yük bərpa olunur — bu bir az çəkə bilər, səhifəni bağlamayın."
+msgstr "Yük bərpa olunur — bu bir az çəkə bilər, səhifəni bağlamayın."
+
 msgctxt "organizations.permission.label"
 msgid "Öz qruplarının jurnallarında lab qruplarını idarə etmək"
 msgstr "Öz qruplarının jurnallarında lab qruplarını idarə etmək"
