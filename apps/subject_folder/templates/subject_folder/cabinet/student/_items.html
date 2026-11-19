@@ -10,7 +10,7 @@
                 {% elif item.material.url %}<a href="{{ item.material.url }}" target="_blank" rel="noopener noreferrer" data-force-navigation="true">{{ item.material.title }} <i class="fas fa-arrow-up-right-from-square sfc-ext" aria-hidden="true"></i></a>
                 {% else %}{{ item.material.title }}{% endif %}
             </p>
-            <p class="sfc-item__meta"><span>{{ item.kind_label }}</span>{% if item.size %}<span>{{ item.size }}</span>{% endif %}</p>
+            <p class="sfc-item__meta"><span>{{ item.kind_label }}</span>{% if item.size %}<span>{{ item.size }}</span>{% endif %}{% if item.hidden %}<span class="ems-badge ems-badge--warning">{% trans "dərc edilməyib" context "subject_folder.ui" %}</span>{% endif %}</p>
             {% if item.material.kind == "code" and item.material.code_text %}
                 <details class="sfc-code"><summary>{% trans "Kodu göstər" context "subject_folder.ui" %}{% if item.material.code_language %} · {{ item.material.get_code_language_display }}{% endif %}</summary><pre><code>{{ item.material.code_text }}</code></pre></details>
             {% elif item.material.description %}

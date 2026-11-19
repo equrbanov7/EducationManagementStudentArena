@@ -275,6 +275,30 @@ icazə redaktorunda «yalançı düymə» idi — verib/almaq heç nəyi dəyiş
   RİM əməkdaşı, imtahan mərkəzi rəhbəri/işçisi və RİM rəhbəri şablonlarından
   `qa.*` silindi — bu rolların gördüyü bölmələr dəyişmir (QA bölməsi yox idi).
 
+## Monitorinq şöbəsi rolları — 2026-11-19 (cədvəldə hələ ölçülməyib)
+
+Sahib: «Monitorinq şöbəsinə jurnallara, sillabuslara, fənn qovluqlarına, dərs cədvəlinə, cədvəl idarəetməsinə,
+keçilmiş dərslərə baxmaq icazəsi olsun». İki yeni rol (`apps/organizations/default_roles_monitoring.py`, mövcud
+tenantlar: miqrasiya `organizations 0085` — «Monitorinq şöbəsi»ndəki `admin_unit_head` → `monitoring_head`,
+`member` → `monitoring_staff`; üzvlükdə şöbə qalır, əhatəni daraltmır):
+
+| rol | səviyyə | əhatə | dəst |
+|---|---:|---|---|
+| `monitoring_head` | 70 | organization | yalnız oxu (aşağıda) + `application.create` |
+| `monitoring_staff` | 60 | organization | eyni dəst |
+
+Açarlar (bir dənə də yazma açarı yoxdur): `journal.view`, `journal.lessons_unit`, `grade.view`, `syllabus.view`,
+`subject_folder.view_unit`, `schedule.view`, `people.view_teachers`, `people.view_students`, `unit.view`,
+`member.view`, `catalog.view`, `course.view`, `group.view`, `plan.view`, `semester.view`, `workload.view`,
+`workload.report`, `analytics.view_all`, `analytics.view_unit`, `student.records_view`, `student.registry_view`.
+
+Görünən bölmələr (test: `apps/accounts/tests/test_monitoring_readonly_2026_11_19.py`): `my-journal` (bütün
+təşkilat, yalnız oxu + xlsx), `lessons-log`, `syllabus-list`, `unit-subject-folders`, `schedule-manage`
+(yalnız oxu), `people-teachers`, `people-students`, `groups-registry`, `org-structure-tree`, `chair-profile`,
+`programs-registry`, `subject-catalog`, `curriculum-editor`, `semester-opening`, `workload-overview`,
+`analytics`, `academic-records`, `student-registry`. GÖRÜNMÜR: yük bölgüsü, fənn təhvili, sillabus təsdiqi,
+RİM mərkəzi, audit, rollar, mühasibatlıq, kadr analitikası, sorğu nəticələri. View-as aktoru deyil.
+
 ## Tələlər (skriptdə həll olunub — silməyin)
 
 1. **`ALLOWED_HOSTS`.**  `django.test.Client` `testserver` host-u ilə gəlir;

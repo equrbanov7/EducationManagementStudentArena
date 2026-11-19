@@ -193,6 +193,9 @@ ROLE_FILTER_MAP = {
         "trustee",
         "quality_control_head",
         "quality_control_staff",
+        # Monitorinq şöbəsi (sahib 2026-11-19) — «Əməkdaşlar» süzgəcində HƏDƏF; view-as AKTORU deyil (keyfiyyət kimi).
+        "monitoring_head",
+        "monitoring_staff",
     },
 }
 

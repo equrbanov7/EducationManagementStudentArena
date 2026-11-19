@@ -48,6 +48,16 @@ def staff_scope_covers_offering(user, offering) -> bool:
     return False
 
 
+def has_org_wide_staff_view(user, organization) -> bool:
+    """Jurnal oxusu BÜTÜN təşkilat üzrədirmi (rektor / RİM / tədris şöbəsi / monitorinq — sahib 2026-11-19)."""
+    if not lookups.is_authenticated(user) or organization is None:
+        return False
+    return any(
+        _scope(user, organization, permission).is_org_wide
+        for permission in (*ORG_VIEW_PERMISSIONS, *STAFF_VIEW_PERMISSIONS)
+    )
+
+
 def staff_offerings_q(user, organization, *, field: str = "offering") -> Q | None:
     """Əhatəli əməkdaşın gördüyü açılışların Q-su (``field`` = açılış FK yolu); əhatə yoxdursa ``None``.
 
@@ -211,6 +221,7 @@ def visible_submissions_q(user, organization) -> Q:
 
 __all__ = [
     "can_manage_folder",
+    "has_org_wide_staff_view",
     "can_review_assignment",
     "can_view_folder",
     "can_view_material",

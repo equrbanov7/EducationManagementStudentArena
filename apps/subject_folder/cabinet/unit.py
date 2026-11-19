@@ -129,28 +129,54 @@ def _folder_state(organization, user, urls, folder_id) -> dict:
     )
     if folder is None or not unit_view.covers_folder(user, folder):
         return {"state": "missing", "urls": urls}
+    # Sahib 2026-11-19 (Monitorinq şöbəsi: «fənn qovluqlarına FULL baxmaq»): jurnalı oxuya bilən əməkdaş
+    # (``unit_view.is_full_viewer``) qovluğu TAM görür: dərc edilməmiş
+    # material və tapşırıqlar da (göndəriş sayı ilə). Yalnız ``subject_folder.view_unit`` daşıyan (tyutor /
+    # laborant) əvvəlki kimi yalnız dərc edilmiş materialı görür. Yazı əməli heç bir halda yoxdur.
+    full = unit_view.is_full_viewer(user, folder)
     topics: dict = {}
-    general = []
-    for material in unit_view.published_materials(folder):
-        item = _material_row(material)
-        if material.topic_id is None:
-            general.append(item)
-        else:
-            topics.setdefault(material.topic_id, {"topic": material.topic, "materials": []})["materials"].append(item)
+    general = {"materials": [], "tasks": []}
+
+    def bucket(item):
+        if item.topic_id is None:
+            return general
+        return topics.setdefault(item.topic_id, {"topic": item.topic, "materials": [], "tasks": []})
+
+    materials = unit_view.all_materials(folder) if full else unit_view.published_materials(folder)
+    for material in materials:
+        bucket(material)["materials"].append(_material_row(material))
+    task_count = 0
+    if full:
+        for task in unit_view.all_tasks(folder):
+            bucket(task)["tasks"].append(_task_row(task))
+            task_count += 1
     return {
         "state": "folder",
         "urls": urls,
         "folder": folder,
         "teacher": common.user_name(folder.owner),
         "period_label": _period_label(folder.period),
-        "topics": list(topics.values()),
-        "general": general,
+        "topics": sorted(topics.values(), key=lambda row: (row["topic"].order, row["topic"].week_no or 0)),
+        "general": general if (general["materials"] or general["tasks"]) else None,
+        "is_full_view": full,
+        "task_count": task_count,
+    }
+
+
+def _task_row(task) -> dict:
+    return {
+        "task": task,
+        "kind_label": str(public.TaskKind(task.kind).label),
+        "max_points": task.max_points if task.kind == public.TaskKind.SELFWORK else None,
+        "hidden": not unit_view.is_visible_item(task),
+        "sent": task.sent_count,
     }
 
 
 def _material_row(material) -> dict:
     return {
         "material": material,
+        "hidden": not unit_view.is_visible_item(material),
         "download_url": common.material_download_url(material) if material.file else "",
         "size": common.human_size(material.size) if material.file else "",
         "kind_label": str(public.MaterialKind(material.kind).label),

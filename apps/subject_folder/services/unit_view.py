@@ -90,9 +90,25 @@ def is_visible_item(item) -> bool:
     return bool(item.is_published) and not item.is_archived
 
 
+def is_full_viewer(user, folder) -> bool:
+    """TAM baxış (sahib 2026-11-19, Monitorinq şöbəsi: «fənn qovluqlarına FULL baxmaq»).
+
+    Jurnalı oxuya bilən əməkdaş: qovluğun açılışı ``journal.view`` əhatəsindədir (``access.is_staff_viewer``) və ya
+    jurnal oxusu bütün təşkilat üzrədir (açılışa hələ təyin edilməmiş qovluq da). Yalnız
+    ``subject_folder.view_unit`` daşıyan (tyutor / laborant) TAM baxış almır — dərc edilmiş materialla qalır.
+    """
+    from . import access
+
+    if folder is None or not covers_folder(user, folder):
+        return False
+    return access.is_staff_viewer(user, folder) or access.has_org_wide_staff_view(user, folder.organization)
+
+
 def can_view_material(user, material) -> bool:
-    """Endirmə qapısı: dərc edilmiş material + qovluq əhatədədir."""
-    return is_visible_item(material) and covers_folder(user, material.folder)
+    """Endirmə qapısı: qovluq əhatədədir + material dərc edilib (TAM baxışda — dərc edilməmiş də)."""
+    if not covers_folder(user, material.folder):
+        return False
+    return is_visible_item(material) or is_full_viewer(user, material.folder)
 
 
 def published_materials(folder):
@@ -105,12 +121,39 @@ def published_materials(folder):
     )
 
 
+def all_materials(folder):
+    """TAM baxış (əməkdaş, ``access.is_staff_viewer``): dərc edilməmiş / gizlədilmiş materiallar da."""
+    return (
+        folder.materials.all().select_related("topic").order_by("topic__order", "topic__week_no", "order", "created_at")
+    )
+
+
+def all_tasks(folder):
+    """TAM baxış: qovluğun tapşırıqları + göndərilmiş (qaralama OLMAYAN, cari) cəhdlərin sayı ``sent_count``.
+
+    Sərbəst iş ləğv olunmuş dövrdə sərbəst iş tapşırıqları heç kimə göstərilmir (``queries.folder_contents`` qaydası).
+    """
+    from django.db.models import Count
+
+    from ..constants import SubmissionStatus, TaskKind
+    from . import selfwork_rule
+
+    tasks = folder.tasks.all().select_related("topic")
+    if not selfwork_rule.folder_active(folder):
+        tasks = tasks.exclude(kind=TaskKind.SELFWORK)
+    sent = Count("submissions", filter=Q(submissions__is_current=True) & ~Q(submissions__status=SubmissionStatus.DRAFT))
+    return tasks.annotate(sent_count=sent).order_by("topic__order", "kind", "slot_index", "order", "created_at")
+
+
 __all__ = [
     "VISIBLE_STATUSES",
+    "all_materials",
+    "all_tasks",
     "can_view_material",
     "covers_folder",
     "folders_q",
     "has_unit_view",
+    "is_full_viewer",
     "is_visible_item",
     "published_materials",
     "visible_folders",
