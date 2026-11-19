@@ -173,6 +173,15 @@ def same_question_scores(old, new) -> bool:
     return [int(v) for v in old] == [int(v) for v in new]
 
 
+def split_unchanged(old, new) -> bool:
+    """Eyni cəmdə sual bölgüsü dəyişməyibmi (``change_decision``). ``same_question_scores``-dan fərqi (sahib
+    2026-11-19): bölgüsü heç yazılmamış bal (``old is None`` — testdən gələn) TƏK sütunda S1 = cəm kimi gəlir;
+    bu yeni məlumat deyil — «RİM təqdimatı» rejimində toxunulmamış test sətirləri boş düzəliş yazmasın."""
+    if old is None and new is not None and len(new) == 1:
+        return True
+    return same_question_scores(old, new)
+
+
 __all__ = [
     "QUESTION_COUNT_DEFAULT",
     "QUESTION_COUNT_MAX",
@@ -185,4 +194,5 @@ __all__ = [
     "question_defaults",
     "question_labels",
     "same_question_scores",
+    "split_unchanged",
 ]

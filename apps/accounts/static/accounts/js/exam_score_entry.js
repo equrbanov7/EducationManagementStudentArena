@@ -101,6 +101,15 @@
         return row.getAttribute("data-final") === "1" && !(host && host.getAttribute("data-change-mode"));
     }
 
+    /* S-xanaları: testdən gələn bal (`data-q-locked`, 2026-11-18) yalnız «RİM təqdimatı» rejimində açılır
+       (sahib 2026-11-19: rejim «ballar açıldı» deyirdi, amma test balı kilidli qalırdı — heç nə dəyişmirdi). */
+    function questionsLocked(row, host) {
+        if (rowLocked(row, host)) {
+            return true;
+        }
+        return row.getAttribute("data-q-locked") === "1" && !(host && host.getAttribute("data-change-mode") === "correction");
+    }
+
     function questionSelects(row) {
         return Array.prototype.slice.call(row.querySelectorAll("[data-ese-q]")).filter(function (select) {
             return !select.disabled;
@@ -220,8 +229,8 @@
             var select = td.querySelector("[data-ese-q]");
             if (select) {
                 // Bitmiş dövr (2026-09-26, `data-locked`) və «Yekun» sətir (2026-10-25, `data-final`).
-                // 2026-11-18: testdən gələn bal (`data-q-locked`) heç bir rejimdə S-xanasında dəyişmir — apellyasiya ilə.
-                var locked = rowLocked(td.parentNode, host) || td.parentNode.getAttribute("data-q-locked") === "1";
+                // 2026-11-18: testdən gələn bal (`data-q-locked`) — apellyasiya ilə; 2026-11-19: RİM rejimində də açılır.
+                var locked = questionsLocked(td.parentNode, host);
                 select.disabled = off || locked;
                 var toggle = td.querySelector("[data-ese-qtoggle], .bootstrap-single-select__toggle");
                 if (toggle) {
@@ -525,6 +534,7 @@
         columnMaxes: columnMaxes,
         applyQuestionGrid: applyQuestionGrid,
         rowLocked: rowLocked,
+        questionsLocked: questionsLocked,
         grade: grade,
         config: config,
         onRowInput: onRowInput,
