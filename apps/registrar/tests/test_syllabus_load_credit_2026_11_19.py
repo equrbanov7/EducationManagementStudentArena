@@ -57,7 +57,7 @@ class SyllabusLoadCreditTest(MidtermPeriodFixture, TestCase):
             TeachingTask.objects.filter(pk=row.task_id).update(status="cancelled")
         self.assertEqual(self._credit(), 5)
 
-    def test_plan_row_without_credit_falls_to_load_and_explicit_plan_credit_wins(self):
+    def test_plan_order_own_cohort_then_load_then_other_cohort(self):
         from unittest import mock
 
         from apps.registrar.models import Curriculum, CurriculumSubject, PlanStatus, Program
@@ -67,14 +67,27 @@ class SyllabusLoadCreditTest(MidtermPeriodFixture, TestCase):
             TeachingTaskRow.objects.filter(pk=row.pk).update(credits_value=3)
             program = Program.objects.create(organization=self.org, code="SLCP", name="Plan ixtisası")
             plan = Curriculum.objects.create(
-                organization=self.org, program=program, admission_year=2024, name="plan", status=PlanStatus.APPROVED
+                organization=self.org, program=program, admission_year=2020, name="plan", status=PlanStatus.APPROVED
             )
             plan_row = CurriculumSubject.objects.create(
                 organization=self.org, curriculum=plan, subject=self.offering.subject, semester_number=1, credits=0
             )
-        with mock.patch("apps.registrar.plan_hours.program_for_offering", return_value=program):
-            # MR-562: planda fənn var, amma kreditsizdir → dərs yükü (3), kataloq (5) yox.
+        with (
+            mock.patch("apps.registrar.plan_hours.program_for_offering", return_value=program),
+            mock.patch("apps.organizations.public.group_cohort_year", return_value=2025),
+        ):
+            # Kreditsiz plan sətri → dərs yükü (3), kataloq (5) yox.
             self.assertEqual(self._credit(), 3)
+            # MR-562: başqa kohortun (2020) köhnə planı 4 desə də, cari yük (3) üstündür.
             with bypass_rls():
                 CurriculumSubject.objects.filter(pk=plan_row.pk).update(credits=4)
-            self.assertEqual(self._credit(), 4)  # planın açıq krediti üstündür
+            self.assertEqual(self._credit(), 3)
+            # Yük kreditsizdirsə — başqa kohortun planı (4), kataloq yox.
+            with bypass_rls():
+                TeachingTaskRow.objects.filter(pk=row.pk).update(credits_value=0)
+            self.assertEqual(self._credit(), 4)
+            # Qrupun ÖZ kohortunun planı hər şeydən üstündür.
+            with bypass_rls():
+                TeachingTaskRow.objects.filter(pk=row.pk).update(credits_value=3)
+                Curriculum.objects.filter(pk=plan.pk).update(admission_year=2025)
+            self.assertEqual(self._credit(), 4)

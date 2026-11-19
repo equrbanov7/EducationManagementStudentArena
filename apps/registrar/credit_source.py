@@ -284,8 +284,11 @@ def plan_row_credit(plan_row) -> int:
     return credits if credits > 0 else int(getattr(plan_row.subject, "ects", 0) or 0)
 
 
-def _plan_credit(offering):
-    """Təsdiqlənmiş plandan kredit; plan (və ya ixtisas) tapılmasa ``None``."""
+def _plan_credit(offering, *, cohort_only: bool = False):
+    """Təsdiqlənmiş plandan kredit; plan (və ya ixtisas) tapılmasa ``None``.
+
+    ``cohort_only`` — yalnız qrupun ÖZ qəbul ilinin planı (başqa kohortun köhnə planına düşmür).
+    """
     from apps.organizations.public import group_cohort_year
 
     from .models import Curriculum
@@ -308,7 +311,10 @@ def _plan_credit(offering):
     if not plans:
         return None
     cohort = group_cohort_year(offering.group) if offering.group_id else None
-    chosen = next((pk for pk, year in plans if cohort and int(year) == int(cohort)), plans[0][0])
+    exact = next((pk for pk, year in plans if cohort and int(year) == int(cohort)), None)
+    if exact is None and cohort_only:
+        return None
+    chosen = exact or plans[0][0]
     # Plan sətrinin ÖZ krediti (> 0); sətir kreditsizdirsə ``None`` — çağıran dərs yükünə / kataloqa düşür
     # (MR-562, 2026-11-19: 935 BM / 135 T / 435 R planında fənn kreditsiz idi → kataloq 5, yükdə 3).
     resolver = resolver_for_curriculum(chosen, {offering.subject_id})
@@ -355,13 +361,21 @@ def load_credit_for_offering(offering) -> int:
 
 
 def syllabus_credit_for_offering(offering) -> int:
-    """Sillabusda göstərilən kredit: təsdiqlənmiş plan → dərs yükü sətri → kataloq."""
+    """Sillabusda göstərilən kredit: qrupun öz kohortunun planı → cari dərs yükü → ixtisasın başqa planı → kataloq.
+
+    MR-562 (2026-11-19): 935 BM-in (2025 qəbulu) öz planı yoxdur; ixtisasın 2020 planında fənn 5 kredit idi,
+    kafedranın 2026/2027 yükündə və müəllimdə 3 — başqa kohortun köhnə planı cari yükdən üstün tutulmur.
+    """
     if offering is None:
         return 0
-    credit = _plan_credit(offering)
+    credit = _plan_credit(offering, cohort_only=True)
     if credit is not None:
         return credit
-    return load_credit_for_offering(offering) or _catalogue(offering)
+    load = load_credit_for_offering(offering)
+    if load:
+        return load
+    credit = _plan_credit(offering)
+    return _catalogue(offering) if credit is None else credit
 
 
 __all__ = [
