@@ -121,10 +121,14 @@ class JournalListTeacherSearchTest(TestCase):
                 self.assertEqual(self._names(self.corrector, query), [expected])
 
     def test_roster_coordinator_gets_the_teachers_of_their_own_list(self):
-        # Köhnə endpoint (`student.records_view`) koordinatora BOŞ qaytarırdı — seçici «işləmirdi».
+        # Köhnə endpoint (`student.records_view`) koordinatora əvvəl BOŞ qaytarırdı. 2026-11-19: tyutor/koordinator
+        # açarı alır («qrup dövrəsi») — indi öz fakültəsinin müəllimini tapır, başqa fakültəninkini yox.
         self.client.force_login(self.coordinator)
         legacy = self.client.get(reverse("accounts:journal_teacher_search"), {"q": "fir"}).json()
-        self.assertEqual(legacy["results"], [])
+        self.assertEqual([row["text"] for row in legacy["results"]], ["Əliyeva Firuzə"])
+        self.assertEqual(
+            self.client.get(reverse("accounts:journal_teacher_search"), {"q": "ulvi"}).json()["results"], []
+        )
         self.assertEqual(self._names(self.coordinator, "fir"), ["Əliyeva Firuzə"])
         # Əhatə siyahı ilə eynidir: başqa fakültənin müəllimi çıxmır.
         self.assertEqual(self._names(self.coordinator, "ulvi"), [])
