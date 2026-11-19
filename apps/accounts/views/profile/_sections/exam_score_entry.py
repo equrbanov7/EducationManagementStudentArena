@@ -513,10 +513,17 @@ def _group_first(request, section, filter_fields, service, sheets_service, selec
 
 
 def _offering_option_label(offering) -> str:
-    """«CS101 — Proqramlaşdırma · Müəllim Adı» — sahib: müəllim adı seçimdə görünsün."""
+    """«CS101 — Proqramlaşdırma · Müəllim Adı» — sahib: müəllim adı seçimdə görünsün.
+
+    Ana qrupun birgə jurnalı (alt qrup seçiləndə) «536 Bİ ilə birgə» qeydi ilə (MR-580, 2026-11-19).
+    """
+    label = offering.subject_label
     if offering.instructor_label:
-        return f"{offering.subject_label} · {offering.instructor_label}"
-    return offering.subject_label
+        label = f"{label} · {offering.instructor_label}"
+    joint = getattr(offering, "joint_group_name", "")
+    if joint:
+        label = f"{label} · " + pgettext(_CTX, "%(group)s ilə birgə") % {"group": joint}
+    return label
 
 
 def _subject_first(request, section, filter_fields, service, selected_org, period, selection):

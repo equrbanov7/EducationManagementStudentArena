@@ -41,6 +41,10 @@ CHAIR_SYLLABI = (
     "b4bab847-32ea-4e07-bc8d-b341f98e188e",
     "228354a5-9204-4899-9b03-f897319a9bb4",
     "2074e92b-2bee-427f-a18b-36dece27c18e",
+    # MR-000579 (Arzu Hacıyeva, eyni səbəb — Fəlsəfə + Tarix üzvlüyü; yük Fəlsəfə tapşırığında 92f80a3b):
+    "b282094e-0c62-4f89-969e-2b88bf1ab775",  # İşgüzar yazışmalar · 334T1
+    "5a7405c0-2699-4086-8f13-0c0d3551b2f3",  # İşgüzar yazışmalar · 334T2
+    "b2154e82-fbb8-44ee-af09-b57cca2bfebd",  # Biznes hüququ · 534 MU az
 )
 #: MR-000550 — (dosye, gözlənilən jurnal, dosyenin hazırkı səhv fənn kodu).
 SUBJECT_FIXES = (("637be7e0-1a0f-4c71-800d-1b369a7c3c90", "e41172b8-934c-4070-870e-169bde5faedd", "QKU-2577"),)

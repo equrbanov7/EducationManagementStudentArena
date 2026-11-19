@@ -74,14 +74,48 @@ def groups_for_period(*, organization, period):
 
 
 def offerings_for_group(*, organization, period, group_id):
-    """Qrupun bu dövrdəki açılışları — FƏNN seçimi üçün (fənn + müəllim ilə)."""
+    """Qrupun bu dövrdəki açılışları — FƏNN seçimi üçün (fənn + müəllim ilə).
+
+    MR-534/555/558/580 (2026-11-19): alt qrupun («536 Bi 1») bəzi fənləri ANA qrupun («536 Bİ») birgə
+    jurnalında keçilir — İmtahan Mərkəzi alt qrupu seçəndə o fənlər görünmürdü. Alt qrupun ÖZ jurnalı olmayan
+    fənlər üçün ana qrupun jurnalı da siyahıya düşür (``joint_group_name`` ilə işarələnir); əhatə süzgəci
+    çağıranda qalır.
+    """
     if organization is None or period is None or not group_id:
         return []
-    return list(
+    own = list(
         CourseOffering.objects.filter(organization=organization, period=period, group_id=group_id, is_active=True)
         .select_related("subject", "group", "instructor")
         .order_by("subject__code", "subject__name")
     )
+    return own + _parent_group_offerings(organization, period, group_id, own)
+
+
+def _parent_group_offerings(organization, period, group_id, own) -> list:
+    from django.apps import apps as django_apps
+
+    from .subgroup_rollup import parent_group_candidates
+
+    group = (
+        django_apps.get_model("organizations", "OrgUnit")
+        .objects.filter(organization=organization, pk=group_id)
+        .only("id", "name", "parent_id", "settings")
+        .first()
+    )
+    parents = parent_group_candidates(organization, group)
+    if not parents:
+        return []
+    joint = list(
+        CourseOffering.objects.filter(
+            organization=organization, period=period, group_id__in=[p.pk for p in parents], is_active=True
+        )
+        .exclude(subject_id__in={o.subject_id for o in own})
+        .select_related("subject", "group", "instructor")
+        .order_by("subject__code", "subject__name")
+    )
+    for offering in joint:
+        offering.joint_group_name = offering.group.name
+    return joint
 
 
 def offering_selection_keys(*, organization, period, offering_id) -> dict:

@@ -195,6 +195,22 @@ class _DuplicateSyllabus(Exception):
         self.syllabus_id = syllabus_id
 
 
+def _official_chair(offering):
+    """Jurnalın dərs yükündəki YEGANƏ kafedra (MR-562/579, 2026-11-19).
+
+    İki kafedranın üzvü olan müəllimin (Fəlsəfə + Tarix) sillabusu qrupu ixtisasa bağlı deyilsə birinci üzvlüyün
+    kafedrasını (Tarix) alırdı. Yük bir kafedra göstərirsə o götürülür; yoxdursa / bir neçədirsə əvvəlki qayda.
+    """
+    from apps.organizations.models import OrgUnit
+    from apps.registrar.public import offering_chairs
+
+    queryset = type(offering).objects.filter(pk=offering.pk)
+    chairs = offering_chairs.official_offering_chairs(queryset, offering.organization_id).get(offering.pk) or ()
+    if len(chairs) != 1:
+        return None
+    return OrgUnit.objects.filter(organization_id=offering.organization_id, pk=next(iter(chairs))).first()
+
+
 def _create_draft(request, organization, actor, offering):
     from apps.registrar.public import plan_hours_for_offering, program_for_offering
 
@@ -204,7 +220,8 @@ def _create_draft(request, organization, actor, offering):
         period=offering.period,
         actor=actor,
         offering=offering,
-        chair_unit=getattr(offering.group, "parent", None) if offering.group_id else None,
+        chair_unit=_official_chair(offering)
+        or (getattr(offering.group, "parent", None) if offering.group_id else None),
         program=program_for_offering(offering),
         author=request.user,
         # Saat bölgüsü TƏSDİQLƏNMİŞ tədris planının sətrindən gəlir
