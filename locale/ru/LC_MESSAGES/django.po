@@ -120874,3 +120874,13 @@ msgstr "Текущая группа студента"
 msgctxt "registrar.exam_score_entry"
 msgid "%(group)s ilə birgə"
 msgstr "совместно с %(group)s"
+
+msgctxt "workload.history_restore"
+msgid "Cəmi"
+msgstr "Итого"
+
+msgctxt "workload.history_restore"
+msgid "Yük bərpa olunur — bu bir az çəkə bilər, səhifəni bağlamayın."
+msgstr ""
+"Нагрузка восстанавливается — это может занять немного времени, не закрывайте"
+" страницу."
