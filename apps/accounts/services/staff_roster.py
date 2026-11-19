@@ -86,6 +86,10 @@ UNIT_HEAD_ROLE_RULES = (
     ("rəqəmsal inkişaf", "ikt_rehber"),
     ("insan resu", "hr"),
     ("tədrisin təşkili", "teaching_office_head"),
+    # Sahib 2026-11-19: Monitorinq şöbəsi — tədris prosesinə org-wide YALNIZ-OXU (`default_roles_monitoring`).
+    # Açar söz QƏSDƏN «monitorinq şöbə»dir (tək «monitorinq» yox) və SONDA durur: «Ekoloji monitorinq kafedrası»
+    # kimi akademik bölmənin heyəti org-wide oxu rolu ALMAMALIDIR; «Tədrisin təşkili və …» yuxarıdakı qaydada qalır.
+    ("monitorinq şöbə", "monitoring_head"),
 )
 
 #: Bölmə açar sözü → həmin bölmənin ADİ əməkdaşı üçün rol.
@@ -96,6 +100,7 @@ UNIT_STAFF_ROLE_RULES = (
     ("tədrisin təşkili", "teaching_office_staff"),
     ("dövlət nümunəli sənədlər", "student_services"),
     ("tələbə dəstək", "student_services"),
+    ("monitorinq şöbə", "monitoring_staff"),  # sonda; «… monitorinq kafedrası» düşmür (sahib 2026-11-19)
 )
 
 #: Heç bir qaydaya düşməyən vəzifə üçün rol (səlahiyyət vermir).

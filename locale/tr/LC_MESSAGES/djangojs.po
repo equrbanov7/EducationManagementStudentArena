@@ -3409,3 +3409,132 @@ msgstr "%(count)s satırda %(hours)s saat öğretim elemanına dağıtılmamış
 
 msgid "«Vakant» saxlanıldı: %(hours)s saat (%(rows)s sətir)."
 msgstr "«Boş» bırakıldı: %(hours)s saat (%(rows)s satır)."
+
+msgid "Eyni fənnin digər qruplarında saat fərqlidir. Səhvdirsə «Tapşırıq sətirləri» → «Redaktə» ilə düzəldin."
+msgstr "Saat, aynı dersin diğer gruplarından farklı. Hatalıysa «Görev satırları» → «Düzenle» ile düzeltin."
+
+#, javascript-format
+msgid "digər qruplarda %(hours)s — saatı yoxlayın"
+msgstr "diğer gruplarda %(hours)s — saati kontrol edin"
+
+msgid "Bu sətrin qrupları mühazirəni bir neçə axında keçir, amma sətir qruplara ayrılmayıb."
+msgstr "Bu satırın grupları dersi birkaç akışta işliyor, ancak satır gruplara ayrılmamış."
+
+#, javascript-format
+msgid "%(n)s axın bir sətirdə"
+msgstr "tek satırda %(n)s akış"
+
+msgid "Axının mühazirəçisi başqa kartdadır"
+msgstr "Akışın öğretim üyesi başka kartta"
+
+msgid "Axına bağlanmayıb — mühazirə heç kimin yükünə düşmür"
+msgstr "Akışa bağlanmamış — ders kimsenin yüküne yazılmıyor"
+
+msgid "Bu qruplar mühazirəni birlikdə dinləyir: saat müəllimin yükünə 1 dəfə yazılır, jurnal hər qrupda açılır."
+msgstr "Bu gruplar dersi birlikte dinliyor: saat öğretim elemanının yüküne 1 kez yazılır, defter her grupta açılır."
+
+#, javascript-format
+msgid "%(n)s qrup birlikdə"
+msgstr "%(n)s grup birlikte"
+
+msgid "tək qrup"
+msgstr "tek grup"
+
+#, javascript-format
+msgid "%(n)s axın · müəllim yükünə cəmi %(hours)s"
+msgstr "%(n)s akış · yüke toplam %(hours)s"
+
+msgid "Hansı qrupların mühazirəni birlikdə dinlədiyini (patok) və mühazirəçini seçin."
+msgstr "Hangi grupların dersi birlikte dinlediğini ve öğretim üyesini seçin."
+
+msgid "Patok qur"
+msgstr "Akış kur"
+
+#, javascript-format
+msgid "%(n)s qrup ayrıca keçir · müəllim yükünə cəmi %(hours)s"
+msgstr "%(n)s grup ayrı işliyor · yüke toplam %(hours)s"
+
+msgid "Mühazirəçi seç"
+msgstr "Öğretim üyesi seç"
+
+msgid "Axın (patok) — mühazirəni birlikdə dinləyən qruplar. Bir axının saatı müəllimin yükünə 1 dəfə yazılır, jurnal isə hər qrupda açılır."
+msgstr "Akış — dersi birlikte dinleyen gruplar. Bir akışın saati öğretim elemanının yüküne 1 kez yazılır, defter ise her grupta açılır."
+
+#, javascript-format
+msgid "Bölünməyib: %(hours)s"
+msgstr "Dağıtılmamış: %(hours)s"
+
+msgid "Bu qruplar məşğələni birlikdə keçir — saat müəllimin yükünə 1 dəfə yazılır."
+msgstr "Bu gruplar dersi birlikte işliyor — saat öğretim elemanının yüküne 1 kez yazılır."
+
+msgid "Qruplar birlikdə keçir"
+msgstr "Gruplar birlikte işliyor"
+
+msgid "Saat bütün sətrə yazılıb. Hər qrupa ayrıca müəllim vermək üçün «Bölüşdür» düyməsinə basın."
+msgstr "Saat tüm satıra yazılmış. Her gruba ayrı öğretim elemanı vermek için «Dağıt» düğmesine basın."
+
+msgid "Qruplara ayrılmayıb"
+msgstr "Gruplara ayrılmamış"
+
+msgid "Ümumi bölgüyə daxildir"
+msgstr "Ortak dağılıma dahil"
+
+msgid "Birgə keçilir"
+msgstr "Birlikte işleniyor"
+
+msgid "Müəllim təyin olunmayıb"
+msgstr "Öğretim elemanı atanmamış"
+
+#, javascript-format
+msgid "cəmi %(total)s · bölünüb %(assigned)s"
+msgstr "toplam %(total)s · dağıtılan %(assigned)s"
+
+msgid "Hər qrupa müəllim və saat verin; qrupu Lab-1 / Lab-2 kimi alt qruplara da bölə bilərsiniz."
+msgstr "Her gruba öğretim elemanı ve saat verin; grubu Lab-1 / Lab-2 gibi alt gruplara da bölebilirsiniz."
+
+msgid "Qrup"
+msgstr "Grup"
+
+msgid "Plan saatı"
+msgstr "Plan saati"
+
+msgid "Müəllim və saat"
+msgstr "Öğretim elemanı ve saat"
+
+msgid "Saat bölünüb, amma müəllim hələ təyin edilməyib (vakant)."
+msgstr "Saat dağıtılmış, ancak öğretim elemanı henüz atanmamış (boş)."
+
+#, javascript-format
+msgid "Vakant: %(hours)s"
+msgstr "Boş: %(hours)s"
+
+msgid "Tam bölünüb"
+msgstr "Tamamı dağıtıldı"
+
+msgid "Natamam"
+msgstr "Eksik"
+
+msgid "Bu fəndə heç bir axına bağlanmamış mühazirə sətri var — «Axınları dəyiş» ilə qrupları axına salın."
+msgstr "Bu derste hiçbir akışa bağlanmamış ders satırı var — «Akışları değiştir» ile grupları akışa yerleştirin."
+
+msgid "birlikdə dinləyir"
+msgstr "birlikte dinliyor"
+
+#, javascript-format
+msgid "Yekun: %(n)s axın · müəllimlərin yükünə cəmi %(load)s (axınlar birləşdirilməsəydi %(separate)s olardı)."
+msgstr "Sonuç: %(n)s akış · öğretim elemanlarının yüküne toplam %(load)s (akışlar birleştirilmeseydi %(separate)s olurdu)."
+
+#, javascript-format
+msgid "Yekun: %(n)s axın · müəllimlərin yükünə cəmi %(load)s."
+msgstr "Sonuç: %(n)s akış · öğretim elemanlarının yüküne toplam %(load)s."
+
+#, javascript-format
+msgid "artıq bölünüb: %(hours)s"
+msgstr "fazla dağıtılmış: %(hours)s"
+
+#, javascript-format
+msgid "bölünməyib: %(hours)s"
+msgstr "dağıtılmamış: %(hours)s"
+
+msgid "Bu saat qruplara ayrılmadan bütün sətrə yazılıb. Hər qrupa ayrıca müəllim vermək üçün buradakı müəllimi silin və yuxarıdakı qrupların altında «Müəllim əlavə et» düyməsinə basın."
+msgstr "Bu saat gruplara ayrılmadan tüm satıra yazılmış. Her gruba ayrı öğretim elemanı vermek için buradaki öğretim elemanını silin ve yukarıdaki grupların altında «Öğretim elemanı ekle» düğmesine basın."

@@ -1,0 +1,340 @@
+/* Dərs yükü — fənn kartının AYDINLIQ qatı (sahib 2026-11-19: «patokda, seminar bölünəndə qarışıqdır, axın yazısı
+ * aydın deyil; dəyişəndən sonra yuxarı gedir, adamı axtarıb tapası oluram»).
+ * `workload_cards.css`-dən SONRA yüklənir (onu genişləndirir); rənglər yalnız `--ems-*` tokenlərindən.
+ * Markup: `workload_distribution_cards.js`, `workload_distribution_pickers.js`, `workload_distribution_anchor.js`. */
+
+/* ── Addım nömrəsi və növ başlığı ─────────────────────────────────────── */
+.wl-kind__step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  border-radius: 50%;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--ems-primary-600, #2563eb);
+}
+
+.wl-kind--seminar .wl-kind__step {
+  background: var(--ems-info, #2563a8);
+}
+
+.wl-kind--lab .wl-kind__step {
+  background: var(--ems-neutral-600, #5b6b7c);
+}
+
+.wl-kind__label {
+  font-size: 0.92rem;
+}
+
+.wl-kind__rule span {
+  min-width: 0;
+}
+
+/* ── Kartın vəziyyət nişanı ───────────────────────────────────────────── */
+.wl-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.wl-state--ok {
+  color: var(--ems-success-700, #17693a);
+  background: var(--ems-success-bg, #e8f7ee);
+  border: 1px solid var(--ems-success-bd, #b7e2c6);
+}
+
+.wl-state--open {
+  color: #8a5a00;
+  background: var(--ems-warning-bg, #fdf6e3);
+  border: 1px solid var(--ems-warning-bd, #f0c36d);
+}
+
+/* ── Axın sətri: «Axın 1» · qrup nişanları · birlikdə/tək → müəllim · saat ── */
+.wl-stream__tag {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #fff;
+  background: var(--ems-primary-600, #2563eb);
+}
+
+.wl-stream.is-orphan .wl-stream__tag {
+  background: #b7791f;
+}
+
+.wl-stream__groups {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.wl-pill {
+  padding: 1px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ems-neutral-900, #1b2733);
+  background: #fff;
+  border: 1px solid var(--ems-neutral-300, #cbd5e1);
+}
+
+.wl-stream__mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.74rem;
+  color: var(--ems-neutral-600, #5b6b7c);
+}
+
+.wl-stream__mode.is-joint {
+  font-weight: 600;
+  color: var(--ems-primary-700, #1b4fa0);
+}
+
+.wl-stream__hours {
+  font-weight: 700;
+}
+
+/* ── Qrup cədvəli: başlıq + sütunlar bir xətdə ────────────────────────── */
+.wl-lines__head,
+.wl-line {
+  grid-template-columns: minmax(110px, 170px) 104px minmax(0, 1fr) auto;
+}
+
+.wl-lines__head {
+  display: grid;
+  gap: 6px 10px;
+  padding: 0 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--ems-neutral-500, #6b7a8c);
+}
+
+.wl-line__covered {
+  font-size: 0.78rem;
+  color: var(--ems-neutral-500, #6b7a8c);
+}
+
+.wl-line.is-covered {
+  border-style: dashed;
+  background: var(--ems-neutral-50, #f7f9fc);
+}
+
+.wl-line__vacant {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.wl-badge--odd {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── «Bölgü necə işləyir?» izahı ──────────────────────────────────────── */
+.wl-help {
+  margin: 0 0 12px;
+  border: 1px solid var(--ems-primary-100, #d5e3fb);
+  border-radius: 12px;
+  background: var(--ems-primary-50, #eef4ff);
+}
+
+.wl-help > summary {
+  padding: 8px 14px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--ems-primary-700, #1b4fa0);
+  cursor: pointer;
+}
+
+.wl-help__body {
+  padding: 0 14px 12px;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--ems-neutral-800, #2c3e50);
+}
+
+.wl-help__steps {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.wl-help__steps li + li {
+  margin-top: 4px;
+}
+
+.wl-help__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.76rem;
+}
+
+.wl-help__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wl-help__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  border: 1px solid var(--ems-neutral-300, #cbd5e1);
+  background: #fff;
+}
+
+.wl-help__dot--ok {
+  background: var(--ems-success-bg, #e8f7ee);
+  border-color: var(--ems-success-bd, #b7e2c6);
+}
+
+.wl-help__dot--open {
+  background: var(--ems-warning-bg, #fdf6e3);
+  border-color: var(--ems-warning-bd, #f0c36d);
+}
+
+/* ── Yer saxlanması: dəyişən kart və müəllim qısa vurğulanır ───────────── */
+@keyframes wl-flash {
+  0% {
+    box-shadow: 0 0 0 3px var(--ems-primary-300, #8fb2ee);
+  }
+  100% {
+    box-shadow: 0 0 0 3px transparent;
+  }
+}
+
+.wl-card.is-updated,
+.wl-teacher.is-changed {
+  animation: wl-flash 2.4s ease-out 1;
+}
+
+.wl-teacher__delta {
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ems-primary-700, #1b4fa0);
+  background: var(--ems-primary-50, #eef4ff);
+}
+
+/* ── Sağ panel: ekrana sığır, öz içində sürüşür, müəllim axtarışı ──────── */
+.wl__aside {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 24px);
+}
+
+.wl__aside .wl-teachers {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+}
+
+.wl-aside__search {
+  width: 100%;
+  margin: 0 0 10px;
+  padding: 7px 10px;
+  font-size: 0.82rem;
+  color: var(--ems-neutral-900, #1b2733);
+  background: #fff;
+  border: 1px solid var(--ems-neutral-300, #cbd5e1);
+  border-radius: 8px;
+}
+
+.wl-aside__search:focus {
+  outline: 2px solid var(--ems-primary-300, #8fb2ee);
+  outline-offset: 1px;
+}
+
+.wl-aside__none {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  color: var(--ems-neutral-500, #6b7a8c);
+}
+
+.wl-teacher.is-filtered-out,
+.wl-aside__none[hidden] {
+  display: none;
+}
+
+/* ── Axın modalı: addımlar, sürətli düymələr, yekun ───────────────────── */
+.wl-streams-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 8px;
+}
+
+.wl-sp__mode {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--ems-primary-700, #1b4fa0);
+}
+
+.wl-streams-total {
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ems-neutral-800, #2c3e50);
+  background: var(--ems-neutral-50, #f7f9fc);
+  border: 1px solid var(--ems-neutral-200, #e2e8f0);
+}
+
+.wl-kt__hint td {
+  padding: 2px 8px 6px;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--ems-neutral-600, #5b6b7c);
+}
+
+@media (max-width: 640px) {
+  .wl-lines__head {
+    display: none;
+  }
+
+  .wl-line {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wl-card.is-updated,
+  .wl-teacher.is-changed {
+    animation: none;
+  }
+}
+
+/* Dar ekranda panel siyahının altına düşür (`workload_dialog.css`, ≤992px) — öz sürüşməsi lazım deyil. */
+@media (max-width: 992px) {
+  .wl__aside {
+    max-height: none;
+  }
+
+  .wl__aside .wl-teachers {
+    overflow: visible;
+  }
+}

@@ -120701,3 +120701,104 @@ msgstr "Поиск людей"
 msgctxt "registrar.exam_score_entry"
 msgid "Alt qrup"
 msgstr "Подгруппа"
+
+msgctxt "accounts.workload"
+msgid "Bölgü necə işləyir?"
+msgstr "Как работает распределение?"
+
+msgctxt "accounts.workload"
+msgid "Mühazirə."
+msgstr "Лекция."
+
+msgctxt "accounts.workload"
+msgid "Mühazirəni birlikdə dinləyən qruplar bir «axın»dır (patok). «Patok qur» / «Axınları dəyiş» ilə qrupları axınlara yığın və hər axının mühazirəçisini seçin. Bir axının saatı müəllimin yükünə 1 dəfə yazılır, jurnal isə hər qrupda açılır."
+msgstr "Группы, которые слушают лекцию вместе, образуют один «поток». Кнопкой «Создать поток» / «Изменить потоки» соберите группы в потоки и выберите лектора для каждого потока. Часы потока засчитываются в нагрузку преподавателя один раз, а журнал открывается для каждой группы."
+
+msgctxt "accounts.workload"
+msgid "Seminar və laboratoriya."
+msgstr "Семинар и лабораторная."
+
+msgctxt "accounts.workload"
+msgid "Hər qrup ayrıca keçir. «Bölüşdür» ilə hər qrupa müəllim və saat verin; qrup Lab-1 / Lab-2 kimi alt qruplara bölünübsə, hər alt qrupa öz müəllimini seçin."
+msgstr "Каждая группа занимается отдельно. Кнопкой «Распределить» назначьте каждой группе преподавателя и часы; если группа разделена на подгруппы (Lab-1 / Lab-2), выберите преподавателя для каждой подгруппы."
+
+msgctxt "accounts.workload"
+msgid "Saatı və ya qrupu dəyişmək."
+msgstr "Изменение часов или групп."
+
+msgctxt "accounts.workload"
+msgid "Kartın altındakı «Tapşırıq sətirləri» → «Redaktə». Eyni fənnin digər qruplarından fərqlənən saat kartda «saatı yoxlayın» nişanı ilə göstərilir."
+msgstr "«Строки задания» внизу карточки → «Редактировать». Часы, отличающиеся от других групп того же предмета, отмечаются на карточке значком «проверьте часы»."
+
+msgctxt "accounts.workload"
+msgid "tam bölünüb"
+msgstr "распределено полностью"
+
+msgctxt "accounts.workload"
+msgid "vakant və ya bölünməyib"
+msgstr "вакансия или не распределено"
+
+msgctxt "accounts.workload"
+msgid "müəllim təyin olunmayıb"
+msgstr "преподаватель не назначен"
+
+msgctxt "accounts.workload"
+msgid "Uyğun müəllim tapılmadı."
+msgstr "Подходящий преподаватель не найден."
+
+msgctxt "accounts.workload"
+msgid "Axın nədir?"
+msgstr "Что такое поток?"
+
+msgctxt "accounts.workload"
+msgid "Axın (patok) — mühazirəni eyni vaxtda BİRLİKDƏ dinləyən qruplardır. Ayrıca keçən qrup öz axınında tək qalır."
+msgstr "Поток — это группы, которые слушают лекцию ВМЕСТЕ в одно время. Группа, занимающаяся отдельно, остаётся одна в своём потоке."
+
+msgctxt "accounts.workload"
+msgid "Bir axının mühazirə saatı müəllimin yükünə BİR dəfə yazılır; jurnal isə hər qrupda ayrıca açılır və mühazirə hər birində görünür."
+msgstr "Лекционные часы потока засчитываются в нагрузку преподавателя ОДИН раз; журнал открывается отдельно для каждой группы, и лекция видна в каждом из них."
+
+msgctxt "accounts.workload"
+msgid "Bir tapşırıq sətrinin qrupları birlikdə hərəkət edir — onları ayırmaq üçün əvvəlcə sətri «Redaktə» ilə bölün."
+msgstr "Группы одной строки задания перемещаются вместе — чтобы разделить их, сначала разбейте строку через «Редактировать»."
+
+msgctxt "accounts.workload"
+msgid "«Alt qrup» sütunu boşdursa qrup hələ Lab-1 / Lab-2-yə bölünməyib. Alt qruplar «Lab qrupları» bölməsində yaradılır; sonra burada hər alt qrupa öz müəllimini seçin."
+msgstr "Если столбец «Подгруппа» пуст, группа ещё не разделена на Lab-1 / Lab-2. Подгруппы создаются в разделе «Лабораторные группы»; затем выберите здесь преподавателя для каждой подгруппы."
+
+msgctxt "accounts.workload"
+msgid "1. Hər qrupu bir axına salın"
+msgstr "1. Отнесите каждую группу к потоку"
+
+msgctxt "accounts.workload"
+msgid "Hamısı bir axında"
+msgstr "Все в одном потоке"
+
+msgctxt "accounts.workload"
+msgid "Hər qrup ayrıca"
+msgstr "Каждая группа отдельно"
+
+msgctxt "accounts.workload"
+msgid "2. Hər axının mühazirəçisini seçin"
+msgstr "2. Выберите лектора для каждого потока"
+
+msgctxt "accounts.workload"
+msgid "Hər qrupun altında müəllimi və saatı seçin. Qrup alt qruplara (Lab-1 / Lab-2) bölünübsə «Müəllim əlavə et» ilə hər alt qrupa ayrıca müəllim verin. Bölünən saat qrupun planından çox ola bilməz — «bölünməyib» 0 olanda qrup hazırdır."
+msgstr "Под каждой группой выберите преподавателя и часы. Если группа разделена на подгруппы (Lab-1 / Lab-2), кнопкой «Добавить преподавателя» назначьте преподавателя каждой подгруппе. Распределённые часы не могут превышать план группы — группа готова, когда «не распределено» равно 0."
+
+msgctxt "registrar.journal"
+msgid "cədvəl üzrə"
+msgstr "по расписанию"
+
+msgctxt "subject_folder.ui"
+msgid "Tam baxış (yalnız oxu)"
+msgstr "Полный просмотр (только чтение)"
+
+msgctxt "subject_folder.ui"
+msgid "dərc edilməyib"
+msgstr "не опубликовано"
+
+#, python-format
+msgctxt "subject_folder.ui"
+msgid "göndərən: %(n)s tələbə"
+msgstr "отправили: %(n)s студентов"

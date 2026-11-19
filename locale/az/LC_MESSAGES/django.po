@@ -119787,3 +119787,104 @@ msgstr "Şəxslərdə axtar"
 msgctxt "registrar.exam_score_entry"
 msgid "Alt qrup"
 msgstr "Alt qrup"
+
+msgctxt "accounts.workload"
+msgid "Bölgü necə işləyir?"
+msgstr "Bölgü necə işləyir?"
+
+msgctxt "accounts.workload"
+msgid "Mühazirə."
+msgstr "Mühazirə."
+
+msgctxt "accounts.workload"
+msgid "Mühazirəni birlikdə dinləyən qruplar bir «axın»dır (patok). «Patok qur» / «Axınları dəyiş» ilə qrupları axınlara yığın və hər axının mühazirəçisini seçin. Bir axının saatı müəllimin yükünə 1 dəfə yazılır, jurnal isə hər qrupda açılır."
+msgstr "Mühazirəni birlikdə dinləyən qruplar bir «axın»dır (patok). «Patok qur» / «Axınları dəyiş» ilə qrupları axınlara yığın və hər axının mühazirəçisini seçin. Bir axının saatı müəllimin yükünə 1 dəfə yazılır, jurnal isə hər qrupda açılır."
+
+msgctxt "accounts.workload"
+msgid "Seminar və laboratoriya."
+msgstr "Seminar və laboratoriya."
+
+msgctxt "accounts.workload"
+msgid "Hər qrup ayrıca keçir. «Bölüşdür» ilə hər qrupa müəllim və saat verin; qrup Lab-1 / Lab-2 kimi alt qruplara bölünübsə, hər alt qrupa öz müəllimini seçin."
+msgstr "Hər qrup ayrıca keçir. «Bölüşdür» ilə hər qrupa müəllim və saat verin; qrup Lab-1 / Lab-2 kimi alt qruplara bölünübsə, hər alt qrupa öz müəllimini seçin."
+
+msgctxt "accounts.workload"
+msgid "Saatı və ya qrupu dəyişmək."
+msgstr "Saatı və ya qrupu dəyişmək."
+
+msgctxt "accounts.workload"
+msgid "Kartın altındakı «Tapşırıq sətirləri» → «Redaktə». Eyni fənnin digər qruplarından fərqlənən saat kartda «saatı yoxlayın» nişanı ilə göstərilir."
+msgstr "Kartın altındakı «Tapşırıq sətirləri» → «Redaktə». Eyni fənnin digər qruplarından fərqlənən saat kartda «saatı yoxlayın» nişanı ilə göstərilir."
+
+msgctxt "accounts.workload"
+msgid "tam bölünüb"
+msgstr "tam bölünüb"
+
+msgctxt "accounts.workload"
+msgid "vakant və ya bölünməyib"
+msgstr "vakant və ya bölünməyib"
+
+msgctxt "accounts.workload"
+msgid "müəllim təyin olunmayıb"
+msgstr "müəllim təyin olunmayıb"
+
+msgctxt "accounts.workload"
+msgid "Uyğun müəllim tapılmadı."
+msgstr "Uyğun müəllim tapılmadı."
+
+msgctxt "accounts.workload"
+msgid "Axın nədir?"
+msgstr "Axın nədir?"
+
+msgctxt "accounts.workload"
+msgid "Axın (patok) — mühazirəni eyni vaxtda BİRLİKDƏ dinləyən qruplardır. Ayrıca keçən qrup öz axınında tək qalır."
+msgstr "Axın (patok) — mühazirəni eyni vaxtda BİRLİKDƏ dinləyən qruplardır. Ayrıca keçən qrup öz axınında tək qalır."
+
+msgctxt "accounts.workload"
+msgid "Bir axının mühazirə saatı müəllimin yükünə BİR dəfə yazılır; jurnal isə hər qrupda ayrıca açılır və mühazirə hər birində görünür."
+msgstr "Bir axının mühazirə saatı müəllimin yükünə BİR dəfə yazılır; jurnal isə hər qrupda ayrıca açılır və mühazirə hər birində görünür."
+
+msgctxt "accounts.workload"
+msgid "Bir tapşırıq sətrinin qrupları birlikdə hərəkət edir — onları ayırmaq üçün əvvəlcə sətri «Redaktə» ilə bölün."
+msgstr "Bir tapşırıq sətrinin qrupları birlikdə hərəkət edir — onları ayırmaq üçün əvvəlcə sətri «Redaktə» ilə bölün."
+
+msgctxt "accounts.workload"
+msgid "«Alt qrup» sütunu boşdursa qrup hələ Lab-1 / Lab-2-yə bölünməyib. Alt qruplar «Lab qrupları» bölməsində yaradılır; sonra burada hər alt qrupa öz müəllimini seçin."
+msgstr "«Alt qrup» sütunu boşdursa qrup hələ Lab-1 / Lab-2-yə bölünməyib. Alt qruplar «Lab qrupları» bölməsində yaradılır; sonra burada hər alt qrupa öz müəllimini seçin."
+
+msgctxt "accounts.workload"
+msgid "1. Hər qrupu bir axına salın"
+msgstr "1. Hər qrupu bir axına salın"
+
+msgctxt "accounts.workload"
+msgid "Hamısı bir axında"
+msgstr "Hamısı bir axında"
+
+msgctxt "accounts.workload"
+msgid "Hər qrup ayrıca"
+msgstr "Hər qrup ayrıca"
+
+msgctxt "accounts.workload"
+msgid "2. Hər axının mühazirəçisini seçin"
+msgstr "2. Hər axının mühazirəçisini seçin"
+
+msgctxt "accounts.workload"
+msgid "Hər qrupun altında müəllimi və saatı seçin. Qrup alt qruplara (Lab-1 / Lab-2) bölünübsə «Müəllim əlavə et» ilə hər alt qrupa ayrıca müəllim verin. Bölünən saat qrupun planından çox ola bilməz — «bölünməyib» 0 olanda qrup hazırdır."
+msgstr "Hər qrupun altında müəllimi və saatı seçin. Qrup alt qruplara (Lab-1 / Lab-2) bölünübsə «Müəllim əlavə et» ilə hər alt qrupa ayrıca müəllim verin. Bölünən saat qrupun planından çox ola bilməz — «bölünməyib» 0 olanda qrup hazırdır."
+
+msgctxt "registrar.journal"
+msgid "cədvəl üzrə"
+msgstr "cədvəl üzrə"
+
+msgctxt "subject_folder.ui"
+msgid "Tam baxış (yalnız oxu)"
+msgstr "Tam baxış (yalnız oxu)"
+
+msgctxt "subject_folder.ui"
+msgid "dərc edilməyib"
+msgstr "dərc edilməyib"
+
+#, python-format
+msgctxt "subject_folder.ui"
+msgid "göndərən: %(n)s tələbə"
+msgstr "göndərən: %(n)s tələbə"

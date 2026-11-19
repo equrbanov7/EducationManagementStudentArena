@@ -3423,3 +3423,132 @@ msgstr "В %(count)s строк(ах) %(hours)s ч не распределены
 
 msgid "«Vakant» saxlanıldı: %(hours)s saat (%(rows)s sətir)."
 msgstr "Оставлено «Вакансия»: %(hours)s ч (%(rows)s строк)."
+
+msgid "Eyni fənnin digər qruplarında saat fərqlidir. Səhvdirsə «Tapşırıq sətirləri» → «Redaktə» ilə düzəldin."
+msgstr "Часы отличаются от других групп того же предмета. Если это ошибка, исправьте через «Строки задания» → «Редактировать»."
+
+#, javascript-format
+msgid "digər qruplarda %(hours)s — saatı yoxlayın"
+msgstr "в других группах %(hours)s — проверьте часы"
+
+msgid "Bu sətrin qrupları mühazirəni bir neçə axında keçir, amma sətir qruplara ayrılmayıb."
+msgstr "Группы этой строки слушают лекцию в нескольких потоках, но строка не разделена по группам."
+
+#, javascript-format
+msgid "%(n)s axın bir sətirdə"
+msgstr "%(n)s потока в одной строке"
+
+msgid "Axının mühazirəçisi başqa kartdadır"
+msgstr "Лектор потока находится в другой карточке"
+
+msgid "Axına bağlanmayıb — mühazirə heç kimin yükünə düşmür"
+msgstr "Не привязано к потоку — лекция не засчитывается ни в чью нагрузку"
+
+msgid "Bu qruplar mühazirəni birlikdə dinləyir: saat müəllimin yükünə 1 dəfə yazılır, jurnal hər qrupda açılır."
+msgstr "Эти группы слушают лекцию вместе: часы засчитываются в нагрузку преподавателя один раз, журнал открывается для каждой группы."
+
+#, javascript-format
+msgid "%(n)s qrup birlikdə"
+msgstr "%(n)s группы вместе"
+
+msgid "tək qrup"
+msgstr "одна группа"
+
+#, javascript-format
+msgid "%(n)s axın · müəllim yükünə cəmi %(hours)s"
+msgstr "%(n)s потока · всего в нагрузку %(hours)s"
+
+msgid "Hansı qrupların mühazirəni birlikdə dinlədiyini (patok) və mühazirəçini seçin."
+msgstr "Выберите, какие группы слушают лекцию вместе, и лектора."
+
+msgid "Patok qur"
+msgstr "Создать поток"
+
+#, javascript-format
+msgid "%(n)s qrup ayrıca keçir · müəllim yükünə cəmi %(hours)s"
+msgstr "%(n)s группы отдельно · всего в нагрузку %(hours)s"
+
+msgid "Mühazirəçi seç"
+msgstr "Выбрать лектора"
+
+msgid "Axın (patok) — mühazirəni birlikdə dinləyən qruplar. Bir axının saatı müəllimin yükünə 1 dəfə yazılır, jurnal isə hər qrupda açılır."
+msgstr "Поток — группы, которые слушают лекцию вместе. Часы потока засчитываются в нагрузку преподавателя один раз, а журнал открывается для каждой группы."
+
+#, javascript-format
+msgid "Bölünməyib: %(hours)s"
+msgstr "Не распределено: %(hours)s"
+
+msgid "Bu qruplar məşğələni birlikdə keçir — saat müəllimin yükünə 1 dəfə yazılır."
+msgstr "Эти группы занимаются вместе — часы засчитываются в нагрузку преподавателя один раз."
+
+msgid "Qruplar birlikdə keçir"
+msgstr "Группы занимаются вместе"
+
+msgid "Saat bütün sətrə yazılıb. Hər qrupa ayrıca müəllim vermək üçün «Bölüşdür» düyməsinə basın."
+msgstr "Часы записаны на всю строку. Чтобы назначить преподавателя каждой группе отдельно, нажмите «Распределить»."
+
+msgid "Qruplara ayrılmayıb"
+msgstr "Не разделено по группам"
+
+msgid "Ümumi bölgüyə daxildir"
+msgstr "Входит в общее распределение"
+
+msgid "Birgə keçilir"
+msgstr "Проводится совместно"
+
+msgid "Müəllim təyin olunmayıb"
+msgstr "Преподаватель не назначен"
+
+#, javascript-format
+msgid "cəmi %(total)s · bölünüb %(assigned)s"
+msgstr "всего %(total)s · распределено %(assigned)s"
+
+msgid "Hər qrupa müəllim və saat verin; qrupu Lab-1 / Lab-2 kimi alt qruplara da bölə bilərsiniz."
+msgstr "Назначьте каждой группе преподавателя и часы; группу можно также разделить на подгруппы (Lab-1 / Lab-2)."
+
+msgid "Qrup"
+msgstr "Группа"
+
+msgid "Plan saatı"
+msgstr "Часы по плану"
+
+msgid "Müəllim və saat"
+msgstr "Преподаватель и часы"
+
+msgid "Saat bölünüb, amma müəllim hələ təyin edilməyib (vakant)."
+msgstr "Часы распределены, но преподаватель ещё не назначен (вакансия)."
+
+#, javascript-format
+msgid "Vakant: %(hours)s"
+msgstr "Вакансия: %(hours)s"
+
+msgid "Tam bölünüb"
+msgstr "Распределено полностью"
+
+msgid "Natamam"
+msgstr "Не завершено"
+
+msgid "Bu fəndə heç bir axına bağlanmamış mühazirə sətri var — «Axınları dəyiş» ilə qrupları axına salın."
+msgstr "В этом предмете есть лекционная строка, не привязанная ни к одному потоку — кнопкой «Изменить потоки» отнесите группы к потоку."
+
+msgid "birlikdə dinləyir"
+msgstr "слушают вместе"
+
+#, javascript-format
+msgid "Yekun: %(n)s axın · müəllimlərin yükünə cəmi %(load)s (axınlar birləşdirilməsəydi %(separate)s olardı)."
+msgstr "Итог: %(n)s потока · всего в нагрузку преподавателей %(load)s (без объединения потоков было бы %(separate)s)."
+
+#, javascript-format
+msgid "Yekun: %(n)s axın · müəllimlərin yükünə cəmi %(load)s."
+msgstr "Итог: %(n)s потока · всего в нагрузку преподавателей %(load)s."
+
+#, javascript-format
+msgid "artıq bölünüb: %(hours)s"
+msgstr "распределено лишнее: %(hours)s"
+
+#, javascript-format
+msgid "bölünməyib: %(hours)s"
+msgstr "не распределено: %(hours)s"
+
+msgid "Bu saat qruplara ayrılmadan bütün sətrə yazılıb. Hər qrupa ayrıca müəllim vermək üçün buradakı müəllimi silin və yuxarıdakı qrupların altında «Müəllim əlavə et» düyməsinə basın."
+msgstr "Эти часы записаны на всю строку без разделения по группам. Чтобы назначить преподавателя каждой группе, удалите преподавателя здесь и нажмите «Добавить преподавателя» под группами выше."

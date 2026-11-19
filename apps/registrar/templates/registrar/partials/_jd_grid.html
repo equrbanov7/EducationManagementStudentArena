@@ -83,7 +83,8 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                                         {% if not lm.editable %}data-locked="1"{% endif %}
                                         {% if show_lesson_timing %}data-started="{% if lm.lesson.is_legacy_synthesised or not lm.lesson.created_by_id %}{% trans 'köhnə sistemdən' context 'registrar.journal' %}{% else %}{{ lm.lesson.created_at|date:'d.m.Y H:i' }}{% endif %}"
                                         data-time="{% if lm.lesson.start_time %}{{ lm.lesson.start_time|time:'H:i' }}{% if lm.lesson.end_time %}–{{ lm.lesson.end_time|time:'H:i' }}{% endif %}{% endif %}"
-                                        data-hours="{% if lm.passive %}{% trans 'Passiv' context 'registrar.passive_lessons' %} · {% endif %}{{ lm.lesson.hours }} {% trans 'saat' context 'registrar.journal' %}"{% endif %}
+                                        data-hours="{% if lm.passive %}{% trans 'Passiv' context 'registrar.passive_lessons' %} · {% endif %}{{ lm.lesson.hours }} {% trans 'saat' context 'registrar.journal' %}"
+                                        data-room="{% if lm.lesson.timing_room %}{{ lm.lesson.timing_room.label }}{% if lm.lesson.timing_room.from_slot %} · {% trans 'cədvəl üzrə' context 'registrar.journal' %}{% endif %}{% endif %}"{% endif %}
                                         data-date="{{ lm.lesson.date|date:'d.m.Y' }}"
                                         data-iso="{{ lm.lesson.date|date:'Y-m-d' }}"
                                         data-kind="{{ lm.lesson.get_kind_display }}"
@@ -95,8 +96,8 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                                 {% else %}
                                 {{ lm.lesson.date|date:"d.m" }}
                                 {% endif %}
-                                {% if show_lesson_timing %}{# Saat aralığı + saat sayı — yalnız əməkdaşa (sahib 2026-11-17) #}
-                                <div class="jd2-th-timing" data-jd-lesson-timing>{% if lm.lesson.start_time %}<span class="jd2-th-time">{{ lm.lesson.start_time|time:"H:i" }}{% if lm.lesson.end_time %}–{{ lm.lesson.end_time|time:"H:i" }}{% endif %}</span>{% endif %}{% if not lm.passive %}<span class="jd2-th-hours">{{ lm.lesson.hours }} {% trans "saat" context "registrar.journal" %}</span>{% endif %}</div>
+                                {% if show_lesson_timing %}{# Saat aralığı + otaq (2026-11-19) + saat sayı — yalnız əməkdaşa (sahib 2026-11-17) #}
+                                <div class="jd2-th-timing" data-jd-lesson-timing>{% if lm.lesson.start_time %}<span class="jd2-th-time">{{ lm.lesson.start_time|time:"H:i" }}{% if lm.lesson.end_time %}–{{ lm.lesson.end_time|time:"H:i" }}{% endif %}</span>{% endif %}{% if lm.lesson.timing_room %}<span class="jd2-th-room{% if lm.lesson.timing_room.from_slot %} jd2-th-room--slot{% endif %}" data-jd-th-room title="{% trans 'Otaq' context 'registrar.journal' %}: {{ lm.lesson.timing_room.label }}{% if lm.lesson.timing_room.from_slot %} · {% trans 'cədvəl üzrə' context 'registrar.journal' %}{% endif %}"><i class="fas fa-door-open" aria-hidden="true"></i> {{ lm.lesson.timing_room.name }}</span>{% endif %}{% if not lm.passive %}<span class="jd2-th-hours">{{ lm.lesson.hours }} {% trans "saat" context "registrar.journal" %}</span>{% endif %}</div>
                                 {% endif %}
                                 {% if lm.passive %}<div class="jd2-th-passive">{% trans "Passiv" context "registrar.passive_lessons" %} · {{ lm.lesson.hours }} {% trans "saat" context "registrar.journal" %}</div>{% endif %}
                                 {% if lm.is_today %}<div class="jd2-th-today">{% trans "BU GÜN" context "registrar.journal" %}</div>{% endif %}

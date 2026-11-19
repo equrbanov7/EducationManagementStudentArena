@@ -1,0 +1,19 @@
+{% load i18n %}
+{% comment %}TAM baxış (sahib 2026-11-19, Monitorinq şöbəsi): qovluğun tapşırıqları — YALNIZ OXU. Göndərişlərin özü
+açılmır; neçə tələbənin göndərdiyi göstərilir. Yalnız ``access.is_staff_viewer`` üçün (``cabinet/unit.py``).{% endcomment %}
+<ul class="sfc-items" role="list">
+    {% for item in tasks %}
+    <li class="sfc-item sfc-item--task">
+        <span class="sfc-item__icon sfc-item__icon--{{ item.task.kind }}" aria-hidden="true"><i class="fas {% if item.task.kind == 'selfwork' %}fa-star{% else %}fa-clipboard-list{% endif %}"></i></span>
+        <div class="sfc-item__main">
+            <p class="sfc-item__title">{{ item.task.title }}</p>
+            <p class="sfc-item__meta">
+                <span class="ems-badge ems-badge--{% if item.task.kind == 'selfwork' %}primary{% else %}info{% endif %}">{{ item.kind_label }}{% if item.max_points %} · {% blocktrans trimmed with points=item.max_points context "subject_folder.ui" %}maks. {{ points }} bal{% endblocktrans %}{% endif %}</span>
+                {% if item.hidden %}<span class="ems-badge ems-badge--warning">{% trans "dərc edilməyib" context "subject_folder.ui" %}</span>{% endif %}
+                <span class="sfc-muted">{% blocktrans trimmed with n=item.sent context "subject_folder.ui" %}göndərən: {{ n }} tələbə{% endblocktrans %}</span>
+            </p>
+            {% if item.task.instructions %}<p class="sfc-item__desc">{{ item.task.instructions|linebreaksbr }}</p>{% endif %}
+        </div>
+    </li>
+    {% endfor %}
+</ul>
