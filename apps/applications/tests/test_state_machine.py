@@ -88,23 +88,25 @@ def test_unknown_action_is_denied():
     assert excinfo.value.code == "transition.unknown"
 
 
-@pytest.mark.parametrize(
-    "action", [Action.RESOLVE, Action.REJECT, Action.FORWARD, Action.REQUEST_INFO, Action.RETURN_FOR_CORRECTION]
-)
+@pytest.mark.parametrize("action", [Action.REJECT, Action.FORWARD, Action.REQUEST_INFO, Action.RETURN_FOR_CORRECTION])
 def test_decisions_require_a_reason(action):
     with pytest.raises(TransitionDenied) as excinfo:
         ensure_allowed(action=action, status=S.IN_REVIEW.value, text="   ")
     assert excinfo.value.code == "transition.reason_required"
 
 
-@pytest.mark.parametrize(
-    "action", [Action.RESOLVE, Action.REJECT, Action.FORWARD, Action.REQUEST_INFO, Action.RETURN_FOR_CORRECTION]
-)
+@pytest.mark.parametrize("action", [Action.REJECT, Action.FORWARD, Action.REQUEST_INFO, Action.RETURN_FOR_CORRECTION])
 def test_decisions_require_ten_characters(action):
     with pytest.raises(TransitionDenied) as excinfo:
         ensure_allowed(action=action, status=S.IN_REVIEW.value, text="qısa")
     assert excinfo.value.code == "transition.text_too_short"
     assert excinfo.value.params["min_length"] == 10
+
+
+@pytest.mark.parametrize("text", ["", "   ", "ok"])
+def test_resolve_needs_no_reply_text(text):
+    """Sahib 2026-11-19: «müraciəti bağlamaq həmişə aktiv olsun, cavab yazmadan da»."""
+    assert ensure_allowed(action=Action.RESOLVE, status=S.IN_REVIEW.value, text=text).name == Action.RESOLVE
 
 
 def test_open_and_closed_partition_every_status():

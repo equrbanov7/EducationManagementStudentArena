@@ -35,7 +35,7 @@ def test_invalid_source_message_follows_active_language(language):
 def test_placeholders_are_filled_in_every_language():
     for language, expected in {"en": "at least 10 characters", "ru": "не менее 10 символов"}.items():
         with translation.override(language):
-            exc = _denied(action=Action.RESOLVE, status=S.IN_REVIEW.value, text="qısa")
+            exc = _denied(action=Action.REJECT, status=S.IN_REVIEW.value, text="qısa")
         assert exc.code == "transition.text_too_short"
         assert expected in str(exc)
     with translation.override("tr"):
