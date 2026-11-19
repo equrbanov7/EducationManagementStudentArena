@@ -244,7 +244,8 @@
 
     function resetFinalRows(host) {
         api().rows(host).forEach(function (row) {
-            if (row.getAttribute("data-final") !== "1") {
+            // 2026-11-19: test balı (`data-q-locked`) da rejimdə açılır — çıxanda o da server dəyərinə qayıdır.
+            if (row.getAttribute("data-final") !== "1" && row.getAttribute("data-q-locked") !== "1") {
                 return;
             }
             var input = api().scoreInput(row);

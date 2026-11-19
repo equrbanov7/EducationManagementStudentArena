@@ -420,7 +420,7 @@ def change_decision(
     (``exam_score_assessment.decide_after_window``); ``rules=None`` köhnə təqdimatlı müqavilədir.
     """
     if _same_score(old_score, new_score):
-        if cleaned_questions is None or questions.same_question_scores(latest_question_scores(), cleaned_questions):
+        if cleaned_questions is None or questions.split_unchanged(latest_question_scores(), cleaned_questions):
             return None
     blank_appeal = appeal_cell and old_score is None  # sahib 2026-11-18: balsız tələbəyə də apellyasiya
     if old_score is not None and policy.changes_blocked:
