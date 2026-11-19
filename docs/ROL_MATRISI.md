@@ -299,6 +299,26 @@ təşkilat, yalnız oxu + xlsx), `lessons-log`, `syllabus-list`, `unit-subject-f
 `analytics`, `academic-records`, `student-registry`. GÖRÜNMÜR: yük bölgüsü, fənn təhvili, sillabus təsdiqi,
 RİM mərkəzi, audit, rollar, mühasibatlıq, kadr analitikası, sorğu nəticələri. View-as aktoru deyil.
 
+## Tyutorun «qrup dövrəsi» (2026-11-19, əl ilə qeyd — cədvəl hələ yenidən ölçülməyib)
+
+Sahib: «tyutora özəllik olaraq rol ver ki qrupa tələbə əlavə etmək, qruplardan tələbə köçürmək, qrup yaratmaq …
+bütün bu circle-i edə bilsin». `tutor` və `program_coordinator` (paritet — dəstlər eynidir) üçün, əhatə
+`Membership.scope_unit` alt-ağacı (prod-da fakültə/məktəb). Mənbə: `apps/organizations/permissions_tutor_circle.py`,
+mövcud tenantlar: miqrasiya `organizations/0086_tutor_group_circle`; testlər:
+`apps/registrar/tests/test_tutor_group_circle_2026_11_19.py`.
+
+| əməl | açar | qeyd |
+|---|---|---|
+| tələbə datası (reyestr kartı, ÜOMG/transkript, FİN/telefon/ünvan, cins/yaş) | `student.registry_view`, `people.view_students` (vardı) + **`student.records_view`, `people.view_contacts`, `people.view_demographics`** | oxu fakültə üzrə |
+| qrup yaratmaq, qrupa tələbə əlavə, qruplar arası köçürmə, ana qrupu alt qruplara bölmək | `unit.group_manage` (vardı) | «Qruplar» reyestri; köçürmə rəsmi `transfer_student_group` xidməti ilə |
+| jurnala alt qrupdan əlavə tələbə | `journal.roster` (vardı) | sənəd (təqdimat) məcburi qalır |
+| müəllimin qrupdan-qrupa təhvili | **`journal.reassign`** | «Fənn təhvili» bölməsi; açılışın QRUPU əhatədə olmalıdır |
+| lab qrupları | **`journal.lab_groups`** (yeni) | QRUPU əhatədə olan jurnal; `workload.distribute` verilmir |
+| xarici dil səviyyə qrupu | `journal.roster` (vardı) + **`journal.level_cohorts`** (yeni) | dil kafedrasında (artıq səviyyə qrupu olan) açır, ÖZ açdığı qrupu idarə edir; tələbə yerləşdirmə/çıxarma yalnız öz əhatəsinin tələbələri |
+
+QƏSDƏN verilməyən: `student.movement` (akademik məzuniyyət, xaric, bərpa — dekanlıq / TXM qərarı),
+`workload.distribute` (bütün yük bölgüsü).
+
 ## Tələlər (skriptdə həll olunub — silməyin)
 
 1. **`ALLOWED_HOSTS`.**  `django.test.Client` `testserver` host-u ilə gəlir;

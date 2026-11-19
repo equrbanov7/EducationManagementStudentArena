@@ -119965,3 +119965,11 @@ msgstr "Cəmi"
 msgctxt "workload.history_restore"
 msgid "Yük bərpa olunur — bu bir az çəkə bilər, səhifəni bağlamayın."
 msgstr "Yük bərpa olunur — bu bir az çəkə bilər, səhifəni bağlamayın."
+
+msgctxt "organizations.permission.label"
+msgid "Öz qruplarının jurnallarında lab qruplarını idarə etmək"
+msgstr "Öz qruplarının jurnallarında lab qruplarını idarə etmək"
+
+msgctxt "organizations.permission.label"
+msgid "Dil kafedrasında xarici dil səviyyə qrupu açmaq (öz tələbələri üçün)"
+msgstr "Dil kafedrasında xarici dil səviyyə qrupu açmaq (öz tələbələri üçün)"

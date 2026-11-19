@@ -20,7 +20,8 @@ QAYDALAR:
   dövrdə tərkib dəyişmir.
 
 SƏLAHİYYƏT (:func:`can_manage`) — jurnalın müəllimi (açılışın canlı müəllimi və ya «lab» növünü daşıyan aktiv
-pay), açılışın KAFEDRASINI əhatə edən ``workload.distribute`` daşıyıcısı (kafedra müdiri — «Praktiki məşğələ»
+pay), açılışın QRUPUNU əhatə edən ``journal.lab_groups`` daşıyıcısı (tyutor, 2026-11-19), açılışın KAFEDRASINI
+əhatə edən ``workload.distribute`` daşıyıcısı (kafedra müdiri — «Praktiki məşğələ»
 açarı ilə eyni əhatə, :mod:`apps.registrar.practical_toggle`), RİM rəhbəri, təşkilat sahibi və superadmin.
 Müşahidəçi, başqa müəllim və tələbə heç nə dəyişmir (HTTP 403). Hər dəyişiklik ``core.audit``-ə yazılır.
 """
@@ -44,6 +45,9 @@ _CTX = "registrar.lab_groups"
 RESOURCE = "registrar.lab_groups"
 #: Kafedra müdirinin açarı (dərs yükünün bölgüsü — lab yarım qrupları da yükün hissəsidir).
 CHAIR_PERMISSION = "workload.distribute"
+#: Tyutorun açarı (sahib 2026-11-19, «qrup dövrəsi»): əhatə açılışın QRUPU ilə yoxlanır — kafedra yox,
+#: tələbələrin öz qrupu (bax ``apps/organizations/permissions_tutor_circle.py``).
+GROUP_PERMISSION = "journal.lab_groups"
 
 
 class LabGroupManageError(ValueError):
@@ -72,6 +76,10 @@ def can_manage(user, offering) -> bool:
 
     share = share_for(user, offering)
     if share is not None and (not share.kinds or LessonKind.LAB in share.kinds):
+        return True
+    from .journal_scope import offering_in_actor_scope
+
+    if offering_in_actor_scope(user, offering.organization, offering, permission=GROUP_PERMISSION):
         return True
     return _chair_scope_covers(user, offering)
 
@@ -386,6 +394,7 @@ def delete_group(*, offering, number, actor, confirmed, request=None) -> int:
 
 __all__ = [
     "CHAIR_PERMISSION",
+    "GROUP_PERMISSION",
     "LabGroupManageError",
     "assign",
     "block_reason",

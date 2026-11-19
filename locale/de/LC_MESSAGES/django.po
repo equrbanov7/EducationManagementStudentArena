@@ -122214,3 +122214,13 @@ msgid "Yük bərpa olunur — bu bir az çəkə bilər, səhifəni bağlamayın.
 msgstr ""
 "Die Lehrlast wird wiederhergestellt — das kann etwas dauern, bitte die Seite"
 " geöffnet lassen."
+
+msgctxt "organizations.permission.label"
+msgid "Öz qruplarının jurnallarında lab qruplarını idarə etmək"
+msgstr "Laborgruppen in den Journalen der eigenen Gruppen verwalten"
+
+msgctxt "organizations.permission.label"
+msgid "Dil kafedrasında xarici dil səviyyə qrupu açmaq (öz tələbələri üçün)"
+msgstr ""
+"Fremdsprachen-Niveaugruppe am Sprachlehrstuhl eröffnen (für eigene "
+"Studierende)"

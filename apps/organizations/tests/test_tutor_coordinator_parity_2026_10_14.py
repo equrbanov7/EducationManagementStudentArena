@@ -32,6 +32,8 @@ User = get_user_model()
 MIGRATION = importlib.import_module("apps.organizations.migrations.0064_tutor_coordinator_parity")
 #: Sonrakı addım (2026-10-27): tyutor + koordinator + laborant — kafedranın sillabus / material OXUSU.
 UNIT_VIEW_MIGRATION = importlib.import_module("apps.organizations.migrations.0074_tutor_laborant_unit_view")
+#: 2026-11-19: tyutorun «qrup dövrəsi» (tələbə datası, təhvil, lab / səviyyə qrupları).
+TUTOR_CIRCLE_MIGRATION = importlib.import_module("apps.organizations.migrations.0086_tutor_group_circle")
 
 
 def _seed(name):
@@ -65,7 +67,9 @@ class TemplateParityTest(TestCase):
         for key in _seed("tutor")["permissions"]:
             self.assertNotEqual(key, "*")
             self.assertFalse(key.endswith(".*"), key)
-            self.assertNotIn(key, {"role.assign", "member.manage", "org.edit", "people.view_contacts"}, key)
+            # 2026-11-19 (sahib: «tələbə datasını görməkdən … bütün bu circle-i»): `people.view_contacts` artıq
+            # tyutordadır — reyestr kartında FİN / telefon / ünvan, əhatə fakültə (UNIT) qalır.
+            self.assertNotIn(key, {"role.assign", "member.manage", "org.edit", "student.movement"}, key)
 
     def test_parity_helper_is_idempotent_and_skips_wildcards(self):
         roles = [
@@ -139,6 +143,7 @@ class MigrationParityTest(TestCase):
         # Şablon 0064-dən sonrakı paritet addımlarını da daşıyır — mövcud tenant onları 0074 ilə alır.
         with bypass_rls():
             UNIT_VIEW_MIGRATION.forward(django_apps, None)
+            TUTOR_CIRCLE_MIGRATION.forward(django_apps, None)
         migrated = set(self._role("tutor").permissions)
         self.assertEqual(migrated, set(self._role("program_coordinator").permissions))
         tutor = self._role("tutor")

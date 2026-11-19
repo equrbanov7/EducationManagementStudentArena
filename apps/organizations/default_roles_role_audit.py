@@ -18,6 +18,8 @@ Yeni açarlar (kataloq: ``permissions_role_audit.py``):
   Qeyri-universitet şablonları ``default_roles.py``-dadır; mövcud tenantlar — miqrasiya ``organizations/0062``.
 """
 
+from .permissions_tutor_circle import apply_tutor_circle_grants
+
 #: Rol adı → VERİLƏN açarlar. Açar, onun ``<prefiks>.*`` wildcard-ı və ya ``*`` artıq varsa atlanır.
 ROLE_AUDIT_GRANTS: dict[str, tuple[str, ...]] = {
     # B1 — qərar yalnız rəhbərdə; işçi və RİM əməkdaşı görür.
@@ -115,6 +117,8 @@ def apply_role_audit_grants(roles):
         for key in ROLE_AUDIT_GRANTS.get(name, ()):
             if not _covered(permissions, key):
                 permissions.append(key)
+    # Tyutorun «qrup dövrəsi» (sahib 2026-11-19) — `default_roles_university.py` 600 sətir sərhədindədir.
+    apply_tutor_circle_grants(roles)
     apply_role_parity(roles)
     return apply_post_parity_revokes(roles)
 
