@@ -30,6 +30,11 @@
     set("[data-jd-day-started]", btn.getAttribute("data-started"));
     set("[data-jd-day-time]", btn.getAttribute("data-time"));
     set("[data-jd-day-hours]", btn.getAttribute("data-hours"));
+    // Otaq (sahib 2026-11-19): saatın yanında; otaq məlum deyilsə sətir gizli qalır («—» göstərilmir).
+    var room = btn.getAttribute("data-room") || "";
+    set("[data-jd-day-room]", room);
+    var roomRow = modal.querySelector("[data-jd-day-room-row]");
+    if (roomRow) roomRow.hidden = !room;
     // «Redaktə vaxtı keçib» qeydi yalnız kilidli sütunda (əməkdaş açıq dərsin də özətini açır).
     var note = modal.querySelector("[data-jd-day-note]");
     if (note) note.hidden = btn.getAttribute("data-locked") !== "1";

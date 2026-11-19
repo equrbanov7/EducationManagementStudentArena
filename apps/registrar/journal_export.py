@@ -103,6 +103,10 @@ def build_journal_workbook(*, offering, journal, finals, lesson_timing: bool = F
     ws.append([])  # boş sətir
 
     # Sütun başlıqları.
+    if lesson_timing:  # otaq (sahib 2026-11-19): saat aralığının yanında — bütün dərslər üçün tək sorğu
+        from apps.registrar.journal_lesson_timing import attach_rooms
+
+        attach_rooms(offering, lessons)
     # Sahib 2026-10-10: jurnaldakı kimi «Soyad Ad Ata adı» (adı-soyadı eyni tələbələr ayrılsın).
     head = [pgettext("registrar.journal", "Soyad, ad, ata adı")]
     # «Passiv» dərs (sahib 2026-11-14): başlıqda «P», xanası «P» — saat hesabına düşmür.
@@ -122,7 +126,7 @@ def build_journal_workbook(*, offering, journal, finals, lesson_timing: bool = F
         cell.font = header_font
         cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
         cell.border = border
-    ws.row_dimensions[header_row].height = 58 if lesson_timing else 30
+    ws.row_dimensions[header_row].height = 72 if lesson_timing else 30
 
     names = {}
     for r_idx, row in enumerate(journal["rows"]):
@@ -279,10 +283,11 @@ def _hours_text(lesson) -> str:
 
 
 def _timing_head(lesson) -> str:
-    """Dərs başlığına əlavə: «10:10–11:40» + «2 saat» (passiv dərsdə saat «Passiv» sətrinin yanındadır)."""
-    from apps.registrar.journal_lesson_timing import time_range
+    """Dərs başlığına əlavə: «10:10–11:40» + otaq + «2 saat» (passiv dərsdə saat «Passiv» sətrinin yanındadır)."""
+    from apps.registrar.journal_lesson_timing import ROOM_ATTR, time_range
 
-    parts = [time_range(lesson), _hours_text(lesson)]
+    room = getattr(lesson, ROOM_ATTR, None) or {}
+    parts = [time_range(lesson), room.get("name", ""), _hours_text(lesson)]
     return "".join(f"\n{part}" for part in parts if part)
 
 
@@ -292,7 +297,7 @@ def _lessons_sheet(workbook, lessons, *, header_fill, header_font, border) -> No
 
     from openpyxl.styles import Alignment
 
-    from apps.registrar.journal_lesson_timing import started_at_text, time_range
+    from apps.registrar.journal_lesson_timing import room_text, started_at_text, time_range
 
     teacher_ids = {lesson.instructor_id for lesson in lessons if lesson.instructor_id}
     teachers = {
@@ -308,6 +313,7 @@ def _lessons_sheet(workbook, lessons, *, header_fill, header_font, border) -> No
         pgettext("registrar.journal", "Tarix"),
         pgettext("registrar.journal", "Dərs növü"),
         pgettext("registrar.journal", "Dərs saatı"),
+        pgettext("registrar.journal", "Otaq"),  # saatın yanında (sahib 2026-11-19); otaq məlum deyilsə boş
         pgettext("registrar.journal", "Akademik saat"),
         pgettext("registrar.passive_lessons", "Passiv"),
         pgettext("registrar.journal", "Dərs başladılıb"),
@@ -326,6 +332,7 @@ def _lessons_sheet(workbook, lessons, *, header_fill, header_font, border) -> No
                 lesson.date.strftime("%d.%m.%Y"),
                 str(lesson.get_kind_display()),
                 time_range(lesson),
+                room_text(lesson),
                 int(lesson.hours or 0),
                 pgettext("registrar.journal", "Bəli") if getattr(lesson, "is_passive", False) else "",
                 started_at_text(lesson) or pgettext("registrar.journal", "köhnə sistemdən"),
@@ -335,6 +342,6 @@ def _lessons_sheet(workbook, lessons, *, header_fill, header_font, border) -> No
         )
         for cell in sheet[sheet.max_row]:
             cell.border = border
-    for letter, width in zip("ABCDEFGHI", (6, 12, 18, 14, 10, 9, 18, 28, 60)):
+    for letter, width in zip("ABCDEFGHIJ", (6, 12, 18, 14, 26, 10, 9, 18, 28, 60)):
         sheet.column_dimensions[letter].width = width
     sheet.freeze_panes = "A2"

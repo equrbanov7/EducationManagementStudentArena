@@ -12,6 +12,14 @@
 .jd2-th-hours {
     font-size: 0.6rem; font-weight: 600; color: var(--ems-neutral-500, #64748b);
 }
+/* Otaq (sahib 2026-11-19) — saat aralığının altında; cədvəldən götürülübsə (dərsdə yazılmayıb) kursivlə. */
+.jd2-th-room {
+    max-width: 11ch; overflow: hidden; text-overflow: ellipsis;
+    font-size: 0.6rem; font-weight: 700; color: var(--ems-neutral-700, #334155);
+}
+.jd2-th-room i { font-size: 0.55rem; color: var(--ems-primary-600, #2563eb); }
+.jd2-th-room--slot { font-style: italic; font-weight: 600; }
+.jd-day-timing__row[hidden] { display: none; }
 .jd-day-timing {
     display: grid; gap: 4px; margin-bottom: 0.75rem; padding: 8px 10px; border-radius: 8px;
     background: var(--ems-primary-50, #eff6ff); border: 1px solid var(--ems-primary-100, #dbeafe);
