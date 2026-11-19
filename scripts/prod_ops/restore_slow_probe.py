@@ -7,7 +7,7 @@ bərpanın iki dəfə hesabladığı jurnal qrafının müddəti və cədvəl ü
 
 import time
 
-from django.db import connection
+from django.db import connection, transaction
 
 from core.reviewed_graph import graph
 from core.rls import bypass_rls
@@ -40,7 +40,18 @@ with rls_worker_atomic(), bypass_rls():
     org_id = CourseOffering.objects.filter(pk=OFFERING).values_list("organization_id", flat=True).first()
     t0 = time.monotonic()
     try:
-        result = graph({"registrar.CourseOffering": [OFFERING]}, organization_id=org_id)
+        # graph() sətirləri FOR UPDATE ilə oxuyur — tranzaksiya içində, sonda GERİ (heç nə yazılmır).
+        with transaction.atomic():
+            result = graph({"registrar.CourseOffering": [OFFERING]}, organization_id=org_id)
+            mid = time.monotonic()
+            scoped = graph(
+                {"registrar.CourseOffering": [OFFERING]},
+                organization_id=org_id,
+                app_labels={"registrar", "syllabus", "workload"},
+            )
+            print(f"scoped_graph_seconds: {time.monotonic() - mid:.2f}")
+            print(f"scoped_graph_total_rows: {sum(map(len, scoped.values()))}")
+            transaction.set_rollback(True)
         status = "ok"
     except Exception as exc:  # noqa: BLE001 — diaqnostika
         result, status = {}, type(exc).__name__ + ":" + str(exc)[:80]

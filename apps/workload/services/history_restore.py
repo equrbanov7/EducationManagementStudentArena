@@ -122,6 +122,20 @@ def plan(request, offering_id):
     return actor, course, chairs
 
 
+#: Bərpanın toxuna biləcəyi tətbiqlər — jurnal (registrar), sillabus, dərs yükü. İmtahan / canlı imtahan / lab /
+#: tapşırıq / fənn qovluğu qrafa salınmır: yük bərpası onlara yazmır, amma onların sətirlərini ``FOR UPDATE``
+#: kilidləmək canlı yazılarla toqquşurdu (2026-11-19, 160 s+ asılma → 504).
+JOURNAL_GRAPH_APPS = frozenset({"registrar", "syllabus", "workload"})
+
+
+def _journal_graph(course, actor):
+    return graph(
+        {"registrar.CourseOffering": [course.pk]},
+        organization_id=actor.organization.pk,
+        app_labels=JOURNAL_GRAPH_APPS,
+    )
+
+
 def _matching_rows(course):
     return TeachingTaskRow.objects.filter(
         organization=course.organization,
@@ -266,7 +280,7 @@ def restore(*, request, offering_id, chair_id, hours, reason, syllabus_id=""):
         "syllabus_choice",
         "Bir neçə uyğun təsdiqli sillabus var; istifadə ediləcək sillabusu seçin.",
     )
-    before = digest(graph({"registrar.CourseOffering": [course.pk]}, organization_id=actor.organization.pk))
+    before = digest(_journal_graph(course, actor))
     amend = {"reason": AmendmentReason.CORRECTION, "note": reason.strip()}
     if row is None:
         data = {
@@ -314,7 +328,7 @@ def restore(*, request, offering_id, chair_id, hours, reason, syllabus_id=""):
         request=request,
         context_for=syllabus_context,
     )
-    after_graph = graph({"registrar.CourseOffering": [course.pk]}, organization_id=actor.organization.pk)
+    after_graph = _journal_graph(course, actor)
     if syllabus["share_id"]:
         after_graph["syllabus.SyllabusShare"] = [
             item for item in after_graph.get("syllabus.SyllabusShare", []) if item["id"] != syllabus["share_id"]

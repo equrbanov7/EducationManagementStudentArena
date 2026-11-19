@@ -120665,3 +120665,12 @@ msgstr "Student's current group"
 msgctxt "registrar.exam_score_entry"
 msgid "%(group)s ilə birgə"
 msgstr "joint with %(group)s"
+
+msgctxt "workload.history_restore"
+msgid "Cəmi"
+msgstr "Total"
+
+msgctxt "workload.history_restore"
+msgid "Yük bərpa olunur — bu bir az çəkə bilər, səhifəni bağlamayın."
+msgstr ""
+"Restoring the load — this may take a moment, please keep the page open."

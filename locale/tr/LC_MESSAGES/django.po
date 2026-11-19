@@ -119832,3 +119832,11 @@ msgstr "Öğrencinin mevcut grubu"
 msgctxt "registrar.exam_score_entry"
 msgid "%(group)s ilə birgə"
 msgstr "%(group)s ile ortak"
+
+msgctxt "workload.history_restore"
+msgid "Cəmi"
+msgstr "Toplam"
+
+msgctxt "workload.history_restore"
+msgid "Yük bərpa olunur — bu bir az çəkə bilər, səhifəni bağlamayın."
+msgstr "Yük geri yükleniyor — bu biraz sürebilir, sayfayı kapatmayın."
