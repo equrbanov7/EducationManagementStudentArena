@@ -624,3 +624,13 @@ class HistoryRestoreTest(TestCase):
                         assignments=[SimpleNamespace(activity=activity, teacher_id=teacher, hours=1)],
                     )
                 )
+
+
+class JournalGraphScopeTest(TestCase):
+    """2026-11-19: bərpanın inteqrallıq qrafı imtahan/lab/tapşırıq cədvəllərinə enmir (FOR UPDATE toqquşması → 504)."""
+
+    def test_restore_graph_apps_exclude_exam_tables(self):
+        from apps.workload.services.history_restore import JOURNAL_GRAPH_APPS
+
+        self.assertEqual(JOURNAL_GRAPH_APPS, {"registrar", "syllabus", "workload"})
+        self.assertNotIn("exams", JOURNAL_GRAPH_APPS)
