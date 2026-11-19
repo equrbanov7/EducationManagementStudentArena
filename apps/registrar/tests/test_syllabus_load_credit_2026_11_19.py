@@ -56,3 +56,25 @@ class SyllabusLoadCreditTest(MidtermPeriodFixture, TestCase):
             TeachingTaskRow.objects.filter(pk=other.pk).delete()
             TeachingTask.objects.filter(pk=row.task_id).update(status="cancelled")
         self.assertEqual(self._credit(), 5)
+
+    def test_plan_row_without_credit_falls_to_load_and_explicit_plan_credit_wins(self):
+        from unittest import mock
+
+        from apps.registrar.models import Curriculum, CurriculumSubject, PlanStatus, Program
+
+        with bypass_rls():
+            row = seed_current_journal_load(self.offering)
+            TeachingTaskRow.objects.filter(pk=row.pk).update(credits_value=3)
+            program = Program.objects.create(organization=self.org, code="SLCP", name="Plan ixtisası")
+            plan = Curriculum.objects.create(
+                organization=self.org, program=program, admission_year=2024, name="plan", status=PlanStatus.APPROVED
+            )
+            plan_row = CurriculumSubject.objects.create(
+                organization=self.org, curriculum=plan, subject=self.offering.subject, semester_number=1, credits=0
+            )
+        with mock.patch("apps.registrar.plan_hours.program_for_offering", return_value=program):
+            # MR-562: planda fənn var, amma kreditsizdir → dərs yükü (3), kataloq (5) yox.
+            self.assertEqual(self._credit(), 3)
+            with bypass_rls():
+                CurriculumSubject.objects.filter(pk=plan_row.pk).update(credits=4)
+            self.assertEqual(self._credit(), 4)  # planın açıq krediti üstündür

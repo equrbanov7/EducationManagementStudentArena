@@ -309,7 +309,11 @@ def _plan_credit(offering):
         return None
     cohort = group_cohort_year(offering.group) if offering.group_id else None
     chosen = next((pk for pk, year in plans if cohort and int(year) == int(cohort)), plans[0][0])
-    return credit_for_offering_and_curriculum(offering, chosen)
+    # Plan sətrinin ÖZ krediti (> 0); sətir kreditsizdirsə ``None`` — çağıran dərs yükünə / kataloqa düşür
+    # (MR-562, 2026-11-19: 935 BM / 135 T / 435 R planında fənn kreditsiz idi → kataloq 5, yükdə 3).
+    resolver = resolver_for_curriculum(chosen, {offering.subject_id})
+    credit = resolver.curriculum_credit(chosen, offering.subject_id, period=_period_ref(offering), catalogue=0)
+    return credit or None
 
 
 def plan_credit_for_offering(offering) -> int:
