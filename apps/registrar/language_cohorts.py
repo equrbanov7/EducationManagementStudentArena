@@ -15,7 +15,7 @@ from . import guest_roster
 from .integrity import is_authorized_instructor, validate_same_organization
 from .journal_access import can_edit_journal
 from .journal_shares import journal_scope
-from .language_levels import level_family, level_of
+from .language_levels import LEVEL_RE, level_family, level_of
 from .models import CourseOffering, LanguageLevelCohort
 
 #: Tyutorun «qrup dövrəsi» (sahib 2026-11-19) — bax ``apps/organizations/permissions_tutor_circle.py``.
@@ -42,9 +42,45 @@ def department_choices(user, organization):
         return units.order_by("name", "id")
     allowed = scope.unit_subtree_q() if scope.has_structure_access else Q(pk__in=[])
     if level_chairs:
-        # Tyutor (sahib 2026-11-19): öz tələbələri üçün DİL kafedrasında qrup açır — artıq səviyyə qrupu olan kafedra.
-        allowed |= Q(pk__in=LanguageLevelCohort.objects.filter(organization=organization).values("department_id"))
+        # Tyutor (sahib 2026-11-19): öz tələbələri üçün DİL kafedrasında qrup açır — cari semestrin səviyyə
+        # jurnallarını RƏSMİ aparan kafedra (dərs yükü sətri / fənnin kafedrası; ehtimal yox, fail-closed).
+        allowed |= Q(pk__in=sorted(level_teaching_chair_ids(organization)))
     return units.filter(allowed).order_by("name", "id")
+
+
+def level_teaching_chair_ids(organization) -> set:
+    """Cari semestrin (kohort olmayan) səviyyə jurnallarını rəsmi aparan kafedraların id-ləri.
+
+    ``offering_chairs.official_offering_chairs``: yalnız dəqiq dərs yükü sətri və ya ``Subject.chair_unit`` —
+    müəllimin ştatı / tələbənin fakültəsi sayılmır. Başqa fakültənin adi kafedrası (orada bir dəfə kohort açılsa
+    belə) bu siyahıya DÜŞMÜR (review 2026-11-19).
+    """
+    from .models import Subject
+    from .offering_chairs import official_offering_chairs
+
+    subjects = Subject.objects.filter(organization=organization, is_active=True, name__iregex=LEVEL_RE.pattern)
+    subject_ids = [pk for pk, name in subjects.values_list("pk", "name") if level_of(name)]
+    if not subject_ids:
+        return set()
+    offerings = CourseOffering.objects.filter(
+        organization=organization,
+        is_active=True,
+        period__is_current=True,
+        period__is_active=True,
+        subject_id__in=subject_ids,
+        language_cohort__isnull=True,
+    )
+    found = set()
+    for chairs in official_offering_chairs(offerings, organization.pk).values():
+        found |= set(chairs)
+    return found
+
+
+def creator_only_access(user, cohort) -> bool:
+    """Aktor kohorta YALNIZ yaradıcı yolu ilə çatır (kafedra əhatəsində deyil) — siyahı öz əhatəsi ilə süzülür."""
+    if guest_roster.unit_in_scope(user, cohort.organization, cohort.department_id):
+        return False
+    return manages_by_creation(user, cohort)
 
 
 def _level_cohort_access(user, organization) -> bool:

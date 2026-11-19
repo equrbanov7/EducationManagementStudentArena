@@ -25,7 +25,14 @@ from apps.organizations.permissions_tutor_circle import TUTOR_CIRCLE_GRANTS
 from apps.registrar import guest_roster, handover, handover_actions, lab_groups_manage, lab_groups_section
 from apps.registrar import language_cohort_placement as placement
 from apps.registrar import language_cohorts
-from apps.registrar.models import Enrollment, LabGroup, LanguageLevelCohort, StudentAcademicRecord, Subject
+from apps.registrar.models import (
+    CourseOffering,
+    Enrollment,
+    LabGroup,
+    LanguageLevelCohort,
+    StudentAcademicRecord,
+    Subject,
+)
 from apps.registrar.tests.subgroup_base import SubgroupFixture
 from core.constants import OrgUnitType
 from core.rls import bypass_rls
@@ -53,8 +60,20 @@ class TutorCircleBase(SubgroupFixture, TestCase):
                 unit_type=OrgUnitType.CHAIR,
                 parent=cls.far_faculty,
             )
+            # Dil kafedrası səviyyə fənnini RƏSMİ aparır (fənnin kafedrası) və cari semestrdə adi səviyyə jurnalı var.
             cls.level_subject = Subject.objects.create(
-                organization=cls.org, code="TGCLVL", name="Xarici dil-1 (Intermediate)"
+                organization=cls.org, code="TGCLVL", name="Xarici dil-1 (Intermediate)", chair_unit=cls.lang_chair
+            )
+            CourseOffering.objects.create(
+                organization=cls.org, subject=cls.level_subject, period=cls.period, group=cls.far_group
+            )
+            # Kənar fakültənin ADİ kafedrası — orada kohort açılsa da tyutora dil kafedrası kimi təklif olunmur.
+            cls.far_chair = OrgUnit.objects.create(
+                organization=cls.org,
+                name="Uzaq kafedra",
+                slug="tgc-far-ch",
+                unit_type=OrgUnitType.CHAIR,
+                parent=cls.far_faculty,
             )
             for user in (cls.tutor, cls.far_tutor, cls.rim, cls.teacher, cls.new_teacher, cls.host, cls.student):
                 user.profile.organization = cls.org
@@ -290,11 +309,41 @@ class LevelCohortTest(TutorCircleBase):
             self.assertEqual(Enrollment.objects.get(pk=own.pk).status, Enrollment.Status.DROPPED)
             self.assertEqual(Enrollment.objects.get(pk=far.pk).status, Enrollment.Status.ENROLLED)
 
-    def test_language_chair_without_cohorts_is_not_offered_and_other_tutor_has_no_access(self):
+    def test_other_faculty_ordinary_chair_is_not_offered_even_with_a_cohort(self):
+        self.create(self.rim, self.far_chair, "Uzaq kafedranın qrupu")
         with bypass_rls():
-            self.assertFalse(
-                language_cohorts.department_choices(self.tutor, self.org).filter(pk=self.lang_chair.pk).exists()
-            )
+            choices = language_cohorts.department_choices(self.tutor, self.org)
+            self.assertFalse(choices.filter(pk=self.far_chair.pk).exists())
+            self.assertTrue(choices.filter(pk=self.lang_chair.pk).exists())
+            with self.assertRaises(PermissionDenied):
+                language_cohorts.create_cohort(
+                    organization=self.org,
+                    actor=self.tutor,
+                    department=self.far_chair,
+                    period=self.period,
+                    subject=self.level_subject,
+                    instructor=self.teacher,
+                    name="Kənar kafedrada",
+                    lecture_hours=0,
+                    seminar_hours=30,
+                    lab_hours=0,
+                    confirm_separate=True,
+                )
+
+    def test_creator_sees_only_own_faculty_students_on_the_detail_page(self):
+        cohort = self.create(self.tutor, self.lang_chair, "Tyutorun B1 qrupu")
+        self.place(cohort, self.host, self.tutor)
+        self.place(cohort, self.far_student, self.rim)
+        with bypass_rls():
+            response = self.client_for(self.tutor).get(reverse("registrar:language_cohort_detail", args=[cohort.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([row["enrollment"].student_id for row in response.context["rows"]], [self.host.pk])
+        self.assertEqual({event.student_id for event in response.context["events"]}, {self.host.pk})
+        with bypass_rls():
+            full = self.client_for(self.rim).get(reverse("registrar:language_cohort_detail", args=[cohort.pk]))
+        self.assertEqual(len(full.context["rows"]), 2)
+
+    def test_other_tutor_has_no_access(self):
         cohort = self.create(self.tutor, self.chair, "Öz kafedrasında")
         with bypass_rls():
             self.assertFalse(language_cohorts.can_manage_as_staff(self.far_tutor, cohort))
