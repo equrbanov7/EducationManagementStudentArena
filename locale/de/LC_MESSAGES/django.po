@@ -122204,3 +122204,13 @@ msgstr "Aktuelle Gruppe des Studierenden"
 msgctxt "registrar.exam_score_entry"
 msgid "%(group)s ilə birgə"
 msgstr "gemeinsam mit %(group)s"
+
+msgctxt "organizations.permission.label"
+msgid "Öz qruplarının jurnallarında lab qruplarını idarə etmək"
+msgstr "Laborgruppen in den Journalen der eigenen Gruppen verwalten"
+
+msgctxt "organizations.permission.label"
+msgid "Dil kafedrasında xarici dil səviyyə qrupu açmaq (öz tələbələri üçün)"
+msgstr ""
+"Fremdsprachen-Niveaugruppe am Sprachlehrstuhl eröffnen (für eigene "
+"Studierende)"

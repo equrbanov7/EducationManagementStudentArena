@@ -120665,3 +120665,13 @@ msgstr "Student's current group"
 msgctxt "registrar.exam_score_entry"
 msgid "%(group)s ilə birgə"
 msgstr "joint with %(group)s"
+
+msgctxt "organizations.permission.label"
+msgid "Öz qruplarının jurnallarında lab qruplarını idarə etmək"
+msgstr "Manage lab groups in journals of own groups"
+
+msgctxt "organizations.permission.label"
+msgid "Dil kafedrasında xarici dil səviyyə qrupu açmaq (öz tələbələri üçün)"
+msgstr ""
+"Open a foreign-language level group at a language department (for own "
+"students)"
