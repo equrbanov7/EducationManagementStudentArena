@@ -132,6 +132,21 @@ ENTRIES = {
                 "Wählen Sie unter jeder Gruppe Lehrkraft und Stunden. Ist eine Gruppe in Untergruppen (Lab-1 / Lab-2) geteilt, geben Sie mit „Lehrkraft hinzufügen“ jeder Untergruppe eine eigene Lehrkraft. Die verteilten Stunden dürfen den Plan der Gruppe nicht überschreiten — die Gruppe ist fertig, wenn „nicht verteilt“ 0 ist.",
             ),
         },
+        "subject_folder.ui": {
+            "Tam baxış (yalnız oxu)": t(
+                "Full view (read-only)",
+                "Полный просмотр (только чтение)",
+                "Tam görünüm (salt okunur)",
+                "Vollansicht (nur Lesen)",
+            ),
+            "dərc edilməyib": t("not published", "не опубликовано", "yayımlanmamış", "nicht veröffentlicht"),
+            "göndərən: %(n)s tələbə": t(
+                "submitted by: %(n)s students",
+                "отправили: %(n)s студентов",
+                "gönderen: %(n)s öğrenci",
+                "eingereicht von: %(n)s Studierenden",
+            ),
+        },
     },
     "djangojs": {
         "": {

@@ -120493,3 +120493,104 @@ msgstr "Search people"
 msgctxt "registrar.exam_score_entry"
 msgid "Alt qrup"
 msgstr "Subgroup"
+
+msgctxt "accounts.workload"
+msgid "Bölgü necə işləyir?"
+msgstr "How does the distribution work?"
+
+msgctxt "accounts.workload"
+msgid "Mühazirə."
+msgstr "Lecture."
+
+msgctxt "accounts.workload"
+msgid "Mühazirəni birlikdə dinləyən qruplar bir «axın»dır (patok). «Patok qur» / «Axınları dəyiş» ilə qrupları axınlara yığın və hər axının mühazirəçisini seçin. Bir axının saatı müəllimin yükünə 1 dəfə yazılır, jurnal isə hər qrupda açılır."
+msgstr "Groups that attend the lecture together form one “stream”. Use “Create stream” / “Change streams” to put the groups into streams and choose a lecturer for each stream. A stream's hours count towards the teacher's load once, while a journal is opened for every group."
+
+msgctxt "accounts.workload"
+msgid "Seminar və laboratoriya."
+msgstr "Seminar and laboratory."
+
+msgctxt "accounts.workload"
+msgid "Hər qrup ayrıca keçir. «Bölüşdür» ilə hər qrupa müəllim və saat verin; qrup Lab-1 / Lab-2 kimi alt qruplara bölünübsə, hər alt qrupa öz müəllimini seçin."
+msgstr "Each group is taught separately. Use “Distribute” to give every group a teacher and hours; if a group is split into subgroups such as Lab-1 / Lab-2, choose a teacher for each subgroup."
+
+msgctxt "accounts.workload"
+msgid "Saatı və ya qrupu dəyişmək."
+msgstr "Changing hours or groups."
+
+msgctxt "accounts.workload"
+msgid "Kartın altındakı «Tapşırıq sətirləri» → «Redaktə». Eyni fənnin digər qruplarından fərqlənən saat kartda «saatı yoxlayın» nişanı ilə göstərilir."
+msgstr "“Assignment rows” at the bottom of the card → “Edit”. Hours that differ from the other groups of the same subject are marked “check the hours” on the card."
+
+msgctxt "accounts.workload"
+msgid "tam bölünüb"
+msgstr "fully distributed"
+
+msgctxt "accounts.workload"
+msgid "vakant və ya bölünməyib"
+msgstr "vacant or not distributed"
+
+msgctxt "accounts.workload"
+msgid "müəllim təyin olunmayıb"
+msgstr "no teacher assigned"
+
+msgctxt "accounts.workload"
+msgid "Uyğun müəllim tapılmadı."
+msgstr "No matching teacher found."
+
+msgctxt "accounts.workload"
+msgid "Axın nədir?"
+msgstr "What is a stream?"
+
+msgctxt "accounts.workload"
+msgid "Axın (patok) — mühazirəni eyni vaxtda BİRLİKDƏ dinləyən qruplardır. Ayrıca keçən qrup öz axınında tək qalır."
+msgstr "A stream is a set of groups that attend the lecture TOGETHER at the same time. A group taught separately stays alone in its own stream."
+
+msgctxt "accounts.workload"
+msgid "Bir axının mühazirə saatı müəllimin yükünə BİR dəfə yazılır; jurnal isə hər qrupda ayrıca açılır və mühazirə hər birində görünür."
+msgstr "A stream's lecture hours count towards the teacher's load ONCE; a separate journal is opened for every group and the lecture appears in each of them."
+
+msgctxt "accounts.workload"
+msgid "Bir tapşırıq sətrinin qrupları birlikdə hərəkət edir — onları ayırmaq üçün əvvəlcə sətri «Redaktə» ilə bölün."
+msgstr "The groups of one assignment row move together — to separate them, first split the row with “Edit”."
+
+msgctxt "accounts.workload"
+msgid "«Alt qrup» sütunu boşdursa qrup hələ Lab-1 / Lab-2-yə bölünməyib. Alt qruplar «Lab qrupları» bölməsində yaradılır; sonra burada hər alt qrupa öz müəllimini seçin."
+msgstr "If the “Subgroup” column is empty, the group has not been split into Lab-1 / Lab-2 yet. Subgroups are created in the “Lab groups” section; then choose a teacher for each subgroup here."
+
+msgctxt "accounts.workload"
+msgid "1. Hər qrupu bir axına salın"
+msgstr "1. Put each group into a stream"
+
+msgctxt "accounts.workload"
+msgid "Hamısı bir axında"
+msgstr "All in one stream"
+
+msgctxt "accounts.workload"
+msgid "Hər qrup ayrıca"
+msgstr "Each group separately"
+
+msgctxt "accounts.workload"
+msgid "2. Hər axının mühazirəçisini seçin"
+msgstr "2. Choose a lecturer for each stream"
+
+msgctxt "accounts.workload"
+msgid "Hər qrupun altında müəllimi və saatı seçin. Qrup alt qruplara (Lab-1 / Lab-2) bölünübsə «Müəllim əlavə et» ilə hər alt qrupa ayrıca müəllim verin. Bölünən saat qrupun planından çox ola bilməz — «bölünməyib» 0 olanda qrup hazırdır."
+msgstr "Choose the teacher and hours under each group. If a group is split into subgroups (Lab-1 / Lab-2), use “Add teacher” to give each subgroup its own teacher. Distributed hours cannot exceed the group's plan — the group is done when “not distributed” is 0."
+
+msgctxt "registrar.journal"
+msgid "cədvəl üzrə"
+msgstr "per timetable"
+
+msgctxt "subject_folder.ui"
+msgid "Tam baxış (yalnız oxu)"
+msgstr "Full view (read-only)"
+
+msgctxt "subject_folder.ui"
+msgid "dərc edilməyib"
+msgstr "not published"
+
+#, python-format
+msgctxt "subject_folder.ui"
+msgid "göndərən: %(n)s tələbə"
+msgstr "submitted by: %(n)s students"

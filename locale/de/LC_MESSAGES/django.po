@@ -122031,3 +122031,104 @@ msgstr "Personen suchen"
 msgctxt "registrar.exam_score_entry"
 msgid "Alt qrup"
 msgstr "Untergruppe"
+
+msgctxt "accounts.workload"
+msgid "Bölgü necə işləyir?"
+msgstr "Wie funktioniert die Verteilung?"
+
+msgctxt "accounts.workload"
+msgid "Mühazirə."
+msgstr "Vorlesung."
+
+msgctxt "accounts.workload"
+msgid "Mühazirəni birlikdə dinləyən qruplar bir «axın»dır (patok). «Patok qur» / «Axınları dəyiş» ilə qrupları axınlara yığın və hər axının mühazirəçisini seçin. Bir axının saatı müəllimin yükünə 1 dəfə yazılır, jurnal isə hər qrupda açılır."
+msgstr "Gruppen, die die Vorlesung gemeinsam hören, bilden einen „Strom“. Ordnen Sie die Gruppen mit „Strom bilden“ / „Ströme ändern“ den Strömen zu und wählen Sie für jeden Strom einen Dozenten. Die Stunden eines Stroms zählen einmal zur Lehrlast, das Journal wird für jede Gruppe geöffnet."
+
+msgctxt "accounts.workload"
+msgid "Seminar və laboratoriya."
+msgstr "Seminar und Labor."
+
+msgctxt "accounts.workload"
+msgid "Hər qrup ayrıca keçir. «Bölüşdür» ilə hər qrupa müəllim və saat verin; qrup Lab-1 / Lab-2 kimi alt qruplara bölünübsə, hər alt qrupa öz müəllimini seçin."
+msgstr "Jede Gruppe wird getrennt unterrichtet. Weisen Sie mit „Verteilen“ jeder Gruppe Lehrkraft und Stunden zu; ist eine Gruppe in Untergruppen (Lab-1 / Lab-2) geteilt, wählen Sie für jede Untergruppe eine Lehrkraft."
+
+msgctxt "accounts.workload"
+msgid "Saatı və ya qrupu dəyişmək."
+msgstr "Stunden oder Gruppen ändern."
+
+msgctxt "accounts.workload"
+msgid "Kartın altındakı «Tapşırıq sətirləri» → «Redaktə». Eyni fənnin digər qruplarından fərqlənən saat kartda «saatı yoxlayın» nişanı ilə göstərilir."
+msgstr "„Auftragszeilen“ unten auf der Karte → „Bearbeiten“. Stunden, die von den anderen Gruppen desselben Fachs abweichen, werden auf der Karte mit „Stunden prüfen“ markiert."
+
+msgctxt "accounts.workload"
+msgid "tam bölünüb"
+msgstr "vollständig verteilt"
+
+msgctxt "accounts.workload"
+msgid "vakant və ya bölünməyib"
+msgstr "unbesetzt oder nicht verteilt"
+
+msgctxt "accounts.workload"
+msgid "müəllim təyin olunmayıb"
+msgstr "keine Lehrkraft zugewiesen"
+
+msgctxt "accounts.workload"
+msgid "Uyğun müəllim tapılmadı."
+msgstr "Keine passende Lehrkraft gefunden."
+
+msgctxt "accounts.workload"
+msgid "Axın nədir?"
+msgstr "Was ist ein Strom?"
+
+msgctxt "accounts.workload"
+msgid "Axın (patok) — mühazirəni eyni vaxtda BİRLİKDƏ dinləyən qruplardır. Ayrıca keçən qrup öz axınında tək qalır."
+msgstr "Ein Strom sind Gruppen, die die Vorlesung zur selben Zeit GEMEINSAM hören. Eine getrennt unterrichtete Gruppe bleibt allein in ihrem Strom."
+
+msgctxt "accounts.workload"
+msgid "Bir axının mühazirə saatı müəllimin yükünə BİR dəfə yazılır; jurnal isə hər qrupda ayrıca açılır və mühazirə hər birində görünür."
+msgstr "Die Vorlesungsstunden eines Stroms zählen EINMAL zur Lehrlast; das Journal wird für jede Gruppe separat geöffnet und die Vorlesung erscheint in jedem."
+
+msgctxt "accounts.workload"
+msgid "Bir tapşırıq sətrinin qrupları birlikdə hərəkət edir — onları ayırmaq üçün əvvəlcə sətri «Redaktə» ilə bölün."
+msgstr "Die Gruppen einer Auftragszeile bewegen sich gemeinsam — um sie zu trennen, teilen Sie die Zeile zuerst über „Bearbeiten“."
+
+msgctxt "accounts.workload"
+msgid "«Alt qrup» sütunu boşdursa qrup hələ Lab-1 / Lab-2-yə bölünməyib. Alt qruplar «Lab qrupları» bölməsində yaradılır; sonra burada hər alt qrupa öz müəllimini seçin."
+msgstr "Ist die Spalte „Untergruppe“ leer, wurde die Gruppe noch nicht in Lab-1 / Lab-2 geteilt. Untergruppen werden im Bereich „Laborgruppen“ angelegt; wählen Sie danach hier für jede Untergruppe eine Lehrkraft."
+
+msgctxt "accounts.workload"
+msgid "1. Hər qrupu bir axına salın"
+msgstr "1. Ordnen Sie jede Gruppe einem Strom zu"
+
+msgctxt "accounts.workload"
+msgid "Hamısı bir axında"
+msgstr "Alle in einem Strom"
+
+msgctxt "accounts.workload"
+msgid "Hər qrup ayrıca"
+msgstr "Jede Gruppe getrennt"
+
+msgctxt "accounts.workload"
+msgid "2. Hər axının mühazirəçisini seçin"
+msgstr "2. Wählen Sie für jeden Strom einen Dozenten"
+
+msgctxt "accounts.workload"
+msgid "Hər qrupun altında müəllimi və saatı seçin. Qrup alt qruplara (Lab-1 / Lab-2) bölünübsə «Müəllim əlavə et» ilə hər alt qrupa ayrıca müəllim verin. Bölünən saat qrupun planından çox ola bilməz — «bölünməyib» 0 olanda qrup hazırdır."
+msgstr "Wählen Sie unter jeder Gruppe Lehrkraft und Stunden. Ist eine Gruppe in Untergruppen (Lab-1 / Lab-2) geteilt, geben Sie mit „Lehrkraft hinzufügen“ jeder Untergruppe eine eigene Lehrkraft. Die verteilten Stunden dürfen den Plan der Gruppe nicht überschreiten — die Gruppe ist fertig, wenn „nicht verteilt“ 0 ist."
+
+msgctxt "registrar.journal"
+msgid "cədvəl üzrə"
+msgstr "laut Stundenplan"
+
+msgctxt "subject_folder.ui"
+msgid "Tam baxış (yalnız oxu)"
+msgstr "Vollansicht (nur Lesen)"
+
+msgctxt "subject_folder.ui"
+msgid "dərc edilməyib"
+msgstr "nicht veröffentlicht"
+
+#, python-format
+msgctxt "subject_folder.ui"
+msgid "göndərən: %(n)s tələbə"
+msgstr "eingereicht von: %(n)s Studierenden"

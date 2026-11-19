@@ -3423,3 +3423,132 @@ msgstr "In %(count)s row(s) %(hours)s hours are not assigned to a teacher:"
 
 msgid "«Vakant» saxlanıldı: %(hours)s saat (%(rows)s sətir)."
 msgstr "Kept “Vacant”: %(hours)s hours (%(rows)s rows)."
+
+msgid "Eyni fənnin digər qruplarında saat fərqlidir. Səhvdirsə «Tapşırıq sətirləri» → «Redaktə» ilə düzəldin."
+msgstr "The hours differ from the other groups of the same subject. If this is a mistake, fix it via “Assignment rows” → “Edit”."
+
+#, javascript-format
+msgid "digər qruplarda %(hours)s — saatı yoxlayın"
+msgstr "other groups have %(hours)s — check the hours"
+
+msgid "Bu sətrin qrupları mühazirəni bir neçə axında keçir, amma sətir qruplara ayrılmayıb."
+msgstr "The groups of this row attend the lecture in several streams, but the row is not split by group."
+
+#, javascript-format
+msgid "%(n)s axın bir sətirdə"
+msgstr "%(n)s streams in one row"
+
+msgid "Axının mühazirəçisi başqa kartdadır"
+msgstr "The stream's lecturer is on another card"
+
+msgid "Axına bağlanmayıb — mühazirə heç kimin yükünə düşmür"
+msgstr "Not linked to a stream — the lecture counts towards nobody's load"
+
+msgid "Bu qruplar mühazirəni birlikdə dinləyir: saat müəllimin yükünə 1 dəfə yazılır, jurnal hər qrupda açılır."
+msgstr "These groups attend the lecture together: the hours count towards the teacher's load once, and a journal is opened for every group."
+
+#, javascript-format
+msgid "%(n)s qrup birlikdə"
+msgstr "%(n)s groups together"
+
+msgid "tək qrup"
+msgstr "single group"
+
+#, javascript-format
+msgid "%(n)s axın · müəllim yükünə cəmi %(hours)s"
+msgstr "%(n)s streams · %(hours)s towards teacher load in total"
+
+msgid "Hansı qrupların mühazirəni birlikdə dinlədiyini (patok) və mühazirəçini seçin."
+msgstr "Choose which groups attend the lecture together and who the lecturer is."
+
+msgid "Patok qur"
+msgstr "Create stream"
+
+#, javascript-format
+msgid "%(n)s qrup ayrıca keçir · müəllim yükünə cəmi %(hours)s"
+msgstr "%(n)s groups taught separately · %(hours)s towards teacher load in total"
+
+msgid "Mühazirəçi seç"
+msgstr "Choose lecturer"
+
+msgid "Axın (patok) — mühazirəni birlikdə dinləyən qruplar. Bir axının saatı müəllimin yükünə 1 dəfə yazılır, jurnal isə hər qrupda açılır."
+msgstr "A stream is a set of groups that attend the lecture together. A stream's hours count towards the teacher's load once, while a journal is opened for every group."
+
+#, javascript-format
+msgid "Bölünməyib: %(hours)s"
+msgstr "Not distributed: %(hours)s"
+
+msgid "Bu qruplar məşğələni birlikdə keçir — saat müəllimin yükünə 1 dəfə yazılır."
+msgstr "These groups have the class together — the hours count towards the teacher's load once."
+
+msgid "Qruplar birlikdə keçir"
+msgstr "Groups taught together"
+
+msgid "Saat bütün sətrə yazılıb. Hər qrupa ayrıca müəllim vermək üçün «Bölüşdür» düyməsinə basın."
+msgstr "The hours are recorded for the whole row. To give each group its own teacher, press “Distribute”."
+
+msgid "Qruplara ayrılmayıb"
+msgstr "Not split by group"
+
+msgid "Ümumi bölgüyə daxildir"
+msgstr "Included in the shared assignment"
+
+msgid "Birgə keçilir"
+msgstr "Taught jointly"
+
+msgid "Müəllim təyin olunmayıb"
+msgstr "No teacher assigned"
+
+#, javascript-format
+msgid "cəmi %(total)s · bölünüb %(assigned)s"
+msgstr "%(total)s in total · %(assigned)s distributed"
+
+msgid "Hər qrupa müəllim və saat verin; qrupu Lab-1 / Lab-2 kimi alt qruplara da bölə bilərsiniz."
+msgstr "Give each group a teacher and hours; you can also split a group into subgroups such as Lab-1 / Lab-2."
+
+msgid "Qrup"
+msgstr "Group"
+
+msgid "Plan saatı"
+msgstr "Planned hours"
+
+msgid "Müəllim və saat"
+msgstr "Teacher and hours"
+
+msgid "Saat bölünüb, amma müəllim hələ təyin edilməyib (vakant)."
+msgstr "The hours are distributed, but no teacher is assigned yet (vacant)."
+
+#, javascript-format
+msgid "Vakant: %(hours)s"
+msgstr "Vacant: %(hours)s"
+
+msgid "Tam bölünüb"
+msgstr "Fully distributed"
+
+msgid "Natamam"
+msgstr "Incomplete"
+
+msgid "Bu fəndə heç bir axına bağlanmamış mühazirə sətri var — «Axınları dəyiş» ilə qrupları axına salın."
+msgstr "This subject has a lecture row that is not linked to any stream — use “Change streams” to put the groups into a stream."
+
+msgid "birlikdə dinləyir"
+msgstr "attend together"
+
+#, javascript-format
+msgid "Yekun: %(n)s axın · müəllimlərin yükünə cəmi %(load)s (axınlar birləşdirilməsəydi %(separate)s olardı)."
+msgstr "Result: %(n)s streams · %(load)s towards teacher load in total (without merging the streams it would be %(separate)s)."
+
+#, javascript-format
+msgid "Yekun: %(n)s axın · müəllimlərin yükünə cəmi %(load)s."
+msgstr "Result: %(n)s streams · %(load)s towards teacher load in total."
+
+#, javascript-format
+msgid "artıq bölünüb: %(hours)s"
+msgstr "over-distributed: %(hours)s"
+
+#, javascript-format
+msgid "bölünməyib: %(hours)s"
+msgstr "not distributed: %(hours)s"
+
+msgid "Bu saat qruplara ayrılmadan bütün sətrə yazılıb. Hər qrupa ayrıca müəllim vermək üçün buradakı müəllimi silin və yuxarıdakı qrupların altında «Müəllim əlavə et» düyməsinə basın."
+msgstr "These hours are recorded for the whole row without splitting by group. To give each group its own teacher, remove the teacher here and press “Add teacher” under the groups above."

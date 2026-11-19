@@ -3481,3 +3481,132 @@ msgstr "In %(count)s Zeile(n) sind %(hours)s Std. keiner Lehrkraft zugeteilt:"
 
 msgid "«Vakant» saxlanıldı: %(hours)s saat (%(rows)s sətir)."
 msgstr "„Unbesetzt“ belassen: %(hours)s Std. (%(rows)s Zeilen)."
+
+msgid "Eyni fənnin digər qruplarında saat fərqlidir. Səhvdirsə «Tapşırıq sətirləri» → «Redaktə» ilə düzəldin."
+msgstr "Die Stunden weichen von den anderen Gruppen desselben Fachs ab. Falls das ein Fehler ist, korrigieren Sie ihn über „Auftragszeilen“ → „Bearbeiten“."
+
+#, javascript-format
+msgid "digər qruplarda %(hours)s — saatı yoxlayın"
+msgstr "andere Gruppen haben %(hours)s — Stunden prüfen"
+
+msgid "Bu sətrin qrupları mühazirəni bir neçə axında keçir, amma sətir qruplara ayrılmayıb."
+msgstr "Die Gruppen dieser Zeile hören die Vorlesung in mehreren Strömen, die Zeile ist aber nicht nach Gruppen aufgeteilt."
+
+#, javascript-format
+msgid "%(n)s axın bir sətirdə"
+msgstr "%(n)s Ströme in einer Zeile"
+
+msgid "Axının mühazirəçisi başqa kartdadır"
+msgstr "Der Dozent des Stroms steht auf einer anderen Karte"
+
+msgid "Axına bağlanmayıb — mühazirə heç kimin yükünə düşmür"
+msgstr "Keinem Strom zugeordnet — die Vorlesung zählt zu niemandes Lehrlast"
+
+msgid "Bu qruplar mühazirəni birlikdə dinləyir: saat müəllimin yükünə 1 dəfə yazılır, jurnal hər qrupda açılır."
+msgstr "Diese Gruppen hören die Vorlesung gemeinsam: Die Stunden zählen einmal zur Lehrlast, das Journal wird für jede Gruppe geöffnet."
+
+#, javascript-format
+msgid "%(n)s qrup birlikdə"
+msgstr "%(n)s Gruppen gemeinsam"
+
+msgid "tək qrup"
+msgstr "einzelne Gruppe"
+
+#, javascript-format
+msgid "%(n)s axın · müəllim yükünə cəmi %(hours)s"
+msgstr "%(n)s Ströme · insgesamt %(hours)s Lehrlast"
+
+msgid "Hansı qrupların mühazirəni birlikdə dinlədiyini (patok) və mühazirəçini seçin."
+msgstr "Wählen Sie, welche Gruppen die Vorlesung gemeinsam hören, und den Dozenten."
+
+msgid "Patok qur"
+msgstr "Strom bilden"
+
+#, javascript-format
+msgid "%(n)s qrup ayrıca keçir · müəllim yükünə cəmi %(hours)s"
+msgstr "%(n)s Gruppen getrennt · insgesamt %(hours)s Lehrlast"
+
+msgid "Mühazirəçi seç"
+msgstr "Dozenten wählen"
+
+msgid "Axın (patok) — mühazirəni birlikdə dinləyən qruplar. Bir axının saatı müəllimin yükünə 1 dəfə yazılır, jurnal isə hər qrupda açılır."
+msgstr "Strom — Gruppen, die die Vorlesung gemeinsam hören. Die Stunden eines Stroms zählen einmal zur Lehrlast, das Journal wird für jede Gruppe geöffnet."
+
+#, javascript-format
+msgid "Bölünməyib: %(hours)s"
+msgstr "Nicht verteilt: %(hours)s"
+
+msgid "Bu qruplar məşğələni birlikdə keçir — saat müəllimin yükünə 1 dəfə yazılır."
+msgstr "Diese Gruppen haben den Unterricht gemeinsam — die Stunden zählen einmal zur Lehrlast."
+
+msgid "Qruplar birlikdə keçir"
+msgstr "Gruppen gemeinsam"
+
+msgid "Saat bütün sətrə yazılıb. Hər qrupa ayrıca müəllim vermək üçün «Bölüşdür» düyməsinə basın."
+msgstr "Die Stunden sind für die ganze Zeile eingetragen. Um jeder Gruppe eine eigene Lehrkraft zu geben, klicken Sie auf „Verteilen“."
+
+msgid "Qruplara ayrılmayıb"
+msgstr "Nicht nach Gruppen aufgeteilt"
+
+msgid "Ümumi bölgüyə daxildir"
+msgstr "In der gemeinsamen Zuweisung enthalten"
+
+msgid "Birgə keçilir"
+msgstr "Gemeinsam unterrichtet"
+
+msgid "Müəllim təyin olunmayıb"
+msgstr "Keine Lehrkraft zugewiesen"
+
+#, javascript-format
+msgid "cəmi %(total)s · bölünüb %(assigned)s"
+msgstr "insgesamt %(total)s · verteilt %(assigned)s"
+
+msgid "Hər qrupa müəllim və saat verin; qrupu Lab-1 / Lab-2 kimi alt qruplara da bölə bilərsiniz."
+msgstr "Weisen Sie jeder Gruppe Lehrkraft und Stunden zu; eine Gruppe kann auch in Untergruppen (Lab-1 / Lab-2) geteilt werden."
+
+msgid "Qrup"
+msgstr "Gruppe"
+
+msgid "Plan saatı"
+msgstr "Planstunden"
+
+msgid "Müəllim və saat"
+msgstr "Lehrkraft und Stunden"
+
+msgid "Saat bölünüb, amma müəllim hələ təyin edilməyib (vakant)."
+msgstr "Die Stunden sind verteilt, aber noch keiner Lehrkraft zugewiesen (unbesetzt)."
+
+#, javascript-format
+msgid "Vakant: %(hours)s"
+msgstr "Unbesetzt: %(hours)s"
+
+msgid "Tam bölünüb"
+msgstr "Vollständig verteilt"
+
+msgid "Natamam"
+msgstr "Unvollständig"
+
+msgid "Bu fəndə heç bir axına bağlanmamış mühazirə sətri var — «Axınları dəyiş» ilə qrupları axına salın."
+msgstr "In diesem Fach gibt es eine Vorlesungszeile ohne Strom — ordnen Sie die Gruppen mit „Ströme ändern“ einem Strom zu."
+
+msgid "birlikdə dinləyir"
+msgstr "hören gemeinsam"
+
+#, javascript-format
+msgid "Yekun: %(n)s axın · müəllimlərin yükünə cəmi %(load)s (axınlar birləşdirilməsəydi %(separate)s olardı)."
+msgstr "Ergebnis: %(n)s Ströme · insgesamt %(load)s Lehrlast (ohne Zusammenlegung wären es %(separate)s)."
+
+#, javascript-format
+msgid "Yekun: %(n)s axın · müəllimlərin yükünə cəmi %(load)s."
+msgstr "Ergebnis: %(n)s Ströme · insgesamt %(load)s Lehrlast."
+
+#, javascript-format
+msgid "artıq bölünüb: %(hours)s"
+msgstr "zu viel verteilt: %(hours)s"
+
+#, javascript-format
+msgid "bölünməyib: %(hours)s"
+msgstr "nicht verteilt: %(hours)s"
+
+msgid "Bu saat qruplara ayrılmadan bütün sətrə yazılıb. Hər qrupa ayrıca müəllim vermək üçün buradakı müəllimi silin və yuxarıdakı qrupların altında «Müəllim əlavə et» düyməsinə basın."
+msgstr "Diese Stunden sind ohne Aufteilung nach Gruppen für die ganze Zeile eingetragen. Um jeder Gruppe eine eigene Lehrkraft zu geben, entfernen Sie die Lehrkraft hier und klicken Sie unter den Gruppen oben auf „Lehrkraft hinzufügen“."
