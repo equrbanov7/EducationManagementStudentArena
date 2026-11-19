@@ -120594,3 +120594,11 @@ msgstr "not published"
 msgctxt "subject_folder.ui"
 msgid "göndərən: %(n)s tələbə"
 msgstr "submitted by: %(n)s students"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya rejimi: «Yekun» ballar açıldı. Sənəd və qeyd istəyə bağlıdır."
+msgstr "Appeal mode: the “Final” scores are unlocked. The document and the note are optional."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya ilə dəyişiklik — sənəd (qərar / ərizə) və qeyd istəyə bağlıdır. Dəyişiklik «apellyasiya» kimi işarələnir: kim, köhnə → yeni bal, nə vaxt — tarixçədə görünür."
+msgstr "Change by appeal — the document (decision / application) and the note are optional. The change is marked as “appeal”: who, old → new score and when are shown in the history."

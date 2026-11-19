@@ -327,6 +327,13 @@ def appeal_head_only_error() -> ValidationError:
     )
 
 
+def appeal_document_required() -> bool:
+    """Apellyasiya balı yazılanda sənəd məcburidirmi — apellyasiya qərarı ilə EYNİ açar (defolt ``False``)."""
+    from core.runtime_settings_appeals import appeal_document_required as required
+
+    return required()
+
+
 def appeal_document_error() -> ValidationError:
     return ValidationError(pgettext(_CTX, "Apellyasiya ilə dəyişiklik üçün apellyasiya sənədi yüklənməlidir."))
 
@@ -337,15 +344,22 @@ def decide_after_window(
     """Yazılmış balın dəyişdirilməsi (cari dövr) → yazılacaq sətrin növü; qadağandırsa ``ValidationError``.
 
     * ``kind=appeal`` — APELLYASİYA: İmtahan Mərkəzinin rəhbəri və işçisi (sahib 2026-11-18) / RİM rəhbəri /
-      superadmin, sənəd (sətrin
-      və ya vərəqin faylı) MƏCBURİ;
+      superadmin; sənəd (sətrin
+      və ya vərəqin faylı) yalnız ``exam.appeal_document_required`` yandırılıbsa məcburidir (2026-11-19);
     * ``kind=correction`` — yalnız RİM rəhbəri / superadmin, tam təqdimatla (səbəb + qeyd + sənəd);
     * növ yoxdursa — daxil edənin öz pəncərəsi açıqdırsa ``window_edit`` (sənədsiz), yoxsa rədd.
     """
     if kind == ExamScoreEntryKind.APPEAL:
         if not rules.can_appeal:
             raise appeal_head_only_error()
-        if not evidence and not (sheet is not None and sheet.evidence) and not superadmin_waiver.waives(by_user):
+        # Sahib 2026-11-19 («sənəd yükləməyə ehtiyac olmasın, indilik opsional olsun»): sənəd yalnız «Sistem
+        # tənzimləmələri» → «Apellyasiya qərarında sənəd məcburidir» YANDIRILIBSA tələb olunur (defolt: söndürülü).
+        if (
+            appeal_document_required()
+            and not evidence
+            and not (sheet is not None and sheet.evidence)
+            and not superadmin_waiver.waives(by_user)
+        ):
             raise appeal_document_error()  # superadmin sənədsiz keçir (sahib 2026-10-27)
         return ExamScoreEntryKind.APPEAL
     if kind == ExamScoreEntryKind.CORRECTION:
@@ -364,6 +378,7 @@ __all__ = [
     "FINAL",
     "MIDTERM",
     "appeal_document_error",
+    "appeal_document_required",
     "appeal_head_only_error",
     "assert_assessment_allowed",
     "assert_midterm_single_column",

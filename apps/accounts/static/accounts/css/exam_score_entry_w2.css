@@ -284,6 +284,11 @@
     overflow: auto;
 }
 
+/* 2026-11-19: təqdimat / apellyasiya sənədi tələb olunanda cədvəl qısalır ki, fayl sahəsi sürüşdürmədən görünsün. */
+.ese-confirm__wrap:has(~ .ese-just:not([hidden])) .ese-confirm__scroll {
+    max-height: 22vh;
+}
+
 .ese-confirm__table th[scope="row"] {
     font-weight: 600;
 }
@@ -312,4 +317,10 @@
     .ese-meta__grid-pair {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+}
+
+/* Sənəd seçilmədən təsdiqə basılıb — fayl sahəsi qırmızı çərçivə ilə göstərilir (2026-11-19). */
+.ese-drop.is-required {
+    border-color: var(--ems-danger);
+    background: var(--ems-danger-bg);
 }

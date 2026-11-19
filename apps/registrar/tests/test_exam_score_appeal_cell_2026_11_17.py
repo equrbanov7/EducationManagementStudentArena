@@ -190,6 +190,7 @@ class ExamAppealCellTest(MidtermPeriodFixture, TestCase):
             self.assertEqual((same["written"], same["failed"]), (0, 0))  # köhnə forma/idxal: eyni bal səssiz
             self.assertEqual(self._final_score(), Decimal("38"))
 
+    @mock.patch("apps.registrar.exam_score_assessment.appeal_document_required", new=lambda: True)
     def test_appeal_cell_needs_appeal_role_and_document(self):
         with bypass_rls():
             self._save(self.center, [self._exam("30")])
@@ -204,6 +205,16 @@ class ExamAppealCellTest(MidtermPeriodFixture, TestCase):
             self.assertEqual(staff["written"], 1, staff)
             self.assertEqual(self._final_score(), Decimal("38"))
 
+    def test_appeal_cell_document_is_optional_by_default(self):
+        """Sahib 2026-11-19: «sənəd yükləməyə ehtiyac olmasın, indilik opsional olsun» — açar söndürülü (defolt)."""
+        with bypass_rls():
+            self._save(self.center, [self._exam("30")])
+            result = self._save(self.staff, [self._appeal("38")])
+            self.assertEqual((result["written"], result["failed"]), (1, 0), result)
+            self.assertEqual(self._final_score(), Decimal("38"))
+            self.assertTrue(ExamScoreEntry.objects.filter(kind=ExamScoreEntryKind.APPEAL).exists())
+
+    @mock.patch("apps.registrar.exam_score_assessment.appeal_document_required", new=lambda: True)
     def test_appeal_cell_on_student_without_exam_score(self):
         """Sahib 2026-11-18: imtahan balı yazılmamış tələbəyə də apellyasiya balı yazılır (sənəd yenə məcburi)."""
         second = self.enrollments[1]

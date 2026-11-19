@@ -119888,3 +119888,11 @@ msgstr "dərc edilməyib"
 msgctxt "subject_folder.ui"
 msgid "göndərən: %(n)s tələbə"
 msgstr "göndərən: %(n)s tələbə"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya rejimi: «Yekun» ballar açıldı. Sənəd və qeyd istəyə bağlıdır."
+msgstr "Apellyasiya rejimi: «Yekun» ballar açıldı. Sənəd və qeyd istəyə bağlıdır."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya ilə dəyişiklik — sənəd (qərar / ərizə) və qeyd istəyə bağlıdır. Dəyişiklik «apellyasiya» kimi işarələnir: kim, köhnə → yeni bal, nə vaxt — tarixçədə görünür."
+msgstr "Apellyasiya ilə dəyişiklik — sənəd (qərar / ərizə) və qeyd istəyə bağlıdır. Dəyişiklik «apellyasiya» kimi işarələnir: kim, köhnə → yeni bal, nə vaxt — tarixçədə görünür."

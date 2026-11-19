@@ -86,7 +86,7 @@ Skan DİALOQUN öz fayl sahəsində (`justification_evidence`) və ya vərəq ka
 <div class="ese-just" data-ese-just hidden>
   <p class="ems-msg ems-msg--warning ese-just__note">
     <i class="fas fa-triangle-exclamation ems-msg__icon" aria-hidden="true"></i>
-    <span data-ese-just-text="appeal" hidden>{% trans "Apellyasiya ilə dəyişiklik — apellyasiya sənədi (qərar / ərizə) MƏCBURİDİR. Dəyişiklik «apellyasiya» kimi işarələnir: kim, köhnə → yeni bal, nə vaxt — tarixçədə görünür." context "registrar.exam_score_entry" %}</span>
+    <span data-ese-just-text="appeal" hidden>{% if s.appeal_document_required %}{% trans "Apellyasiya ilə dəyişiklik — apellyasiya sənədi (qərar / ərizə) MƏCBURİDİR. Dəyişiklik «apellyasiya» kimi işarələnir: kim, köhnə → yeni bal, nə vaxt — tarixçədə görünür." context "registrar.exam_score_entry" %}{% else %}{% trans "Apellyasiya ilə dəyişiklik — sənəd (qərar / ərizə) və qeyd istəyə bağlıdır. Dəyişiklik «apellyasiya» kimi işarələnir: kim, köhnə → yeni bal, nə vaxt — tarixçədə görünür." context "registrar.exam_score_entry" %}{% endif %}</span>
     <span data-ese-just-text="correction" hidden>{% trans "RİM təqdimatı ilə düzəliş — səbəb, qeyd və skan edilmiş sənəd üçü də məcburidir və audit olunur." context "registrar.exam_score_entry" %}</span>
     <span data-ese-just-text="period" hidden>{% if s.first_entry_needs_document and not s.correction_mode %}{% blocktrans context "registrar.exam_score_entry" with days=s.document_after_days %}Bu dövr {{ days }} gündən çox əvvəl bağlanıb — köhnə nəticənin köçürülməsi təqdimat əsasındadır: səbəb, qeyd və skan edilmiş sənəd üçü də məcburidir.{% endblocktrans %}{% else %}{% trans "Bitmiş dövrün düzəliş rejimi — hər yazı (ilk daxiletmə də) təqdimat əsasındadır: səbəb, qeyd və skan edilmiş sənəd üçü də məcburidir və audit olunur." context "registrar.exam_score_entry" %}{% endif %}</span>
   </p>
@@ -103,14 +103,12 @@ Skan DİALOQUN öz fayl sahəsində (`justification_evidence`) və ya vərəq ka
       </div>
     </div>
   </div>
-  <div class="ems-field">
-    <label class="ems-field__label" for="ese-note">{% trans "Qeyd" context "registrar.exam_score_entry" %}{% if not superadmin_doc_waiver %} <span class="ems-field__req" aria-hidden="true" data-ese-note-req>*</span>{% endif %}</label>
-    <textarea id="ese-note" name="note" class="ems-textarea" rows="3" maxlength="500" data-ese-note></textarea>
-  </div>
+  {# 2026-11-19 (sahib: «sənəd yükləməyə yer də yoxdur»): fayl sahəsi QEYDDƏN ƏVVƏL — əvvəl o, qeydin altında, #}
+  {# dialoqun görünən hissəsindən kənarda qalırdı və məcburi sənədin harada seçildiyi bilinmirdi. #}
   {# 2026-09-26 (sahib: «file yükləmə yeri də olsun, məcburi»): skan DİALOQUN İÇİNDƏ seçilir; #}
   {# vərəq kartında seçilmiş fayl da qəbul olunur (server: dialoq faylı üstündür). #}
   <div class="ems-field">
-    <span class="ems-field__label" id="ese-just-file-label">{% trans "Skan edilmiş sənəd (təqdimat / apellyasiya)" context "registrar.exam_score_entry" %}{% if not superadmin_doc_waiver %} <span class="ems-field__req" aria-hidden="true">*</span>{% endif %}</span>
+    <span class="ems-field__label" id="ese-just-file-label">{% trans "Skan edilmiş sənəd (təqdimat / apellyasiya)" context "registrar.exam_score_entry" %}{% if not superadmin_doc_waiver %} <span class="ems-field__req" aria-hidden="true" data-ese-file-req>*</span>{% endif %}</span>
     <label class="ese-drop ese-drop--compact" data-ese-just-drop>
       <input type="file" class="ese-drop__input" name="{{ s.justification_file_field }}"
              accept="{{ s.evidence_accept }}" aria-labelledby="ese-just-file-label" data-ese-just-file>
@@ -119,6 +117,10 @@ Skan DİALOQUN öz fayl sahəsində (`justification_evidence`) və ya vərəq ka
       <span class="ese-drop__hint">{{ s.evidence_accept }} · {% blocktrans context "registrar.exam_score_entry" with size=s.evidence_max_mb %}ən çox {{ size }} MB{% endblocktrans %}</span>
     </label>
     {% include "partials/ems_ui/_superadmin_waiver_hint.html" %}
+  </div>
+  <div class="ems-field">
+    <label class="ems-field__label" for="ese-note">{% trans "Qeyd" context "registrar.exam_score_entry" %}{% if not superadmin_doc_waiver %} <span class="ems-field__req" aria-hidden="true" data-ese-note-req>*</span>{% endif %}</label>
+    <textarea id="ese-note" name="note" class="ems-textarea" rows="2" maxlength="500" data-ese-note></textarea>
   </div>
   <p class="ese-just__scan" data-ese-scan-status></p>
 </div>

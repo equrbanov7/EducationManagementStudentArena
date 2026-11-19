@@ -38,6 +38,10 @@ def fill_period_lock(request, section, *, period, organization, service, is_supe
     section["document_after_days"] = lock.PAST_FIRST_ENTRY_DOCUMENT_AFTER_DAYS
     section["correction_mode_field"] = lock.CORRECTION_MODE_FIELD
     section["justification_file_field"] = lock.JUSTIFICATION_FILE_FIELD
+    # Sahib 2026-11-19: apellyasiya sənədi defolt OPSİONAL — «Sistem tənzimləmələri» açarı yandırılanda məcburi.
+    from core.runtime_settings_appeals import appeal_document_required
+
+    section["appeal_document_required"] = appeal_document_required()
     section["evidence_accept"] = lock.EVIDENCE_ACCEPT
     section["evidence_max_mb"] = lock.EVIDENCE_MAX_MB
     section["correction_on_url"] = _append_query_params(base_url, **{lock.CORRECTION_MODE_QUERY: "1"})
