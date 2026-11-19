@@ -182,6 +182,8 @@
                     '<div class="wl-sp" data-stream="' + stream.index + '">' +
                     '<div class="wl-sp__head"><span class="wl-sp__title">' + esc(fmt(gettext("Axın %(n)s"), { n: n + 1 })) + "</span>" +
                     '<span class="wl-sp__groups">' + stream.units.map(function (u) { return esc(u.label); }).join(" · ") + "</span>" +
+                    '<span class="wl-sp__mode">' + esc(stream.units.length > 1 || stream.units[0].multi
+                        ? gettext("birlikdə dinləyir") : gettext("tək qrup")) + "</span>" +
                     '<span class="wl-sp__hours">' + esc(fmt(gettext("mühazirə %(hours)s · yükə bir dəfə"), { hours: hours(stream.units[0].plan) })) + "</span></div>" +
                     '<label class="wl-sp__teacher"><span>' + esc(gettext("Mühazirəçi")) + "</span>" +
                     select('data-wl-stream-teacher data-stream="' + stream.index + '"', teacherOptions(current, extra), true) +
@@ -192,6 +194,29 @@
             })
             .join("");
         if (window.EMSBootstrapSelect) window.EMSBootstrapSelect.init(host);
+        renderTotal(streams);
+    }
+
+    /** Yekun: müəllimlərin yükünə düşən mühazirə saatı (axın başına 1 dəfə) və qruplar ayrıca keçsəydi neçə olardı. */
+    function renderTotal(streams) {
+        var node = q("[data-wl-streams-total]");
+        if (!node) return;
+        var load = 0, separate = 0;
+        streams.forEach(function (stream) {
+            load += Number(stream.units[0].plan) || 0;
+            stream.units.forEach(function (u) { separate += Number(u.plan) || 0; });
+        });
+        node.hidden = !streams.length;
+        node.textContent = load < separate
+            ? fmt(gettext("Yekun: %(n)s axın · müəllimlərin yükünə cəmi %(load)s (axınlar birləşdirilməsəydi %(separate)s olardı)."), { n: streams.length, load: hours(load), separate: hours(separate) })
+            : fmt(gettext("Yekun: %(n)s axın · müəllimlərin yükünə cəmi %(load)s."), { n: streams.length, load: hours(load) });
+    }
+
+    /** Sürətli düymələr: «Hamısı bir axında» / «Hər qrup ayrıca». */
+    function quickStreams(mode) {
+        S.units.forEach(function (unit, i) { unit.stream = mode === "one" ? 0 : i; });
+        renderUnits();
+        renderPreview();
     }
 
     function saveStreams() {
@@ -283,13 +308,22 @@
             var remaining = rowRemaining(li);
             var badges = line.joint ? '<span class="wl-badge wl-badge--info">' + esc(gettext("Bütün qruplar birlikdə")) + "</span>" : "";
             if (line.joint_elsewhere) badges += '<span class="wl-badge wl-badge--info">' + esc(gettext("Birgə — saat başqa sətirdədir")) + "</span>";
+            if (line.shared) badges += '<span class="wl-badge">' + esc(gettext("Qruplara ayrılmayıb")) + "</span>";
             html +=
                 '<tr class="wl-kt__group"><th scope="rowgroup" colspan="5">' +
                 '<span class="wl-kt__name">' + esc(line.label) + "</span> " + badges +
                 '<span class="wl-kt__plan">' + esc(fmt(gettext("qrup planı %(hours)s"), { hours: hours(line.plan) })) + "</span>" +
                 '<span class="wl-kt__remaining' + (remaining < 0 ? " is-over" : remaining > 0 ? " is-open" : "") + '">' +
-                esc(fmt(gettext("sətir qalığı %(hours)s"), { hours: hours(remaining) })) + "</span>" +
+                esc(remaining < 0
+                    ? fmt(gettext("artıq bölünüb: %(hours)s"), { hours: hours(-remaining) })
+                    : fmt(gettext("bölünməyib: %(hours)s"), { hours: hours(remaining) })) + "</span>" +
                 "</th></tr>";
+            if (line.shared) {
+                // 2026-11-19: saat bütün sətrə yazılıb — qrup-qrup bölmək üçün nə etmək lazım olduğu burada deyilir.
+                html += '<tr class="wl-kt__hint"><td colspan="5">' +
+                    esc(gettext("Bu saat qruplara ayrılmadan bütün sətrə yazılıb. Hər qrupa ayrıca müəllim vermək üçün buradakı müəllimi silin və yuxarıdakı qrupların altında «Müəllim əlavə et» düyməsinə basın.")) +
+                    "</td></tr>";
+            }
             entry.items.forEach(function (item, ii) {
                 if (item.removed) return;
                 var extra = item.teacher_id ? [{ id: item.teacher_id, name: item.teacher_name }] : [];
@@ -418,6 +452,7 @@
             S.touched[Number(field.dataset.stream)] = true;
         });
         EMSDelegate.on("click", "[data-wl-streams-save]", saveStreams);
+        EMSDelegate.on("click", "[data-wl-streams-quick]", function (event, btn) { quickStreams(btn.dataset.wlStreamsQuick); });
         EMSDelegate.on("change", "[data-wl-kind-field]", function (event, field) {
             var item = (K.lines[Number(field.dataset.line)] || { items: [] }).items[Number(field.dataset.item)];
             if (!item) return;

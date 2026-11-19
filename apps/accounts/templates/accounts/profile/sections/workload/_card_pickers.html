@@ -15,17 +15,22 @@ doldurulur, sabit mətnlər burada tərcümə olunur.
       <div class="modal-body">
         <p class="wl-assign__row" data-wl-streams-subject></p>
         <div class="wl-rule" role="note">
-          <strong>{% trans "Qayda" context "accounts.workload" %}</strong>
+          <strong>{% trans "Axın nədir?" context "accounts.workload" %}</strong>
           <ul>
-            <li>{% trans "Patok — bir neçə qrupun mühazirəni birlikdə dinləməsidir. Eyni axındakı qrupların mühazirəsi müəllimin yükünə BİR dəfə düşür." context "accounts.workload" %}</li>
-            <li>{% trans "Sistem axını «aparıcı sətir» bağı ilə tanıyır: axının mühazirə saatı aparıcı sətirdə qalır, digər sətirlərdə mühazirə cəmi 0 olur və onlar aparıcıya bağlanır. Hər qrupun jurnalında mühazirə öz saatı ilə görünür." context "accounts.workload" %}</li>
-            <li>{% trans "Aşağıda hər sətri bir axına salın və axının mühazirəçisini seçin. Bir sətrin qrupları birlikdə hərəkət edir — qrupları ayırmaq üçün sətri «Redaktə» ilə bölün." context "accounts.workload" %}</li>
+            <li>{% trans "Axın (patok) — mühazirəni eyni vaxtda BİRLİKDƏ dinləyən qruplardır. Ayrıca keçən qrup öz axınında tək qalır." context "accounts.workload" %}</li>
+            <li>{% trans "Bir axının mühazirə saatı müəllimin yükünə BİR dəfə yazılır; jurnal isə hər qrupda ayrıca açılır və mühazirə hər birində görünür." context "accounts.workload" %}</li>
+            <li>{% trans "Bir tapşırıq sətrinin qrupları birlikdə hərəkət edir — onları ayırmaq üçün əvvəlcə sətri «Redaktə» ilə bölün." context "accounts.workload" %}</li>
           </ul>
         </div>
-        <h6 class="wl-modal__section-title">{% trans "Sətirlər → axın" context "accounts.workload" %}</h6>
+        <h6 class="wl-modal__section-title">{% trans "1. Hər qrupu bir axına salın" context "accounts.workload" %}</h6>
+        <div class="wl-streams-quick">
+          <button type="button" class="wl-btn wl-btn--ghost wl-btn--sm" data-wl-streams-quick="one"><i class="fas fa-people-group" aria-hidden="true"></i> {% trans "Hamısı bir axında" context "accounts.workload" %}</button>
+          <button type="button" class="wl-btn wl-btn--ghost wl-btn--sm" data-wl-streams-quick="each"><i class="fas fa-user" aria-hidden="true"></i> {% trans "Hər qrup ayrıca" context "accounts.workload" %}</button>
+        </div>
         <div data-wl-streams-units></div>
-        <h6 class="wl-modal__section-title">{% trans "Nəticə" context "accounts.workload" %}</h6>
+        <h6 class="wl-modal__section-title">{% trans "2. Hər axının mühazirəçisini seçin" context "accounts.workload" %}</h6>
         <div data-wl-streams-preview></div>
+        <p class="wl-streams-total" data-wl-streams-total role="status" hidden></p>
         <p class="wl-form__error" data-wl-streams-error role="alert" hidden></p>
       </div>
       <div class="modal-footer">
@@ -44,7 +49,7 @@ doldurulur, sabit mətnlər burada tərcümə olunur.
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'accounts.workload' %}"></button>
       </div>
       <div class="modal-body">
-        <p class="wl-aside__hint">{% trans "Hər qrup üçün müəllimi və saatı seçin; bir qrupa bir neçə müəllim (saat bölgüsü və ya Lab-1 / Lab-2) əlavə edilə bilər. Saat sətrin cəmindən çox ola bilməz." context "accounts.workload" %}</p>
+        <p class="wl-aside__hint">{% trans "Hər qrupun altında müəllimi və saatı seçin. Qrup alt qruplara (Lab-1 / Lab-2) bölünübsə «Müəllim əlavə et» ilə hər alt qrupa ayrıca müəllim verin. Bölünən saat qrupun planından çox ola bilməz — «bölünməyib» 0 olanda qrup hazırdır." context "accounts.workload" %}</p>
         <table class="wl-kt">
           <thead>
             <tr>

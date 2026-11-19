@@ -468,7 +468,8 @@ def assign(request) -> JsonResponse:
             hours=payload.get("hours"),
             groups_note=payload.get("groups_note") or "",
             is_hourly_paid=_truthy(payload.get("is_hourly_paid")),
-            note=payload.get("note") or "",
+            # 2026-11-19: forma `note` göndərmir — mövcud bölgünün qeydi saat/müəllim redaktəsində SİLİNMƏSİN.
+            note=(payload.get("note") or "") if "note" in payload or assignment is None else assignment.note,
             assignment=assignment,
             request=request,
             # Sahib 2026-11-09: bölgünün qrupu + lab/seminar alt qrupu nömrəsi («bir fənn = bir kart» seçicisi).

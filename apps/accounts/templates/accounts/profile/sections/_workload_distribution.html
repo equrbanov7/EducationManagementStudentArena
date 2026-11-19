@@ -239,6 +239,23 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
   <div class="wl__layout">
     {# ── Sol: sətirlər ──────────────────────────────────────────────── #}
     <div class="wl__main">
+      {% comment %}Sahib 2026-11-19: «axın yazısı aydın deyil, patokda / seminar bölünəndə qarışıqdır» — qısa izah,
+      istəyən açır (kartın özü də addım-addım yazılıb: 1 Mühazirə · 2 Seminar · 3 Laboratoriya).{% endcomment %}
+      <details class="wl-help" data-wl-chair-only>
+        <summary><i class="fas fa-circle-question" aria-hidden="true"></i> {% trans "Bölgü necə işləyir?" context "accounts.workload" %}</summary>
+        <div class="wl-help__body">
+          <ol class="wl-help__steps">
+            <li><strong>{% trans "Mühazirə." context "accounts.workload" %}</strong> {% trans "Mühazirəni birlikdə dinləyən qruplar bir «axın»dır (patok). «Axınları qur» ilə qrupları axınlara yığın və hər axının mühazirəçisini seçin. Bir axının saatı müəllimin yükünə 1 dəfə yazılır, jurnal isə hər qrupda açılır." context "accounts.workload" %}</li>
+            <li><strong>{% trans "Seminar və laboratoriya." context "accounts.workload" %}</strong> {% trans "Hər qrup ayrıca keçir. «Bölüşdür» ilə hər qrupa müəllim və saat verin; qrup Lab-1 / Lab-2 kimi alt qruplara bölünübsə, hər alt qrupa öz müəllimini seçin." context "accounts.workload" %}</li>
+            <li><strong>{% trans "Saatı və ya qrupu dəyişmək." context "accounts.workload" %}</strong> {% trans "Kartın altındakı «Tapşırıq sətirləri» → «Redaktə». Eyni fənnin digər qruplarından fərqlənən saat kartda «saatı yoxlayın» nişanı ilə göstərilir." context "accounts.workload" %}</li>
+          </ol>
+          <ul class="wl-help__legend">
+            <li><span class="wl-help__dot wl-help__dot--ok" aria-hidden="true"></span>{% trans "tam bölünüb" context "accounts.workload" %}</li>
+            <li><span class="wl-help__dot wl-help__dot--open" aria-hidden="true"></span>{% trans "vakant və ya bölünməyib" context "accounts.workload" %}</li>
+            <li><span class="wl-help__dot" aria-hidden="true"></span>{% trans "müəllim təyin olunmayıb" context "accounts.workload" %}</li>
+          </ul>
+        </div>
+      </details>
       {% comment %}2026-10-25: sağ paneldən seçilmiş müəllim süzgəci (× ilə götürülür) + «göstərilir N / M» sayğacı.
       Mətnlər şablondadır; ad/say `workload_distribution_list.js`-dən doldurulur.{% endcomment %}
       <div class="wl-active-filter" data-wl-teacher-filter hidden>
@@ -282,7 +299,12 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
       <h3 class="wl-aside__title">{% trans "Müəllim yükü" context "accounts.workload" %}</h3>
       <p class="wl-aside__hint">{{ workload_distribution_section.norm_note }}</p>
       <p class="wl-aside__hint">{% trans "Müəllimin üstünə vurun — solda yalnız ona bölgüsü olan sətirlər qalsın. Təkrar vurun və ya × ilə süzgəci götürün." context "accounts.workload" %}</p>
+      {% comment %}2026-11-19: panel ekrana sığır və öz içində sürüşür; ad ilə axtarış (`workload_distribution_anchor.js`).{% endcomment %}
+      <input type="search" class="wl-aside__search" data-wl-teacher-search autocomplete="off"
+             placeholder="{% trans 'Müəllim axtar…' context 'accounts.workload' %}"
+             aria-label="{% trans 'Müəllim axtar…' context 'accounts.workload' %}">
       <div class="wl-teachers" data-wl-teacher-panel></div>
+      <p class="wl-aside__none" data-wl-teacher-none role="status" hidden>{% trans "Uyğun müəllim tapılmadı." context "accounts.workload" %}</p>
     </aside>
   </div>
 

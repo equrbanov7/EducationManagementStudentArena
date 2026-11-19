@@ -59,10 +59,11 @@
 
     var ALL_CHAIRS = "all"; // «Bütün kafedralar» (2026-11-04) — rejim `EMSWorkloadList.applyChairMode`-dadır
 
-    function setBusy(busy) {
+    function setBusy(busy, quiet) {
         STATE.loading = busy; // tənbəl yükləmə (`workload_distribution_list.js`) yüklənmə zamanı ikinci dilim istəmir
         var skeleton = q("[data-wl-skeleton]");
-        if (skeleton) skeleton.hidden = !busy;
+        // 2026-11-19: yazıdan sonrakı yenidən yükləmədə (`quiet`) skelet göstərilmir — siyahını aşağı itələyib yeri pozurdu.
+        if (skeleton) skeleton.hidden = !busy || !!quiet;
         var rowsHost = q("[data-wl-rows]");
         if (rowsHost) rowsHost.setAttribute("aria-busy", busy ? "true" : "false");
     }
@@ -137,11 +138,14 @@
             keep: fresh ? 0 : (STATE.cards ? STATE.cards.length : STATE.rows.length),
             panel: !(arg && arg.panel === false),
         });
-        setBusy(true);
+        setBusy(true, !fresh && (STATE.cards || STATE.rows || []).length > 0);
         var mine = (STATE.rowsSeq = (STATE.rowsSeq || 0) + 1); // köhnə cavab atılır
         window.EMSCore.fetchJSON(url)
             .then(function (payload) {
                 if (mine !== STATE.rowsSeq) return;
+                // 2026-11-19: yer saxlanması — işlənən kart, açıq «Tapşırıq sətirləri», sağ panelin sürüşməsi.
+                var Anchor = window.EMSWorkloadAnchor;
+                var snap = Anchor ? Anchor.capture(fresh) : null;
                 STATE.rows = payload.rows || [];
                 STATE.cards = payload.cards || null; // «bir fənn = bir kart» (yalnız kafedra rejimi)
                 STATE.task = payload.task || null;
@@ -162,6 +166,7 @@
                 List.afterLoad(payload);
                 renderStatus();
                 if (window.EMSWorkloadAmend) window.EMSWorkloadAmend.afterRows();
+                if (snap) Anchor.restore(snap);
             })
             .catch(function () {
                 var empty = q("[data-wl-empty]");
