@@ -187,19 +187,22 @@
         var lecture = card.lecture || {};
         var streams = lecture.streams || [];
         if (!streams.length) return "";
+        // «Axın» sözü yalnız həqiqi patok olanda işlənir; qruplar ayrıca keçirsə sadəcə «qrup → müəllim» siyahısıdır.
         var joint = streams.some(function (s) { return (s.groups || []).length > 1 || s.union_count > 1; });
-        var many = streams.length > 1 || joint;
         var usual = typicalByForm(card, streams.map(function (s) { return { row: s.lead_row_id, value: s.plan }; }));
-        var summary = many
+        var summary = joint
             ? fmt(gettext("%(n)s axın · müəllim yükünə cəmi %(hours)s"), { n: streams.length, hours: hours(lecture.load_hours) })
-            : hours(lecture.load_hours);
+            : streams.length > 1
+                ? fmt(gettext("%(n)s qrup ayrıca keçir · müəllim yükünə cəmi %(hours)s"), { n: streams.length, hours: hours(lecture.load_hours) })
+                : hours(lecture.load_hours);
+        var action = joint ? gettext("Axınları dəyiş") : streams.length > 1 ? gettext("Patok qur") : gettext("Mühazirəçi seç");
         var button = editable
             ? '<button type="button" class="wl-btn wl-btn--ghost wl-btn--sm" data-wl-streams-open data-card-id="' +
               esc(card.id) + '" title="' +
-              esc(gettext("Hansı qrupların mühazirəni birlikdə dinlədiyini və mühazirəçini seçin.")) + '">' +
-              '<i class="fas fa-people-group" aria-hidden="true"></i> ' +
-              esc(many ? gettext("Axınları qur") : gettext("Mühazirəçi seç")) + "</button>"
+              esc(gettext("Hansı qrupların mühazirəni birlikdə dinlədiyini (patok) və mühazirəçini seçin.")) + '">' +
+              '<i class="fas fa-people-group" aria-hidden="true"></i> ' + esc(action) + "</button>"
             : "";
+        var many = joint; // nömrəli axın nişanı və «birlikdə / tək qrup» qeydi yalnız patoklu kartda
         return (
             '<section class="wl-kind wl-kind--lecture">' +
             kindHead(1, labels.lecture || gettext("Mühazirə"), esc(summary), button) +
@@ -471,7 +474,7 @@
             groupChips(card.groups) +
             ((card.warnings || []).indexOf("patok_unlinked") >= 0
                 ? '<p class="wl-card__warn"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> ' +
-                  esc(gettext("Bu fəndə heç bir axına bağlanmamış mühazirə sətri var — «Axınları qur» ilə qrupları axına salın.")) + "</p>"
+                  esc(gettext("Bu fəndə heç bir axına bağlanmamış mühazirə sətri var — «Axınları dəyiş» ilə qrupları axına salın.")) + "</p>"
                 : "") +
             lecture +
             seminar +

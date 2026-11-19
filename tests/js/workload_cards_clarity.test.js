@@ -102,8 +102,24 @@ test("axın nömrəli sətirdir, birlikdə dinləyən qruplar yazılır, patok k
     assert.match(streams[0].querySelector(".wl-stream__mode").textContent, /2 qrup birlikdə/);
     assert.match(streams[1].querySelector(".wl-stream__mode").textContent, /tək qrup/);
     assert.match(host.querySelector(".wl-kind__rule").textContent, /Axın \(patok\)/);
-    assert.match(host.querySelector("[data-wl-streams-open]").textContent, /Axınları qur/);
+    assert.match(host.querySelector("[data-wl-streams-open]").textContent, /Axınları dəyiş/);
     assert.equal(host.querySelector(".wl-kind--lecture .wl-kind__step").textContent, "1");
+});
+
+test("qruplar ayrıca keçirsə «axın» sözü yoxdur — «N qrup ayrıca keçir» və «Patok qur»", () => {
+    const window = boot();
+    const host = render(window, card({
+        lecture: { plan: 45, load_hours: 90, without_groups: [], streams: [
+            stream("r1", ["534 Bİ az"], 45, [entry("1", "Rəfiyev Aydın", 45)]),
+            stream("r2", ["534 Bİ ing"], 45, [entry("2", "Axundlu Aynur", 45)]),
+        ] },
+    }));
+    assert.equal(host.querySelectorAll(".wl-stream").length, 2);
+    assert.equal(host.querySelector(".wl-stream__tag"), null);
+    assert.equal(host.querySelector(".wl-stream__mode"), null);
+    assert.equal(host.querySelector(".wl-kind__rule"), null);
+    assert.match(host.querySelector(".wl-kind--lecture .wl-kind__sum").textContent, /2 qrup ayrıca keçir · müəllim yükünə cəmi 90 s/);
+    assert.match(host.querySelector("[data-wl-streams-open]").textContent, /Patok qur/);
 });
 
 test("tək qruplu fəndə «axın» sözü yoxdur — yalnız mühazirəçi seçilir", () => {

@@ -50,6 +50,8 @@ doldurulur, sabit mətnlər burada tərcümə olunur.
       </div>
       <div class="modal-body">
         <p class="wl-aside__hint">{% trans "Hər qrupun altında müəllimi və saatı seçin. Qrup alt qruplara (Lab-1 / Lab-2) bölünübsə «Müəllim əlavə et» ilə hər alt qrupa ayrıca müəllim verin. Bölünən saat qrupun planından çox ola bilməz — «bölünməyib» 0 olanda qrup hazırdır." context "accounts.workload" %}</p>
+        {% comment %}2026-11-19: laboratoriyada «Alt qrup» sütunu boşdursa səbəbi və harada yaradıldığı (JS göstərir).{% endcomment %}
+        <p class="wl-aside__hint" data-wl-kind-lab-hint hidden><i class="fas fa-circle-info" aria-hidden="true"></i> {% trans "«Alt qrup» sütunu boşdursa qrup hələ Lab-1 / Lab-2-yə bölünməyib. Alt qruplar «Lab qrupları» bölməsində yaradılır; sonra burada hər alt qrupa öz müəllimini seçin." context "accounts.workload" %}</p>
         <table class="wl-kt">
           <thead>
             <tr>

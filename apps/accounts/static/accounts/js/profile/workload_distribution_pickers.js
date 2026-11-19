@@ -275,6 +275,8 @@
             title.textContent = fmt(gettext("%(kind)s bölgüsü — %(subject)s"), { kind: card[kind].label || kind, subject: card.subject });
         }
         showError("[data-wl-kind-error]", "");
+        var labHint = q("[data-wl-kind-lab-hint]"); // laboratoriya + heç bir qrupda alt qrup yoxdur
+        if (labHint) labHint.hidden = !(kind === "lab" && !K.lines.some(function (e) { return (e.line.sections || []).length; }));
         renderKind();
         loadPool().then(renderKind);
         var instance = modal("[data-wl-kind-modal]");

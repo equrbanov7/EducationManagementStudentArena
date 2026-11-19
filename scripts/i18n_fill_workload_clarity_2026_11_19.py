@@ -35,11 +35,11 @@ ENTRIES = {
                 "Wie funktioniert die Verteilung?",
             ),
             "Mühazirə.": t("Lecture.", "Лекция.", "Ders (teorik).", "Vorlesung."),
-            "Mühazirəni birlikdə dinləyən qruplar bir «axın»dır (patok). «Axınları qur» ilə qrupları axınlara yığın və hər axının mühazirəçisini seçin. Bir axının saatı müəllimin yükünə 1 dəfə yazılır, jurnal isə hər qrupda açılır.": t(
-                "Groups that attend the lecture together form one “stream”. Use “Set up streams” to put the groups into streams and choose a lecturer for each stream. A stream's hours count towards the teacher's load once, while a journal is opened for every group.",
-                "Группы, которые слушают лекцию вместе, образуют один «поток». Кнопкой «Настроить потоки» соберите группы в потоки и выберите лектора для каждого потока. Часы потока засчитываются в нагрузку преподавателя один раз, а журнал открывается для каждой группы.",
-                "Dersi birlikte dinleyen gruplar bir «akış» oluşturur. «Akışları kur» ile grupları akışlara toplayın ve her akışın öğretim üyesini seçin. Bir akışın saati öğretim elemanının yüküne 1 kez yazılır, defter ise her grupta açılır.",
-                "Gruppen, die die Vorlesung gemeinsam hören, bilden einen „Strom“. Ordnen Sie die Gruppen mit „Ströme einrichten“ den Strömen zu und wählen Sie für jeden Strom einen Dozenten. Die Stunden eines Stroms zählen einmal zur Lehrlast, das Journal wird für jede Gruppe geöffnet.",
+            "Mühazirəni birlikdə dinləyən qruplar bir «axın»dır (patok). «Patok qur» / «Axınları dəyiş» ilə qrupları axınlara yığın və hər axının mühazirəçisini seçin. Bir axının saatı müəllimin yükünə 1 dəfə yazılır, jurnal isə hər qrupda açılır.": t(
+                "Groups that attend the lecture together form one “stream”. Use “Create stream” / “Change streams” to put the groups into streams and choose a lecturer for each stream. A stream's hours count towards the teacher's load once, while a journal is opened for every group.",
+                "Группы, которые слушают лекцию вместе, образуют один «поток». Кнопкой «Создать поток» / «Изменить потоки» соберите группы в потоки и выберите лектора для каждого потока. Часы потока засчитываются в нагрузку преподавателя один раз, а журнал открывается для каждой группы.",
+                "Dersi birlikte dinleyen gruplar bir «akış» oluşturur. «Akış kur» / «Akışları değiştir» ile grupları akışlara toplayın ve her akışın öğretim üyesini seçin. Bir akışın saati öğretim elemanının yüküne 1 kez yazılır, defter ise her grupta açılır.",
+                "Gruppen, die die Vorlesung gemeinsam hören, bilden einen „Strom“. Ordnen Sie die Gruppen mit „Strom bilden“ / „Ströme ändern“ den Strömen zu und wählen Sie für jeden Strom einen Dozenten. Die Stunden eines Stroms zählen einmal zur Lehrlast, das Journal wird für jede Gruppe geöffnet.",
             ),
             "Seminar və laboratoriya.": t(
                 "Seminar and laboratory.", "Семинар и лабораторная.", "Seminer ve laboratuvar.", "Seminar und Labor."
@@ -100,6 +100,12 @@ ENTRIES = {
                 "Группы одной строки задания перемещаются вместе — чтобы разделить их, сначала разбейте строку через «Редактировать».",
                 "Bir görev satırının grupları birlikte hareket eder — ayırmak için önce satırı «Düzenle» ile bölün.",
                 "Die Gruppen einer Auftragszeile bewegen sich gemeinsam — um sie zu trennen, teilen Sie die Zeile zuerst über „Bearbeiten“.",
+            ),
+            "«Alt qrup» sütunu boşdursa qrup hələ Lab-1 / Lab-2-yə bölünməyib. Alt qruplar «Lab qrupları» bölməsində yaradılır; sonra burada hər alt qrupa öz müəllimini seçin.": t(
+                "If the “Subgroup” column is empty, the group has not been split into Lab-1 / Lab-2 yet. Subgroups are created in the “Lab groups” section; then choose a teacher for each subgroup here.",
+                "Если столбец «Подгруппа» пуст, группа ещё не разделена на Lab-1 / Lab-2. Подгруппы создаются в разделе «Лабораторные группы»; затем выберите здесь преподавателя для каждой подгруппы.",
+                "«Alt grup» sütunu boşsa grup henüz Lab-1 / Lab-2 olarak ayrılmamıştır. Alt gruplar «Laboratuvar grupları» bölümünde oluşturulur; ardından burada her alt gruba öğretim elemanını seçin.",
+                "Ist die Spalte „Untergruppe“ leer, wurde die Gruppe noch nicht in Lab-1 / Lab-2 geteilt. Untergruppen werden im Bereich „Laborgruppen“ angelegt; wählen Sie danach hier für jede Untergruppe eine Lehrkraft.",
             ),
             "1. Hər qrupu bir axına salın": t(
                 "1. Put each group into a stream",
@@ -181,13 +187,19 @@ ENTRIES = {
                 "%(n)s akış · yüke toplam %(hours)s",
                 "%(n)s Ströme · insgesamt %(hours)s Lehrlast",
             ),
-            "Hansı qrupların mühazirəni birlikdə dinlədiyini və mühazirəçini seçin.": t(
+            "Hansı qrupların mühazirəni birlikdə dinlədiyini (patok) və mühazirəçini seçin.": t(
                 "Choose which groups attend the lecture together and who the lecturer is.",
                 "Выберите, какие группы слушают лекцию вместе, и лектора.",
                 "Hangi grupların dersi birlikte dinlediğini ve öğretim üyesini seçin.",
                 "Wählen Sie, welche Gruppen die Vorlesung gemeinsam hören, und den Dozenten.",
             ),
-            "Axınları qur": t("Set up streams", "Настроить потоки", "Akışları kur", "Ströme einrichten"),
+            "Patok qur": t("Create stream", "Создать поток", "Akış kur", "Strom bilden"),
+            "%(n)s qrup ayrıca keçir · müəllim yükünə cəmi %(hours)s": t(
+                "%(n)s groups taught separately · %(hours)s towards teacher load in total",
+                "%(n)s группы отдельно · всего в нагрузку %(hours)s",
+                "%(n)s grup ayrı işliyor · yüke toplam %(hours)s",
+                "%(n)s Gruppen getrennt · insgesamt %(hours)s Lehrlast",
+            ),
             "Mühazirəçi seç": t("Choose lecturer", "Выбрать лектора", "Öğretim üyesi seç", "Dozenten wählen"),
             "Axın (patok) — mühazirəni birlikdə dinləyən qruplar. Bir axının saatı müəllimin yükünə 1 dəfə yazılır, jurnal isə hər qrupda açılır.": t(
                 "A stream is a set of groups that attend the lecture together. A stream's hours count towards the teacher's load once, while a journal is opened for every group.",
@@ -266,11 +278,11 @@ ENTRIES = {
             ),
             "Tam bölünüb": t("Fully distributed", "Распределено полностью", "Tamamı dağıtıldı", "Vollständig verteilt"),
             "Natamam": t("Incomplete", "Не завершено", "Eksik", "Unvollständig"),
-            "Bu fəndə heç bir axına bağlanmamış mühazirə sətri var — «Axınları qur» ilə qrupları axına salın.": t(
-                "This subject has a lecture row that is not linked to any stream — use “Set up streams” to put the groups into a stream.",
-                "В этом предмете есть лекционная строка, не привязанная ни к одному потоку — кнопкой «Настроить потоки» отнесите группы к потоку.",
-                "Bu derste hiçbir akışa bağlanmamış ders satırı var — «Akışları kur» ile grupları akışa yerleştirin.",
-                "In diesem Fach gibt es eine Vorlesungszeile ohne Strom — ordnen Sie die Gruppen mit „Ströme einrichten“ einem Strom zu.",
+            "Bu fəndə heç bir axına bağlanmamış mühazirə sətri var — «Axınları dəyiş» ilə qrupları axına salın.": t(
+                "This subject has a lecture row that is not linked to any stream — use “Change streams” to put the groups into a stream.",
+                "В этом предмете есть лекционная строка, не привязанная ни к одному потоку — кнопкой «Изменить потоки» отнесите группы к потоку.",
+                "Bu derste hiçbir akışa bağlanmamış ders satırı var — «Akışları değiştir» ile grupları akışa yerleştirin.",
+                "In diesem Fach gibt es eine Vorlesungszeile ohne Strom — ordnen Sie die Gruppen mit „Ströme ändern“ einem Strom zu.",
             ),
             "birlikdə dinləyir": t("attend together", "слушают вместе", "birlikte dinliyor", "hören gemeinsam"),
             "Yekun: %(n)s axın · müəllimlərin yükünə cəmi %(load)s (axınlar birləşdirilməsəydi %(separate)s olardı).": t(
