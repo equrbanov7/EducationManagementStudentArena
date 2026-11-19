@@ -120869,3 +120869,8 @@ msgstr ""
 msgctxt "registrar.exam_score_entry"
 msgid "Tələbənin cari qrupu"
 msgstr "Текущая группа студента"
+
+#, python-format
+msgctxt "registrar.exam_score_entry"
+msgid "%(group)s ilə birgə"
+msgstr "совместно с %(group)s"
