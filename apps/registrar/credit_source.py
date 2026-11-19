@@ -284,14 +284,8 @@ def plan_row_credit(plan_row) -> int:
     return credits if credits > 0 else int(getattr(plan_row.subject, "ects", 0) or 0)
 
 
-def plan_credit_for_offering(offering) -> int:
-    """Qrup açılışının (tələbəsiz — sillabus) krediti: qrupun ixtisası + kohortunun TƏSDİQLƏNMİŞ planı.
-
-    ``plan_hours.plan_hours_for_subject`` ilə eyni plan seçimi (ixtisas + kohort, sonra ixtisasın ən yeni planı);
-    başqa ixtisasın planına GERİ ÇƏKİLMİR (kredit ixtisasa görə dəyişir) — tapılmasa kataloq.
-    """
-    if offering is None:
-        return 0
+def _plan_credit(offering):
+    """Təsdiqlənmiş plandan kredit; plan (və ya ixtisas) tapılmasa ``None``."""
     from apps.organizations.public import group_cohort_year
 
     from .models import Curriculum
@@ -299,7 +293,7 @@ def plan_credit_for_offering(offering) -> int:
 
     program = program_for_offering(offering)
     if program is None:
-        return _catalogue(offering)
+        return None
     plans = list(
         Curriculum.objects.filter(
             organization_id=offering.organization_id,
@@ -312,14 +306,64 @@ def plan_credit_for_offering(offering) -> int:
         .distinct()
     )
     if not plans:
-        return _catalogue(offering)
+        return None
     cohort = group_cohort_year(offering.group) if offering.group_id else None
     chosen = next((pk for pk, year in plans if cohort and int(year) == int(cohort)), plans[0][0])
     return credit_for_offering_and_curriculum(offering, chosen)
 
 
+def plan_credit_for_offering(offering) -> int:
+    """Qrup açılışının (tələbəsiz — sillabus) krediti: qrupun ixtisası + kohortunun TƏSDİQLƏNMİŞ planı.
+
+    ``plan_hours.plan_hours_for_subject`` ilə eyni plan seçimi (ixtisas + kohort, sonra ixtisasın ən yeni planı);
+    başqa ixtisasın planına GERİ ÇƏKİLMİR (kredit ixtisasa görə dəyişir) — tapılmasa kataloq.
+    """
+    if offering is None:
+        return 0
+    credit = _plan_credit(offering)
+    return _catalogue(offering) if credit is None else credit
+
+
+def load_credit_for_offering(offering) -> int:
+    """Açılışın DƏRS YÜKÜ sətrindəki kredit (> 0): eyni fənn + dövr + qrup, ləğv olunmamış tapşırıq; yoxsa 0.
+
+    Yalnız SİLLABUS göstərişi üçündür (MR-566/562, 2026-11-19): qrupun təsdiqlənmiş planında fənn yoxdursa,
+    sillabus kataloqdakı (çox vaxt 5) krediti göstərirdi, kafedranın yükündə isə doğru dəyər yazılıb.
+    Transkript / ÜOMG kataloqda qalır (modul başlığı). Bir neçə fərqli dəyər varsa — qərar verilmir, 0.
+    """
+    if offering is None or not offering.group_id:
+        return 0
+    from django.apps import apps as django_apps
+
+    row_model = django_apps.get_model("workload", "TeachingTaskRow")
+    values = set(
+        row_model.objects.filter(
+            organization_id=offering.organization_id,
+            subject_id=offering.subject_id,
+            period_id=offering.period_id,
+            groups=offering.group_id,
+            credits_value__gt=0,
+        )
+        .exclude(task__status="cancelled")
+        .values_list("credits_value", flat=True)
+    )
+    return int(values.pop()) if len(values) == 1 else 0
+
+
+def syllabus_credit_for_offering(offering) -> int:
+    """Sillabusda göstərilən kredit: təsdiqlənmiş plan → dərs yükü sətri → kataloq."""
+    if offering is None:
+        return 0
+    credit = _plan_credit(offering)
+    if credit is not None:
+        return credit
+    return load_credit_for_offering(offering) or _catalogue(offering)
+
+
 __all__ = [
     "CreditResolver",
+    "load_credit_for_offering",
+    "syllabus_credit_for_offering",
     "credit_for_enrollment",
     "credit_for_offering_and_curriculum",
     "credits_for_enrollments",

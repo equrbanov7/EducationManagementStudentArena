@@ -290,13 +290,47 @@ def mark_subgroup_rows(rows, *, offering) -> list:
         organization_id=offering.organization_id,
         student_ids=[enrollment.student_id for enrollment in candidates if enrollment.pk in documented],
     )
+    other_groups = other_group_names(rows, offering=offering)
     for row in rows:
         enrollment = row["enrollment"]
         row["is_subgroup"] = enrollment.pk in documented and guest_roster.row_is_guest(
             enrollment, offering=offering, current_group_id=current_groups.get(enrollment.student_id)
         )
+        row["other_group"] = other_groups.get(enrollment.student_id, "")
     rows.sort(key=lambda row: bool(row["is_subgroup"]))
     return rows
+
+
+def other_group_names(rows, *, offering) -> dict:
+    """``{student_id: cari qrup adı}`` — tələbənin cari qrupu jurnalın qrupu DEYİLSƏ (MR-534/555/558, 2026-11-19).
+
+    İmtahan Mərkəzi başqa qrupdan gələn tələbəni (sənədsiz köhnə əlavələr də daxil) «Alt qrup» hissəsində axtarır,
+    ümumi siyahıda isə onu tanıya bilmirdi. Burada yalnız NİŞAN verilir — «Alt qrup» başlığı və sıralama
+    sənədli qaydada qalır (sahib 2026-11-18). Jurnalın öz ana/alt qrupu (``subgroup_rollup.is_subgroup_of``,
+    «536 Bİ» ↔ «536 Bi 1») nişansızdır — birləşik jurnallar səs-küyə boğulmasın. Sorğu: ≤ 2 (qrupsuz açılışda 0).
+    """
+    from apps.organizations.models import OrgUnit
+
+    from . import guest_roster
+    from .subgroup_rollup import is_subgroup_of
+
+    if offering.group_id is None or not rows:
+        return {}
+    current = guest_roster.current_group_map(
+        organization_id=offering.organization_id,
+        student_ids=[row["enrollment"].student_id for row in rows],
+    )
+    other_ids = {group_id for group_id in current.values() if group_id and group_id != offering.group_id}
+    if not other_ids:
+        return {}
+    names = dict(OrgUnit.objects.filter(pk__in=other_ids | {offering.group_id}).values_list("pk", "name"))
+    own = names.get(offering.group_id, "")
+    result = {}
+    for student_id, group_id in current.items():
+        name = names.get(group_id, "") if group_id in other_ids else ""
+        if name and not (own and (is_subgroup_of(own, name) or is_subgroup_of(name, own))):
+            result[student_id] = name
+    return result
 
 
 def _row_matches_search(row, needle: str) -> bool:
@@ -365,6 +399,7 @@ __all__ = [
     "group_ids_for_instructor",
     "instructors_for_period",
     "mark_subgroup_rows",
+    "other_group_names",
     "offering_label",
     "offerings_for_subject",
     "roster_for_offering",

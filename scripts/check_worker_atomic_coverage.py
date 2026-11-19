@@ -151,6 +151,8 @@ INTENTIONAL_EXEMPTIONS = {
     "apps/registrar/management/commands/retire_misattached_syllabus_20261116.py",
     # 2026-11-18 MR-000537 «colloquium» cümlələri: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/remove_colloquium_note_20261118.py",
+    # 2026-11-19 MR-000562/550 sillabus kafedra/fənn bağı: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
+    "apps/registrar/management/commands/fix_syllabus_links_20261119.py",
     # 2026-11-19 boş həftəlik planlı sillabuslar (bütün formalar): eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/fill_empty_syllabus_weeks_20261119.py",
     # 2026-11-19 dublikat tələbənin jurnaldakı ikinci sətri: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
