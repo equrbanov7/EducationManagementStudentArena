@@ -471,7 +471,7 @@ def build_syllabus_editor_section(request, *, organization, version) -> dict:
     week_rows = _week_rows(week_data, tags, plan_hours)
     hours = _hour_totals(week_rows, plan_hours)
     hours["has_plan"] = bool(plan_hours)
-    hours["credit"] = credit_source.plan_credit_for_offering(syllabus.offering) or syllabus.subject.ects
+    hours["credit"] = credit_source.syllabus_credit_for_offering(syllabus.offering) or syllabus.subject.ects
     # Əl ilə daxil edilən saat: forma həmişə görünür (seçilmiş dəyərlərlə) — sonradan düzəltmək olur.
     hours["manual"] = plan_manual and context["view_state"] == "normal"
     hours["options"] = PLAN_HOUR_OPTIONS
