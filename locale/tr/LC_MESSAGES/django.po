@@ -119763,3 +119763,11 @@ msgstr "yayımlanmamış"
 msgctxt "subject_folder.ui"
 msgid "göndərən: %(n)s tələbə"
 msgstr "gönderen: %(n)s öğrenci"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya rejimi: «Yekun» ballar açıldı. Sənəd və qeyd istəyə bağlıdır."
+msgstr "İtiraz modu: «Final» puanları açıldı. Belge ve not isteğe bağlıdır."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya ilə dəyişiklik — sənəd (qərar / ərizə) və qeyd istəyə bağlıdır. Dəyişiklik «apellyasiya» kimi işarələnir: kim, köhnə → yeni bal, nə vaxt — tarixçədə görünür."
+msgstr "İtiraz ile değişiklik — belge (karar / dilekçe) ve not isteğe bağlıdır. Değişiklik «itiraz» olarak işaretlenir: kim, eski → yeni puan, ne zaman — geçmişte görünür."

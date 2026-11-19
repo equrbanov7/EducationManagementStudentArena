@@ -86,6 +86,10 @@
     }
 
     function syncScanStatus(host) {
+        var requiredDrop = host.querySelector("[data-ese-just-drop].is-required");
+        if (requiredDrop && scanSelected(host)) {
+            requiredDrop.classList.remove("is-required"); // sənəd seçildi — qırmızı çərçivə götürülür
+        }
         var status = host.querySelector("[data-ese-scan-status]");
         var own = fileOf(host, "[data-ese-just-file]");
         var meta = fileOf(host, "[data-ese-meta-file]");
@@ -110,13 +114,18 @@
         status.classList.toggle("is-missing", !ok);
     }
 
+    function appealDocRequired(host) {
+        return host.getAttribute("data-appeal-doc-required") === "1";
+    }
+
     function justificationComplete(host, need) {
         // Superadmin (sahib 2026-10-27): səbəb / qeyd / skan istəyə bağlıdır — server avtomatik qeyd yazır.
         if (host.getAttribute("data-doc-optional") === "1") {
             return true;
         }
         if (need === "appeal") {
-            return scanSelected(host);
+            // Sahib 2026-11-19: apellyasiya sənədi defolt opsionaldır (server açarı: `data-appeal-doc-required`).
+            return !appealDocRequired(host) || scanSelected(host);
         }
         var reason = host.querySelector("[data-ese-reason]");
         var note = host.querySelector("[data-ese-note]");
@@ -139,6 +148,15 @@
         var noteReq = host.querySelector("[data-ese-note-req]");
         if (noteReq) {
             noteReq.hidden = need === "appeal";
+        }
+        var optionalDoc = need === "appeal" && !appealDocRequired(host);
+        var fileReq = host.querySelector("[data-ese-file-req]");
+        if (fileReq) {
+            fileReq.hidden = optionalDoc;
+        }
+        var scanStatus = host.querySelector("[data-ese-scan-status]");
+        if (scanStatus) {
+            scanStatus.hidden = optionalDoc; // «✗ sənəd seçilməyib» opsional halda göstərilmir
         }
     }
 
@@ -413,6 +431,12 @@
             event.preventDefault();
             showDialogError(host, t(need === "period" ? "need-submission" : need === "appeal" ? "need-appeal" : "need-justification"));
             syncScanStatus(host);
+            // 2026-11-19: sənəd seçilməyibsə fayl sahəsi görünən yerə gətirilir (əvvəl dialoqun altında itirdi).
+            var drop = host.querySelector("[data-ese-just-drop]");
+            if (drop && !scanSelected(host) && drop.scrollIntoView) {
+                drop.scrollIntoView({ block: "center" });
+                drop.classList.add("is-required");
+            }
             var reason = host.querySelector("[data-ese-reason]");
             if (reason && !reason.value) {
                 var toggle = form.querySelector(".ese-just .bootstrap-single-select__toggle");

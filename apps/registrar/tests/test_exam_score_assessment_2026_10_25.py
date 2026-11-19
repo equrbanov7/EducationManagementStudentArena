@@ -278,6 +278,7 @@ class AssessmentRulesTest(MidtermPeriodFixture, TestCase):
                 with mock.patch("django.utils.timezone.now", return_value=later):
                     self.assertEqual(self._final("41", self.center)["written"], 1)
 
+    @mock.patch("apps.registrar.exam_score_assessment.appeal_document_required", new=lambda: True)
     def test_appeal_after_window_requires_document_and_is_marked(self):
         with bypass_rls():
             self._final("40", self.center)

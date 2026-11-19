@@ -122132,3 +122132,11 @@ msgstr "nicht veröffentlicht"
 msgctxt "subject_folder.ui"
 msgid "göndərən: %(n)s tələbə"
 msgstr "eingereicht von: %(n)s Studierenden"
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya rejimi: «Yekun» ballar açıldı. Sənəd və qeyd istəyə bağlıdır."
+msgstr "Einspruchsmodus: Die Endpunkte sind freigegeben. Dokument und Notiz sind optional."
+
+msgctxt "registrar.exam_score_entry"
+msgid "Apellyasiya ilə dəyişiklik — sənəd (qərar / ərizə) və qeyd istəyə bağlıdır. Dəyişiklik «apellyasiya» kimi işarələnir: kim, köhnə → yeni bal, nə vaxt — tarixçədə görünür."
+msgstr "Änderung per Einspruch — Dokument (Entscheidung / Antrag) und Notiz sind optional. Die Änderung wird als „Einspruch“ markiert: wer, alte → neue Punktzahl und wann stehen im Verlauf."

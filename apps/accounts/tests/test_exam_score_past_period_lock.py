@@ -373,10 +373,12 @@ class PastPeriodLockTest(TestCase):
         (entry,) = self._entries()
         self.assertEqual(entry.kind, ExamScoreEntryKind.INITIAL)
 
+    @mock.patch("apps.registrar.exam_score_assessment.appeal_document_required", new=lambda: True)
     def test_current_period_change_requires_scan_and_accepts_dialog_file(self):
         self._unlock_period()
         self._post(self.center)
-        # 2026-10-25: təsdiqdən 15 dəqiqə sonra yazılmış bal yalnız apellyasiya (sənəd MƏCBURİ) ilə dəyişir.
+        # 2026-10-25: təsdiqdən sonra yazılmış bal yalnız apellyasiya ilə dəyişir; sənəd — açar yandırılıbsa MƏCBURİ
+        # (2026-11-19: defolt opsional, bu test məcburi halı yoxlayır).
         change = {
             f"score__{self.enrollment.id}": "30",
             "kind": "appeal",

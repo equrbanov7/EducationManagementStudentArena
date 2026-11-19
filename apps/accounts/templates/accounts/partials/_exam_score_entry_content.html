@@ -31,7 +31,7 @@ dəyərlər `data-*` atributları ilə ötürülür. Bölmə skriptləri panel �
 tavan), «Yekun» sətirlər + apellyasiya / RİM rejimi (`_modebar.html`), qaralama + «Yadda saxlamamısınız»
 (`exam_score_entry_draft.js`), yekun təsdiq dialoqu (yoxlanma tarixi). Ekran yalnız daxili şəbəkədə açılır.{% endcomment %}
 <link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry.css' %}?v=20260914-3">
-<link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry_w2.css' %}?v=20260930-resp">
+<link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry_w2.css' %}?v=20261119-doc">
 <link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry_lock.css' %}?v=20260926-2">
 <link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry_assessment.css' %}?v=20261025-1">
 <link rel="stylesheet" href="{% static 'accounts/css/exam_score_entry_appeal.css' %}?v=20261118-1">
@@ -50,6 +50,7 @@ tavan), «Yekun» sətirlər + apellyasiya / RİM rejimi (`_modebar.html`), qara
      data-correction-mode="{% if s.correction_mode %}1{% else %}0{% endif %}"
      data-submission-required="{% if s.submission_required %}1{% else %}0{% endif %}"
      data-doc-optional="{% if superadmin_doc_waiver %}1{% else %}0{% endif %}"
+     data-appeal-doc-required="{% if s.appeal_document_required %}1{% else %}0{% endif %}"
      data-assessment="{{ s.assessment|default:'' }}"
      data-offering="{% if s.offering %}{{ s.offering.id }}{% endif %}"
      data-draft-url="{{ s.draft_url|default:'' }}"
@@ -187,7 +188,7 @@ tavan), «Yekun» sətirlər + apellyasiya / RİM rejimi (`_modebar.html`), qara
      data-cols-blocked="{% trans 'Sütunların cəmi tavana bərabər deyil — əvvəlcə sütunları düzəldin.' context 'registrar.exam_score_entry' %}"
      data-col-remove="{% trans 'Sütunu sil' context 'registrar.exam_score_entry' %}"
      data-col-max="{% trans 'Sütunun maksimum balı' context 'registrar.exam_score_entry' %}"
-     data-mode-appeal="{% trans 'Apellyasiya rejimi: «Yekun» ballar açıldı. Yadda saxlayanda apellyasiya sənədi məcburidir.' context 'registrar.exam_score_entry' %}"
+     data-mode-appeal="{% if s.appeal_document_required %}{% trans 'Apellyasiya rejimi: «Yekun» ballar açıldı. Yadda saxlayanda apellyasiya sənədi məcburidir.' context 'registrar.exam_score_entry' %}{% else %}{% trans 'Apellyasiya rejimi: «Yekun» ballar açıldı. Sənəd və qeyd istəyə bağlıdır.' context 'registrar.exam_score_entry' %}{% endif %}"
      data-mode-correction="{% trans 'RİM təqdimatı rejimi: «Yekun» ballar açıldı. Yadda saxlayanda səbəb, qeyd və sənəd məcburidir.' context 'registrar.exam_score_entry' %}"
      data-need-appeal="{% trans 'Apellyasiya ilə dəyişiklik üçün apellyasiya sənədini seçin.' context 'registrar.exam_score_entry' %}"
      data-need-checked-on="{% trans 'İmtahanın yoxlanma tarixini seçin (gələcək tarix olmaz).' context 'registrar.exam_score_entry' %}"
@@ -202,7 +203,7 @@ tavan), «Yekun» sətirlər + apellyasiya / RİM rejimi (`_modebar.html`), qara
 <script defer src="{% static 'accounts/js/exam_score_entry_keys.js' %}?v=20261118-1"></script>
 <script defer src="{% static 'accounts/js/exam_score_entry_columns.js' %}?v=20261117-1"></script>
 <script defer src="{% static 'accounts/js/exam_score_entry_appeal.js' %}?v=20261118-1"></script>
-<script defer src="{% static 'accounts/js/exam_score_entry_confirm.js' %}?v=20261117-1"></script>
+<script defer src="{% static 'accounts/js/exam_score_entry_confirm.js' %}?v=20261119-doc"></script>
 <script defer src="{% static 'accounts/js/exam_score_entry_nav.js' %}?v=20261117-1"></script>
 <script defer src="{% static 'accounts/js/exam_score_entry_draft.js' %}?v=20261118-1"></script>
 <script defer src="{% static 'accounts/js/profile/exam_score_import.js' %}?v=20261117-1"></script>
