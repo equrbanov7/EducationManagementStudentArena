@@ -20,6 +20,7 @@ from .extraction import (
     _merge_bare_question_numbers,
     _normalize_cyrillic_option_labels,
 )
+from .line_join import _join_line, _join_option, _start_block_option
 from .math_text import sanitize_math_text
 from .media_markers import extract_media_refs
 from .option_markers import _option_from_match
@@ -80,6 +81,7 @@ def _finish_question(current: dict | None) -> dict | None:
 
     current["answer_mode"] = "multiple" if len(current["correct"]) > 1 else "single"
     current.pop("_answerline_correct", None)
+    current.pop("_block_options", None)
     return current
 
 
@@ -233,10 +235,11 @@ def _parse_labeled_end_question_block(lines: list[str], fallback_no: int) -> dic
         m_opt = OPTION_RE.match(line)
         if m_opt:
             if current is None:
-                question_text = " ".join(question_lines).strip()
-                if not question_text:
+                kept = [ln for ln in question_lines if ln.strip()]
+                if not kept:
                     return None
-                q_no, q_text = _strip_question_number(question_text, fallback_no)
+                q_no, q_text = _strip_question_number(kept[0], fallback_no)
+                q_text = "\n".join([q_text, *kept[1:]]).strip()
                 current = _new_question(q_no, q_text)
 
             label, text, star = _option_from_match(m_opt)
@@ -247,11 +250,11 @@ def _parse_labeled_end_question_block(lines: list[str], fallback_no: int) -> dic
             continue
 
         if current is not None and current_opt_label:
-            current["options"][current_opt_label] += " " + line.strip()
+            current["options"][current_opt_label] = _join_option(current, current_opt_label, line)
         elif current is not None:
-            current["text"] += " " + line.strip()
+            current["text"] = _join_line(current["text"], line)
         else:
-            question_lines.append(line.strip())
+            question_lines.append(line.rstrip())
 
     return _finish_question(current)
 
@@ -532,6 +535,10 @@ def parse_bulk_mcq(raw_text: str):
             current["_answerline_correct"] = uniq
             continue
 
+        bare_label = _start_block_option(current, line) if current else None
+        if bare_label:
+            current_opt_label, state = bare_label, IN_OPT
+            continue
         # OPTION?
         m_opt = OPTION_RE.match(line)
         if m_opt and current:
@@ -576,9 +583,9 @@ def parse_bulk_mcq(raw_text: str):
 
             # Əks halda bu sətir ya sualın davamıdır, ya da variantın davamıdır
             if state == IN_OPT and current_opt_label:
-                current["options"][current_opt_label] += " " + line.strip()
+                current["options"][current_opt_label] = _join_option(current, current_opt_label, line)
             else:
-                current["text"] += " " + line.strip()
+                current["text"] = _join_line(current["text"], line)
         else:
             # OUTSIDE ikən sual formatına düşməyən mətn → ignore
             pass
