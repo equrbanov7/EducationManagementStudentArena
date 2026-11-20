@@ -27,7 +27,7 @@ from django.utils.translation import pgettext_lazy
 from core.models import TimeStampedModel, UUIDModel
 from core.upload_security import FileUploadValidator
 
-from .corrections import CorrectionReason, ImmutableCorrectionEvidence
+from .corrections import CorrectionReason, ImmutableCorrectionEvidence, storage_name
 
 #: Sübut faylının ölçü limiti — jurnal düzəliş sənədləri ilə EYNİ (10 MB).
 _MAX_EVIDENCE_MB = 10
@@ -40,7 +40,7 @@ EVIDENCE_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif
 
 def exam_score_evidence_path(instance, filename: str) -> str:
     """Qorunan media altında org-scoped saxlama yolu."""
-    return f"exam_score_entries/{instance.organization_id}/{filename}"
+    return f"exam_score_entries/{instance.organization_id}/{storage_name(filename)}"
 
 
 class ExamScoreEntryKind(models.TextChoices):
@@ -247,7 +247,7 @@ def exam_score_sheet_evidence_prefix(organization_id) -> str:
 
 def exam_score_sheet_path(instance, filename: str) -> str:
     """Skan edilmiş protokol/vərəq — qorunan media altında org-scoped yol."""
-    return f"{exam_score_sheet_evidence_prefix(instance.organization_id)}{filename}"
+    return f"{exam_score_sheet_evidence_prefix(instance.organization_id)}{storage_name(filename)}"
 
 
 class ExamScoreSheet(UUIDModel, TimeStampedModel):

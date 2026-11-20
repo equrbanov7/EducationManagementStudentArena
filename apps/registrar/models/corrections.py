@@ -13,6 +13,8 @@ Servis qatı: ``apps/registrar/corrections.py`` (2 saatlıq kilidi
 
 from __future__ import annotations
 
+from uuid import uuid4
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -46,26 +48,40 @@ class ImmutableCorrectionEvidence(UUIDModel, TimeStampedModel):
         raise ValidationError("Correction evidence cannot be deleted.")
 
 
+def storage_name(filename: str) -> str:
+    """Yüklənən sənədin saxlama adı — ``<32 hex><uzantı>`` (istifadəçinin adı yolda saxlanmır).
+
+    Prod 2026-11-20: «30.09.2026 Birləşmiş … Payız son.pdf» kimi uzun + nöqtəli ad ``FileField`` 100 simvol
+    limitini keçirdi; Django ``get_available_name`` ilk nöqtədən sonrasını uzantı sayıb kökü kəsə bilmir →
+    ``SuspiciousFileOperation`` → HTML 400. Təsadüfi ad yolu həmişə qısa saxlayır (``movement_document_path``
+    ilə eyni qayda); uzantı yalnız ≤10 hərf/rəqəmdirsə saxlanır.
+    """
+    _, dot, tail = str(filename or "").rpartition(".")
+    tail = tail.lower()
+    extension = f".{tail}" if dot and tail.isascii() and tail.isalnum() and len(tail) <= 10 else ""
+    return f"{uuid4().hex}{extension}"
+
+
 def correction_document_path(instance, filename: str) -> str:
     """Qorunan media altında saxlama yolu (org-scoped)."""
-    return f"journal_corrections/{instance.organization_id}/{filename}"
+    return f"journal_corrections/{instance.organization_id}/{storage_name(filename)}"
 
 
 def lesson_correction_document_path(instance, filename: str) -> str:
     """Dərs-səviyyə düzəliş sənədi üçün org-scoped saxlama yolu."""
-    return f"journal_lesson_corrections/{instance.organization_id}/{filename}"
+    return f"journal_lesson_corrections/{instance.organization_id}/{storage_name(filename)}"
 
 
 def selfwork_correction_document_path(instance, filename: str) -> str:
-    return f"journal_selfwork_corrections/{instance.organization_id}/{filename}"
+    return f"journal_selfwork_corrections/{instance.organization_id}/{storage_name(filename)}"
 
 
 def coursework_correction_document_path(instance, filename: str) -> str:
-    return f"journal_coursework_corrections/{instance.organization_id}/{filename}"
+    return f"journal_coursework_corrections/{instance.organization_id}/{storage_name(filename)}"
 
 
 def component_correction_document_path(instance, filename: str) -> str:
-    return f"journal_component_corrections/{instance.organization_id}/{filename}"
+    return f"journal_component_corrections/{instance.organization_id}/{storage_name(filename)}"
 
 
 class CorrectionField(models.TextChoices):
