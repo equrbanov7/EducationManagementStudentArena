@@ -73,7 +73,10 @@ def _cached_usage_counts(cache_key: str, builder):
 
 # Verilmiş attempt_id və question üçün options-ları random sırada qaytarır.
 def build_shuffled_options(attempt_id, question):
-    opts = list(question.options.all())
+    # Sıra deterministik olmalıdır: model-də ``ordering`` yoxdur, DB sətirləri
+    # hər sorğuda başqa sırada qaytara bilər — eyni toxum fərqli giriş sırası ilə
+    # fərqli nəticə verir və tələbə suala qayıdanda variantlar yerini dəyişirdi.
+    opts = sorted(question.options.all(), key=lambda option: option.pk)
     rnd = random.Random(f"{attempt_id}:{question.id}")  # nosec B311
     rnd.shuffle(opts)
     packed = []
