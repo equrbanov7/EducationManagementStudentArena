@@ -21,6 +21,7 @@ from .views import journal_hygiene as journal_hygiene_views
 from .views import journal_removals as journal_removals_views
 from .views import lessons_log_lazy as lessons_log_lazy_views
 from .views import network_zone_page
+from .views import remote_journal_access as remote_journal_access_views
 from .views import session_ping as session_ping_views
 from .views import subgroup_students as subgroup_students_views
 from .views import subgroup_students_export as subgroup_students_export_views
@@ -364,6 +365,17 @@ urlpatterns = [
     path("groups/lead/", group_lead_views.group_lead_action, name="group_lead_action"),
     # 2026-10-03: «Sistem tənzimləmələri» — saxlama (yalnız RİM rəhbəri / superadmin).
     path("system-settings/save/", views.system_settings_save, name="system_settings_save"),
+    # 2026-11-20: «Kənardan jurnal girişi» — namizəd axtarışı (GET) + ver / geri al (JSON POST); RİM rəhbəri.
+    path(
+        "system-settings/remote-journal/candidates/",
+        remote_journal_access_views.remote_journal_access_candidates,
+        name="remote_journal_access_candidates",
+    ),
+    path(
+        "system-settings/remote-journal/action/",
+        remote_journal_access_views.remote_journal_access_action,
+        name="remote_journal_access_action",
+    ),
     # 2026-10-10: «Jurnal təmizliyi» — siyahı (GET) + önizləmə/tətbiq/bərpa (tək JSON POST); RİM rəhbəri.
     path("journal-hygiene/rows/", journal_hygiene_views.journal_hygiene_rows, name="journal_hygiene_rows"),
     path("journal-hygiene/action/", journal_hygiene_views.journal_hygiene_action, name="journal_hygiene_action"),

@@ -13,6 +13,13 @@ from core.admin_auth import ADMIN_2FA_VERIFIED_USER_SESSION_KEY
 
 @override_settings(JOURNAL_REMOTE_USER_IDS=("41",), ADMIN_2FA_REQUIRED=False)
 class JournalRemoteAccessTest(SimpleTestCase):
+    def setUp(self):
+        # Kabinetdən verilən icazə (DB) burada yoxdur — mühit siyahısının qaydası təcrid olunur
+        # (DB yolu: test_remote_journal_access_2026_11_20.py).
+        patcher = patch("apps.accounts.services.remote_journal_access.has_active_grant", return_value=False)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def request(self, uid=41, path="/jurnal/", **fields):
         request = RequestFactory().get(path, REMOTE_ADDR="203.0.113.5")
         request.user = SimpleNamespace(pk=uid, is_authenticated=True, is_active=True, is_staff=False, **fields)

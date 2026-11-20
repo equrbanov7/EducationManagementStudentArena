@@ -216,6 +216,8 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/_legacy_grade_review.html" %}
             {% elif active_section == "system-settings" and 'system-settings' in allowed_sections %}
                 {% include "accounts/profile/sections/_system_settings.html" %}
+            {% elif active_section == "remote-journal-access" and 'remote-journal-access' in allowed_sections %}
+                {% include "accounts/profile/sections/_remote_journal_access.html" %}
             {% elif active_section == "journal-hygiene" and 'journal-hygiene' in allowed_sections %}
                 {% include "accounts/profile/sections/_journal_hygiene.html" %}
             {% elif active_section == "journal-removals" and 'journal-removals' in allowed_sections %}

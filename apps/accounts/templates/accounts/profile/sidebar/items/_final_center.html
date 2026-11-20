@@ -3,13 +3,16 @@
 DEYİL, ayrıca səhifədir (sidebar-sız öz ekranı; ↗ nişanı bunu bildirir). Bölmə açarı YOXDUR, qapı
 bayraqdır: imtahan mərkəzi HƏMİŞƏ, müəllim-nəzarətçi yalnız təyin olunmuş oturumu olduqda
 (`role_capabilities.can_access_final_center`). Bu bayraq sidebar düzümü seçimində də nəzərə alınır
-(`profile_shell.resolve_sidebar_layout`).{% endcomment %}
+(`profile_shell.resolve_sidebar_layout`).
+
+2026-11-20 (sahib): «o zallar olsun gərək adı» — bənd səhifənin öz başlığı ilə adlanır
+(«İmtahan zalları», `room_list.html` h1-i ilə eyni msgid); əvvəl «İmtahan Nəzarət Sistemi» idi.{% endcomment %}
 {% if role_capabilities.can_access_final_center %}
 <li class="sidebar-menu-item">
     <a href="{% url 'exams:exam_center_room_list' %}"
        class="sidebar-menu-link">
         {% nav_icon "monitor-check" "sidebar-menu-icon" %}
-        <span class="sidebar-menu-text">{% trans 'İmtahan Nəzarət Sistemi' %}</span>
+        <span class="sidebar-menu-text">{% trans 'İmtahan zalları' %}</span>
         {% nav_icon "external-link" "sidebar-menu-ext" %}
     </a>
 </li>
