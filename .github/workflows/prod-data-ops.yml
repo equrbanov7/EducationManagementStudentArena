@@ -387,6 +387,11 @@
 #   remove_colloquium_note_20261118 — MR-000537: Səkinə Abasovanın iki köçürülmüş sillabusunun (a4694393, 9a9da58b)
 #       `assess.note` mətnindən «colloquium» sözü olan cümlələr silinir (köhnə bal qaydası). `batch` boş — sil (apply
 #       `batch=colloq-…` çap edir); `batch` = colloq-… — geri. Loga YALNIZ saylar.
+#   create_quiz_test_accounts_20261120 — sahib 2026-11-20: quiz üçün 30 MÜVƏQQƏTİ test tələbə hesabı (testuser1 …
+#       testuser30, parol koddadır — sahibin istəyi), hamısı yeni kök «TestQrup» qrupunda (arxiv test proqramı, enrolled
+#       qeyd); ilk-giriş / OTP / profil tamamlama qapısı yoxdur. İdempotent (parol + blok yenilənir). `batch` boş —
+#       yarat (apply `batch=quiztest-…` çap edir); `batch=undo` — bu əmrin yaratdıqlarını sil (apply=true +
+#       confirm=APPLY; apply=false — önizləmə). Loga YALNIZ saylar (`quiz_test:`), parol çap olunmur.
 #   fill_empty_syllabus_weeks_20261119 — sahib 2026-11-19: bütün cari jurnallar üzrə həll olunan dosyenin həftəlik planı
 #       boşdursa (öz / semestr / baza dosyesi) jurnalın göstərdiyi ehtiyat mənbə + jurnalın saatı ilə doldurulur; mövzulu
 #       amma plan saatsız versiyaya yalnız saat yazılır; paylaşılan / qarışıq saat / qarışıq müəllim — yalnız sayılır.
@@ -635,6 +640,7 @@ on:
           - move_politologiya_rows_20261109
           - move_psixologiya_rows_20261115
           - move_ekologiya_rows_20261117
+          - create_quiz_test_accounts_20261120
           - publish_reviewed_syllabi_20261110
           - fix_azdili_journals_20261110
           - apply_lab_splits_20261108
@@ -1903,6 +1909,18 @@ jobs:
                 echo "batch yalnız 'undo' ola bilər" >&2; exit 2
               fi
               ;;
+            create_quiz_test_accounts_20261120)
+              # Sahib 2026-11-20: quiz üçün 30 müvəqqəti test hesabı (testuser1..30, TestQrup; sabitlər koddadır).
+              # batch boş — yarat / yenilə; batch=undo — bu əmrin yaratdıqlarını sil (apply=true + confirm=APPLY).
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [ "$BATCH" = "undo" ]; then
+                args+=(--undo)
+              elif [ -n "$BATCH" ]; then
+                echo "batch yalnız 'undo' ola bilər" >&2; exit 2
+              fi
+              ;;
             move_groups_to_program_specialty)
               # Sahib 2026-11-12: qrup tələbələrinin proqram ixtisasının (və məktəbinin) altına — müraciət düzgün
               # dekanlığa getsin. teacher = yalnız bu qrup (dəqiq ad, boş = hamısı); batch=groupmove-… = həmin
@@ -2867,6 +2885,17 @@ jobs:
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "create_quiz_test_accounts_20261120" ]; then
+            # Loga YALNIZ «quiz_test:» sətirləri (saylar, rejim, paket id — parol / ad yoxdur) və rədd kodu.
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^quiz_test: [a-z_]+=[a-z0-9_-]+( [a-z_]+=[a-z0-9_-]+)*$' "$RUNNER_TEMP/out.log" | head -n 20 > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_0-9]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
               rm -f "$RUNNER_TEMP/out.log"
               exit "$status"
             fi

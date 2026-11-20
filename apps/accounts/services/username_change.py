@@ -58,8 +58,8 @@ RESERVED_USERNAMES = frozenset(
         "emsarena", "help", "helpdesk", "hostmaster", "hr", "info", "kadr", "mail", "moderator", "muhasib",
         "noreply", "no-reply", "none", "null", "operator", "ops", "owner", "postmaster", "qku", "rector",
         "recovery", "registrar", "rektor", "rim", "root", "security", "staff", "superadmin", "superuser",
-        "support", "sys", "sysadmin", "system", "test", "undefined", "user", "verification", "wcu", "webmaster",
-        "www",
+        "support", "sys", "sysadmin", "system", "test", "testuser", "undefined", "user", "verification", "wcu",
+        "webmaster", "www",
     }
 )  # fmt: skip
 #: Kodda XÜSUSİ mənası olan prefikslər (bax modul sənədi).
