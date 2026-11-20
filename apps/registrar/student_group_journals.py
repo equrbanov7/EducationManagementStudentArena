@@ -77,7 +77,7 @@ def sync_student(*, organization, actor, student_id, counts, period=None) -> Non
         if elsewhere:
             counts["active_in_other_journal_skipped"] += 1
             continue
-        if is_exempt_from_subject(record, period, offering.subject_id):
+        if is_exempt_from_subject(record, period, offering.subject_id, offering_id=offering.pk):
             counts["exempt_skipped"] += 1
             continue
         with transaction.atomic():

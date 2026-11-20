@@ -183,6 +183,28 @@ class SubjectExemptFlowTest(_ExemptBase):
             type(self.offering).objects.filter(pk=self.offering.pk).update(is_active=False)
             self.assertFalse(is_exempt_from_subject(*args))
 
+    def test_mistake_removal_blocks_only_that_journal(self):
+        """2026-11-20 (MR-000183): «Səhv əlavə olunub» yalnız həmin jurnala qayıtmağı bloklayır, başqa jurnala yox."""
+        from apps.registrar.subject_exempt import is_exempt_from_subject
+
+        self.assertEqual(self._exempt(removal_reason="added_by_mistake").status_code, 200)
+        with bypass_rls():
+            record = StudentAcademicRecord.objects.get(organization=self.org, student=self.student)
+            args = (record, self.offering.period, self.offering.subject_id)
+            self.assertTrue(is_exempt_from_subject(*args, offering_id=self.offering.pk))
+            self.assertFalse(is_exempt_from_subject(*args))  # başqa (məs. yeni qrupun) jurnalı / intensiv
+            self.assertFalse(is_exempt_from_subject(*args, offering_id=self.math_enrollment.offering_id))
+
+    def test_real_exemption_still_blocks_every_journal(self):
+        from apps.registrar.subject_exempt import is_exempt_from_subject
+
+        self.assertEqual(self._exempt().status_code, 200)  # subject_substitution
+        with bypass_rls():
+            record = StudentAcademicRecord.objects.get(organization=self.org, student=self.student)
+            args = (record, self.offering.period, self.offering.subject_id)
+            self.assertTrue(is_exempt_from_subject(*args))
+            self.assertTrue(is_exempt_from_subject(*args, offering_id=self.math_enrollment.offering_id))
+
     def test_journal_page_lists_exempted_and_hides_row(self):
         self._exempt()
         page = self._client(self.coordinator).get(reverse("registrar:journal_detail", args=[self.offering.id]))
