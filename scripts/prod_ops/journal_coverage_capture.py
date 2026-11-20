@@ -236,6 +236,7 @@ def collect():
     for o in data["offerings"]:
         ids_by_off[o["id"]].update(by_key[(o["period_id"], o["subject_id"], o["group_id"])])
     teacher_ids = set().union(*ids_by_off.values())
+    teacher_ids.update(a["teacher_id"] for a in data["assignments"] if a["teacher_id"] and a["hours"] > 0)
     teacher_ids.update(r["entered_by_id"] for r in data["authors"] if r["entered_by_id"])
     recipients = {
         r["id"] for r in data["roles"] if r["name"] in {"chair_head", "lab_assistant", "tutor", "program_coordinator"}
