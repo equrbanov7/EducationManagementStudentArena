@@ -88,6 +88,7 @@ _NAV_ICONS = {
     "subgroup-placement": "fa-user-plus",
     "credit-recognition": "fa-earth-europe",
     "journal-removals": "fa-user-minus",
+    "remote-journal-access": "fa-globe",
     "subgroup-students": "fa-users-viewfinder",
     "lab-groups": "fa-flask",
     "teaching-appeals": "fa-scale-balanced",

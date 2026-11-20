@@ -153,7 +153,9 @@ def attempt_timeline(attempt, *, limit: int = TIMELINE_LIMIT) -> list:
                 "label": str(incident.get_event_type_display()),
                 "severity": incident.severity,
                 "at": incident.timestamp,
-                "counts": incident.event_type in VIOLATION_EVENT_TYPES,
+                # 2026-11-20: eyni epizodun təkrarı / kilid altındakı hadisə sayğaca düşmür (metadata.counted).
+                "counts": incident.event_type in VIOLATION_EVENT_TYPES
+                and (incident.metadata if isinstance(incident.metadata, dict) else {}).get("counted") is not False,
             }
         )
     logs = ProctoringLog.objects.filter(exam_attempt_id=attempt.pk).order_by("-timestamp", "-id")[:limit]

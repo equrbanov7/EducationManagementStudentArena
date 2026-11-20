@@ -1,0 +1,32 @@
+/* «Kənardan jurnal girişi» — RİM kabinet bölməsi (sahib 2026-11-20).
+ * Şablon: accounts/profile/sections/_remote_journal_access.html */
+
+.rja { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+
+.rja-add__body {
+    display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1.4fr) auto;
+    gap: 12px; align-items: end;
+}
+.rja-add__body .ems-field { margin: 0; min-width: 0; }
+.rja-add__actions { display: flex; justify-content: flex-end; }
+.rja-add__hint { margin: 0; padding: 0 16px 14px; }
+
+.rja-table td, .rja-table th { vertical-align: top; }
+.rja-strong { display: block; font-weight: 700; color: var(--ems-neutral-800); overflow-wrap: anywhere; }
+.rja-muted { display: block; font-size: 12px; color: var(--ems-neutral-500); overflow-wrap: anywhere; }
+.rja-note { max-width: 320px; white-space: pre-line; overflow-wrap: anywhere; font-size: 12.5px; }
+
+.rja-badge {
+    display: inline-flex; align-items: center; margin-top: 4px; padding: 2px 8px; border-radius: 999px;
+    font-size: 11.5px; font-weight: 700; border: 1px solid var(--ems-warning-bd);
+    background: var(--ems-warning-bg); color: var(--ems-warning-800);
+}
+.rja-badge--env {
+    margin-top: 0; border-color: var(--ems-primary-200); background: var(--ems-primary-50); color: var(--ems-primary-700);
+}
+
+@media (max-width: 860px) {
+    .rja-add__body { grid-template-columns: minmax(0, 1fr); }
+    .rja-add__actions { justify-content: stretch; }
+    .rja-add__actions .ems-btn { width: 100%; justify-content: center; }
+}

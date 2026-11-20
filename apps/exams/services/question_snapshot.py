@@ -26,7 +26,7 @@ def _option_snapshot(opt):
 def build_question_snapshot(question, options=None):
     """Bir sualın tam çatdırılma snapshot-u (dict)."""
     if options is None:
-        options = list(question.options.all())
+        options = sorted(question.options.all(), key=lambda option: option.pk)
     image = getattr(question, "image", None)
     video = getattr(question, "video", None)
     return {
@@ -91,7 +91,7 @@ def delivered_question_view(answer):
         "video": question.video.name if getattr(question, "video", None) else "",
         "points": getattr(question, "points", 1),
         "answer_mode": getattr(question, "answer_mode", "") or "",
-        "options": [_option_snapshot(o) for o in question.options.all()],
+        "options": [_option_snapshot(o) for o in sorted(question.options.all(), key=lambda option: option.pk)],
         "from_snapshot": False,
     }
 

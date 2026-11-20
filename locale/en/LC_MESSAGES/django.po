@@ -120692,3 +120692,202 @@ msgstr ""
 msgctxt "registrar.guest_roster"
 msgid "Sənəd saxlanıla bilmədi — faylı yenidən yükləyin."
 msgstr "The document could not be saved — please upload the file again."
+
+msgctxt "profile.section"
+msgid "Kənardan jurnal girişi"
+msgstr "Remote journal access"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Hesab tapılmadı və ya aktiv deyil."
+msgstr "Account not found or inactive."
+
+msgctxt "accounts.remote_journal_access"
+msgid ""
+"Bu hesaba kənardan jurnal girişi verilə bilməz (tələbə və ya üzvlüyü "
+"yoxdur)."
+msgstr ""
+"Remote journal access cannot be granted to this account (student or no "
+"membership)."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Bu hesab artıq siyahıdadır."
+msgstr "This account is already on the list."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Bu icazə artıq geri alınıb."
+msgstr "This access has already been revoked."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Bu əməl yalnız RİM rəhbəri üçündür."
+msgstr "This action is only for the head of the RIM."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Kənardan jurnal girişi yalnız RİM rəhbəri üçündür."
+msgstr "Remote journal access is only for the head of the RIM."
+
+#, python-format
+msgctxt "accounts.remote_journal_access"
+msgid ""
+"%(name)s universitet şəbəkəsindən kənarda da jurnala girə biləcək. Digər "
+"icazələri dəyişmir."
+msgstr ""
+"%(name)s will be able to open the journal outside the university network "
+"too. Other permissions stay the same."
+
+#, python-format
+msgctxt "accounts.remote_journal_access"
+msgid "%(name)s jurnala yalnız universitet şəbəkəsindən girə biləcək."
+msgstr ""
+"%(name)s will be able to open the journal only from the university network."
+
+msgctxt "accounts.remote_journal_access"
+msgid "artıq siyahıdadır"
+msgstr "already on the list"
+
+#, python-format
+msgctxt "accounts.remote_journal_access"
+msgid "%(name)s kənardan jurnala girə bilər."
+msgstr "%(name)s can now open the journal remotely."
+
+#, python-format
+msgctxt "accounts.remote_journal_access"
+msgid "%(name)s üçün kənardan jurnal girişi geri alındı."
+msgstr "Remote journal access was revoked for %(name)s."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Naməlum əməl."
+msgstr "Unknown action."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Əməl alınmadı. Bir azdan yenidən cəhd edin."
+msgstr "The action failed. Please try again shortly."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Kənardan jurnal girişi verilsin?"
+msgstr "Grant remote journal access?"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Əlavə et"
+msgstr "Add"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Kənardan jurnal girişi geri alınsın?"
+msgstr "Revoke remote journal access?"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Geri al"
+msgstr "Revoke"
+
+msgctxt "accounts.remote_journal_access"
+msgid ""
+"Universitet şəbəkəsindən kənarda jurnala yalnız bu siyahıdakı hesablar girə "
+"bilər."
+msgstr ""
+"Outside the university network, only the accounts on this list can open the "
+"journal."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Hesab əlavə et"
+msgstr "Add an account"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Şəxs"
+msgstr "Person"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Uyğun hesab tapılmadı."
+msgstr "No matching account found."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Ad, soyad və ya istifadəçi adı üzrə axtar"
+msgstr "Search by first name, last name or username"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Qeyd"
+msgstr "Note"
+
+msgctxt "accounts.remote_journal_access"
+msgid "(istəyə bağlı)"
+msgstr "(optional)"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Məs.: kafedra müdiri, evdən jurnal yazır"
+msgstr "E.g.: head of department, fills in the journal from home"
+
+msgctxt "accounts.remote_journal_access"
+msgid ""
+"Yalnız jurnal (və imtahan balının daxil edilməsi) kənardan açılır; hesabın "
+"rolu və digər icazələri dəyişmir. İnzibati (admin) hesablar üçün iki "
+"mərhələli təsdiq yenə tələb olunur."
+msgstr ""
+"Only the journal (and exam score entry) opens remotely; the account's role "
+"and other permissions do not change. Administrative (admin) accounts still "
+"need two-step verification."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Vəzifə / bölmə"
+msgstr "Position / unit"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Kim verib"
+msgstr "Granted by"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Əməl"
+msgstr "Action"
+
+msgctxt "accounts.remote_journal_access"
+msgid "İki mərhələli təsdiq"
+msgstr "Two-step verification"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Server tənzimləməsi"
+msgstr "Server setting"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Buradan dəyişmir"
+msgstr "Not editable here"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Siyahı boşdur"
+msgstr "The list is empty"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Kənardan jurnala heç kim girə bilmir. Yuxarıdan hesab əlavə edin."
+msgstr "Nobody can open the journal remotely. Add an account above."
+
+msgctxt "exams.template.take_exam"
+msgid "İnternet bağlantısı kəsildi"
+msgstr "Internet connection lost"
+
+msgctxt "exams.template.take_exam"
+msgid ""
+"Cavablarınız bu kompüterdə saxlanılır. Bağlantı qayıdanda tam ekrana qayıdın"
+" — bu pozuntu sayılmır."
+msgstr ""
+"Your answers are kept on this computer. Return to full screen when the "
+"connection is back — this is not counted as a violation."
+
+msgctxt "exams.template.take_exam"
+msgid "Bağlantı bərpa olundu"
+msgstr "Connection restored"
+
+msgctxt "exams.template.take_exam"
+msgid ""
+"Davam etmək üçün tam ekrana qayıdın. Bağlantının kəsilməsi pozuntu "
+"sayılmadı."
+msgstr ""
+"Return to full screen to continue. The connection loss was not counted as a "
+"violation."
+
+msgctxt "exams.proctoring.signal"
+msgid "İnternet bağlantısı kəsilmişdi (pozuntu sayılmadı)"
+msgstr "Internet connection was lost (not counted as a violation)"
+
+msgctxt "exams.supervision_room"
+msgid ""
+"Dayandırılma müddəti tələbənin vaxtından getmir — «Bərpa et» basılanda ona "
+"qaytarılır."
+msgstr ""
+"The paused time is not taken from the student — it is given back when you "
+"press “Resume”."

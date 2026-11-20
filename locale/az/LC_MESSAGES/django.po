@@ -119983,3 +119983,201 @@ msgstr ""
 msgctxt "registrar.guest_roster"
 msgid "Sənəd saxlanıla bilmədi — faylı yenidən yükləyin."
 msgstr "Sənəd saxlanıla bilmədi — faylı yenidən yükləyin."
+
+msgctxt "profile.section"
+msgid "Kənardan jurnal girişi"
+msgstr "Kənardan jurnal girişi"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Hesab tapılmadı və ya aktiv deyil."
+msgstr "Hesab tapılmadı və ya aktiv deyil."
+
+msgctxt "accounts.remote_journal_access"
+msgid ""
+"Bu hesaba kənardan jurnal girişi verilə bilməz (tələbə və ya üzvlüyü "
+"yoxdur)."
+msgstr ""
+"Bu hesaba kənardan jurnal girişi verilə bilməz (tələbə və ya üzvlüyü "
+"yoxdur)."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Bu hesab artıq siyahıdadır."
+msgstr "Bu hesab artıq siyahıdadır."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Bu icazə artıq geri alınıb."
+msgstr "Bu icazə artıq geri alınıb."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Bu əməl yalnız RİM rəhbəri üçündür."
+msgstr "Bu əməl yalnız RİM rəhbəri üçündür."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Kənardan jurnal girişi yalnız RİM rəhbəri üçündür."
+msgstr "Kənardan jurnal girişi yalnız RİM rəhbəri üçündür."
+
+#, python-format
+msgctxt "accounts.remote_journal_access"
+msgid ""
+"%(name)s universitet şəbəkəsindən kənarda da jurnala girə biləcək. Digər "
+"icazələri dəyişmir."
+msgstr ""
+"%(name)s universitet şəbəkəsindən kənarda da jurnala girə biləcək. Digər "
+"icazələri dəyişmir."
+
+#, python-format
+msgctxt "accounts.remote_journal_access"
+msgid "%(name)s jurnala yalnız universitet şəbəkəsindən girə biləcək."
+msgstr "%(name)s jurnala yalnız universitet şəbəkəsindən girə biləcək."
+
+msgctxt "accounts.remote_journal_access"
+msgid "artıq siyahıdadır"
+msgstr "artıq siyahıdadır"
+
+#, python-format
+msgctxt "accounts.remote_journal_access"
+msgid "%(name)s kənardan jurnala girə bilər."
+msgstr "%(name)s kənardan jurnala girə bilər."
+
+#, python-format
+msgctxt "accounts.remote_journal_access"
+msgid "%(name)s üçün kənardan jurnal girişi geri alındı."
+msgstr "%(name)s üçün kənardan jurnal girişi geri alındı."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Naməlum əməl."
+msgstr "Naməlum əməl."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Əməl alınmadı. Bir azdan yenidən cəhd edin."
+msgstr "Əməl alınmadı. Bir azdan yenidən cəhd edin."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Kənardan jurnal girişi verilsin?"
+msgstr "Kənardan jurnal girişi verilsin?"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Əlavə et"
+msgstr "Əlavə et"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Kənardan jurnal girişi geri alınsın?"
+msgstr "Kənardan jurnal girişi geri alınsın?"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Geri al"
+msgstr "Geri al"
+
+msgctxt "accounts.remote_journal_access"
+msgid ""
+"Universitet şəbəkəsindən kənarda jurnala yalnız bu siyahıdakı hesablar girə "
+"bilər."
+msgstr ""
+"Universitet şəbəkəsindən kənarda jurnala yalnız bu siyahıdakı hesablar girə "
+"bilər."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Hesab əlavə et"
+msgstr "Hesab əlavə et"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Şəxs"
+msgstr "Şəxs"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Uyğun hesab tapılmadı."
+msgstr "Uyğun hesab tapılmadı."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Ad, soyad və ya istifadəçi adı üzrə axtar"
+msgstr "Ad, soyad və ya istifadəçi adı üzrə axtar"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Qeyd"
+msgstr "Qeyd"
+
+msgctxt "accounts.remote_journal_access"
+msgid "(istəyə bağlı)"
+msgstr "(istəyə bağlı)"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Məs.: kafedra müdiri, evdən jurnal yazır"
+msgstr "Məs.: kafedra müdiri, evdən jurnal yazır"
+
+msgctxt "accounts.remote_journal_access"
+msgid ""
+"Yalnız jurnal (və imtahan balının daxil edilməsi) kənardan açılır; hesabın "
+"rolu və digər icazələri dəyişmir. İnzibati (admin) hesablar üçün iki "
+"mərhələli təsdiq yenə tələb olunur."
+msgstr ""
+"Yalnız jurnal (və imtahan balının daxil edilməsi) kənardan açılır; hesabın "
+"rolu və digər icazələri dəyişmir. İnzibati (admin) hesablar üçün iki "
+"mərhələli təsdiq yenə tələb olunur."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Vəzifə / bölmə"
+msgstr "Vəzifə / bölmə"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Kim verib"
+msgstr "Kim verib"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Əməl"
+msgstr "Əməl"
+
+msgctxt "accounts.remote_journal_access"
+msgid "İki mərhələli təsdiq"
+msgstr "İki mərhələli təsdiq"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Server tənzimləməsi"
+msgstr "Server tənzimləməsi"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Buradan dəyişmir"
+msgstr "Buradan dəyişmir"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Siyahı boşdur"
+msgstr "Siyahı boşdur"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Kənardan jurnala heç kim girə bilmir. Yuxarıdan hesab əlavə edin."
+msgstr "Kənardan jurnala heç kim girə bilmir. Yuxarıdan hesab əlavə edin."
+
+msgctxt "exams.template.take_exam"
+msgid "İnternet bağlantısı kəsildi"
+msgstr "İnternet bağlantısı kəsildi"
+
+msgctxt "exams.template.take_exam"
+msgid ""
+"Cavablarınız bu kompüterdə saxlanılır. Bağlantı qayıdanda tam ekrana qayıdın"
+" — bu pozuntu sayılmır."
+msgstr ""
+"Cavablarınız bu kompüterdə saxlanılır. Bağlantı qayıdanda tam ekrana qayıdın"
+" — bu pozuntu sayılmır."
+
+msgctxt "exams.template.take_exam"
+msgid "Bağlantı bərpa olundu"
+msgstr "Bağlantı bərpa olundu"
+
+msgctxt "exams.template.take_exam"
+msgid ""
+"Davam etmək üçün tam ekrana qayıdın. Bağlantının kəsilməsi pozuntu "
+"sayılmadı."
+msgstr ""
+"Davam etmək üçün tam ekrana qayıdın. Bağlantının kəsilməsi pozuntu "
+"sayılmadı."
+
+msgctxt "exams.proctoring.signal"
+msgid "İnternet bağlantısı kəsilmişdi (pozuntu sayılmadı)"
+msgstr "İnternet bağlantısı kəsilmişdi (pozuntu sayılmadı)"
+
+msgctxt "exams.supervision_room"
+msgid ""
+"Dayandırılma müddəti tələbənin vaxtından getmir — «Bərpa et» basılanda ona "
+"qaytarılır."
+msgstr ""
+"Dayandırılma müddəti tələbənin vaxtından getmir — «Bərpa et» basılanda ona "
+"qaytarılır."

@@ -356,6 +356,8 @@ def apply_permission_section_gates(
         (can_watch_legacy_grades, "legacy-grade-review"),
         # «Sistem tənzimləmələri» — sahib 2026-10-03: YALNIZ RİM rəhbəri və superadmin (açar qapısı yox).
         (bool(is_superadmin or is_rim_head), "system-settings"),
+        # «Kənardan jurnal girişi» — sahib 2026-11-20: «Sistem tənzimləmələri» ilə EYNİ qapı (RİM rəhbəri / superadmin).
+        (bool(is_superadmin or is_rim_head), "remote-journal-access"),
         # «Jurnal təmizliyi» — sahib 2026-10-10: eyni qapı; yazı servisdə `journal.correct` ilə yenidən yoxlanılır.
         (bool(is_superadmin or is_rim_head), "journal-hygiene"),
         # «Jurnaldan çıxarılmalar» — sahib 2026-11-04: səbəbli çıxarılma qeydləri; eyni qapı (yalnız oxu + ixrac).

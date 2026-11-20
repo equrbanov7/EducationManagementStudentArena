@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="{% static 'exams/css/coding_exam/_part3.css' %}?v=20260528-1">
     <link rel="stylesheet" href="{% static 'exams/css/exam_time_warning.css' %}?v=20260519-1">
     <link rel="stylesheet" href="{% static 'exams/css/coding_exam_media.css' %}?v=20260731-c3">
-    <link rel="stylesheet" href="{% static 'exams/css/take_exam/proctor.css' %}?v=20261001-proc">
+    <link rel="stylesheet" href="{% static 'exams/css/take_exam/proctor.css' %}?v=20261120-net">
     <link rel="stylesheet" href="{% static 'exams/css/take_exam/id_card.css' %}?v=20261013-idcard2">
 {% endblock %}
 
@@ -517,6 +517,10 @@ KLASSİK skriptdir — deferred `coding_exam.entry.js` modulundan əvvəl
             "resumeTitle": "{% filter escapejs %}{% trans 'supervision_resume_title' context 'exams.template.take_exam' %}{% endfilter %}",
             "resumeMsg": "{% filter escapejs %}{% trans 'supervision_resume_msg' context 'exams.template.take_exam' %}{% endfilter %}",
             "resumeBtn": "{% filter escapejs %}{% trans 'supervision_resume_btn' context 'exams.template.take_exam' %}{% endfilter %}",
+        "offlineTitle": "{% filter escapejs %}{% trans 'İnternet bağlantısı kəsildi' context 'exams.template.take_exam' %}{% endfilter %}",
+        "offlineMsg": "{% filter escapejs %}{% trans 'Cavablarınız bu kompüterdə saxlanılır. Bağlantı qayıdanda tam ekrana qayıdın — bu pozuntu sayılmır.' context 'exams.template.take_exam' %}{% endfilter %}",
+        "reconnectTitle": "{% filter escapejs %}{% trans 'Bağlantı bərpa olundu' context 'exams.template.take_exam' %}{% endfilter %}",
+        "reconnectMsg": "{% filter escapejs %}{% trans 'Davam etmək üçün tam ekrana qayıdın. Bağlantının kəsilməsi pozuntu sayılmadı.' context 'exams.template.take_exam' %}{% endfilter %}",
             "resumeCountdownLabel": "{% filter escapejs %}{% trans 'Bərpa etməyə qalan vaxt' %}{% endfilter %}",
             "lockedCountdownLabel": "{% filter escapejs %}{% trans 'Müəllim bərpa etməsə, imtahan avtomatik bitəcək' %}{% endfilter %}"
         }</script>
@@ -531,7 +535,7 @@ KLASSİK skriptdir — deferred `coding_exam.entry.js` modulundan əvvəl
              data-max-violations="{{ supervision.max_violations|default:'3' }}"
              data-supervision-status="{{ supervision.supervision_status|default:'active' }}"></div>
         <script src="{% static 'exams/js/exam_supervision/take_exam_supervision_bootstrap.js' %}?v=20260921-1"></script>
-        <script type="module" src="{% static 'exams/js/exam_supervision/exam_supervision.entry.js' %}?v=20261117-xtime"></script>
+        <script type="module" src="{% static 'exams/js/exam_supervision/exam_supervision.entry.js' %}?v=20261120-net"></script>
         {% include "exams/student/partials/_proctor_signals.html" %}
     {% endif %}
 {% endblock %}

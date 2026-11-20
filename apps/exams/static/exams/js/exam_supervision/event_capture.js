@@ -60,6 +60,12 @@ Object.assign(ExamSupervision, {
                 if (this._isInPreviewGrace()) {
                     return;
                 }
+                // 2026-11-20: bağlantı yoxdur / yenicə qayıdıb — çıxış pozuntu deyil (network.js).
+                if (this._isNetworkExempt && this._isNetworkExempt()) {
+                    this._noteNetworkEpisode("fsExit");
+                    if (this._netDown) this._showOfflineWarning();
+                    return;
+                }
                 // Only start grace timer if not already running
                 if (!this.graceTimer) {
                     this._showWarning();
@@ -69,6 +75,7 @@ Object.assign(ExamSupervision, {
             } else if (isFS) {
                 this._hideWarning();
                 this._clearGraceTimer();
+                if (this._onFullscreenRegained) this._onFullscreenRegained();
                 this._logEvent("fullscreen_restored");
             }
         },
@@ -82,6 +89,10 @@ Object.assign(ExamSupervision, {
                 if (this._isInPreviewGrace() || this._focusInsidePreview()) {
                     return;
                 }
+                if (this._isNetworkExempt && this._isNetworkExempt()) {
+                    this._noteNetworkEpisode("hidden");
+                    return;
+                }
                 this._logEvent("tab_switched");
                 this._incrementViolation();
             }
@@ -93,6 +104,10 @@ Object.assign(ExamSupervision, {
                 // Ignore blur events caused by the student's own alert()/
                 // confirm()/prompt() — they are still inside the exam page.
                 if (this._isInPreviewGrace() || this._focusInsidePreview()) {
+                    return;
+                }
+                if (this._isNetworkExempt && this._isNetworkExempt()) {
+                    this._noteNetworkEpisode("hidden");
                     return;
                 }
                 this._logEvent("window_blurred");

@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
 from apps.exams.constants import EXAM_LANGUAGE_CHOICES
-from apps.exams.domain.attempt_deadline import attempt_deadline_at, lazy_expiry_cutoff, write_window_closed
+from apps.exams.domain import attempt_deadline as _deadline
 from apps.exams.domain.grade_events import ExamGradeEventManager, _immutable_error
 from apps.exams.question_timer_protocol import default_question_timing
 from apps.exams.validators import validate_file_extension, validate_file_size, validate_zip_contents
@@ -246,7 +246,7 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
     @property
     def deadline_at(self):
         # Audit 2026-09-28 EX28-07: min(started_at + müddət, end_datetime) — bax attempt_deadline.
-        return attempt_deadline_at(self)
+        return _deadline.attempt_deadline_at(self)
 
     @property
     def score_percent(self):
@@ -261,10 +261,8 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
         return round(self.correct_count * 100 / total, 1)
 
     def is_time_limit_reached(self, *, at_time=None):
-        deadline = self.deadline_at
-        if deadline is None:
-            return False
-        return (at_time or timezone.now()) >= deadline
+        # 2026-11-20: əl ilə pauzada vaxt «donur» (tavana qədər) — bax attempt_deadline.time_limit_reached.
+        return _deadline.time_limit_reached(self, at_time=at_time or timezone.now())
 
     @property
     def is_resume_time_expired(self):
@@ -272,14 +270,16 @@ class ExamAttempt(AttemptGradingMixin, models.Model):
 
     def expire_if_time_limit_reached(self, *, at_time=None):
         # Audit 2026-09-28 EX28-04: defolt an ``now − grace`` — lazy GET/sweep grace-i pozmasın.
-        if self.is_finished or not self.is_time_limit_reached(at_time=at_time or lazy_expiry_cutoff()):
+        if self.is_finished or not self.is_time_limit_reached(at_time=at_time or _deadline.lazy_expiry_cutoff()):
             return False
         self.mark_finished(status="expired")
         return True
 
     def expire_if_write_window_closed(self, *, at_time=None):
         """POST yazı yolları: deadline və ya (müddətsizdə) ``end_datetime`` + grace keçibsə bağla."""
-        if self.is_finished or not write_window_closed(self, at_time=at_time or lazy_expiry_cutoff()):
+        if self.is_finished or not _deadline.write_window_closed(
+            self, at_time=at_time or _deadline.lazy_expiry_cutoff()
+        ):
             return False
         self.mark_finished(status="expired")
         return True

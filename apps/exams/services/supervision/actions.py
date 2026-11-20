@@ -6,6 +6,7 @@ from django.db import transaction
 from django.db.models import DateTimeField, ExpressionWrapper, F
 from django.utils import timezone
 
+from apps.exams.domain.attempt_deadline import MANUAL_PAUSE_MAX_SECONDS
 from apps.exams.features import exam_supervision_enabled, supervision_disabled_message
 from apps.exams.models import ExamAttempt, SupervisionIncident
 
@@ -25,7 +26,34 @@ _LOCKED_STATE_FIELDS = (
     "supervision_violation_count",
     "supervision_locked_at",
     "supervision_resumed_at",
+    "extra_time_seconds",
 )
+
+#: Müəllimin əl ilə pauzasının incident işarəsi (pauzanın başlama anı buradan oxunur).
+_MANUAL_PAUSE_ACTION = "teacher_temporary_lock"
+
+
+def _notify_after_commit(attempt_id, payload):
+    """WS xəbəri yalnız COMMIT-dən sonra (2026-11-20).
+
+    Prod-da ``ATOMIC_REQUESTS`` açıqdır: «resumed»/«locked» xəbəri tranzaksiya bağlanmamış gedirdi —
+    tələbə səhifəsi status sorğusunda hələ KÖHNƏ vəziyyəti görüb kilid ekranını yenidən aça, autosave
+    isə 423 ala bilirdi. Tranzaksiyadan kənarda ``on_commit`` dərhal icra olunur.
+    """
+    transaction.on_commit(lambda: _notify_student_via_ws(attempt_id, payload))
+
+
+def _manual_pause_seconds(attempt, now):
+    """Son əl ilə pauzanın davam etdiyi saniyə (tavanla); pauza qeydi yoxdursa 0."""
+    paused_at = (
+        SupervisionIncident.objects.filter(attempt_id=attempt.pk, teacher_action=_MANUAL_PAUSE_ACTION)
+        .order_by("-timestamp", "-id")
+        .values_list("timestamp", flat=True)
+        .first()
+    )
+    if paused_at is None:
+        return 0
+    return max(0, min(int((now - paused_at).total_seconds()), MANUAL_PAUSE_MAX_SECONDS))
 
 
 def _lock_fresh_state(attempt):
@@ -95,8 +123,15 @@ def _resume_locked(attempt, teacher, *, grant_extra_chance):
             raise ValueError("Student has already used their extra chance.")
 
     old_status = attempt.supervision_status
+    now = timezone.now()
     attempt.supervision_status = "resumed"
-    attempt.supervision_resumed_at = timezone.now()
+    attempt.supervision_resumed_at = now
+    # 2026-11-20 (sahib: «dayandırdığım tələbəni bərpa edəndə olmur»): müəllimin pauzası tələbənin vaxtını
+    # yeməməlidir — pauza müddəti fərdi əlavə vaxt kimi qaytarılır (deadline-ın tək mənbəyi, taymer WS/status
+    # ilə yenilənir). Pauza deadline-dan sonra bitibsə də tələbə dayandırıldığı andakı qalan vaxtı alır.
+    paused_seconds = _manual_pause_seconds(attempt, now) if is_manual_lock else 0
+    if paused_seconds:
+        attempt.extra_time_seconds = int(attempt.extra_time_seconds or 0) + paused_seconds
     # Teacher acted → stop any lock countdown and clear the manual-pause flag so
     # the sweep can no longer auto-finish this attempt and a later auto-lock is
     # handled on its own terms.
@@ -108,8 +143,11 @@ def _resume_locked(attempt, teacher, *, grant_extra_chance):
     # the teacher simply lets the student carry on.
     if grant_extra_chance and not is_manual_lock:
         attempt.supervision_extra_chances += 1
-        # Reset violation count to give student a fresh start
-        attempt.supervision_violation_count = max(0, attempt.supervision_violation_count - 1)
+        # 2026-11-20: sayğac limitdən YUXARI ola bilirdi (kilid altında da sayılırdı) — «-1»dən sonra da
+        # limitdə qalır, növbəti hərəkət dərhal yenidən kilidləyirdi. Əvvəl limitə endir, sonra bir vahid.
+        max_violations = config.get_max_total_violations() if config else attempt.supervision_violation_count
+        current = min(attempt.supervision_violation_count, max_violations)
+        attempt.supervision_violation_count = max(0, current - 1)
 
     attempt.status = "in_progress"
     attempt.save(
@@ -120,6 +158,7 @@ def _resume_locked(attempt, teacher, *, grant_extra_chance):
             "supervision_manual_lock",
             "supervision_extra_chances",
             "supervision_violation_count",
+            "extra_time_seconds",
             "status",
         ]
     )
@@ -146,18 +185,21 @@ def _resume_locked(attempt, teacher, *, grant_extra_chance):
             "teacher_username": teacher.username,
             "previous_status": old_status,
             "extra_chance_granted": grant_extra_chance,
+            "paused_seconds_credited": paused_seconds,
         },
         violation_count_at_time=attempt.supervision_violation_count,
         teacher_action=action_type,
     )
 
-    _notify_student_via_ws(
+    _notify_after_commit(
         attempt.id,
         {
             "action": "resumed",
             "supervision_status": "resumed",
             "violation_count": attempt.supervision_violation_count,
             "max_violations": config.get_max_total_violations() if config else 3,
+            # Taymer bərpa anında pauza vaxtını alır (cəm; brauzer yalnız artımı əlavə edir).
+            "extra_time_seconds": int(attempt.extra_time_seconds or 0),
         },
     )
 
@@ -212,10 +254,10 @@ def _pause_locked(attempt, teacher, *, reason):
             "display_reason": display_reason,
         },
         violation_count_at_time=attempt.supervision_violation_count,
-        teacher_action="teacher_temporary_lock",
+        teacher_action=_MANUAL_PAUSE_ACTION,
     )
 
-    _notify_student_via_ws(
+    _notify_after_commit(
         attempt.id,
         {
             "action": "locked",

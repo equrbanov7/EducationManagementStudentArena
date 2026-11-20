@@ -27,6 +27,13 @@ def delivered_selected_option_ids(answer) -> set[int]:
     return {option.id for option in answer.selected_options.all()}
 
 
+def _option_sort_key(option):
+    try:
+        return (0, int(option.get("id")))
+    except (TypeError, ValueError):
+        return (1, 0)
+
+
 def safe_delivered_question(answer):
     """Template-ə düzgün cavab metadatası daxil etməyən snapshot proyeksiyası.
 
@@ -37,7 +44,9 @@ def safe_delivered_question(answer):
     """
     delivered = delivered_question_view(answer)
     selected_ids = delivered_selected_option_ids(answer)
-    options = list(delivered.get("options") or [])
+    # Səhifə yüklənəndə (``build_shuffled_options``) və suala qayıdanda eyni sıra:
+    # hər iki yol id-yə görə sıralanmış siyahını eyni toxumla qarışdırır.
+    options = sorted(delivered.get("options") or [], key=_option_sort_key)
     random.Random(f"{answer.attempt_id}:{answer.question_id}").shuffle(options)  # nosec B311
 
     safe_options = []

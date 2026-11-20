@@ -47,6 +47,12 @@ LAB_GROUPS_SECTION_PARTIALS: dict[str, str] = {
     "lab-groups": "accounts/profile/sections/_lab_groups.html",
 }
 
+#: «Kənardan jurnal girişi» (sahib 2026-11-20) — RİM rəhbəri / superadmin; data ``{% remote_journal_access_panel %}``
+#: tag-ı ilə (qapı render vaxtı yenidən yoxlanır), əməllər JSON POST-dur (``accounts:remote_journal_access_action``).
+REMOTE_JOURNAL_ACCESS_SECTION_PARTIALS: dict[str, str] = {
+    "remote-journal-access": "accounts/profile/sections/_remote_journal_access.html",
+}
+
 #: ``sections_api``-a birləşən əlavə bölmələr (Əmək müqavilələri + Xarici nəticələrin tanınması).
 EXTRA_SECTION_PARTIALS: dict[str, str] = (
     HR_CONTRACT_SECTION_PARTIALS
@@ -56,6 +62,7 @@ EXTRA_SECTION_PARTIALS: dict[str, str] = (
     | JOURNAL_REMOVALS_SECTION_PARTIALS
     | SUBGROUP_STUDENTS_SECTION_PARTIALS
     | LAB_GROUPS_SECTION_PARTIALS
+    | REMOTE_JOURNAL_ACCESS_SECTION_PARTIALS
 )
 EXTRA_AJAX_SECTIONS: frozenset[str] = (
     HR_CONTRACT_AJAX_SECTIONS
@@ -65,6 +72,7 @@ EXTRA_AJAX_SECTIONS: frozenset[str] = (
     | frozenset(JOURNAL_REMOVALS_SECTION_PARTIALS)
     | frozenset(SUBGROUP_STUDENTS_SECTION_PARTIALS)
     | frozenset(LAB_GROUPS_SECTION_PARTIALS)
+    | frozenset(REMOTE_JOURNAL_ACCESS_SECTION_PARTIALS)
 )
 
 __all__ = [
@@ -74,6 +82,7 @@ __all__ = [
     "LAB_GROUPS_SECTION_PARTIALS",
     "RECOGNITION_AJAX_SECTIONS",
     "RECOGNITION_SECTION_PARTIALS",
+    "REMOTE_JOURNAL_ACCESS_SECTION_PARTIALS",
     "SUBGROUP_STUDENTS_SECTION_PARTIALS",
     "TEACHING_APPEALS_SECTION_PARTIALS",
     "UNIT_MATERIALS_SECTION_PARTIALS",

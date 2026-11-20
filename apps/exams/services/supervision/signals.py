@@ -34,6 +34,9 @@ CLIENT_SIGNAL_KINDS = {
     "programmatic_input": ("copy_paste", "high"),
     "fast_input": ("suspicious_activity", "medium"),
     "print_attempt": ("screenshot_attempt", "medium"),
+    # 2026-11-20: brauzerin özünün gördüyü internet kəsilməsi (bərpadan sonra bir dəfə göndərilir: müddət,
+    # bu arada tam ekrandan / səhifədən çıxıbmı). Kəsilmə POZUNTU sayılmır — nəzarətçi yalnız izi görür.
+    "network_offline": ("network_disconnect", "low"),
 }
 
 #: Yalnız serverin özünün yazdığı siqnallar (klientdən qəbul OLUNMUR).
@@ -63,6 +66,7 @@ SIGNAL_LABELS = {
     "programmatic_input": pgettext_lazy(_CTX, "Cavab skriptlə dəyişdirildi"),
     "fast_input": pgettext_lazy(_CTX, "Qeyri-adi sürətli yazı"),
     "print_attempt": pgettext_lazy(_CTX, "Çap cəhdi"),
+    "network_offline": pgettext_lazy(_CTX, "İnternet bağlantısı kəsilmişdi (pozuntu sayılmadı)"),
     "heartbeat_gap": pgettext_lazy(_CTX, "Nəzarət siqnalı müvəqqəti kəsilmişdi"),
     "concurrent_session": pgettext_lazy(_CTX, "İmtahan eyni anda iki səhifədə/cihazda açıqdır"),
     "ip_changed": pgettext_lazy(_CTX, "İmtahan zamanı IP ünvanı dəyişdi"),
