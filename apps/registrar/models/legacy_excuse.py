@@ -37,6 +37,8 @@ from django.utils.translation import pgettext_lazy
 from core.models import TimeStampedModel, UUIDModel
 from core.upload_security import FileUploadValidator
 
+from .corrections import storage_name
+
 SHA256_RE = r"\A[0-9a-f]{64}\Z"
 TOKEN_RE = r"\A[a-z0-9][a-z0-9._-]{0,63}\Z"
 sha256_validator = RegexValidator(SHA256_RE, "SHA-256 lowercase hex formatında olmalıdır.")
@@ -57,7 +59,7 @@ DOCUMENT_NAME_MAX_LENGTH = 64
 def legacy_excuse_document_path(instance, filename: str) -> str:
     """Qorunan media altında org-scoped saxlama yolu (sonradan qoşulan fayl)."""
 
-    return f"legacy_excuse_documents/{instance.organization_id}/{filename}"
+    return f"legacy_excuse_documents/{instance.organization_id}/{storage_name(filename)}"
 
 
 class LegacyExcuseMappingStatus(models.TextChoices):
