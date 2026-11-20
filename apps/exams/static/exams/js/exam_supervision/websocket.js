@@ -93,6 +93,11 @@ Object.assign(ExamSupervision, {
                     clearInterval(this._lockCountdownTimer);
                     this._lockCountdownTimer = null;
                 }
+                // 2026-11-20: kilid sorğusu dayanır — əks halda növbəti cavab («resumed») «davam et»
+                // pəncərəsini tələbə onu bağlayandan sonra İKİNCİ dəfə açırdı.
+                if (this._stopLockStatusPolling) this._stopLockStatusPolling();
+                // Əl ilə pauzanın müddəti əlavə vaxt kimi qaytarılır (cəm) — taymer yerində uzanır.
+                this._emitTimeExtended(data.extra_time_seconds);
                 var overlay = document.getElementById("supervision-locked-overlay");
                 if (overlay) overlay.remove();
                 var teacherLockOverlay = document.getElementById("supervision-teacher-lock-overlay");

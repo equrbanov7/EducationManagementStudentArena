@@ -4,6 +4,9 @@
     // Take-exam yazı yolu (autosave / qaralama / bitir) — draft.js-dən ayrılıb (2026-10-21,
     // modul ölçüsü). Lokal draft, növbə və input bağlamaları draft.js-dədir.
 
+    //: Şəbəkə xətasından sonra autosave-in yenidən cəhd fasiləsi (ms).
+    var OFFLINE_RETRY_MS = 5000;
+
     function appendFieldToFormData(formData, field) {
         if (!field || !field.name || field.disabled) {
             return;
@@ -320,7 +323,9 @@
                     if (ns.syncStatus) ns.syncStatus.failed(ctx, err);
 
                     if (effectiveAction === "autosave") {
-                        ns.draft.queueAutoSave(ctx);
+                        // 2026-11-20: şəbəkə xətası (fetch düşdü) → 30 s-lik adi fasilə yox, tez-tez yoxla ki,
+                        // bağlantı qayıdan kimi cavablar serverə çatsın (oflayn sorğu dərhal düşür, yük yoxdur).
+                        ns.draft.queueAutoSave(ctx, err && err.name === "TypeError" ? OFFLINE_RETRY_MS : undefined);
                     }
 
                     if (!effectiveOptions.silent || effectiveAction === "save_draft") {

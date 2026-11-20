@@ -125,6 +125,8 @@ class SupervisionIncidentApiHardeningTests(TestCase):
         response = self._post({"event_type": "tab_switched", "metadata": {"blob": "x" * 20000}})
         self.assertEqual(response.status_code, 413)
 
+    # 2026-11-20: ardıcıl iki hadisə ayrı epizod sayılsın (eyni epizodun təkrarı sayılmır — incidents.py).
+    @override_settings(EXAM_SUPERVISION_VIOLATION_EPISODE_SECONDS=0)
     def test_violation_count_increments_without_lost_updates(self):
         self.assertEqual(self._post({"event_type": "tab_switched", "metadata": {}}).status_code, 200)
         self.assertEqual(self._post({"event_type": "tab_switched", "metadata": {}}).status_code, 200)

@@ -94,3 +94,53 @@ html.proctor-guard .CodeMirror {
         display: none;
     }
 }
+
+/* ── İnternet kəsilməsi (2026-11-20, exam_supervision/network.js) ──
+   Bağlantı yoxdursa tam ekran xəbərdarlığında geri sayım/«pozuntu olacaq» sətri gizlənir (sayılmır);
+   bağlantı qayıdanda «tam ekrana qayıt» pəncərəsi göstərilir. */
+#supervision-warning-modal.is-offline #supervision-countdown,
+#supervision-warning-modal.is-offline #supervision-countdown + p {
+    display: none;
+}
+.supervision-net-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(15, 23, 42, .92);
+}
+.supervision-net-card {
+    width: 100%;
+    max-width: 500px;
+    padding: 2.25rem 2rem;
+    border-radius: 12px;
+    background: var(--ems-neutral-0, #fff);
+    color: var(--ems-neutral-700, #374151);
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .3);
+}
+.supervision-net-card__icon {
+    display: block;
+    margin-bottom: 1rem;
+    font-size: 3rem;
+    color: var(--ems-success-600, #16a34a);
+}
+.supervision-net-card__title {
+    margin: 0 0 .5rem;
+    color: var(--ems-neutral-900, #111827);
+    font-size: 1.4rem;
+}
+.supervision-net-card__text { margin: 0 0 1.25rem; }
+.supervision-net-card__btn {
+    padding: .75rem 2rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--ems-primary-600, #2563eb);
+    color: #fff;
+    font-size: 1.05rem;
+    cursor: pointer;
+}
+.supervision-net-card__btn:focus-visible { outline: 3px solid var(--ems-primary-300, #93c5fd); outline-offset: 2px; }

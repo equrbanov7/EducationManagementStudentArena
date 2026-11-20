@@ -1,11 +1,12 @@
 import ExamSupervision from "./state.js?v=20260914-w4r3";
-import "./ui.js?v=20260914-w4r3";
+import "./ui.js?v=20261120-net";
 import "./trial_notice.js?v=20260914-w4r3";
-import "./event_capture.js?v=20260914-w4r3";
-import "./scoring.js?v=20260914-w4r3";
-import "./api.js?v=20261117-xtime";
+import "./event_capture.js?v=20261120-net";
+import "./scoring.js?v=20261120-net";
+import "./api.js?v=20261120-net";
 import "./intervention.js?v=20260914-w4r3";
-import "./websocket.js?v=20261117-xtime";
+import "./websocket.js?v=20261120-net";
+import "./network.js?v=20261120-net";
 
 window.ExamSupervision = ExamSupervision;
 
