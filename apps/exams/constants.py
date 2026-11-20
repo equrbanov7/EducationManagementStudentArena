@@ -50,7 +50,8 @@ QUESTION_RE = re.compile(r"^\s*(\d+)\s*(?:\)\s*|\.(?!\d)\s*)(.+)\s*$")
 
 # Variant sətrləri: opsional düz-cavab markeri ("*" və ya "+"), sonra A-E, sonra ")"
 # və ya ".", sonra variant mətni. 2026-10-08 (müəllim rəyi S1): «+B)» də marker sayılır.
-OPTION_RE = re.compile(r"^\s*([*+])?\s*([A-E])\s*[\)\.]\s*(.+)\s*$", re.IGNORECASE)
+# 2026-11-20: «.» ayırıcısından sonra BOŞLUQ olmalıdır — «b.append(3)» / «a.copy()» kimi kod sətri variant deyil.
+OPTION_RE = re.compile(r"^\s*([*+])?\s*([A-E])\s*(?:\)|\.(?=\s))\s*(.+)\s*$", re.IGNORECASE)
 
 # Cavab sətrləri: "cavab"/"düzgün cavab"/"correct answer"/"ответ"/"cevap" ilə başlayır,
 # sonra ":" / "-" / "–" / "—", sonra A-E variantları (bir neçə ola bilər). 4 dil: az/en/ru/tr.

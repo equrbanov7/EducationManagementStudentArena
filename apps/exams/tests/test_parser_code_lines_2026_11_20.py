@@ -52,3 +52,17 @@ class ParserCodeLinesTest(SimpleTestCase):
         self.assertEqual(q["options"]["C"], "result = values")
         self.assertEqual(sorted(q["options"]), ["A", "B", "C", "D"])
         self.assertNotIn("_block_options", q)
+
+
+class ParserDotCodeLineTest(SimpleTestCase):
+    def test_method_call_line_is_not_option(self):
+        raw = (
+            "2. Nəticə nə olacaq?\na = [1, 2]\nb = a\nb.append(3)\nprint(a)\n\nA) [1, 2, 3]\nB) [1, 2]\nC) [3]\nD) []\n"
+        )
+        q = parse_bulk_mcq(raw)[0]
+        self.assertEqual(q["text"], "Nəticə nə olacaq?\na = [1, 2]\nb = a\nb.append(3)\nprint(a)")
+        self.assertEqual(q["options"]["B"], "[1, 2]")
+
+    def test_dot_label_with_space_still_option(self):
+        q = parse_bulk_mcq("1. Sual?\nA. bir\nB. iki\nC. üç\nD. dörd\n")[0]
+        self.assertEqual(q["options"], {"A": "bir", "B": "iki", "C": "üç", "D": "dörd"})
