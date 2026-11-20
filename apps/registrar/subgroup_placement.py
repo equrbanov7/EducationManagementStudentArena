@@ -128,7 +128,7 @@ def evaluate(*, student, offering, actor, release_source=False, record=None, che
     if outcome and outcome["passed"]:
         found.append(_error(errors.ALREADY_PASSED))
     plan["retake"] = bool(outcome and outcome["failed"])
-    if subject_exempt.is_exempt_from_subject(record, offering.period, offering.subject_id):
+    if subject_exempt.is_exempt_from_subject(record, offering.period, offering.subject_id, offering_id=offering.pk):
         found.append(_error(errors.SUBJECT_EXEMPT))
 
     capacity = runtime_settings.get_int("credits.journal_capacity")
