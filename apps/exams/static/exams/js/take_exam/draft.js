@@ -343,6 +343,13 @@
                     ns.draft.flushAutoSave(ctx);
                 }
             });
+            // 2026-11-20: Wi-Fi qoşulu, amma internet yox idi (brauzer `online` göndərmir) — nəzarət
+            // skripti bağlantının qayıtdığını serverin cavabından görür və xəbər verir (network.js).
+            document.addEventListener("ems:network-restored", function () {
+                if (ctx.hasUnsavedChanges) {
+                    ns.draft.flushAutoSave(ctx);
+                }
+            });
             window.addEventListener("offline", function () {
                 ns.draft.persistLocalDraft(ctx);
             });

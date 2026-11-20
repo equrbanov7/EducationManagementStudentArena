@@ -22,7 +22,7 @@ from contextlib import contextmanager
 from unittest import mock
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -377,6 +377,8 @@ class SupervisionRoomTests(_QuizBase):
 
         self.assertEqual(response.status_code, 405)
 
+    # 2026-11-20: üç ayrı çıxış epizodu (eyni epizodun təkrarı sayılmır — incidents.py).
+    @override_settings(EXAM_SUPERVISION_VIOLATION_EPISODE_SECONDS=0)
     def test_student_lock_flow_is_resumable_end_to_end(self):
         """Tələbə pozuntu limitinə çatır → kilid → müəllim otaqdan bərpa edir → tələbə davam edir."""
         exam = self.make_exam()

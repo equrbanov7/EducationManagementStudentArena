@@ -24,6 +24,14 @@ Object.assign(ExamSupervision, {
                 headers: headers,
             })
                 .then(function (r) {
+                    // 2026-11-20: cavab gəldi → bağlantı var (network.js); fetch-in özü düşdüsə — yoxdur.
+                    if (self._markNetworkUp) self._markNetworkUp();
+                    return r;
+                }, function (err) {
+                    if (self._markNetworkDown) self._markNetworkDown("fetch");
+                    throw err;
+                })
+                .then(function (r) {
                     if (r.status === 304) {
                         return self._statusLastData;
                     }
@@ -59,6 +67,10 @@ Object.assign(ExamSupervision, {
                     if (data && data.extra_time_seconds !== undefined && self._emitTimeExtended) {
                         self._emitTimeExtended(data.extra_time_seconds);
                     }
+                    // Server sayğacı avtoritativdir (bağlantı kəsiləndən sonra brauzerinki fərqlənə bilər).
+                    if (data && data.violation_count !== undefined && self._applyServerViolations) {
+                        self._applyServerViolations(data.violation_count, data.max_violations);
+                    }
                     if (callback) callback(data);
                 })
                 .catch(function () {})
@@ -79,6 +91,7 @@ Object.assign(ExamSupervision, {
 
         _logEvent: function (eventType, metadata) {
             if (!this.logEndpoint) return;
+            var self = this;
             fetch(this.logEndpoint, {
                 method: "POST",
                 headers: {
@@ -92,7 +105,12 @@ Object.assign(ExamSupervision, {
                 }),
             })
                 .then(function (r) {
+                    if (self._markNetworkUp) self._markNetworkUp();
                     return r.json();
+                }, function (err) {
+                    // Hadisə serverə çatmadı → sayılmadı; bağlantı yoxdur rejimi (network.js).
+                    if (self._markNetworkDown) self._markNetworkDown("fetch");
+                    throw err;
                 })
                 .then(
                     function (data) {
@@ -107,9 +125,7 @@ Object.assign(ExamSupervision, {
                             ExamSupervision._showTrialViolationNotice();
                         }
                         if (data.violation_count !== undefined) {
-                            ExamSupervision.violationCount = data.violation_count;
-                            ExamSupervision.maxViolations = data.max_violations || ExamSupervision.maxViolations;
-                            ExamSupervision._updateBadge();
+                            ExamSupervision._applyServerViolations(data.violation_count, data.max_violations);
                         }
                     }
                 )
@@ -129,6 +145,7 @@ Object.assign(ExamSupervision, {
             }
             if (this._stopLockStatusPolling) this._stopLockStatusPolling();
             if (this._stopBackgroundStatusWatch) this._stopBackgroundStatusWatch();
+            if (this._cancelReconnectGrace) this._cancelReconnectGrace();
             this._closeWebSocket();
         },
 });
