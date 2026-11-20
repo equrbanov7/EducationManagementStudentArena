@@ -2,7 +2,7 @@
 
 from types import SimpleNamespace
 
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q
 
 from core.search_text import tolerant_q
 
@@ -11,14 +11,27 @@ from .journal_access import can_edit_journal, can_observe_journal
 from .journal_list_scope import journal_list_base
 from .journal_shares import own_or_shared_q
 from .language_levels import LEVEL_RE, level_family, level_of
-from .models import AcademicStatus, CourseOffering, Enrollment, StudentAcademicRecord
+from .models import AcademicStatus, CourseOffering, Enrollment, Lesson, StudentAcademicRecord
+
+
+def _has_content_q():
+    """Jurnalda ən azı bir oxuyan (``enrolled``) tələbə və ya bir dərs var."""
+    return Q(Exists(Enrollment.objects.filter(offering_id=OuterRef("pk"), status=Enrollment.Status.ENROLLED))) | Q(
+        Exists(Lesson.objects.filter(offering_id=OuterRef("pk")))
+    )
 
 
 def existing_level_journals(user, organization):
-    queryset, _broad = journal_list_base(user, SimpleNamespace(organization=organization))
-    queryset = CourseOffering.objects.filter(organization=organization, is_active=True).filter(
-        Q(pk__in=queryset.values("pk")) | own_or_shared_q(user)
-    )
+    scoped, broad = journal_list_base(user, SimpleNamespace(organization=organization))
+    queryset = CourseOffering.objects.filter(organization=organization, is_active=True)
+    if broad:
+        # Səviyyə qruplarını idarə edən heyət (``journal.roster`` / ``journal.view`` əhatəsi) — əvvəlki kimi.
+        queryset = queryset.filter(Q(pk__in=scoped.values("pk")) | own_or_shared_q(user))
+    else:
+        # MR-000593 (2026-11-20): adi müəllim YALNIZ öz və aktiv payı olan jurnalları görür — təhvil/tarixçə
+        # yolu (``own_visible_queryset``) başqasının köhnə, boşalmış səviyyə jurnalını bura gətirirdi. Boş jurnal
+        # (oxuyan tələbəsi də, dərsi də yoxdur) heç göstərilmir.
+        queryset = queryset.filter(own_or_shared_q(user)).filter(_has_content_q())
     # Səviyyə fənləri DB-də süzülür (2026-11-01): korrektor/koordinator üçün əhatə
     # BÜTÜN jurnallardır (1700+) — hamısını çəkib Python-da yoxlamaq səhifəni ləngidirdi.
     # `level_of` dəqiq qaydası (yazı variantları) yenə Python-da təsdiqlənir.
