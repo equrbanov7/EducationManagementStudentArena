@@ -1,0 +1,64 @@
+name: WCU journal coverage (encrypted, read-only)
+on:
+  workflow_dispatch:
+    inputs:
+      actor:
+        description: "Aktiv superadmin istifadəçi adı; sabitWCU2026/27metadata ixracı"
+        type: string
+        required: true
+      journal_batch:
+        description: "Optional pinned chair-cells-NNN read-only journal audit batch"
+        type: string
+        required: false
+        default: ""
+      journal_pack:
+        description: "Optional fixed journal-pack-NNN (19packs, at most5 sequential batches)"
+        type: string
+        required: false
+        default: ""
+permissions:
+  contents: read
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+jobs:
+  export:
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 20
+    env:
+      APP_CONTAINER: educationmanagementstudentarena-app-1
+      EXPORT_DIR: /tmp/wcu-workload-export-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - name: Mask validated operator and fixed export selection
+        run: python3 scripts/ops/journal_export_inputs.py
+      - name: Read fixed-tenant metadata and encrypt before disk
+        id: capture
+        run: |
+          set -euo pipefail
+          umask 077
+          mkdir -m 700 "$RUNNER_TEMP/wcu-workload-export"
+          docker exec "$APP_CONTAINER" mkdir -m 700 "$EXPORT_DIR"
+          docker cp scripts/data/wcu_workload_export_public.pem "$APP_CONTAINER:$EXPORT_DIR/public.pem"
+          test -z "$JOURNAL_PACK"
+          test -z "$JOURNAL_BATCH"
+          docker exec -i -e COVERAGE_ACTOR="$ACTOR" -e COVERAGE_PUBLIC_KEY="$EXPORT_DIR/public.pem" -e COVERAGE_OUTPUT="$EXPORT_DIR/snapshot.enc.json" "$APP_CONTAINER" python manage.py shell -c 'import sys; exec(compile(sys.stdin.read(), "journal_coverage_capture.py", "exec"), {"__name__": "__main__"})' < scripts/prod_ops/journal_coverage_capture.py
+          docker cp "$APP_CONTAINER:$EXPORT_DIR/snapshot.enc.json" "$RUNNER_TEMP/wcu-workload-export/snapshot.enc.json"
+          test -s "$RUNNER_TEMP/wcu-workload-export/snapshot.enc.json"
+          sha256sum "$RUNNER_TEMP/wcu-workload-export/snapshot.enc.json"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: wcu-journal-coverage-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/wcu-workload-export/snapshot.enc.json
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+      - name: Remove temporary encrypted artifacts and public key
+        if: always()
+        run: |
+          set -euo pipefail
+          docker exec "$APP_CONTAINER" rm -rf -- "$EXPORT_DIR" || true
+          rm -rf -- "$RUNNER_TEMP/wcu-workload-export" "$RUNNER_TEMP/wcu-workload-export-quarantine"
