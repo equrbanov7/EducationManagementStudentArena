@@ -29,6 +29,8 @@ sonra, köçürülmüş xana (``entered_by`` boş) isə həmişə kilidlidir (:f
 SAHİB 2026-10-26: kilid yalnız q/b və bala düşür — balsız i/e xanası pəncərədən sonra (köçürülmüş olsa da) YENİ
 qeyd kimi dəyişir (:class:`~journal_edit_windows.EntryRule`; müddət bitibsə ``LOCK_ENTRY``), kilid saatı yenidən
 başlayır (``created_at`` = dəyişiklik anı).
+SAHİB 2026-11-21: balsız i/e də öz müddətindən (``journal.presence_edit_minutes``, defolt 1 gün; ilk yazılışdan,
+köçürülmüş də) sonra donur — ``LOCK_PRESENCE`` (açar ``journal.presence_lock_enabled`` söndürülüdə 2026-10-26 qaydası).
 Kilidli xanaya FƏRQLİ dəyər gəlsə yazılmır və ``report=True`` cavabında ``locked`` (say) + ``locked_reason``
 («RİM-ə müraciət edib təqdimat yazın» mətni) qayıdır — view avtomatik yadda saxlamada 409 verir. Grid-in geri
 göndərdiyi DƏYİŞMƏYƏN dəyər kilid sayılmır. Toplu doldurma kilidli xanaya toxunmur (o, yalnız-oxu render olunur).
@@ -192,6 +194,7 @@ def save_marks(
     locked = 0
     locked_reason = ""
     lock_window = journal_edit_windows.mark_edit_window()
+    presence_window = journal_edit_windows.presence_edit_window()  # i/e müddəti (sahib 2026-11-21); söndürülü — None
     by_user_id = getattr(by_user, "pk", None)
     reason_required = 0  # «Data bərpası»: qapını keçməli, amma səbəbsiz gələn xanalar
     full_changes, to_clear, unlock_db = [], [], False
@@ -237,6 +240,7 @@ def save_marks(
                 mark,
                 now=now,
                 window=lock_window,
+                presence_window=presence_window,
                 entry_open=entry_open,
                 unsupported_score=mark.score is not None and not gradebook.lesson_allows_score(lesson),
             )
@@ -247,7 +251,9 @@ def save_marks(
                 continue
             if not full_edit or lock == journal_edit_windows.LOCK_CORRECTED:
                 locked += 1
-                locked_reason = locked_reason or journal_edit_windows.lock_message(lock, window=lock_window)
+                locked_reason = locked_reason or journal_edit_windows.lock_message(
+                    lock, window=lock_window, presence_window=presence_window
+                )
                 continue
             bypass = True
         if entry_rule is not None and mark is None:

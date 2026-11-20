@@ -268,11 +268,11 @@ SPECS: dict[str, Spec] = {
         ),
         Spec(
             "journal.mark_edit_minutes", "journal", "int", _setting("JOURNAL_MARK_EDIT_MINUTES", 15),
-            pgettext_lazy(_CTX, "q/b, i/e və balı dəyişmə müddəti"),
+            pgettext_lazy(_CTX, "q/b və balı dəyişmə müddəti"),
             pgettext_lazy(
                 _CTX,
-                "Müəllimin yazdığı q/b, i/e və bal İLK yazılışdan bu qədər dəqiqə sonra donur (defolt 15); sonra yalnız "
-                "RİM-in rəsmi düzəlişi. Köçürülmüş xana həmişə kilidlidir. Verilənlər bazası da eyni müddəti yoxlayır.",
+                "Müəllimin yazdığı q/b və bal İLK yazılışdan bu qədər dəqiqə sonra donur (defolt 15); sonra yalnız RİM-in "
+                "rəsmi düzəlişi. Köçürülmüş q/b və bal həmişə kilidlidir. i/e üçün ayrıca müddət aşağıdakı sətirdədir.",
             ),
             pgettext_lazy(_CTX, "dəqiqə"), min=1, max=4320, legacy_key="journal.mark_edit_hours",
         ),

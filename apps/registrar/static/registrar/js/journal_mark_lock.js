@@ -3,8 +3,8 @@
    «Müəllim kiməsə q/b və ya bal yazıbsa, yazdığından 15 dəqiqə sonra onu geri dəyişə bilməsin, olduğu kimi
    qalsın. Bunun üçün RİM-ə müraciət edib təqdimat yazmaq lazım olduğunu qeyd etsin.»
 
-   Kilidli xana (`[data-jd-lock="time|legacy|entry"]`, _jd_grid.html; 2026-10-26-dan balsız i/e yalnız
-   yazma müddəti bitəndə — «entry») yalnız-oxu render olunur — kilidi SERVER
+   Kilidli xana (`[data-jd-lock="time|legacy|entry|presence"]`, _jd_grid.html; balsız i/e öz müddəti bitəndə —
+   «presence», sahib 2026-11-21 — və ya yazma müddəti bitəndə — «entry») yalnız-oxu render olunur — kilidi SERVER
    məcburi edir (gradebook_marks.save_marks + DB trigger; avtomatik yadda saxlama 409 qaytarır). Bu fayl
    yalnız izah edir: klikdə EMSConfirm dialoqu açılır — mətn formanın
    `data-jd-lock-msg-<səbəb>` atributundan (xanaya mətn yazılmır: 555 × 20 xanada HTML böyüməsin), təsdiq

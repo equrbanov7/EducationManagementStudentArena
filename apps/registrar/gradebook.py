@@ -128,8 +128,8 @@ can_edit_lesson_date = can_edit_lesson
 
 def can_edit_mark(mark, *, now=None, window=None, entry_open=True) -> bool:
     """Boş xana həmişə yazılır; q/b və ballı xana yalnız müəllimin İLK yazılışından pəncərə (defolt 15 dəqiqə)
-    ərzində dəyişir, köçürülmüş q/b/bal həmişə kilidlidir (sahib 2026-10-25). Balsız i/e xanası pəncərədən
-    sonra da dəyişir (sahib 2026-10-26) — dərsin yazma müddəti (``entry_open``) bitməyibsə."""
+    ərzində dəyişir, köçürülmüş q/b/bal həmişə kilidlidir (sahib 2026-10-25). Balsız i/e öz müddətində (sahib
+    2026-11-21, defolt 1 gün) dəyişir — dərsin yazma müddəti (``entry_open``) bitməyibsə (sahib 2026-10-26)."""
     return not journal_edit_windows.mark_lock_reason(mark, now=now, window=window, entry_open=entry_open)
 
 
@@ -279,7 +279,7 @@ def get_offering_journal(
     # Yeni işarə: dərs günü (+ gecikmiş yazı günləri) və aktivləşdirmə pəncərəsi — servis qaydası ilə EYNİ.
     entry_rule = EntryRule.current(now=now)
     markable = {lesson.id: entry_rule.allows(lesson) and not lesson.is_passive for lesson in lessons}  # passiv: yox
-    lock_window = mark_edit_window()  # xana kilidi — bir dəfə oxunur (xana-xana runtime oxunuşu yox)
+    lock_window, presence_window = mark_edit_window(), journal_edit_windows.presence_edit_window()  # bir dəfə oxunur
     lesson_meta = [
         {
             "lesson": lesson,
@@ -331,11 +331,12 @@ def get_offering_journal(
                 )
                 continue
             corrected = mark is not None and mark.id in corrected_mark_ids
-            # Balsız i/e xanası pəncərədən sonra da dəyişir — dərsə yeni qeyd yazmaq olursa (sahib 2026-10-26).
+            # Balsız i/e öz müddətində (sahib 2026-11-21) dəyişir — dərsə yeni qeyd yazmaq olursa (2026-10-26).
             lock_reason = journal_edit_windows.mark_lock_reason(
                 mark,
                 now=now,
                 window=lock_window,
+                presence_window=presence_window,
                 entry_open=markable[lesson.id],
                 unsupported_score=mark is not None and mark.score is not None and not lesson_allows_score(lesson),
             )
@@ -346,8 +347,7 @@ def get_offering_journal(
                     "mark": mark,
                     "allows_score": lesson_allows_score(lesson),
                     "locked": locked,
-                    # «time» (15 dəq. keçib) / «legacy» (köçürülüb) / «entry» (i/e, yazma müddəti bitib) — kilidli
-                    # xana dialoqu (journal_mark_lock.js).
+                    # time / legacy / entry / presence (i/e müddəti) — kilidli xana dialoqu (journal_mark_lock.js).
                     "lock_reason": "" if corrected else lock_reason,
                     # Rəsmi düzəlişli xana müəllim üçün kilidli (yalnız admin düzəlişi dəyişir).
                     "corrected": corrected,

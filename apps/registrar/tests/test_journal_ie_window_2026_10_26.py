@@ -10,6 +10,9 @@ Kilidlənən qaydalar:
 * köçürülmüş (``entered_by`` boş) i/e dəyişir, eyni dəyərin geri-göndərişi onu «mənimsəmir»; köçürülmüş q/b kilidli;
 * i/e dəyişikliyi YENİ qeyd kimidir: dərsin yazma müddəti (7 gün) bitibsə ``LOCK_ENTRY``;
 * grid: açıq i/e select-dir (kilid nişanı yox), müddəti bitmiş i/e ``data-jd-lock="entry"``.
+
+Sahib 2026-11-21: i/e öz müddətindən (defolt 1 gün) sonra donur — burada yaşlar 1 gündən azdır; 30 günlük köçürülmüş
+i/e yoxlaması ``journal.presence_lock_enabled`` söndürülüdə aparılır (``test_presence_edit_window_2026_11_21``).
 """
 
 from __future__ import annotations
@@ -210,7 +213,12 @@ class TriggerTest(_Base):
                 LessonMark.objects.filter(pk=mark.pk).update(score=Decimal("6"))
             self.assertEqual(self._mark().score, Decimal("5"))
 
-    def test_trigger_allows_legacy_ie(self):
+    def test_trigger_allows_legacy_ie_when_presence_lock_off(self):
+        # Sahib 2026-11-21: i/e 1 gündən sonra donur (``test_presence_edit_window_2026_11_21``); 2026-10-26 qaydası
+        # yalnız ``journal.presence_lock_enabled`` söndürülüdə qalır.
+        from apps.accounts.models import RuntimeSetting
+
+        RuntimeSetting.objects.create(key="journal.presence_lock_enabled", value=False)
         with bypass_rls():
             mark = LessonMark.objects.create(
                 organization=self.org, lesson=self.lesson, enrollment=self.enrollment, status=AttendanceStatus.PRESENT
