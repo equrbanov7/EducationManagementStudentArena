@@ -15,8 +15,9 @@ QAYDALAR
   olduğu kimi qalır; səhifə yalnız BOŞ sahələri göstərir və yalnız onları yazır.
 * E-poçt «dolu» deyil: boşdursa və ya yer-tutucudursa (``…@placeholder.invalid``) — belə ünvana parol bərpası
   kodu getmir (bax ``forms/auth/login.CustomPasswordResetForm``).
-* Azad: superuser, ``qa.*`` QA hesabları, aktiv olmayan / arxiv (məzun, xaric) / mərhələlənmiş hesablar,
-  ilk-giriş axınındakı hesab (o axın üstündür) və başqasının adından baxış (view-as).
+* Azad: superuser, ``qa.*`` QA hesabları, müvəqqəti quiz test hesabları (``quiz_test_accounts``), aktiv olmayan /
+  arxiv (məzun, xaric) / mərhələlənmiş hesablar, ilk-giriş axınındakı hesab (o axın üstündür) və başqasının adından
+  baxış (view-as).
 * Söndürmə: «Sistem tənzimləmələri» → ``profile.required_fields_enabled`` (qəza açarı) və hər sahə üçün ayrıca
   ``profile.require_<sahə>``. Testlərdə defolt ``PROFILE_COMPLETION_ENABLED=False`` (bax ``config/settings/test``).
 * FİN və telefon DƏYƏRLƏRİ heç vaxt loga / audit-ə yazılmır — yalnız sahə adları.
@@ -36,6 +37,10 @@ from core import phone as phone_lib
 from core import runtime_settings
 from core.roles import ProfileRole
 from core.validators import FIN_PATTERN, normalize_fin
+
+from .quiz_test_accounts import EMAIL_DOMAIN as QUIZ_TEST_EMAIL_DOMAIN
+from .quiz_test_accounts import USERNAMES as QUIZ_TEST_USERNAMES
+from .quiz_test_accounts import is_quiz_test_account
 
 _CTX = "accounts.profile_completion"
 
@@ -178,6 +183,9 @@ def is_exempt_user(user) -> bool:
         return True
     if str(getattr(user, "username", "") or "").lower().startswith(QA_USERNAME_PREFIX):
         return True
+    # Sahib 2026-11-20: müvəqqəti quiz test hesabları (``testuserN``, FİN-siz) dərhal quiz yazmalıdır.
+    if is_quiz_test_account(user):
+        return True
     profile = getattr(user, "profile", None)
     if profile is None:
         return True
@@ -252,6 +260,7 @@ def missing_users_q(prefix: str = "") -> Q:
     exempt = (
         Q(**{f"{prefix}is_superuser": True})
         | Q(**{f"{prefix}username__istartswith": QA_USERNAME_PREFIX})
+        | Q(**{f"{prefix}username__in": QUIZ_TEST_USERNAMES, f"{prefix}email__iendswith": "@" + QUIZ_TEST_EMAIL_DOMAIN})
         | Q(**{f"{prefix}is_active": False})
         | ~Q(**{f"{prefix}profile__access_state": "active"})
         | Q(**{f"{prefix}profile__is_deleted": True})
