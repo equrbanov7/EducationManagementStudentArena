@@ -43,9 +43,18 @@ jobs:
           mkdir -m 700 "$RUNNER_TEMP/wcu-workload-export"
           docker exec "$APP_CONTAINER" mkdir -m 700 "$EXPORT_DIR"
           docker cp scripts/data/wcu_workload_export_public.pem "$APP_CONTAINER:$EXPORT_DIR/public.pem"
-          test -z "$JOURNAL_PACK"
-          test -z "$JOURNAL_BATCH"
-          docker exec -i -e COVERAGE_ACTOR="$ACTOR" -e COVERAGE_PUBLIC_KEY="$EXPORT_DIR/public.pem" -e COVERAGE_OUTPUT="$EXPORT_DIR/snapshot.enc.json" "$APP_CONTAINER" python manage.py shell -c 'import sys; exec(compile(sys.stdin.read(), "journal_coverage_capture.py", "exec"), {"__name__": "__main__"})' < scripts/prod_ops/journal_coverage_capture.py
+          if [ -n "$JOURNAL_PACK" ]; then
+            python3 scripts/ops/journal_export_pack.py
+            exit $?
+          fi
+          command=export_wcu_workload_snapshot
+          args=(--actor "$ACTOR" --public-key "$EXPORT_DIR/public.pem" --output "$EXPORT_DIR/snapshot.enc.json")
+          if [ -n "$JOURNAL_BATCH" ]; then
+            [[ "$JOURNAL_BATCH" =~ ^chair-cells-[0-9]{3}$ ]] || { echo "invalid_pinned_journal_batch" >&2; exit 2; }
+            command=export_wcu_journal_cells
+            args+=(--batch "$JOURNAL_BATCH")
+          fi
+          docker exec "$APP_CONTAINER" python manage.py "$command" "${args[@]}"
           docker cp "$APP_CONTAINER:$EXPORT_DIR/snapshot.enc.json" "$RUNNER_TEMP/wcu-workload-export/snapshot.enc.json"
           test -s "$RUNNER_TEMP/wcu-workload-export/snapshot.enc.json"
           sha256sum "$RUNNER_TEMP/wcu-workload-export/snapshot.enc.json"
