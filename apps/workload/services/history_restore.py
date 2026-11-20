@@ -1,5 +1,7 @@
 """Explicit current allocation from a populated journal; never manufacture taught hours."""
 
+import re
+
 from django.apps import apps
 from django.db import transaction
 from django.db.models import Sum
@@ -171,7 +173,12 @@ def shared_rows(organization, courses):
         .prefetch_related("groups")
     )
     blocked = {}
+    aliases = _alias_subject_rows(organization, courses)
     for course in courses:
+        alias = aliases.get(course.pk)
+        if alias is not None:
+            blocked[course.pk] = alias
+            continue
         matches = [
             row
             for row in rows
@@ -189,6 +196,55 @@ def shared_rows(organization, courses):
             ),
         }
     return blocked
+
+
+def _subject_key(name) -> str:
+    """«Zərərverici proqram vasitələrinin təhlili (Malware analysis)» ≡ «Zərərverici proqram vasitələrinin təhlili»."""
+    return " ".join(re.sub(r"\([^)]*\)", " ", str(name or "")).casefold().split())
+
+
+def _alias_subject_rows(organization, courses) -> dict:
+    """Eyni dövr + qrup üçün ADI eyni, amma BAŞQA fənn id-sinə bağlı yük sətri (2026-11-20, Leyla «Malware»).
+
+    Köhnə sistemdən gələn sətir köhnə kataloq fənnində qalıbsa, jurnal (yeni fənn) cari yükə düşmür və «Cari
+    yükə bərpa et» ikinci sətir yaradırdı → ikiqat/üçqat yük. Belə sətir varsa bərpa yox, həmin sətrin fənni
+    «Yük bölgüsü»ndə düzəldilir. Bir sorğu.
+    """
+    if not courses:
+        return {}
+    rows = list(
+        TeachingTaskRow.objects.filter(
+            organization=organization,
+            task__organization=organization,
+            row_kind=RowKind.TEACHING,
+            period_id__in={c.period_id for c in courses},
+            groups__in={c.group_id for c in courses},
+        )
+        .exclude(task__status=TaskStatus.CANCELLED)
+        .exclude(subject_id__in={c.subject_id for c in courses})
+        .distinct()
+        .select_related("task", "subject")
+        .prefetch_related("groups")
+    )
+    found = {}
+    for course in courses:
+        key = _subject_key(course.subject.name)
+        for row in rows:
+            if (
+                row.period_id == course.period_id
+                and row.subject_id != course.subject_id
+                and _subject_key(row.subject.name) == key
+                and any(group.pk == course.group_id for group in row.groups.all())
+            ):
+                found[course.pk] = {
+                    "groups": ", ".join(sorted(group.name for group in row.groups.all())),
+                    "url": distribution_edit_url(
+                        chair_id=row.task.chair_id, academic_year=row.task.academic_year, row_id=row.pk
+                    ),
+                    "alias_subject": f"{row.subject.code} · {row.subject.name}",
+                }
+                break
+    return found
 
 
 @transaction.atomic
@@ -216,6 +272,11 @@ def restore(*, request, offering_id, chair_id, hours, reason, syllabus_id=""):
         all(row["kind"] in hours and hours[row["kind"]] >= row["total"] for row in taught),
         "taught_hours",
         "Plan saatı müəllimin həmin növdə artıq keçdiyi saatdan az ola bilməz.",
+    )
+    _require(
+        not _alias_subject_rows(actor.organization, [course]),
+        "alias_subject",
+        "Bu jurnalın yükü eyni adlı köhnə fənn sətrindədir; sətrin fənnini «Yük bölgüsü»ndə düzəldin.",
     )
     chairs = {str(chair.pk): chair for chair in available_chairs(actor, course)}
     _require(str(chair_id) in chairs, "scope", "Jurnalın səlahiyyətli mənbə kafedrasını seçin.")
