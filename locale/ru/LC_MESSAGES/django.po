@@ -120903,3 +120903,165 @@ msgstr ""
 msgctxt "registrar.guest_roster"
 msgid "Sənəd saxlanıla bilmədi — faylı yenidən yükləyin."
 msgstr "Не удалось сохранить документ — загрузите файл ещё раз."
+
+msgctxt "profile.section"
+msgid "Kənardan jurnal girişi"
+msgstr "Доступ к журналу извне"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Hesab tapılmadı və ya aktiv deyil."
+msgstr "Учётная запись не найдена или неактивна."
+
+msgctxt "accounts.remote_journal_access"
+msgid ""
+"Bu hesaba kənardan jurnal girişi verilə bilməz (tələbə və ya üzvlüyü "
+"yoxdur)."
+msgstr ""
+"Этой учётной записи нельзя дать доступ к журналу извне (студент или нет "
+"членства)."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Bu hesab artıq siyahıdadır."
+msgstr "Эта учётная запись уже в списке."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Bu icazə artıq geri alınıb."
+msgstr "Этот доступ уже отозван."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Bu əməl yalnız RİM rəhbəri üçündür."
+msgstr "Это действие доступно только руководителю РИМ."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Kənardan jurnal girişi yalnız RİM rəhbəri üçündür."
+msgstr "Доступ к журналу извне управляется только руководителем РИМ."
+
+#, python-format
+msgctxt "accounts.remote_journal_access"
+msgid ""
+"%(name)s universitet şəbəkəsindən kənarda da jurnala girə biləcək. Digər "
+"icazələri dəyişmir."
+msgstr ""
+"%(name)s сможет открывать журнал и вне сети университета. Остальные права не"
+" меняются."
+
+#, python-format
+msgctxt "accounts.remote_journal_access"
+msgid "%(name)s jurnala yalnız universitet şəbəkəsindən girə biləcək."
+msgstr "%(name)s сможет открывать журнал только из сети университета."
+
+msgctxt "accounts.remote_journal_access"
+msgid "artıq siyahıdadır"
+msgstr "уже в списке"
+
+#, python-format
+msgctxt "accounts.remote_journal_access"
+msgid "%(name)s kənardan jurnala girə bilər."
+msgstr "%(name)s теперь может открывать журнал извне."
+
+#, python-format
+msgctxt "accounts.remote_journal_access"
+msgid "%(name)s üçün kənardan jurnal girişi geri alındı."
+msgstr "Доступ к журналу извне для %(name)s отозван."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Naməlum əməl."
+msgstr "Неизвестное действие."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Əməl alınmadı. Bir azdan yenidən cəhd edin."
+msgstr "Действие не выполнено. Попробуйте ещё раз чуть позже."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Kənardan jurnal girişi verilsin?"
+msgstr "Дать доступ к журналу извне?"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Əlavə et"
+msgstr "Добавить"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Kənardan jurnal girişi geri alınsın?"
+msgstr "Отозвать доступ к журналу извне?"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Geri al"
+msgstr "Отозвать"
+
+msgctxt "accounts.remote_journal_access"
+msgid ""
+"Universitet şəbəkəsindən kənarda jurnala yalnız bu siyahıdakı hesablar girə "
+"bilər."
+msgstr ""
+"Вне сети университета журнал могут открывать только учётные записи из этого "
+"списка."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Hesab əlavə et"
+msgstr "Добавить учётную запись"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Şəxs"
+msgstr "Сотрудник"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Uyğun hesab tapılmadı."
+msgstr "Подходящая учётная запись не найдена."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Ad, soyad və ya istifadəçi adı üzrə axtar"
+msgstr "Поиск по имени, фамилии или имени пользователя"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Qeyd"
+msgstr "Примечание"
+
+msgctxt "accounts.remote_journal_access"
+msgid "(istəyə bağlı)"
+msgstr "(необязательно)"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Məs.: kafedra müdiri, evdən jurnal yazır"
+msgstr "Напр.: заведующий кафедрой, ведёт журнал из дома"
+
+msgctxt "accounts.remote_journal_access"
+msgid ""
+"Yalnız jurnal (və imtahan balının daxil edilməsi) kənardan açılır; hesabın "
+"rolu və digər icazələri dəyişmir. İnzibati (admin) hesablar üçün iki "
+"mərhələli təsdiq yenə tələb olunur."
+msgstr ""
+"Извне открывается только журнал (и ввод экзаменационных баллов); роль и "
+"остальные права учётной записи не меняются. Для административных (admin) "
+"учётных записей двухэтапная проверка по-прежнему обязательна."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Vəzifə / bölmə"
+msgstr "Должность / подразделение"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Kim verib"
+msgstr "Кто выдал"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Əməl"
+msgstr "Действие"
+
+msgctxt "accounts.remote_journal_access"
+msgid "İki mərhələli təsdiq"
+msgstr "Двухэтапная проверка"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Server tənzimləməsi"
+msgstr "Настройка сервера"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Buradan dəyişmir"
+msgstr "Здесь не меняется"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Siyahı boşdur"
+msgstr "Список пуст"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Kənardan jurnala heç kim girə bilmir. Yuxarıdan hesab əlavə edin."
+msgstr "Никто не может открывать журнал извне. Добавьте учётную запись выше."

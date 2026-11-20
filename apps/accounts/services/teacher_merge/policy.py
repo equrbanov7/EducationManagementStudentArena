@@ -35,6 +35,9 @@ KEEP = (KEEP_PERSONAL, KEEP_EVIDENCE, KEEP_STUDENT)
 _REPOINT = (
     # accounts — müəllimin akademik profili (CV), aktor sahələri
     "accounts.AcademicProfileItem.user",
+    # «Kənardan jurnal girişi» (2026-11-20) — kim verib / kim geri alıb (aktor sahələri)
+    "accounts.RemoteJournalAccess.granted_by",
+    "accounts.RemoteJournalAccess.revoked_by",
     "accounts.RuntimeSetting.updated_by",
     "accounts.UserProfile.blocked_by",
     "accounts.UserProfile.deleted_by",
@@ -223,6 +226,9 @@ _REPOINT = (
 
 _KEEP_PERSONAL = (
     "accounts.EmailOTP.user",
+    # Şəbəkə istisnası hesaba bağlı təhlükəsizlik icazəsidir — birləşdirmədə səssizcə hədəfə KEÇMİR (lazımsa RİM
+    # rəhbəri «Kənardan jurnal girişi»ndən yenidən verir); bloklanmış mənbə hesabda aktiv olmayan hesab kimi işləmir.
+    "accounts.RemoteJournalAccess.user",
     "accounts.UserProfile.user",
     "admin.LogEntry.user",
     "ai_assistant.AIAssistantLog.user",

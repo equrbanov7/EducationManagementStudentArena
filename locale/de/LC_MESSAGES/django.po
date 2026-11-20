@@ -122236,3 +122236,166 @@ msgid "Sənəd saxlanıla bilmədi — faylı yenidən yükləyin."
 msgstr ""
 "Das Dokument konnte nicht gespeichert werden — bitte laden Sie die Datei "
 "erneut hoch."
+
+msgctxt "profile.section"
+msgid "Kənardan jurnal girişi"
+msgstr "Journalzugriff von außen"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Hesab tapılmadı və ya aktiv deyil."
+msgstr "Konto nicht gefunden oder inaktiv."
+
+msgctxt "accounts.remote_journal_access"
+msgid ""
+"Bu hesaba kənardan jurnal girişi verilə bilməz (tələbə və ya üzvlüyü "
+"yoxdur)."
+msgstr ""
+"Diesem Konto kann kein Journalzugriff von außen gewährt werden (Studierende "
+"oder keine Mitgliedschaft)."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Bu hesab artıq siyahıdadır."
+msgstr "Dieses Konto steht bereits auf der Liste."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Bu icazə artıq geri alınıb."
+msgstr "Dieser Zugriff wurde bereits entzogen."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Bu əməl yalnız RİM rəhbəri üçündür."
+msgstr "Diese Aktion ist nur für die RIM-Leitung."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Kənardan jurnal girişi yalnız RİM rəhbəri üçündür."
+msgstr "Journalzugriff von außen ist nur für die RIM-Leitung."
+
+#, python-format
+msgctxt "accounts.remote_journal_access"
+msgid ""
+"%(name)s universitet şəbəkəsindən kənarda da jurnala girə biləcək. Digər "
+"icazələri dəyişmir."
+msgstr ""
+"%(name)s kann das Journal auch außerhalb des Universitätsnetzes öffnen. "
+"Andere Rechte bleiben gleich."
+
+#, python-format
+msgctxt "accounts.remote_journal_access"
+msgid "%(name)s jurnala yalnız universitet şəbəkəsindən girə biləcək."
+msgstr "%(name)s kann das Journal nur noch aus dem Universitätsnetz öffnen."
+
+msgctxt "accounts.remote_journal_access"
+msgid "artıq siyahıdadır"
+msgstr "bereits auf der Liste"
+
+#, python-format
+msgctxt "accounts.remote_journal_access"
+msgid "%(name)s kənardan jurnala girə bilər."
+msgstr "%(name)s kann das Journal jetzt von außen öffnen."
+
+#, python-format
+msgctxt "accounts.remote_journal_access"
+msgid "%(name)s üçün kənardan jurnal girişi geri alındı."
+msgstr "Journalzugriff von außen für %(name)s wurde entzogen."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Naməlum əməl."
+msgstr "Unbekannte Aktion."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Əməl alınmadı. Bir azdan yenidən cəhd edin."
+msgstr "Die Aktion ist fehlgeschlagen. Bitte gleich erneut versuchen."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Kənardan jurnal girişi verilsin?"
+msgstr "Journalzugriff von außen gewähren?"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Əlavə et"
+msgstr "Hinzufügen"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Kənardan jurnal girişi geri alınsın?"
+msgstr "Journalzugriff von außen entziehen?"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Geri al"
+msgstr "Entziehen"
+
+msgctxt "accounts.remote_journal_access"
+msgid ""
+"Universitet şəbəkəsindən kənarda jurnala yalnız bu siyahıdakı hesablar girə "
+"bilər."
+msgstr ""
+"Außerhalb des Universitätsnetzes können nur die Konten auf dieser Liste das "
+"Journal öffnen."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Hesab əlavə et"
+msgstr "Konto hinzufügen"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Şəxs"
+msgstr "Person"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Uyğun hesab tapılmadı."
+msgstr "Kein passendes Konto gefunden."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Ad, soyad və ya istifadəçi adı üzrə axtar"
+msgstr "Nach Vorname, Nachname oder Benutzername suchen"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Qeyd"
+msgstr "Notiz"
+
+msgctxt "accounts.remote_journal_access"
+msgid "(istəyə bağlı)"
+msgstr "(optional)"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Məs.: kafedra müdiri, evdən jurnal yazır"
+msgstr "Z. B.: Lehrstuhlleitung, führt das Journal von zu Hause"
+
+msgctxt "accounts.remote_journal_access"
+msgid ""
+"Yalnız jurnal (və imtahan balının daxil edilməsi) kənardan açılır; hesabın "
+"rolu və digər icazələri dəyişmir. İnzibati (admin) hesablar üçün iki "
+"mərhələli təsdiq yenə tələb olunur."
+msgstr ""
+"Von außen öffnet sich nur das Journal (und die Eingabe der Prüfungsnoten); "
+"Rolle und andere Rechte des Kontos bleiben gleich. Für Verwaltungskonten "
+"(Admin) ist die Zwei-Schritt-Bestätigung weiterhin erforderlich."
+
+msgctxt "accounts.remote_journal_access"
+msgid "Vəzifə / bölmə"
+msgstr "Funktion / Einheit"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Kim verib"
+msgstr "Gewährt von"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Əməl"
+msgstr "Aktion"
+
+msgctxt "accounts.remote_journal_access"
+msgid "İki mərhələli təsdiq"
+msgstr "Zwei-Schritt-Bestätigung"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Server tənzimləməsi"
+msgstr "Servereinstellung"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Buradan dəyişmir"
+msgstr "Hier nicht änderbar"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Siyahı boşdur"
+msgstr "Die Liste ist leer"
+
+msgctxt "accounts.remote_journal_access"
+msgid "Kənardan jurnala heç kim girə bilmir. Yuxarıdan hesab əlavə edin."
+msgstr ""
+"Niemand kann das Journal von außen öffnen. Fügen Sie oben ein Konto hinzu."
