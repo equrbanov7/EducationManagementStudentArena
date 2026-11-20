@@ -634,3 +634,42 @@ class JournalGraphScopeTest(TestCase):
 
         self.assertEqual(JOURNAL_GRAPH_APPS, {"registrar", "syllabus", "workload"})
         self.assertNotIn("exams", JOURNAL_GRAPH_APPS)
+
+
+class AliasSubjectRowTest(TestCase):
+    """2026-11-20 (Leyla «Malware»): eyni qrupun yükü EYNİ ADLI köhnə fənn sətrindədirsə bərpa yeni sətir yaratmır."""
+
+    # Fikstur HistoryRestoreTest ilə eynidir — onun testlərini təkrar işlətmədən.
+    setUpTestData = classmethod(HistoryRestoreTest.setUpTestData.__func__)
+    request = HistoryRestoreTest.request
+    restore = HistoryRestoreTest.restore
+
+    def _alias_row(self, name):
+        from apps.registrar.models import Subject
+
+        with bypass_rls():
+            subject = self.stack["subject"]
+            Subject.objects.filter(pk=subject.pk).update(name="Zərərverici proqramlar (Malware analysis)")
+            old = Subject.objects.create(organization=self.org, code="HR-OLD", name=name)
+            row = make_row(self.task, self.stack, lecture_total=45, seminar_total=30)
+            TeachingTaskRow.objects.filter(pk=row.pk).update(subject=old)
+            self.offering.subject.refresh_from_db()
+        return row
+
+    def test_same_named_old_subject_row_blocks_restore_and_shows_panel(self):
+        row = self._alias_row("Zərərverici proqramlar")
+        with bypass_rls():
+            course = CourseOffering.objects.select_related("subject").get(pk=self.offering.pk)
+            shared = service.shared_rows(self.org, [course])[course.pk]
+            self.assertIn("HR-OLD", shared["alias_subject"])
+            before = TeachingTaskRow.objects.count()
+            with self.assertRaises(WorkloadDenied):
+                self.restore()
+            self.assertEqual(TeachingTaskRow.objects.count(), before)
+        self.assertTrue(TeachingTaskRow.objects.filter(pk=row.pk).exists())
+
+    def test_different_subject_name_does_not_block(self):
+        self._alias_row("Tamamilə başqa fənn")
+        with bypass_rls():
+            course = CourseOffering.objects.select_related("subject").get(pk=self.offering.pk)
+            self.assertNotIn(course.pk, service.shared_rows(self.org, [course]))

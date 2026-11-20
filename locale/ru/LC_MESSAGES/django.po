@@ -120884,3 +120884,18 @@ msgid "Yük bərpa olunur — bu bir az çəkə bilər, səhifəni bağlamayın.
 msgstr ""
 "Нагрузка восстанавливается — это может занять немного времени, не закрывайте"
 " страницу."
+
+msgctxt "workload.history_restore"
+msgid "Bu jurnalın yükü eyni adlı köhnə fənn sətrindədir"
+msgstr ""
+"Нагрузка этого журнала находится в строке со старым одноимённым предметом"
+
+msgctxt "workload.history_restore"
+msgid ""
+"Yeni sətir yaradılmır (yük ikiqat sayılardı). «Yük bölgüsü»ndə həmin sətrin "
+"fənnini jurnalın fənninə dəyişin — jurnal cari yükə qayıdır, qeydlər "
+"dəyişmir."
+msgstr ""
+"Новая строка не создаётся (нагрузка учитывалась бы дважды). В «Распределении"
+" нагрузки» замените предмет этой строки на предмет журнала — журнал вернётся"
+" в текущую нагрузку, записи не изменятся."
