@@ -119854,3 +119854,7 @@ msgstr ""
 "Yeni satır oluşturulmaz (yük iki kez sayılırdı). «Yük dağılımı»nda o satırın"
 " dersini günlüğün dersiyle değiştirin — günlük mevcut yüke döner, kayıtlar "
 "değişmez."
+
+msgctxt "registrar.guest_roster"
+msgid "Sənəd saxlanıla bilmədi — faylı yenidən yükləyin."
+msgstr "Belge kaydedilemedi — lütfen dosyayı yeniden yükleyin."

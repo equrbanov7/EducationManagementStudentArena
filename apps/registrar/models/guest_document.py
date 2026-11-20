@@ -14,6 +14,9 @@ Fayl qorunan media altındadır (`guest_roster_documents/<org>/…`); oxu siyas�
 
 from __future__ import annotations
 
+from pathlib import PurePosixPath
+from uuid import uuid4
+
 from django.conf import settings
 from django.db import models
 from django.utils.translation import pgettext_lazy
@@ -31,8 +34,18 @@ GUEST_DOCUMENT_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png", ".webp", ".heic", 
 
 
 def guest_document_path(instance, filename: str) -> str:
-    """Qorunan media altında org-scoped saxlama yolu."""
-    return f"guest_roster_documents/{instance.organization_id}/{filename}"
+    """Qorunan media altında org-scoped saxlama yolu — ad TƏSADÜFİLƏŞİR (``<uuid>.<uzantı>``).
+
+    Prod 2026-11-20: «30.09.2026 Birləşmiş Alt qrup təqdimat 2026-2027 Payız son.pdf» kimi ad (nöqtəli + uzun)
+    ``FileField`` 100 simvol limitini keçirdi; Django ``get_available_name`` bütün nöqtədən sonrakı hissəni
+    «uzantı» sayıb kökü kəsə bilmirdi → ``SuspiciousFileOperation`` → HTML 400, modalda ümumi xəta. Orijinal ad
+    yolda saxlanılmır (heç yerdə göstərilmir; ``movement_document_path`` / ``retake_document_path`` ilə eyni):
+    yol həmişə ``guest_roster_documents/<org uuid>/<32 hex><≤5 uzantı>`` = maks. 97 simvoldur.
+    """
+    extension = PurePosixPath(str(filename or "").lower()).suffix
+    if extension not in GUEST_DOCUMENT_EXTENSIONS:
+        extension = ""
+    return f"guest_roster_documents/{instance.organization_id}/{uuid4().hex}{extension}"
 
 
 class GuestRosterDocument(ImmutableCorrectionEvidence):

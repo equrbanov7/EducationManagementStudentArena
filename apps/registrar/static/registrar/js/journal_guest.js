@@ -75,10 +75,15 @@
         }
     }
 
+    /** Serverin səbəbi (`error` / `message` / `detail`) — yoxdursa ümumi mətn + HTTP kodu (dəstək üçün iz). */
     function errorText(err) {
         var payload = err && err.payload;
-        if (payload && typeof payload === "object" && payload.error) return payload.error;
-        return attr(modalEl(), "data-generic-error");
+        if (payload && typeof payload === "object") {
+            var reason = payload.error || payload.message || payload.detail;
+            if (typeof reason === "string" && reason.trim()) return reason;
+        }
+        var generic = attr(modalEl(), "data-generic-error");
+        return err && err.status ? generic + " (HTTP " + err.status + ")" : generic;
     }
 
     /* ── Fokus tələsi (a11y) ───────────────────────────────────────────────── */

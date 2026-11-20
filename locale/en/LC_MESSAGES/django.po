@@ -120688,3 +120688,7 @@ msgstr ""
 "No new row is created (the load would be counted twice). In «Load "
 "distribution», change that row's subject to the journal's subject — the "
 "journal returns to the current load and records stay unchanged."
+
+msgctxt "registrar.guest_roster"
+msgid "Sənəd saxlanıla bilmədi — faylı yenidən yükləyin."
+msgstr "The document could not be saved — please upload the file again."

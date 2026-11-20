@@ -11,9 +11,11 @@ uyğundur: ``{"results": [{"id", "text"}], "has_more": bool}`` + ``?q``/``?offse
 
 from __future__ import annotations
 
+import logging
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
+from django.core.exceptions import SuspiciousFileOperation, ValidationError
 from django.http import Http404, JsonResponse
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET, require_POST
@@ -27,6 +29,7 @@ from .journal_access import offering_or_404
 from .models import AcademicStatus, Enrollment, RemovalAction
 
 _CTX = "registrar.guest_roster"
+logger = logging.getLogger(__name__)
 _PAGE_SIZE = 20
 _MAX_PAGE = 50
 
@@ -303,6 +306,14 @@ def guest_add(request, offering_id):
         return _error(exc.message, status=409)
     except ValidationError as exc:
         return _error("; ".join(exc.messages))
+    except (SuspiciousFileOperation, OSError):
+        # Faylın saxlanması (ad / disk) uğursuz — Django bunu HTML 400/500 səhifəsinə çevirirdi və modal yalnız
+        # ümumi «Əməliyyat alınmadı» göstərirdi (prod 2026-11-20). Tranzaksiya geri qayıdıb; səbəb JSON-da.
+        logger.exception("guest_add: document store failed (offering=%s)", offering.pk)
+        return _error(
+            pgettext(_CTX, "Sənəd saxlanıla bilmədi — faylı yenidən yükləyin."),
+            status=400,
+        )
 
     return JsonResponse(
         {

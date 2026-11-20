@@ -119979,3 +119979,7 @@ msgstr ""
 "Yeni sətir yaradılmır (yük ikiqat sayılardı). «Yük bölgüsü»ndə həmin sətrin "
 "fənnini jurnalın fənninə dəyişin — jurnal cari yükə qayıdır, qeydlər "
 "dəyişmir."
+
+msgctxt "registrar.guest_roster"
+msgid "Sənəd saxlanıla bilmədi — faylı yenidən yükləyin."
+msgstr "Sənəd saxlanıla bilmədi — faylı yenidən yükləyin."
