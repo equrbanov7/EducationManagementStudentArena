@@ -52,6 +52,7 @@ from .models import Organization, OrgUnit
 from .scoping import scope_org_units
 from .self_conflict import REASON_CODE, deny_self_conflict
 from .subgroup_targets import bind_parent, eligible_records_q
+from .university_wide_scope import candidate_scope
 from .views.shared._helpers import _unique_unit_slug
 
 _CTX = "accounts.groups"
@@ -345,8 +346,9 @@ def _add_students(request, organization, scope):
     requested = (
         StudentAcademicRecord.objects.select_for_update(of=("self",))
         .filter(organization=organization, is_active=True, status="enrolled", pk__in=ids)
-        # Audit 2026-09-28 S3: yalnız aktorun idarə əhatəsindəki tələbələr.
-        .filter(student_record_scope_q(scope))
+        # Audit 2026-09-28 S3: yalnız aktorun idarə əhatəsindəki tələbələr; universitet əhatəli kafedranın
+        # qrupunda bütün təşkilat (sahib 2026-11-22, ``university_wide_scope``).
+        .filter(student_record_scope_q(candidate_scope(organization, scope, unit)))
         .select_related("student", "program", "organization", "group")
     )
     eligible_ids = set(requested.filter(eligible).values_list("pk", flat=True))

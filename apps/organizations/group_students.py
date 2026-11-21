@@ -38,6 +38,7 @@ from .groups_registry import (
 )
 from .models import Organization
 from .subgroup_targets import eligible_records_q, reusable_children, subgroup_number
+from .university_wide_scope import candidate_scope
 
 _CTX = "accounts.groups"
 
@@ -266,10 +267,10 @@ def group_student_candidates(request, slug, unit_id):
     # Sahib 2026-11-18: axtarış yazılanda BÜTÜN tələbələr (başqa qrupdakı da — «əlavə olaraq» və ya «məcburi
     # köçür» seçimi ilə); boş axtarışda əvvəlki kimi yalnız qrupsuzlar (siyahı nəhəng olmasın).
     records = records.exclude(group=unit) if len(query) >= OTHER_GROUP_MIN_QUERY else records.filter(eligible)
-    records = (
-        # Audit 2026-09-28 S3: başqa fakültənin tələbələri görünmür.
-        records.filter(student_record_scope_q(scope)).select_related("student__profile", "program", "group")
-    )
+    # Audit 2026-09-28 S3: başqa fakültənin tələbələri görünmür — universitet əhatəli kafedranın (Xarici dillər)
+    # qrupunda isə bütün təşkilat (sahib 2026-11-22, ``university_wide_scope``).
+    candidates = candidate_scope(organization, scope, unit)
+    records = records.filter(student_record_scope_q(candidates)).select_related("student__profile", "program", "group")
     # Dözümlü axtarış (sahib 2026-09-26): ad/ixtisas adı az/ing hərfinə, şifr ayırıcıya dözümlü.
     search_q = tolerant_q(
         query,

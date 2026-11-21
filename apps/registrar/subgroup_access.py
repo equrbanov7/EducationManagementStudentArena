@@ -2,7 +2,8 @@
 
 Açar ``retake.manage`` (dekanlıq / tədris şöbəsi / RİM — kataloq: ``organizations.permissions_accounting``).
 Əhatə mövcud struktur-scope məntiqinə tabedir (``OrgUnit.user_permission_scope``): ORGANIZATION rolu bütün
-təşkilat, UNIT rolu yalnız öz alt-ağacındakı qrupların tələbələri. Hədəf jurnal (başqa fakültənin ümumi
+təşkilat, UNIT rolu yalnız öz alt-ağacındakı qrupların tələbələri (üzvlüyü universitet əhatəli kafedraya bağlıdırsa —
+bütün təşkilat, sahib 2026-11-22: ``apps.organizations.university_wide_scope``). Hədəf jurnal (başqa fakültənin ümumi
 fənni ola bilər) əhatə ilə məhdudlaşdırılmır — tələbə aktorun əhatəsində olmalıdır. Fail-closed:
 
 * açar yoxdursa → ``FORBIDDEN`` (HTTP 403);
@@ -64,6 +65,12 @@ def scoped_groups(user, organization):
         return queryset.none()
     if scope.is_org_wide:
         return queryset
+    from apps.organizations.public import actor_in_university_wide_chair, widen_to_university
+
+    if actor_in_university_wide_chair(user, organization, PLACEMENT_PERMISSION):
+        # Sahib 2026-11-22: universitet əhatəli kafedraya (Xarici dillər) bağlı dekanlıq / tyutor — bütün təşkilatın
+        # tələbələri («öz qrupu» istisnası qalır). Hədəf jurnal onsuz da əhatə ilə məhdud deyil.
+        scope = widen_to_university(scope)
     return queryset.filter(scope.unit_subtree_q())
 
 

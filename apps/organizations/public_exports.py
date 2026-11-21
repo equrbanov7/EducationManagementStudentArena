@@ -89,6 +89,9 @@ from .unit_heads import members_covering_unit  # noqa: F401
 from .unit_heads import resolve_ancestor  # noqa: F401
 from .unit_types import UNIT_TYPES_BY_ORG  # noqa: F401
 from .unit_types import validate_unit_type_for_org  # noqa: F401
+from .university_wide_scope import actor_in_university_wide_chair  # noqa: F401
+from .university_wide_scope import unit_is_university_wide  # noqa: F401
+from .university_wide_scope import widen as widen_to_university  # noqa: F401
 from .views import _visible_units_queryset as visible_units_queryset  # noqa: F401
 from .views.shared._helpers import _can_manage_org_settings as can_manage_org_settings  # noqa: F401
 from .views.shared._helpers import _can_manage_organization as can_manage_organization  # noqa: F401
@@ -185,6 +188,9 @@ __all__ = [
     "student_only_q",
     "student_record_scope_q",
     "unit_type_label",
+    "actor_in_university_wide_chair",
+    "unit_is_university_wide",
+    "widen_to_university",
     "update_settings_key",
     "user_scope_covers_unit",
     "validate_unit_type_for_org",
