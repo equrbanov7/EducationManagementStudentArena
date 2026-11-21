@@ -6,7 +6,7 @@ from django.db.models import Exists, OuterRef, Q
 
 from core.search_text import tolerant_q
 
-from . import guest_roster, language_cohorts
+from . import language_cohorts, roster_source_scope
 from .journal_access import can_edit_journal, can_observe_journal
 from .journal_list_scope import journal_list_base
 from .journal_shares import own_or_shared_q
@@ -91,7 +91,11 @@ def candidate_records(*, cohort, actor, query=""):
         student__memberships__is_active=True,
         student__memberships__role__organization=cohort.organization,
         student__memberships__role__is_active=True,
-    ).filter(Q(group__in=guest_roster.scoped_group_queryset(actor, cohort.organization)) | Q(student_id__in=source_ids))
+    ).filter(
+        # Sahib 2026-11-22: universitet əhatəli kafedranın (Xarici dillər) səviyyə qrupu — bütün təşkilatın qrupları.
+        Q(group__in=roster_source_scope.cohort_source_groups(actor, cohort))
+        | Q(student_id__in=source_ids)
+    )
     # Dözümlü axtarış (core.search_text, sahib 2026-11-11): registr, az↔ing hərfləri, söz sırası; qrup kod rejimində.
     search_q = tolerant_q(
         query,

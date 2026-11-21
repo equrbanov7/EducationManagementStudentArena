@@ -27,6 +27,7 @@ _MODULES = (
     "core.runtime_settings_applications",  # «Müraciətlər» — bir istifadəçinin gündəlik müraciət limiti (2026-11-04)
     "core.runtime_settings_journal_off_schedule",  # «journal»: «cədvəldən kənar» işarəsi açarı (2026-11-14)
     "core.runtime_settings_journal_presence",  # «journal»: i/e xanasının 1 günlük dəyişmə müddəti (2026-11-21)
+    "core.runtime_settings_university_scope",  # «academic»: Xarici dillər kafedrası — bütün universitet (2026-11-22)
 )
 
 
