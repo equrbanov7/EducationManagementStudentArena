@@ -150,6 +150,10 @@ def world(django_capture_on_commit_callbacks):
     """İki AYRI fakültə (hərəsində kafedra + ixtisas + qrup + müəllim + jurnal + sillabus + qovluq) və şöbə."""
     owner = _user("mn_owner")
     today = dt.date.today()
+    # Cədvəl şəbəkəsi B.e.–Şənbə göstərir: bazar günü düşən dərs/slot kart kimi görünmür (CI bazar günü düşürdü).
+    lesson_day = today - dt.timedelta(days=7)
+    if lesson_day.isoweekday() == 7:
+        lesson_day -= dt.timedelta(days=1)
     with bypass_rls():
         org = Organization.objects.create(
             name="MN Univ", slug="mn-univ", org_type=OrganizationType.UNIVERSITY, owner=owner, status="active"
@@ -215,7 +219,7 @@ def world(django_capture_on_commit_callbacks):
             lesson = Lesson.objects.create(
                 organization=org,
                 offering=offering,
-                date=today - dt.timedelta(days=7),
+                date=lesson_day,
                 kind=LessonKind.LECTURE,
                 topic=f"Mövzu {key.upper()} kafedrası",
                 hours=2,
