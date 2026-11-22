@@ -53,6 +53,13 @@ class TeachingChairDirectoryTest(TestCase):
                 group=cls.fx.offering_a.group,
                 instructor=cls.fx.teacher_b,
             )
+            cls.unrelated = CourseOffering.objects.create(
+                organization=cls.fx.org,
+                subject=subject,
+                period=cls.fx.period,
+                group=cls.fx.group_b1,
+                instructor=cls.fx.teacher_b,
+            )
             # Journal-view permission is a scoped role capability, not a role-name exception.
             role = cls.fx.role_chair
             role.permissions = [*role.permissions, "journal.view"]
@@ -92,5 +99,9 @@ class TeachingChairDirectoryTest(TestCase):
             page = self.client.get(reverse("registrar:journal_list"), {"teacher": self.fx.teacher_b.pk})
             self.assertEqual(page.status_code, 200)
             self.assertEqual({o.pk for o in page.context["offerings"]}, {self.fx.offering_a.pk})
-            denied = self.client.get(reverse("registrar:journal_detail", args=[self.other.pk]))
+            # Sahib 2026-11-22: kafedranın ÖZ qrupunun başqa kafedradakı jurnalı yalnız-oxu açılır …
+            own_group = self.client.get(reverse("registrar:journal_detail", args=[self.other.pk]))
+            self.assertEqual(own_group.status_code, 200)
+            # … kafedraya aid olmayan qrupun başqa kafedra jurnalı isə yox.
+            denied = self.client.get(reverse("registrar:journal_detail", args=[self.unrelated.pk]))
             self.assertEqual(denied.status_code, 404)
