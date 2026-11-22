@@ -384,7 +384,7 @@ def build(
     """
     enrollments = list(enrollments)
     enr_ids = [e.id for e in enrollments]
-    from . import language_level_grading
+    from . import language_business_grading, language_level_grading
 
     offerings = {}
     for enrollment in enrollments:
@@ -394,6 +394,8 @@ def build(
     offering_ids = list(offerings)
     # Səviyyə qaydası dövr-qapılıdır (``is_level``: cari / Midterm dövrü) — köçürülmüş səviyyə kursu adi fənn kimi oxunur.
     level_ids = {o.pk for o in offerings.values() if language_level_grading.is_level(o)}
+    # «Xarici dildə işgüzar kommunikasiya» (sahib 2026-11-22): sərbəst iş RİM açarından asılı olmadan sayılır.
+    business_ids = {oid for oid in level_ids if language_business_grading.is_business(offerings[oid])}
     # Yeni qaydanın RİM bayraqları BİR dəfə (sətir başına oxu yox) — bütün sətirlərin qaydası eynidir.
     flags = entry_standard.rule_flags()
 
@@ -425,7 +427,7 @@ def build(
         oid
         for oid, comps in components_by_offering.items()
         if any(c.kind == ComponentKind.SELF_WORK for c in comps)
-        and (flags.selfwork or not midterm_by_offering.get(oid))
+        and (flags.selfwork or not midterm_by_offering.get(oid) or oid in business_ids)
     ]
     if selfwork_offerings and enr_ids:
         loader = selfwork_loader or selfwork_points.selfwork_totals_by_offering

@@ -86,10 +86,8 @@ def entry_score_for(
     SIFIRA endirir (:mod:`apps.registrar.finals_batch` hamısını bir dəfə oxuyur).
     Verilməsə əvvəlki kimi ayrıca sorğulanır (geriyə-uyğun).
 
-    ``selfwork_done`` — KÖHNƏ ad (2026-09-25-ə qədər «təhvil SAYI» idi), geriyə
-    uyğunluq üçün saxlanılır və ``selfwork_points`` kimi (BAL) qəbul olunur:
-    köhnə çeklist datasında say == bal olduğu üçün köhnə çağıranların rəqəmi
-    dəyişmir. Yeni kod ``selfwork_points`` işlətməlidir."""
+    ``selfwork_done`` — KÖHNƏ ad («təhvil SAYI» idi), geriyə uyğunluq üçün ``selfwork_points`` kimi (BAL) qəbul
+    olunur (köhnə çeklistdə say == bal). Yeni kod ``selfwork_points`` işlətməlidir."""
     if language_level_grading.is_level(enrollment.offering):
         parts = language_level_grading.parts_for(
             enrollment,
@@ -99,6 +97,7 @@ def entry_score_for(
             rule=rule,
             absence_count=absence_count,
             absence_hours=absence_hours,
+            selfwork_points=selfwork_points if selfwork_points is not None else selfwork_done,
         )
         return parts.total
     cap = Decimal(cap)
@@ -190,6 +189,7 @@ def entry_parts_for(
             rule=rule,
             absence_count=absence_count,
             absence_hours=absence_hours,
+            selfwork_points=selfwork_points if selfwork_points is not None else selfwork_done,
         )
         return parts
     if rule is None:

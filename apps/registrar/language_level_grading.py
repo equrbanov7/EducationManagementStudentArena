@@ -269,21 +269,27 @@ def parts_for(
     rule=None,
     absence_count=None,
     absence_hours=None,
+    selfwork_points=None,
     **_unused,
 ):
     from . import activity_kinds, entry_standard
+    from . import language_business_grading as business
     from .gradebook_components import round_score
     from .models import AssessmentComponent, ComponentScore, LessonMark
 
     if not is_level(enrollment.offering):
         return None
+    # «Xarici dildə işgüzar kommunikasiya» (sahib 2026-11-22): aktivlik yoxdur, onun 10 balı sərbəst işdir.
+    business_profile = business.is_business(enrollment.offering)
     if components is None:
         components = list(
             AssessmentComponent.objects.filter(
                 organization_id=enrollment.organization_id, offering_id=enrollment.offering_id
             )
         )
-    if marks is None:
+    if business_profile:
+        marks = []
+    elif marks is None:
         marks = list(
             activity_kinds.annotate_kind(
                 LessonMark.objects.filter(
@@ -325,6 +331,18 @@ def parts_for(
     )
     attendance = check["attendance_score"]
     attendance = Decimal(0) if attendance is None else attendance
+    if business_profile:
+        return business.entry_parts(
+            attendance=attendance,
+            midterm=max(Decimal(0), midterm),
+            # Standart qayda kimi YALNIZ SELF_WORK komponenti olan jurnalda (canlı yazı yolları onu həmişə yaradır).
+            selfwork=(
+                business.selfwork_points_for(enrollment, selfwork_points)
+                if any(component.kind == "self_work" for component in components)
+                else Decimal(0)
+            ),
+            barred=check["barred"],
+        )
     return entry_standard.EntryParts(
         attendance=attendance,
         activity=activity,

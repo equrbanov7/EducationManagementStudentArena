@@ -192,6 +192,8 @@
 .jl-page .jl-restore-note i { font-size: var(--ems-fs-2xs); color: var(--ems-neutral-500); }
 .jl-page .jl-restore-note a { color: var(--ems-primary-700); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
 .jl-page .jl-badge--master { background: var(--ems-sky-100); color: var(--ems-sky-800); }
+/* Öz qrupunun başqa bölmədəki jurnalı (sahib 2026-11-22) — yalnız baxış. */
+.jl-page .jl-badge--reach { display: inline-flex; align-items: center; gap: 4px; background: var(--ems-warning-100); color: var(--ems-warning-800); }
 
 /* Cədvəldəki növbəti / hazırda gedən dərs (sahib 2026-09-27) — siyahı da bu sıra ilə düzülür. */
 .jl-page .jl-next {

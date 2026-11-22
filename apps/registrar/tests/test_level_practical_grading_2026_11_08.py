@@ -109,7 +109,10 @@ class LevelSyllabusFormulaTests(SimpleTestCase):
         )
 
 
-@override_settings(UNIVERSITY_MODE=True)
+# Sahib 2026-11-22: LEVEL_NAME («…işgüzar … kommunikasiya-1(elementary)») indi «işgüzar kommunikasiya» profilindədir
+# (sərbəst iş əvəzinə praktiki məşğələ yox) — bu sinif SƏVİYYƏ qaydasını yoxlayır, ona görə profil açarı söndürülür
+# (profilin öz testləri: test_language_business_grading_2026_11_22.py).
+@override_settings(UNIVERSITY_MODE=True, ACADEMIC_LANGUAGE_BUSINESS_PROFILE=False)
 class LevelSurfacesTests(TestCase):
     setUpTestData = classmethod(fixtures.ExamScoreEntrySectionTest.setUpTestData.__func__)
     _client = fixtures.ExamScoreEntrySectionTest._client

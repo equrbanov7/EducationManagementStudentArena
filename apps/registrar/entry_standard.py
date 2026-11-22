@@ -134,6 +134,9 @@ class EntryParts:
     capped: bool = field(default=False, compare=False)
     #: Aktivlik = «Praktiki məşğələ» ballarının ortası (xarici dil səviyyə fənni, sahib 2026-11-08; yalnız görünüş).
     practical: bool = field(default=False, compare=False)
+    #: Aktivlik hissəsi bu fəndə VARMI — «Xarici dildə işgüzar kommunikasiya» profilində yoxdur, onun 10 balı sərbəst
+    #: işdir (sahib 2026-11-22, :mod:`core.language_business_rule`; yalnız görünüş).
+    activity_active: bool = field(default=True, compare=False)
 
     @property
     def raw_sum(self) -> Decimal:

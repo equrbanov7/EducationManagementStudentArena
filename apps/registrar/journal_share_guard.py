@@ -185,7 +185,7 @@ def _readonly_interim(grid):
         return grid
     rows = [{**row, "cells": [{**cell, "editable": False} for cell in row["cells"]]} for row in grid.get("rows", [])]
     columns = [{**column, "open": False} for column in grid.get("columns", [])]
-    return {**grid, "rows": rows, "columns": columns, "any_open": False}
+    return {**grid, "rows": rows, "columns": columns, "any_open": False, "any_writable": False, "teacher_write": False}
 
 
 def restrict_detail_context(context, scope_) -> None:
