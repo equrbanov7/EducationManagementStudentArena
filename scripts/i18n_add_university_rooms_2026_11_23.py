@@ -22,7 +22,7 @@ STRINGS = {
         "Üniversite odaları",
         "Universitätsräume",
     ),
-    (_R, "— Bina seçin —"): ("— Select building —", "— Выберите корпус —", "— Bina seçin —", "— Gebäude wählen —"),
+    (_R, "— Bina seçin —"): ("— Select building —", "— Выберите корпус —", "— Bina seçiniz —", "— Gebäude wählen —"),
     (_R, "Axtar…"): ("Search…", "Поиск…", "Ara…", "Suchen…"),
     (_R, "Uyğun nəticə yoxdur"): ("No matches", "Нет совпадений", "Eşleşme yok", "Keine Treffer"),
     ("exams.final_center.form", "Bu binada bu adla otaq artıq var."): (

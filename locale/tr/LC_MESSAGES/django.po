@@ -120250,7 +120250,7 @@ msgstr "Üniversite odaları"
 
 msgctxt "accounts.superadmin_exam_rooms"
 msgid "— Bina seçin —"
-msgstr "— Bina seçin —"
+msgstr "— Bina seçiniz —"
 
 msgctxt "accounts.superadmin_exam_rooms"
 msgid "Axtar…"
