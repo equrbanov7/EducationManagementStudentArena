@@ -120243,3 +120243,23 @@ msgstr ""
 msgctxt "profile.subjects"
 msgid "Praktiki / sərbəst iş"
 msgstr "Uygulama / bağımsız çalışma"
+
+msgctxt "profile.section"
+msgid "Universitet otaqları"
+msgstr "Üniversite odaları"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "— Bina seçin —"
+msgstr "— Bina seçin —"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Axtar…"
+msgstr "Ara…"
+
+msgctxt "accounts.superadmin_exam_rooms"
+msgid "Uyğun nəticə yoxdur"
+msgstr "Eşleşme yok"
+
+msgctxt "exams.final_center.form"
+msgid "Bu binada bu adla otaq artıq var."
+msgstr "Bu binada bu adla bir oda zaten var."

@@ -14,7 +14,16 @@ sahələri ilə birəbir. `is_active` checkbox-u «1» göndərir (BooleanField)
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="sar-room-building">{% trans "Bina" context "accounts.superadmin_exam_rooms" %}</label>
-        <input class="ems-input" type="text" id="sar-room-building" name="building" maxlength="120" autocomplete="off">
+        {% comment %}Sahib 2026-11-23: bina seçimdir (korpus xəritəsi + reyestrdəki binalar), sərbəst mətn deyil.{% endcomment %}
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="sar-room-building" name="building" data-bootstrap-select
+                    {% if s.room_building_options|length > 8 %}data-live-search="true" data-live-search-placeholder="{% trans 'Axtar…' context 'accounts.superadmin_exam_rooms' %}" data-live-search-empty="{% trans 'Uyğun nəticə yoxdur' context 'accounts.superadmin_exam_rooms' %}"{% endif %}>
+                <option value="">{% trans "— Bina seçin —" context "accounts.superadmin_exam_rooms" %}</option>
+                {% for building in s.room_building_options %}
+                    <option value="{{ building }}">{{ building }}</option>
+                {% endfor %}
+            </select>
+        </div>
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="sar-room-floor">{% trans "Mərtəbə" context "accounts.superadmin_exam_rooms" %}</label>

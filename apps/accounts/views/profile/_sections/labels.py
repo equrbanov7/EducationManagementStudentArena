@@ -126,7 +126,7 @@ def build_section_titles() -> dict:
         "rim-center": pgettext_lazy("profile.section", "rim_center"),
         "account-password-reset": pgettext_lazy("profile.sidebar", "Parol və istifadəçi adı"),
         "superadmin-ai": pgettext_lazy("superadmin.ai_settings", "title"),
-        "superadmin-exam-rooms": pgettext_lazy("profile.section", "İmtahan zalları"),
+        "superadmin-exam-rooms": pgettext_lazy("profile.section", "Universitet otaqları"),
         "exam-center-pins": pgettext_lazy("profile.section", "PIN axtarışı"),
         "exam-center-stats": pgettext_lazy("profile.section", "İmtahan statistikaları"),
         # Sahib 2026-09-25: 3 kollokvium → TƏK midterm (bölmə keçmiş dövrlər üçün K1–K3-ü də göstərir).
