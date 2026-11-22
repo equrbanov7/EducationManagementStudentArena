@@ -448,7 +448,7 @@ def permission_scope_units(user, organization, permission: str) -> tuple:
 FACULTY_WATCHER_ROLE_NAMES = frozenset({"tutor", "program_coordinator"})
 
 
-def faculty_watcher_paths(user, organization, permission: str) -> tuple:
+def faculty_watcher_paths(user, organization, permission: str, *, role_names=FACULTY_WATCHER_ROLE_NAMES) -> tuple:
     """Tyutor / proqram koordinatoru üzvlüklərinin ən yaxın FAKÜLTƏ ``path``-ləri (``permission`` daşıyanlar).
 
     Sahib 2026-11-16 (MR-000380): tyutor öz fakültəsinin qruplarının BÜTÜN jurnallarını görməlidir — fənni başqa
@@ -462,7 +462,7 @@ def faculty_watcher_paths(user, organization, permission: str) -> tuple:
         role = membership.role
         if role.scope_type != RoleScopeType.UNIT or not membership.scope_unit_id:
             continue
-        if role.name not in FACULTY_WATCHER_ROLE_NAMES or not has_permission(list(role.permissions or []), permission):
+        if role.name not in role_names or not has_permission(list(role.permissions or []), permission):
             continue
         unit = membership.scope_unit
         if unit is not None and unit.is_active:

@@ -11,6 +11,9 @@ səviyyə kohortu — açılışın qrupu kohortdur, tələbələr ev qrupundan 
   ixtisas → qrup; kafedra altında qrup varsa kafedra müdiri / laborantı üçün həmin qruplar);
 * ``journal.view`` daşıyan tyutor / proqram koordinatorunun fakültəsi (``faculty_watcher_paths``, MR-000380 —
   kafedraya təyin olunsa da; yalnız ``journal.roster`` daşıyan kafedra tyutoru öz kafedrasının alt-ağacı ilə qalır);
+* kafedra müdiri / laborantın kafedrasının aid olduğu MƏKTƏBİN (fakültə) qrupları (sahib 2026-11-22 «Bəli,
+  görsünlər»: qruplar kafedraya yox, məktəbə bağlıdır) — YALNIZ bu oxu əhatəsi üçün; kafedra müdirinin öz
+  kafedrası üzrə əvvəlki görünüşü (``journal_view_q``, 2026-11-07) dəyişmir;
 * Kollec qrupları SAYILMIR (sahib 2026-11-10: Kollec bu sistemdə yazılmır), tələbə + heyət rolunun öz qrupu da.
 
 Org-wide aktor (RİM, rektor, monitorinq …) onsuz da hər şeyi görür — bu modul ona heç nə əlavə etmir.
@@ -41,6 +44,8 @@ REACH_PERMISSIONS = ("journal.view", "journal.roster")
 #: Kollec əlaməti (``college_journals_hide_2026_11_10`` və ``group_education_form`` ilə eyni markerlər).
 _COLLEGE_RE = r"(kollec|kolec|college)"
 _CACHE_ATTR = "_ems_group_reach_ids"
+#: Kafedraya bağlı olub məktəbinin qruplarını OXU üçün görən rollar (sahib 2026-11-22).
+CHAIR_SCHOOL_ROLE_NAMES = frozenset({"chair_head", "lab_assistant"})
 
 
 def _model(app_label, name):
@@ -119,6 +124,8 @@ def _compute_own_group_ids(user, organization) -> frozenset:
         query |= scope.unit_subtree_q()
     # MR-000380 ilə EYNİ qayda: fakültə genişlənməsi yalnız ``journal.view`` daşıyan tyutor / koordinatora.
     for path in faculty_watcher_paths(user, organization, "journal.view"):
+        query |= Q(path__startswith=f"{path}/")
+    for path in faculty_watcher_paths(user, organization, "journal.view", role_names=CHAIR_SCHOOL_ROLE_NAMES):
         query |= Q(path__startswith=f"{path}/")
     groups = (
         _model("organizations", "OrgUnit")
@@ -201,4 +208,12 @@ def attach(offerings, *, user, organization) -> None:
             offering.group_reach = {"chair": ", ".join(labels)}
 
 
-__all__ = ["REACH_PERMISSIONS", "attach", "college_groups", "offering_in_reach", "own_group_ids", "reach_q"]
+__all__ = [
+    "CHAIR_SCHOOL_ROLE_NAMES",
+    "REACH_PERMISSIONS",
+    "attach",
+    "college_groups",
+    "offering_in_reach",
+    "own_group_ids",
+    "reach_q",
+]

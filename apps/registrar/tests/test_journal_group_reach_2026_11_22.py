@@ -282,6 +282,40 @@ class JournalGroupReachTest(TestCase):
         self.assertIn(self._detail(self.laborant, self.level, "post", {"action": "add_lesson"}).status_code, (403, 404))
         self.assertFalse(self._observes(self.laborant, self.b_only))
 
+    def test_chair_head_and_laborant_see_school_groups_outside_chair(self):
+        """Sahib 2026-11-22 «Bəli, görsünlər»: qrup kafedraya yox, məktəbə bağlıdır — məktəbin qrupu da görünür."""
+        with bypass_rls():
+            school_group = OrgUnit.objects.create(
+                organization=self.org,
+                name="135 P",
+                slug="gr-school-group",
+                unit_type=OrgUnitType.GROUP,
+                parent=OrgUnit.objects.create(
+                    organization=self.org,
+                    name="Menecment",
+                    slug="gr-school-spec",
+                    unit_type=OrgUnitType.SPECIALTY,
+                    parent=self.school_a,
+                ),
+            )
+            subject = Subject.objects.create(organization=self.org, code="GR-SG", name="GR-SG", chair_unit=self.chair_y)
+            school_row = CourseOffering.objects.create(
+                organization=self.org,
+                subject=subject,
+                period=self.period,
+                group=school_group,
+                instructor=self.teacher_y,
+            )
+        for user in (self.chair_head, self.laborant):
+            self.assertIn("GR-SG", self._listed(user))
+            self.assertTrue(self._observes(user, school_row))
+            with bypass_rls():
+                self.assertFalse(journal_access.is_direct_editor(self._fresh(user), school_row))
+            self.assertFalse(self._observes(user, self.b_only))  # başqa məktəb — yox
+            self.assertFalse(self._observes(user, self.college))
+        self.assertEqual(self._detail(self.chair_head, school_row).status_code, 200)
+        self.assertFalse(self._observes(self.teacher_x, school_row))  # müəllim dəyişmir
+
     # ── Tyutor (fakültə əhatəsi, ``journal.roster``) ───────────────────────────
 
     def test_tutor_same_reach(self):
