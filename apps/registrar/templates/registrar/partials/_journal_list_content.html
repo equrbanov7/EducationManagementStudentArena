@@ -198,6 +198,8 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
                             </span>
                             {% endwith %}{% endif %}
                             {% if offering.is_evening %}<span class="jl-badge jl-badge--master">{% trans "MAGİSTRATURA" context "registrar.journal" %}</span>{% endif %}
+                            {% comment %}Sahib 2026-11-22: öz qrupunun başqa bölmədəki jurnalı — yalnız baxış (journal_group_reach).{% endcomment %}
+                            {% if offering.group_reach %}<span class="jl-badge jl-badge--reach" title="{% trans "Qrupunuzun tələbələrinin başqa bölmədəki dərsi — yalnız baxış" context "registrar.journal" %}"><i class="fas fa-people-arrows" aria-hidden="true"></i> {% trans "Başqa bölmə" context "registrar.journal" %}{% if offering.group_reach.chair %} · {{ offering.group_reach.chair }}{% endif %}</span>{% endif %}
                         </div>
                         <div class="jl-subject-sub">
                             <span class="jl-code">{{ offering.subject.code }}</span>

@@ -178,18 +178,23 @@ class LaborantJournalTests(TestCase):
         )
 
     def test_real_9496_nature_scope_sees_only_nature_load_and_catalogue(self):
-        self.assertEqual(self.listed(), {self.own.pk, self.by_catalogue.pk})
+        # Sahib 2026-11-22: kafedranın ÖZ qrupunun (Nature alt-ağacındakı qrup) başqa kafedranın dərsi də — yalnız OXU.
+        self.assertEqual(self.listed(), {self.own.pk, self.by_catalogue.pk, self.other.pk})
         membership = Membership.objects.get(pk=self.lab_membership.pk)
         self.assertEqual(str(membership.scope_unit_id), NATURE)
         self.assertTrue(membership.is_active)
         self.assertFalse(membership.is_primary)
 
-    def test_list_and_detail_agree_and_foreign_course_under_same_tree_is_excluded(self):
+    def test_list_and_detail_agree_and_foreign_course_under_same_tree_is_read_only(self):
         user = User.objects.get(pk=self.lab.pk)
         visible = self.listed(user)
         for journal in (self.own, self.other, self.by_catalogue):
             self.assertEqual(journal_access.can_observe_journal(user, journal), journal.pk in visible)
-        self.assertNotIn(self.other.pk, visible)
+        # Sahib 2026-11-22 (``journal_group_reach``): kafedranın öz qrupunun başqa kafedradakı jurnalı görünür,
+        # amma yazı hüququ vermir; başqa təşkilatın jurnalı heç vaxt.
+        self.assertIn(self.other.pk, visible)
+        self.assertFalse(journal_access.is_direct_editor(user, self.other))
+        self.assertFalse(journal_access.can_edit_journal(user, self.other))
         self.assertNotIn(self.foreign_journal.pk, visible)
 
     def test_observation_does_not_grant_writing_correction_or_roster_management(self):
@@ -290,4 +295,4 @@ class LaborantJournalTests(TestCase):
         live = OrganizationMiddleware._session_memberships_queryset(fresh, self.org.slug)
         self.assertTrue(any("journal.view" in m.role.permissions for m in live if m.role.name == "lab_assistant"))
         self.assertTrue(get_permission_scope(fresh, self.org, "journal.view").has_structure_access)
-        self.assertEqual(self.listed(fresh), {self.own.pk, self.by_catalogue.pk})
+        self.assertEqual(self.listed(fresh), {self.own.pk, self.by_catalogue.pk, self.other.pk})

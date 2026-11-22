@@ -120312,3 +120312,11 @@ msgstr ""
 msgctxt "profile.subjects"
 msgid "Xarici dildə işgüzar kommunikasiya"
 msgstr "Xarici dildə işgüzar kommunikasiya"
+
+msgctxt "registrar.journal"
+msgid "Başqa bölmə"
+msgstr "Başqa bölmə"
+
+msgctxt "registrar.journal"
+msgid "Qrupunuzun tələbələrinin başqa bölmədəki dərsi — yalnız baxış"
+msgstr "Qrupunuzun tələbələrinin başqa bölmədəki dərsi — yalnız baxış"

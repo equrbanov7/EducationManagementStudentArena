@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from django.db.models import Q
 
-from apps.registrar import journal_scope
+from apps.registrar import journal_group_reach, journal_scope
 from apps.registrar.models import CourseOffering
 
 
@@ -54,15 +54,38 @@ def journal_list_base(user, request=None):
         # halda düymə oradadır və köhnə transkript dəyişər — bax guest_roster.
         # assert_roster_open). Müəllimin ÖZ jurnalları toxunulmaz qalır: onun
         # tarixçəsi dövr süzgəcindən keçmir.
-        scoped_groups = guest_roster.scoped_group_queryset(user, organization) if can_roster else []
-        visible = Q(group__in=scoped_groups, period__is_current=True, period__is_active=True) | own_q
-        return base_qs.filter(organization=organization).filter(visible | (view_q or Q(pk__in=[]))), True
+        visible = _prior_q(user, organization, can_roster=can_roster, view_q=view_q, own_q=own_q)
+        # Sahib 2026-11-22: öz qrupunun BAŞQA bölmədəki cari jurnalları (yalnız OXU — ``journal_group_reach``).
+        reach = journal_group_reach.reach_q(user, organization)
+        return base_qs.filter(organization=organization).filter(visible if reach is None else visible | reach), True
     # Fənni TƏHVİL VERMİŞ köhnə müəllim jurnalı YALNIZ-OXU görməyə davam edir (bax
     # apps/registrar/handover.is_handover_observer) — siyahıda sətir olmasaydı, ona gedən
     # yeganə keçid itərdi. Yazma hüququ `is_direct_editor`-dədir, təhvildən sonra False.
     from apps.registrar.teacher_journal_list import own_visible_queryset
 
     return own_visible_queryset(base_qs, user, organization), False
+
+
+def _prior_q(user, organization, *, can_roster, view_q, own_q):
+    """Əhatəli görünüş ``journal_group_reach``-dən ƏVVƏL: siyahı idarəsinin qrupları (cari dövr) + ``journal.view`` + öz."""
+    from apps.registrar import guest_roster
+
+    scoped_groups = guest_roster.scoped_group_queryset(user, organization) if can_roster else []
+    visible = Q(group__in=scoped_groups, period__is_current=True, period__is_active=True) | own_q
+    return visible | (view_q or Q(pk__in=[]))
+
+
+def prior_visibility_q(user, organization):
+    """Siyahı etiketi üçün (``journal_group_reach.attach``): aktorun qaydadan əvvəlki əhatəli görünüşü; yoxdursa ``None``."""
+    from apps.registrar import guest_roster, journal_shares
+
+    can_roster = guest_roster.can_manage_roster(user, organization)
+    view_q = journal_scope.journal_view_q(user, organization)
+    if not can_roster and view_q is None:
+        return None
+    return _prior_q(
+        user, organization, can_roster=can_roster, view_q=view_q, own_q=journal_shares.own_or_shared_q(user)
+    )
 
 
 def _not_own_q(user, organization):
@@ -75,4 +98,4 @@ def _not_own_q(user, organization):
     return ~Q(pk__in=sorted(own.offering_ids)) & ~Q(group_id__in=sorted(own.group_ids))
 
 
-__all__ = ["journal_list_base"]
+__all__ = ["journal_list_base", "prior_visibility_q"]

@@ -121025,3 +121025,11 @@ msgstr ""
 msgctxt "profile.subjects"
 msgid "Xarici dildə işgüzar kommunikasiya"
 msgstr "Business communication in a foreign language"
+
+msgctxt "registrar.journal"
+msgid "Başqa bölmə"
+msgstr "Another unit"
+
+msgctxt "registrar.journal"
+msgid "Qrupunuzun tələbələrinin başqa bölmədəki dərsi — yalnız baxış"
+msgstr "A lesson of your group's students in another unit — view only"
