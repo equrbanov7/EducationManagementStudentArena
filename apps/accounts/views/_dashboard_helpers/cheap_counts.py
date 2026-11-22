@@ -17,7 +17,7 @@ heavy collectors. RLS behaviour is unchanged.
 from __future__ import annotations
 
 from django.contrib.auth import get_user_model
-from django.db.models import Count, F, IntegerField, OuterRef, Q, Subquery
+from django.db.models import Count, Exists, F, IntegerField, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 
@@ -25,6 +25,7 @@ from apps.assignments.models import Assignment, Submission
 from apps.courses.models import CourseMembership
 from apps.exams.models import ExamAttempt, StudentExamAttemptGrant
 from apps.labs.models import Lab, LabSubmission
+from apps.labs.public import labs_with_student_target
 from apps.projects.models import Project, ProjectSubmission
 
 from .._helpers import (
@@ -43,15 +44,11 @@ FINISHED_ATTEMPT_STATUSES = ("submitted", "expired")
 
 
 def _count_assigned_exams(request, user) -> int:
-    """
-    Cheap exam count matching `_collect_assigned_tasks`.
+    return remaining_assigned_exams(request, user, timezone.now()).count()
 
-    Completed exams whose result is already visible move to "My results", so they
-    must not keep the "Assigned tasks" sidebar badge alive.
-    """
-    now = timezone.now()
+
+def remaining_assigned_exams(request, user, now):
     review_cutoff = now - REVIEW_EDIT_WINDOW
-
     finished_sq = Subquery(
         ExamAttempt.objects.filter(
             exam=OuterRef("pk"),
@@ -67,30 +64,25 @@ def _count_assigned_exams(request, user) -> int:
         StudentExamAttemptGrant.objects.filter(exam=OuterRef("pk"), student=user).values("extra_attempts")[:1],
         output_field=IntegerField(),
     )
-    visible_result_sq = Subquery(
+    visible_result_sq = Exists(
         ExamAttempt.objects.filter(
             exam=OuterRef("pk"),
             user=user,
             status__in=FINISHED_ATTEMPT_STATUSES,
             exam__results_hidden_from_students=False,
-        )
-        .filter(Q(exam__exam_type="test") | Q(checked_by_teacher=True, teacher_checked_at__lte=review_cutoff))
-        .values("exam")
-        .annotate(cnt=Count("id"))
-        .values("cnt"),
-        output_field=IntegerField(),
+        ).filter(Q(exam__exam_type="test") | Q(checked_by_teacher=True, teacher_checked_at__lte=review_cutoff))
     )
 
     return (
         _assigned_exams_queryset(request, user, active_only=True)
-        .annotate(
+        .alias(
             _finished_attempts=Coalesce(finished_sq, 0),
             _extra_grant=Coalesce(grant_sq, 0),
-            _visible_result_attempts=Coalesce(visible_result_sq, 0),
+            _visible_result_attempts=visible_result_sq,
         )
         # Siyahı ilə eyni: nəticə görünsə də tələbənin cəhd haqqı (qrant) varsa say.
         .filter(
-            Q(_visible_result_attempts=0)
+            Q(_visible_result_attempts=False)
             | Q(max_attempts_per_user__gt=0, _finished_attempts__lt=F("max_attempts_per_user") + F("_extra_grant"))
         )
         .filter(
@@ -98,8 +90,11 @@ def _count_assigned_exams(request, user) -> int:
             | Q(max_attempts_per_user=0)
             | Q(_finished_attempts__lt=F("max_attempts_per_user") + F("_extra_grant"))
         )
-        .count()
     )
+
+
+def assigned_lab_candidates(user, course_ids):
+    return labs_with_student_target(Lab.objects.filter(course_id__in=course_ids, status="published"), user)
 
 
 def count_assigned_tasks(request, user) -> int:
@@ -152,11 +147,7 @@ def count_assigned_tasks(request, user) -> int:
 
     # Labs need a small Python pass because allowed_groups is CSV.
     lab_count = 0
-    labs_qs = (
-        Lab.objects.filter(course_id__in=course_ids, status="published")
-        .only("id", "course_id", "allowed_groups")
-        .prefetch_related("allowed_students")
-    )
+    labs_qs = assigned_lab_candidates(user, course_ids).values_list("course_id", "allowed_groups", "_direct")
     # Pre-compute the user's per-course group memberships once.
     memberships = CourseMembership.objects.filter(course_id__in=course_ids, user=user, role="student").values_list(
         "course_id", "group_name"
@@ -168,15 +159,8 @@ def count_assigned_tasks(request, user) -> int:
             continue
         course_groups.setdefault(course_id, set()).add(normalized)
 
-    for lab in labs_qs:
-        allowed_student_ids = {s.id for s in lab.allowed_students.all()}
-        allowed_group_names = _csv_to_lower_token_set(lab.allowed_groups)
-        if not allowed_student_ids and not allowed_group_names:
-            continue
-        if user.id in allowed_student_ids:
-            lab_count += 1
-            continue
-        if allowed_group_names and course_groups.get(lab.course_id, set()).intersection(allowed_group_names):
+    for course_id, groups, direct in labs_qs:
+        if direct or course_groups.get(course_id, set()).intersection(_csv_to_lower_token_set(groups)):
             lab_count += 1
 
     return exam_count + assignment_count + lab_count + project_count

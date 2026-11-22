@@ -68,8 +68,8 @@ def build_review_results_context(request) -> dict:
         evaluated_review_submitted_order,
         evaluated_review_period,
         extras,
-    ) = _collect_evaluated_review_items(request)
-    evaluated_review_page_obj = Paginator(evaluated_review_items, 15).get_page(request.GET.get("er_page", 1))
+    ) = _collect_evaluated_review_items(request, paginate=True)
+    evaluated_review_page_obj = extras["page"]
     # Test balı yalnız görünən 15 sətir üçün (əvvəl bütün tarixçə üçün hesablanırdı).
     fill_evaluated_test_scores(evaluated_review_page_obj.object_list)
     # «Yoxlayan» — insan yoxdursa «Avtomatik (sistem)» (2026-10-27); yenə yalnız görünən sətirlər.

@@ -23,7 +23,11 @@ from apps.courses.forms import CourseForm, CourseResourceForm, CourseTopicForm
 from apps.courses.models import Course, CourseMembership
 from apps.courses.presentation import course_identity
 from apps.exams.models import Exam, ExamAttempt
-from apps.exams.public import DEFAULT_EXAM_LANGUAGE, available_language_options, without_disabled_practical_exams
+from apps.exams.public import (
+    DEFAULT_EXAM_LANGUAGE,
+    available_language_options_for_exams,
+    without_disabled_practical_exams,
+)
 from apps.registrar.public import course_groups
 from core.helpers import (
     ASSIGNED_TASK_FILTER_CHOICES,
@@ -35,13 +39,13 @@ from core.tenancy import scoped_by_organization
 User = get_user_model()
 
 
-def _build_exam_language_modal_context(exam):
+def _build_exam_language_modal_context(exam, language_options):
     options = [
         {
             "language": option["language"],
             "display_name": option["display_name"],
         }
-        for option in available_language_options(exam)
+        for option in language_options
     ]
     codes = {option["language"] for option in options}
     default_language = ""
@@ -318,6 +322,11 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                 ).annotate(questions_total=Count("questions", distinct=True))
             )
 
+            all_course_exams = [
+                exam for exam in all_course_exams if exam.can_user_see(user, course_membership=membership)
+            ]
+            language_options = available_language_options_for_exams(all_course_exams)
+
             # Batch-fetch all this user's non-draft attempts for all exams in one query,
             # grouped by exam_id to avoid N+1 (one query instead of two per exam).
             exam_ids = [exam.id for exam in all_course_exams]
@@ -332,30 +341,29 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
 
             exams_with_data = []
             for exam in all_course_exams:
-                if exam.can_user_see(user):
-                    # Use pre-fetched attempts instead of per-exam queries.
-                    exam_attempts = attempts_by_exam.get(exam.id, [])
-                    last_attempt = exam_attempts[0] if exam_attempts else None
-                    attempt_count = len(exam_attempts)
-                    attempts_left = (
-                        max(exam.max_attempts_per_user - attempt_count, 0) if exam.max_attempts_per_user else None
-                    )
-                    can_start_without_code, _ = exam.can_user_start(user, code=None)
-                    is_exam_window_open = not exam.is_before_start() and not exam.is_after_end()
-                    has_attempts_left = attempts_left is None or attempts_left > 0
-                    requires_code = bool(exam.access_code and is_exam_window_open and has_attempts_left)
+                # Use pre-fetched attempts instead of per-exam queries.
+                exam_attempts = attempts_by_exam.get(exam.id, [])
+                last_attempt = exam_attempts[0] if exam_attempts else None
+                attempt_count = len(exam_attempts)
+                attempts_left = (
+                    max(exam.max_attempts_per_user - attempt_count, 0) if exam.max_attempts_per_user else None
+                )
+                can_start_without_code, _ = exam.can_user_start(user, code=None)
+                is_exam_window_open = not exam.is_before_start() and not exam.is_after_end()
+                has_attempts_left = attempts_left is None or attempts_left > 0
+                requires_code = bool(exam.access_code and is_exam_window_open and has_attempts_left)
 
-                    exams_with_data.append(
-                        {
-                            "exam": exam,
-                            "last_attempt": last_attempt,
-                            "attempt_count": attempt_count,
-                            "attempts_left": attempts_left,
-                            "can_start": can_start_without_code or requires_code,
-                            "requires_code": requires_code,
-                            **_build_exam_language_modal_context(exam),
-                        }
-                    )
+                exams_with_data.append(
+                    {
+                        "exam": exam,
+                        "last_attempt": last_attempt,
+                        "attempt_count": attempt_count,
+                        "attempts_left": attempts_left,
+                        "can_start": can_start_without_code or requires_code,
+                        "requires_code": requires_code,
+                        **_build_exam_language_modal_context(exam, language_options.get(exam.pk, ())),
+                    }
+                )
 
             context["course_exams"] = []
             context["exams_with_data"] = exams_with_data

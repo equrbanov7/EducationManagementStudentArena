@@ -22,6 +22,7 @@ from apps.exams.services.manual_grading import (
     ManualGradingWindowClosed,
     apply_attempt_grade,
 )
+from apps.exams.services.result_answers import prefetch_score_answers
 from apps.exams.services.result_calculation import calculate_test_attempt_result
 from apps.exams.services.review_visibility import (
     resolve_exam_attempt_name_visibility as _resolve_attempt_name_visibility,
@@ -48,7 +49,6 @@ from ._helpers import (
     _resolve_profile_navigation,
 )
 from ._reset_views import reset_page_context
-from ._test_scores import attach_legacy_selected_options
 
 
 def _explicit_return_url(request):
@@ -193,7 +193,8 @@ def teacher_exam_results(request, slug):
     paginator.count = total_count
     page_obj = paginator.get_page(request.GET.get("page"))
     attempts_page = list(page_obj.object_list)
-    attach_legacy_selected_options(attempts_page)
+    if exam.exam_type == "test":
+        prefetch_score_answers(attempts_page)
     can_delete_attempts = bool(
         request_has_permission(request, "exam.delete")
         and not exam.is_deleted

@@ -22,13 +22,13 @@ def _build_student_group_map_and_available(teacher):
     teacher_groups = StudentGroup.objects.filter(Q(teacher=teacher) | Q(teachers=teacher)).distinct()
     student_group_pairs = teacher_groups.values_list("students__id", "name")
     student_group_map = {}
+    group_names = set()
     for student_id, group_name in student_group_pairs:
+        if group_name:
+            group_names.add(group_name)
         if student_id and group_name:
             student_group_map[student_id] = group_name
-    available_groups = sorted(
-        {g.name for g in teacher_groups if g.name},
-        key=str.lower,
-    )
+    available_groups = sorted(group_names, key=str.lower)
     return student_group_map, available_groups
 
 
@@ -39,11 +39,9 @@ def _attach_registry_groups(items, legacy_available):
     sıralanmış qrup adları (sətirlərdə görünən + köhnə kurs qrupları)."""
     from apps.registrar.public import student_group_names
 
-    names = student_group_names.current_group_names(
-        getattr(item.get("student"), "pk", None) for item in items if item.get("student") is not None
-    )
-    for item in items:
-        student_id = getattr(item.get("student"), "pk", None)
+    ids = [item.get("student_id") or item["student"].pk for item in items]
+    names = student_group_names.current_group_names(ids)
+    for item, student_id in zip(items, ids):
         if student_id in names:
             item["group_name"] = names[student_id]
     groups = {item["group_name"] for item in items if item.get("group_name")} | set(legacy_available)

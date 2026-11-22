@@ -5,7 +5,10 @@ Final imtahan mərkəzi — kabinet konteksti + xatırlatma bildirişləri testl
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
+from django.db import connection
 from django.test import TestCase, override_settings
+from django.test.utils import CaptureQueriesContext
+from django.urls import reverse
 from django.utils import timezone
 
 from apps.accounts.models import ProfileRole
@@ -74,6 +77,37 @@ class _CabinetBase(TestCase):
 
 
 class CabinetContextTests(_CabinetBase):
+    def test_multiple_assigned_cards_read_own_tickets_and_pins_once(self):
+        from apps.exams.services.student_pins import ensure_student_pin, student_visible_pin
+        from apps.exams.tests.test_views import _login_with_org
+
+        expected = {}
+        for title in ("Birinci final", "İkinci final", "Üçüncü final"):
+            exam = Exam.objects.create(
+                title=title,
+                organization=self.org,
+                author=self.center,
+                exam_type="test",
+                exam_type_extended="final",
+                is_active=True,
+                is_public=False,
+            )
+            exam.allowed_users.add(self.student)
+            ensure_student_pin(exam, self.student)
+            expected[exam.slug] = student_visible_pin(exam, self.student)
+            FinalExamTicket.objects.create(organization=self.org, exam=exam, student=self.student)
+
+        _login_with_org(self.client, self.student, self.org)
+        url = reverse("accounts:profile_section_fragment", kwargs={"section": "assigned-exams"})
+        with CaptureQueriesContext(connection) as queries:
+            response = self.client.get(url, {"assigned_type": "exams"}, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertEqual(response.status_code, 200)
+        for pin in expected.values():
+            self.assertTrue(pin and pin in response.json()["html"])
+        for table in ("exams_finalexamticket", "exams_examstudentpin"):
+            reads = [q for q in queries if f'FROM "{table}"' in q["sql"]]
+            self.assertEqual(len(reads), 1, table)
+
     def test_no_ticket_returns_has_ticket_false(self):
         ctx = student_final_exam_context(self.student, self.exam)
         self.assertFalse(ctx["has_ticket"])

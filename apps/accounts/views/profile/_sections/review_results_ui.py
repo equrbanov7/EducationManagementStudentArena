@@ -83,7 +83,7 @@ def build_kpi_tiles(items, appeal_map):
     since = timezone.now() - timedelta(days=RECENT_DAYS)
     exam_count = sum(1 for item in items if item["type"] == "exam")
     recent = sum(1 for item in items if _item_date(item) and _item_date(item) >= since)
-    students = {item["student"].pk for item in items}
+    students = {item.get("student_id") or item["student"].pk for item in items}
     groups = {item.get("group_name") for item in items if item.get("group_name")}
     open_appeals = sum(1 for row in appeal_map.values() if not row["is_final"])
     return [

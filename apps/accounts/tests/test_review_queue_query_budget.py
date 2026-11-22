@@ -144,7 +144,7 @@ class ReviewQueueQueryBudgetTest(TestCase):
         session.save()
         url = reverse(FRAGMENT, kwargs={"section": section})
         self.client.get(url, params, HTTP_X_REQUESTED_WITH="XMLHttpRequest")  # isinmə
-        with _RowCounter(ExamAnswer) as rows, CaptureQueriesContext(connection) as ctx:
+        with _RowCounter(ExamAnswer, ExamAttempt) as rows, CaptureQueriesContext(connection) as ctx:
             response = self.client.get(url, params, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
         self.assertEqual(response.status_code, 200)
         return response, ctx, rows.counts
@@ -166,12 +166,15 @@ class ReviewQueueQueryBudgetTest(TestCase):
         # 20 qiymətləndirilmiş test cəhdi, səhifə 15 sətir: yalnız 15 × 5 cavab yüklənir (əvvəl 100).
         self.assertEqual(large_rows["ExamAnswer"], 15 * QUESTIONS)
         self.assertEqual(small_rows["ExamAnswer"], 4 * QUESTIONS)
+        self.assertEqual(large_rows["ExamAttempt"], 15)
+        self.assertEqual(small_rows["ExamAttempt"], 4)
         page = response.context["evaluated_review_page_obj"]
         self.assertEqual(page.paginator.count, 20)
         self.assertTrue(all(item["score_display"] for item in page.object_list))
 
         second, _, second_rows = self._get(self.large, "review-results", er_page=2)
         self.assertEqual(second_rows["ExamAnswer"], 5 * QUESTIONS)
+        self.assertEqual(second_rows["ExamAttempt"], 5)
         items = second.context["evaluated_review_page_obj"].object_list
         self.assertEqual(len(items), 5)
         attempts = {

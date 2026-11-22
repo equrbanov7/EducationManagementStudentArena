@@ -3,14 +3,14 @@
 """
 
 from django.contrib.auth import get_user_model
-from django.db.models import Count, Q
+from django.db.models import Exists, OuterRef, Q
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
 from apps.assignments.models import Submission
-from apps.exams.models import ExamAttempt
-from apps.exams.public import attach_attempt_interventions, calculate_test_attempt_result
+from apps.exams.models import ExamAnswer, ExamAttempt
+from apps.exams.public import attach_attempt_interventions, calculate_test_attempt_result, prefetch_score_answers
 from apps.labs.models import LabSubmission
 from apps.projects.models import ProjectSubmission
 from core.search_text import tolerant_match
@@ -49,13 +49,11 @@ def fill_my_results_scores(items):
     bonusları tək sorğuda oxunur; hesablama qaydası və mətn formatı əvvəlki kimidir.
     Apellyasiya statusu (kartdakı nişan) da yalnız bu səhifənin imtahan sətirləri üçün
     TƏK sorğu ilə gəlir. ``items`` — səhifənin dict siyahısı (yerində dəyişir)."""
-    from django.db.models import prefetch_related_objects
-
     page_items = list(items)
     pending = [item for item in page_items if item.get("pending_score_attempt") is not None]
     if pending:
         attempts = [item["pending_score_attempt"] for item in pending]
-        prefetch_related_objects(attempts, "answers__question__options", "answers__selected_options")
+        prefetch_score_answers(attempts)
         # Apellyasiya bonusları (tək sorğu) — tələbənin görəcəyi balda yalnız 5 dəqiqəlik reviewer
         # redaktə pəncərəsi bağlanandan sonra əks olunsun (əvvəlki fallback qaydası ilə).
         try:
@@ -141,10 +139,10 @@ def _collect_my_results(request, filter_type=None, search=None, year=None, seaso
             .select_related("exam")
             # Perf (Paket A, 2026-10-18): əvvəl BÜTÜN cəhdlərin cavab + sual + variant
             # sətirləri (cəhd × sual × variant) burada yüklənirdi — yalnız 6 kartlıq
-            # səhifənin balı üçün. İndi yalnız çatdırılmış cavab SAYI gəlir (bal olub-
+            # səhifənin balı üçün. İndi yalnız cavabın mövcudluğu yoxlanılır (bal olub-
             # olmadığını və statusu bilmək üçün kifayətdir); balın özü görünən səhifə
             # üçün ``fill_my_results_scores`` ilə toplu hesablanır — rəqəm eynidir.
-            .annotate(_delivered_answers=Count("answers"))
+            .annotate(_delivered_answers=Exists(ExamAnswer.objects.filter(attempt_id=OuterRef("pk"))))
             .order_by("-started_at")
         )
         attempts = list(attempts)

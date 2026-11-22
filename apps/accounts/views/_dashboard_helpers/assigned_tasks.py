@@ -3,8 +3,6 @@ Assigned-tasks collector for the profile dashboard.
 """
 
 from django.contrib.auth import get_user_model
-from django.db.models import Count, F, IntegerField, OuterRef, Q, Subquery
-from django.db.models.functions import Coalesce
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext
@@ -14,6 +12,7 @@ from apps.courses.models import CourseMembership
 from apps.exams.models import ExamAttempt, StudentExamAttemptGrant
 from apps.exams.public import (
     ATTEMPT_FINISHED_STATUSES,
+    assigned_student_pins,
     available_language_options_for_exams,
     cabinet_center_notice,
     center_entry_url_for_exam,
@@ -22,22 +21,20 @@ from apps.exams.public import (
     is_center_exam,
     language_step_options,
     start_intent_token,
-    student_final_exam_context,
+    student_final_exam_contexts,
 )
-from apps.labs.models import Lab
 from apps.projects.models import Project
 from core.search_text import tolerant_match
 
 from .._helpers import (
-    REVIEW_EDIT_WINDOW,
     _append_query_params,
     _assigned_courses_queryset,
-    _assigned_exams_queryset,
     _csv_to_lower_token_set,
     _normalize_assigned_tasks_filter,
     _task_state_badge_data,
 )
 from .._helpers.task_kind_visibility import coursework_tasks_visible, selfwork_tasks_visible, visible_task_filter
+from .cheap_counts import assigned_lab_candidates, remaining_assigned_exams
 from .formatters import _standard_item_type_meta
 
 User = get_user_model()
@@ -108,90 +105,18 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
             payload.update(extra)
         items.append(payload)
 
-    counts["courses"] = assigned_courses_qs.count()
+    counts["courses"] = len(course_ids)
 
     # Cəhd limiti bitmiş (tamamlanıb qiymətləndirilmiş) imtahanlar təyin olunmuş
     # tapşırıqlardan çıxır — tələbə nəticəsini "Nəticələr" bölməsində görür.
     # Müəllimin verdiyi əlavə cəhd (grant) nəzərə alınır.
-    _finished_sq = Subquery(
-        ExamAttempt.objects.filter(
-            exam=OuterRef("pk"),
-            user=user,
-            status__in=ATTEMPT_FINISHED_STATUSES,
-        )
-        .values("exam")
-        .annotate(cnt=Count("id"))
-        .values("cnt"),
-        output_field=IntegerField(),
-    )
-    _grant_sq = Subquery(
-        StudentExamAttemptGrant.objects.filter(exam=OuterRef("pk"), student=user).values("extra_attempts")[:1],
-        output_field=IntegerField(),
-    )
-    review_cutoff = now - REVIEW_EDIT_WINDOW
-    _visible_result_sq = Subquery(
-        ExamAttempt.objects.filter(
-            exam=OuterRef("pk"),
-            user=user,
-            status__in=ATTEMPT_FINISHED_STATUSES,
-            exam__results_hidden_from_students=False,
-        )
-        .filter(Q(exam__exam_type="test") | Q(checked_by_teacher=True, teacher_checked_at__lte=review_cutoff))
-        .values("exam")
-        .annotate(cnt=Count("id"))
-        .values("cnt"),
-        output_field=IntegerField(),
-    )
-    assigned_exams_qs = (
-        _assigned_exams_queryset(request, user, active_only=True)
-        .annotate(
-            _finished_attempts=Coalesce(_finished_sq, 0),
-            _extra_grant=Coalesce(_grant_sq, 0),
-            _visible_result_attempts=Coalesce(_visible_result_sq, 0),
-        )
-        # Nəticə artıq görünürsə imtahan siyahıdan çıxır — AMMA tələbənin hələ
-        # cəhd haqqı varsa (məs. müəllim əlavə cəhd/qrant veribsə) yenidən görünsün.
-        # Əvvəl bu istisna qeyd-şərtsiz idi, ona görə qrant nəticə görünəndən sonra
-        # verilsə imtahan heç vaxt geri qayıtmırdı.
-        .filter(
-            Q(_visible_result_attempts=0)
-            | Q(max_attempts_per_user__gt=0, _finished_attempts__lt=F("max_attempts_per_user") + F("_extra_grant"))
-        )
-        .filter(
-            Q(max_attempts_per_user__isnull=True)
-            | Q(max_attempts_per_user=0)
-            | Q(_finished_attempts__lt=F("max_attempts_per_user") + F("_extra_grant"))
-        )
-        .order_by("-start_datetime", "-created_at")
-    )
-    counts["exams"] = assigned_exams_qs.count()
+    assigned_exams_qs = remaining_assigned_exams(request, user, now).order_by("-start_datetime", "-created_at")
+    show_exams = filter_type in {"all", "exams"}
+    counts["exams"] = len(assigned_exams_qs) if show_exams else assigned_exams_qs.count()
 
     # ── Cədvəl blokları (2026-07): eyni vaxt / eyni gün — TOPLU hesablanır ──
     # Kabinet modalı "başla" düyməsi əvəzinə səliqəli izah göstərsin deyə hər
     # imtahan üçün blok səbəbini əvvəlcədən veririk (per-imtahan sorğu yox).
-    from django.utils import timezone as _tz
-
-    _today = _tz.localdate()
-    # 2026-10-20: (exam_id, bilet_id) — biletsiz açıq cəhd = kabinetdən başlamış köhnə midterm cəhdi
-    # (mərkəz açarı yandırılmazdan əvvəl); o, kabinetdən davam edib normal bitir.
-    _open_attempt_rows = list(
-        ExamAttempt.objects.filter(user=user, status__in=("draft", "in_progress"), is_trial=False).values_list(
-            "exam_id", "final_tickets__id"
-        )
-    )
-    _active_exam_ids = {exam_id for exam_id, _ticket in _open_attempt_rows}
-    _ticketless_open_exam_ids = {exam_id for exam_id, ticket_id in _open_attempt_rows if ticket_id is None}
-    _today_official_ids = set(
-        ExamAttempt.objects.filter(
-            user=user,
-            is_trial=False,
-            status__in=ATTEMPT_FINISHED_STATUSES,
-            finished_at__date=_today,
-            exam__exam_type_extended__in=("final", "midterm"),
-        ).values_list("exam_id", flat=True)
-    )
-    _retake_exam_ids = set(StudentExamAttemptGrant.objects.filter(student=user).values_list("exam_id", flat=True))
-
     def _schedule_block_reason(exam):
         """Bu imtahan üçün cədvəl-blok səbəbi (yoxdursa boş sətir)."""
         # 2026-10-13 (gecə): final/midterm yalnız universitet şəbəkəsindən — kabinet «başla» əvəzinə
@@ -208,42 +133,56 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
             return pgettext("exams.model.access", "already_examined_today")
         return ""
 
-    if filter_type in {"all", "exams"}:
-        assigned_exams = list(assigned_exams_qs)
-        # Sahib 2026-11-06: çoxdilli imtahanda kabinet modalı MƏCBURİ dil addımı göstərir (toplu, 2 sorğu).
-        exam_language_options = available_language_options_for_exams(assigned_exams)
-        for exam in assigned_exams:
-            if not matches_search(
-                exam.title,
-                exam.description,
-                exam.course.title if exam.course else "",
-            ):
-                continue
-
-            category = getattr(exam, "exam_type_extended", None)
-            # Final imtahanları HƏMİŞƏ imtahan mərkəzi axını ilə verilir: tələbə
-            # kabinetdən imtahana BAŞLAYA BİLMİR — yalnız məlumat + fərdi giriş
-            # PIN-ini görür və imtahana `/exams/final/` səhifəsindən istifadəçi
-            # adı + PIN ilə daxil olur. Bilet hələ təyin olunmayıbsa (otaq-oturum
-            # yaradılmayıb) modal bunu bildirir; giriş kodu/PIN xanası göstərilmir.
-            # 2026-10-20 (sahib): midterm də («Sistem tənzimləmələri» → exam.midterm_via_center) final kimi
-            # yalnız zalda `/exams/midterm/` ünvanından — ``is_center_exam`` yeganə mənbədir. Köhnə (biletsiz)
-            # açıq midterm cəhdi kabinet axınında qalır ki, tələbə onu davam etdirib bitirə bilsin.
-            use_center_flow = is_center_exam(exam) and not (
-                category == "midterm" and exam.id in _ticketless_open_exam_ids
+    if show_exams and assigned_exams_qs:
+        assigned_exams = [
+            exam
+            for exam in assigned_exams_qs
+            if matches_search(exam.title, exam.description, exam.course.title if exam.course else "")
+        ]
+        _today = timezone.localdate()
+        # 2026-10-20: (exam_id, bilet_id) — biletsiz açıq cəhd = kabinetdən başlamış köhnə midterm cəhdi
+        # (mərkəz açarı yandırılmazdan əvvəl); o, kabinetdən davam edib normal bitir.
+        _open_attempt_rows = list(
+            ExamAttempt.objects.filter(user=user, status__in=("draft", "in_progress"), is_trial=False).values_list(
+                "exam_id", "final_tickets__id"
             )
-            final_ctx = student_final_exam_context(user, exam) if use_center_flow else {}
+        )
+        _active_exam_ids = {exam_id for exam_id, _ticket in _open_attempt_rows}
+        _ticketless_open_exam_ids = {exam_id for exam_id, ticket_id in _open_attempt_rows if ticket_id is None}
+        _today_official_ids = set(
+            ExamAttempt.objects.filter(
+                user=user,
+                is_trial=False,
+                status__in=ATTEMPT_FINISHED_STATUSES,
+                finished_at__date=_today,
+                exam__exam_type_extended__in=("final", "midterm"),
+            ).values_list("exam_id", flat=True)
+        )
+        _retake_exam_ids = set(StudentExamAttemptGrant.objects.filter(student=user).values_list("exam_id", flat=True))
+
+        center_exams = [
+            exam
+            for exam in assigned_exams
+            if is_center_exam(exam)
+            and not (exam.exam_type_extended == "midterm" and exam.id in _ticketless_open_exam_ids)
+        ]
+        center_ids = {exam.pk for exam in center_exams}
+        center_contexts = student_final_exam_contexts(user, center_exams)
+        pins = assigned_student_pins(
+            [exam for exam in assigned_exams if exam.exam_type_extended in {"midterm", "final"}], user
+        )
+        exam_language_options = available_language_options_for_exams(
+            [exam for exam in assigned_exams if exam.pk not in center_ids]
+        )
+        for exam in assigned_exams:
+            use_center_flow = exam.pk in center_ids
+            final_ctx = center_contexts.get(exam.pk, {})
             has_ticket = bool(final_ctx.get("has_ticket"))
 
             # Final/midterm: imtahan yaradılanda hər tələbəyə təyin olunan fərdi
             # PIN (dərhal görünür). Midterm bunu kabinet giriş xanasında, final
             # isə yalnız məlumat olaraq (PIN blokunda) göstərir.
-            student_pin = None
-            if category in {"final", "midterm"}:
-                from apps.exams.public import student_visible_pin
-
-                # 2026-10-13 (gecə): təyinatdan SONRA qrupa düşmüş tələbənin PIN sətri yoxdursa yaradılır.
-                student_pin = student_visible_pin(exam, user, provision_missing=True)
+            student_pin = pins.get(exam.pk)
 
             # Final imtahanının kabinetdə göstərilən giriş PIN-i: imtahan mərkəzi
             # bileti varsa onun (zaman-pəncərəli) PIN-i, yoxdursa təyin olunmuş
@@ -348,7 +287,7 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
     # (`task_kind_visibility` — digər kurs bölmələri ilə eyni qayda; data silinmir).
     if not selfwork_tasks_visible():
         assignments_qs = assignments_qs.none()
-    counts["assignments"] = assignments_qs.count()
+    counts["assignments"] = len(assignments_qs) if filter_type in {"all", "assignments"} else assignments_qs.count()
     if filter_type in {"all", "assignments"}:
         for assignment in assignments_qs:
             if not matches_search(assignment.title, assignment.description, assignment.course.title):
@@ -379,27 +318,13 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
                 description=assignment.description,
             )
 
-    labs_qs = (
-        Lab.objects.filter(course_id__in=course_ids, status="published")
-        .select_related("course")
-        .prefetch_related("allowed_students")
-        .order_by("-created_at")
-    )
-    assigned_labs = []
-    for lab in labs_qs:
-        # Use .all() to hit the prefetch_related cache (values_list bypasses it).
-        allowed_student_ids = {s.id for s in lab.allowed_students.all()}
-        allowed_group_names = _csv_to_lower_token_set(lab.allowed_groups)
-        if not allowed_student_ids and not allowed_group_names:
-            continue
-
-        is_assigned = user.id in allowed_student_ids
-        if not is_assigned and allowed_group_names:
-            student_groups = course_groups.get(lab.course_id, set())
-            is_assigned = bool(student_groups.intersection(allowed_group_names))
-
-        if is_assigned:
-            assigned_labs.append(lab)
+    labs_qs = assigned_lab_candidates(user, course_ids).select_related("course").order_by("-created_at")
+    assigned_labs = [
+        lab
+        for lab in labs_qs
+        if lab._direct
+        or course_groups.get(lab.course_id, set()).intersection(_csv_to_lower_token_set(lab.allowed_groups))
+    ]
 
     counts["labs"] = len(assigned_labs)
     if filter_type in {"all", "labs"}:
@@ -442,7 +367,7 @@ def _collect_assigned_tasks(request, filter_type=None, search=None):
     )
     if not coursework_tasks_visible():  # B12: «Kurs işi» bağlıdırsa layihələr də.
         projects_qs = projects_qs.none()
-    counts["independent"] = projects_qs.count()
+    counts["independent"] = len(projects_qs) if filter_type in {"all", "independent"} else projects_qs.count()
     if filter_type in {"all", "independent"}:
         for project in projects_qs:
             if not matches_search(project.title, project.description, project.course.title):
