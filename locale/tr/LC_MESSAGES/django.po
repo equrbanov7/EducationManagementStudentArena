@@ -120133,3 +120133,12 @@ msgstr ""
 "öğrencilerini görür. Kimin grup oluşturup öğrenci ekleyebileceği değişmez. "
 "Kapalıysa önceki kural geçerlidir: yalnızca kendi okulunun (fakültesinin) "
 "öğrencileri."
+
+msgctxt "registrar.journal"
+msgid "Başqa bölmə"
+msgstr "Başka birim"
+
+msgctxt "registrar.journal"
+msgid "Qrupunuzun tələbələrinin başqa bölmədəki dərsi — yalnız baxış"
+msgstr ""
+"Grubunuzun öğrencilerinin başka birimdeki dersi — yalnızca görüntüleme"

@@ -38,7 +38,7 @@ from django.db.models import Count, Min, Q, Sum
 from django.utils import timezone
 from django.utils.translation import pgettext
 
-from apps.registrar import lessons_log_units
+from apps.registrar import journal_group_reach, lessons_log_units
 from apps.registrar.lessons_late_rule import is_late
 from apps.registrar.lessons_log_pages import PAGE_SIZE, page_rows, parse_offset  # noqa: F401 — «Daha çox göstər»
 from apps.registrar.lessons_log_periods import (  # noqa: F401 — geri-uyğun re-export
@@ -77,7 +77,7 @@ from apps.registrar.lessons_log_totals import (  # noqa: F401 — geri-uyğun re
 from apps.registrar.lessons_log_units import filter_state as unit_filter_state  # noqa: F401 — Fakültə/Kafedra
 from apps.registrar.lessons_log_units import offering_option_rows, teacher_option_rows  # noqa: F401 — seçicilər
 from apps.registrar.lessons_log_unrecorded import unrecorded_slots  # noqa: F401 — «Cədvəldə var, qeydə alınmayıb»
-from apps.registrar.models import AttendanceStatus, Lesson, LessonKind, LessonMark
+from apps.registrar.models import AttendanceStatus, CourseOffering, Lesson, LessonKind, LessonMark
 from apps.registrar.models.catalog_meta import EducationForm
 from core import academic_rules
 from core.search_text import tolerant_q
@@ -172,6 +172,9 @@ def supervision_q(user, organization, *, prefix: str = "offering__"):
         combined |= scope.unit_subtree_q(path_field=f"{prefix}group__path", id_field=f"{prefix}group__id")
         for unit in kafedra_scope_roots(user, organization, scope, permission):
             combined |= lessons_log_units.kafedra_offering_q(unit, offering=prefix)
+    # Sahib 2026-11-22: öz qrupunun başqa bölmədəki cari jurnallarının dərsləri (``journal_group_reach``).
+    if (reach := journal_group_reach.reach_q(user, organization)) is not None:
+        combined |= Q(**{f"{prefix}id__in": CourseOffering.objects.filter(reach).values("pk")})
     return combined
 
 

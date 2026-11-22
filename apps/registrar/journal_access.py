@@ -6,7 +6,8 @@
   superuser / İKT Rəhbəri jurnalı aça bilər. İKT texniki super-operatordur.
 * :func:`can_observe_journal` — YALNIZ-OXU: fənni TƏHVİL VERMİŞ köhnə müəllim
   VƏ YA əhatəsi açılışın qrupunu örtən ``journal.view`` daşıyıcısı (2026-09-14; kafedra
-  kökü kafedraya aid açılışları da örtür — 2026-10-24, ``journal_scope.journal_view_q``).
+  kökü kafedraya aid açılışları da örtür — 2026-10-24, ``journal_scope.journal_view_q``)
+  VƏ YA öz qrupunun başqa bölmədəki cari jurnalı (2026-11-22, ``journal_group_reach``).
   Yazma hüququ dərhal gedir, görünüş qalır (bax :func:`apps.registrar.handover.
   is_handover_observer` şərhi: apellyasiya/komissiya sualı təhvildən sonra da gəlir).
 * :func:`is_direct_editor` — BİRBAŞA (audit-siz) redaktə hüququ: müəllim, org
@@ -175,7 +176,12 @@ def can_observe_journal(user, offering) -> bool:
 
     # Siyahı (``journal_scope.journal_view_q``) ilə EYNİ əhatə: kafedra kökü kafedraya aid açılışları da
     # örtür (2026-10-24). Yalnız OXU — yazma qapıları (``is_direct_editor``) bu açara baxmır.
-    return offering_in_journal_view_scope(user, offering.organization, offering)
+    if offering_in_journal_view_scope(user, offering.organization, offering):
+        return True
+    # Sahib 2026-11-22: öz qrupunun BAŞQA bölmədəki cari jurnalı (dil kohortu, başqa kafedra/məktəb) — yalnız OXU.
+    from .journal_group_reach import offering_in_reach
+
+    return offering_in_reach(user, offering)
 
 
 def can_open_journal(request, offering) -> bool:

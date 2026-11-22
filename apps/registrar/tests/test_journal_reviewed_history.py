@@ -234,6 +234,9 @@ class ReviewedHistoryTests(HandoverBase):
         self.assertEqual(self.client_.get(self.url).status_code, 404)
 
     def test_unauthorized_or_source_only_viewer_cannot_follow_relation(self):
+        # Fikstur hədəf jurnalda A qrupu tələbəsinin AKTİV sətrini saxlayır (real köçürmədə o sətir «dropped» olur) —
+        # «öz qrupunun başqa bölmədəki jurnalı» qaydası (2026-11-22, ayrıca test) burada əlaqə qapısını gizlətməsin.
+        self.patches.enter_context(patch("apps.registrar.journal_group_reach.offering_in_reach", return_value=False))
         self.assertEqual(self._login(self.other_teacher).get(self.url).status_code, 404)
         with bypass_rls():
             role = Role.objects.create(
