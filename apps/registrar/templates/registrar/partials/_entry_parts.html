@@ -5,7 +5,8 @@ Tavanlar hesabın İŞLƏTDİYİ qaydadan gəlir (sahib 2026-10-10): Midterm /30
 <div class="d-flex flex-wrap gap-2" data-entry-standard>
     <span class="ems-badge ems-badge--neutral">{% trans "Davamiyyət" context "registrar.journal" %}: <strong>{{ parts.attendance|floatformat:"-2" }}</strong>/{{ parts.attendance_max|floatformat:"-2" }}</span>
     {% with detail=parts.activity_detail %}
-    {% if not parts.activity_active %}
+    {% if parts.practical_selfwork %}
+    <span class="ems-badge ems-badge--neutral" title="{% trans 'Praktiki məşğələ ballarının ortası + sərbəst iş balı; cəmi ən çox 10.' context 'registrar.journal' %}">{% trans "Praktiki / sərbəst iş" context "registrar.journal" %}: <strong>{{ parts.activity|floatformat:"-2" }}</strong>/{{ parts.activity_max|floatformat:"-2" }}</span>
     {% elif detail.split %}
     <span class="ems-badge ems-badge--neutral" title="{% trans 'Fəndə seminar və laboratoriya var: hər növün ədədi ortasının yarısı toplanır (5 + 5); balı olmayan növ 0 sayılır.' context 'registrar.journal' %}">{% trans "Aktivlik" context "registrar.journal" %}: <strong>{{ parts.activity|floatformat:"-2" }}</strong>/{{ parts.activity_max|floatformat:"-2" }} ({% trans "seminar" context "registrar.journal" %} {{ detail.seminar_part|floatformat:"-2" }} + {% trans "lab" context "registrar.journal" %} {{ detail.lab_part|floatformat:"-2" }})</span>
     {% else %}

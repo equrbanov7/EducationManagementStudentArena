@@ -20,17 +20,16 @@ Zolaqlar native `<progress>`-dir (dinamik en üçün inline style lazım deyil).
         <span class="ems-breakdown__value">{{ parts.attendance|floatformat:"-2" }} <span class="ems-breakdown__max">/{{ parts.attendance_max|floatformat:"-2" }}</span></span>
         <progress class="ems-progress" value="{{ parts.attendance|unlocalize }}" max="{{ parts.attendance_max|unlocalize }}" aria-hidden="true"></progress>
     </li>
-    {% if parts.activity_active %}
     <li class="ems-breakdown__item">
-        <span class="ems-breakdown__label">{% trans "Aktivlik" context "registrar.journal" %}</span>
+        <span class="ems-breakdown__label">{% if parts.practical_selfwork %}{% trans "Praktiki / sərbəst iş" context "registrar.journal" %}{% else %}{% trans "Aktivlik" context "registrar.journal" %}{% endif %}</span>
         <span class="ems-breakdown__value">{{ parts.activity|floatformat:"-2" }} <span class="ems-breakdown__max">/{{ parts.activity_max|floatformat:"-2" }}</span></span>
         <progress class="ems-progress" value="{{ parts.activity|unlocalize }}" max="{{ parts.activity_max|unlocalize }}" aria-hidden="true"></progress>
-        {% if parts.practical %}<span class="ems-breakdown__note">{% trans "praktiki məşğələ" context "registrar.journal" %}</span>{% endif %}
+        {% if parts.practical_selfwork %}<span class="ems-breakdown__note">{% trans "praktiki məşğələ" context "registrar.journal" %} {{ parts.activity_parts.0|floatformat:"-2" }} + {% trans "Sərbəst iş" context "registrar.journal" %} {{ parts.activity_parts.1|floatformat:"-2" }}</span>
+        {% elif parts.practical %}<span class="ems-breakdown__note">{% trans "praktiki məşğələ" context "registrar.journal" %}</span>{% endif %}
         {% with detail=parts.activity_detail %}{% if detail.split %}
         <span class="ems-breakdown__note">{% trans "seminar" context "registrar.journal" %} {{ detail.seminar_part|floatformat:"-2" }} + {% trans "lab" context "registrar.journal" %} {{ detail.lab_part|floatformat:"-2" }}</span>
         {% endif %}{% endwith %}
     </li>
-    {% endif %}
     <li class="ems-breakdown__item">
         <span class="ems-breakdown__label">{% trans "Midterm" context "registrar.journal" %}</span>
         <span class="ems-breakdown__value">{{ parts.midterm|floatformat:"-2" }} <span class="ems-breakdown__max">/{{ parts.midterm_max|floatformat:"-2" }}</span></span>

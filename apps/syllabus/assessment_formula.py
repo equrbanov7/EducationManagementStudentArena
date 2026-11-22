@@ -35,6 +35,7 @@ from django.utils.translation import pgettext_lazy
 
 from core import academic_rules
 from core import language_level_rule as levels
+from core.language_business_rule import graded_level_name
 
 from .policy import assessment_weights
 
@@ -149,7 +150,8 @@ def activity_kinds_for_offering(offering) -> tuple[str, ...]:
 
 
 def _is_level_subject(subject) -> bool:
-    return levels.is_level_name(getattr(subject, "name", ""))
+    # Sahib 2026-11-22: səviyyəsiz «Xarici dildə işgüzar … kommunikasiya-1/2/3» də səviyyə düsturu ilə (10/10/10/70).
+    return graded_level_name(getattr(subject, "name", ""))
 
 
 def activity_kinds_for_syllabus(syllabus) -> tuple[str, ...]:

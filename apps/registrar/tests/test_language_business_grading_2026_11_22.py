@@ -43,11 +43,22 @@ CATALOG_VARIANTS = (
     "Xarici dilde isguzar ve kommunikasiya 3 (Pre Intermediate)",
     "  Xarici  dildə işgüzar və kommunikasiya-3 ( Beginner )  ",
 )
+#: Sahib 2026-11-22 (2): prod-da səviyyəsiz cari jurnallar — «…-1» (27), «…-2» (45), «…-3» (1) + boşluq variantları.
+NOLEVEL_NAMES = (
+    "Xarici dildə işgüzar və akademik kommunikasiya-1",
+    "Xarici dildə işgüzar və akademik kommunikasiya-2",
+    "Xarici dildə işgüzar və akademik kommunikasiya-3",
+    "Xarici dildə işgüzar və akademik kommunikasiya -3",
+    "Xarici dildə işgüzar və akademik kommunikasiya - 2",
+    "xarici dildə işgüzar və kommunikasiya 1",
+)
 NEGATIVES = (
     "Xarici dil-1",
     "Xarici dil-1(elementary)",
     "İşgüzar yazışmalar",
-    "Xarici dildə işgüzar və akademik kommunikasiya-1",
+    "Azərbaycan dilində işgüzar və akademik kommunikasiya-1",
+    "Xarici dildə işgüzar və akademik kommunikasiya",
+    "Xarici dildə işgüzar və akademik kommunikasiya-1 (A1)",
     "Xarici dildə işgüzar və kommunikasiya -1 (upper-intermediate)",
     "Xarici dildə işgüzar və kommunikasiya -4 (Beginner)",
     "Xarici dildə işgüzar və kommunikasiya -12 (Beginner)",
@@ -55,6 +66,7 @@ NEGATIVES = (
     "Proqramlaşdırma",
 )
 BUSINESS_NAME = "Xarici dildə işgüzar və akademik kommunikasiya-1(elementary)"
+NOLEVEL_NAME = "Xarici dildə işgüzar və akademik kommunikasiya -2"
 OTHER_LEVEL_NAME = "Xarici dildə kommunikasiya-1(intermediate)"
 REGULAR_NAME = "Proqramlaşdırma"
 
@@ -67,10 +79,31 @@ class BusinessNameRuleTests(SimpleTestCase):
                 self.assertTrue(rule.is_business_name(name))
                 self.assertTrue(levels.is_level_name(name))  # profil səviyyə fənlərinin alt dəstidir
 
+    def test_nolevel_names_match_grading_but_not_cohort_grouping(self):
+        from apps.registrar import language_level_grading, language_levels
+
+        for name in NOLEVEL_NAMES:
+            with self.subTest(name=name):
+                self.assertTrue(rule.is_business_name(name))
+                self.assertTrue(rule.is_nolevel_business_name(name))
+                self.assertTrue(rule.graded_level_name(name))
+                self.assertTrue(language_level_grading.is_graded_name(name))
+                self.assertTrue(levels.is_practical_name(name))  # «Praktiki məşğələ» etiketi
+                # Kohort / səviyyə qrupu məntiqi dəyişmir.
+                self.assertEqual(levels.level_of(name), "")
+                self.assertFalse(levels.is_level_name(name))
+                self.assertFalse(language_levels.is_level_subject(name))
+                self.assertFalse(language_level_grading.is_level_name(name))
+        with override_settings(ACADEMIC_LANGUAGE_BUSINESS_PROFILE=False):
+            self.assertFalse(rule.graded_level_name(NOLEVEL_NAME))
+            self.assertTrue(rule.graded_level_name(BUSINESS_NAME))  # səviyyəli ad səviyyə qaydasında qalır
+
     def test_negatives(self):
         for name in NEGATIVES:
             with self.subTest(name=name):
                 self.assertFalse(rule.is_business_name(name))
+                if not levels.is_level_name(name):
+                    self.assertFalse(rule.graded_level_name(name))
         self.assertFalse(rule.is_business_name(OTHER_LEVEL_NAME))
         self.assertTrue(levels.is_level_name(OTHER_LEVEL_NAME))
 
@@ -98,7 +131,7 @@ class BusinessProfileTests(TestCase):
     setUpTestData = classmethod(fixtures.ExamScoreEntrySectionTest.setUpTestData.__func__)
     _client = fixtures.ExamScoreEntrySectionTest._client
 
-    def prepare(self, name=BUSINESS_NAME, *, selfwork_points=6, midterm=8):
+    def prepare(self, name=BUSINESS_NAME, *, selfwork_points=6, midterm=8, practical=9):
         """2026/2027 dövrü, Midterm 8, iki praktiki məşğələ balı 9, sərbəst iş 6, final 45."""
         with bypass_rls():
             self.subject.name = name
@@ -126,7 +159,7 @@ class BusinessProfileTests(TestCase):
                     hours=2,
                 )
                 LessonMark.objects.create(
-                    organization=self.org, lesson=lesson, enrollment=self.enrollment, status="present", score=9
+                    organization=self.org, lesson=lesson, enrollment=self.enrollment, status="present", score=practical
                 )
             AssessmentComponent.objects.create(
                 organization=self.org, offering=self.offering, name="Sərbəst iş", kind="self_work", max_score=10
@@ -158,20 +191,75 @@ class BusinessProfileTests(TestCase):
         return gradebook_components.entry_parts_for(self.enrollment_fresh(), 50)
 
     # ── Komponentlər / hesab ────────────────────────────────────────────────
-    def test_business_entry_is_selfwork_attendance_midterm(self):
+    def test_business_practical_plus_selfwork_capped_at_10(self):
         from apps.registrar import language_business_grading
 
-        self.prepare()
+        self.prepare()  # praktiki ortası 9 + sərbəst iş 6 = 15 → 10
         with bypass_rls():
             self.assertTrue(language_business_grading.is_business(self.offering_fresh()))
             parts = self.parts()
-        self.assertEqual(parts.activity, 0)
-        self.assertFalse(parts.activity_active)
-        self.assertTrue(parts.selfwork_active)
-        self.assertEqual(parts.selfwork, Decimal(6))
+        self.assertTrue(parts.practical_selfwork)
+        self.assertEqual(parts.activity, Decimal(10))
+        self.assertEqual(parts.activity_parts, (Decimal(9), Decimal(6)))
+        self.assertEqual(parts.selfwork, 0)
+        self.assertFalse(parts.selfwork_active)  # ayrıca sütun yoxdur — bir «Praktiki / sərbəst iş» sütunu
         self.assertEqual(parts.midterm, Decimal(8))
         self.assertEqual(parts.midterm_max, Decimal(10))
-        self.assertEqual(parts.total, parts.attendance + Decimal(14))
+        self.assertEqual(parts.total, parts.attendance + Decimal(18))
+
+    def test_business_practical_average_counts_like_seminar(self):
+        self.prepare(selfwork_points=0, practical=7)
+        with bypass_rls():
+            parts = self.parts()
+        self.assertEqual(parts.activity, Decimal(7))
+        self.assertEqual(parts.activity_parts, (Decimal(7), Decimal(0)))
+        self.assertEqual(parts.total, parts.attendance + Decimal(15))
+
+    def test_business_practical_and_selfwork_add_below_cap(self):
+        self.prepare(selfwork_points=4, practical=3)
+        with bypass_rls():
+            parts = self.parts()
+        self.assertEqual(parts.activity, Decimal(7))
+
+    def test_nolevel_offering_gets_full_profile(self):
+        from apps.registrar import (
+            exam_score_assessment,
+            interim_components,
+            language_business_grading,
+            language_level_grading,
+            student_display_policy,
+        )
+
+        self.prepare(NOLEVEL_NAME, midterm=None)
+        with bypass_rls():
+            offering = self.offering_fresh()
+            self.assertTrue(language_level_grading.is_level(offering))
+            self.assertTrue(language_business_grading.is_business(offering))
+            self.assertEqual(exam_score_assessment.cap_for(offering, exam_score_assessment.FINAL), 70)
+            self.assertEqual(exam_score_assessment.cap_for(offering, exam_score_assessment.MIDTERM), 10)
+            self.assertEqual(student_display_policy.entry_cap(offering, None), 30)
+            grid = interim_components.get_kollokvium_grid(offering)
+            self.assertTrue(grid["teacher_write"])
+            self.assertEqual(grid["components"][0].max_score, 10)
+            parts = self.parts()
+        self.assertEqual(parts.activity, Decimal(10))
+        self.assertEqual(parts.midterm_max, Decimal(10))
+        self.post_midterm(9)
+        self.assertEqual(self.cell(), Decimal(9))
+        self.post_midterm(11)
+        self.assertEqual(self.cell(), Decimal(9))
+
+    @override_settings(ACADEMIC_LANGUAGE_BUSINESS_PROFILE=False)
+    def test_nolevel_switch_off_is_university_standard(self):
+        from apps.registrar import exam_score_assessment, language_level_grading
+
+        self.prepare(NOLEVEL_NAME)
+        with bypass_rls():
+            offering = self.offering_fresh()
+            self.assertFalse(language_level_grading.is_level(offering))
+            self.assertEqual(exam_score_assessment.cap_for(offering, exam_score_assessment.FINAL), 50)
+            parts = self.parts()
+        self.assertEqual(parts.midterm_max, Decimal(30))
 
     def test_business_final_result_totals_100_with_exam_70(self):
         from apps.registrar import exam_score_assessment, finals, gradebook
@@ -190,13 +278,22 @@ class BusinessProfileTests(TestCase):
     def test_batch_path_matches_single_row_path(self):
         from apps.registrar import finals_batch, gradebook
 
-        self.prepare()
-        with bypass_rls():
-            single = gradebook.entry_score_for(self.enrollment_fresh(), 50)
-            enrollment = self.enrollment_fresh()
-            batch = finals_batch.build([enrollment], with_finals=True)
-            batched = gradebook.entry_score_for(enrollment, 50, **batch.entry_kwargs(enrollment))
-        self.assertEqual(single, batched)
+        for name, selfwork, practical in ((BUSINESS_NAME, 6, 9), (NOLEVEL_NAME, 2, 5)):
+            with self.subTest(name=name):
+                with bypass_rls():
+                    SelfWorkMark.objects.filter(enrollment=self.enrollment).delete()
+                    SelfWorkTopic.objects.filter(offering=self.offering).delete()
+                    ComponentScore.objects.filter(enrollment=self.enrollment).delete()
+                    AssessmentComponent.objects.filter(offering=self.offering).delete()
+                    LessonMark.objects.filter(enrollment=self.enrollment).delete()
+                    Lesson.objects.filter(offering=self.offering).delete()
+                self.prepare(name, selfwork_points=selfwork, practical=practical)
+                with bypass_rls():
+                    single = gradebook.entry_score_for(self.enrollment_fresh(), 50)
+                    enrollment = self.enrollment_fresh()
+                    batch = finals_batch.build([enrollment], with_finals=True)
+                    batched = gradebook.entry_score_for(enrollment, 50, **batch.entry_kwargs(enrollment))
+                self.assertEqual(single, batched)
 
     @override_settings(ACADEMIC_LANGUAGE_BUSINESS_PROFILE=False)
     def test_switch_off_returns_to_level_rule(self):
@@ -204,7 +301,7 @@ class BusinessProfileTests(TestCase):
         with bypass_rls():
             parts = self.parts()
         self.assertEqual(parts.activity, Decimal(9))  # praktiki məşğələ ortası
-        self.assertTrue(parts.activity_active)
+        self.assertFalse(parts.practical_selfwork)
         self.assertEqual(parts.selfwork, 0)
         self.assertFalse(parts.selfwork_active)
 
@@ -227,7 +324,7 @@ class BusinessProfileTests(TestCase):
             self.assertEqual(exam_score_assessment.cap_for(offering, exam_score_assessment.FINAL), 50)
         self.assertEqual(parts.midterm_max, Decimal(30))
         self.assertFalse(parts.selfwork_active)  # sərbəst iş RİM-də söndürülü (defolt)
-        self.assertTrue(parts.activity_active)
+        self.assertFalse(parts.practical_selfwork)
         self.assertEqual(parts.activity, Decimal(9))
 
     def test_selfwork_active_only_for_business(self):
@@ -333,9 +430,9 @@ class BusinessProfileTests(TestCase):
         final = self.get(self.teacher, self.journal_url("yekun"))
         self.assertIn('MIDTERM<div class="jd2-th-sub">/10</div>', final)
         self.assertIn("İMTAHANA QƏDƏR BAL<div>/30</div>", final)
-        self.assertIn("SƏRBƏST İŞ", final)
-        self.assertNotIn('class="jd2-fb-semhead">Aktivlik', final)
-        self.assertIn("Giriş balı = davamiyyət + Midterm + sərbəst iş", final)
+        self.assertIn('class="jd2-fb-semhead">Praktiki / sərbəst iş', final)
+        self.assertNotIn("SƏRBƏST İŞ", final)
+        self.assertIn("Giriş balı = davamiyyət + Midterm + praktiki / sərbəst iş", final)
         interim = self.get(self.teacher, self.journal_url("kollokvium"))
         self.assertIn("data-jd-teacher-midterm", interim)
         self.assertIn('name="kscore__', interim)
@@ -355,6 +452,7 @@ class BusinessProfileTests(TestCase):
         subjects = self.get(self.student, reverse("accounts:profile") + "?section=my-subjects")
         self.assertIn("data-business-weights", subjects)
         self.assertIn("Xarici dildə işgüzar kommunikasiya", subjects)
+        self.assertIn("Praktiki / sərbəst iş", subjects)
         self.assertNotIn("Aktivlik (praktiki məşğələ)", subjects)
 
     # ── Audit əmri ──────────────────────────────────────────────────────────
@@ -369,6 +467,7 @@ class BusinessProfileTests(TestCase):
         self.assertIn("components_max_above_ten=1", text)  # xam tavan 30 qalıb (yenidən miqyaslanmır)
         self.assertIn("seminar_scores=2", text)
         self.assertIn("marks=1", text)
+        self.assertIn("nolevel_applied=0", text)
         self.assertNotIn(self.student.username, text)
         with bypass_rls():
             self.assertEqual(ComponentScore.objects.get(component=self.midterm).score, Decimal(8))

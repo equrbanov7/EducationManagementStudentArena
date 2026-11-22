@@ -12,7 +12,7 @@ def results_for(queryset, *, organization, offering_ids=None):
     candidates = queryset.select_related(
         "offering__subject", "offering__period", "offering__organization", "offering__assessment_scheme"
     )
-    enrollments = [e for e in candidates if language_level_grading.is_level_name(e.offering.subject.name)]
+    enrollments = [e for e in candidates if language_level_grading.is_graded_name(e.offering.subject.name)]
     if not enrollments:
         return {}
     batch = finals_batch.build(enrollments, organization=organization)
@@ -26,7 +26,7 @@ def results_for(queryset, *, organization, offering_ids=None):
 
 
 def evaluation_override(enrollment, maps):
-    if not language_level_grading.is_level_name(enrollment.offering.subject.name):
+    if not language_level_grading.is_graded_name(enrollment.offering.subject.name):
         return None
     if "language_results" not in maps:
         maps["language_results"] = results_for(

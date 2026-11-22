@@ -530,7 +530,7 @@ def get_student_journal_summary(
         scheme = getattr(offering, "assessment_scheme", None)
         from . import language_level_grading
 
-        cap = language_level_grading.entry_cap(offering.subject.name, scheme.entry_score_max if scheme else 50)
+        cap = language_level_grading.offering_entry_cap(offering, scheme.entry_score_max if scheme else 50)
         if language_level_grading.is_level(offering):
             absence_hours = (entry_batch.level_absence_hours or {}).get(enrollment.pk, absence_hours)
         entry_score = entry_score_for(enrollment, cap, **entry_batch.entry_kwargs(enrollment))

@@ -23,7 +23,17 @@ SEMINAR_MAX = ACTIVITY_MAX
 
 
 def is_level_name(subject_name):
+    """Ad mötərizədə SƏVİYYƏ daşıyırmı (köçürülmüş / donmuş kurs qaydaları bunu işlədir)."""
     return bool(level_of(subject_name))
+
+
+def is_graded_name(subject_name):
+    """QİYMƏTLƏNDİRMƏ yolu: səviyyəli ad VƏ ya «Xarici dildə işgüzar kommunikasiya» adı (səviyyəsiz «…-2» də, RİM
+    açarı ilə — sahib 2026-11-22, :func:`core.language_business_rule.graded_level_name`). Kohort qruplaşması bunu
+    işlətmir (``level_of``)."""
+    from core.language_business_rule import graded_level_name
+
+    return graded_level_name(subject_name)
 
 
 def is_level(offering):
@@ -32,9 +42,10 @@ def is_level(offering):
     Cari semestrdə həmişə qüvvədədir. Köçürülmüş (keçmiş, cari olmayan) semestrlərdə səviyyə adlı fənlər köhnə sistemdə universitet standartı ilə
     (giriş 0–50) aparılıb və imtahansız qalıb — sahib 2026-11-09: onlar adi fənn kimi oxunur, yekun = giriş balı
     (bax :func:`apps.registrar.finals.compute_final_result`). Ad yoxlaması üçün :func:`is_level_name` qalır.
+    Sahib 2026-11-22: səviyyəsiz «Xarici dildə işgüzar … kommunikasiya-1/2/3» də (:func:`is_graded_name`).
     """
     subject = getattr(offering, "subject", None)
-    if subject is None or not is_level_name(getattr(subject, "name", "")):
+    if subject is None or not is_graded_name(getattr(subject, "name", "")):
         return False
     return level_era(offering)
 
@@ -88,6 +99,13 @@ def level_era(offering) -> bool:
 
 def entry_cap(subject_name, configured):
     return ENTRY_MAX if is_level_name(subject_name) else configured
+
+
+def offering_entry_cap(offering, configured):
+    """Açılışın giriş tavanı: :func:`entry_cap` + dövrü qüvvədə olan səviyyəsiz işgüzar kommunikasiya fənni (30)."""
+    subject = getattr(offering, "subject", None)
+    cap = entry_cap(getattr(subject, "name", ""), configured)
+    return ENTRY_MAX if cap != ENTRY_MAX and is_level(offering) else cap
 
 
 def exam_cap(subject_name, configured_entry):
@@ -279,7 +297,7 @@ def parts_for(
 
     if not is_level(enrollment.offering):
         return None
-    # «Xarici dildə işgüzar kommunikasiya» (sahib 2026-11-22): aktivlik yoxdur, onun 10 balı sərbəst işdir.
+    # «Xarici dildə işgüzar kommunikasiya» (sahib 2026-11-22): üçüncü 10 bal = praktiki məşğələ ortası + sərbəst iş.
     business_profile = business.is_business(enrollment.offering)
     if components is None:
         components = list(
@@ -287,9 +305,7 @@ def parts_for(
                 organization_id=enrollment.organization_id, offering_id=enrollment.offering_id
             )
         )
-    if business_profile:
-        marks = []
-    elif marks is None:
+    if marks is None:
         marks = list(
             activity_kinds.annotate_kind(
                 LessonMark.objects.filter(
@@ -334,6 +350,7 @@ def parts_for(
     if business_profile:
         return business.entry_parts(
             attendance=attendance,
+            practical=activity,
             midterm=max(Decimal(0), midterm),
             # Standart qayda kimi YALNIZ SELF_WORK komponenti olan jurnalda (canlı yazı yolları onu həmişə yaradır).
             selfwork=(
