@@ -200,9 +200,9 @@ def get_final_breakdown(offering):
     standard = entry_batch.is_midterm(offering)
     # Sərbəst iş sütunu lövhənin CƏMİ-dir (arxiv qaydası daxil) — struktur/sillabus oxunmur; söndürülmüş
     # Midterm dövründə (sahib 2026-10-10) sütun yoxdur, lövhə də oxunmur.
-    # «Xarici dildə işgüzar kommunikasiya» (sahib 2026-11-22): sərbəst iş /10 var, aktivlik sütunu yoxdur.
+    # «Xarici dildə işgüzar kommunikasiya» (sahib 2026-11-22): praktiki məşğələ + sərbəst iş BİR sütundadır (/10).
     business = level and language_business_grading.is_business(offering)
-    selfwork_active = not standard or entry_batch.flags.selfwork or business
+    selfwork_active = (not standard or entry_batch.flags.selfwork) and not business
     selfwork_totals = (
         {r["enrollment"].id: r["total"] for r in get_selfwork_board(offering, with_structure=False)["rows"]}
         if selfwork_active
@@ -293,7 +293,6 @@ def get_final_breakdown(offering):
         # Yeni qayda (sahib 2026-10-10): sərbəst iş sütunu, 5 + 5 aktivlik sütunları, midterm tavanı.
         "selfwork_active": selfwork_active,
         "activity_split": standard and not business and entry_batch.activity_split_for(offering),
-        "activity_active": not business,
         "business": business,
         # Səviyyə fənni (``core.language_level_rule``, sahib 2026-11-08): midterm /10, seminar = «Praktiki məşğələ».
         "midterm_max": Decimal(levels.MIDTERM_MAX) if level else entry_batch.flags.midterm_max,

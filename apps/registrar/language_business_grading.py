@@ -5,7 +5,7 @@ dəstidir (:mod:`apps.registrar.language_level_grading` — midterm 10, imtahan 
 funksiyalar yalnız fərqi verir:
 
 * :func:`is_business` — açılış profilə düşürmü (səviyyə dövr qapısı + ad + RİM açarı);
-* :func:`entry_parts` — giriş balı = davamiyyət + midterm + sərbəst iş (aktivlik sayılmır);
+* :func:`entry_parts` — giriş balı = davamiyyət + midterm + (praktiki məşğələ ortası + sərbəst iş, ≤ 10);
 * :func:`teacher_cell_open` / :func:`teacher_entries` — İmtahan Mərkəzinin pəncərəsi açıq olmayanda müəllimin
   midterm xanası: boş xana həmişə, yazılmış xana jurnal balının redaktə müddəti ərzində
   (``gradebook.mark_edit_window``); imtahandan avtomatik yazılmış xana heç vaxt (əvvəlki qayda).
@@ -41,21 +41,27 @@ def selfwork_points_for(enrollment, selfwork_points=None) -> Decimal:
     return max(ZERO, min(value, Decimal(rule.SELFWORK_MAX)))
 
 
-def entry_parts(*, attendance, midterm, selfwork, barred):
-    """Profilin :class:`entry_standard.EntryParts`-ı: aktivlik 0 və gizli, sərbəst iş görünür (/10)."""
+def entry_parts(*, attendance, practical, midterm, selfwork, barred):
+    """Profilin :class:`entry_standard.EntryParts`-ı (sahib 2026-11-22 «Praktiki məşğələ balını hesabla seminar kimi»):
+    üçüncü hissə = praktiki məşğələ ortası (səviyyə qaydası kimi, /10) + sərbəst iş, cəmi 10-la kəsilir — bir sütun
+    («Praktiki / sərbəst iş», ``practical_selfwork``); ``activity_parts`` = (praktiki, sərbəst iş) yalnız görünüşdür."""
     from . import entry_standard
     from .gradebook_components import round_score
 
+    practical = max(ZERO, practical)
+    combined = min(practical + selfwork, Decimal(rule.PRACTICAL_SELFWORK_MAX))
     return entry_standard.EntryParts(
         attendance=attendance,
-        activity=ZERO,
+        activity=combined,
         midterm=midterm,
-        selfwork=selfwork,
-        total=round_score(attendance + midterm + selfwork),
+        selfwork=ZERO,
+        total=round_score(attendance + combined + midterm),
         attendance_barred=barred,
         midterm_max=Decimal(rule.MIDTERM_MAX),
-        selfwork_active=True,
-        activity_active=False,
+        selfwork_active=False,
+        practical=True,
+        practical_selfwork=True,
+        activity_parts=(practical, selfwork),
     )
 
 

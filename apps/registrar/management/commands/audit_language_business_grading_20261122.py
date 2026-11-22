@@ -7,7 +7,8 @@ profilə düşən açılışları və köhnə tavanlarla yazılmış (yeni tavan
 * ``offerings`` — profil adına uyğun açılışlar (səviyyə dövr qapısı + RİM açarı tətbiq olunanlar ayrıca);
 * ``midterm`` — Midterm komponentinin tavanı > 10, xana balı > 10 (hesabda 10-a kəsilir), avtomatik (imtahandan) xanalar;
 * ``final`` — ``FinalGrade.exam_score`` > 70 / ``ResitRecord.resit_score`` > 70 / İmtahan Mərkəzinin final sətri > 70;
-* ``activity`` — praktiki məşğələ (seminar) dərs balları: profildə artıq toplanmır (data qalır);
+* ``offerings`` ``nolevel_*`` — mötərizədə səviyyəsi olmayan adlar («…kommunikasiya-2», sahib 2026-11-22);
+* ``activity`` — praktiki məşğələ (seminar) dərs balları: profildə sərbəst işlə birlikdə ≤ 10 sayılır;
 * ``selfwork`` — sərbəst iş işarələri və SELF_WORK komponenti olan açılışlar;
 * ``names`` — «işgüzar … kommunikasiya» sözləri olan, amma şablona düşməyən fənn adlarının sayı (ad yoxlaması).
 
@@ -95,11 +96,14 @@ class Command(BaseCommand):
                     report["names"]["near_miss_offerings"] += 1
                 continue
             report["offerings"]["name_match"] += 1
+            if rule.is_nolevel_business_name(name):
+                report["offerings"]["nolevel_name_match"] += 1
             if language_business_grading.is_business(offering):
                 offerings.append(offering)
             else:
                 report["offerings"]["not_applied"] += 1
         report["offerings"]["applied"] = len(offerings)
+        report["offerings"]["nolevel_applied"] = sum(rule.is_nolevel_business_name(o.subject.name) for o in offerings)
         report["names"]["distinct_matched"] = len({o.subject.name for o in offerings})
         if not offerings:
             return report

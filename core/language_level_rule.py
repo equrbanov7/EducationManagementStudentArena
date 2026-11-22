@@ -65,7 +65,12 @@ FOREIGN_LANGUAGE_COURSE_RE = re.compile(r"^\s*xarici\s+dil\s*[-–—]?\s*[123](
 def is_practical_name(name) -> bool:
     """Bu fənnin seminarı həmişə «Praktiki məşğələ» adlanırmı (sahib 2026-11-08: səviyyə fənləri praktikidir;
     2026-11-16: «Xarici dil 1/2/3» də)."""
-    return is_level_name(name) or bool(FOREIGN_LANGUAGE_COURSE_RE.match(str(name or "")))
+    if is_level_name(name) or FOREIGN_LANGUAGE_COURSE_RE.match(str(name or "")):
+        return True
+    # Sahib 2026-11-22: səviyyəsiz «Xarici dildə işgüzar … kommunikasiya-1/2/3» də — praktiki məşğələ seminar kimi sayılır.
+    from core.language_business_rule import is_business_name
+
+    return is_business_name(name)
 
 
 __all__ = [

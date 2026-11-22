@@ -377,7 +377,7 @@ def build_period_analytics(*, organization, period, scope_q=None) -> dict:
     )
 
     # Səviyyə qaydası donmuş (köçürülmüş) açılışa aid deyil (``language_level_grading.is_level`` güzgüsü, 2026-11-09).
-    level_ids = [row[7] for row in info.values() if language_level_grading.is_level_name(row[10]) and not row[6]]
+    level_ids = [row[7] for row in info.values() if language_level_grading.is_graded_name(row[10]) and not row[6]]
     level_results = (
         language_level_analytics.results_for(flat, organization=organization, offering_ids=level_ids)
         if level_ids

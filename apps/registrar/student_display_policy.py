@@ -4,7 +4,7 @@ from . import exam_eligibility, language_level_grading
 
 
 def entry_cap(offering, scheme):
-    return language_level_grading.entry_cap(offering.subject.name, scheme.entry_score_max if scheme else 50)
+    return language_level_grading.offering_entry_cap(offering, scheme.entry_score_max if scheme else 50)
 
 
 def eligibility(enrollment, *, absence_count=None, **inputs):
