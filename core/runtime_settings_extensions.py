@@ -28,6 +28,7 @@ _MODULES = (
     "core.runtime_settings_journal_off_schedule",  # «journal»: «cədvəldən kənar» işarəsi açarı (2026-11-14)
     "core.runtime_settings_journal_presence",  # «journal»: i/e xanasının 1 günlük dəyişmə müddəti (2026-11-21)
     "core.runtime_settings_university_scope",  # «academic»: Xarici dillər kafedrası — bütün universitet (2026-11-22)
+    "core.runtime_settings_language_business",  # «academic»: işgüzar kommunikasiya — sərbəst iş + midterm 10 (2026-11-22)
 )
 
 

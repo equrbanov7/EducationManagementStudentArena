@@ -349,6 +349,7 @@ def kollokvium_save(request, offering_id):
     """
     from apps.registrar import interim_assessment
     from apps.registrar import kollokvium_windows as kw
+    from apps.registrar import language_business_grading
 
     offering = _offering_or_404(request, offering_id)
     spec = interim_assessment.spec_for_offering(offering)
@@ -363,8 +364,7 @@ def kollokvium_save(request, offering_id):
     idx_by_id = {str(c.id): idx for idx, c in enumerate(components)}
     today = timezone.localdate()
 
-    entries = []
-    blocked = False
+    entries, teacher = [], []
     # Pəncərə vəziyyəti K üzrə BİR dəfə (əvvəl hər xana üçün pəncərə + əlavə gün SELECT-i).
     open_by_index = {}
 
@@ -381,9 +381,10 @@ def kollokvium_save(request, offering_id):
             continue
         # Midterm dövründə yalnız əsas sütun (k_index=0) yazılır; balı olan köhnə qalıq oxu-rejimlidir.
         if idx_by_id[parts[1]] >= spec.count or not _window_open(idx_by_id[parts[1]]):
-            blocked = True
-            continue  # pəncərə bağlı / aktiv deyil — bu K-ya yazma qadağandır
+            teacher.append({"component_id": parts[1], "enrollment_id": parts[2], "score": raw})
+            continue  # pəncərə bağlı / aktiv deyil — yalnız işgüzar kommunikasiya profilində müəllim yazısı (aşağıda)
         entries.append({"component_id": parts[1], "enrollment_id": parts[2], "score": raw})
+    entries, blocked = language_business_grading.merge_midterm_entries(offering, components, entries, teacher)
 
     from apps.registrar import journal_autosave  # sahib 2026-10-14: eyni yazı yolu, JSON cavab
 

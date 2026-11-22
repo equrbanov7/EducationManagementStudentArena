@@ -141,9 +141,20 @@ def selfwork_active_for_period(period, organization=None) -> bool:
 
 
 def selfwork_active_for_offering(offering) -> bool:
+    """Açılışın sərbəst işi: dövr qaydası, üstəlik «Xarici dildə işgüzar kommunikasiya» fənlərində HƏMİŞƏ (sahib
+    2026-11-22 — onların 10 balı sərbəst işdir; :mod:`core.language_business_rule`, RİM açarı ilə)."""
     if offering is None:
         return selfwork_enabled()
-    return selfwork_active_for_period(getattr(offering, "period", None), getattr(offering, "organization", None))
+    if selfwork_active_for_period(getattr(offering, "period", None), getattr(offering, "organization", None)):
+        return True
+    return business_selfwork_offering(offering)
+
+
+def business_selfwork_offering(offering) -> bool:
+    """Açılış «işgüzar kommunikasiya» profilindədirmi (ad + RİM açarı) — sərbəst iş onda ümumi açardan asılı deyil."""
+    from core import language_business_rule
+
+    return language_business_rule.applies_to_name(language_business_rule.offering_subject_name(offering))
 
 
 def coursework_active_for_period(period, organization=None) -> bool:
@@ -191,6 +202,7 @@ __all__ = [
     "coursework_active_for_period",
     "coursework_enabled",
     "available_exams_page_enabled",
+    "business_selfwork_offering",
     "contact_page_enabled",
     "lesson_activation_enabled",
     "midterm_from_year",

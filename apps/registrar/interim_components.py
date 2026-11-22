@@ -235,13 +235,29 @@ def get_kollokvium_grid(offering):
     score_map = {}
     # Sahib 2026-10-21: test midterm cəhdindən avtomatik yazılmış xana (``exam_source``) müəllimə OXU-rejimlidir.
     auto_map = {}
+    rows_map = {}
     for cs in ComponentScore.objects.filter(component__in=components, enrollment__offering=offering):
         score_map[(cs.enrollment_id, cs.component_id)] = cs.score
+        rows_map[(cs.enrollment_id, cs.component_id)] = cs
         if cs.exam_source:
             auto_map[(cs.enrollment_id, cs.component_id)] = cs.exam_source
+    from . import language_business_grading as business
     from .language_level_grading import MIDTERM_MAX, is_level
 
     level_policy = is_level(offering)
+    # «Xarici dildə işgüzar kommunikasiya» (sahib 2026-11-22): pəncərə açıq deyilsə də müəllim əsas Midterm xanasını
+    # yazır — boş xana həmişə, yazılmış xana jurnal balının redaktə müddəti ərzində (``language_business_grading``).
+    teacher_write = bool(components) and not open_by_comp[components[0].id] and business.is_business(offering)
+    now = timezone.now()
+    if teacher_write:
+        open_by_comp[components[0].id] = None  # «müəllim yazısı» — xana səviyyəsində həll olunur
+
+    def _cell_open(enrollment_id, component):
+        state = open_by_comp[component.id]
+        if state is None:
+            return business.teacher_cell_open(rows_map.get((enrollment_id, component.id)), now)
+        return state
+
     rows = [
         {
             "enrollment": e,
@@ -250,7 +266,7 @@ def get_kollokvium_grid(offering):
                 {
                     "component": c,
                     "score": score_map.get((e.id, c.id)),
-                    "editable": open_by_comp[c.id]
+                    "editable": _cell_open(e.id, c)
                     and (e.id, c.id) not in auto_map
                     and not (level_policy and (score_map.get((e.id, c.id)) or 0) > MIDTERM_MAX),
                     "level_raw_over_cap": level_policy and (score_map.get((e.id, c.id)) or 0) > MIDTERM_MAX,
@@ -267,6 +283,9 @@ def get_kollokvium_grid(offering):
         "columns": columns,
         "rows": rows,
         "any_open": any(col["open"] for col in columns),
+        # Müəllimin pəncərəsiz Midterm yazısı (işgüzar kommunikasiya profili) — saxlama paneli bununla da görünür.
+        "teacher_write": teacher_write,
+        "any_writable": teacher_write or any(col["open"] for col in columns),
         "any_auto": bool(auto_map),
         # «CƏMİ» sütunu yalnız bir neçə sütun olanda mənalıdır (kollokvium: /30).
         "show_total": len(columns) > 1,

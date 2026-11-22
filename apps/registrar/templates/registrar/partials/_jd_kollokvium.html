@@ -6,8 +6,10 @@ Rejim açılışın dövründən gəlir (apps/registrar/interim_assessment.py): 
 tam bal seçə/dəyişə bilər (bootstrap-select); boş = 0 sayılır. Pəncərə bağlananda tam
 kilidlənir — burada 2 saat kilidi YOXDUR. Midterm dövründə balı olan köhnə «Kollokvium N»
 qalığı (nəzəri hal) oxu-rejimli əlavə sütun kimi görünür.
+«Xarici dildə işgüzar kommunikasiya» (sahib 2026-11-22, teacher_write): pəncərə açıq olmasa da əsas Midterm xanası
+müəllimə açıqdır (0–10; yazılmış bal jurnal balının redaktə müddəti ərzində) — any_writable saxlama panelini açır.
 {% endcomment %}
-<form method="post" action="{% url 'registrar:journal_kollokvium_save' offering.id %}" class="jd-kollokvium-form" data-jd-draft="kollokvium"{% if can_edit and kollokvium_grid.any_open and not correction_mode %} data-jd-autosave data-jd-autosave-url="{% url 'registrar:journal_kollokvium_save' offering.id %}"{% endif %}>
+<form method="post" action="{% url 'registrar:journal_kollokvium_save' offering.id %}" class="jd-kollokvium-form" data-jd-draft="kollokvium"{% if can_edit and kollokvium_grid.any_writable and not correction_mode %} data-jd-autosave data-jd-autosave-url="{% url 'registrar:journal_kollokvium_save' offering.id %}"{% endif %}>
     {% csrf_token %}
     <p class="jd2-panel-hint">
         {% if kollokvium_grid.spec.is_midterm %}
@@ -16,6 +18,12 @@ qalığı (nəzəri hal) oxu-rejimli əlavə sütun kimi görünür.
         {% trans "Kollokvium bal-yazma aralığını İmtahan Mərkəzi təyin edir. Pəncərə açıq olduqca balı sərbəst yaza/dəyişə bilərsiniz; bağlanandan sonra kilidlənir. Boş buraxılan bal 0 sayılır." context "registrar.journal" %}
         {% endif %}
     </p>
+    {% if kollokvium_grid.teacher_write %}
+    <p class="jd2-panel-hint jd2-kwin-note" data-jd-teacher-midterm>
+        <i class="fas fa-pen"></i>
+        {% blocktrans with max=kollokvium_grid.primary_max context "registrar.journal" %}Bu fəndə Midterm balını (0–{{ max }}) özünüz yazırsınız — İmtahan Mərkəzinin pəncərəsini gözləmək lazım deyil. Yazılmış bal digər jurnal balları kimi qısa müddət ərzində dəyişdirilə bilər, sonra yalnız sənədli düzəliş ilə. İmtahan Mərkəzində keçirilən midterm nəticəsi də bu xanaya 10 ballıq şkala ilə köçürülür.{% endblocktrans %}
+    </p>
+    {% endif %}
     {% if kollokvium_grid.any_auto %}
     <p class="jd2-panel-hint jd2-kwin-note jd2-auto-note">
         <i class="fas fa-robot"></i>
@@ -96,7 +104,7 @@ qalığı (nəzəri hal) oxu-rejimli əlavə sütun kimi görünür.
         </table>
     </div>
 
-    {% if can_edit and kollokvium_grid.any_open %}
+    {% if can_edit and kollokvium_grid.any_writable %}
     <div class="jd2-savebar">
         {% if not correction_mode %}{% include "registrar/partials/_jd_autosave_status.html" %}{% endif %}
         <button type="submit" class="jd2-save-btn"><i class="fas fa-floppy-disk"></i> {% trans "Yadda saxla" context "registrar.journal" %}</button>
