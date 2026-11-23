@@ -22,6 +22,7 @@ from django.utils.translation import pgettext
 
 from .. import public
 from ..services import analytics_guard as guard
+from ..services.filters import report_metadata
 from .results_filters import effective_params, period_options, query_string, resolve
 from .results_labels import TAB_GENERAL, TAB_LABELS, TAB_OVERVIEW, TAB_TEACHERS, TABS, short_label
 
@@ -303,6 +304,7 @@ def _live_context(resolved, request, base_url) -> dict:
     }
 
 
+@report_metadata()
 def panel_context(context) -> dict:
     request = context.get("request")
     resolved = resolve(request, with_choices=True) if request is not None else None

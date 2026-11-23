@@ -35,8 +35,8 @@
                     <span><a href="{% url 'accounts:public_profile' post.author.username %}" class="author-link"><i class="fas fa-user-circle"></i> {{ post.author.username }}</a></span>
                 {% endif %}
                 <span><i class="far fa-eye"></i> {% blocktrans with count=post.view_count|compact_number %}{{ count }} baxış{% endblocktrans %}</span>
-                {% if post.average_rating %}
-                    <span>• <i class="fas fa-star"></i> {{ post.average_rating|floatformat:1 }} / 5</span>
+                {% if average_rating %}
+                    <span>• <i class="fas fa-star"></i> {{ average_rating|floatformat:1 }} / 5</span>
                 {% endif %}
             </div>
         </header>
@@ -63,15 +63,15 @@
 
     <section class="article-extra-section">
         <div class="article-rating-block">
-            {% if post.average_rating %}
-                <p>{% trans "avg_rating_label" context "blog.post_detail_page" %} <strong>{{ post.average_rating|floatformat:1 }}</strong> <i class="fas fa-star"></i> / 5</p>
+            {% if average_rating %}
+                <p>{% trans "avg_rating_label" context "blog.post_detail_page" %} <strong>{{ average_rating|floatformat:1 }}</strong> <i class="fas fa-star"></i> / 5</p>
             {% else %}
                 <p>{% trans "no_rating" context "blog.post_detail_page" %}</p>
             {% endif %}
         </div>
 
         <div class="comments-section">
-            <h2 class="comments-title">{% trans "comments_title" context "blog.post_detail_page" %} ({{ comments.count }})</h2>
+            <h2 class="comments-title">{% trans "comments_title" context "blog.post_detail_page" %} ({{ comments|length }})</h2>
 
             {% for comment in comments %}
                 <article class="comment-item">

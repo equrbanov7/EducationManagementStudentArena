@@ -12,6 +12,7 @@ from apps.registrar import language_cohort_query, language_cohorts
 from apps.registrar.models import (
     CourseOffering,
     Enrollment,
+    JournalShare,
     LanguageLevelCohort,
     LanguageLevelPlacement,
     Lesson,
@@ -663,6 +664,20 @@ class LanguageCohortTests(_GuestRosterBase):
                 self.move(cohort)
         self.assertFalse(cohort.placements.exists())
         self.assertFalse(Enrollment.objects.filter(offering=cohort.offering).exists())
+
+    def test_candidate_lookup_applies_journal_scope_once_across_enrollments(self):
+        cohort = self.create()
+        with bypass_rls():
+            self._make_student("lc_picker_peer", self.group1)
+            CourseOffering.objects.filter(pk=self.offering.pk).update(instructor=None)
+            # A visiting teacher may only select the one enrollment in their share.
+            actor = self.teacher
+            share = JournalShare.objects.create(organization=self.org, offering=self.offering, teacher=actor)
+            share.enrollments.add(self.host.enrollments.get(offering=self.offering))
+            with patch.object(language_cohorts, "source_scope", wraps=language_cohorts.source_scope) as resolve:
+                found = set(language_cohort_query._source_students(cohort, actor).values_list("student_id", flat=True))
+            self.assertEqual(found, {self.host.pk})
+            self.assertEqual(resolve.call_count, 1)
 
     def test_staff_readds_removed_student_using_explicit_placement_history(self):
         # Sahib 2026-11-10: tərkibi heyət idarə edir (əvvəl müəllim də edə bilirdi).

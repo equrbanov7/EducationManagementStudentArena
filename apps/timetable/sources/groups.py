@@ -184,14 +184,14 @@ def policy_rows(organization) -> tuple[dict, dict]:
     return by_group, by_level
 
 
-def load_groups(organization, groups) -> dict:
+def load_groups(organization, groups, *, policies=None) -> dict:
     """``{group_id: GroupInfo}`` — metadata + ailə + siyasət + korpus."""
     groups = list(groups)
     ids = [group.pk for group in groups]
     stats = _record_stats(organization, ids)
     unit_degrees = _unique_program_degree(organization, {group.parent_id for group in groups if group.parent_id})
     buildings = schedule_publish.group_buildings(organization, groups)
-    by_group, by_level = policy_rows(organization)
+    by_group, by_level = policies if policies is not None else policy_rows(organization)
     infos: dict = {}
     for group in groups:
         key = str(group.pk)

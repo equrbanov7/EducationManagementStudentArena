@@ -80,8 +80,10 @@ def _build_direct_post_count_map(posts_queryset):
 
 def get_category_subtree_ids(category, *, category_queryset=None):
     categories = _load_categories(category_queryset)
-    children_by_parent = _build_children_map(categories)
+    return _subtree_ids(category, _build_children_map(categories))
 
+
+def _subtree_ids(category, children_by_parent):
     subtree_ids = []
     pending = [category.id]
 
@@ -161,6 +163,22 @@ def get_flat_category_tree(
     return flattened_categories
 
 
+def _section_sidebar(categories):
+    nested = [category for category in categories if category.tree_depth > 0]
+    for category in nested:
+        category.tree_depth -= 1
+    return nested or categories
+
+
+def category_page_navigation(category, root_category, published_posts):
+    tree = get_flat_category_tree(
+        posts_queryset=published_posts, root_category=root_category, include_empty=True, sort_by_post_count=True
+    )
+    subtree_ids = _subtree_ids(category, _build_children_map(tree))
+    topics = [node for node in tree if node.tree_depth == 1][:5]
+    return subtree_ids, _section_sidebar(tree), topics
+
+
 def get_sidebar_categories(*, posts_queryset=None, active_category=None, include_empty=False):
     root_category = active_category.get_root() if active_category else None
 
@@ -179,16 +197,7 @@ def get_sidebar_categories(*, posts_queryset=None, active_category=None, include
         sort_by_post_count=True,
     )
 
-    if active_category is None:
-        result = categories
-    else:
-        nested_categories = [category for category in categories if category.tree_depth > 0]
-        if not nested_categories:
-            result = categories
-        else:
-            for category in nested_categories:
-                category.tree_depth = max(category.tree_depth - 1, 0)
-            result = nested_categories
+    result = _section_sidebar(categories) if active_category else categories
 
     if use_cache:
         try:

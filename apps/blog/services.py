@@ -5,7 +5,9 @@ This module contains service functions that encapsulate business operations.
 
 from collections import defaultdict
 
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
 from django.db.models import Q
 
 from apps.exams.models import StudentGroup
@@ -224,11 +226,10 @@ def normalize_approval_status(value, *, include_all=False, default=Post.Approval
     return default
 
 
-def _build_group_scope_for_reviewer(reviewer):
+def _build_group_scope_for_reviewer(reviewer, reviewer_admin_org_ids):
     if is_superadmin_user(reviewer):
         return StudentGroup.objects.filter(students__posts__isnull=False).distinct()
 
-    reviewer_admin_org_ids = _active_admin_org_ids_for_user(reviewer)
     if reviewer_admin_org_ids:
         return StudentGroup.objects.filter(
             organization_id__in=reviewer_admin_org_ids,
@@ -242,7 +243,28 @@ def _build_group_scope_for_reviewer(reviewer):
     return groups_qs.distinct()
 
 
-def collect_reviewable_posts(reviewer, *, search="", status="pending", group_id="", organization_id=""):
+def _admin_post_authors(org_ids):
+    with bypass_rls():
+        members = set(
+            _active_institutional_memberships_qs()
+            .filter(organization_id__in=org_ids, user__posts__isnull=False)
+            .order_by()
+            .values_list("user_id", flat=True)
+            .distinct()
+        )
+        owners = Organization.objects.filter(id__in=org_ids).values_list("owner_id", flat=True)
+        return members, members.union(owners)
+
+
+def _lower_ranked_posts(posts, reviewer_level):
+    author_ids = posts.order_by().values("author_id")
+    authors = get_user_model().objects.filter(pk__in=author_ids).select_related("profile")
+    return posts.filter(author_id__in=[author.pk for author in authors if reviewer_level > get_user_role_level(author)])
+
+
+def collect_reviewable_posts(
+    reviewer, *, search="", status="pending", group_id="", organization_id="", page_number=None
+):
     normalized_search = (search or "").strip()
     superadmin = is_superadmin_user(reviewer)
     reviewer_admin_org_ids = _active_admin_org_ids_for_user(reviewer)
@@ -254,9 +276,10 @@ def collect_reviewable_posts(reviewer, *, search="", status="pending", group_id=
     selected_organization = str(organization_id or "").strip()
 
     if not superadmin and reviewer_level < ROLE_LEVEL_TEACHER:
-        return [], normalized_search, normalized_status, "", [], "", []
+        empty = [] if page_number is None else Paginator([], 10).get_page(page_number)
+        return empty, normalized_search, normalized_status, "", [], "", []
 
-    groups_scope = _build_group_scope_for_reviewer(reviewer)
+    groups_scope = _build_group_scope_for_reviewer(reviewer, reviewer_admin_org_ids)
     available_groups = list(groups_scope.order_by("name").values("id", "name"))
     available_group_ids = {str(group["id"]) for group in available_groups}
     available_organizations = []
@@ -276,9 +299,7 @@ def collect_reviewable_posts(reviewer, *, search="", status="pending", group_id=
             available_organizations = [
                 {"id": row["organization_id"], "name": row["organization__name"]} for row in available_organizations
             ]
-            active_institutional_author_ids = set(
-                _active_institutional_memberships_qs().values_list("user_id", flat=True)
-            )
+            active_institutional_author_ids = _active_institutional_memberships_qs().values("user_id")
             has_personal_authors = Post.objects.exclude(author_id__in=active_institutional_author_ids).exists()
 
         available_org_ids = {str(org["id"]) for org in available_organizations}
@@ -327,17 +348,7 @@ def collect_reviewable_posts(reviewer, *, search="", status="pending", group_id=
         if selected_group:
             posts_qs = posts_qs.filter(author__student_groups_as_student__id=selected_group)
     elif is_org_admin:
-        if not reviewer_admin_org_ids:
-            return [], normalized_search, normalized_status, selected_group, available_groups, "", []
-        with bypass_rls():
-            reviewer_author_ids = list(
-                _active_institutional_memberships_qs()
-                .filter(organization_id__in=reviewer_admin_org_ids)
-                .values_list("user_id", flat=True)
-            )
-            reviewer_author_ids.extend(
-                Organization.objects.filter(id__in=reviewer_admin_org_ids).values_list("owner_id", flat=True)
-            )
+        member_author_ids, reviewer_author_ids = _admin_post_authors(reviewer_admin_org_ids)
         posts_qs = posts_qs.filter(author_id__in=reviewer_author_ids)
         if selected_group:
             posts_qs = posts_qs.filter(author__student_groups_as_student__id=selected_group)
@@ -346,10 +357,10 @@ def collect_reviewable_posts(reviewer, *, search="", status="pending", group_id=
         if selected_group:
             posts_qs = posts_qs.filter(author__student_groups_as_student__id=selected_group)
 
-    posts = list(posts_qs)
-    if not superadmin and not is_org_admin:
-        posts = [post for post in posts if reviewer_level > get_user_role_level(post.author)]
+        posts_qs = _lower_ranked_posts(posts_qs, reviewer_level)
 
+    page = Paginator(posts_qs, 10).get_page(page_number) if page_number is not None else None
+    posts = list(page.object_list if page is not None else posts_qs)
     author_ids = {post.author_id for post in posts}
     author_group_names = defaultdict(list)
     author_organization_names = defaultdict(list)
@@ -401,6 +412,11 @@ def collect_reviewable_posts(reviewer, *, search="", status="pending", group_id=
     items = []
     for post in posts:
         author_name = (post.author.get_full_name() or "").strip() or post.author.username
+        # Teacher rows have already passed both group and rank checks. For an
+        # organization admin, owning an organization alone is insufficient for
+        # the author's row actions: these require an active membership.
+        within_scope = not is_org_admin or post.author_id in member_author_ids
+        can_review = within_scope and post.requires_approval and post.author_id != reviewer.pk
         items.append(
             {
                 "post": post,
@@ -409,13 +425,15 @@ def collect_reviewable_posts(reviewer, *, search="", status="pending", group_id=
                 "organization_names": author_organization_names.get(post.author_id, []),
                 "status_label": status_label_map.get(post.approval_status, post.approval_status),
                 "status_class": status_class_map.get(post.approval_status, "status-draft"),
-                "can_review": can_user_review_post(reviewer, post),
-                "can_moderate": can_user_moderate_post(reviewer, post),
+                "can_review": can_review,
+                "can_moderate": within_scope if superadmin or is_org_admin else can_review,
             }
         )
 
+    if page is not None:
+        page.object_list = items
     return (
-        items,
+        items if page is None else page,
         normalized_search,
         normalized_status,
         selected_group,
@@ -426,8 +444,16 @@ def collect_reviewable_posts(reviewer, *, search="", status="pending", group_id=
 
 
 def count_pending_reviewable_posts(reviewer):
-    items, _, _, _, _, _, _ = collect_reviewable_posts(
-        reviewer,
-        status=Post.ApprovalStatus.PENDING,
-    )
-    return len(items)
+    posts = Post.objects.filter(approval_status=Post.ApprovalStatus.PENDING)
+    if is_superadmin_user(reviewer):
+        return posts.count()
+    level = get_user_role_level(reviewer)
+    if level < ROLE_LEVEL_TEACHER:
+        return 0
+    admin_org_ids = _active_admin_org_ids_for_user(reviewer)
+    if admin_org_ids:
+        _, authors = _admin_post_authors(admin_org_ids)
+        return posts.filter(author_id__in=authors).count()
+    groups = _build_group_scope_for_reviewer(reviewer, admin_org_ids)
+    posts = posts.filter(requires_approval=True, author__student_groups_as_student__in=groups).distinct()
+    return _lower_ranked_posts(posts, level).count()

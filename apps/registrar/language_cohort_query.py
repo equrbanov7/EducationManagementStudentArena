@@ -46,37 +46,46 @@ def existing_level_journals(user, organization):
     ]
 
 
-def candidate_records(*, cohort, actor, query=""):
-    # Staff source-home-group scope OR existing course/enrollment scope. A
-    # teacher's grade.input permission never opens the whole tenant directory.
-    source_ids = set()
+def _source_students(cohort, actor):
+    active = Enrollment.objects.filter(organization=cohort.organization, status=Enrollment.Status.ENROLLED)
     offerings = (
         CourseOffering.objects.filter(organization=cohort.organization, period_id=cohort.period_id, is_active=True)
         .filter(Q(instructor=actor) | Q(shares__teacher=actor, shares__is_active=True))
+        .filter(Exists(active.filter(offering_id=OuterRef("pk"))))
         .select_related("subject", "organization")
         .distinct()
     )
+    full_offerings, permitted_rows = [], Q(pk__in=[])
     for offering in offerings:
-        if level_of(offering.subject.name) and level_family(offering.subject.name) == cohort.family:
-            for enrollment in Enrollment.objects.filter(
-                organization=cohort.organization, offering=offering, status=Enrollment.Status.ENROLLED
-            ).select_related("offering__organization"):
-                if language_cohorts.source_access(actor, enrollment):
-                    source_ids.add(enrollment.student_id)
-    removed = (
-        Enrollment.objects.filter(
-            organization=cohort.organization,
-            offering=cohort.offering,
-            status=Enrollment.Status.DROPPED,
-            level_departures__cohort=cohort,
-            level_departures__action="remove",
-        )
-        .select_related("offering__organization")
-        .distinct()
+        if not level_of(offering.subject.name) or level_family(offering.subject.name) != cohort.family:
+            continue
+        scope = language_cohorts.source_scope(actor, offering)
+        if scope is None:
+            continue
+        if scope.enrollment_ids is None:
+            full_offerings.append(offering.pk)
+        else:
+            permitted_rows |= Q(offering_id=offering.pk, pk__in=scope.enrollment_ids)
+    active = active.filter(Q(offering_id__in=full_offerings) | permitted_rows)
+    removed = Enrollment.objects.filter(
+        organization=cohort.organization,
+        offering_id=cohort.offering_id,
+        status=Enrollment.Status.DROPPED,
+        level_departures__cohort=cohort,
+        level_departures__action="remove",
     )
-    for enrollment in removed:
-        if language_cohorts.source_access(actor, enrollment):
-            source_ids.add(enrollment.student_id)
+    if removed.exists():
+        scope = language_cohorts.source_scope(actor, cohort.offering)
+        if scope is not None:
+            if scope.enrollment_ids is not None:
+                removed = removed.filter(pk__in=scope.enrollment_ids)
+            return (active | removed).values("student_id")
+    return active.values("student_id")
+
+
+def candidate_records(*, cohort, actor, query=""):
+    # Staff source-home-group scope OR existing course/enrollment scope.
+    source_ids = _source_students(cohort, actor)
     records = StudentAcademicRecord.objects.filter(
         organization=cohort.organization,
         group__organization=cohort.organization,

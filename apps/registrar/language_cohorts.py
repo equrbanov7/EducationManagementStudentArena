@@ -97,11 +97,14 @@ def _active_actor(user):
     )
 
 
+def source_scope(user, offering):
+    return journal_scope(user, offering) if can_edit_journal(user, offering) else None
+
+
 def source_access(user, enrollment):
     """Course-scope access must include this student's row, not only the journal."""
-    return can_edit_journal(user, enrollment.offering) and journal_scope(user, enrollment.offering).allows_enrollment(
-        enrollment.pk
-    )
+    scope = source_scope(user, enrollment.offering)
+    return scope is not None and scope.allows_enrollment(enrollment.pk)
 
 
 def eligible_family_enrollments(*, cohort, student_id, lock=False):
