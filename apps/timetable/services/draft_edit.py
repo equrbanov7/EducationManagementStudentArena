@@ -43,7 +43,7 @@ def _load(run):
     index = {meta["key"]: i for i, meta in enumerate(problem.events)}
     state = State(problem.instance, Weights.from_dict((run.params or {}).get("weights")))
     rows = {}
-    for row in run.slots.all().only("event_key", "weekday", "pair", "week_type"):
+    for row in run.slots.only("run_id", "event_key", "weekday", "pair", "week_type"):
         rows.setdefault(row.event_key, row)
     values = [None] * len(problem.events)
     for key, row in rows.items():

@@ -237,6 +237,7 @@ def lesson_rows(offering, *, memo: bool = False) -> list:
     rows = list(
         offering.lessons.select_related("instructor")
         .only(
+            "offering_id",
             "topic",
             "syllabus_week",
             "kind",
