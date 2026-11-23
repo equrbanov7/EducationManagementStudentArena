@@ -11,14 +11,18 @@ from .language_cohorts import can_manage
 from .models import LanguageLevelPlacement, LessonMark
 
 
-def can_view_source(actor, event):
+def can_view_source(actor, event, *, scopes=None):
     enrollment = event.source_enrollment
     if enrollment is None:
         return False
     offering = enrollment.offering
-    return (can_edit_journal(actor, offering) or can_observe_journal(actor, offering)) and journal_scope(
-        actor, offering
-    ).allows_enrollment(enrollment.pk)
+    if scopes is None:
+        scopes = {}
+    if offering.pk not in scopes:
+        permitted = can_edit_journal(actor, offering) or can_observe_journal(actor, offering)
+        scopes[offering.pk] = journal_scope(actor, offering) if permitted else None
+    scope = scopes[offering.pk]
+    return scope is not None and scope.allows_enrollment(enrollment.pk)
 
 
 @login_required

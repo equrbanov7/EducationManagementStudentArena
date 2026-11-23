@@ -84,6 +84,20 @@ class LanguageCohortTests(_GuestRosterBase):
         values.update(kwargs)
         return placement.place_student(**values)
 
+    def test_candidate_source_lookup_batches_students_and_preserves_choices(self):
+        cohort = self.create()
+        students = [self.host.pk, self.guest.pk, self.far_student.pk]
+        expected = {
+            pk: [r.pk for r in language_cohorts.eligible_family_enrollments(cohort=cohort, student_id=pk)]
+            for pk in students
+        }
+        self.assertTrue(any(expected.values()))
+        with self.assertNumQueries(1):
+            grouped = language_cohorts.family_enrollments_by_student(cohort, students)
+            self.assertEqual({pk: [r.pk for r in grouped.get(pk, [])] for pk in students}, expected)
+        with self.assertNumQueries(0):
+            self.assertFalse(language_cohorts.family_enrollments_by_student(cohort, []))
+
     def test_staff_creates_distinct_teaching_group_and_teacher_sees_it(self):
         cohort = self.create()
         self.assertEqual(cohort.group.parent_id, self.chair.pk)

@@ -195,7 +195,6 @@ def get_offering_journal(
     # Mövzusuz, sillabus sətrinə bağlı dərsin başlığı sətrin mövzusudur (``display_topic``, 2026-10-25).
     from apps.registrar.journal_topics import attach_syllabus_topics
 
-    attach_syllabus_topics(all_lessons, offering=offering)
     lessons = [lesson for lesson in all_lessons if lesson.kind == lesson_kind] if lesson_kind else list(all_lessons)
     # Dərs növü eyni sorğuda (JOIN artıq var) — giriş balının 5 + 5 aktivliyi üçün (``activity_kinds``).
     marks = activity_kinds.annotate_kind(LessonMark.objects.filter(lesson__offering=offering))
@@ -210,6 +209,7 @@ def get_offering_journal(
     window_size, window_offset = journal_window.resolve_window(total_lessons, limit=lesson_limit, offset=lesson_offset)
     if lesson_limit:
         lessons = lessons[window_offset : window_offset + window_size]
+    attach_syllabus_topics(lessons, offering=offering)
     # `source_group` — «alt qrupdan əlavə olunub» çipi üçün (bax guest_roster.py).
     enrollments = read_memo.enrolled_roster(offering)  # GET-də tablar arasında bir sorğu (PERF-1 F-06)
     from . import lab_groups, passive_lessons  # lab qrupu (sahib 2026-11-06): qruplu lab dərsi yalnız öz qrupunun
@@ -302,17 +302,17 @@ def get_offering_journal(
     from .absence_credit_read import credit_hours_map, effective_hours
 
     absence_credits = credit_hours_map([row.pk for row in enrollments])
+    hours_by_lesson = {lesson.pk: lesson.hours for lesson in all_lessons}
+    absences = defaultdict(list)
+    for mark in mark_map.values():
+        if mark.status == AttendanceStatus.ABSENT and mark.lesson_id in hours_by_lesson:
+            absences[mark.enrollment_id].append(hours_by_lesson[mark.lesson_id])
     rows = []
     for enrollment in enrollments:
         cells = []
-        absence_hours = 0
-        absence_count = 0
-        # Qayıb BÜTÜN dərslər üzrə (pəncərədən asılı deyil).
-        for lesson in all_lessons:
-            mark = mark_map.get((enrollment.id, lesson.id))
-            if mark is not None and mark.status == AttendanceStatus.ABSENT:
-                absence_hours += lesson.hours
-                absence_count += 1
+        absent_hours = absences.get(enrollment.pk, ())
+        absence_hours = sum(absent_hours)
+        absence_count = len(absent_hours)
         for lesson in lessons:
             mark = mark_map.get((enrollment.id, lesson.id))
             if lesson.is_passive:
@@ -443,6 +443,7 @@ def get_offering_journal(
         "scheme": scheme,
         "lessons": lessons,
         "lesson_meta": lesson_meta,
+        "has_lessons": bool(all_lessons),
         "rows": rows,
         # Alt qrupdan əlavə olunmuş sətirlər (idarəetmə modalının siyahısı).
         "guest_rows": [row for row in rows if row["is_guest"]],

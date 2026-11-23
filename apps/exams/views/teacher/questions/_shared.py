@@ -98,7 +98,7 @@ def _append_navigation_query(path, navigation_query):
 
 
 def _resequence_exam_questions(exam):
-    ordered_questions = list(exam.questions.order_by("order", "id").only("id", "order"))
+    ordered_questions = list(exam.questions.order_by("order", "id").only("id", "exam_id", "order"))
     updated_questions = []
 
     for index, question in enumerate(ordered_questions, start=1):

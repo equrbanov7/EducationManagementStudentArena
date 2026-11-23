@@ -27,7 +27,7 @@ from .constants import (
 from .models import ApplicationContentRevision
 from .services import access
 from .services.content import can_edit_application, current_reply
-from .services.reply_visibility import can_moderate
+from .services.reply_visibility import can_moderate, moderatable_event_ids
 from .services.sender_identity import sender_person
 from .sla import calendar_for, sla_banner
 from .state_machine import available_actions
@@ -129,7 +129,7 @@ def attachment_payload(attachment) -> dict:
     }
 
 
-def event_payload(event, *, sender_id=None, viewer=None) -> dict:
+def event_payload(event, *, sender_id=None, viewer=None, moderatable_ids=None) -> dict:
     """Zaman xəttinin bir sətri.
 
     ``sender_id`` verilirsə hadisə YAZIŞMA tərəfi ilə işarələnir
@@ -153,7 +153,15 @@ def event_payload(event, *, sender_id=None, viewer=None) -> dict:
         "revision": str(revision.pk) if revision else "",
         "edited_at": revision.created_at.isoformat() if revision else None,
         "is_hidden": bool(event.hidden_at),
-        "can_moderate": bool(not deleted and viewer and can_moderate(viewer, event.application, event)),
+        "can_moderate": bool(
+            not deleted
+            and viewer
+            and (
+                event.pk in moderatable_ids
+                if moderatable_ids is not None
+                else can_moderate(viewer, event.application, event)
+            )
+        ),
         "is_internal": event.is_internal,
         "created_at": event.created_at.isoformat(),
         "attachments": (
@@ -220,13 +228,15 @@ def detail_payload(application, *, user) -> dict:
             queryset=ApplicationContentRevision.objects.only("id", "event_id", "new_text", "created_at"),
         ),
     )
+    if not sees_internal:
+        events = events.filter(is_internal=False)
     event_list = list(events)
+    moderatable = set() if application.deleted_at else moderatable_event_ids(user, application, event_list)
     for event in event_list:
         event.application = application
     timeline = [
-        event_payload(event, sender_id=application.created_by_id, viewer=user)
+        event_payload(event, sender_id=application.created_by_id, viewer=user, moderatable_ids=moderatable)
         for event in event_list
-        if sees_internal or not event.is_internal
     ]
     # SEC-04 (2026-10-07): daxili qeydə qoşulan sənəd də daxili qeyd kimi gizlidir — əvvəl
     # ümumi siyahıya düşürdü və sahib onun adını görüb endirə bilirdi.
@@ -234,10 +244,10 @@ def detail_payload(application, *, user) -> dict:
     if not sees_internal:
         attachments = attachments.exclude(event__is_internal=True)
     attachments = [] if application.deleted_at else [attachment_payload(item) for item in attachments]
-    latest_edit = (
+    edited_at = (
         application.content_revisions.filter(event__isnull=True)
-        .only("id", "created_at")
         .order_by("-created_at", "-id")
+        .values_list("created_at", flat=True)
         .first()
     )
     return {
@@ -246,7 +256,7 @@ def detail_payload(application, *, user) -> dict:
         "body": application.body,
         "updated_at": application.updated_at.isoformat(),
         "deleted_at": application.deleted_at.isoformat() if application.deleted_at else None,
-        "edited_at": latest_edit.created_at.isoformat() if latest_edit else None,
+        "edited_at": edited_at.isoformat() if edited_at else None,
         "content_actions": {
             "can_edit": can_edit_application(user, application),
             "can_delete": access.can_manage_application(user, application) and not application.deleted_at,

@@ -212,7 +212,7 @@ def journal_detail(request, offering_id):
         _lab_view.apply(journal, lab_view)
     elif seminar_view:
         _lab_view.apply(journal, seminar_view, "seminar")
-    corrections_map = corrections_service.corrections_map_for_offering(offering)
+    corrections_map = corrections_service.corrections_map_for_offering(offering, include_document=correction_mode)
     legacy_excuse.attach_to_offering_journal(offering, journal, corrections_map)  # sarı üq sənədi
     # Ağır tab dataları YALNIZ lazım olanda (hər biri 555 sətirlik keçid idi).
     needs_coursework, needs_finals = active_tab in {"kurs-isi", "yekun"}, active_tab == "yekun"
@@ -273,7 +273,7 @@ def journal_detail(request, offering_id):
         # Sillabus vəziyyəti: xəbərdarlıq zolağı + «Sillabusa bax» keçidi.
         # ⚠️ Jurnalı KİLİDLƏMİR — yalnız məlumat verir (bax syllabus_notice.py).
         "syllabus_notice": syllabus_notice.journal_syllabus_notice(
-            offering, has_lessons=offering.lessons.exists(), journal_closed=journal_locked
+            offering, has_lessons=journal["has_lessons"], journal_closed=journal_locked
         ),
         # README §8/2 qapısı — ORG SİYASƏTİ (default söndürülü).  Açıq olduqda
         # təsdiqlənmiş sillabusu olmayan jurnal YALNIZ-OXU olur (`can_edit`
@@ -330,17 +330,13 @@ def journal_detail(request, offering_id):
         "lesson_default_building": campus.default_building_for_offering(offering),
         "lesson_room_memory": lesson_rooms.remembered_rooms(offering),  # eyni növ + gün → son otaq
     }
+    from apps.registrar import item_corrections
+
+    context.update(item_corrections.annotate_view(offering, context, include_document=correction_mode))
     if correction_mode:
-        # Yerində düzəliş rejimi: audited correction editoru üçün kontekst
-        # (journal + corrections_map include_document ilə əvəzlənir).
         from apps.registrar.correction_views import build_correction_context
 
         context.update(build_correction_context(offering, request))
-    else:
-        # Normal görünüş: sərbəst iş/kurs işi/kollokvium düzəlişləri də sarı + tarixçə.
-        from apps.registrar import item_corrections
-
-        context.update(item_corrections.annotate_normal_view(offering, context))
     context.update(journal_activation.strip_context(offering, context))  # «Bu günün cədvəl dərsləri» (UNEC P1-1)
     from apps.registrar import subject_exempt  # «Fəndən azad et» + «Azad edilənlər» (sahib 2026-10-15)
 

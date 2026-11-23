@@ -21,12 +21,28 @@ def _has_content_q():
     )
 
 
-def existing_level_journals(user, organization):
-    scoped, broad = journal_list_base(user, SimpleNamespace(organization=organization))
+class LevelJournalAccess:
+    """Reuse the same actor's visibility decisions across both selectors in one request."""
+
+    def __init__(self, user, organization):
+        self.user = user
+        self.scoped, self.broad = journal_list_base(user, SimpleNamespace(organization=organization))
+        self._visible = {}
+
+    def allows(self, offering):
+        if offering.pk not in self._visible:
+            self._visible[offering.pk] = can_edit_journal(self.user, offering) or can_observe_journal(
+                self.user, offering
+            )
+        return self._visible[offering.pk]
+
+
+def existing_level_journals(user, organization, *, access=None):
+    access = access or LevelJournalAccess(user, organization)
     queryset = CourseOffering.objects.filter(organization=organization, is_active=True)
-    if broad:
+    if access.broad:
         # Səviyyə qruplarını idarə edən heyət (``journal.roster`` / ``journal.view`` əhatəsi) — əvvəlki kimi.
-        queryset = queryset.filter(Q(pk__in=scoped.values("pk")) | own_or_shared_q(user))
+        queryset = queryset.filter(Q(pk__in=access.scoped.values("pk")) | own_or_shared_q(user))
     else:
         # MR-000593 (2026-11-20): adi müəllim YALNIZ öz və aktiv payı olan jurnalları görür — təhvil/tarixçə
         # yolu (``own_visible_queryset``) başqasının köhnə, boşalmış səviyyə jurnalını bura gətirirdi. Boş jurnal
@@ -40,9 +56,9 @@ def existing_level_journals(user, organization):
         for row in queryset.filter(
             organization=organization, language_cohort__isnull=True, subject__name__iregex=LEVEL_RE.pattern
         )
-        .select_related("subject", "group", "period", "instructor", "organization")
+        .select_related("subject", "group", "period", "instructor__profile", "organization")
         .order_by("subject__name", "group__name")
-        if level_of(row.subject.name) and (can_edit_journal(user, row) or can_observe_journal(user, row))
+        if level_of(row.subject.name) and access.allows(row)
     ]
 
 

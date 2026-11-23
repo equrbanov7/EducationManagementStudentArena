@@ -22,16 +22,22 @@ REPLY_KINDS = {
 }
 
 
+def moderatable_event_ids(user, application, events):
+    replies = [event for event in events if event.kind in REPLY_KINDS and event.application_id == application.pk]
+    if not replies or not access.can_view(user, application):
+        return set()
+    own = {event.pk for event in replies if event.actor_id == user.pk}
+    if len(own) == len(replies):
+        return own
+    if access.is_universal_responder(user, application.organization) or access._is_privileged(
+        user, application.organization
+    ):
+        return {event.pk for event in replies}
+    return own
+
+
 def can_moderate(user, application, event):
-    return bool(
-        access.can_view(user, application)
-        and event.kind in REPLY_KINDS
-        and (
-            event.actor_id == user.pk
-            or access.is_universal_responder(user, application.organization)
-            or access._is_privileged(user, application.organization)
-        )
-    )
+    return event.pk in moderatable_event_ids(user, application, [event])
 
 
 @transaction.atomic
