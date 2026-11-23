@@ -318,7 +318,9 @@ def journal_detail(request, offering_id):
         # #7/#8/#9 keçirilmiş saat + növ-müəllimləri; dərs modalı üçün müəllim seçimləri.
         "teaching_summary": journal_extras.journal_teaching_summary(
             offering,
-            personal_actor=request.user if is_direct_editor and not (can_correct or roster_scope) else None,
+            # MR-651 (2026-11-23): tyutor/koordinator (``journal.roster``) öz dərs dediyi jurnalda da ÖZ payını
+            # görür (seminar 30), jurnalın cəmini (mühazirə + seminar = 60) yox. Yalnız korrektor tam görünüşdədir.
+            personal_actor=request.user if is_direct_editor and not can_correct else None,
             scope=share_scope,
         ),
         "lesson_teacher_choices": journal_extras.has_lesson_teacher_choices(offering),
