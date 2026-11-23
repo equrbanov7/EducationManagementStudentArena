@@ -155,6 +155,7 @@ INTENTIONAL_EXEMPTIONS = {
     "apps/registrar/management/commands/fix_syllabus_links_20261119.py",
     # 2026-11-23 MR-000647 sillabusun müəllifi: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/fix_syllabus_author_20261123.py",
+    "apps/registrar/management/commands/fix_syllabus_chairs_20261123.py",
     # 2026-11-19 boş həftəlik planlı sillabuslar (bütün formalar): eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/fill_empty_syllabus_weeks_20261119.py",
     # 2026-11-19 dublikat tələbənin jurnaldakı ikinci sətri: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
