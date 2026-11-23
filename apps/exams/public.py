@@ -96,6 +96,7 @@ from apps.exams.services.second_chance_revoke import (  # noqa: F401
     revoke_second_chance,
 )
 from apps.exams.services.start_intent import start_intent_token  # noqa: F401
+from apps.exams.services.student_list_batch import StudentExamListBatch
 from apps.exams.services.supervision import attach_attempt_interventions  # noqa: F401
 from apps.exams.services.teacher_dashboard import (  # noqa: F401
     build_teacher_exam_dashboard,
@@ -112,6 +113,7 @@ __all__ = [
     "ExamRoomComputer",
     "RoomAdminError",
     "StudentGroupForm",
+    "StudentExamListBatch",
     "add_computer",
     "MAX_EXTRA_ATTEMPTS",
     "SecondChanceError",

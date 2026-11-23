@@ -13,7 +13,8 @@ from urllib.parse import urlencode
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.db.models import Count
+from django.db.models import Count, F, Window
+from django.db.models.functions import RowNumber
 from django.urls import reverse
 from django.utils.translation import pgettext
 from django.views.generic import DetailView
@@ -25,7 +26,7 @@ from apps.courses.presentation import course_identity
 from apps.exams.models import Exam, ExamAttempt
 from apps.exams.public import (
     DEFAULT_EXAM_LANGUAGE,
-    available_language_options_for_exams,
+    StudentExamListBatch,
     without_disabled_practical_exams,
 )
 from apps.registrar.public import course_groups
@@ -322,33 +323,32 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                 ).annotate(questions_total=Count("questions", distinct=True))
             )
 
-            all_course_exams = [
-                exam for exam in all_course_exams if exam.can_user_see(user, course_membership=membership)
-            ]
-            language_options = available_language_options_for_exams(all_course_exams)
+            exam_batch = StudentExamListBatch(all_course_exams, user)
+            all_course_exams = [exam for exam in all_course_exams if exam_batch.can_user_see(exam)]
 
-            # Batch-fetch all this user's non-draft attempts for all exams in one query,
-            # grouped by exam_id to avoid N+1 (one query instead of two per exam).
-            exam_ids = [exam.id for exam in all_course_exams]
-            all_user_attempts = (
-                ExamAttempt.objects.filter(exam_id__in=exam_ids, user=user)
+            # The cards show only the latest non-draft attempt and the full non-draft count.
+            latest_attempts = (
+                ExamAttempt.objects.filter(exam_id__in=[exam.pk for exam in all_course_exams], user=user)
                 .exclude(status="draft")
-                .order_by("-started_at")
+                .annotate(
+                    course_attempt_count=Window(Count("pk"), partition_by="exam_id"),
+                    attempt_rank=Window(
+                        RowNumber(), partition_by="exam_id", order_by=[F("started_at").desc(), F("pk").desc()]
+                    ),
+                )
+                .filter(attempt_rank=1)
+                .order_by()
             )
-            attempts_by_exam: dict[int, list] = defaultdict(list)
-            for attempt in all_user_attempts:
-                attempts_by_exam[attempt.exam_id].append(attempt)
+            latest_by_exam = {attempt.exam_id: attempt for attempt in latest_attempts}
 
             exams_with_data = []
             for exam in all_course_exams:
-                # Use pre-fetched attempts instead of per-exam queries.
-                exam_attempts = attempts_by_exam.get(exam.id, [])
-                last_attempt = exam_attempts[0] if exam_attempts else None
-                attempt_count = len(exam_attempts)
+                last_attempt = latest_by_exam.get(exam.pk)
+                attempt_count = last_attempt.course_attempt_count if last_attempt else 0
                 attempts_left = (
                     max(exam.max_attempts_per_user - attempt_count, 0) if exam.max_attempts_per_user else None
                 )
-                can_start_without_code, _ = exam.can_user_start(user, code=None)
+                can_start_without_code, _ = exam_batch.can_user_start(exam)
                 is_exam_window_open = not exam.is_before_start() and not exam.is_after_end()
                 has_attempts_left = attempts_left is None or attempts_left > 0
                 requires_code = bool(exam.access_code and is_exam_window_open and has_attempts_left)
@@ -361,7 +361,7 @@ class CourseDashboardView(LoginRequiredMixin, DetailView):
                         "attempts_left": attempts_left,
                         "can_start": can_start_without_code or requires_code,
                         "requires_code": requires_code,
-                        **_build_exam_language_modal_context(exam, language_options.get(exam.pk, ())),
+                        **_build_exam_language_modal_context(exam, exam_batch.available_language_options(exam)),
                     }
                 )
 
