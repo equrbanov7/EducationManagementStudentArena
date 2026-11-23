@@ -13,6 +13,7 @@ from apps.registrar.journal_shares import FULL, Scope, journal_scope
 from apps.registrar.models import CourseOffering, JournalShare, Lesson
 from apps.workload.models import TeacherAssignment
 from apps.workload.tests.factories import TEACHER_PERMS, activate_member, make_org, make_row, make_structure, make_task
+from core.constants import RoleScopeType
 
 
 class JournalTeachingHeadingTests(TestCase):
@@ -139,6 +140,34 @@ class JournalTeachingHeadingTests(TestCase):
             summary = journal_teaching_summary(self.course, personal_actor=self.seminar, scope=FULL)
         self.assertEqual((75, 6), (summary["total"], summary["held_total"]))
         self.assertEqual(["seminar"], [kind["kind"] for kind in summary["kinds"]])
+
+    def test_tutor_seminar_teacher_journal_page_shows_own30_not_course60(self):
+        """MR-651 (2026-11-23): seminarı aparan tyutor (``journal.roster``) öz 30 saatını görür, 60-ı yox."""
+        from django.test import Client
+        from django.urls import reverse
+
+        from apps.registrar import guest_roster
+
+        activate_member(
+            self.org,
+            self.seminar,
+            "tutor",
+            permissions=[*TEACHER_PERMS, "journal.roster"],
+            scope_unit=self.stack["faculty"],
+            scope_type=RoleScopeType.UNIT,
+        )
+        tutor = get_user_model().objects.get(pk=self.seminar.pk)
+        self.assertTrue(
+            guest_roster.can_manage_offering_roster(tutor, self.course)
+        )  # öz qrupunun siyahısını idarə edir
+        client = Client()
+        client.force_login(self.seminar)
+        response = client.get(reverse("registrar:journal_detail", args=[self.course.pk]))
+        self.assertEqual(200, response.status_code)
+        summary = response.context["teaching_summary"]
+        self.assertTrue(summary["personal"])
+        self.assertEqual((30, 6), (summary["total"], summary["held_total"]))
+        self.assertNotContains(response, "/ 60 saat")
 
 
 class SubgroupPlanHoursTests(TestCase):
