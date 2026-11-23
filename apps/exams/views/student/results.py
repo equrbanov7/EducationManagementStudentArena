@@ -10,6 +10,7 @@ from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext, pgettext
+from django.views.decorators.cache import never_cache
 
 from apps.exams import score_adjustments
 from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
@@ -180,6 +181,7 @@ def _resolve_result_navigation(request, exam, return_to):
 
 
 @login_required
+@never_cache
 def exam_result(request, slug, attempt_id):
     """
     Student üçün konkret attempt-in nəticə səhifəsi.
@@ -493,6 +495,7 @@ def exam_result(request, slug, attempt_id):
 
 
 @login_required
+@never_cache
 def student_exam_history(request):
     ensure_student_exam_tenant_context(request)
     active_tenant_exams = tenant_scoped_exams(request)

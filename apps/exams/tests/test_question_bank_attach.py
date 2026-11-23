@@ -211,8 +211,12 @@ class AccessibleBanksTests(TestCase):
         )
 
     def test_user_sees_own_and_shared_within_org_only(self):
+        QuestionBank.objects.create(name="own-b", created_by=self.owner_a, organization=self.org_b)
+        QuestionBank.objects.create(name="own-legacy", created_by=self.owner_a, organization=None)
         visible = set(accessible_banks(self.owner_a, self.org_a).values_list("name", flat=True))
         self.assertIn("own", visible)
+        self.assertIn("own-legacy", visible)
+        self.assertNotIn("own-b", visible)
         self.assertIn("shared-a", visible)
         # Başqasının paylaşılmamış bankı görünmür.
         self.assertNotIn("private-a", visible)

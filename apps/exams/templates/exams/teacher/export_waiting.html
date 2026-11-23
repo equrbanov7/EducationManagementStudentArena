@@ -19,7 +19,7 @@
             <i class="fas fa-circle-notch fa-spin" aria-hidden="true"></i>
         </div>
         <p class="export-waiting-error" data-waiting-error hidden></p>
-        <a class="export-waiting-back" href="javascript:history.back()">{% trans "export_back_link" context "exams.template.export_waiting" %}</a>
+        <a class="export-waiting-back" href="{% url 'accounts:profile' %}" data-export-back>{% trans "export_back_link" context "exams.template.export_waiting" %}</a>
     </div>
 </div>
 {% endblock %}

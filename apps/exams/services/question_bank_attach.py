@@ -56,7 +56,7 @@ def accessible_banks(user, organization, *, include_shared=True):
     """
     from apps.exams.services.access_policy import is_exam_center_user
 
-    visibility = Q(created_by=user)
+    visibility = Q(created_by=user) & (Q(organization=organization) | Q(organization__isnull=True))
     if is_exam_center_user(user):
         if organization is not None:
             visibility |= Q(organization=organization)

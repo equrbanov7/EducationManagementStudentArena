@@ -5,6 +5,7 @@ import tempfile
 from copy import deepcopy
 
 from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import override_settings
 from django.urls import reverse
@@ -19,6 +20,7 @@ from PIL import Image, ImageDraw
 
 from apps.accounts.models import ProfileRole
 from apps.exams.models import Exam, ExamAnswer, ExamAttempt, QuestionSubmission, StudentGroup
+from apps.exams.services.parsing import parse_bulk_mcq
 from apps.exams.services.parsing.docx_reader import read_docx
 from apps.exams.services.question_bank_attach import attach_bank_questions_to_exam
 from apps.exams.services.question_chair_review import chair_approve
@@ -160,10 +162,28 @@ class MathUploadDeliveryTests(_Base):
         chair_approve(submission, actor=self.chair_head)
         bank, count = accept_submission(submission, reviewer=self.exam_center)
         self.assertEqual(count, 1)
+        bank_question = bank.library_questions.get()
+        visual_option = bank_question.options.get(is_correct=True)
+        thumbnail = io.BytesIO()
+        Image.new("RGB", (24, 18), "red").save(thumbnail, "PNG")
+        visual_option.image.save("option.png", ContentFile(thumbnail.getvalue()))
         exam = Exam.objects.create(
             title="Qrafik testi", author=self.teacher, organization=self.org, is_active=True, is_public=True
         )
         [question] = attach_bank_questions_to_exam(exam, [bank.library_questions.get().pk])
+        for client, url in (
+            (self._client_for(self.exam_center), reverse("exams:question_bank_word_export", args=[bank.pk])),
+            (self.client, reverse("exams:exam_questions_word_export", args=[exam.slug])),
+        ):
+            exported = client.get(url)
+            self.assertEqual(exported.status_code, 200)
+            sheet = read_docx(exported.content)
+            self.assertEqual([(img.width, img.height) for img in sheet.images], [(121, 91), (24, 18)])
+            [imported] = parse_bulk_mcq(sheet.text)
+            [correct_label] = imported["correct"]
+            self.assertEqual(imported["media_refs"], {"stem": [1], correct_label: [2]})
+            self.assertIn(r"\(\frac{a}{b}\)", imported["text"])
+            self.assertEqual(imported["options"][correct_label], r"\(\alpha x\)")
         student = get_user_model().objects.create_user("math_reader")
         _assign_user_to_org(student, self.org, ProfileRole.STUDENT, "student")
         attempt = ExamAttempt.objects.create(user=student, exam=exam, status="in_progress", attempt_number=1)

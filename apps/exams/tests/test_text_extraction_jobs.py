@@ -118,6 +118,7 @@ class TestStatusEndpoint:
         data = resp.json()
         assert data["status"] == TextExtractionJob.STATUS_SUCCESS
         assert "Sual metni" in data["text"]
+        assert "no-store" in resp["Cache-Control"]
 
     def test_other_teacher_gets_404(self, teacher_client, client, django_user_model, org):
         start = teacher_client.post(reverse("exams:start_text_extraction"), {"source_file": _upload()}).json()
@@ -328,6 +329,16 @@ class TestExportJobs:
         assert "attachment" in resp["Content-Disposition"]
         # sinxron yol job YARATMIR
         assert not TextExtractionJob.objects.filter(kind=TextExtractionJob.KIND_EXPORT).exists()
+
+    def test_worker_rechecks_current_authorization(self, exam, teacher, org):
+        from apps.exams.export_registry import run_export
+        from apps.organizations.models import Membership
+
+        params = {"exam_id": exam.pk, "filters": {}}
+        assert run_export("exam_results_xlsx", user=teacher, organization=org, params=params)[2].startswith(b"PK")
+        Membership.objects.filter(user=teacher, organization=org).update(is_active=False)
+        with pytest.raises(ValueError):
+            run_export("exam_results_xlsx", user=teacher, organization=org, params=params)
 
     def test_large_dataset_goes_through_job_eager(self, teacher_client, exam, settings):
         settings.EXPORT_SYNC_MAX_ROWS = -1  # hər şey "böyük" sayılsın

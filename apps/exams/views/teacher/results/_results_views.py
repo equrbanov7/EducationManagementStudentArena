@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import pgettext, pgettext_lazy
+from django.views.decorators.cache import never_cache
 
 from apps.exams import score_adjustments
 from apps.exams.models import ExamAnswer, ExamAttempt
@@ -354,6 +355,7 @@ def teacher_exam_results(request, slug):
 
 
 @login_required
+@never_cache
 def export_exam_results_xlsx(request, slug):
     """İmtahan nəticələrini xlsx olaraq export et.
 

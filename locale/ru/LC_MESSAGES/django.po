@@ -121321,3 +121321,7 @@ msgstr "В этом корпусе уже есть аудитория с так�
 msgctxt "exams.service.parsing.error"
 msgid "docx_chart_needs_picture"
 msgstr "У диаграммы Word нет доступного изображения для просмотра. Экспортируйте документ в PDF или вставьте диаграмму в Word как изображение."
+
+msgctxt "exams.export"
+msgid "question_picture_export_failed"
+msgstr "Не удалось экспортировать все изображения вопросов. Убедитесь, что изображения открываются, и уменьшите большие файлы."

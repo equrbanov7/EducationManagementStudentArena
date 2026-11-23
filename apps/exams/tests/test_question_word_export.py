@@ -86,6 +86,7 @@ class BankWordExportViewTests(TestCase):
         response = client.get(reverse("exams:question_bank_word_export", kwargs={"bank_id": self.bank.id}))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], DOCX_CONTENT_TYPE)
+        self.assertIn("no-store", response["Cache-Control"])
         self.assertTrue(response.content.startswith(b"PK"))
 
     def test_foreign_org_teacher_cannot_export(self):
@@ -144,6 +145,7 @@ class ExamWordExportViewTests(TestCase):
         response = client.get(reverse("exams:exam_questions_word_export", kwargs={"slug": self.exam.slug}))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], DOCX_CONTENT_TYPE)
+        self.assertIn("no-store", response["Cache-Control"])
         self.assertTrue(response.content.startswith(b"PK"))
 
     def test_non_author_cannot_export_exam_questions(self):
