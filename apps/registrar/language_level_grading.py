@@ -50,6 +50,25 @@ def is_level(offering):
     return level_era(offering)
 
 
+def uses_qb_count_limit(offering) -> bool:
+    """11-ci q/b (SAY) qaydası — yalnız adında SƏVİYYƏ olan dil fənləri (``is_level`` + ``is_level_name``).
+
+    Sahib 2026-11-23 (MR-000698, 335F2): səviyyəsiz «Xarici dildə işgüzar və akademik kommunikasiya-2» ixtisas
+    fənnidir (60 saat) — qiymətləndirmə profili (10 + 10 + 10 / 70) qalır, qayıb həddi isə adi fənlər kimi dərs
+    saatının faizi ilə (25%: 60 saat → 7 q/b) hesablanır.
+    """
+    if not is_level(offering):
+        return False
+    return is_level_name(getattr(getattr(offering, "subject", None), "name", ""))
+
+
+def journal_limit_qb(count_policy, allowed_absence, lesson_hours) -> int:
+    """Jurnal başlığının «limit N q/b»-si: səviyyə fənnində sabit SAY, qalanlarında icazəli saat / dərs saatı."""
+    if count_policy:
+        return ABSENCE_LIMIT
+    return int(allowed_absence // lesson_hours) if allowed_absence else 0
+
+
 #: Dövr qapısının keşi: ``period_id → (vaxt, qüvvədədir)``. Açılış başına sorğu OLMASIN deyə (döngülərdə 37 çağırış
 #: yeri var) dövr sahələri dövr başına bir dəfə oxunur və qısa müddət saxlanılır (semestr dəyişəndə ≤ TTL gecikmə).
 _ERA_TTL_SECONDS = 120
@@ -251,6 +270,20 @@ def eligibility(
         absence_hours = metrics["hours"] if absence_hours is None else absence_hours
     hours = lesson_hours if lesson_hours is not None else exam_eligibility.lesson_hours_for(enrollment.offering)
     absent = enrollment.absence_hours if absence_hours is None else absence_hours
+    if not uses_qb_count_limit(enrollment.offering):
+        # MR-000698: səviyyəsiz «İşgüzar … kommunikasiya -N» ixtisas fənnidir — qayıb həddi saatın faizidir (25%).
+        from .absence_limit import limit_percent_for_enrollment
+
+        result = exam_eligibility.resolve(
+            absence_hours=absent,
+            lesson_hours=hours,
+            limit_percent=limit_percent_for_enrollment(enrollment),
+            exempt=exempt,
+            resit_done=resit_done,
+            frozen=frozen,
+        )
+        result.setdefault("absence_count", absence_count)
+        return result
     # Retain the canonical proportional attendance score, while the admission
     # decision uses the displayed count. A historical freeze cannot bypass 11.
     result = exam_eligibility.resolve(absence_hours=absent, lesson_hours=hours, exempt=True, frozen=False)

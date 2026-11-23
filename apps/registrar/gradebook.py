@@ -189,6 +189,8 @@ def get_offering_journal(
     from . import language_level_grading
 
     level_policy = language_level_grading.is_level(offering)
+    # MR-000698: 11-ci q/b SAY qaydası yalnız adında səviyyə olan dil fənlərində; səviyyəsiz «İşgüzar …» saat faizi ilə.
+    count_policy = language_level_grading.uses_qb_count_limit(offering)
     all_lessons = list(offering.lessons.order_by("date", "created_at"))
     # Mövzusuz, sillabus sətrinə bağlı dərsin başlığı sətrin mövzusudur (``display_topic``, 2026-10-25).
     from apps.registrar.journal_topics import attach_syllabus_topics
@@ -393,7 +395,7 @@ def get_offering_journal(
         # yalnız hələ qərar verilə bilən semestrdə mənalıdır.
         warning = (
             (not barred and absence_count >= 8)
-            if level_policy
+            if count_policy
             else absence_limit.near_limit(absence_hours, row_limit, frozen=frozen, barred=barred)
         )
         rows.append(
@@ -448,11 +450,7 @@ def get_offering_journal(
         "limit_percent": limit_percent,
         "allowed_absence": allowed_absence,
         # İcazə verilən maksimum q/b sayı (1 q/b=2 saat; 25% həddi) — UI "limit N q/b".
-        "limit_qb": (
-            language_level_grading.ABSENCE_LIMIT
-            if level_policy
-            else (int(allowed_absence // DEFAULT_LESSON_HOURS) if allowed_absence else 0)
-        ),
+        "limit_qb": language_level_grading.journal_limit_qb(count_policy, allowed_absence, DEFAULT_LESSON_HOURS),
         "level_policy": level_policy,
         "has_lab_groups": has_lab_groups,
         "entry_score_max": scheme.entry_score_max,
