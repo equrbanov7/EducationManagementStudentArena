@@ -159,6 +159,7 @@ INTENTIONAL_EXEMPTIONS = {
     "apps/registrar/management/commands/remove_share_students_20261123.py",
     "apps/registrar/management/commands/unlink_qiyabi_carry_20261123.py",
     "apps/registrar/management/commands/convert_intensive_to_group_20261123.py",
+    "apps/registrar/management/commands/copy_moved_student_marks_20261123.py",
     # 2026-11-19 boş həftəlik planlı sillabuslar (bütün formalar): eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/fill_empty_syllabus_weeks_20261119.py",
     # 2026-11-19 dublikat tələbənin jurnaldakı ikinci sətri: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
