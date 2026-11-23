@@ -450,11 +450,7 @@ def get_offering_journal(
         "limit_percent": limit_percent,
         "allowed_absence": allowed_absence,
         # İcazə verilən maksimum q/b sayı (1 q/b=2 saat; 25% həddi) — UI "limit N q/b".
-        "limit_qb": (
-            language_level_grading.ABSENCE_LIMIT
-            if count_policy
-            else (int(allowed_absence // DEFAULT_LESSON_HOURS) if allowed_absence else 0)
-        ),
+        "limit_qb": language_level_grading.journal_limit_qb(count_policy, allowed_absence, DEFAULT_LESSON_HOURS),
         "level_policy": level_policy,
         "has_lab_groups": has_lab_groups,
         "entry_score_max": scheme.entry_score_max,

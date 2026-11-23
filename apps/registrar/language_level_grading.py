@@ -62,6 +62,13 @@ def uses_qb_count_limit(offering) -> bool:
     return is_level_name(getattr(getattr(offering, "subject", None), "name", ""))
 
 
+def journal_limit_qb(count_policy, allowed_absence, lesson_hours) -> int:
+    """Jurnal başlığının «limit N q/b»-si: səviyyə fənnində sabit SAY, qalanlarında icazəli saat / dərs saatı."""
+    if count_policy:
+        return ABSENCE_LIMIT
+    return int(allowed_absence // lesson_hours) if allowed_absence else 0
+
+
 #: Dövr qapısının keşi: ``period_id → (vaxt, qüvvədədir)``. Açılış başına sorğu OLMASIN deyə (döngülərdə 37 çağırış
 #: yeri var) dövr sahələri dövr başına bir dəfə oxunur və qısa müddət saxlanılır (semestr dəyişəndə ≤ TTL gecikmə).
 _ERA_TTL_SECONDS = 120
