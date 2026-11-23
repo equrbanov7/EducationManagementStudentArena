@@ -183,14 +183,13 @@ def attach_bank_questions_to_exam(exam, bank_question_ids, *, block=None, create
 
     Qaytarır: yaradılmış ``ExamQuestion`` obyektlərinin siyahısı.
     """
-    requested_ids = []
+    requested_ids = {}
     for raw_id in bank_question_ids or []:
         try:
             requested_id = int(raw_id)
         except (TypeError, ValueError):
             continue
-        if requested_id not in requested_ids:
-            requested_ids.append(requested_id)
+        requested_ids[requested_id] = None
 
     questions_by_id = {
         bank_question.id: bank_question
@@ -215,7 +214,7 @@ def attach_bank_questions_to_exam(exam, bank_question_ids, *, block=None, create
         exam_question = ExamQuestion.objects.create(
             exam=exam,
             block=block,
-            bank=bank_question.bank,
+            bank_id=bank_question.bank_id,
             source_bank_question=bank_question,
             language=language,
             language_variant=variant,
@@ -236,14 +235,20 @@ def attach_bank_questions_to_exam(exam, bank_question_ids, *, block=None, create
         # Audit 2026-09-28 EX28-01: köhnə banklar A→E (END_QUESTION-da düzgün
         # cavab birinci) yaradılıb — snapshot təsadüfi sıra ilə köçürülür və
         # A..E yenidən hərflənir; şəkil faylının adı da mənbə hərfini daşımır.
-        for position, bank_option in enumerate(shuffled(bank_question.options.all())):
-            exam_option = ExamQuestionOption.objects.create(
-                question=exam_question,
-                label=display_label(position),
-                text=bank_option.text,
-                image_replaces_text=bank_option.image_replaces_text,
-                is_correct=bank_option.is_correct,
-            )
+        bank_options = shuffled(bank_question.options.all())
+        exam_options = ExamQuestionOption.objects.bulk_create(
+            [
+                ExamQuestionOption(
+                    question=exam_question,
+                    label=display_label(position),
+                    text=bank_option.text,
+                    image_replaces_text=bank_option.image_replaces_text,
+                    is_correct=bank_option.is_correct,
+                )
+                for position, bank_option in enumerate(bank_options)
+            ]
+        )
+        for bank_option, exam_option in zip(bank_options, exam_options):
             _duplicate_filefield(
                 bank_option.image,
                 exam_option,

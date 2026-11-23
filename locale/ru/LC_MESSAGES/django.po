@@ -121317,3 +121317,7 @@ msgstr "Нет совпадений"
 msgctxt "exams.final_center.form"
 msgid "Bu binada bu adla otaq artıq var."
 msgstr "В этом корпусе уже есть аудитория с таким названием."
+
+msgctxt "exams.service.parsing.error"
+msgid "docx_chart_needs_picture"
+msgstr "У диаграммы Word нет доступного изображения для просмотра. Экспортируйте документ в PDF или вставьте диаграмму в Word как изображение."

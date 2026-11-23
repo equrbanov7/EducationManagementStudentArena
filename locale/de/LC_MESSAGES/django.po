@@ -122658,3 +122658,7 @@ msgstr "Keine Treffer"
 msgctxt "exams.final_center.form"
 msgid "Bu binada bu adla otaq artıq var."
 msgstr "In diesem Gebäude gibt es bereits einen Raum mit diesem Namen."
+
+msgctxt "exams.service.parsing.error"
+msgid "docx_chart_needs_picture"
+msgstr "Für dieses Word-Diagramm ist kein lesbares Vorschaubild vorhanden. Exportieren Sie das Dokument als PDF oder fügen Sie das Diagramm in Word als Bild ein."

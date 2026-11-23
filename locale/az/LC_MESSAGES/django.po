@@ -120388,3 +120388,7 @@ msgstr "Uyğun nəticə yoxdur"
 msgctxt "exams.final_center.form"
 msgid "Bu binada bu adla otaq artıq var."
 msgstr "Bu binada bu adla otaq artıq var."
+
+msgctxt "exams.service.parsing.error"
+msgid "docx_chart_needs_picture"
+msgstr "Word diaqramının daxili şəklini oxumaq mümkün olmadı. Qrafiki qorumaq üçün sənədi PDF kimi ixrac edib yükləyin və ya diaqramı Word sənədinə şəkil kimi əlavə edin."
