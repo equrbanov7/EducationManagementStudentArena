@@ -78,6 +78,17 @@ class FreezeInactiveStudentsTest(_LabWorld, TestCase):
         self.assertEqual(self._state(self.e2), ("enrolled", True))
         self.assertEqual(self._state(self.e0), ("enrolled", True))
 
+    def test_undo_only_restores_named_students(self):
+        """2026-11-24: bərpa olunmuş tələbə — ``--only`` yalnız onun dondurulmasını geri qaytarır."""
+        self._mark(self.e1, status="present")
+        self._call("--apply")
+        self.assertEqual(self._state(self.e2), ("suspended", False))
+        self.assertEqual(self._state(self.e0), ("suspended", False))
+        counts = self._call("--apply", "--undo", "--only", str(self.e2.student_id))
+        self.assertEqual(counts["undo_students"], "1")
+        self.assertEqual(self._state(self.e2), ("enrolled", True))
+        self.assertEqual(self._state(self.e0), ("suspended", False))
+
     def test_score_or_excused_counts_as_activity(self):
         self._mark(self.e1, status="absent", score=5)
         self._mark(self.e2, status="excused")
@@ -119,4 +130,5 @@ class FreezeInactiveStudentsTest(_LabWorld, TestCase):
         self.assertIn('[ "$COMMAND" = "freeze_inactive_students_20261108" ]', text)
         self.assertIn("\n            freeze_inactive_students_20261108)\n", text)
         self.assertIn("args+=(--show-skipped)", text)
+        self.assertIn('args+=(--undo --only "${BATCH#undo:}")', text)
         self.assertIn("|inactive_students|lab_groups|", text)
