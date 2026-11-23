@@ -38,7 +38,7 @@ def build_course_dashboard_context(*, course, user, membership, can_manage, is_s
 
     # Batch-fetch submission counts for this user across all assignments
     # to avoid N+1 queries (one query instead of one per assignment).
-    assignment_ids = list(assignments_qs.values_list("id", flat=True))
+    assignment_ids = [assignment.pk for assignment in assignments_qs]
     submission_counts_qs = (
         Submission.objects.filter(assignment_id__in=assignment_ids, user=user)
         .values("assignment_id")

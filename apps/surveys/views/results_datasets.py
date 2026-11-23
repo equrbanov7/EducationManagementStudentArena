@@ -15,6 +15,7 @@ from django.utils.translation import pgettext
 
 from .. import public
 from ..services import analytics_guard as guard
+from ..services.filters import report_metadata
 
 CTX = "surveys.results"
 
@@ -241,6 +242,7 @@ def _keywords_table(general) -> dict:
     }
 
 
+@report_metadata()
 def build_tables(resolved, filters, wanted, *, scope_label="") -> list:
     """İstənilən cədvəllər (``wanted`` ⊆ ``DATASETS``) — lazım olan tab qurucuları bir dəfə çağırılır."""
     from .results_general import general_tab

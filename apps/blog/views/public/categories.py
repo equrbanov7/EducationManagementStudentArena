@@ -7,7 +7,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from ...models import Category, Post
-from ...selectors import filter_posts_by_category_scope, get_popular_topics, get_sidebar_categories
+from ...selectors import category_page_navigation
 from ..shared.module_gate import posts_module_required
 
 _PAGE_NUMBER_RE = re.compile(r"^[0-9]+$")
@@ -26,22 +26,13 @@ def render_category_page(request, category, *, template_name="blog/category_deta
     published_posts = Post.objects.filter(is_published=True).select_related("category", "author")
     root_category = category.get_root()
     parent_category = category.parent
-    post_list = filter_posts_by_category_scope(
-        published_posts,
-        category,
-    ).order_by("-created_at")
     raw_page_number = request.GET.get("page")
     page_number = _parse_category_page_number(raw_page_number)
     if raw_page_number not in (None, "") and page_number is None:
         return HttpResponseBadRequest("Invalid page parameter.")
+    subtree_ids, categories, popular_topics = category_page_navigation(category, root_category, published_posts)
+    post_list = published_posts.filter(category_id__in=subtree_ids).order_by("-created_at")
     page_obj = Paginator(post_list, 6).get_page(page_number)
-
-    categories = get_sidebar_categories(
-        posts_queryset=published_posts,
-        active_category=category,
-        include_empty=True,
-    )
-    popular_topics = get_popular_topics(active_category=category, limit=5)
 
     context = {
         "category": category,

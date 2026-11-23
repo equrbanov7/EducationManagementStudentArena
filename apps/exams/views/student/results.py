@@ -16,6 +16,7 @@ from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.models import CodingSubmission, ExamAttempt
 from apps.exams.services.center_exams import attempt_in_center, entry_url_for_exam, hall_review_open
 from apps.exams.services.question_snapshot import delivered_question_render
+from apps.exams.services.result_answers import prefetch_result_options
 from apps.exams.services.result_calculation import attach_test_result_summaries, calculate_test_attempt_result
 from apps.exams.services.result_release import (
     FINAL_CENTER_REVIEW_SECONDS,
@@ -187,6 +188,8 @@ def exam_result(request, slug, attempt_id):
     ensure_student_exam_tenant_context(request)
     exam = get_object_or_404(tenant_scoped_exams(request), slug=slug)
     attempt = get_object_or_404(ExamAttempt, id=attempt_id, exam=exam, user=request.user)
+    attempt.exam = exam
+    attempt.user = request.user
     # Audit 2026-09-13 EX-01 (P0): status yoxlanmadığından tələbə imtahan
     # GEDƏRKƏN ikinci tabda nəticə URL-ini açıb düzgün variantları görür,
     # sonra `take_exam`-a qayıdıb cavabları düzəldirdi. Vaxtı bitmiş cəhd
@@ -255,40 +258,33 @@ def exam_result(request, slug, attempt_id):
         )
         return redirect(return_to or f"{reverse('accounts:profile')}?section=my-results")
 
-    previous_attempts = list(
-        ExamAttempt.objects.filter(
-            user=request.user,
-            exam=exam,
-            status__in=ATTEMPT_FINISHED_STATUSES,
-        )
-        .exclude(id=attempt.id)
-        # EXAMQA 2026-10-01: görünürlük/URL/bal xülasəsi hər cəhddə ``attempt.exam``-a
-        # baxır — select_related olmadan əvvəlki cəhd başına əlavə sorğu (N+1) gedirdi.
-        .select_related("exam")
-        .order_by("-started_at")
+    history = ExamAttempt.objects.filter(user=request.user, exam=exam, status__in=ATTEMPT_FINISHED_STATUSES).exclude(
+        pk=attempt.pk
     )
-    previous_attempts = annotate_attempt_result_visibility(previous_attempts)
-    attach_test_result_summaries(previous_attempts, bonus_map_fn=score_adjustments.student_visible_bonus_map)
-    for previous_attempt in previous_attempts:
-        previous_attempt.result_url = build_exam_result_url(previous_attempt, return_to=request.get_full_path())
+    previous_attempts = []
+    if is_final_center_result:
+        # The hall screen has no history table.
+        previous_count = history.count()
+    else:
+        previous_attempts = list(history.order_by("-started_at"))
+        for previous in previous_attempts:
+            previous.exam = exam
+        previous_attempts = annotate_attempt_result_visibility(previous_attempts)
+        attach_test_result_summaries(previous_attempts, bonus_map_fn=score_adjustments.student_visible_bonus_map)
+        for previous in previous_attempts:
+            previous.result_url = build_exam_result_url(previous, return_to=request.get_full_path())
+        previous_count = len(previous_attempts)
 
     # YALNIZ bu attempt-ə düşən suallar:
-    answers_qs = (
-        attempt.answers.select_related("question")
-        .prefetch_related(
-            "selected_options",
-            "files",
-            "question__options",
-        )
-        .order_by("id")  # attempt yaranma ardıcıllığı ilə
-    )
-
+    answers_qs = attempt.answers.select_related("question").order_by("id")
+    if exam.exam_type not in {"test", "coding"}:
+        answers_qs = answers_qs.prefetch_related("files")
     answers = list(answers_qs)
+    prefetch_result_options(answers, for_display=True)
 
     # Template-də istifadə üçün:
     questions = [a.question for a in answers]
     answers_by_qid = {a.question_id: a for a in answers}
-    answer_has_selection_by_qid = {a.question_id: bool(list(a.selected_options.all())) for a in answers}
     # EXAM-P0-03: hər cavab üçün dondurulmuş (yoxdursa canlı) seçilmiş variant
     # id-ləri — verdikt, effektiv bal və çatdırılma-render-i eyni mənbədən gəlsin.
     selected_ids_by_qid = {}
@@ -372,11 +368,6 @@ def exam_result(request, slug, attempt_id):
     appeal_deadline = score_adjustments.deadline(attempt) if can_appeal else None
     # Qəbul olunmuş apellyasiya bonusları tələbəyə yalnız 5 dəqiqəlik redaktə
     # pəncərəsi bağlanandan sonra görünür.
-    effective_score_info = (
-        score_adjustments.student_visible_effective_test_score(attempt, answers=answers)
-        if exam.exam_type == "test"
-        else None
-    )
     _appeal_state = score_adjustments.student_visible_score_state(attempt)
     appeal_bonus_points = _appeal_state["bonus_points"]
     appeal_bonus_by_qid = {
@@ -396,8 +387,17 @@ def exam_result(request, slug, attempt_id):
     appeal_pending_count = sum(1 for status in appeal_status_by_qid.values() if status == "pending")
     # Baş bal göstəricisi də EFFEKTİV balı göstərsin — bonus yalnız aşağıdakı
     # qeyddə yox, əsas faiz/bal blokunda da əks olunmalıdır.
-    if test_result is not None and appeal_bonus_points:
-        test_result = score_adjustments.apply_bonus(test_result, appeal_bonus_points)
+    effective_score_info = None
+    if test_result is not None:
+        base = test_result
+        test_result = score_adjustments.apply_bonus(base, appeal_bonus_points)
+        effective_score_info = {
+            "base": base,
+            "bonus_points": appeal_bonus_points,
+            "effective_score": test_result.score,
+            "max_score": test_result.max_score,
+            "effective_percentage": test_result.percentage,
+        }
 
     # Paket A (2026-10-18): yazılı/praktiki nəticənin «bal / maks» halqası üçün tavan — çatdırılan
     # sualların snapshot balından (müəllim baxışı və jurnal sinxronu ilə eyni qayda); sorğu YOX,
@@ -415,7 +415,7 @@ def exam_result(request, slug, attempt_id):
     # İmtahan bir jurnal fənninə bağlıdırsa göstərilir (best-effort, sındırmır).
     journal_result = None
     subject_id = getattr(exam, "subject_id", None)
-    if subject_id and getattr(exam, "organization_id", None):
+    if subject_id and exam.organization_id and (exam.exam_type == "test" or attempt.checked_by_teacher):
         try:
             from apps.registrar.public import exam_result_summary
 
@@ -426,11 +426,6 @@ def exam_result(request, slug, attempt_id):
             journal_result = summary if summary.get("linked") else None
         except Exception:
             journal_result = None
-    # Paket A baxışı (2026-10-18): yazılı/praktiki imtahan hələ yoxlanmayıbsa jurnal kartı (və «F» hərfi)
-    # göstərilmir — yoxlanmamış iş tələbəyə kəsilmiş kimi görünməsin.
-    if journal_result is not None and exam.exam_type != "test" and not attempt.checked_by_teacher:
-        journal_result = None
-
     return render(
         request,
         "exams/student/exam_result.html",
@@ -447,7 +442,7 @@ def exam_result(request, slug, attempt_id):
             "questions": questions,
             "answers_by_qid": answers_by_qid,
             "delivered_by_qid": delivered_by_qid,
-            "answer_has_selection_by_qid": answer_has_selection_by_qid,
+            "answer_has_selection_by_qid": {qid: bool(ids) for qid, ids in selected_ids_by_qid.items()},
             "answer_verdict_by_qid": answer_verdict_by_qid,
             "marked_question_by_qid": {question_id: True for question_id in marked_question_ids},
             "marked_question_count": len(marked_question_ids),
@@ -467,7 +462,7 @@ def exam_result(request, slug, attempt_id):
             "final_result_remaining_seconds": final_result_remaining_seconds,
             "final_result_timeout_url": final_result_timeout_url,
             "previous_attempts": previous_attempts,
-            "previous_attempts_count": len(previous_attempts) + 1,
+            "previous_attempts_count": previous_count + 1,
             "can_appeal": can_appeal,
             "appeal_applicable": appeal_applicable,
             "appeal_create_url": appeal_create_url,

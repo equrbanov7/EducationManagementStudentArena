@@ -179,24 +179,11 @@ def attach_test_result_summaries(attempts, *, bonus_map_fn=None):
     bonus_by_attempt_id = resolve_bonus_map([attempt.id for attempt in test_attempts])
     apply_bonus = score_adjustments.apply_bonus
 
-    # Faza 4 (audit 2026-07-02): N+1 aradan qaldırıldı — bütün attempt-lərin
-    # cavabları TƏK sorğu dəsti ilə (base + 2 prefetch) yığılır və
-    # calculate_test_attempt_result-a hazır ötürülür. Boş siyahı halında
-    # funksiya əvvəlki kimi legacy fallback-a düşür (davranış eynidir).
-    from apps.exams.models import ExamAnswer
+    from apps.exams.services.result_answers import prefetch_score_answers
 
-    answers_by_attempt_id: dict[int, list] = {attempt.id: [] for attempt in test_attempts}
-    answers_qs = (
-        ExamAnswer.objects.filter(attempt_id__in=list(answers_by_attempt_id))
-        .select_related("question")
-        .prefetch_related("question__options", "selected_options")
-        .order_by("id")
-    )
-    for answer in answers_qs:
-        answers_by_attempt_id[answer.attempt_id].append(answer)
-
+    prefetch_score_answers(test_attempts)
     for attempt in test_attempts:
-        result = calculate_test_attempt_result(attempt, answers=answers_by_attempt_id.get(attempt.id, []))
+        result = calculate_test_attempt_result(attempt, answers=attempt.answers.all())
         bonus = bonus_by_attempt_id.get(attempt.id)
         if bonus:
             result = apply_bonus(result, bonus)

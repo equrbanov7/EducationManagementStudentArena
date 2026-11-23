@@ -170,6 +170,13 @@ class ExamHotPathQueryBudgetTests(_HotPathBase):
         self.assertEqual((self.attempt.correct_count, self.attempt.wrong_count), (3, 2))
         self.assertEqual(self.attempt.autosave_revision, 2)
 
+        with CaptureQueriesContext(connection) as result_queries:
+            result = self.client.get(response.json()["redirect_url"])
+        self.assertEqual(result.status_code, 200)
+        self.assertEqual(result.context["test_result"].correct_count, 3)
+        self.assertFalse(any('FROM "exams_examanswer_selected_options"' in q["sql"] for q in result_queries))
+        self.assertFalse(any('FROM "exams_examanswerfile"' in q["sql"] for q in result_queries))
+
 
 class LockedPostGuaranteeTests(_HotPathBase):
     """Tək kilidli POST yolu köhnə iki-mərhələli yoxlamanın hər zəmanətini saxlayır."""

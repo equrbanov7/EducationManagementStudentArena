@@ -61,11 +61,25 @@ def page_rows(lessons_qs, *, offset: int = 0, size: int = PAGE_SIZE) -> dict:
 
     rows = build_rows(lessons_qs, limit=size + 1, offset=offset)
     has_more = len(rows) > size
+    boundary_dates = set()
+    if rows and offset:
+        boundary_dates.add(rows[0]["date"])
+    if has_more and rows[size]["date"] == rows[size - 1]["date"]:
+        boundary_dates.add(rows[size]["date"])
     rows = rows[:size]
+    totals = {}
+    for row in rows:
+        bucket = totals.setdefault(row["date"], {"lessons": 0, "hours": 0, "passive_hours": 0})
+        if row["is_passive"]:
+            bucket["passive_hours"] += row["hours"]
+        else:
+            bucket["lessons"] += 1
+            bucket["hours"] += row["hours"]
+    totals.update(day_totals(lessons_qs, boundary_dates))
     return {
         "rows": rows,
         "next_offset": offset + size if has_more else None,
-        "day_totals": day_totals(lessons_qs, [row["date"] for row in rows]),
+        "day_totals": totals,
     }
 
 

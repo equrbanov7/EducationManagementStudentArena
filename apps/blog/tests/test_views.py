@@ -502,6 +502,37 @@ class BlogRoleAccessTest(TestCase):
         self.assertContains(response, 'data-moderator-edit="true"')
         self.assertContains(response, reverse("post_edit_ajax", args=[pending_post.id]))
 
+    def test_moderation_list_checks_permissions_without_loading_offpage_posts(self):
+        from unittest.mock import patch
+
+        from apps.blog.services import (
+            can_user_moderate_post,
+            can_user_review_post,
+            collect_reviewable_posts,
+            count_pending_reviewable_posts,
+        )
+
+        for index in range(13):
+            Post.objects.create(
+                author=self.student,
+                title=f"Queue {index}",
+                content="Review",
+                category=self.tech_category,
+                requires_approval=True,
+                approval_status=Post.ApprovalStatus.PENDING,
+            )
+        self._activate_org(self.teacher)
+        reviewer = self.client.get(reverse("accounts:profile") + "?section=pending-post-approvals").wsgi_request.user
+        from_db = Post.from_db
+        with patch.object(Post, "from_db", side_effect=from_db) as hydrated:
+            page, *_ = collect_reviewable_posts(reviewer, status="pending", page_number=2)
+            self.assertEqual(page.paginator.count, 13)
+            self.assertEqual(count_pending_reviewable_posts(reviewer), 13)
+            self.assertEqual(hydrated.call_count, 3)
+        for item in page:
+            self.assertEqual(item["can_review"], can_user_review_post(reviewer, item["post"]))
+            self.assertEqual(item["can_moderate"], can_user_moderate_post(reviewer, item["post"]))
+
     def test_teacher_can_edit_reviewable_student_post_without_changing_review_state(self):
         pending_post = Post.objects.create(
             author=self.student,

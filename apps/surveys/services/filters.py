@@ -7,6 +7,8 @@ yoxlanılır (UUID / tam ədəd), yanlış dəyər səssizcə atılır (500 yox)
 from __future__ import annotations
 
 import uuid
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import dataclass, replace
 
 from django.db.models import Max
@@ -76,18 +78,47 @@ class ResultFilters:
         return replace(self, **{name: None for name in self.NARROWING})
 
 
+# Only memoize metadata while rendering a single report. Other callers and later
+# requests must observe edits to tenant membership of campaigns and anonymity limits.
+_report_metadata = ContextVar("survey_report_metadata", default=None)
+
+
+@contextmanager
+def report_metadata():
+    token = _report_metadata.set({})
+    try:
+        yield
+    finally:
+        _report_metadata.reset(token)
+
+
 def campaign_ids_for(organization, filters) -> list:
     """Filtrdəki kampaniyalar (təşkilata aid olanlar); boşdursa bütün kampaniyalar."""
+    memo = _report_metadata.get()
+    key = ("ids", getattr(organization, "pk", organization), frozenset(filters.campaign_ids or ()))
+    if memo is not None and key in memo:
+        return list(memo[key])
     queryset = SurveyCampaign.objects.filter(organization=organization)
     if filters.campaign_ids:
         queryset = queryset.filter(pk__in=filters.campaign_ids)
-    return list(queryset.values_list("pk", flat=True))
+    ids = list(queryset.values_list("pk", flat=True))
+    if memo is not None:
+        memo[key] = tuple(ids)
+    return ids
 
 
 def k_threshold(campaign_ids) -> int:
     """Birdən çox kampaniya birləşəndə ən SƏRT (böyük) k tətbiq olunur."""
+    campaign_ids = frozenset(campaign_ids)
+    memo = _report_metadata.get()
+    key = ("threshold", campaign_ids)
+    if memo is not None and key in memo:
+        return memo[key]
     value = SurveyCampaign.objects.filter(pk__in=campaign_ids).aggregate(k=Max("min_group_size"))["k"]
-    return max(int(value or DEFAULT_MIN_GROUP_SIZE), DEFAULT_MIN_GROUP_SIZE)
+    threshold = max(int(value or DEFAULT_MIN_GROUP_SIZE), DEFAULT_MIN_GROUP_SIZE)
+    if memo is not None:
+        memo[key] = threshold
+    return threshold
 
 
 def responses(organization, scope, filters, campaign_ids, *, section=Section.TEACHER):

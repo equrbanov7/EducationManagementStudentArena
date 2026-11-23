@@ -219,7 +219,7 @@ def pending_posts_section(request, *, have_category_options) -> dict:
     """pending-post-approvals aktiv bölməsi üçün tam kontekst (davranış
     _stage2-dəki köhnə inline blokla eynidir)."""
     (
-        items,
+        page_obj,
         search_query,
         filter_status,
         filter_group,
@@ -228,21 +228,24 @@ def pending_posts_section(request, *, have_category_options) -> dict:
         available_organizations,
     ) = collect_reviewable_posts(
         request.user,
+        page_number=request.GET.get("approval_page") or 1,
         search=request.GET.get("approval_search"),
         status=request.GET.get("approval_status"),
         group_id=request.GET.get("approval_group"),
         organization_id=request.GET.get("approval_organization"),
     )
-    total_count = len(items)
-    count = count_pending_reviewable_posts(request.user)
+    total_count = page_obj.paginator.count
+    count = (
+        total_count
+        if filter_status == "pending" and not (search_query or filter_group or filter_organization)
+        else count_pending_reviewable_posts(request.user)
+    )
 
     category_options = None
     if not have_category_options:
         post_category_tree = get_post_category_tree()
         root_options, subcategory_options = build_post_category_picker_options(post_category_tree)
         category_options = (post_category_tree, root_options, subcategory_options)
-
-    page_obj = Paginator(items, 10).get_page(request.GET.get("approval_page", 1))
 
     extra = ["section=pending-post-approvals"]
     if search_query:
@@ -255,7 +258,7 @@ def pending_posts_section(request, *, have_category_options) -> dict:
         extra.append(f"approval_organization={filter_organization}")
 
     return {
-        "items": items,
+        "items": page_obj.object_list,
         "search_query": search_query,
         "filter_status": filter_status,
         "filter_group": filter_group,

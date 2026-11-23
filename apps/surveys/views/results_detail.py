@@ -30,6 +30,7 @@ from django.views.decorators.http import require_GET
 from .. import public
 from ..services import analytics_guard as guard
 from ..services.analytics_extra import buckets_for
+from ..services.filters import report_metadata
 from .results_filters import query_string, resolve
 from .results_labels import likert_labels, short_label
 from .results_overview import likert_row, trend_block
@@ -142,6 +143,7 @@ def _guarded_detail(resolved, teacher_id, filters):
     return detail, nested_hidden
 
 
+@report_metadata()
 def detail_context(request, teacher_id):
     """``(context, status)`` — ``context`` ``None``-dursa ``status`` 403/404/409-dur."""
     # Təhlükəsizlik auditi 2026-10-05: panel kimi kaskad — uyğunsuz seçimlər atılır və çekməcə

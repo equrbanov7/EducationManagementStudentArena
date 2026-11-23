@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
+from django.db.models import Prefetch
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -14,7 +15,7 @@ from apps.exams.constants import ATTEMPT_FINISHED_STATUSES
 from apps.exams.domain.attempt_deadline import write_window_closed
 from apps.exams.features import exam_supervision_enabled, practical_exam_disabled_message, practical_exams_enabled
 from apps.exams.metrics import record_autosave
-from apps.exams.models import Exam, ExamAnswer, ExamAttempt
+from apps.exams.models import Exam, ExamAnswer, ExamAttempt, ExamQuestionOption
 from apps.exams.services.attempts import (
     _start_or_resume_attempt,
     generate_random_questions_for_attempt,
@@ -54,7 +55,7 @@ from .access_guard import USER_EXCLUDED_ANNOTATION, ensure_active_attempt_access
 from .script_data import take_exam_script_data
 
 
-def _attempt_answers_queryset(attempt, *, question_ids=None, with_options=True, with_files=True):
+def _attempt_answers_queryset(attempt, *, question_ids=None, with_options=True, with_files=True, for_write=False):
     """
     Return the answers (with question + optional options/files prefetch) for `attempt`.
 
@@ -68,11 +69,24 @@ def _attempt_answers_queryset(attempt, *, question_ids=None, with_options=True, 
     `answer.files.all().delete()` öz sorğusudur).
     """
     prefetch = []
-    if with_options:
+    if with_options and for_write:
+        prefetch.extend(
+            (
+                Prefetch(
+                    "question__options", queryset=ExamQuestionOption.objects.only("id", "question_id", "is_correct")
+                ),
+                Prefetch("selected_options", queryset=ExamQuestionOption.objects.only("id")),
+            )
+        )
+    elif with_options:
         prefetch += ["question__options", "selected_options"]
     if with_files:
         prefetch.append("files")
-    qs = attempt.answers.select_related("question", "question__exam", "question__block")
+    if for_write:
+        # Timers only need the exam's default duration. Bind the already locked exam below.
+        qs = attempt.answers.select_related("question")
+    else:
+        qs = attempt.answers.select_related("question", "question__exam", "question__block")
     if prefetch:
         qs = qs.prefetch_related(*prefetch)
     qs = qs.order_by("id")
@@ -269,7 +283,11 @@ def _handle_take_exam_post(request, *, attempt, action, is_ajax, return_to):
 
     autosave_question_ids_for_fetch = posted_autosave_question_ids(request, action=action)
     with_options = exam.exam_type == "test"
-    answers_qs_kwargs = {"question_ids": autosave_question_ids_for_fetch, "with_options": with_options}
+    answers_qs_kwargs = {
+        "question_ids": autosave_question_ids_for_fetch,
+        "with_options": with_options,
+        "for_write": True,
+    }
     answers = list(_attempt_answers_queryset(attempt, with_files=False, **answers_qs_kwargs))
 
     if not answers:
@@ -291,6 +309,10 @@ def _handle_take_exam_post(request, *, attempt, action, is_ajax, return_to):
         )
         messages.error(request, pgettext("exams.view.access.message", message_key))
         return redirect(resolve_exam_failure_redirect(request))
+
+    for answer in answers:
+        if answer.question.exam_id == exam.pk:
+            answer.question.exam = exam
 
     # Tam yükləmədə (`question_ids is None`) `answers` attempt-in BÜTÜN cavablarıdır.
     full_answer_set = autosave_question_ids_for_fetch is None

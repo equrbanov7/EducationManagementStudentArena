@@ -3,6 +3,7 @@ Evaluated-review collector for the teacher review-results section.
 """
 
 from django.contrib.auth import get_user_model
+from django.core.paginator import Paginator
 from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
@@ -61,12 +62,12 @@ def fill_evaluated_test_scores(items):
     from django.db.models import Prefetch, prefetch_related_objects
 
     from apps.appeals.public import appeal_bonus_map, apply_bonus_to_test_result
-    from apps.exams.public import answer_max_points, calculate_test_attempt_result
+    from apps.exams.public import answer_max_points, calculate_test_attempt_result, prefetch_score_answers
 
     pending = [item for item in items if item.get("pending_score_attempt") is not None]
     if pending:
         attempts = [item["pending_score_attempt"] for item in pending]
-        prefetch_related_objects(attempts, "answers__question__options", "answers__selected_options")
+        prefetch_score_answers(attempts)
         appeal_bonus_by_attempt = appeal_bonus_map([attempt.id for attempt in attempts])
         for item, attempt in zip(pending, attempts):
             result = calculate_test_attempt_result(attempt, answers=attempt.answers.all())
@@ -120,12 +121,73 @@ __all__ = [
 ]
 
 
+def _exam_item(attempt, teacher_id, profile_return_url, group_name):
+    course = attempt.exam.course
+    submitted_at = attempt.finished_at or attempt.started_at
+    pending_score_attempt = None
+    pending_written_attempt = None
+    if attempt.exam.exam_type == "test":
+        # "Nəticə" sütununda əsas dəyər BAL-dır (bal / maks bal);
+        # faiz ayrıca badge kimi göstərilir (əvvəl yalnız faiz çıxırdı).
+        if attempt.teacher_score is not None:
+            score_display = _format_score_display(attempt.teacher_score)
+        else:
+            # Səhifələmədən SONRA doldurulur (bax ``fill_evaluated_test_scores``).
+            score_display = ""
+            pending_score_attempt = attempt
+        score_percent_display = ""
+    else:
+        if attempt.teacher_score is not None:
+            score_display = _format_score_display(attempt.teacher_score)
+            # «bal / maks» + faiz səhifələmədən SONRA (``fill_evaluated_test_scores``).
+            pending_written_attempt = attempt
+        else:
+            score_display = _format_score_display(attempt.score_percent)
+        score_percent_display = ""
+    return {
+        "type": "exam",
+        "exam_kind": attempt.exam.exam_type,
+        "exam_kind_label": attempt.exam.get_exam_type_display(),
+        "exam_category": attempt.exam.exam_type_extended or "",
+        "exam_category_label": (
+            attempt.exam.get_exam_type_extended_display() if attempt.exam.exam_type_extended else ""
+        ),
+        "attempt_id": attempt.id,
+        "attempt": attempt,
+        "student": attempt.user,
+        "title": attempt.exam.title,
+        "course_title": course.title if course else "-",
+        "subject_title": (attempt.exam.subject.name if attempt.exam.subject_id else (course.title if course else "")),
+        "group_name": group_name,
+        "score_display": score_display,
+        "score_percent_display": score_percent_display,
+        # 2026-10-27: «Yoxlayan» = bal qoyan İNSAN, yoxdursa «Avtomatik (sistem)» — müəllif DEYİL
+        # (``fill_evaluated_checkers``, yalnız görünən səhifə; ixrac eyni qaydanı işlədir).
+        "evaluator_display": "",
+        # Başqasının imtahanı (mərkəz görünüşü) — «Yaradan» sətirdə ayrıca göstərilir.
+        "creator_display": (_user_display_name(attempt.exam.author) if attempt.exam.author_id != teacher_id else ""),
+        "submitted_at": submitted_at,
+        "reviewed_at": attempt.teacher_checked_at,
+        "action_url": _append_query_params(
+            reverse(
+                "exams:teacher_view_attempt",
+                kwargs={"slug": attempt.exam.slug, "attempt_id": attempt.id},
+            ),
+            from_section="review-results",
+            return_to=profile_return_url,
+        ),
+        "action_label": pgettext_lazy("profile.pending_review.action", "review"),
+        "pending_score_attempt": pending_score_attempt,
+        "pending_written_attempt": pending_written_attempt,
+    }
+
+
 def _param(request, name, override=None):
     return (override if override is not None else request.GET.get(name, "")).strip()
 
 
 def _collect_evaluated_review_items(
-    request, search=None, filter_type=None, filter_group=None, submitted_order=None, period=None
+    request, search=None, filter_type=None, filter_group=None, submitted_order=None, period=None, *, paginate=False
 ):
     """Süzülmüş sətirlər + seçici vəziyyəti.
 
@@ -218,70 +280,36 @@ def _collect_evaluated_review_items(
         )
         if search_q is not None:
             attempts = attempts.filter(search_q)
-        for attempt in attempts:
-            course = attempt.exam.course
-            submitted_at = attempt.finished_at or attempt.started_at
-            pending_score_attempt = None
-            pending_written_attempt = None
-            if attempt.exam.exam_type == "test":
-                # "Nəticə" sütununda əsas dəyər BAL-dır (bal / maks bal);
-                # faiz ayrıca badge kimi göstərilir (əvvəl yalnız faiz çıxırdı).
-                if attempt.teacher_score is not None:
-                    score_display = _format_score_display(attempt.teacher_score)
-                else:
-                    # Səhifələmədən SONRA doldurulur (bax ``fill_evaluated_test_scores``).
-                    score_display = ""
-                    pending_score_attempt = attempt
-                score_percent_display = ""
-            else:
-                if attempt.teacher_score is not None:
-                    score_display = _format_score_display(attempt.teacher_score)
-                    # «bal / maks» + faiz səhifələmədən SONRA (``fill_evaluated_test_scores``).
-                    pending_written_attempt = attempt
-                else:
-                    score_display = _format_score_display(attempt.score_percent)
-                score_percent_display = ""
-            items.append(
-                {
-                    "type": "exam",
-                    "exam_kind": attempt.exam.exam_type,
-                    "exam_kind_label": attempt.exam.get_exam_type_display(),
-                    "exam_category": attempt.exam.exam_type_extended or "",
-                    "exam_category_label": (
-                        attempt.exam.get_exam_type_extended_display() if attempt.exam.exam_type_extended else ""
-                    ),
-                    "attempt_id": attempt.id,
-                    "attempt": attempt,
-                    "student": attempt.user,
-                    "title": attempt.exam.title,
-                    "course_title": course.title if course else "-",
-                    "subject_title": (
-                        attempt.exam.subject.name if attempt.exam.subject_id else (course.title if course else "")
-                    ),
-                    "group_name": student_group_map.get(attempt.user_id, ""),
-                    "score_display": score_display,
-                    "score_percent_display": score_percent_display,
-                    # 2026-10-27: «Yoxlayan» = bal qoyan İNSAN, yoxdursa «Avtomatik (sistem)» — müəllif DEYİL
-                    # (``fill_evaluated_checkers``, yalnız görünən səhifə; ixrac eyni qaydanı işlədir).
-                    "evaluator_display": "",
-                    # Başqasının imtahanı (mərkəz görünüşü) — «Yaradan» sətirdə ayrıca göstərilir.
-                    "creator_display": (
-                        _user_display_name(attempt.exam.author) if attempt.exam.author_id != request.user.id else ""
-                    ),
-                    "submitted_at": submitted_at,
-                    "reviewed_at": attempt.teacher_checked_at,
-                    "action_url": _append_query_params(
-                        reverse(
-                            "exams:teacher_view_attempt",
-                            kwargs={"slug": attempt.exam.slug, "attempt_id": attempt.id},
-                        ),
-                        from_section="review-results",
-                        return_to=profile_return_url,
-                    ),
-                    "action_label": pgettext_lazy("profile.pending_review.action", "review"),
-                    "pending_score_attempt": pending_score_attempt,
-                    "pending_written_attempt": pending_written_attempt,
-                }
+        if paginate:
+            # The page index needs ids, dates and filter labels across the full result set.
+            index_rows = attempts.values_list(
+                "id",
+                "user_id",
+                "exam__exam_type",
+                "teacher_checked_at",
+                "finished_at",
+                "started_at",
+                "exam__subject_id",
+                "exam__subject__name",
+                "exam__course__title",
+            )
+            for pk, user_id, kind, reviewed, finished, started, subject_id, subject, course in index_rows.iterator():
+                items.append(
+                    {
+                        "type": "exam",
+                        "attempt_id": pk,
+                        "student_id": user_id,
+                        "exam_kind": kind,
+                        "subject_title": subject if subject_id else (course or ""),
+                        "group_name": student_group_map.get(user_id, ""),
+                        "reviewed_at": reviewed,
+                        "submitted_at": finished or started,
+                    }
+                )
+        else:
+            items.extend(
+                _exam_item(att, request.user.id, profile_return_url, student_group_map.get(att.user_id, ""))
+                for att in attempts
             )
 
     if normalized_type in {"all", "assignments"} and "assignments" not in hidden_types:
@@ -449,6 +477,17 @@ def _collect_evaluated_review_items(
         ),
         reverse=normalized_submitted_order == "newest",
     )
+    page = None
+    if paginate:
+        page = Paginator(items, 15).get_page(request.GET.get("er_page"))
+        ids = [row["attempt_id"] for row in page.object_list if row["type"] == "exam"]
+        if ids:
+            visible = attempts.in_bulk(ids)
+            for row in page.object_list:
+                attempt = visible.get(row.get("attempt_id"))
+                if attempt is not None:
+                    row.update(_exam_item(attempt, request.user.id, profile_return_url, row["group_name"]))
+            page.object_list = [row for row in page.object_list if row["type"] != "exam" or "attempt" in row]
     return (
         items,
         search_query,
@@ -458,6 +497,7 @@ def _collect_evaluated_review_items(
         normalized_submitted_order,
         selected_period,
         {
+            "page": page,
             "subject": selected_subject,
             "subjects": available_subjects,
             "date_from": window.from_text,
