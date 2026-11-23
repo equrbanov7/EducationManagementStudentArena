@@ -6,6 +6,7 @@ Qaydalar: :mod:`apps.accounts.services.inactive_students_2026_11_08`. Stdout-a Y
 
 from __future__ import annotations
 
+import re
 from collections import Counter
 
 from django.apps import apps as django_apps
@@ -28,6 +29,9 @@ class Command(BaseCommand):
         parser.add_argument("--org", required=True, help="Təşkilatın slug-ı (məs. qku)")
         parser.add_argument("--actor", required=True, help="Aktiv superadmin istifadəçi adı (audit müəllifi)")
         parser.add_argument("--undo", action="store_true", help="Bu əmrin dondurduğunu geri qaytar")
+        parser.add_argument(
+            "--only", default="", help="--undo ilə: yalnız bu hesab id-ləri (vergül/tire ilə), məs. bərpa olunan tələbə"
+        )
         parser.add_argument("--apply", action="store_true", help="Faktiki yaz (defolt: dry-run)")
         parser.add_argument(
             "--show-skipped", action="store_true", help="Yalnız oxu: heç kimə yazılmamış jurnallı tələbələr + qrup id"
@@ -52,7 +56,17 @@ class Command(BaseCommand):
                     self.stdout.write(f"{PREFIX} no_evidence={student_id}_{group_id or 'none'}")
                 return
             with transaction.atomic():
-                run(organization=organization, actor=actor, counts=counts, undo=options["undo"], report=report)
+                only = [int(x) for x in re.split(r"[,\-\s]+", options["only"] or "") if x.isdigit()]
+                if options["only"] and not only:
+                    raise CommandError("inactive_students_only_invalid")
+                run(
+                    organization=organization,
+                    actor=actor,
+                    counts=counts,
+                    undo=options["undo"],
+                    report=report,
+                    only=only or None,
+                )
                 if not options["apply"]:
                     transaction.set_rollback(True)
         self.stdout.write(f"{PREFIX} mode={'apply' if options['apply'] else 'dry_run'}")
