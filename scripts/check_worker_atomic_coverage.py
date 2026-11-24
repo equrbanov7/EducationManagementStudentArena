@@ -164,6 +164,7 @@ INTENTIONAL_EXEMPTIONS = {
     "apps/registrar/management/commands/fix_practical_lab_lessons_20261124.py",
     # 2026-11-19 boş həftəlik planlı sillabuslar (bütün formalar): eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/fill_empty_syllabus_weeks_20261119.py",
+    "apps/registrar/management/commands/fix_seminar_week_rows_20261124.py",
     # 2026-11-19 dublikat tələbənin jurnaldakı ikinci sətri: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/resolve_duplicate_rows_20261119.py",
     # 2026-11-12 MR-000188 434 R payı ayrıca alt qrup jurnalına: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
