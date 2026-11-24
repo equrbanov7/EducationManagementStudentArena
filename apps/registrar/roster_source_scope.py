@@ -58,7 +58,15 @@ def source_group_queryset(user, offering):
 
 
 def cohort_is_wide(user, cohort) -> bool:
-    """Səviyyə qrupunun kafedrası universitet əhatəlidir (aktor siyahını idarə edən heyətdir)."""
+    """Səviyyə qrupunun kafedrası universitet əhatəlidir (aktor siyahını idarə edən heyətdir).
+
+    2026-11-19 («qrup dövrəsi»): məktəb tyutoru dil kafedrasında ÖZ açdığı qrupa yalnız yaradıcı yolu ilə çatır —
+    universitet genişliyi ona keçmir, yalnız öz əhatəsinin tələbələri (``language_cohorts.creator_only_access``).
+    """
+    from . import language_cohorts
+
+    if getattr(cohort, "created_by_id", None) is not None and language_cohorts.creator_only_access(user, cohort):
+        return False
     return _is_wide(user, cohort.organization, cohort.department)
 
 
