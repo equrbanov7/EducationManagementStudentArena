@@ -110,7 +110,10 @@ def _own_attendance(record, period, organization_id) -> dict:
     if period is not None:
         rows = list(
             Enrollment.objects.filter(
-                organization_id=organization_id, student_id=record.student_id, offering__period=period
+                organization_id=organization_id,
+                student_id=record.student_id,
+                offering__period=period,
+                offering__is_active=True,
             )
             .exclude(status=Enrollment.Status.DROPPED)
             .values(
