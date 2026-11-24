@@ -121104,3 +121104,11 @@ msgstr "No matches"
 msgctxt "exams.final_center.form"
 msgid "Bu binada bu adla otaq artıq var."
 msgstr "A room with this name already exists in this building."
+
+msgctxt "exams.service.parsing.error"
+msgid "docx_chart_needs_picture"
+msgstr "This Word chart has no readable preview image. Export the document as a PDF or paste the chart as a picture in Word to preserve it."
+
+msgctxt "exams.export"
+msgid "question_picture_export_failed"
+msgstr "The question images could not be exported in full. Check that the images open and reduce large files before trying again."

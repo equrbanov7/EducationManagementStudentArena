@@ -21,16 +21,18 @@ import logging
 from datetime import timedelta
 
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.translation import pgettext
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_POST
 
 from apps.exams.models import TextExtractionJob
 from apps.exams.services.access_policy import _ensure_teacher, can_view_attempt_results
 from apps.exams.services.parsing import MAX_UPLOAD_BYTES
 from apps.exams.tasks import run_text_extraction_job
+from core.download_types import attachment_file_response
 from core.tenancy import get_request_organization
 from core.upload_security import randomize_uploaded_filename
 
@@ -207,6 +209,7 @@ def start_text_extraction(request):
 
 @login_required
 @require_GET
+@never_cache
 def text_extraction_status(request, job_id):
     """Job statusu — yalnız sahibi üçün (tenant RLS + user filtri).
 
@@ -214,19 +217,18 @@ def text_extraction_status(request, job_id):
     halıdır: job pickup-pəncərəsindən uzun PENDING qalıbsa bu poll onu bir dəfə
     inline icra edir (bax :func:`_take_over_stalled_job`).
     """
-    _ensure_job_reader(request.user)
-    job = get_object_or_404(TextExtractionJob, pk=job_id, user=request.user)
+    job = _reader_job(request, job_id, "kind", "created_at", "status", "text", "error", "result_meta")
     job = _take_over_stalled_job(job)
     return JsonResponse({"ok": True, **_job_payload(job)})
 
 
-def _ensure_job_reader(user):
-    """Job status / gözləmə / endirmə: müəllim VƏ YA İmtahan Mərkəzi (2026-11-17 — statistika ixracı worker-də).
-
-    Sahiblik ayrıca ``user=request.user`` filtri ilə məcburidir — başqasının job-u 404.
-    """
-    if not can_view_attempt_results(user):
-        _ensure_teacher(user)
+def _reader_job(request, job_id, *fields, export=False):
+    if not can_view_attempt_results(request.user):
+        _ensure_teacher(request.user)
+    jobs = TextExtractionJob.objects.filter(user=request.user, organization=get_request_organization(request))
+    if export:
+        jobs = jobs.filter(kind=TextExtractionJob.KIND_EXPORT)
+    return get_object_or_404(jobs.only("pk", *fields), pk=job_id)
 
 
 def start_export_job(request, *, export_name, params):
@@ -269,19 +271,9 @@ def start_export_job(request, *, export_name, params):
 
 
 def _serve_export_file(job):
-    from django.http import FileResponse, Http404
-
     if job.status != TextExtractionJob.STATUS_SUCCESS or not job.result_file:
         raise Http404
-    meta = job.result_meta or {}
-    response = FileResponse(
-        job.result_file.open("rb"),
-        as_attachment=True,
-        filename=meta.get("filename") or "export",
-    )
-    if meta.get("content_type"):
-        response["Content-Type"] = meta["content_type"]
-    return response
+    return attachment_file_response(job.result_file, filename=(job.result_meta or {}).get("filename") or "export")
 
 
 @login_required
@@ -291,13 +283,11 @@ def export_job_waiting(request, job_id):
     from django.shortcuts import render
     from django.urls import reverse
 
-    _ensure_job_reader(request.user)
-    job = get_object_or_404(TextExtractionJob, pk=job_id, user=request.user)
+    job = _reader_job(request, job_id, export=True)
     return render(
         request,
         "exams/teacher/export_waiting.html",
         {
-            "job": job,
             "status_url": reverse("exams:text_extraction_status", kwargs={"job_id": job.pk}),
             "download_url": reverse("exams:export_job_download", kwargs={"job_id": job.pk}),
         },
@@ -308,6 +298,5 @@ def export_job_waiting(request, job_id):
 @require_GET
 def export_job_download(request, job_id):
     """Hazır export faylını endirir — yalnız sahibi üçün."""
-    _ensure_job_reader(request.user)
-    job = get_object_or_404(TextExtractionJob, pk=job_id, user=request.user)
+    job = _reader_job(request, job_id, "status", "result_file", "result_meta", export=True)
     return _serve_export_file(job)

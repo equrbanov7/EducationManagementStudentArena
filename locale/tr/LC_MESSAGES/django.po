@@ -120263,3 +120263,11 @@ msgstr "Eşleşme yok"
 msgctxt "exams.final_center.form"
 msgid "Bu binada bu adla otaq artıq var."
 msgstr "Bu binada bu adla bir oda zaten var."
+
+msgctxt "exams.service.parsing.error"
+msgid "docx_chart_needs_picture"
+msgstr "Bu Word grafiğinin okunabilir bir önizleme resmi yok. Grafiği korumak için belgeyi PDF olarak dışa aktarın veya grafiği Word belgesine resim olarak ekleyin."
+
+msgctxt "exams.export"
+msgid "question_picture_export_failed"
+msgstr "Sorulardaki görsellerin tümü dışa aktarılamadı. Görsellerin açıldığını kontrol edin ve büyük dosyaları küçültüp yeniden deneyin."

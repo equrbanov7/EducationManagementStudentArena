@@ -95,6 +95,8 @@ class ExamCenterStatsExportAsyncTest(TestCase):
         self.assertEqual(status.json()["status"], "success")
         download = client.get(reverse("exams:export_job_download", kwargs={"job_id": job.pk}))
         self.assertEqual(download.status_code, 200)
+        self.assertIn("no-store", download["Cache-Control"])
+        self.assertEqual(download["X-Content-Type-Options"], "nosniff")
         content = b"".join(download.streaming_content) if download.streaming else download.content
         self.assertTrue(content.startswith(b"PK"))
         rows = list(load_workbook(BytesIO(content)).active.iter_rows(values_only=True))
