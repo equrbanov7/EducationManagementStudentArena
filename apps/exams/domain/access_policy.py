@@ -280,8 +280,8 @@ class ExamAccessPolicyMixin:
             return False
         return self.course.memberships.filter(user=user, role="student").exists()
 
-    def can_user_see(self, user: User) -> bool:
-        if user == self.author:
+    def can_user_see(self, user: User, *, course_membership=None) -> bool:
+        if self._is_author(user):
             return True
 
         # EXAM-P1-02: arxivlənmiş/soft-silinmiş imtahan tələbəyə görünmür.
@@ -294,6 +294,14 @@ class ExamAccessPolicyMixin:
             return False
 
         if self.is_public:
+            return True
+
+        if (
+            course_membership is not None
+            and course_membership.user_id == user.pk
+            and course_membership.course_id == self.course_id
+            and course_membership.role == "student"
+        ):
             return True
 
         if self.allowed_users.filter(id=user.id).exists():

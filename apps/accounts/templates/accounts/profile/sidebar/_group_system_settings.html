@@ -11,7 +11,7 @@ bir şeyi axtararkən rahatlıqla tapmaq üçün»). Əvvəl «İdarəetmə» qr
 {% if 'system-settings' in allowed_sections %}
 {% system_settings_nav as ssnav %}
 <li class="sidebar-menu-group" data-sidebar-group="system-settings">
-    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|system-settings|" %} open{% endif %}>
+    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|system-settings|remote-journal-access|" %} open{% endif %}>
         {% trans "Sistem tənzimləmələri" context "profile.section" as group_label %}
         {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="sliders-horizontal" %}
         <ul class="sidebar-menu-group-items">
@@ -39,6 +39,19 @@ bir şeyi axtararkən rahatlıqla tapmaq üçün»). Əvvəl «İdarəetmə» qr
                 </a>
             </li>
             {% endfor %}
+            {% comment %}2026-11-20 (sahib): «Kənardan jurnal girişi» — kabinetdən verilən şəbəkə istisnası; qapı eyni.{% endcomment %}
+            {% if 'remote-journal-access' in allowed_sections %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=remote-journal-access"
+                   data-section="remote-journal-access"
+                   data-title="{% trans 'Kənardan jurnal girişi' context 'profile.section' %}"
+                   data-source-url="{{ profile_base_url }}?section=remote-journal-access"
+                   class="sidebar-menu-link js-profile-section-link {% if active_section == 'remote-journal-access' %}active{% endif %}">
+                    {% nav_icon "network" "sidebar-menu-icon" %}
+                    <span class="sidebar-menu-text">{% trans "Kənardan jurnal girişi" context "profile.section" %}</span>
+                </a>
+            </li>
+            {% endif %}
         </ul>
     </details>
 </li>

@@ -8,6 +8,7 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import pgettext
+from django.views.decorators.cache import never_cache
 
 from apps.exams.models import ExamQuestion, ExamQuestionOption, QuestionBlock
 from apps.exams.services.access_policy import _ensure_teacher, ensure_can_manage_exam_questions
@@ -64,6 +65,7 @@ def test_question_bank_template_download(request, slug):
 
 
 @login_required
+@never_cache
 def exam_questions_word_export(request, slug):
     """
     İmtahanın suallarını Word (.docx) faylı kimi export edir.
@@ -76,10 +78,15 @@ def exam_questions_word_export(request, slug):
 
     from django.http import HttpResponse
 
-    from apps.exams.services.question_word_export import build_questions_docx, exam_questions_payload
+    from apps.exams.services.question_word_export import (
+        WordExportImageError,
+        build_questions_docx,
+        exam_questions_payload,
+    )
 
     _ensure_teacher(request.user)
     exam = get_teacher_exam_or_404(request, slug=slug)
+    ensure_can_manage_exam_questions(request.user, exam)
 
     language = (request.GET.get("language") or "").strip().lower() or None
     payload = exam_questions_payload(exam, language=language)
@@ -91,11 +98,15 @@ def exam_questions_word_export(request, slug):
     if language:
         subtitle_parts.append(pgettext("exams.export", "Dil: %(language)s") % {"language": language.upper()})
 
-    buffer = build_questions_docx(
-        title=pgettext("exams.export", "İmtahan sualları — %(title)s") % {"title": exam.title},
-        subtitle=" · ".join(subtitle_parts),
-        questions=payload,
-    )
+    try:
+        buffer = build_questions_docx(
+            title=pgettext("exams.export", "İmtahan sualları — %(title)s") % {"title": exam.title},
+            subtitle=" · ".join(subtitle_parts),
+            questions=payload,
+        )
+    except WordExportImageError as exc:
+        messages.error(request, str(exc))
+        return redirect("exams:test_question_bank", slug=exam.slug)
     response = HttpResponse(
         buffer.read(),
         content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",

@@ -299,7 +299,9 @@ class ExamScoreEntryServiceTest(TestCase):
             )
             self.assertEqual(entry.kind, ExamScoreEntryKind.INITIAL)
             self.assertTrue(entry.evidence.name.endswith(".jpg"))
-            self.assertIn("verq", entry.evidence.name)
+            # 2026-11-20: saxlama adı təsadüfidir (uzun/nöqtəli ad FileField limitini keçirdi).
+            self.assertNotIn("verq", entry.evidence.name)
+            self.assertTrue(entry.evidence.name.startswith(f"exam_score_entries/{self.org.pk}/"))
 
     def test_evidence_rejects_unsupported_type(self):
         with bypass_rls():

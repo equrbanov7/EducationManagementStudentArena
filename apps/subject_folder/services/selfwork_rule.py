@@ -23,7 +23,9 @@ def offering_active(offering, organization=None) -> bool:
         return False
     if organization is None:
         return academic_rules.selfwork_active_for_offering(offering)
-    return academic_rules.selfwork_active_for_period(getattr(offering, "period", None), organization)
+    return academic_rules.selfwork_active_for_period(
+        getattr(offering, "period", None), organization
+    ) or academic_rules.business_selfwork_offering(offering)
 
 
 def folder_active(folder, *, organization=None, offering=None, version=None) -> bool:
@@ -48,7 +50,7 @@ def active_offering_ids(offering_ids, organization=None) -> set:
     ids = {pk for pk in offering_ids if pk}
     if not ids or academic_rules.selfwork_enabled():
         return ids  # bayraq yanılıdır → köhnə və yeni bütün dövrlərdə sərbəst iş var
-    rows = lookups.offering_model().objects.filter(pk__in=ids).select_related("period", "organization")
+    rows = lookups.offering_model().objects.filter(pk__in=ids).select_related("period", "organization", "subject")
     return {row.pk for row in rows if offering_active(row, organization)}
 
 

@@ -97,13 +97,13 @@ def stash_docx_bundle(
     owner_id: object = None,
     organization_id: object = None,
 ) -> tuple[str, str]:
-    """DOCX-i oxu; şəkil varsa bundle yarat. ``(mətn, token)`` (şəkilsiz → token boş)."""
+    """DOCX mətnini qaytar, şəkillər və ya idxal xəbərdarlıqları varsa onları tokenlə saxla."""
 
     # PDF/şəkil yolundakı ölçü limiti burada da tətbiq olunur (45 MB, settings).
     _ensure_within_size_limit(uploaded_file, MAX_UPLOAD_BYTES)
     original = read_upload(uploaded_file)
     extract = read_docx(original)
-    if not extract.images:
+    if not extract.images and not extract.warnings:
         return extract.text, ""
 
     raw_name = str(getattr(uploaded_file, "name", "") or "").replace("\\", "/")
@@ -250,7 +250,7 @@ def _compose(images: Sequence[bytes], *, label: str | None = None) -> bytes:
     return buffer.getvalue()
 
 
-def _target_png(token: str, manifest: Mapping[str, object], indices: Sequence[int], *, label=None) -> bytes | None:
+def _target_image(token: str, manifest: Mapping[str, object], indices: Sequence[int], *, label=None) -> bytes | None:
     blobs = [blob for blob in (_load_image(token, manifest, index) for index in indices) if blob]
     if not blobs:
         return None
@@ -309,10 +309,11 @@ def attach_docx_media_batch(
                 continue
             stem_refs = binding.get("stem") or []
             if stem_refs and not question.image:
-                png = _target_png(token, manifest, stem_refs)
-                if png:
-                    name = f"docx_{token[:8]}_q{source_index + 1}_stem.png"
-                    question.image.save(name, ContentFile(png), save=False)
+                image = _target_image(token, manifest, stem_refs)
+                if image:
+                    suffix = "jpg" if image.startswith(b"\xff\xd8") else "png"
+                    name = f"docx_{token[:8]}_q{source_index + 1}_stem.{suffix}"
+                    question.image.save(name, ContentFile(image), save=False)
                     created.append((question.image.storage, question.image.name))
                     question.image_replaces_text = False
                     stem_updates.append(question)
@@ -325,12 +326,13 @@ def attach_docx_media_batch(
                 option = options.get(label)
                 if label == "stem" or option is None or option.image or not refs:
                     continue
-                png = _target_png(token, manifest, refs)
-                if not png:
+                image = _target_image(token, manifest, refs)
+                if not image:
                     continue
                 # Audit 2026-09-28 EX28-01: fayl adında mənbə hərfi saxlanmır.
-                name = f"docx_{token[:8]}_q{source_index + 1}_option_{uuid.uuid4().hex[:12]}.png"
-                option.image.save(name, ContentFile(png), save=False)
+                suffix = "jpg" if image.startswith(b"\xff\xd8") else "png"
+                name = f"docx_{token[:8]}_q{source_index + 1}_option_{uuid.uuid4().hex[:12]}.{suffix}"
+                option.image.save(name, ContentFile(image), save=False)
                 created.append((option.image.storage, option.image.name))
                 option.image_replaces_text = False
                 option_updates.append(option)
@@ -364,16 +366,16 @@ def render_docx_question_preview(
     if not binding:
         raise ValueError("source_index üçün bağlama yoxdur")
     parts: list[bytes] = []
-    stem = _target_png(token, manifest, binding.get("stem") or [])
+    stem = _target_image(token, manifest, binding.get("stem") or [])
     if stem:
         parts.append(stem)
     for label in sorted(key for key in binding if key != "stem"):
-        png = _target_png(token, manifest, binding[label], label=label)
+        png = _target_image(token, manifest, binding[label], label=label)
         if png:
             parts.append(png)
     if not parts:
         raise ValueError("Bağlanmış şəkil tapılmadı")
-    return parts[0] if len(parts) == 1 else _compose(parts)
+    return parts[0] if len(parts) == 1 and parts[0].startswith(b"\x89PNG") else _compose(parts)
 
 
 __all__ = [

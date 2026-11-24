@@ -148,7 +148,7 @@ def _week_progress(offering) -> dict:
     week_rows = journal_topics.syllabus_week_rows(offering)
     if not week_rows:
         return {"rows": [], "covered": 0, "total": 0}
-    lessons = list(offering.lessons.only("date", "topic", "syllabus_week"))
+    lessons = list(offering.lessons.only("offering_id", "date", "topic", "syllabus_week"))
     rows = [
         {
             "week": row["week"],

@@ -25,6 +25,18 @@ from apps.exams.services.visual_import_upload import prepare_question_upload
 from apps.exams.views.teacher.workbench_paste import paste_context
 
 
+def _bind_analysis(token, analysis, *, owner_id, organization_id):
+    from apps.exams.services.import_media import bind_import_manifest, stash_level_warnings
+
+    parsed = analysis["parsed"]
+    bind_import_manifest(token, parsed, owner_id=owner_id, organization_id=organization_id)
+    warnings = [
+        {"type": "import_source", "severity": "warning", "msg": message}
+        for message in stash_level_warnings(token, owner_id=owner_id, organization_id=organization_id)
+    ]
+    return finalize_analysis(parsed, analysis["test_level_warnings"] + warnings)
+
+
 def process_workbench_post(request, organization, form_state):
     """POST (preview|save) emalı: fayl yükləmə, analiz, manifest, seçim.
 
@@ -66,17 +78,8 @@ def process_workbench_post(request, organization, form_state):
     analysis = analyze_mcq_bulk(raw_text, single_answer=form_state.get("exam_kind") in SINGLE_ANSWER_EXAM_TYPES)
     parsed = analysis["parsed"]
     if math_token:
-        from apps.exams.services.import_media import bind_import_manifest
-
         try:
-            bind_import_manifest(
-                math_token,
-                parsed,
-                owner_id=request.user.pk,
-                organization_id=organization.pk,
-            )
-            # 2026-10-26: bağlama xəbərdarlıqları → meta (is_clean) + sayğaclar yenilənir.
-            analysis = finalize_analysis(parsed, analysis["test_level_warnings"])
+            analysis = _bind_analysis(math_token, analysis, owner_id=request.user.pk, organization_id=organization.pk)
         except (OSError, ValueError) as exc:
             messages.error(request, str(exc))
             action = "preview"
@@ -118,17 +121,8 @@ def initial_workbench_state(request, organization, *, raw_text, math_token, exam
     analysis = analyze_mcq_bulk(raw_text, single_answer=exam_kind in SINGLE_ANSWER_EXAM_TYPES)
     parsed = analysis["parsed"]
     if math_token:
-        from apps.exams.services.import_media import bind_import_manifest
-
         try:
-            bind_import_manifest(
-                math_token,
-                parsed,
-                owner_id=request.user.pk,
-                organization_id=organization.pk,
-            )
-            # 2026-10-26: bağlama xəbərdarlıqları → meta (is_clean) + sayğaclar yenilənir.
-            analysis = finalize_analysis(parsed, analysis["test_level_warnings"])
+            analysis = _bind_analysis(math_token, analysis, owner_id=request.user.pk, organization_id=organization.pk)
         except (OSError, ValueError):
             math_token = ""
     return {

@@ -14,7 +14,7 @@ from django.utils.translation import pgettext
 from apps.registrar.public import schedule_grid
 
 from ..constants import BAND_CODES, BUILTIN_POLICY, Band, PolicyLevel
-from ..sources.groups import load_groups, policy_rows, prune_groups, resolve_policy
+from ..sources.groups import load_groups, policy_rows, prune_groups
 
 _CTX = "timetable.policy"
 
@@ -186,8 +186,9 @@ def save_group(*, actor, organization, group, data, request=None):
     return row
 
 
-def level_rows(organization) -> list:
-    _by_group, by_level = policy_rows(organization)
+def level_rows(organization, *, by_level=None) -> list:
+    if by_level is None:
+        _by_group, by_level = policy_rows(organization)
     out = []
     for level, label in PolicyLevel.choices:
         row = by_level.get(level)
@@ -207,10 +208,10 @@ def level_rows(organization) -> list:
     return out
 
 
-def group_rows(actor, organization, period, groups) -> list:
+def group_rows(actor, organization, period, groups, *, policies=None) -> list:
     """Semestrdə açılışı olan qruplar (+ ailəsi) və onların effektiv siyasəti."""
     Offering = django_apps.get_model("registrar", "CourseOffering")
-    infos = load_groups(organization, groups)
+    infos = load_groups(organization, groups, policies=policies)
     active = {
         str(gid)
         for gid in Offering.objects.filter(
@@ -218,13 +219,12 @@ def group_rows(actor, organization, period, groups) -> list:
         ).values_list("group_id", flat=True)
     }
     infos = prune_groups(infos, active)
-    by_group, by_level = policy_rows(organization)
     band_labels = dict(Band.choices)
     degree_labels = dict(PolicyLevel.choices)
     form_labels = {"full_time": pgettext(_CTX, "əyani"), "part_time": pgettext(_CTX, "qiyabi")}
     out = []
     for info in sorted(infos.values(), key=lambda item: item.name):
-        policy = resolve_policy(info, by_group, by_level)
+        policy = info.policy
         out.append(
             {
                 "id": info.id,

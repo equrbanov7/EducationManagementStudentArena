@@ -159,16 +159,25 @@ def level_assessment_weights_view(rows) -> dict | None:
     """Xarici dil SƏVİYYƏ fənlərinin struktur zolağı (sahib 2026-11-08) — tələbənin belə fənni varsa, yoxsa ``None``.
 
     Tavanlar :mod:`core.language_level_rule`-dandır: davamiyyət 10 · praktiki məşğələ 10 · midterm 10 · imtahan 70."""
+    from core import language_business_rule as business
     from core import language_level_rule as levels
 
-    if not any(levels.is_level_name(getattr(row.get("subject"), "name", "")) for row in rows or ()):
+    names = [getattr(row.get("subject"), "name", "") for row in rows or ()]
+    names = [name for name in names if business.graded_level_name(name)]  # səviyyəsiz işgüzar kommunikasiya da
+    if not names:
         return None
+    # «Xarici dildə işgüzar kommunikasiya» (sahib 2026-11-22): davamiyyət 10 + praktiki / sərbəst iş 10 + midterm 10, 70.
+    business_names = [name for name in names if business.applies_to_name(name)]
     return {
         "attendance": levels.ATTENDANCE_MAX,
         "activity": levels.ACTIVITY_MAX,
         "midterm": levels.MIDTERM_MAX,
         "final": levels.EXAM_MAX,
         "total": levels.ENTRY_MAX + levels.EXAM_MAX,
+        "level": len(business_names) < len(names),
+        "business": bool(business_names),
+        "practical_selfwork": business.PRACTICAL_SELFWORK_MAX,
+        "business_total": business.ENTRY_MAX + business.EXAM_MAX,
     }
 
 

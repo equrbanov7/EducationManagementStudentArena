@@ -73,6 +73,7 @@ from apps.exams.services.open_attempts import user_has_open_exam_attempt  # noqa
 from apps.exams.services.question_bank_attach import (  # noqa: F401
     accessible_banks,
 )
+from apps.exams.services.result_answers import prefetch_score_answers
 from apps.exams.services.result_calculation import (  # noqa: F401
     calculate_test_attempt_result,
 )
@@ -95,6 +96,7 @@ from apps.exams.services.second_chance_revoke import (  # noqa: F401
     revoke_second_chance,
 )
 from apps.exams.services.start_intent import start_intent_token  # noqa: F401
+from apps.exams.services.student_list_batch import StudentExamListBatch
 from apps.exams.services.supervision import attach_attempt_interventions  # noqa: F401
 from apps.exams.services.teacher_dashboard import (  # noqa: F401
     build_teacher_exam_dashboard,
@@ -111,6 +113,7 @@ __all__ = [
     "ExamRoomComputer",
     "RoomAdminError",
     "StudentGroupForm",
+    "StudentExamListBatch",
     "add_computer",
     "MAX_EXTRA_ATTEMPTS",
     "SecondChanceError",
@@ -157,6 +160,7 @@ __all__ = [
     "sync_attempt_to_journal",
     "resolve_exam_attempt_review_window_seconds",
     "student_final_exam_context",
+    "prefetch_score_answers",
     "tenant_scoped_exams",
     "user_supervises_final_sessions",
     "without_disabled_practical_exams",

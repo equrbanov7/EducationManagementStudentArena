@@ -1,0 +1,123 @@
+{% load i18n static remote_journal_access_tags %}
+{% comment %}
+«Kənardan jurnal girişi» (sahib 2026-11-20: «sistem tənzimləmələri yerində olsun, ordan mən bunları əlavə edib çıxara
+bilim — profil accessini belə kiməsə verib çıxarmaq»). Universitet şəbəkəsindən kənarda jurnala girə bilən hesablar:
+server tənzimləməsindəkilər (mühit siyahısı — yalnız göstərilir) + RİM rəhbərinin buradan verdikləri.
+
+Menyu qapısı «Sistem tənzimləmələri» ilə EYNİDİR (rbac_sections.py); data qapısı `{% remote_journal_access_panel %}`
+tag-ında render vaxtı yenidən yoxlanır. Seçici server-backed `EMSSearchableSelect`-dir (native select yox); əməllər
+JSON POST-dur (URL və mətnlər data-atributlarda — `accounts/js/profile/remote_journal_access.js`). CSS / JS
+panelin İÇİNDƏDİR (AJAX-safe).
+{% endcomment %}
+{% if 'remote-journal-access' in allowed_sections %}
+<section class="profile-section-panel profile-section--remote-journal-access {% if active_section == 'remote-journal-access' %}is-active{% endif %}"
+         data-profile-section-panel="remote-journal-access"
+         data-source-url="{{ profile_base_url }}?section=remote-journal-access">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/remote_journal_access.css' %}?v=20261120-1">
+{% remote_journal_access_panel as rja %}
+{% if not rja.has_access %}
+    {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-lock" state_title=rja.access_denied_message %}
+{% else %}
+<div class="rja" data-rja-root
+     data-action-url="{{ rja.action_url }}"
+     data-msg-generic="{% trans 'Əməl alınmadı. Bir azdan yenidən cəhd edin.' context 'accounts.remote_journal_access' %}"
+     data-msg-grant-title="{% trans 'Kənardan jurnal girişi verilsin?' context 'accounts.remote_journal_access' %}"
+     data-msg-grant-body="{{ rja.grant_body }}"
+     data-msg-grant-ok="{% trans 'Əlavə et' context 'accounts.remote_journal_access' %}"
+     data-msg-revoke-title="{% trans 'Kənardan jurnal girişi geri alınsın?' context 'accounts.remote_journal_access' %}"
+     data-msg-revoke-body="{{ rja.revoke_body }}"
+     data-msg-revoke-ok="{% trans 'Geri al' context 'accounts.remote_journal_access' %}">
+    {% trans "Universitet şəbəkəsindən kənarda jurnala yalnız bu siyahıdakı hesablar girə bilər." context "accounts.remote_journal_access" as rja_sub %}
+    {% include "partials/ems_ui/_content_header.html" with header_subtitle=rja_sub %}
+
+    <form class="ems-card rja-add" data-rja-add-form novalidate>
+        <div class="ems-card__head">
+            <h2 class="ems-card__title">{% trans "Hesab əlavə et" context "accounts.remote_journal_access" %}</h2>
+        </div>
+        <div class="ems-card__body rja-add__body">
+            <div class="ems-field rja-add__person">
+                <label class="ems-field__label" for="rja-person-search">{% trans "Şəxs" context "accounts.remote_journal_access" %}</label>
+                <input type="hidden" name="user" value="" data-rja-user>
+                <div class="ems-ss rja-ms js-rja-person"
+                     data-rja-picker
+                     data-url="{{ rja.candidates_url }}"
+                     data-empty="{% trans 'Uyğun hesab tapılmadı.' context 'accounts.remote_journal_access' %}">
+                    <div class="ems-ss__chips rja-ms__chips">
+                        <input type="text" id="rja-person-search" class="ems-ss__search rja-ms__search"
+                               placeholder="{% trans 'Ad, soyad və ya istifadəçi adı üzrə axtar' context 'accounts.remote_journal_access' %}"
+                               autocomplete="off">
+                    </div>
+                    <div class="ems-ss__menu rja-ms__menu"></div>
+                </div>
+            </div>
+            <div class="ems-field rja-add__note">
+                <label class="ems-field__label" for="rja-note">{% trans "Qeyd" context "accounts.remote_journal_access" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "accounts.remote_journal_access" %}</span></label>
+                <input type="text" id="rja-note" name="note" class="ems-input" maxlength="255" data-rja-note
+                       placeholder="{% trans 'Məs.: kafedra müdiri, evdən jurnal yazır' context 'accounts.remote_journal_access' %}">
+            </div>
+            <div class="rja-add__actions">
+                <button type="submit" class="ems-btn ems-btn--primary" data-rja-add disabled>
+                    <i class="fas fa-plus" aria-hidden="true"></i> {% trans "Əlavə et" context "accounts.remote_journal_access" %}
+                </button>
+            </div>
+        </div>
+        <p class="ems-field__hint rja-add__hint">{% trans "Yalnız jurnal (və imtahan balının daxil edilməsi) kənardan açılır; hesabın rolu və digər icazələri dəyişmir. İnzibati (admin) hesablar üçün iki mərhələli təsdiq yenə tələb olunur." context "accounts.remote_journal_access" %}</p>
+    </form>
+
+    {% if rja.rows %}
+    <div class="ems-tablewrap">
+        <div class="ems-tablescroll">
+            <table class="ems-table ems-table--zebra rja-table">
+                <thead>
+                    <tr>
+                        <th scope="col">{% trans "Şəxs" context "accounts.remote_journal_access" %}</th>
+                        <th scope="col">{% trans "Vəzifə / bölmə" context "accounts.remote_journal_access" %}</th>
+                        <th scope="col">{% trans "Kim verib" context "accounts.remote_journal_access" %}</th>
+                        <th scope="col">{% trans "Qeyd" context "accounts.remote_journal_access" %}</th>
+                        <th scope="col"><span class="visually-hidden">{% trans "Əməl" context "accounts.remote_journal_access" %}</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rja.rows %}
+                    <tr>
+                        <th scope="row">
+                            <span class="rja-strong">{{ row.name }}</span>
+                            <span class="rja-muted">{{ row.username }}</span>
+                            {% if row.needs_2fa %}<span class="rja-badge">{% trans "İki mərhələli təsdiq" context "accounts.remote_journal_access" %}</span>{% endif %}
+                        </th>
+                        <td>{{ row.role|default:"—" }}</td>
+                        <td>
+                            {% if row.from_env %}
+                                <span class="rja-badge rja-badge--env">{% trans "Server tənzimləməsi" context "accounts.remote_journal_access" %}</span>
+                            {% else %}
+                                <span class="rja-strong">{{ row.granted_by|default:"—" }}</span>
+                                <span class="rja-muted">{{ row.granted_at|date:"d.m.Y H:i" }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="rja-note">{{ row.note|default:"—" }}</td>
+                        <td class="ems-table__nowrap">
+                            {% if row.from_env %}
+                                <span class="rja-muted">{% trans "Buradan dəyişmir" context "accounts.remote_journal_access" %}</span>
+                            {% else %}
+                                <button type="button" class="ems-btn ems-btn--sm ems-btn--danger" data-rja-revoke
+                                        data-grant="{{ row.grant_id }}" data-name="{{ row.name }}">
+                                    <i class="fas fa-user-xmark" aria-hidden="true"></i> {% trans "Geri al" context "accounts.remote_journal_access" %}
+                                </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+        {% trans "Siyahı boşdur" context "accounts.remote_journal_access" as st_title %}
+        {% trans "Kənardan jurnala heç kim girə bilmir. Yuxarıdan hesab əlavə edin." context "accounts.remote_journal_access" as st_body %}
+        {% include "partials/ems_ui/_empty.html" with state_kind="empty" state_icon="fa-network-wired" state_title=st_title state_body=st_body %}
+    {% endif %}
+</div>
+<script src="{% static 'accounts/js/profile/remote_journal_access.js' %}?v=20261120-1" defer></script>
+{% endif %}
+</section>
+{% endif %}

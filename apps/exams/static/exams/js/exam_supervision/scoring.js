@@ -222,6 +222,12 @@ Object.assign(ExamSupervision, {
         },
 
         _onGracePeriodExpired: function () {
+            // 2026-11-20: bağlantı kəsilibsə sayğac pozuntu yazmır — xəbərdarlıq «bağlantı yoxdur» olur.
+            if (this._isNetworkExempt && this._isNetworkExempt()) {
+                this._noteNetworkEpisode("fsExit");
+                if (this._netDown) this._showOfflineWarning();
+                return;
+            }
             this._logEvent("grace_period_expired", {
                 reason: "fullscreen_not_restored",
                 fullscreen_active: this._isFullscreenActive()
@@ -234,21 +240,29 @@ Object.assign(ExamSupervision, {
             }
         },
 
+        // 2026-11-20: sayğac və kilid SERVERİNDİR. Əvvəl brauzer öz sayğacı limitə çatanda səhifəni ÖZÜ
+        // kilidləyirdi — server heç nə yazmamış olsa belə (bağlantı yox idi; eyni hərəkətin təkrarı
+        // serverdə sayılmır; «şübhəli işarələ» və sınaq rejimində server ümumiyyətlə kilidləmir) — və
+        // status sorğusu «active» desə də kilid ekranı açılmırdı. İndi burada yalnız nişan yenilənir;
+        // dəqiq say, xəbərdarlıq həddi və kilid `_logEvent` cavabından gəlir (`_applyServerViolations`).
         _incrementViolation: function () {
+            if (this._isNetworkExempt && this._isNetworkExempt()) return;
             this.violationCount++;
             this._updateBadge();
+        },
 
+        _applyServerViolations: function (count, max) {
+            if (count === undefined || count === null) return;
+            this.violationCount = parseInt(count, 10) || 0;
+            if (max) this.maxViolations = max;
+            this._updateBadge();
             // Show attention-grabbing warning at 75% threshold
-            if (!this._thresholdWarned && this.maxViolations > 0) {
+            if (!this._thresholdWarned && this.isActive && this.maxViolations > 0) {
                 var threshold = Math.ceil(this.maxViolations * 0.75);
                 if (this.violationCount >= threshold && this.violationCount < this.maxViolations) {
                     this._thresholdWarned = true;
                     this._showThresholdWarning();
                 }
-            }
-
-            if (this.violationCount >= this.maxViolations) {
-                this._onLimitExceeded();
             }
         },
 });

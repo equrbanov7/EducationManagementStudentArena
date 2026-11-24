@@ -121,6 +121,8 @@ def build_exam_rooms_section(request, section, *, is_superadmin, active_organiza
     scoped_rooms = org_rooms.filter(exam_hall_scope_q()) if filters["scope"] == "halls" else org_rooms
     # Korpus seçimləri görünüşdən asılı deyil — «Göstər» dəyişəndə seçilmiş korpus itmir.
     buildings = _buildings(org_rooms)
+    # Sahib 2026-11-23: dialoqda «Bina» sərbəst mətn deyil, seçimdir — korpus xəritəsi + reyestrdəki binalar.
+    section["room_building_options"] = _room_building_options(selected_org, buildings)
 
     # ── Siyahı: filtr → sıralama → səhifə ─────────────────────────────────
     queryset = scoped_rooms.annotate(computer_registered=Count("computers", distinct=True))
@@ -262,6 +264,15 @@ def _natural_key(value):
 def _buildings(org_rooms):
     values = {b for b in org_rooms.exclude(building="").order_by().values_list("building", flat=True) if b}
     return sorted(values, key=_natural_key)
+
+
+def _room_building_options(organization, buildings):
+    """Dialoqun «Bina» seçimləri: ``Organization.settings["campuses"]`` korpusları + reyestrdə yazılmış binalar."""
+    from apps.registrar.public import schedule_rooms
+
+    names = {entry["building"] for entry in schedule_rooms.campus.campus_entries(organization)}
+    names.update(buildings)
+    return sorted(names, key=_natural_key)
 
 
 def _group_totals(queryset):

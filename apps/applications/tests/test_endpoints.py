@@ -8,7 +8,9 @@ import zipfile
 from datetime import timedelta
 
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import connection
 from django.test import Client
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
 
@@ -479,3 +481,44 @@ def test_assign_with_an_invalid_assignee_is_a_json_error_not_a_500(world, applic
         response = client.post(url, {"action": "assign", "assignee": bad, "text": "Təyinat sınağı üçün qeyd."})
         assert response.status_code < 500, bad
         assert response["Content-Type"].startswith("application/json"), bad
+
+
+def test_watcher_timeline_queries_stay_constant_as_replies_grow(application, world):
+    actor = world["coordinator"]
+    org = world["organization"]
+    workflow.mark_seen(application=application, user=actor)
+    workflow.forward(
+        application=application, user=actor, target_unit=world["units"]["rim"], note="RİM baxsın.", keep_watching=True
+    )
+    client = client_for(actor, org)
+    url = reverse("applications:detail", args=[application.pk])
+
+    def fetch():
+        with CaptureQueriesContext(connection) as queries:
+            response = client.get(url)
+        assert response.status_code == 200
+        return body(response)["application"]["events"], len(queries)
+
+    def comments(count):
+        return ApplicationEvent.objects.bulk_create(
+            [
+                ApplicationEvent(
+                    organization=org,
+                    application=application,
+                    kind=EventKind.COMMENT,
+                    actor=world["student"],
+                    text=f"Qeyd {i}",
+                )
+                for i in range(count)
+            ]
+        )
+
+    comments(1)
+    fetch()
+    _, small = fetch()
+    added = comments(24)
+    events, large = fetch()
+    flags = {row["id"]: row["can_moderate"] for row in events}
+    assert large <= small
+    assert all(flags[str(event.pk)] is False for event in added)
+    assert any(row["kind"] == EventKind.FORWARDED and row["can_moderate"] for row in events)

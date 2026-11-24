@@ -21,6 +21,13 @@ Sahib 2026-11-17 — fərdi əlavə vaxt: nəzarətçi texniki problemə görə 
 (``ExamAttempt.extra_time_seconds``, bax ``services/attempt_time_extension.py``). Əlavə vaxt hesablanmış
 deadline-ın ÜSTÜNƏ gəlir (``end_datetime`` kəsimindən SONRA da) — yalnız həmin cəhdin vaxtı uzanır.
 Bütün yollar (taymer, lazy bağlanma, sweep, POST kilidi) bu funksiyanı oxuyur.
+
+Sahib 2026-11-20 («dayandırdığım tələbəni bərpa edəndə olmur»): müəllimin «Dayandır»ı (əl ilə pauza,
+``supervision_manual_lock``) tələbənin günahı deyil — pauza vaxtı tələbədən getmir. Pauza davam edərkən
+cəhd vaxta görə BAĞLANMIR (əvvəl 60 s-lik sweep pauzadakı cəhdi deadline-da «expired» edirdi və
+«Bərpa et» artıq «İmtahan bitib» deyirdi); bərpada pauza müddəti əlavə vaxt kimi qaytarılır
+(``services/supervision/actions.py``). Unudulmuş pauza sonsuz açıq qalmasın deyə tavan var:
+deadline + ``MANUAL_PAUSE_MAX_SECONDS``.
 """
 
 from __future__ import annotations
@@ -29,6 +36,9 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.utils import timezone
+
+#: Əl ilə pauzanın vaxt saatını «dondura» biləcəyi maksimum (və bərpada qaytarılan pauza vaxtının tavanı).
+MANUAL_PAUSE_MAX_SECONDS = 2 * 60 * 60
 
 
 def submit_grace() -> timedelta:
@@ -71,6 +81,29 @@ def attempt_deadline_at(attempt):
     return deadline + extra_time(attempt)
 
 
+def manual_pause_active(attempt) -> bool:
+    """Cəhd hazırda müəllimin əl ilə pauzasındadırmı (nəzarət funksiyası açıq olduqda)."""
+    from apps.exams.features import exam_supervision_enabled
+
+    return bool(
+        getattr(attempt, "supervision_manual_lock", False)
+        and getattr(attempt, "supervision_status", "") == "locked"
+        and exam_supervision_enabled()
+    )
+
+
+def _pause_allowance(attempt) -> timedelta:
+    return timedelta(seconds=MANUAL_PAUSE_MAX_SECONDS) if manual_pause_active(attempt) else timedelta(0)
+
+
+def time_limit_reached(attempt, *, at_time) -> bool:
+    """``at_time`` anında cəhdin vaxtı bitibmi — əl ilə pauzada deadline tavan qədər «donur»."""
+    deadline = attempt.deadline_at
+    if deadline is None:
+        return False
+    return at_time >= deadline + _pause_allowance(attempt)
+
+
 def write_window_closed(attempt, *, at_time) -> bool:
     """``at_time`` anında cəhdə yazı pəncərəsi bağlıdırmı.
 
@@ -79,14 +112,18 @@ def write_window_closed(attempt, *, at_time) -> bool:
     ilə verir (``lazy_expiry_cutoff``)."""
     deadline = attempt.deadline_at
     if deadline is not None:
-        return at_time >= deadline
-    return _window_end_applies(attempt) and at_time > attempt.exam.end_datetime + extra_time(attempt)
+        return at_time >= deadline + _pause_allowance(attempt)
+    end = getattr(attempt.exam, "end_datetime", None)
+    return _window_end_applies(attempt) and at_time > end + extra_time(attempt) + _pause_allowance(attempt)
 
 
 __all__ = [
+    "MANUAL_PAUSE_MAX_SECONDS",
     "attempt_deadline_at",
     "extra_time",
     "lazy_expiry_cutoff",
+    "manual_pause_active",
     "submit_grace",
+    "time_limit_reached",
     "write_window_closed",
 ]

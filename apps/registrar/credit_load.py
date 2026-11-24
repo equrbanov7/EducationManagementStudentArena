@@ -123,6 +123,7 @@ def credit_load(student, period, *, organization=None, record=None) -> dict:
     enrollments = list(
         subgroup_evidence.annotate_documented(Enrollment.objects)
         .filter(organization_id=organization_id, student=student, offering__period=period, status__in=LOAD_STATUSES)
+        .filter(offering__is_active=True)  # bağlanmış jurnal kredit yükünə düşmür (2026-11-25)
         .select_related("offering__subject", "offering__group")
         .order_by("offering__subject__code")
     )

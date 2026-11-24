@@ -237,7 +237,9 @@ def _interim_notice(spec, data_rows) -> str:
 
     if not getattr(spec, "is_midterm", False):
         return spec.description
-    level = [levels.is_level_name(row.get("subject_name")) for row in data_rows]
+    from core.language_business_rule import graded_level_name  # səviyyəsiz işgüzar kommunikasiya da (2026-11-22)
+
+    level = [graded_level_name(row.get("subject_name")) for row in data_rows]
     if level and all(level):
         return pgettext("registrar.interim", "Midterm — aralıq imtahan (0–%(max)s bal)") % {"max": levels.MIDTERM_MAX}
     if any(level):

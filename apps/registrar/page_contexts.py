@@ -11,6 +11,7 @@ Performans: hər kontekst yalnız aktiv bölmə üçün qurulur (lazy, stage4 ga
 from __future__ import annotations
 
 from django.apps import apps as django_apps
+from django.core.paginator import Paginator
 from django.urls import reverse
 from django.utils import timezone
 
@@ -225,9 +226,7 @@ def journal_list_context(user, request=None) -> dict:
     # QUERYSET üzərində gedir (Paginator siyahı DEYİL, queryset alır) — yalnız
     # görünən 20 sətir DB-dən LIMIT/OFFSET ilə gəlir. Filtr querystring-i
     # qorunur (page istisna) ki, keçidlər filtri saxlasın.
-    from django.core.paginator import Paginator
-
-    from . import joint_journal_list
+    from . import joint_journal_list, journal_group_reach
 
     if not is_broad and teaching_view == "current":
         qs = joint_journal_list.project(qs, organization=organization, user=user, selected_kind=selected_kind)
@@ -261,6 +260,7 @@ def journal_list_context(user, request=None) -> dict:
     attach_labels(page_offerings, within=base_qs)
     jls.attach(page_offerings, occurrences)
     joint_journal_list.attach(page_offerings, user=user)
+    journal_group_reach.attach(page_offerings, user=user, organization=organization)  # sahib 2026-11-22
     querystring = ""
     if request is not None:
         params = request.GET.copy()

@@ -88,6 +88,8 @@
 #       artıq paylanmış istifadəçi adları — parol yox). Parol YALNIZ siyahıda olmayan VƏ aktivləşməmiş hesablara;
 #       hesabat və yeni parollar şifrəli artifaktdadır, loga yalnız saylar düşür. `student-known-…` tag-ı (asset
 #       sətirləri `username<TAB>parol`) → OXUYAN tələbələr; siyahıdakı parol hash ilə yoxlanılır, uyğun deyilsə yenisi.
+#       `target-users-…` tag-ı (sahib 2026-11-20; asset sətirləri = istifadəçi id-si / adı) → YALNIZ həmin hesablar,
+#       eyni qayda: parol yalnız aktivləşməmiş aktiv hesaba; `task_chair` / `teacher` / `batch` boş qalır.
 #   purge_trial_exam — real olmayan SINAQ imtahanı (sahib 2026-10-21: «233IT ing üçün Cloud-dan sınaq midterm») hamıdan
 #       silir: `teacher` = imtahanın slug-ı (DƏQİQ, məs. cloud-computing-51K75E), `task_chair` = imtahanın adı (BƏRABƏR
 #       olmalıdır — təhlükəsizlik). Cəhdlər + cavablar, apellyasiyalar (+ qərar/sənəd), bilet/PIN, zal pozuntuları,
@@ -252,6 +254,9 @@
 #       fənnin jurnalında olmayan tələbə səbəbə görə sayılır (yerləşdirmə: merge_duplicate_subjects_20261111
 #       batch=takers). Qeydiyyat yaradılmır; defolt dry-run; bildiriş yoxdur.
 #       Loga YALNIZ «exam_results:» sətirləri (saylar, imtahan id-si).
+#   audit_language_business_grading_20261122 — sahib 2026-11-22: «Xarici dildə işgüzar kommunikasiya -1/-2/-3»
+#       (sərbəst iş 10 + davamiyyət 10 + midterm 10, final 70) — profilə düşən açılışlar və köhnə tavanla yazılmış
+#       (midterm > 10, final > 70) balların SAYI. YALNIZ OXU (apply rədd olunur); loga YALNIZ «language_business:» saylar.
 #   annul_removed_exam_results_20261116 — sahib 2026-11-16: imtahandan UZAQLAŞDIRILMIŞ tələbənin rəsmi nəticəsi
 #       jurnalda 0 olsun (texniki dayandırma yox); canlı körpü ilə eyni yol, bildiriş yoxdur. Defolt dry-run;
 #       loga YALNIZ «annul_removed:» sətirləri (saylar).
@@ -384,9 +389,24 @@
 #       MR-000550: 236 YDK «Ümumi xarici dil» dosyesi (637be7e0) köhnə VoIP fənnindən jurnalın fənninə. Sabit id-lər,
 #       gözlənilən vəziyyət yoxlanır. `batch` boş — düzəliş (apply `batch=sylink-…` çap edir); `batch` = sylink-… — geri.
 #       Loga YALNIZ saylar.
+#   fix_syllabus_chairs_20261123 — MR-000681: cari semestr sillabusunun kafedrası jurnalın dərs yükü kafedrasına (yük
+#       sətri / fənnin kafedrası TAM BİR olanda). `batch` boş — düzəliş (apply `batch=sychair-…` çap edir); `batch` =
+#       sychair-… — geri. Loga YALNIZ saylar.
+#   fix_syllabus_author_20261123 — MR-000647: Nərmin Əsədzadənin 2033 qiyabi «İnkişaf və yaş psixologiyası» dosyesinin
+#       (4cca130d) müəllifi köhnə sistemdən qalıb → jurnalın müəllimi. Sabit id, gözlənilən vəziyyət yoxlanır. `batch` boş —
+#       düzəliş (apply `batch=syauth-…` çap edir); `batch` = syauth-… — geri. Loga YALNIZ saylar.
 #   remove_colloquium_note_20261118 — MR-000537: Səkinə Abasovanın iki köçürülmüş sillabusunun (a4694393, 9a9da58b)
 #       `assess.note` mətnindən «colloquium» sözü olan cümlələr silinir (köhnə bal qaydası). `batch` boş — sil (apply
 #       `batch=colloq-…` çap edir); `batch` = colloq-… — geri. Loga YALNIZ saylar.
+#   create_quiz_test_accounts_20261120 — sahib 2026-11-20: quiz üçün 30 MÜVƏQQƏTİ test tələbə hesabı (testuser1 …
+#       testuser30, parol koddadır — sahibin istəyi), hamısı yeni kök «TestQrup» qrupunda (arxiv test proqramı, enrolled
+#       qeyd); ilk-giriş / OTP / profil tamamlama qapısı yoxdur. İdempotent (parol + blok yenilənir). `batch` boş —
+#       yarat (apply `batch=quiztest-…` çap edir); `batch=undo` — bu əmrin yaratdıqlarını sil (apply=true +
+#       confirm=APPLY; apply=false — önizləmə). Loga YALNIZ saylar (`quiz_test:`), parol çap olunmur.
+#   fix_seminar_week_rows_20261124 — sahib 2026-11-24: həftəlik planda seminar (və ya lab) saatı mühazirə kimi yazılıb
+#       (plan 30/15, sətirlərdə 45 mühazirə + 0 seminar; son sətirlər məhz 15 saat) — quyruq sətirləri seminara keçir.
+#       Mövzu/status/təsdiq toxunulmur. `batch` boş — düzəliş (apply `batch=semwk-…` çap edir); `batch` = semwk-… —
+#       geri. Loga saylar + versiya uuid-ləri (`seminar_weeks_ids:`), şəxs adı yoxdur.
 #   fill_empty_syllabus_weeks_20261119 — sahib 2026-11-19: bütün cari jurnallar üzrə həll olunan dosyenin həftəlik planı
 #       boşdursa (öz / semestr / baza dosyesi) jurnalın göstərdiyi ehtiyat mənbə + jurnalın saatı ilə doldurulur; mövzulu
 #       amma plan saatsız versiyaya yalnız saat yazılır; paylaşılan / qarışıq saat / qarışıq müəllim — yalnız sayılır.
@@ -399,6 +419,27 @@
 #   copy_share_marks_20261118 — MR-000504: 434 R paralel yarım qrupun 5 köhnə dərsində Günayın 9 tələbəsinin xanaları
 #       (ana jurnalın düşürülmüş qeydiyyatlarından) onun 434 R-2 jurnalına; hədəfdə dolu xanaya toxunulmur, mənbə qalır.
 #       `batch` boş — köçürmə (apply `batch=shmarks-…` çap edir); `batch` = shmarks-… — geri. Loga YALNIZ saylar.
+#   fix_journal_share_students_20261120 — MR-000607: 235 EKO «Bitki ekologiyası» seminarçısının (müəllim 8313) payına
+#       jurnalda oxuyan, amma pay siyahısında olmayan 3 tələbə (sabit id-lər, açılış/müəllim/qeydiyyat yoxlanır).
+#       `batch` boş — əlavə (apply `batch=shstud-…` çap edir); `batch` = shstud-… — geri. Loga YALNIZ saylar.
+#   remove_share_students_20261123 — MR-000686/687: 935 BM «İxtisasyönümlü xarici dil-2» jurnalında iki müəllimin
+#       payında olan 2 tələbə (Musa → yalnız Günay, Mədinə → yalnız Aytac); sabit id-lər, tələbə paysız qalmır.
+#       `batch` boş — çıxar (apply `batch=shrem-…` çap edir); `batch` = shrem-… — geri. Loga YALNIZ saylar.
+#   unlink_qiyabi_carry_20261123 — MR-000675: qiyabi 2536 MRK-nın cari jurnallarında 536 MRK (əyani) jurnalından gələn
+#       «əvvəlki jurnal» köçürməsi ayrılır (sələfin superseded_by boşalır, xanalar qalır, q/b sayğacı yenilənir).
+#       `batch` boş — ayır (apply `batch=cunlink-…` çap edir); `batch` = cunlink-… — geri. Loga YALNIZ saylar.
+#   convert_intensive_to_group_20261123 — sahib 2026-11-23: 2033 «Psixogenetika» intensiv deyil, qrupun öz fənnidir —
+#       açılış yerində qrup açılışına (2033), yük sətri adi sətrə çevrilir; 3 tələbə, müəllim, saat qalır.
+#       `batch` boş — çevir (apply `batch=intgrp-…` çap edir); `batch` = intgrp-… — geri. Loga YALNIZ saylar.
+#   copy_moved_student_marks_20261123 — MR-000710: Uluxanova Tahirə 505/6 G «Ali məktəb pedaqogikası»-ndan MB jurnalına
+#       keçdi; G-dəki xanalar (eyni tarix + növ) və Midterm balı MB-yə kopyalanır (yalnız boş yerə). `batch` boş —
+#       kopyala (apply `batch=mvmarks-…` çap edir); `batch` = mvmarks-… — geri. Loga YALNIZ saylar.
+#   copy_dup_journal_midterms_20261124 — MR-000714: İM Midterm ballarını «Biologiyanın müasir problemləri və
+#       perspektivləri» boş təkrar jurnallarına yazıb; ballar əsl «Biologiyanın müasir problemləri» jurnalına (709/6 SBİO,
+#       505/6 MB, 505/6 G) yalnız boş yerə köçür. `batch` boş — köçür; `batch` = dupmid-… — geri. Loga YALNIZ saylar.
+#   fix_practical_lab_lessons_20261124 — sahib 2026-11-24: «Praktiki məşğələ» jurnallarında (planda lab yoxdur) əvvəl
+#       «Laboratoriya» kimi yazılmış dərslər praktiki dərsə çevrilir (alt qrupsuz, təkrar sütun yaratmadan). `batch` boş —
+#       çevir (apply `batch=praclab-…` çap edir); `batch` = praclab-… — geri. Loga YALNIZ saylar.
 #   repair_applications_20261116 — RİM müraciətləri 2026-11-16: MR-000393 (2132T seçmə fənni «Genderin tarixi» →
 #       «Sosial tarix» + yük sətrinin jurnal sinxronu, dərssiz köhnə jurnal passiv), MR-000395 (505/6 MB qeydləri
 #       «Malekulyar biologiya» proqramına + qəbul ilinin planı), MR-000396 (935 BM tələbəsi «İXD-2» jurnalından
@@ -591,6 +632,7 @@ on:
           - move_merged_fin_20261115
           - reinstate_part_time_graduates_20261115
           - audit_exam_results_20261116
+          - audit_language_business_grading_20261122
           - place_midterm_takers_20261116
           - annul_removed_exam_results_20261116
           - merge_psychology_duplicates_20261105
@@ -635,6 +677,7 @@ on:
           - move_politologiya_rows_20261109
           - move_psixologiya_rows_20261115
           - move_ekologiya_rows_20261117
+          - create_quiz_test_accounts_20261120
           - publish_reviewed_syllabi_20261110
           - fix_azdili_journals_20261110
           - apply_lab_splits_20261108
@@ -655,9 +698,19 @@ on:
           - copy_share_marks_20261118
           - fill_base_syllabus_weeks_20261118
           - fill_empty_syllabus_weeks_20261119
+          - fix_seminar_week_rows_20261124
           - remove_colloquium_note_20261118
           - fix_syllabus_links_20261119
+          - fix_syllabus_author_20261123
+          - fix_syllabus_chairs_20261123
           - resolve_duplicate_rows_20261119
+          - fix_journal_share_students_20261120
+          - remove_share_students_20261123
+          - unlink_qiyabi_carry_20261123
+          - convert_intensive_to_group_20261123
+          - copy_moved_student_marks_20261123
+          - copy_dup_journal_midterms_20261124
+          - fix_practical_lab_lessons_20261124
           - repair_applications_20261116
           - release_stale_slot_teachers
           - fix_offering_subject
@@ -863,7 +916,7 @@ jobs:
               match "$ROSTER_TAG" '^teaching-load-[0-9a-z-]+$' || { echo "roster_tag formatı: teaching-load-…" >&2; exit 1; }
               asset=forma1.docx.enc; target="/tmp/teaching_load_${GITHUB_RUN_ID}.docx" ;;
             issue_staff_credentials)
-              match "$ROSTER_TAG" '^(staff|student)-known-[0-9a-z-]+$' || { echo "roster_tag formatı: staff-known-… / student-known-…" >&2; exit 1; }
+              match "$ROSTER_TAG" '^((staff|student)-known|target-users)-[0-9a-z-]+$' || { echo "roster_tag formatı: staff-known-… / student-known-… / target-users-…" >&2; exit 1; }
               asset=usernames.txt.enc; target="/tmp/staff_known_${GITHUB_RUN_ID}.txt" ;;
             audit_staff_placement)
               match "$ROSTER_TAG" '^staff-placement-[0-9a-z-]+$' || { echo "roster_tag formatı: staff-placement-…" >&2; exit 1; }
@@ -1322,26 +1375,38 @@ jobs:
               # `student-known-…` tag-ı → tələbə rejimi (fakültə boşdursa bütün fakültələr; siyahıdakı parol yoxlanılır).
               students=0
               case "$ROSTER_TAG" in (student-known-*) students=1 ;; esac
-              test "$students" = 1 || test -n "$TASK_CHAIR" || test -n "$TEACHER" || { echo "task_chair (fakültə) və ya teacher (ad) verin" >&2; exit 2; }
-              args=(--org "$ORG" --report-out "/tmp/roster_details_${GITHUB_RUN_ID}.csv")
-              test "$students" = 0 || args+=(--audience students)
-              test -z "$TASK_CHAIR" || args+=(--faculty "$TASK_CHAIR")
-              test -z "$TEACHER" || args+=(--find-name "$TEACHER")
-              test -z "$ROSTER_TAG" || args+=(--known-usernames "/tmp/staff_known_${GITHUB_RUN_ID}.txt")
-              # Sahib 2026-10-26: `batch` = qəbul ili (məs. 2026 = 1-ci kurs) — yalnız tələbə rejimində.
-              if [ -n "$BATCH" ]; then
-                if [ "$students" != 1 ] || ! match "$BATCH" '^20[0-9]{2}$'; then
-                  echo "batch (qəbul ili) yalnız tələbə rejimində, 4 rəqəm" >&2
-                  exit 2
+              # Sahib 2026-11-20: `target-users-…` tag-ı → YALNIZ fayldakı hesablar (sətirdə id / istifadəçi adı).
+              if [ "${ROSTER_TAG#target-users-}" != "$ROSTER_TAG" ]; then
+                test -z "$TASK_CHAIR$TEACHER$BATCH" || { echo "target-users rejimində task_chair / teacher / batch boş olmalıdır" >&2; exit 2; }
+                args=(--org "$ORG" --report-out "/tmp/roster_details_${GITHUB_RUN_ID}.csv"
+                      --target-users "/tmp/staff_known_${GITHUB_RUN_ID}.txt")
+                if [ "$APPLY" = "true" ]; then
+                  args+=(--apply --credentials-out "/tmp/staff_creds_${GITHUB_RUN_ID}.csv"
+                         --reason "Dəqiq siyahı üzrə ilkin parol (aktivləşməmiş hesablar) — sahibin 2026-11-20 tapşırığı"
+                         --i-know-this-is-production)
                 fi
-                args+=(--admission-year "$BATCH")
-              fi
-              if [ "$APPLY" = "true" ]; then
-                test "$students" = 1 || test -n "$TASK_CHAIR" || { echo "apply üçün task_chair (fakültə) məcburidir" >&2; exit 2; }
-                test -n "$ROSTER_TAG" || { echo "apply üçün roster_tag (staff-known-…) məcburidir" >&2; exit 2; }
-                args+=(--apply --credentials-out "/tmp/staff_creds_${GITHUB_RUN_ID}.csv"
-                       --reason "Fakültə üzrə ilkin parol siyahısının tamamlanması — sahibin 2026-10-19 tapşırığı"
-                       --i-know-this-is-production)
+              else
+                test "$students" = 1 || test -n "$TASK_CHAIR" || test -n "$TEACHER" || { echo "task_chair (fakültə) və ya teacher (ad) verin" >&2; exit 2; }
+                args=(--org "$ORG" --report-out "/tmp/roster_details_${GITHUB_RUN_ID}.csv")
+                test "$students" = 0 || args+=(--audience students)
+                test -z "$TASK_CHAIR" || args+=(--faculty "$TASK_CHAIR")
+                test -z "$TEACHER" || args+=(--find-name "$TEACHER")
+                test -z "$ROSTER_TAG" || args+=(--known-usernames "/tmp/staff_known_${GITHUB_RUN_ID}.txt")
+                # Sahib 2026-10-26: `batch` = qəbul ili (məs. 2026 = 1-ci kurs) — yalnız tələbə rejimində.
+                if [ -n "$BATCH" ]; then
+                  if [ "$students" != 1 ] || ! match "$BATCH" '^20[0-9]{2}$'; then
+                    echo "batch (qəbul ili) yalnız tələbə rejimində, 4 rəqəm" >&2
+                    exit 2
+                  fi
+                  args+=(--admission-year "$BATCH")
+                fi
+                if [ "$APPLY" = "true" ]; then
+                  test "$students" = 1 || test -n "$TASK_CHAIR" || { echo "apply üçün task_chair (fakültə) məcburidir" >&2; exit 2; }
+                  test -n "$ROSTER_TAG" || { echo "apply üçün roster_tag (staff-known-…) məcburidir" >&2; exit 2; }
+                  args+=(--apply --credentials-out "/tmp/staff_creds_${GITHUB_RUN_ID}.csv"
+                         --reason "Fakültə üzrə ilkin parol siyahısının tamamlanması — sahibin 2026-10-19 tapşırığı"
+                         --i-know-this-is-production)
+                fi
               fi
               custom_apply=1
               ;;
@@ -1816,6 +1881,11 @@ jobs:
               # create_missing=true → jurnalsız halların şəxssiz izahı (fənn kodu + qrup adı, --detail).
               test "$CREATE_MISSING" != "true" || args+=(--detail)
               ;;
+            audit_language_business_grading_20261122)
+              # Sahib 2026-11-22: işgüzar kommunikasiya profili — açılışlar və yeni tavandan böyük balların sayı (yalnız oxu).
+              test "$APPLY" != "true" || { echo "yalnız oxu əmridir — apply=false ilə işə salın" >&2; exit 2; }
+              args=(--org "$ORG")
+              ;;
             annul_removed_exam_results_20261116)
               # Sahib 2026-11-16: uzaqlaşdırılmış tələbənin nəticəsi jurnalda 0 (saylar; apply=true + confirm=APPLY yazır).
               args=(--org "$ORG")
@@ -1894,6 +1964,18 @@ jobs:
             move_ekologiya_rows_20261117)
               # MR-000475 (2026-11-17): ekologiya fənləri Yer kadastrı tapşırığından Ekologiya kafedrasının tapşırığına
               # (id-lər və qaydalar koddadır). batch=undo — köçürməni geri qaytarır (apply=true + confirm=APPLY).
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [ "$BATCH" = "undo" ]; then
+                args+=(--undo)
+              elif [ -n "$BATCH" ]; then
+                echo "batch yalnız 'undo' ola bilər" >&2; exit 2
+              fi
+              ;;
+            create_quiz_test_accounts_20261120)
+              # Sahib 2026-11-20: quiz üçün 30 müvəqqəti test hesabı (testuser1..30, TestQrup; sabitlər koddadır).
+              # batch boş — yarat / yenilə; batch=undo — bu əmrin yaratdıqlarını sil (apply=true + confirm=APPLY).
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor")
@@ -2048,6 +2130,9 @@ jobs:
               if [ "$BATCH" = "undo" ]; then
                 test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }
                 args+=(--undo)
+              elif [[ "$BATCH" =~ ^undo:[0-9]+(-[0-9]+)*$ ]]; then
+                # 2026-11-24: bərpa olunmuş tələbə(lər) — yalnız bu hesab id-lərinin dondurulması geri qaytarılır.
+                args+=(--undo --only "${BATCH#undo:}")
               elif [ "$BATCH" = "skipped" ]; then
                 args+=(--show-skipped)
               elif [ -n "$BATCH" ]; then
@@ -2246,6 +2331,96 @@ jobs:
                 args+=(--undo "--batch=$BATCH")
               fi
               ;;
+            fix_journal_share_students_20261120)
+              # MR-000607: 235 EKO seminarçısının payına çatışmayan 3 tələbə (sabit id-lər). batch boş — əlavə; shstud-… — geri.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^shstud-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || { echo "batch = boş və ya shstud-…" >&2; exit 2; }
+                args+=(--undo "--batch=$BATCH")
+              fi
+              ;;
+            fix_practical_lab_lessons_20261124)
+              # Sahib 2026-11-24: praktiki jurnallarda lab kimi yazılmış dərslər → praktiki. batch boş — çevir; praclab-… — geri.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^praclab-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || { echo "batch = boş və ya praclab-…" >&2; exit 2; }
+                args+=(--undo "--batch=$BATCH")
+              fi
+              ;;
+            copy_dup_journal_midterms_20261124)
+              # MR-000714: təkrar jurnaldakı Midterm → əsl jurnal (sabit cütlər). batch boş — köçür; dupmid-… — geri.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^dupmid-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || { echo "batch = boş və ya dupmid-…" >&2; exit 2; }
+                args+=(--undo "--batch=$BATCH")
+              fi
+              ;;
+            copy_moved_student_marks_20261123)
+              # MR-000710: Tahirə G → MB xanaları + Midterm (sabit id-lər). batch boş — kopyala; mvmarks-… — geri.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^mvmarks-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || { echo "batch = boş və ya mvmarks-…" >&2; exit 2; }
+                args+=(--undo "--batch=$BATCH")
+              fi
+              ;;
+            convert_intensive_to_group_20261123)
+              # Sahib 2026-11-23: 2033 Psixogenetika intensiv → qrup açılışı (sabit id-lər). batch boş — çevir; intgrp-… — geri.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^intgrp-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || { echo "batch = boş və ya intgrp-…" >&2; exit 2; }
+                args+=(--undo "--batch=$BATCH")
+              fi
+              ;;
+            unlink_qiyabi_carry_20261123)
+              # MR-000675: 2536 MRK qiyabi — 536 MRK əyani jurnalından gələn köçürmə ayrılır. batch boş — ayır; cunlink-… — geri.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^cunlink-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || { echo "batch = boş və ya cunlink-…" >&2; exit 2; }
+                args+=(--undo "--batch=$BATCH")
+              fi
+              ;;
+            remove_share_students_20261123)
+              # MR-000686/687: 935 BM iki payda olan 2 tələbə səhv paydan çıxır (sabit id-lər). batch boş — çıxar; shrem-… — geri.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^shrem-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || { echo "batch = boş və ya shrem-…" >&2; exit 2; }
+                args+=(--undo "--batch=$BATCH")
+              fi
+              ;;
+            fix_syllabus_author_20261123)
+              # MR-000647: qiyabi sillabusun müəllifi → jurnalın müəllimi (sabit id). batch boş — düzəlt; syauth-… — geri.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^syauth-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || { echo "batch = boş və ya syauth-…" >&2; exit 2; }
+                args+=(--undo "--batch=$BATCH")
+              fi
+              ;;
+            fix_syllabus_chairs_20261123)
+              # MR-000681: sillabusun kafedrası dərs yükünün kafedrasına. batch boş — düzəlt; sychair-… — geri.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^sychair-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || { echo "batch = boş və ya sychair-…" >&2; exit 2; }
+                args+=(--undo "--batch=$BATCH")
+              fi
+              ;;
             fix_syllabus_links_20261119)
               # MR-000562/550: sillabusun kafedra və fənn bağı (sabit id-lər). batch boş — düzəlt; sylink-… — geri.
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
@@ -2273,6 +2448,16 @@ jobs:
               args=(--org "$ORG" --actor "$actor")
               if [ -n "$BATCH" ]; then
                 match "$BATCH" '^emptywk-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || { echo "batch = boş və ya emptywk-…" >&2; exit 2; }
+                args+=(--undo "--batch=$BATCH")
+              fi
+              ;;
+            fix_seminar_week_rows_20261124)
+              # Sahib 2026-11-24: mühazirə kimi yazılmış seminar sətirləri seminara. batch boş — düzəliş; semwk-… — geri.
+              actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
+              echo "::add-mask::$actor"
+              args=(--org "$ORG" --actor "$actor")
+              if [ -n "$BATCH" ]; then
+                match "$BATCH" '^semwk-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$' || { echo "batch = boş və ya semwk-…" >&2; exit 2; }
                 args+=(--undo "--batch=$BATCH")
               fi
               ;;
@@ -2859,14 +3044,25 @@ jobs:
               exit "$status"
             fi
             rm -f "$RUNNER_TEMP/out.log"
-          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "clear_off_schedule_flags_20261114" ] || [ "$COMMAND" = "mark_off_schedule_lessons_20261116" ] || [ "$COMMAND" = "fix_legacy_hour_rows_20261117" ] || [ "$COMMAND" = "carry_intensive_lessons_20261116" ] || [ "$COMMAND" = "copy_share_marks_20261118" ] || [ "$COMMAND" = "fill_base_syllabus_weeks_20261118" ] || [ "$COMMAND" = "fill_empty_syllabus_weeks_20261119" ] || [ "$COMMAND" = "remove_colloquium_note_20261118" ] || [ "$COMMAND" = "fix_syllabus_links_20261119" ] || [ "$COMMAND" = "resolve_duplicate_rows_20261119" ] || [ "$COMMAND" = "repair_applications_20261116" ] || [ "$COMMAND" = "release_stale_slot_teachers" ] || [ "$COMMAND" = "fix_offering_subject" ] || [ "$COMMAND" = "repair_twins_20261105b" ] || [ "$COMMAND" = "repair_applications_20261105" ] || [ "$COMMAND" = "repair_applications_20261105c" ] || [ "$COMMAND" = "fix_ydk236_subject_20261106" ] || [ "$COMMAND" = "sync_student_group_journals" ] || [ "$COMMAND" = "rebuild_language_cohorts_20261106" ] || [ "$COMMAND" = "apply_lab_groups_20261106" ] || [ "$COMMAND" = "apply_first_year_splits_20261107" ] || [ "$COMMAND" = "restore_subgroup_parent_enrollments" ] || [ "$COMMAND" = "apply_seminar_groups" ] || [ "$COMMAND" = "bind_lab_lessons_20261108" ] || [ "$COMMAND" = "merge_duplicate_teacher" ] || [ "$COMMAND" = "move_merged_fin_20261115" ] || [ "$COMMAND" = "freeze_inactive_students_20261108" ] || [ "$COMMAND" = "merge_subgroup_journals_20261108" ] || [ "$COMMAND" = "fill_legacy_cells_20261108" ] || [ "$COMMAND" = "repair_applications_20261106" ] || [ "$COMMAND" = "repair_applications_20261107" ] || [ "$COMMAND" = "hide_college_journals_20261110" ] || [ "$COMMAND" = "restore_lesson_authors_20261113" ] || [ "$COMMAND" = "retire_uiux_syllabus_20261112" ] || [ "$COMMAND" = "retire_misattached_syllabus_20261116" ] || [ "$COMMAND" = "split_share_journal_20261112" ] || [ "$COMMAND" = "split_group_journal_20261112" ] || [ "$COMMAND" = "fill_empty_cells_20261110" ] || [ "$COMMAND" = "merge_duplicate_subjects_20261111" ] || [ "$COMMAND" = "repair_applications_20261107b" ] || [ "$COMMAND" = "fix_mexanika_lessons_20261108" ] || [ "$COMMAND" = "carry_approved_syllabi_20261108" ] || [ "$COMMAND" = "resolve_subgroup_families_20261108" ] || [ "$COMMAND" = "remove_pre_semester_lessons_20261108" ] || [ "$COMMAND" = "remove_pre_semester_lessons_20261114" ] || [ "$COMMAND" = "single_seminar_stream_20261108" ] || [ "$COMMAND" = "apply_lab_splits_20261108" ] || [ "$COMMAND" = "recompute_carried_absences_20261108" ] || [ "$COMMAND" = "link_patok_leads_20261108" ] || [ "$COMMAND" = "repair_legacy_identity_20261108" ] || [ "$COMMAND" = "add_legacy_guest_students_20261109" ] || [ "$COMMAND" = "split_shared_fin_identity_20261109" ] || [ "$COMMAND" = "move_politologiya_rows_20261109" ] || [ "$COMMAND" = "move_psixologiya_rows_20261115" ] || [ "$COMMAND" = "move_ekologiya_rows_20261117" ] || [ "$COMMAND" = "fix_azdili_journals_20261110" ] || [ "$COMMAND" = "publish_reviewed_syllabi_20261110" ] || [ "$COMMAND" = "restore_intensive_results_20261112" ] || [ "$COMMAND" = "recover_mr230_lessons" ]; then
+          elif [ "$COMMAND" = "relocate_twin_enrollment" ] || [ "$COMMAND" = "merge_twin_offerings" ] || [ "$COMMAND" = "fix_legacy_lesson_kinds" ] || [ "$COMMAND" = "fix_slot_week_parity" ] || [ "$COMMAND" = "set_practical_offerings" ] || [ "$COMMAND" = "clear_stale_off_schedule_flags" ] || [ "$COMMAND" = "clear_off_schedule_flags_20261114" ] || [ "$COMMAND" = "mark_off_schedule_lessons_20261116" ] || [ "$COMMAND" = "fix_legacy_hour_rows_20261117" ] || [ "$COMMAND" = "carry_intensive_lessons_20261116" ] || [ "$COMMAND" = "copy_share_marks_20261118" ] || [ "$COMMAND" = "fill_base_syllabus_weeks_20261118" ] || [ "$COMMAND" = "fill_empty_syllabus_weeks_20261119" ] || [ "$COMMAND" = "fix_seminar_week_rows_20261124" ] || [ "$COMMAND" = "remove_colloquium_note_20261118" ] || [ "$COMMAND" = "fix_syllabus_links_20261119" ] || [ "$COMMAND" = "fix_syllabus_author_20261123" ] || [ "$COMMAND" = "fix_syllabus_chairs_20261123" ] || [ "$COMMAND" = "resolve_duplicate_rows_20261119" ] || [ "$COMMAND" = "fix_journal_share_students_20261120" ] || [ "$COMMAND" = "remove_share_students_20261123" ] || [ "$COMMAND" = "unlink_qiyabi_carry_20261123" ] || [ "$COMMAND" = "convert_intensive_to_group_20261123" ] || [ "$COMMAND" = "copy_moved_student_marks_20261123" ] || [ "$COMMAND" = "copy_dup_journal_midterms_20261124" ] || [ "$COMMAND" = "fix_practical_lab_lessons_20261124" ] || [ "$COMMAND" = "repair_applications_20261116" ] || [ "$COMMAND" = "release_stale_slot_teachers" ] || [ "$COMMAND" = "fix_offering_subject" ] || [ "$COMMAND" = "repair_twins_20261105b" ] || [ "$COMMAND" = "repair_applications_20261105" ] || [ "$COMMAND" = "repair_applications_20261105c" ] || [ "$COMMAND" = "fix_ydk236_subject_20261106" ] || [ "$COMMAND" = "sync_student_group_journals" ] || [ "$COMMAND" = "rebuild_language_cohorts_20261106" ] || [ "$COMMAND" = "apply_lab_groups_20261106" ] || [ "$COMMAND" = "apply_first_year_splits_20261107" ] || [ "$COMMAND" = "restore_subgroup_parent_enrollments" ] || [ "$COMMAND" = "apply_seminar_groups" ] || [ "$COMMAND" = "bind_lab_lessons_20261108" ] || [ "$COMMAND" = "merge_duplicate_teacher" ] || [ "$COMMAND" = "move_merged_fin_20261115" ] || [ "$COMMAND" = "freeze_inactive_students_20261108" ] || [ "$COMMAND" = "merge_subgroup_journals_20261108" ] || [ "$COMMAND" = "fill_legacy_cells_20261108" ] || [ "$COMMAND" = "repair_applications_20261106" ] || [ "$COMMAND" = "repair_applications_20261107" ] || [ "$COMMAND" = "hide_college_journals_20261110" ] || [ "$COMMAND" = "restore_lesson_authors_20261113" ] || [ "$COMMAND" = "retire_uiux_syllabus_20261112" ] || [ "$COMMAND" = "retire_misattached_syllabus_20261116" ] || [ "$COMMAND" = "split_share_journal_20261112" ] || [ "$COMMAND" = "split_group_journal_20261112" ] || [ "$COMMAND" = "fill_empty_cells_20261110" ] || [ "$COMMAND" = "merge_duplicate_subjects_20261111" ] || [ "$COMMAND" = "repair_applications_20261107b" ] || [ "$COMMAND" = "fix_mexanika_lessons_20261108" ] || [ "$COMMAND" = "carry_approved_syllabi_20261108" ] || [ "$COMMAND" = "resolve_subgroup_families_20261108" ] || [ "$COMMAND" = "remove_pre_semester_lessons_20261108" ] || [ "$COMMAND" = "remove_pre_semester_lessons_20261114" ] || [ "$COMMAND" = "single_seminar_stream_20261108" ] || [ "$COMMAND" = "apply_lab_splits_20261108" ] || [ "$COMMAND" = "recompute_carried_absences_20261108" ] || [ "$COMMAND" = "link_patok_leads_20261108" ] || [ "$COMMAND" = "repair_legacy_identity_20261108" ] || [ "$COMMAND" = "add_legacy_guest_students_20261109" ] || [ "$COMMAND" = "split_shared_fin_identity_20261109" ] || [ "$COMMAND" = "move_politologiya_rows_20261109" ] || [ "$COMMAND" = "move_psixologiya_rows_20261115" ] || [ "$COMMAND" = "move_ekologiya_rows_20261117" ] || [ "$COMMAND" = "fix_azdili_journals_20261110" ] || [ "$COMMAND" = "publish_reviewed_syllabi_20261110" ] || [ "$COMMAND" = "restore_intensive_results_20261112" ] || [ "$COMMAND" = "recover_mr230_lessons" ]; then
             # Loga YALNIZ «twin_relocate: / twin_merge: / lesson_kinds: / slot_parity: / practical_flag: / off_schedule_flags: / slot_teachers: /
             # offering_subject_fix: açar=say …» sətirləri və rədd kodu.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
-            grep -E '^(twin_relocate|fin_move|twin_merge|lesson_kinds|slot_parity|practical_flag|off_schedule_flags|off_schedule_mark|legacy_hours|slot_teachers|subgroup_merge|legacy_cells|mexanika_lessons|teacher_merge|syllabus_carry|subgroup_resolve|pre_semester|carried_absences|patok_links|legacy_identity|legacy_guests|legacy_split|intensive_results|intensive_carry|share_marks|base_weeks|empty_weeks|empty_weeks_ids|colloquium_note|syllabus_links|dup_rows|apps16|task_rows_move|psix_rows_move|eko_rows_move|reviewed_publish|syllabus_retire|share_split|group_split|seminar_stream|inactive_students|lab_groups|offering_subject_fix): [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            grep -E '^(twin_relocate|fin_move|twin_merge|lesson_kinds|slot_parity|practical_flag|off_schedule_flags|off_schedule_mark|legacy_hours|slot_teachers|subgroup_merge|legacy_cells|mexanika_lessons|teacher_merge|syllabus_carry|subgroup_resolve|pre_semester|carried_absences|patok_links|legacy_identity|legacy_guests|legacy_split|intensive_results|intensive_carry|share_marks|share_students|share_remove|carry_unlink|intgrp|mvmarks|dupmid|praclab|base_weeks|empty_weeks|empty_weeks_ids|seminar_weeks|seminar_weeks_ids|colloquium_note|syllabus_links|syllabus_author|syllabus_chairs|dup_rows|apps16|task_rows_move|psix_rows_move|eko_rows_move|reviewed_publish|syllabus_retire|share_split|group_split|seminar_stream|inactive_students|lab_groups|offering_subject_fix): [a-z_]+=[0-9a-z_-]+( [a-z_]+=[0-9a-z_-]+)*$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "create_quiz_test_accounts_20261120" ]; then
+            # Loga YALNIZ «quiz_test:» sətirləri (saylar, rejim, paket id — parol / ad yoxdur) və rədd kodu.
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^quiz_test: [a-z_]+=[a-z0-9_-]+( [a-z_]+=[a-z0-9_-]+)*$' "$RUNNER_TEMP/out.log" | head -n 20 > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_0-9]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
               rm -f "$RUNNER_TEMP/out.log"
               exit "$status"
             fi
@@ -2875,6 +3071,17 @@ jobs:
             # Loga YALNIZ «annul_removed:» sətirləri (saylar — ad yoxdur) və rədd kodu.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^annul_removed: [a-z_]+=[a-z0-9_]+( [a-z_]+=[a-z0-9_]+)*$' "$RUNNER_TEMP/out.log" | head -n 100 > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_0-9]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "audit_language_business_grading_20261122" ]; then
+            # Loga YALNIZ «language_business:» saylar sətirləri (ad / FİN yoxdur) və rədd kodu.
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E '^language_business: [a-z_]+( [a-z_]+=[0-9]+)+$' "$RUNNER_TEMP/out.log" | head -n 40 > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_0-9]+' "$RUNNER_TEMP/out.log" | head -n 1 || true

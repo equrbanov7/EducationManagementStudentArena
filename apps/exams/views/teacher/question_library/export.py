@@ -5,9 +5,10 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import pgettext
+from django.views.decorators.cache import never_cache
 
 from apps.exams.services.access_policy import _ensure_teacher
-from apps.exams.services.question_bank_attach import accessible_banks
+from apps.exams.services.question_bank_attach import accessible_banks, bank_questions_queryset
 from core.tenancy import get_request_organization
 
 from ._shared import (
@@ -44,6 +45,7 @@ def question_bank_template_download(request, bank_id):
 
 
 @login_required
+@never_cache
 def question_bank_word_export(request, bank_id):
     """
     Bankdakı sualları Word (.docx) faylı kimi export edir.
@@ -55,7 +57,11 @@ def question_bank_word_export(request, bank_id):
     """
     from urllib.parse import quote
 
-    from apps.exams.services.question_word_export import bank_questions_payload, build_questions_docx
+    from apps.exams.services.question_word_export import (
+        WordExportImageError,
+        bank_questions_payload,
+        build_questions_docx,
+    )
 
     _ensure_teacher(request.user)
     organization = get_request_organization(request)
@@ -67,7 +73,8 @@ def question_bank_word_export(request, bank_id):
     from django.conf import settings as _settings
 
     threshold = getattr(_settings, "EXPORT_SYNC_MAX_ROWS", 500)
-    if bank.library_questions.count() > threshold:
+    candidates = bank_questions_queryset(bank, language=language).order_by()
+    if threshold < 0 or candidates[threshold : threshold + 1].exists():
         from apps.exams.views.teacher.extract_jobs import start_export_job
 
         return start_export_job(
@@ -90,11 +97,15 @@ def question_bank_word_export(request, bank_id):
     if language:
         subtitle_parts.append(pgettext("exams.export", "Dil: %(language)s") % {"language": language.upper()})
 
-    buffer = build_questions_docx(
-        title=pgettext("exams.export", "Sual bankı — %(name)s") % {"name": bank.name},
-        subtitle=" · ".join(subtitle_parts),
-        questions=payload,
-    )
+    try:
+        buffer = build_questions_docx(
+            title=pgettext("exams.export", "Sual bankı — %(name)s") % {"name": bank.name},
+            subtitle=" · ".join(subtitle_parts),
+            questions=payload,
+        )
+    except WordExportImageError as exc:
+        messages.error(request, str(exc))
+        return redirect("exams:question_bank_detail", bank_id=bank.pk)
     response = HttpResponse(
         buffer.read(),
         content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",

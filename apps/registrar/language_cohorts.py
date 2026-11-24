@@ -132,7 +132,9 @@ def authorized_cohorts(user, organization):
     """``can_manage`` ilə eyni qayda, toplu: əhatə BİR dəfə hesablanır (N×exists əvəzinə 1 sorğu)."""
     rows = list(
         LanguageLevelCohort.objects.filter(organization=organization)
-        .select_related("organization", "department", "group", "period", "offering__subject", "offering__instructor")
+        .select_related(
+            "organization", "department", "group", "period", "offering__subject", "offering__instructor__profile"
+        )
         .order_by("-period__start_date", "department__name", "name")
     )
     if not rows or not _active_actor(user):
@@ -164,19 +166,33 @@ def _active_actor(user):
     )
 
 
+def source_scope(user, offering):
+    return journal_scope(user, offering) if can_edit_journal(user, offering) else None
+
+
 def source_access(user, enrollment):
     """Course-scope access must include this student's row, not only the journal."""
-    return can_edit_journal(user, enrollment.offering) and journal_scope(user, enrollment.offering).allows_enrollment(
-        enrollment.pk
-    )
+    scope = source_scope(user, enrollment.offering)
+    return scope is not None and scope.allows_enrollment(enrollment.pk)
 
 
 def eligible_family_enrollments(*, cohort, student_id, lock=False):
+    return _family_enrollments(cohort, [student_id], lock=lock)
+
+
+def family_enrollments_by_student(cohort, student_ids):
+    grouped = {}
+    for row in _family_enrollments(cohort, student_ids):
+        grouped.setdefault(row.student_id, []).append(row)
+    return grouped
+
+
+def _family_enrollments(cohort, student_ids, *, lock=False):
     from .models import Enrollment
 
     rows = Enrollment.objects.filter(
         organization=cohort.organization,
-        student_id=student_id,
+        student_id__in=student_ids,
         offering__organization=cohort.organization,
         offering__period_id=cohort.period_id,
         status=Enrollment.Status.ENROLLED,

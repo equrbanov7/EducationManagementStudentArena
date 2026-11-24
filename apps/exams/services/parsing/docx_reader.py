@@ -30,7 +30,7 @@ from django.utils.translation import pgettext
 from PIL import Image, ImageOps, UnidentifiedImageError
 
 from apps.exams.services.parsing.docx_emphasis import mark_emphasized_options, paragraph_is_emphasized
-from apps.exams.services.parsing.omml import M_NS, W_NS, omml_to_latex
+from apps.exams.services.parsing.omml import M_NS, W_NS, escape_math_text, omml_to_latex
 from apps.exams.services.pdf_math import remap_symbol_pua
 from core.upload_security import validate_zip_archive
 
@@ -42,6 +42,16 @@ R_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
 V_NS = "urn:schemas-microsoft-com:vml"
 MC_NS = "http://schemas.openxmlformats.org/markup-compatibility/2006"
 WPS_NS = "http://schemas.microsoft.com/office/word/2010/wordprocessingShape"
+
+_CHART_TAGS = {
+    "{http://schemas.openxmlformats.org/drawingml/2006/chart}chart",
+    "{http://schemas.microsoft.com/office/drawing/2014/chartex}chart",
+}
+
+
+class _ChartWithoutPreview(ValueError):
+    """The chart needs Word's fallback picture or a visual PDF."""
+
 
 MAX_IMAGES = 200
 MAX_IMAGE_BYTES = 12 * 1024 * 1024
@@ -135,7 +145,26 @@ class _Walker:
             out.append(self._image_marker(blip.get(f"{{{R_NS}}}embed") or blip.get(f"{{{R_NS}}}link")))
         for imagedata in node.iter(f"{{{V_NS}}}imagedata"):
             out.append(self._image_marker(imagedata.get(f"{{{R_NS}}}id")))
-        return "".join(out)
+        markers = "".join(out)
+        if any(element.tag in _CHART_TAGS for element in node.iter()):
+            raise _ChartWithoutPreview(pgettext(_ERR, "docx_chart_needs_picture"))
+        return markers
+
+    def _alternate_text(self, node):
+        chart_error = None
+        for branch in node:
+            if branch.tag not in (f"{{{MC_NS}}}Choice", f"{{{MC_NS}}}Fallback"):
+                continue
+            try:
+                text = self._paragraph_text(branch)
+            except _ChartWithoutPreview as exc:
+                chart_error = exc
+                continue
+            if text.strip():
+                return text
+        if chart_error:
+            raise chart_error
+        return ""
 
     # -- düstur -----------------------------------------------------------
     def _formula(self, node, display: bool) -> str:
@@ -153,10 +182,17 @@ class _Walker:
     # -- mətn -------------------------------------------------------------
     def _run_text(self, run) -> str:
         parts: list[str] = []
+        align = run.find(f"{_w('rPr')}/{_w('vertAlign')}")
+        position = align.get(_w("val")) if align is not None else None
         for child in run:
             tag = child.tag
             if tag == _w("t"):
-                parts.append(child.text or "")
+                text = child.text or ""
+                if text.strip() and position in ("superscript", "subscript"):
+                    operator = "^" if position == "superscript" else "_"
+                    text = r"\({}" + operator + "{" + escape_math_text(text) + r"}\)"
+                    self.formula_count += 1
+                parts.append(text)
             elif tag == _w("tab"):
                 parts.append(" ")
             elif tag in (_w("br"), _w("cr")):
@@ -167,9 +203,7 @@ class _Walker:
                 parts.append(self._drawing_markers(child))
                 parts.append(self._textbox_lines(child))
             elif tag == f"{{{MC_NS}}}AlternateContent":
-                choice = child.find(f"{{{MC_NS}}}Choice")
-                parts.append(self._drawing_markers(choice if choice is not None else child))
-                parts.append(self._textbox_lines(choice if choice is not None else child))
+                parts.append(self._alternate_text(child))
             # w:delText, w:instrText, w:rPr və s. atılır.
         return "".join(parts)
 
@@ -191,6 +225,11 @@ class _Walker:
             tag = child.tag
             if tag == _w("r"):
                 parts.append(self._run_text(child))
+            elif tag == f"{{{MC_NS}}}AlternateContent":
+                parts.append(self._alternate_text(child))
+            elif tag in (_w("drawing"), _w("pict"), _w("object")):
+                parts.append(self._drawing_markers(child))
+                parts.append(self._textbox_lines(child))
             elif tag == _m("oMath"):
                 parts.append(self._formula(child, display=False))
             elif tag == _m("oMathPara"):
@@ -218,11 +257,7 @@ class _Walker:
             tag = child.tag
             if tag == _w("p"):
                 self._emit(self._paragraph_text(child), emphasized=paragraph_is_emphasized(child))
-            elif tag == _w("tbl"):
-                for row in child.iter(_w("tr")):
-                    for cell in row.findall(_w("tc")):
-                        self.walk(cell)
-            elif tag in (_w("sdt"), _w("sdtContent"), _w("ins")):
+            elif tag in (_w("tbl"), _w("tr"), _w("tc"), _w("sdt"), _w("sdtContent"), _w("ins")):
                 self.walk(child)
             # w:sectPr, w:bookmarkStart və s. atılır.
 

@@ -17,8 +17,20 @@ YENİDƏN başlayır (``created_at`` = dəyişiklik anı): yeni q/b/bal da yazı
 DB trigger-i (registrar 0106) eyni istisnanı edir — ``registrar_lessonmark``-da köhnə dəyəri balsız i/e olan
 sətrin UPDATE-i pəncərədən asılı deyil (yazma pəncərəsi isə yalnız servis qatındadır).
 
+SAHİB 2026-11-21 (RİM rəhbəri): «i/e qoyulandan sonra 1 gün ərzində müəllim onu dəyişə bilsin, sonra q/b kimi
+donsun; q/b və bal 15 dəqiqədən sonra donur; əvvəlki olanlarda elə donsun; boş xanalara yazmaq olsun; hamısını
+sistem tənzimləmələrindən idarə edim.» 2026-10-26 qaydası bununla ƏVƏZ olunur (açarla geri qaytarılır):
+``journal.presence_lock_enabled`` (defolt yanılı) olanda balsız i/e İLK yazılışından (``created_at``)
+``journal.presence_edit_minutes`` (defolt 1440 = 1 gün) sonra ``LOCK_PRESENCE`` ilə donur — köçürülmüş
+(``entered_by`` boş) i/e də eyni saatla (köhnələr artıq donub; :func:`presence_edit_window`, :func:`mark_lock_reason`).
+Müddət ərzində qalan hər şey 2026-10-26 kimidir: 15 dəqiqədən sonrakı i/e dəyişikliyi YENİ qeyddir (yazma müddətinə
+tabedir — ``LOCK_ENTRY``; ``created_at`` sıfırlanır, yeni q/b/bal öz 15 dəqiqəsini alır). Açar söndürülüdə i/e
+2026-10-26 qaydasındadır. DB trigger-i (registrar 0125) eyni açarları oxuyur. Boş xanaya yazı (:class:`EntryRule`)
+və data bərpası rejimi (``journal.teacher_full_edit`` — bütün kilidləri keçir) dəyişmir.
+
 * dərs sətri (tarix/növ/mövzu/saat/silmə) — yaranışdan sonra ``lesson_edit_window()``;
-* q/b və bal — yazılışdan sonra ``mark_edit_window()`` (balsız i/e — yazma pəncərəsi); Postgres trigger-i eyni açarları oxuyur
+* q/b və bal — yazılışdan sonra ``mark_edit_window()`` (balsız i/e — ``presence_edit_window()`` + yazma pəncərəsi);
+  Postgres trigger-i eyni açarları oxuyur
   (registrar 0089: əvvəl ``journal.mark_edit_minutes``, sonra köhnə ``journal.mark_edit_hours``), ona görə
   servis və DB qaydası üst-üstə düşür;
 * gecikmiş yazı — ``journal.late_entry_days`` (defolt 7; 0 = yalnız dərs günü): müəllim dərs tarixindən ən çox
@@ -47,6 +59,7 @@ from django.utils import timezone
 from django.utils.translation import pgettext
 
 from apps.registrar.models import AttendanceStatus
+from core.runtime_settings_journal_presence import DEFAULT_PRESENCE_MINUTES
 
 _CTX = "registrar.journal_timing"
 DEFAULT_WINDOW_MINUTES = 120
@@ -60,6 +73,7 @@ LOCK_TIME = "time"  # müəllim yazıb, pəncərə bitib
 LOCK_LEGACY = "legacy"  # köhnə sistemdən köçürülüb (``entered_by`` boş)
 LOCK_CORRECTED = "corrected"  # RİM-in rəsmi (sənədli) düzəlişi var
 LOCK_ENTRY = "entry"  # balsız i/e xanası, amma dərsin yazma müddəti bitib (sahib 2026-10-26)
+LOCK_PRESENCE = "presence"  # balsız i/e ilk yazılışından ``presence_edit_window()`` sonra (sahib 2026-11-21)
 LOCK_UNSUPPORTED_SCORE = "unsupported_score"  # əvvəlki rəqəm növün adi formasında silinə bilməz
 
 #: «RİM-ə müraciət edib təqdimat yazın» keçidinin müraciət növü — müəllimin göndərə bildiyi və RİM-ə gedən
@@ -86,6 +100,16 @@ def lesson_edit_window() -> timedelta:
 
 def mark_edit_window() -> timedelta:
     return _window("journal.mark_edit_minutes", "journal.mark_edit_hours")
+
+
+def presence_edit_window() -> timedelta | None:
+    """Balsız i/e xanasının dəyişmə müddəti (sahib 2026-11-21); ``journal.presence_lock_enabled`` söndürülüdə ``None``."""
+    from core import runtime_settings
+    from core.runtime_settings_journal_presence import KEY_PRESENCE_LOCK, KEY_PRESENCE_MINUTES
+
+    if not runtime_settings.get_bool(KEY_PRESENCE_LOCK):
+        return None
+    return timedelta(minutes=max(1, runtime_settings.get_int(KEY_PRESENCE_MINUTES)))
 
 
 def late_entry_days() -> int:
@@ -171,8 +195,18 @@ past_date_error = lesson_date_error
 
 
 def is_open_presence(mark) -> bool:
-    """Balsız i/e xanası (``status=present``, ``score`` boş) — pəncərədən sonra da dəyişə bilən YEGANƏ dəyər."""
+    """Balsız i/e xanası (``status=present``, ``score`` boş) — q/b/bal pəncərəsindən sonra da dəyişə bilən YEGANƏ
+    dəyər; öz müddəti :func:`presence_edit_window` (sahib 2026-11-21)."""
     return mark is not None and mark.status == AttendanceStatus.PRESENT and mark.score is None
+
+
+def presence_expired(mark, *, now=None, presence_window=_UNSET) -> bool:
+    """Balsız i/e xanasının müddəti bitib: İLK yazılışdan (``created_at``) ``presence_window`` keçib. Köçürülmüş
+    (``entered_by`` boş) i/e də eyni saatla. Açar söndürülüdə (``None``) heç vaxt."""
+    if not is_open_presence(mark) or mark.created_at is None:
+        return False
+    window = presence_edit_window() if presence_window is _UNSET else presence_window
+    return window is not None and ((now or timezone.now()) - mark.created_at) > window
 
 
 def _within_window(mark, *, now, window) -> bool:
@@ -188,8 +222,11 @@ def reopens_presence(mark, *, now=None, window=None) -> bool:
     return is_open_presence(mark) and not _within_window(mark, now=now or timezone.now(), window=window)
 
 
-def mark_lock_reason(mark, *, now=None, window=None, entry_open=True, unsupported_score=False) -> str:
-    """Müəllim bu xananı DƏYİŞƏ bilmirsə səbəb (``LOCK_TIME`` / ``LOCK_LEGACY`` / ``LOCK_ENTRY``), bilirsə «».
+def mark_lock_reason(
+    mark, *, now=None, window=None, entry_open=True, unsupported_score=False, presence_window=_UNSET
+) -> str:
+    """Müəllim bu xananı DƏYİŞƏ bilmirsə səbəb (``LOCK_TIME`` / ``LOCK_LEGACY`` / ``LOCK_ENTRY`` /
+    ``LOCK_PRESENCE``), bilirsə «».
 
     Boş xana (``None``) kilidli deyil (yeni qeyd :class:`EntryRule`-a tabedir). Kilid İLK yazılışdan
     (``created_at``) sayılır — sonrakı düzəliş saatı uzatmır. Kilid YALNIZ q/b və bal daşıyan xanaya düşür
@@ -197,12 +234,17 @@ def mark_lock_reason(mark, *, now=None, window=None, entry_open=True, unsupporte
     (``entry_open`` — çağıran ``EntryRule.allows(lesson)`` ötürür), olmursa ``LOCK_ENTRY``. Rəsmi düzəliş
     kilidi ayrıca yoxlanır (sorğu tələb edir). Sistem yazıları (midterm/imtahan sinxronu, rəsmi düzəliş) bu
     qaydaya tabe deyil.
+
+    Sahib 2026-11-21: balsız i/e öz müddətindən (``presence_window``; ötürülməyibsə :func:`presence_edit_window`,
+    açar söndürülüdə ``None`` — 2026-10-26 qaydası) sonra ``LOCK_PRESENCE`` ilə donur, köçürülmüş olsa da.
     """
     if mark is None:
         return ""
     if unsupported_score:
         return LOCK_UNSUPPORTED_SCORE
     now = now or timezone.now()
+    if presence_expired(mark, now=now, presence_window=presence_window):
+        return LOCK_PRESENCE
     if _within_window(mark, now=now, window=window):
         return ""
     if is_open_presence(mark):
@@ -212,7 +254,7 @@ def mark_lock_reason(mark, *, now=None, window=None, entry_open=True, unsupporte
     return LOCK_TIME
 
 
-def lock_message(reason: str, *, window=None) -> str:
+def lock_message(reason: str, *, window=None, presence_window=None) -> str:
     """Kilidli xananın istifadəçi mətni (UI dialoqu, forma xəbərdarlığı, avtomatik yadda saxlamanın 409-u)."""
     if reason == LOCK_UNSUPPORTED_SCORE:
         return pgettext(
@@ -231,6 +273,13 @@ def lock_message(reason: str, *, window=None) -> str:
             "Bu xanaya rəsmi düzəliş edilib və dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib "
             "təqdimat yazın.",
         )
+    if reason == LOCK_PRESENCE:
+        presence = presence_window if presence_window is not None else presence_edit_window()
+        return pgettext(
+            _CTX,
+            "Bu i/e qeydi yazılandan %(w)s keçib və artıq dəyişdirilə bilməz. Dəyişiklik üçün RİM-ə müraciət edib "
+            "təqdimat yazın.",
+        ) % {"w": duration_text(presence or timedelta(minutes=DEFAULT_PRESENCE_MINUTES))}
     if reason == LOCK_ENTRY:
         return pgettext(
             _CTX,
@@ -323,9 +372,12 @@ def template_context(today=None) -> dict:
     earliest = earliest_entry_date(today, days=days, since=since)
     activation = activation_write_window()
     mark_window = mark_edit_window()
+    presence = presence_edit_window()
     return {
         "lesson_edit_window_label": duration_text(lesson_edit_window()),
         "mark_edit_window_label": duration_text(mark_window),
+        # i/e xanasının müddəti (sahib 2026-11-21); açar söndürülüdə «» — grid qeydi onu göstərmir.
+        "presence_edit_window_label": duration_text(presence) if presence is not None else "",
         "late_entry_days": days,
         "lesson_date_min": earliest,
         # Hədd keçmiş tarixli dərs başlanğıcından gəlirsə tarix (modal/grid ipucu «N gün geriyə» yox, onu deyir).
@@ -337,6 +389,7 @@ def template_context(today=None) -> dict:
             LOCK_TIME: lock_message(LOCK_TIME, window=mark_window),
             LOCK_LEGACY: lock_message(LOCK_LEGACY),
             LOCK_ENTRY: lock_message(LOCK_ENTRY),
+            LOCK_PRESENCE: lock_message(LOCK_PRESENCE, presence_window=presence),
             LOCK_UNSUPPORTED_SCORE: lock_message(LOCK_UNSUPPORTED_SCORE),
         },
         "mark_lock_request_url": fix_request_url(),
@@ -346,6 +399,7 @@ def template_context(today=None) -> dict:
 __all__ = [
     "DEFAULT_LATE_ENTRY_DAYS",
     "DEFAULT_MARK_LOCK_MINUTES",
+    "DEFAULT_PRESENCE_MINUTES",
     "DEFAULT_WINDOW_MINUTES",
     "EntryRule",
     "FIX_APPLICATION_KIND",
@@ -353,6 +407,7 @@ __all__ = [
     "LOCK_CORRECTED",
     "LOCK_ENTRY",
     "LOCK_LEGACY",
+    "LOCK_PRESENCE",
     "LOCK_TIME",
     "LOCK_UNSUPPORTED_SCORE",
     "MARK_EDIT_WINDOW",
@@ -370,6 +425,8 @@ __all__ = [
     "mark_edit_window",
     "mark_lock_reason",
     "past_date_error",
+    "presence_edit_window",
+    "presence_expired",
     "reopens_presence",
     "template_context",
 ]

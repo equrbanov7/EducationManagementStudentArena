@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import datetime as _dt
 import hashlib
+import heapq
 
 from django.core.cache import cache
 from django.db.models import Q
@@ -201,9 +202,11 @@ def unrecorded_slots(
         return empty
     held: dict = {}
     # Alt-sorğu (IN (SELECT …)): org-wide nəzarətçidə minlərlə açılış id-si parametr siyahısına düşmür.
-    for offering_id, day, start_time, kind in Lesson.objects.filter(
-        offering_id__in=slots_qs.values("offering_id"), date__gte=start, date__lte=end
-    ).values_list("offering_id", "date", "start_time", "kind"):
+    for offering_id, day, start_time, kind in (
+        Lesson.objects.filter(offering_id__in=slots_qs.values("offering_id"), date__gte=start, date__lte=end)
+        .values_list("offering_id", "date", "start_time", "kind")
+        .iterator()
+    ):
         held.setdefault((offering_id, day), []).append((start_time, kind))
 
     due: dict = {}
@@ -212,18 +215,24 @@ def unrecorded_slots(
             if day in off_days:
                 continue
             due.setdefault((slot.offering_id, day), []).append(slot)
-    missing = []
-    for (offering_id, day), day_slots in due.items():
-        for slot in _unmatched(day_slots, held.get((offering_id, day), ())):
-            missing.append((day, slot))
-    missing.sort(key=lambda item: (-item[0].toordinal(), item[1].start_time))  # yeni gün əvvəl, gün içində saat sırası
+    count = 0
+
+    def missing_slots():
+        nonlocal count
+        for key, day_slots in due.items():
+            for slot in _unmatched(day_slots, held.get(key, ())):
+                count += 1
+                yield key[1], slot
+
+    # The count covers the whole range. Only the 30 displayed entries need sorting/storage.
+    missing = heapq.nsmallest(ITEM_LIMIT, missing_slots(), key=lambda item: (-item[0].toordinal(), item[1].start_time))
 
     from apps.registrar import design_practical_scope
 
     # «Praktiki məşğələ» etiketi (`slot.get_kind_display`) sətir başına sorğu etməsin — toplu (PERF 2026-11-11).
-    design_practical_scope.prime(slot.offering for _day, slot in missing[:ITEM_LIMIT] if slot.kind == "seminar")
+    design_practical_scope.prime(slot.offering for _day, slot in missing if slot.kind == "seminar")
     items = []
-    for day, slot in missing[:ITEM_LIMIT]:
+    for day, slot in missing:
         offering = slot.offering
         items.append(
             {
@@ -240,7 +249,7 @@ def unrecorded_slots(
             }
         )
     result = {
-        "count": len(missing),
+        "count": count,
         "items": items,
         "start": start,
         "end": end,

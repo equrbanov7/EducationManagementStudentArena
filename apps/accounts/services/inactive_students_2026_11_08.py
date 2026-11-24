@@ -122,9 +122,9 @@ def skipped_report(organization) -> list:
     return [(student_id, groups.get(student_id)) for student_id in sorted(skipped)]
 
 
-def run(*, organization, actor, counts, undo=False, report=None) -> None:
+def run(*, organization, actor, counts, undo=False, report=None, only=None) -> None:
     if undo:
-        _undo(organization=organization, actor=actor, counts=counts)
+        _undo(organization=organization, actor=actor, counts=counts, only=only)
         return
     Enrollment = _model("Enrollment")
     targets, guard_counts = candidates(organization)
@@ -161,12 +161,15 @@ def run(*, organization, actor, counts, undo=False, report=None) -> None:
         )
 
 
-def _undo(*, organization, actor, counts) -> None:
+def _undo(*, organization, actor, counts, only=None) -> None:
+    """``only`` — yalnız bu hesab id-ləri (bərpa olunmuş tələbə, 2026-11-24); boşdursa hamısı."""
     Enrollment = _model("Enrollment")
     AuditLog = django_apps.get_model("audit", "AuditLog")
     rows = AuditLog.objects.filter(
         organization=organization, resource_type=RESOURCE, changes__has_key="blocked"
     ).order_by("created_at")
+    if only:
+        rows = rows.filter(resource_id__in=[str(pk) for pk in only])
     users = get_user_model().objects.in_bulk([int(row.resource_id) for row in rows])
     for row in rows:
         changes = row.changes or {}

@@ -37,7 +37,7 @@ def post_detail(request, slug):
     Rating yalnız ilk şərhdə nəzərə alınır.
     """
     # 1) Postu statusdan asılı olmayaraq tap
-    post = get_object_or_404(Post, slug=slug)
+    post = get_object_or_404(Post.objects.select_related("author", "category__parent"), slug=slug)
 
     # 2) Əgər post nəşr olunmayıbsa, yalnız müəllif və ya uyğun reviewer görə bilsin.
     if not post.is_published and request.user != post.author and not can_user_review_post(request.user, post):
@@ -81,7 +81,9 @@ def post_detail(request, slug):
     else:
         form = CommentForm()
 
+    comments = list(comments)
     context = {
+        "average_rating": sum(comment.rating for comment in comments) / len(comments) if comments else 0,
         "post": post,
         "comments": comments,
         "comment_form": form,

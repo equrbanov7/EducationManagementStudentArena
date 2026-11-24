@@ -246,6 +246,9 @@ class TimetableViewsTest(TestCase):
             with CaptureQueriesContext(connection) as ctx:
                 response = client.get(url, params)
             self.assertEqual(response.status_code, 200, url)
+            if url == reverse("timetable:policies"):
+                policy_reads = [row for row in ctx if 'FROM "timetable_grouptimepolicy"' in row["sql"]]
+                self.assertEqual(len(policy_reads), 1)
             self.assertLessEqual(len(ctx.captured_queries), budget, (url, len(ctx.captured_queries)))
 
     def test_schedule_manage_section_links_to_generator(self):

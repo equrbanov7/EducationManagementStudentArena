@@ -280,7 +280,7 @@ def plan_lessons(
         locked = gradebook.journal_is_locked(offering)
         topic_rows = journal_topics.lesson_topic_meta(offering, [])
         covered: dict = {}
-        for lesson in offering.lessons.only("topic", "syllabus_week", "kind"):
+        for lesson in offering.lessons.only("offering_id", "topic", "syllabus_week", "kind"):
             journal_topics.add_coverage(covered, lesson)  # başlıq + plan sətri (təkrar başlıq — MR-000377)
         rows = []
         for day in _days(date_from, date_to):

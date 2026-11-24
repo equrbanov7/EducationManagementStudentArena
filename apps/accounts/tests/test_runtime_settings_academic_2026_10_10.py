@@ -151,6 +151,8 @@ class AcademicRulesSettingsTest(TestCase):
                 "academic.activity_split",
                 "academic.coursework_enabled",
                 "syllabus.hours_from_load",  # sahib 2026-10-12
+                "academic.university_wide_chairs",  # sahib 2026-11-22 — Xarici dillər kafedrası
+                "academic.language_business_profile",  # sahib 2026-11-22 — işgüzar kommunikasiya profili
             ],
         )
         self.assertIn('id="ssConfirmDialog"', content)  # açar dəyişəndə təsdiq pəncərəsi

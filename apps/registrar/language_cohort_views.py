@@ -56,7 +56,7 @@ class CohortForm(forms.Form):
         label=_("Yekun imtahanın minimum balı (mənbə seçilməyibsə)"), min_value=0, max_value=100, required=False
     )
 
-    def __init__(self, *args, actor, organization, **kwargs):
+    def __init__(self, *args, actor, organization, journal_access=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["entry_score_max"].initial = 30
         self.fields["entry_score_max"].disabled = True
@@ -72,27 +72,19 @@ class CohortForm(forms.Form):
             organization=organization, is_active=True, name__iregex=LEVEL_RE.pattern
         ).order_by("name")
         self.fields["subject"].queryset = subjects.filter(pk__in=[row.pk for row in subjects if level_of(row.name)])
-        from types import SimpleNamespace
-
-        from .journal_access import can_edit_journal, can_observe_journal
-        from .journal_list_scope import journal_list_base
         from .models import CourseOffering
 
-        source_scope, _broad = journal_list_base(actor, SimpleNamespace(organization=organization))
+        journal_access = journal_access or language_cohort_query.LevelJournalAccess(actor, organization)
         # İcazə yoxlaması (sətir başına sorğu) yalnız real namizədlərdə: cari dövrün
         # qiymətləndirmə sxemli SƏVİYYƏ jurnalları — aşağıdakı yekun süzgəclə eynidir.
-        source_candidates = source_scope.filter(
+        source_candidates = journal_access.scoped.filter(
             is_active=True,
             period__is_current=True,
             period__is_active=True,
             assessment_scheme__isnull=False,
             subject_id__in=self.fields["subject"].queryset.values("pk"),
         ).select_related("organization", "group", "period", "subject", "instructor")
-        source_ids = [
-            source.pk
-            for source in source_candidates
-            if can_edit_journal(actor, source) or can_observe_journal(actor, source)
-        ]
+        source_ids = [source.pk for source in source_candidates if journal_access.allows(source)]
         self.fields["source_offering"].queryset = (
             CourseOffering.objects.filter(
                 organization=organization,
@@ -135,17 +127,22 @@ def _organization(request):
 @require_http_methods(["GET", "POST"])
 def index(request):
     org = _organization(request)
-    can_create = language_cohorts.department_choices(request.user, org).exists()
     cohorts = language_cohorts.authorized_cohorts(request.user, org)
-    existing = language_cohort_query.existing_level_journals(request.user, org)
     if request.method == "GET" and request.GET.get("cohort"):
         selected = next((row for row in cohorts if str(row.pk) == request.GET["cohort"]), None)
         if selected is None:
             raise Http404
         return redirect("registrar:language_cohort_detail", cohort_id=selected.pk)
+    can_create = language_cohorts.department_choices(request.user, org).exists()
+    access = language_cohort_query.LevelJournalAccess(request.user, org)
+    existing = language_cohort_query.existing_level_journals(request.user, org, access=access)
     if not can_create and not cohorts and not existing:
         raise Http404
-    form = CohortForm(request.POST or None, actor=request.user, organization=org) if can_create else None
+    form = (
+        CohortForm(request.POST or None, actor=request.user, organization=org, journal_access=access)
+        if can_create
+        else None
+    )
     if request.method == "POST":
         if not can_create:
             raise Http404
@@ -208,7 +205,7 @@ def detail(request, cohort_id):
         return redirect(reverse("registrar:language_cohort_detail", args=[cohort.pk]))
     enrollments = list(
         Enrollment.objects.filter(organization=org, offering=cohort.offering, status=Enrollment.Status.ENROLLED)
-        .select_related("student")
+        .select_related("student__profile")
         .order_by("student__last_name", "student__first_name", "pk")
     )
     groups = home_group_map(organization_id=org.pk, student_ids=[e.student_id for e in enrollments])
@@ -221,18 +218,21 @@ def detail(request, cohort_id):
     candidates = []
     roster_open = guest_roster.roster_is_open(cohort.offering)
     if roster_open and can_edit_roster:
-        for record in language_cohort_query.candidate_records(
-            cohort=cohort, actor=request.user, query=request.GET.get("q")
-        ):
-            sources = language_cohorts.eligible_family_enrollments(cohort=cohort, student_id=record.student_id)
+        records = list(
+            language_cohort_query.candidate_records(cohort=cohort, actor=request.user, query=request.GET.get("q"))
+        )
+        by_student = language_cohorts.family_enrollments_by_student(cohort, [row.student_id for row in records])
+        for record in records:
+            sources = by_student.get(record.student_id, [])
             candidates.append({"record": record, "sources": sources, "ambiguous": len(sources) > 1})
     placements = cohort.placements.filter(organization=org)
     if creator_only:
         placements = placements.filter(home_group__in=guest_roster.scoped_group_queryset(request.user, org))
-    events = placements.select_related("student", "actor", "home_group").order_by("-created_at")[:50]
+    events = placements.select_related("student__profile", "actor", "home_group").order_by("-created_at")[:50]
     events = list(events.select_related("source_enrollment__offering__organization"))
+    source_scopes = {}
     for event in events:
-        event.can_view_history = can_view_source(request.user, event)
+        event.can_view_history = can_view_source(request.user, event, scopes=source_scopes)
         event.action_label = {
             "add": _("Əlavə edildi"),
             "remove": _("Çıxarıldı"),

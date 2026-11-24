@@ -202,7 +202,10 @@ def student_subjects(*, organization, record, period) -> dict:
         return result
     enrollments = list(
         Enrollment.objects.filter(
-            organization_id=record.organization_id, student_id=record.student_id, offering__period=period
+            organization_id=record.organization_id,
+            student_id=record.student_id,
+            offering__period=period,
+            offering__is_active=True,  # bağlanmış (deaktiv) jurnal kabinetdə fənn sayılmır — MR-000765/766
         )
         .exclude(status=Enrollment.Status.DROPPED)
         .select_related("offering__subject", "offering__assessment_scheme")

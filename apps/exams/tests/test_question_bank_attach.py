@@ -6,7 +6,9 @@ import tempfile
 
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
+from django.db import connection
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 
 from apps.exams.models import Exam, ExamLanguageVariant, QuestionBank
 from apps.exams.services.question_bank_attach import (
@@ -57,6 +59,16 @@ class QuestionBankLibraryTests(TestCase):
         self.assertEqual(
             [option.label for option in first.options.order_by("id")], ["A", "B", "C", "D"], "id sırası = hərf sırası"
         )
+
+    def test_attaching_twelve_four_option_questions_has_bounded_queries(self):
+        questions = create_bank_questions_from_parsed(
+            self.bank, [_parsed(f"Sual {n}") for n in range(12)], language="az", created_by=self.teacher
+        )
+        with CaptureQueriesContext(connection) as queries:
+            attached = attach_bank_questions_to_exam(self.exam, [question.pk for question in questions])
+        self.assertEqual(len(attached), 12)
+        # Hər sual üçün bir INSERT və dörd variant üçün ortaq bir INSERT.
+        self.assertLessEqual(len(queries), 2 * len(questions) + 12)
 
     def test_exam_center_user_sees_all_org_banks(self):
         """İmtahan mərkəzi bank hovuzunun idarəçisidir: təşkilatın BÜTÜN aktiv
@@ -199,8 +211,12 @@ class AccessibleBanksTests(TestCase):
         )
 
     def test_user_sees_own_and_shared_within_org_only(self):
+        QuestionBank.objects.create(name="own-b", created_by=self.owner_a, organization=self.org_b)
+        QuestionBank.objects.create(name="own-legacy", created_by=self.owner_a, organization=None)
         visible = set(accessible_banks(self.owner_a, self.org_a).values_list("name", flat=True))
         self.assertIn("own", visible)
+        self.assertIn("own-legacy", visible)
+        self.assertNotIn("own-b", visible)
         self.assertIn("shared-a", visible)
         # Başqasının paylaşılmamış bankı görünmür.
         self.assertNotIn("private-a", visible)

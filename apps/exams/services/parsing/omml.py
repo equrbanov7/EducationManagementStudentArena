@@ -14,6 +14,7 @@ qalır və xəbərdarlıq siyahısına düşür (preview-da göstərilir).
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 
 M_NS = "http://schemas.openxmlformats.org/officeDocument/2006/math"
@@ -259,7 +260,7 @@ def _flag(element, tag: str) -> bool:
     return value in ("1", "true", "on")
 
 
-def _escape_text(text: str) -> str:
+def escape_math_text(text: str) -> str:
     out = []
     for char in text:
         if char in UNICODE_TO_LATEX:
@@ -293,11 +294,20 @@ def _convert_run(run, ctx: OmmlContext) -> str:
         # «lim»/«sin» kimi funksiya adı düz run kimi gəlibsə — kursiv olmasın.
         return "\\" + stripped + " "
     # Riyazi rejimdə boşluqlar onsuz da render olunmur; yalnız yığcamlaşdırılır.
-    return " ".join(_escape_text(text).split())
+    return " ".join(escape_math_text(text).split())
 
 
 def _children_latex(element, ctx: OmmlContext) -> str:
-    return "".join(convert_node(child, ctx) for child in element)
+    parts = []
+    for child in element:
+        part = convert_node(child, ctx)
+        if not part:
+            continue
+        # Word can split α and x across runs. In TeX the control word needs a terminator.
+        if parts and re.match("[A-Za-z]", part) and re.search(r"\\[A-Za-z]+$", parts[-1]):
+            parts.append(" ")
+        parts.append(part)
+    return "".join(parts)
 
 
 def _arg(element, tag: str, ctx: OmmlContext) -> str:
@@ -326,7 +336,7 @@ def _convert_nary(node, ctx):
     operator = NARY_CHARS.get(chr_value)
     if operator is None:
         ctx.warnings.append(f"naryPr chr={chr_value!r}")
-        operator = "\\operatorname{" + _escape_text(chr_value) + "}"
+        operator = "\\operatorname{" + escape_math_text(chr_value) + "}"
     lim_loc = _val(props, "limLoc", "subSup")
     sub = "" if _flag(props, "subHide") else _arg(node, "sub", ctx)
     sup = "" if _flag(props, "supHide") else _arg(node, "sup", ctx)
@@ -345,8 +355,8 @@ def _convert_delimiter(node, ctx):
     beg = _val(props, "begChr", "(")
     end = _val(props, "endChr", ")")
     sep = _val(props, "sepChr", "|")
-    left = DELIMITERS.get(beg, _escape_text(beg))
-    right = DELIMITERS.get(end, _escape_text(end))
+    left = DELIMITERS.get(beg, escape_math_text(beg))
+    right = DELIMITERS.get(end, escape_math_text(end))
     inner = (" " + DELIMITERS.get(sep, sep) + " ").join(_children_latex(child, ctx) for child in node.findall(_m("e")))
     return f"\\left{left} {inner} \\right{right}"
 

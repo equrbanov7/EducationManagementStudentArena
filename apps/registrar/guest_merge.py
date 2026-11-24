@@ -415,8 +415,8 @@ def _source_entry_scores(predecessors, marks_by_enrollment):
         AssessmentScheme.objects.filter(offering_id__in=offering_ids).values_list("offering_id", "entry_score_max")
     )
     caps = {
-        source.offering_id: language_level_grading.entry_cap(
-            source.offering.subject.name, caps.get(source.offering_id, DEFAULT_ENTRY_SCORE_MAX)
+        source.offering_id: language_level_grading.offering_entry_cap(
+            source.offering, caps.get(source.offering_id, DEFAULT_ENTRY_SCORE_MAX)
         )
         for source in predecessors
     }

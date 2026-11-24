@@ -230,6 +230,17 @@ def decrypt_student_pin_row(pin) -> str | None:
         return None
 
 
+def assigned_student_pins(exams, user):
+    """Own PINs for already-authorized exam cards, provisioning only genuinely missing rows."""
+    exams = {exam.pk: exam for exam in exams}
+    rows = ExamStudentPin.objects.filter(student=user, exam_id__in=exams).only("exam_id", "pin_cipher")
+    pins = {row.exam_id: decrypt_student_pin_row(row) for row in rows}
+    missing = [pk for pk in exams.keys() - pins.keys() if ensure_student_pin(exams[pk], user)]
+    if missing:
+        pins.update({row.exam_id: decrypt_student_pin_row(row) for row in rows.filter(exam_id__in=missing)})
+    return pins
+
+
 def student_visible_pin(exam, user, *, provision_missing: bool = False) -> str | None:
     """Tələbənin öz PIN-i (kabinetdə göstərmək üçün). İcazə view qatında yoxlanır.
 

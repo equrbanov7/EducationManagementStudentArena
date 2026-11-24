@@ -572,6 +572,37 @@ class LessonInputEchoTest(JournalViewTest):
 class JournalWindowIntegrationTest(JournalViewTest):
     """Pəncərə rəqəmləri təhrif etmir + tab server tərəfdə render olunur (P1-8)."""
 
+    def test_correction_window_shows_requested_lessons_and_preserves_navigation(self):
+        from apps.registrar import journal_activation
+
+        with bypass_rls():
+            admin = User.objects.create_user("journal_window_admin", is_superuser=True)
+            lessons = Lesson.objects.bulk_create(
+                [
+                    Lesson(
+                        organization=self.org,
+                        offering=self.offering,
+                        date=datetime.date(2024, 9, day),
+                        kind=LessonKind.SEMINAR,
+                        topic=f"Dərs {day}",
+                    )
+                    for day in range(1, 25)
+                ]
+            )
+            with self.assertNumQueries(1):
+                self.assertEqual(len(journal_activation.lesson_rows(self.offering)), 24)
+
+        client = self._client(admin)
+        url = reverse("registrar:journal_detail", args=[self.offering.pk])
+        page = client.get(url, {"correct": "1", "lo": 10, "lw": 10})
+        journal = page.context["journal"]
+        self.assertTrue(page.context["correction_mode"])
+        self.assertIn("correct=1", page.context["journal_nav_query"])
+        self.assertEqual(journal["lesson_window"]["total"], 24)
+        self.assertEqual([row.pk for row in journal["lessons"]], [row.pk for row in reversed(lessons[4:14])])
+        all_lessons = client.get(url, {"correct": "1", "lw": 0}).context["journal"]["lessons"]
+        self.assertEqual(len(all_lessons), 24)
+
     def test_absence_totals_ignore_the_window(self):
         import datetime
 

@@ -32,6 +32,7 @@ from __future__ import annotations
 import datetime as dt
 
 from django.db import transaction
+from django.db.models import Q
 from django.utils.translation import pgettext
 
 from . import guest_roster
@@ -41,6 +42,9 @@ from . import journal_removal
 from .models import Enrollment, HygieneCategory, JournalHygieneDecision, RemovalAction, RemovalReason
 
 _CTX = "registrar.subject_exempt"
+
+#: Bu səbəblə çıxarılma yalnız HƏMİN jurnala qayıtmağı bloklayır (fəndən real azadolma deyil).
+_MISPLACEMENT_REASONS = (RemovalReason.ADDED_BY_MISTAKE, RemovalReason.GROUP_TRANSFER)
 EXEMPT = HygieneCategory.SUBJECT_EXEMPT.value
 REASON_CODE = "subject_exempt"
 #: «Xarici nəticənin tanınması» ilə yaranan azadlığın səbəb kodu (``credit_recognition``).
@@ -298,11 +302,16 @@ def student_exempt_subjects(record, period) -> list:
     return sorted(items.values(), key=lambda item: str(item["name"]))
 
 
-def is_exempt_from_subject(record, period, subject_id) -> bool:
-    """Tələbə bu dövrdə *subject_id* fənnindən azad edilibmi (alt qrupa yerləşdirmə qapısı)."""
+def is_exempt_from_subject(record, period, subject_id, *, offering_id=None) -> bool:
+    """Tələbə bu dövrdə *subject_id* fənnindən azad edilibmi (alt qrupa yerləşdirmə qapısı).
+
+    2026-11-20 (MR-000183 / qiyabi 2536 MRK): «Səhv əlavə olunub» və «Başqa qrupa / alt qrupa keçid» səbəbli
+    çıxarılma real azadolma DEYİL — yalnız həmin jurnala (``offering_id``) qayıtmağı bloklayır. Əks halda köhnə
+    əyani jurnaldan «səhv əlavə» kimi çıxarılan tələbə yeni (qiyabi) qrupunun eyni adlı fənn jurnalına da düşmürdü.
+    """
     if record is None or period is None or subject_id is None:
         return False
-    return JournalHygieneDecision.objects.filter(
+    decisions = JournalHygieneDecision.objects.filter(
         organization_id=record.organization_id,
         category=EXEMPT,
         reverted_at__isnull=True,
@@ -311,7 +320,11 @@ def is_exempt_from_subject(record, period, subject_id) -> bool:
         enrollment__offering__period=period,
         enrollment__offering__subject_id=subject_id,
         enrollment__offering__is_active=True,  # ləğv olunmuş jurnaldakı azadolma bloklamır (MR-000465)
-    ).exists()
+    )
+    misplaced = Q(removal_reasons__reason__in=_MISPLACEMENT_REASONS)
+    if offering_id is not None:
+        misplaced &= ~Q(enrollment__offering_id=offering_id)
+    return decisions.exclude(misplaced).exists()
 
 
 def page_context(user, offering) -> dict:

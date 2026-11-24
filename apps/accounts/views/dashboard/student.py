@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.utils.translation import pgettext_lazy
 
+from apps.exams.public import StudentExamListBatch
 from core.search_text import tolerant_q
 from core.tenancy import restore_request_organization_from_profile
 
@@ -51,9 +52,10 @@ def assigned_exams(request):
     if search_q is not None:
         exams = exams.filter(search_q)
 
+    exam_batch = StudentExamListBatch(exams, request.user)
     exam_items = []
     for exam in exams:
-        can_start_without_code, _ = exam.can_user_start(request.user, code=None)
+        can_start_without_code, _ = exam_batch.can_user_start(exam)
         exam_items.append(
             {
                 "exam": exam,

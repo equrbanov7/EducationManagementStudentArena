@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db import transaction
+from django.db.models import Count, Q
 from django.db.models.functions import Lower
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -394,8 +395,9 @@ def question_bank_detail(request, bank_id):
     scoped = bank.library_questions.all()
     if language_filter:
         scoped = scoped.filter(language=language_filter)
-    total_questions = scoped.count()
-    active_questions = scoped.filter(is_active=True).count()
+    counts = scoped.aggregate(total=Count("pk"), active=Count("pk", filter=Q(is_active=True)))
+    total_questions = counts["total"]
+    active_questions = counts["active"]
     inactive_questions = max(total_questions - active_questions, 0)
 
     base_params = {}

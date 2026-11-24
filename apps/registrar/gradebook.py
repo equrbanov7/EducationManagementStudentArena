@@ -128,8 +128,8 @@ can_edit_lesson_date = can_edit_lesson
 
 def can_edit_mark(mark, *, now=None, window=None, entry_open=True) -> bool:
     """Boş xana həmişə yazılır; q/b və ballı xana yalnız müəllimin İLK yazılışından pəncərə (defolt 15 dəqiqə)
-    ərzində dəyişir, köçürülmüş q/b/bal həmişə kilidlidir (sahib 2026-10-25). Balsız i/e xanası pəncərədən
-    sonra da dəyişir (sahib 2026-10-26) — dərsin yazma müddəti (``entry_open``) bitməyibsə."""
+    ərzində dəyişir, köçürülmüş q/b/bal həmişə kilidlidir (sahib 2026-10-25). Balsız i/e öz müddətində (sahib
+    2026-11-21, defolt 1 gün) dəyişir — dərsin yazma müddəti (``entry_open``) bitməyibsə (sahib 2026-10-26)."""
     return not journal_edit_windows.mark_lock_reason(mark, now=now, window=window, entry_open=entry_open)
 
 
@@ -189,11 +189,12 @@ def get_offering_journal(
     from . import language_level_grading
 
     level_policy = language_level_grading.is_level(offering)
+    # MR-000698: 11-ci q/b SAY qaydası yalnız adında səviyyə olan dil fənlərində; səviyyəsiz «İşgüzar …» saat faizi ilə.
+    count_policy = language_level_grading.uses_qb_count_limit(offering)
     all_lessons = list(offering.lessons.order_by("date", "created_at"))
     # Mövzusuz, sillabus sətrinə bağlı dərsin başlığı sətrin mövzusudur (``display_topic``, 2026-10-25).
     from apps.registrar.journal_topics import attach_syllabus_topics
 
-    attach_syllabus_topics(all_lessons, offering=offering)
     lessons = [lesson for lesson in all_lessons if lesson.kind == lesson_kind] if lesson_kind else list(all_lessons)
     # Dərs növü eyni sorğuda (JOIN artıq var) — giriş balının 5 + 5 aktivliyi üçün (``activity_kinds``).
     marks = activity_kinds.annotate_kind(LessonMark.objects.filter(lesson__offering=offering))
@@ -208,6 +209,7 @@ def get_offering_journal(
     window_size, window_offset = journal_window.resolve_window(total_lessons, limit=lesson_limit, offset=lesson_offset)
     if lesson_limit:
         lessons = lessons[window_offset : window_offset + window_size]
+    attach_syllabus_topics(lessons, offering=offering)
     # `source_group` — «alt qrupdan əlavə olunub» çipi üçün (bax guest_roster.py).
     enrollments = read_memo.enrolled_roster(offering)  # GET-də tablar arasında bir sorğu (PERF-1 F-06)
     from . import lab_groups, passive_lessons  # lab qrupu (sahib 2026-11-06): qruplu lab dərsi yalnız öz qrupunun
@@ -279,7 +281,7 @@ def get_offering_journal(
     # Yeni işarə: dərs günü (+ gecikmiş yazı günləri) və aktivləşdirmə pəncərəsi — servis qaydası ilə EYNİ.
     entry_rule = EntryRule.current(now=now)
     markable = {lesson.id: entry_rule.allows(lesson) and not lesson.is_passive for lesson in lessons}  # passiv: yox
-    lock_window = mark_edit_window()  # xana kilidi — bir dəfə oxunur (xana-xana runtime oxunuşu yox)
+    lock_window, presence_window = mark_edit_window(), journal_edit_windows.presence_edit_window()  # bir dəfə oxunur
     lesson_meta = [
         {
             "lesson": lesson,
@@ -300,17 +302,17 @@ def get_offering_journal(
     from .absence_credit_read import credit_hours_map, effective_hours
 
     absence_credits = credit_hours_map([row.pk for row in enrollments])
+    hours_by_lesson = {lesson.pk: lesson.hours for lesson in all_lessons}
+    absences = defaultdict(list)
+    for mark in mark_map.values():
+        if mark.status == AttendanceStatus.ABSENT and mark.lesson_id in hours_by_lesson:
+            absences[mark.enrollment_id].append(hours_by_lesson[mark.lesson_id])
     rows = []
     for enrollment in enrollments:
         cells = []
-        absence_hours = 0
-        absence_count = 0
-        # Qayıb BÜTÜN dərslər üzrə (pəncərədən asılı deyil).
-        for lesson in all_lessons:
-            mark = mark_map.get((enrollment.id, lesson.id))
-            if mark is not None and mark.status == AttendanceStatus.ABSENT:
-                absence_hours += lesson.hours
-                absence_count += 1
+        absent_hours = absences.get(enrollment.pk, ())
+        absence_hours = sum(absent_hours)
+        absence_count = len(absent_hours)
         for lesson in lessons:
             mark = mark_map.get((enrollment.id, lesson.id))
             if lesson.is_passive:
@@ -331,11 +333,12 @@ def get_offering_journal(
                 )
                 continue
             corrected = mark is not None and mark.id in corrected_mark_ids
-            # Balsız i/e xanası pəncərədən sonra da dəyişir — dərsə yeni qeyd yazmaq olursa (sahib 2026-10-26).
+            # Balsız i/e öz müddətində (sahib 2026-11-21) dəyişir — dərsə yeni qeyd yazmaq olursa (2026-10-26).
             lock_reason = journal_edit_windows.mark_lock_reason(
                 mark,
                 now=now,
                 window=lock_window,
+                presence_window=presence_window,
                 entry_open=markable[lesson.id],
                 unsupported_score=mark is not None and mark.score is not None and not lesson_allows_score(lesson),
             )
@@ -346,8 +349,7 @@ def get_offering_journal(
                     "mark": mark,
                     "allows_score": lesson_allows_score(lesson),
                     "locked": locked,
-                    # «time» (15 dəq. keçib) / «legacy» (köçürülüb) / «entry» (i/e, yazma müddəti bitib) — kilidli
-                    # xana dialoqu (journal_mark_lock.js).
+                    # time / legacy / entry / presence (i/e müddəti) — kilidli xana dialoqu (journal_mark_lock.js).
                     "lock_reason": "" if corrected else lock_reason,
                     # Rəsmi düzəlişli xana müəllim üçün kilidli (yalnız admin düzəlişi dəyişir).
                     "corrected": corrected,
@@ -393,7 +395,7 @@ def get_offering_journal(
         # yalnız hələ qərar verilə bilən semestrdə mənalıdır.
         warning = (
             (not barred and absence_count >= 8)
-            if level_policy
+            if count_policy
             else absence_limit.near_limit(absence_hours, row_limit, frozen=frozen, barred=barred)
         )
         rows.append(
@@ -441,6 +443,7 @@ def get_offering_journal(
         "scheme": scheme,
         "lessons": lessons,
         "lesson_meta": lesson_meta,
+        "has_lessons": bool(all_lessons),
         "rows": rows,
         # Alt qrupdan əlavə olunmuş sətirlər (idarəetmə modalının siyahısı).
         "guest_rows": [row for row in rows if row["is_guest"]],
@@ -448,11 +451,7 @@ def get_offering_journal(
         "limit_percent": limit_percent,
         "allowed_absence": allowed_absence,
         # İcazə verilən maksimum q/b sayı (1 q/b=2 saat; 25% həddi) — UI "limit N q/b".
-        "limit_qb": (
-            language_level_grading.ABSENCE_LIMIT
-            if level_policy
-            else (int(allowed_absence // DEFAULT_LESSON_HOURS) if allowed_absence else 0)
-        ),
+        "limit_qb": language_level_grading.journal_limit_qb(count_policy, allowed_absence, DEFAULT_LESSON_HOURS),
         "level_policy": level_policy,
         "has_lab_groups": has_lab_groups,
         "entry_score_max": scheme.entry_score_max,
@@ -530,7 +529,7 @@ def get_student_journal_summary(
         scheme = getattr(offering, "assessment_scheme", None)
         from . import language_level_grading
 
-        cap = language_level_grading.entry_cap(offering.subject.name, scheme.entry_score_max if scheme else 50)
+        cap = language_level_grading.offering_entry_cap(offering, scheme.entry_score_max if scheme else 50)
         if language_level_grading.is_level(offering):
             absence_hours = (entry_batch.level_absence_hours or {}).get(enrollment.pk, absence_hours)
         entry_score = entry_score_for(enrollment, cap, **entry_batch.entry_kwargs(enrollment))

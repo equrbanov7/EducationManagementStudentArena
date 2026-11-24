@@ -27,6 +27,14 @@
         var timeoutText = card.getAttribute("data-i18n-timeout") || "";
         var errorEl = card.querySelector("[data-waiting-error]");
         var spinnerEl = card.querySelector("[data-waiting-spinner]");
+        var back = card.querySelector("[data-export-back]");
+        if (back && document.referrer && new URL(document.referrer).origin === location.origin && history.length > 1) {
+            back.addEventListener("click", function (event) {
+                if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+                event.preventDefault();
+                history.back();
+            });
+        }
         var startedAt = Date.now();
         var delay = POLL_START_MS;
 
@@ -48,12 +56,20 @@
         }
 
         function poll() {
+            if (!card.isConnected) return;
             fetch(statusUrl, {
                 headers: { "X-Requested-With": "XMLHttpRequest" },
                 credentials: "same-origin"
             })
-                .then(function (r) { return r.json(); })
+                .then(function (r) {
+                    if (r.redirected || r.status === 401 || r.status === 403 || r.status === 404) {
+                        return { status: "failed" };
+                    }
+                    if (!r.ok) throw new Error("export_status_unavailable");
+                    return r.json();
+                })
                 .then(function (json) {
+                    if (!card.isConnected) return;
                     if (json.status === "success") {
                         window.location.href = downloadUrl;
                         return;

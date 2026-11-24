@@ -57,7 +57,14 @@ class LevelRuleRegistryTests(SimpleTestCase):
             with self.subTest(name=name):
                 self.assertTrue(levels.is_practical_name(name))
                 self.assertFalse(levels.is_level_name(name))
-        for name in ("Xarici dildə işgüzar və akademik kommunikasiya-1", "Xarici dil 4", "Xarici dil 12", REGULAR_NAME):
+        # Sahib 2026-11-22: səviyyəsiz «Xarici dildə işgüzar … kommunikasiya-1» indi praktikidir (işgüzar profil).
+        self.assertTrue(levels.is_practical_name("Xarici dildə işgüzar və akademik kommunikasiya-1"))
+        for name in (
+            "Azərbaycan dilində işgüzar və akademik kommunikasiya",
+            "Xarici dil 4",
+            "Xarici dil 12",
+            REGULAR_NAME,
+        ):
             with self.subTest(name=name):
                 self.assertFalse(levels.is_practical_name(name))
 
@@ -109,7 +116,10 @@ class LevelSyllabusFormulaTests(SimpleTestCase):
         )
 
 
-@override_settings(UNIVERSITY_MODE=True)
+# Sahib 2026-11-22: LEVEL_NAME («…işgüzar … kommunikasiya-1(elementary)») indi «işgüzar kommunikasiya» profilindədir
+# (sərbəst iş əvəzinə praktiki məşğələ yox) — bu sinif SƏVİYYƏ qaydasını yoxlayır, ona görə profil açarı söndürülür
+# (profilin öz testləri: test_language_business_grading_2026_11_22.py).
+@override_settings(UNIVERSITY_MODE=True, ACADEMIC_LANGUAGE_BUSINESS_PROFILE=False)
 class LevelSurfacesTests(TestCase):
     setUpTestData = classmethod(fixtures.ExamScoreEntrySectionTest.setUpTestData.__func__)
     _client = fixtures.ExamScoreEntrySectionTest._client

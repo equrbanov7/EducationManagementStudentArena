@@ -23,7 +23,7 @@ from django.views.decorators.http import require_POST
 
 from core.http_ids import parse_uuid
 
-from . import corrections, gradebook
+from . import corrections
 from .journal_access import writable_offering_or_404
 from .models import (
     AssessmentComponent,
@@ -93,48 +93,10 @@ def build_correction_context(offering, request) -> dict:
     düzəliş rejimi (``?correct=1``) audited editoru göstərsin deyə (köhnə standalone
     ``duzelis/<uuid>/`` şimi URL auditi A11, 2026-10-10 ilə silindi). Bütün yazma
     ``corrections.apply_correction`` (audit + sənəd) üzərindəndir."""
-    from core.academic_rules import coursework_active_for_offering, selfwork_active_for_offering
-
-    from . import item_corrections, journal_extras, legacy_excuse
-
-    # Sahib 2026-10-10: sərbəst iş ləğv olunan dövrdə düzəliş hədəfi də YOXDUR — lövhə qurulmur, xəritə boşdur
-    # (servis — ``item_corrections`` — onsuz da rədd edir; data toxunulmur).
-    selfwork_active = selfwork_active_for_offering(offering)
-    sw_map = item_corrections.selfwork_corrections_map(offering, include_document=True) if selfwork_active else {}
-    # Sahib 2026-10-11: kurs işi söndürülən dövrdə onun düzəliş hədəfi və tarixçəsi də yoxdur.
-    coursework_active = coursework_active_for_offering(offering)
-    cw_map = item_corrections.coursework_corrections_map(offering, include_document=True) if coursework_active else {}
-    cm_map = item_corrections.component_corrections_map(offering, include_document=True)
-    journal = gradebook.get_offering_journal(offering=offering, newest_first=True)
-    corrections_map = corrections.corrections_map_for_offering(offering, include_document=True)
-    # Düzəliş rejimində də köhnə üzrlü-qayıb sənədi görünür (normal görünüşlə
-    # eyni payload) — korrektor nəyin əsasında üq yazıldığını görsün deyə.
-    legacy_excuse.attach_to_offering_journal(offering, journal, corrections_map)
     from .absence_credit_views import context as credit_context
 
     return {
         **credit_context(offering),
-        "journal": journal,
-        "corrections_map": corrections_map,
-        # Sərbəst iş / kurs işi / kollokvium düzəliş rejimi: annotasiyalı board + sarı/tarixçə map-ları.
-        "selfwork_board": (
-            item_corrections.annotate_selfwork_board(journal_extras.get_selfwork_board(offering), sw_map)
-            if selfwork_active
-            else None
-        ),
-        "selfwork_active": selfwork_active,
-        "coursework_rows": (
-            item_corrections.annotate_coursework_rows(journal_extras.get_course_work_rows(offering), cw_map)
-            if coursework_active
-            else []
-        ),
-        "coursework_active": coursework_active,
-        "kollokvium_grid": item_corrections.annotate_kollokvium_grid(
-            journal_extras.get_kollokvium_grid(offering), cm_map
-        ),
-        "selfwork_corrections_map": sw_map,
-        "coursework_corrections_map": cw_map,
-        "component_corrections_map": cm_map,
         "correction_reasons": CorrectionReason.choices,
         "attendance_choices": [
             (AttendanceStatus.PRESENT, pgettext("registrar.correction", "İştirak (iə)")),

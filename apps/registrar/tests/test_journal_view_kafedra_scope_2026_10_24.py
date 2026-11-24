@@ -15,7 +15,7 @@ from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
 from apps.organizations.models import AcademicPeriod, OrgUnit
-from apps.registrar import journal_access, journal_scope
+from apps.registrar import journal_access, journal_group_reach, journal_scope
 from apps.registrar.models import CourseOffering, Subject
 from apps.syllabus.tests.factories import activate_member, make_org
 from core.constants import AcademicPeriodType, OrgUnitType, RoleScopeType
@@ -127,12 +127,15 @@ class JournalViewKafedraScopeTest(TestCase):
 
     # ── Siyahı ───────────────────────────────────────────────────────────────
 
-    def test_kafedra_scoped_viewer_lists_own_kafedra_offerings_only(self):
-        self.assertEqual(self._codes(self.chair_head), {"JVKS-MP", "JVKS-IT"})
+    def test_kafedra_scoped_viewer_lists_own_kafedra_and_school_group_offerings(self):
+        # Sahib 2026-11-22 «Bəli, görsünlər»: kafedra müdiri məktəbinin qruplarının jurnallarını da görür (OXU) —
+        # başqa kafedranın JVKS-AL-ı və kafedrasız JVKS-XX; başqa məktəbin JVKS-FN-i yox.
+        self.assertEqual(self._codes(self.chair_head), {"JVKS-MP", "JVKS-IT", "JVKS-AL", "JVKS-XX"})
 
     def test_kafedra_scoped_viewer_kafedra_filter_matches_scope(self):
         self.assertEqual(self._codes(self.chair_head, department=self.kafedra.pk), {"JVKS-MP", "JVKS-IT"})
-        self.assertEqual(self._codes(self.chair_head, department=self.other_chair.pk), set())
+        self.assertEqual(self._codes(self.chair_head, department=self.other_chair.pk), {"JVKS-AL"})
+        self.assertEqual(self._codes(self.chair_head, department=self.econ_chair.pk), set())
 
     def test_faculty_scoped_viewer_unchanged_group_subtree(self):
         # Fakültə əhatəsi qrup alt-ağacıdır: JVKS-IT (qrupu İqtisadiyyatda) DÜŞMÜR, fakültə qruplarının hamısı düşür.
@@ -152,11 +155,12 @@ class JournalViewKafedraScopeTest(TestCase):
         self.assertEqual(self._detail_status(self.chair_head, self.by_teacher), 200)
         self.assertEqual(self._detail_status(self.chair_head, self.by_subject), 200)
 
-    def test_kafedra_scoped_viewer_cannot_open_other_kafedra_journal(self):
-        # Detal səhifəsi icazəsizə (mövcud davranış) 404 verir — obyektin varlığı açılmır.
-        self.assertEqual(self._detail_status(self.chair_head, self.other), 404)
+    def test_kafedra_scoped_viewer_opens_school_group_journal_but_not_other_school(self):
+        # Sahib 2026-11-22: məktəbin qrupunun başqa kafedradakı jurnalı OXU üçün açılır; başqa məktəbinki 404.
+        self.assertEqual(self._detail_status(self.chair_head, self.other), 200)
+        self.assertEqual(self._detail_status(self.chair_head, self.unattributed), 200)
         self.assertEqual(self._detail_status(self.chair_head, self.finance), 404)
-        self.assertEqual(self._detail_status(self.chair_head, self.unattributed), 404)
+        self.assertFalse(journal_access.is_direct_editor(self.chair_head, self.other))
 
     def test_kafedra_observation_is_read_only(self):
         status = self._detail_status(self.chair_head, self.by_teacher, method="post", action="add_lesson")
@@ -175,6 +179,9 @@ class JournalViewKafedraScopeTest(TestCase):
     def test_list_and_detail_scope_agree(self):
         for user in (self.chair_head, self.dean):
             view_q = journal_scope.journal_view_q(user, self.org)
+            reach = journal_group_reach.reach_q(User.objects.get(pk=user.pk), self.org)
+            if reach is not None:
+                view_q |= reach
             listed = set(
                 CourseOffering.objects.filter(organization=self.org).filter(view_q).values_list("pk", flat=True)
             )

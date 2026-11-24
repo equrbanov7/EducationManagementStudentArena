@@ -41,6 +41,7 @@ sorğular `supervision_room.js`. Tələbənin adı və detal JS ilə doldurulur.
         </div>
         <div class="ems-dialog__body">
             <p class="svr-dialog__text">{% trans "Tələbənin ekranı kilidlənir, cəhd təhvil verilmir. «Bərpa et» ilə davam etdirə bilərsiniz." context "exams.supervision_room" %}</p>
+            <p class="svr-dialog__text">{% trans "Dayandırılma müddəti tələbənin vaxtından getmir — «Bərpa et» basılanda ona qaytarılır." context "exams.supervision_room" %}</p>
             <label class="ems-field__label" for="svr-pause-reason">{% trans "Səbəb (tələbəyə göstərilir)" context "exams.supervision_room" %}</label>
             <textarea id="svr-pause-reason" class="ems-textarea" rows="3" maxlength="500"
                       placeholder="{% trans 'Məsələn: telefondan istifadə' context 'exams.supervision_room' %}"></textarea>

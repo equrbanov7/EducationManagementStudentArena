@@ -3501,6 +3501,39 @@ class StudentExamVisibilityFilteringTest(TestCase):
         self.assertEqual(attempt.status, "in_progress")
         self.assertEqual(attempt.correct_count, 0)
 
+    def test_course_and_assigned_exam_queries_stay_constant_as_cards_grow(self):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        urls = [
+            reverse("courses:course_dashboard", args=[self.assigned_course.pk]),
+            reverse("accounts:assigned_exams"),
+        ]
+
+        def measure(url):
+            with CaptureQueriesContext(connection) as queries:
+                response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
+            return response, len(queries)
+
+        for url in urls:
+            measure(url)
+        baseline = [measure(url)[1] for url in urls]
+        for i in range(8):
+            new_exam = Exam.objects.create(
+                author=self.teacher,
+                course=self.assigned_course,
+                title=f"Kurs imtahanı {i}",
+                is_active=True,
+                is_public=False,
+            )
+        self.course_code_exam.excluded_users.add(self.student)
+        for url, small in zip(urls, baseline):
+            response, large = measure(url)
+            self.assertContains(response, new_exam.title)
+            self.assertNotContains(response, self.course_code_exam.title)
+            self.assertLessEqual(large, small)
+
     def test_course_dashboard_student_exam_actions_use_info_modal(self):
         response = self.client.get(reverse("courses:course_dashboard", args=[self.assigned_course.id]))
 
@@ -3671,10 +3704,19 @@ class StudentExamVisibilityFilteringTest(TestCase):
             attempt_number=1,
         )
 
+        latest = ExamAttempt.objects.create(
+            user=self.student, exam=self.course_assigned_exam, status="submitted", attempt_number=2
+        )
+        ExamAttempt.objects.create(user=self.student, exam=self.course_assigned_exam, status="draft", attempt_number=3)
+
         response = self.client.get(reverse("courses:course_dashboard", args=[self.assigned_course.id]))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Cavablarım (1)")
+        card = next(
+            row for row in response.context["exams_with_data"] if row["exam"].pk == self.course_assigned_exam.pk
+        )
+        self.assertEqual(card["last_attempt"].pk, latest.pk)
+        self.assertContains(response, "Cavablarım (2)")
         self.assertContains(
             response,
             f'{reverse("exams:student_exam_history")}?exam={self.course_assigned_exam.slug}',

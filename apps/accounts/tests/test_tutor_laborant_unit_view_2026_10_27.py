@@ -252,12 +252,13 @@ def test_role_templates_carry_the_keys(world):
 
 def test_kafedra_scoped_supervisor_sees_own_kafedra_lessons_only(world):
     org = world["org"]
-    for key in ("laborant", "tutor"):
+    # Sahib 2026-11-22: laborant məktəbinin qruplarının başqa kafedradakı dərslərini də görür (OXU).
+    for key, sees_other in (("laborant", True), ("tutor", False)):
         user = world[key]
         assert lessons_service.is_supervisor(user, org)
         visible = set(lessons_service.scoped_lessons(user, org, supervisor=True).values_list("pk", flat=True))
         assert world["lesson"].pk in visible, key
-        assert world["other_lesson"].pk not in visible, key
+        assert (world["other_lesson"].pk in visible) is sees_other, key
 
 
 def test_lessons_log_section_renders_kafedra_lessons(world):
@@ -267,7 +268,7 @@ def test_lessons_log_section_renders_kafedra_lessons(world):
     assert response.status_code == 200
     body = response.content.decode()
     assert "Kafedranın mövzusu" in body
-    assert "Başqa kafedranın mövzusu" not in body
+    assert "Başqa kafedranın mövzusu" in body  # sahib 2026-11-22: məktəbin qrupu — OXU
 
 
 def test_teacher_lessons_scope_unchanged(world):

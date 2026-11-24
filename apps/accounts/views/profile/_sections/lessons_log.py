@@ -108,9 +108,20 @@ def build_lessons_log_section(request, section, *, active_organization, allowed_
     # * Gün siyahısı: ilk səhifə (`PAGE_SIZE` dərs), qalanı «Daha çox göstər» ilə; gün başlığı günün TAM cəmidir.
     # * Seçici siyahıları (fakültə / kafedra / fənn / qrup / müəllim) 120 s keşlidir (`cached_by_query`).
     full_totals = service.cached_range_totals(lessons)
-    totals = full_totals or service.quick_totals(lessons)
     page = service.page_rows(lessons)
     rows = page["rows"]
+    if full_totals is not None:
+        totals = full_totals
+    elif page["next_offset"] is None:
+        active = [row for row in rows if not row["is_passive"]]
+        totals = {
+            "lessons": len(active),
+            "hours": sum(row["hours"] for row in active),
+            "passive_lessons": len(rows) - len(active),
+            "passive_hours": sum(row["hours"] for row in rows if row["is_passive"]),
+        }
+    else:
+        totals = service.quick_totals(lessons)
     unrecorded = service.unrecorded_for(request, active_organization, ctx, cached_only=True)
     section["unrecorded"] = unrecorded
     section["insights_pending"] = full_totals is None or unrecorded is None

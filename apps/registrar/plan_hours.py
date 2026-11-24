@@ -81,6 +81,11 @@ def plan_hours_for_offering(offering):
 
     if cohort_hours := hours_for_offering(offering):
         return cohort_hours
+    from .plan_hours_load import is_intensive
+
+    if is_intensive(offering):
+        # İntensiv kursun saatı kursun öz yük sətridir (müəllim 25 saatı 16 + 9 bölür) — tədris planının 30 + 30-u deyil.
+        return workload_hours_for_offering(offering)
     from core.academic_rules import syllabus_hours_from_load
 
     def from_plan(program_only=False):

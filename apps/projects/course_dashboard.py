@@ -29,7 +29,7 @@ def build_course_dashboard_context(*, course, user, membership, can_manage, is_s
 
         # Batch-fetch submission counts for this user across all projects
         # to avoid N+1 queries (one query instead of one per project).
-        project_ids = list(projects_qs.values_list("id", flat=True))
+        project_ids = [project.pk for project in projects_qs]
         project_submission_counts_qs = (
             ProjectSubmission.objects.filter(project_id__in=project_ids, student=user)
             .values("project_id")

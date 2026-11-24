@@ -22,8 +22,10 @@ from pathlib import Path
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.template.loader import render_to_string
 from django.test import Client, SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
+from django.utils import translation
 
 from apps.accounts.templatetags.profile_shell import (
     COMPACT_SIDEBAR_FLAG_ITEMS,
@@ -410,3 +412,29 @@ class SidebarLayoutRenderTest(TestCase):
         self.assertRegex(aside, r'data-section="question-submissions"[^>]*class="[^"]*\bactive\b')
         self.assertNotIn("sidebar-account", aside)
         self.assertIn("accounts/js/profile/sidebar_nav.js", response.content.decode())
+
+
+class FinalCenterItemLabelTest(SimpleTestCase):
+    """Sahib 2026-11-20: «o zallar olsun gərək adı» — bənd zallar səhifəsinin öz başlığı ilə adlanır."""
+
+    def _render(self, lang):
+        with translation.override(lang):
+            return render_to_string(
+                "accounts/profile/sidebar/items/_final_center.html",
+                {"role_capabilities": {"can_access_final_center": True}},
+            )
+
+    def test_item_is_named_like_the_halls_page(self):
+        expected = {
+            "az": "İmtahan zalları",
+            "en": "Exam halls",
+            "ru": "Экзаменационные залы",
+            "tr": "Sınav salonları",
+            "de": "Prüfungsräume",
+        }
+        for lang, label in expected.items():
+            with self.subTest(lang=lang):
+                html = self._render(lang)
+                self.assertIn(f'<span class="sidebar-menu-text">{label}</span>', html)
+                self.assertIn(reverse("exams:exam_center_room_list"), html)
+        self.assertNotIn("İmtahan Nəzarət Sistemi", self._render("az"))

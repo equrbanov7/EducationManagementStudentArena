@@ -14,13 +14,8 @@ from .factories import client_for, member
 from .results_world import add_general, add_responses, build_results_world
 
 FRAGMENT = "accounts:profile_section_fragment"
-#: Ölçülmüş dəyər + 3 ehtiyat (2026-09-25: overview 75, teachers 68, general 80, drawer 50,
-#: export 81, search 13). Fraqment yolu kabinet qabığının sorğularını da sayır (~35, bax
-#: test_cabinet_shell_query_budget); bölmənin özü sabit sayda aqreqat sorğusudur.
-#: Audit 2026-09-28 SV-1: vahid dərc qaydası (kafedra müqayisə nöqtəsi, kafedra dinamikası) drawer-ə
-#: +3 (56), ixraca +1 (85) sabit sorğu əlavə edir — büdcə yenə «ölçülmüş + 3».
-#: Təhlükəsizlik auditi 2026-10-05: drawer panel kimi filtr kaskadını hesablayır (+6 sabit, 62).
-BUDGETS = {"overview": 78, "teachers": 71, "general": 83, "drawer": 65, "export": 88, "search": 16}
+# Report metadata is reused only within a render. Keep coverage at two dataset sizes.
+BUDGETS = {"overview": 68, "teachers": 68, "general": 69, "drawer": 63, "export": 63, "search": 16}
 
 
 def _grow(world, extra):

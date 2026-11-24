@@ -342,7 +342,7 @@ Object.assign(ExamSupervision, {
 
         _startTeacherLockPolling: function () {
             this._startLockStatusPolling(function (data) {
-                if (data.supervision_status === "resumed" || data.supervision_status === "active") {
+                if (ExamSupervision._isUnlockedStatus(data.supervision_status)) {
                     var ov = document.getElementById("supervision-teacher-lock-overlay");
                     if (ov) ov.remove();
                     ExamSupervision.isActive = true;
@@ -371,9 +371,16 @@ Object.assign(ExamSupervision, {
             });
         },
 
+        // 2026-11-20: «warned» («şübhəli» işarəsi) də kilidsizdir — əvvəl kilid ekranı onu gözləmirdi və açılmırdı.
+        _isUnlockedStatus: function (status) {
+            return status === "resumed" || status === "active" || status === "warned";
+        },
+
         _onLimitExceeded: function () {
             this.isActive = false;
             this._hideWarning();
+            // Güzəşt sayğacı kilid altında işləməsin (əvvəl kilid ekranının arxasında pozuntu yazmağa davam edirdi).
+            this._clearGraceTimer();
 
             // Don't create duplicate locked overlays
             if (document.getElementById("supervision-locked-overlay")) return;
@@ -441,7 +448,7 @@ Object.assign(ExamSupervision, {
 
         _startStatusPolling: function () {
             this._startLockStatusPolling(function (data) {
-                if (data.supervision_status === "resumed" || data.supervision_status === "active") {
+                if (ExamSupervision._isUnlockedStatus(data.supervision_status)) {
                     if (ExamSupervision._lockCountdownTimer) {
                         clearInterval(ExamSupervision._lockCountdownTimer);
                         ExamSupervision._lockCountdownTimer = null;

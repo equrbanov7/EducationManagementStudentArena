@@ -11,9 +11,11 @@ uyğundur: ``{"results": [{"id", "text"}], "has_more": bool}`` + ``?q``/``?offse
 
 from __future__ import annotations
 
+import logging
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ValidationError
+from django.core.exceptions import SuspiciousFileOperation, ValidationError
 from django.http import Http404, JsonResponse
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_GET, require_POST
@@ -22,11 +24,12 @@ from apps.organizations.public import guard_self_conflict
 from core import superadmin_waiver
 from core.search_text import tolerant_q
 
-from . import guest_merge, guest_roster, journal_removal, subgroup_placement
+from . import guest_merge, guest_roster, journal_removal, roster_source_scope, subgroup_placement
 from .journal_access import offering_or_404
 from .models import AcademicStatus, Enrollment, RemovalAction
 
 _CTX = "registrar.guest_roster"
+logger = logging.getLogger(__name__)
 _PAGE_SIZE = 20
 _MAX_PAGE = 50
 
@@ -102,7 +105,7 @@ def guest_group_search(request, offering_id):
     """Aktorun əhatəsindəki AKADEMİK QRUPLAR (açılışın öz qrupu xaric)."""
     offering = _offering_for_roster(request, offering_id)
     query = (request.GET.get("q") or "").strip()
-    groups = guest_roster.scoped_group_queryset(request.user, offering.organization)
+    groups = roster_source_scope.source_group_queryset(request.user, offering)
     if offering.group_id is not None:
         groups = groups.exclude(pk=offering.group_id)
     search_q = tolerant_q(query, ("name", "code"), compact=True)
@@ -122,7 +125,7 @@ def guest_student_search(request, offering_id):
     group_id = _uuid((request.GET.get("group") or "").strip())
     if group_id is None:
         return JsonResponse({"results": [], "has_more": False})
-    group = guest_roster.scoped_group_queryset(request.user, offering.organization).filter(pk=group_id).first()
+    group = roster_source_scope.source_group_queryset(request.user, offering).filter(pk=group_id).first()
     if group is None or (offering.group_id is not None and str(group.pk) == str(offering.group_id)):
         return JsonResponse({"results": [], "has_more": False})
 
@@ -191,7 +194,7 @@ def guest_add_preview(request, offering_id):
     student_id = _int((request.GET.get("student") or "").strip())
     if group_id is None or student_id is None:
         return _error(pgettext(_CTX, "Qrup və tələbə seçilməlidir."))
-    group = guest_roster.scoped_group_queryset(request.user, offering.organization).filter(pk=group_id).first()
+    group = roster_source_scope.source_group_queryset(request.user, offering).filter(pk=group_id).first()
     if group is None:
         return _error(pgettext(_CTX, "Seçilmiş qrup sizin əhatənizdə deyil."), status=403)
     student = _resolve_student(request, offering, group, student_id)
@@ -243,7 +246,7 @@ def guest_add(request, offering_id):
     # əhatəsindən və tranzaksiyadan ƏVVƏL (aydın 403 + audit).
     _guard_target(request, offering, student_id, group_id=group_id)
 
-    group = guest_roster.scoped_group_queryset(request.user, offering.organization).filter(pk=group_id).first()
+    group = roster_source_scope.source_group_queryset(request.user, offering).filter(pk=group_id).first()
     if group is None:
         return _error(pgettext(_CTX, "Seçilmiş qrup sizin əhatənizdə deyil."), status=403)
 
@@ -303,6 +306,14 @@ def guest_add(request, offering_id):
         return _error(exc.message, status=409)
     except ValidationError as exc:
         return _error("; ".join(exc.messages))
+    except (SuspiciousFileOperation, OSError):
+        # Faylın saxlanması (ad / disk) uğursuz — Django bunu HTML 400/500 səhifəsinə çevirirdi və modal yalnız
+        # ümumi «Əməliyyat alınmadı» göstərirdi (prod 2026-11-20). Tranzaksiya geri qayıdıb; səbəb JSON-da.
+        logger.exception("guest_add: document store failed (offering=%s)", offering.pk)
+        return _error(
+            pgettext(_CTX, "Sənəd saxlanıla bilmədi — faylı yenidən yükləyin."),
+            status=400,
+        )
 
     return JsonResponse(
         {

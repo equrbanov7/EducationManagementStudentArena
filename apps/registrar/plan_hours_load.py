@@ -100,6 +100,23 @@ def _task_row_model():
         return None
 
 
+#: ``workload.RowKind.INTENSIVE`` — sətir dəyəri (registrar → workload Python importu yaranmasın).
+INTENSIVE_ROW_KIND = "intensive"
+
+
+def is_intensive(offering) -> bool:
+    return getattr(offering, "course_format", "") == INTENSIVE_ROW_KIND
+
+
+def _row_matches(row, group_ids, offering) -> bool:
+    """Toplu yolda ``workload_hours_for_offering``-in eyni süzgəci: intensiv → öz sətri, qrup → qrupun sətirləri."""
+    if is_intensive(offering):
+        return row.intensive_offering_id == offering.pk
+    if offering.group_id:
+        return offering.group_id in group_ids
+    return getattr(row, "row_kind", "") != INTENSIVE_ROW_KIND
+
+
 def workload_hours_for_offering(offering) -> dict:
     """Açılışın (fənn + dövr + qrup) yük sətirlərindən BİR QRUPUN bölgüsü (``{}`` — sətir yoxdur)."""
     if offering is None or not (getattr(offering, "subject_id", None) and getattr(offering, "period_id", None)):
@@ -114,8 +131,14 @@ def workload_hours_for_offering(offering) -> dict:
     rows = TaskRow.objects.filter(
         organization_id=offering.organization_id, subject_id=offering.subject_id, period_id=offering.period_id
     ).exclude(task__status="cancelled")
-    if offering.group_id:
+    if is_intensive(offering):
+        # MR-654/659 (2026-11-23): intensiv kursun saatı YALNIZ öz sətrindəndir (16 + 9). Qrupsuz açılış əvvəl fənnin
+        # BÜTÜN sətirlərinin ən böyüyünü (adi qrupların 30 + 30) alırdı → sillabus 15 həftə göstərirdi.
+        rows = rows.filter(intensive_offering_id=offering.pk)
+    elif offering.group_id:
         rows = rows.filter(groups=offering.group_id)
+    else:
+        rows = rows.exclude(row_kind=INTENSIVE_ROW_KIND)
     shares = [row_group_hours(row, group_count=row.groups.count) for row in rows.order_by("-updated_at")]
     return merge_group_hours(shares)
 
@@ -146,7 +169,7 @@ def workload_hours_by_offering(offerings) -> dict:
             for row, group_ids, share in rows
             if row.subject_id == offering.subject_id
             and row.period_id == offering.period_id
-            and (not offering.group_id or offering.group_id in group_ids)
+            and _row_matches(row, group_ids, offering)
         )
     from .language_cohort_journal import hours_by_offering
 

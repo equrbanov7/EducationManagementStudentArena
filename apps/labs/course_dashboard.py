@@ -10,6 +10,7 @@ from collections import defaultdict
 from django.utils import timezone
 
 from apps.labs.models import LabAssignment, LabSubmission
+from apps.labs.selectors import labs_with_student_target
 from core.helpers import REVIEW_EDIT_LOCK_WINDOW
 
 
@@ -33,11 +34,12 @@ def build_course_dashboard_context(*, course, user, membership, can_manage, is_s
 
     labs_with_user_data = []
 
-    # Fetch all published labs with their M2M allowed_students pre-loaded
-    # in a single query to avoid per-lab allowed_student lookups (N+1).
-    published_labs = list(
-        course.labs.filter(status="published").prefetch_related("allowed_students").order_by("-created_at")
-    )
+    candidates = labs_with_student_target(course.labs.filter(status="published"), user, include_any=True)
+    published_labs = []
+    for lab in candidates.order_by("-created_at"):
+        groups = {group.casefold() for group in lab.get_allowed_groups_list()}
+        if lab._direct or (not lab._has_targets and not groups) or (student_group and student_group in groups):
+            published_labs.append(lab)
 
     # Batch-fetch LabAssignments for this student across all labs.
     lab_ids = [lab.id for lab in published_labs]
@@ -51,23 +53,6 @@ def build_course_dashboard_context(*, course, user, membership, can_manage, is_s
 
     # Published olan lab-ları yoxla
     for lab in published_labs:
-        # ƏSAS MƏNTİQ — `Lab.can_student_access` ilə EYNİ (2026-09-28):
-        # 1. Hər iki filtr boşdursa → bütün kursa açıqdır (əvvəl heç kim görmürdü,
-        #    halbuki detal səhifəsi açılırdı və bildiriş bütün kursa gedirdi)
-        # 2. Tələbə ID siyahısındadırsa → görür
-        # 3. Qrupu (casefold) siyahıdadırsa → görür
-        allowed_student_ids = {s.id for s in lab.allowed_students.all()}
-        allowed_group_keys = {g.casefold() for g in lab.get_allowed_groups_list()}
-
-        if not allowed_student_ids and not allowed_group_keys:
-            is_assigned = True
-        else:
-            is_assigned = user.id in allowed_student_ids or bool(student_group and student_group in allowed_group_keys)
-
-        # Əgər təyin olunmayıbsa, skip et
-        if not is_assigned:
-            continue
-
         # Use pre-fetched LabAssignment and LabSubmissions.
         assignment = lab_assignments_by_lab.get(lab.id)
 

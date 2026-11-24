@@ -16,6 +16,7 @@ from django.db.models import Count, Q
 from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 from django.utils.translation import pgettext, pgettext_lazy
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
 from apps.exams.domain.unit_scope_filters import (
@@ -361,6 +362,7 @@ def exam_center_stats_data(request):
 
 @login_required
 @require_GET
+@never_cache
 def exam_center_stats_export(request):
     """Filtrlənmiş bütün nəticələrin Excel (.xlsx) ixracı.
 

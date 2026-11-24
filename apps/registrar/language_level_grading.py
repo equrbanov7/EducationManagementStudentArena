@@ -23,7 +23,17 @@ SEMINAR_MAX = ACTIVITY_MAX
 
 
 def is_level_name(subject_name):
+    """Ad mötərizədə SƏVİYYƏ daşıyırmı (köçürülmüş / donmuş kurs qaydaları bunu işlədir)."""
     return bool(level_of(subject_name))
+
+
+def is_graded_name(subject_name):
+    """QİYMƏTLƏNDİRMƏ yolu: səviyyəli ad VƏ ya «Xarici dildə işgüzar kommunikasiya» adı (səviyyəsiz «…-2» də, RİM
+    açarı ilə — sahib 2026-11-22, :func:`core.language_business_rule.graded_level_name`). Kohort qruplaşması bunu
+    işlətmir (``level_of``)."""
+    from core.language_business_rule import graded_level_name
+
+    return graded_level_name(subject_name)
 
 
 def is_level(offering):
@@ -32,11 +42,31 @@ def is_level(offering):
     Cari semestrdə həmişə qüvvədədir. Köçürülmüş (keçmiş, cari olmayan) semestrlərdə səviyyə adlı fənlər köhnə sistemdə universitet standartı ilə
     (giriş 0–50) aparılıb və imtahansız qalıb — sahib 2026-11-09: onlar adi fənn kimi oxunur, yekun = giriş balı
     (bax :func:`apps.registrar.finals.compute_final_result`). Ad yoxlaması üçün :func:`is_level_name` qalır.
+    Sahib 2026-11-22: səviyyəsiz «Xarici dildə işgüzar … kommunikasiya-1/2/3» də (:func:`is_graded_name`).
     """
     subject = getattr(offering, "subject", None)
-    if subject is None or not is_level_name(getattr(subject, "name", "")):
+    if subject is None or not is_graded_name(getattr(subject, "name", "")):
         return False
     return level_era(offering)
+
+
+def uses_qb_count_limit(offering) -> bool:
+    """11-ci q/b (SAY) qaydası — yalnız adında SƏVİYYƏ olan dil fənləri (``is_level`` + ``is_level_name``).
+
+    Sahib 2026-11-23 (MR-000698, 335F2): səviyyəsiz «Xarici dildə işgüzar və akademik kommunikasiya-2» ixtisas
+    fənnidir (60 saat) — qiymətləndirmə profili (10 + 10 + 10 / 70) qalır, qayıb həddi isə adi fənlər kimi dərs
+    saatının faizi ilə (25%: 60 saat → 7 q/b) hesablanır.
+    """
+    if not is_level(offering):
+        return False
+    return is_level_name(getattr(getattr(offering, "subject", None), "name", ""))
+
+
+def journal_limit_qb(count_policy, allowed_absence, lesson_hours) -> int:
+    """Jurnal başlığının «limit N q/b»-si: səviyyə fənnində sabit SAY, qalanlarında icazəli saat / dərs saatı."""
+    if count_policy:
+        return ABSENCE_LIMIT
+    return int(allowed_absence // lesson_hours) if allowed_absence else 0
 
 
 #: Dövr qapısının keşi: ``period_id → (vaxt, qüvvədədir)``. Açılış başına sorğu OLMASIN deyə (döngülərdə 37 çağırış
@@ -88,6 +118,13 @@ def level_era(offering) -> bool:
 
 def entry_cap(subject_name, configured):
     return ENTRY_MAX if is_level_name(subject_name) else configured
+
+
+def offering_entry_cap(offering, configured):
+    """Açılışın giriş tavanı: :func:`entry_cap` + dövrü qüvvədə olan səviyyəsiz işgüzar kommunikasiya fənni (30)."""
+    subject = getattr(offering, "subject", None)
+    cap = entry_cap(getattr(subject, "name", ""), configured)
+    return ENTRY_MAX if cap != ENTRY_MAX and is_level(offering) else cap
 
 
 def exam_cap(subject_name, configured_entry):
@@ -233,6 +270,20 @@ def eligibility(
         absence_hours = metrics["hours"] if absence_hours is None else absence_hours
     hours = lesson_hours if lesson_hours is not None else exam_eligibility.lesson_hours_for(enrollment.offering)
     absent = enrollment.absence_hours if absence_hours is None else absence_hours
+    if not uses_qb_count_limit(enrollment.offering):
+        # MR-000698: səviyyəsiz «İşgüzar … kommunikasiya -N» ixtisas fənnidir — qayıb həddi saatın faizidir (25%).
+        from .absence_limit import limit_percent_for_enrollment
+
+        result = exam_eligibility.resolve(
+            absence_hours=absent,
+            lesson_hours=hours,
+            limit_percent=limit_percent_for_enrollment(enrollment),
+            exempt=exempt,
+            resit_done=resit_done,
+            frozen=frozen,
+        )
+        result.setdefault("absence_count", absence_count)
+        return result
     # Retain the canonical proportional attendance score, while the admission
     # decision uses the displayed count. A historical freeze cannot bypass 11.
     result = exam_eligibility.resolve(absence_hours=absent, lesson_hours=hours, exempt=True, frozen=False)
@@ -269,14 +320,18 @@ def parts_for(
     rule=None,
     absence_count=None,
     absence_hours=None,
+    selfwork_points=None,
     **_unused,
 ):
     from . import activity_kinds, entry_standard
+    from . import language_business_grading as business
     from .gradebook_components import round_score
     from .models import AssessmentComponent, ComponentScore, LessonMark
 
     if not is_level(enrollment.offering):
         return None
+    # «Xarici dildə işgüzar kommunikasiya» (sahib 2026-11-22): üçüncü 10 bal = praktiki məşğələ ortası + sərbəst iş.
+    business_profile = business.is_business(enrollment.offering)
     if components is None:
         components = list(
             AssessmentComponent.objects.filter(
@@ -325,6 +380,19 @@ def parts_for(
     )
     attendance = check["attendance_score"]
     attendance = Decimal(0) if attendance is None else attendance
+    if business_profile:
+        return business.entry_parts(
+            attendance=attendance,
+            practical=activity,
+            midterm=max(Decimal(0), midterm),
+            # Standart qayda kimi YALNIZ SELF_WORK komponenti olan jurnalda (canlı yazı yolları onu həmişə yaradır).
+            selfwork=(
+                business.selfwork_points_for(enrollment, selfwork_points)
+                if any(component.kind == "self_work" for component in components)
+                else Decimal(0)
+            ),
+            barred=check["barred"],
+        )
     return entry_standard.EntryParts(
         attendance=attendance,
         activity=activity,

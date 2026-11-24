@@ -29,6 +29,7 @@ from ..constants import (
 from ..engine import Weights
 from ..services import access, availability, policy, review, teachers
 from ..sources import scope_options
+from ..sources.groups import policy_rows
 from .common import base_context
 from .forms import new_run_form, run_row, weight_labels
 
@@ -122,14 +123,17 @@ def policies_page(request):
     organization = access.organization_for(request)
     period = _period(organization, request)
     query = str(request.GET.get("q") or "").strip()[:80]
-    rows = policy.group_rows(request.user, organization, period, access.scoped_groups(request.user, organization))
+    policies = policy_rows(organization)
+    rows = policy.group_rows(
+        request.user, organization, period, access.scoped_groups(request.user, organization), policies=policies
+    )
     if query:
         # Qrup adı kod rejimində: «234king» → «234 K ing» (sahib 2026-09-26).
         rows = [row for row in rows if tolerant_match(query, row["name"], compact=True)]
     context = base_context(request, organization, period, "policies")
     context.update(
         {
-            "levels": policy.level_rows(organization),
+            "levels": policy.level_rows(organization, by_level=policies[1]),
             # Audit 2026-09-28 TT-1: pillə defoltu yalnız org-wide aktora redaktə olunur.
             "can_edit_levels": policy.can_edit_levels(request.user, organization),
             "band_choices": [{"code": code, "label": str(label)} for code, label in Band.choices],

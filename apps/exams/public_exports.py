@@ -36,6 +36,7 @@ from .services.exam_center_gate import HallComputerDenied  # noqa: F401
 from .services.exam_network import exam_network_allowed  # noqa: F401
 from .services.exam_network import exam_network_denied_message  # noqa: F401
 from .services.final_center import clear_entry_session  # noqa: F401
+from .services.final_center.cabinet import student_final_exam_contexts
 from .services.manual_grading import answer_max_points  # noqa: F401
 from .services.question_chair_review import chair_queue_queryset  # noqa: F401
 from .services.question_chair_review import pending_chair_review_count  # noqa: F401
@@ -45,7 +46,7 @@ from .services.results_export import exam_attempt_rows as results_export_attempt
 from .services.results_export import patronymic_map as results_export_patronymic_map  # noqa: F401
 from .services.results_export_meta import auto_checker_label  # noqa: F401
 from .services.results_export_meta import checked_by_map as attempt_checked_by_map  # noqa: F401
-from .services.student_pins import student_visible_pin  # noqa: F401
+from .services.student_pins import assigned_student_pins, student_visible_pin  # noqa: F401
 from .views.exam_center._shared import supervisor_org_or_403  # noqa: F401
 from .views.student._final_device import hall_computer_blocked_response  # noqa: F401
 from .views.student._helpers import ensure_student_exam_tenant_context  # noqa: F401
@@ -93,6 +94,8 @@ __all__ = [
     "score_adjustments",
     "split_group_filter_values",
     "student_visible_pin",
+    "assigned_student_pins",
+    "student_final_exam_contexts",
     "supervisor_org_or_403",
     "student_assigned_exams_q",
     "student_excluded_exams_q",

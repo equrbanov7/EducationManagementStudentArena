@@ -11,7 +11,7 @@ from django.utils.translation import pgettext
 from core.audit import log_action
 from core.constants import AuditAction
 
-from . import guest_merge, guest_roster, language_cohorts
+from . import guest_merge, guest_roster, language_cohorts, roster_source_scope
 from .language_levels import level_family, level_of
 from .models import (
     AcademicStatus,
@@ -92,7 +92,8 @@ def _record(cohort, record_id):
 def _authorize_record(actor, cohort, record, sources):
     if not language_cohorts.can_manage_as_staff(actor, cohort):
         raise PermissionDenied
-    if guest_roster.unit_in_scope(actor, cohort.organization, record.group_id):
+    # Sahib 2026-11-22: universitet əhatəli kafedranın səviyyə qrupu — tələbə istənilən məktəbin qrupundan.
+    if roster_source_scope.cohort_allows_group(actor, cohort, record.group_id):
         return
     if any(language_cohorts.source_access(actor, source) for source in sources):
         return
@@ -187,6 +188,9 @@ def place_student(*, cohort, record_id, actor, reason, source_enrollment_id=None
         if not (
             guest_roster.can_manage_offering_roster(actor, source.offering)
             or language_cohorts.source_access(actor, source)
+            # Sahib 2026-11-22: universitet əhatəli kafedranın səviyyə qrupu — tələbənin öz məktəbindəki eyni dil
+            # ailəsinin səviyyə jurnalından keçidi də (başqa məktəbin qrupu olsa belə).
+            or roster_source_scope.cohort_allows_source(actor, cohort, source.offering)
         ):
             raise PermissionDenied
         guest_roster.assert_roster_open(source.offering)

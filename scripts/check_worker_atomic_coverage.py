@@ -153,8 +153,18 @@ INTENTIONAL_EXEMPTIONS = {
     "apps/registrar/management/commands/remove_colloquium_note_20261118.py",
     # 2026-11-19 MR-000562/550 sillabus kafedra/fənn bağı: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/fix_syllabus_links_20261119.py",
+    # 2026-11-23 MR-000647 sillabusun müəllifi: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
+    "apps/registrar/management/commands/fix_syllabus_author_20261123.py",
+    "apps/registrar/management/commands/fix_syllabus_chairs_20261123.py",
+    "apps/registrar/management/commands/remove_share_students_20261123.py",
+    "apps/registrar/management/commands/unlink_qiyabi_carry_20261123.py",
+    "apps/registrar/management/commands/convert_intensive_to_group_20261123.py",
+    "apps/registrar/management/commands/copy_moved_student_marks_20261123.py",
+    "apps/registrar/management/commands/copy_dup_journal_midterms_20261124.py",
+    "apps/registrar/management/commands/fix_practical_lab_lessons_20261124.py",
     # 2026-11-19 boş həftəlik planlı sillabuslar (bütün formalar): eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/fill_empty_syllabus_weeks_20261119.py",
+    "apps/registrar/management/commands/fix_seminar_week_rows_20261124.py",
     # 2026-11-19 dublikat tələbənin jurnaldakı ikinci sətri: eyni `relocate_twin_enrollment.run_plan` gövdəsi.
     "apps/registrar/management/commands/resolve_duplicate_rows_20261119.py",
     # 2026-11-12 MR-000188 434 R payı ayrıca alt qrup jurnalına: eyni `relocate_twin_enrollment.run_plan` gövdəsi.

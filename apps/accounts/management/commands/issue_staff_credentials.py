@@ -14,6 +14,8 @@ da sistemə əlavə et — dekan və dekan müavininə fakültə üzrə paylanac
 
 Çıxış: ``--report-out`` CSV (bütün fakültə heyəti: vəziyyət və əməl; parol YOX) və ``--apply`` ilə
 ``--credentials-out`` CSV (yalnız yeni verilən parollar). Stdout-a YALNIZ saylar düşür (workflow logu).
+``--target-users FAYL`` (sahib 2026-11-20): YALNIZ fayldakı hesablar (sətirdə id və ya istifadəçi adı), eyni qayda —
+parol yalnız aktivləşməmiş, aktiv hesaba (bax ``apps.accounts.services.targeted_initial_credentials``).
 ``--find-name`` «Ad Soyad» hissələri ilə üzv axtarır və tapılanların rolunu/fakültəsini hesabata yazır
 (fakültə bilinməyəndə — məs. dekan müavininin fakültəsini tapmaq üçün).
 
@@ -46,6 +48,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import connection, transaction
 from django.utils.crypto import get_random_string
 
+from apps.accounts.services import targeted_initial_credentials as targeted
 from core.audit import log_action
 from core.constants import AuditAction
 from core.export_safety import safe_csv_writer
@@ -120,6 +123,11 @@ class Command(BaseCommand):
             default=None,
             help="--audience students: yalnız bu qəbul ilinin tələbələri (məs. 2026 = 1-ci kurs; sahib 2026-10-26)",
         )
+        parser.add_argument(
+            "--target-users",
+            default="",
+            help="Yalnız bu hesablar (sətirdə id və ya istifadəçi adı; sahib 2026-11-20) — fakültə/rol seçimi yox",
+        )
         parser.add_argument("--report-out", default="", help="Hesabat CSV (parolsuz)")
         parser.add_argument("--apply", action="store_true")
         parser.add_argument("--credentials-out", default="", help="--apply: yeni parolların CSV-si")
@@ -133,7 +141,7 @@ class Command(BaseCommand):
                 raise CommandError("--apply üçün --credentials-out məcburidir (parollar bir daha görünmür).")
             if len(opts["reason"].strip()) < _REASON_MIN:
                 raise CommandError(f"--apply üçün --reason ən azı {_REASON_MIN} simvol olmalıdır.")
-            if not opts["faculty"].strip() and opts["audience"] != "students":
+            if not opts["faculty"].strip() and opts["audience"] != "students" and not opts["target_users"]:
                 raise CommandError("--apply üçün --faculty məcburidir.")
         with rls_worker_atomic(), bypass_rls():
             if opts["apply"] and not (_disposable_database() or opts["i_know_this_is_production"]):
@@ -145,6 +153,8 @@ class Command(BaseCommand):
         organization = Organization.objects.filter(slug=opts["org"].strip()).first()
         if organization is None:
             raise CommandError(f"Təşkilat tapılmadı: {opts['org']!r}")
+        if opts["target_users"]:
+            return self._run_targeted(organization, opts)
         known = self._known(opts["known_usernames"])
         if opts["audience"] == "students":
             return self._run_students(organization, known, opts)
@@ -289,6 +299,29 @@ class Command(BaseCommand):
                 }
             )
         return found
+
+    # ── dəqiq siyahı ─────────────────────────────────────────────────────────
+    def _run_targeted(self, organization, opts):
+        rows, targets, missing = targeted.collect(self, organization, opts["target_users"], activated=_activated)
+        issued = []
+        if opts["apply"] and targets:
+            issued = self._issue(organization, targets, opts["reason"].strip(), verb="issue_targeted_credentials")
+            issued_ids = {item["user_id"] for item in issued}
+            for row in rows:
+                if row["user_id"] in issued_ids:
+                    row["action"] = "yeni ilkin parol verildi"
+        if opts["report_out"]:
+            targeted.write_report(opts["report_out"], rows)
+        if opts["credentials_out"] and issued:
+            targeted.write_credentials(opts["credentials_out"], issued)
+        self.stdout.write(
+            "staff_credentials: "
+            f"audience=TARGETED requested={len(rows) + missing} found={len(rows)} not_found={missing} "
+            f"activated={sum(1 for r in rows if r['state'] == STATE_ACTIVATED)} "
+            f"skipped_inactive={sum(1 for r in rows if r['state'] == targeted.STATE_SKIPPED)} "
+            f"new_targets={len(targets)} issued={len(issued)} "
+            f"mode={'APPLY' if opts['apply'] else 'DRY-RUN'}"
+        )
 
     # ── tələbələr ────────────────────────────────────────────────────────────
     def _run_students(self, organization, known, opts):

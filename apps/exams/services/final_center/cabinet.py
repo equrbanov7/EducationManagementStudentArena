@@ -23,18 +23,23 @@ def student_final_exam_context(user, exam) -> dict:
     zaldakı kompüterdən girmək olar). ``has_ticket=False`` — təyinat yoxdur.
     ``pin`` yalnız görünmə pəncərəsi daxilində və uyğun statuslarda dolur.
     """
+    return student_final_exam_contexts(user, [exam]).get(exam.pk, {"has_ticket": False})
+
+
+def student_final_exam_contexts(user, exams) -> dict:
+    """Cabinet data for the student's own tickets in the supplied exams."""
     if not getattr(user, "is_authenticated", False):
-        return {"has_ticket": False}
+        return {}
+    by_id = {exam.pk: exam for exam in exams}
+    contexts = {}
+    for ticket in FinalExamTicket.objects.filter(student=user, exam_id__in=by_id).select_related("session"):
+        exam = by_id[ticket.exam_id]
+        ticket.exam = exam
+        contexts[exam.pk] = _ticket_context(ticket, exam)
+    return contexts
 
-    ticket = (
-        FinalExamTicket.objects.filter(student=user, exam=exam)
-        .select_related("session", "session__room")
-        .order_by("-created_at")
-        .first()
-    )
-    if ticket is None:
-        return {"has_ticket": False}
 
+def _ticket_context(ticket, exam):
     now = timezone.now()
     start = exam.start_datetime
     end = exam.end_datetime
@@ -51,4 +56,4 @@ def student_final_exam_context(user, exam) -> dict:
     }
 
 
-__all__ = ["student_final_exam_context"]
+__all__ = ["student_final_exam_context", "student_final_exam_contexts"]

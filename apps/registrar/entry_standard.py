@@ -134,6 +134,11 @@ class EntryParts:
     capped: bool = field(default=False, compare=False)
     #: Aktivlik = «Praktiki məşğələ» ballarının ortası (xarici dil səviyyə fənni, sahib 2026-11-08; yalnız görünüş).
     practical: bool = field(default=False, compare=False)
+    #: «Xarici dildə işgüzar kommunikasiya» (sahib 2026-11-22, :mod:`core.language_business_rule`): ``activity`` =
+    #: praktiki məşğələ ortası + sərbəst iş (≤ 10), ad «Praktiki / sərbəst iş»; ``activity_parts`` = (praktiki,
+    #: sərbəst iş) — yalnız görünüş.
+    practical_selfwork: bool = field(default=False, compare=False)
+    activity_parts: tuple | None = field(default=None, compare=False)
 
     @property
     def raw_sum(self) -> Decimal:

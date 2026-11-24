@@ -20,7 +20,6 @@ from __future__ import annotations
 from datetime import datetime
 from io import BytesIO
 
-from django.db.models import prefetch_related_objects
 from django.utils import timezone
 from django.utils.text import slugify
 
@@ -102,15 +101,13 @@ def subject_title(exam) -> str:
 def _score_numbers(attempts):
     """``attempt_id`` → bal / maks / faiz / bonus / sayğaclar (test: snapshot + apellyasiya bonusu)."""
     from apps.exams import score_adjustments
-    from apps.exams.views.teacher.results._test_scores import attach_legacy_selected_options
+    from apps.exams.services.result_answers import prefetch_score_answers
 
     from .manual_grading import answer_max_points
     from .result_calculation import calculate_test_attempt_result
 
-    prefetch_related_objects(attempts, "answers__question__options")
+    prefetch_score_answers(attempts)
     tests = [attempt for attempt in attempts if attempt.exam.exam_type == "test"]
-    if tests:
-        attach_legacy_selected_options(tests)
     bonuses = score_adjustments.bonus_map([attempt.id for attempt in tests]) if tests else {}
     numbers = {}
     for attempt in attempts:

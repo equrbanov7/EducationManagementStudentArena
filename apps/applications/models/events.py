@@ -186,6 +186,10 @@ class ApplicationAttachment(UUIDModel, TimeStampedModel):
     )
     file = models.FileField(
         upload_to=application_attachment_path,
+        # 2026-11-24: yol «applications/<org>/<app>/<32 hex><ext>» ~124 simvoldur; 100-lük defolt
+        # 5 hərfli uzantıda (.docx/.xlsx/.pptx/.jpeg/.webp) storage adı qısalda bilmir →
+        # SuspiciousFileOperation → HTML 400 (Word faylları ZIP-ə qoyulurdu).
+        max_length=255,
         validators=[
             FileUploadValidator(
                 allowed_extensions=set(ALLOWED_ATTACHMENT_EXTENSIONS),

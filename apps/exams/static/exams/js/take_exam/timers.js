@@ -20,6 +20,24 @@
         return secondsLeft;
     }
 
+    // 2026-11-20 (sahib: «internet gedəndə … bal bərpa etmək olmur»): vaxt bitəndə bağlantı yox idisə
+    // avtomatik təhvil BİR dəfə düşüb itirdi — son cavablar serverə çatmırdı. Şəbəkə xətasında server
+    // grace pəncərəsi (EXAM_SUBMIT_GRACE_SECONDS) ərzində bir neçə dəfə yenidən cəhd edilir.
+    var FINISH_NETWORK_RETRIES = 5;
+    var FINISH_RETRY_MS = 3000;
+
+    function sendTimeUpFinish(ctx, triesLeft) {
+        ctx.finishRequestInFlight = true;
+        ns.draft.sendDraft(ctx, "finish").catch(function (err) {
+            ctx.finishRequestInFlight = false;
+            if (triesLeft > 0 && ctx.examTimeUp && err && err.name === "TypeError") {
+                setTimeout(function () {
+                    if (ctx.examTimeUp && !ctx.isFinishingExam) sendTimeUpFinish(ctx, triesLeft - 1);
+                }, FINISH_RETRY_MS);
+            }
+        });
+    }
+
     function handleQuestionTimerExpiry(ctx, slideElement) {
         ns.timers.stopQuestionTimer(ctx);
         slideElement.setAttribute("data-time-limit", "0");
@@ -240,6 +258,14 @@
                 return false;
             }
             ctx.extraTimeSeconds = total;
+            if (ctx.examTimeUp && ctx.examTimerDeadlineMs && !ctx.isFinishingExam) {
+                // 2026-11-20: müəllimin pauzası zamanı taymer 00:00-a çatmışdı, bərpada server pauza vaxtını
+                // qaytardı — səhifə serverdən təzə qalan vaxtı alsın (cavablar lokal qaralamadan bərpa olunur).
+                ns.draft.persistLocalDraft(ctx);
+                ctx.isFinishingExam = true;
+                window.location.reload();
+                return true;
+            }
             if (!ctx.examTimerDeadlineMs || ctx.examTimeUp || typeof ctx.examTimerTick !== "function") {
                 return false;
             }
@@ -312,10 +338,7 @@
                         ns.draft.persistLocalDraft(ctx);
 
                         setTimeout(function () {
-                            ctx.finishRequestInFlight = true;
-                            ns.draft.sendDraft(ctx, "finish").catch(function () {
-                                ctx.finishRequestInFlight = false;
-                            });
+                            sendTimeUpFinish(ctx, FINISH_NETWORK_RETRIES);
                         }, 1500);
                         return;
                     }

@@ -15,8 +15,13 @@
     {% if shared_row %}<div class="history-restore__shared" role="status">
       <i class="fas fa-users" aria-hidden="true"></i>
       <div>
+        {% if shared_row.alias_subject %}
+        <strong>{% trans "Bu jurnalın yükü eyni adlı köhnə fənn sətrindədir" context "workload.history_restore" %}: {{ shared_row.alias_subject }} — {{ shared_row.groups }}</strong>
+        <p>{% trans "Yeni sətir yaradılmır (yük ikiqat sayılardı). «Yük bölgüsü»ndə həmin sətrin fənnini jurnalın fənninə dəyişin — jurnal cari yükə qayıdır, qeydlər dəyişmir." context "workload.history_restore" %}</p>
+        {% else %}
         <strong>{% trans "Bu jurnalın yükü çoxqruplu (patok) sətirdədir" context "workload.history_restore" %}: {{ shared_row.groups }}</strong>
         <p>{% trans "Ortaq mühazirə bütün qruplara aiddir, ona görə müəllim «Yük bölgüsü»ndə həmin sətirdə təyin edilir. Jurnal qeydləri dəyişmir." context "workload.history_restore" %}</p>
+        {% endif %}
       </div>
     </div>
     <div class="history-restore__actions">
