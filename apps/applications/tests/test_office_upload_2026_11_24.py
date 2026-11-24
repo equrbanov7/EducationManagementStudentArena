@@ -27,14 +27,19 @@ XLSX_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 def _office_bytes(main_part: str, xml: str) -> bytes:
     """Word-ün özü kimi DEFLATE ilə sıxılmış minimal OOXML paketi."""
     buffer = io.BytesIO()
-    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
-        archive.writestr(
+    parts = (
+        (
             "[Content_Types].xml",
             '<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/'
             'content-types"><Default Extension="xml" ContentType="application/xml"/></Types>',
-        )
-        archive.writestr("_rels/.rels", '<?xml version="1.0" encoding="UTF-8"?><Relationships/>')
-        archive.writestr(main_part, xml)
+        ),
+        ("_rels/.rels", '<?xml version="1.0" encoding="UTF-8"?><Relationships/>'),
+        (main_part, xml),
+    )
+    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
+        for name, payload in parts:
+            # Sabit tarix: baytlar hər xdist işçisində eyni olsun (toplama fərqi olmasın).
+            archive.writestr(zipfile.ZipInfo(name, date_time=(2026, 11, 24, 0, 0, 0)), payload, zipfile.ZIP_DEFLATED)
     return buffer.getvalue()
 
 
@@ -74,6 +79,7 @@ def _json(response):
         ("ders-yuku.docx", DOCX_BYTES, "application/octet-stream"),
         ("Cədvəl.xlsx", XLSX_BYTES, XLSX_TYPE),
     ],
+    ids=["docx-word-mime", "docx-octet-stream", "xlsx"],
 )
 def test_office_file_is_accepted_on_create(world, name, data, content_type):
     client = _client(world["student"], world["organization"])
