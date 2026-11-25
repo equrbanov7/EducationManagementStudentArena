@@ -27,12 +27,15 @@ from django.apps import apps as django_apps
 _COUNTED_STATUSES = ("enrolled", "completed")
 
 
+def subject_code(subject) -> str:
+    """Fənnin öz kodu — daxili ``MYEDU-*`` (köçürmə artefaktı) heç vaxt yazılmır."""
+    raw = (getattr(subject, "code", "") or "").strip()
+    return "" if raw.upper().startswith("MYEDU") else raw
+
+
 def _code(subject, plan_codes: dict) -> str:
     code = (plan_codes.get(subject.pk) or "").strip()
-    if code:
-        return code
-    raw = (subject.code or "").strip()
-    return "" if raw.upper().startswith("MYEDU") else raw
+    return code or subject_code(subject)
 
 
 def _teacher(offering) -> str:
@@ -116,6 +119,12 @@ class PlanSources:
         wanted = set(period_ids or ())
         offerings = [item for item in self._offerings_by_student.get(student_id, []) if item.period_id in wanted]
         return _first_per_subject(offerings)
+
+    def student_offering_map(self, student_id, period_ids) -> dict:
+        """``subject_id → jurnal`` — tələbənin həmin semestrdəki öz jurnalları."""
+        if not period_ids:
+            return {}
+        return {offering.subject_id: offering for offering in self.student_offerings(student_id, period_ids)}
 
     def student_teachers(self, student_id, period_ids) -> dict:
         """``subject_id → müəllim`` — tələbənin həmin semestrdəki öz jurnallarından (keçmiş illər üçün əsas mənbə)."""
@@ -210,4 +219,4 @@ def extra_member_records(organization, group, period_ids) -> list:
     )
 
 
-__all__ = ["PlanSources", "extra_member_records", "offering_row"]
+__all__ = ["PlanSources", "extra_member_records", "offering_row", "subject_code"]
