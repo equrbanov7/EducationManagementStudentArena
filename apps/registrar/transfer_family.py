@@ -1,31 +1,37 @@
-"""Ana qrup ↔ alt qrup köçürməsi: ana qrupun jurnalı TƏK jurnal qalır (sahib 2026-11-07/08).
+"""Ana qrup ↔ alt qrup: ana qrupun jurnalı TƏK jurnal qalır (sahib 2026-11-07/08).
 
 Sahib: «ana qrup alt qrupların cəmidir»; ana jurnal 0 göstərirsə, alt qruplarda isə tələbə varsa — bu, xətadır.
 Mühazirə bir dəfə ana jurnalda yazılır, alt qruplar həmin jurnalın İÇİNDƏ seminar alt qrupudur
 (:class:`~apps.registrar.models.SeminarGroup`, ``Enrollment.seminar_group``). Ailə yalnız reyestr bölgüsünün
 izi ilə tanınır (``OrgUnit.settings["parent_group"]``) — ad oxşarlığı burada SAYILMIR.
 
+Forma: alt qrupun (A1) tələbəsinin bu fənn üzrə aktiv sətri ANA qrupun (A) aktiv açılışındadır, provenans
+``source_group`` = A1. Alt qrupun öz açılışı ya yoxdur, ya da passivdir (bölmənin boş varisi / birləşdirilmiş jurnal).
+
 Rəsmi köçürmə xidməti (:func:`apps.registrar.transfer.transfer_student_group`) bu köməkçiləri çağırır:
 
-* :func:`return_to_parent` — «ana qrupu alt qruplara böl» (``keep_parent_journal=True``). DB qapısı (0045,
-  ``registrar_finalize_student_group_transfer``) köçürmənin özündə ana qrup açılışlarında aktiv sətir QOYMUR — hər
-  sətir alt qrupun açılışındakı varisə keçməlidir. Ona görə köçürmə adi qaydada yekunlaşır, SONRA eyni
-  tranzaksiyada forma çevrilir (köçürmənin tərsi ilə eyni naxış): ana sətir yenidən ``enrolled`` olur (qeydləri
-  yerində; provenans ``source_group`` = alt qrup, yalnız boşdursa — 0056 trigger-i bir dəfə yazmağa icazə verir),
-  boş varis ``dropped`` + ``superseded_by`` = ana sətir; bu köçürmədə yaranmış alt qrup açılışı müəllimsiz və
-  dərssiz qalır və passivləşdirilir (``is_active=False``) — müəllimin siyahısında ikinci jurnal görünmür;
-* :func:`sync_seminar_groups` — ailə daxilində hər köçürmədən sonra ana jurnaldakı seminar yeri: alt qrupa
-  keçəndə həmin alt qrupun seminar sırası (yoxdursa yaradılır), qardaş alt qrupa keçəndə yeni sıraya, ana qrupa
-  qayıdanda boşaldılır. Əl ilə başqa sıraya qoyulmuş tələbəyə toxunulmur;
-* :func:`is_chain_undo` — köhnə formada (alt qrup jurnalları) A → A1 → A2 → A kimi zəncirin geri qaytarılması:
-  ana jurnalın tarixçə sətri məhz cari sətirlə (zəncir boyu) əvəzlənibsə, yenidən aktivləşdirilir.
+* :func:`redirect_target` — varis alt qrupun açılışına düşməli idisə, amma ana jurnal TƏK jurnaldırsa (A1-in açılışı
+  passivdir; və ya bölmədə A1-in canlı jurnalı yoxdur) ana qrupun aktiv açılışı. DB qapısı (0045,
+  ``registrar_finalize_student_group_transfer``) köçürmənin özündə varisin YENİ qrupun açılışında aktiv olmasını
+  tələb edir — ona görə köçürmə adi qaydada yekunlaşır, SONRA eyni tranzaksiyada :func:`return_to_parent`: ana
+  qrupdakı sətir yaradılır / yenidən ``enrolled`` olur (qeydləri yerində; boş provenansa alt qrup yazılır — 0056
+  trigger-i bir dəfə yazmağa icazə verir), varis ``dropped`` + ``superseded_by`` = ana sətir, bu köçürmədə yaranmış
+  boş alt qrup açılışı passivləşir (``is_active=False``), tələbə alt qrupunun seminar sırasına düşür;
+* :func:`carry_rows` — ailədən KƏNAR qrupa köçəndə (A1 → B) tələbənin ana jurnaldakı sətirləri də köçürülür
+  (yoxsa A1-in açılışında sətri olmadığından köçürmə «0 sətir» ilə keçər, tələbə A-nın jurnalında qalardı);
+* :func:`sync_seminar_groups` — ailə daxilində (qardaş alt qrup, ana qrupa qayıdış) seminar yerinin yenilənməsi;
+* :func:`is_chain_undo` — A → A1 → A2 → A kimi zəncirin geri qaytarılması.
 
-Silmə yoxdur; bütün iz köçürmənin audit sətrinə yazılır.
+Silmə yoxdur; bütün iz audit sətirlərindədir.
 """
 
 from __future__ import annotations
 
-from apps.registrar.models import Enrollment, Lesson, SeminarGroup
+from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.utils import timezone
+
+from apps.registrar.models import CourseOffering, Enrollment, Lesson, SeminarGroup
 from apps.registrar.models.lab_group import LAB_GROUP_MAX_NUMBER, LAB_GROUP_NAME_MAX_LENGTH
 from core import audit as audit_service
 from core.constants import AuditAction
@@ -56,42 +62,162 @@ def family_parent_id(old_group, new_group) -> str:
     return ""
 
 
+def is_live(offering) -> bool:
+    """Alt qrupun öz jurnalı «canlıdır»: aktivdir və siyahısında tələbə və ya dərsi var."""
+    if offering is None or not offering.is_active:
+        return False
+    return (
+        Enrollment.objects.filter(offering=offering, status=Enrollment.Status.ENROLLED).exists()
+        or Lesson.objects.filter(offering=offering).exists()
+    )
+
+
+def parent_offering(*, organization, group, subject_id, period):
+    """Alt qrupun ana qrupunun bu fənn üzrə AKTİV açılışı (yoxdursa ``None``)."""
+    parent_id = trail_parent_id(group)
+    if not parent_id or period is None:
+        return None
+    return CourseOffering.objects.filter(
+        organization=organization, subject_id=subject_id, period=period, group_id=parent_id, is_active=True
+    ).first()
+
+
+def parent_journal_for(*, organization, group, subject_id, period):
+    """Alt qrupun tələbəsi bu fənn üzrə ANA jurnala yazılmalıdırsa onun açılışı: alt qrupun öz aktiv açılışı yoxdur
+    (yoxdur və ya passivdir), ana qrupun isə aktiv açılışı var. Mandat / seçmə qeydiyyatı üçün."""
+    own = CourseOffering.objects.filter(
+        organization=organization, subject_id=subject_id, period=period, group=group, is_active=True
+    ).exists()
+    return (
+        None if own else parent_offering(organization=organization, group=group, subject_id=subject_id, period=period)
+    )
+
+
+@transaction.atomic
+def enroll_in_parent_journal(offering, student, group, kind):
+    """Ana jurnala «alt qrupdan» sətir (idempotent) + alt qrupun seminar sırası. Tarixçə sətri bərpa olunmur."""
+    enrollment, created = Enrollment.objects.get_or_create(
+        organization_id=offering.organization_id,
+        student=student,
+        offering=offering,
+        defaults={"kind": kind, "source_group": group},
+    )
+    if created:
+        number = seminar_number(offering, group, create=True)
+        if number is not None:
+            enrollment.seminar_group = number
+            enrollment.save(update_fields=["seminar_group", "updated_at"])
+    return enrollment, created
+
+
+def redirect_target(*, record, new_group, subject_id, period, target, keep_parent):
+    """Köçürmənin varisi ana jurnala qaytarılmalıdırsa ana qrupun aktiv açılışı, əks halda ``None``.
+
+    * alt qrupun bu fənn üzrə açılışı PASSİVDİR (bölmənin varisi / ana jurnala birləşdirilib) — hər köçürmədə;
+    * bölmə (``keep_parent``): alt qrupun canlı jurnalı yoxdur. Canlı (aktiv + doldurulmuş) köhnə formalı jurnal
+      varsa bölmə dayanır — iki jurnal yaranmasın (əvvəlcə alt qrup jurnalı ana jurnala birləşdirilməlidir).
+    """
+    parent = parent_offering(organization=record.organization, group=new_group, subject_id=subject_id, period=period)
+    if parent is None:
+        return None
+    if target is not None and not target.is_active:
+        return parent
+    if not keep_parent:
+        return None
+    if is_live(target):
+        raise ValidationError(
+            f"«{new_group.name}» alt qrupunun «{target.subject.name}» fənni üzrə ayrıca aktiv jurnalı var. "
+            "İki jurnal yaranmasın deyə bölmə dayandırıldı: əvvəlcə alt qrup jurnalı ana qrupun jurnalı ilə "
+            "birləşdirilməlidir (RİM — alt qrup jurnallarının birləşdirilməsi)."
+        )
+    return parent
+
+
+def carry_rows(*, record, old_group, new_group, period) -> list:
+    """Ailədən KƏNAR qrupa köçəndə (A1 → B) tələbənin ana qrupun (A) jurnallarındakı aktiv sətirləri."""
+    parent_id = trail_parent_id(old_group)
+    if not parent_id or period is None or family_parent_id(old_group, new_group) or str(new_group.pk) == parent_id:
+        return []
+    return list(
+        Enrollment.objects.select_for_update(of=("self",))
+        .filter(
+            organization=record.organization,
+            student=record.student,
+            offering__period=period,
+            offering__group_id=parent_id,
+            status=Enrollment.Status.ENROLLED,
+        )
+        .select_related("offering__subject", "offering__instructor")
+    )
+
+
 def _save(enrollment, fields) -> None:
     enrollment.full_clean(validate_unique=False, validate_constraints=False)
     enrollment.save(update_fields=[*fields, "updated_at"])
 
 
-def return_to_parent(kept, *, subgroup) -> tuple[list, list]:
-    """``kept`` = ``[(ana sətir, varis, açılış yeni)]`` → ana sətir aktiv, varis tarixçə; boş yeni açılış passiv.
-
-    Qaytarır ``(bərpa olunan ana sətir id-ləri, passivləşən açılış id-ləri)``."""
-    restored, fresh = [], {}
-    for parent_row, successor, offering_is_new in kept:
-        # Sıra vacibdir: ana sətrin ``superseded_by``-ı əvvəl boşalır ki, zəncirdə dövr yaranmasın.
-        parent_row.status = Enrollment.Status.ENROLLED
-        parent_row.superseded_by = None
+def _parent_row(successor, offering, *, subgroup, by_user):
+    """Tələbənin ana jurnaldakı sətri: yoxdursa yaradılır, tarixçədədirsə bərpa olunur."""
+    row = (
+        Enrollment.objects.select_for_update(of=("self",))
+        .filter(organization_id=successor.organization_id, student_id=successor.student_id, offering=offering)
+        .first()
+    )
+    if row is None:
+        return Enrollment.objects.create(
+            organization_id=successor.organization_id,
+            student_id=successor.student_id,
+            offering=offering,
+            kind=successor.kind,
+            status=Enrollment.Status.ENROLLED,
+            source_group=subgroup,
+            added_by=by_user,
+            added_at=timezone.now(),
+        )
+    if row.status == Enrollment.Status.DROPPED:
+        # Sıra vacibdir: ``superseded_by`` əvvəl boşalır ki, zəncirdə dövr yaranmasın.
+        row.status, row.superseded_by = Enrollment.Status.ENROLLED, None
         fields = ["status", "superseded_by"]
-        if parent_row.source_group_id is None:
-            parent_row.source_group = subgroup
+        if row.source_group_id is None:
+            row.source_group = subgroup
             fields.append("source_group")
-        _save(parent_row, fields)
-        successor.status = Enrollment.Status.DROPPED
-        successor.superseded_by = parent_row
+        _save(row, fields)
+    elif row.status != Enrollment.Status.ENROLLED:
+        raise ValidationError(
+            "Tələbənin ana qrupun jurnalındakı sətri dondurulub və ya bağlanıb — ana jurnala qaytarmaq üçün "
+            "inzibati yoxlama tələb olunur."
+        )
+    return row
+
+
+def return_to_parent(redirects, *, subgroup, by_user) -> dict:
+    """``redirects`` = ``[(varis, ana açılış, açılış bu köçürmədə yarandı)]`` (bax modul şərhi)."""
+    restored, placed, fresh = [], [], {}
+    for successor, offering, offering_is_new in redirects:
+        row = _parent_row(successor, offering, subgroup=subgroup, by_user=by_user)
+        successor.status, successor.superseded_by = Enrollment.Status.DROPPED, row
         _save(successor, ["status", "superseded_by"])
-        restored.append(parent_row.pk)
+        restored.append(row.pk)
+        if row.seminar_group is None:
+            number = seminar_number(offering, subgroup, create=True)
+            if number is not None:
+                row.seminar_group = number
+                row.save(update_fields=["seminar_group", "updated_at"])
+                placed.append(row.pk)
         if offering_is_new:
             fresh[successor.offering_id] = successor.offering
     retired = []
     for offering in fresh.values():
-        busy = (
-            Enrollment.objects.filter(offering=offering, status=Enrollment.Status.ENROLLED).exists()
-            or Lesson.objects.filter(offering=offering).exists()
-        )
-        if offering.is_active and not busy:
+        offering.refresh_from_db(fields=["is_active"])
+        if offering.is_active and not is_live(offering):
             offering.is_active = False
             offering.save(update_fields=["is_active", "updated_at"])
             retired.append(offering.pk)
-    return restored, retired
+    return {
+        "kept_in_parent_enrollment_ids": restored,
+        "seminar_placed_enrollment_ids": placed,
+        "retired_offering_ids": retired,
+    }
 
 
 def _used_numbers(offering, rows) -> set:
@@ -158,20 +284,22 @@ def sync_seminar_groups(*, record, old_group, new_group, period) -> dict:
             continue
         row.seminar_group = target
         row.save(update_fields=["seminar_group", "updated_at"])
-        (placed if target is not None else cleared).append(str(row.pk))
+        (placed if target is not None else cleared).append(row.pk)
     return {"seminar_placed_enrollment_ids": placed, "seminar_cleared_enrollment_ids": cleared}
 
 
-def after_transfer(*, record, old_group, new_group, period, by_user, kept) -> None:
+def after_transfer(*, record, old_group, new_group, period, by_user, redirects, carried=()) -> None:
     """Köçürmə yekunlaşdıqdan sonra (eyni tranzaksiya): ana jurnala qayıdış + seminar yeri + audit (fail-closed)."""
-    restored, retired = return_to_parent(kept, subgroup=new_group) if kept else ([], [])
-    seminar = sync_seminar_groups(record=record, old_group=old_group, new_group=new_group, period=period)
-    changes = {
-        "kept_in_parent_enrollment_ids": [str(pk) for pk in restored],
-        "retired_offering_ids": [str(pk) for pk in retired],
-        **seminar,
-    }
-    if not any(changes.values()):
+    changes = return_to_parent(redirects, subgroup=new_group, by_user=by_user) if redirects else {}
+    for key, values in sync_seminar_groups(
+        record=record, old_group=old_group, new_group=new_group, period=period
+    ).items():
+        changes[key] = [*changes.get(key, []), *values]
+    if carried:
+        changes["family_carried_enrollment_ids"] = [row.pk for row in carried]
+        changes["family_carried_successor_ids"] = [row.superseded_by_id for row in carried]
+    changes = {key: [str(value) for value in values] for key, values in changes.items() if values}
+    if not changes:
         return
     audit_service.log_action(
         user=by_user if getattr(by_user, "pk", None) else None,
@@ -204,8 +332,14 @@ def is_chain_undo(successor, current) -> bool:
 
 __all__ = [
     "after_transfer",
+    "carry_rows",
+    "enroll_in_parent_journal",
     "family_parent_id",
     "is_chain_undo",
+    "is_live",
+    "parent_journal_for",
+    "parent_offering",
+    "redirect_target",
     "return_to_parent",
     "seminar_number",
     "sync_seminar_groups",
