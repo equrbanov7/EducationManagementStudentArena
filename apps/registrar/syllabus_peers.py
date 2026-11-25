@@ -11,8 +11,9 @@ Burada YENİ qayda yoxdur — hamısı mövcud köməkçilərdir:
   oxu qapısı: baxanın sillabus əhatəsi, müəllimdə cari tədris ili); qrup adları dosyenin öz açılışı + qüvvədə olan
   paylaşımlar (``services.sharing.effective_shares``);
 * TƏKLİF — ``services.sharing.share_code`` (yalnız öz sillabusu, eyni fənn + semestr, hədəf jurnal boşdur, aktor
-  jurnalın müəllimidir).  Yazı mövcud ``accounts:syllabus_reuse_action`` (``action=share``) ucundan keçir, burada
-  yazı YOXDUR.
+  jurnalın müəllimidir, sahib 2026-11-25: jurnalın plan saatı sillabusun saatı ilə EYNİDİR — əyani 45 saatlıq
+  sillabus qiyabi 25 saatlıq jurnala «dəyişmədən» təklif olunmur).  Yazı mövcud ``accounts:syllabus_reuse_action``
+  (``action=share``) ucundan keçir, burada yazı YOXDUR.
 
 Jurnal səhifəsinin sorğu büdcəsi dəyişmir: məlumat banner göstəriləndə JS ilə ayrıca GET-lə gəlir.
 Giriş qapısı «Sillabusa bax» panelinin qapısıdır (``syllabus_views._viewer_mode``) — tələbəyə və kənar
@@ -116,6 +117,9 @@ def _reuse_sources(rows, *, actor, offering, notice_state) -> list:
     state_code = sharing.target_code(offering)  # hədəfin vəziyyəti BİR dəfə (mənbə başına sorğu yox)
     if state_code:
         return []
+    from .plan_hours import plan_hours_for_offering
+
+    target_hours = plan_hours_for_offering(offering)  # jurnalın saatı BİR dəfə; mənbənin saatı versiyadan (sorğusuz)
     return [
         {
             "id": data["id"],
@@ -125,7 +129,7 @@ def _reuse_sources(rows, *, actor, offering, notice_state) -> list:
             "question": str(_QUESTION) % {"group": data["group_text"]},
         }
         for row, data in own
-        if not sharing.share_code(row, actor=actor, offering=offering, state_code=state_code)
+        if not sharing.share_code(row, actor=actor, offering=offering, target_hours=target_hours, state_code=state_code)
     ]
 
 

@@ -166,6 +166,14 @@ TRANSITION_MESSAGES = {
     "share.not_shared": pgettext_lazy(_CTX, "Bu qrup bu sillabusu istifadə etmir."),
 }
 
+#: Sahib 2026-11-25: paylaşımda ``reuse.hours_differ`` (əyani ↔ qiyabi saat fərqi) — «bağla» mətnindən ayrıca, aydın
+#: tövsiyə ilə.  Kod eynidir; mətni ``share_context.share_text`` seçir.
+SHARE_HOURS_DIFFER = pgettext_lazy(
+    _CTX,
+    "Bu qrupun dərs saatı sillabusun saatından fərqlidir (məsələn, əyani və qiyabi qrup) — eyni sillabus hər iki "
+    "jurnalda istifadə oluna bilməz. «Kopyala və uyğunlaşdır» ilə bu qrup üçün ayrıca sillabus yaradın.",
+)
+
 _FALLBACK = pgettext_lazy(_CTX, "Əməliyyat yerinə yetirilmədi.")
 
 
@@ -196,6 +204,7 @@ __all__ = [
     "HOUR_KIND_LABELS",
     "ISSUE_MESSAGES",
     "NEXT_STEP_TONES",
+    "SHARE_HOURS_DIFFER",
     "STATUS_TONES",
     "TRANSITION_MESSAGES",
     "issue_text",

@@ -121126,3 +121126,7 @@ msgid "Dil kafedrasında xarici dil səviyyə qrupu açmaq (öz tələbələri �
 msgstr ""
 "Open a foreign-language level group at a language department (for own "
 "students)"
+
+msgctxt "accounts.syllabus"
+msgid "Bu qrupun dərs saatı sillabusun saatından fərqlidir (məsələn, əyani və qiyabi qrup) — eyni sillabus hər iki jurnalda istifadə oluna bilməz. «Kopyala və uyğunlaşdır» ilə bu qrup üçün ayrıca sillabus yaradın."
+msgstr "This group's teaching hours differ from the syllabus hours (for example, a full-time and a part-time group) — the same syllabus cannot be used in both journals. Use «Copy and adjust» to create a separate syllabus for this group."

@@ -6,10 +6,13 @@ Qaydalar və yazı ``apps.syllabus.services.sharing``-dədir; burada yalnız:
 2. «digər qruplarınız» siyahısında paylaşılmış qrupun vəziyyəti;
 3. redaktorun paylaşım bloku — sillabusu öz yerində istifadə edən qruplar («Ayır») və hələ sillabusu olmayan
    öz qruplarınız (layihənin seçim komponenti + «Əlavə et»);
-4. siyahı sətrinin «həmçinin bu qruplarda» qeydi.
+4. siyahı sətrinin «həmçinin bu qruplarda» qeydi;
+5. saat qaydası (sahib 2026-11-25, ``sharing.hours_code``): hədəf jurnalın plan saatı mənbənin saatından fərqlidirsə
+   (məsələn, əyani 45 saat ↔ qiyabi 25 saat) paylaşım təklif olunmur və POST rədd olunur — «Kopyala və uyğunlaşdır».
 
-SORĞU BÜDCƏSİ: dialoqda hədəfin vəziyyəti BİR dəfə hesablanır (mənbə başına sorğu yoxdur); redaktor bloku ən çox
-dörd sorğudur; siyahı səhifəsi üçün bir sorğu.
+SORĞU BÜDCƏSİ: dialoqda hədəfin vəziyyəti BİR dəfə hesablanır (mənbə başına sorğu yoxdur; mənbənin saatı versiyadan
+gəlir); redaktor bloku dörd sorğu + sillabussuz hər öz qrupu üçün plan saatı (müəllimin bu fənn + semestr üzrə bir neçə
+qrupu); siyahı səhifəsi üçün bir sorğu.
 """
 
 from __future__ import annotations
@@ -19,7 +22,7 @@ from django.utils.translation import pgettext_lazy
 from apps.syllabus.models import ShareSource, Syllabus, SyllabusShare
 from apps.syllabus.public import PERM_EDIT, services
 
-from .labels import transition_text
+from .labels import SHARE_HOURS_DIFFER, transition_text
 
 _CTX = "accounts.syllabus"
 
@@ -31,6 +34,27 @@ _LEGACY = pgettext_lazy(_CTX, "köhnə sistemdən")
 def _group_name(offering) -> str:
     group = offering.group if offering is not None and offering.group_id else None
     return group.name if group is not None else str(_NO_GROUP)
+
+
+def share_text(code: str) -> str:
+    """Paylaşımın səbəb mətni — saat fərqi üçün «Kopyala və uyğunlaşdır» tövsiyəsi ilə ayrıca mətn."""
+    if code == services.reuse_rules.CODE_HOURS_DIFFER:
+        return str(SHARE_HOURS_DIFFER)
+    return transition_text(code)
+
+
+def share_hours(source, offering) -> tuple[dict, dict]:
+    """POST yolu: ``(hədəf jurnalın plan saatı, mənbə jurnalın rəsmi saatı)`` — ``sharing.share``-ə ötürülür."""
+    from apps.registrar.public import plan_hours_for_offering
+
+    return plan_hours_for_offering(offering) or {}, _fallback_hours(source)
+
+
+def _fallback_hours(syllabus) -> dict:
+    """Mənbənin versiyasında saat yoxdursa onun jurnalının rəsmi saatı (əks halda sorğu etmirik)."""
+    from .plan_hours_source import official_plan_hours
+
+    return {} if services.sharing.source_hours(syllabus) else official_plan_hours(syllabus)
 
 
 def target_state(target) -> str:
@@ -48,8 +72,11 @@ def sibling_share(row, *, actor, target, state_code) -> dict:
     if target.offering is None:
         code = services.reuse_rules.CODE_NOT_SIBLING
     else:
-        code = services.sharing.share_code(row, actor=actor, offering=target.offering, state_code=state_code)
-    return {"can_share": not code, "share_reason": transition_text(code) if code else ""}
+        # Hədəfin dosyesi yoxdur (yoxsa ``state_code``) — ``target.plan_hours`` jurnalın rəsmi saatıdır.
+        code = services.sharing.share_code(
+            row, actor=actor, offering=target.offering, target_hours=target.plan_hours, state_code=state_code
+        )
+    return {"can_share": not code, "share_reason": share_text(code) if code else ""}
 
 
 def shared_targets(organization, offering_ids) -> dict:
@@ -114,14 +141,25 @@ def editor_share_state(request, organization, *, syllabus, is_author: bool) -> d
                 "offering_id", flat=True
             )
         ) | set(SyllabusShare.objects.filter(offering_id__in=ids).values_list("offering_id", flat=True))
-        free = [
-            {"offering": str(offering.pk), "group": _group_name(offering)}
-            for offering in offerings
-            if offering.pk not in taken
-        ]
+        free = _same_hours(syllabus, [offering for offering in offerings if offering.pk not in taken])
     if not shares and not free:
         return {"mode": ""}
     return {"mode": "share", "syllabus": str(syllabus.pk), "shares": shares, "free": free, "can_act": can_act}
+
+
+def _same_hours(syllabus, offerings) -> list:
+    """Redaktorun «Bu qrupda da istifadə et» seçimləri — saatı FƏRQLİ qrup (əyani ↔ qiyabi) siyahıya düşmür."""
+    if not offerings:
+        return []
+    from apps.registrar.public import plan_hours_for_offering
+
+    fallback = _fallback_hours(syllabus)
+    hours_code = services.sharing.hours_code
+    return [
+        {"offering": str(offering.pk), "group": _group_name(offering)}
+        for offering in offerings
+        if not hours_code(syllabus, target_hours=plan_hours_for_offering(offering), source_fallback=fallback)
+    ]
 
 
 def page_shared_groups(page_syllabi) -> dict:
@@ -144,6 +182,8 @@ __all__ = [
     "candidate_shared",
     "editor_share_state",
     "page_shared_groups",
+    "share_hours",
+    "share_text",
     "shared_targets",
     "sibling_share",
     "target_state",
