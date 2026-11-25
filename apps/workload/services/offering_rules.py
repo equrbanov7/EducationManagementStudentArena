@@ -89,9 +89,17 @@ def per_group_hours(row) -> dict:
         plan = int(getattr(row, plan_field, 0) or 0)
         if not plan:
             total = int(getattr(row, total_field, 0) or 0)
-            plan = total // max(int(getattr(row, multiplier_field, 1) or 1), 1)
+            plan = total // max(multiplier(row, activity, multiplier_field), 1)
         hours[activity] = plan
     return hours
+
+
+def multiplier(row, activity: str, field: str = "") -> int:
+    """Fəaliyyətin çarpanı: mühazirə — birləşmə, seminar — alt qrup, lab — ``lab_group_count`` (verilibsə; 2026-11-26)."""
+    if activity == "lab" and int(getattr(row, "lab_group_count", 0) or 0):
+        return int(row.lab_group_count)
+    field = field or HOUR_FIELDS[activity][2]
+    return int(getattr(row, field, 1) or 1)
 
 
 def merge_hours(rows) -> dict:
@@ -159,6 +167,7 @@ __all__ = [
     "decide_instructor",
     "journal_owner",
     "merge_hours",
+    "multiplier",
     "owner_for_rows",
     "per_group_hours",
     "plan_reached_chair",
