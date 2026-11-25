@@ -2,10 +2,12 @@
  * «Bölgü sehrbazı» — addım 2–3: Seminar, Laboratoriya + başlanğıc vəziyyət (`window.EMSWorkloadWizard`, 2026-11-26).
  *
  * Vəziyyət (`W.S`): `selected` {qrup: true}; `rows` {sətir: {joint, fix}}; `groups` {qrup: {seminar, lab, editable,
- * reason}} — seminar `{count, names[], units[], place{qeydiyyat: indeks}}`, lab `{mode: none|nested|flat, per,
- * count, names[], place{}}`. Bölmə indeksi 1..count; server də 1..count nömrələyir (jurnal `SeminarGroup` /
- * `LabGroup`). İç-içə rejimdə lab № = (seminar indeksi − 1) × per + k — bir lab qrupu iki seminar alt qrupunu
- * qarışdırmır. Tələbə siyahısı yalnız jurnal varsa, səlahiyyət varsa və jurnal bağlı deyilsə dəyişdirilir.
+ * reason}} — seminar `{numbers[], names[], units[], place{qeydiyyat: №}}`, lab `{mode: none|nested|flat, per,
+ * numbers[], names[], place{}}`. Bölmələr jurnalın REAL nömrələri ilə saxlanılır (2026-11-26 review: «Lab-1
+ * silinib, {2,3} qalıb» halında yenidən nömrələmə Lab-2-nin dərslərini başqa tələbələrə keçirirdi) — yeni bölmə ən
+ * kiçik boş nömrəni alır. İç-içə rejimdə i-ci seminar alt qrupunun lab qrupları lab nömrələrinin [i·per, i·per+per)
+ * dilimidir — bir lab qrupu iki seminar alt qrupunu qarışdırmır. Dərsi olan bölmənin tərkibi dəyişdirilmir.
+ * Tələbə siyahısı yalnız jurnal varsa, səlahiyyət varsa və jurnal bağlı deyilsə dəyişdirilir.
  */
 (function (window) {
     "use strict";
@@ -32,9 +34,18 @@
         return top;
     }
 
-    function indexMap(sections) {
+    function range(n) { var out = []; for (var i = 1; i <= Math.min(n, MAX); i += 1) out.push(i); return out; }
+    function size(part) { return part.numbers.length; }
+
+    /** Bölmələrin real nömrələri: jurnalda ≥ 2 bölmə varsa onlar (boşluqlu da — {2,3}), yoxdursa yükdəki say. */
+    function startNumbers(sections, fallback) {
+        if (sections.length >= 2) return sections.map(function (s) { return s.number; }).slice(0, MAX);
+        return fallback >= 2 ? range(fallback) : [];
+    }
+
+    function byNumber(sections) {
         var map = {};
-        sections.forEach(function (s, i) { map[s.number] = i + 1; });
+        sections.forEach(function (x) { map[x.number] = x; });
         return map;
     }
 
@@ -44,55 +55,44 @@
         var semSections = journal ? journal.seminar : [];
         var labSections = journal ? journal.lab : [];
         var single = row.groups.length === 1;
-        var semCount = semSections.length >= 2 ? semSections.length : 0;
-        if (!semCount && W.active(row, "seminar")) {
+        var semFallback = 0;
+        if (W.active(row, "seminar")) {
             var top = maxSub(row, group.id, "seminar");
-            semCount = top >= 2 ? top : single && row.subgroup_count >= 2 ? row.subgroup_count : 0;
+            semFallback = top >= 2 ? top : single && row.subgroup_count >= 2 ? row.subgroup_count : 0;
         }
-        semCount = Math.min(semCount, MAX);
-        var semIndex = indexMap(semSections);
-        var seminar = { count: semCount, names: [], units: [], place: {} };
-        for (var i = 0; i < semCount; i += 1) {
-            var section = semSections[i];
-            seminar.names.push(section ? section.name : clip(group.name + (i + 1)));
-            seminar.units.push(section ? section.unit_id : "");
-        }
-        (journal ? journal.students : []).forEach(function (st) {
-            var idx = st.seminar ? semIndex[st.seminar] : 0;
-            if (idx && idx <= semCount) seminar.place[st.id] = idx;
+        var semMap = byNumber(semSections);
+        var seminar = { numbers: startNumbers(semSections, semFallback), names: [], units: [], place: {} };
+        seminar.numbers.forEach(function (n) {
+            seminar.names.push(semMap[n] ? semMap[n].name : clip(group.name + n));
+            seminar.units.push(semMap[n] ? semMap[n].unit_id : "");
         });
-        var labCount = labSections.length >= 2 ? labSections.length : 0;
-        if (!labCount && W.active(row, "lab")) {
+        var labFallback = 0;
+        if (W.active(row, "lab")) {
             var labTop = maxSub(row, group.id, "lab");
             var rowLab = row.lab_group_count || row.subgroup_count;
-            labCount = labTop >= 2 ? labTop : single && rowLab >= 2 ? rowLab : 0;
+            labFallback = labTop >= 2 ? labTop : single && rowLab >= 2 ? rowLab : 0;
         }
-        labCount = Math.min(labCount, MAX);
-        var labIndex = indexMap(labSections);
-        var lab = { mode: "none", per: 2, count: labCount, names: [], place: {} };
+        var labMap = byNumber(labSections);
+        var lab = { mode: "none", per: 2, numbers: startNumbers(labSections, labFallback), names: [], place: {} };
         (journal ? journal.students : []).forEach(function (st) {
-            var idx = st.lab ? labIndex[st.lab] : 0;
-            if (idx && idx <= labCount) lab.place[st.id] = idx;
+            if (st.seminar && seminar.numbers.indexOf(st.seminar) >= 0) seminar.place[st.id] = st.seminar;
+            if (st.lab && lab.numbers.indexOf(st.lab) >= 0) lab.place[st.id] = st.lab;
         });
+        var semCount = size(seminar), labCount = size(lab);
         if (labCount) {
             var nested = semCount >= 2 && labCount % semCount === 0;
+            var per = nested ? labCount / semCount : 2;
             if (nested && journal) {
-                var owner = {};
                 journal.students.forEach(function (st) {
-                    var l = lab.place[st.id];
-                    var s = seminar.place[st.id];
-                    if (!l || !s) return;
-                    if (owner[l] && owner[l] !== s) nested = false;
-                    owner[l] = s;
-                    if (Math.ceil(l / (labCount / semCount)) !== s) nested = false;
+                    var li = lab.numbers.indexOf(lab.place[st.id]);
+                    var si = seminar.numbers.indexOf(seminar.place[st.id]);
+                    if (li >= 0 && si >= 0 && Math.floor(li / per) !== si) nested = false;
                 });
             }
             lab.mode = nested ? "nested" : "flat";
-            lab.per = nested ? labCount / semCount : 2;
+            lab.per = nested ? per : 2;
         }
-        for (var k = 0; k < labCount; k += 1) {
-            lab.names.push(labSections[k] ? labSections[k].name : defaultLabName(group, seminar, lab, k + 1));
-        }
+        lab.numbers.forEach(function (n, i) { lab.names.push(labMap[n] ? labMap[n].name : defaultLabName(group, seminar, lab, i)); });
         var editable = !!(journal && journal.can_manage && !journal.block_reason);
         var reason = !journal
             ? ""
@@ -100,14 +100,14 @@
         return { seminar: seminar, lab: lab, editable: editable, reason: reason };
     }
 
-    function defaultLabName(group, seminar, lab, number) {
-        if (lab.mode === "nested" && seminar.count >= 2) {
-            var s = Math.ceil(number / lab.per);
-            var k = number - (s - 1) * lab.per;
-            var base = seminar.names[s - 1] || group.name + s;
-            return clip(base + " · Lab-" + k);
+    /** Lab qrupunun defolt adı (`i` — sıradakı indeks): iç-içə — «234 K1 · Lab-1», müstəqil — «234 K · Lab-№». */
+    function defaultLabName(group, seminar, lab, i) {
+        if (lab.mode === "nested" && size(seminar) >= 2) {
+            var si = Math.floor(i / lab.per);
+            var base = seminar.names[si] || group.name + seminar.numbers[si];
+            return clip(base + " · Lab-" + ((i % lab.per) + 1));
         }
-        return clip(group.name + " · Lab-" + number);
+        return clip(group.name + " · Lab-" + lab.numbers[i]);
     }
 
     W.init = function (data) {
@@ -129,92 +129,110 @@
     // ── köməkçilər ──────────────────────────────────────────────────────────
     function students(group) { return group.journal ? group.journal.students : []; }
 
-    function counts(place, n, list) {
-        var out = [];
-        for (var i = 0; i <= n; i += 1) out.push(0);
-        list.forEach(function (st) { var v = place[st.id]; out[v && v <= n ? v : 0] += 1; });
+    /** `{№: say, 0: yerləşməyən}`. */
+    function counts(place, numbers, list) {
+        var out = { 0: 0 };
+        numbers.forEach(function (n) { out[n] = 0; });
+        list.forEach(function (st) {
+            var v = place[st.id];
+            if (v && out[v] != null) out[v] += 1;
+            else out[0] += 1;
+        });
         return out;
     }
 
-    /** Əlifba ilə bərabər bölmə (siyahı server tərəfindən soyad sırası ilə gəlir). */
-    function splitEven(list, n, offset) {
+    /** Əlifba ilə bərabər bölmə (siyahı soyad sırası ilə gəlir) — dəyərlər `numbers`-dəki real nömrələrdir. */
+    function splitEven(list, numbers) {
         var place = {};
-        var size = Math.ceil(list.length / n) || 1;
-        list.forEach(function (st, i) { place[st.id] = Math.min(Math.floor(i / size), n - 1) + 1 + (offset || 0); });
+        var n = numbers.length;
+        var chunk = Math.ceil(list.length / n) || 1;
+        list.forEach(function (st, i) { place[st.id] = numbers[Math.min(Math.floor(i / chunk), n - 1)]; });
         return place;
+    }
+
+    /** Sayı dəyiş: mövcud nömrələr saxlanır (artıqlar sondan düşür), yenilər ən kiçik boş nömrəni alır. */
+    function resize(part, count, defaults) {
+        if (count < 2) {
+            part.numbers = [];
+            part.names = [];
+            if (part.units) part.units = [];
+            part.place = {};
+            return;
+        }
+        var keep = part.numbers.slice(0, count);
+        var names = part.names.slice(0, count);
+        var units = part.units ? part.units.slice(0, count) : null;
+        for (var n = 1; n <= MAX && keep.length < count; n += 1) {
+            if (keep.indexOf(n) >= 0) continue;
+            keep.push(n);
+            names.push(defaults(n));
+            if (units) units.push("");
+        }
+        var order = keep.map(function (number, i) { return i; }).sort(function (a, b) { return keep[a] - keep[b]; });
+        part.numbers = order.map(function (i) { return keep[i]; });
+        part.names = order.map(function (i) { return names[i]; });
+        if (units) part.units = order.map(function (i) { return units[i]; });
+        Object.keys(part.place).forEach(function (id) { if (part.numbers.indexOf(part.place[id]) < 0) delete part.place[id]; });
     }
 
     function setSeminarCount(groupId, count) {
         var group = W.group(groupId);
         var cfg = W.S.groups[groupId];
-        var sem = cfg.seminar;
-        var old = sem.count;
-        sem.count = count;
-        var names = [], units = [];
-        for (var i = 0; i < count; i += 1) {
-            names.push(i < old ? sem.names[i] : clip(group.name + (i + 1)));
-            units.push(i < old ? sem.units[i] : "");
-        }
-        sem.names = names;
-        sem.units = units;
-        Object.keys(sem.place).forEach(function (id) { if (sem.place[id] > count) delete sem.place[id]; });
-        if (count < 2) {
-            sem.place = {};
+        resize(cfg.seminar, count, function (n) { return clip(group.name + n); });
+        if (size(cfg.seminar) < 2) {
             if (cfg.lab.mode === "nested") setLabMode(groupId, "flat");
         } else if (cfg.lab.mode === "nested") {
             setLabMode(groupId, "nested");
         }
     }
 
-    function setLabMode(groupId, mode) {
+    function setLabMode(groupId, mode, count) {
         var group = W.group(groupId);
         var cfg = W.S.groups[groupId];
         var lab = cfg.lab;
-        if (mode === "nested" && cfg.seminar.count < 2) mode = "flat";
+        var semCount = size(cfg.seminar);
+        if (mode === "nested" && semCount < 2) mode = "flat";
         lab.mode = mode;
-        if (mode === "none") {
-            lab.count = 0;
-        } else if (mode === "nested") {
-            lab.per = Math.max(2, lab.per || 2);
-            lab.count = Math.min(cfg.seminar.count * lab.per, MAX);
-            lab.per = Math.floor(lab.count / cfg.seminar.count);
-            lab.count = cfg.seminar.count * lab.per;
-        } else if (lab.count < 2) {
-            lab.count = 2;
+        var target = 0;
+        if (mode === "nested") {
+            lab.per = Math.max(2, Math.min(lab.per || 2, Math.floor(MAX / semCount)));
+            target = semCount * lab.per;
+        } else if (mode === "flat") {
+            target = Math.max(2, count || size(lab) || 2);
         }
-        lab.names = [];
-        for (var n = 1; n <= lab.count; n += 1) lab.names.push(defaultLabName(group, cfg.seminar, lab, n));
+        resize(lab, target, function (n) { return clip(group.name + " · Lab-" + n); });
+        lab.names = lab.numbers.map(function (n, i) { return defaultLabName(group, cfg.seminar, lab, i); });
         if (mode === "nested") lab.place = nestedFill(group, cfg, lab.place);
-        else Object.keys(lab.place).forEach(function (id) { if (lab.place[id] > lab.count) delete lab.place[id]; });
-        if (mode === "none") lab.place = {};
         // Heç kim yerləşməyibsə ilkin təklif əlifba ilədir (sonra əl ilə dəyişmək olar) — «kim haradadır» dərhal görünür.
         if (mode !== "none" && !Object.keys(lab.place).length) {
-            lab.place = mode === "nested" ? nestedAlphabet(group, cfg) : splitEven(students(group), lab.count, 0);
+            lab.place = mode === "nested" ? nestedAlphabet(group, cfg) : splitEven(students(group), lab.numbers);
         }
+    }
+
+    /** Seminar alt qrupunun (№) lab qrupları (iç-içə rejim) — real lab nömrələri. */
+    function labsOf(cfg, seminarNumber) {
+        var si = cfg.seminar.numbers.indexOf(seminarNumber);
+        return si < 0 ? [] : cfg.lab.numbers.slice(si * cfg.lab.per, si * cfg.lab.per + cfg.lab.per);
     }
 
     /** İç-içə rejim: tələbə öz seminar alt qrupunun lab qruplarındadır; uyğun olmayan/boş olan ən az dolu qrupa düşür. */
     function nestedFill(group, cfg, current) {
         if (!Object.keys(current || {}).length) return nestedAlphabet(group, cfg);
-        var lab = cfg.lab;
-        var per = lab.per;
         var place = {};
         var sizes = {};
         var list = students(group);
         list.forEach(function (st) {
-            var s = cfg.seminar.place[st.id];
             var l = current[st.id];
-            if (s && l && Math.ceil(l / per) === s) { place[st.id] = l; sizes[l] = (sizes[l] || 0) + 1; }
+            if (l && labsOf(cfg, cfg.seminar.place[st.id]).indexOf(l) >= 0) {
+                place[st.id] = l;
+                sizes[l] = (sizes[l] || 0) + 1;
+            }
         });
         list.forEach(function (st) {
             if (place[st.id]) return;
-            var s = cfg.seminar.place[st.id];
-            if (!s) return;
-            var best = 0;
-            for (var k = 1; k <= per; k += 1) {
-                var n = (s - 1) * per + k;
-                if (!best || (sizes[n] || 0) < (sizes[best] || 0)) best = n;
-            }
+            var options = labsOf(cfg, cfg.seminar.place[st.id]);
+            if (!options.length) return;
+            var best = options.reduce(function (a, b) { return (sizes[b] || 0) < (sizes[a] || 0) ? b : a; });
             place[st.id] = best;
             sizes[best] = (sizes[best] || 0) + 1;
         });
@@ -223,11 +241,13 @@
 
     function nestedAlphabet(group, cfg) {
         var place = {};
-        for (var s = 1; s <= cfg.seminar.count; s += 1) {
+        cfg.seminar.numbers.forEach(function (s) {
             var members = students(group).filter(function (st) { return cfg.seminar.place[st.id] === s; });
-            var part = splitEven(members, cfg.lab.per, (s - 1) * cfg.lab.per);
+            var labs = labsOf(cfg, s);
+            if (!labs.length) return;
+            var part = splitEven(members, labs);
             Object.keys(part).forEach(function (id) { place[id] = part[id]; });
-        }
+        });
         return place;
     }
 
@@ -236,12 +256,12 @@
         var regs = group.registry_subgroups || [];
         setSeminarCount(group.id, Math.min(regs.length, MAX));
         var sem = W.S.groups[group.id].seminar;
-        sem.names = regs.slice(0, MAX).map(function (u) { return clip(u.name); });
-        sem.units = regs.slice(0, MAX).map(function (u) { return u.id; });
+        sem.names = regs.slice(0, size(sem)).map(function (u) { return clip(u.name); });
+        sem.units = regs.slice(0, size(sem)).map(function (u) { return u.id; });
         sem.place = {};
         students(group).forEach(function (st) {
             var index = sem.units.indexOf(st.unit_id);
-            if (index >= 0) sem.place[st.id] = index + 1;
+            if (index >= 0) sem.place[st.id] = sem.numbers[index];
         });
         if (W.S.groups[group.id].lab.mode === "nested") setLabMode(group.id, "nested");
     }
@@ -252,66 +272,42 @@
     }
 
     // ── 2. Seminar ──────────────────────────────────────────────────────────
-    function notice(kind, text, extra) {
-        return '<p class="wl-wiz-note wl-wiz-note--' + kind + '"><i class="fas fa-' + (kind === "warn" ? "triangle-exclamation" : "circle-info") +
-            '" aria-hidden="true"></i> <span>' + esc(text) + "</span>" + (extra || "") + "</p>";
-    }
+    // Ortaq UI parçaları `workload_split_wizard_groups.js`-dədir (`W.ui`) — modul ölçüsü büdcəsi.
+    function notice(kind, text, extra) { return W.ui.notice(kind, text, extra); }
+    function journalNotice(group) { return W.ui.journalNotice(group); }
+    function segment(attr, groupId, options, current, disabled) { return W.ui.segment(attr, groupId, options, current, disabled); }
 
-    function journalNotice(group) {
-        var cfg = W.S.groups[group.id];
-        if (!group.journal) {
-            var can = W.S.data.task.plan_reached;
-            return notice(
-                "warn",
-                can
-                    ? gettext("Bu qrupun jurnalı hələ yaradılmayıb. Tələbələri bölmək üçün əvvəlcə jurnalı yaradın — bölgü saatını isə indi də seçə bilərsiniz.")
-                    : gettext("Bu qrupun jurnalı hələ yoxdur — tapşırıq dekanlıqda təsdiqlənəndən sonra yaranacaq. İndi yalnız say seçilir, tələbələr sonra bölünür."),
-                can ? ' <button type="button" class="wl-btn wl-btn--ghost wl-btn--sm" data-wl-wiz-journal-create><i class="fas fa-book-medical" aria-hidden="true"></i> ' + esc(gettext("Jurnalı indi yarat")) + "</button>" : ""
-            );
-        }
-        return cfg.reason ? notice("warn", cfg.reason) : "";
-    }
-
-    function segment(attr, groupId, options, current, disabled) {
-        return '<div class="wl-wiz-seg" role="group">' + options.map(function (opt) {
-            var on = String(opt.value) === String(current);
-            return '<button type="button" class="wl-wiz-seg__btn' + (on ? " is-on" : "") + '" ' + attr + '="' + esc(opt.value) +
-                '" data-group-id="' + esc(groupId) + '" aria-pressed="' + (on ? "true" : "false") + '"' +
-                (disabled || opt.disabled ? " disabled" : "") + (opt.title ? ' title="' + esc(opt.title) + '"' : "") + ">" + esc(opt.label) + "</button>";
-        }).join("") + "</div>";
-    }
-
-    function sectionChips(kind, group, names, place, n) {
+    function sectionChips(kind, group, part) {
         var list = students(group);
-        var c = counts(place, n, list);
+        var c = counts(part.place, part.numbers, list);
         var cfg = W.S.groups[group.id];
         var html = '<div class="wl-wiz-secs">';
-        for (var i = 1; i <= n; i += 1) {
-            html += '<label class="wl-wiz-sec wl-wiz-c' + i + '"><span class="wl-wiz-sec__no">' + i + "</span>" +
-                '<input type="text" maxlength="40" value="' + esc(names[i - 1]) + '" placeholder="' + esc(group.name + i) + '" data-wl-wiz-' + kind + '-name="' + i +
-                '" data-group-id="' + esc(group.id) + '"' + (cfg.editable || !group.journal ? "" : " disabled") + ' aria-label="' + esc(fmt(gettext("%(n)s-ci bölmənin adı"), { n: i })) + '">' +
-                (group.journal ? '<span class="wl-wiz-sec__count">' + esc(fmt(gettext("%(n)s tələbə"), { n: c[i] })) + "</span>" : "") + "</label>";
-        }
+        part.numbers.forEach(function (n, i) {
+            html += '<label class="wl-wiz-sec wl-wiz-c' + (i + 1) + '"><span class="wl-wiz-sec__no">' + n + "</span>" +
+                '<input type="text" maxlength="40" value="' + esc(part.names[i]) + '" placeholder="' + esc(group.name + n) + '" data-wl-wiz-' + kind + '-name="' + n +
+                '" data-group-id="' + esc(group.id) + '"' + (cfg.editable || !group.journal ? "" : " disabled") + ' aria-label="' + esc(fmt(gettext("%(n)s-ci bölmənin adı"), { n: n })) + '">' +
+                (group.journal ? '<span class="wl-wiz-sec__count">' + esc(fmt(gettext("%(n)s tələbə"), { n: c[n] })) + "</span>" : "") + "</label>";
+        });
         html += "</div>";
         if (group.journal && c[0]) html += notice("warn", fmt(gettext("Heç bir bölməyə yerləşdirilməyib: %(n)s tələbə."), { n: c[0] }));
         return html;
     }
 
-    function studentRows(kind, group, n, allowed) {
+    function studentRows(kind, group, allowed) {
         var cfg = W.S.groups[group.id];
-        var place = cfg[kind].place;
+        var part = cfg[kind];
         var list = students(group);
         if (!list.length) return group.journal ? notice("info", gettext("Jurnalda aktiv tələbə yoxdur.")) : "";
         return '<div class="wl-wiz-students">' + list.map(function (st) {
-            var current = place[st.id] || 0;
+            var current = part.place[st.id] || 0;
             var reg = registryName(group, st.unit_id);
             var buttons = "";
-            for (var i = 1; i <= n; i += 1) {
-                if (allowed && !allowed(st, i)) continue;
-                buttons += '<button type="button" class="wl-wiz-place wl-wiz-c' + i + (current === i ? " is-on" : "") + '" data-wl-wiz-place="' + kind +
-                    '" data-number="' + i + '" data-group-id="' + esc(group.id) + '" data-enrollment="' + esc(st.id) + '" aria-pressed="' +
-                    (current === i ? "true" : "false") + '" title="' + esc(cfg[kind].names[i - 1] || "") + '"' + (cfg.editable ? "" : " disabled") + ">" + i + "</button>";
-            }
+            part.numbers.forEach(function (n, i) {
+                if (allowed && !allowed(st, n)) return;
+                buttons += '<button type="button" class="wl-wiz-place wl-wiz-c' + (i + 1) + (current === n ? " is-on" : "") + '" data-wl-wiz-place="' + kind +
+                    '" data-number="' + n + '" data-group-id="' + esc(group.id) + '" data-enrollment="' + esc(st.id) + '" aria-pressed="' +
+                    (current === n ? "true" : "false") + '" title="' + esc(part.names[i] || "") + '"' + (cfg.editable ? "" : " disabled") + ">" + n + "</button>";
+            });
             return '<div class="wl-wiz-st' + (current ? "" : " is-unplaced") + '" data-wl-wiz-student="' + esc(st.id) + '">' +
                 '<span class="wl-wiz-st__name">' + esc(st.name) + "</span>" +
                 (reg ? '<span class="wl-wiz-st__reg">' + esc(reg) + "</span>" : "") +
@@ -319,10 +315,29 @@
         }).join("") + "</div>";
     }
 
-    function lessonWarnings(group, kind, n) {
-        var sections = group.journal ? group.journal[kind] : [];
-        return sections.filter(function (s, i) { return s.lessons > 0 && i + 1 > n; }).map(function (s) {
-            return notice("warn", fmt(gettext("«%(name)s» bölməsinə %(n)s dərs bağlıdır — bu bölmə silinə bilməz. Əvvəlcə jurnalda həmin dərslərin bölməsini dəyişin."), { name: s.label, n: s.lessons }));
+    /** Dərsi olan bölmə: silinə bilməz və tərkibi (tələbələri) dəyişməməlidir — server də eyni qaydanı yoxlayır. */
+    function lessonIssues(group, kind) {
+        var part = W.S.groups[group.id][kind];
+        var issues = [];
+        (group.journal ? group.journal[kind] : []).forEach(function (s) {
+            if (!s.lessons) return;
+            if (part.numbers.indexOf(s.number) < 0) {
+                issues.push({ section: s, removed: true });
+                return;
+            }
+            var changed = students(group).some(function (st) { return (st[kind] === s.number) !== (part.place[st.id] === s.number); });
+            issues.push({ section: s, removed: false, changed: changed });
+        });
+        return issues;
+    }
+
+    function lessonWarnings(group, kind) {
+        return lessonIssues(group, kind).map(function (issue) {
+            var s = issue.section;
+            if (issue.removed) {
+                return notice("warn", fmt(gettext("«%(name)s» bölməsinə %(n)s dərs bağlıdır — bu bölmə silinə bilməz. Əvvəlcə jurnalda həmin dərslərin bölməsini dəyişin."), { name: s.label, n: s.lessons }));
+            }
+            return notice(issue.changed ? "warn" : "info", fmt(gettext("«%(name)s» bölməsinə %(n)s dərs bağlıdır — onun tələbələri burada dəyişdirilmir (tələbəni jurnalın öz ekranında köçürün)."), { name: s.label, n: s.lessons }));
         }).join("");
     }
 
@@ -341,12 +356,12 @@
         var cfg = W.S.groups[group.id];
         var sem = cfg.seminar;
         var options = [{ value: 0, label: gettext("Bölünmür") }, { value: 2, label: gettext("2 alt qrup") }, { value: 3, label: gettext("3 alt qrup") }, { value: 4, label: gettext("4 alt qrup") }];
-        if (sem.count > 4) options.push({ value: sem.count, label: fmt(gettext("%(n)s alt qrup"), { n: sem.count }) });
+        if (size(sem) > 4) options.push({ value: size(sem), label: fmt(gettext("%(n)s alt qrup"), { n: size(sem) }) });
         var locked = !!group.journal && !cfg.editable;
         var html = '<article class="wl-wiz-gp" data-wl-wiz-gpanel="' + esc(group.id) + '"><header class="wl-wiz-gp__head"><h4>' + esc(group.name) + "</h4>" +
             '<span class="wl-wiz-gp__meta">' + esc(fmt(gettext("%(n)s tələbə · seminar planı %(h)s (bir alt qrup üçün)"), { n: group.journal ? group.student_count : row.student_count, h: W.hours(row.plans.seminar) })) + "</span></header>" +
-            journalNotice(group) + segment("data-wl-wiz-seminar-count", group.id, options, sem.count, locked);
-        if (sem.count >= 2) {
+            journalNotice(group) + segment("data-wl-wiz-seminar-count", group.id, options, size(sem), locked);
+        if (size(sem) >= 2) {
             var regs = group.registry_subgroups || [];
             var helpers = "";
             if (regs.length >= 2 && group.journal) {
@@ -357,12 +372,12 @@
                 helpers += '<button type="button" class="wl-btn wl-btn--ghost wl-btn--sm" data-wl-wiz-seminar-alpha data-group-id="' + esc(group.id) + '"' + (cfg.editable ? "" : " disabled") + '>' +
                     '<i class="fas fa-arrow-down-a-z" aria-hidden="true"></i> ' + esc(gettext("Əlifba ilə bərabər böl")) + "</button>";
             }
-            html += (helpers ? '<div class="wl-wiz-helpers">' + helpers + "</div>" : "") + sectionChips("seminar", group, sem.names, sem.place, sem.count);
-            html += studentRows("seminar", group, sem.count, null);
+            html += (helpers ? '<div class="wl-wiz-helpers">' + helpers + "</div>" : "") + sectionChips("seminar", group, sem);
+            html += studentRows("seminar", group, null);
         } else if (group.journal) {
             html += notice("info", gettext("Seminar bütün qrupla keçir — bir bölmə, bir müəllim."));
         }
-        html += lessonWarnings(group, "seminar", sem.count);
+        html += lessonWarnings(group, "seminar");
         return html + "</article>";
     }
 
@@ -390,8 +405,8 @@
                 var cfg = W.S.groups[id];
                 var part = cfg[kind];
                 if (!group.journal || !cfg.editable) return;
-                if (part.count >= 2) {
-                    var c = counts(part.place, part.count, students(group));
+                if (size(part) >= 2) {
+                    var c = counts(part.place, part.numbers, students(group));
                     if (c[0]) problems.push(fmt(gettext("%(group)s: %(n)s tələbə yerləşdirilməyib."), { group: group.name, n: c[0] }));
                     var seen = {};
                     part.names.forEach(function (name) {
@@ -400,8 +415,8 @@
                         seen[key] = true;
                     });
                 }
-                group.journal[kind].forEach(function (s, i) {
-                    if (s.lessons > 0 && i + 1 > part.count) problems.push(fmt(gettext("%(group)s: «%(name)s» bölməsinə dərs bağlıdır."), { group: group.name, name: s.label }));
+                lessonIssues(group, kind).forEach(function (issue) {
+                    if (issue.removed || issue.changed) problems.push(fmt(gettext("%(group)s: «%(name)s» bölməsinə dərs bağlıdır."), { group: group.name, name: issue.section.label }));
                 });
             });
         });
@@ -416,36 +431,35 @@
         var cfg = W.S.groups[group.id];
         var lab = cfg.lab;
         var locked = !!group.journal && !cfg.editable;
-        var canNest = cfg.seminar.count >= 2;
+        var canNest = size(cfg.seminar) >= 2;
         var html = '<article class="wl-wiz-gp" data-wl-wiz-gpanel="' + esc(group.id) + '"><header class="wl-wiz-gp__head"><h4>' + esc(group.name) + "</h4>" +
             '<span class="wl-wiz-gp__meta">' + esc(fmt(gettext("lab planı %(h)s (bir lab qrupu üçün)"), { h: W.hours(row.plans.lab) })) + "</span></header>" +
             journalNotice(group) +
             segment("data-wl-wiz-lab-mode", group.id, [
                 { value: "none", label: gettext("Bölünmür") },
-                { value: "nested", label: fmt(gettext("Hər seminar alt qrupunu böl (%(n)s alt qrup)"), { n: cfg.seminar.count || 0 }), disabled: !canNest, title: canNest ? "" : gettext("Əvvəlcə seminarı alt qruplara bölün.") },
+                { value: "nested", label: fmt(gettext("Hər seminar alt qrupunu böl (%(n)s alt qrup)"), { n: size(cfg.seminar) }), disabled: !canNest, title: canNest ? "" : gettext("Əvvəlcə seminarı alt qruplara bölün.") },
                 { value: "flat", label: gettext("Seminardan asılı olmadan") },
             ], lab.mode, locked);
         if (lab.mode === "nested") {
             html += '<div class="wl-wiz-row"><span class="wl-wiz-row__label">' + esc(gettext("Hər seminar alt qrupunda neçə lab qrupu:")) + "</span>" +
-                segment("data-wl-wiz-lab-per", group.id, [2, 3, 4].filter(function (n) { return n * cfg.seminar.count <= MAX; }).map(function (n) { return { value: n, label: String(n) }; }), lab.per, locked) + "</div>";
+                segment("data-wl-wiz-lab-per", group.id, [2, 3, 4].filter(function (n) { return n * size(cfg.seminar) <= MAX; }).map(function (n) { return { value: n, label: String(n) }; }), lab.per, locked) + "</div>";
         } else if (lab.mode === "flat") {
             html += '<div class="wl-wiz-row"><span class="wl-wiz-row__label">' + esc(gettext("Lab qrupu sayı:")) + "</span>" +
-                segment("data-wl-wiz-lab-count", group.id, [2, 3, 4, 5, 6].map(function (n) { return { value: n, label: String(n) }; }), lab.count, locked) + "</div>";
+                segment("data-wl-wiz-lab-count", group.id, [2, 3, 4, 5, 6].map(function (n) { return { value: n, label: String(n) }; }), size(lab), locked) + "</div>";
         }
         if (lab.mode !== "none") {
             if (group.journal) {
                 html += '<div class="wl-wiz-helpers"><button type="button" class="wl-btn wl-btn--ghost wl-btn--sm" data-wl-wiz-lab-fill data-group-id="' + esc(group.id) + '"' + (cfg.editable ? "" : " disabled") + '>' +
                     '<i class="fas fa-arrow-down-a-z" aria-hidden="true"></i> ' + esc(lab.mode === "nested" ? gettext("Seminar alt qrupundan doldur (əlifba ilə)") : gettext("Əlifba ilə bərabər böl")) + "</button></div>";
             }
-            html += sectionChips("lab", group, lab.names, lab.place, lab.count);
-            var per = lab.per;
-            html += studentRows("lab", group, lab.count, lab.mode === "nested"
-                ? function (st, n) { var s = cfg.seminar.place[st.id]; return !s || Math.ceil(n / per) === s; }
+            html += sectionChips("lab", group, lab);
+            html += studentRows("lab", group, lab.mode === "nested"
+                ? function (st, n) { var s = cfg.seminar.place[st.id]; return !s || labsOf(cfg, s).indexOf(n) >= 0; }
                 : null);
         } else if (group.journal) {
             html += notice("info", gettext("Laboratoriya bütün qrupla keçir — bir bölmə, bir müəllim."));
         }
-        html += lessonWarnings(group, "lab", lab.count);
+        html += lessonWarnings(group, "lab");
         return html + "</article>";
     }
 
@@ -479,7 +493,7 @@
                 students(W.group(id)).forEach(function (st) {
                     var s = cfg.seminar.place[st.id];
                     var l = cfg.lab.place[st.id];
-                    if (s && l && Math.ceil(l / cfg.lab.per) !== s) mixed = fmt(gettext("%(name)s başqa seminar alt qrupunun lab qrupundadır."), { name: st.name });
+                    if (s && l && labsOf(cfg, s).indexOf(l) < 0) mixed = fmt(gettext("%(name)s başqa seminar alt qrupunun lab qrupundadır."), { name: st.name });
                 });
             });
         });
@@ -515,13 +529,14 @@
             } else {
                 setSeminarCount(group.id, count);
                 var sem = W.S.groups[group.id].seminar;
-                if (count >= 2 && !Object.keys(sem.place).length) sem.place = splitEven(students(group), count, 0);
+                if (count >= 2 && !Object.keys(sem.place).length) sem.place = splitEven(students(group), sem.numbers);
             }
             rerender();
         });
         D.on("click", "[data-wl-wiz-seminar-alpha]", function (event, btn) {
             var cfg = W.S.groups[btn.dataset.groupId];
-            cfg.seminar.place = splitEven(students(W.group(btn.dataset.groupId)), cfg.seminar.count, 0);
+            cfg.seminar.place = splitEven(students(W.group(btn.dataset.groupId)), cfg.seminar.numbers);
+            if (cfg.lab.mode === "nested") cfg.lab.place = nestedFill(W.group(btn.dataset.groupId), cfg, cfg.lab.place);
             rerender();
         });
         D.on("click", "[data-wl-wiz-seminar-registry]", function (event, btn) {
@@ -538,10 +553,13 @@
         });
         D.on("input", "[data-wl-wiz-seminar-name]", function (event, field) {
             var sem = W.S.groups[field.dataset.groupId].seminar;
-            sem.names[Number(field.dataset.wlWizSeminarName) - 1] = clip(field.value);
+            var i = sem.numbers.indexOf(Number(field.dataset.wlWizSeminarName));
+            if (i >= 0) sem.names[i] = clip(field.value);
         });
         D.on("input", "[data-wl-wiz-lab-name]", function (event, field) {
-            W.S.groups[field.dataset.groupId].lab.names[Number(field.dataset.wlWizLabName) - 1] = clip(field.value);
+            var lab = W.S.groups[field.dataset.groupId].lab;
+            var i = lab.numbers.indexOf(Number(field.dataset.wlWizLabName));
+            if (i >= 0) lab.names[i] = clip(field.value);
         });
         D.on("click", "[data-wl-wiz-lab-mode]", function (event, btn) {
             setLabMode(btn.dataset.groupId, btn.dataset.wlWizLabMode);
@@ -553,15 +571,13 @@
             rerender();
         });
         D.on("click", "[data-wl-wiz-lab-count]", function (event, btn) {
-            var cfg = W.S.groups[btn.dataset.groupId];
-            cfg.lab.count = Number(btn.dataset.wlWizLabCount) || 2;
-            setLabMode(btn.dataset.groupId, "flat");
+            setLabMode(btn.dataset.groupId, "flat", Number(btn.dataset.wlWizLabCount) || 2);
             rerender();
         });
         D.on("click", "[data-wl-wiz-lab-fill]", function (event, btn) {
             var group = W.group(btn.dataset.groupId);
             var cfg = W.S.groups[group.id];
-            cfg.lab.place = cfg.lab.mode === "nested" ? nestedAlphabet(group, cfg) : splitEven(students(group), cfg.lab.count, 0);
+            cfg.lab.place = cfg.lab.mode === "nested" ? nestedAlphabet(group, cfg) : splitEven(students(group), cfg.lab.numbers);
             rerender();
         });
     };

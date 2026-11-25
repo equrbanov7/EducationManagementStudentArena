@@ -16,6 +16,7 @@ Nəyi qoruyur
 
 from __future__ import annotations
 
+import datetime
 import json
 
 from django.contrib.auth import get_user_model
@@ -28,6 +29,8 @@ from apps.registrar.models import (
     Curriculum,
     Enrollment,
     LabGroup,
+    Lesson,
+    LessonKind,
     SeminarGroup,
     StudentAcademicRecord,
 )
@@ -396,6 +399,93 @@ class SplitWizardDistributedTests(WizardBase):
         self.assertEqual((amendment.reason, amendment.note), ("correction", "Bölgü sehrbazı"))
         self.assertEqual(amendment.old_values["seminar_total"], 30)
         self.assertEqual(SeminarGroup.objects.filter(offering=self.offering).count(), 2)
+
+
+class SplitWizardGappedNumbersTests(WizardBase):
+    """Review 2026-11-26: «Lab-1» silinib {2,3} (və ya {1,3}) qalıb, Lab-2-də dərs var — heç nə dəyişmədən «Təsdiqlə»
+    jurnalı yenidən nömrələməməlidir (əvvəl Lab-2-nin dərsləri Lab-3-ün tələbələrinə keçirdi)."""
+
+    code = "SG"
+
+    def _gapped(self, numbers):
+        LabGroup.objects.filter(offering=self.offering).delete()
+        Lesson.objects.filter(offering=self.offering).delete()
+        for number in numbers:
+            LabGroup.objects.create(organization=self.org, offering=self.offering, number=number)
+        for index, item in enumerate(self.enrollments):
+            Enrollment.objects.filter(pk=item.pk).update(lab_group=numbers[index % 2], seminar_group=None)
+        Lesson.objects.create(
+            organization=self.org,
+            offering=self.offering,
+            date=datetime.date(2026, 10, 7),
+            kind=LessonKind.LAB,
+            hours=2,
+            lab_group=numbers[0],
+        )
+        TeachingTaskRow.objects.filter(pk=self.row.pk).update(lab_total=30, lab_group_count=2, total_hours=90)
+        self.row.refresh_from_db()
+
+    def test_no_op_save_keeps_real_numbers(self):
+        rid, gid = str(self.row.pk), str(self.group.pk)
+        for numbers in ([2, 3], [1, 3]):
+            with self.subTest(numbers=numbers):
+                TeacherAssignment.objects.filter(row=self.row).delete()
+                self._gapped(numbers)
+                state = self._state().json()
+                self.assertEqual([s["number"] for s in state["groups"][0]["journal"]["lab"]], numbers)
+                before = dict(Enrollment.objects.filter(offering=self.offering).values_list("pk", "lab_group"))
+                payload = {
+                    "task_id": str(self.task.pk),
+                    "row_ids": [rid],
+                    "rows": [{"row_id": rid, "joint": False, "fix_totals": False}],
+                    "groups": [
+                        {
+                            "row_id": rid,
+                            "group_id": gid,
+                            "apply_journal": True,
+                            "seminar": {"count": 0, "numbers": [], "names": [], "units": [], "placement": {}},
+                            "lab": {
+                                "count": 2,
+                                "numbers": numbers,
+                                "nested": False,
+                                "names": ["", ""],
+                                "placement": {str(pk): number for pk, number in before.items()},
+                            },
+                        }
+                    ],
+                    "units": [
+                        {"row_id": rid, "activity": "seminar", "group_id": gid, "sub_number": None, "teacher_id": ""},
+                    ]
+                    + [
+                        {
+                            "row_id": rid,
+                            "activity": "lab",
+                            "group_id": gid,
+                            "sub_number": number,
+                            "teacher_id": str(self.teachers[i].pk),
+                            "hours": 15,
+                        }
+                        for i, number in enumerate(numbers)
+                    ],
+                    **AMEND,
+                }
+                response = self._save(payload)
+                self.assertEqual(response.status_code, 200, response.content)
+                self.assertEqual(response.json()["summary"]["sections"], 0)
+                self.assertEqual(
+                    dict(Enrollment.objects.filter(offering=self.offering).values_list("pk", "lab_group")), before
+                )
+                self.assertEqual(
+                    sorted(LabGroup.objects.filter(offering=self.offering).values_list("number", flat=True)), numbers
+                )
+                self.assertEqual(
+                    sorted(
+                        TeacherAssignment.objects.filter(row=self.row, activity="lab").values_list(
+                            "sub_number", flat=True
+                        )
+                    ),
+                    numbers,
+                )
 
 
 class SplitWizardJournalCreationTests(WizardBase):

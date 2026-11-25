@@ -31,8 +31,8 @@
             if (!W.active(row, activity)) return;
             if (W.S.rows[row.id].joint) { out[activity].push({ group: "", sub: null }); return; }
             row.groups.forEach(function (groupId) {
-                var count = W.S.groups[groupId][activity].count;
-                if (count >= 2) for (var n = 1; n <= count; n += 1) out[activity].push({ group: groupId, sub: n });
+                var numbers = W.S.groups[groupId][activity].numbers;
+                if (numbers.length >= 2) numbers.forEach(function (n) { out[activity].push({ group: groupId, sub: n }); });
                 else out[activity].push({ group: groupId, sub: null });
             });
         });

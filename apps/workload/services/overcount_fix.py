@@ -327,6 +327,8 @@ class OvercountFixer:
             other = "lab" if activity == "seminar" else "seminar"
             if not int(getattr(row, TOTAL_FIELD[other]) or 0):
                 data[MULTIPLIER_FIELD[activity]] = 0
+            if activity == "lab":
+                data["lab_group_count"] = 0  # 2026-11-26: lab çarpanı ayrıca da ola bilər
         label = ACTIVITY_LABELS[activity]
         data["note"] = (
             (f"{row.note}\n" if row.note else "")

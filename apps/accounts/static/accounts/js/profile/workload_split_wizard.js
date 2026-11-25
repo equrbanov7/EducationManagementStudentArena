@@ -24,6 +24,7 @@
     W.VACANT = "vacant";
     W.S = null;
     var pool = { key: "", items: [], promise: null };
+    var SEQ = 0; // açılış sessiyasının nişanı — gecikmiş cavab yeni sessiyaya yazılmır
 
     // ── ortaq köməkçilər ────────────────────────────────────────────────────
     W.dist = function () { return window.EMSWorkloadDist || null; };
@@ -139,10 +140,24 @@
         if (!D || !modalNode || !D.state.task) return;
         var card = D.cardById ? D.cardById(cardId) : null;
         if (!card) return;
-        W.S = { card: card, kind: kind || "", data: null, step: 0, selected: {}, rows: {}, groups: {}, units: {}, lecture: {}, saving: false };
+        // QA 2026-11-26: eyni kart üçün təkrar açılış (bağla → aç, və ya düyməyə təkrar klik) köhnə vəziyyəti və
+        // gecikmiş cavabı yeni sessiyaya qarışdırırdı — seminar addımı «ölü» qalırdı. İndi: modal artıq açıqdırsa
+        // heç nə etmirik; əks halda köhnə vəziyyət atılır, yeni sessiya öz nişanı (`token`) ilə BİR dəfə yüklənir.
+        var existing = D.modal("[data-wl-wiz-modal]");
+        var visible = modalNode.classList.contains("show") || !!(existing && existing._isShown);
+        if (W.S && W.S.card && W.S.card.id === card.id && visible) return;
+        SEQ += 1;
+        W.S = {
+            token: SEQ, card: card, kind: kind || "", data: null, step: 0, selected: {}, rows: {}, groups: {}, units: {},
+            lecture: {}, saving: false, loading: null,
+        };
         var subject = W.q("[data-wl-wiz-subject]");
         if (subject) subject.textContent = card.subject + " · " + (card.season_label || "");
         W.showError("");
+        W.STEPS.forEach(function (name) {
+            var panel = W.q('[data-wl-wiz-panel="' + name + '"]');
+            if (panel) panel.innerHTML = "";
+        });
         W.setLoading(true);
         W.go(0);
         var instance = D.modal("[data-wl-wiz-modal]");
@@ -154,22 +169,34 @@
         var D = W.dist();
         var modalNode = W.q("[data-wl-wiz-modal]");
         if (!W.S || !modalNode || !D.state.task) return Promise.resolve();
-        var url = modalNode.dataset.stateUrl + "?task=" + encodeURIComponent(D.state.task.id) + "&rows=" + encodeURIComponent((W.S.card.row_ids || []).join(","));
+        if (W.S.loading) return W.S.loading; // eyni sessiyada ikinci GET yoxdur
+        var session = W.S;
+        var token = session.token;
+        var url = modalNode.dataset.stateUrl + "?task=" + encodeURIComponent(D.state.task.id) + "&rows=" + encodeURIComponent((session.card.row_ids || []).join(","));
+        var current = function () { return W.S === session && W.S.token === token; };
         W.setLoading(true);
-        return Promise.all([window.EMSCore.fetchJSON(url), W.loadPool()])
+        session.loading = Promise.all([window.EMSCore.fetchJSON(url), W.loadPool()])
             .then(function (results) {
-                var data = results[0];
-                if (!W.S) return;
-                W.S.data = data;
-                if (W.init) W.init(data);
+                session.loading = null;
+                if (!current()) return; // köhnə (bağlanmış / əvəz olunmuş) sessiyanın cavabı — atılır
+                session.data = results[0];
+                if (W.init) W.init(session.data);
                 W.setLoading(false);
-                W.go(W.S.step);
+                W.go(session.step);
             })
             .catch(function (err) {
+                session.loading = null;
+                if (!current()) return;
                 W.setLoading(false);
                 var payload = (err && err.payload) || {};
                 W.showError(payload.message || gettext("Məlumat yüklənmədi. Səhifəni yeniləyib yenidən cəhd edin."));
             });
+        return session.loading;
+    };
+
+    /** Modal bağlananda vəziyyət atılır (yadda saxlama gedirsə — düzəliş dialoquna keçid — saxlanır). */
+    W.discard = function () {
+        if (W.S && !W.S.saving) W.S = null;
     };
 
     W.setLoading = function (busy) {
@@ -308,7 +335,10 @@
 
     function bind() {
         var EMSDelegate = window.EMSDelegate;
-        if (!EMSDelegate) return;
+        // QA 2026-11-26: dinləyicilər səhifədə BİR dəfə (skript AJAX ilə təkrar icra olunsa da) — qlobal bayraq.
+        if (!EMSDelegate || window.__emsWorkloadWizardBound) return;
+        window.__emsWorkloadWizardBound = true;
+        EMSDelegate.on("hidden.bs.modal", "[data-wl-wiz-modal]", function () { W.discard(); });
         EMSDelegate.on("click", "[data-wl-wiz-open]", function (event, btn) { W.open(btn.dataset.cardId, btn.dataset.kind); });
         EMSDelegate.on("click", "[data-wl-wiz-next]", function () { W.move(1); });
         EMSDelegate.on("click", "[data-wl-wiz-back]", function () { W.move(-1); });

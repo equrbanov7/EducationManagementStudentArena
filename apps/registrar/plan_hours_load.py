@@ -38,11 +38,15 @@ def _int(value) -> int:
         return 0
 
 
-def section_count(row, group_count: int | None = None) -> tuple[int, bool]:
+def section_count(row, group_count: int | None = None, kind: str = "seminar") -> tuple[int, bool]:
     """Seminar/lab bölmələrinin sayı → ``(say, dəqiqdir)``.
 
-    ``dəqiqdir`` — yarımqrup sütunundan gəlir (şablonun tərifi); qrup sayından çıxarılan təxmindir.
+    ``dəqiqdir`` — yarımqrup sütunundan gəlir (şablonun tərifi); qrup sayından çıxarılan təxmindir. Lab üçün
+    ``lab_group_count`` verilibsə o götürülür (sahib 2026-11-26, «Bölgü sehrbazı»: seminar 2, lab 4).
     """
+    labs = _int(getattr(row, "lab_group_count", 0)) if kind == "lab" else 0
+    if labs > 1:
+        return labs, True
     subgroups = _int(getattr(row, "subgroup_count", 1))
     if subgroups > 1:
         return subgroups, True
@@ -69,12 +73,15 @@ def row_group_hours(row, *, group_count: int | None = None) -> dict:
     """BİR tapşırıq sətrindən bir qrupa düşən ``{növ: saat}`` (boş növlər atılır)."""
     lecture = _int(row.lecture_plan) or _int(row.lecture_total)
     hours = {"lecture": lecture} if lecture else {}
-    sections = None
+    groups = None
     for kind in ("seminar", "lab"):
         plan = _int(getattr(row, f"{kind}_plan"))
         total = _int(getattr(row, f"{kind}_total"))
-        if not plan and total and sections is None:
-            sections = section_count(row, group_count() if callable(group_count) else group_count)
+        sections = None
+        if not plan and total:
+            if groups is None:
+                groups = group_count() if callable(group_count) else group_count
+            sections = section_count(row, groups, kind)
         value = plan or (_split_total(total, sections[0], sections[1], lecture) if total else 0)
         if value:
             hours[kind] = value

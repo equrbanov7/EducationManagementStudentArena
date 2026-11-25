@@ -6,13 +6,15 @@ Nəyi qoruyur
   tələbələr yerləşir; təkrar çağırış heç nə yazmır; ``None`` növə toxunulmur; say ≤ 1 — bölmələr silinir;
 * rədlər: yerləşdirilməmiş tələbə, iç-içə rejimdə qarışıq lab qrupu, dərsi olan bölmənin silinməsi, eyni ad,
   səlahiyyətsiz aktor (403), keçmiş dövr (409) — heç biri heç nə yazmır;
-* ``split_wizard_journal_state``: siyahı, bölmələr, bağlı dərs sayı, aktorun səlahiyyəti.
+* ``split_wizard_journal_state``: siyahı, bölmələr, bağlı dərs sayı, aktorun səlahiyyəti;
+* review 2026-11-26: boşluqlu nömrələr ({2,3}, {1,3}) olduğu kimi qalır — dəyişiklik etmədən saxlama heç nə yazmır,
+  yenidən nömrələmə cəhdi dərsi olan bölmənin tərkibini dəyişəcəksə rədd olunur (``lesson_members``).
 """
 
 from __future__ import annotations
 
 from apps.organizations.models import AcademicPeriod
-from apps.registrar.models import Enrollment, LabGroup, LessonKind, SeminarGroup
+from apps.registrar.models import Enrollment, LabGroup, Lesson, LessonKind, SeminarGroup
 from apps.registrar.public import (
     SplitWizardSectionError,
     split_wizard_apply_sections,
@@ -123,8 +125,6 @@ class SplitWizardSectionsTest(LabManageBase):
         self.apply(**self.two_by_two())
         self.lesson(kind=LessonKind.SEMINAR, lab_group=None)
         with bypass_rls():
-            from apps.registrar.models import Lesson
-
             Lesson.objects.filter(offering=self.offering, kind=LessonKind.SEMINAR).update(seminar_group=2)
         state = split_wizard_journal_state(organization=self.org, user=self.chair_head, keys={self.key})[self.key]
         self.assertEqual([s["lessons"] for s in state["seminar"]], [0, 1])
@@ -136,3 +136,51 @@ class SplitWizardSectionsTest(LabManageBase):
             self.apply(**self.two_by_two())
         self.assertEqual((ctx.exception.code, ctx.exception.status), ("blocked", 409))
         self.assertEqual(self.state(), ({}, {}))
+
+    # ── review 2026-11-26: real nömrələr ────────────────────────────────────
+    def gapped(self, numbers):
+        """Jurnalda yalnız ``numbers`` lab qrupları var (məs. Lab-1 silinib); tələbələr növbə ilə; ilk qrupda dərs."""
+        rows = self.roster()
+        with bypass_rls():
+            for number in numbers:
+                LabGroup.objects.create(organization=self.org, offering=self.offering, number=number)
+            for index, row in enumerate(rows):
+                Enrollment.objects.filter(pk=row.pk).update(lab_group=numbers[index % len(numbers)])
+        self.lesson(lab_group=numbers[0])
+        return {str(row.pk): numbers[index % len(numbers)] for index, row in enumerate(rows)}
+
+    def test_gapped_numbers_survive_a_no_op_save(self):
+        for numbers in ([2, 3], [1, 3]):
+            with self.subTest(numbers=numbers):
+                with bypass_rls():
+                    LabGroup.objects.filter(offering=self.offering).delete()
+                    Lesson.objects.filter(offering=self.offering).delete()
+                    Enrollment.objects.filter(offering=self.offering).update(lab_group=None)
+                placement = self.gapped(numbers)
+                before = {row.pk: row.lab_group for row in self.roster()}
+                result = self.apply(seminar=None, lab={"numbers": numbers, "names": ["", ""], "placement": placement})
+                self.assertFalse(result["changed"])
+                self.assertEqual(sorted(self.state()[1]), numbers)
+                self.assertEqual({row.pk: row.lab_group for row in self.roster()}, before)
+                state = split_wizard_journal_state(organization=self.org, user=self.chair_head, keys={self.key})
+                self.assertEqual([s["number"] for s in state[self.key]["lab"]], numbers)
+
+    def test_renumbering_a_lesson_bound_section_is_refused(self):
+        placement = self.gapped([2, 3])
+        renumbered = {pk: 1 if number == 2 else 2 for pk, number in placement.items()}
+        with self.assertRaises(SplitWizardSectionError) as ctx:
+            self.apply(seminar=None, lab={"count": 2, "names": ["", ""], "placement": renumbered})
+        self.assertEqual(ctx.exception.code, "lesson_members")
+        self.assertEqual(sorted(self.state()[1]), [2, 3])
+
+    def test_lesson_bound_membership_is_frozen_but_rename_is_allowed(self):
+        placement = self.gapped([2, 3])
+        moved = dict(placement)
+        first = next(pk for pk, number in placement.items() if number == 2)
+        moved[first] = 3
+        with self.assertRaises(SplitWizardSectionError) as ctx:
+            self.apply(seminar=None, lab={"numbers": [2, 3], "names": ["", ""], "placement": moved})
+        self.assertEqual(ctx.exception.code, "lesson_members")
+        result = self.apply(seminar=None, lab={"numbers": [2, 3], "names": ["Axşam", ""], "placement": placement})
+        self.assertTrue(result["changed"])
+        self.assertEqual(self.state()[1], {2: "Axşam", 3: ""})
