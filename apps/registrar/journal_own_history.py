@@ -45,13 +45,32 @@ def offering_ids(user, organization):
     return recorded_lessons(user).filter(organization=organization).values("offering_id")
 
 
+def can_view_teacher_part(request, offering) -> bool:
+    """Another teacher's authored part: the viewer opens the FULL journal (editor / corrector / roster manager /
+    observer) AND is not narrowed by a kind/row-limited share — a seminar-only share holder must not see the
+    lecturer's lessons or another section's students through this page (same rule as ``journal_reviewed_history``)."""
+    from .journal_access import can_open_journal
+    from .journal_shares import journal_scope
+
+    return can_open_journal(request, offering) and journal_scope(request.user, offering).full
+
+
+def gate_list_links(request, offerings) -> None:
+    """Broad journal list: «Müəllimin yazdığı hissə» only where :func:`can_view_teacher_part` holds."""
+    for offering in offerings:
+        if getattr(offering, "journal_teacher_history_id", None) and (
+            request is None or not can_view_teacher_part(request, offering)
+        ):
+            offering.journal_teacher_history_id = None
+
+
 def _subject(request, offering):
     """``(teacher, broad)`` — whose authored part is shown.
 
     No ``teacher`` param (or the viewer's own id): the viewer's own history, behind live ``grade.input`` authority.
     Another teacher's id (owner 2026-11-26, «Müəllimin yazdığı hissə»): only for a viewer who may already open the
-    FULL journal read-only (``journal_access.can_open_journal`` — editor / corrector / roster manager / observer);
-    the subset can never show more than that viewer already sees. Anyone else gets 404.
+    FULL, unnarrowed journal (:func:`can_view_teacher_part`); the subset can never show more than that viewer already
+    sees. Anyone else gets 404.
     """
     raw = (request.GET.get("teacher") or "").strip()
     if not raw or raw == str(request.user.pk):
@@ -64,9 +83,7 @@ def _subject(request, offering):
         raise Http404
     from django.contrib.auth import get_user_model
 
-    from .journal_access import can_open_journal
-
-    if pk <= 0 or not can_open_journal(request, offering):
+    if pk <= 0 or not can_view_teacher_part(request, offering):
         raise Http404
     teacher = get_user_model().objects.filter(pk=pk).first()
     if teacher is None:
