@@ -118,8 +118,13 @@ def _reuse_sources(rows, *, actor, offering, notice_state) -> list:
     if state_code:
         return []
     from .plan_hours import plan_hours_for_offering
+    from .syllabus_reuse_targets import plan_hours_by_offering
 
     target_hours = plan_hours_for_offering(offering)  # jurnalın saatı BİR dəfə; mənbənin saatı versiyadan (sorğusuz)
+    # Versiyasında saat olmayan (köçürülmüş) mənbə — onun jurnalının saatı (POST yolu ilə eyni qərar). Bütün öz
+    # mənbələr üçün BİR toplu çağırış: sorğu sayı mənbələrin versiyasında saat olub-olmamasından asılı deyil.
+    sources = [row.offering for row, _data in own if row.offering_id]
+    fallback_hours = plan_hours_by_offering(sources) if sources else {}
     return [
         {
             "id": data["id"],
@@ -129,7 +134,14 @@ def _reuse_sources(rows, *, actor, offering, notice_state) -> list:
             "question": str(_QUESTION) % {"group": data["group_text"]},
         }
         for row, data in own
-        if not sharing.share_code(row, actor=actor, offering=offering, target_hours=target_hours, state_code=state_code)
+        if not sharing.share_code(
+            row,
+            actor=actor,
+            offering=offering,
+            target_hours=target_hours,
+            source_fallback=fallback_hours.get(row.offering_id),
+            state_code=state_code,
+        )
     ]
 
 

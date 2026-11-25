@@ -131,7 +131,18 @@ def program_for_offering(offering):
     unit_id = getattr(group, "parent_id", None) if group is not None else None
     if unit_id is None:
         return None
-    programs = list(Program.objects.filter(organization_id=offering.organization_id, specialty_unit_id=unit_id))
+    return pick_program(
+        Program.objects.filter(organization_id=offering.organization_id, specialty_unit_id=unit_id), group
+    )
+
+
+def pick_program(programs, group):
+    """Bir ixtisas bölməsinin proqramlarından (``Program.Meta.ordering`` — ad sırası) qrupunkunu seç.
+
+    TƏK qayda — tək açılış (:func:`program_for_offering`) və toplu yol (``syllabus_reuse_targets``) eyni seçimi
+    etməlidir: qrupun təhsil formasına uyğun proqram, yoxdursa ilk proqram; proqram yoxdursa ``None``.
+    """
+    programs = list(programs)
     if not programs:
         return None
     form = _group_education_form(group)
@@ -150,6 +161,7 @@ __all__ = [
     "curriculum_is_approved",
     "plan_hours_for_offering",
     "plan_hours_for_subject",
+    "pick_program",
     "program_for_offering",
     "workload_hours_for_offering",
 ]

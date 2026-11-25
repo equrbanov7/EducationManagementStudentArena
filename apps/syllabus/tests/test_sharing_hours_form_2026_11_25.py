@@ -177,3 +177,76 @@ def test_editor_free_list_skips_other_form_group(world):
     assert f'value="{world["offerings"]["o2"].pk}"' in html
     assert f'value="{world["offerings"]["o6"].pk}"' not in html
     assert f'value="{world["offerings"]["o3"].pk}"' not in html
+
+
+# ── Toplu yol (``syllabus_reuse_targets``) — tək açılışla EYNİ seçim ───────────
+
+
+def test_batched_programme_and_hours_match_the_single_lookup(world):
+    from apps.registrar.public import plan_hours_by_offering, programs_by_offering
+
+    offerings = list(
+        CourseOffering.objects.filter(pk__in=[row.pk for row in world["offerings"].values()]).select_related(
+            "group", "group__parent"
+        )
+    )
+    assert plan_hours_by_offering(offerings) == {row.pk: plan_hours_for_offering(row) for row in offerings}
+    assert programs_by_offering(offerings) == {row.pk: program_for_offering(row) for row in offerings}
+    o6 = next(row for row in offerings if row.pk == world["offerings"]["o6"].pk)
+    assert plan_hours_by_offering([o6]) == {o6.pk: QIYABI_HOURS}
+    assert programs_by_offering([o6]) == {o6.pk: world["programs"]["a_part"]}
+
+
+def test_bulk_apply_copies_into_the_part_time_journal_with_its_own_hours(world):
+    from apps.syllabus.models import Syllabus
+
+    client = _client(world)
+    options = client.get(reverse("accounts:syllabus_reuse_options"), {"offering": str(world["offerings"]["o2"].pk)})
+    [row] = [row for row in options.json()["siblings"] if row["id"] == str(world["source"].pk)]
+    assert row["modes"][str(world["offerings"]["o6"].pk)] == "copy"  # «bağla» YOX — saat fərqlidir
+    payload = {
+        "action": "bulk",
+        "source": str(world["source"].pk),
+        "offerings": [str(world["offerings"][key].pk) for key in ("o2", "o6")],
+    }
+    response = client.post(
+        reverse("accounts:syllabus_reuse_action"), json.dumps(payload), content_type="application/json"
+    )
+    assert response.status_code == 200, response.content
+    statuses = {item["offering"]: item["status"] for item in response.json()["results"]}
+    assert statuses == {str(world["offerings"]["o2"].pk): "linked", str(world["offerings"]["o6"].pk): "copied"}
+    copy = Syllabus.objects.select_related("current_version").get(offering=world["offerings"]["o6"])
+    assert copy.reused_from_id is None
+    assert copy.program_id == world["programs"]["a_part"].pk
+    assert copy.current_version.plan_hours == QIYABI_HOURS
+
+
+# ── Versiyasında saat olmayan (köçürülmüş) mənbə: təklif = POST qərarı ─────────
+
+
+@pytest.fixture()
+def legacy_world(world):
+    from apps.syllabus.models import SyllabusVersion
+
+    SyllabusVersion.objects.filter(syllabus=world["source"]).update(plan_hours={})
+    world["source"].refresh_from_db()
+    return world
+
+
+def _card(client, world, key):
+    url = reverse("accounts:syllabus_reuse_options")
+    options = client.get(url, {"offering": str(world["offerings"][key].pk)}).json()
+    [row] = [row for row in options["siblings"] if row["id"] == str(world["source"].pk)]
+    return row
+
+
+def test_legacy_source_uses_its_journal_hours_in_dialog_prompt_and_post(legacy_world):
+    world = legacy_world
+    client = _client(world)
+    assert _card(client, world, "o6")["can_share"] is False
+    assert _peers(world, "o6")["reuse"] == []
+    assert _post_share(client, world, "o6").status_code == 409
+    # Saat eynidir — üç yol da razıdır.
+    assert _card(client, world, "o2")["can_share"] is True
+    assert [row["id"] for row in _peers(world, "o2")["reuse"]] == [str(world["source"].pk)]
+    assert _post_share(client, world, "o2").status_code == 200

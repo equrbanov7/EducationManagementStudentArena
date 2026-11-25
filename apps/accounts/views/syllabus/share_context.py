@@ -11,8 +11,8 @@ Qaydalar və yazı ``apps.syllabus.services.sharing``-dədir; burada yalnız:
    (məsələn, əyani 45 saat ↔ qiyabi 25 saat) paylaşım təklif olunmur və POST rədd olunur — «Kopyala və uyğunlaşdır».
 
 SORĞU BÜDCƏSİ: dialoqda hədəfin vəziyyəti BİR dəfə hesablanır (mənbə başına sorğu yoxdur; mənbənin saatı versiyadan
-gəlir); redaktor bloku dörd sorğu + sillabussuz hər öz qrupu üçün plan saatı (müəllimin bu fənn + semestr üzrə bir neçə
-qrupu); siyahı səhifəsi üçün bir sorğu.
+gəlir, versiyasız köhnə dosyelər üçün toplu ``plan_hours_by_offering``); redaktor bloku dörd sorğu + toplu plan saatı;
+siyahı səhifəsi üçün bir sorğu.
 """
 
 from __future__ import annotations
@@ -57,6 +57,22 @@ def _fallback_hours(syllabus) -> dict:
     return {} if services.sharing.source_hours(syllabus) else official_plan_hours(syllabus)
 
 
+def fallback_hours_map(rows) -> dict:
+    """``{syllabus_id: mənbə jurnalın rəsmi saatı}`` — YALNIZ versiyasında saat olmayan mənbələr üçün, TOPLU.
+
+    Dialoq kartı POST yolu (``share_hours``) ilə eyni qərarı versin: köhnə (köçürülmüş) dosyenin versiyasında saat
+    yoxdursa onun jurnalının saatı ilə tutuşdurulur.  Saat bütün açılışlı mənbələr üçün BİR toplu çağırışla alınır —
+    sorğu sayı nə mənbə sayından, nə də onların versiyasında saat olub-olmamasından asılıdır.
+    """
+    rows = [row for row in rows if row.offering_id]
+    if not rows:
+        return {}
+    from apps.registrar.public import plan_hours_by_offering
+
+    hours = plan_hours_by_offering([row.offering for row in rows])
+    return {row.pk: hours.get(row.offering_id) or {} for row in rows if not services.sharing.source_hours(row)}
+
+
 def target_state(target) -> str:
     """Dialoq hədəfi paylaşıma açıqdırmı — ``""`` və ya səbəb kodu (BİR dəfə, mənbədən asılı deyil)."""
     sharing = services.sharing
@@ -67,14 +83,19 @@ def target_state(target) -> str:
     return sharing.target_code(target.offering)
 
 
-def sibling_share(row, *, actor, target, state_code) -> dict:
-    """Mənbə kartının ``can_share`` / ``share_reason`` sahələri."""
+def sibling_share(row, *, actor, target, state_code, source_fallback=None) -> dict:
+    """Mənbə kartının ``can_share`` / ``share_reason`` sahələri (``source_fallback`` — :func:`fallback_hours_map`)."""
     if target.offering is None:
         code = services.reuse_rules.CODE_NOT_SIBLING
     else:
         # Hədəfin dosyesi yoxdur (yoxsa ``state_code``) — ``target.plan_hours`` jurnalın rəsmi saatıdır.
         code = services.sharing.share_code(
-            row, actor=actor, offering=target.offering, target_hours=target.plan_hours, state_code=state_code
+            row,
+            actor=actor,
+            offering=target.offering,
+            target_hours=target.plan_hours,
+            source_fallback=source_fallback,
+            state_code=state_code,
         )
     return {"can_share": not code, "share_reason": share_text(code) if code else ""}
 
@@ -151,14 +172,15 @@ def _same_hours(syllabus, offerings) -> list:
     """Redaktorun «Bu qrupda da istifadə et» seçimləri — saatı FƏRQLİ qrup (əyani ↔ qiyabi) siyahıya düşmür."""
     if not offerings:
         return []
-    from apps.registrar.public import plan_hours_for_offering
+    from apps.registrar.public import plan_hours_by_offering
 
     fallback = _fallback_hours(syllabus)
+    hours = plan_hours_by_offering(offerings)  # toplu — qrup sayından asılı olmayan sorğu
     hours_code = services.sharing.hours_code
     return [
         {"offering": str(offering.pk), "group": _group_name(offering)}
         for offering in offerings
-        if not hours_code(syllabus, target_hours=plan_hours_for_offering(offering), source_fallback=fallback)
+        if not hours_code(syllabus, target_hours=hours.get(offering.pk), source_fallback=fallback)
     ]
 
 
@@ -181,6 +203,7 @@ def page_shared_groups(page_syllabi) -> dict:
 __all__ = [
     "candidate_shared",
     "editor_share_state",
+    "fallback_hours_map",
     "page_shared_groups",
     "share_hours",
     "share_text",
