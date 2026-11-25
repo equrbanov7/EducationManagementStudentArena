@@ -120443,8 +120443,12 @@ msgid "Bu tələbənin jurnal qeydi yoxdur."
 msgstr "Bu tələbənin jurnal qeydi yoxdur."
 
 msgctxt "accounts.group_history"
-msgid "Bütün semestrlərin jurnal statistikası — dondurulmuş və köçürülmüş qeydiyyatlar da daxildir."
-msgstr "Bütün semestrlərin jurnal statistikası — dondurulmuş və köçürülmüş qeydiyyatlar da daxildir."
+msgid ""
+"Bütün semestrlərin jurnal statistikası — dondurulmuş və köçürülmüş "
+"qeydiyyatlar da daxildir."
+msgstr ""
+"Bütün semestrlərin jurnal statistikası — dondurulmuş və köçürülmüş "
+"qeydiyyatlar da daxildir."
 
 msgctxt "accounts.group_history"
 msgid "Dondurulana qədər bal"
@@ -120572,8 +120576,12 @@ msgid "Adi qrup"
 msgstr "Adi qrup"
 
 msgctxt "accounts.groups"
-msgid "Başqa bölmənin tələbəsini yalnız «əlavə olaraq» qoşmaq olar — öz qrupu dəyişmir."
-msgstr "Başqa bölmənin tələbəsini yalnız «əlavə olaraq» qoşmaq olar — öz qrupu dəyişmir."
+msgid ""
+"Başqa bölmənin tələbəsini yalnız «əlavə olaraq» qoşmaq olar — öz qrupu "
+"dəyişmir."
+msgstr ""
+"Başqa bölmənin tələbəsini yalnız «əlavə olaraq» qoşmaq olar — öz qrupu "
+"dəyişmir."
 
 msgctxt "accounts.groups"
 msgid "Məzun et"
@@ -120597,12 +120605,24 @@ msgid "Qrupu məzun et"
 msgstr "Qrupu məzun et"
 
 msgctxt "accounts.groups"
-msgid "Qrupun BÜTÜN qeydiyyatlı tələbələri bir əmrlə məzun edilir (əlavə üzvlər öz qrupu ilə). Bir tələbə rədd olunsa heç kim məzun edilmir. Əmr nömrəsi və tarixi məcburidir."
-msgstr "Qrupun BÜTÜN qeydiyyatlı tələbələri bir əmrlə məzun edilir (əlavə üzvlər öz qrupu ilə). Bir tələbə rədd olunsa heç kim məzun edilmir. Əmr nömrəsi və tarixi məcburidir."
+msgid ""
+"Qrupun BÜTÜN qeydiyyatlı tələbələri bir əmrlə məzun edilir (əlavə üzvlər öz "
+"qrupu ilə). Bir tələbə rədd olunsa heç kim məzun edilmir. Əmr nömrəsi və "
+"tarixi məcburidir."
+msgstr ""
+"Qrupun BÜTÜN qeydiyyatlı tələbələri bir əmrlə məzun edilir (əlavə üzvlər öz "
+"qrupu ilə). Bir tələbə rədd olunsa heç kim məzun edilmir. Əmr nömrəsi və "
+"tarixi məcburidir."
 
 msgctxt "accounts.groups"
-msgid "Status «məzun» olur: tələbə qrupun aktiv siyahısından çıxır, akademik qeyd və qiymət tarixçəsi qalır. Səhv məzun etmə «Bərpa et» ilə geri qaytarılır. Əmr nömrəsi və tarixi məcburidir."
-msgstr "Status «məzun» olur: tələbə qrupun aktiv siyahısından çıxır, akademik qeyd və qiymət tarixçəsi qalır. Səhv məzun etmə «Bərpa et» ilə geri qaytarılır. Əmr nömrəsi və tarixi məcburidir."
+msgid ""
+"Status «məzun» olur: tələbə qrupun aktiv siyahısından çıxır, akademik qeyd "
+"və qiymət tarixçəsi qalır. Səhv məzun etmə «Bərpa et» ilə geri qaytarılır. "
+"Əmr nömrəsi və tarixi məcburidir."
+msgstr ""
+"Status «məzun» olur: tələbə qrupun aktiv siyahısından çıxır, akademik qeyd "
+"və qiymət tarixçəsi qalır. Səhv məzun etmə «Bərpa et» ilə geri qaytarılır. "
+"Əmr nömrəsi və tarixi məcburidir."
 
 msgctxt "accounts.groups"
 msgid "Tarixçə"
@@ -120621,8 +120641,12 @@ msgid "Əcnəbi tələbələr qrupu"
 msgstr "Əcnəbi tələbələr qrupu"
 
 msgctxt "accounts.groups"
-msgid "Əcnəbi tələbələr qrupunu Əcnəbi tələbələrlə iş şöbəsi idarə edir; müəllim belə qruplarda eyni saatda bir neçə qrupla dərs keçə bilir."
-msgstr "Əcnəbi tələbələr qrupunu Əcnəbi tələbələrlə iş şöbəsi idarə edir; müəllim belə qruplarda eyni saatda bir neçə qrupla dərs keçə bilir."
+msgid ""
+"Əcnəbi tələbələr qrupunu Əcnəbi tələbələrlə iş şöbəsi idarə edir; müəllim "
+"belə qruplarda eyni saatda bir neçə qrupla dərs keçə bilir."
+msgstr ""
+"Əcnəbi tələbələr qrupunu Əcnəbi tələbələrlə iş şöbəsi idarə edir; müəllim "
+"belə qruplarda eyni saatda bir neçə qrupla dərs keçə bilir."
 
 msgctxt "registrar.admission_channel"
 msgid "Müqavilə ilə qəbul"
@@ -120645,24 +120669,40 @@ msgid "Qrup tapılmadı və ya icazə əhatənizdən kənardadır."
 msgstr "Qrup tapılmadı və ya icazə əhatənizdən kənardadır."
 
 msgctxt "student_intake"
-msgid "Bu qrupa tələbə əlavə etmək icazəniz yoxdur — yalnız öz qruplarınızı seçin."
-msgstr "Bu qrupa tələbə əlavə etmək icazəniz yoxdur — yalnız öz qruplarınızı seçin."
+msgid ""
+"Bu qrupa tələbə əlavə etmək icazəniz yoxdur — yalnız öz qruplarınızı seçin."
+msgstr ""
+"Bu qrupa tələbə əlavə etmək icazəniz yoxdur — yalnız öz qruplarınızı seçin."
 
 msgctxt "accounts.groups"
 msgid "Tələbəni qrupdan çıxar"
 msgstr "Tələbəni qrupdan çıxar"
 
 msgctxt "accounts.groups"
-msgid "Tələbə xaric edilmir və dondurulmur: statusu «Qeydiyyatlı» qalır, sadəcə qrupsuz olur — sonra «Tələbə əlavə et» ilə istənilən qrupa qoşmaq olar. Bu qrupun cari semestr jurnallarındakı qeydiyyatı tarixçəyə keçir, bal və davamiyyət silinmir. Səbəb audit jurnalına yazılır."
-msgstr "Tələbə xaric edilmir və dondurulmur: statusu «Qeydiyyatlı» qalır, sadəcə qrupsuz olur — sonra «Tələbə əlavə et» ilə istənilən qrupa qoşmaq olar. Bu qrupun cari semestr jurnallarındakı qeydiyyatı tarixçəyə keçir, bal və davamiyyət silinmir. Səbəb audit jurnalına yazılır."
+msgid ""
+"Tələbə xaric edilmir və dondurulmur: statusu «Qeydiyyatlı» qalır, sadəcə "
+"qrupsuz olur — sonra «Tələbə əlavə et» ilə istənilən qrupa qoşmaq olar. Bu "
+"qrupun cari semestr jurnallarındakı qeydiyyatı tarixçəyə keçir, bal və "
+"davamiyyət silinmir. Səbəb audit jurnalına yazılır."
+msgstr ""
+"Tələbə xaric edilmir və dondurulmur: statusu «Qeydiyyatlı» qalır, sadəcə "
+"qrupsuz olur — sonra «Tələbə əlavə et» ilə istənilən qrupa qoşmaq olar. Bu "
+"qrupun cari semestr jurnallarındakı qeydiyyatı tarixçəyə keçir, bal və "
+"davamiyyət silinmir. Səbəb audit jurnalına yazılır."
 
 msgctxt "accounts.groups"
 msgid "Əlavə üzvü qrupdan çıxar"
 msgstr "Əlavə üzvü qrupdan çıxar"
 
 msgctxt "accounts.groups"
-msgid "Tələbə yalnız bu qrupun cari semestr jurnallarından çıxır — öz qrupu və oradakı jurnalları dəyişmir. Bal və davamiyyət silinmir, jurnalın dəyişiklik tarixçəsinə yazılır."
-msgstr "Tələbə yalnız bu qrupun cari semestr jurnallarından çıxır — öz qrupu və oradakı jurnalları dəyişmir. Bal və davamiyyət silinmir, jurnalın dəyişiklik tarixçəsinə yazılır."
+msgid ""
+"Tələbə yalnız bu qrupun cari semestr jurnallarından çıxır — öz qrupu və "
+"oradakı jurnalları dəyişmir. Bal və davamiyyət silinmir, jurnalın dəyişiklik"
+" tarixçəsinə yazılır."
+msgstr ""
+"Tələbə yalnız bu qrupun cari semestr jurnallarından çıxır — öz qrupu və "
+"oradakı jurnalları dəyişmir. Bal və davamiyyət silinmir, jurnalın dəyişiklik"
+" tarixçəsinə yazılır."
 
 msgctxt "accounts.groups"
 msgid "Tələbə bu qrupun tələbəsi deyil."
@@ -120674,8 +120714,12 @@ msgstr "Əmr tarixi düzgün deyil."
 
 #, python-format
 msgctxt "accounts.groups"
-msgid "Tələbə qrupdan çıxarıldı — statusu «Qeydiyyatlı» qaldı, %(count)d jurnal sətri tarixçəyə keçdi."
-msgstr "Tələbə qrupdan çıxarıldı — statusu «Qeydiyyatlı» qaldı, %(count)d jurnal sətri tarixçəyə keçdi."
+msgid ""
+"Tələbə qrupdan çıxarıldı — statusu «Qeydiyyatlı» qaldı, %(count)d jurnal "
+"sətri tarixçəyə keçdi."
+msgstr ""
+"Tələbə qrupdan çıxarıldı — statusu «Qeydiyyatlı» qaldı, %(count)d jurnal "
+"sətri tarixçəyə keçdi."
 
 msgctxt "accounts.groups"
 msgid "Bu tələbə qrupun öz tələbəsidir — əlavə üzv deyil."
@@ -120684,7 +120728,8 @@ msgstr "Bu tələbə qrupun öz tələbəsidir — əlavə üzv deyil."
 #, python-format
 msgctxt "accounts.groups"
 msgid "Əlavə üzv qrupun %(count)d jurnalından çıxarıldı — öz qrupu dəyişmədi."
-msgstr "Əlavə üzv qrupun %(count)d jurnalından çıxarıldı — öz qrupu dəyişmədi."
+msgstr ""
+"Əlavə üzv qrupun %(count)d jurnalından çıxarıldı — öz qrupu dəyişmədi."
 
 msgctxt "registrar.group_removal"
 msgid "Akademik dövr tələbənin təşkilatına aid deyil."
@@ -120703,8 +120748,12 @@ msgid "Tələbə onsuz da heç bir qrupda deyil."
 msgstr "Tələbə onsuz da heç bir qrupda deyil."
 
 msgctxt "registrar.group_removal"
-msgid "Yalnız qeydiyyatlı tələbə qrupdan çıxarılır — məzuniyyətdə / xaric edilmiş deyil."
-msgstr "Yalnız qeydiyyatlı tələbə qrupdan çıxarılır — məzuniyyətdə / xaric edilmiş deyil."
+msgid ""
+"Yalnız qeydiyyatlı tələbə qrupdan çıxarılır — məzuniyyətdə / xaric edilmiş "
+"deyil."
+msgstr ""
+"Yalnız qeydiyyatlı tələbə qrupdan çıxarılır — məzuniyyətdə / xaric edilmiş "
+"deyil."
 
 msgctxt "registrar.group_removal"
 msgid "Qrupdan çıxarma üçün icraçı tələb olunur."
@@ -120729,3 +120778,412 @@ msgstr "Qrup reyestrindən əlavə üzvlük götürüldü"
 msgctxt "registrar.group_removal"
 msgid "Heç bir jurnaldan çıxarılmadı."
 msgstr "Heç bir jurnaldan çıxarılmadı."
+
+msgctxt "registrar.own_history"
+msgid "Müəllimin yazdığı hissə"
+msgstr "Müəllimin yazdığı hissə"
+
+msgctxt "registrar.own_history"
+msgid "Müəllimin öz daxil etdiyi qeyd"
+msgstr "Müəllimin öz daxil etdiyi qeyd"
+
+msgctxt "registrar.own_history"
+msgid "Xülasə"
+msgstr "Xülasə"
+
+msgctxt "registrar.own_history"
+msgid "Dərs tipi"
+msgstr "Dərs tipi"
+
+msgctxt "registrar.own_history"
+msgid "Hamısı"
+msgstr "Hamısı"
+
+msgctxt "registrar.own_history"
+msgid "Jurnal"
+msgstr "Jurnal"
+
+msgctxt "registrar.own_history"
+msgid "s."
+msgstr "s."
+
+msgctxt "registrar.own_history"
+msgid "Müh."
+msgstr "Müh."
+
+msgctxt "registrar.own_history"
+msgid "Sem."
+msgstr "Sem."
+
+msgctxt "registrar.own_history"
+msgid "Prak."
+msgstr "Prak."
+
+msgctxt "registrar.own_history"
+msgid "Lab."
+msgstr "Lab."
+
+msgctxt "registrar.own_history"
+msgid "iştirak"
+msgstr "iştirak"
+
+msgctxt "registrar.own_history"
+msgid "qayıb"
+msgstr "qayıb"
+
+msgctxt "registrar.own_history"
+msgid "göstərilən qeyd yoxdur"
+msgstr "göstərilən qeyd yoxdur"
+
+msgctxt "registrar.own_history"
+msgid "köçürülmüş qeyd, daxil edəni bilinmir"
+msgstr "köçürülmüş qeyd, daxil edəni bilinmir"
+
+msgctxt "registrar.own_history"
+msgid "Bu dərslərdə görünən bal/davamiyyət qeydi yoxdur."
+msgstr "Bu dərslərdə görünən bal/davamiyyət qeydi yoxdur."
+
+msgctxt "registrar.own_history"
+msgid "Nə vaxt, harada yazılıb"
+msgstr "Nə vaxt, harada yazılıb"
+
+msgctxt "registrar.own_history"
+msgid "Vaxt"
+msgstr "Vaxt"
+
+msgctxt "registrar.own_history"
+msgid "Bölmə"
+msgstr "Bölmə"
+
+msgctxt "registrar.own_history"
+msgid "Mövzu"
+msgstr "Mövzu"
+
+msgctxt "registrar.own_history"
+msgid "Otaq"
+msgstr "Otaq"
+
+msgctxt "registrar.own_history"
+msgid "Qeyd"
+msgstr "Qeyd"
+
+msgctxt "registrar.own_history"
+msgid "Yazılıb"
+msgstr "Yazılıb"
+
+msgctxt "registrar.own_history"
+msgid "Passiv"
+msgstr "Passiv"
+
+msgctxt "registrar.own_history"
+msgid "Dərs"
+msgstr "Dərs"
+
+msgctxt "registrar.own_history"
+msgid "Son qeyd"
+msgstr "Son qeyd"
+
+msgctxt "registrar.own_history"
+msgid "Köhnə sistemdən"
+msgstr "Köhnə sistemdən"
+
+msgctxt "registrar.own_history"
+msgid "Keçirib"
+msgstr "Keçirib"
+
+msgctxt "registrar.own_history"
+msgid "Dərsi yaradıb"
+msgstr "Dərsi yaradıb"
+
+msgctxt "registrar.own_history"
+msgid "Yalnız qeyd daxil edib"
+msgstr "Yalnız qeyd daxil edib"
+
+msgctxt "registrar.own_history"
+msgid ""
+"Yalnız sizin keçirdiyiniz və ya yazdığınız dərslər və öz daxil etdiyiniz "
+"qeydlər göstərilir. Saat yalnız adınıza keçirilmiş dərslərdən sayılır. "
+"Yalnız oxunur."
+msgstr ""
+"Yalnız sizin keçirdiyiniz və ya yazdığınız dərslər və öz daxil etdiyiniz "
+"qeydlər göstərilir. Saat yalnız adınıza keçirilmiş dərslərdən sayılır. "
+"Yalnız oxunur."
+
+msgctxt "registrar.own_history"
+msgid ""
+"Yalnız bu müəllimin keçirdiyi və ya yazdığı dərslər və onun daxil etdiyi "
+"qeydlər göstərilir. Saat yalnız müəllimin adına keçirilmiş dərslərdən "
+"sayılır. Yalnız oxunur."
+msgstr ""
+"Yalnız bu müəllimin keçirdiyi və ya yazdığı dərslər və onun daxil etdiyi "
+"qeydlər göstərilir. Saat yalnız müəllimin adına keçirilmiş dərslərdən "
+"sayılır. Yalnız oxunur."
+
+msgctxt "accounts.workload"
+msgid "Lab qrupu sayı"
+msgstr "Lab qrupu sayı"
+
+msgctxt "accounts.workload"
+msgid "0 — «Qrup/yarımqrup sayı» ilə eyni"
+msgstr "0 — «Qrup/yarımqrup sayı» ilə eyni"
+
+msgctxt "workload.split_wizard"
+msgid "Bölgü sehrbazı"
+msgstr "Bölgü sehrbazı"
+
+msgctxt "workload.split_wizard"
+msgid "Sehrbazın addımları"
+msgstr "Sehrbazın addımları"
+
+msgctxt "workload.split_wizard"
+msgid "Qruplar"
+msgstr "Qruplar"
+
+msgctxt "workload.split_wizard"
+msgid "Hansı qrupları bölürük"
+msgstr "Hansı qrupları bölürük"
+
+msgctxt "workload.split_wizard"
+msgid "Seminar"
+msgstr "Seminar"
+
+msgctxt "workload.split_wizard"
+msgid "Alt qruplar və tələbələr"
+msgstr "Alt qruplar və tələbələr"
+
+msgctxt "workload.split_wizard"
+msgid "Laboratoriya"
+msgstr "Laboratoriya"
+
+msgctxt "workload.split_wizard"
+msgid "Lab qrupları və tələbələr"
+msgstr "Lab qrupları və tələbələr"
+
+msgctxt "workload.split_wizard"
+msgid "Müəllimlər"
+msgstr "Müəllimlər"
+
+msgctxt "workload.split_wizard"
+msgid "Hər bölməyə müəllim və saat"
+msgstr "Hər bölməyə müəllim və saat"
+
+msgctxt "workload.split_wizard"
+msgid "Yoxla"
+msgstr "Yoxla"
+
+msgctxt "workload.split_wizard"
+msgid "Xülasə və təsdiq"
+msgstr "Xülasə və təsdiq"
+
+msgctxt "workload.split_wizard"
+msgid ""
+"«Təsdiqlə» basılana qədər heç nə yadda saxlanmır — addımlar arasında rahat "
+"gedib-gələ bilərsiniz."
+msgstr ""
+"«Təsdiqlə» basılana qədər heç nə yadda saxlanmır — addımlar arasında rahat "
+"gedib-gələ bilərsiniz."
+
+msgctxt "workload.split_wizard"
+msgid "Bağla"
+msgstr "Bağla"
+
+msgctxt "workload.split_wizard"
+msgid "Yüklənir…"
+msgstr "Yüklənir…"
+
+msgctxt "workload.split_wizard"
+msgid "1. Qrupları seçin"
+msgstr "1. Qrupları seçin"
+
+msgctxt "workload.split_wizard"
+msgid ""
+"Bölmək istədiyiniz qrupu (və ya bir neçə qrupu) seçin. Reyestrdə alt "
+"qrupları (məs. 234 K1, 234 K2) olan qrup bunu nişanla göstərir."
+msgstr ""
+"Bölmək istədiyiniz qrupu (və ya bir neçə qrupu) seçin. Reyestrdə alt "
+"qrupları (məs. 234 K1, 234 K2) olan qrup bunu nişanla göstərir."
+
+msgctxt "workload.split_wizard"
+msgid "2. Seminar — neçə alt qrup?"
+msgstr "2. Seminar — neçə alt qrup?"
+
+msgctxt "workload.split_wizard"
+msgid ""
+"Hər qrup üçün seminarın neçə alt qrupa bölündüyünü seçin, sonra tələbələri "
+"alt qruplara yerləşdirin. Mühazirə bütün qrupla keçir."
+msgstr ""
+"Hər qrup üçün seminarın neçə alt qrupa bölündüyünü seçin, sonra tələbələri "
+"alt qruplara yerləşdirin. Mühazirə bütün qrupla keçir."
+
+msgctxt "workload.split_wizard"
+msgid "3. Laboratoriya — lab qrupları"
+msgstr "3. Laboratoriya — lab qrupları"
+
+msgctxt "workload.split_wizard"
+msgid ""
+"Lab qrupları seminar alt qrupunun içində (hər alt qrup yenə bölünür) və ya "
+"ondan asılı olmadan qurula bilər. Hər tələbə bir lab qrupunda olur."
+msgstr ""
+"Lab qrupları seminar alt qrupunun içində (hər alt qrup yenə bölünür) və ya "
+"ondan asılı olmadan qurula bilər. Hər tələbə bir lab qrupunda olur."
+
+msgctxt "workload.split_wizard"
+msgid "4. Müəllimləri təyin edin"
+msgstr "4. Müəllimləri təyin edin"
+
+msgctxt "workload.split_wizard"
+msgid ""
+"Hər sətir bir bölmədir: mühazirə, hər seminar alt qrupu, hər lab qrupu. "
+"Müəllim seçin; saat bölmənin planı ilə doldurulub."
+msgstr ""
+"Hər sətir bir bölmədir: mühazirə, hər seminar alt qrupu, hər lab qrupu. "
+"Müəllim seçin; saat bölmənin planı ilə doldurulub."
+
+msgctxt "workload.split_wizard"
+msgid "5. Yoxlayın və təsdiqləyin"
+msgstr "5. Yoxlayın və təsdiqləyin"
+
+msgctxt "workload.split_wizard"
+msgid ""
+"Aşağıda nə yazılacağı görünür. Xəbərdarlıqları düzəldin, sonra «Təsdiqlə» "
+"basın."
+msgstr ""
+"Aşağıda nə yazılacağı görünür. Xəbərdarlıqları düzəldin, sonra «Təsdiqlə» "
+"basın."
+
+msgctxt "workload.split_wizard"
+msgid "Geri"
+msgstr "Geri"
+
+msgctxt "workload.split_wizard"
+msgid "Növbəti"
+msgstr "Növbəti"
+
+msgctxt "workload.split_wizard"
+msgid "Təsdiqlə"
+msgstr "Təsdiqlə"
+
+msgctxt "workload.split_wizard"
+msgid "Vakant"
+msgstr "Vakant"
+
+msgctxt "workload.split_wizard"
+msgid "seminar"
+msgstr "seminar"
+
+msgctxt "workload.split_wizard"
+msgid "laboratoriya"
+msgstr "laboratoriya"
+
+msgctxt "workload.split_wizard"
+msgid "Sətir tapılmadı."
+msgstr "Sətir tapılmadı."
+
+msgctxt "workload.split_wizard"
+msgid "Sətir seçilməyib."
+msgstr "Sətir seçilməyib."
+
+msgctxt "workload.split_wizard"
+msgid "Sətir bu tapşırığın tədris sətri deyil."
+msgstr "Sətir bu tapşırığın tədris sətri deyil."
+
+msgctxt "workload.split_wizard"
+msgid "Sətirlər eyni fənn və semestrdə olmalıdır."
+msgstr "Sətirlər eyni fənn və semestrdə olmalıdır."
+
+msgctxt "workload.split_wizard"
+msgid "Müəllim düzgün seçilməyib."
+msgstr "Müəllim düzgün seçilməyib."
+
+msgctxt "workload.split_wizard"
+msgid "Bölmələr dəyişib — sehrbazı bağlayıb yenidən açın."
+msgstr "Bölmələr dəyişib — sehrbazı bağlayıb yenidən açın."
+
+msgctxt "workload.split_wizard"
+msgid "Saat sıfırdan böyük olmalıdır."
+msgstr "Saat sıfırdan böyük olmalıdır."
+
+#, python-format
+msgctxt "workload.split_wizard"
+msgid ""
+"%(groups)s: %(activity)s üçün %(hours)s saat paylanıb, sətrin cəmi isə "
+"%(total)s saatdır. «Yoxla» addımında «Sətri düzəlt» seçin və ya saatı "
+"azaldın."
+msgstr ""
+"%(groups)s: %(activity)s üçün %(hours)s saat paylanıb, sətrin cəmi isə "
+"%(total)s saatdır. «Yoxla» addımında «Sətri düzəlt» seçin və ya saatı "
+"azaldın."
+
+msgctxt "workload.split_wizard"
+msgid ""
+"Bu mərhələdə sətrin cəmini dəyişmək olmur — tədris şöbəsinə müraciət edin."
+msgstr ""
+"Bu mərhələdə sətrin cəmini dəyişmək olmur — tədris şöbəsinə müraciət edin."
+
+msgctxt "workload.split_wizard"
+msgid "Mühazirəçini bu sətirdə seçmək olmur."
+msgstr "Mühazirəçini bu sətirdə seçmək olmur."
+
+msgctxt "workload.split_wizard"
+msgid ""
+"Jurnal tapşırıq dekanlıqda təsdiqlənəndən sonra yaranır — indi yalnız saatı "
+"bölmək olar."
+msgstr ""
+"Jurnal tapşırıq dekanlıqda təsdiqlənəndən sonra yaranır — indi yalnız saatı "
+"bölmək olar."
+
+msgctxt "registrar.split_wizard"
+msgid "Seminar"
+msgstr "Seminar"
+
+msgctxt "registrar.split_wizard"
+msgid "Laboratoriya"
+msgstr "Laboratoriya"
+
+msgctxt "registrar.split_wizard"
+msgid "Jurnal tapılmadı."
+msgstr "Jurnal tapılmadı."
+
+msgctxt "registrar.split_wizard"
+msgid "Bölmə sayı düzgün deyil."
+msgstr "Bölmə sayı düzgün deyil."
+
+#, python-format
+msgctxt "registrar.split_wizard"
+msgid "Bölmə sayı 1–%(max)s arası olmalıdır."
+msgstr "Bölmə sayı 1–%(max)s arası olmalıdır."
+
+#, python-format
+msgctxt "registrar.split_wizard"
+msgid "%(kind)s: %(n)s tələbə heç bir bölməyə yerləşdirilməyib."
+msgstr "%(kind)s: %(n)s tələbə heç bir bölməyə yerləşdirilməyib."
+
+msgctxt "registrar.split_wizard"
+msgid "İki bölmənin adı eynidir — adları fərqləndirin."
+msgstr "İki bölmənin adı eynidir — adları fərqləndirin."
+
+#, python-format
+msgctxt "registrar.split_wizard"
+msgid ""
+"%(group)s: «%(section)s» bölməsinə dərs bağlıdır — əvvəlcə həmin dərslərin "
+"bölməsini jurnalda dəyişin, sonra bölmə sayını azaldın."
+msgstr ""
+"%(group)s: «%(section)s» bölməsinə dərs bağlıdır — əvvəlcə həmin dərslərin "
+"bölməsini jurnalda dəyişin, sonra bölmə sayını azaldın."
+
+#, python-format
+msgctxt "registrar.split_wizard"
+msgid ""
+"«%(lab)s» lab qrupunda iki seminar alt qrupunun tələbəsi var — qarışdırmaq "
+"olmaz."
+msgstr ""
+"«%(lab)s» lab qrupunda iki seminar alt qrupunun tələbəsi var — qarışdırmaq "
+"olmaz."
+
+msgctxt "registrar.split_wizard"
+msgid "Bu jurnalın bölmələrini dəyişməyə icazəniz yoxdur."
+msgstr "Bu jurnalın bölmələrini dəyişməyə icazəniz yoxdur."
+
+msgctxt "registrar.split_wizard"
+msgid "Bölgü sehrbazı: seminar alt qrupları və lab qrupları"
+msgstr "Bölgü sehrbazı: seminar alt qrupları və lab qrupları"
