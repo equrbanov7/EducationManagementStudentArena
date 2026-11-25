@@ -122136,3 +122136,12 @@ msgid ""
 msgstr ""
 "Показаны только проведённые или записанные этим преподавателем занятия и "
 "внесённые им записи. Только просмотр."
+
+#, python-format
+msgctxt "registrar.split_wizard"
+msgid ""
+"%(group)s: «%(section)s» bölməsinə dərs bağlıdır — onun tələbələrini "
+"sehrbazda dəyişmək olmaz. Tələbəni jurnalın öz ekranında köçürün."
+msgstr ""
+"%(group)s: к секции «%(section)s» привязаны занятия — её студентов нельзя "
+"менять в мастере. Переведите студента на экране самого журнала."

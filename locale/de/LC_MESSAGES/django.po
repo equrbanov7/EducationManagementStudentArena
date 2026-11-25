@@ -123495,3 +123495,13 @@ msgid ""
 msgstr ""
 "Angezeigt werden nur von dieser Lehrkraft gehaltene oder erfasste "
 "Lehrveranstaltungen und ihre Einträge. Nur Lesezugriff."
+
+#, python-format
+msgctxt "registrar.split_wizard"
+msgid ""
+"%(group)s: «%(section)s» bölməsinə dərs bağlıdır — onun tələbələrini "
+"sehrbazda dəyişmək olmaz. Tələbəni jurnalın öz ekranında köçürün."
+msgstr ""
+"%(group)s: Mit „%(section)s“ sind Stunden verknüpft — die Studierenden "
+"können im Assistenten nicht geändert werden. Verschieben Sie sie im Journal "
+"selbst."

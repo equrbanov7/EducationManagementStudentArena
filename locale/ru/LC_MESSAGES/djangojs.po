@@ -3948,3 +3948,11 @@ msgstr "— Преподаватель не выбран —"
 
 msgid "— seçilməyib —"
 msgstr "— не выбран —"
+
+#, python-format
+msgid ""
+"«%(name)s» bölməsinə %(n)s dərs bağlıdır — onun tələbələri burada "
+"dəyişdirilmir (tələbəni jurnalın öz ekranında köçürün)."
+msgstr ""
+"К секции «%(name)s» привязано занятий: %(n)s — её студенты здесь не меняются"
+" (переводите студента на экране журнала)."

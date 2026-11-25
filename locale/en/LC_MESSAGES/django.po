@@ -121922,3 +121922,12 @@ msgid ""
 msgstr ""
 "Only lessons this teacher taught or recorded and the entries they made are "
 "shown. Read-only."
+
+#, python-format
+msgctxt "registrar.split_wizard"
+msgid ""
+"%(group)s: «%(section)s» bölməsinə dərs bağlıdır — onun tələbələrini "
+"sehrbazda dəyişmək olmaz. Tələbəni jurnalın öz ekranında köçürün."
+msgstr ""
+"%(group)s: lessons are linked to “%(section)s” — its students cannot be "
+"changed in the wizard. Move the student on the journal's own screen."

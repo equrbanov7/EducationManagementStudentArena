@@ -121203,3 +121203,12 @@ msgid ""
 msgstr ""
 "Yalnız bu müəllimin keçirdiyi və ya yazdığı dərslər və onun daxil etdiyi "
 "qeydlər göstərilir. Yalnız oxunur."
+
+#, python-format
+msgctxt "registrar.split_wizard"
+msgid ""
+"%(group)s: «%(section)s» bölməsinə dərs bağlıdır — onun tələbələrini "
+"sehrbazda dəyişmək olmaz. Tələbəni jurnalın öz ekranında köçürün."
+msgstr ""
+"%(group)s: «%(section)s» bölməsinə dərs bağlıdır — onun tələbələrini "
+"sehrbazda dəyişmək olmaz. Tələbəni jurnalın öz ekranında köçürün."

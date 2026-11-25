@@ -121080,3 +121080,12 @@ msgid ""
 msgstr ""
 "Yalnızca bu öğretmenin verdiği veya yazdığı dersler ve girdiği kayıtlar "
 "gösterilir. Salt okunur."
+
+#, python-format
+msgctxt "registrar.split_wizard"
+msgid ""
+"%(group)s: «%(section)s» bölməsinə dərs bağlıdır — onun tələbələrini "
+"sehrbazda dəyişmək olmaz. Tələbəni jurnalın öz ekranında köçürün."
+msgstr ""
+"%(group)s: «%(section)s» bölümüne dersler bağlı — öğrencileri sihirbazda "
+"değiştirilemez. Öğrenciyi not defterinin kendi ekranında taşıyın."

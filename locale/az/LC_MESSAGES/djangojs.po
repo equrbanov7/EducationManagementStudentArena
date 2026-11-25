@@ -3927,3 +3927,11 @@ msgstr "— Müəllim seçilməyib —"
 
 msgid "— seçilməyib —"
 msgstr "— seçilməyib —"
+
+#, python-format
+msgid ""
+"«%(name)s» bölməsinə %(n)s dərs bağlıdır — onun tələbələri burada "
+"dəyişdirilmir (tələbəni jurnalın öz ekranında köçürün)."
+msgstr ""
+"«%(name)s» bölməsinə %(n)s dərs bağlıdır — onun tələbələri burada "
+"dəyişdirilmir (tələbəni jurnalın öz ekranında köçürün)."

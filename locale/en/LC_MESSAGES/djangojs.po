@@ -3950,3 +3950,11 @@ msgstr "— No teacher chosen —"
 
 msgid "— seçilməyib —"
 msgstr "— not chosen —"
+
+#, python-format
+msgid ""
+"«%(name)s» bölməsinə %(n)s dərs bağlıdır — onun tələbələri burada "
+"dəyişdirilmir (tələbəni jurnalın öz ekranında köçürün)."
+msgstr ""
+"%(n)s lessons are linked to “%(name)s” — its students are not changed here "
+"(move a student on the journal's own screen)."

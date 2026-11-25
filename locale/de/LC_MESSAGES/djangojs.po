@@ -4017,3 +4017,11 @@ msgstr "— Keine Lehrperson gewählt —"
 
 msgid "— seçilməyib —"
 msgstr "— nicht gewählt —"
+
+#, python-format
+msgid ""
+"«%(name)s» bölməsinə %(n)s dərs bağlıdır — onun tələbələri burada "
+"dəyişdirilmir (tələbəni jurnalın öz ekranında köçürün)."
+msgstr ""
+"Mit „%(name)s“ sind %(n)s Stunden verknüpft — die Studierenden werden hier "
+"nicht geändert (im Journal selbst verschieben)."
