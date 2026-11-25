@@ -117,6 +117,16 @@ class PlanSources:
         offerings = [item for item in self._offerings_by_student.get(student_id, []) if item.period_id in wanted]
         return _first_per_subject(offerings)
 
+    def student_teachers(self, student_id, period_ids) -> dict:
+        """``subject_id → müəllim`` — tələbənin həmin semestrdəki öz jurnallarından (keçmiş illər üçün əsas mənbə)."""
+        if not period_ids:
+            return {}
+        return {
+            offering.subject_id: name
+            for offering in self.student_offerings(student_id, period_ids)
+            if (name := _teacher(offering))
+        }
+
     def plan_codes(self, curriculum_id) -> dict:
         """``subject_id → row_code`` kurikulumdan (fənn başqa semestrdə olsa da kod eynidir) — kurikulum üzrə bir dəfə."""
         if not curriculum_id:
