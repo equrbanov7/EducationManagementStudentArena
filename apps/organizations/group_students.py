@@ -132,9 +132,9 @@ def group_students(request, slug, unit_id):
     # əhatəsindədirsə (server yazıda onsuz da bu əhatəni yoxlayır).
     rows = [_row(record) for record in records]
     # Sahib 2026-11-25: «Tarixçə» düyməsi — `student.records_view` daşıyana (dondurulmuşlar daxil, oxu).
-    from .group_student_history import can_view_history, history_url
+    from .group_student_history import can_view_history, history_allowed, history_url
 
-    if can_view_history(request):
+    if can_view_history(request) and history_allowed(request, organization, unit):
         for row in rows + removed + extra:
             row["history_url"] = history_url(organization, unit, row["id"])
     manage_scope = group_manage_scope(request, organization)

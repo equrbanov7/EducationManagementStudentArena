@@ -46,6 +46,13 @@ def can_view_history(request) -> bool:
     return _has_org_permission(request, PERM_RECORDS_VIEW)
 
 
+def history_allowed(request, organization, unit) -> bool:
+    """Qrup ``student.records_view`` daşıyan üzvlüyün ƏHATƏSİNDƏDİR (açar başqa üzvlüyün vahidindən borc alınmır)."""
+    from .scoping import faculty_read_scope, unit_in_scope
+
+    return unit_in_scope(faculty_read_scope(request.user, organization, PERM_RECORDS_VIEW, request=request), unit)
+
+
 def history_url(organization, unit, record_id) -> str:
     return reverse(
         "organizations:group_student_history",
@@ -93,9 +100,14 @@ def _load_record(organization, unit, record_id):
     group_ids = roster_group_ids(organization, [unit])[str(unit.pk)]
     if record.group_id in group_ids:
         return record
-    in_group = enrollment_model.objects.filter(
-        organization=organization, student_id=record.student_id, offering__group_id__in=list(group_ids)
-    ).exists()
+    # Köçürülmüş / əvəzlənmiş (``dropped``) keçmiş bağlılıq sayılmır — yalnız canlı və ya dondurulmuş qeydiyyat.
+    in_group = (
+        enrollment_model.objects.filter(
+            organization=organization, student_id=record.student_id, offering__group_id__in=list(group_ids)
+        )
+        .exclude(status="dropped")
+        .exists()
+    )
     return record if in_group else None
 
 
@@ -235,7 +247,7 @@ def group_student_history(request, slug, unit_id, record_id):
     if not scope.has_structure_access:
         return _error(pgettext(_CTX, "Struktur əhatəniz yoxdur."), status=403, code="forbidden")
     unit = _visible_group(organization, scope, str(unit_id), include_archived=True)
-    if unit is None:
+    if unit is None or not history_allowed(request, organization, unit):
         return _error(pgettext(_CTX, "Qrup tapılmadı."), status=404, code="not_found")
     record = _load_record(organization, unit, record_id)
     if record is None:
@@ -243,4 +255,4 @@ def group_student_history(request, slug, unit_id, record_id):
     return JsonResponse(build_history(organization, record))
 
 
-__all__ = ["build_history", "can_view_history", "group_student_history", "history_url"]
+__all__ = ["build_history", "can_view_history", "group_student_history", "history_allowed", "history_url"]

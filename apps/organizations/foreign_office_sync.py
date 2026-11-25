@@ -68,8 +68,17 @@ def sync_for_group(organization, unit, *, actor=None) -> int:
     """Qrup yadda saxlananda: əcnəbi qrupudursa şöbəyə əhatə verilir (idempotent; başqa qrupa toxunmur)."""
     from .group_kind import is_foreign
 
-    if unit is None or not unit.is_active or not is_foreign(unit):
+    if unit is None:
         return 0
+    if not unit.is_active or not is_foreign(unit):
+        # Növ «adi»yə qayıdıb (və ya qrup arxivdədir): bu qrup üzrə şöbə üzvlükləri passivləşir (silinmir).
+        Membership = django_apps.get_model("organizations", "Membership")
+        return Membership.objects.filter(
+            organization=organization,
+            scope_unit=unit,
+            role__name__in=list(DEPARTMENT_ROLE_MAP.values()),
+            is_active=True,
+        ).update(is_active=False)
     _counts, wanted = plan(organization)
     return apply(organization, [item for item in wanted if item[2].pk == unit.pk], actor=actor)
 

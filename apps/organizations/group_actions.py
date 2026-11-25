@@ -94,7 +94,7 @@ def _int_or(value, default, *, low, high):
     return max(low, min(high, number))
 
 
-def _apply_meta(unit, request):
+def _apply_meta(unit, request, *, previous_kind=""):
     """`settings` JSON-u yerində yeniləyir — MÖVCUD açarlar silinmir."""
     settings_blob = dict(unit.settings) if isinstance(unit.settings, dict) else {}
     settings_blob["language_sector"] = (request.POST.get("language_sector") or "").strip()[:16]
@@ -114,9 +114,10 @@ def _apply_meta(unit, request):
     # İndi «tutor» kimi: yalnız sahə POST-da VARSA dəyişir (boş dəyər = bağlantını sil).
     if "curriculum_id" in request.POST:
         settings_blob["curriculum_id"] = _known_curriculum_id(unit.organization, request.POST.get("curriculum_id"))
-    from .group_kind import apply_kind  # «Qrup növü» — adi / əcnəbi (sahib 2026-11-25)
+    from .group_kind import apply_kind  # «Qrup növü» — adi / əcnəbi; dəyişmək yalnız org-wide idarəçiyə (2026-11-25)
 
-    apply_kind(settings_blob, request.POST)
+    allowed = group_manage_scope(request, unit.organization).is_org_wide
+    apply_kind(settings_blob, request.POST, allowed=allowed, previous=previous_kind)
     unit.settings = settings_blob
 
 
@@ -197,11 +198,14 @@ def _save_group(request, organization, scope):
         {} if is_create else {"name": instance.name, "code": instance.code, "settings": dict(instance.settings or {})}
     )
 
+    from .group_kind import kind_of
+
+    previous_kind = "" if is_create else kind_of(instance)  # ad dəyişikliyi növü çevirməsin (adın «əcnəbi» qaydası)
     instance.name = name
     instance.code = code
     if specialty is not None:
         instance.parent = specialty
-    _apply_meta(instance, request)
+    _apply_meta(instance, request, previous_kind=previous_kind)
 
     tutor_id = (request.POST.get("tutor") or "").strip()
     if tutor_id:
@@ -379,11 +383,15 @@ def _add_students(request, organization, scope):
             code="other_mode_required",
             field="other_mode",
         )
-    # Sahib 2026-11-25: genişlənmiş namizəd əhatəsi (əcnəbi qrupu) yalnız «əlavə olaraq» üçündür — başqa bölmənin
-    # tələbəsini öz qrupundan «məcburi köçür» ilə çıxarmaq üçün tələbə aktorun ÖZ idarə əhatəsində olmalıdır.
-    if others and other_mode != "extra":
+    # Sahib 2026-11-25: əcnəbi qrupunun genişlənmiş namizəd əhatəsi yalnız «əlavə olaraq» üçündür — aktorun ÖZ idarə
+    # əhatəsindən kənar tələbə (başqa qrupda, qrupsuz və ya arxiv qrupunda) bu qrupa KÖÇÜRÜLMÜR. Universitet əhatəli
+    # kafedranın (2026-11-22) qaydası dəyişmir.
+    from .group_kind import is_foreign
+
+    if not scope.is_org_wide and is_foreign(unit):
         own = set(requested.filter(student_record_scope_q(scope)).values_list("pk", flat=True))
-        if any(record.pk not in own for record in others):
+        moving = records + (others if other_mode != "extra" else [])
+        if any(record.pk not in own for record in moving):
             return _error(
                 pgettext(_CTX, "Başqa bölmənin tələbəsini yalnız «əlavə olaraq» qoşmaq olar — öz qrupu dəyişmir."),
                 code="transfer_outside_scope",

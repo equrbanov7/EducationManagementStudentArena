@@ -68,12 +68,18 @@ def foreign_group_ids(organization) -> frozenset:
     return result
 
 
-def apply_kind(settings_blob: dict, post) -> None:
-    """Formada sahə VARSA yazılır (köhnə forma göndərmirsə dəyər qalır)."""
-    if GROUP_KIND_KEY not in post:
-        return
-    value = (post.get(GROUP_KIND_KEY) or "").strip()
-    settings_blob[GROUP_KIND_KEY] = value if value in _KNOWN else KIND_REGULAR
+def apply_kind(settings_blob: dict, post, *, allowed: bool, previous: str = "") -> None:
+    """Növü yazır — hər yazıda AÇIQ dəyər (ad dəyişikliyi növü çevirməsin).
+
+    Əcnəbi bayrağı namizəd əhatəsini bütün universitetə açır, şöbəyə üzvlük verir və cədvəl toqquşmasını yumşaldır;
+    ona görə onu yalnız ``allowed`` (org-wide ``unit.group_manage`` — Tədris şöbəsi, RİM, sahib) dəyişə bilər.
+    Qalan aktorda əvvəlki növ (``previous``; yeni qrupda «adi») saxlanılır.
+    """
+    value = previous if previous in _KNOWN else KIND_REGULAR
+    if allowed and GROUP_KIND_KEY in post:
+        raw = (post.get(GROUP_KIND_KEY) or "").strip()
+        value = raw if raw in _KNOWN else KIND_REGULAR
+    settings_blob[GROUP_KIND_KEY] = value
 
 
 __all__ = [

@@ -176,3 +176,78 @@ class ForeignParallelTest(ForeignOfficeBase):
         first, found = self.clashes(ordinary)
         self.assertIsNotNone(first)
         self.assertIn("teacher", {row["kind"] for row in found})
+
+
+class ReviewFixesTest(ForeignOfficeBase):
+    """Müstəqil yoxlamanın tapıntıları (2026-11-25): növü yalnız org-wide idarəçi dəyişir; tarixçə öz açarının əhatəsi."""
+
+    def save(self, user, unit=None, **data):
+        payload = {"action": "save_group", "course_year": "1", **data}
+        if unit is not None:
+            payload["id"] = str(unit.pk)
+        else:
+            payload["specialty"] = str(self.chair.pk)
+        with bypass_rls():
+            return self.client_for(user).post(
+                reverse("organizations:group_action", kwargs={"slug": self.org.slug}), payload
+            )
+
+    def test_unit_scoped_manager_cannot_flip_kind_or_rename_into_foreign(self):
+        with bypass_rls():
+            coordinator = self._member("fso_coord", self.org.roles.get(name="program_coordinator"), self.group1)
+        response = self.save(coordinator, self.group1, name="G1-əcnəbilər", group_kind=KIND_FOREIGN)
+        self.assertEqual(response.status_code, 200, response.content)
+        with bypass_rls():
+            self.group1.refresh_from_db()
+            self.assertEqual(self.group1.name, "G1-əcnəbilər")
+            self.assertEqual(kind_of(self.group1), "")
+            self.assertFalse(Membership.objects.filter(scope_unit=self.group1, user=self.staff).exists())
+
+    def test_owner_reverting_to_regular_deactivates_office_scope(self):
+        self.assertEqual(self.save(self.owner, self.foreign, name=self.foreign.name, group_kind="").status_code, 200)
+        with bypass_rls():
+            self.assertFalse(
+                Membership.objects.filter(scope_unit=self.foreign, is_active=True, user=self.staff).exists()
+            )
+        self.assertEqual(
+            self.save(self.owner, self.foreign, name=self.foreign.name, group_kind=KIND_FOREIGN).status_code, 200
+        )
+        with bypass_rls():
+            self.assertTrue(
+                Membership.objects.filter(scope_unit=self.foreign, is_active=True, user=self.staff).exists()
+            )
+
+    def test_history_needs_records_view_scope_over_the_group(self):
+        from apps.organizations.models import Role
+        from core.constants import RoleScopeType
+
+        with bypass_rls():
+            reader = Role.objects.create(
+                organization=self.org,
+                name="fso_reader",
+                display_name="Oxu",
+                level=40,
+                scope_type=RoleScopeType.UNIT,
+                permissions=["unit.view", "people.view_students"],
+            )
+            records = Role.objects.create(
+                organization=self.org,
+                name="fso_records",
+                display_name="Qeyd",
+                level=40,
+                scope_type=RoleScopeType.UNIT,
+                permissions=["student.records_view"],
+            )
+            actor = self._member("fso_mixed", reader, self.faculty)
+            Membership.objects.create(
+                user=actor, organization=self.org, role=records, scope_unit=self.far_faculty, is_active=True
+            )
+            actor.profile.organization = self.org
+            actor.profile.save(update_fields=["organization"])
+        url = reverse(
+            "organizations:group_student_history",
+            args=[self.org.slug, self.foreign.pk, self.record_of(self.foreign_student).pk],
+        )
+        self.assertEqual(self.get_json(actor, url).status_code, 404)
+        drawer = self.get_json(actor, reverse("organizations:group_students", args=[self.org.slug, self.foreign.pk]))
+        self.assertNotIn("history_url", drawer.json()["rows"][0])
