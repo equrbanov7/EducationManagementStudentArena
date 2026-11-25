@@ -2,7 +2,9 @@
 
 * ``intensive_preview`` — seçilmiş tələbələrin yoxlaması (yazmadan): ``ok`` / ``conflict`` / ``blocked``;
 * ``intensive_create`` — sətir + bölgü + jurnal + qeydiyyat bir addımda (``services.intensive.create_intensive``);
-* ``intensive_cancel`` — dərssiz kursu ləğv.
+* ``intensive_cancel`` — dərssiz kursu ləğv;
+* ``intensive_hours`` — saatı ləğvsiz dəyiş (``row``, ``lecture_hours``, ``seminar_hours``, ``reason`` ≥ 10 simvol;
+  2026-11-25, ``services.intensive_hours``).
 
 Qapılar servisdədir (fail-closed); burada yalnız sorğu → arqument çevrilməsi.
 """
@@ -12,6 +14,7 @@ from __future__ import annotations
 from django.http import JsonResponse
 
 from .services.intensive import cancel_intensive, create_intensive, preview
+from .services.intensive_hours import change_intensive_hours
 
 
 def _students(request) -> list:
@@ -62,10 +65,24 @@ def _cancel(request, organization, actor):
     return JsonResponse({"ok": True, **result})
 
 
+def _hours(request, organization, actor):
+    result = change_intensive_hours(
+        organization=organization,
+        actor=actor,
+        row_id=request.POST.get("row") or "",
+        lecture_hours=request.POST.get("lecture_hours") or 0,
+        seminar_hours=request.POST.get("seminar_hours") or 0,
+        reason=request.POST.get("reason") or "",
+        request=request,
+    )
+    return JsonResponse({"ok": True, **result})
+
+
 INTENSIVE_HANDLERS = {
     "intensive_preview": _preview,
     "intensive_create": _create,
     "intensive_cancel": _cancel,
+    "intensive_hours": _hours,
 }
 
 __all__ = ["INTENSIVE_HANDLERS"]

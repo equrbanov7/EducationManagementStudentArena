@@ -6,7 +6,9 @@ işlədir (bax :mod:`apps.registrar.intensive`):
 * ``open_intensive_course(...)`` — açılış + qeydiyyatlar (bir tranzaksiya), :class:`IntensiveError` atır;
 * ``check_intensive_students(...)`` — ön baxış: hər tələbə ``ok`` / ``conflict`` / ``blocked``;
 * ``cancel_intensive_course(...)`` — dərssiz kursu ləğv (köçürülmüş qeydiyyatlar geri qayıdır);
-* ``search_intensive_students(...)`` — ad / qrup / istifadəçi adı ilə axtarış (``EMSSearchableSelect``).
+* ``search_intensive_students(...)`` — ad / qrup / istifadəçi adı ilə axtarış (``EMSSearchableSelect``);
+* ``intensive_held_hours(offering)`` / ``set_intensive_course_hours(...)`` — saatın dəyişməsi (2026-11-25,
+  :mod:`apps.registrar.intensive_hours`).
 """
 
 from __future__ import annotations
@@ -18,6 +20,8 @@ from .intensive import cancel_course as cancel_intensive_course
 from .intensive import check_students as check_intensive_students
 from .intensive import open_course as open_intensive_course
 from .intensive import public_check
+from .intensive_hours import held_hours as intensive_held_hours
+from .intensive_hours import set_course_hours as set_intensive_course_hours
 from .models import AcademicStatus, CourseFormat, StudentAcademicRecord
 
 intensive_public_check = public_check
@@ -57,7 +61,9 @@ __all__ = [
     "IntensiveError",
     "cancel_intensive_course",
     "check_intensive_students",
+    "intensive_held_hours",
     "intensive_public_check",
     "open_intensive_course",
     "search_intensive_students",
+    "set_intensive_course_hours",
 ]
