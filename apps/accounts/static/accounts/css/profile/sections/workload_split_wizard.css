@@ -319,7 +319,7 @@
 
 .wl-wiz-unit {
   display: grid;
-  grid-template-columns: minmax(150px, 1.3fr) 70px minmax(180px, 1.6fr) 76px auto;
+  grid-template-columns: minmax(140px, 1.2fr) 64px minmax(0, 1.6fr) 76px max-content;
   align-items: center;
   gap: 8px;
   padding: 6px 0;
@@ -331,7 +331,9 @@
 .wl-wiz-unit__size { font-size: 0.78rem; color: var(--ems-text-muted, #6b7280); }
 .wl-wiz-unit__keep { display: block; margin-bottom: 4px; font-size: 0.76rem; color: var(--ems-text-muted, #6b7280); }
 .wl-wiz-unit__hours input { width: 72px; padding: 5px 6px; border: 1px solid var(--ems-border, #d1d5db); border-radius: 8px; }
-.wl-wiz-unit__hourly { font-size: 0.78rem; white-space: nowrap; }
+.wl-wiz-unit__hourly { font-size: 0.78rem; white-space: nowrap; padding-right: 4px; }
+.wl-wiz-unit__teacher { min-width: 0; }
+.wl-wiz-unit__teacher .bootstrap-single-select, .wl-wiz-unit__teacher .bootstrap-single-select__toggle { max-width: 100%; min-width: 0; }
 
 /* ── 5. yoxla ─────────────────────────────────────────────────────────── */
 .wl-wiz-fix {
