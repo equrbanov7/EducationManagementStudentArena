@@ -36,7 +36,7 @@ from core import phone as phone_lib
 from core.constants import OrgUnitType
 from core.validators import validate_fin
 
-from ...identity import canonical_identity
+from ...identity import canonical_identity, claim_placeholder_email
 from . import create, fin_claims
 
 _CTX = "student_intake"
@@ -488,9 +488,8 @@ def _validate_credentials(plan: RowPlan, row: dict, context: IntakeContext) -> b
     plan.username = context.claim_username(create.username_base(create.KIND_STUDENT, code=code, fin=plan.fin))
 
     email = _text(row.get("email"))
-    placeholder = "intake.%s@%s" % (plan.fin.lower(), PLACEHOLDER_DOMAIN)
-    if not email:
-        plan.email = placeholder
+    if not email:  # Yer-tutucu bazada/faylda tutulubsa ``intake.<fin>.2@…`` (bax ``claim_placeholder_email``).
+        plan.email = claim_placeholder_email("intake." + plan.fin, context.seen_emails)
         plan.warnings.append(pgettext(_CTX, "E-poçt yoxdur — placeholder yazılır (ilk girişdə istifadəçi özü yazır)."))
     else:
         try:
@@ -500,7 +499,7 @@ def _validate_credentials(plan: RowPlan, row: dict, context: IntakeContext) -> b
             return False
         key = canonical_identity(email)
         if key in context.existing_emails or key in context.seen_emails:
-            plan.email = placeholder
+            plan.email = claim_placeholder_email("intake." + plan.fin, context.seen_emails)
             plan.warnings.append(pgettext(_CTX, "E-poçt artıq istifadə olunur — placeholder yazılır."))
         else:
             context.seen_emails.add(key)
