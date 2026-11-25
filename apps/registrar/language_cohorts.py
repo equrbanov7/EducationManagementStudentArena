@@ -5,6 +5,7 @@ import uuid
 from django.apps import apps
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
+from django.db.models import Q
 from django.utils.translation import gettext as _
 
 from core.audit import log_action
@@ -14,8 +15,11 @@ from . import guest_roster
 from .integrity import is_authorized_instructor, validate_same_organization
 from .journal_access import can_edit_journal
 from .journal_shares import journal_scope
-from .language_levels import level_family, level_of
+from .language_levels import LEVEL_RE, level_family, level_of
 from .models import CourseOffering, LanguageLevelCohort
+
+#: Tyutorun «qrup dövrəsi» (sahib 2026-11-19) — bax ``apps/organizations/permissions_tutor_circle.py``.
+LEVEL_COHORT_PERMISSION = "journal.level_cohorts"
 
 
 def department_choices(user, organization):
@@ -31,11 +35,71 @@ def department_choices(user, organization):
     ):
         return units.none()
     scope = apps.get_model("organizations", "OrgUnit").user_permission_scope(user, organization, "journal.roster")
-    if not scope.has_structure_access:
+    level_chairs = _level_cohort_access(user, organization)
+    if not scope.has_structure_access and not level_chairs:
         return units.none()
-    if not scope.is_org_wide or scope.excluded_unit_ids:
-        units = units.filter(scope.unit_subtree_q())
-    return units.order_by("name", "id")
+    if scope.has_structure_access and scope.is_org_wide and not scope.excluded_unit_ids:
+        return units.order_by("name", "id")
+    allowed = scope.unit_subtree_q() if scope.has_structure_access else Q(pk__in=[])
+    if level_chairs:
+        # Tyutor (sahib 2026-11-19): öz tələbələri üçün DİL kafedrasında qrup açır — cari semestrin səviyyə
+        # jurnallarını RƏSMİ aparan kafedra (dərs yükü sətri / fənnin kafedrası; ehtimal yox, fail-closed).
+        allowed |= Q(pk__in=sorted(level_teaching_chair_ids(organization)))
+    return units.filter(allowed).order_by("name", "id")
+
+
+def level_teaching_chair_ids(organization) -> set:
+    """Cari semestrin (kohort olmayan) səviyyə jurnallarını rəsmi aparan kafedraların id-ləri.
+
+    ``offering_chairs.official_offering_chairs``: yalnız dəqiq dərs yükü sətri və ya ``Subject.chair_unit`` —
+    müəllimin ştatı / tələbənin fakültəsi sayılmır. Başqa fakültənin adi kafedrası (orada bir dəfə kohort açılsa
+    belə) bu siyahıya DÜŞMÜR (review 2026-11-19).
+    """
+    from .models import Subject
+    from .offering_chairs import official_offering_chairs
+
+    subjects = Subject.objects.filter(organization=organization, is_active=True, name__iregex=LEVEL_RE.pattern)
+    subject_ids = [pk for pk, name in subjects.values_list("pk", "name") if level_of(name)]
+    if not subject_ids:
+        return set()
+    offerings = CourseOffering.objects.filter(
+        organization=organization,
+        is_active=True,
+        period__is_current=True,
+        period__is_active=True,
+        subject_id__in=subject_ids,
+        language_cohort__isnull=True,
+    )
+    found = set()
+    for chairs in official_offering_chairs(offerings, organization.pk).values():
+        found |= set(chairs)
+    return found
+
+
+def creator_only_access(user, cohort) -> bool:
+    """Aktor kohorta YALNIZ yaradıcı yolu ilə çatır (kafedra əhatəsində deyil) — siyahı öz əhatəsi ilə süzülür."""
+    if guest_roster.unit_in_scope(user, cohort.organization, cohort.department_id):
+        return False
+    return manages_by_creation(user, cohort)
+
+
+def _level_cohort_access(user, organization) -> bool:
+    """``journal.level_cohorts`` (tyutorun «qrup dövrəsi») struktur əhatəsi verirmi.
+
+    Bu yol YALNIZ iki şey açır: dil kafedrasında qrup YARATMAQ və aktorun ÖZ yaratdığı qrupu idarə etmək.
+    Tələbə yerləşdirmə/çıxarma hər halda ``journal.roster`` əhatəsindəki tələbələrlə məhduddur
+    (``language_cohort_placement``) — başqa fakültənin tələbəsinə toxunmur.
+    """
+    return (
+        apps.get_model("organizations", "OrgUnit")
+        .user_permission_scope(user, organization, LEVEL_COHORT_PERMISSION)
+        .has_structure_access
+    )
+
+
+def manages_by_creation(user, cohort) -> bool:
+    """Kohortu aktor özü yaradıb və ``journal.level_cohorts`` açarını hələ də daşıyır (kafedra əhatəsindən kənar)."""
+    return bool(cohort.created_by_id == getattr(user, "pk", None) and _level_cohort_access(user, cohort.organization))
 
 
 def can_manage_as_staff(user, cohort):
@@ -46,7 +110,9 @@ def can_manage_as_staff(user, cohort):
     jurnaldakı «Xarici dil səviyyə qrupları» düyməsi də yalnız bu yolla görünür."""
     if not _active_actor(user):
         return False
-    return guest_roster.unit_in_scope(user, cohort.organization, cohort.department_id)
+    if guest_roster.unit_in_scope(user, cohort.organization, cohort.department_id):
+        return True
+    return manages_by_creation(user, cohort)
 
 
 def can_manage(user, cohort):
@@ -74,10 +140,11 @@ def authorized_cohorts(user, organization):
     if not rows or not _active_actor(user):
         return []
     managed = guest_roster.units_in_scope(user, organization, {row.department_id for row in rows})
+    created = any(row.created_by_id == user.pk for row in rows) and _level_cohort_access(user, organization)
     instructor_ok = None
     result = []
     for row in rows:
-        if row.department_id in managed:
+        if row.department_id in managed or (created and row.created_by_id == user.pk):
             row.can_edit_roster = True  # heyət — tərkibi idarə edir
             result.append(row)
             continue

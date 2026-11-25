@@ -262,6 +262,11 @@ def remove_student(*, cohort, enrollment_id, actor, reason):
     cohort = _cohort(cohort)
     if not language_cohorts.can_manage_as_staff(actor, cohort):
         raise PermissionDenied
+    if not guest_roster.unit_in_scope(actor, cohort.organization, cohort.department_id) and not (
+        guest_roster.unit_in_scope(actor, cohort.organization, record.group_id)
+    ):
+        # Yaradıcı yolu (tyutor, dil kafedrası əhatəsindən kənar): yalnız ÖZ əhatəsinin tələbəsini çıxarır.
+        raise PermissionDenied
     enrollment = (
         Enrollment.objects.select_for_update(of=("self",))
         .select_related("offering")

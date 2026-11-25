@@ -120391,8 +120391,21 @@ msgstr "Bu binada bu adla otaq artıq var."
 
 msgctxt "exams.service.parsing.error"
 msgid "docx_chart_needs_picture"
-msgstr "Word diaqramının daxili şəklini oxumaq mümkün olmadı. Qrafiki qorumaq üçün sənədi PDF kimi ixrac edib yükləyin və ya diaqramı Word sənədinə şəkil kimi əlavə edin."
+msgstr ""
+"Word diaqramının daxili şəklini oxumaq mümkün olmadı. Qrafiki qorumaq üçün "
+"sənədi PDF kimi ixrac edib yükləyin və ya diaqramı Word sənədinə şəkil kimi "
+"əlavə edin."
 
 msgctxt "exams.export"
 msgid "question_picture_export_failed"
-msgstr "Sual şəkilləri tam ixrac edilmədi. Şəkillərin açıldığını yoxlayın və böyük faylları kiçildib yenidən cəhd edin."
+msgstr ""
+"Sual şəkilləri tam ixrac edilmədi. Şəkillərin açıldığını yoxlayın və böyük "
+"faylları kiçildib yenidən cəhd edin."
+
+msgctxt "organizations.permission.label"
+msgid "Öz qruplarının jurnallarında lab qruplarını idarə etmək"
+msgstr "Öz qruplarının jurnallarında lab qruplarını idarə etmək"
+
+msgctxt "organizations.permission.label"
+msgid "Dil kafedrasında xarici dil səviyyə qrupu açmaq (öz tələbələri üçün)"
+msgstr "Dil kafedrasında xarici dil səviyyə qrupu açmaq (öz tələbələri üçün)"

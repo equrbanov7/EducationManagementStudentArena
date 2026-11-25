@@ -210,6 +210,11 @@ def detail(request, cohort_id):
     )
     groups = home_group_map(organization_id=org.pk, student_ids=[e.student_id for e in enrollments])
     rows = [{"enrollment": e, "home_group": groups.get(e.student_id)} for e in enrollments]
+    creator_only = can_edit_roster and language_cohorts.creator_only_access(request.user, cohort)
+    if creator_only:
+        # Yaradıcı yolu (tyutor, dil kafedrası əhatəsindən kənar): yalnız ÖZ əhatəsinin tələbələri görünür.
+        visible = guest_roster.units_in_scope(request.user, org, {group.pk for group in groups.values()})
+        rows = [row for row in rows if row["home_group"] is not None and row["home_group"].pk in visible]
     candidates = []
     roster_open = guest_roster.roster_is_open(cohort.offering)
     if roster_open and can_edit_roster:
@@ -220,11 +225,10 @@ def detail(request, cohort_id):
         for record in records:
             sources = by_student.get(record.student_id, [])
             candidates.append({"record": record, "sources": sources, "ambiguous": len(sources) > 1})
-    events = (
-        cohort.placements.filter(organization=org)
-        .select_related("student__profile", "actor", "home_group")
-        .order_by("-created_at")[:50]
-    )
+    placements = cohort.placements.filter(organization=org)
+    if creator_only:
+        placements = placements.filter(home_group__in=guest_roster.scoped_group_queryset(request.user, org))
+    events = placements.select_related("student__profile", "actor", "home_group").order_by("-created_at")[:50]
     events = list(events.select_related("source_enrollment__offering__organization"))
     source_scopes = {}
     for event in events:

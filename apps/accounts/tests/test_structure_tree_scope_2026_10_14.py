@@ -253,12 +253,13 @@ class StructureTreeScopeTest(TestCase):
         self.assertContains(response, "sts_ali@qku.edu.az")
         self.assertContains(response, 'id="tofTreeLeadDialog"')
 
-    def test_tutor_sees_students_without_contacts(self):
+    def test_tutor_sees_students_with_contacts_in_own_faculty(self):
+        # 2026-11-19 (sahib, tyutorun «qrup dövrəsi»: «tələbə datasını görməkdən»): tyutor `people.view_contacts`
+        # alır — öz fakültəsinin qrup panelində əlaqə sütunu görünür (əvvəl gizli idi).
         response, section = self.tree(self.tutor, st_unit=str(self.group_a.pk))
         panel = section["detail"]["group_panel"]
         self.assertTrue(panel["can_view_students"])
-        self.assertFalse(panel["show_contacts"])
-        self.assertNotContains(response, "sts_ali@qku.edu.az")
+        self.assertTrue(panel["show_contacts"])
 
     def test_office_without_student_key_gets_no_student_list(self):
         response, section = self.tree(self.office, st_unit=str(self.group_a.pk))

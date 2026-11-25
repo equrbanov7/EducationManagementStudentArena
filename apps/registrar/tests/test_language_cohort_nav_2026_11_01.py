@@ -60,9 +60,11 @@ class LanguageCohortNavTests(_GuestRosterBase):
         group_start = html.index('data-sidebar-group="teaching-office"')
         groups_item = html.index('data-section="groups-registry"', group_start)
         self.assertLess(groups_item, html.index(link, group_start))
-        # Qruplar ilə səviyyə qrupları arasında başqa bənd yoxdur (eyni hissə, yanaşı).
+        # Qruplar ilə səviyyə qrupları arasında yalnız qrup ailəsinin bəndləri var (eyni hissə, yanaşı). 2026-11-19:
+        # koordinator/tyutor `journal.lab_groups` alır — «Lab qrupları» da şablonda məhz bu ikisinin arasındadır.
         between = html[groups_item : html.index(link, group_start)]
-        self.assertEqual(between.count("sidebar-menu-item"), 1)
+        self.assertEqual(between.count("sidebar-menu-item"), 2)
+        self.assertIn('data-section="lab-groups"', between)
 
     def test_level_journal_teacher_gets_the_link_beside_the_journal_entry(self):
         html = self._sidebar(self.teacher)

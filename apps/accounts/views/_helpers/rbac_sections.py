@@ -502,7 +502,7 @@ def _lab_groups_visible(user, organization, permissions) -> bool:
 
     if organization is None:
         return False
-    if has_permission(permissions, "workload.distribute"):
+    if has_permission(permissions, "workload.distribute") or has_permission(permissions, "journal.lab_groups"):
         return True
     if not has_permission(permissions, "grade.input"):
         return False

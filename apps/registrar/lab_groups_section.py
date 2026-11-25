@@ -11,6 +11,7 @@ jurnalları verir; qrupların özünü dəyişən qaydalar (yaratmaq, ad, yerlə
 * superadmin / RİM rəhbəri / təşkilat sahibi — təşkilatın bütün jurnalları;
 * ``workload.distribute`` (kafedra müdiri) — təşkilat miqyasında hamısı, UNIT rolunda isə kafedrası əhatədə olan
   açılışlar (``offering_chairs`` — «Praktiki məşğələ» açarı ilə eyni tərif);
+* ``journal.lab_groups`` (tyutor, 2026-11-19) — QRUPU əhatədə olan açılışlar (``lab_groups_manage.can_manage``);
 * müəllim — canlı ``grade.input`` səlahiyyəti varsa öz açılışları və «lab» növünü daşıyan aktiv payları.
 
 Siyahıda yalnız laboratoriya saatı olan jurnallar görünür (:func:`lab_capable`): plan / dərs yükü / dil səviyyəsi /
@@ -67,20 +68,22 @@ STATUS_CHOICES = (
 
 @dataclass(frozen=True)
 class Scope:
-    """Aktorun jurnal əhatəsi: ``org_wide`` — hamısı; ``chair_units`` — kafedra alt-ağacı; ``own`` — öz / pay."""
+    """Aktorun jurnal əhatəsi: ``org_wide`` — hamısı; ``chair_units`` — kafedra alt-ağacı; ``group_units`` — QRUPU
+    əhatədə olan açılışlar (tyutor, ``journal.lab_groups``, 2026-11-19); ``own`` — öz / pay."""
 
     org_wide: bool = False
     chair_units: frozenset = frozenset()
     own: bool = False
+    group_units: frozenset = frozenset()
 
     @property
     def has_access(self) -> bool:
-        return self.org_wide or bool(self.chair_units) or self.own
+        return self.org_wide or bool(self.chair_units) or bool(self.group_units) or self.own
 
     @property
     def is_personal(self) -> bool:
         """Yalnız öz jurnalları (müəllim) — struktur süzgəcləri (fakültə / kafedra / müəllim) lazım deyil."""
-        return not self.org_wide and not self.chair_units
+        return not self.org_wide and not self.chair_units and not self.group_units
 
 
 NO_ACCESS = Scope()
@@ -108,16 +111,26 @@ def resolve_scope(user, organization) -> Scope:
     chair = permission_scope_for(user, organization, service.CHAIR_PERMISSION)
     if chair.has_structure_access and chair.is_org_wide:
         return Scope(org_wide=True)
-    units = frozenset()
-    if chair.has_structure_access:
-        units = frozenset(
-            str(pk)
-            for pk in django_apps.get_model("organizations", "OrgUnit")
-            .objects.filter(organization_id=organization.pk)
-            .filter(chair.unit_subtree_q())
-            .values_list("pk", flat=True)
-        )
-    return Scope(chair_units=units, own=_instructor_ok(user, organization))
+    group = permission_scope_for(user, organization, service.GROUP_PERMISSION)
+    if group.has_structure_access and group.is_org_wide:
+        return Scope(org_wide=True)
+    return Scope(
+        chair_units=_subtree_ids(organization, chair),
+        own=_instructor_ok(user, organization),
+        group_units=_subtree_ids(organization, group),
+    )
+
+
+def _subtree_ids(organization, scope) -> frozenset:
+    if not scope.has_structure_access:
+        return frozenset()
+    return frozenset(
+        str(pk)
+        for pk in django_apps.get_model("organizations", "OrgUnit")
+        .objects.filter(organization_id=organization.pk)
+        .filter(scope.unit_subtree_q())
+        .values_list("pk", flat=True)
+    )
 
 
 def _own_q(user) -> Q:
@@ -139,6 +152,8 @@ def _scoped(user, organization, scope: Scope, base):
         ids = [pk for pk, found in chairs.items() if set(found) & scope.chair_units]
         if ids:
             condition |= Q(pk__in=ids)
+    if scope.group_units:
+        condition |= Q(group_id__in=sorted(scope.group_units))
     return base.filter(condition)
 
 
@@ -165,7 +180,7 @@ def teaches_lab(user, organization) -> bool:
 def visible(user, organization, scope: Scope | None = None) -> bool:
     """Bölmə görünürmü: təşkilat / kafedra əhatəsi və ya ən azı bir lab saatlı öz jurnalı."""
     scope = scope or resolve_scope(user, organization)
-    if scope.org_wide or scope.chair_units:
+    if scope.org_wide or scope.chair_units or scope.group_units:
         return True
     return scope.own and teaches_lab(user, organization)
 

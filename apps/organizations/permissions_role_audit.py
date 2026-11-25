@@ -6,6 +6,8 @@ eyni naxış: burada YALNIZ data, birləşmə ``permissions.py``-ın sonunda bir
 
 from django.utils.translation import pgettext_lazy
 
+from .permissions_tutor_circle import merge_tutor_circle_permissions
+
 _PERM_CTX = "organizations.permission.label"
 
 PERM_EXAM_CENTER_DECIDE = "exam_center.decide"
@@ -40,6 +42,8 @@ def merge_role_audit_permissions(categories: dict, category_labels: dict, permis
             if key not in bucket:
                 bucket.append(key)
     permission_labels.update(ROLE_AUDIT_PERMISSION_LABELS)
+    # Tyutorun «qrup dövrəsi» (2026-11-19) — `permissions.py` 600 sətir sərhədindədir, birləşmə buradan gedir.
+    merge_tutor_circle_permissions(categories, permission_labels)
 
 
 __all__ = [
