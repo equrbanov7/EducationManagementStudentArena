@@ -526,7 +526,16 @@ _HANDLERS = {
     "promote": lambda request, organization, scope: _promote(request, organization, scope),
     # Ana qrupu alt qruplara bölmə (sahib 2026-09-20) — ayrı modul (ölçü büdcəsi).
     "split_group": lambda request, organization, scope: _split_group(request, organization, scope),
+    # «Qrupdan çıxar» (sahib 2026-11-25): tələbə qrupsuz qalır / əlavə üzv qrupun jurnallarından çıxır.
+    "remove_student": lambda request, organization, scope: _removal("remove_student", request, organization, scope),
+    "remove_extra": lambda request, organization, scope: _removal("remove_extra", request, organization, scope),
 }
+
+
+def _removal(name, request, organization, scope):
+    from . import group_remove
+
+    return getattr(group_remove, name)(request, organization, scope)
 
 
 def _split_group(request, organization, scope):

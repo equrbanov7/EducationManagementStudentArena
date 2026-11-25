@@ -47,3 +47,30 @@ def extra_group_members(*, organization, group, period):
     if _extra_reader is None:
         return []
     return _extra_reader(organization=organization, group=group, period=period)
+
+
+# Sahib 2026-11-25: «Qrupdan çıxar» — tələbə qrupsuz qalır (status dəyişmir); əlavə üzv isə yalnız bu qrupun
+# cari jurnallarından çıxır. Registrar həm rəsmi sübutlu çıxarmanı, həm əlavənin tərsini təmin edir.
+_removal_handler = None
+_extra_removal_handler = None
+
+
+def register_student_group_removal(handler, extra_handler):
+    if not callable(handler) or not callable(extra_handler):
+        raise TypeError("Student group-removal handlers must be callable")
+    global _removal_handler, _extra_removal_handler
+    _removal_handler, _extra_removal_handler = handler, extra_handler
+
+
+def remove_student_from_group(*, record, period, by_user, reason, order_number="", order_date=None):
+    if _removal_handler is None:
+        raise ValidationError("Qrupdan çıxarma xidməti qoşulmayıb.")
+    return _removal_handler(
+        record=record, period=period, by_user=by_user, reason=reason, order_number=order_number, order_date=order_date
+    )
+
+
+def remove_extra_group_member(*, record, group, period, by_user, reason):
+    if _extra_removal_handler is None:
+        raise ValidationError("Əlavə qrup xidməti qoşulmayıb.")
+    return _extra_removal_handler(record=record, group=group, period=period, by_user=by_user, reason=reason)

@@ -7,10 +7,15 @@ class RegistrarConfig(AppConfig):
     verbose_name = "Registrar (curriculum)"
 
     def ready(self):
-        from apps.organizations.public import register_student_extra_group, register_student_transfer
+        from apps.organizations.public import (
+            register_student_extra_group,
+            register_student_group_removal,
+            register_student_transfer,
+        )
 
         register_student_transfer(_transfer_student_group)
         register_student_extra_group(_add_extra_group_member, _extra_group_members)
+        register_student_group_removal(_remove_student_from_group, _remove_extra_group_member)
         _register_self_conflict()
         _register_retake_media()
         _register_off_schedule_reevaluation()
@@ -108,6 +113,19 @@ def _add_extra_group_member(**kwargs):
     from .group_extra_member import add_extra_group_member
 
     return add_extra_group_member(**kwargs)
+
+
+def _remove_student_from_group(**kwargs):
+    """Sahib 2026-11-25: «Qrupdan çıxar» — rəsmi sübutlu qrup → qrupsuz keçidi (``group_removal``)."""
+    from .group_removal import remove_student_from_group
+
+    return remove_student_from_group(**kwargs)
+
+
+def _remove_extra_group_member(**kwargs):
+    from .group_removal import remove_extra_group_member
+
+    return remove_extra_group_member(**kwargs)
 
 
 def _extra_group_members(**kwargs):

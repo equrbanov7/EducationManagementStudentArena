@@ -173,17 +173,23 @@ def _clear_transfer_gucs() -> None:
 
 
 def begin_authorized_group_transfer(*, record, new_group, period, actor_id):
-    """Apply one transition and create pending, transaction-bound evidence."""
+    """Apply one transition and create pending, transaction-bound evidence.
+
+    ``new_group=None`` — qrupdan çıxarılma (0127): yalnız qrupu olan qeyd üçün; DB funksiyası da yoxlayır.
+    """
 
     if not connection.in_atomic_block:
         raise RuntimeError("registrar_group_transfer_requires_atomic_transaction")
     if actor_id is None:
         raise ValidationError({"by_user": "Qrup köçürməsi üçün icraçı tələb olunur."})
+    new_group_id = getattr(new_group, "pk", None)
+    if new_group_id is None and record.group_id is None:
+        raise ValidationError({"group": "Tələbə onsuz da qrupsuzdur."})
     evidence_id = uuid.uuid4()
     binding = _TransferBinding(
         record_id=_identity(record.pk),
         old_group=_identity(record.group_id),
-        new_group=_identity(new_group.pk),
+        new_group=_identity(new_group_id),
         actor_id=_identity(actor_id),
     )
     token = _TRANSFER_BINDING.set(binding)
@@ -196,7 +202,7 @@ def begin_authorized_group_transfer(*, record, new_group, period, actor_id):
                         str(evidence_id),
                         str(record.pk),
                         str(record.group_id) if record.group_id else None,
-                        str(new_group.pk),
+                        str(new_group_id) if new_group_id is not None else None,
                         str(period.pk) if period is not None else None,
                         actor_id,
                     ],
@@ -212,7 +218,7 @@ def begin_authorized_group_transfer(*, record, new_group, period, actor_id):
                 organization_id=record.organization_id,
                 record_id=record.pk,
                 old_group_id=old_group_id,
-                new_group_id=new_group.pk,
+                new_group_id=new_group_id,
                 period_id=getattr(period, "pk", None),
                 actor_ref=actor_id,
                 transaction_id=f"sqlite-{evidence_id}",

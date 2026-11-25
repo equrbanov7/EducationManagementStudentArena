@@ -121366,3 +121366,85 @@ msgstr "Group not found or outside your scope."
 msgctxt "student_intake"
 msgid "Bu qrupa tələbə əlavə etmək icazəniz yoxdur — yalnız öz qruplarınızı seçin."
 msgstr "You may not add students to this group — choose one of your own groups."
+
+msgctxt "accounts.groups"
+msgid "Tələbəni qrupdan çıxar"
+msgstr "Remove student from group"
+
+msgctxt "accounts.groups"
+msgid "Tələbə xaric edilmir və dondurulmur: statusu «Qeydiyyatlı» qalır, sadəcə qrupsuz olur — sonra «Tələbə əlavə et» ilə istənilən qrupa qoşmaq olar. Bu qrupun cari semestr jurnallarındakı qeydiyyatı tarixçəyə keçir, bal və davamiyyət silinmir. Səbəb audit jurnalına yazılır."
+msgstr "The student is not expelled or put on leave: the status stays “Enrolled”, the student simply has no group — later “Add student” can attach them to any group. Their enrolments in this group's current-semester gradebooks move to history; marks and attendance are kept. The reason is written to the audit log."
+
+msgctxt "accounts.groups"
+msgid "Əlavə üzvü qrupdan çıxar"
+msgstr "Remove additional member from group"
+
+msgctxt "accounts.groups"
+msgid "Tələbə yalnız bu qrupun cari semestr jurnallarından çıxır — öz qrupu və oradakı jurnalları dəyişmir. Bal və davamiyyət silinmir, jurnalın dəyişiklik tarixçəsinə yazılır."
+msgstr "The student leaves only this group's current-semester gradebooks — their own group and its gradebooks stay unchanged. Marks and attendance are kept; the change is written to the gradebook history."
+
+msgctxt "accounts.groups"
+msgid "Tələbə bu qrupun tələbəsi deyil."
+msgstr "The student is not a member of this group."
+
+msgctxt "accounts.groups"
+msgid "Əmr tarixi düzgün deyil."
+msgstr "The order date is invalid."
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "Tələbə qrupdan çıxarıldı — statusu «Qeydiyyatlı» qaldı, %(count)d jurnal sətri tarixçəyə keçdi."
+msgstr "The student was removed from the group — the status stays “Enrolled”, %(count)d gradebook rows moved to history."
+
+msgctxt "accounts.groups"
+msgid "Bu tələbə qrupun öz tələbəsidir — əlavə üzv deyil."
+msgstr "This student belongs to the group itself — not an additional member."
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "Əlavə üzv qrupun %(count)d jurnalından çıxarıldı — öz qrupu dəyişmədi."
+msgstr "The additional member was removed from %(count)d of the group's gradebooks — their own group is unchanged."
+
+msgctxt "registrar.group_removal"
+msgid "Akademik dövr tələbənin təşkilatına aid deyil."
+msgstr "The academic period does not belong to the student's organisation."
+
+msgctxt "registrar.group_removal"
+msgid "Aktiv cari akademik dövr göstərilməlidir."
+msgstr "The active current academic period must be given."
+
+msgctxt "registrar.group_removal"
+msgid "Qrupdan çıxarma yalnız aktiv cari akademik dövrdə aparılır."
+msgstr "Removal from a group is only possible in the active current academic period."
+
+msgctxt "registrar.group_removal"
+msgid "Tələbə onsuz da heç bir qrupda deyil."
+msgstr "The student is already not in any group."
+
+msgctxt "registrar.group_removal"
+msgid "Yalnız qeydiyyatlı tələbə qrupdan çıxarılır — məzuniyyətdə / xaric edilmiş deyil."
+msgstr "Only an enrolled student can be removed from a group — not one on leave or expelled."
+
+msgctxt "registrar.group_removal"
+msgid "Qrupdan çıxarma üçün icraçı tələb olunur."
+msgstr "Removal from a group requires an acting user."
+
+msgctxt "registrar.group_removal"
+msgid "Bu tələbənin öz qrupudur — əlavə üzv deyil."
+msgstr "This is the student's own group — not an additional membership."
+
+msgctxt "registrar.group_removal"
+msgid "Cari akademik dövr yoxdur — jurnal siyahısı dəyişdirilmir."
+msgstr "There is no current academic period — gradebook rosters are not changed."
+
+msgctxt "registrar.group_removal"
+msgid "Tələbə bu qrupun cari jurnallarında yoxdur."
+msgstr "The student is not in this group's current gradebooks."
+
+msgctxt "registrar.group_removal"
+msgid "Qrup reyestrindən əlavə üzvlük götürüldü"
+msgstr "Additional membership withdrawn from the group registry"
+
+msgctxt "registrar.group_removal"
+msgid "Heç bir jurnaldan çıxarılmadı."
+msgstr "Not removed from any gradebook."
