@@ -114,6 +114,8 @@ def redirect_target(*, record, new_group, subject_id, period, target, keep_paren
     """Köçürmənin varisi ana jurnala qaytarılmalıdırsa ana qrupun aktiv açılışı, əks halda ``None``.
 
     * alt qrupun bu fənn üzrə açılışı PASSİVDİR (bölmənin varisi / ana jurnala birləşdirilib) — hər köçürmədə;
+    * alt qrupun açılışı YOXDUR, ana jurnal isə artıq alt qrup formasındadır (ailənin seminar alt qrupu var) — hər
+      köçürmədə; ailə hələ bölünməyibsə (təzə alt qrup) adi köçürmə köhnə qayda ilə gedir (sahibin açıq qərarı);
     * bölmə (``keep_parent``): alt qrupun canlı jurnalı yoxdur. Canlı (aktiv + doldurulmuş) köhnə formalı jurnal
       varsa bölmə dayanır — iki jurnal yaranmasın (əvvəlcə alt qrup jurnalı ana jurnala birləşdirilməlidir).
     """
@@ -121,6 +123,8 @@ def redirect_target(*, record, new_group, subject_id, period, target, keep_paren
     if parent is None:
         return None
     if target is not None and not target.is_active:
+        return parent
+    if target is None and (keep_parent or is_family_journal(parent)):
         return parent
     if not keep_parent:
         return None
@@ -131,6 +135,11 @@ def redirect_target(*, record, new_group, subject_id, period, target, keep_paren
             "birləşdirilməlidir (RİM — alt qrup jurnallarının birləşdirilməsi)."
         )
     return parent
+
+
+def is_family_journal(offering) -> bool:
+    """Ana jurnal alt qrup formasındadırmı: reyestr alt qrupuna bağlı seminar alt qrupu var (bölmə / birləşdirmə)."""
+    return SeminarGroup.objects.filter(offering=offering, unit__isnull=False).exists()
 
 
 def carry_rows(*, record, old_group, new_group, period) -> list:
@@ -175,6 +184,13 @@ def _parent_row(successor, offering, *, subgroup, by_user):
             added_at=timezone.now(),
         )
     if row.status == Enrollment.Status.DROPPED:
+        # Yalnız köçürmə zəncirinin sübut etdiyi sətir bərpa olunur (bölmə: ana sətir → varis; geri dönüş: ana sətir
+        # → B → varis). Əl ilə çıxarılmış / jurnal təmizliyi qərarı ilə düşmüş sətir səssiz bərpa OLUNMUR.
+        if not is_chain_undo(row, successor):
+            raise ValidationError(
+                "Yeni qrupun açılışında bu tələbəyə aid tarixi qeydiyyat var; "
+                "tarixçəni yenidən aktivləşdirmədən əvvəl inzibati yoxlama tələb olunur."
+            )
         # Sıra vacibdir: ``superseded_by`` əvvəl boşalır ki, zəncirdə dövr yaranmasın.
         row.status, row.superseded_by = Enrollment.Status.ENROLLED, None
         fields = ["status", "superseded_by"]
@@ -198,9 +214,10 @@ def return_to_parent(redirects, *, subgroup, by_user) -> dict:
         successor.status, successor.superseded_by = Enrollment.Status.DROPPED, row
         _save(successor, ["status", "superseded_by"])
         restored.append(row.pk)
-        if row.seminar_group is None:
+        if row.seminar_group is None or _is_registry_seminar(offering, row.seminar_group):
+            # Boş və ya başqa reyestr alt qrupunun (köhnə) sırası → yeni alt qrupun sırası; əl ilə qoyulan qalır.
             number = seminar_number(offering, subgroup, create=True)
-            if number is not None:
+            if number is not None and number != row.seminar_group:
                 row.seminar_group = number
                 row.save(update_fields=["seminar_group", "updated_at"])
                 placed.append(row.pk)
@@ -218,6 +235,11 @@ def return_to_parent(redirects, *, subgroup, by_user) -> dict:
         "seminar_placed_enrollment_ids": placed,
         "retired_offering_ids": retired,
     }
+
+
+def _is_registry_seminar(offering, number) -> bool:
+    """Bu nömrə reyestr alt qrupuna bağlı seminar alt qrupudurmu (əl ilə yaradılmış deyil)."""
+    return SeminarGroup.objects.filter(offering=offering, number=number, unit__isnull=False).exists()
 
 
 def _used_numbers(offering, rows) -> set:
@@ -336,6 +358,7 @@ __all__ = [
     "enroll_in_parent_journal",
     "family_parent_id",
     "is_chain_undo",
+    "is_family_journal",
     "is_live",
     "parent_journal_for",
     "parent_offering",

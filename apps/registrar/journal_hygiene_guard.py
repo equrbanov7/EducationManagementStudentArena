@@ -79,14 +79,21 @@ def existing_enrollment(record, *, subject, period):
     )
 
 
-def drop_empty_enrollments(queryset, *, organization, reason_code, reason, actor=None, request=None) -> int:
-    """``queryset``-in BOŞ (alt-qrup əlavəsi olmayan) qeydiyyatlarını ``dropped`` edir — jurnal + audit ilə."""
+def drop_empty_enrollments(
+    queryset, *, organization, reason_code, reason, actor=None, request=None, guest_q=None
+) -> int:
+    """``queryset``-in BOŞ (alt-qrup əlavəsi olmayan) qeydiyyatlarını ``dropped`` edir — jurnal + audit ilə.
+
+    ``guest_q`` — istisna olaraq daxil edilən «alt qrupdan» sətirlər (bölünmüş alt qrupun ana jurnaldakı sətirləri)."""
+    from django.db.models import Q
+
     from . import journal_hygiene_actions as actions
     from . import journal_hygiene_rows as rows_service
 
+    own = Q(source_group__isnull=True) | guest_q if guest_q is not None else Q(source_group__isnull=True)
     with transaction.atomic():
         found = list(
-            queryset.filter(organization=organization, source_group__isnull=True, absence_hours=0)
+            queryset.filter(own, organization=organization, absence_hours=0)
             .exclude(status=Enrollment.Status.DROPPED)
             .filter(*hygiene.no_evidence_filters())
             .select_for_update(of=("self",))
@@ -118,8 +125,18 @@ def drop_replaced_elective(*, organization, group, period, old_subject_id, new_s
     """Qrup seçmə blokunu dəyişdi: köhnə seçimin BOŞ (``elective``) qeydiyyatları nəticələrdən çıxır."""
     if not prevention_enabled() or not old_subject_id or old_subject_id == getattr(new_subject, "pk", None):
         return 0
+    from django.db.models import Q
+
+    from .transfer_family import trail_parent_id
+
+    # Bölünmüş alt qrup (sahib 2026-11-08): seçim ana qrupun jurnalına yazılır — oradakı bu alt qrupun sətirləri də.
+    own = Q(offering__group=group)
+    parent_id = trail_parent_id(group)
+    family = Q(offering__group_id=parent_id, source_group=group) if parent_id else None
+    if family is not None:
+        own |= family
     queryset = Enrollment.objects.filter(
-        offering__group=group,
+        own,
         offering__period=period,
         offering__subject_id=old_subject_id,
         kind=EnrollmentKind.ELECTIVE,
@@ -128,7 +145,12 @@ def drop_replaced_elective(*, organization, group, period, old_subject_id, new_s
         _CTX, "Qrupun seçmə fənni dəyişdirildi (%(group)s → %(subject)s): köhnə seçimin boş qeydiyyatı çıxarıldı."
     ) % {"group": getattr(group, "name", ""), "subject": getattr(new_subject, "code", "")}
     return drop_empty_enrollments(
-        queryset, organization=organization, reason_code=hygiene.SOURCE_REPLACED, reason=reason, actor=actor
+        queryset,
+        organization=organization,
+        reason_code=hygiene.SOURCE_REPLACED,
+        reason=reason,
+        actor=actor,
+        guest_q=family,
     )
 
 
