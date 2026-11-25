@@ -98,14 +98,14 @@ Data: apps/registrar/journal_own_history_grid.py · giriş: journal_own_history.
                     <tr>
                         <th scope="col">№</th>
                         <th scope="col">{% trans "Tarix" %}</th>
-                        <th scope="col">{% trans "Vaxt" context "registrar.own_history" %}</th>
+                        {% if show_timing %}<th scope="col">{% trans "Vaxt" context "registrar.own_history" %}</th>{% endif %}
                         <th scope="col">{% trans "Növ" %}</th>
                         <th scope="col">{% trans "Bölmə" context "registrar.own_history" %}</th>
                         <th scope="col">{% trans "Mövzu" context "registrar.own_history" %}</th>
                         <th scope="col" class="joh-num">{% trans "Saat" %}</th>
                         <th scope="col">{% trans "Otaq" context "registrar.own_history" %}</th>
                         <th scope="col" class="joh-num">{% trans "Qeyd" context "registrar.own_history" %}</th>
-                        <th scope="col">{% trans "Yazılıb" context "registrar.own_history" %}</th>
+                        {% if show_timing %}<th scope="col">{% trans "Yazılıb" context "registrar.own_history" %}</th>{% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -113,18 +113,18 @@ Data: apps/registrar/journal_own_history_grid.py · giriş: journal_own_history.
                     <tr{% if col.lesson.is_passive %} class="is-passive"{% endif %}>
                         <td class="joh-num">{{ forloop.counter }}</td>
                         <td class="joh-nowrap">{{ col.lesson.date|date:"d.m.Y" }}</td>
-                        <td class="joh-nowrap">{{ col.time|default:"—" }}</td>
-                        <td>{{ col.label }}{% if col.lesson.is_passive %} <span class="joh-tag">{% trans "Passiv" context "registrar.own_history" %}</span>{% endif %}<span class="joh-role">{{ col.role }}</span></td>
+                        {% if show_timing %}<td class="joh-nowrap">{{ col.time|default:"—" }}</td>{% endif %}
+                        <td>{{ col.label }}{% if col.lesson.is_passive %} <span class="joh-tag">{% trans "Passiv" context "registrar.own_history" %}</span>{% endif %}{% if col.imported %} <span class="joh-tag">{% trans "Köhnə sistemdən" context "registrar.own_history" %}</span>{% endif %}<span class="joh-role">{{ col.role }}</span></td>
                         <td>{{ col.section|default:"—" }}</td>
                         <td class="joh-topic">{{ col.lesson.display_topic|default:"—" }}</td>
                         <td class="joh-num">{{ col.lesson.hours }}</td>
                         <td>{{ col.room|default:"—" }}</td>
                         <td class="joh-num">{{ col.cells }}</td>
-                        <td class="joh-nowrap">
+                        {% if show_timing %}<td class="joh-nowrap">
                             {% if col.lesson_recorded %}<span class="joh-stamp">{% trans "Dərs" context "registrar.own_history" %}: {{ col.lesson_recorded }}</span>{% endif %}
                             {% if col.marks_recorded %}<span class="joh-stamp">{% trans "Son qeyd" context "registrar.own_history" %}: {{ col.marks_recorded }}</span>{% endif %}
-                            {% if not col.lesson_recorded and not col.marks_recorded %}<span class="joh-stamp joh-stamp--muted">{% if col.imported %}{% trans "Köhnə sistemdən" context "registrar.own_history" %}{% else %}—{% endif %}</span>{% endif %}
-                        </td>
+                            {% if not col.lesson_recorded and not col.marks_recorded %}<span class="joh-stamp joh-stamp--muted">—</span>{% endif %}
+                        </td>{% endif %}
                     </tr>
                     {% endfor %}
                 </tbody>

@@ -57,7 +57,16 @@ class OwnHistoryTableTests(TestCase):
     def scenario(self):
         offering = self.offering(instructor=self.other)
         lecture = self.lesson(offering, days_ago=3, kind="lecture", instructor=self.teacher, topic="Own lecture topic")
-        seminar = self.lesson(offering, days_ago=2, instructor=self.teacher, hours=2, topic="Own seminar topic")
+        seminar = self.lesson(
+            offering,
+            days_ago=2,
+            instructor=self.teacher,
+            created_by=self.teacher,
+            hours=2,
+            topic="Own seminar topic",
+            start_time=datetime.time(9, 0),
+            end_time=datetime.time(10, 20),
+        )
         foreign = self.lesson(offering, days_ago=1, instructor=self.other, topic="Other teacher private lesson")
         zeynal = self.student(offering, "Zeynalov")
         abbas = self.student(offering, "Abbasov")
@@ -99,7 +108,7 @@ class OwnHistoryTableTests(TestCase):
 
         offering = self.scenario()
         lessons = load_lessons(recorded_lessons(self.teacher).filter(offering=offering), offering, self.teacher)
-        data = build(offering, self.teacher, lessons)
+        data = build(offering, self.teacher, lessons, timing=True)
         self.assertEqual([c["lesson"].topic for c in data["columns"]], ["Own lecture topic", "Own seminar topic"])
         self.assertEqual([row["name"].split()[0] for row in data["rows"]], ["Abbasov", "Zeynalov"])
         zeynal = data["rows"][1]["cells"]
@@ -121,6 +130,47 @@ class OwnHistoryTableTests(TestCase):
         self.assertIn("Dərsi yaradıb", html)
         self.assertNotIn("Nullov", html)
         self.assertIn("<b>0</b> saat", html)
+
+    # ── lesson timing: staff only (owner 2026-11-17) ────────────────────────
+    TIMING_MARKERS = ("09:00", "10:20", ">Vaxt<", ">Yazılıb<", "Son qeyd:", "Dərs:")
+
+    def test_own_view_renders_no_time_or_recorded_moments(self):
+        offering = self.scenario()
+        for params in ({}, {"teacher": str(self.teacher.pk)}):
+            html = self.get(offering, **params).content.decode()
+            self.assertIn("Own seminar topic", html)
+            for marker in self.TIMING_MARKERS:
+                with self.subTest(params=params, marker=marker):
+                    self.assertNotIn(marker, html)
+        from apps.registrar.journal_own_history import recorded_lessons
+        from apps.registrar.journal_own_history_grid import build, load_lessons
+
+        lessons = load_lessons(recorded_lessons(self.teacher).filter(offering=offering), offering, self.teacher)
+        columns = build(offering, self.teacher, lessons)["columns"]
+        self.assertTrue(all(not (c["time"] or c["lesson_recorded"] or c["marks_recorded"]) for c in columns))
+
+    def test_staff_broad_view_shows_time_and_recorded_moments(self):
+        offering = self.scenario()
+        html = self.get(offering, self.org.owner, teacher=str(self.teacher.pk)).content.decode()
+        for marker in ("09:00–10:20", ">Vaxt<", ">Yazılıb<", "Son qeyd:", "Dərs:"):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, html)
+
+    def test_broad_view_by_the_journals_own_teacher_hides_timing(self):
+        offering = self.scenario()  # offering.instructor = self.other → a journal teacher, not staff
+        html = self.get(offering, self.other, teacher=str(self.teacher.pk)).content.decode()
+        self.assertIn("Müəllimin yazdığı hissə", html)
+        for marker in self.TIMING_MARKERS:
+            with self.subTest(marker=marker):
+                self.assertNotIn(marker, html)
+
+    def test_imported_marker_stays_for_everyone(self):
+        offering = self.offering(instructor=self.other)
+        self.lesson(offering, instructor=self.teacher, topic="Imported lesson")  # created_by NULL → old system
+        self.assertIn("Köhnə sistemdən", self.get(offering).content.decode())
+        self.assertIn(
+            "Köhnə sistemdən", self.get(offering, self.org.owner, teacher=str(self.teacher.pk)).content.decode()
+        )
 
     # ── kind filter ───────────────────────────────────────────────────────
     def test_kind_filter_tabs_only_present_kinds(self):

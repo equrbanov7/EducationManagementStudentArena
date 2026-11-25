@@ -105,7 +105,11 @@ def detail(request, offering):
     )
     if not lessons:
         raise Http404
-    context = build(offering, teacher, lessons, kind=(request.GET.get("kind") or "").strip())
+    # Owner 2026-11-17: lesson time / «Yazılıb» moments are staff-only — never on the teacher's own view.
+    from .journal_lesson_timing import show_lesson_timing
+
+    timing = broad and show_lesson_timing(request.user, offering)
+    context = build(offering, teacher, lessons, kind=(request.GET.get("kind") or "").strip(), timing=timing)
     back = _back_url(request, teacher, broad)
     base = {"own_history": "1", **({"teacher": teacher.pk} if broad else {})}
     if request.GET.get("next") and back == request.GET.get("next"):

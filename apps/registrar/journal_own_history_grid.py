@@ -134,8 +134,11 @@ def _rows(shown, subject_id) -> list:
     return ordered
 
 
-def build(offering, subject, lessons, *, kind="") -> dict:
-    """Template context for the grid, the kind tabs and the «Nə vaxt, harada yazılıb» table."""
+def build(offering, subject, lessons, *, kind="", timing=False) -> dict:
+    """Template context for the grid, the kind tabs and the «Nə vaxt, harada yazılıb» table.
+
+    ``timing`` — start–end time and the «Yazılıb» moments. Owner 2026-11-17: staff only, never the teacher's own
+    view (``journal_lesson_timing.show_lesson_timing``); when ``False`` nothing time-related leaves this module."""
     practical = offering_is_practical(offering)
     labels = {value: kind_label(value, practical=practical) for value in KINDS}
     kinds_present = [value for value in KINDS if any(lesson.kind == value for lesson in lessons)]
@@ -149,16 +152,17 @@ def build(offering, subject, lessons, *, kind="") -> dict:
     columns = []
     for lesson in shown:
         own_stamps = [mark.updated_at for mark in lesson.author_marks if mark.entered_by_id == subject_id]
+        own_stamps = own_stamps if timing else []
         columns.append(
             {
                 "lesson": lesson,
                 "short": _short_kind(lesson.kind, practical),
                 "label": labels.get(lesson.kind, lesson.kind),
                 "section": _section(lesson, offering),
-                "time": journal_lesson_timing.time_range(lesson),
+                "time": journal_lesson_timing.time_range(lesson) if timing else "",
                 "room": journal_lesson_timing.room_text(lesson),
                 "role": _role(lesson, subject_id),
-                "lesson_recorded": _stamp(lesson.created_at) if lesson.created_by_id == subject_id else "",
+                "lesson_recorded": _stamp(lesson.created_at) if timing and lesson.created_by_id == subject_id else "",
                 "marks_recorded": _stamp(max(own_stamps)) if own_stamps else "",
                 "imported": journal_lesson_timing.is_imported(lesson),
                 "cells": sum(1 for _mark in lesson.author_marks),
@@ -170,6 +174,7 @@ def build(offering, subject, lessons, *, kind="") -> dict:
         "selected_kind": kind,
         "columns": columns,
         "rows": _rows(shown, subject_id),
+        "show_timing": timing,
         "has_unknown_cells": any(mark.entered_by_id is None for lesson in shown for mark in lesson.author_marks),
     }
 
