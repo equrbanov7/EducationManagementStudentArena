@@ -21,7 +21,7 @@ from django.core.validators import validate_email
 from django.db import transaction
 from django.utils.translation import pgettext
 
-from apps.accounts.identity import canonical_identity
+from apps.accounts.identity import canonical_identity, claim_placeholder_email
 from apps.audit.public import log_action
 from core.constants import AuditAction, OrgUnitType
 
@@ -29,7 +29,7 @@ from . import create as create_mod
 from . import fin_claims
 from .parsing import read_rows as _read_rows
 from .spec import Column, normalize_header
-from .validate import PLACEHOLDER_DOMAIN, IntakeContext, RowPlan, _parse_date, _parse_gender, _text, _validate_identity
+from .validate import IntakeContext, RowPlan, _parse_date, _parse_gender, _text, _validate_identity
 
 _CTX = "teacher_intake"
 
@@ -204,9 +204,8 @@ def _validate_credentials(plan: RowPlan, row: dict, context: IntakeContext) -> b
         context.existing_codes.add(code)
     plan.username = context.claim_username(create_mod.username_base(create_mod.KIND_TEACHER, code=code, fin=plan.fin))
     email = _text(row.get("email"))
-    placeholder = "intake.%s@%s" % (plan.fin.lower(), PLACEHOLDER_DOMAIN)
-    if not email:
-        plan.email = placeholder
+    if not email:  # Yer-tutucu bazada/faylda tutulubsa ``intake.<fin>.2@…`` (bax ``claim_placeholder_email``).
+        plan.email = claim_placeholder_email("intake." + plan.fin, context.seen_emails)
         plan.warnings.append(pgettext(_CTX, "E-poçt yoxdur — placeholder yazılır (ilk girişdə istifadəçi özü yazır)."))
     else:
         try:
@@ -216,7 +215,7 @@ def _validate_credentials(plan: RowPlan, row: dict, context: IntakeContext) -> b
             return False
         key = canonical_identity(email)
         if key in context.existing_emails or key in context.seen_emails:
-            plan.email = placeholder
+            plan.email = claim_placeholder_email("intake." + plan.fin, context.seen_emails)
             plan.warnings.append(pgettext(_CTX, "E-poçt artıq istifadə olunur — placeholder yazılır."))
         else:
             context.seen_emails.add(key)

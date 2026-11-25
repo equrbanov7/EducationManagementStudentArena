@@ -246,7 +246,7 @@ class ChairTeacherResolver:
         if not self.apply:
             preview = get_user_model()(username=username, first_name=name.first, last_name=name.last)
             return TeacherResult(status, user=preview, display=name.display, candidates=namesakes, flags=flags)
-        from ...identity import PLACEHOLDER_EMAIL_DOMAIN
+        from ...identity import claim_placeholder_email
 
         user, _password = create_account(
             organization=self.organization,
@@ -255,7 +255,7 @@ class ChairTeacherResolver:
                 "username": username,
                 "first_name": name.first,
                 "last_name": name.last,
-                "email": f"{EMAIL_PREFIX}.{username}@{PLACEHOLDER_EMAIL_DOMAIN}",
+                "email": claim_placeholder_email(f"{EMAIL_PREFIX}.{username}"),
                 "fin": None,  # sahib: FİN olmasa da olar — ilk girişdə «Məcburi profil məlumatları» istəyir
                 "patronymic": name.patronymic,
                 "gender": "",

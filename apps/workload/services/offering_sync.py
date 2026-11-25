@@ -49,6 +49,13 @@ from .plan_calendar import PeriodResolver, ensure_row_periods
 
 logger = logging.getLogger(__name__)
 
+
+def _subgroup_parent_id(group) -> str:
+    """Reyestr bölgüsünün izi (``settings.parent_group``) — qrup bölünmüş ana qrupun alt qrupudursa."""
+    raw = group.settings if isinstance(getattr(group, "settings", None), dict) else {}
+    return str(raw.get("parent_group") or "")
+
+
 #: ``registrar.integrity.INSTRUCTOR_PERMISSION`` — açılış müəllimi bal yaza bilməlidir.
 INSTRUCTOR_PERMISSION = "grade.input"
 
@@ -66,6 +73,8 @@ COUNTER_KEYS = (
     "skipped",
     "not_created",
     "inactive_skipped",
+    # Sahib 2026-11-08: bölünmüş alt qrupun passiv jurnalı (tələbələr ana jurnalda) — yük sətri ana jurnala düşmür.
+    "inactive_subgroup_journal",
     "elective_pending",
     # 2026-10-15: tapşırıqdakı rəsmi seçmə blok seçimi (bax :mod:`.offering_electives`).
     "elective_from_task",
@@ -383,6 +392,16 @@ class _Sync(SyncWrites, ElectiveFlow):
                 continue
             if not offering.is_active:
                 self.counters["inactive_skipped"] += 1
+                if _subgroup_parent_id(entry["group"]):
+                    # Alt qrupun jurnalı ana jurnala qaytarılıb (seminar alt qrupu) — bu sətrin müəllimi heç bir
+                    # jurnala yazılmır; kafedra/RİM ana jurnalın seminar payını əl ilə təyin etməlidir.
+                    self.counters["inactive_subgroup_journal"] += 1
+                    logger.warning(
+                        "offering_sync: inactive subgroup offering %s (group %s) — load row not applied; "
+                        "students are in the parent journal",
+                        offering.pk,
+                        entry["group"].pk,
+                    )
                 continue
             self.offering_ids.append(str(offering.pk))
             previous_id = UNKNOWN if self.previous is UNKNOWN else self.previous.get(key)

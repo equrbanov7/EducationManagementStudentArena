@@ -1,0 +1,568 @@
+"""Ana qrup ↔ alt qrup köçürmələri ana jurnalı TƏK jurnal saxlayır (sahib 2026-11-07/08).
+
+Hər köçürmə ayrıca tranzaksiyadır (DB sübutu: bir qeyd × bir tranzaksiya) — ona görə ``TransactionTestCase``.
+
+* bölmə (``keep_parent_journal=True``) → ana sətir aktiv, varis tarixçədə, boş varis açılışı passiv;
+* ana qrupa geri qayıdış «tarixi qeydiyyat var» xətası vermir, seminar yeri boşalır;
+* qardaş alt qrupa keçid seminar yerini dəyişir;
+* yenidən alt qrupa (adi köçürmə) — passiv alt qrup açılışına düşmür, ana jurnalda qalır;
+* bayraqsız adi köçürmə köhnə qayda ilə gedir (mövcud alətlər dəyişmir);
+* köhnə forma zənciri A → A1 → A2 → A geri qaytarılır, ailədən kənar zəncir isə yenə yoxlama tələb edir.
+"""
+
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
+from django.db import connection
+from django.test import TransactionTestCase
+
+from apps.audit.models import AuditLog
+from apps.organizations.models import AcademicPeriod, Membership, Organization, OrgUnit
+from apps.registrar import services, transfer
+from apps.registrar.models import (
+    CourseOffering,
+    Curriculum,
+    CurriculumSubject,
+    Enrollment,
+    EnrollmentKind,
+    Lesson,
+    Program,
+    SeminarGroup,
+    StudentAcademicRecord,
+    Subject,
+)
+from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType
+from core.rls import bypass_rls
+
+User = get_user_model()
+
+
+class SubgroupParentJournalTransferTest(TransactionTestCase):
+    def setUp(self):
+        if connection.vendor != "postgresql":
+            self.skipTest("PostgreSQL group-transfer evidence required")
+        self.owner = User.objects.create_user("spj_owner", "spj_owner@qku.edu.az", "pw")
+        with bypass_rls():
+            self.org = Organization.objects.create(
+                name="SPJ Univ",
+                slug="spj-univ",
+                org_type=OrganizationType.UNIVERSITY,
+                owner=self.owner,
+                status="active",
+                is_active=True,
+            )
+            self.parent = OrgUnit.objects.create(
+                organization=self.org, name="KM", slug="spj-km", unit_type=OrgUnitType.GROUP
+            )
+            self.subs = [
+                OrgUnit.objects.create(
+                    organization=self.org,
+                    name=f"KM-{index}",
+                    slug=f"spj-km-{index}",
+                    unit_type=OrgUnitType.GROUP,
+                    settings={"parent_group": str(self.parent.pk)},
+                )
+                for index in (1, 2)
+            ]
+            self.other = OrgUnit.objects.create(
+                organization=self.org, name="Başqa", slug="spj-other", unit_type=OrgUnitType.GROUP
+            )
+            self.period = AcademicPeriod.objects.create(
+                organization=self.org,
+                name="P",
+                period_type=AcademicPeriodType.SEMESTER,
+                academic_year="2026/2027",
+                start_date="2026-09-15",
+                end_date="2027-01-31",
+                is_current=True,
+            )
+            program = Program.objects.create(organization=self.org, code="KM", name="Kompüter mühəndisliyi")
+            curriculum = Curriculum.objects.create(organization=self.org, program=program, admission_year=2024)
+            self.subject = Subject.objects.create(organization=self.org, code="DR101", name="Diskret riyaziyyat")
+            self.student = User.objects.create_user("spj_student", "spj_student@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=self.student,
+                organization=self.org,
+                role=self.org.roles.get(name="student"),
+                is_primary=True,
+                is_active=True,
+            )
+            self.record = StudentAcademicRecord.objects.create(
+                organization=self.org,
+                student=self.student,
+                program=program,
+                curriculum=curriculum,
+                group=self.parent,
+                admission_year=2024,
+            )
+            services.enroll_student_in_subject(
+                record=self.record, subject=self.subject, period=self.period, kind=EnrollmentKind.MANDATORY
+            )
+            self.parent_row = Enrollment.objects.get(student=self.student, offering__group=self.parent)
+
+    def _move(self, group, **options):
+        with bypass_rls():
+            return transfer.transfer_student_group(
+                record=self.record, new_group=group, period=self.period, by_user=self.owner, reason="QA", **options
+            )
+
+    def _refresh(self):
+        with bypass_rls():
+            self.record.refresh_from_db()
+            self.parent_row.refresh_from_db()
+
+    def _number(self, unit):
+        with bypass_rls():
+            return SeminarGroup.objects.get(offering=self.parent_row.offering, unit=unit).number
+
+    def _enrolled(self):
+        with bypass_rls():
+            return list(Enrollment.objects.filter(student=self.student, status=Enrollment.Status.ENROLLED))
+
+    def test_split_keeps_parent_row_and_retires_empty_successor_offering(self):
+        result = self._move(self.subs[0], keep_parent_journal=True)
+        self._refresh()
+        self.assertEqual(result["kept"], 1)
+        self.assertEqual(self.record.group_id, self.subs[0].pk)
+        self.assertEqual(self.parent_row.status, Enrollment.Status.ENROLLED)
+        self.assertIsNone(self.parent_row.superseded_by_id)
+        self.assertEqual(self.parent_row.source_group_id, self.subs[0].pk)
+        self.assertEqual(self.parent_row.seminar_group, self._number(self.subs[0]))
+        self.assertEqual(self._enrolled(), [self.parent_row])
+        with bypass_rls():
+            shell = CourseOffering.objects.get(group=self.subs[0])
+            successor = Enrollment.objects.get(offering=shell)
+            self.assertFalse(shell.is_active)
+            self.assertIsNone(shell.instructor_id)
+            self.assertEqual(successor.status, Enrollment.Status.DROPPED)
+            self.assertEqual(successor.superseded_by_id, self.parent_row.pk)
+            self.assertTrue(
+                AuditLog.objects.filter(
+                    resource_type="registrar.subgroup_parent_journal", resource_id=str(self.record.pk)
+                ).exists()
+            )
+
+    def test_move_back_to_parent_works_and_clears_seminar_place(self):
+        self._move(self.subs[0], keep_parent_journal=True)
+        self._move(self.parent)  # «Qrupu dəyiş» — bayraqsız adi köçürmə
+        self._refresh()
+        self.assertEqual(self.record.group_id, self.parent.pk)
+        self.assertEqual(self.parent_row.status, Enrollment.Status.ENROLLED)
+        self.assertIsNone(self.parent_row.seminar_group)
+        self.assertEqual(self._enrolled(), [self.parent_row])
+
+    def test_sibling_move_switches_seminar_place(self):
+        self._move(self.subs[0], keep_parent_journal=True)
+        self._move(self.subs[1])
+        self._refresh()
+        self.assertEqual(self.record.group_id, self.subs[1].pk)
+        self.assertEqual(self.parent_row.status, Enrollment.Status.ENROLLED)
+        self.assertEqual(self.parent_row.seminar_group, self._number(self.subs[1]))
+        self.assertEqual(self._enrolled(), [self.parent_row])
+
+    def test_plain_move_into_retired_subgroup_offering_stays_in_parent(self):
+        self._move(self.subs[0], keep_parent_journal=True)
+        self._move(self.parent)
+        self._move(self.subs[0])  # adi köçürmə: alt qrupun açılışı passivdir → ana jurnal
+        self._refresh()
+        self.assertEqual(self.record.group_id, self.subs[0].pk)
+        self.assertEqual(self.parent_row.status, Enrollment.Status.ENROLLED)
+        self.assertEqual(self.parent_row.seminar_group, self._number(self.subs[0]))
+        self.assertEqual(self._enrolled(), [self.parent_row])
+
+    def test_plain_transfer_to_subgroup_keeps_existing_rule(self):
+        result = self._move(self.subs[0])
+        self._refresh()
+        self.assertEqual(result["kept"], 0)
+        self.assertEqual(self.parent_row.status, Enrollment.Status.DROPPED)
+        self.assertEqual(self.parent_row.superseded_by.offering.group_id, self.subs[0].pk)
+        with bypass_rls():
+            self.assertTrue(CourseOffering.objects.get(group=self.subs[0]).is_active)
+
+    def test_old_shape_chain_back_to_parent_reactivates_parent_row(self):
+        self._move(self.subs[0])
+        self._move(self.subs[1])
+        self._move(self.parent)
+        self._refresh()
+        self.assertEqual(self.record.group_id, self.parent.pk)
+        self.assertEqual(self.parent_row.status, Enrollment.Status.ENROLLED)
+        self.assertIsNone(self.parent_row.superseded_by_id)
+        with bypass_rls():
+            current = Enrollment.objects.get(student=self.student, offering__group=self.subs[1])
+        self.assertEqual(current.status, Enrollment.Status.DROPPED)
+        self.assertEqual(current.superseded_by_id, self.parent_row.pk)
+        self.assertEqual(self._enrolled(), [self.parent_row])
+
+    def test_chain_outside_family_still_requires_review(self):
+        self._move(self.subs[0])
+        self._move(self.other)
+        with self.assertRaises(ValidationError):
+            self._move(self.parent)
+        self._refresh()
+        self.assertEqual(self.record.group_id, self.other.pk)
+
+    # ── Review PR #472 ────────────────────────────────────────────────────────────────────────────────────────────
+
+    def _second_student(self, username, group):
+        with bypass_rls():
+            user = User.objects.create_user(username, f"{username}@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=user,
+                organization=self.org,
+                role=self.org.roles.get(name="student"),
+                is_primary=True,
+                is_active=True,
+            )
+            return StudentAcademicRecord.objects.create(
+                organization=self.org,
+                student=user,
+                program=self.record.program,
+                curriculum=self.record.curriculum,
+                group=group,
+                admission_year=2024,
+            )
+
+    def _rows(self, student):
+        with bypass_rls():
+            return {
+                (row.offering.group_id, row.status, row.offering.is_active)
+                for row in Enrollment.objects.filter(student=student).select_related("offering")
+            }
+
+    def test_leaving_family_after_split_carries_parent_journal_rows(self):
+        self._move(self.subs[0], keep_parent_journal=True)
+        result = self._move(self.other)
+        self._refresh()
+        self.assertEqual(self.record.group_id, self.other.pk)
+        self.assertEqual(result["moved"], 1)
+        self.assertEqual(self.parent_row.status, Enrollment.Status.DROPPED)
+        self.assertEqual(self.parent_row.superseded_by.offering.group_id, self.other.pk)
+        enrolled = self._enrolled()
+        self.assertEqual(len(enrolled), 1)
+        with bypass_rls():
+            self.assertEqual(enrolled[0].offering.group_id, self.other.pk)
+            audit = AuditLog.objects.filter(
+                resource_type="registrar.subgroup_parent_journal", resource_id=str(self.record.pk)
+            ).latest("created_at")
+        self.assertEqual(audit.changes["family_carried_enrollment_ids"], [str(self.parent_row.pk)])
+
+    def test_coming_back_from_outside_returns_to_parent_journal(self):
+        self._move(self.subs[0], keep_parent_journal=True)
+        self._move(self.other)
+        self._move(self.subs[0])  # B → A1: A1-in açılışı passivdir → ana jurnal
+        self._refresh()
+        self.assertEqual(self.record.group_id, self.subs[0].pk)
+        self.assertEqual(self.parent_row.status, Enrollment.Status.ENROLLED)
+        self.assertEqual(self.parent_row.seminar_group, self._number(self.subs[0]))
+        self.assertEqual(self._enrolled(), [self.parent_row])
+
+    def test_outside_student_entering_split_subgroup_lands_in_parent_journal(self):
+        self._move(self.subs[0], keep_parent_journal=True)
+        newcomer = self._second_student("spj_new", self.other)
+        with bypass_rls():
+            services.enroll_student_in_subject(
+                record=newcomer, subject=self.subject, period=self.period, kind=EnrollmentKind.MANDATORY
+            )
+            result = transfer.transfer_student_group(
+                record=newcomer, new_group=self.subs[0], period=self.period, by_user=self.owner, reason="QA"
+            )
+            row = Enrollment.objects.get(student=newcomer.student, status=Enrollment.Status.ENROLLED)
+        self.assertEqual(result["kept"], 1)
+        self.assertEqual(row.offering_id, self.parent_row.offering_id)
+        self.assertEqual(row.source_group_id, self.subs[0].pk)
+        self.assertEqual(row.seminar_group, self._number(self.subs[0]))
+        self.assertIsNotNone(row.added_at)
+        self.assertNotIn((self.subs[0].pk, Enrollment.Status.ENROLLED, False), self._rows(newcomer.student))
+
+    def test_mandatory_enrollment_of_split_subgroup_student_uses_parent_journal(self):
+        self._move(self.subs[0], keep_parent_journal=True)
+        newcomer = self._second_student("spj_mand", self.subs[0])
+        with bypass_rls():
+            row, created = services.enroll_student_in_subject(
+                record=newcomer,
+                subject=self.subject,
+                period=self.period,
+                kind=EnrollmentKind.MANDATORY,
+                prefer_parent_journal=True,
+            )
+        self.assertTrue(created)
+        self.assertEqual(row.offering_id, self.parent_row.offering_id)
+        self.assertEqual(row.source_group_id, self.subs[0].pk)
+        self.assertEqual(row.seminar_group, self._number(self.subs[0]))
+
+    def test_split_into_subgroup_with_live_own_journal_is_refused(self):
+        with bypass_rls():
+            own = CourseOffering.objects.create(
+                organization=self.org, subject=self.subject, period=self.period, group=self.subs[0]
+            )
+            Lesson.objects.create(organization=self.org, offering=own, date=self.period.start_date, kind="lecture")
+        with self.assertRaises(ValidationError) as raised:
+            self._move(self.subs[0], keep_parent_journal=True)
+        self.assertIn("ayrıca aktiv jurnalı var", " ".join(raised.exception.messages))
+        self._refresh()
+        self.assertEqual(self.record.group_id, self.parent.pk)
+        self.assertEqual(self.parent_row.status, Enrollment.Status.ENROLLED)
+
+    # ── Review 2 PR #472 ──────────────────────────────────────────────────────────────────────────────────────────
+
+    def _active(self, student):
+        with bypass_rls():
+            return list(
+                Enrollment.objects.filter(student=student, status=Enrollment.Status.ENROLLED).select_related("offering")
+            )
+
+    def _link_seminar(self, unit, number):
+        """Alt qrup ana jurnalda artıq seminar alt qrupudur (birləşdirmə / seminar_groups_apply forması)."""
+        with bypass_rls():
+            SeminarGroup.objects.create(
+                organization=self.org, offering=self.parent_row.offering, number=number, name=unit.name, unit=unit
+            )
+
+    def test_entering_sibling_without_own_offering_uses_parent_journal(self):
+        self._move(self.subs[0], keep_parent_journal=True)
+        self._link_seminar(self.subs[1], 5)  # A2-nin açılışı yoxdur, amma ana jurnalda seminar alt qrupudur
+        newcomer = self._second_student("spj_a2", self.other)
+        with bypass_rls():
+            services.enroll_student_in_subject(
+                record=newcomer, subject=self.subject, period=self.period, kind=EnrollmentKind.MANDATORY
+            )
+            transfer.transfer_student_group(
+                record=newcomer, new_group=self.subs[1], period=self.period, by_user=self.owner, reason="QA"
+            )
+            self.assertFalse(CourseOffering.objects.filter(group=self.subs[1], is_active=True).exists())
+        active = self._active(newcomer.student)
+        self.assertEqual([row.offering_id for row in active], [self.parent_row.offering_id])
+        self.assertEqual(active[0].seminar_group, self._number(self.subs[1]))
+
+    def test_manually_removed_parent_row_is_not_silently_restored(self):
+        self._move(self.subs[0], keep_parent_journal=True)
+        newcomer = self._second_student("spj_rm", self.other)
+        with bypass_rls():
+            removed = Enrollment.objects.create(
+                organization=self.org,
+                student=newcomer.student,
+                offering=self.parent_row.offering,
+                kind=EnrollmentKind.MANDATORY,
+                status=Enrollment.Status.DROPPED,
+            )
+            services.enroll_student_in_subject(
+                record=newcomer, subject=self.subject, period=self.period, kind=EnrollmentKind.MANDATORY
+            )
+        with self.assertRaises(ValidationError) as raised:
+            with bypass_rls():
+                transfer.transfer_student_group(
+                    record=newcomer, new_group=self.subs[0], period=self.period, by_user=self.owner, reason="QA"
+                )
+        self.assertIn("tarixi qeydiyyat var", " ".join(raised.exception.messages))
+        with bypass_rls():
+            removed.refresh_from_db()
+            newcomer.refresh_from_db()
+        self.assertEqual(removed.status, Enrollment.Status.DROPPED)
+        self.assertEqual(newcomer.group_id, self.other.pk)
+
+    def test_out_and_back_into_sibling_moves_seminar_place(self):
+        self._move(self.subs[0], keep_parent_journal=True)
+        self._link_seminar(self.subs[1], 5)
+        self._move(self.other)
+        self._move(self.subs[1])  # A1 → B → A2
+        self._refresh()
+        self.assertEqual(self.record.group_id, self.subs[1].pk)
+        self.assertEqual(self.parent_row.status, Enrollment.Status.ENROLLED)
+        self.assertEqual(self.parent_row.seminar_group, self._number(self.subs[1]))
+        self.assertEqual(self._enrolled(), [self.parent_row])
+
+    def test_out_and_back_into_sibling_with_inactive_offering_moves_seminar_place(self):
+        other = self._second_student("spj_sib", self.parent)
+        with bypass_rls():
+            services.enroll_student_in_subject(
+                record=other, subject=self.subject, period=self.period, kind=EnrollmentKind.MANDATORY
+            )
+            transfer.transfer_student_group(
+                record=other,
+                new_group=self.subs[1],
+                period=self.period,
+                by_user=self.owner,
+                reason="QA",
+                keep_parent_journal=True,
+            )
+        self._move(self.subs[0], keep_parent_journal=True)
+        self._move(self.other)
+        self._move(self.subs[1])
+        self._refresh()
+        self.assertEqual(self.parent_row.seminar_group, self._number(self.subs[1]))
+        self.assertEqual(self._enrolled(), [self.parent_row])
+
+    def test_manual_seminar_place_survives_return(self):
+        self._move(self.subs[0], keep_parent_journal=True)
+        with bypass_rls():
+            SeminarGroup.objects.create(organization=self.org, offering=self.parent_row.offering, number=8, name="Əl")
+            Enrollment.objects.filter(pk=self.parent_row.pk).update(seminar_group=8)
+        self._move(self.other)
+        self._move(self.subs[0])
+        self._refresh()
+        self.assertEqual(self.parent_row.seminar_group, 8)
+
+    def test_audit_marks_temporary_reactivation_and_counts_carried_rows(self):
+        self._move(self.subs[0], keep_parent_journal=True)
+        with bypass_rls():
+            transfer.transfer_student_group(
+                record=self.record, new_group=self.other, period=self.period, by_user=self.owner, reason=""
+            )
+            out = AuditLog.objects.filter(resource_type="registrar.group_transfer").latest("created_at")
+        self.assertIn("(1 qeydiyyat tarixçəyə keçirildi)", out.reason)
+        self._move(self.subs[0])
+        with bypass_rls():
+            back = AuditLog.objects.filter(resource_type="registrar.group_transfer").latest("created_at")
+            shell_row = Enrollment.objects.get(student=self.student, offering__group=self.subs[0])
+        self.assertEqual(back.changes["temporarily_reactivated_ids"], [str(shell_row.pk)])
+        self.assertNotIn("reactivated_enrollment_ids", back.changes)
+        self.assertEqual(shell_row.status, Enrollment.Status.DROPPED)
+
+    def test_split_subgroup_elective_switch_drops_old_choice_in_parent(self):
+        with bypass_rls():
+            first = Subject.objects.create(organization=self.org, code="EX1", name="Seçmə X")
+            second = Subject.objects.create(organization=self.org, code="EY1", name="Seçmə Y")
+            for subject in (first, second):
+                CurriculumSubject.objects.create(
+                    organization=self.org,
+                    curriculum=self.record.curriculum,
+                    subject=subject,
+                    semester_number=1,
+                    is_elective=True,
+                    elective_group="SB9",
+                )
+                CourseOffering.objects.create(
+                    organization=self.org, subject=subject, period=self.period, group=self.parent
+                )
+        member = self._second_student("spj_el", self.subs[0])
+        for subject in (first, second):
+            with bypass_rls():
+                services.choose_group_elective(
+                    organization=self.org,
+                    group=self.subs[0],
+                    curriculum=self.record.curriculum,
+                    period=self.period,
+                    elective_group="SB9",
+                    subject=subject,
+                    decided_by=self.owner,
+                    enforce_window=False,
+                )
+        active = self._active(member.student)
+        self.assertEqual(
+            [(row.offering.subject_id, row.offering.group_id) for row in active], [(second.pk, self.parent.pk)]
+        )
+
+    # ── Review 3 PR #472 ──────────────────────────────────────────────────────────────────────────────────────────
+
+    def _two_electives(self):
+        with bypass_rls():
+            subjects = [
+                Subject.objects.create(organization=self.org, code=code, name=f"Seçmə {code}") for code in ("RX", "RY")
+            ]
+            for subject in subjects:
+                CurriculumSubject.objects.create(
+                    organization=self.org,
+                    curriculum=self.record.curriculum,
+                    subject=subject,
+                    semester_number=1,
+                    is_elective=True,
+                    elective_group="SB7",
+                )
+                CourseOffering.objects.create(
+                    organization=self.org, subject=subject, period=self.period, group=self.parent
+                )
+        return subjects
+
+    def _choose(self, group, subject):
+        with bypass_rls():
+            services.choose_group_elective(
+                organization=self.org,
+                group=group,
+                curriculum=self.record.curriculum,
+                period=self.period,
+                elective_group="SB7",
+                subject=subject,
+                decided_by=self.owner,
+                enforce_window=False,
+            )
+
+    def _statuses(self, student, subject):
+        with bypass_rls():
+            return list(
+                Enrollment.objects.filter(
+                    student=student, offering__subject=subject, offering__group=self.parent
+                ).values_list("status", flat=True)
+            )
+
+    def _parent_elective(self, subject):
+        with bypass_rls():
+            Enrollment.objects.create(
+                organization=self.org,
+                student=self.student,
+                offering=CourseOffering.objects.get(group=self.parent, subject=subject),
+                kind=EnrollmentKind.ELECTIVE,
+            )
+
+    def test_split_student_elective_switch_drops_old_parent_row(self):
+        first, second = self._two_electives()
+        self._parent_elective(first)  # ana qrupda X seçilib, sonra A → A1 bölmə
+        self._move(self.subs[0], keep_parent_journal=True)
+        self._choose(self.subs[0], first)
+        self._choose(self.subs[0], second)  # A1: X → Y
+        active = self._active(self.student)
+        self.assertEqual(
+            sorted((row.offering.subject_id, row.offering.group_id) for row in active if row.kind == "elective"),
+            [(second.pk, self.parent.pk)],
+        )
+
+    def test_sibling_mover_keeps_elective_when_old_subgroup_switches(self):
+        first, second = self._two_electives()
+        self._parent_elective(first)
+        self._move(self.subs[0], keep_parent_journal=True)
+        self._move(self.subs[1])  # A1 → A2: source_group A1 qalır (write-once)
+        self._choose(self.subs[1], first)
+        self._choose(self.subs[0], first)
+        self._choose(self.subs[0], second)  # A1: X → Y — A2 tələbəsinə toxunmamalıdır
+        self.assertEqual(self._statuses(self.student, first), [Enrollment.Status.ENROLLED])
+
+    def test_direct_member_moved_to_sibling_keeps_elective(self):
+        first, second = self._two_electives()
+        self._move(self.subs[0], keep_parent_journal=True)
+        member = self._second_student("spj_dm", self.subs[0])
+        self._choose(self.subs[0], first)  # ana jurnala, source_group = A1
+        with bypass_rls():
+            transfer.transfer_student_group(
+                record=member, new_group=self.subs[1], period=self.period, by_user=self.owner, reason="QA"
+            )
+        self._choose(self.subs[1], first)
+        self._choose(self.subs[0], second)
+        self.assertEqual(self._statuses(member.student, first), [Enrollment.Status.ENROLLED])
+
+    def test_returned_to_parent_student_keeps_elective(self):
+        first, second = self._two_electives()
+        self._parent_elective(first)
+        self._move(self.subs[0], keep_parent_journal=True)
+        self._move(self.parent)  # A1 → A
+        self._choose(self.subs[0], first)
+        self._choose(self.subs[0], second)
+        self.assertEqual(self._statuses(self.student, first), [Enrollment.Status.ENROLLED])
+
+    def test_plain_move_to_fresh_sibling_in_partially_split_family_keeps_old_rule(self):
+        other = self._second_student("spj_ps", self.parent)
+        with bypass_rls():
+            services.enroll_student_in_subject(
+                record=other, subject=self.subject, period=self.period, kind=EnrollmentKind.MANDATORY
+            )
+            transfer.transfer_student_group(
+                record=other,
+                new_group=self.subs[0],
+                period=self.period,
+                by_user=self.owner,
+                reason="QA",
+                keep_parent_journal=True,
+            )
+        result = self._move(self.subs[1])  # A → A2 (təzə), bayraqsız — «Tələbə əlavə et» / «Qrupu dəyiş»
+        self._refresh()
+        self.assertEqual(result["kept"], 0)
+        self.assertEqual(self.parent_row.status, Enrollment.Status.DROPPED)
+        with bypass_rls():
+            self.assertTrue(CourseOffering.objects.get(group=self.subs[1], subject=self.subject).is_active)

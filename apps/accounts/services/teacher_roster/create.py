@@ -35,7 +35,7 @@ from django.db.models.deletion import Collector, ProtectedError
 from core.audit import log_action
 from core.constants import AuditAction
 
-from ...identity import PLACEHOLDER_EMAIL_DOMAIN
+from ...identity import claim_placeholder_email
 from ..staff_roster import username_seed
 from .matching import STATUS_NOT_FOUND
 from .parsing import DEGREE_RANK, TITLE_RANK
@@ -160,7 +160,7 @@ def create_accounts(new_accounts, *, plan, actor, tag: str, keep_passwords: bool
                 "username": username,
                 "first_name": item.first,
                 "last_name": item.last,
-                "email": f"{EMAIL_PREFIX}.{username}@{PLACEHOLDER_EMAIL_DOMAIN}",
+                "email": claim_placeholder_email(f"{EMAIL_PREFIX}.{username}"),
                 "fin": None,  # Forma 7-də FİN yoxdur; sahə unikal + nullable — boş sətir toqquşardı
                 "patronymic": item.patronymic,
                 "gender": "",

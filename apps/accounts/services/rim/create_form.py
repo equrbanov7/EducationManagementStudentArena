@@ -31,11 +31,10 @@ from core import phone as phone_lib
 from core.constants import OrgUnitType
 from core.validators import validate_fin
 
-from ...identity import canonical_identity
+from ...identity import canonical_identity, claim_placeholder_email
 from ..intake import create as intake_create
 from ..intake.validate import (
     MAX_NAME_LENGTH,
-    PLACEHOLDER_DOMAIN,
     IntakeContext,
     normalize_text,
     parse_birth_date,
@@ -365,19 +364,21 @@ def _validate_credentials(draft: AccountDraft, data: dict, context: IntakeContex
         )
 
     email = normalize_text(data.get("email"))
-    placeholder = "intake.%s@%s" % ((fin or draft.values.get("username", "")).lower(), PLACEHOLDER_DOMAIN)
+    # Ad (``ad.soyad``) boş ola bilər, amma ``intake.ad.soyad@…`` adı dəyişmiş köhnə hesabda qala bilər (2026-11-25
+    # QA klon: 500) — yer-tutucu bazaya qarşı unikallaşdırılır: ``intake.ad.soyad.2@…`` (``claim_placeholder_email``).
+    placeholder_base = "intake." + (fin or draft.values.get("username", ""))
     if not email:
-        draft.values["email"] = placeholder
+        draft.values["email"] = claim_placeholder_email(placeholder_base)
         draft.warnings.append(pgettext(_CTX, "E-poçt yoxdur — placeholder yazılır (ilk girişdə istifadəçi özü yazır)."))
     else:
         try:
             validate_email(email)
         except ValidationError:
             _fail(draft, "email", pgettext(_CTX, "E-poçt formatı yanlışdır."))
-            draft.values["email"] = placeholder
+            draft.values["email"] = claim_placeholder_email(placeholder_base)
         else:
             if canonical_identity(email) in context.existing_emails:
-                draft.values["email"] = placeholder
+                draft.values["email"] = claim_placeholder_email(placeholder_base)
                 draft.warnings.append(pgettext(_CTX, "E-poçt artıq istifadə olunur — placeholder yazılır."))
             else:
                 draft.values["email"] = email

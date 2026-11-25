@@ -262,7 +262,25 @@ class ApprovalCreatesOfferingsTest(PlanOfferingBase):
         self.assertFalse(self.offerings(period=spring).exists())
         self.assertEqual(result["offerings"]["period_locked"], 1)
         self.assertEqual(result["offerings"]["inactive_skipped"], 1)
+        self.assertEqual(result["offerings"].get("inactive_subgroup_journal", 0), 0)
         self.assertFalse(Enrollment.objects.filter(offering__subject=cancelled_subject).exists())
+
+    def test_inactive_split_subgroup_journal_is_reported(self):
+        """Sahib 2026-11-08: bölünmüş alt qrupun passiv jurnalına düşən yük sətri ayrıca sayılır (səssiz itmir)."""
+        group = self.stack["group"]
+        parent = OrgUnit.objects.create(
+            organization=self.org, parent=group.parent, unit_type=OrgUnitType.GROUP, name="P2A ana", slug="p2a-ana"
+        )
+        OrgUnit.objects.filter(pk=group.pk).update(settings={**(group.settings or {}), "parent_group": str(parent.pk)})
+        subject = Subject.objects.create(organization=self.org, code="P2A-S", name="Alt qrup", ects=3)
+        CourseOffering.objects.create(
+            organization=self.org, subject=subject, period=self.stack["period"], group=group, is_active=False
+        )
+        task, _row = self.office_task()
+        make_row(task, {**self.stack, "subject": subject})
+        result = self.approve(task)
+        self.assertEqual(result["offerings"]["inactive_skipped"], 1)
+        self.assertEqual(result["offerings"]["inactive_subgroup_journal"], 1)
 
 
 class PeriodResolverTest(PlanOfferingBase):

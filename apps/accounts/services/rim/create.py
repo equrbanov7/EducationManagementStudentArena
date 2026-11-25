@@ -37,7 +37,7 @@ from __future__ import annotations
 import logging
 
 from django.conf import settings
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.utils.translation import pgettext
 
 from core.rate_limit import is_rate_limited, record_rate_limit_hit
@@ -70,6 +70,9 @@ RATE_LIMIT_SCOPE = "rim_create_account"
 
 #: Audit qeydinin (opsional) yuxarı həddi.
 MAX_NOTE_LENGTH = 300
+
+#: Kanonik e-poçt unikal indeksi (0013) — yarış/drift qalığı 500 yox, sahə xətası olur.
+EMAIL_UNIQUE_INDEX = "accounts_auth_email_canon_uniq"
 
 
 class RimCreateError(RimAccessError):
@@ -215,22 +218,14 @@ def create_account(actor: RimActor, *, kind: str, data: dict, request=None, note
         # Rol kataloqu natamamdır — bu, sahə xətası deyil, KONFİQURASİYA xətasıdır.
         raise RimCreateError(exc.code, exc.message, status=409) from exc
 
-    with transaction.atomic():
-        user, password = intake_create.create_account(
-            organization=organization,
-            kind=kind,
-            values=draft.values,
-            role=role,
-            actor=actor.user,
-            request=request,
-            student_targets=draft.targets or None,
-            group_name=draft.group_name,
-            specialization=draft.specialization,
-            scope_unit=draft.scope_unit,
-            audit_reason=_audit_reason(kind, note),
-            membership_title=draft.values.get("title", "") if kind != intake_create.KIND_STUDENT else "",
-            employee_id=draft.values.get("student_code", "") if kind != intake_create.KIND_STUDENT else "",
-        )
+    try:
+        with transaction.atomic():  # savepoint: IntegrityError yalnız bu bloku geri qaytarır
+            user, password = _create(organization, kind, draft, role, actor, request, note)
+    except IntegrityError as exc:
+        if EMAIL_UNIQUE_INDEX not in str(exc):
+            raise
+        message = pgettext(_CTX, "Bu e-poçt artıq başqa hesabdadır. Başqa ünvan yazın və ya boş saxlayın.")
+        raise field_error(message, {"email": message}, code="email_taken") from None
 
     record_rate_limit_hit(RATE_LIMIT_SCOPE, rate, *key_parts)
     logger.info(
@@ -250,6 +245,24 @@ def create_account(actor: RimActor, *, kind: str, data: dict, request=None, note
         "group": draft.group_name,
         "warnings": list(draft.warnings),
     }
+
+
+def _create(organization, kind, draft, role, actor, request, note):
+    return intake_create.create_account(
+        organization=organization,
+        kind=kind,
+        values=draft.values,
+        role=role,
+        actor=actor.user,
+        request=request,
+        student_targets=draft.targets or None,
+        group_name=draft.group_name,
+        specialization=draft.specialization,
+        scope_unit=draft.scope_unit,
+        audit_reason=_audit_reason(kind, note),
+        membership_title=draft.values.get("title", "") if kind != intake_create.KIND_STUDENT else "",
+        employee_id=draft.values.get("student_code", "") if kind != intake_create.KIND_STUDENT else "",
+    )
 
 
 __all__ = [
