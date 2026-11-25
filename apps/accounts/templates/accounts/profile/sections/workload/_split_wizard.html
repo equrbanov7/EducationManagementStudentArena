@@ -1,0 +1,89 @@
+{% load i18n %}
+{% comment %}
+«Bölgü sehrbazı» (sahib 2026-11-26: «necə bölmək lazım olduğu aydın deyil … imtahan yaratma forması kimi addımlı
+modal olsun») — `_workload_distribution.html` panelinin İÇİNDƏ. 5 addım: Qruplar → Seminar → Laboratoriya →
+Müəllimlər → Yoxla. Addımların məzmununu xarici JS çəkir (`workload_split_wizard*.js`); URL-lər data-atributlardadır.
+Hər idarəedici elementin `data-wl-wiz-*` seçicisi var (video təlimatı yazan alət onlarla klikləyir).
+{% endcomment %}
+<div class="modal fade wl-modal wl-wiz-modal" id="wlSplitWizard" tabindex="-1" aria-hidden="true" aria-labelledby="wlSplitWizardTitle"
+     data-wl-wiz-modal
+     data-state-url="{% url 'workload:split_wizard_state' %}"
+     data-save-url="{% url 'workload:split_wizard_save' %}"
+     data-journals-url="{% url 'workload:split_wizard_journals' %}">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="wl-wiz">
+        <aside class="wl-wiz__rail" aria-label="{% trans 'Sehrbazın addımları' context 'workload.split_wizard' %}">
+          <div class="wl-wiz__rail-head">
+            <h2 class="wl-wiz__title" id="wlSplitWizardTitle">{% trans "Bölgü sehrbazı" context "workload.split_wizard" %}</h2>
+            <p class="wl-wiz__subject" data-wl-wiz-subject></p>
+          </div>
+          <ol class="wl-wiz__steps">
+            <li><button type="button" class="wl-wiz__step is-active" data-wl-wiz-step-nav="groups" aria-current="step">
+              <span class="wl-wiz__sn" aria-hidden="true">1</span>
+              <span class="wl-wiz__stx"><span class="wl-wiz__st">{% trans "Qruplar" context "workload.split_wizard" %}</span><span class="wl-wiz__ss">{% trans "Hansı qrupları bölürük" context "workload.split_wizard" %}</span></span>
+            </button></li>
+            <li><button type="button" class="wl-wiz__step" data-wl-wiz-step-nav="seminar">
+              <span class="wl-wiz__sn" aria-hidden="true">2</span>
+              <span class="wl-wiz__stx"><span class="wl-wiz__st">{% trans "Seminar" context "workload.split_wizard" %}</span><span class="wl-wiz__ss">{% trans "Alt qruplar və tələbələr" context "workload.split_wizard" %}</span></span>
+            </button></li>
+            <li><button type="button" class="wl-wiz__step" data-wl-wiz-step-nav="lab">
+              <span class="wl-wiz__sn" aria-hidden="true">3</span>
+              <span class="wl-wiz__stx"><span class="wl-wiz__st">{% trans "Laboratoriya" context "workload.split_wizard" %}</span><span class="wl-wiz__ss">{% trans "Lab qrupları və tələbələr" context "workload.split_wizard" %}</span></span>
+            </button></li>
+            <li><button type="button" class="wl-wiz__step" data-wl-wiz-step-nav="teachers">
+              <span class="wl-wiz__sn" aria-hidden="true">4</span>
+              <span class="wl-wiz__stx"><span class="wl-wiz__st">{% trans "Müəllimlər" context "workload.split_wizard" %}</span><span class="wl-wiz__ss">{% trans "Hər bölməyə müəllim və saat" context "workload.split_wizard" %}</span></span>
+            </button></li>
+            <li><button type="button" class="wl-wiz__step" data-wl-wiz-step-nav="review">
+              <span class="wl-wiz__sn" aria-hidden="true">5</span>
+              <span class="wl-wiz__stx"><span class="wl-wiz__st">{% trans "Yoxla" context "workload.split_wizard" %}</span><span class="wl-wiz__ss">{% trans "Xülasə və təsdiq" context "workload.split_wizard" %}</span></span>
+            </button></li>
+          </ol>
+          <div class="wl-wiz__rail-foot">
+            <i class="fas fa-circle-info" aria-hidden="true"></i>
+            <span>{% trans "«Təsdiqlə» basılana qədər heç nə yadda saxlanmır — addımlar arasında rahat gedib-gələ bilərsiniz." context "workload.split_wizard" %}</span>
+          </div>
+        </aside>
+
+        <div class="wl-wiz__pane">
+          <div class="wl-wiz__head">
+            <div class="wl-wiz__head-tx">
+              <h3 class="wl-wiz__panel-title" data-wl-wiz-title></h3>
+              <p class="wl-wiz__panel-desc" data-wl-wiz-desc></p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" data-wl-wiz-close aria-label="{% trans 'Bağla' context 'workload.split_wizard' %}"></button>
+          </div>
+          <p class="wl-wiz__error" data-wl-wiz-error role="alert" hidden></p>
+          <div class="wl-wiz__body" data-wl-wiz-body>
+            <div class="wl-wiz__loading" data-wl-wiz-loading><i class="fas fa-spinner fa-spin" aria-hidden="true"></i> {% trans "Yüklənir…" context "workload.split_wizard" %}</div>
+            <section class="wl-wiz__panel" data-wl-wiz-panel="groups" hidden
+                     data-title="{% trans '1. Qrupları seçin' context 'workload.split_wizard' %}"
+                     data-desc="{% trans 'Bölmək istədiyiniz qrupu (və ya bir neçə qrupu) seçin. Reyestrdə alt qrupları (məs. 234 K1, 234 K2) olan qrup bunu nişanla göstərir.' context 'workload.split_wizard' %}"></section>
+            <section class="wl-wiz__panel" data-wl-wiz-panel="seminar" hidden
+                     data-title="{% trans '2. Seminar — neçə alt qrup?' context 'workload.split_wizard' %}"
+                     data-desc="{% trans 'Hər qrup üçün seminarın neçə alt qrupa bölündüyünü seçin, sonra tələbələri alt qruplara yerləşdirin. Mühazirə bütün qrupla keçir.' context 'workload.split_wizard' %}"></section>
+            <section class="wl-wiz__panel" data-wl-wiz-panel="lab" hidden
+                     data-title="{% trans '3. Laboratoriya — lab qrupları' context 'workload.split_wizard' %}"
+                     data-desc="{% trans 'Lab qrupları seminar alt qrupunun içində (hər alt qrup yenə bölünür) və ya ondan asılı olmadan qurula bilər. Hər tələbə bir lab qrupunda olur.' context 'workload.split_wizard' %}"></section>
+            <section class="wl-wiz__panel" data-wl-wiz-panel="teachers" hidden
+                     data-title="{% trans '4. Müəllimləri təyin edin' context 'workload.split_wizard' %}"
+                     data-desc="{% trans 'Hər sətir bir bölmədir: mühazirə, hər seminar alt qrupu, hər lab qrupu. Müəllim seçin; saat bölmənin planı ilə doldurulub.' context 'workload.split_wizard' %}"></section>
+            <section class="wl-wiz__panel" data-wl-wiz-panel="review" hidden
+                     data-title="{% trans '5. Yoxlayın və təsdiqləyin' context 'workload.split_wizard' %}"
+                     data-desc="{% trans 'Aşağıda nə yazılacağı görünür. Xəbərdarlıqları düzəldin, sonra «Təsdiqlə» basın.' context 'workload.split_wizard' %}"></section>
+          </div>
+          <div class="wl-wiz__foot">
+            <button type="button" class="wl-btn wl-btn--ghost" data-wl-wiz-back hidden><i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Geri" context "workload.split_wizard" %}</button>
+            <button type="button" class="wl-btn wl-btn--ghost" data-bs-dismiss="modal" data-wl-wiz-cancel>{% trans "Bağla" context "workload.split_wizard" %}</button>
+            <span class="wl-wiz__prog" data-wl-wiz-prog aria-live="polite"></span>
+            <div class="wl-wiz__foot-right">
+              <button type="button" class="wl-btn wl-btn--primary" data-wl-wiz-next>{% trans "Növbəti" context "workload.split_wizard" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></button>
+              <button type="button" class="wl-btn wl-btn--primary" data-wl-wiz-submit hidden><i class="fas fa-check" aria-hidden="true"></i> {% trans "Təsdiqlə" context "workload.split_wizard" %}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

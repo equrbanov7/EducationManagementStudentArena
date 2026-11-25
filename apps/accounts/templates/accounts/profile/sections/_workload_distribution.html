@@ -311,6 +311,8 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
   {% if workload_distribution_section.can_intensive %}{% include "accounts/profile/sections/workload/_intensive_modal.html" %}{% endif %}
   {# Sahib 2026-11-09: «bir fənn = bir kart» — axın (patok) və qrup bölgüsü modalları. #}
   {% include "accounts/profile/sections/workload/_card_pickers.html" %}
+  {# 2026-11-26: «Bölgü sehrbazı» — seminar / lab bölgüsü addım-addım (kartın «Bölüşdür» düyməsi açır). #}
+  {% include "accounts/profile/sections/workload/_split_wizard.html" %}
 
   {# ══ MODAL — sətir yaratma/redaktə ══════════════════════════════════ #}
   <div class="modal fade wl-modal" id="wlRowModal" tabindex="-1" aria-hidden="true" data-wl-row-modal>
@@ -385,6 +387,7 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
               <label class="wl-form__field"><span>{% trans "Tələbə sayı" context "accounts.workload" %}</span><input type="number" name="student_count" min="0" value="0"></label>
               <label class="wl-form__field"><span>{% trans "Birləşmə sayı" context "accounts.workload" %}</span><input type="number" name="union_count" min="0" value="1"></label>
               <label class="wl-form__field"><span>{% trans "Qrup/yarımqrup sayı" context "accounts.workload" %}</span><input type="number" name="subgroup_count" min="0" value="1"></label>
+              <label class="wl-form__field"><span>{% trans "Lab qrupu sayı" context "accounts.workload" %}</span><input type="number" name="lab_group_count" min="0" value="0" title="{% trans '0 — «Qrup/yarımqrup sayı» ilə eyni' context 'accounts.workload' %}"></label>
               <label class="wl-form__field"><span>{% trans "Mühazirə (plan)" context "accounts.workload" %}</span><input type="number" name="lecture_plan" min="0" value="0" data-wl-plan="lecture"></label>
               <label class="wl-form__field"><span>{% trans "Mühazirə (cəmi)" context "accounts.workload" %}</span><input type="number" name="lecture_total" min="0" value="0" data-wl-total="lecture"></label>
               <label class="wl-form__field"><span>{% trans "Seminar (plan)" context "accounts.workload" %}</span><input type="number" name="seminar_plan" min="0" value="0" data-wl-plan="seminar"></label>

@@ -41,6 +41,7 @@ ROW_SCALAR_FIELDS = (
     "student_count_text",
     "union_count",
     "subgroup_count",
+    "lab_group_count",
     "lecture_plan",
     "lecture_total",
     "seminar_plan",
@@ -71,6 +72,7 @@ _INT_FIELDS = {
     "student_count",
     "union_count",
     "subgroup_count",
+    "lab_group_count",
     "lecture_plan",
     "lecture_total",
     "seminar_plan",
@@ -199,7 +201,7 @@ def row_warnings(row: TeachingTaskRow) -> list[dict]:
     expected_seminar = int(row.seminar_plan or 0) * int(row.subgroup_count or 0)
     if row.seminar_plan and row.seminar_total != expected_seminar:
         warnings.append({"code": "seminar_total_mismatch", "expected": expected_seminar})
-    expected_lab = int(row.lab_plan or 0) * int(row.subgroup_count or 0)
+    expected_lab = int(row.lab_plan or 0) * row.lab_groups_total  # 2026-11-26: lab qrupu sayı ayrıca ola bilər
     if row.lab_plan and row.lab_total != expected_lab:
         warnings.append({"code": "lab_total_mismatch", "expected": expected_lab})
     computed = row.computed_total_hours

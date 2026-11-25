@@ -116,6 +116,7 @@
             student_count: row.student_count,
             union_count: row.union_count,
             subgroup_count: row.subgroup_count,
+            lab_group_count: row.lab_group_count,
             credits: row.credits,
         };
         Object.keys(row.hours || {}).forEach(function (name) {

@@ -103,12 +103,12 @@ xülasə və çekmecə məntiqi qalır. Göndəriş ortaq `teaching_office.js`-d
 çökmür — sadəcə bölmə init olunmur).{% endcomment %}
 <script src="{% static 'accounts/js/profile/workload_distribution_render.js' %}?v=20261109-cards"></script>
 {# 2026-11-09: fənn kartı render-i (`EMSWorkloadRender.cards`) — render modulundan SONRA, əsas moduldan ƏVVƏL. #}
-<script src="{% static 'accounts/js/profile/workload_distribution_cards.js' %}?v=20261119-clarity"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution_cards.js' %}?v=20261126-wizard"></script>
 {# 2026-11-19: yer saxlanması (işlənən kart, açıq sətirlər, sağ panel) + sağ paneldə müəllim axtarışı — əsas moduldan ƏVVƏL. #}
 <script src="{% static 'accounts/js/profile/workload_distribution_anchor.js' %}?v=20261119-clarity"></script>
 {# 2026-10-25: tənbəl yükləmə + müəllimə görə süzgəc — əsas moduldan ƏVVƏL (o, `EMSWorkloadList`-i null-safe oxuyur). #}
 <script src="{% static 'accounts/js/profile/workload_distribution_list.js' %}?v=20261109-cards"></script>
-<script src="{% static 'accounts/js/profile/workload_distribution_forms.js' %}?v=20261030-transfer"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution_forms.js' %}?v=20261126-wizard"></script>
 <script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20261119-clarity"></script>
 {# 2026-11-12: «Bölgünü təsdiqlə» dialoqu — natamam sətirlər + «Aydındır, Vakant saxla və təsdiqlə» (əsas moduldan SONRA). #}
 <script src="{% static 'accounts/js/profile/workload_distribution_confirm.js' %}?v=20261112-vacant"></script>
@@ -118,6 +118,11 @@ xülasə və çekmecə məntiqi qalır. Göndəriş ortaq `teaching_office.js`-d
 <script src="{% static 'accounts/js/profile/workload_distribution_amend.js' %}?v=20261109-cards"></script>
 {# 2026-11-09: axın (patok) və seminar/lab qrup bölgüsü seçiciləri — əsas və düzəliş modullarından SONRA. #}
 <script src="{% static 'accounts/js/profile/workload_distribution_pickers.js' %}?v=20261119-clarity"></script>
+{# 2026-11-26: «Bölgü sehrbazı» (kartın «Bölüşdür» düyməsi) — əsas modul + addım 1 + addım 2–3 + addım 4–5 (eyni ad sahəsi). #}
+<script src="{% static 'accounts/js/profile/workload_split_wizard.js' %}?v=20261126-wizard"></script>
+<script src="{% static 'accounts/js/profile/workload_split_wizard_groups.js' %}?v=20261126-wizard"></script>
+<script src="{% static 'accounts/js/profile/workload_split_wizard_sections.js' %}?v=20261126-wizard"></script>
+<script src="{% static 'accounts/js/profile/workload_split_wizard_units.js' %}?v=20261126-wizard"></script>
 {# 2026-10-25: «İntensiv kurs» dialoqu (sətir + bölgü + jurnal + qeydiyyat bir addımda). #}
 <script src="{% static 'accounts/js/profile/workload_intensive.js' %}?v=20261025-intensive2"></script>
 {% endif %}

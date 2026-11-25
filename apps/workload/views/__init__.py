@@ -15,6 +15,7 @@ from .distribution_api import (
 )
 from .intensive_api import intensive_lookup
 from .row_transfer_api import row_transfer, row_transfer_destinations
+from .split_wizard_api import split_wizard_journals, split_wizard_save, split_wizard_state
 from .streams_api import patok_streams
 from .teacher_api import my_export, my_rows
 
@@ -33,6 +34,9 @@ __all__ = [
     "row_transfer",
     "row_transfer_destinations",
     "rows",
+    "split_wizard_journals",
+    "split_wizard_save",
+    "split_wizard_state",
     "task",
     "teachers",
     "unassign_view",
