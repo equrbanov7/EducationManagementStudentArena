@@ -6,6 +6,7 @@ from django.urls import path
 
 from . import (
     group_actions,
+    group_student_history,
     group_students,
     members_export,
     members_registry_actions,
@@ -72,6 +73,12 @@ urlpatterns = [
     path("<slug:slug>/groups/action/", group_actions.group_action, name="group_action"),
     # Qrupun tələbə siyahısı (JSON, oxu) — «Qruplar» ekranındakı tələbə çekmecəsi.
     path("<slug:slug>/groups/<uuid:unit_id>/students/", group_students.group_students, name="group_students"),
+    # «Tarixçə» — tələbənin bütün jurnal statistikası, dondurulmuş qeydiyyatlar daxil (sahib 2026-11-25; oxu).
+    path(
+        "<slug:slug>/groups/<uuid:unit_id>/students/<uuid:record_id>/history/",
+        group_student_history.group_student_history,
+        name="group_student_history",
+    ),
     path(
         "<slug:slug>/groups/<uuid:unit_id>/students/candidates/",
         group_students.group_student_candidates,

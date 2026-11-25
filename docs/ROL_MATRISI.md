@@ -319,6 +319,25 @@ mövcud tenantlar: miqrasiya `organizations/0086_tutor_group_circle`; testlər:
 QƏSDƏN verilməyən: `student.movement` (akademik məzuniyyət, xaric, bərpa — dekanlıq / TXM qərarı),
 `workload.distribute` (bütün yük bölgüsü).
 
+## Əcnəbi tələbələrlə iş şöbəsi — 2026-11-25 (əl ilə qeyd)
+
+Rollar `foreign_students_head` (55) / `foreign_students_staff` (50), UNIT; şablon
+`apps/organizations/default_roles_foreign_office.py`, mövcud tenantlar `organizations/0087`.
+
+- **Əhatə:** hər əcnəbi QRUPU üçün ayrıca üzvlük (`scope_unit` = qrup). Oxu əhatəsi fakültəyə GENİŞLƏNMİR
+  (`scoping_exact.py`) — «Lifelong» fakültəsinin digər qrupları görünmür.
+- **Açarlar:** proqram koordinatorunun yekun dəsti − `workload.*`, `application.handle`; ＋ `student.movement`
+  (dondur / uzaqlaşdır / bərpa / məzun et), `user.import` (tələbə yaratma — yalnız öz qruplarına, `intake/scope.py`),
+  `journal.view`, `grade.view`.
+- **Qrup növü** (`settings.group_kind`, `group_kind.py`): «Əcnəbi tələbələr qrupu» seçiləndə şöbəyə əhatə
+  avtomatik verilir; köhnə qruplarda adında «əcnəbi» olan qrup əcnəbi sayılır. Əl ilə sinxron:
+  `manage.py sync_foreign_students_office --org qku [--apply]`.
+- **Əcnəbi qrupunda:** «Tələbə əlavə et» namizədləri bütün universitetdəndir; başqa bölmənin tələbəsi yalnız
+  «əlavə olaraq» (məcburi köçürmə aktorun öz əhatəsindədir). Müəllim eyni saatda bir neçə əcnəbi qrupunda dərs keçə
+  bilir (`registrar/foreign_parallel.py` — cədvəl toqquşması deyil).
+- **Hamıya (açara görə):** qrup çekmecəsində «Tarixçə» (`student.records_view`; dondurulmuş qeydiyyatlar daxil,
+  «dondurulana qədər bal»), «Məzun et» və «Qrupu məzun et» (`student.movement`).
+
 ## Tələlər (skriptdə həll olunub — silməyin)
 
 1. **`ALLOWED_HOSTS`.**  `django.test.Client` `testserver` host-u ilə gəlir;

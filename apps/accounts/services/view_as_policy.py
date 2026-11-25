@@ -196,6 +196,9 @@ ROLE_FILTER_MAP = {
         # Monitorinq şöbəsi (sahib 2026-11-19) — «Əməkdaşlar» süzgəcində HƏDƏF; view-as AKTORU deyil (keyfiyyət kimi).
         "monitoring_head",
         "monitoring_staff",
+        # Əcnəbi tələbələrlə iş şöbəsi (sahib 2026-11-25) — «Əməkdaşlar» süzgəcində HƏDƏF.
+        "foreign_students_head",
+        "foreign_students_staff",
     },
 }
 

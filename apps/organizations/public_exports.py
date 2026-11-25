@@ -16,6 +16,7 @@ from .group_education_form import chain_names as group_chain_names  # noqa: F401
 from .group_education_form import education_form_from_group_name  # noqa: F401
 from .group_education_form import group_rule_form  # noqa: F401
 from .group_education_form import rule_form_for as group_rule_form_for  # noqa: F401
+from .group_kind import foreign_group_ids  # noqa: F401
 from .groups_registry import build_groups_registry  # noqa: F401
 from .groups_registry import student_record_scope_q  # noqa: F401
 from .holidays import HolidayError  # noqa: F401
@@ -154,6 +155,7 @@ __all__ = [
     "disabled_sections",
     "drop_request_memberships",
     "faculty_read_scope",
+    "foreign_group_ids",
     "get_active_memberships",
     "get_default_roles_for_org_type",
     "get_permission_label",

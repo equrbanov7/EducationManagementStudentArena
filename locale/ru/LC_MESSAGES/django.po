@@ -121357,3 +121357,225 @@ msgid ""
 msgstr ""
 "Этот e-mail уже принадлежит другой учётной записи. Укажите другой адрес или "
 "оставьте поле пустым."
+
+msgctxt "accounts.group_history"
+msgid "Akademik məzuniyyət"
+msgstr "Академический отпуск"
+
+msgctxt "accounts.group_history"
+msgid "Akademik məzuniyyət əmri"
+msgstr "Приказ об академическом отпуске"
+
+msgctxt "accounts.group_history"
+msgid "Bal sayı"
+msgstr "Кол-во оценок"
+
+msgctxt "accounts.group_history"
+msgid "Bu tələbənin jurnal qeydi yoxdur."
+msgstr "У этого студента нет записей в журнале."
+
+msgctxt "accounts.group_history"
+msgid "Bütün semestrlərin jurnal statistikası — dondurulmuş və köçürülmüş qeydiyyatlar da daxildir."
+msgstr "Статистика журнала за все семестры — включая замороженные и переведённые записи."
+
+msgctxt "accounts.group_history"
+msgid "Dondurulana qədər bal"
+msgstr "Оценки до заморозки"
+
+msgctxt "accounts.group_history"
+msgid "Dondurulub"
+msgstr "Заморожено"
+
+msgctxt "accounts.group_history"
+msgid "Fənn"
+msgstr "Дисциплина"
+
+msgctxt "accounts.group_history"
+msgid "Hərəkət əmri yoxdur."
+msgstr "Приказов о движении нет."
+
+msgctxt "accounts.group_history"
+msgid "Hərəkət əmrləri"
+msgstr "Приказы о движении"
+
+msgctxt "accounts.group_history"
+msgid "Jurnal qrupu"
+msgstr "Группа журнала"
+
+msgctxt "accounts.group_history"
+msgid "Məzun"
+msgstr "Выпускник"
+
+msgctxt "accounts.group_history"
+msgid "Orta bal"
+msgstr "Средний балл"
+
+msgctxt "accounts.group_history"
+msgid "Oxuyur"
+msgstr "Обучается"
+
+msgctxt "accounts.group_history"
+msgid "Qayıb"
+msgstr "Пропуск"
+
+msgctxt "accounts.group_history"
+msgid "Qayıb saatı"
+msgstr "Часы пропусков"
+
+msgctxt "accounts.group_history"
+msgid "Qeydiyyatlı"
+msgstr "Зачислен"
+
+msgctxt "accounts.group_history"
+msgid "Qrup tapılmadı."
+msgstr "Группа не найдена."
+
+msgctxt "accounts.group_history"
+msgid "Siyahı çox uzundur — ən yeni qeydiyyatlar göstərilir."
+msgstr "Список слишком длинный — показаны последние записи."
+
+msgctxt "accounts.group_history"
+msgid "Son dərs"
+msgstr "Последнее занятие"
+
+msgctxt "accounts.group_history"
+msgid "Struktur əhatəniz yoxdur."
+msgstr "У вас нет структурной зоны."
+
+msgctxt "accounts.group_history"
+msgid "Tamamlanıb"
+msgstr "Завершено"
+
+msgctxt "accounts.group_history"
+msgid "Tarixçə yüklənir…"
+msgstr "Загрузка истории…"
+
+msgctxt "accounts.group_history"
+msgid "Tarixçə yüklənmədi — yenidən cəhd edin."
+msgstr "История не загрузилась — попробуйте снова."
+
+msgctxt "accounts.group_history"
+msgid "Tələbə bu qrupda tapılmadı."
+msgstr "Студент не найден в этой группе."
+
+msgctxt "accounts.group_history"
+msgid "Tələbənin tarixçəsi"
+msgstr "История студента"
+
+msgctxt "accounts.group_history"
+msgid "Tələbənin tarixçəsinə baxmaq səlahiyyətiniz yoxdur."
+msgstr "У вас нет права просматривать историю студента."
+
+msgctxt "accounts.group_history"
+msgid "Vəziyyət"
+msgstr "Статус"
+
+msgctxt "accounts.group_history"
+msgid "Xaric edilib"
+msgstr "Отчислен"
+
+msgctxt "accounts.group_history"
+msgid "bitmə tarixi"
+msgstr "дата окончания"
+
+msgctxt "accounts.group_history"
+msgid "Çıxarılıb / köçürülüb"
+msgstr "Исключён / переведён"
+
+msgctxt "accounts.group_history"
+msgid "Üzrlü"
+msgstr "Уважительная"
+
+msgctxt "accounts.group_history"
+msgid "İştirak"
+msgstr "Присутствие"
+
+msgctxt "accounts.group_history"
+msgid "Əmr №"
+msgstr "Приказ №"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "%d tələbə məzun edildi."
+msgstr "Выпускниками стали %d студентов."
+
+msgctxt "accounts.groups"
+msgid "Adi qrup"
+msgstr "Обычная группа"
+
+msgctxt "accounts.groups"
+msgid "Başqa bölmənin tələbəsini yalnız «əlavə olaraq» qoşmaq olar — öz qrupu dəyişmir."
+msgstr "Студента другого подразделения можно добавить только «дополнительно» — его группа не меняется."
+
+msgctxt "accounts.groups"
+msgid "Məzun et"
+msgstr "Выпустить"
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "Qrup məzun edilmədi — heç bir dəyişiklik yazılmadı: %s"
+msgstr "Группа не выпущена — изменения не сохранены: %s"
+
+msgctxt "accounts.groups"
+msgid "Qrup növü"
+msgstr "Тип группы"
+
+msgctxt "accounts.groups"
+msgid "Qrupda məzun ediləcək qeydiyyatlı tələbə yoxdur."
+msgstr "В группе нет зачисленных студентов для выпуска."
+
+msgctxt "accounts.groups"
+msgid "Qrupu məzun et"
+msgstr "Выпустить группу"
+
+msgctxt "accounts.groups"
+msgid "Qrupun BÜTÜN qeydiyyatlı tələbələri bir əmrlə məzun edilir (əlavə üzvlər öz qrupu ilə). Bir tələbə rədd olunsa heç kim məzun edilmir. Əmr nömrəsi və tarixi məcburidir."
+msgstr "ВСЕ зачисленные студенты группы выпускаются одним приказом (дополнительные — со своей группой). Если один студент отклонён, никто не выпускается. Номер и дата приказа обязательны."
+
+msgctxt "accounts.groups"
+msgid "Status «məzun» olur: tələbə qrupun aktiv siyahısından çıxır, akademik qeyd və qiymət tarixçəsi qalır. Səhv məzun etmə «Bərpa et» ilə geri qaytarılır. Əmr nömrəsi və tarixi məcburidir."
+msgstr "Статус «выпускник»: студент выходит из активного списка, академическая запись и история оценок сохраняются. Ошибочный выпуск отменяется через «Восстановить». Номер и дата приказа обязательны."
+
+msgctxt "accounts.groups"
+msgid "Tarixçə"
+msgstr "История"
+
+msgctxt "accounts.groups"
+msgid "Tələbəni məzun et"
+msgstr "Выпустить студента"
+
+msgctxt "accounts.groups"
+msgid "Tələbəni məzun etmək səlahiyyətiniz yoxdur."
+msgstr "У вас нет права выпускать студентов."
+
+msgctxt "accounts.groups"
+msgid "Əcnəbi tələbələr qrupu"
+msgstr "Группа иностранных студентов"
+
+msgctxt "accounts.groups"
+msgid "Əcnəbi tələbələr qrupunu Əcnəbi tələbələrlə iş şöbəsi idarə edir; müəllim belə qruplarda eyni saatda bir neçə qrupla dərs keçə bilir."
+msgstr "Группы иностранных студентов ведёт отдел по работе с иностранными студентами; преподаватель может вести несколько таких групп в одно время."
+
+msgctxt "registrar.admission_channel"
+msgid "Müqavilə ilə qəbul"
+msgstr "Приём по договору"
+
+msgctxt "profile.rim"
+msgid "Azərbaycan Respublikası"
+msgstr "Азербайджанская Республика"
+
+msgctxt "profile.rim"
+msgid "Əcnəbi vətəndaş (əcnəbi tələbə)"
+msgstr "Иностранный гражданин (иностранный студент)"
+
+msgctxt "profile.rim"
+msgid "Vətəndaşlığı olmayan şəxs"
+msgstr "Лицо без гражданства"
+
+msgctxt "profile.rim"
+msgid "Qrup tapılmadı və ya icazə əhatənizdən kənardadır."
+msgstr "Группа не найдена или вне вашей зоны."
+
+msgctxt "student_intake"
+msgid "Bu qrupa tələbə əlavə etmək icazəniz yoxdur — yalnız öz qruplarınızı seçin."
+msgstr "Вы не можете добавлять студентов в эту группу — выберите свою группу."

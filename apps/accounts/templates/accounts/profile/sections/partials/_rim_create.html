@@ -324,8 +324,17 @@ Django şablon mühərrikindən keçmir).
                 <p class="ems-msg ems-msg--error" data-rimc-error="tuition_fee" role="alert" hidden></p>
               </div>
               <div class="ems-field" data-rimc-only="student">
+                {% comment %}Sahib 2026-11-25: «əcnəbi tələbə olub-olmayan vətəndaşlıq seçimi». Dəyər profilin mövcud
+                `citizenship` mətn sahəsinə OLDUĞU KİMİ yazılır (ATİS idxalı da eyni sahəyə sərbəst mətn yazır).{% endcomment %}
                 <label class="ems-field__label" for="rimc-citizenship">{% trans "Vətəndaşlıq" context "profile.rim" %}</label>
-                <input class="ems-input" id="rimc-citizenship" type="text" name="citizenship" maxlength="64" data-rimc-field="citizenship">
+                <div class="bootstrap-single-select bootstrap-single-select--ems">
+                  <select class="ems-select bootstrap-single-select__native" data-bootstrap-select id="rimc-citizenship" name="citizenship" data-rimc-field="citizenship">
+                    <option value="">{% trans "Seçilməyib" context "profile.rim" %}</option>
+                    <option value="Azərbaycan Respublikası">{% trans "Azərbaycan Respublikası" context "profile.rim" %}</option>
+                    <option value="Əcnəbi vətəndaş">{% trans "Əcnəbi vətəndaş (əcnəbi tələbə)" context "profile.rim" %}</option>
+                    <option value="Vətəndaşlığı olmayan şəxs">{% trans "Vətəndaşlığı olmayan şəxs" context "profile.rim" %}</option>
+                  </select>
+                </div>
               </div>
               <div class="ems-field" data-rimc-only="student">
                 <label class="ems-field__label" for="rimc-id-series">{% trans "Vəsiqə seriyası" context "profile.rim" %}</label>

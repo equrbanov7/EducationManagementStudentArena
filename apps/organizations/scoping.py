@@ -408,7 +408,9 @@ def faculty_read_scope(user, organization, permission: str, request=None) -> Uni
     ``student.movement``) həmişə dar ``get_permission_scope`` ilə qalır.
     """
     scope = get_permission_scope(user, organization, permission, request=request)
-    return widen_chair_scope_to_faculty(organization, scope, request=request)
+    from .scoping_exact import widen_except_exact  # əcnəbi şöbəsi — kök genişlənmir (sahib 2026-11-25)
+
+    return widen_except_exact(user, organization, permission, scope, request=request)
 
 
 def permission_scope_unit_types(user, organization, permission: str) -> frozenset:

@@ -45,10 +45,12 @@ class AdmissionStatus(models.TextChoices):
 
 
 class AdmissionChannel(models.TextChoices):
-    """ATİS «QƏBUL XƏTTİ» — DİM imtahanı ilə, yoxsa imtahansız."""
+    """ATİS «QƏBUL XƏTTİ» — DİM imtahanı ilə, yoxsa müqavilə ilə (imtahansız).
+
+    Sahib 2026-11-25: «İmtahansız qəbul» → «Müqavilə ilə qəbul» (yalnız ad; saxlanan açar ``exam_free`` qalır)."""
 
     DIM = "dim", pgettext_lazy("registrar.admission_channel", "DİM vasitəsilə")
-    EXAM_FREE = "exam_free", pgettext_lazy("registrar.admission_channel", "İmtahansız qəbul")
+    EXAM_FREE = "exam_free", pgettext_lazy("registrar.admission_channel", "Müqavilə ilə qəbul")
 
 
 class AdmissionTour(models.TextChoices):

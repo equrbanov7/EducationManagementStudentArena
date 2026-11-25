@@ -78,7 +78,12 @@ def _plans_from_request(request, organization):
         rows = intake.read_rows(request.FILES.get("file"))
     except intake.IntakeFileError as exc:
         return None, JsonResponse({"ok": False, "error": exc.code, "message": exc.message}, status=400)
-    return intake.build_plans(organization, rows, group_overrides=_group_overrides(request)), None
+    plans = intake.build_plans(organization, rows, group_overrides=_group_overrides(request))
+    # Sahib 2026-11-25: UNIT əhatəli yaradıcı (əcnəbi şöbəsi) yalnız ÖZ qruplarına yazır — ön baxış = tətbiq.
+    from apps.accounts.services.intake.scope import enforce_group_scope
+
+    enforce_group_scope(plans, user=request.user, organization=organization)
+    return plans, None
 
 
 @never_cache
@@ -176,6 +181,12 @@ def student_admission_create_group(request):
         unit_type=OrgUnitType.SPECIALTY,
         is_active=True,
     ).first()
+    if specialty is not None:
+        # Sahib 2026-11-25: ixtisas `student.assign_group` əhatəsində olmalıdır (UNIT aktor başqa ixtisasda qrup açmır).
+        from apps.organizations.public import get_permission_scope, unit_in_scope
+
+        if not unit_in_scope(get_permission_scope(request.user, organization, "student.assign_group"), specialty):
+            specialty = None
     if specialty is None:
         return JsonResponse(
             {"ok": False, "error": "specialty_not_found", "message": pgettext(_CTX, "İxtisas tapılmadı.")},

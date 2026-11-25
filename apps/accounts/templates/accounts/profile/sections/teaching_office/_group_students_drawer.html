@@ -24,6 +24,8 @@ istəyə bağlıdır (sahib 2026-10-15). Məzuniyyətdə / xaric edilmiş tələ
      data-t-freeze="{% trans 'Dondur' context 'accounts.groups' %}"
      data-t-expel="{% trans 'Uzaqlaşdır' context 'accounts.groups' %}"
      data-t-reinstate="{% trans 'Bərpa et' context 'accounts.groups' %}"
+     data-t-history="{% trans 'Tarixçə' context 'accounts.groups' %}"
+     data-t-graduate="{% trans 'Məzun et' context 'accounts.groups' %}"
      data-t-removed="{% trans '%d qrupdan çıxıb (məzuniyyət / xaric / məzun)' context 'accounts.groups' %}"
      data-t-extra="{% trans '%d əlavə üzv (öz qrupu başqadır)' context 'accounts.groups' %}"
      data-t-extra-badge="{% trans 'Əlavə üzv' context 'accounts.groups' %}"
@@ -49,6 +51,17 @@ istəyə bağlıdır (sahib 2026-10-15). Məzuniyyətdə / xaric edilmiş tələ
                     hidden>
                 <i class="fas fa-user-plus" aria-hidden="true"></i>
                 {% trans "Tələbə əlavə et" context "accounts.groups" %}
+            </button>
+            {% endif %}
+            {% if groups_registry_section.can_move_students %}
+            {% comment %}«Qrupu məzun et» (sahib 2026-11-25) — qeydiyyatlı tələbələrin hamısı bir əmrlə; prefill JS-dədir.{% endcomment %}
+            <button type="button" class="ems-btn ems-btn--sm"
+                    data-tof-open="tofGroupGraduateDialog"
+                    data-tof-group-graduate
+                    data-tof-prefill='{"id": ""}'
+                    hidden>
+                <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                {% trans "Qrupu məzun et" context "accounts.groups" %}
             </button>
             {% endif %}
         </div>

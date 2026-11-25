@@ -26,6 +26,7 @@ from .views import session_ping as session_ping_views
 from .views import subgroup_students as subgroup_students_views
 from .views import subgroup_students_export as subgroup_students_export_views
 from .views.profile import statistics_export_metrics as statistics_export_metrics_views
+from .views.student_group_graduate import student_group_graduate
 
 app_name = "accounts"
 
@@ -360,6 +361,8 @@ urlpatterns = [
     path("student-registry/card/<uuid:record_id>/", views.student_registry_card, name="student_registry_card"),
     path("student-registry/programs/", views.student_registry_programs, name="student_registry_programs"),
     path("student-registry/action/", views.student_registry_action, name="student_registry_action"),
+    # «Qrupu məzun et» — qrupun qeydiyyatlı tələbələrinə bir əmrlə məzuniyyət (sahib 2026-11-25; `student.movement`).
+    path("student-registry/group-graduate/", student_group_graduate, name="student_group_graduate"),
     path("student-registry/export/", views.student_registry_export, name="student_registry_export"),
     # 2026-10-13 (gecə): «Starosta təyin et / dəyiş / götür» — qrup reyestri çekmecəsi (JSON POST).
     path("groups/lead/", group_lead_views.group_lead_action, name="group_lead_action"),

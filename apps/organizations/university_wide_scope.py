@@ -120,6 +120,11 @@ def candidate_scope(organization, scope: UnitScope, target) -> UnitScope:
     """Hədəf universitet əhatəli kafedradadırsa namizəd əhatəsi bütün təşkilat, yoxsa ``scope`` olduğu kimi."""
     if not scope.has_structure_access or scope.is_org_wide:
         return scope
+    # Sahib 2026-11-25: əcnəbi qrupuna tələbə BÜTÜN universitetdən gəlir (öz qrupu başqa məktəbdə olur).
+    from .group_kind import is_foreign
+
+    if getattr(target, "unit_type", "") == "group" and is_foreign(target):
+        return widen(scope)
     return widen(scope) if unit_is_university_wide(organization, target) else scope
 
 
