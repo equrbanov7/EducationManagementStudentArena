@@ -26,8 +26,11 @@ class GroupTransferEvidence(UUIDModel):
         on_delete=models.PROTECT,
         related_name="+",
     )
+    #: NULL = qrupdan çıxarılma (sahib 2026-11-25, 0127) — tələbə qrupsuz qalır, statusu dəyişmir.
     new_group = models.ForeignKey(
         "organizations.OrgUnit",
+        null=True,
+        blank=True,
         on_delete=models.PROTECT,
         related_name="+",
     )

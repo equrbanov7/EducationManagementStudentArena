@@ -120524,3 +120524,85 @@ msgstr "Grup bulunamadı veya yetki kapsamınız dışında."
 msgctxt "student_intake"
 msgid "Bu qrupa tələbə əlavə etmək icazəniz yoxdur — yalnız öz qruplarınızı seçin."
 msgstr "Bu gruba öğrenci ekleme yetkiniz yok — yalnızca kendi gruplarınızı seçin."
+
+msgctxt "accounts.groups"
+msgid "Tələbəni qrupdan çıxar"
+msgstr "Öğrenciyi gruptan çıkar"
+
+msgctxt "accounts.groups"
+msgid "Tələbə xaric edilmir və dondurulmur: statusu «Qeydiyyatlı» qalır, sadəcə qrupsuz olur — sonra «Tələbə əlavə et» ilə istənilən qrupa qoşmaq olar. Bu qrupun cari semestr jurnallarındakı qeydiyyatı tarixçəyə keçir, bal və davamiyyət silinmir. Səbəb audit jurnalına yazılır."
+msgstr "Öğrenci kaydı silinmez ve dondurulmaz: durumu «Kayıtlı» kalır, yalnızca grupsuz olur — daha sonra «Öğrenci ekle» ile herhangi bir gruba eklenebilir. Bu grubun bu dönemki defterlerindeki kaydı geçmişe taşınır; notlar ve devam silinmez. Gerekçe denetim kaydına yazılır."
+
+msgctxt "accounts.groups"
+msgid "Əlavə üzvü qrupdan çıxar"
+msgstr "Ek üyeyi gruptan çıkar"
+
+msgctxt "accounts.groups"
+msgid "Tələbə yalnız bu qrupun cari semestr jurnallarından çıxır — öz qrupu və oradakı jurnalları dəyişmir. Bal və davamiyyət silinmir, jurnalın dəyişiklik tarixçəsinə yazılır."
+msgstr "Öğrenci yalnızca bu grubun bu dönemki defterlerinden çıkar — kendi grubu ve oradaki defterleri değişmez. Notlar ve devam silinmez; değişiklik defter geçmişine yazılır."
+
+msgctxt "accounts.groups"
+msgid "Tələbə bu qrupun tələbəsi deyil."
+msgstr "Öğrenci bu grubun üyesi değil."
+
+msgctxt "accounts.groups"
+msgid "Əmr tarixi düzgün deyil."
+msgstr "Karar tarihi geçersiz."
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "Tələbə qrupdan çıxarıldı — statusu «Qeydiyyatlı» qaldı, %(count)d jurnal sətri tarixçəyə keçdi."
+msgstr "Öğrenci gruptan çıkarıldı — durumu «Kayıtlı» kaldı, %(count)d defter satırı geçmişe taşındı."
+
+msgctxt "accounts.groups"
+msgid "Bu tələbə qrupun öz tələbəsidir — əlavə üzv deyil."
+msgstr "Bu öğrenci grubun kendi öğrencisidir — ek üye değil."
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "Əlavə üzv qrupun %(count)d jurnalından çıxarıldı — öz qrupu dəyişmədi."
+msgstr "Ek üye grubun %(count)d defterinden çıkarıldı — kendi grubu değişmedi."
+
+msgctxt "registrar.group_removal"
+msgid "Akademik dövr tələbənin təşkilatına aid deyil."
+msgstr "Akademik dönem öğrencinin kurumuna ait değil."
+
+msgctxt "registrar.group_removal"
+msgid "Aktiv cari akademik dövr göstərilməlidir."
+msgstr "Etkin güncel akademik dönem belirtilmelidir."
+
+msgctxt "registrar.group_removal"
+msgid "Qrupdan çıxarma yalnız aktiv cari akademik dövrdə aparılır."
+msgstr "Gruptan çıkarma yalnızca etkin güncel akademik dönemde yapılır."
+
+msgctxt "registrar.group_removal"
+msgid "Tələbə onsuz da heç bir qrupda deyil."
+msgstr "Öğrenci zaten hiçbir grupta değil."
+
+msgctxt "registrar.group_removal"
+msgid "Yalnız qeydiyyatlı tələbə qrupdan çıxarılır — məzuniyyətdə / xaric edilmiş deyil."
+msgstr "Yalnızca kayıtlı öğrenci gruptan çıkarılır — izinli veya kaydı silinmiş öğrenci değil."
+
+msgctxt "registrar.group_removal"
+msgid "Qrupdan çıxarma üçün icraçı tələb olunur."
+msgstr "Gruptan çıkarma için işlemi yapan kullanıcı gerekir."
+
+msgctxt "registrar.group_removal"
+msgid "Bu tələbənin öz qrupudur — əlavə üzv deyil."
+msgstr "Bu öğrencinin kendi grubudur — ek üyelik değil."
+
+msgctxt "registrar.group_removal"
+msgid "Cari akademik dövr yoxdur — jurnal siyahısı dəyişdirilmir."
+msgstr "Güncel akademik dönem yok — defter listeleri değiştirilmez."
+
+msgctxt "registrar.group_removal"
+msgid "Tələbə bu qrupun cari jurnallarında yoxdur."
+msgstr "Öğrenci bu grubun güncel defterlerinde yok."
+
+msgctxt "registrar.group_removal"
+msgid "Qrup reyestrindən əlavə üzvlük götürüldü"
+msgstr "Ek üyelik grup kaydından geri alındı"
+
+msgctxt "registrar.group_removal"
+msgid "Heç bir jurnaldan çıxarılmadı."
+msgstr "Hiçbir defterden çıkarılmadı."

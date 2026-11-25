@@ -52,6 +52,11 @@ səhifələmə SERVER tərəfdədir (handoff §8/14). SİLMƏ YOXDUR — arxivl�
 {% trans "Tələbənin qrupunu dəyiş" context "accounts.groups" as gr_move_title %}
 {% trans "Tələbə seçilmiş qrupa köçürülür; köhnə qrupdakı jurnal qeydiyyatı tarixçəyə keçir, silinmir. Səbəb audit jurnalına yazılır." context "accounts.groups" as gr_move_sub %}
 {% trans "Qrupu dəyiş" context "accounts.groups" as gr_move_btn %}
+{% trans "Tələbəni qrupdan çıxar" context "accounts.groups" as gr_remove_title %}
+{% trans "Tələbə xaric edilmir və dondurulmur: statusu «Qeydiyyatlı» qalır, sadəcə qrupsuz olur — sonra «Tələbə əlavə et» ilə istənilən qrupa qoşmaq olar. Bu qrupun cari semestr jurnallarındakı qeydiyyatı tarixçəyə keçir, bal və davamiyyət silinmir. Səbəb audit jurnalına yazılır." context "accounts.groups" as gr_remove_sub %}
+{% trans "Əlavə üzvü qrupdan çıxar" context "accounts.groups" as gr_remove_extra_title %}
+{% trans "Tələbə yalnız bu qrupun cari semestr jurnallarından çıxır — öz qrupu və oradakı jurnalları dəyişmir. Bal və davamiyyət silinmir, jurnalın dəyişiklik tarixçəsinə yazılır." context "accounts.groups" as gr_remove_extra_sub %}
+{% trans "Qrupdan çıxar" context "accounts.groups" as gr_remove_btn %}
 {% trans "Ana qrupu alt qruplara böl" context "accounts.groups" as gr_split_title %}
 {% trans "Tələbələr əvvəlcə bərabər bölünür; siyahılar arasında keçirə, alt qrupları adlandıra bilərsiniz. Seçilməyənlər ana qrupda qalır. Hər köçürmə rəsmi xidmətlə yazılır — tarixçə silinmir." context "accounts.groups" as gr_split_sub %}
 {% trans "Alt qrupları yarat" context "accounts.groups" as gr_split_btn %}
@@ -140,6 +145,10 @@ səhifələmə SERVER tərəfdədir (handoff §8/14). SİLMƏ YOXDUR — arxivl�
         {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofGroupAddStudentsDialog" form_dialog_title=gr_add_title form_dialog_subtitle=gr_add_sub form_dialog_submit_label=gr_add_btn form_dialog_body_include="accounts/profile/sections/teaching_office/_group_add_students_fields.html" form_dialog_action=groups_registry_section.action_url form_dialog_hidden=groups_registry_section.add_students_hidden form_dialog_data=groups_registry_section.form_data %}
         {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofGroupSplitDialog" form_dialog_title=gr_split_title form_dialog_subtitle=gr_split_sub form_dialog_submit_label=gr_split_btn form_dialog_wide=True form_dialog_body_include="accounts/profile/sections/teaching_office/_group_split_fields.html" form_dialog_action=groups_registry_section.action_url form_dialog_hidden=groups_registry_section.split_hidden form_dialog_data=groups_registry_section.form_data %}
         {% include "partials/ems_ui/_form_dialog.html" with form_dialog_id="tofGroupMoveDialog" form_dialog_title=gr_move_title form_dialog_subtitle=gr_move_sub form_dialog_submit_label=gr_move_btn form_dialog_body_include="accounts/profile/sections/teaching_office/_group_move_fields.html" form_dialog_action=groups_registry_section.action_url form_dialog_hidden=groups_registry_section.move_hidden form_dialog_data=groups_registry_section.form_data %}
+        {% comment %}«Qrupdan çıxar» (sahib 2026-11-25) — səbəb ≥20; tələbə qrupsuz qalır / əlavə üzv qrupun jurnallarından
+        çıxır (`group_remove.py`). Prefill (`action`, `id`, `record_id`) çekmecə sətrindən.{% endcomment %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofGroupRemoveDialog" reason_title=gr_remove_title reason_subtitle=gr_remove_sub reason_submit_label=gr_remove_btn reason_submit_tone="warning" reason_action=groups_registry_section.action_url reason_hidden=groups_registry_section.remove_hidden reason_form_data=groups_registry_section.form_data reason_extra_include="accounts/profile/sections/teaching_office/_group_remove_fields.html" remove_with_order=True %}
+        {% include "partials/ems_ui/_reason_dialog.html" with reason_id="tofGroupRemoveExtraDialog" reason_title=gr_remove_extra_title reason_subtitle=gr_remove_extra_sub reason_submit_label=gr_remove_btn reason_submit_tone="warning" reason_action=groups_registry_section.action_url reason_hidden=groups_registry_section.remove_hidden reason_form_data=groups_registry_section.form_data reason_extra_include="accounts/profile/sections/teaching_office/_group_remove_fields.html" remove_with_order=False %}
     {% endif %}
 </div>
 {% endif %}
