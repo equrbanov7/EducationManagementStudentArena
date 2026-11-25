@@ -16,10 +16,11 @@ def register_student_transfer(handler):
     _handler = handler
 
 
-def transfer_student_group(*, record, new_group, period, by_user, reason):
+def transfer_student_group(*, record, new_group, period, by_user, reason, **options):
+    """``options`` dəyişmədən ötürülür (məs. ``keep_parent_journal=True`` — «ana qrupu alt qruplara böl»)."""
     if _handler is None:
         raise ValidationError("Tələbə köçürmə xidməti qoşulmayıb.")
-    return _handler(record=record, new_group=new_group, period=period, by_user=by_user, reason=reason)
+    return _handler(record=record, new_group=new_group, period=period, by_user=by_user, reason=reason, **options)
 
 
 # Sahib 2026-11-18: «əcnəbi tələbə 2 qrupda ola bilər» — ƏLAVƏ üzvlük (öz qrupu qalır). Registrar həm
