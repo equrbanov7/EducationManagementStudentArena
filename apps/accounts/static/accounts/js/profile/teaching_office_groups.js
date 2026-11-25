@@ -77,6 +77,10 @@
         // Əlavə üzv (sahib 2026-11-18): öz qrupu başqadır — hərəkətlər öz qrupunun çekmecəsindədir;
         // burada yalnız bu qrupun jurnallarından çıxarmaq olar (sahib 2026-11-25).
         if (row.extra) {
+            // Fərdi plan (sahib 2026-11-25): əlavə üzvün DOCX-i bu qrupun jurnalları ilə birlikdə qurulur.
+            if (state.planUrl) {
+                out.push('<a class="ems-btn ems-btn--sm" href="' + esc(withStudent(state.planUrl, row.id)) + '" download title="' + esc(t("plan")) + '"><i class="fas fa-file-word" aria-hidden="true"></i><span class="tof-students__btn-label">DOCX</span></a>');
+            }
             if (state.canManage) { out.push(removeButton(row, REMOVE_EXTRA_DIALOG_ID, "remove_extra")); }
             return out.join("");
         }
