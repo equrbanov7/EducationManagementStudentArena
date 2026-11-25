@@ -43,7 +43,11 @@ from apps.organizations.structure_views import (  # noqa: F401
     build_organization_faculties_context,
     build_organization_kafedras_context,
 )
-from apps.organizations.student_transfer import register_student_extra_group, register_student_transfer  # noqa: F401
+from apps.organizations.student_transfer import (  # noqa: F401
+    register_student_extra_group,
+    register_student_group_removal,
+    register_student_transfer,
+)
 from apps.organizations.unit_heads import (  # noqa: F401
     ancestor_paths,
     chair_head_memberships_for_unit,
@@ -61,6 +65,7 @@ from apps.organizations.views import (  # noqa: F401
 __all__ = [
     "register_student_transfer",
     "register_student_extra_group",
+    "register_student_group_removal",
     "can_view_group_students",
     "can_view_groups",
     "group_meta",

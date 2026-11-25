@@ -366,6 +366,8 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
     section["add_students_hidden"] = [{"name": "action"}, {"name": "id"}, {"name": "record_ids"}]
     # «Qrupu dəyiş» — tələbə qeydi (`record_id`) + hədəf qrup (`id`) + səbəb.
     section["move_hidden"] = [{"name": "action"}, {"name": "record_id"}]
+    # «Qrupdan çıxar» (sahib 2026-11-25) — `remove_student` / `remove_extra`: açıq qrup (`id`) + tələbə qeydi.
+    section["remove_hidden"] = [{"name": "action"}, {"name": "id"}, {"name": "record_id"}]
     # Tələbə çekmecəsinin dialoqları («qrupdan çıxar» = başqa qrupa köçür, «dondur»,
     # «uzaqlaşdır», «bərpa et») tələbə-hərəkət endpoint-inə gedir (əmr № + tarix; səbəb istəyə bağlı).
     # Qrup dəyişikliyi DB qapısı ilə yalnız rəsmi köçürmə xidmətinə buraxılır.

@@ -121579,3 +121579,85 @@ msgstr "Группа не найдена или вне вашей зоны."
 msgctxt "student_intake"
 msgid "Bu qrupa tələbə əlavə etmək icazəniz yoxdur — yalnız öz qruplarınızı seçin."
 msgstr "Вы не можете добавлять студентов в эту группу — выберите свою группу."
+
+msgctxt "accounts.groups"
+msgid "Tələbəni qrupdan çıxar"
+msgstr "Исключить студента из группы"
+
+msgctxt "accounts.groups"
+msgid "Tələbə xaric edilmir və dondurulmur: statusu «Qeydiyyatlı» qalır, sadəcə qrupsuz olur — sonra «Tələbə əlavə et» ilə istənilən qrupa qoşmaq olar. Bu qrupun cari semestr jurnallarındakı qeydiyyatı tarixçəyə keçir, bal və davamiyyət silinmir. Səbəb audit jurnalına yazılır."
+msgstr "Студент не отчисляется и не замораживается: статус остаётся «Зачислен», он просто остаётся без группы — позже через «Добавить студента» его можно добавить в любую группу. Записи в журналах текущего семестра этой группы переходят в историю, оценки и посещаемость сохраняются. Причина записывается в журнал аудита."
+
+msgctxt "accounts.groups"
+msgid "Əlavə üzvü qrupdan çıxar"
+msgstr "Исключить дополнительного участника из группы"
+
+msgctxt "accounts.groups"
+msgid "Tələbə yalnız bu qrupun cari semestr jurnallarından çıxır — öz qrupu və oradakı jurnalları dəyişmir. Bal və davamiyyət silinmir, jurnalın dəyişiklik tarixçəsinə yazılır."
+msgstr "Студент исключается только из журналов текущего семестра этой группы — его собственная группа и её журналы не меняются. Оценки и посещаемость сохраняются, изменение записывается в историю журнала."
+
+msgctxt "accounts.groups"
+msgid "Tələbə bu qrupun tələbəsi deyil."
+msgstr "Студент не состоит в этой группе."
+
+msgctxt "accounts.groups"
+msgid "Əmr tarixi düzgün deyil."
+msgstr "Неверная дата приказа."
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "Tələbə qrupdan çıxarıldı — statusu «Qeydiyyatlı» qaldı, %(count)d jurnal sətri tarixçəyə keçdi."
+msgstr "Студент исключён из группы — статус остался «Зачислен», %(count)d строк журнала перешли в историю."
+
+msgctxt "accounts.groups"
+msgid "Bu tələbə qrupun öz tələbəsidir — əlavə üzv deyil."
+msgstr "Этот студент — собственный студент группы, а не дополнительный участник."
+
+#, python-format
+msgctxt "accounts.groups"
+msgid "Əlavə üzv qrupun %(count)d jurnalından çıxarıldı — öz qrupu dəyişmədi."
+msgstr "Дополнительный участник исключён из %(count)d журналов группы — его собственная группа не изменилась."
+
+msgctxt "registrar.group_removal"
+msgid "Akademik dövr tələbənin təşkilatına aid deyil."
+msgstr "Учебный период не относится к организации студента."
+
+msgctxt "registrar.group_removal"
+msgid "Aktiv cari akademik dövr göstərilməlidir."
+msgstr "Необходимо указать активный текущий учебный период."
+
+msgctxt "registrar.group_removal"
+msgid "Qrupdan çıxarma yalnız aktiv cari akademik dövrdə aparılır."
+msgstr "Исключение из группы возможно только в активном текущем учебном периоде."
+
+msgctxt "registrar.group_removal"
+msgid "Tələbə onsuz da heç bir qrupda deyil."
+msgstr "Студент и так не состоит ни в одной группе."
+
+msgctxt "registrar.group_removal"
+msgid "Yalnız qeydiyyatlı tələbə qrupdan çıxarılır — məzuniyyətdə / xaric edilmiş deyil."
+msgstr "Из группы исключается только зачисленный студент — не находящийся в отпуске или отчисленный."
+
+msgctxt "registrar.group_removal"
+msgid "Qrupdan çıxarma üçün icraçı tələb olunur."
+msgstr "Для исключения из группы требуется исполнитель."
+
+msgctxt "registrar.group_removal"
+msgid "Bu tələbənin öz qrupudur — əlavə üzv deyil."
+msgstr "Это собственная группа студента — не дополнительное участие."
+
+msgctxt "registrar.group_removal"
+msgid "Cari akademik dövr yoxdur — jurnal siyahısı dəyişdirilmir."
+msgstr "Нет текущего учебного периода — списки журналов не изменяются."
+
+msgctxt "registrar.group_removal"
+msgid "Tələbə bu qrupun cari jurnallarında yoxdur."
+msgstr "Студента нет в текущих журналах этой группы."
+
+msgctxt "registrar.group_removal"
+msgid "Qrup reyestrindən əlavə üzvlük götürüldü"
+msgstr "Дополнительное участие снято из реестра групп"
+
+msgctxt "registrar.group_removal"
+msgid "Heç bir jurnaldan çıxarılmadı."
+msgstr "Не исключён ни из одного журнала."

@@ -1,0 +1,23 @@
+{% load i18n %}
+{% comment %}«Qrupdan çıxar» (sahib 2026-11-25) — səbəb dialoqunun ƏLAVƏ sahələri (`reason_extra_include`).
+
+Tələbənin öz qrupundan çıxarılmasında (`remove_with_order`) əmr nömrəsi / tarixi İSTƏYƏ BAĞLIDIR — varsa audit
+sətrinə yazılır (rəsmi hərəkət əmri deyil, `StudentMovement` yaranmır). Əlavə üzvün çıxarılmasında yalnız tələbənin
+adı göstərilir. Səbəb (≥20) dialoqun öz sahəsidir.{% endcomment %}
+{% if remove_with_order %}
+<div class="ems-grid ems-grid--2 tof-movement-fields">
+    <div class="ems-field">
+        <label class="ems-field__label" for="{{ reason_id }}-order-number">{% trans "Əmr nömrəsi" context "accounts.groups" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "ui.dialog" %}</span></label>
+        <input type="text" class="ems-input" id="{{ reason_id }}-order-number" name="order_number" maxlength="64" autocomplete="off"
+               placeholder="{% trans 'Məs.: 12/T' context 'accounts.groups' %}">
+    </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="{{ reason_id }}-order-date">{% trans "Əmr tarixi" context "accounts.groups" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "ui.dialog" %}</span></label>
+        <input type="date" class="ems-input" id="{{ reason_id }}-order-date" name="order_date">
+    </div>
+</div>
+{% endif %}
+<div class="tof-students__target" data-tof-movement-target>
+    <span class="tof-students__target-label">{% trans "Tələbə" context "accounts.groups" %}</span>
+    <strong data-tof-movement-name></strong>
+</div>

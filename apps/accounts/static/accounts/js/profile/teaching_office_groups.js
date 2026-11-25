@@ -3,7 +3,7 @@
  * Qrup sətrindəki «Tələbələr» düyməsi (`[data-tof-students-open]`) sağdan
  * çekmecə açır, siyahı JSON-dan gəlir (`data-url`), axtarış/status süzgəci
  * müştəri tərəfindədir (qrup ≤ bir neçə yüz tələbədir). Hərəkət düymələri
- * («Qrupdan çıxar» = başqa qrupa köçür / «Dondur» / «Uzaqlaşdır») səbəb dialoqlarını
+ * («Qrupu dəyiş» / «Qrupdan çıxar» = qrupsuz qalır / «Dondur» / «Uzaqlaşdır») səbəb dialoqlarını
  * `data-tof-open` + `data-tof-prefill` ilə açır — göndərişi `teaching_office.js`
  * edir (əmr № + tarix + təsdiq məcburi, səbəb istəyə bağlı — sahib 2026-10-15),
  * uğurda bölmə yenilənir və çekmecə eyni qrup üçün YENİDƏN açılır ki, istifadəçi
@@ -30,11 +30,14 @@
     var DRAWER_ID = "tofGroupStudentsDrawer";
     var ADD_DIALOG_ID = "tofGroupAddStudentsDialog";
     var MOVE_DIALOG_ID = "tofGroupMoveDialog";
+    // «Qrupdan çıxar» (sahib 2026-11-25): öz tələbəsi qrupsuz qalır / əlavə üzv qrupun jurnallarından çıxır.
+    var REMOVE_DIALOG_ID = "tofGroupRemoveDialog";
+    var REMOVE_EXTRA_DIALOG_ID = "tofGroupRemoveExtraDialog";
     // 2026-10-13 (gecə): «Starosta təyin et / dəyiş / götür» dialoqları — göndərişdən sonra çekmecə qayıdır.
     var LEAD_DIALOG_ID = "tofGroupLeadDialog";
     var LEAD_REMOVE_DIALOG_ID = "tofGroupLeadRemoveDialog";
     var REINSTATE_DIALOG_ID = "tofStudentReinstateDialog";
-    var DIALOG_IDS = ["tofStudentTransferDialog", "tofStudentFreezeDialog", "tofStudentExpelDialog", REINSTATE_DIALOG_ID, ADD_DIALOG_ID, MOVE_DIALOG_ID, LEAD_DIALOG_ID, LEAD_REMOVE_DIALOG_ID];
+    var DIALOG_IDS = ["tofStudentTransferDialog", "tofStudentFreezeDialog", "tofStudentExpelDialog", REINSTATE_DIALOG_ID, ADD_DIALOG_ID, MOVE_DIALOG_ID, LEAD_DIALOG_ID, LEAD_REMOVE_DIALOG_ID, REMOVE_DIALOG_ID, REMOVE_EXTRA_DIALOG_ID];
     var state = {
         url: "", name: "", planUrl: "", candidatesUrl: "", groupActive: true,
         rowManage: false, rowLead: false,
@@ -64,10 +67,19 @@
         return '<button type="button" class="ems-btn ems-btn--sm" data-tof-history-url="' + esc(row.history_url) + '" data-tof-history-name="' + esc(row.name) + '"><i class="fas fa-chart-column" aria-hidden="true"></i> ' + esc(t("history")) + "</button>";
     }
 
+    // «Qrupdan çıxar» — status dəyişmir; prefill açıq qrupu (`id`) və tələbə qeydini daşıyır (server əhatəni yoxlayır).
+    function removeButton(row, dialogId, action) {
+        return '<button type="button" class="ems-btn ems-btn--sm ems-btn--warning" data-tof-open="' + dialogId + '" data-tof-student-name="' + esc(row.name) + '" data-tof-prefill=\'' + esc(prefill({ action: action, id: state.groupId || "", record_id: row.id })) + '\'><i class="fas fa-user-minus" aria-hidden="true"></i> ' + esc(t("detach")) + "</button>";
+    }
+
     function actionButtons(row) {
         var out = [historyButton(row)];
-        // Əlavə üzv (sahib 2026-11-18): öz qrupu başqadır — hərəkətlər öz qrupunun çekmecəsindədir.
-        if (row.extra) { return out.join(""); }
+        // Əlavə üzv (sahib 2026-11-18): öz qrupu başqadır — hərəkətlər öz qrupunun çekmecəsindədir;
+        // burada yalnız bu qrupun jurnallarından çıxarmaq olar (sahib 2026-11-25).
+        if (row.extra) {
+            if (state.canManage) { out.push(removeButton(row, REMOVE_EXTRA_DIALOG_ID, "remove_extra")); }
+            return out.join("");
+        }
         if (state.planUrl) {
             out.push('<a class="ems-btn ems-btn--sm" href="' + esc(withStudent(state.planUrl, row.id)) + '" download title="' + esc(t("plan")) + '"><i class="fas fa-file-word" aria-hidden="true"></i><span class="tof-students__btn-label">DOCX</span></a>');
         }
@@ -76,6 +88,7 @@
         // reyestri»ndə qalır; dondur/uzaqlaşdır isə `student.movement` açarı ilə.
         if (state.canManage && row.status === "enrolled") {
             out.push('<button type="button" class="ems-btn ems-btn--sm ems-btn--primary" data-tof-open="' + MOVE_DIALOG_ID + '" data-tof-student-name="' + esc(row.name) + '" data-tof-prefill=\'' + esc(prefill({ action: "move_student", record_id: row.id, id: "", reason: "" })) + '\'><i class="fas fa-people-arrows" aria-hidden="true"></i> ' + esc(t("move")) + "</button>");
+            out.push(removeButton(row, REMOVE_DIALOG_ID, "remove_student"));
         }
         if (state.canMove && row.status === "enrolled") {
             out.push('<button type="button" class="ems-btn ems-btn--sm ems-btn--warning" data-tof-open="tofStudentFreezeDialog" data-tof-student-name="' + esc(row.name) + '" data-tof-prefill=\'' + esc(prefill({ record_id: row.id, kind: "academic_leave" })) + '\'>' + esc(t("freeze")) + "</button>");
