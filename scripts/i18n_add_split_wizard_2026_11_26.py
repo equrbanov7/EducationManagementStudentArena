@@ -310,6 +310,21 @@ STRINGS = {
         "%(group)s: Mit „%(section)s“ sind Stunden verknüpft — ändern Sie zuerst deren Abschnitt im Journal und "
         "verringern Sie dann die Anzahl.",
     ),
+    (
+        "django",
+        _R,
+        "%(group)s: «%(section)s» bölməsinə dərs bağlıdır — onun tələbələrini sehrbazda dəyişmək olmaz. Tələbəni "
+        "jurnalın öz ekranında köçürün.",
+    ): (
+        "%(group)s: lessons are linked to “%(section)s” — its students cannot be changed in the wizard. Move the "
+        "student on the journal's own screen.",
+        "%(group)s: к секции «%(section)s» привязаны занятия — её студентов нельзя менять в мастере. Переведите "
+        "студента на экране самого журнала.",
+        "%(group)s: «%(section)s» bölümüne dersler bağlı — öğrencileri sihirbazda değiştirilemez. Öğrenciyi not "
+        "defterinin kendi ekranında taşıyın.",
+        "%(group)s: Mit „%(section)s“ sind Stunden verknüpft — die Studierenden können im Assistenten nicht geändert "
+        "werden. Verschieben Sie sie im Journal selbst.",
+    ),
     ("django", _R, "«%(lab)s» lab qrupunda iki seminar alt qrupunun tələbəsi var — qarışdırmaq olmaz."): (
         "Lab group “%(lab)s” contains students of two seminar subgroups — they must not be mixed.",
         "В лаб. группе «%(lab)s» студенты двух подгрупп семинара — смешивать нельзя.",
@@ -751,6 +766,21 @@ STRINGS = {
         "К секции «%(name)s» привязано занятий: %(n)s — её нельзя удалить. Сначала измените секцию этих занятий в журнале.",
         "«%(name)s» bölümüne %(n)s ders bağlı — bu bölüm silinemez. Önce not defterinde bu derslerin bölümünü değiştirin.",
         "Mit „%(name)s“ sind %(n)s Stunden verknüpft — der Abschnitt kann nicht entfernt werden. Ändern Sie zuerst deren Abschnitt im Journal.",
+    ),
+    (
+        "djangojs",
+        JS,
+        "«%(name)s» bölməsinə %(n)s dərs bağlıdır — onun tələbələri burada dəyişdirilmir (tələbəni jurnalın öz "
+        "ekranında köçürün).",
+    ): (
+        "%(n)s lessons are linked to “%(name)s” — its students are not changed here (move a student on the journal's "
+        "own screen).",
+        "К секции «%(name)s» привязано занятий: %(n)s — её студенты здесь не меняются (переводите студента на "
+        "экране журнала).",
+        "«%(name)s» bölümüne %(n)s ders bağlı — öğrencileri burada değiştirilmez (öğrenciyi not defterinin kendi "
+        "ekranında taşıyın).",
+        "Mit „%(name)s“ sind %(n)s Stunden verknüpft — die Studierenden werden hier nicht geändert (im Journal selbst "
+        "verschieben).",
     ),
     ("djangojs", JS, "Əlifba ilə bərabər böl"): (
         "Split evenly (alphabetical)",

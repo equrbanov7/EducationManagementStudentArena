@@ -12,8 +12,9 @@ hansı tələbə haraya düşür bilinmir». Dərs yükü sehrbazı (``apps.work
 
 QAYDALAR (mövcud modullarla eyni — :mod:`.lab_groups`, :mod:`.seminar_groups`, :mod:`.lab_groups_manage`):
 
-* bölmələr 1..N nömrələnir; ``say ≤ 1`` = «bölünmür» (bütün tələbələrin bölməsi boşalır, sətirlər silinir);
-* dərs bağlı nömrə silinə bilməz (``has_lessons``) — əvvəl dərsin bölməsi dəyişdirilməlidir;
+* bölmələr REAL nömrələri ilə saxlanılır (boşluqlu {2,3} də — yenidən nömrələnmir); ``say ≤ 1`` = «bölünmür»
+  (bütün tələbələrin bölməsi boşalır, sətirlər silinir);
+* dərs bağlı nömrə silinə bilməz (``has_lessons``) və onun tərkibi dəyişə bilməz (``lesson_members``);
 * ``say ≥ 2`` olanda HƏR aktiv tələbə bir bölməyə yerləşdirilməlidir (tələbə başına bir seminar + bir lab);
 * iç-içə rejimdə (``lab.nested``) bir lab qrupu iki seminar alt qrupunu QARIŞDIRMIR (``lab_mixed``);
 * ad ≤ 40 simvol, eyni növdə iki eyni ad olmur; lab adı «Lab-N»-dirsə boş saxlanır (jurnal «234 K · Lab-N» yazır);
@@ -219,9 +220,26 @@ def _count(raw) -> int:
     return value if value >= 2 else 0
 
 
-def _placement(raw, count, enrolled, kind_label) -> dict:
-    """``{enrollment_pk: nömrə | None}`` — say ≥ 2 olanda HƏR aktiv tələbə yerləşməlidir."""
-    if not count:
+def _numbers(raw) -> list:
+    """Bölmələrin REAL nömrələri (artan sıra). ``numbers`` verilibsə o (boşluqlu da — {2,3}), yoxsa ``1..count``.
+
+    Review 2026-11-26: əvvəl hər yazı 1..N yenidən nömrələyirdi — «Lab-1» silinib {2,3} qalanda dəyişiklik etmədən
+    «Təsdiqlə» Lab-2-nin tələbələrini №1-ə, Lab-3-ünkünü №2-yə köçürür, Lab-2-nin dərsləri başqalarına keçirdi."""
+    if "numbers" not in raw:
+        return list(range(1, _count(raw.get("count")) + 1))
+    values = raw.get("numbers") if isinstance(raw.get("numbers"), (list, tuple)) else []
+    try:
+        numbers = [int(value) for value in values]
+    except (TypeError, ValueError):
+        raise SectionSetupError("invalid_count", pgettext(_CTX, "Bölmə sayı düzgün deyil."))
+    if len(set(numbers)) != len(numbers) or any(not 1 <= number <= MAX_SECTIONS for number in numbers):
+        raise SectionSetupError("invalid_count", pgettext(_CTX, "Bölmə sayı düzgün deyil."))
+    return numbers if len(numbers) >= 2 else []
+
+
+def _placement(raw, numbers, enrolled, kind_label) -> dict:
+    """``{enrollment_pk: nömrə | None}`` — bölmə varsa HƏR aktiv tələbə yerləşməlidir (nömrə ``numbers``-dən)."""
+    if not numbers:
         return {row.pk: None for row in enrolled}
     raw = raw if isinstance(raw, dict) else {}
     wanted = {}
@@ -233,7 +251,7 @@ def _placement(raw, count, enrolled, kind_label) -> dict:
             number = int(value)
         except (TypeError, ValueError):
             number = 0
-        wanted[pk] = number if 1 <= number <= count else None
+        wanted[pk] = number if number in numbers else None
     missing = [row for row in enrolled if wanted.get(row.pk) is None]
     if missing:
         raise SectionSetupError(
@@ -273,37 +291,55 @@ def _lab_name(number, name) -> str:
     return "" if _name_key(name) in defaults else name
 
 
-def _check_lessons(offering, field, keep_upto, label) -> None:
-    bound = (
-        Lesson.objects.filter(offering_id=offering.pk, **{f"{field}__gt": keep_upto})
-        .order_by()
-        .values_list(field, flat=True)
-        .distinct()
-    )
-    numbers = sorted(set(bound))
-    if numbers:
-        raise SectionSetupError(
-            "has_lessons",
-            pgettext(
-                _CTX,
-                "%(group)s: «%(section)s» bölməsinə dərs bağlıdır — əvvəlcə həmin dərslərin bölməsini jurnalda "
-                "dəyişin, sonra bölmə sayını azaldın.",
-            )
-            % {"group": offering.group.name if offering.group_id else "—", "section": label(numbers[0])},
+def _guard_lessons(offering, field, kind, desired, enrolled, label) -> None:
+    """Dərs bağlı bölmə: silinə bilməz və TƏRKİBİ dəyişə bilməz (eyni tələbələr qalmalıdır) — dərslər öz tələbələrinə
+    bağlı qalsın. Tələbə köçürmək jurnalın öz ekranındadır («Lab qrupları»), sehrbaz yalnız quruluşu yazır."""
+    spec = desired[kind]
+    bound = sorted(
+        set(
+            Lesson.objects.filter(offering_id=offering.pk, **{f"{field}__isnull": False})
+            .order_by()
+            .values_list(field, flat=True)
+            .distinct()
         )
+    )
+    group = offering.group.name if offering.group_id else "—"
+    for number in bound:
+        if number not in spec["numbers"]:
+            raise SectionSetupError(
+                "has_lessons",
+                pgettext(
+                    _CTX,
+                    "%(group)s: «%(section)s» bölməsinə dərs bağlıdır — əvvəlcə həmin dərslərin bölməsini jurnalda "
+                    "dəyişin, sonra bölmə sayını azaldın.",
+                )
+                % {"group": group, "section": label(number)},
+            )
+        before = {row.pk for row in enrolled if getattr(row, field) == number}
+        after = {row.pk for row in enrolled if _new_value(desired, row, kind, field) == number}
+        if before != after:
+            raise SectionSetupError(
+                "lesson_members",
+                pgettext(
+                    _CTX,
+                    "%(group)s: «%(section)s» bölməsinə dərs bağlıdır — onun tələbələrini sehrbazda dəyişmək olmaz. "
+                    "Tələbəni jurnalın öz ekranında köçürün.",
+                )
+                % {"group": group, "section": label(number)},
+            )
 
 
-def _sync_rows(model, offering, count, names, units, *, is_lab) -> int:
-    """Bölmə sətirləri 1..count (ad, mənbə alt qrup); artıq sətirlər silinir. Qaytarır: dəyişən sətir sayı."""
+def _sync_rows(model, offering, numbers, names, units, *, is_lab) -> int:
+    """Bölmə sətirləri ``numbers`` (ad, mənbə alt qrup); qalan sətirlər silinir. Qaytarır: dəyişən sətir sayı."""
     changed = 0
     existing = {row.number: row for row in model.objects.select_for_update().filter(offering_id=offering.pk)}
-    for number in range(1, count + 1):
-        name = names[number - 1]
+    for index, number in enumerate(numbers):
+        name = names[index]
         if is_lab:
             name = _lab_name(number, name)
         fields = {"name": name}
         if not is_lab:
-            fields["unit_id"] = units[number - 1]
+            fields["unit_id"] = units[index]
         row = existing.pop(number, None)
         if row is None:
             model.objects.create(organization_id=offering.organization_id, offering=offering, number=number, **fields)
@@ -334,12 +370,13 @@ def _desired_kind(organization, raw, enrolled, kind):
     if raw is None:
         return None
     raw = raw if isinstance(raw, dict) else {}
-    count = _count(raw.get("count"))
+    numbers = _numbers(raw)
+    count = len(numbers)
     return {
-        "count": count,
+        "numbers": numbers,
         "names": _names(raw.get("names"), count),
         "units": _units(organization, raw.get("units"), count) if kind == "seminar" else [None] * count,
-        "place": _placement(raw.get("placement"), count, enrolled, _kind_label(kind)),
+        "place": _placement(raw.get("placement"), numbers, enrolled, _kind_label(kind)),
         "nested": bool(raw.get("nested")),
     }
 
@@ -351,7 +388,7 @@ def _new_value(desired, row, kind, field):
 def _check_nested(desired, enrolled, offering) -> None:
     """İç-içə rejim: bir lab qrupu iki seminar alt qrupunu qarışdırmır."""
     lab = desired["lab"]
-    if lab is None or not lab["nested"] or not lab["count"]:
+    if lab is None or not lab["nested"] or not lab["numbers"]:
         return
     mixed: dict = defaultdict(set)
     for row in enrolled:
@@ -361,17 +398,18 @@ def _check_nested(desired, enrolled, offering) -> None:
         raise SectionSetupError(
             "lab_mixed",
             pgettext(_CTX, "«%(lab)s» lab qrupunda iki seminar alt qrupunun tələbəsi var — qarışdırmaq olmaz.")
-            % {"lab": lab["names"][bad[0] - 1] or lab_groups.label(bad[0], offering)},
+            % {"lab": lab["names"][lab["numbers"].index(bad[0])] or lab_groups.label(bad[0], offering)},
         )
 
 
 def _rows_differ(model, offering, spec, *, is_lab) -> bool:
     current = {row.number: row for row in model.objects.filter(offering_id=offering.pk)}
-    if set(current) != set(range(1, spec["count"] + 1)):
+    if set(current) != set(spec["numbers"]):
         return True
-    for number, row in current.items():
-        name = _lab_name(number, spec["names"][number - 1]) if is_lab else spec["names"][number - 1]
-        if row.name != name or (not is_lab and row.unit_id != spec["units"][number - 1]):
+    for index, number in enumerate(spec["numbers"]):
+        row = current[number]
+        name = _lab_name(number, spec["names"][index]) if is_lab else spec["names"][index]
+        if row.name != name or (not is_lab and row.unit_id != spec["units"][index]):
             return True
     return False
 
@@ -384,8 +422,9 @@ def _label_for(kind, offering):
 def apply_sections(*, organization, user, key, seminar=None, lab=None, request=None) -> dict:
     """(fənn, dövr, qrup) jurnalının seminar alt qruplarını və lab qruplarını istənən vəziyyətə gətir (modul başlığı).
 
-    ``seminar`` — ``{"count", "names": [...], "units": [OrgUnit id | ""], "placement": {enrollment_id: nömrə}}``;
-    ``lab`` — ``{"count", "names", "placement", "nested": bool}``; ``None`` — həmin növə toxunulmur. Qaytarır:
+    ``seminar`` — ``{"numbers": [2, 3] | "count", "names": [...], "units": [OrgUnit id | ""], "placement":
+    {enrollment_id: nömrə}}``; ``lab`` — ``{"numbers" | "count", "names", "placement", "nested": bool}``; ``None`` —
+    həmin növə toxunulmur. Nömrələr REALDIR (yenidən nömrələnmir). Qaytarır:
     ``{"changed", "students", "sections"}``. Xəta — :class:`SectionSetupError`; çağıranın tranzaksiyası geri qaytarılır.
     """
     key = tuple(key or ())
@@ -427,9 +466,9 @@ def apply_sections(*, organization, user, key, seminar=None, lab=None, request=N
             spec = desired[kind]
             if spec is None:
                 continue
-            _check_lessons(offering, field, spec["count"], _label_for(kind, offering))
+            _guard_lessons(offering, field, kind, desired, enrolled, _label_for(kind, offering))
             if dirty[kind]:
-                sections += _sync_rows(model, offering, spec["count"], spec["names"], spec["units"], is_lab=is_lab)
+                sections += _sync_rows(model, offering, spec["numbers"], spec["names"], spec["units"], is_lab=is_lab)
         old = {str(row.pk): [row.seminar_group, row.lab_group] for row in movers}
         now = timezone.now()
         for row in movers:
@@ -445,7 +484,7 @@ def apply_sections(*, organization, user, key, seminar=None, lab=None, request=N
             obj=offering,
             old_values={"students": old},
             new_values={
-                kind: (desired[kind]["names"] or desired[kind]["count"]) if desired[kind] is not None else "kept"
+                kind: (desired[kind]["names"] or desired[kind]["numbers"]) if desired[kind] is not None else "kept"
                 for kind, _f, _m, _l in _KINDS
             }
             | {"students": {str(row.pk): [row.seminar_group, row.lab_group] for row in movers}},

@@ -35,11 +35,14 @@ from django.db.models import Q
 
 from ..constants import RowKind, Season, TaskStatus
 from ..models import TeacherAssignment, TeachingTaskRow
+from .offering_rules import multiplier as _offering_multiplier
 from .task_form1_import import SUBJECT_THRESHOLD, subject_key
 
 TEACHING_ACTIVITIES = ("lecture", "seminar", "lab")
 TOTAL_FIELD = {"lecture": "lecture_total", "seminar": "seminar_total", "lab": "lab_total"}
 PLAN_FIELD = {"lecture": "lecture_plan", "seminar": "seminar_plan", "lab": "lab_plan"}
+#: Çarpanın SAHƏSİ (yazı üçün — ``overcount_fix``). Oxuda lab çarpanı ``lab_group_count`` verilibsə odur
+#: (sahib 2026-11-26, «Bölgü sehrbazı»: seminar 2, lab 4) — :func:`.offering_rules.multiplier`.
 MULTIPLIER_FIELD = {"lecture": "union_count", "seminar": "subgroup_count", "lab": "subgroup_count"}
 
 #: «Dərs yükü faylı» (``load_upload`` — həm Tədris şöbəsinin yüklədiyi fayl, həm köhnə sistem deltasının
@@ -51,6 +54,13 @@ TIMETABLE_NOTE = "saat bölgüsü cədvəldən"
 JOINT_MIN_DATES = 2
 _LEVEL_RE = re.compile(r"elementar|interm|beginn|advanc|upper")
 JOINT_MIN_SHARE = 0.75
+
+
+def row_multiplier(row, activity: str) -> int:
+    """Fəaliyyətin çarpanı (0 ola bilər): lab — ``lab_group_count`` verilibsə o, yoxsa ``subgroup_count``."""
+    if activity == "lab" and int(getattr(row, "lab_group_count", 0) or 0):
+        return _offering_multiplier(row, "lab")
+    return int(getattr(row, MULTIPLIER_FIELD[activity]) or 0)
 
 
 def row_source(row) -> str:
@@ -103,8 +113,7 @@ class RowInfo:
         plan = int(getattr(self.row, PLAN_FIELD[activity]) or 0)
         if plan:
             return plan
-        multiplier = max(int(getattr(self.row, MULTIPLIER_FIELD[activity]) or 1), 1)
-        return int(self.hours.get(activity, 0)) // multiplier
+        return int(self.hours.get(activity, 0)) // max(row_multiplier(self.row, activity), 1)
 
 
 @dataclass
@@ -461,7 +470,7 @@ def find_plan_overrun(organization, infos: list[RowInfo]) -> list[dict]:
             if not total:
                 continue
             plan = int(getattr(row, PLAN_FIELD[activity]) or 0)
-            multiplier = int(getattr(row, MULTIPLIER_FIELD[activity]) or 0)
+            multiplier = row_multiplier(row, activity)
             limit = plan * max(multiplier, 1) if plan else 0
             if limit and total > limit:
                 found.append({"info": info, "activity": activity, "total": total, "limit": limit, "basis": "row_plan"})

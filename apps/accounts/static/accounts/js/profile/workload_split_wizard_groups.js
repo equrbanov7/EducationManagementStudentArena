@@ -17,6 +17,38 @@
     function esc(v) { return W.esc(v); }
     function fmt(a, b) { return W.fmt(a, b); }
     function students(group) { return group.journal ? group.journal.students : []; }
+    W.ui = W.ui || {};
+
+    W.ui.notice = function (kind, text, extra) {
+        return '<p class="wl-wiz-note wl-wiz-note--' + kind + '"><i class="fas fa-' + (kind === "warn" ? "triangle-exclamation" : "circle-info") +
+            '" aria-hidden="true"></i> <span>' + esc(text) + "</span>" + (extra || "") + "</p>";
+    };
+
+    W.ui.journalNotice = function (group) {
+        var cfg = W.S.groups[group.id];
+        if (!group.journal) {
+            var can = W.S.data.task.plan_reached;
+            return W.ui.notice(
+                "warn",
+                can
+                    ? gettext("Bu qrupun jurnalı hələ yaradılmayıb. Tələbələri bölmək üçün əvvəlcə jurnalı yaradın — bölgü saatını isə indi də seçə bilərsiniz.")
+                    : gettext("Bu qrupun jurnalı hələ yoxdur — tapşırıq dekanlıqda təsdiqlənəndən sonra yaranacaq. İndi yalnız say seçilir, tələbələr sonra bölünür."),
+                can ? ' <button type="button" class="wl-btn wl-btn--ghost wl-btn--sm" data-wl-wiz-journal-create><i class="fas fa-book-medical" aria-hidden="true"></i> ' + esc(gettext("Jurnalı indi yarat")) + "</button>" : ""
+            );
+        }
+        return cfg.reason ? W.ui.notice("warn", cfg.reason) : "";
+    };
+
+    W.ui.segment = function (attr, groupId, options, current, disabled) {
+        return '<div class="wl-wiz-seg" role="group">' + options.map(function (opt) {
+            var on = String(opt.value) === String(current);
+            return '<button type="button" class="wl-wiz-seg__btn' + (on ? " is-on" : "") + '" ' + attr + '="' + esc(opt.value) +
+                '" data-group-id="' + esc(groupId) + '" aria-pressed="' + (on ? "true" : "false") + '"' +
+                (disabled || opt.disabled ? " disabled" : "") + (opt.title ? ' title="' + esc(opt.title) + '"' : "") + ">" + esc(opt.label) + "</button>";
+        }).join("") + "</div>";
+    };
+
+
     // ── 1. Qruplar ──────────────────────────────────────────────────────────
     function rowHours(row) {
         var parts = [];
@@ -47,8 +79,8 @@
                 })) + "</span>");
             }
             var cfg = W.S.groups[group.id];
-            if (cfg.seminar.count) badges.push('<span class="wl-badge">' + esc(fmt(gettext("Seminar: %(n)s alt qrup"), { n: cfg.seminar.count })) + "</span>");
-            if (cfg.lab.count) badges.push('<span class="wl-badge">' + esc(fmt(gettext("Lab: %(n)s qrup"), { n: cfg.lab.count })) + "</span>");
+            if (cfg.seminar.numbers.length) badges.push('<span class="wl-badge">' + esc(fmt(gettext("Seminar: %(n)s alt qrup"), { n: cfg.seminar.numbers.length })) + "</span>");
+            if (cfg.lab.numbers.length) badges.push('<span class="wl-badge">' + esc(fmt(gettext("Lab: %(n)s qrup"), { n: cfg.lab.numbers.length })) + "</span>");
             if (row.groups.length > 1) {
                 var mates = row.groups.filter(function (id) { return id !== group.id; }).map(function (id) { return (W.group(id) || {}).name; });
                 badges.push('<span class="wl-badge" title="' + esc(gettext("Bir tapşırıq sətrinin qrupları birlikdə seçilir.")) + '">' +
@@ -77,22 +109,29 @@
         var group = W.group(groupId);
         var joint = W.S.rows[row.id].joint;
         var sem = cfg.seminar, lab = cfg.lab;
-        var semCount = W.active(row, "seminar") && !joint ? sem.count : 0;
-        var labCount = W.active(row, "lab") && !joint ? lab.count : 0;
+        var semNumbers = W.active(row, "seminar") && !joint ? sem.numbers : [];
+        var labNumbers = W.active(row, "lab") && !joint ? lab.numbers : [];
         var apply = !!(group.journal && cfg.editable && !joint);
         var seminarPlace = {}, labPlace = {};
         if (apply) {
             students(group).forEach(function (st) {
-                if (semCount >= 2 && sem.place[st.id]) seminarPlace[st.id] = sem.place[st.id];
-                if (labCount >= 2 && lab.place[st.id]) labPlace[st.id] = lab.place[st.id];
+                if (semNumbers.length >= 2 && sem.place[st.id]) seminarPlace[st.id] = sem.place[st.id];
+                if (labNumbers.length >= 2 && lab.place[st.id]) labPlace[st.id] = lab.place[st.id];
             });
         }
         return {
             row_id: row.id,
             group_id: groupId,
             apply_journal: apply,
-            seminar: { count: semCount, names: sem.names.slice(0, semCount), units: sem.units.slice(0, semCount), placement: seminarPlace },
-            lab: { count: labCount, nested: lab.mode === "nested", names: lab.names.slice(0, labCount), placement: labPlace },
+            // Real bölmə nömrələri (`numbers`) — server onları yenidən nömrələmir (boşluqlu {2,3} də qalır).
+            seminar: {
+                count: semNumbers.length, numbers: semNumbers.slice(), names: sem.names.slice(0, semNumbers.length),
+                units: sem.units.slice(0, semNumbers.length), placement: seminarPlace,
+            },
+            lab: {
+                count: labNumbers.length, numbers: labNumbers.slice(), nested: lab.mode === "nested",
+                names: lab.names.slice(0, labNumbers.length), placement: labPlace,
+            },
         };
     };
 
@@ -100,7 +139,7 @@
         var cfg = W.S.groups[groupId];
         var group = W.group(groupId);
         var part = cfg[activity];
-        var name = part.names[number - 1];
+        var name = part.names[part.numbers.indexOf(number)];
         if (name) return name;
         return activity === "lab" ? group.name + " · Lab-" + number : group.name + number;
     };

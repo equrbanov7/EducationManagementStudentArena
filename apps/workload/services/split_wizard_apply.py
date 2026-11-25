@@ -5,9 +5,10 @@
     {"task_id": "…", "row_ids": ["…"],
      "rows":   [{"row_id": "…", "joint": false, "fix_totals": true}],
      "groups": [{"row_id": "…", "group_id": "…", "apply_journal": true,
-                 "seminar": {"count": 2, "names": ["234 K1", "234 K2"], "units": ["<OrgUnit>", "…"],
+                 "seminar": {"count": 2, "numbers": [1, 2], "names": ["234 K1", "234 K2"], "units": ["<OrgUnit>", "…"],
                              "placement": {"<enrollment>": 1, …}},
-                 "lab": {"count": 4, "nested": true, "names": ["234 K1 · Lab-1", …], "placement": {…}}}],
+                 "lab": {"count": 4, "numbers": [1, 2, 3, 4], "nested": true, "names": ["234 K1 · Lab-1", …],
+                         "placement": {…}}}],
      "units":  [{"row_id": "…", "activity": "seminar|lab", "group_id": "…|", "sub_number": 1|null,
                  "teacher_id": "<id>|vacant|", "hours": 30, "is_hourly_paid": false, "keep": false}],
      "lecture": [{"row_id": "…", "teacher_id": "<id>|vacant"}],
@@ -15,6 +16,7 @@
 
 QAYDALAR:
 
+* ``numbers`` — jurnal bölmələrinin REAL nömrələri (boşluqlu {2,3} də; yoxdursa 1..count) — yenidən nömrələnmir;
 * vahidlər (bölmələr) serverdə konfiqurasiyadan YENİDƏN törədilir (:func:`expected_units`) və gövdədəki ``units`` ilə
   TAM üst-üstə düşməlidir — müştəri ilə server fərqli düşünürsə heç nə yazılmır (``workload.wizard_units``);
 * ``teacher_id`` boş — vahidə bölgü yoxdur (mövcudu silinir), ``vacant`` — vakant bölgü, ``keep`` — vahidin mövcud
@@ -61,6 +63,20 @@ def _count(raw) -> int:
     return value if 2 <= value <= 9 else 0
 
 
+def _numbers(raw) -> list:
+    """Bölmələrin REAL nömrələri (``numbers``; yoxdursa ``1..count``) — boşluqlu {2,3} yenidən nömrələnmir."""
+    if "numbers" not in raw:
+        return list(range(1, _count(raw.get("count")) + 1))
+    values = raw.get("numbers") if isinstance(raw.get("numbers"), (list, tuple)) else []
+    try:
+        numbers = [int(value) for value in values]  # sıra adlarla (``names``) üst-üstə düşür — dəyişdirilmir
+    except (TypeError, ValueError):
+        numbers = []
+    if len(set(numbers)) != len(values) or any(not 1 <= number <= 9 for number in numbers):
+        raise deny("workload.wizard_units", pgettext(_CTX, "Bölmələr dəyişib — sehrbazı bağlayıb yenidən açın."))
+    return numbers if len(numbers) >= 2 else []
+
+
 def _teacher(raw):
     """``""`` → yoxdur (``False``), ``vacant`` → ``None``, id → ``int`` / UUID."""
     text = str(raw or "").strip()
@@ -92,8 +108,8 @@ def _parse_config(payload, rows) -> dict:
             seminar = entry.get("seminar") if isinstance(entry.get("seminar"), dict) else {}
             lab = entry.get("lab") if isinstance(entry.get("lab"), dict) else {}
             per_group[group.pk] = {
-                "seminar": 0 if joint else _count(seminar.get("count")),
-                "lab": 0 if joint else _count(lab.get("count")),
+                "seminar": [] if joint else _numbers(seminar),
+                "lab": [] if joint else _numbers(lab),
                 "journal": ({"seminar": seminar, "lab": lab} if entry.get("apply_journal") and not joint else None),
             }
         config[row.pk] = {"joint": joint, "fix": bool(item.get("fix_totals")), "groups": per_group, "row": row}
@@ -116,8 +132,8 @@ def expected_units(row, cfg) -> dict:
             continue
         keys = []
         for group in row_groups(row):
-            count = cfg["groups"][group.pk][activity]
-            keys += [(group.pk, number) for number in range(1, count + 1)] if count else [(group.pk, None)]
+            numbers = cfg["groups"][group.pk][activity]
+            keys += [(group.pk, number) for number in numbers] if numbers else [(group.pk, None)]
         result[activity] = keys
     return result
 
@@ -273,8 +289,11 @@ def _apply_sections(task, actor, config, request) -> int:
                 continue
             # Sətirdə saatı olmayan növə toxunulmur (``None``) — eyni jurnalın başqa sətrinin bölmələri qorunur.
             row = cfg["row"]
-            seminar = dict(entry["journal"]["seminar"], count=entry["seminar"]) if _active(row, "seminar") else None
-            lab = dict(entry["journal"]["lab"], count=entry["lab"]) if _active(row, "lab") else None
+            seminar = lab = None
+            if _active(row, "seminar"):
+                seminar = dict(entry["journal"]["seminar"], count=len(entry["seminar"]), numbers=entry["seminar"])
+            if _active(row, "lab"):
+                lab = dict(entry["journal"]["lab"], count=len(entry["lab"]), numbers=entry["lab"])
             try:
                 result = split_wizard_apply_sections(
                     organization=task.organization,
