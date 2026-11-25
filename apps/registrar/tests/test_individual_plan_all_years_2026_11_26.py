@@ -18,7 +18,7 @@ from django.urls import reverse
 
 from apps.accounts.tests.test_group_students_drawer import _StudentsBase
 from apps.organizations.models import AcademicPeriod, Membership, OrgUnit
-from apps.registrar.models import CourseOffering, Enrollment, StudentAcademicRecord
+from apps.registrar.models import CourseOffering, CurriculumSubject, Enrollment, StudentAcademicRecord, Subject
 from core.constants import OrgUnitType
 
 User = get_user_model()
@@ -102,6 +102,48 @@ class IndividualPlanAllYearsTest(_StudentsBase):
         self.assertIn("QA-5", xml)  # cari ilin (P-5) plan sətri
         self.assertNotIn("{{", xml)
         self.assertNotIn('<w:br w:type="page"/>', xml)  # bir tələbə — səhifə keçidi yoxdur
+
+    def test_old_plan_row_takes_code_and_contact_hours_from_the_journal(self):
+        """Köhnə planda sətir yalnız ümumi iş yükü (150) və kodsuzdur — saat/kod tələbənin o ilki jurnalından."""
+        subject = Subject.objects.create(
+            organization=self.org, code="QKU-777", name="QA-DS2 Köhnə fənn", ects=5, chair_unit=self.chair
+        )
+        CurriculumSubject.objects.create(
+            organization=self.org,
+            curriculum=self.plan,
+            subject=subject,
+            semester_number=3,
+            credits=5,
+            total_hours=150,
+            row_code="",
+        )
+        fall_2025 = AcademicPeriod.objects.create(
+            organization=self.org,
+            name="Payız 2025",
+            period_type=self.period.period_type,
+            academic_year="2025/2026",
+            start_date=date(2025, 9, 15),
+            end_date=date(2026, 1, 31),
+        )
+        offering = CourseOffering.objects.create(
+            organization=self.org,
+            subject=subject,
+            period=fall_2025,
+            group=self.senior_group,
+            instructor=self.old_teacher,
+            lesson_hours=45,
+        )
+        Enrollment.objects.create(
+            organization=self.org, student=self.senior.student, offering=offering, status="completed"
+        )
+
+        xml = _xml(self._download(self.senior_group, self.senior).content)
+
+        start = xml.index("QA-DS2 Köhnə fənn")
+        row = xml[xml.rindex("<w:tr", 0, start) : xml.index("</w:tr>", start)]
+        self.assertIn("QKU-777", row)
+        self.assertIn(">45<", row)
+        self.assertNotIn(">150<", row)
 
     def test_first_course_document_has_one_year(self):
         xml = _xml(self._download(self.group).content)

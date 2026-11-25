@@ -225,19 +225,32 @@ def _row_chair(row) -> str:
     return (getattr(chair, "name", "") or "").strip()
 
 
-def _semester_block(title: str, rows, teachers: dict, extra=()) -> SemesterBlock:
+def _plan_row_hours(row, offering) -> int:
+    """Auditoriya saatı: plan sətrinin mühazirə+seminar+lab cəmi; köhnə planlarda bu sahələr boşdur (yalnız ümumi iş
+    yükü, məs. 150) — onda tələbənin həmin semestrdəki jurnalının saatı (sahib 2026-11-26: illər eyni formada)."""
+    contact = int(row.lecture_hours or 0) + int(row.seminar_hours or 0) + int(row.lab_hours or 0)
+    if contact > 0:
+        return contact
+    if offering is not None and int(offering.lesson_hours or 0) > 0:
+        return int(offering.lesson_hours)
+    return int(row.total_hours or 0)
+
+
+def _semester_block(title: str, rows, teachers: dict, extra=(), offerings=None) -> SemesterBlock:
     """Plan sətirləri + (plan boşdursa / başqa qrupun jurnalı varsa) jurnal sətirləri (:mod:`.individual_plan_sources`).
 
-    ``teachers``: ``subject_id → müəllim`` (tələbənin öz jurnalı, yoxdursa qrupun həmin semestrdəki açılışı).
+    ``teachers``: ``subject_id → müəllim`` (tələbənin öz jurnalı, yoxdursa qrupun həmin semestrdəki açılışı);
+    ``offerings``: ``subject_id → tələbənin jurnalı`` (kodu/saatı olmayan köhnə plan sətirləri üçün).
     """
+    offerings = offerings or {}
     block = SemesterBlock(title=title)
     for index, row in enumerate(rows, start=1):
         block.rows.append(
             PlanRow(
                 n=index,
-                code=(row.row_code or "").strip(),
+                code=(row.row_code or "").strip() or sources.subject_code(row.subject),
                 subject=(row.subject.name or "").strip(),
-                hours=_row_hours(row),
+                hours=_plan_row_hours(row, offerings.get(row.subject_id)),
                 credits=int(row.credits or 0),
                 chair=_row_chair(row),
                 teacher=teachers.get(row.subject_id, ""),
@@ -340,7 +353,12 @@ def build_student_plan(
                 fallback_groups=fallback_groups if start == current_start else [],
             )
             prefix = "P" if season == "fall" else "Y"
-            semesters.append(_semester_block(f"{label} semestri ({prefix}-{number})", season_rows, teachers, extra))
+            offerings = plan_sources.student_offering_map(record.student_id, seasons[season])
+            semesters.append(
+                _semester_block(
+                    f"{label} semestri ({prefix}-{number})", season_rows, teachers, extra, offerings=offerings
+                )
+            )
         roman = _ROMAN.get(year_course, str(year_course))
         title = f"{roman} kurs — {_year_label(start)} tədris ili" if start else f"{roman} kurs"
         years.append(YearBlock(title=title, semesters=semesters))
