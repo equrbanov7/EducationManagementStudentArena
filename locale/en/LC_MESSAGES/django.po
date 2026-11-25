@@ -121126,3 +121126,10 @@ msgid "Dil kafedrasında xarici dil səviyyə qrupu açmaq (öz tələbələri �
 msgstr ""
 "Open a foreign-language level group at a language department (for own "
 "students)"
+
+msgctxt "profile.rim"
+msgid ""
+"Bu e-poçt artıq başqa hesabdadır. Başqa ünvan yazın və ya boş saxlayın."
+msgstr ""
+"This e-mail already belongs to another account. Enter a different address or"
+" leave it empty."

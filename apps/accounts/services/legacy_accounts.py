@@ -51,7 +51,7 @@ def create_legacy_student(
 ):
     """Tələbə hesabı (parolsuz). Qaytarır: ``User``."""
 
-    from ..identity import PLACEHOLDER_EMAIL_DOMAIN
+    from ..identity import claim_placeholder_email
     from .intake.create import create_account, student_role
     from .staff_roster import username_seed
     from .teacher_roster.create import claim_name_username
@@ -64,7 +64,7 @@ def create_legacy_student(
             "username": username,
             "first_name": first_name,
             "last_name": last_name,
-            "email": f"{LEGACY_STUDENT_EMAIL_PREFIX}.{username}@{PLACEHOLDER_EMAIL_DOMAIN}",
+            "email": claim_placeholder_email(f"{LEGACY_STUDENT_EMAIL_PREFIX}.{username}"),
             "fin": fin or None,
             "patronymic": patronymic,
             "gender": gender,
