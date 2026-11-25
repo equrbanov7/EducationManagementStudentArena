@@ -24,7 +24,9 @@
 .tof-students__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 
 .tof-students__row {
-    display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; align-items: center;
+    /* Sahib 2026-11-25: düymələr (Tarixçə, DOCX, Qrupu dəyiş, Dondur, Uzaqlaşdır, Məzun et) adın YANINDA ad sütununu
+     * hərf-hərf sıxırdı — indi ayrıca sırada, adın altında; ad sütunu tam enini alır. */
+    display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 8px 12px; align-items: center;
     padding: 10px 12px; border: 1px solid var(--ems-border, #e2e8f0); border-radius: 12px;
     background: var(--ems-surface, #fff);
 }
@@ -42,7 +44,8 @@
 .tof-students__name { font-weight: 600; font-size: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .tof-students__sub { font-size: 12px; color: var(--ems-text-muted, #64748b); overflow-wrap: anywhere; }
 
-.tof-students__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.tof-students__actions { grid-column: 2 / -1; display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 6px; }
+.tof-students__actions:empty { display: none; }
 .tof-students__btn-label { margin-left: 4px; }
 
 .tof-students__skeleton { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid var(--ems-border, #eef2f7); border-radius: 12px; }
@@ -70,8 +73,8 @@
 .ems-badge--graduated { background: #eff6ff; color: #1d4ed8; }
 
 @media (max-width: 640px) {
-    .tof-students__row { grid-template-columns: 32px 1fr; }
-    .tof-students__actions { grid-column: 1 / -1; justify-content: flex-start; }
+    .tof-students__row { grid-template-columns: 32px minmax(0, 1fr); }
+    .tof-students__actions { grid-column: 1 / -1; }
 }
 
 /* ── «Tələbə əlavə et» (sahib, 2026-09-07) ─────────────────────────────────── */
