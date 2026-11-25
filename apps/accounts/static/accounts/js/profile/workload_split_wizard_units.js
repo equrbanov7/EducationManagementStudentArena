@@ -318,16 +318,45 @@
             html += '<div class="wl-wiz-note wl-wiz-note--warn"><i class="fas fa-trash-can" aria-hidden="true"></i> <span>' + esc(gettext("Bu köhnə bölgülər silinəcək:")) + "<ul>" +
                 gone.map(function (a) { return "<li>" + esc(kindLabel(a.activity) + " · " + a.teacher_name + " · " + W.hours(a.hours)) + "</li>"; }).join("") + "</ul></span></div>";
         }
-        if (W.S.data.task.needs_amendment) html += '<p class="wl-wiz-note wl-wiz-note--info"><i class="fas fa-file-signature" aria-hidden="true"></i> <span>' + esc(gettext("Bölgü artıq təsdiqlənib — «Təsdiqlə» basanda düzəliş səbəbi və qeydi soruşulacaq.")) + "</span></p>";
+        if (W.S.data.task.needs_amendment) html += amendBlock();
         html += '<div class="wl-wiz-table-wrap"><table class="wl-wiz-table" data-wl-wiz-summary><thead><tr><th scope="col">' + esc(gettext("Bölmə")) + '</th><th scope="col">' + esc(gettext("Tələbə")) +
             '</th><th scope="col">' + esc(gettext("Müəllim")) + '</th><th scope="col">' + esc(gettext("Saat")) + "</th></tr></thead><tbody>";
         rows.forEach(function (row) { html += summaryRows(row); });
         html += "</tbody></table></div>";
         panel.innerHTML = html;
+        W.initSelects(panel);
     };
 
+    // QA 2026-11-26: təsdiqlənmiş bölgüdə səbəb + qeyd ELƏ BU addımda soruşulur — ayrıca dialoqda «Bağla»
+    // basanda sehrbazın bütün seçimləri itirdi. Səbəblər səhifənin düzəliş formasındakı kataloqdan götürülür.
+    function amendState() {
+        W.S.amend = W.S.amend || { reason: "", note: "" };
+        return W.S.amend;
+    }
+
+    function amendBlock() {
+        var st = amendState();
+        var source = document.querySelector("[data-wl-amend-form] select[name=reason]");
+        var options = '<option value="">' + esc(gettext("— Səbəb seçin —")) + "</option>";
+        if (source) {
+            Array.prototype.forEach.call(source.options, function (opt) {
+                if (!opt.value) return;
+                options += '<option value="' + esc(opt.value) + '"' + (opt.value === st.reason ? " selected" : "") + ">" + esc(opt.textContent) + "</option>";
+            });
+        }
+        return '<div class="wl-wiz-amend" data-wl-wiz-amend><p class="wl-wiz-amend__lead"><i class="fas fa-file-signature" aria-hidden="true"></i> ' +
+            esc(gettext("Bölgü artıq təsdiqlənib — dəyişiklik audit jurnalına yazılır. Səbəbi seçin və qısa qeyd yazın.")) + "</p>" +
+            '<label class="wl-wiz-amend__field"><span>' + esc(gettext("Səbəb")) + "</span>" +
+            W.select('data-wl-wiz-amend-reason aria-label="' + esc(gettext("Səbəb")) + '"', options, false) + "</label>" +
+            '<label class="wl-wiz-amend__field"><span>' + esc(gettext("Qeyd")) + "</span>" +
+            '<textarea rows="2" maxlength="500" data-wl-wiz-amend-note placeholder="' + esc(gettext("Məsələn: seminar 2 alt qrupa bölündü")) + '">' + esc(st.note) + "</textarea></label></div>";
+    }
+
     W.validate.review = function () {
-        return W.validate.teachers() || overProblems()[0] || "";
+        var problem = W.validate.teachers() || overProblems()[0] || "";
+        if (problem || !W.S.data.task.needs_amendment) return problem;
+        var st = amendState();
+        return st.reason && st.note.trim() ? "" : gettext("Düzəliş səbəbi və qeydi məcburidir.");
     };
 
     // ── gövdə ───────────────────────────────────────────────────────────────
@@ -351,7 +380,7 @@
                 if (lec.teacher !== lec.initial) lecture.push({ row_id: row.id, teacher_id: lec.teacher || W.VACANT });
             }
         });
-        return {
+        var body = {
             task_id: D.state.task.id,
             row_ids: rows.map(function (row) { return row.id; }),
             rows: rows.map(function (row) {
@@ -361,6 +390,12 @@
             units: units,
             lecture: lecture,
         };
+        if (W.S.data.task.needs_amendment) {
+            var amend = amendState();
+            body.amend_reason = amend.reason;
+            body.amend_note = amend.note.trim();
+        }
+        return body;
     };
 
     function refreshCounters(row) {
@@ -410,6 +445,8 @@
             var row = W.row(field.dataset.wlWizLecture);
             if (row) lectureState(row).teacher = field.value;
         });
+        D.on("change", "[data-wl-wiz-amend-reason]", function (event, field) { amendState().reason = field.value; });
+        D.on("input", "[data-wl-wiz-amend-note]", function (event, field) { amendState().note = field.value; });
         D.on("click", "[data-wl-wiz-fix-totals]", function (event, btn) {
             var state = W.S.rows[btn.dataset.wlWizFixTotals];
             if (!state) return;
@@ -417,4 +454,6 @@
             W.render.review(W.q('[data-wl-wiz-panel="review"]'));
         });
     };
+    // Əsas fayl artıq bağlayıbsa (bu modul sonra yükləndi) — dinləyiciləri indi bağla.
+    if (W.bindModules && window.__emsWorkloadWizardBound) W.bindModules();
 })(window);

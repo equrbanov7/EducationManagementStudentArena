@@ -3958,3 +3958,22 @@ msgid ""
 msgstr ""
 "%(n)s lessons are linked to “%(name)s” — its students are not changed here "
 "(move a student on the journal's own screen)."
+
+msgid "— Səbəb seçin —"
+msgstr "— Choose a reason —"
+
+msgid ""
+"Bölgü artıq təsdiqlənib — dəyişiklik audit jurnalına yazılır. Səbəbi seçin "
+"və qısa qeyd yazın."
+msgstr ""
+"The allocation is already approved — the change is written to the audit log."
+" Choose a reason and write a short note."
+
+msgid "Qeyd"
+msgstr "Note"
+
+msgid "Məsələn: seminar 2 alt qrupa bölündü"
+msgstr "For example: the seminar was split into 2 subgroups"
+
+msgid "Düzəliş səbəbi və qeydi məcburidir."
+msgstr "An amendment reason and note are required."

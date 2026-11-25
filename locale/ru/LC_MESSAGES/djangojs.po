@@ -3956,3 +3956,22 @@ msgid ""
 msgstr ""
 "К секции «%(name)s» привязано занятий: %(n)s — её студенты здесь не меняются"
 " (переводите студента на экране журнала)."
+
+msgid "— Səbəb seçin —"
+msgstr "— Выберите причину —"
+
+msgid ""
+"Bölgü artıq təsdiqlənib — dəyişiklik audit jurnalına yazılır. Səbəbi seçin "
+"və qısa qeyd yazın."
+msgstr ""
+"Распределение уже утверждено — изменение записывается в журнал аудита. "
+"Выберите причину и напишите короткое примечание."
+
+msgid "Qeyd"
+msgstr "Примечание"
+
+msgid "Məsələn: seminar 2 alt qrupa bölündü"
+msgstr "Например: семинар разделён на 2 подгруппы"
+
+msgid "Düzəliş səbəbi və qeydi məcburidir."
+msgstr "Причина и примечание изменения обязательны."

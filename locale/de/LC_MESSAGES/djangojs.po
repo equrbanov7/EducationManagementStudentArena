@@ -4025,3 +4025,22 @@ msgid ""
 msgstr ""
 "Mit „%(name)s“ sind %(n)s Stunden verknüpft — die Studierenden werden hier "
 "nicht geändert (im Journal selbst verschieben)."
+
+msgid "— Səbəb seçin —"
+msgstr "— Grund wählen —"
+
+msgid ""
+"Bölgü artıq təsdiqlənib — dəyişiklik audit jurnalına yazılır. Səbəbi seçin "
+"və qısa qeyd yazın."
+msgstr ""
+"Die Verteilung ist bereits freigegeben — die Änderung wird im Prüfprotokoll "
+"erfasst. Wählen Sie einen Grund und schreiben Sie eine kurze Notiz."
+
+msgid "Qeyd"
+msgstr "Notiz"
+
+msgid "Məsələn: seminar 2 alt qrupa bölündü"
+msgstr "Zum Beispiel: Seminar in 2 Untergruppen geteilt"
+
+msgid "Düzəliş səbəbi və qeydi məcburidir."
+msgstr "Änderungsgrund und Notiz sind erforderlich."

@@ -3939,3 +3939,22 @@ msgid ""
 msgstr ""
 "«%(name)s» bölümüne %(n)s ders bağlı — öğrencileri burada değiştirilmez "
 "(öğrenciyi not defterinin kendi ekranında taşıyın)."
+
+msgid "— Səbəb seçin —"
+msgstr "— Neden seçin —"
+
+msgid ""
+"Bölgü artıq təsdiqlənib — dəyişiklik audit jurnalına yazılır. Səbəbi seçin "
+"və qısa qeyd yazın."
+msgstr ""
+"Dağılım zaten onaylandı — değişiklik denetim günlüğüne yazılır. Nedeni seçin"
+" ve kısa bir not yazın."
+
+msgid "Qeyd"
+msgstr "Not"
+
+msgid "Məsələn: seminar 2 alt qrupa bölündü"
+msgstr "Örneğin: seminer 2 alt gruba bölündü"
+
+msgid "Düzəliş səbəbi və qeydi məcburidir."
+msgstr "Düzeltme nedeni ve notu zorunludur."

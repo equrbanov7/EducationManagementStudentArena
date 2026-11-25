@@ -540,6 +540,27 @@ STRINGS = {
         "Dağılım zaten onaylandı — «Onayla»ya basınca düzeltme nedeni ve notu sorulacak.",
         "Die Verteilung ist bereits freigegeben — bei „Bestätigen“ werden Änderungsgrund und Notiz abgefragt.",
     ),
+    ("djangojs", JS, "— Səbəb seçin —"): ("— Choose a reason —", "— Выберите причину —", "— Neden seçin —", "— Grund wählen —"),
+    ("djangojs", JS, "Bölgü artıq təsdiqlənib — dəyişiklik audit jurnalına yazılır. Səbəbi seçin və qısa qeyd yazın."): (
+        "The allocation is already approved — the change is written to the audit log. Choose a reason and write a short note.",
+        "Распределение уже утверждено — изменение записывается в журнал аудита. Выберите причину и напишите короткое примечание.",
+        "Dağılım zaten onaylandı — değişiklik denetim günlüğüne yazılır. Nedeni seçin ve kısa bir not yazın.",
+        "Die Verteilung ist bereits freigegeben — die Änderung wird im Prüfprotokoll erfasst. Wählen Sie einen Grund und schreiben Sie eine kurze Notiz.",
+    ),
+    ("djangojs", JS, "Səbəb"): ("Reason", "Причина", "Neden", "Grund"),
+    ("djangojs", JS, "Qeyd"): ("Note", "Примечание", "Not", "Notiz"),
+    ("djangojs", JS, "Məsələn: seminar 2 alt qrupa bölündü"): (
+        "For example: the seminar was split into 2 subgroups",
+        "Например: семинар разделён на 2 подгруппы",
+        "Örneğin: seminer 2 alt gruba bölündü",
+        "Zum Beispiel: Seminar in 2 Untergruppen geteilt",
+    ),
+    ("djangojs", JS, "Düzəliş səbəbi və qeydi məcburidir."): (
+        "An amendment reason and note are required.",
+        "Причина и примечание изменения обязательны.",
+        "Düzeltme nedeni ve notu zorunludur.",
+        "Änderungsgrund und Notiz sind erforderlich.",
+    ),
     ("djangojs", JS, "Bölgü yadda saxlandı."): (
         "Allocation saved.",
         "Распределение сохранено.",

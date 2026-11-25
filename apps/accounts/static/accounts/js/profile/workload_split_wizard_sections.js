@@ -582,4 +582,6 @@
         });
     };
 
+    // Əsas fayl artıq bağlayıbsa (bu modul sonra yükləndi) — dinləyiciləri indi bağla.
+    if (W.bindModules && window.__emsWorkloadWizardBound) W.bindModules();
 })(window);

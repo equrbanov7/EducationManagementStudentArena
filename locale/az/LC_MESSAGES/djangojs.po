@@ -3935,3 +3935,22 @@ msgid ""
 msgstr ""
 "«%(name)s» bölməsinə %(n)s dərs bağlıdır — onun tələbələri burada "
 "dəyişdirilmir (tələbəni jurnalın öz ekranında köçürün)."
+
+msgid "— Səbəb seçin —"
+msgstr "— Səbəb seçin —"
+
+msgid ""
+"Bölgü artıq təsdiqlənib — dəyişiklik audit jurnalına yazılır. Səbəbi seçin "
+"və qısa qeyd yazın."
+msgstr ""
+"Bölgü artıq təsdiqlənib — dəyişiklik audit jurnalına yazılır. Səbəbi seçin "
+"və qısa qeyd yazın."
+
+msgid "Qeyd"
+msgstr "Qeyd"
+
+msgid "Məsələn: seminar 2 alt qrupa bölündü"
+msgstr "Məsələn: seminar 2 alt qrupa bölündü"
+
+msgid "Düzəliş səbəbi və qeydi məcburidir."
+msgstr "Düzəliş səbəbi və qeydi məcburidir."

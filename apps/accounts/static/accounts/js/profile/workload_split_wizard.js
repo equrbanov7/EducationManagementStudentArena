@@ -135,6 +135,7 @@
 
     // ── açılış ──────────────────────────────────────────────────────────────
     W.open = function (cardId, kind) {
+        if (W.bindModules) W.bindModules();
         var D = W.dist();
         var modalNode = W.q("[data-wl-wiz-modal]");
         if (!D || !modalNode || !D.state.task) return;
@@ -345,9 +346,24 @@
         EMSDelegate.on("click", "[data-wl-wiz-step-nav]", function (event, btn) { W.jump(btn.dataset.wlWizStepNav); });
         EMSDelegate.on("click", "[data-wl-wiz-submit]", function () { W.submit(); });
         EMSDelegate.on("click", "[data-wl-wiz-journal-create]", function () { W.createJournals(); });
-        if (W.bindSections) W.bindSections(EMSDelegate);
-        if (W.bindUnits) W.bindUnits(EMSDelegate);
+        bindModules();
     }
+
+    // QA 2026-11-26: alt modullar (sections / units) bu fayldan SONRA yüklənə bilər — onların dinləyiciləri öz
+    // bayrağı ilə, modul hazır olan kimi bağlanır (bind-da və hər açılışda yoxlanır), bir dəfə.
+    function bindModules() {
+        var EMSDelegate = window.EMSDelegate;
+        if (!EMSDelegate) return;
+        if (W.bindSections && !window.__emsWorkloadWizardSectionsBound) {
+            window.__emsWorkloadWizardSectionsBound = true;
+            W.bindSections(EMSDelegate);
+        }
+        if (W.bindUnits && !window.__emsWorkloadWizardUnitsBound) {
+            window.__emsWorkloadWizardUnitsBound = true;
+            W.bindUnits(EMSDelegate);
+        }
+    }
+    W.bindModules = bindModules;
 
     W.bind = bind;
     if (window.EMSReady) {
