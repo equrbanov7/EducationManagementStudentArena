@@ -23,6 +23,12 @@ def world():
     return value
 
 
+def _hours(offering):
+    from apps.registrar.public import plan_hours_for_offering
+
+    return plan_hours_for_offering(offering)
+
+
 def _change(world, instance, field):
     if field == "subject":
         model = apps.get_model("registrar", "Subject")
@@ -59,7 +65,7 @@ def test_own_syllabus_stops_following_a_changed_course_or_period(world, field):
 @pytest.mark.parametrize("field", ["subject", "period"])
 def test_shared_syllabus_stops_following_a_changed_target(world, field):
     offering = world["offerings"]["o2"]
-    sharing.share(source=world["source"], offering=offering, actor=actor(world))
+    sharing.share(source=world["source"], offering=offering, actor=actor(world), target_hours=_hours(offering))
     _change(world, offering, field)
     assert sharing.shared_syllabus_ids([offering.pk]) == {}
     _assert_missing(world, offering)
@@ -68,7 +74,7 @@ def test_shared_syllabus_stops_following_a_changed_target(world, field):
 @pytest.mark.parametrize("field", ["subject", "period"])
 def test_shared_syllabus_stops_using_a_changed_source_offering(world, field):
     offering = world["offerings"]["o2"]
-    sharing.share(source=world["source"], offering=offering, actor=actor(world))
+    sharing.share(source=world["source"], offering=offering, actor=actor(world), target_hours=_hours(offering))
     _change(world, world["offerings"]["o1"], field)
     assert sharing.shared_syllabus_ids([offering.pk]) == {}
     _assert_missing(world, offering)

@@ -13,6 +13,10 @@ QAYDALAR
    hədəf açılışın müəllimi də aktordur.  Həmkarın sillabusu paylaşılmır.
 2. **Eyni fənn + eyni semestr** — mənbə açılışlı, semestrli, aktiv KÖK dosyedir (bağlı nüsxə deyil).
 3. **Yalnız boş jurnal** — hədəf açılışın öz dosyesi və ya başqa paylaşımı varsa YAZILMIR (fill-only).
+3a. **Eyni saat** (sahib 2026-11-25) — eyni fənnin əyani qrupu üçün 45 saatlıq, qiyabi qrupu üçün 25 saatlıq sillabus
+   ola bilər; birini dəyişmək o birinə TOXUNMAMALIDIR.  Hədəf jurnalın plan saatı (``plan_hours_for_offering``) və
+   mənbənin saatı ikisi də MƏLUMDUR və növ-növ fərqlidirsə paylaşım ``reuse.hours_differ`` ilə rədd olunur («bağla» ilə
+   eyni kod) — müəllim «Kopyala və uyğunlaşdır» ilə ayrıca sillabus yaradır (:func:`hours_code`).
 4. **Tətbiq qapısı** (oxu tərəfi) — paylaşım yalnız açılışın CARİ müəllimi dosyenin müəllifi və ya öz açılışının
    müəllimi olanda görünür (:func:`effective_shares`).  Fənn başqa müəllimə təhvil veriləndə yeni müəllim köhnə
    müəllimin sillabusunu «öz sillabusu» kimi görmür.
@@ -34,7 +38,8 @@ from core.constants import AuditAction
 from ..constants import PERM_EDIT
 from ..models import ShareSource, Syllabus, SyllabusShare
 from ..state_machine import TransitionDenied
-from .reuse_rules import CODE_NOT_OWN, CODE_NOT_SIBLING
+from .plan_override import clean_override_hours
+from .reuse_rules import CODE_HOURS_DIFFER, CODE_NOT_OWN, CODE_NOT_SIBLING, normalize_hours
 from .scoping import is_author
 
 CODE_HAS_OWN = "share.target_has_own"
@@ -132,8 +137,40 @@ def target_code(offering, *, syllabus_id=None) -> str:
     return CODE_ALREADY if syllabus_id is not None and current == syllabus_id else CODE_TAKEN
 
 
-def share_code(source, *, actor, offering, state_code=None) -> str:
-    """Paylaşmanın qadağa səbəbi (``""`` — olar). ``state_code`` — :func:`target_code` əvvəlcədən hesablanıbsa."""
+def source_hours(source, fallback=None) -> dict:
+    """Paylaşılan məzmunun saatı — kafedranın düzəlişi → qüvvədə olan versiya → cari versiya → ``fallback``.
+
+    Sorğusuzdur (``approved_version`` / ``current_version`` ``select_related`` ilə gəlir) — dialoq və jurnal
+    təklifi mənbə başına sorğu etmir.  ``fallback`` — çağıranın hesabladığı rəsmi saat (mənbə jurnalın
+    ``plan_hours_for_offering``-i); yalnız versiyada saat yoxdursa istifadə olunur.
+    """
+    override = clean_override_hours(getattr(source, "plan_hours_override", None))
+    if override:
+        return override
+    for field in ("approved_version", "current_version"):
+        version = getattr(source, field, None) if getattr(source, f"{field}_id", None) else None
+        hours = normalize_hours(getattr(version, "plan_hours", None)) if version is not None else {}
+        if hours:
+            return hours
+    return normalize_hours(fallback)
+
+
+def hours_code(source, *, target_hours, source_fallback=None) -> str:
+    """Qayda 3a: hədəf jurnalın saatı mənbənin saatından fərqlidirsə ``CODE_HOURS_DIFFER`` (``""`` — olar).
+
+    İki tərəf də MƏLUM olmalıdır — saat bilinmirsə fərq sübut olunmur və köhnə davranış qalır.
+    """
+    target = normalize_hours(target_hours)
+    origin = source_hours(source, source_fallback)
+    return CODE_HOURS_DIFFER if target and origin and target != origin else ""
+
+
+def share_code(source, *, actor, offering, target_hours, source_fallback=None, state_code=None) -> str:
+    """Paylaşmanın qadağa səbəbi (``""`` — olar). ``state_code`` — :func:`target_code` əvvəlcədən hesablanıbsa.
+
+    ``target_hours`` — hədəf jurnalın plan saatı (``registrar.plan_hours_for_offering``; bu modul registrar-ı
+    idxal etmir, saatı çağıran ötürür).  Qayda 3a: saat fərqlidirsə ``CODE_HOURS_DIFFER``.
+    """
     if not actor.has(PERM_EDIT):
         return "transition.permission_denied"
     if not is_author(actor, source):
@@ -142,7 +179,8 @@ def share_code(source, *, actor, offering, state_code=None) -> str:
         return CODE_NOT_SIBLING
     if offering.instructor_id is None or offering.instructor_id != actor.user_id:
         return "transition.author_only"
-    return target_code(offering, syllabus_id=source.pk) if state_code is None else state_code
+    state = target_code(offering, syllabus_id=source.pk) if state_code is None else state_code
+    return state or hours_code(source, target_hours=target_hours, source_fallback=source_fallback)
 
 
 # ── Yazı ────────────────────────────────────────────────────────────────────────
@@ -172,10 +210,12 @@ def _audit(share, *, action, user=None, request=None, source=""):
 
 
 @transaction.atomic
-def share(*, source, offering, actor, request=None):
-    """«Eyni sillabusu bu qrupda da istifadə et» — müəllimin seçimi (qaydalar 1–3)."""
+def share(*, source, offering, actor, target_hours, source_fallback=None, request=None):
+    """«Eyni sillabusu bu qrupda da istifadə et» — müəllimin seçimi (qaydalar 1–3a; saat — :func:`share_code`)."""
     Syllabus.objects.select_for_update(of=("self",)).filter(pk=source.pk).first()
-    code = share_code(source, actor=actor, offering=offering)
+    code = share_code(
+        source, actor=actor, offering=offering, target_hours=target_hours, source_fallback=source_fallback
+    )
     if code:
         raise TransitionDenied(code)
     try:
@@ -283,7 +323,9 @@ __all__ = [
     "CODE_TAKEN",
     "REASON_CODES",
     "RESOURCE_TYPE",
+    "CODE_HOURS_DIFFER",
     "effective_shares",
+    "hours_code",
     "link_carry",
     "link_legacy",
     "release_offering",
@@ -292,6 +334,7 @@ __all__ = [
     "share_counts",
     "shared_syllabus_ids",
     "shares_of",
+    "source_hours",
     "target_code",
     "unlink_carry",
     "unshare",

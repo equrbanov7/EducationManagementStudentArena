@@ -112,15 +112,41 @@ def plan_hours_for_offering(offering):
     return from_plan() or workload_hours_for_offering(offering)
 
 
+def _group_education_form(group) -> str:
+    """Qrupun təhsil forması (``OrgUnit.settings.education_form``: ``full_time`` / ``part_time`` / ``distance``)."""
+    settings = getattr(group, "settings", None)
+    return str(settings.get("education_form") or "").strip() if isinstance(settings, dict) else ""
+
+
 def program_for_offering(offering):
-    """Açılışın ixtisası — qrupun valideyn bölməsi üzərindən (tapılmasa ``None``)."""
+    """Açılışın ixtisası — qrupun valideyn bölməsi üzərindən (tapılmasa ``None``).
+
+    Sahib 2026-11-25: eyni ixtisas bölməsində əyani VƏ qiyabi proqram ola bilər (əyani 45 saat, qiyabi 25 saat) —
+    qrupun təhsil forması (``settings.education_form``) ilə ``Program.education_form`` eyni olan proqram üstündür;
+    uyğun proqram yoxdursa (və ya qrupda forma yazılmayıbsa) köhnə qayda — bölmənin ilk proqramı.  TƏK sorğu.
+    """
     from .models import Program
 
     group = offering.group if offering.group_id else None
     unit_id = getattr(group, "parent_id", None) if group is not None else None
     if unit_id is None:
         return None
-    return Program.objects.filter(organization_id=offering.organization_id, specialty_unit_id=unit_id).first()
+    return pick_program(
+        Program.objects.filter(organization_id=offering.organization_id, specialty_unit_id=unit_id), group
+    )
+
+
+def pick_program(programs, group):
+    """Bir ixtisas bölməsinin proqramlarından (``Program.Meta.ordering`` — ad sırası) qrupunkunu seç.
+
+    TƏK qayda — tək açılış (:func:`program_for_offering`) və toplu yol (``syllabus_reuse_targets``) eyni seçimi
+    etməlidir: qrupun təhsil formasına uyğun proqram, yoxdursa ilk proqram; proqram yoxdursa ``None``.
+    """
+    programs = list(programs)
+    if not programs:
+        return None
+    form = _group_education_form(group)
+    return next((program for program in programs if form and program.education_form == form), programs[0])
 
 
 def curriculum_is_approved(*, organization, program) -> bool:
@@ -135,6 +161,7 @@ __all__ = [
     "curriculum_is_approved",
     "plan_hours_for_offering",
     "plan_hours_for_subject",
+    "pick_program",
     "program_for_offering",
     "workload_hours_for_offering",
 ]
