@@ -1,0 +1,138 @@
+/* Müəllimin öz yazdığı jurnal hissəsi — jurnal kimi cədvəl, yalnız oxu (sahib 2026-11-26).
+ *
+ * Şablon: registrar/journal_own_history.html. Jurnal şəbəkəsinin (jd2) vizual dili: i/e yaşıl, q/b qırmızı,
+ * boş xana solğun nöqtə; tələbə sütunu yapışqan, dərs sütunları üfüqi sürüşür. Yalnız `--ems-*` tokenləri.
+ */
+
+.joh { max-width: 1480px; }
+
+.joh-back {
+    display: inline-flex; align-items: center; gap: 6px; margin-bottom: 12px;
+    color: var(--ems-primary-700); font-weight: 700; font-size: 0.85rem; text-decoration: none;
+}
+.joh-back:hover, .joh-back:focus-visible { text-decoration: underline; text-underline-offset: 2px; }
+
+/* ── Başlıq ─────────────────────────────────────────────────────────────── */
+.joh-head { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 12px; }
+.joh-head__mark {
+    flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+    width: 42px; height: 42px; border-radius: var(--ems-r-lg);
+    background: var(--ems-primary-100); color: var(--ems-primary-700); font-size: 18px;
+}
+.joh-head__text { min-width: 0; }
+.joh-title { margin: 0 0 2px; font-size: 1.2rem; font-weight: 800; color: var(--ems-text); }
+.joh-sub { margin: 0; font-size: 0.88rem; font-weight: 600; color: var(--ems-text-muted); }
+.joh-teacher { margin: 2px 0 0; font-size: 0.85rem; font-weight: 700; color: var(--ems-neutral-700); }
+.joh-teacher .fa-user { color: var(--ems-primary-600); margin-right: 4px; }
+
+/* ── Xülasə çipləri ─────────────────────────────────────────────────────── */
+.joh-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; padding: 0; list-style: none; }
+.joh-chip {
+    display: inline-flex; align-items: center; gap: 4px; padding: 4px 11px;
+    border: 1px solid var(--ems-border); border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-0); color: var(--ems-neutral-700); font-size: 0.8rem; font-weight: 600;
+}
+.joh-chip b { color: var(--ems-text); font-weight: 800; }
+.joh-chip--lecture { border-color: var(--ems-primary-200); background: var(--ems-primary-50); }
+.joh-chip--seminar { border-color: var(--ems-success-bd); background: var(--ems-success-bg); }
+.joh-chip--lab { border-color: var(--ems-warning-bd); background: var(--ems-warning-bg); }
+.joh-chip--dates .fa-calendar { color: var(--ems-neutral-500); }
+
+.joh-note {
+    display: flex; gap: 8px; align-items: flex-start; margin: 0 0 14px; padding: 9px 12px;
+    border: 1px solid var(--ems-primary-200); border-radius: var(--ems-r-lg);
+    background: var(--ems-primary-50); color: var(--ems-neutral-800); font-size: 0.82rem;
+}
+.joh-note .fa-circle-info { color: var(--ems-primary-600); margin-top: 2px; }
+
+/* ── Dərs tipi tabları ──────────────────────────────────────────────────── */
+.joh-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.joh-tab {
+    padding: 6px 14px; border: 1px solid var(--ems-neutral-300); border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-0); color: var(--ems-neutral-700); font-size: 0.82rem; font-weight: 700;
+    text-decoration: none;
+}
+.joh-tab:hover { border-color: var(--ems-primary-300); color: var(--ems-primary-700); }
+.joh-tab.is-active { border-color: var(--ems-primary-600); background: var(--ems-primary-600); color: var(--ems-neutral-0); }
+
+/* ── Kartlar ────────────────────────────────────────────────────────────── */
+.joh-card {
+    margin-bottom: 18px; padding: 14px 16px; border: 1px solid var(--ems-border);
+    border-radius: var(--ems-r-xl); background: var(--ems-neutral-0);
+}
+.joh-card__title { margin: 0 0 10px; font-size: 0.95rem; font-weight: 800; color: var(--ems-text); }
+.joh-empty { margin: 0; color: var(--ems-text-muted); font-size: 0.85rem; }
+
+/* ── Jurnal şəbəkəsi ────────────────────────────────────────────────────── */
+.joh-grid-wrap { overflow-x: auto; max-height: 70vh; overflow-y: auto; border: 1px solid var(--ems-neutral-200); border-radius: var(--ems-r-lg); }
+.joh-grid-wrap:focus-visible, .joh-table-wrap:focus-visible { outline: 2px solid var(--ems-primary-500); outline-offset: 2px; }
+.joh-grid { border-collapse: separate; border-spacing: 0; font-size: 0.8rem; min-width: 100%; }
+.joh-grid th, .joh-grid td { border-bottom: 1px solid var(--ems-neutral-100); border-right: 1px solid var(--ems-neutral-100); }
+.joh-grid thead th {
+    position: sticky; top: 0; z-index: 2; background: var(--ems-bg-subtle);
+    padding: 6px 6px; vertical-align: bottom; text-align: center; font-weight: 700; color: var(--ems-neutral-700);
+}
+.joh-grid__student {
+    position: sticky; left: 0; z-index: 1; min-width: 220px; max-width: 280px;
+    padding: 6px 10px; text-align: left; font-weight: 600; color: var(--ems-text);
+    background: var(--ems-neutral-0); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    box-shadow: inset -1px 0 0 var(--ems-neutral-200);
+}
+.joh-grid thead .joh-grid__student { z-index: 3; background: var(--ems-bg-subtle); vertical-align: bottom; }
+.joh-grid__lesson { min-width: 74px; }
+.joh-grid__date { display: block; font-size: 0.74rem; font-weight: 800; color: var(--ems-text); white-space: nowrap; }
+.joh-grid__kind { display: block; font-size: 0.68rem; font-weight: 700; white-space: nowrap; }
+.joh-grid__section {
+    display: block; max-width: 92px; margin: 2px auto 0; font-size: 0.64rem; font-weight: 700;
+    color: var(--ems-primary-700); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.joh-k--lecture .joh-grid__kind { color: var(--ems-primary-700); }
+.joh-k--seminar .joh-grid__kind { color: var(--ems-success-700); }
+.joh-k--lab .joh-grid__kind { color: var(--ems-warning-700); }
+.joh-grid__lesson.is-passive { background: var(--ems-neutral-100); }
+.joh-rowno { display: inline-block; min-width: 20px; color: var(--ems-neutral-500); font-size: 0.7rem; font-weight: 700; }
+.joh-grid tbody tr:hover td, .joh-grid tbody tr:hover .joh-grid__student { background: var(--ems-primary-50); }
+.joh-cell { padding: 6px 4px; text-align: center; white-space: nowrap; }
+.joh-cell.is-empty { background: var(--ems-neutral-50); }
+.joh-cell.is-unknown .joh-v { opacity: 0.8; }
+
+.joh-v { font-weight: 800; font-size: 0.78rem; }
+.joh-v--ie { color: var(--ems-success-700); }
+.joh-v--qb { color: var(--ems-danger-600); }
+.joh-v--uq { color: var(--ems-warning-700); }
+.joh-v--none { color: var(--ems-neutral-300); }
+.joh-unknown { margin-left: 1px; color: var(--ems-neutral-500); font-weight: 800; font-size: 0.7rem; vertical-align: super; }
+
+.joh-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 10px 0 0; font-size: 0.75rem; color: var(--ems-text-muted); }
+
+/* ── «Nə vaxt, harada yazılıb» ─────────────────────────────────────────── */
+.joh-table-wrap { overflow-x: auto; }
+.joh-lessons { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.joh-lessons th {
+    padding: 7px 8px; border-bottom: 2px solid var(--ems-neutral-200); background: var(--ems-bg-subtle);
+    text-align: left; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.02em; color: var(--ems-neutral-600);
+    white-space: nowrap;
+}
+.joh-lessons td { padding: 7px 8px; border-bottom: 1px solid var(--ems-neutral-100); vertical-align: top; color: var(--ems-text); }
+.joh-lessons tr.is-passive td { color: var(--ems-text-muted); background: var(--ems-neutral-50); }
+.joh-num { text-align: right; font-variant-numeric: tabular-nums; }
+.joh-lessons th.joh-num { text-align: right; }
+.joh-nowrap { white-space: nowrap; }
+.joh-topic { min-width: 200px; max-width: 420px; }
+.joh-role { display: block; font-size: 0.7rem; font-weight: 600; color: var(--ems-text-muted); }
+.joh-tag {
+    display: inline-block; padding: 0 6px; border-radius: var(--ems-r-pill);
+    background: var(--ems-neutral-200); color: var(--ems-neutral-700); font-size: 0.66rem; font-weight: 700;
+}
+.joh-stamp { display: block; font-variant-numeric: tabular-nums; }
+.joh-stamp--muted { color: var(--ems-text-muted); }
+
+@media (max-width: 640px) {
+    .joh-grid__student { min-width: 150px; max-width: 170px; }
+    .joh-head__mark { display: none; }
+}
+
+@media print {
+    .joh-back, .joh-tabs { display: none; }
+    .joh-grid-wrap { max-height: none; overflow: visible; }
+}

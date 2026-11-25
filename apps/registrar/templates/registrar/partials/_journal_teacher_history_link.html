@@ -1,0 +1,7 @@
+{% load i18n %}{% comment %}«Müəllimin yazdığı hissə» (sahib 2026-11-26): geniş görünüşdə seçilmiş müəllimin bu jurnalda yazdığı
+dərslər/qeydlər — jurnal kimi cədvəl, yalnız oxu. Giriş yenidən yoxlanılır: journal_own_history._subject.{% endcomment %}
+<div class="jl-subject-sub jl-teacher-history">
+    <a class="jl-teacher-history__link" href="{% url 'registrar:journal_detail' offering.id %}?own_history=1&amp;teacher={{ offering.journal_teacher_history_id }}&amp;next={{ jl_history_next }}">
+        <i class="fas fa-table-cells" aria-hidden="true"></i> {% trans "Müəllimin yazdığı hissə" context "registrar.own_history" %}
+    </a>
+</div>

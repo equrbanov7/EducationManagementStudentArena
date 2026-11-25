@@ -1,28 +1,135 @@
 {% extends "base.html" %}
-{% load i18n %}
-{% block title %}{% trans "Öz jurnal qeydlərim" %} — {{ offering.subject.name }}{% endblock %}
+{% load static i18n %}
+{% comment %}Müəllimin öz yazdığı jurnal hissəsi — jurnal kimi cədvəl, yalnız oxu (sahib 2026-11-26).
+Data: apps/registrar/journal_own_history_grid.py · giriş: journal_own_history.detail.{% endcomment %}
+{% block title %}{% if broad_view %}{% trans "Müəllimin yazdığı hissə" context "registrar.own_history" %}{% else %}{% trans "Öz jurnal qeydlərim" %}{% endif %} — {{ offering.subject.name }}{% endblock %}
+{% block extraCss %}
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_own_history.css' %}?v=20261126">
+{% endblock %}
 {% block content %}
-<main class="container py-4">
-    <h1>{% trans "Öz jurnal qeydlərim" %}</h1>
-    <p>{{ offering.subject.name }} · {{ offering.group.name }} · {{ offering.period.name }}</p>
-    <p class="alert alert-info">{% trans "Bu fənn üzrə cari dərs yükü təyinatınız yoxdur. Yalnız əvvəl adınıza keçirilmiş və ya sizin yazdığınız dərslər göstərilir. Şəxsən daxil etdiyiniz xanalar və adınıza keçirilmiş dərslərdə daxil edən şəxsi məlum olmayan qeydlər göstərilir. Tarixçə yalnız oxunur." %}</p>
-    {% for lesson in page_obj %}
-    <section class="card mb-3">
-        <div class="card-body">
-            <h2 class="h5">{{ lesson.date }} · {{ lesson.get_kind_display }} · {{ lesson.hours }} {% trans "saat" %}</h2>
-            <p>{{ lesson.topic }}</p>
-            {% if lesson.author_marks %}
-            <div class="table-responsive"><table class="table">
-                <thead><tr><th>{% trans "Tələbə" %}</th><th>{% trans "Davamiyyət" %}</th><th>{% trans "Bal" %}</th><th>{% trans "Mənbə" %}</th></tr></thead>
-                <tbody>{% for mark in lesson.author_marks %}
-                    <tr><td>{{ mark.enrollment.student.get_full_name|default:mark.enrollment.student.username }}</td><td>{{ mark.get_status_display }}</td><td>{{ mark.score|default_if_none:"—" }}</td><td>{% if mark.entered_by_id %}{% trans "Öz daxil etdiyiniz qeyd" %}{% else %}<span class="text-muted">{% trans "Daxil edən şəxs məlum deyil" %}</span>{% endif %}</td></tr>
-                {% endfor %}</tbody>
-            </table></div>
-            {% else %}<p>{% trans "Bu dərsdə görünən bal/davamiyyət qeydi yoxdur." %}</p>{% endif %}
+<main class="joh container-fluid py-4">
+    <a class="joh-back" href="{{ back_url }}"><i class="fas fa-arrow-left" aria-hidden="true"></i> {% trans "Jurnal tarixçəsinə qayıt" %}</a>
+
+    <header class="joh-head">
+        <div class="joh-head__mark" aria-hidden="true"><i class="fas fa-clock-rotate-left"></i></div>
+        <div class="joh-head__text">
+            <h1 class="joh-title">{% if broad_view %}{% trans "Müəllimin yazdığı hissə" context "registrar.own_history" %}{% else %}{% trans "Öz jurnal qeydlərim" %}{% endif %}</h1>
+            <p class="joh-sub">{{ offering.subject.name }}{% if offering.group %} · {{ offering.group.name }}{% endif %} · {{ offering.period.name }}</p>
+            <p class="joh-teacher"><i class="fas fa-user" aria-hidden="true"></i> {{ subject_name }}</p>
+        </div>
+    </header>
+
+    <ul class="joh-chips" aria-label="{% trans 'Xülasə' context 'registrar.own_history' %}">
+        <li class="joh-chip"><b>{{ summary.lessons }}</b> {% trans "dərs" %}</li>
+        {% for item in summary.by_kind %}
+        <li class="joh-chip joh-chip--{{ item.kind }}">{{ item.label }}: <b>{{ item.lessons }}</b> {% trans "dərs" %} · <b>{{ item.hours }}</b> {% trans "saat" %}</li>
+        {% endfor %}
+        {% if summary.first %}
+        <li class="joh-chip joh-chip--dates"><i class="far fa-calendar" aria-hidden="true"></i> {{ summary.first|date:"d.m.Y" }}{% if summary.last != summary.first %} – {{ summary.last|date:"d.m.Y" }}{% endif %}</li>
+        {% endif %}
+    </ul>
+
+    <p class="joh-note">
+        <i class="fas fa-circle-info" aria-hidden="true"></i>
+        {% if broad_view %}{% trans "Yalnız bu müəllimin keçirdiyi və ya yazdığı dərslər və onun daxil etdiyi qeydlər göstərilir. Saat yalnız müəllimin adına keçirilmiş dərslərdən sayılır. Yalnız oxunur." context "registrar.own_history" %}
+        {% else %}{% trans "Yalnız sizin keçirdiyiniz və ya yazdığınız dərslər və öz daxil etdiyiniz qeydlər göstərilir. Saat yalnız adınıza keçirilmiş dərslərdən sayılır. Yalnız oxunur." context "registrar.own_history" %}{% endif %}
+    </p>
+
+    {% if kind_tabs|length > 1 %}
+    <nav class="joh-tabs" aria-label="{% trans 'Dərs tipi' context 'registrar.own_history' %}">
+        <a class="joh-tab{% if not selected_kind %} is-active{% endif %}" href="{{ all_tab_url }}"{% if not selected_kind %} aria-current="page"{% endif %}>{% trans "Hamısı" context "registrar.own_history" %}</a>
+        {% for tab in kind_tabs %}
+        <a class="joh-tab{% if selected_kind == tab.value %} is-active{% endif %}" href="{{ tab.url }}"{% if selected_kind == tab.value %} aria-current="page"{% endif %}>{{ tab.label }}</a>
+        {% endfor %}
+    </nav>
+    {% endif %}
+
+    <section class="joh-card" aria-labelledby="joh-grid-title">
+        <h2 class="joh-card__title" id="joh-grid-title">{% trans "Jurnal" context "registrar.own_history" %}</h2>
+        {% if rows %}
+        <div class="joh-grid-wrap" tabindex="0" role="region" aria-labelledby="joh-grid-title">
+            <table class="joh-grid">
+                <thead>
+                    <tr>
+                        <th scope="col" class="joh-grid__student">{% trans "Tələbə" %}</th>
+                        {% for col in columns %}
+                        <th scope="col" class="joh-grid__lesson joh-k--{{ col.lesson.kind }}{% if col.lesson.is_passive %} is-passive{% endif %}" title="{{ col.label }}{% if col.section %} · {{ col.section }}{% endif %} · {{ col.role }}">
+                            <span class="joh-grid__date">{{ col.lesson.date|date:"d.m.Y" }}</span>
+                            <span class="joh-grid__kind">{{ col.short }} · {{ col.lesson.hours }} {% trans "s." context "registrar.own_history" %}</span>
+                            {% if col.section %}<span class="joh-grid__section">{{ col.section }}</span>{% endif %}
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                    <tr>
+                        <th scope="row" class="joh-grid__student"><span class="joh-rowno">{{ forloop.counter }}</span> {{ row.name }}</th>
+                        {% for cell in row.cells %}
+                        {% with mark=cell.mark %}
+                        <td class="joh-cell{% if not mark %} is-empty{% elif not cell.own %} is-unknown{% endif %}">
+                            {% if mark %}
+                            <span class="joh-v {% if mark.status == 'absent' %}joh-v--qb{% elif mark.status == 'excused' %}joh-v--uq{% else %}joh-v--ie{% endif %}" title="{% if cell.own %}{% if broad_view %}{% trans 'Müəllimin öz daxil etdiyi qeyd' context 'registrar.own_history' %}{% else %}{% trans 'Öz daxil etdiyiniz qeyd' %}{% endif %}{% else %}{% trans 'Daxil edən şəxs məlum deyil' %}{% endif %}">{% if mark.status == 'absent' %}q/b{% elif mark.status == 'excused' %}üq{% elif mark.score is not None %}{{ mark.score|floatformat:'-2' }}{% else %}i/e{% endif %}</span>{% if not cell.own %}<span class="joh-unknown" aria-hidden="true">*</span>{% endif %}
+                            {% else %}<span class="joh-v joh-v--none" aria-hidden="true">·</span>{% endif %}
+                        </td>
+                        {% endwith %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="joh-legend">
+            <span><b class="joh-v joh-v--ie">i/e</b> {% trans "iştirak" context "registrar.own_history" %}</span>
+            <span><b class="joh-v joh-v--qb">q/b</b> {% trans "qayıb" context "registrar.own_history" %}</span>
+            <span><b class="joh-v joh-v--none">·</b> {% trans "göstərilən qeyd yoxdur" context "registrar.own_history" %}</span>
+            {% if has_unknown_cells %}<span><b class="joh-unknown">*</b> {% trans "köçürülmüş qeyd, daxil edəni bilinmir" context "registrar.own_history" %}</span>{% endif %}
+        </p>
+        {% else %}
+        <p class="joh-empty">{% trans "Bu dərslərdə görünən bal/davamiyyət qeydi yoxdur." context "registrar.own_history" %}</p>
+        {% endif %}
+    </section>
+
+    <section class="joh-card" aria-labelledby="joh-lessons-title">
+        <h2 class="joh-card__title" id="joh-lessons-title">{% trans "Nə vaxt, harada yazılıb" context "registrar.own_history" %}</h2>
+        <div class="joh-table-wrap" tabindex="0" role="region" aria-labelledby="joh-lessons-title">
+            <table class="joh-lessons">
+                <thead>
+                    <tr>
+                        <th scope="col">№</th>
+                        <th scope="col">{% trans "Tarix" %}</th>
+                        <th scope="col">{% trans "Vaxt" context "registrar.own_history" %}</th>
+                        <th scope="col">{% trans "Növ" %}</th>
+                        <th scope="col">{% trans "Bölmə" context "registrar.own_history" %}</th>
+                        <th scope="col">{% trans "Mövzu" context "registrar.own_history" %}</th>
+                        <th scope="col" class="joh-num">{% trans "Saat" %}</th>
+                        <th scope="col">{% trans "Otaq" context "registrar.own_history" %}</th>
+                        <th scope="col" class="joh-num">{% trans "Qeyd" context "registrar.own_history" %}</th>
+                        <th scope="col">{% trans "Yazılıb" context "registrar.own_history" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for col in columns %}
+                    <tr{% if col.lesson.is_passive %} class="is-passive"{% endif %}>
+                        <td class="joh-num">{{ forloop.counter }}</td>
+                        <td class="joh-nowrap">{{ col.lesson.date|date:"d.m.Y" }}</td>
+                        <td class="joh-nowrap">{{ col.time|default:"—" }}</td>
+                        <td>{{ col.label }}{% if col.lesson.is_passive %} <span class="joh-tag">{% trans "Passiv" context "registrar.own_history" %}</span>{% endif %}<span class="joh-role">{{ col.role }}</span></td>
+                        <td>{{ col.section|default:"—" }}</td>
+                        <td class="joh-topic">{{ col.lesson.display_topic|default:"—" }}</td>
+                        <td class="joh-num">{{ col.lesson.hours }}</td>
+                        <td>{{ col.room|default:"—" }}</td>
+                        <td class="joh-num">{{ col.cells }}</td>
+                        <td class="joh-nowrap">
+                            {% if col.lesson_recorded %}<span class="joh-stamp">{% trans "Dərs" context "registrar.own_history" %}: {{ col.lesson_recorded }}</span>{% endif %}
+                            {% if col.marks_recorded %}<span class="joh-stamp">{% trans "Son qeyd" context "registrar.own_history" %}: {{ col.marks_recorded }}</span>{% endif %}
+                            {% if not col.lesson_recorded and not col.marks_recorded %}<span class="joh-stamp joh-stamp--muted">{% if col.imported %}{% trans "Köhnə sistemdən" context "registrar.own_history" %}{% else %}—{% endif %}</span>{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </section>
-    {% endfor %}
-    {% include "partials/_pagination.html" with page_obj=page_obj %}
-    <a href="{% url 'registrar:journal_list' %}?teaching=history">{% trans "Jurnal tarixçəsinə qayıt" %}</a>
 </main>
 {% endblock %}
