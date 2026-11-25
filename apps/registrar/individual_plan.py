@@ -4,16 +4,16 @@ FORMAT UNİVERSİTETİN RƏSMİ NÜMUNƏSİNDƏN OLDUĞU KİMİDİR. Sahibin gö
 «235 QM fərdi plan.docx» nümunəsinin BİR tələbə bloku (başlıq paraqrafları,
 iki semestr cədvəli, qeyd və imza sətirləri) `docx_templates/individual_plan.docx`
 şablonudur; mətn yerlərində `{{TOKEN}}` yer tutucuları var. Sənəd python-docx ilə
-YOX, XML səviyyəsində doldurulur — nümunənin şrifti (Times New Roman 12),
-sütun enləri, sərhədləri və A4 səhifə parametrləri bir bayt belə dəyişmir
-(«kənara çıxma — rəsmi sənədin formatı odur», 2026-09-07).
+YOX, XML səviyyəsində doldurulur — nümunənin şrifti, sərhədləri saxlanılır (2026-09-07).
+Sahib 2026-11-26: nümunənin cədvəli A4-dən kənara çıxırdı (en 11484, girinti −998) — şablonda kənar boşluqlar
+2/1 sm, cədvəl eni mətn sahəsinə bərabər (10205), cədvəl şrifti 11, başlıq sətri hər səhifədə təkrarlanır.
 
 Məlumat mənbəyi:
   * tələbə / qrup / ixtisas / fakültə — `StudentAcademicRecord` + `OrgUnit` zənciri
     (fakültə = qrupun ən yaxın `faculty` əcdadı; ixtisas = `specialty` əcdadı,
     yoxdursa proqramın adı);
-  * fənlər — tələbənin planının (`Curriculum`) cari tədris ilinə düşən iki semestri:
-    payız = 2·kurs−1, yaz = 2·kurs. Kurs qrupun metadatasından (`course_year`),
+  * fənlər — tələbənin planının (`Curriculum`) I kursdan CARİ kursa qədər BÜTÜN semestrləri
+    (sahib 2026-11-26), hər kurs öz başlığı ilə: payız = 2·k−1, yaz = 2·k. Kurs qrupun metadatasından (`course_year`),
     boşdursa qəbul ili ilə cari tədris ilinin fərqindən;
   * müəllim — həmin semestrin `CourseOffering`-i (qrup + fənn) varsa `instructor`;
   * «Fənnin kodu» — YALNIZ `CurriculumSubject.row_code` (plan şifri). Daxili
@@ -84,6 +84,14 @@ class SemesterBlock:
 
 
 @dataclass
+class YearBlock:
+    """Bir tədris ili (kurs): başlıq + payız/yaz semestrləri."""
+
+    title: str
+    semesters: list[SemesterBlock]
+
+
+@dataclass
 class StudentPlan:
     university: str
     faculty: str
@@ -92,7 +100,11 @@ class StudentPlan:
     student: str
     study_year: str
     academic_year: str
-    semesters: list[SemesterBlock]
+    years: list[YearBlock]
+
+    @property
+    def semesters(self) -> list[SemesterBlock]:
+        return [semester for year in self.years for semester in year.semesters]
 
 
 # ── Məlumatın yığılması ──────────────────────────────────────────────────────
@@ -108,7 +120,7 @@ def _ancestor_named(unit, unit_type: str) -> str:
 
 
 def _start_year(academic_year: str) -> int:
-    match = re.match(r"\s*(\d{4})", academic_year or "")
+    match = re.search(r"(\d{4})", academic_year or "")
     return int(match.group(1)) if match else 0
 
 
@@ -128,17 +140,34 @@ def current_period(organization):
     return queryset.filter(is_current=True).first() or queryset.order_by("-start_date").first()
 
 
+def _season_of(name: str) -> str:
+    name = (name or "").lower()
+    if "pay" in name or "güz" in name or "fall" in name or "autumn" in name:
+        return "fall"
+    if "yaz" in name or "spring" in name or "bahar" in name:
+        return "spring"
+    return ""
+
+
 def _season_periods(organization, academic_year: str) -> dict[str, list]:
     """Tədris ilinin dövrlərini fəslə görə ayır: `fall` (Payız) / `spring` (Yaz)."""
+    return _periods_by_year(organization).get(_start_year(academic_year), {"fall": [], "spring": []})
+
+
+def _periods_by_year(organization) -> dict[int, dict[str, list]]:
+    """``başlanğıc ili → {fall, spring}`` — BÜTÜN tədris illərinin dövrləri bir sorğuda.
+
+    ``academic_year`` sərbəst mətndir («2024/2025», «2024-2025», «2024») — ilk 4 rəqəmli il açardır.
+    """
     AcademicPeriod = django_apps.get_model("organizations", "AcademicPeriod")
-    seasons: dict[str, list] = {"fall": [], "spring": []}
-    for period in AcademicPeriod.objects.filter(organization=organization, academic_year=academic_year):
-        name = (period.name or "").lower()
-        if "pay" in name or "güz" in name or "fall" in name or "autumn" in name:
-            seasons["fall"].append(period.id)
-        elif "yaz" in name or "spring" in name or "bahar" in name:
-            seasons["spring"].append(period.id)
-    return seasons
+    years: dict[int, dict[str, list]] = {}
+    for period_id, name, academic_year in AcademicPeriod.objects.filter(organization=organization).values_list(
+        "id", "name", "academic_year"
+    ):
+        season, start = _season_of(name), _start_year(academic_year)
+        if season and start:
+            years.setdefault(start, {"fall": [], "spring": []})[season].append(period_id)
+    return years
 
 
 def _teacher_map(organization, group, seasons) -> dict[tuple[str, object], str]:
@@ -196,8 +225,11 @@ def _row_chair(row) -> str:
     return (getattr(chair, "name", "") or "").strip()
 
 
-def _semester_block(title: str, rows, season: str, teachers, extra=()) -> SemesterBlock:
-    """Plan sətirləri + (plan boşdursa / başqa qrupun jurnalı varsa) jurnal sətirləri (:mod:`.individual_plan_sources`)."""
+def _semester_block(title: str, rows, teachers: dict, extra=()) -> SemesterBlock:
+    """Plan sətirləri + (plan boşdursa / başqa qrupun jurnalı varsa) jurnal sətirləri (:mod:`.individual_plan_sources`).
+
+    ``teachers``: ``subject_id → müəllim`` (tələbənin öz jurnalı, yoxdursa qrupun həmin semestrdəki açılışı).
+    """
     block = SemesterBlock(title=title)
     for index, row in enumerate(rows, start=1):
         block.rows.append(
@@ -208,7 +240,7 @@ def _semester_block(title: str, rows, season: str, teachers, extra=()) -> Semest
                 hours=_row_hours(row),
                 credits=int(row.credits or 0),
                 chair=_row_chair(row),
-                teacher=teachers.get((season, row.subject_id), ""),
+                teacher=teachers.get(row.subject_id, ""),
             )
         )
     for item in extra:
@@ -227,6 +259,10 @@ def _semester_block(title: str, rows, season: str, teachers, extra=()) -> Semest
     return block
 
 
+def _year_label(start: int) -> str:
+    return f"{start}-{start + 1}" if start else ""
+
+
 def build_student_plan(
     organization,
     record,
@@ -238,61 +274,76 @@ def build_student_plan(
     context_group=None,
     plan_sources: sources.PlanSources | None = None,
 ) -> StudentPlan:
-    """Bir tələbənin fərdi planı — sənədin bir səhifəsi.
+    """Bir tələbənin fərdi planı — I kursdan cari kursa qədər BÜTÜN tədris illəri (sahib 2026-11-26).
 
-    Perf auditi 2026-09-13 F-03: qrup sənədində hər tələbə üçün
-    `_season_periods` (dövrlər) + `CurriculumSubject` sorğusu gedirdi
-    (25 tələbə → 19→65 sorğu), halbuki eyni qrup/kurikulum/kurs üçün nəticə
-    eynidir. `teachers_cache` kimi çağıran `seasons_cache` (tədris ili üzrə)
-    və `rows_cache` (`(curriculum_id, kurs)` sətirləri + `(qrup, proqram)`
-    struktur adları) ötürür.
+    Hər kurs bir blokdur: «I kurs — 2023-2024 tədris ili», altında payız (P-1) və yaz (Y-2) cədvəlləri.
+    Kurs ``k``-nın tədris ili = cari ilin başlanğıcı − (cari kurs − k).
+
+    Perf auditi 2026-09-13 F-03: qrup sənədində sorğu sayı tələbə sayından asılı olmamalıdır —
+    ``seasons_cache`` (bütün illərin dövrləri, bir sorğu), ``teachers_cache`` ((qrup, il) üzrə),
+    ``rows_cache`` (kurikulumun BÜTÜN sətirləri + (qrup, proqram) struktur adları) çağıran tərəfindən ötürülür.
     """
     CurriculumSubject = django_apps.get_model("registrar", "CurriculumSubject")
     academic_year = getattr(period, "year_display", None) or getattr(period, "academic_year", "") or ""
     raw_year = getattr(period, "academic_year", "") or ""
+    current_start = _start_year(raw_year)
     group = record.group
     course = _course_year(group, record, raw_year)
-    fall_no, spring_no = 2 * course - 1, 2 * course
 
     if seasons_cache is None:
         seasons_cache = {}
-    if raw_year not in seasons_cache:
-        seasons_cache[raw_year] = _season_periods(organization, raw_year)
-    seasons = seasons_cache[raw_year]
+    if "by_year" not in seasons_cache:
+        seasons_cache["by_year"] = _periods_by_year(organization)
+    by_year = seasons_cache["by_year"]
     if teachers_cache is None:
         teachers_cache = {}
-    key = getattr(group, "id", None)
-    if key not in teachers_cache:
-        teachers_cache[key] = _teacher_map(organization, group, seasons)
-    teachers = teachers_cache[key]
-
     if rows_cache is None:
         rows_cache = {}
-    rows_key = ("rows", record.curriculum_id, course)
+    rows_key = ("rows", record.curriculum_id)
     if rows_key not in rows_cache:
         rows_cache[rows_key] = list(
-            CurriculumSubject.objects.filter(curriculum=record.curriculum, semester_number__in=(fall_no, spring_no))
+            CurriculumSubject.objects.filter(curriculum_id=record.curriculum_id)
             .select_related("subject", "subject__chair_unit", "teaching_chair")
             .order_by("semester_number", "order", "row_code", "subject__name")
+            if record.curriculum_id
+            else []
         )
-    rows = rows_cache[rows_key]
-    fall_rows = [row for row in rows if row.semester_number == fall_no]
-    spring_rows = [row for row in rows if row.semester_number == spring_no]
-    # Sahib 2026-11-25: plan boşdursa jurnallar, başqa qrupun (əlavə / alt qrup) jurnalı varsa o da.
+    all_rows = rows_cache[rows_key]
+    if plan_sources is None:
+        plan_sources = sources.PlanSources(
+            organization, [pid for seasons in by_year.values() for pid in seasons["fall"] + seasons["spring"]]
+        )
     home_group_id = getattr(group, "id", None)
     fallback_groups = [home_group_id, getattr(context_group, "id", None)]
-    if plan_sources is None:
-        plan_sources = sources.PlanSources(organization, seasons["fall"] + seasons["spring"])
-    extra = {
-        season: plan_sources.semester_extra_rows(
-            record,
-            period_ids=seasons[season],
-            curriculum_subject_ids={row.subject_id for row in season_rows},
-            home_group_id=home_group_id,
-            fallback_groups=fallback_groups,
-        )
-        for season, season_rows in (("fall", fall_rows), ("spring", spring_rows))
-    }
+
+    years: list[YearBlock] = []
+    for year_course in range(1, course + 1):
+        start = current_start - (course - year_course) if current_start else 0
+        seasons = by_year.get(start, {"fall": [], "spring": []})
+        teacher_key = (home_group_id, start)
+        if teacher_key not in teachers_cache:
+            teachers_cache[teacher_key] = _teacher_map(organization, group, seasons)
+        group_teachers = teachers_cache[teacher_key]
+        fall_no, spring_no = 2 * year_course - 1, 2 * year_course
+        semesters = []
+        for season, number, label in (("fall", fall_no, "Payız"), ("spring", spring_no, "Yaz")):
+            season_rows = [row for row in all_rows if row.semester_number == number]
+            teachers = {subject_id: name for (key, subject_id), name in group_teachers.items() if key == season}
+            teachers.update(plan_sources.student_teachers(record.student_id, seasons[season]))
+            # Sahib 2026-11-25: plan boşdursa jurnallar, başqa qrupun (əlavə / alt qrup) jurnalı varsa o da.
+            # Keçmiş illərdə qrupun açılışları ehtiyat mənbə deyil (qrup o vaxt başqa kursda idi).
+            extra = plan_sources.semester_extra_rows(
+                record,
+                period_ids=seasons[season],
+                curriculum_subject_ids={row.subject_id for row in season_rows},
+                home_group_id=home_group_id,
+                fallback_groups=fallback_groups if start == current_start else [],
+            )
+            prefix = "P" if season == "fall" else "Y"
+            semesters.append(_semester_block(f"{label} semestri ({prefix}-{number})", season_rows, teachers, extra))
+        roman = _ROMAN.get(year_course, str(year_course))
+        title = f"{roman} kurs — {_year_label(start)} tədris ili" if start else f"{roman} kurs"
+        years.append(YearBlock(title=title, semesters=semesters))
 
     program = record.program
     # Struktur adları (ixtisas/fakültə) `parent` zənciri ilə tapılır — zəncirin
@@ -312,19 +363,15 @@ def build_student_plan(
     specialty, faculty = rows_cache[names_key]
 
     student = record.student
-    student_name = _student_name(student)
     return StudentPlan(
         university=az_upper(organization.name),
         faculty=faculty,
         specialty=specialty,
         group=(group.name if group is not None else ""),
-        student=student_name,
+        student=_student_name(student),
         study_year=_ROMAN.get(course, str(course)),
         academic_year=re.sub(r"\s*/\s*", "-", academic_year),  # nümunədəki kimi «2026-2027»
-        semesters=[
-            _semester_block(f"Payız semestri (P-{fall_no})", fall_rows, "fall", teachers, extra["fall"]),
-            _semester_block(f"Yaz semestri (Y-{spring_no})", spring_rows, "spring", teachers, extra["spring"]),
-        ],
+        years=years,
     )
 
 
@@ -384,13 +431,35 @@ def _fill_table(tbl_xml: str, block: SemesterBlock) -> str:
     return head + header + body + total_xml + "</w:tbl>"
 
 
+def _paragraph_start(xml: str, token: str) -> int:
+    return xml.rindex("<w:p ", 0, xml.index(token))
+
+
+def _year_title_paragraph(sem_title_paragraph: str) -> str:
+    """Semestr başlığı paraqrafından kurs başlığı: altdan xətt, bir az yuxarı boşluq, cədvəllə bir yerdə."""
+    para = sem_title_paragraph.replace("{{SEM1_TITLE}}", "{{YEAR_TITLE}}")
+    para = para.replace('w:before="120" w:after="60"', 'w:before="240" w:after="60"', 1)
+    return para.replace("<w:b/>", '<w:b/><w:u w:val="single"/>')
+
+
 def _fill_block(block_xml: str, plan: StudentPlan) -> str:
-    tables = _TBL_RE.findall(block_xml)
-    out = block_xml
-    for tbl_xml, semester in zip(tables, plan.semesters):
-        out = out.replace(tbl_xml, _fill_table(tbl_xml, semester), 1)
+    """Tələbə bloku: başlıq + hər kurs üçün [kurs başlığı, payız cədvəli, yaz cədvəli] + qeyd/imzalar."""
+    seg_start = _paragraph_start(block_xml, "{{SEM1_TITLE}}")
+    tables = list(_TBL_RE.finditer(block_xml))
+    seg_end = tables[1].end()
+    head, segment, tail = block_xml[:seg_start], block_xml[seg_start:seg_end], block_xml[seg_end:]
+    year_title = _year_title_paragraph(segment[: segment.index("</w:p>") + len("</w:p>")])
+    seg_tables = _TBL_RE.findall(segment)
+
+    parts = []
+    for year in plan.years:
+        filled = segment
+        for tbl_xml, semester in zip(seg_tables, year.semesters):
+            filled = filled.replace(tbl_xml, _fill_table(tbl_xml, semester), 1)
+        filled = _sub(filled, {"SEM1_TITLE": year.semesters[0].title, "SEM2_TITLE": year.semesters[1].title})
+        parts.append(_sub(year_title, {"YEAR_TITLE": year.title}) + filled)
     return _sub(
-        out,
+        head + "".join(parts) + tail,
         {
             "UNIVERSITY": plan.university,
             "FACULTY": plan.faculty,
@@ -399,8 +468,6 @@ def _fill_block(block_xml: str, plan: StudentPlan) -> str:
             "STUDENT": plan.student,
             "STUDY_YEAR": plan.study_year,
             "ACADEMIC_YEAR": plan.academic_year,
-            "SEM1_TITLE": plan.semesters[0].title,
-            "SEM2_TITLE": plan.semesters[1].title,
         },
     )
 
@@ -430,12 +497,15 @@ def build_group_document(organization, group, *, record_id=None) -> tuple[str, b
     """(fayl adı, DOCX baytları, tələbə sayı) — bütöv qrup və ya tək tələbə üçün."""
     period = current_period(organization)
     raw_year = getattr(period, "academic_year", "") or ""
-    seasons_cache: dict = {raw_year: _season_periods(organization, raw_year)}
-    year_periods = seasons_cache[raw_year]["fall"] + seasons_cache[raw_year]["spring"]
+    by_year = _periods_by_year(organization)
+    seasons_cache: dict = {"by_year": by_year}
+    current = by_year.get(_start_year(raw_year), {"fall": [], "spring": []})
+    year_periods = current["fall"] + current["spring"]
     records = group_records(organization, group, record_id=record_id, period_ids=year_periods)
     teachers_cache: dict = {}
     rows_cache: dict = {}
-    plan_sources = sources.PlanSources(organization, year_periods)
+    all_periods = [pid for seasons in by_year.values() for pid in seasons["fall"] + seasons["spring"]]
+    plan_sources = sources.PlanSources(organization, all_periods)
     plan_sources.prime([record.student_id for record in records])
     plans = [
         build_student_plan(
@@ -464,6 +534,7 @@ __all__ = [
     "PlanRow",
     "SemesterBlock",
     "StudentPlan",
+    "YearBlock",
     "az_upper",
     "build_group_document",
     "build_student_plan",
