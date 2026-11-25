@@ -71,7 +71,7 @@ kifayət deyil, sətrin `can_view_students` bayrağı tələbə tərəfi açarı
 {% if row.data.can_manage %}
 <button type="button" class="ems-btn ems-btn--sm"
         data-tof-open="tofGroupDialog"
-        data-tof-prefill='{"action": "save_group", "id": "{{ row.data.id }}", "name": "{{ row.data.name|escapejs }}", "code": "{{ row.data.code|escapejs }}", "specialty": "{{ row.data.specialty_id }}", "course_year": "{{ row.data.course_year }}", "language_sector": "{{ row.data.language_sector|escapejs }}", "education_form": "{{ row.data.education_form|escapejs }}", "admission_year": "{{ row.data.admission_year }}", "capacity": "{{ row.data.capacity }}", "tutor": "{{ row.data.tutor_id }}"}'>
+        data-tof-prefill='{"action": "save_group", "id": "{{ row.data.id }}", "name": "{{ row.data.name|escapejs }}", "code": "{{ row.data.code|escapejs }}", "specialty": "{{ row.data.specialty_id }}", "course_year": "{{ row.data.course_year }}", "language_sector": "{{ row.data.language_sector|escapejs }}", "education_form": "{{ row.data.education_form|escapejs }}", "group_kind": "{{ row.data.group_kind|escapejs }}", "admission_year": "{{ row.data.admission_year }}", "capacity": "{{ row.data.capacity }}", "tutor": "{{ row.data.tutor_id }}"}'>
     {% trans "Redaktə" context "accounts.groups" %}
 </button>
 {% if row.data.is_active %}

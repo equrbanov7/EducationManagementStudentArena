@@ -54,6 +54,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.utils.translation import pgettext
 
+from apps.registrar.foreign_parallel import foreign_parallel
 from apps.registrar.models import ScheduleSlot, SlotKind, WeekType
 from apps.registrar.schedule import effective_instructor, effective_instructor_id, is_joint_lecture, same_id
 
@@ -344,6 +345,8 @@ def detect(
             slot=slot,
             subject_name=subject_name,
         ):
+            continue
+        if not same_group and foreign_parallel(organization, group_id, slot):  # əcnəbi qrupları (sahib 2026-11-25)
             continue
         if same_id(instructor_id, effective_instructor_id(slot)):
             found.setdefault(KIND_TEACHER, slot)

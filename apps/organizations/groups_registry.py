@@ -34,6 +34,7 @@ from django.utils.translation import pgettext
 from core.constants import OrgUnitType
 from core.search_text import tolerant_q
 
+from .group_kind import kind_of, kind_options
 from .models import OrgUnit
 from .scoping import EMPTY_SCOPE, faculty_read_scope, get_permission_scope, scope_org_units, unit_in_scope
 from .views.shared._helpers import _has_org_permission, _visible_units_queryset
@@ -400,6 +401,7 @@ def build_groups_registry(request, organization) -> dict:
                 "curriculum_id": meta["curriculum_id"],
                 "education_form": meta["education_form"],
                 "education_form_label": form_labels.get(meta["education_form"], ""),
+                "group_kind": kind_of(unit),
                 # «Tələbə əlavə et» dialoqunun namizəd axtarışı (qrupsuz tələbələr).
                 "candidates_url": reverse("organizations:group_student_candidates", args=[organization.slug, unit.id]),
                 "students": student_counts.get(unit.id, 0),
@@ -465,6 +467,7 @@ def build_groups_registry(request, organization) -> dict:
             organization, settings_rows=scoped_settings if scope.is_org_wide else None
         ),
         "education_form_options": education_form_choices(),
+        "group_kind_options": kind_options(),
         "current_year": current_year,
         "admission_year_options": admission_year_options(
             organization, current_year=current_year, scope=scope, settings_rows=scoped_settings

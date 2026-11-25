@@ -83,6 +83,7 @@ LEADERSHIP_ROLE_NAMES = frozenset(
         "vice_director",
         "admin_unit_head",
         "monitoring_head",
+        "foreign_students_head",
         "org_admin",
         "owner",
         "manager",

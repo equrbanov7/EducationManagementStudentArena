@@ -205,6 +205,12 @@ def create_account(actor: RimActor, *, kind: str, data: dict, request=None, note
     if kind == intake_create.KIND_TEACHER and draft.scope_unit is not None:
         if not teacher_unit_allowed(actor, draft.scope_unit):
             draft.errors["unit"] = pgettext(_CTX, "Bölmə tapılmadı və ya icazə əhatənizdən kənardadır.")
+    # Sahib 2026-11-25: tələbənin qrupu da yaradıcının `user.import` əhatəsində (əcnəbi şöbəsi — yalnız öz qrupları).
+    if kind == intake_create.KIND_STUDENT and draft.targets.get("group") is not None:
+        from ..intake.scope import group_allowed
+
+        if not group_allowed(actor.user, organization, draft.targets["group"]):
+            draft.errors["group"] = pgettext(_CTX, "Qrup tapılmadı və ya icazə əhatənizdən kənardadır.")
     if not draft.ok:
         raise field_error(pgettext(_CTX, "Formda düzəliş tələb olunan sahələr var."), draft.errors)
     _screen_draft_names(request, draft, organization, user=actor.user)

@@ -373,6 +373,10 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
     section["group_options"] = payload.get("group_options", [])
     section["movement_form_data"] = {"data-tof-form": "1", "data-tof-url": section["movement_action_url"]}
     section["movement_hidden"] = [{"name": "record_id"}, {"name": "kind"}]
+    # «Qrupu məzun et» (sahib 2026-11-25) — `organizations:group_graduate`, gizli `id` = açıq qrup.
+    section["graduate_action_url"] = reverse("accounts:student_group_graduate")
+    section["graduate_form_data"] = {"data-tof-form": "1", "data-tof-url": section["graduate_action_url"]}
+    section["graduate_hidden"] = [{"name": "id"}]
     # «Dondur» dialoqunun səbəb kateqoriyası (sahib 2026-11-04) — registrar enum-undan.
     from apps.accounts.services.people.movements import leave_reason_options
 

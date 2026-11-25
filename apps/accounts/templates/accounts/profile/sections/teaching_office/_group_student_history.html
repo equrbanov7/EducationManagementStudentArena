@@ -1,0 +1,29 @@
+{% load i18n %}
+{% comment %}Qrup çekmecəsi «Tarixçə» dialoqunun gövdəsi (sahib 2026-11-25). Məzmun `organizations:group_student_history`
+JSON-undan `teaching_office_group_history.js` ilə yazılır — burada yalnız karkas və data-atributlarla mətnlər
+(xarici JS Django şablonundan keçmir).{% endcomment %}
+<div class="tof-history" data-tof-history
+     data-t-loading="{% trans 'Tarixçə yüklənir…' context 'accounts.group_history' %}"
+     data-t-error="{% trans 'Tarixçə yüklənmədi — yenidən cəhd edin.' context 'accounts.group_history' %}"
+     data-t-empty="{% trans 'Bu tələbənin jurnal qeydi yoxdur.' context 'accounts.group_history' %}"
+     data-t-subjects="{% trans 'Fənn' context 'accounts.group_history' %}"
+     data-t-marks="{% trans 'Bal sayı' context 'accounts.group_history' %}"
+     data-t-before-freeze="{% trans 'Dondurulana qədər bal' context 'accounts.group_history' %}"
+     data-t-average="{% trans 'Orta bal' context 'accounts.group_history' %}"
+     data-t-present="{% trans 'İştirak' context 'accounts.group_history' %}"
+     data-t-absent="{% trans 'Qayıb' context 'accounts.group_history' %}"
+     data-t-excused="{% trans 'Üzrlü' context 'accounts.group_history' %}"
+     data-t-absence-hours="{% trans 'Qayıb saatı' context 'accounts.group_history' %}"
+     data-t-last-date="{% trans 'Son dərs' context 'accounts.group_history' %}"
+     data-t-group="{% trans 'Jurnal qrupu' context 'accounts.group_history' %}"
+     data-t-status="{% trans 'Vəziyyət' context 'accounts.group_history' %}"
+     data-t-freeze="{% trans 'Akademik məzuniyyət əmri' context 'accounts.group_history' %}"
+     data-t-until="{% trans 'bitmə tarixi' context 'accounts.group_history' %}"
+     data-t-movements="{% trans 'Hərəkət əmrləri' context 'accounts.group_history' %}"
+     data-t-no-movements="{% trans 'Hərəkət əmri yoxdur.' context 'accounts.group_history' %}"
+     data-t-order="{% trans 'Əmr №' context 'accounts.group_history' %}"
+     data-t-truncated="{% trans 'Siyahı çox uzundur — ən yeni qeydiyyatlar göstərilir.' context 'accounts.group_history' %}">
+    <p class="tof-history__who" data-tof-history-who></p>
+    <p class="ems-msg ems-msg--error" data-tof-history-error role="alert" hidden></p>
+    <div class="tof-history__body" data-tof-history-body aria-live="polite" aria-busy="true"></div>
+</div>

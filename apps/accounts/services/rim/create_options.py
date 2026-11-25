@@ -95,10 +95,13 @@ def _base_queryset(actor, catalog: str, request=None):
 
     from apps.organizations.models import OrgUnit
 
-    return OrgUnit.objects.filter(
-        organization=actor.organization,
-        unit_type__in=_UNIT_TYPES[catalog],
-        is_active=True,
+    from ..intake.scope import scope_groups
+
+    # Sahib 2026-11-25: tələbə qrupu siyahısı yaradıcının `user.import` əhatəsi ilə (org-wide aktorda dəyişmir).
+    return scope_groups(
+        OrgUnit.objects.filter(organization=actor.organization, unit_type__in=_UNIT_TYPES[catalog], is_active=True),
+        actor.user,
+        actor.organization,
     )
 
 

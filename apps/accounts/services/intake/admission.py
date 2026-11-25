@@ -143,7 +143,7 @@ def parse_admission_channel(raw) -> str:
         return ""
     if key.startswith("dim"):
         return "dim"
-    if "imtahansiz" in key or key.startswith("imtahandaistiraketmeden"):
+    if "imtahansiz" in key or "muqavile" in key or key.startswith("imtahandaistiraketmeden"):
         return "exam_free"
     return ""
 

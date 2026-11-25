@@ -58,10 +58,16 @@
 
     function prefill(obj) { return JSON.stringify(obj); }
 
+    // «Tarixçə» (sahib 2026-11-25): bütün jurnal statistikası, dondurulmuşlar daxil — `teaching_office_group_history.js`.
+    function historyButton(row) {
+        if (!row.history_url) { return ""; }
+        return '<button type="button" class="ems-btn ems-btn--sm" data-tof-history-url="' + esc(row.history_url) + '" data-tof-history-name="' + esc(row.name) + '"><i class="fas fa-chart-column" aria-hidden="true"></i> ' + esc(t("history")) + "</button>";
+    }
+
     function actionButtons(row) {
-        var out = [];
+        var out = [historyButton(row)];
         // Əlavə üzv (sahib 2026-11-18): öz qrupu başqadır — hərəkətlər öz qrupunun çekmecəsindədir.
-        if (row.extra) { return ""; }
+        if (row.extra) { return out.join(""); }
         if (state.planUrl) {
             out.push('<a class="ems-btn ems-btn--sm" href="' + esc(withStudent(state.planUrl, row.id)) + '" download title="' + esc(t("plan")) + '"><i class="fas fa-file-word" aria-hidden="true"></i><span class="tof-students__btn-label">DOCX</span></a>');
         }
@@ -74,6 +80,8 @@
         if (state.canMove && row.status === "enrolled") {
             out.push('<button type="button" class="ems-btn ems-btn--sm ems-btn--warning" data-tof-open="tofStudentFreezeDialog" data-tof-student-name="' + esc(row.name) + '" data-tof-prefill=\'' + esc(prefill({ record_id: row.id, kind: "academic_leave" })) + '\'>' + esc(t("freeze")) + "</button>");
             out.push(expelButton(row));
+            // «Məzun et» (sahib 2026-11-25) — tək tələbə; bütöv qrup çekmecənin başındakı «Qrupu məzun et»-dədir.
+            out.push('<button type="button" class="ems-btn ems-btn--sm" data-tof-open="tofStudentGraduateDialog" data-tof-student-name="' + esc(row.name) + '" data-tof-prefill=\'' + esc(prefill({ record_id: row.id, kind: "graduation" })) + '\'><i class="fas fa-graduation-cap" aria-hidden="true"></i> ' + esc(t("graduate")) + "</button>");
         }
         // «Bərpa et» (2026-10-15): bu qrupa qaytarır — arxiv qrupa yox (server də hədəfi əhatədə yoxlayır).
         if (state.canMove && state.groupActive && (row.status === "academic_leave" || row.status === "expelled" || row.status === "graduated")) {
@@ -231,6 +239,11 @@
         if (empty) {
             empty.hidden = state.rows.length + state.extra.length + state.removed.length > 0;
             if (emptyText) { emptyText.textContent = t("empty"); }
+        }
+        var graduate = drawer() ? drawer().querySelector("[data-tof-group-graduate]") : null;
+        if (graduate) {
+            graduate.hidden = !(state.canMove && state.groupActive && state.rows.some(function (row) { return row.status === "enrolled"; }));
+            graduate.setAttribute("data-tof-prefill", prefill({ id: state.groupId || "" }));
         }
         renderLead(true);
         applyFilter();

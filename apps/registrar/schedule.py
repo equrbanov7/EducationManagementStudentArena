@@ -24,6 +24,7 @@ from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.translation import pgettext_lazy
 
+from apps.registrar.foreign_parallel import foreign_parallel
 from apps.registrar.models import Enrollment, HygieneCategory, JournalHygieneDecision, ScheduleSlot, SlotKind, WeekType
 
 
@@ -213,6 +214,8 @@ def find_conflict(
             slot=slot,
             subject_name=subject_name,
         ):
+            continue
+        if not same_group and foreign_parallel(organization, offering.group_id, slot):  # əcnəbi qrupları
             continue
         if same_group or same_instructor or same_room:
             return slot

@@ -114,6 +114,9 @@ def _apply_meta(unit, request):
     # İndi «tutor» kimi: yalnız sahə POST-da VARSA dəyişir (boş dəyər = bağlantını sil).
     if "curriculum_id" in request.POST:
         settings_blob["curriculum_id"] = _known_curriculum_id(unit.organization, request.POST.get("curriculum_id"))
+    from .group_kind import apply_kind  # «Qrup növü» — adi / əcnəbi (sahib 2026-11-25)
+
+    apply_kind(settings_blob, request.POST)
     unit.settings = settings_blob
 
 
@@ -227,6 +230,9 @@ def _save_group(request, organization, scope):
         old_values=old_values or None,
         new_values={"name": instance.name, "code": instance.code, "settings": dict(instance.settings or {})},
     )
+    from .foreign_office_sync import sync_for_group
+
+    sync_for_group(organization, instance, actor=request.user)  # əcnəbi qrupu → şöbəyə əhatə (sahib 2026-11-25)
     return JsonResponse({"ok": True, "id": str(instance.id), "created": is_create})
 
 
@@ -373,6 +379,16 @@ def _add_students(request, organization, scope):
             code="other_mode_required",
             field="other_mode",
         )
+    # Sahib 2026-11-25: genişlənmiş namizəd əhatəsi (əcnəbi qrupu) yalnız «əlavə olaraq» üçündür — başqa bölmənin
+    # tələbəsini öz qrupundan «məcburi köçür» ilə çıxarmaq üçün tələbə aktorun ÖZ idarə əhatəsində olmalıdır.
+    if others and other_mode != "extra":
+        own = set(requested.filter(student_record_scope_q(scope)).values_list("pk", flat=True))
+        if any(record.pk not in own for record in others):
+            return _error(
+                pgettext(_CTX, "Başqa bölmənin tələbəsini yalnız «əlavə olaraq» qoşmaq olar — öz qrupu dəyişmir."),
+                code="transfer_outside_scope",
+                field="other_mode",
+            )
 
     from django.core.exceptions import ValidationError
 

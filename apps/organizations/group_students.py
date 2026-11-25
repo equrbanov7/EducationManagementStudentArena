@@ -130,6 +130,13 @@ def group_students(request, slug, unit_id):
     extra = _extra_rows(organization, unit, StudentAcademicRecord)
     # Audit 2026-09-28 S4: idarə düymələri yalnız qrup `unit.group_manage`
     # əhatəsindədirsə (server yazıda onsuz da bu əhatəni yoxlayır).
+    rows = [_row(record) for record in records]
+    # Sahib 2026-11-25: «Tarixçə» düyməsi — `student.records_view` daşıyana (dondurulmuşlar daxil, oxu).
+    from .group_student_history import can_view_history, history_url
+
+    if can_view_history(request):
+        for row in rows + removed + extra:
+            row["history_url"] = history_url(organization, unit, row["id"])
     manage_scope = group_manage_scope(request, organization)
     can_manage = can_manage_groups(request) and (
         _visible_group(organization, manage_scope, str(unit.pk), include_archived=True) is not None
@@ -138,7 +145,7 @@ def group_students(request, slug, unit_id):
         {
             "ok": True,
             "group": {"id": str(unit.pk), "name": unit.name, "is_active": unit.is_active},
-            "rows": [_row(record) for record in records],
+            "rows": rows,
             # 2026-10-15 (sahib): «çıxardığım birini sonra əlavə edə bilim» — məzuniyyətdə / xaric
             # edilmiş tələbələr qrupun FK-sını saxlayır (status dəyişir, qrup yox); çekmecədə ayrıca
             # görünür və «Bərpa et» (reinstatement əmri) ilə bu qrupa qaytarılır.
@@ -266,7 +273,11 @@ def group_student_candidates(request, slug, unit_id):
     records = StudentAcademicRecord.objects.filter(organization=organization, is_active=True, status="enrolled")
     # Sahib 2026-11-18: axtarış yazılanda BÜTÜN tələbələr (başqa qrupdakı da — «əlavə olaraq» və ya «məcburi
     # köçür» seçimi ilə); boş axtarışda əvvəlki kimi yalnız qrupsuzlar (siyahı nəhəng olmasın).
-    records = records.exclude(group=unit) if len(query) >= OTHER_GROUP_MIN_QUERY else records.filter(eligible)
+    # Əcnəbi qrupu (sahib 2026-11-25): boş axtarışda da bütün tələbələr (səhifə-səhifə) — öz qrupu başqadır.
+    from .group_kind import is_foreign
+
+    show_all = len(query) >= OTHER_GROUP_MIN_QUERY or is_foreign(unit)
+    records = records.exclude(group=unit) if show_all else records.filter(eligible)
     # Audit 2026-09-28 S3: başqa fakültənin tələbələri görünmür — universitet əhatəli kafedranın (Xarici dillər)
     # qrupunda isə bütün təşkilat (sahib 2026-11-22, ``university_wide_scope``).
     candidates = candidate_scope(organization, scope, unit)

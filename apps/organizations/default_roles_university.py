@@ -4,6 +4,7 @@ modul ölçü budcəsinə — SOFT_CAP=600 — görə ayrılıb; məzmun dəyiş
 from core.constants import RoleScopeType
 
 from .default_roles_accounting import ACCOUNTING_ROLES, apply_accounting_grants
+from .default_roles_foreign_office import FOREIGN_STUDENTS_ROLES
 from .default_roles_monitoring import MONITORING_ROLES
 from .default_roles_oversight import OVERSIGHT_ROLES
 from .default_roles_quality import QUALITY_CONTROL_ROLES, apply_quality_control_grants
@@ -547,12 +548,11 @@ UNIVERSITY_ROLES.extend(TEACHING_OFFICE_ROLES)
 apply_teaching_office_grants(UNIVERSITY_ROLES)
 _grant_application_permissions(UNIVERSITY_ROLES)
 
-
 # Tələbə Xidmətləri Mərkəzi (Mərhələ 3) — bir yeni rol + `student.*` açarları.
 UNIVERSITY_ROLES.extend(STUDENT_SERVICES_ROLES)
-
-# Əlavələr (izahlar öz modullarında): 2026-09-06 rim / vice_dean / oversight; 09-25 quality; 11-19 monitoring.
-UNIVERSITY_ROLES.extend(RIM_STAFF_ROLES + VICE_DEAN_ROLES + OVERSIGHT_ROLES + QUALITY_CONTROL_ROLES + MONITORING_ROLES)
+# Əlavələr (izahlar öz modullarında): 09-06 rim / vice_dean / oversight; 09-25 quality; 11-19 monitoring; 11-25 əcnəbi.
+UNIVERSITY_ROLES.extend(RIM_STAFF_ROLES + VICE_DEAN_ROLES + OVERSIGHT_ROLES + QUALITY_CONTROL_ROLES)
+UNIVERSITY_ROLES.extend(MONITORING_ROLES + FOREIGN_STUDENTS_ROLES)
 apply_student_services_grants(UNIVERSITY_ROLES)
 _grant_application_permissions(UNIVERSITY_ROLES)
 

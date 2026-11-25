@@ -35,6 +35,18 @@ Təhsil forması: əyani / qiyabi / distant — registrar-ın seçimlərindən.{
             </select>
         </div>
     </div>
+    {% comment %}«Qrup növü» (sahib 2026-11-25) — əcnəbi qrupu şöbəyə avtomatik əhatə verir (`group_kind.py`).{% endcomment %}
+    <div class="ems-field">
+        <label class="ems-field__label" for="tof-gr-kind">{% trans "Qrup növü" context "accounts.groups" %}</label>
+        <div class="bootstrap-single-select bootstrap-single-select--ems">
+            <select class="ems-select bootstrap-single-select__native" id="tof-gr-kind" name="group_kind" data-bootstrap-select>
+                {% for option in groups_registry_section.group_kind_options %}
+                    <option value="{{ option.value }}">{{ option.label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <p class="ems-field__hint">{% trans "Əcnəbi tələbələr qrupunu Əcnəbi tələbələrlə iş şöbəsi idarə edir; müəllim belə qruplarda eyni saatda bir neçə qrupla dərs keçə bilir." context "accounts.groups" %}</p>
+    </div>
     <div class="ems-field">
         <label class="ems-field__label" for="tof-gr-course">{% trans "Kurs" context "accounts.groups" %}</label>
         <div class="bootstrap-single-select bootstrap-single-select--ems">
