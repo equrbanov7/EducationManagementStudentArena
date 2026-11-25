@@ -7,6 +7,11 @@ successors; their journal, final-grade and correction provenance remains
 queryable as history and is excluded from normal grade-write services.
 All-specialty offerings (``group=None``) are left untouched.  Audit is
 fail-closed inside the same database transaction.
+
+Ana qrup ↔ alt qrup (sahib 2026-11-07/08, :mod:`apps.registrar.transfer_family`): «ana qrupu alt qruplara böl»
+``keep_parent_journal=True`` ilə çağırır — rəsmi köçürmə (DB qapısı + tarixçə) adi qaydada gedir, sonra ana
+jurnalın sətri geri aktivləşir, alt qrupun boş açılışı passivləşir; ailə daxilindəki hər köçürmədən sonra ana
+jurnaldakı seminar alt qrupu yenilənir.
 """
 
 from __future__ import annotations
@@ -16,6 +21,7 @@ from django.db import transaction
 from django.utils.translation import pgettext
 
 from apps.registrar import integrity, services
+from apps.registrar import transfer_family as family
 from apps.registrar.models import CourseOffering, Enrollment, StudentAcademicRecord
 from apps.registrar.reference_identity import (
     begin_authorized_group_transfer,
@@ -48,7 +54,9 @@ def _validate_scope(record, new_group, period):
         )
 
 
-def _audit(record, old_group, new_group, moved, created, by_user, reason, old_ids, new_ids, reactivated_ids=()):
+def _audit(
+    record, old_group, new_group, moved, created, by_user, reason, old_ids, new_ids, reactivated_ids=(), temporary=()
+):
     changes = {
         "moved_enrollment_ids": [str(value) for value in old_ids],
         "successor_enrollment_ids": [str(value) for value in new_ids],
@@ -58,6 +66,9 @@ def _audit(record, old_group, new_group, moved, created, by_user, reason, old_id
         # QA 2026-10-17 F-06: son köçürmənin geri qaytarılması — tarixçə sətri
         # bərpa olundu (silinmədi); izi audit qeydində qalır.
         changes["reactivated_enrollment_ids"] = [str(value) for value in reactivated_ids]
+    if temporary:
+        # Passiv alt qrup açılışının boş varisi DB sübutu üçün müvəqqəti aktiv oldu, yekundan sonra yenidən tarixçə.
+        changes["temporarily_reactivated_ids"] = [str(value) for value in temporary]
     return audit_service.log_action(
         user=by_user if getattr(by_user, "pk", None) else None,
         organization=record.organization,
@@ -145,15 +156,24 @@ def _reactivate_predecessor(enrollment) -> None:
 
 
 @transaction.atomic
-def transfer_student_group(*, record, new_group, period, by_user=None, reason=""):
+def transfer_student_group(*, record, new_group, period, by_user=None, reason="", keep_parent_journal=False):
     """Move a student without deleting or reactivating enrollment history.
 
     Yeganə istisna (QA 2026-10-17 F-06): son köçürmənin dərhal tərsi (A → B → A)
     — A-dakı sətir məhz B-sətri ilə əvəzlənibsə, o, yenidən aktivləşdirilir
     (bax :func:`_is_undo_of_last_move`); B-sətri adi qaydada tarixçəyə keçir.
+    Ana qrup ↔ alt qrup ailəsində zəncirin tərsi də belədir (A → A1 → A2 → A).
+
+    Alt qrup ailəsi (bax :mod:`apps.registrar.transfer_family`): alt qrupun bu fənn üzrə açılışı
+    passivdirsə tələbə ana qrupun jurnalına qaytarılır; ailədən kənar qrupa köçəndə ana jurnaldakı
+    sətirlər də köçür. ``keep_parent_journal`` (yalnız «ana qrupu alt qruplara böl»): alt qrupun
+    canlı jurnalı yoxdursa ana jurnalın sətirləri ``enrolled`` qalır; canlı köhnə jurnal varsa
+    bölmə ``ValidationError`` ilə dayanır.
 
     Returns ``{"moved": <historical old enrollments>, "created": <new enrollments>,
-    "record": record}``. A no-op (moved=0) when the group is unchanged or None."""
+    "kept": <rows returned to the parent journal>, "record": record}``.
+    A no-op (moved=0) when the group is unchanged or None.
+    """
     if new_group is None:
         return {"moved": 0, "created": 0, "record": record}
     _validate_scope(record, new_group, period)
@@ -178,6 +198,7 @@ def transfer_student_group(*, record, new_group, period, by_user=None, reason=""
         raise ValidationError({"by_user": "Qrup köçürməsi üçün icraçı tələb olunur."})
 
     old_enrollments = []
+    carried = []
     if old_group is not None and period is not None:
         old_enrollments = list(
             Enrollment.objects.select_for_update(of=("self",))
@@ -190,6 +211,9 @@ def transfer_student_group(*, record, new_group, period, by_user=None, reason=""
             )
             .select_related("offering__subject", "offering__instructor")
         )
+        # Sahib 2026-11-08: bölünmüş alt qrupun tələbəsinin aktiv sətirləri ANA qrupun jurnalındadır — ailədən kənar
+        # qrupa köçəndə onlar da köçür (DB sübutu yalnız köhnə qrupun açılışlarını yoxlayır; ayrıca audit açarları).
+        carried = family.carry_rows(record=record, old_group=old_group, new_group=new_group, period=period)
 
     evidence_id = begin_authorized_group_transfer(
         record=record,
@@ -201,14 +225,32 @@ def transfer_student_group(*, record, new_group, period, by_user=None, reason=""
     created = 0
     successors = []
     reactivated = []
+    temporary = []
     inherit_from_parent = _is_subgroup_of(new_group, old_group)
-    for enrollment in old_enrollments:
-        offering_is_new = not CourseOffering.objects.filter(
-            organization=record.organization,
+    keep_parent = bool(keep_parent_journal) and inherit_from_parent
+    in_family = bool(family.family_parent_id(old_group, new_group))
+    carried_ids = {row.pk for row in carried}
+    redirects = []  # (varis, ana qrupun açılışı, açılış bu köçürmədə yarandı) — yekundan sonra ana jurnala
+    for enrollment in [*old_enrollments, *carried]:
+        target = (
+            CourseOffering.objects.filter(
+                organization=record.organization,
+                subject_id=enrollment.offering.subject_id,
+                period=period,
+                group=new_group,
+            )
+            .select_related("subject")
+            .first()
+        )
+        offering_is_new = target is None
+        parent = family.redirect_target(
+            record=record,
+            new_group=new_group,
             subject_id=enrollment.offering.subject_id,
             period=period,
-            group=new_group,
-        ).exists()
+            target=target,
+            keep_parent=keep_parent,
+        )
         successor, was_created = services.enroll_student_in_subject(
             record=record,
             subject=enrollment.offering.subject,
@@ -216,21 +258,32 @@ def transfer_student_group(*, record, new_group, period, by_user=None, reason=""
             kind=enrollment.kind,
             allow_inactive=True,  # aktiv sətir 1:1 daşınır — yeni fantom yaranmır (jurnal təmizliyi qapısı)
         )
-        if _is_undo_of_last_move(successor, enrollment):
+        undo = _is_undo_of_last_move(successor, enrollment) or (
+            (in_family or parent is not None or enrollment.pk in carried_ids)
+            and family.is_chain_undo(successor, enrollment)
+        )
+        if undo:
             _reactivate_predecessor(successor)
-            reactivated.append(successor.pk)
+            (temporary if parent is not None else reactivated).append(successor.pk)
         elif successor.status != Enrollment.Status.ENROLLED:
-            raise ValidationError(
-                "Yeni qrupun açılışında bu tələbəyə aid tarixi qeydiyyat var; "
-                "tarixçəni yenidən aktivləşdirmədən əvvəl inzibati yoxlama tələb olunur."
-            )
-        if offering_is_new or inherit_from_parent:
+            if parent is None:
+                raise ValidationError(
+                    "Yeni qrupun açılışında bu tələbəyə aid tarixi qeydiyyat var; "
+                    "tarixçəni yenidən aktivləşdirmədən əvvəl inzibati yoxlama tələb olunur."
+                )
+            # Passiv alt qrup açılışının boş varisi: DB sübutu üçün müvəqqəti aktiv, yekundan sonra ana jurnala.
+            _reactivate_predecessor(successor)
+            temporary.append(successor.pk)
+        if parent is not None:
+            redirects.append((successor, parent, offering_is_new))
+        elif offering_is_new or inherit_from_parent:
             _inherit_teaching_config(successor.offering, enrollment.offering)
         enrollment.status = Enrollment.Status.DROPPED
         enrollment.superseded_by = successor
         enrollment.full_clean(validate_unique=False, validate_constraints=False)
         enrollment.save(update_fields=["status", "superseded_by", "updated_at"])
-        successors.append(successor)
+        if enrollment.pk not in carried_ids:
+            successors.append(successor)
         created += int(was_created)
 
     moved = len(old_enrollments)
@@ -238,17 +291,28 @@ def transfer_student_group(*, record, new_group, period, by_user=None, reason=""
         record,
         old_group,
         new_group,
-        moved,
+        moved + len(carried),  # yalnız səbəb mətni üçün; DB sübutu id siyahılarını yoxlayır
         created,
         by_user,
         reason,
         [enrollment.pk for enrollment in old_enrollments],
         [enrollment.pk for enrollment in successors],
         reactivated,
+        temporary,
     )
     finalize_authorized_group_transfer(
         evidence_id=evidence_id,
         audit_id=audit.pk,
+    )
+    # Sahib 2026-11-08: «ana qrup alt qrupların cəmidir» — köçürmə yekunlaşdıqdan sonra ana jurnal tək jurnal qalır.
+    family.after_transfer(
+        record=record,
+        old_group=old_group,
+        new_group=new_group,
+        period=period,
+        by_user=by_user,
+        redirects=redirects,
+        carried=carried,
     )
     # 2026-09-14 (W5 `w5left`, tapşırıq 3): qrup yazısı DB funksiyası ilə gedir
     # (`post_save` yoxdur) → törəmə artefaktlar (imtahan PIN-ləri, `exams`)
@@ -260,4 +324,4 @@ def transfer_student_group(*, record, new_group, period, by_user=None, reason=""
         new_group=new_group,
         organization=record.organization,
     )
-    return {"moved": moved, "created": created, "record": record}
+    return {"moved": moved + len(carried), "created": created, "kept": len(redirects), "record": record}

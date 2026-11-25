@@ -12,15 +12,25 @@ Cədvəldə slot dayananda dərs «Aktivləşdir» / «Yeni dərs» ilə hər qr
 from __future__ import annotations
 
 
-def foreign_parallel(organization, group_id, slot) -> bool:
-    """``group_id`` ilə ``slot``-un qrupu fərqli əcnəbi qruplarıdırmı (qrup id-ləri təşkilat obyektində yaddaşda)."""
-    other = getattr(getattr(slot, "offering", None), "group_id", None)
-    if not group_id or not other or str(group_id) == str(other) or organization is None:
-        return False
+def foreign_ids(organization) -> frozenset:
+    """Aktiv əcnəbi qruplarının id-ləri (təşkilat obyektində yaddaşda — sorğu başına bir dəfə)."""
+    if organization is None:
+        return frozenset()
     from apps.organizations.public import foreign_group_ids
 
-    ids = foreign_group_ids(organization)
+    return foreign_group_ids(organization)
+
+
+def foreign_parallel(organization, group_id, slot, *, ids=None) -> bool:
+    """``group_id`` ilə ``slot``-un qrupu fərqli əcnəbi qruplarıdırmı.
+
+    ``ids`` — əvvəlcədən yüklənmiş dəst (``detect`` onu döngüdən ƏVVƏL bir dəfə alır ki, sorğu sayı slot sayından
+    asılı olmasın); verilməyibsə tənbəl yüklənir."""
+    other = getattr(getattr(slot, "offering", None), "group_id", None)
+    if not group_id or not other or str(group_id) == str(other):
+        return False
+    ids = foreign_ids(organization) if ids is None else ids
     return str(group_id) in ids and str(other) in ids
 
 
-__all__ = ["foreign_parallel"]
+__all__ = ["foreign_ids", "foreign_parallel"]

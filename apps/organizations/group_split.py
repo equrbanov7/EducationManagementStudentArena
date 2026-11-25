@@ -19,6 +19,12 @@ birləşməsi» (registrar.subgroup_rollup) bu izi tanıyır. Tələbə köçür
 YALNIZ rəsmi xidmətlə (`student_transfer.transfer_student_group`) gedir: DB
 qapısı sadə FK yazısına icazə vermir, jurnal tarixçəsi qorunur. Bütün əməl bir
 transaksiyadadır — bir tələbədə xəta olarsa heç nə yaradılmır.
+
+Jurnal (sahib 2026-11-07/08: «ana qrup alt qrupların cəmidir»): köçürmə
+``keep_parent_journal=True`` ilə gedir — ana qrupun cari jurnalları TƏK jurnal
+qalır, köçürülən tələbələr orada ``enrolled`` qalır (provenans = alt qrup), alt
+qruplar həmin jurnalın içində seminar alt qrupu olur; alt qrup üçün ikinci
+(təkrar) jurnal yaranmır. Bax :mod:`apps.registrar.transfer_family`.
 """
 
 from __future__ import annotations
@@ -175,7 +181,12 @@ def split_group(request, organization, scope):
             moved = 0
             for rid in item["record_ids"]:
                 result = group_transfer.transfer_student_group(
-                    record=records[rid], new_group=unit, period=period, by_user=request.user, reason=reason
+                    record=records[rid],
+                    new_group=unit,
+                    period=period,
+                    by_user=request.user,
+                    reason=reason,
+                    keep_parent_journal=True,
                 )
                 moved += 1 if result.get("record") is not None else 0
             moved_total += moved

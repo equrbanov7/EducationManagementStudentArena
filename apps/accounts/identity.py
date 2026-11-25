@@ -90,6 +90,33 @@ def canonical_identity_queryset(queryset, field_name: str, value: object, *, ali
     return queryset.annotate(**{alias: expression}).filter(**{alias: key})
 
 
+#: ``claim_placeholder_email`` neçə namizədə baxır (``<ad>``, ``<ad>.2`` … ``<ad>.N``).
+PLACEHOLDER_EMAIL_MAX_TRIES = 1000
+
+
+def claim_placeholder_email(local_part: object, taken: set | None = None) -> str:
+    """Bazada və ``taken``-də BOŞ yer-tutucu: ``<ad>@placeholder.invalid``, sonra ``<ad>.2@…``, ``<ad>.3@…``.
+
+    2026-11-25 (QA klon): RİM «Yeni yarat» → FİN-siz, e-poçtsuz müəllim 500 verirdi —
+    ``ad.soyad`` adı boş idi, amma ``intake.ad.soyad@placeholder.invalid`` adı sonradan
+    dəyişdirilmiş köhnə hesabda qalmışdı → ``accounts_auth_email_canon_uniq``. Yoxlama
+    indekslə EYNİ kanonik formadadır (``canonical_identity_queryset``). ``taken`` — bu
+    əməliyyatda (fayl / toplu) artıq ayrılmış kanonik açarlar; seçilən açar ora əlavə olunur.
+    """
+
+    base = canonical_identity(local_part).strip(".") or "user"
+    queryset = get_user_model()._default_manager.all()
+    for index in range(1, PLACEHOLDER_EMAIL_MAX_TRIES + 1):
+        candidate = "%s@%s" % (base if index == 1 else "%s.%d" % (base, index), PLACEHOLDER_EMAIL_DOMAIN)
+        if taken is not None and candidate in taken:
+            continue
+        if not canonical_identity_queryset(queryset, "email", candidate, alias="_placeholder_key").exists():
+            if taken is not None:
+                taken.add(candidate)
+            return candidate
+    raise ValueError("placeholder_email_exhausted")
+
+
 def _access_state_in(user, states) -> bool:
     """Read the current DB state; never trust a stale related-object cache."""
 
@@ -186,9 +213,11 @@ def staged_user_for_email(email: object):
 __all__ = [
     "PLACEHOLDER_EMAIL_DOMAIN",
     "StagedAccountAccessError",
+    "PLACEHOLDER_EMAIL_MAX_TRIES",
     "assert_account_access_allowed",
     "canonical_identity",
     "canonical_identity_queryset",
+    "claim_placeholder_email",
     "email_is_placeholder",
     "login_rate_identity",
     "REQUEST_USER_LOGIN_CHECKED_ATTR",

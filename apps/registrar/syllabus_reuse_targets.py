@@ -7,13 +7,14 @@ hesablanır (accounts glue ``registrar.public`` vasitəsilə çağırır).
 ``plan_hours_by_offering`` — :func:`.plan_hours.plan_hours_for_offering`-in TOPLU
 qarşılığı: açılış sayından asılı olmayaraq SABİT sayda sorğu (ixtisas, plan
 sətirləri, dərs yükü sətirləri + onların qrupları).  Seçim qaydası tək-açılış
-funksiyası ilə EYNİDİR (paritet testi: ``apps/syllabus/tests/test_reuse_queries.py``).
+funksiyası ilə EYNİDİR (paritet testləri: ``apps/syllabus/tests/test_reuse_api.py``,
+``test_sharing_hours_form_2026_11_25.py``); proqram seçimi ``plan_hours.pick_program``-dədir (təhsil forması).
 """
 
 from __future__ import annotations
 
 from .models import CourseOffering, CurriculumSubject, PlanStatus, Program
-from .plan_hours import _row_hours
+from .plan_hours import _row_hours, pick_program
 from .plan_hours_load import workload_hours_by_offering
 
 #: Kafedra həlli ``group → ixtisas → fakültə → universitet`` ağacında gəzir —
@@ -53,13 +54,20 @@ def instructor_offerings(*, organization, user, subject_id, period_id) -> list:
 
 
 def _programs_by_unit(organization_id, unit_ids) -> dict:
-    """``{ixtisas_bölməsi_id: Program}`` — ``program_for_offering``-in ``.first()`` sırası ilə."""
+    """``{ixtisas_bölməsi_id: [Program…]}`` — ``program_for_offering``-in sırası ilə (``Program.Meta.ordering``)."""
     if not unit_ids:
         return {}
     programs: dict = {}
     for program in Program.objects.filter(organization_id=organization_id, specialty_unit_id__in=list(unit_ids)):
-        programs.setdefault(program.specialty_unit_id, program)
+        programs.setdefault(program.specialty_unit_id, []).append(program)
     return programs
+
+
+def _program_for(offering, programs):
+    """Açılışın proqramı — ``plan_hours.pick_program`` (sahib 2026-11-25: qrupun təhsil forması) ilə, sorğusuz."""
+    if not offering.group_id:
+        return None
+    return pick_program(programs.get(offering.group.parent_id, ()), offering.group)
 
 
 def _plan_rows_by_subject(organization_id, subject_ids) -> dict:
@@ -98,7 +106,7 @@ def plan_hours_by_offering(offerings) -> dict:
     own, fallback = {}, {}
     for offering in offerings:
         rows = plan_rows.get(offering.subject_id, [])
-        program = programs.get(offering.group.parent_id) if offering.group_id else None
+        program = _program_for(offering, programs)
         chosen = None
         if program is not None:
             chosen = next((row for row in rows if row.curriculum.program_id == program.pk), None)
@@ -124,9 +132,7 @@ def programs_by_offering(offerings) -> dict:
         return {}
     unit_ids = {offering.group.parent_id for offering in offerings if offering.group_id and offering.group.parent_id}
     programs = _programs_by_unit(offerings[0].organization_id, unit_ids)
-    return {
-        offering.pk: (programs.get(offering.group.parent_id) if offering.group_id else None) for offering in offerings
-    }
+    return {offering.pk: _program_for(offering, programs) for offering in offerings}
 
 
 __all__ = [

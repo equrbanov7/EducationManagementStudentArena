@@ -197,9 +197,12 @@ class WriteScopeTest(_ScopeBase):
 
 
 class SplitKeepsTeacherTest(_ScopeBase):
-    """Audit 2026-09-28 S2: bölgüdən sonra alt qrup jurnalı müəllimsiz qalmır."""
+    """Audit 2026-09-28 S2: bölgüdən sonra tələbə müəllimsiz jurnala düşmür.
 
-    def test_subgroup_offering_inherits_instructor_and_hours(self):
+    Sahib 2026-11-08 («ana qrup alt qrupların cəmidir»): tələbələr müəllimin ANA jurnalında qalır (seminar alt qrupu
+    kimi); alt qrup üçün ikinci (aktiv) jurnal yaranmır."""
+
+    def test_split_students_stay_in_teachers_parent_journal(self):
         import json
 
         from apps.registrar.models import CourseOffering, Enrollment
@@ -221,7 +224,15 @@ class SplitKeepsTeacherTest(_ScopeBase):
         }
         response = self._action("teaching_office_head", payload)
         self.assertEqual(response.status_code, 200, response.content)
-        for name in ("B2 KE-24-1", "B2 KE-24-2"):
-            offering = CourseOffering.objects.get(organization=self.org, group__name=name, subject=self.subject)
-            self.assertEqual(offering.instructor_id, self.users["teacher"].pk)
-            self.assertEqual(offering.lesson_hours, 60)
+        parent = CourseOffering.objects.get(pk=self.offering.pk)
+        self.assertEqual(parent.instructor_id, self.users["teacher"].pk)
+        self.assertEqual(parent.lesson_hours, 60)
+        self.assertEqual(
+            set(parent.enrollments.filter(status="enrolled").values_list("student_id", flat=True)),
+            {a.student_id, b.student_id},
+        )
+        self.assertFalse(
+            CourseOffering.objects.filter(
+                organization=self.org, group__name__in=("B2 KE-24-1", "B2 KE-24-2"), is_active=True
+            ).exists()
+        )

@@ -35,6 +35,7 @@ from . import reuse_context
 from .api import _body, _context, _fail
 from .labels import transition_text
 from .lookup import safe_uuid
+from .share_context import share_hours, share_text
 
 logger = logging.getLogger(__name__)
 
@@ -161,7 +162,16 @@ def _share(request, organization, actor, payload, action):
     offering = instructor_offering(organization=organization, user=actor.user, offering_id=offering_id)
     if source is None or offering is None:
         return _fail(_NOT_FOUND, status=404)
-    services.sharing.share(source=source, offering=offering, actor=actor, request=request)
+    # Sahib 2026-11-25: əyani 45 saat ≠ qiyabi 25 saat — saat fərqlidirsə paylaşım yox, «Kopyala və uyğunlaşdır».
+    target_hours, source_fallback = share_hours(source, offering)
+    services.sharing.share(
+        source=source,
+        offering=offering,
+        actor=actor,
+        target_hours=target_hours,
+        source_fallback=source_fallback,
+        request=request,
+    )
     message = str(_SHARED) % {"group": reuse_context.group_label(source)}
     return _version_payload(None, message, syllabus=str(source.pk), mode=action)
 
@@ -250,7 +260,8 @@ def syllabus_reuse_action(request):
         return _fail(transition_text("syllabus.exists"), status=409, code="syllabus.exists")
     except TransitionDenied as exc:
         status = 404 if exc.code == "transition.out_of_scope" else 409
-        return _fail(transition_text(exc.code, exc.params), status=status, code=exc.code)
+        text = share_text(exc.code) if action == "share" else transition_text(exc.code, exc.params)
+        return _fail(text, status=status, code=exc.code)
     return _fail(_BAD_REQUEST)
 
 

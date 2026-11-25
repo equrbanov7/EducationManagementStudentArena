@@ -44,8 +44,15 @@ def _offering(world, key):
     return CourseOffering.objects.get(pk=world["offerings"][key].pk)
 
 
+def _hours(offering):
+    from apps.registrar.public import plan_hours_for_offering
+
+    return plan_hours_for_offering(offering)
+
+
 def _share(world, key="o2"):
-    return sharing.share(source=world["source"], offering=_offering(world, key), actor=actor(world))
+    offering = _offering(world, key)
+    return sharing.share(source=world["source"], offering=offering, actor=actor(world), target_hours=_hours(offering))
 
 
 def test_share_links_the_same_syllabus_without_a_copy(world):
@@ -64,10 +71,10 @@ def test_share_links_the_same_syllabus_without_a_copy(world):
 
 def test_one_approval_serves_every_linked_journal(world):
     _share(world, "o2")
-    _share(world, "o3")
+    _share(world, "o4")  # o3-ün saatı fərqlidir (30/30) — sahib 2026-11-25: ona paylaşılmır
     version = approve_version(world, fill(world["version"], actor(world)), actor(world))
     assert version.status == SyllabusStatus.APPROVED
-    offerings = [_offering(world, key) for key in ("o1", "o2", "o3")]
+    offerings = [_offering(world, key) for key in ("o1", "o2", "o4")]
     for offering in offerings:
         state = services.offering_syllabus_state(services.syllabus_for_offering_obj(offering))
         assert state["state"] == "approved"
@@ -83,20 +90,22 @@ def test_share_rules(world):
     teacher = actor(world)
     # Başqa müəllimin açılışı.
     with pytest.raises(TransitionDenied) as denied:
-        sharing.share(source=world["source"], offering=_offering(world, "o5"), actor=teacher)
+        sharing.share(source=world["source"], offering=_offering(world, "o5"), actor=teacher, target_hours={})
     assert denied.value.code == "transition.author_only"
     # Həmkarın sillabusu (sahib 2026-10-27: yalnız öz sillabusu).
     with pytest.raises(TransitionDenied) as denied:
-        sharing.share(source=world["source"], offering=_offering(world, "o2"), actor=actor(world, "teacher2"))
+        sharing.share(
+            source=world["source"], offering=_offering(world, "o2"), actor=actor(world, "teacher2"), target_hours={}
+        )
     assert denied.value.code == CODE_NOT_OWN
     # Öz açılışına paylaşmaq olmaz.
     with pytest.raises(TransitionDenied) as denied:
-        sharing.share(source=world["source"], offering=_offering(world, "o1"), actor=teacher)
+        sharing.share(source=world["source"], offering=_offering(world, "o1"), actor=teacher, target_hours={})
     assert denied.value.code == CODE_NOT_SIBLING
     # Öz dosyesi olan qrup üstünə yazılmır (fill-only).
     draft_for(world, "o3")
     with pytest.raises(TransitionDenied) as denied:
-        sharing.share(source=world["source"], offering=_offering(world, "o3"), actor=teacher)
+        sharing.share(source=world["source"], offering=_offering(world, "o3"), actor=teacher, target_hours={})
     assert denied.value.code == sharing.CODE_HAS_OWN
     _share(world, "o2")
     with pytest.raises(TransitionDenied) as denied:
@@ -201,6 +210,7 @@ def test_editor_shows_shared_groups_and_free_groups_with_project_select(world):
     assert "data-syl-share" in html
     assert 'data-syl-action="unshare"' in html and f'data-offering="{world["offerings"]["o2"].pk}"' in html
     assert "bootstrap-single-select__native" in html and "data-syl-share-select" in html
-    assert f'value="{world["offerings"]["o3"].pk}"' in html  # sillabussuz öz qrupu
+    assert f'value="{world["offerings"]["o4"].pk}"' in html  # sillabussuz öz qrupu (saat eynidir)
+    assert f'value="{world["offerings"]["o3"].pk}"' not in html  # saatı fərqli qrup (sahib 2026-11-25)
     assert f'value="{world["offerings"]["o5"].pk}"' not in html  # həmkarın qrupu
     assert "data-syl-reuse-confirm" in html

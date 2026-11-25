@@ -60,8 +60,12 @@ def get_or_create_offering(*, organization, subject, period, group, course=None)
     return offering
 
 
-def enroll_student_in_subject(*, record, subject, period, kind, allow_inactive=False):
+def enroll_student_in_subject(*, record, subject, period, kind, allow_inactive=False, prefer_parent_journal=False):
     """Ensure the student is enrolled in *subject* for *period* (their group section).
+
+    ``prefer_parent_journal`` (sahib 2026-11-08, «ana qrup alt qrupların cəmidir»): tələbənin qrupu bölünmüş alt
+    qrupdursa və onun bu fənn üzrə aktiv açılışı yoxdursa, sətir ANA qrupun aktiv jurnalına yazılır (provenans =
+    alt qrup, seminar sırası). Rəsmi köçürmə bunu istifadə etmir — DB sübutu varisi yeni qrupun açılışında istəyir.
 
     Existing rows, including historical ones, are never reactivated implicitly;
     callers that require a current enrollment must inspect ``status``.
@@ -76,6 +80,14 @@ def enroll_student_in_subject(*, record, subject, period, kind, allow_inactive=F
     )
     if not allow_inactive and not journal_hygiene_guard.record_is_enrollable(record):
         return journal_hygiene_guard.existing_enrollment(record, subject=subject, period=period), False
+    if prefer_parent_journal:
+        from . import transfer_family
+
+        parent = transfer_family.parent_journal_for(
+            organization=record.organization, group=record.group, subject_id=subject.pk, period=period
+        )
+        if parent is not None:
+            return transfer_family.enroll_in_parent_journal(parent, record.student, record.group, kind)
     offering = get_or_create_offering(
         organization=record.organization, subject=subject, period=period, group=record.group
     )
@@ -102,7 +114,12 @@ def enroll_mandatory_subjects(*, record, period, semester_number):
     created = 0
     for row in rows:
         _, was_created = enroll_student_in_subject(
-            record=record, subject=row.subject, period=period, kind=EnrollmentKind.MANDATORY, allow_inactive=True
+            record=record,
+            subject=row.subject,
+            period=period,
+            kind=EnrollmentKind.MANDATORY,
+            allow_inactive=True,
+            prefer_parent_journal=True,
         )
         created += int(was_created)
     return created
@@ -166,7 +183,13 @@ def choose_group_elective(
         choice, _ = GroupElectiveChoice.objects.update_or_create(
             **block, defaults={"chosen_subject": subject, "decided_by": decided_by}
         )
-    offering = get_or_create_offering(organization=organization, subject=subject, period=period, group=group)
+    # Bölünmüş alt qrup: öz aktiv jurnalı yoxdursa qərar ANA qrupun jurnalına yazılır (passiv jurnala yox).
+    from . import transfer_family
+
+    parent = transfer_family.parent_journal_for(
+        organization=organization, group=group, subject_id=subject.pk, period=period
+    )
+    offering = parent or get_or_create_offering(organization=organization, subject=subject, period=period, group=group)
     records = list(
         journal_hygiene_guard.enrollable_records(
             StudentAcademicRecord.objects.filter(
@@ -183,12 +206,17 @@ def choose_group_elective(
             # DB qapısı (``registrar_guard_active_member``): aktiv üzvlüyü olmayan tələbə ötürülür —
             # qrupun qərarı bütövlükdə dayanmır (``enroll_group_students``-dakı ``not_member`` ilə eyni).
             with transaction.atomic():
-                _, created = Enrollment.objects.get_or_create(
-                    organization=organization,
-                    student=rec.student,
-                    offering=offering,
-                    defaults={"kind": EnrollmentKind.ELECTIVE},
-                )
+                if parent is not None:
+                    _, created = transfer_family.enroll_in_parent_journal(
+                        parent, rec.student, group, EnrollmentKind.ELECTIVE
+                    )
+                else:
+                    _, created = Enrollment.objects.get_or_create(
+                        organization=organization,
+                        student=rec.student,
+                        offering=offering,
+                        defaults={"kind": EnrollmentKind.ELECTIVE},
+                    )
         except IntegrityError:
             continue
         enrolled += int(created)
