@@ -114,8 +114,8 @@ def redirect_target(*, record, new_group, subject_id, period, target, keep_paren
     """Köçürmənin varisi ana jurnala qaytarılmalıdırsa ana qrupun aktiv açılışı, əks halda ``None``.
 
     * alt qrupun bu fənn üzrə açılışı PASSİVDİR (bölmənin varisi / ana jurnala birləşdirilib) — hər köçürmədə;
-    * alt qrupun açılışı YOXDUR, ana jurnal isə artıq alt qrup formasındadır (ailənin seminar alt qrupu var) — hər
-      köçürmədə; ailə hələ bölünməyibsə (təzə alt qrup) adi köçürmə köhnə qayda ilə gedir (sahibin açıq qərarı);
+    * alt qrupun açılışı YOXDUR, amma o, ana jurnalda artıq seminar alt qrupudur — hər köçürmədə; təzə alt qrupa
+      (ana jurnalda seminar alt qrupu yoxdur) adi köçürmə köhnə qayda ilə gedir (sahibin açıq qərarı);
     * bölmə (``keep_parent``): alt qrupun canlı jurnalı yoxdur. Canlı (aktiv + doldurulmuş) köhnə formalı jurnal
       varsa bölmə dayanır — iki jurnal yaranmasın (əvvəlcə alt qrup jurnalı ana jurnala birləşdirilməlidir).
     """
@@ -124,7 +124,7 @@ def redirect_target(*, record, new_group, subject_id, period, target, keep_paren
         return None
     if target is not None and not target.is_active:
         return parent
-    if target is None and (keep_parent or is_family_journal(parent)):
+    if target is None and (keep_parent or is_family_journal(parent, new_group)):
         return parent
     if not keep_parent:
         return None
@@ -137,9 +137,10 @@ def redirect_target(*, record, new_group, subject_id, period, target, keep_paren
     return parent
 
 
-def is_family_journal(offering) -> bool:
-    """Ana jurnal alt qrup formasındadırmı: reyestr alt qrupuna bağlı seminar alt qrupu var (bölmə / birləşdirmə)."""
-    return SeminarGroup.objects.filter(offering=offering, unit__isnull=False).exists()
+def is_family_journal(offering, unit) -> bool:
+    """Bu alt qrup ana jurnalda artıq seminar alt qrupudurmu (bölmə / birləşdirmə). Ailənin BAŞQA alt qrupu bölünüb,
+    bu isə təzədirsə — yox: təzə alt qrupa adi köçürmə köhnə qayda ilə gedir (sahibin açıq qərarı)."""
+    return SeminarGroup.objects.filter(offering=offering, unit=unit).exists()
 
 
 def carry_rows(*, record, old_group, new_group, period) -> list:
