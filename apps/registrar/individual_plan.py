@@ -37,6 +37,8 @@ from django.apps import apps as django_apps
 
 from apps.organizations.public import group_meta
 
+from . import individual_plan_sources as sources
+
 TEMPLATE_PATH = Path(__file__).resolve().parent / "docx_templates" / "individual_plan.docx"
 
 _BLOCK_RE = re.compile(r"<!--STUDENT_BLOCK_START-->(.*?)<!--STUDENT_BLOCK_END-->", re.S)
@@ -161,6 +163,29 @@ def _teacher_map(organization, group, seasons) -> dict[tuple[str, object], str]:
     return mapping
 
 
+_PATRONYMIC_SUFFIX_RE = re.compile(r"\s+(qızı|oğlu|qizi|oglu)\s*$", re.I)
+
+
+def _az_title(text: str) -> str:
+    """«SAHİL» → «Sahil» (Python-un ``.title()``-i «İ»-ni «i̇» edir, «I»-ni «i»)."""
+
+    def word(part: str) -> str:
+        lower = part.replace("İ", "i").replace("I", "ı").lower()
+        return lower[:1].replace("i", "İ").replace("ı", "I").upper() + lower[1:] if lower else lower
+
+    return " ".join(word(part) for part in text.split())
+
+
+def _student_name(student) -> str:
+    """«Ad Soyad Ata adı» — rəsmi nümunədəki kimi (sahib 2026-11-25); ata adının «qızı/oğlu» sonluğu yazılmır."""
+    base = (student.get_full_name() or "").strip() or student.username
+    profile = getattr(student, "profile", None)
+    patronymic = _PATRONYMIC_SUFFIX_RE.sub("", (getattr(profile, "patronymic", "") or "").strip()).strip()
+    if patronymic and patronymic.casefold() not in base.casefold():
+        return f"{base} {_az_title(patronymic) if patronymic.isupper() else patronymic}"
+    return base
+
+
 def _row_hours(row) -> int:
     contact = int(row.lecture_hours or 0) + int(row.seminar_hours or 0) + int(row.lab_hours or 0)
     return contact if contact > 0 else int(row.total_hours or 0)
@@ -171,7 +196,8 @@ def _row_chair(row) -> str:
     return (getattr(chair, "name", "") or "").strip()
 
 
-def _semester_block(title: str, rows, season: str, teachers) -> SemesterBlock:
+def _semester_block(title: str, rows, season: str, teachers, extra=()) -> SemesterBlock:
+    """Plan sətirləri + (plan boşdursa / başqa qrupun jurnalı varsa) jurnal sətirləri (:mod:`.individual_plan_sources`)."""
     block = SemesterBlock(title=title)
     for index, row in enumerate(rows, start=1):
         block.rows.append(
@@ -185,6 +211,19 @@ def _semester_block(title: str, rows, season: str, teachers) -> SemesterBlock:
                 teacher=teachers.get((season, row.subject_id), ""),
             )
         )
+    for item in extra:
+        block.rows.append(
+            PlanRow(
+                n=len(block.rows) + 1,
+                code=item["code"],
+                subject=item["subject"],
+                hours=item["hours"],
+                credits=item["credits"],
+                chair=item["chair"],
+                teacher=item["teacher"],
+                note=item["note"],
+            )
+        )
     return block
 
 
@@ -196,6 +235,8 @@ def build_student_plan(
     teachers_cache: dict | None = None,
     seasons_cache: dict | None = None,
     rows_cache: dict | None = None,
+    context_group=None,
+    plan_sources: sources.PlanSources | None = None,
 ) -> StudentPlan:
     """Bir tələbənin fərdi planı — sənədin bir səhifəsi.
 
@@ -237,6 +278,21 @@ def build_student_plan(
     rows = rows_cache[rows_key]
     fall_rows = [row for row in rows if row.semester_number == fall_no]
     spring_rows = [row for row in rows if row.semester_number == spring_no]
+    # Sahib 2026-11-25: plan boşdursa jurnallar, başqa qrupun (əlavə / alt qrup) jurnalı varsa o da.
+    home_group_id = getattr(group, "id", None)
+    fallback_groups = [home_group_id, getattr(context_group, "id", None)]
+    if plan_sources is None:
+        plan_sources = sources.PlanSources(organization, seasons["fall"] + seasons["spring"])
+    extra = {
+        season: plan_sources.semester_extra_rows(
+            record,
+            period_ids=seasons[season],
+            curriculum_subject_ids={row.subject_id for row in season_rows},
+            home_group_id=home_group_id,
+            fallback_groups=fallback_groups,
+        )
+        for season, season_rows in (("fall", fall_rows), ("spring", spring_rows))
+    }
 
     program = record.program
     # Struktur adları (ixtisas/fakültə) `parent` zənciri ilə tapılır — zəncirin
@@ -256,7 +312,7 @@ def build_student_plan(
     specialty, faculty = rows_cache[names_key]
 
     student = record.student
-    student_name = (student.get_full_name() or "").strip() or student.username
+    student_name = _student_name(student)
     return StudentPlan(
         university=az_upper(organization.name),
         faculty=faculty,
@@ -264,25 +320,34 @@ def build_student_plan(
         group=(group.name if group is not None else ""),
         student=student_name,
         study_year=_ROMAN.get(course, str(course)),
-        academic_year=academic_year,
+        academic_year=re.sub(r"\s*/\s*", "-", academic_year),  # nümunədəki kimi «2026-2027»
         semesters=[
-            _semester_block(f"Payız semestri (P-{fall_no})", fall_rows, "fall", teachers),
-            _semester_block(f"Yaz semestri (Y-{spring_no})", spring_rows, "spring", teachers),
+            _semester_block(f"Payız semestri (P-{fall_no})", fall_rows, "fall", teachers, extra["fall"]),
+            _semester_block(f"Yaz semestri (Y-{spring_no})", spring_rows, "spring", teachers, extra["spring"]),
         ],
     )
 
 
-def group_records(organization, group, *, record_id=None):
-    """Qrupun aktiv (qeydiyyatlı) tələbələri — sənəd sırası soyad/ad üzrədir."""
+def group_records(organization, group, *, record_id=None, period_ids=()):
+    """Qrupun aktiv (qeydiyyatlı) tələbələri — sənəd sırası soyad/ad üzrədir.
+
+    Sahib 2026-11-25: «Əlavə olaraq» üzvlər (öz qrupu başqadır, bu qrupun jurnalındadır) da — sonda.
+    """
     StudentAcademicRecord = django_apps.get_model("registrar", "StudentAcademicRecord")
     queryset = (
         StudentAcademicRecord.objects.filter(organization=organization, group=group, is_active=True)
-        .select_related("student", "program", "program__specialty_unit", "curriculum", "group", "group__parent")
+        .select_related(
+            "student", "student__profile", "program", "program__specialty_unit", "curriculum", "group", "group__parent"
+        )
         .order_by("student__last_name", "student__first_name", "student__username")
     )
     if record_id:
         queryset = queryset.filter(pk=record_id)
-    return list(queryset)
+    records = list(queryset)
+    extras = sources.extra_member_records(organization, group, period_ids)
+    if record_id:
+        extras = [record for record in extras if str(record.pk) == str(record_id)]
+    return records + [record for record in extras if record.pk not in {item.pk for item in records}]
 
 
 # ── XML doldurma ─────────────────────────────────────────────────────────────
@@ -364,10 +429,14 @@ def render_docx(plans: list[StudentPlan]) -> bytes:
 def build_group_document(organization, group, *, record_id=None) -> tuple[str, bytes, int]:
     """(fayl adı, DOCX baytları, tələbə sayı) — bütöv qrup və ya tək tələbə üçün."""
     period = current_period(organization)
-    records = group_records(organization, group, record_id=record_id)
+    raw_year = getattr(period, "academic_year", "") or ""
+    seasons_cache: dict = {raw_year: _season_periods(organization, raw_year)}
+    year_periods = seasons_cache[raw_year]["fall"] + seasons_cache[raw_year]["spring"]
+    records = group_records(organization, group, record_id=record_id, period_ids=year_periods)
     teachers_cache: dict = {}
-    seasons_cache: dict = {}
     rows_cache: dict = {}
+    plan_sources = sources.PlanSources(organization, year_periods)
+    plan_sources.prime([record.student_id for record in records])
     plans = [
         build_student_plan(
             organization,
@@ -376,6 +445,8 @@ def build_group_document(organization, group, *, record_id=None) -> tuple[str, b
             teachers_cache=teachers_cache,
             seasons_cache=seasons_cache,
             rows_cache=rows_cache,
+            context_group=group,
+            plan_sources=plan_sources,
         )
         for record in records
     ]
