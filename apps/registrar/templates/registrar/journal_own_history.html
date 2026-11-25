@@ -22,7 +22,7 @@ Data: apps/registrar/journal_own_history_grid.py · giriş: journal_own_history.
     <ul class="joh-chips" aria-label="{% trans 'Xülasə' context 'registrar.own_history' %}">
         <li class="joh-chip"><b>{{ summary.lessons }}</b> {% trans "dərs" %}</li>
         {% for item in summary.by_kind %}
-        <li class="joh-chip joh-chip--{{ item.kind }}">{{ item.label }}: <b>{{ item.lessons }}</b> {% trans "dərs" %} · <b>{{ item.hours }}</b> {% trans "saat" %}</li>
+        <li class="joh-chip joh-chip--{{ item.kind }}">{{ item.label }}: <b>{{ item.lessons }}</b> {% trans "dərs" %}{% if show_timing %} · <b>{{ item.hours }}</b> {% trans "saat" %}{% endif %}</li>
         {% endfor %}
         {% if summary.first %}
         <li class="joh-chip joh-chip--dates"><i class="far fa-calendar" aria-hidden="true"></i> {{ summary.first|date:"d.m.Y" }}{% if summary.last != summary.first %} – {{ summary.last|date:"d.m.Y" }}{% endif %}</li>
@@ -31,8 +31,9 @@ Data: apps/registrar/journal_own_history_grid.py · giriş: journal_own_history.
 
     <p class="joh-note">
         <i class="fas fa-circle-info" aria-hidden="true"></i>
-        {% if broad_view %}{% trans "Yalnız bu müəllimin keçirdiyi və ya yazdığı dərslər və onun daxil etdiyi qeydlər göstərilir. Saat yalnız müəllimin adına keçirilmiş dərslərdən sayılır. Yalnız oxunur." context "registrar.own_history" %}
-        {% else %}{% trans "Yalnız sizin keçirdiyiniz və ya yazdığınız dərslər və öz daxil etdiyiniz qeydlər göstərilir. Saat yalnız adınıza keçirilmiş dərslərdən sayılır. Yalnız oxunur." context "registrar.own_history" %}{% endif %}
+        {% if show_timing %}{% trans "Yalnız bu müəllimin keçirdiyi və ya yazdığı dərslər və onun daxil etdiyi qeydlər göstərilir. Saat yalnız müəllimin adına keçirilmiş dərslərdən sayılır. Yalnız oxunur." context "registrar.own_history" %}
+        {% elif broad_view %}{% trans "Yalnız bu müəllimin keçirdiyi və ya yazdığı dərslər və onun daxil etdiyi qeydlər göstərilir. Yalnız oxunur." context "registrar.own_history" %}
+        {% else %}{% trans "Yalnız sizin keçirdiyiniz və ya yazdığınız dərslər və öz daxil etdiyiniz qeydlər göstərilir. Yalnız oxunur." context "registrar.own_history" %}{% endif %}
     </p>
 
     {% if kind_tabs|length > 1 %}
@@ -55,7 +56,7 @@ Data: apps/registrar/journal_own_history_grid.py · giriş: journal_own_history.
                         {% for col in columns %}
                         <th scope="col" class="joh-grid__lesson joh-k--{{ col.lesson.kind }}{% if col.lesson.is_passive %} is-passive{% endif %}" title="{{ col.label }}{% if col.section %} · {{ col.section }}{% endif %} · {{ col.role }}">
                             <span class="joh-grid__date">{{ col.lesson.date|date:"d.m.Y" }}</span>
-                            <span class="joh-grid__kind">{{ col.short }} · {{ col.lesson.hours }} {% trans "s." context "registrar.own_history" %}</span>
+                            <span class="joh-grid__kind">{{ col.short }}{% if show_timing %} · {{ col.lesson.hours }} {% trans "s." context "registrar.own_history" %}{% endif %}</span>
                             {% if col.section %}<span class="joh-grid__section">{{ col.section }}</span>{% endif %}
                         </th>
                         {% endfor %}
@@ -102,8 +103,8 @@ Data: apps/registrar/journal_own_history_grid.py · giriş: journal_own_history.
                         <th scope="col">{% trans "Növ" %}</th>
                         <th scope="col">{% trans "Bölmə" context "registrar.own_history" %}</th>
                         <th scope="col">{% trans "Mövzu" context "registrar.own_history" %}</th>
-                        <th scope="col" class="joh-num">{% trans "Saat" %}</th>
-                        <th scope="col">{% trans "Otaq" context "registrar.own_history" %}</th>
+                        {% if show_timing %}<th scope="col" class="joh-num">{% trans "Saat" %}</th>
+                        <th scope="col">{% trans "Otaq" context "registrar.own_history" %}</th>{% endif %}
                         <th scope="col" class="joh-num">{% trans "Qeyd" context "registrar.own_history" %}</th>
                         {% if show_timing %}<th scope="col">{% trans "Yazılıb" context "registrar.own_history" %}</th>{% endif %}
                     </tr>
@@ -117,8 +118,8 @@ Data: apps/registrar/journal_own_history_grid.py · giriş: journal_own_history.
                         <td>{{ col.label }}{% if col.lesson.is_passive %} <span class="joh-tag">{% trans "Passiv" context "registrar.own_history" %}</span>{% endif %}{% if col.imported %} <span class="joh-tag">{% trans "Köhnə sistemdən" context "registrar.own_history" %}</span>{% endif %}<span class="joh-role">{{ col.role }}</span></td>
                         <td>{{ col.section|default:"—" }}</td>
                         <td class="joh-topic">{{ col.lesson.display_topic|default:"—" }}</td>
-                        <td class="joh-num">{{ col.lesson.hours }}</td>
-                        <td>{{ col.room|default:"—" }}</td>
+                        {% if show_timing %}<td class="joh-num">{{ col.lesson.hours }}</td>
+                        <td>{{ col.room|default:"—" }}</td>{% endif %}
                         <td class="joh-num">{{ col.cells }}</td>
                         {% if show_timing %}<td class="joh-nowrap">
                             {% if col.lesson_recorded %}<span class="joh-stamp">{% trans "Dərs" context "registrar.own_history" %}: {{ col.lesson_recorded }}</span>{% endif %}

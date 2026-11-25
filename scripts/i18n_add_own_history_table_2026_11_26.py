@@ -95,17 +95,25 @@ STRINGS = {
     (
         "django",
         _C,
-        "Yalnız sizin keçirdiyiniz və ya yazdığınız dərslər və öz daxil etdiyiniz qeydlər göstərilir. "
-        "Saat yalnız adınıza keçirilmiş dərslərdən sayılır. Yalnız oxunur.",
+        "Yalnız sizin keçirdiyiniz və ya yazdığınız dərslər və öz daxil etdiyiniz qeydlər göstərilir. Yalnız oxunur.",
     ): (
-        "Only lessons you taught or recorded and the entries you made yourself are shown. "
-        "Hours count only lessons held in your name. Read-only.",
-        "Показаны только проведённые или записанные вами занятия и внесённые вами записи. "
-        "Часы считаются только по занятиям, проведённым на ваше имя. Только просмотр.",
-        "Yalnızca verdiğiniz veya yazdığınız dersler ve kendi girdiğiniz kayıtlar gösterilir. "
-        "Saatler yalnızca adınıza işlenen derslerden sayılır. Salt okunur.",
+        "Only lessons you taught or recorded and the entries you made yourself are shown. Read-only.",
+        "Показаны только проведённые или записанные вами занятия и внесённые вами записи. Только просмотр.",
+        "Yalnızca verdiğiniz veya yazdığınız dersler ve kendi girdiğiniz kayıtlar gösterilir. Salt okunur.",
         "Angezeigt werden nur von Ihnen gehaltene oder erfasste Lehrveranstaltungen und Ihre eigenen Einträge. "
-        "Stunden zählen nur für auf Ihren Namen gehaltene Lehrveranstaltungen. Nur Lesezugriff.",
+        "Nur Lesezugriff.",
+    ),
+    (
+        "django",
+        _C,
+        "Yalnız bu müəllimin keçirdiyi və ya yazdığı dərslər və onun daxil etdiyi qeydlər göstərilir. Yalnız oxunur.",
+    ): (
+        "Only lessons this teacher taught or recorded and the entries they made are shown. Read-only.",
+        "Показаны только проведённые или записанные этим преподавателем занятия и внесённые им записи. "
+        "Только просмотр.",
+        "Yalnızca bu öğretmenin verdiği veya yazdığı dersler ve girdiği kayıtlar gösterilir. Salt okunur.",
+        "Angezeigt werden nur von dieser Lehrkraft gehaltene oder erfasste Lehrveranstaltungen und ihre Einträge. "
+        "Nur Lesezugriff.",
     ),
     (
         "django",

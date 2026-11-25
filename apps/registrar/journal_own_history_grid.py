@@ -80,7 +80,7 @@ def _role(lesson, subject_id) -> str:
     return pgettext(_CTX, "Yalnız qeyd daxil edib")
 
 
-def _summary(lessons, subject_id, labels) -> dict:
+def _summary(lessons, subject_id, labels, timing) -> dict:
     """Lesson count + taught hours by kind. Hours = explicit ``Lesson.instructor`` only, passive excluded
     (created_by / mark-only lessons are history, never the subject's taught hours)."""
     by_kind = []
@@ -91,10 +91,10 @@ def _summary(lessons, subject_id, labels) -> dict:
         hours = sum(
             lesson.hours or 0 for lesson in rows if lesson.instructor_id == subject_id and not lesson.is_passive
         )
-        by_kind.append({"kind": kind, "label": labels[kind], "lessons": len(rows), "hours": hours})
+        by_kind.append({"kind": kind, "label": labels[kind], "lessons": len(rows), "hours": hours if timing else None})
     return {
         "lessons": len(lessons),
-        "hours": sum(item["hours"] for item in by_kind),
+        "hours": sum(item["hours"] for item in by_kind) if timing else None,
         "by_kind": by_kind,
         "first": lessons[0].date if lessons else None,
         "last": lessons[-1].date if lessons else None,
@@ -137,14 +137,16 @@ def _rows(shown, subject_id) -> list:
 def build(offering, subject, lessons, *, kind="", timing=False) -> dict:
     """Template context for the grid, the kind tabs and the «Nə vaxt, harada yazılıb» table.
 
-    ``timing`` — start–end time and the «Yazılıb» moments. Owner 2026-11-17: staff only, never the teacher's own
-    view (``journal_lesson_timing.show_lesson_timing``); when ``False`` nothing time-related leaves this module."""
+    ``timing`` — start–end time, per-lesson hours, room and the «Yazılıb» moments. Owner 2026-11-17/19: staff only,
+    never the teacher's own view (``journal_lesson_timing.show_lesson_timing``); when ``False`` none of it leaves this
+    module (templates must not read ``lesson.hours`` / ``lesson.room`` either)."""
     practical = offering_is_practical(offering)
     labels = {value: kind_label(value, practical=practical) for value in KINDS}
     kinds_present = [value for value in KINDS if any(lesson.kind == value for lesson in lessons)]
     kind = kind if kind in kinds_present else ""
     shown = [lesson for lesson in lessons if not kind or lesson.kind == kind]
-    journal_lesson_timing.attach_rooms(offering, shown)
+    if timing:
+        journal_lesson_timing.attach_rooms(offering, shown)
     from .journal_topics import attach_syllabus_topics
 
     attach_syllabus_topics(shown, offering=offering)
@@ -160,7 +162,7 @@ def build(offering, subject, lessons, *, kind="", timing=False) -> dict:
                 "label": labels.get(lesson.kind, lesson.kind),
                 "section": _section(lesson, offering),
                 "time": journal_lesson_timing.time_range(lesson) if timing else "",
-                "room": journal_lesson_timing.room_text(lesson),
+                "room": journal_lesson_timing.room_text(lesson) if timing else "",
                 "role": _role(lesson, subject_id),
                 "lesson_recorded": _stamp(lesson.created_at) if timing and lesson.created_by_id == subject_id else "",
                 "marks_recorded": _stamp(max(own_stamps)) if own_stamps else "",
@@ -169,7 +171,7 @@ def build(offering, subject, lessons, *, kind="", timing=False) -> dict:
             }
         )
     return {
-        "summary": _summary(lessons, subject_id, labels),
+        "summary": _summary(lessons, subject_id, labels, timing),
         "kind_tabs": [{"value": value, "label": labels[value]} for value in kinds_present],
         "selected_kind": kind,
         "columns": columns,

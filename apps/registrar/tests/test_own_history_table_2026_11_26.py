@@ -15,9 +15,10 @@ from django.test import TestCase
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
+from apps.exams.models import ExamRoom
 from apps.organizations.models import Membership
 from apps.registrar.journal_own_history import detail
-from apps.registrar.models import Enrollment, Lesson, LessonMark
+from apps.registrar.models import Enrollment, JournalShare, Lesson, LessonMark
 from apps.registrar.page_contexts import journal_list_context
 from apps.registrar.tests import test_teacher_journal_visibility as fixtures
 from apps.workload.tests.factories import TEACHER_PERMS, activate_member
@@ -66,6 +67,7 @@ class OwnHistoryTableTests(TestCase):
             topic="Own seminar topic",
             start_time=datetime.time(9, 0),
             end_time=datetime.time(10, 20),
+            room=ExamRoom.objects.create(organization=self.org, name="R-305", code="R305", building="Korpus Z"),
         )
         foreign = self.lesson(offering, days_ago=1, instructor=self.other, topic="Other teacher private lesson")
         zeynal = self.student(offering, "Zeynalov")
@@ -129,10 +131,25 @@ class OwnHistoryTableTests(TestCase):
         self.assertIn("Created only", html)
         self.assertIn("Dərsi yaradıb", html)
         self.assertNotIn("Nullov", html)
-        self.assertIn("<b>0</b> saat", html)
+        self.assertNotIn("</b> saat", html)  # own view: no hours (staff-only, owner 2026-11-17)
+        staff = self.get(offering, self.org.owner, teacher=str(self.teacher.pk)).content.decode()
+        self.assertIn("<b>0</b> saat", staff)  # created-only lesson is not the teacher's taught hours
+        self.assertNotIn("Nullov", staff)
 
     # ── lesson timing: staff only (owner 2026-11-17) ────────────────────────
-    TIMING_MARKERS = ("09:00", "10:20", ">Vaxt<", ">Yazılıb<", "Son qeyd:", "Dərs:")
+    TIMING_MARKERS = (
+        "09:00",
+        "10:20",
+        ">Vaxt<",
+        ">Yazılıb<",
+        "Son qeyd:",
+        "Dərs:",
+        ">Saat<",
+        ">Otaq<",
+        "R-305",
+        "</b> saat",
+        " s.</span>",
+    )
 
     def test_own_view_renders_no_time_or_recorded_moments(self):
         offering = self.scenario()
@@ -147,12 +164,27 @@ class OwnHistoryTableTests(TestCase):
 
         lessons = load_lessons(recorded_lessons(self.teacher).filter(offering=offering), offering, self.teacher)
         columns = build(offering, self.teacher, lessons)["columns"]
-        self.assertTrue(all(not (c["time"] or c["lesson_recorded"] or c["marks_recorded"]) for c in columns))
+        self.assertTrue(
+            all(not (c["time"] or c["room"] or c["lesson_recorded"] or c["marks_recorded"]) for c in columns)
+        )
+        self.assertTrue(
+            all(item["hours"] is None for item in build(offering, self.teacher, lessons)["summary"]["by_kind"])
+        )
 
     def test_staff_broad_view_shows_time_and_recorded_moments(self):
         offering = self.scenario()
         html = self.get(offering, self.org.owner, teacher=str(self.teacher.pk)).content.decode()
-        for marker in ("09:00–10:20", ">Vaxt<", ">Yazılıb<", "Son qeyd:", "Dərs:"):
+        for marker in (
+            "09:00–10:20",
+            ">Vaxt<",
+            ">Yazılıb<",
+            "Son qeyd:",
+            "Dərs:",
+            ">Saat<",
+            ">Otaq<",
+            "R-305",
+            "</b> saat",
+        ):
             with self.subTest(marker=marker):
                 self.assertIn(marker, html)
 
@@ -163,6 +195,30 @@ class OwnHistoryTableTests(TestCase):
         for marker in self.TIMING_MARKERS:
             with self.subTest(marker=marker):
                 self.assertNotIn(marker, html)
+
+    def test_kind_limited_share_holder_cannot_open_another_teachers_part(self):
+        from apps.registrar.journal_access import can_open_journal
+        from apps.registrar.journal_own_history import gate_list_links
+
+        offering = self.scenario()  # lecturer = self.teacher, journal owner = self.other
+        holder = User.objects.create_user("own-history-seminar-share")
+        activate_member(self.org, holder, "teacher", permissions=TEACHER_PERMS)
+        JournalShare.objects.create(organization=self.org, offering=offering, teacher=holder, kinds=["seminar"])
+        request = self.request(holder, own_history="1", teacher=str(self.teacher.pk))
+        self.assertTrue(can_open_journal(request, offering))  # opens the (narrowed) journal…
+        for target in (self.teacher, self.other):
+            with self.subTest(target=target.username), self.assertRaises(Http404):
+                self.get(offering, holder, teacher=str(target.pk))  # …but never another teacher's full part
+        offering.journal_teacher_history_id = self.teacher.pk
+        gate_list_links(self.request(holder), [offering])
+        self.assertIsNone(offering.journal_teacher_history_id)
+        offering.journal_teacher_history_id = self.teacher.pk
+        gate_list_links(self.request(self.org.owner), [offering])
+        self.assertEqual(offering.journal_teacher_history_id, self.teacher.pk)
+
+    def test_full_scope_staff_opens_another_teachers_part(self):
+        offering = self.scenario()
+        self.assertEqual(self.get(offering, self.org.owner, teacher=str(self.teacher.pk)).status_code, 200)
 
     def test_imported_marker_stays_for_everyone(self):
         offering = self.offering(instructor=self.other)
