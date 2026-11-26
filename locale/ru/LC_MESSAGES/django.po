@@ -122475,3 +122475,79 @@ msgstr "Назначенные вопросы изменились. Обнови
 
 msgid "Əlaqə forması yeniləndi. Mesajınızı yoxlayıb yenidən göndərin."
 msgstr "Форма обратной связи обновлена. Проверьте сообщение и отправьте его ещё раз."
+
+msgctxt "accounts.workload"
+msgid "Kartlar kafedranın illik tədris tapşırığındakı sətirlərdən yaranır. Tədris şöbəsi sətirləri təsdiqlənmiş tədris planından və ya Excel faylından gətirə bilər."
+msgstr "Карточки формируются из строк годового учебного поручения кафедры. Учебный отдел может импортировать строки из утверждённого учебного плана или файла Excel."
+
+msgctxt "accounts.workload"
+msgid "Mövcud sətirdə saatları müəllimlərə bölün. Qrup, semestr və kredit üçün uyğun sətir yoxdursa, «Plan sətri əlavə et» ilə onu yarada bilərsiniz."
+msgstr "Распределите часы существующей строки между преподавателями. Если нет строки с нужной группой, семестром и кредитами, нажмите «Добавить строку плана»."
+
+msgctxt "accounts.workload"
+msgid "Plan sətri əlavə et"
+msgstr "Добавить строку плана"
+
+msgctxt "accounts.workload"
+msgid "«Plan sətirləri»ni açın, qrup və kreditə görə uyğun sətri tapıb «Redaktə»ni seçin."
+msgstr "Откройте «Строки плана», найдите строку по группе и кредитам и нажмите «Редактировать»."
+
+msgctxt "accounts.workload"
+msgid "Plan sətrini redaktə et"
+msgstr "Редактировать строку плана"
+
+msgctxt "accounts.workload"
+msgid "Tədris planından fənn seç"
+msgstr "Выбрать дисциплину из учебного плана"
+
+msgctxt "accounts.workload"
+msgid "Tədris planının sətri"
+msgstr "Строка учебного плана"
+
+msgctxt "accounts.workload"
+msgid "Fənn, semestr və kreditə görə seçin"
+msgstr "Выберите по дисциплине, семестру и кредитам"
+
+msgctxt "accounts.workload"
+msgid "Seçdiyiniz fənn, ixtisas, fəsil və kredit formaya köçürülür. Akademik dövrü, qrupları və dərs saatlarını yoxlayıb yadda saxlayın."
+msgstr "В форму переносятся дисциплина, специальность, сезон обучения и кредиты. Перед сохранением проверьте учебный период, группы и часы занятий."
+
+msgctxt "accounts.workload"
+msgid "Fənn kataloqda yoxdursa, adını yazın"
+msgstr "Если дисциплины нет в каталоге, введите её название"
+
+msgctxt "accounts.workload"
+msgid "Akademik qruplar"
+msgstr "Академические группы"
+
+msgctxt "accounts.workload"
+msgid "Plandakı kredit"
+msgstr "Кредиты по плану"
+
+msgctxt "accounts.workload"
+msgid "Hesabat üçün əsas kredit"
+msgstr "Основное значение кредитов для отчёта"
+
+msgctxt "accounts.workload"
+msgid "Plandakı krediti olduğu kimi yazın, məsələn, 6 və ya 6 / 7. Hesabat üçün bir əsas kredit dəyəri daxil edin. Dərs saatları ayrıca göstərilir."
+msgstr "Укажите кредиты в том виде, как в плане, например 6 или 6 / 7. Для отчётности укажите одно основное значение. Учебные часы указываются отдельно."
+
+msgctxt "accounts.workload"
+msgid "Mühazirəni birlikdə dinləyən qruplar bir axın sayılır. Seminar və laboratoriya üçün ayrıca dərs keçən qrupları sayın. Laboratoriya sayı 0 olduqda seminar sayı götürülür."
+msgstr "Группы, слушающие общую лекцию, считаются одним потоком. Для семинаров и лабораторных посчитайте группы, занимающиеся отдельно. Если для лабораторных указано 0, используется число семинарских групп."
+
+msgctxt "accounts.workload"
+msgid "Mühazirə axınlarının sayı"
+msgstr "Число лекционных потоков"
+
+msgctxt "accounts.workload"
+msgid "Seminar qruplarının və altqruplarının sayı"
+msgstr "Число семинарских групп и подгрупп"
+
+msgctxt "accounts.workload"
+msgid "Laboratoriya qruplarının və altqruplarının sayı"
+msgstr "Число лабораторных групп и подгрупп"
+
+msgctxt "accounts.workload"
+msgid "Plan saatını bir axın və ya bir qrup üçün yazın. Cəmi saat bütün axınlara və ya qruplara ayrılan yükdür. Məsələn, iki seminar qrupunun hərəsinə 15 saat ayrılırsa, cəmi 30 saatdır."
+msgstr "Укажите плановые часы для одного потока или одной группы. Общие часы охватывают все потоки или группы. Например, две семинарские группы по 15 часов дают в сумме 30 часов."

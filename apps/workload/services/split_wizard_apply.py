@@ -3,7 +3,7 @@
 :func:`apply_wizard` gövdəsi (``POST bolgu/sehrbaz/yadda-saxla/``)::
 
     {"task_id": "…", "row_ids": ["…"],
-     "rows":   [{"row_id": "…", "joint": false, "fix_totals": true}],
+     "rows":   [{"row_id": "…", "joint_by_activity": {"seminar": false, "lab": true}, "fix_totals": true}],
      "groups": [{"row_id": "…", "group_id": "…", "apply_journal": true,
                  "seminar": {"count": 2, "numbers": [1, 2], "names": ["234 K1", "234 K2"], "units": ["<OrgUnit>", "…"],
                              "placement": {"<enrollment>": 1, …}},
@@ -16,6 +16,7 @@
 
 QAYDALAR:
 
+* ``joint_by_activity`` hər fəaliyyətin seçimini saxlayır. Köhnə ``joint`` hər iki fəaliyyətə tətbiq olunur;
 * ``numbers`` — jurnal bölmələrinin REAL nömrələri (boşluqlu {2,3} də; yoxdursa 1..count) — yenidən nömrələnmir;
 * vahidlər (bölmələr) serverdə konfiqurasiyadan YENİDƏN törədilir (:func:`expected_units`) və gövdədəki ``units`` ilə
   TAM üst-üstə düşməlidir — müştəri ilə server fərqli düşünürsə heç nə yazılmır (``workload.wizard_units``);
@@ -43,7 +44,7 @@ from core.constants import AuditAction
 from core.http_ids import parse_uuid
 
 from .assignments import _owner_snapshot, _sync_row
-from .offering_rules import plan_reached_chair
+from .offering_rules import multiplier, plan_reached_chair
 from .patok_streams import VACANT, _set_lecturer
 from .row_edit import assign_amended, save_row_amended, unassign_amended
 from .scoping import WorkloadDenied, ensure_can_distribute
@@ -101,16 +102,23 @@ def _parse_config(payload, rows) -> dict:
     for row in rows:
         item = row_items.get(row.pk) or {}
         groups = row_groups(row)
-        joint = len(groups) > 1 and bool(item.get("joint"))
+        modes = item.get("joint_by_activity")
+        if modes is None:
+            modes = dict.fromkeys(SECTION_KINDS, bool(item.get("joint")))
+        if not isinstance(modes, dict) or any(not isinstance(value, bool) for value in modes.values()):
+            raise deny("workload.wizard_units", pgettext(_CTX, "Bölmələr dəyişib — sehrbazı bağlayıb yenidən açın."))
+        joint = {kind: len(groups) > 1 and modes.get(kind, multiplier(row, kind) <= 1) for kind in SECTION_KINDS}
         per_group = {}
         for group in groups:
             entry = group_items.get((row.pk, group.pk)) or {}
             seminar = entry.get("seminar") if isinstance(entry.get("seminar"), dict) else {}
             lab = entry.get("lab") if isinstance(entry.get("lab"), dict) else {}
             per_group[group.pk] = {
-                "seminar": [] if joint else _numbers(seminar),
-                "lab": [] if joint else _numbers(lab),
-                "journal": ({"seminar": seminar, "lab": lab} if entry.get("apply_journal") and not joint else None),
+                "seminar": [] if joint["seminar"] else _numbers(seminar),
+                "lab": [] if joint["lab"] else _numbers(lab),
+                "journal": (
+                    {"seminar": seminar, "lab": lab} if entry.get("apply_journal") and not all(joint.values()) else None
+                ),
             }
         config[row.pk] = {"joint": joint, "fix": bool(item.get("fix_totals")), "groups": per_group, "row": row}
     return config
@@ -127,7 +135,7 @@ def expected_units(row, cfg) -> dict:
         if not _active(row, activity):
             result[activity] = []
             continue
-        if cfg["joint"]:
+        if cfg["joint"][activity]:
             result[activity] = [(None, None)]
             continue
         keys = []
@@ -166,7 +174,7 @@ def _parse_units(payload, config, expected) -> dict:
         except (TypeError, ValueError):
             sub = -1
         row = config.get(row_pk, {}).get("row")
-        if row is not None and group is None and len(row_groups(row)) == 1 and not config[row_pk]["joint"]:
+        if row is not None and group is None and len(row_groups(row)) == 1:
             group = row_groups(row)[0].pk
         marker = (row_pk, activity, (group, sub))
         if marker not in wanted or marker in units:
@@ -207,12 +215,14 @@ def _totals_data(row, cfg, keys) -> dict:
             data[TOTAL_FIELD[activity]] = want
             if not int(getattr(row, PLAN_FIELD[activity]) or 0):
                 data[PLAN_FIELD[activity]] = plans[activity]
-    sub = counts.get("seminar") or counts.get("lab") or int(row.subgroup_count or 1)
-    lab = counts["lab"] if counts.get("lab") and counts["lab"] != sub else 0
-    if sub != int(row.subgroup_count or 0):
+    sub = counts.get("seminar", row.subgroup_count)
+    if sub != row.subgroup_count:
         data["subgroup_count"] = sub
-    if lab != int(row.lab_group_count or 0):
-        data["lab_group_count"] = lab
+    if "lab" in counts:
+        lab = counts["lab"]
+        follows_changed_seminar = sub != row.subgroup_count and lab == sub
+        if lab != (row.lab_group_count or sub) or (row.lab_group_count and follows_changed_seminar):
+            data["lab_group_count"] = 0 if lab == sub else lab
     return data
 
 
@@ -290,10 +300,14 @@ def _apply_sections(task, actor, config, request) -> int:
             # Sətirdə saatı olmayan növə toxunulmur (``None``) — eyni jurnalın başqa sətrinin bölmələri qorunur.
             row = cfg["row"]
             seminar = lab = None
-            if _active(row, "seminar"):
+            if _active(row, "seminar") and not cfg["joint"]["seminar"]:
                 seminar = dict(entry["journal"]["seminar"], count=len(entry["seminar"]), numbers=entry["seminar"])
-            if _active(row, "lab"):
+            if _active(row, "lab") and not cfg["joint"]["lab"]:
                 lab = dict(entry["journal"]["lab"], count=len(entry["lab"]), numbers=entry["lab"])
+                if cfg["joint"]["seminar"]:
+                    lab["nested"] = False
+            if seminar is None and lab is None:
+                continue
             try:
                 result = split_wizard_apply_sections(
                     organization=task.organization,

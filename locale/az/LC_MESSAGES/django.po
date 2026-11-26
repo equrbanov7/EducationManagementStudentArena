@@ -121537,3 +121537,79 @@ msgstr "Təyin edilmiş suallar dəyişib. Təhvildən əvvəl laboratoriya səh
 
 msgid "Əlaqə forması yeniləndi. Mesajınızı yoxlayıb yenidən göndərin."
 msgstr "Əlaqə forması yeniləndi. Mesajınızı yoxlayıb yenidən göndərin."
+
+msgctxt "accounts.workload"
+msgid "Kartlar kafedranın illik tədris tapşırığındakı sətirlərdən yaranır. Tədris şöbəsi sətirləri təsdiqlənmiş tədris planından və ya Excel faylından gətirə bilər."
+msgstr "Kartlar kafedranın illik tədris tapşırığındakı sətirlərdən yaranır. Tədris şöbəsi sətirləri təsdiqlənmiş tədris planından və ya Excel faylından gətirə bilər."
+
+msgctxt "accounts.workload"
+msgid "Mövcud sətirdə saatları müəllimlərə bölün. Qrup, semestr və kredit üçün uyğun sətir yoxdursa, «Plan sətri əlavə et» ilə onu yarada bilərsiniz."
+msgstr "Mövcud sətirdə saatları müəllimlərə bölün. Qrup, semestr və kredit üçün uyğun sətir yoxdursa, «Plan sətri əlavə et» ilə onu yarada bilərsiniz."
+
+msgctxt "accounts.workload"
+msgid "Plan sətri əlavə et"
+msgstr "Plan sətri əlavə et"
+
+msgctxt "accounts.workload"
+msgid "«Plan sətirləri»ni açın, qrup və kreditə görə uyğun sətri tapıb «Redaktə»ni seçin."
+msgstr "«Plan sətirləri»ni açın, qrup və kreditə görə uyğun sətri tapıb «Redaktə»ni seçin."
+
+msgctxt "accounts.workload"
+msgid "Plan sətrini redaktə et"
+msgstr "Plan sətrini redaktə et"
+
+msgctxt "accounts.workload"
+msgid "Tədris planından fənn seç"
+msgstr "Tədris planından fənn seç"
+
+msgctxt "accounts.workload"
+msgid "Tədris planının sətri"
+msgstr "Tədris planının sətri"
+
+msgctxt "accounts.workload"
+msgid "Fənn, semestr və kreditə görə seçin"
+msgstr "Fənn, semestr və kreditə görə seçin"
+
+msgctxt "accounts.workload"
+msgid "Seçdiyiniz fənn, ixtisas, fəsil və kredit formaya köçürülür. Akademik dövrü, qrupları və dərs saatlarını yoxlayıb yadda saxlayın."
+msgstr "Seçdiyiniz fənn, ixtisas, fəsil və kredit formaya köçürülür. Akademik dövrü, qrupları və dərs saatlarını yoxlayıb yadda saxlayın."
+
+msgctxt "accounts.workload"
+msgid "Fənn kataloqda yoxdursa, adını yazın"
+msgstr "Fənn kataloqda yoxdursa, adını yazın"
+
+msgctxt "accounts.workload"
+msgid "Akademik qruplar"
+msgstr "Akademik qruplar"
+
+msgctxt "accounts.workload"
+msgid "Plandakı kredit"
+msgstr "Plandakı kredit"
+
+msgctxt "accounts.workload"
+msgid "Hesabat üçün əsas kredit"
+msgstr "Hesabat üçün əsas kredit"
+
+msgctxt "accounts.workload"
+msgid "Plandakı krediti olduğu kimi yazın, məsələn, 6 və ya 6 / 7. Hesabat üçün bir əsas kredit dəyəri daxil edin. Dərs saatları ayrıca göstərilir."
+msgstr "Plandakı krediti olduğu kimi yazın, məsələn, 6 və ya 6 / 7. Hesabat üçün bir əsas kredit dəyəri daxil edin. Dərs saatları ayrıca göstərilir."
+
+msgctxt "accounts.workload"
+msgid "Mühazirəni birlikdə dinləyən qruplar bir axın sayılır. Seminar və laboratoriya üçün ayrıca dərs keçən qrupları sayın. Laboratoriya sayı 0 olduqda seminar sayı götürülür."
+msgstr "Mühazirəni birlikdə dinləyən qruplar bir axın sayılır. Seminar və laboratoriya üçün ayrıca dərs keçən qrupları sayın. Laboratoriya sayı 0 olduqda seminar sayı götürülür."
+
+msgctxt "accounts.workload"
+msgid "Mühazirə axınlarının sayı"
+msgstr "Mühazirə axınlarının sayı"
+
+msgctxt "accounts.workload"
+msgid "Seminar qruplarının və altqruplarının sayı"
+msgstr "Seminar qruplarının və altqruplarının sayı"
+
+msgctxt "accounts.workload"
+msgid "Laboratoriya qruplarının və altqruplarının sayı"
+msgstr "Laboratoriya qruplarının və altqruplarının sayı"
+
+msgctxt "accounts.workload"
+msgid "Plan saatını bir axın və ya bir qrup üçün yazın. Cəmi saat bütün axınlara və ya qruplara ayrılan yükdür. Məsələn, iki seminar qrupunun hərəsinə 15 saat ayrılırsa, cəmi 30 saatdır."
+msgstr "Plan saatını bir axın və ya bir qrup üçün yazın. Cəmi saat bütün axınlara və ya qruplara ayrılan yükdür. Məsələn, iki seminar qrupunun hərəsinə 15 saat ayrılırsa, cəmi 30 saatdır."

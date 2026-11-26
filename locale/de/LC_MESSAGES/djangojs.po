@@ -4055,3 +4055,57 @@ msgstr ""
 
 msgid "Seçim üçün variant yoxdur"
 msgstr "Keine Auswahlmöglichkeiten verfügbar"
+
+msgid "%(subject)s · %(program)s · Semestr %(semester)s · %(credits)s kredit"
+msgstr "%(subject)s · %(program)s · Semester %(semester)s · %(credits)s Leistungspunkte"
+
+msgid "Plan sətirləri (%(n)s)"
+msgstr "Planzeilen (%(n)s)"
+
+msgid "Saatlar qrupa görə dəyişir."
+msgstr "Die Stundenzahl variiert je nach Gruppe."
+
+msgid "Digər qruplarda %(hours)s"
+msgstr "Andere Gruppen: %(hours)s"
+
+msgid "Plan %(total)s · bölünüb %(assigned)s · qalıq %(remaining)s"
+msgstr "Geplant %(total)s · verteilt %(assigned)s · offen %(remaining)s"
+
+msgid "Qrup və ya müəllim axtar"
+msgstr "Gruppe oder Lehrkraft suchen"
+
+msgid "Hamısını göstər (%(n)s)"
+msgstr "Alle anzeigen (%(n)s)"
+
+msgid "Daha az göstər"
+msgstr "Weniger anzeigen"
+
+msgid "Uyğun nəticə tapılmadı."
+msgstr "Keine passenden Ergebnisse."
+
+msgid "%(n)s nəticə"
+msgstr "Ergebnisse: %(n)s"
+
+msgid "Qruplar (%(n)s)"
+msgstr "Gruppen (%(n)s)"
+
+msgid "Alt qruplar: %(sections)s"
+msgstr "Untergruppen: %(sections)s"
+
+msgid "Planda %(n)s alt qrup"
+msgstr "Untergruppen laut Plan: %(n)s"
+
+msgid "%(n)s axın"
+msgstr "Vorlesungszüge: %(n)s"
+
+msgid "%(n)s qrup ayrıca keçir"
+msgstr "Getrennt unterrichtete Gruppen: %(n)s"
+
+msgid "Qəbul ili %(years)s · mühazirə %(lecture)s s · seminar %(seminar)s s · laboratoriya %(lab)s s"
+msgstr "Zulassungsjahr %(years)s · Vorlesung %(lecture)s Std. · Seminar %(seminar)s Std. · Labor %(lab)s Std."
+
+msgid "Seçmə blok %(group)s"
+msgstr "Wahlbereich %(group)s"
+
+msgid "Seçmə fənn"
+msgstr "Wahlfach"
