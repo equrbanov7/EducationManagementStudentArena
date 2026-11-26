@@ -48,6 +48,7 @@ def plan_for_rows(rows, *, group, owner_rows=None):
     """
     teachers, activity_owners = defaultdict(set), defaultdict(set)
     sections: dict = defaultdict(lambda: defaultdict(set))
+    whole_group: set = set()  # bütün qrupa (alt qrupsuz) bölgüsü olan müəllimlər
     unclear_group = False
     for row in rows:
         if not plan_reached_chair(row.task):
@@ -63,6 +64,8 @@ def plan_for_rows(rows, *, group, owner_rows=None):
                 number = getattr(assignment, "sub_number", None)
                 if number:
                     sections[assignment.teacher_id][assignment.activity].add(int(number))
+                else:
+                    whole_group.add(assignment.teacher_id)
     ambiguous = unclear_group
     for activity, owners in activity_owners.items():
         if len(owners) < 2:
@@ -80,7 +83,9 @@ def plan_for_rows(rows, *, group, owner_rows=None):
         "sections": {
             teacher_id: {activity: sorted(numbers) for activity, numbers in kinds.items() if numbers}
             for teacher_id, kinds in sections.items()
-            if any(kinds.values())
+            # QA 2026-11-26: bütün qrupa mühazirə + bir alt qrupa seminar deyən müəllimin payı alt qrupun
+            # tələbələrinə daralmasın (mühazirə bütün qrupladır); bölməyə bağlı dərs xanaları onsuz da ayırır.
+            if any(kinds.values()) and teacher_id not in whole_group
         },
         "ambiguous": ambiguous,
     }

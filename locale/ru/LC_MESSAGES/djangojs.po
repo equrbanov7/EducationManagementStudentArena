@@ -3975,3 +3975,11 @@ msgstr "Например: семинар разделён на 2 подгруп�
 
 msgid "Düzəliş səbəbi və qeydi məcburidir."
 msgstr "Причина и примечание изменения обязательны."
+
+#, python-format
+msgid ""
+"%(group)s: «%(name)s» bölməsində tələbə yoxdur — tələbə yerləşdirin və ya "
+"bölmə sayını azaldın."
+msgstr ""
+"%(group)s: в секции «%(name)s» нет студентов — распределите студентов или "
+"уменьшите число секций."

@@ -561,6 +561,12 @@ STRINGS = {
         "Düzeltme nedeni ve notu zorunludur.",
         "Änderungsgrund und Notiz sind erforderlich.",
     ),
+    ("djangojs", JS, "%(group)s: «%(name)s» bölməsində tələbə yoxdur — tələbə yerləşdirin və ya bölmə sayını azaldın."): (
+        "%(group)s: section “%(name)s” has no students — place students or reduce the number of sections.",
+        "%(group)s: в секции «%(name)s» нет студентов — распределите студентов или уменьшите число секций.",
+        "%(group)s: «%(name)s» bölümünde öğrenci yok — öğrenci yerleştirin veya bölüm sayısını azaltın.",
+        "%(group)s: Abschnitt „%(name)s“ hat keine Studierenden — Studierende zuordnen oder die Abschnittszahl verringern.",
+    ),
     ("djangojs", JS, "Bölgü yadda saxlandı."): (
         "Allocation saved.",
         "Распределение сохранено.",

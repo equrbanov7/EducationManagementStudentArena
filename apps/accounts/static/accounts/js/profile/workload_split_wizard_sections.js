@@ -145,8 +145,12 @@
     function splitEven(list, numbers) {
         var place = {};
         var n = numbers.length;
-        var chunk = Math.ceil(list.length / n) || 1;
-        list.forEach(function (st, i) { place[st.id] = numbers[Math.min(Math.floor(i / chunk), n - 1)]; });
+        if (!n) return place;  // bərabər: ölçülər ən çox 1 fərqlənir (10 / 3 → 4 · 3 · 3)
+        var base = Math.floor(list.length / n), extra = list.length % n, k = 0;
+        numbers.forEach(function (num, j) {
+            var take = base + (j < extra ? 1 : 0);
+            for (var t = 0; t < take; t += 1, k += 1) place[list[k].id] = num;
+        });
         return place;
     }
 
@@ -178,7 +182,8 @@
     function setSeminarCount(groupId, count) {
         var group = W.group(groupId);
         var cfg = W.S.groups[groupId];
-        resize(cfg.seminar, count, function (n) { return clip(group.name + n); });
+        var pattern = (cfg.seminar.names || []).filter(function (x) { return /\d+$/.test(x || ""); })[0], prefix = pattern ? pattern.replace(/\d+$/, "") : group.name;
+        resize(cfg.seminar, count, function (n) { return clip(prefix + n); });
         if (size(cfg.seminar) < 2) {
             if (cfg.lab.mode === "nested") setLabMode(groupId, "flat");
         } else if (cfg.lab.mode === "nested") {
@@ -192,13 +197,15 @@
         var lab = cfg.lab;
         var semCount = size(cfg.seminar);
         if (mode === "nested" && semCount < 2) mode = "flat";
+        // QA 2026-11-26: rejim dəyişəndə köhnə yerləşdirmə (başqa quruluşdan qalan) yeni təkliflə əvəzlənir.
+        var changed = lab.mode !== mode; if (changed) lab.place = {};
         lab.mode = mode;
         var target = 0;
         if (mode === "nested") {
             lab.per = Math.max(2, Math.min(lab.per || 2, Math.floor(MAX / semCount)));
             target = semCount * lab.per;
         } else if (mode === "flat") {
-            target = Math.max(2, count || size(lab) || 2);
+            target = Math.max(2, count || (changed ? 2 : size(lab)) || 2);
         }
         resize(lab, target, function (n) { return clip(group.name + " · Lab-" + n); });
         lab.names = lab.numbers.map(function (n, i) { return defaultLabName(group, cfg.seminar, lab, i); });
@@ -408,6 +415,12 @@
                 if (size(part) >= 2) {
                     var c = counts(part.place, part.numbers, students(group));
                     if (c[0]) problems.push(fmt(gettext("%(group)s: %(n)s tələbə yerləşdirilməyib."), { group: group.name, n: c[0] }));
+                    // QA 2026-11-26: boş bölmə (məs. 2 → 3 alt qrup, köhnə yerləşdirmə saxlanıb) — müəllim saatı boş bölməyə yazılmasın.
+                    if (students(group).length) {
+                        part.numbers.forEach(function (n, i) {
+                            if (!c[n]) problems.push(fmt(gettext("%(group)s: «%(name)s» bölməsində tələbə yoxdur — tələbə yerləşdirin və ya bölmə sayını azaldın."), { group: group.name, name: part.names[i] || String(n) }));
+                        });
+                    }
                     var seen = {};
                     part.names.forEach(function (name) {
                         var key = String(name || "").toLowerCase().replace(/[\s-]+/g, "");

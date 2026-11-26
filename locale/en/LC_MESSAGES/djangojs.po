@@ -3977,3 +3977,11 @@ msgstr "For example: the seminar was split into 2 subgroups"
 
 msgid "Düzəliş səbəbi və qeydi məcburidir."
 msgstr "An amendment reason and note are required."
+
+#, python-format
+msgid ""
+"%(group)s: «%(name)s» bölməsində tələbə yoxdur — tələbə yerləşdirin və ya "
+"bölmə sayını azaldın."
+msgstr ""
+"%(group)s: section “%(name)s” has no students — place students or reduce the"
+" number of sections."

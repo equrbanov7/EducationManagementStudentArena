@@ -4044,3 +4044,11 @@ msgstr "Zum Beispiel: Seminar in 2 Untergruppen geteilt"
 
 msgid "Düzəliş səbəbi və qeydi məcburidir."
 msgstr "Änderungsgrund und Notiz sind erforderlich."
+
+#, python-format
+msgid ""
+"%(group)s: «%(name)s» bölməsində tələbə yoxdur — tələbə yerləşdirin və ya "
+"bölmə sayını azaldın."
+msgstr ""
+"%(group)s: Abschnitt „%(name)s“ hat keine Studierenden — Studierende "
+"zuordnen oder die Abschnittszahl verringern."

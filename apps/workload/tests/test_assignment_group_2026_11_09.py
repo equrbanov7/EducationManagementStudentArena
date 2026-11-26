@@ -120,6 +120,33 @@ class AssignmentGroupTests(CardsBase):
         TeacherAssignment.objects.filter(pk=a.pk).update(sub_number=None, teacher=None)
         self.assertFalse(plan_for_rows([row], group=group)["ambiguous"])  # vakant sayılmır
 
+    def test_whole_group_lecturer_share_is_not_narrowed_to_his_seminar_section(self):
+        """QA 2026-11-26: bütün qrupa mühazirə + 1-ci seminar alt qrupu — payı alt qrupa daralmır."""
+        row = self._row(
+            [self._group("536 SEM")],
+            lecture_total=15,
+            lecture_plan=15,
+            seminar_total=30,
+            seminar_plan=15,
+            lab_plan=0,
+            lab_total=0,
+            subgroup_count=2,
+        )
+        group = row.groups.get()
+        TeacherAssignment.objects.create(
+            organization=self.org, row=row, teacher=self.habibov, activity="lecture", hours=15
+        )
+        TeacherAssignment.objects.create(
+            organization=self.org, row=row, teacher=self.habibov, activity="seminar", hours=15, sub_number=1
+        )
+        TeacherAssignment.objects.create(
+            organization=self.org, row=row, teacher=self.orucova, activity="seminar", hours=15, sub_number=2
+        )
+        plan = plan_for_rows([row], group=group)
+        self.assertFalse(plan["ambiguous"])
+        self.assertEqual(plan["sections"], {self.orucova.pk: {"seminar": [2]}})
+        self.assertEqual(plan["teachers"], {self.habibov.pk: {"lecture", "seminar"}, self.orucova.pk: {"seminar"}})
+
     def test_backfill_service_is_dry_run_by_default_and_links_single_group_notes(self):
         from apps.workload.services.assignment_groups import backfill_groups
 

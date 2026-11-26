@@ -3958,3 +3958,11 @@ msgstr "Örneğin: seminer 2 alt gruba bölündü"
 
 msgid "Düzəliş səbəbi və qeydi məcburidir."
 msgstr "Düzeltme nedeni ve notu zorunludur."
+
+#, python-format
+msgid ""
+"%(group)s: «%(name)s» bölməsində tələbə yoxdur — tələbə yerləşdirin və ya "
+"bölmə sayını azaldın."
+msgstr ""
+"%(group)s: «%(name)s» bölümünde öğrenci yok — öğrenci yerleştirin veya bölüm"
+" sayısını azaltın."
