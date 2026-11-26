@@ -132,3 +132,46 @@ class FreezeInactiveStudentsTest(_LabWorld, TestCase):
         self.assertIn("args+=(--show-skipped)", text)
         self.assertIn('args+=(--undo --only "${BATCH#undo:}")', text)
         self.assertIn("|inactive_students|lab_groups|", text)
+
+
+class JournalRestoreInactiveFreezeTest(FreezeInactiveStudentsTest):
+    """2026-11-26: jurnalın «Tələbəni bərpa et» pəncərəsi 08.11 dondurulmasını tanıyır və bir kliklə geri qaytarır."""
+
+    def _rows(self, user):
+        from apps.registrar import journal_roster_restore as restore
+
+        with bypass_rls():
+            return {row["enrollment"]: row for row in restore.rows(user, self.offering)}
+
+    def test_restore_window_unfreezes_the_student_and_account(self):
+        from apps.registrar import journal_roster_restore as restore
+        from apps.registrar.models import JournalRemoval
+
+        self._mark(self.e1, status="present")
+        self._call("--apply")
+        rows = self._rows(self.owner)
+        row = rows[str(self.e2.pk)]
+        self.assertEqual((row["kind"], row["restorable"], row["message"]), (restore.KIND_INACTIVE, True, ""))
+        self.assertIn("i/e", row["reason"])
+        with bypass_rls():
+            result = restore.restore(offering=self.offering, enrollment_id=self.e2.pk, actor=self.owner, note="səhv")
+        self.assertEqual(result["kind"], restore.KIND_INACTIVE)
+        self.assertEqual(self._state(self.e2), ("enrolled", True))
+        self.assertEqual(self._state(self.e0), ("suspended", False))  # yalnız seçilən tələbə
+        self.assertNotIn(str(self.e2.pk), self._rows(self.owner))
+        with bypass_rls():
+            self.assertFalse(JournalRemoval.objects.filter(enrollment=self.e2).exists())
+            with self.assertRaises(restore.RestoreError) as again:
+                restore.restore(offering=self.offering, enrollment_id=self.e2.pk, actor=self.owner)
+        self.assertEqual(again.exception.code, "already_enrolled")
+
+    def test_teacher_cannot_unfreeze_and_academic_suspension_stays_unrestorable(self):
+        from apps.registrar import journal_roster_restore as restore
+
+        self._mark(self.e1, status="present")
+        self._call("--apply")
+        self.assertFalse(restore._kind_allowed(self.teacher, self.offering, restore.KIND_INACTIVE))
+        with bypass_rls():
+            Enrollment.objects.filter(pk=self.e1.pk).update(status=Enrollment.Status.SUSPENDED)
+        row = self._rows(self.owner)[str(self.e1.pk)]  # akademik status — əmr dondurmayıb
+        self.assertEqual((row["kind"], row["restorable"]), ("", False))

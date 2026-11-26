@@ -20,6 +20,7 @@ from __future__ import annotations
 from . import credit_load as _credit_load
 from . import guest_merge  # noqa: F401 — «alt qrup birləşməsi» (release_source); legacy delta dedupe işlədir
 from . import subgroup_access, subgroup_placement_history, subgroup_placement_lookups, subgroup_placement_query
+from .journal_inactive_freeze import register_inactive_freeze_provider  # 08.11 dondurulması (2026-11-26)
 from .journal_section_choices import offering_section_choices  # dərs yükü kartı: Lab-1/Lab-2, 234 K1/K2 (2026-11-09)
 from .split_wizard_sections import SectionSetupError as SplitWizardSectionError
 from .split_wizard_sections import apply_sections as split_wizard_apply_sections
@@ -57,6 +58,7 @@ __all__ = [
     "evaluate_subgroup_placement",
     "offering_section_choices",
     "place_in_subgroup",
+    "register_inactive_freeze_provider",
     "record_imported_placement",
     "split_wizard_apply_sections",
     "split_wizard_journal_state",

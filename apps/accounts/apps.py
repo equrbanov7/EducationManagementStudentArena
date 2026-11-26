@@ -43,6 +43,14 @@ class AccountsConfig(AppConfig):
 
         register_chair_teacher_resolver(ChairTeacherResolver)
 
+        # 2026-11-26: jurnalın «Tələbəni bərpa et» pəncərəsi 08.11 aktivlik dondurulmasını tanıyır və geri qaytarır
+        # (hesab + audit izi accounts-dadır; registrar → accounts importu modul dövrü yaradardı).
+        from apps.registrar.public import register_inactive_freeze_provider
+
+        from .services import inactive_students_2026_11_08 as inactive_freeze
+
+        register_inactive_freeze_provider(inactive_freeze)
+
         # 2026-10-01: «Akademik fəaliyyət» qoşmaları — məxfi media prefiksinin
         # icazə siyasəti (core deny-by-default-dur) + qeyd silinəndə faylların
         # təmizlənməsi (istifadəçi kaskadı da daxil).

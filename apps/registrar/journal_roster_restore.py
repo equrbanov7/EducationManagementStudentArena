@@ -33,7 +33,7 @@ from django.utils.translation import pgettext
 from . import guest_roster
 from . import journal_hygiene as hygiene
 from . import journal_hygiene_actions as actions
-from . import journal_removal, subject_exempt
+from . import journal_inactive_freeze, journal_removal, subject_exempt
 from .journal_names import journal_student_name
 from .models import (
     AcademicStatus,
@@ -52,6 +52,8 @@ MAX_ROWS = 300
 KIND_EXEMPT = "exempt"
 KIND_HYGIENE = "hygiene"
 KIND_GUEST = "guest"
+#: 08.11 «aktivliyi olmayan tələbə» dondurulması (sahib 2026-11-26) — hesab + bütün fənlər birlikdə qayıdır.
+KIND_INACTIVE = "inactive_freeze"
 
 #: Jurnal tarixçəsindəki «əməl» kodu (``JournalRemoval`` sətri deyil — yalnız audit izi).
 HISTORY_ACTION_HYGIENE = journal_removal.HISTORY_ACTION_HYGIENE
@@ -80,7 +82,7 @@ def _kind_allowed(user, offering, kind) -> bool:
         return subject_exempt.can_exempt(user, offering)
     if kind == KIND_GUEST:
         return guest_roster.can_manage_offering_roster(user, offering)
-    if kind == KIND_HYGIENE:
+    if kind in (KIND_HYGIENE, KIND_INACTIVE):
         return actions.can_apply(user, offering.organization)
     return False
 
@@ -140,7 +142,7 @@ def _latest_removals(enrollment_ids) -> dict:
     return found
 
 
-def classify(enrollment, decision=None) -> dict:
+def classify(enrollment, decision=None, *, inactive=False) -> dict:
     """``{"kind", "info"}`` — ``kind`` bərpa yoludur (boş → bərpa olunmur, ``info`` səbəbi deyir)."""
     status = enrollment.status
     if decision is not None and decision.to_status == status:
@@ -165,6 +167,8 @@ def classify(enrollment, decision=None) -> dict:
         }
     if status == Enrollment.Status.DROPPED and enrollment.source_group_id:
         return {"kind": KIND_GUEST, "info": ""}
+    if status == Enrollment.Status.SUSPENDED and inactive:
+        return {"kind": KIND_INACTIVE, "info": ""}
     if status == Enrollment.Status.SUSPENDED:
         return {
             "kind": "",
@@ -267,11 +271,15 @@ def rows(user, offering) -> list:
     ):
         records.setdefault(record.student_id, record)
     blocked = block_reason(offering)
+    inactive = journal_inactive_freeze.frozen_enrollment_ids(
+        offering.organization,
+        {item.student_id for item in enrollments if item.status == Enrollment.Status.SUSPENDED},
+    )
     result = []
     for enrollment in enrollments:
         decision = decisions.get(enrollment.pk)
         removal = removals.get(enrollment.pk)
-        state = classify(enrollment, decision)
+        state = classify(enrollment, decision, inactive=str(enrollment.pk) in inactive)
         kind = state["kind"]
         record = records.get(enrollment.student_id)
         message = state["info"]
@@ -294,7 +302,14 @@ def rows(user, offering) -> list:
             )
         else:
             when, by, why, note = enrollment.updated_at, "", "", ""
-        if enrollment.status == Enrollment.Status.SUSPENDED and decision is None and record is not None:
+        if kind == KIND_INACTIVE:
+            by = pgettext(_CTX, "Sistem (08.11 aktivlik yoxlaması)")
+            why = pgettext(
+                _CTX,
+                "Heç bir fəndə i/e, bal və midterm olmadığı üçün dondurulub. «Bərpa et» hesabı açır və tələbəni "
+                "dondurulduğu bütün fənlərin jurnallarına qaytarır.",
+            )
+        elif enrollment.status == Enrollment.Status.SUSPENDED and decision is None and record is not None:
             why = why or _academic_label(record)
         result.append(
             {
@@ -411,7 +426,8 @@ def restore(*, offering, enrollment_id, actor, note="", request=None) -> dict:
     with transaction.atomic():
         enrollment = _lock_enrollment(offering, enrollment_id)
         decision = _active_decisions([enrollment.pk]).get(enrollment.pk)
-        state = classify(enrollment, decision)
+        frozen = journal_inactive_freeze.frozen_enrollment_ids(offering.organization, {enrollment.student_id})
+        state = classify(enrollment, decision, inactive=str(enrollment.pk) in frozen)
         kind = state["kind"]
         if not kind:
             raise RestoreError("not_restorable", state["info"], status=409)
@@ -431,6 +447,20 @@ def restore(*, offering, enrollment_id, actor, note="", request=None) -> dict:
                 )
             except subject_exempt.HygieneError as exc:
                 raise RestoreError(exc.code, exc.message, status=exc.status)
+        elif kind == KIND_INACTIVE:
+            journal_inactive_freeze.undo_student(
+                organization=offering.organization, actor=actor, student_id=enrollment.student_id
+            )
+            enrollment.refresh_from_db(fields=["status"])
+            if enrollment.status != Enrollment.Status.ENROLLED:
+                raise RestoreError("not_restorable", pgettext(_CTX, "Tələbə bərpa olunmadı."), status=409)
+            journal_removal.record_restore(
+                enrollment=enrollment,
+                actor=actor,
+                note=note,
+                request=request,
+                action=journal_removal.HISTORY_ACTION_INACTIVE,
+            )
         elif kind == KIND_HYGIENE:
             _restore_hygiene(
                 offering=offering, enrollment=enrollment, decision=decision, actor=actor, note=note, request=request
@@ -444,6 +474,7 @@ __all__ = [
     "KIND_EXEMPT",
     "KIND_GUEST",
     "KIND_HYGIENE",
+    "KIND_INACTIVE",
     "MAX_ROWS",
     "RestoreError",
     "block_reason",

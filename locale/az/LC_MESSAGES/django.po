@@ -121212,3 +121212,23 @@ msgid ""
 msgstr ""
 "%(group)s: «%(section)s» bölməsinə dərs bağlıdır — onun tələbələrini "
 "sehrbazda dəyişmək olmaz. Tələbəni jurnalın öz ekranında köçürün."
+
+msgctxt "registrar.roster_restore"
+msgid "Sistem (08.11 aktivlik yoxlaması)"
+msgstr "Sistem (08.11 aktivlik yoxlaması)"
+
+msgctxt "registrar.roster_restore"
+msgid ""
+"Heç bir fəndə i/e, bal və midterm olmadığı üçün dondurulub. «Bərpa et» "
+"hesabı açır və tələbəni dondurulduğu bütün fənlərin jurnallarına qaytarır."
+msgstr ""
+"Heç bir fəndə i/e, bal və midterm olmadığı üçün dondurulub. «Bərpa et» "
+"hesabı açır və tələbəni dondurulduğu bütün fənlərin jurnallarına qaytarır."
+
+msgctxt "registrar.roster_restore"
+msgid "Tələbə bərpa olunmadı."
+msgstr "Tələbə bərpa olunmadı."
+
+msgctxt "registrar.journal_removal"
+msgid "Aktivlik yoxlaması (dondurulma)"
+msgstr "Aktivlik yoxlaması (dondurulma)"

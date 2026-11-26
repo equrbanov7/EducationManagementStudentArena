@@ -33,6 +33,8 @@ HISTORY_RESTORE_KIND = "roster-restore"
 #: «Jurnal təmizliyi» qərarının jurnaldan bərpası (sahib 2026-11-15) — YALNIZ tarixçə izinin «əməl» kodu;
 #: ``JournalRemoval.action`` deyil (o cədvəlin CHECK siyahısı dəyişmir).
 HISTORY_ACTION_HYGIENE = "hygiene"
+#: 08.11 «aktivliyi olmayan tələbə» dondurulmasının geri qaytarılması (sahib 2026-11-26).
+HISTORY_ACTION_INACTIVE = "inactive_freeze"
 
 #: HTTP sahə adları (modal ``journal_subject_exempt.js`` / ``journal_guest.js`` bunları göndərir).
 REASON_FIELD = "removal_reason"
@@ -63,6 +65,8 @@ def reason_label(value) -> str:
 def action_label(value) -> str:
     if value == HISTORY_ACTION_HYGIENE:
         return pgettext(_CTX, "Jurnal təmizliyi")
+    if value == HISTORY_ACTION_INACTIVE:
+        return pgettext(_CTX, "Aktivlik yoxlaması (dondurulma)")
     try:
         return str(RemovalAction(value).label)
     except ValueError:
@@ -176,6 +180,7 @@ def latest_by_decision(decision_ids) -> dict:
 
 __all__ = [
     "HISTORY_ACTION_HYGIENE",
+    "HISTORY_ACTION_INACTIVE",
     "HISTORY_KIND",
     "HISTORY_RESTORE_KIND",
     "NOTE_FIELD",
