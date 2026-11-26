@@ -17,9 +17,9 @@ Yoxlanılır:
 from django.urls import reverse
 
 from apps.organizations.default_roles_student_services import STUDENT_SERVICES_GRANTS
-from apps.registrar import credit_recognition_read
-from apps.registrar.models import Enrollment, ExternalCreditRecognition, RecognitionProgram
-from apps.registrar.tests.test_credit_recognition import _RecognitionBase, pdf
+from apps.registrar import credit_recognition_read, services
+from apps.registrar.models import Enrollment, ExternalCreditRecognition, RecognitionProgram, StudentAcademicRecord
+from apps.registrar.tests.test_credit_recognition import _RecognitionBase
 from core.rls import bypass_rls
 
 _SIMPLE = {
@@ -59,7 +59,9 @@ class SimpleReasonTest(_RecognitionBase):
 
     def test_course_needs_institution_but_other_does_not(self):
         self.assertEqual(self._create(**{**_SIMPLE, "institution": ""}).status_code, 400)
-        response = self._create(**{**_SIMPLE, "program": "other", "program_name": "Olimpiada qalibi", "institution": ""})
+        response = self._create(
+            **{**_SIMPLE, "program": "other", "program_name": "Olimpiada qalibi", "institution": ""}
+        )
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(self._recognition().program_label, "Olimpiada qalibi")
 
@@ -73,7 +75,23 @@ class SimpleReasonTest(_RecognitionBase):
 
 
 class JournalRowTest(_RecognitionBase):
+    def _classmate(self):
+        """İkinci tələbə — jurnal boş qalmasın (hamı azad olsa səhifə «tələbə yoxdur» göstərir)."""
+        with bypass_rls():
+            user = self._member("cr_stu2", "student")
+            record = StudentAcademicRecord.objects.create(
+                organization=self.org,
+                student=user,
+                program=self.program,
+                curriculum=self.curriculum,
+                group=self.group,
+                admission_year=2025,
+            )
+            services.enroll_mandatory_subjects(record=record, period=self.period, semester_number=1)
+        return user
+
     def test_exempted_student_stays_in_the_journal_as_azad(self):
+        classmate = self._classmate()
         self.assertEqual(self._create(**_SIMPLE).status_code, 200)
         with bypass_rls():
             rows = credit_recognition_read.journal_rows(self.offering)
@@ -83,6 +101,8 @@ class JournalRowTest(_RecognitionBase):
         self.assertContains(page, "data-jd-recognized")
         self.assertContains(page, "Azad — 85 bal")
         self.assertNotContains(page, f'data-jd-enrollment="{self.enrollment.pk}"')
+        self.assertContains(page, "data-jd-enrollment=", count=1)  # yalnız sinif yoldaşı yazılan sətirdir
+        self.assertTrue(classmate.pk)
 
     def test_revoked_exemption_leaves_the_azad_rows(self):
         self.assertEqual(self._create(**_SIMPLE).status_code, 200)

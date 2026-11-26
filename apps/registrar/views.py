@@ -20,6 +20,7 @@ from django.utils.translation import gettext as _
 
 from . import (
     campus,
+    credit_recognition_read,
     finals,
     gradebook,
     journal_edit_windows,
@@ -28,7 +29,6 @@ from . import (
     lesson_rooms,
     practical_label,
 )
-from . import credit_recognition_read as _recognition_read
 from . import practical_toggle as _practical_toggle
 from . import schedule, seminar_groups
 from .models import CorrectionReason
@@ -270,7 +270,9 @@ def journal_detail(request, offering_id):
         "handover_observer": handover_observer,
         # «Fəndən azad — N bal» sətirləri grid-in ən aşağısında (sahib 2026-11-27; tanınma ilə azad edilənlər).
         "recognized_rows": (
-            _recognition_read.journal_rows(offering) if active_tab == "grid" and not (lab_view or seminar_view) else []
+            credit_recognition_read.journal_rows(offering)
+            if active_tab == "grid" and not (lab_view or seminar_view)
+            else []
         ),
         "journal_locked": journal_locked,
         # RİM xəbərdarlığı — kollokvium lenti ilə EYNİ dizayn (jd2-kmarquee).

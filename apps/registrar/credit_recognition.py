@@ -90,9 +90,7 @@ def _required_texts(data, program=RecognitionProgram.ERASMUS) -> dict:
     for key, limit in _LIMITS.items():
         value = _text(data.get(key), limit)
         if not value and key in required:
-            raise RecognitionError(
-                "required", pgettext(_CTX, "«%(field)s» doldurulmalıdır.") % {"field": _LABELS[key]}
-            )
+            raise RecognitionError("required", pgettext(_CTX, "«%(field)s» doldurulmalıdır.") % {"field": _LABELS[key]})
         cleaned[key] = value
     return cleaned
 
