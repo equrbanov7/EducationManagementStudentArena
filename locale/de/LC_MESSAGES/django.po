@@ -123526,3 +123526,77 @@ msgstr "Die Person wurde nicht wiederhergestellt."
 msgctxt "registrar.journal_removal"
 msgid "Aktivlik yoxlaması (dondurulma)"
 msgstr "Aktivitätsprüfung (Einfrieren)"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Mənbə: %(source)s · Bu jurnal: %(target)s"
+msgstr "Quelle: %(source)s · Dieses Journal: %(target)s"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "%(hours)s saat (%(rows)s həftə)"
+msgstr "%(hours)s Stunden (%(rows)s Wochen)"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "saat məlum deyil (%(rows)s həftə)"
+msgstr "Stunden unbekannt (%(rows)s Wochen)"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "%(hours)s saat (%(rows)s sətir)"
+msgstr "%(hours)s Stunden (%(rows)s Zeilen)"
+
+msgctxt "accounts.syllabus"
+msgid "Dərs saatları fərqlidir"
+msgstr "Die Unterrichtsstunden unterscheiden sich"
+
+msgctxt "accounts.syllabus"
+msgid "Mənbənin dərs saatı məlum deyil"
+msgstr "Die Unterrichtsstunden der Quelle sind unbekannt"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid ""
+"Kopyalananda qaralama bu jurnalın saatını alır, həftəlik plan %(rows)s sətrə"
+" gətirilir: sondan %(count)s sətir kəsiləcək."
+msgstr ""
+"Beim Kopieren übernimmt der Entwurf die Stunden dieses Journals, der "
+"Wochenplan wird auf %(rows)s Zeilen gebracht: %(count)s Zeilen werden am "
+"Ende entfernt."
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid ""
+"Kopyalananda qaralama bu jurnalın saatını alır, həftəlik plan %(rows)s sətrə"
+" gətirilir: %(count)s boş sətir əlavə olunacaq."
+msgstr ""
+"Beim Kopieren übernimmt der Entwurf die Stunden dieses Journals, der "
+"Wochenplan wird auf %(rows)s Zeilen gebracht: %(count)s leere Zeilen werden "
+"hinzugefügt."
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid ""
+"Kopyalananda qaralama bu jurnalın saatını alır; sətir sayı eynidir "
+"(%(rows)s) — saatlar bu jurnalın planına görə yenidən bölünəcək."
+msgstr ""
+"Beim Kopieren übernimmt der Entwurf die Stunden dieses Journals; die "
+"Zeilenzahl bleibt gleich (%(rows)s) — die Stunden werden nach dem Plan "
+"dieses Journals neu verteilt."
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Bu jurnalın rəsmi dərs saatı tapılmadı — həftəlik plan olduğu kimi "
+"köçürülür, saatı redaktorda seçin."
+msgstr ""
+"Die offiziellen Unterrichtsstunden dieses Journals wurden nicht gefunden — "
+"der Wochenplan wird unverändert kopiert; wählen Sie die Stunden im Editor."
+
+msgctxt "accounts.syllabus"
+msgid "Bəli, uyğunlaşdırıb kopyala"
+msgstr "Ja, anpassen und kopieren"
+
+msgctxt "accounts.syllabus"
+msgid "Davam etmək üçün düyməni bir daha basın."
+msgstr "Drücken Sie die Schaltfläche noch einmal, um fortzufahren."

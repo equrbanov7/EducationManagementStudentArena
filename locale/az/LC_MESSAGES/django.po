@@ -121232,3 +121232,74 @@ msgstr "Tələbə bərpa olunmadı."
 msgctxt "registrar.journal_removal"
 msgid "Aktivlik yoxlaması (dondurulma)"
 msgstr "Aktivlik yoxlaması (dondurulma)"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Mənbə: %(source)s · Bu jurnal: %(target)s"
+msgstr "Mənbə: %(source)s · Bu jurnal: %(target)s"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "%(hours)s saat (%(rows)s həftə)"
+msgstr "%(hours)s saat (%(rows)s həftə)"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "saat məlum deyil (%(rows)s həftə)"
+msgstr "saat məlum deyil (%(rows)s həftə)"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "%(hours)s saat (%(rows)s sətir)"
+msgstr "%(hours)s saat (%(rows)s sətir)"
+
+msgctxt "accounts.syllabus"
+msgid "Dərs saatları fərqlidir"
+msgstr "Dərs saatları fərqlidir"
+
+msgctxt "accounts.syllabus"
+msgid "Mənbənin dərs saatı məlum deyil"
+msgstr "Mənbənin dərs saatı məlum deyil"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid ""
+"Kopyalananda qaralama bu jurnalın saatını alır, həftəlik plan %(rows)s sətrə"
+" gətirilir: sondan %(count)s sətir kəsiləcək."
+msgstr ""
+"Kopyalananda qaralama bu jurnalın saatını alır, həftəlik plan %(rows)s sətrə"
+" gətirilir: sondan %(count)s sətir kəsiləcək."
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid ""
+"Kopyalananda qaralama bu jurnalın saatını alır, həftəlik plan %(rows)s sətrə"
+" gətirilir: %(count)s boş sətir əlavə olunacaq."
+msgstr ""
+"Kopyalananda qaralama bu jurnalın saatını alır, həftəlik plan %(rows)s sətrə"
+" gətirilir: %(count)s boş sətir əlavə olunacaq."
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid ""
+"Kopyalananda qaralama bu jurnalın saatını alır; sətir sayı eynidir "
+"(%(rows)s) — saatlar bu jurnalın planına görə yenidən bölünəcək."
+msgstr ""
+"Kopyalananda qaralama bu jurnalın saatını alır; sətir sayı eynidir "
+"(%(rows)s) — saatlar bu jurnalın planına görə yenidən bölünəcək."
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Bu jurnalın rəsmi dərs saatı tapılmadı — həftəlik plan olduğu kimi "
+"köçürülür, saatı redaktorda seçin."
+msgstr ""
+"Bu jurnalın rəsmi dərs saatı tapılmadı — həftəlik plan olduğu kimi "
+"köçürülür, saatı redaktorda seçin."
+
+msgctxt "accounts.syllabus"
+msgid "Bəli, uyğunlaşdırıb kopyala"
+msgstr "Bəli, uyğunlaşdırıb kopyala"
+
+msgctxt "accounts.syllabus"
+msgid "Davam etmək üçün düyməni bir daha basın."
+msgstr "Davam etmək üçün düyməni bir daha basın."
