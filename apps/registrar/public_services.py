@@ -270,6 +270,7 @@ from .legacy_entry_alignment import EntryAlignment, EntryTarget, align_archive_e
 
 __all__ += ["EntryAlignment", "EntryTarget", "align_archive_entries"]
 
-from .student_group_journals import enroll_new_student as enroll_new_student_in_group_journals  # noqa: E402 — 2026-11-26
+# 2026-11-26: qrupa yeni yaradılan tələbə qrupun cari jurnallarına (accounts qəbul yolu çağırır).
+from .student_group_journals import enroll_new_student as enroll_new_student_in_group_journals  # noqa: E402,F401
 
 __all__.append("enroll_new_student_in_group_journals")
