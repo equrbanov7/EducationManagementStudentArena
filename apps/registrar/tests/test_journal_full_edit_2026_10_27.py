@@ -9,6 +9,8 @@ tənzimləməsində bunu söndürüb-yandırmaq olsun.»
 * AÇIQ — müəllim səbəb ilə keçmiş tarixə dərs açır, dərsi xanaları ilə silir, mövzunu dəyişir, bağlı jurnalda
   kilidli xananı dəyişir/təmizləyir; səbəbsiz → rədd (avtomatik yadda saxlama 409 ``reason_required``); hər əməl
   ``registrar.grade.full-edit`` audit sətrinə səbəb + köhnə/yeni dəyərlə düşür;
+* SAHİB 2026-11-27: kilidli (əvvəl yazılmış) xananı dəyişmək / təmizləmək və kilidli xanası olan dərsi silmək YALNIZ
+  RİM-ə (rəhbər / işçi) qalır — müəllim bu rejimdə boş xanaya yazır (test_past_marks_rim_only_2026_11_27);
 * QORUNUR — bölünmüş jurnalın əhatəsi, başqa müəllimin jurnalı, üzrlü xana, imtahan (Midterm) pəncərəsi;
 * açarın dəyişməsi «Sistem tənzimləmələri» auditinə düşür.
 """
@@ -27,6 +29,7 @@ from django.utils import timezone
 from apps.accounts.models import RuntimeSetting
 from apps.accounts.services import runtime_settings_admin
 from apps.audit.models import AuditLog
+from apps.organizations.models import Membership
 from apps.registrar import gradebook, journal_extras, journal_policy
 from apps.registrar.models import (
     ApprovalStatus,
@@ -86,6 +89,11 @@ class _Base(TestCase):
                 enforce_day=False,
             )
             _age_mark(LessonMark.objects.get(lesson=cls.old), 60 * 24 * 20)
+            # Kilidli xananı yalnız RİM dəyişir (sahib 2026-11-27).
+            cls.rim = User.objects.create_user(f"{cls.prefix}_rim", f"{cls.prefix}_rim@qku.edu.az", "pw")
+            Membership.objects.create(
+                user=cls.rim, organization=cls.org, role=cls.org.roles.get(name="ikt_rehber"), is_active=True
+            )
 
     def setUp(self):
         self.old.refresh_from_db()
@@ -202,7 +210,13 @@ class OnLessonsTest(_Base):
             self.assertFalse(Lesson.objects.filter(offering=self.offering, date=TODAY() - timedelta(days=30)).exists())
 
     def test_delete_lesson_with_marks(self):
-        client = self._client()
+        # Müəllim kilidli xanası olan dərsi səbəblə də silə bilmir (sahib 2026-11-27) — RİM silir.
+        self._client().post(
+            self._lesson_url(), {"action": "update_lesson", "do_delete": "1", "full_edit_reason": "səhv gün"}
+        )
+        with bypass_rls():
+            self.assertTrue(Lesson.objects.filter(pk=self.old.pk).exists())
+        client = self._client(self.rim)
         client.post(self._lesson_url(), {"action": "update_lesson", "do_delete": "1"})
         with bypass_rls():
             self.assertTrue(Lesson.objects.filter(pk=self.old.pk).exists())
@@ -249,7 +263,9 @@ class OnMarksTest(_Base):
     prefix = "jfemk"
 
     def test_locked_cell_needs_reason_then_writes_with_audit(self):
-        client = self._client()
+        resp = self._cell(self._client(), "present", full_edit_reason="köçmə xətası")
+        self.assertEqual((resp.status_code, resp.json()["code"]), (409, "mark_locked"))  # müəllim — yox
+        client = self._client(self.rim)
         resp = self._cell(client, "present")
         self.assertEqual((resp.status_code, resp.json()["code"]), (409, "reason_required"))
         self.assertEqual(self._mark().status, AttendanceStatus.ABSENT)
@@ -263,7 +279,7 @@ class OnMarksTest(_Base):
 
     def test_edit_and_clear_cell_in_closed_journal(self):
         self._close_journal()
-        client = self._client()
+        client = self._client(self.rim)
         resp = self._cell(client, "present", full_edit_reason="bağlı jurnal")
         self.assertEqual(resp.json()["written"], 1)
         self.assertEqual(self._mark().status, AttendanceStatus.PRESENT)
@@ -298,7 +314,10 @@ class OnMarksTest(_Base):
 
     def test_page_shows_banner_and_unlocked_cell(self):
         self._close_journal()
-        html = self._client().get(self._detail()).content.decode()
+        teacher_html = self._client().get(self._detail()).content.decode()
+        self.assertIn("data-jd-fe-banner", teacher_html)
+        self.assertNotIn(f'name="att__{self.old.id}__{self.enrollment.id}"', teacher_html)  # müəllimə kilidli
+        html = self._client(self.rim).get(self._detail()).content.decode()
         self.assertIn("data-jd-fe-banner", html)
         self.assertIn("Data bərpası rejimi: keçmiş tarixli dəyişikliklər səbəb ilə açıqdır", html)
         self.assertIn(f'name="att__{self.old.id}__{self.enrollment.id}"', html)
@@ -348,10 +367,10 @@ class OnStillProtectedTest(_Base):
         self.assertEqual(resp.status_code, 403)
         with bypass_rls():
             self.assertTrue(Lesson.objects.filter(pk=self.lecture.pk).exists())
-        # Öz növündə (seminar) — səbəb ilə keçir.
+        # Öz növündə (seminar) əhatə keçir, amma 20 gün əvvəlki q/b donub — yalnız RİM dəyişir (sahib 2026-11-27).
         resp = self._cell(client, "present", full_edit_reason="bərpa üçün")
-        self.assertEqual(resp.status_code, 200)
-        self.assertEqual(self._mark().status, AttendanceStatus.PRESENT)
+        self.assertEqual((resp.status_code, resp.json()["code"]), (409, "mark_locked"))
+        self.assertEqual(self._mark().status, AttendanceStatus.ABSENT)
 
     def test_other_teacher_journal_closed(self):
         client = self._client(self.stranger)

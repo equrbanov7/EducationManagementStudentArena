@@ -410,6 +410,7 @@ class ViewAsMiddleware:
             resolve_view_as_request,
             stop_view_as,
         )
+        from .services.view_as_policy import JOURNAL_MARK_WRITE_URL_NAMES
 
         if VIEW_AS_SESSION_KEY not in request.session:
             return self.get_response(request)
@@ -461,6 +462,15 @@ class ViewAsMiddleware:
                 return self._reject(
                     request,
                     pgettext("accounts.view_as", "action_blocked_sensitive"),
+                )
+
+            # Jurnalın xana / dərs yazısı heç bir rejimdə yoxdur (sahib 2026-11-27: «baxış icazəsi olanlar da edə
+            # bilməsin») — RİM onu öz hesabı ilə edir.
+            if url_name in JOURNAL_MARK_WRITE_URL_NAMES:
+                self._audit_view_as_write(request, target, mode, url_name, allowed=False)
+                return self._reject(
+                    request,
+                    pgettext("accounts.view_as", "action_blocked_journal"),
                 )
 
             if mode == MODE_READONLY:

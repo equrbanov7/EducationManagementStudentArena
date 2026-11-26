@@ -294,6 +294,7 @@ def handle_save_marks(request, offering):
             request=request,
             full_edit=full_edit,
             full_reason=journal_full_edit.posted_reason(request) if full_edit else "",
+            override_locks=full_edit and journal_full_edit.rim_override(request.user, offering),
         )
     except AuditWriteFailed:  # data bərpasının audit sətri yazılmadı — heç nə saxlanmadı (fail-closed)
         if autosave:
