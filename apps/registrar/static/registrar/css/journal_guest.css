@@ -300,6 +300,14 @@
     text-transform: uppercase;
 }
 .jd2-guest-divider__cell i { margin-right: 6px; }
+/* Sahib 2026-11-27: grid sola-sağa sürüşdürüləndə başlıq xətt boyu getmir — sol kənarda qalır (sticky). */
+.jd2-guest-divider__label {
+    position: sticky;
+    left: 12px;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
 
 /* Sahib 2026-11-27: fəndən azad olunan tələbə jurnalda qalır — «Azad — N bal», xanası yoxdur (yazılmır). */
 .jd2-recog-row .jd2-td-student { background: var(--ems-success-50, #ecfdf5); }

@@ -31,6 +31,7 @@
     var applying = false;
     var active = null; // cari YENİ dərs doldurması (redaktədə null)
     var auto = {}; // son avtomatik qoyulan dəyərlər: topic / hours / instructor
+    var SLOT_HOURS = 2; // bir dərs saatı (90 dəq.) = 2 akademik saat (server: lesson_share_scope.SLOT_HOURS)
 
     function readPrefill() {
         var node = document.getElementById("jdLessonPrefill");
@@ -242,6 +243,9 @@
         var taken = (readPrefill() || {}).taken || {};
         var start = f.time && f.time.value ? f.time.value.split("|")[0] : "";
         var hit = adding && f.date && f.date.value && start ? taken[f.date.value + "|" + start] : null;
+        // Sahib 2026-11-27: cütlük (90 dəq.) 2 saatdır — 1 saatlıq dərsin yanına 1 saatlıq dərs sığır, xəbərdarlıq yox.
+        var wanted = parseInt(String((f.hours && f.hours.value) || "2").replace(/\D/g, ""), 10) || 2;
+        if (hit && typeof hit.hours === "number" && hit.hours + wanted <= SLOT_HOURS) hit = null;
         var takenHint = modal.querySelector('[data-jd-prefill-hint="taken"]');
         if (takenHint) {
             takenHint.hidden = !hit;
@@ -347,7 +351,11 @@
     function onField(event) {
         var target = event.target;
         if (applying || !target || !target.matches) return;
-        if (!target.matches("[data-jd-lesson-kind], [data-jd-lesson-date], [data-jd-lesson-time], [data-jd-lesson-topic]")) {
+        if (
+            !target.matches(
+                "[data-jd-lesson-kind], [data-jd-lesson-date], [data-jd-lesson-time], [data-jd-lesson-topic], [data-jd-lesson-hours]"
+            )
+        ) {
             return;
         }
         var modal = target.closest(MODAL);

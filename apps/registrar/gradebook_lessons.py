@@ -249,6 +249,7 @@ def create_lesson(
         kind=kind,
         lab_group=lab_group,
         seminar_group=seminar_group,
+        hours=new_hours,
     ):
         raise SlotTakenError(_slot_taken_message(parsed, start_time))
     from .language_cohort_journal import validate_lesson
@@ -409,7 +410,9 @@ def update_lesson(
     if lesson.seminar_group is not None and lesson.kind != LessonKind.SEMINAR and "kind" in fields:
         lesson.seminar_group = None  # növ seminardan dəyişibsə alt qrup bağı düşür
         fields.append("seminar_group")
-    if lesson.start_time and ({"date", "start_time", "instructor", "kind", "lab_group", "seminar_group"} & set(fields)):
+    if lesson.start_time and (
+        {"date", "start_time", "instructor", "kind", "lab_group", "seminar_group", "hours"} & set(fields)
+    ):
         from .lesson_share_scope import has_slot_collision
 
         CourseOffering.objects.select_for_update().get(pk=offering.pk)
@@ -422,6 +425,7 @@ def update_lesson(
             exclude=lesson.pk,
             lab_group=lesson.lab_group,
             seminar_group=lesson.seminar_group,
+            hours=lesson.hours,
         ):
             raise SlotTakenError(_slot_taken_message(lesson.date, lesson.start_time))
     if fields:
