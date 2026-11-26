@@ -36,10 +36,12 @@ class WiringTest(SimpleTestCase):
 
     def test_mr850_extra_targets(self):
         # MR-000850: Rəhim Həsənovun «Etika» (QKU-69) yaz qaralamaları — 4 ayrı dosye, keeper yoxdur.
-        self.assertEqual(len({item["syllabus"] for item in retire.EXTRA}), 4)
+        self.assertEqual(len({item["syllabus"] for item in retire.EXTRA}), 6)
+        expected = {"MR-000850": (9519, "QKU-69"), "MR-000852": (8374, "QKU-588")}
         for item in retire.EXTRA:
-            self.assertEqual((item["author"], item["subject_code"], item["keeper_subject_code"]), (9519, "QKU-69", ""))
-            self.assertIn("MR-000850", item["reason"])
+            mr = item["reason"][:9]
+            self.assertEqual((item["author"], item["subject_code"]), expected[mr])
+            self.assertEqual(item["keeper_subject_code"], "")
 
 
 @pytest.fixture
