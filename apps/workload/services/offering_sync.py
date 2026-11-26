@@ -211,7 +211,7 @@ def owner_snapshot(row) -> dict:
 class _Sync(SyncWrites, ElectiveFlow):
     """Bir keçid: sətirlər → hədəflər → açılış yaz/yenilə → qeydiyyat → hesabat."""
 
-    def __init__(self, task, *, actor, request, create, previous, reviewed_choices=None):
+    def __init__(self, task, *, actor, request, create, previous, reviewed_choices=None, syllabus_hours=True):
         self.task = task
         self.org_id = task.organization_id
         self.actor_user = getattr(actor, "user", None)
@@ -228,6 +228,7 @@ class _Sync(SyncWrites, ElectiveFlow):
         self.schedule_conflicts: list[dict] = []
         # Saatı bu keçiddə dəyişən açılışlar — sillabus plan saatının öz-özünə sağalması (sahib 2026-11-26).
         self.hours_offering_ids: list[str] = []
+        self._syllabus_hours = syllabus_hours
         self._anchored = False
         self._closed = None
 
@@ -474,6 +475,8 @@ class _Sync(SyncWrites, ElectiveFlow):
         kiçikdir); bütöv sənəd keçidi — yalnız ``lesson_hours``-u dəyişən açılışlar.  Sillabusu olmayan açılış üçün
         TƏK sorğu; qalıqları ``fix_syllabus_plan_hours`` əmri tutur.
         """
+        if not self._syllabus_hours:
+            return
         from apps.registrar.public import refresh_offering_syllabus_plan_hours
 
         ids = self.offering_ids if self._anchored else self.hours_offering_ids
@@ -482,12 +485,30 @@ class _Sync(SyncWrites, ElectiveFlow):
 
 
 def sync_task_offerings(
-    task, *, actor=None, request=None, create=True, previous=UNKNOWN, rows=None, _reviewed_choices=None
+    task,
+    *,
+    actor=None,
+    request=None,
+    create=True,
+    previous=UNKNOWN,
+    rows=None,
+    _reviewed_choices=None,
+    syllabus_hours=True,
 ) -> dict:
-    """Sənədin bütün sətirləri → qrup açılışları (idempotent). Hesabat: :data:`COUNTER_KEYS` + id-lər."""
+    """Sənədin bütün sətirləri → qrup açılışları (idempotent). Hesabat: :data:`COUNTER_KEYS` + id-lər.
+
+    ``syllabus_hours=False`` — sillabus plan saatına toxunma (akademik məzmunun dəyişmədiyini yoxlayan
+    nəzərdən keçirilmiş təmir paketləri; qalıqları ``fix_syllabus_plan_hours`` tutur).
+    """
     rows = rows_queryset(task) if rows is None else rows
     return _Sync(
-        task, actor=actor, request=request, create=create, previous=previous, reviewed_choices=_reviewed_choices
+        task,
+        actor=actor,
+        request=request,
+        create=create,
+        previous=previous,
+        reviewed_choices=_reviewed_choices,
+        syllabus_hours=syllabus_hours,
     ).run(rows)
 
 
