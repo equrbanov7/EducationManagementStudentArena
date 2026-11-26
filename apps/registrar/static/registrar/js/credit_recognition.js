@@ -44,6 +44,58 @@
         }
     }
 
+    /* Sahib 2026-11-27: bal / sənəd / qurum sahələri yalnız səbəb seçiləndə açılır; Erasmus+ / mübadilədə xarici
+       fənnin sahələri də. Gizli `fieldset` `disabled` olur — onun sahələri göndərilmir və brauzer yoxlamasını
+       saxlamır. Server hər halda yenidən yoxlayır (credit_recognition.validate). */
+    function syncReason(select) {
+        var form = select && select.form;
+        if (!form) {
+            return;
+        }
+        var value = select.value || "";
+        var detailed = (select.getAttribute("data-cr-detailed") || "").split(",").indexOf(value) !== -1;
+        var other = value !== "" && value === select.getAttribute("data-cr-other");
+        var after = form.querySelector("[data-cr-after-reason]");
+        var extra = form.querySelector("[data-cr-detailed-fields]");
+        if (after) {
+            after.hidden = !value;
+            after.disabled = !value;
+        }
+        if (extra) {
+            extra.hidden = !detailed;
+            extra.disabled = !detailed;
+        }
+        var institution = form.querySelector("[data-cr-institution]");
+        if (institution) {
+            institution.required = !other;
+        }
+        var star = form.querySelector("[data-cr-institution-req]");
+        if (star) {
+            star.hidden = other;
+        }
+    }
+
+    document.addEventListener("change", function (event) {
+        var select = event.target;
+        if (select && select.matches && select.matches("[data-cr-program]") && rootOf(select)) {
+            syncReason(select);
+        }
+    });
+
+    /* Dialoq hər açılanda (forma sıfırlanıb) sahələr yenidən səbəbə uyğunlaşır. */
+    document.addEventListener("click", function (event) {
+        var opener = event.target.closest ? event.target.closest('[data-ems-overlay-open="crCreateDialog"]') : null;
+        if (!opener || !rootOf(opener)) {
+            return;
+        }
+        window.setTimeout(function () {
+            var select = document.querySelector("#crCreateDialog [data-cr-program]");
+            if (select) {
+                syncReason(select);
+            }
+        }, 0);
+    });
+
     /* «Ləğv et» — hədəf URL düymədən dialoqun formasına (dialoq panelin içində, bir dənədir). */
     document.addEventListener("click", function (event) {
         var trigger = event.target.closest ? event.target.closest("[data-cr-revoke]") : null;

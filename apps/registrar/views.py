@@ -20,6 +20,7 @@ from django.utils.translation import gettext as _
 
 from . import (
     campus,
+    credit_recognition_read,
     finals,
     gradebook,
     journal_edit_windows,
@@ -271,6 +272,12 @@ def journal_detail(request, offering_id):
         and not syllabus_gate["locked"]
         and not getattr(request, "is_view_as", False),
         "handover_observer": handover_observer,
+        # «Fəndən azad — N bal» sətirləri grid-in ən aşağısında (sahib 2026-11-27; tanınma ilə azad edilənlər).
+        "recognized_rows": (
+            credit_recognition_read.journal_rows(offering)
+            if active_tab == "grid" and not (lab_view or seminar_view)
+            else []
+        ),
         "journal_locked": journal_locked,
         # RİM xəbərdarlığı — kollokvium lenti ilə EYNİ dizayn (jd2-kmarquee).
         "journal_close_notice": journal_close_notices.journal_banner(offering, today),

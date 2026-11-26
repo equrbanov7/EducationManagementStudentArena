@@ -5,7 +5,7 @@ Yoxlanılır:
 * yaratma: sənəd məcburi, bal keçid həddindən aşağı deyil, təkrar (qüvvədə olan) tanınma 409; açıq jurnalda
   qeydiyyat «Fəndən azad» qərarı (``external_recognition``) ilə ``dropped`` olur + audit;
 * transkript / kredit yekunu: tanınmış bal jurnal sətrini ƏVƏZ edir (iki sətir yox), ÜOMG və toplanmış krediyə
-  daxildir; jurnal bağlıdırsa azadlıq yazılmır, transkript yenə tanınmış nəticəni göstərir;
+  daxildir; jurnal bağlı olsa da azadlıq yazılır (sahib 2026-11-27), transkript tanınmış nəticəni göstərir;
 * jurnalın «Bərpa et»-i tanınmaya bağlı azadlığı geri açmır (409); ləğv (səbəb ≥10) tələbəni jurnala qaytarır;
 * icazə: açarsız → 403, əhatədən kənar dekan → 404, RİM (org-geniş) → hər tələbə; sənəd media qapısı;
 * DB qoruyucusu: tanınma sahələri dəyişmir, sətir silinmir; kabinet / heyət bölməsi render olunur.
@@ -212,15 +212,17 @@ class CreateTest(_RecognitionBase):
                 )
         self.assertEqual(ctx.exception.status, 409)
 
-    def test_closed_journal_keeps_roster_but_transcript_uses_recognition(self):
+    def test_closed_journal_also_exempts_and_transcript_uses_recognition(self):
+        # Sahib 2026-11-27: fənn tanınmış balla keçilmiş sayılır — bağlı jurnalda da tələbə azad edilir (əvvəl
+        # qeydiyyat ENROLLED qalırdı və kəsr siyahıları hesablanmış «kəsildi»ni göstərirdi).
         with bypass_rls():
             scheme = gradebook.ensure_assessment_scheme(offering=self.offering)
             AssessmentScheme.objects.filter(pk=scheme.pk).update(is_published=True, approval_status="approved")
         response = self._create()
         self.assertEqual(response.status_code, 200, response.content)
-        self.assertIn("Jurnal bağlı", response.json()["message"])
-        self.assertEqual(self._status(self.enrollment), Enrollment.Status.ENROLLED)
-        self.assertIsNone(self._recognition().exempt_decision_id)
+        self.assertIn("85 bal ilə azad edildi", response.json()["message"])
+        self.assertEqual(self._status(self.enrollment), Enrollment.Status.DROPPED)
+        self.assertIsNotNone(self._recognition().exempt_decision_id)
         rows = [row for sem in self._transcript()["semesters"] for row in sem["rows"]]
         physics = [row for row in rows if row["subject"].pk == self.physics.pk]
         self.assertEqual(len(physics), 1)

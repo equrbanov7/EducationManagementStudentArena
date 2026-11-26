@@ -7,9 +7,11 @@ YENİ MEXANİZM İCAD OLUNMUR:
 
 * **Azadlıq** — :func:`subject_exempt.exempt_student` (``JournalHygieneDecision`` kateqoriya ``subject_exempt``,
   səbəb kodu ``external_recognition``): jurnal qeydiyyatı ``enrolled → dropped`` olur, ona görə jurnal, qayıb
-  limiti, imtahana buraxılış / siyahısı, sorğu hədəfləri və «Fənlərim» onu artıq süzür. Jurnal bağlıdırsa və ya
-  dövr keçibsə (siyahı qapısı, ``guest_roster.roster_block_reason``) qeydiyyata toxunulmur — tanınma yenə yazılır
-  və transkriptdə həmin sətri əvəz edir.
+  limiti, imtahana buraxılış / siyahısı, sorğu hədəfləri və «Fənlərim» onu artıq süzür; jurnalda tələbə ayrıca
+  «Fəndən azad — N bal» sətrində görünür (``credit_recognition_read.journal_rows``). Sahib 2026-11-27: bağlı
+  jurnalda / keçmiş dövrdə də (əvvəl toxunulmurdu və kəsr siyahıları «kəsildi» göstərirdi).
+* **Səbəblər** (2026-11-27): kurs / sertifikat, kollec nəticəsi, başqa ali məktəb, Erasmus+, mübadilə, digər;
+  xarici fənnin tam izi yalnız Erasmus+ / mübadilədə məcburidir (``DETAILED_PROGRAMS``).
 * **Sənəd** — 25% / «İmtahan şansı» naxışı (``retake_services.clean_upload``: PDF/JPG/PNG, 10 MB, imza-MIME),
   qorunan media ``credit_recognition_documents/`` (:func:`check_document_access`).
 * **Ləğv** — bir dəfə, səbəblə (≥10 simvol); bağlı azadlıq ``subject_exempt.restore_student`` ilə geri açılır
@@ -23,15 +25,16 @@ from decimal import Decimal, InvalidOperation
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
-from django.utils.translation import pgettext
+from django.utils.translation import pgettext, pgettext_lazy
 
 from core import audit as audit_service
 from core import superadmin_waiver
 from core.constants import AuditAction
 
 from . import credit_recognition_read as read
-from . import credit_source, guest_roster, retake_files, subject_exempt
+from . import credit_source, retake_files, subject_exempt
 from .models import Enrollment, ExternalCreditRecognition, RecognitionProgram
+from .models.external_recognition import DETAILED_PROGRAMS
 from .retake_services import actor_label, clean_upload
 
 _CTX = "registrar.recognition"
@@ -62,24 +65,39 @@ def _text(raw, limit) -> str:
     return " ".join(str(raw or "").split())[:limit]
 
 
-def _required_texts(data) -> dict:
-    labels = {
-        "institution": pgettext(_CTX, "Qurum (universitet)"),
-        "country": pgettext(_CTX, "Ölkə"),
-        "foreign_subject": pgettext(_CTX, "Xarici fənnin adı"),
-        "foreign_grade": pgettext(_CTX, "Xarici qiymət"),
-        "study_period": pgettext(_CTX, "Təhsil müddəti / semestr"),
-    }
+_LABELS = {
+    "institution": pgettext_lazy(_CTX, "Qurum"),
+    "country": pgettext_lazy(_CTX, "Ölkə"),
+    "foreign_subject": pgettext_lazy(_CTX, "Xarici fənnin adı"),
+    "foreign_grade": pgettext_lazy(_CTX, "Xarici qiymət"),
+    "study_period": pgettext_lazy(_CTX, "Təhsil müddəti / semestr"),
+}
+
+
+def _required_keys(program) -> tuple:
+    """Bu səbəbdə məcburi mətn sahələri (sahib 2026-11-27): Erasmus+ / mübadilə — xarici fənnin tam izi; kurs,
+    kollec, başqa ali məktəb — yalnız qurum; «Digər» — heç biri (adı ``program_name``-dədir)."""
+    if program in DETAILED_PROGRAMS:
+        return tuple(_LIMITS)
+    if program == RecognitionProgram.OTHER:
+        return ()
+    return ("institution",)
+
+
+def _required_texts(data, program=RecognitionProgram.ERASMUS) -> dict:
+    required = _required_keys(program)
     cleaned = {}
     for key, limit in _LIMITS.items():
         value = _text(data.get(key), limit)
-        if not value:
-            raise RecognitionError("required", pgettext(_CTX, "«%(field)s» doldurulmalıdır.") % {"field": labels[key]})
+        if not value and key in required:
+            raise RecognitionError("required", pgettext(_CTX, "«%(field)s» doldurulmalıdır.") % {"field": _LABELS[key]})
         cleaned[key] = value
     return cleaned
 
 
-def _foreign_credit(raw) -> Decimal:
+def _foreign_credit(raw, *, required=True):
+    if not required and not str(raw or "").strip():
+        return None
     try:
         value = Decimal(str(raw or "").strip().replace(",", "."))
     except (InvalidOperation, ValueError):
@@ -126,15 +144,15 @@ def validate(*, organization, student_id, data, document, actor=None) -> dict:
     """
     program = str(data.get("program") or "").strip()
     if program not in RecognitionProgram.values:
-        raise RecognitionError("program", pgettext(_CTX, "Proqramı seçin."))
+        raise RecognitionError("program", pgettext(_CTX, "Səbəbi seçin."))
     program_name = _text(data.get("program_name"), PROGRAM_NAME_MAX)
     if program == RecognitionProgram.OTHER and not program_name:
         raise RecognitionError(
             "program_name",
             pgettext(_CTX, "«Digər» seçilibsə proqramın / səbəbin adını yazın (məs. yay məktəbi, onlayn kurs)."),
         )
-    cleaned = {"program": program, "program_name": program_name, **_required_texts(data)}
-    cleaned["foreign_credit"] = _foreign_credit(data.get("foreign_credit"))
+    cleaned = {"program": program, "program_name": program_name, **_required_texts(data, program)}
+    cleaned["foreign_credit"] = _foreign_credit(data.get("foreign_credit"), required=program in DETAILED_PROGRAMS)
     cleaned["recognized_score"] = _score(data.get("recognized_score"))
     cleaned["note"] = str(data.get("note") or "").strip()[:2000]
     enrollment = (
@@ -178,16 +196,17 @@ def _uuid_or_none(raw):
 
 
 def _exempt(enrollment, recognition_ref, cleaned, actor, request):
-    """Açıq jurnalda «Fəndən azad» qərarı (``external_recognition``); bağlı / keçmiş dövrdə ``None``."""
+    """«Fəndən azad» qərarı (``external_recognition``) — tələbə bu jurnaldan çıxır, sətri «Azad — N bal» kimi görünür.
+
+    Sahib 2026-11-27: tələbə fəndən «o bal ilə keçmiş sayılır». Əvvəl bağlı jurnalda / keçmiş dövrdə qeydiyyata
+    toxunulmurdu — onda kəsr siyahıları (25%, alt qrup yerləşdirmə, akademik qeydlər) hesablanmış «kəsildi»ni
+    göstərməyə davam edirdi. Sənədli tanınma rəsmi qərardır, ona görə siyahı qapısı burada tətbiq olunmur."""
     offering = enrollment.offering
-    if enrollment.status != Enrollment.Status.ENROLLED or guest_roster.roster_block_reason(offering):
+    if enrollment.status != Enrollment.Status.ENROLLED:
         return None
     draft = ExternalCreditRecognition(program=cleaned["program"], program_name=cleaned["program_name"])
-    reason = pgettext(_CTX, "Xarici nəticə tanınıb: %(program)s · %(institution)s · %(subject)s") % {
-        "program": draft.program_label,
-        "institution": cleaned["institution"],
-        "subject": cleaned["foreign_subject"],
-    }
+    trail = " · ".join(filter(None, (draft.program_label, cleaned["institution"], cleaned["foreign_subject"])))
+    reason = pgettext(_CTX, "Fəndən azad — nəticə tanınıb: %(trail)s") % {"trail": trail}
     result = subject_exempt.exempt_student(
         offering=offering,
         enrollment_id=enrollment.pk,

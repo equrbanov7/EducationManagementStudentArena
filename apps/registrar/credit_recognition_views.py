@@ -35,7 +35,7 @@ def _guard(request):
         message = pgettext(_CTX, "Başqasının adından baxış rejimində dəyişiklik etmək olmaz.")
         return None, JsonResponse({"ok": False, "view_as_blocked": True, "detail": message}, status=403)
     if not read.can_manage(request.user, organization):
-        return None, _error(pgettext(_CTX, "Xarici nəticəni tanımaq üçün səlahiyyətiniz yoxdur."), 403, "forbidden")
+        return None, _error(pgettext(_CTX, "Tələbəni fəndən azad etmək üçün səlahiyyətiniz yoxdur."), 403, "forbidden")
     return organization, None
 
 
@@ -61,14 +61,15 @@ def create(request, student_id):
         )
     except credit_recognition.RecognitionError as exc:
         return _error(exc.message, exc.status, exc.code)
+    score = result["recognition"].recognized_score
     if result["exempted"]:
-        message = pgettext(_CTX, "Xarici nəticə tanındı — tələbə bu fəndən azad edildi (jurnaldan çıxdı).")
+        message = pgettext(
+            _CTX, "Tələbə bu fəndən %(score)s bal ilə azad edildi — fənn keçilmiş sayılır, jurnalda «Azad» görünür."
+        ) % {"score": score}
     else:
         message = pgettext(
-            _CTX,
-            "Xarici nəticə tanındı. Jurnal bağlı olduğundan jurnal sətri dəyişmədi — transkriptdə tanınmış nəticə "
-            "göstərilir.",
-        )
+            _CTX, "Nəticə tanındı (%(score)s bal) — fənn keçilmiş sayılır; jurnal qeydiyyatı artıq aktiv deyildi."
+        ) % {"score": score}
     return JsonResponse({"ok": True, "message": message, "id": str(result["recognition"].pk)})
 
 

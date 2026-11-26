@@ -204,3 +204,17 @@
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
+
+/* Sahib 2026-11-27: bal / sənəd sahələri səbəb seçiləndə açılır (`fieldset[data-cr-after-reason]`). */
+.cr-fieldset {
+    display: grid;
+    gap: var(--ems-sp-3);
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.cr-fieldset[hidden] {
+    display: none;
+}

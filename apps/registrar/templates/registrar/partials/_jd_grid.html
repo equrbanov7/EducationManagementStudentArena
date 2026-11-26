@@ -292,6 +292,22 @@ yol kimi qalır. Bax journal_grid_autosave.js + apps/registrar/journal_autosave.
                             </td>
                         </tr>
                         {% endfor %}
+                        {% if recognized_rows %}{# Sahib 2026-11-27: fəndən azad olunan tələbə jurnalda qalır — «Azad — N bal», yazılmır #}
+                        <tr class="jd2-guest-divider" data-jd-recognized-divider><td class="jd2-guest-divider__cell" colspan="{{ journal.lesson_meta|length|add:2 }}"><span class="jd2-guest-divider__label"><i class="fas fa-award" aria-hidden="true"></i> {% trans "Fəndən azad olunanlar — fənn tanınmış balla keçilmiş sayılır" context "registrar.recognition" %}</span></td></tr>
+                        {% for rec in recognized_rows %}
+                        <tr class="jd2-recog-row" data-jd-recognized>
+                            <td class="jd2-td-student">
+                                <div class="jd2-stu-inner">
+                                    <span class="jd2-stu-name">{{ rec.student|journal_name }}</span>
+                                </div>
+                            </td>
+                            <td class="jd2-recog-cell" colspan="{{ journal.lesson_meta|length|add:1 }}">
+                                <span class="jd2-recog-chip"><i class="fas fa-circle-check" aria-hidden="true"></i> {% blocktrans with score=rec.score letter=rec.letter context "registrar.recognition" %}Azad — {{ score }} bal ({{ letter }}){% endblocktrans %}</span>
+                                <small class="jd2-recog-note">{{ rec.program_label }}{% if rec.institution %} · {{ rec.institution }}{% endif %}</small>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% endif %}
                     </tbody>
                     {% endspaceless %}
                 </table>

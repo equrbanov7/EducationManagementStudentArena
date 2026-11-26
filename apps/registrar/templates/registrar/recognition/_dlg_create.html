@@ -1,5 +1,5 @@
 {% load i18n %}
-{% comment %}«Xarici nəticəni tanı» dialoqunun sahələri — `cr.selected.targets` (tələbənin jurnal qeydiyyatları), `cr.programs`,
+{% comment %}«Fəndən azad et» (nəticənin tanınması) dialoqunun sahələri — `cr.selected.targets` (tələbənin jurnal qeydiyyatları), `cr.programs`,
 `cr.pass_score`. Server hər sahəni yenidən yoxlayır (`credit_recognition.validate`); sənəd məcburidir.{% endcomment %}
 <div class="ems-field">
     <label class="ems-field__label" for="crTarget">{% trans "Bizim fənn (semestr · fənn)" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
@@ -13,29 +13,50 @@
         </select>
     </div>
 </div>
+<div class="ems-field">
+    <label class="ems-field__label" for="crProgram">{% trans "Azad olunma səbəbi" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" id="crProgram" name="program" required data-bootstrap-select data-cr-program
+                data-cr-detailed="{{ cr.detailed_programs|join:',' }}" data-cr-other="other">
+            <option value="">{% trans "Seçin" context "registrar.recognition" %}</option>
+            {% for value, label in cr.programs %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+        </select>
+    </div>
+    <span class="ems-field__hint">{% trans "Səbəb seçiləndən sonra bal və sənəd sahələri açılır." context "registrar.recognition" %}</span>
+</div>
+{% comment %}Sahib 2026-11-27: bal / sənəd yalnız səbəb seçiləndə görünür. Gizli `fieldset` `disabled`-dır — onun sahələri
+nə göndərilir, nə də brauzer yoxlamasını saxlayır (credit_recognition.js açır).{% endcomment %}
+<fieldset class="cr-fieldset" data-cr-after-reason hidden disabled>
 <div class="cr-grid">
     <div class="ems-field">
-        <label class="ems-field__label" for="crProgram">{% trans "Proqram / səbəb" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-        <div class="bootstrap-single-select bootstrap-single-select--ems">
-            <select class="ems-select bootstrap-single-select__native" id="crProgram" name="program" required data-bootstrap-select>
-                {% for value, label in cr.programs %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
-            </select>
-        </div>
+        <label class="ems-field__label" for="crProgramName">{% trans "Səbəbin / kursun adı" context "registrar.recognition" %}</label>
+        <input class="ems-input" type="text" id="crProgramName" name="program_name" maxlength="150" autocomplete="off"
+               placeholder="{% trans 'məs. IELTS 7.0, Cisco CCNA, kollec diplomu' context 'registrar.recognition' %}">
+        <span class="ems-field__hint">{% trans "«Digər» seçilibsə məcburidir." context "registrar.recognition" %}</span>
     </div>
     <div class="ems-field">
-        <label class="ems-field__label" for="crProgramName">{% trans "Proqramın / səbəbin adı" context "registrar.recognition" %}</label>
-        <input class="ems-input" type="text" id="crProgramName" name="program_name" maxlength="150" autocomplete="off"
-               placeholder="{% trans 'məs. Yay məktəbi, onlayn kurs, Erasmus+ KA171' context 'registrar.recognition' %}">
-        <span class="ems-field__hint">{% trans "«Digər» seçilibsə məcburidir; digər növlərdə dəqiqləşdirmə üçündür." context "registrar.recognition" %}</span>
+        <label class="ems-field__label" for="crInstitution">{% trans "Qurum (kurs təşkilatı, kollec, universitet)" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true" data-cr-institution-req>*</span></label>
+        <input class="ems-input" type="text" id="crInstitution" name="institution" maxlength="255" required autocomplete="off" data-cr-institution>
     </div>
+    <div class="ems-field">
+        <label class="ems-field__label" for="crScore">{% trans "Fənn üzrə yekun bal (100 bal)" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+        <input class="ems-input" type="number" id="crScore" name="recognized_score" min="{{ cr.pass_score }}" max="100" step="1" inputmode="numeric" required>
+        <span class="ems-field__hint">{% blocktrans with floor=cr.pass_score context "registrar.recognition" %}{{ floor }}–100: tələbənin bu fəndən yekun balı olur və fənn keçilmiş sayılır; hərf universitetin şkalasından avtomatik.{% endblocktrans %}</span>
+    </div>
+</div>
+<div class="ems-field">
+    <label class="ems-field__label" for="crDocument">{% trans "Əsas sənəd (sertifikat, kollec arayışı, transkript və ya əmr)" context "registrar.recognition" %}{% if not superadmin_doc_waiver %} <span class="ems-field__req" aria-hidden="true">*</span>{% endif %}</label>
+    <input class="ems-input" type="file" id="crDocument" name="document" accept=".pdf,.jpg,.jpeg,.png"{% if not superadmin_doc_waiver %} required{% endif %}>
+    <span class="ems-field__hint">{% trans "PDF, JPG və ya PNG · ən çox 10 MB · sənədsiz azad etmək olmur" context "registrar.recognition" %}</span>
+    {% include "partials/ems_ui/_superadmin_waiver_hint.html" %}
+</div>
+<fieldset class="cr-fieldset" data-cr-detailed-fields hidden disabled>
+<p class="ems-field__hint">{% trans "Erasmus+ / mübadilə: xarici fənnin məlumatı məcburidir." context "registrar.recognition" %}</p>
+<div class="cr-grid">
     <div class="ems-field">
         <label class="ems-field__label" for="crStudyPeriod">{% trans "Təhsil müddəti / semestr" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
         <input class="ems-input" type="text" id="crStudyPeriod" name="study_period" maxlength="100" required autocomplete="off"
                placeholder="{% trans 'məs. 2025/2026 yaz semestri' context 'registrar.recognition' %}">
-    </div>
-    <div class="ems-field">
-        <label class="ems-field__label" for="crInstitution">{% trans "Qurum (universitet)" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-        <input class="ems-input" type="text" id="crInstitution" name="institution" maxlength="255" required autocomplete="off">
     </div>
     <div class="ems-field">
         <label class="ems-field__label" for="crCountry">{% trans "Ölkə" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
@@ -46,7 +67,7 @@
     <label class="ems-field__label" for="crForeignSubject">{% trans "Xarici fənnin adı" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
     <input class="ems-input" type="text" id="crForeignSubject" name="foreign_subject" maxlength="300" required autocomplete="off">
 </div>
-<div class="cr-grid cr-grid--3">
+<div class="cr-grid">
     <div class="ems-field">
         <label class="ems-field__label" for="crForeignCredit">{% trans "Xarici kredit (ECTS)" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
         <input class="ems-input" type="number" id="crForeignCredit" name="foreign_credit" min="0.5" max="60" step="0.5" inputmode="decimal" required>
@@ -56,19 +77,10 @@
         <input class="ems-input" type="text" id="crForeignGrade" name="foreign_grade" maxlength="32" required autocomplete="off"
                placeholder="{% trans 'məs. B, 8/10, 1.7' context 'registrar.recognition' %}">
     </div>
-    <div class="ems-field">
-        <label class="ems-field__label" for="crScore">{% trans "Bizim şkalada (100 bal)" context "registrar.recognition" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
-        <input class="ems-input" type="number" id="crScore" name="recognized_score" min="{{ cr.pass_score }}" max="100" step="1" inputmode="numeric" required>
-        <span class="ems-field__hint">{% blocktrans with floor=cr.pass_score context "registrar.recognition" %}{{ floor }}–100; hərf universitetin şkalasından avtomatik.{% endblocktrans %}</span>
-    </div>
 </div>
-<div class="ems-field">
-    <label class="ems-field__label" for="crDocument">{% trans "Əsas sənəd (transkript, Learning Agreement və ya əmr)" context "registrar.recognition" %}{% if not superadmin_doc_waiver %} <span class="ems-field__req" aria-hidden="true">*</span>{% endif %}</label>
-    <input class="ems-input" type="file" id="crDocument" name="document" accept=".pdf,.jpg,.jpeg,.png"{% if not superadmin_doc_waiver %} required{% endif %}>
-    <span class="ems-field__hint">{% trans "PDF, JPG və ya PNG · ən çox 10 MB" context "registrar.recognition" %}</span>
-    {% include "partials/ems_ui/_superadmin_waiver_hint.html" %}
-</div>
+</fieldset>
 <div class="ems-field">
     <label class="ems-field__label" for="crNote">{% trans "Qeyd" context "registrar.recognition" %} <span class="ems-field__opt">{% trans "(istəyə bağlı)" context "registrar.recognition" %}</span></label>
     <textarea class="ems-textarea" id="crNote" name="note" rows="2" maxlength="2000"></textarea>
 </div>
+</fieldset>
