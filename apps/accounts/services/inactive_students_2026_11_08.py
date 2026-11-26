@@ -194,3 +194,24 @@ def _undo(*, organization, actor, counts, only=None) -> None:
             resource_type=RESOURCE,
             resource_id=row.resource_id,
         )
+
+
+def frozen_enrollment_ids(organization, student_ids) -> set:
+    """Bu əmrin dondurduğu yazılış id-ləri (str) — jurnalın «Tələbəni bərpa et» pəncərəsi üçün (2026-11-26; bir sorğu)."""
+    AuditLog = django_apps.get_model("audit", "AuditLog")
+    rows = AuditLog.objects.filter(
+        organization=organization,
+        resource_type=RESOURCE,
+        changes__has_key="blocked",
+        resource_id__in=[str(pk) for pk in student_ids],
+    ).values_list("changes", flat=True)
+    return {str(pk) for changes in rows for pk in ((changes or {}).get("enrollment_ids") or [])}
+
+
+def undo_student(*, organization, actor, student_id) -> dict:
+    """Bir tələbənin dondurulmasını geri qaytarır (``--undo --only <id>`` ilə eyni; çağıranın tranzaksiyasında)."""
+    from collections import Counter
+
+    counts = Counter()
+    _undo(organization=organization, actor=actor, counts=counts, only=[int(student_id)])
+    return dict(counts)
