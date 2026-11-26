@@ -102,6 +102,7 @@ def build(offering, context, *, now=None, scope=None) -> dict:
         "hours_by_kind": {kind: _hours(last_by_kind.get(kind)) for kind in KINDS},
         "instructor_labels": labels,
         "slots": {},
+        "taken": taken_slots(journal_activation.lesson_rows(offering, memo=True)),
     }
     candidates = open_slots(offering, today, todays)
     rooms = _slot_rooms(offering, candidates)
@@ -127,6 +128,22 @@ def build(offering, context, *, now=None, scope=None) -> dict:
     else:
         data.update(_fallback(offering, context, data, held, last_by_kind, memory, today))
     return data
+
+
+def taken_slots(lessons) -> dict:
+    """«Yeni dərs»in canlı xəbərdarlığı (sahib 2026-11-26): ``"YYYY-MM-DD|HH:MM"`` → o saatdakı bütün-qrup dərsinin
+    adı. Müəllim tarix + saatı seçəndə modal deyir ki, o saatda artıq dərs var və yeni dərs onu DƏYİŞMİR (əvvəl
+    server jurnalı köhnə dərsin sütununda açırdı, müəllim də onu ✎ ilə başqa dərsə çevirirdi). ``lessons`` —
+    jurnalın BÜTÜN dərsləri (``journal_activation.lesson_rows``; toqquşma qaydası pay əhatəsindən asılı deyil). Alt
+    qrup (Lab / seminar) dərsi sayılmır — eyni saatda iki alt qrup qanunidir; qərarı server qaydası verir."""
+    taken: dict = {}
+    for lesson in sorted(lessons, key=lambda row: row.created_at):
+        if not lesson.start_time or lesson.lab_group or lesson.seminar_group:
+            continue
+        topic = (lesson.topic or "").strip()
+        label = str(lesson.get_kind_display()) + (f" — {topic}" if topic else "")
+        taken.setdefault(f"{lesson.date.isoformat()}|{lesson.start_time:%H:%M}", {"kind": lesson.kind, "label": label})
+    return taken
 
 
 def open_slots(offering, today, todays_lessons) -> list:

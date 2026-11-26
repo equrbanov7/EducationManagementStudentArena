@@ -226,10 +226,8 @@ def resolve_slot_room(offering, slot):
 
 
 def lesson_rows(offering, *, memo: bool = False) -> list:
-    """Açılışın BÜTÜN dərsləri (ən yenisi birinci) — mövzu əhatəsi, son müəllim / növ / saat üçün TƏK sorğu.
-
-    ``memo=True`` yalnız jurnal səhifəsinin GET yolu üçündür (zolaq və «Yeni dərs» doldurması eyni
-    siyahını paylaşır); yazı yolları (aktivləşdirmə, dərs yaratma) həmişə təzə oxuyur."""
+    """Açılışın BÜTÜN dərsləri (ən yenisi birinci) — mövzu əhatəsi, son müəllim / növ / saat / tutulmuş saat üçün TƏK
+    sorğu. ``memo=True`` yalnız jurnal GET yolu üçündür (zolaq + «Yeni dərs» eyni siyahı); yazı yolları təzə oxuyur."""
     if memo:
         cached = getattr(offering, _LESSONS_ATTR, None)
         if cached is not None:
@@ -247,6 +245,8 @@ def lesson_rows(offering, *, memo: bool = False) -> list:
             "end_time",
             "created_at",
             "off_schedule_reason",
+            "lab_group",
+            "seminar_group",
             "instructor__first_name",
             "instructor__last_name",
             "instructor__username",

@@ -233,6 +233,24 @@
         }
         var lastHint = modal.querySelector('[data-jd-prefill-hint="last"]');
         if (lastHint) lastHint.hidden = !(data && adding && data.source === "last");
+        syncWarnings(modal, f, adding);
+    }
+
+    /** Sahib 2026-11-26: YENİ dərsdə o tarix + saatda artıq dərs varsa və ya keçilmiş mövzu seçilibsə açıq deyilir ki,
+     *  yeni dərs AYRICA sütundur — köhnə dərs dəyişmir (müəllim əvvəl köhnə dərsi ✎ ilə başqa dərsə çevirirdi). */
+    function syncWarnings(modal, f, adding) {
+        var taken = (readPrefill() || {}).taken || {};
+        var start = f.time && f.time.value ? f.time.value.split("|")[0] : "";
+        var hit = adding && f.date && f.date.value && start ? taken[f.date.value + "|" + start] : null;
+        var takenHint = modal.querySelector('[data-jd-prefill-hint="taken"]');
+        if (takenHint) {
+            takenHint.hidden = !hit;
+            var label = takenHint.querySelector("[data-jd-prefill-label]");
+            if (label) label.textContent = hit ? hit.label || "" : "";
+        }
+        var option = f.topic && f.topic.tagName === "SELECT" ? f.topic.options[f.topic.selectedIndex] : null;
+        var coveredHint = modal.querySelector('[data-jd-prefill-hint="covered"]');
+        if (coveredHint) coveredHint.hidden = !(adding && option && option.classList.contains("jd-topic-covered"));
     }
 
     /** YENİ dərs: bütün sahələri doldurmadan (yoxdursa standartdan) qur — köhnə redaktə dəyərləri qalmır. */
@@ -329,7 +347,9 @@
     function onField(event) {
         var target = event.target;
         if (applying || !target || !target.matches) return;
-        if (!target.matches("[data-jd-lesson-kind], [data-jd-lesson-date], [data-jd-lesson-time]")) return;
+        if (!target.matches("[data-jd-lesson-kind], [data-jd-lesson-date], [data-jd-lesson-time], [data-jd-lesson-topic]")) {
+            return;
+        }
         var modal = target.closest(MODAL);
         if (!modal) return;
         if (target.matches("[data-jd-lesson-kind]")) {

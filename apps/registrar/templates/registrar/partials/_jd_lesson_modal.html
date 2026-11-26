@@ -51,6 +51,13 @@ varsa o növ yalnız DEFOLTDUR (sahib 2026-11-15 — tip kilidi yoxdur).
                     <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
                     {% trans "Sahələr bu fənnin son dərsinə və sillabusdakı növbəti mövzuya görə doldurulub — yoxlayın, lazım olsa dəyişin." context "registrar.journal_prefill" %}
                 </p>
+                {% comment %}Sahib 2026-11-26: yeni dərs köhnə dərsi DƏYİŞMİR — o saatda dərs varsa / keçilmiş mövzu
+                seçilibsə açıq deyilir (JS: journal_lesson_prefill.js `syncWarnings`, data: `taken`).{% endcomment %}
+                <p class="jd-modal-note jd-modal-note--warn" data-jd-prefill-hint="taken" hidden>
+                    <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+                    {% trans "Bu tarix və saatda artıq dərs var" context "registrar.journal_prefill" %}: <b data-jd-prefill-label></b>.
+                    {% trans "Yeni dərs onu dəyişmir — yeni dərs üçün başqa dərs saatı seçin." context "registrar.journal_prefill" %}
+                </p>
                 {{ lesson_prefill|json_script:"jdLessonPrefill" }}
                 {% endif %}
                 <div class="jd2-field">
@@ -107,6 +114,7 @@ varsa o növ yalnız DEFOLTDUR (sahib 2026-11-15 — tip kilidi yoxdur).
                     {% else %}
                     <small class="jd-field-hint">{% trans "Plandan seçilən mövzu sillabusun həftəlik planında «keçilib» kimi işarələnir." context "registrar.journal_topics" %}</small>
                     {% endif %}
+                    <small class="jd-field-hint jd-field-hint--warn" data-jd-prefill-hint="covered" hidden>{% trans "Bu mövzu artıq keçilib — yeni dərs AYRICA sütun kimi əlavə olunur, əvvəlki dərs dəyişmir." context "registrar.journal_topics" %}</small>
                     {% else %}
                     <input type="text" name="lesson_topic" data-jd-lesson-topic
                            placeholder="{% trans 'Mövzunu yazın…' context 'registrar.journal' %}" aria-label="{% trans 'Mövzunu yazın…' context 'registrar.journal' %}">

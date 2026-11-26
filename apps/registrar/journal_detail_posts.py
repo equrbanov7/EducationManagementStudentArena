@@ -15,6 +15,7 @@ from django.http import Http404, HttpResponseForbidden
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.translation import gettext as _
+from django.utils.translation import pgettext
 
 from . import grade_audit, gradebook, schedule
 from .audit_write import AuditWriteFailed, audit_failure_message
@@ -169,9 +170,18 @@ def handle_add_lesson(request, offering):
             )
         messages.success(request, _("Dərs əlavə edildi."))
     except gradebook.LessonRuleError as exc:
-        messages.error(request, str(exc))
-        # Eyni saatda dərs artıq var (köçürülmüş və ya əvvəl açılmış): jurnal HƏMİN sütunda açılır — xanalar oraya yazılır.
-        return redirect(journal_lesson_prefill.lesson_url(offering, _same_slot_lesson(offering, date, start_time)))
+        from .gradebook_lessons import SlotTakenError
+
+        existing = _same_slot_lesson(offering, date, start_time, kind=kind) if isinstance(exc, SlotTakenError) else None
+        if existing is not None and existing.kind == kind:
+            # Eyni saatda EYNİ növ dərs artıq var (köçürülmüş və ya əvvəl açılmış): jurnal HƏMİN sütunda açılır —
+            # xanalar oraya yazılır (MR-000125).
+            messages.error(request, str(exc))
+            return redirect(journal_lesson_prefill.lesson_url(offering, existing))
+        # Sahib 2026-11-26: başqa növün dərsi o saatdadırsa jurnal onun sütununa KEÇMİR — müəllim «Yeni dərs»
+        # əvəzinə köhnə dərsi ✎ ilə dəyişirdi (13.11 mühazirəsi laboratoriyaya çevrildi, qeydləri ilə birlikdə).
+        messages.error(request, _other_kind_slot_message(existing) if existing is not None else str(exc))
+        return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
     except AuditWriteFailed:
         messages.error(request, audit_failure_message())
         return redirect(reverse("registrar:journal_detail", args=[offering.pk]))
@@ -180,13 +190,24 @@ def handle_add_lesson(request, offering):
     return redirect(journal_lesson_prefill.lesson_url(offering, lesson))
 
 
-def _same_slot_lesson(offering, date, start_time):
+def _same_slot_lesson(offering, date, start_time, *, kind=None):
+    """O gün + saatın dərsi — eyni növdən olan üstündür (``kind``), yoxdursa ilk açılan."""
     from .gradebook_lessons import _coerce_date
 
     day = _coerce_date(date)
     if day is None or not start_time:
         return None
-    return offering.lessons.filter(date=day, start_time=start_time).order_by("created_at").first()
+    lessons = list(offering.lessons.filter(date=day, start_time=start_time).order_by("created_at"))
+    return next((lesson for lesson in lessons if lesson.kind == kind), lessons[0] if lessons else None)
+
+
+def _other_kind_slot_message(lesson) -> str:
+    label = lesson.get_kind_display() + (f" — {lesson.topic}" if (lesson.topic or "").strip() else "")
+    return pgettext(
+        "registrar.journal",
+        "Bu jurnalda %(date)s, saat %(time)s üçün artıq «%(lesson)s» dərsi var. Yeni dərs mövcud dərsi dəyişmir — "
+        "yeni dərs üçün başqa dərs saatı seçin.",
+    ) % {"date": lesson.date.strftime("%d.%m.%Y"), "time": lesson.start_time.strftime("%H:%M"), "lesson": label}
 
 
 def _create(request, offering, bypass, full_reason, *, allow_past, **fields):
