@@ -31,6 +31,8 @@ Yazı, hadisə və bildiriş eyni müraciətin tenantına bağlı qalır.
 > alias-ları sayılır). Yeni `bypass_rls` əlavə edəndə skripti yenidən işlədib
 > bu bölməni əvəz edin; skript təsnif edilməmiş fayl görsə 1 ilə çıxır.
 
+2026-11-27 əlavəsi. `apps/subject_folder/services/notify.py` üzrə xülasə işi D kateqoriyasına daxildir. Ümumi işçi yalnız təşkilat və müəllim açarlarını seçir. Hər xülasə öz təşkilatının tranzaksiyasında hazırlanır və göndərilir. Cari sayları `python scripts/rls_bypass_inventory.py --markdown` göstərir.
+
 | Fayl | Çağırış | Kateqoriya |
 |---|---:|---|
 | `apps/exams/tasks.py` | 12 | D — Celery (sorğu konteksti yoxdur; job sətri org FK-lıdır) |

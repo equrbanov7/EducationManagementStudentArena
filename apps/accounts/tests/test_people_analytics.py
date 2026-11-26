@@ -205,6 +205,7 @@ class PeopleAnalyticsQueryBudgetTest(TestCase):
                 small_payload = people.build_teacher_analytics(actor=actor, filters=filters)
             for index in range(38):
                 self.fx.add_teacher(f"pan_bulk_t{index}", last=f"Bulkov{index}")
+            people.build_teacher_analytics(actor=actor, filters=filters)  # Refresh permissions after membership writes.
             with CaptureQueriesContext(connection) as large:
                 large_payload = people.build_teacher_analytics(actor=actor, filters=filters)
 
@@ -226,6 +227,7 @@ class PeopleAnalyticsQueryBudgetTest(TestCase):
                 small_payload = people.build_student_analytics(actor=actor, filters=filters)
             for index in range(38):
                 self.fx.add_student(f"pan_bulk_s{index}", faculty="a", last=f"Bulkova{index}")
+            people.build_student_analytics(actor=actor, filters=filters)  # Refresh permissions after membership writes.
             with CaptureQueriesContext(connection) as large:
                 large_payload = people.build_student_analytics(actor=actor, filters=filters)
 

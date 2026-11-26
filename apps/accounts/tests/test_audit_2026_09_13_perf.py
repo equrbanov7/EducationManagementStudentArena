@@ -198,6 +198,7 @@ class SyllabusListSectionBudgetTest(TestCase):
         self.assertEqual(small_section["rows"][0]["kind"], "missing")
 
         self._make_syllabi(2 * PAGE_SIZE + 2, "B")
+        self._section()  # Match the warm permission snapshot after creating academic units.
         with CaptureQueriesContext(connection) as large:
             large_section = self._section()
         self.assertEqual(

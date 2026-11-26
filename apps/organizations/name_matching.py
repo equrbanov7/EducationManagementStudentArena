@@ -50,6 +50,10 @@ def name_exists(queryset, name):
     )
 
 
+def is_registry_name_collision(exc):
+    return getattr(getattr(exc.__cause__, "diag", None), "constraint_name", None) == REGISTRY_NAME_CONSTRAINT
+
+
 class RegistryNameTaken(Exception):
     def __str__(self):
         return pgettext("organizations.registry", "Bu adda bölmə artıq var.")
@@ -65,6 +69,6 @@ def registry_unit_write(organization):
             Organization.objects.select_for_update(no_key=True).only("pk").get(pk=organization.pk)
             yield
     except IntegrityError as exc:
-        if getattr(getattr(exc.__cause__, "diag", None), "constraint_name", None) == REGISTRY_NAME_CONSTRAINT:
+        if is_registry_name_collision(exc):
             raise RegistryNameTaken() from exc
         raise

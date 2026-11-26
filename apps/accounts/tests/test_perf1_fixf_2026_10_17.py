@@ -79,6 +79,7 @@ class GroupsRegistryQueryBudgetTest(TestCase):
         small, small_count = self._build()
         for _ in range(8):
             self._add_group_with_tutor()
+        self._build()  # Structural writes invalidate the permission snapshot. Warm both measurements equally.
         large, large_count = self._build()
 
         self.assertEqual(len(large["rows"]), len(small["rows"]) + 8)
@@ -213,6 +214,7 @@ class StudentDirectoryScopeTest(TestCase):
         with bypass_rls():
             for index in range(5):
                 self.fx.add_student(f"pf1_more_{index}", faculty="a")
+        self._names(self.fx.dean_a)  # Student memberships invalidated the warm snapshot.
         names, after = self._names(self.fx.dean_a)
         self.assertEqual(len(before), len(after))
         self.assertTrue({f"pf1_more_{index}" for index in range(5)} <= names)

@@ -12,6 +12,7 @@ from apps.organizations.groups_registry import (  # noqa: F401
     group_scope,
     visible_group,
 )
+from apps.organizations.name_matching import is_registry_name_collision
 from apps.organizations.permissions import (  # noqa: F401
     PERMISSION_CATEGORIES,
     PERMISSION_LABELS,
@@ -95,6 +96,7 @@ __all__ = [
     "get_user_org_role_level",
     "invalidate_permission_scope_cache",
     "is_grant_entry",
+    "is_registry_name_collision",
     "is_tenant_accessible_organization",
     "members_covering_unit",
     "organization_role_user_queryset",
