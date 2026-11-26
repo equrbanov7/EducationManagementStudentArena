@@ -79,6 +79,7 @@ def create_legacy_student(
         student_targets={"group": group, "program": program, "admission_year": admission_year},
         group_name=group.name,
         audit_reason=f"legacy_delta_student_created {tag}".strip(),
+        join_group_journals=False,  # köçürmə öz yazılışlarını yazır (2026-11-26)
     )
     user.set_unusable_password()
     user.save(update_fields=["password"])

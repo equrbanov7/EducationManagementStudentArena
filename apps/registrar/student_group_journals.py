@@ -101,3 +101,14 @@ def run(*, organization, actor, counts, student_ids) -> None:
     period = current_period(organization)
     for student_id in student_ids:
         sync_student(organization=organization, actor=actor, student_id=student_id, counts=counts, period=period)
+
+
+def enroll_new_student(*, organization, actor, student_id) -> dict:
+    """Yeni yaradılan tələbəni qrupunun cari jurnallarına salır (sahib 2026-11-26: «qrupa yeni tələbə gəlibsə bütün
+    jurnala gəlsin»). Qəbul / RİM «Yeni yarat» yolu ``accounts`` fasadından çağırır; qaydalar :func:`sync_student`-dir.
+    """
+    from collections import Counter
+
+    counts = Counter()
+    sync_student(organization=organization, actor=actor, student_id=student_id, counts=counts)
+    return dict(counts)
