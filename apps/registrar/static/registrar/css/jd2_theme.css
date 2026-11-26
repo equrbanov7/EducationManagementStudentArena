@@ -136,6 +136,9 @@
 .jd2-locked-kind { background: var(--ems-neutral-100); color: var(--ems-neutral-700); border: 1px solid var(--ems-border); border-radius: var(--ems-r-lg); }
 .jd-field-hint { color: var(--ems-neutral-500); font-size: var(--ems-fs-xs); }
 .jd-modal-note { background: var(--ems-primary-50); color: var(--ems-neutral-700); border: 1px solid var(--ems-primary-100); border-radius: var(--ems-r-xl); }
+/* «Yeni dərs»: o saatda dərs var / keçilmiş mövzu (sahib 2026-11-26) */
+.jd-modal-note--warn { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+.jd-field-hint--warn { color: #b45309; font-weight: 600; }
 
 /* Paritet nişanı — tarixin yanında */
 .jd2-parity-badge { border-radius: var(--ems-r-pill); padding: 5px 10px; font-size: var(--ems-fs-2xs); }

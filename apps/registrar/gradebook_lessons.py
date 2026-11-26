@@ -39,6 +39,11 @@ _CTX = "registrar.journal_lessons"
 # ── Lesson (dərs) CRUD ───────────────────────────────────────────────────────
 
 
+class SlotTakenError(LessonRuleError):
+    """Eyni jurnalda eyni gün + saat artıq dərs var (``has_slot_collision``) — «Yeni dərs» işləyicisi onu digər
+    qayda xətalarından ayırır: köhnə dərsin sütununa yalnız EYNİ növdə keçir (sahib 2026-11-26)."""
+
+
 def _coerce_date(value):
     import datetime
 
@@ -245,7 +250,7 @@ def create_lesson(
         lab_group=lab_group,
         seminar_group=seminar_group,
     ):
-        raise LessonRuleError(_slot_taken_message(parsed, start_time))
+        raise SlotTakenError(_slot_taken_message(parsed, start_time))
     from .language_cohort_journal import validate_lesson
     from .passive_lessons import available, not_available_message
 
@@ -418,7 +423,7 @@ def update_lesson(
             lab_group=lesson.lab_group,
             seminar_group=lesson.seminar_group,
         ):
-            raise LessonRuleError(_slot_taken_message(lesson.date, lesson.start_time))
+            raise SlotTakenError(_slot_taken_message(lesson.date, lesson.start_time))
     if fields:
         from .language_cohort_journal import validate_lesson
 
