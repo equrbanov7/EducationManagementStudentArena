@@ -245,54 +245,13 @@ class ParentGroupPlanner:
         return [self.decide(family) for _key, family in sorted(self.families.items())]
 
     # ── yazı ────────────────────────────────────────────────────────────
-    def _unique_slug(self, name: str) -> str:
-        base = slugify(name) or "group"
-        slug, suffix = base, 2
-        while OrgUnit.objects.filter(organization=self.organization, slug=slug).exists():
-            slug, suffix = f"{base}-{suffix}", suffix + 1
-        return slug
-
     def _create_parent(self, family: Family):
-        source = family.subgroups[0][0]
-        raw = _settings(source)
-        blob = {key: raw[key] for key in COPY_KEYS if key in raw and raw[key] not in ("", None)}
-        blob[ORIGIN_KEY] = ORIGIN
-        unit = OrgUnit.objects.create(
-            organization=self.organization,
-            parent_id=source.parent_id,
-            unit_type=OrgUnitType.GROUP,
-            name=family.proposed_name,
-            slug=self._unique_slug(family.proposed_name),
-            code="",
-            settings=blob,
-            is_active=True,
+        return create_parent_group(
+            self.organization, subgroups=[unit for unit, _sub in family.subgroups], name=family.proposed_name
         )
-        log_action(
-            action=AuditAction.CREATE,
-            organization=self.organization,
-            obj=unit,
-            reason=AUDIT_REASON,
-            new_values={"subgroups": [str(sub.pk) for sub, _label in family.subgroups], "name": unit.name},
-        )
-        return unit
 
     def _link(self, unit, parent) -> bool:
-        if _trail(unit) == str(parent.pk):
-            return False
-        blob = dict(_settings(unit))
-        old = blob.get("parent_group")
-        blob["parent_group"] = str(parent.pk)
-        unit.settings = blob
-        unit.save(update_fields=["settings", "updated_at"])
-        log_action(
-            action=AuditAction.UPDATE,
-            organization=self.organization,
-            obj=unit,
-            reason=AUDIT_REASON,
-            old_values={"parent_group": old},
-            new_values={"parent_group": str(parent.pk), "parent_group_name": parent.name},
-        )
-        return True
+        return link_parent_group(self.organization, unit, parent)
 
     def apply(self, families: list[Family]) -> None:
         for family in families:
@@ -300,6 +259,65 @@ class ParentGroupPlanner:
                 family.parent = self._create_parent(family)
             if family.action in (ACTION_CREATED, ACTION_EXISTING):
                 family.linked = sum(1 for unit, _sub in family.subgroups if self._link(unit, family.parent))
+
+
+def unique_group_slug(organization, name: str) -> str:
+    base = slugify(name) or "group"
+    slug, suffix = base, 2
+    while OrgUnit.objects.filter(organization=organization, slug=slug).exists():
+        slug, suffix = f"{base}-{suffix}", suffix + 1
+    return slug
+
+
+def create_parent_group(
+    organization, *, subgroups, name, reason=AUDIT_REASON, origin=ORIGIN, actor=None, audit_values=None
+):
+    """Bir ailənin ana qrupu: ilk alt qrupun ixtisası altında qardaş ``OrgUnit(group)``, metadatası :data:`COPY_KEYS`
+    (``ensure_parent_groups`` və birdəfəlik əmrlər eyni qaydanı işlədir; ``origin`` — ``created_by_command``)."""
+    source = subgroups[0]
+    raw = _settings(source)
+    blob = {key: raw[key] for key in COPY_KEYS if key in raw and raw[key] not in ("", None)}
+    blob[ORIGIN_KEY] = origin
+    unit = OrgUnit.objects.create(
+        organization=organization,
+        parent_id=source.parent_id,
+        unit_type=OrgUnitType.GROUP,
+        name=name,
+        slug=unique_group_slug(organization, name),
+        code="",
+        settings=blob,
+        is_active=True,
+    )
+    log_action(
+        action=AuditAction.CREATE,
+        user=actor,
+        organization=organization,
+        obj=unit,
+        reason=reason,
+        new_values={"subgroups": [str(sub.pk) for sub in subgroups], "name": unit.name, **(audit_values or {})},
+    )
+    return unit
+
+
+def link_parent_group(organization, unit, parent, *, reason=AUDIT_REASON, actor=None, audit_values=None) -> bool:
+    """Alt qrupa ``settings.parent_group`` izi (artıq bu ana qrupa baxırsa — ``False``)."""
+    if _trail(unit) == str(parent.pk):
+        return False
+    blob = dict(_settings(unit))
+    old = blob.get("parent_group")
+    blob["parent_group"] = str(parent.pk)
+    unit.settings = blob
+    unit.save(update_fields=["settings", "updated_at"])
+    log_action(
+        action=AuditAction.UPDATE,
+        user=actor,
+        organization=organization,
+        obj=unit,
+        reason=reason,
+        old_values={"parent_group": old},
+        new_values={"parent_group": str(parent.pk), "parent_group_name": parent.name, **(audit_values or {})},
+    )
+    return True
 
 
 def counters(families: list[Family]) -> dict:
@@ -333,11 +351,16 @@ def report_rows(families: list[Family]):
 
 __all__ = [
     "ACTION_AMBIGUOUS",
+    "COPY_KEYS",
+    "CONSISTENT_KEYS",
+    "ORIGIN_KEY",
     "ACTION_CREATED",
     "ACTION_EXISTING",
     "REPORT_HEADER",
     "ParentGroupPlanner",
     "counters",
+    "create_parent_group",
+    "link_parent_group",
     "report_rows",
     "subgroup_label",
 ]

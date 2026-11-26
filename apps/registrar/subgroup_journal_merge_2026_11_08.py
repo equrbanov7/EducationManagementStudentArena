@@ -89,9 +89,13 @@ def _constraint(exc) -> str:
 
 
 class Merger:
+    #: Audit izi — törəmə birdəfəlik əmrlər (məs. ``merge_334f_journals_20261126``) öz resursu / partiyası ilə yazır.
+    audit_resource, audit_reason = RESOURCE, REASON
+
     def __init__(self, *, organization, actor, counts):
         self.organization, self.actor, self.counts = organization, actor, counts
         self.report = []  # ailə başına saylar (stdout: ``subgroup_merge: family=N açar=say …``)
+        self.audit_extra = {}
 
     def run(self, plan=None) -> None:
         for index, family in enumerate(PLAN if plan is None else plan, start=1):
@@ -214,10 +218,10 @@ class Merger:
             user=self.actor,
             organization=self.organization,
             obj=target,
-            new_values={"family": family["name"], "sources": [str(source.pk) for source in live]},
+            new_values={"family": family["name"], "sources": [str(source.pk) for source in live], **self.audit_extra},
             changes={"manifest": dict(manifest), "target": str(target.pk)},
-            reason=REASON,
-            resource_type=RESOURCE,
+            reason=self.audit_reason,
+            resource_type=self.audit_resource,
             resource_id=str(target.pk),
         )
 

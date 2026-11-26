@@ -70,7 +70,8 @@ def undo(*, organization, actor, counts) -> None:
             _undo_family(organization, actor, counts, manifest, target_id)
 
 
-def _undo_family(organization, actor, counts, manifest, target_id) -> None:
+def _undo_family(organization, actor, counts, manifest, target_id, *, audit=None) -> None:
+    """``audit`` — ``{"reason", "resource_type", "new_values"}`` (törəmə əmrin öz izi); yoxdursa 2026-11-08 izi."""
     Enrollment, Lesson, LessonMark = _model("Enrollment"), _model("Lesson"), _model("LessonMark")
     get = manifest.get
     counts["undo_scores_deleted"] += (
@@ -95,8 +96,11 @@ def _undo_family(organization, actor, counts, manifest, target_id) -> None:
     ScheduleSlot = _model("ScheduleSlot")
     ScheduleSlot.objects.filter(pk__in=get("slots_created", [])).delete()
     ScheduleSlot.all_objects.filter(pk__in=get("slots_soft_deleted", [])).update(is_deleted=False, deleted_at=None)
+    # 2026-11-26: sətrə ana jurnalın QRUPU əlavə olunur (``Merger._load_rows``) — açılış id-si ilə silmək heç nə etmirdi.
+    target_group = _model("CourseOffering").objects.filter(pk=target_id).values_list("group_id", flat=True).first()
     for load_row in _model("TeachingTaskRow", "workload").objects.filter(pk__in=get("load_rows_group_added", [])):
-        load_row.groups.remove(target_id)
+        if target_group is not None:
+            load_row.groups.remove(target_group)
     Enrollment.objects.filter(pk__in=get("source_enrollments_dropped", []), status="dropped").update(
         status="enrolled", updated_at=timezone.now()
     )
@@ -111,13 +115,14 @@ def _undo_family(organization, actor, counts, manifest, target_id) -> None:
         + list(Enrollment.objects.filter(offering_id=target_id, status="enrolled"))
     )
     counts["undo_families"] += 1
+    audit = audit or {}
     log_action(
         AuditAction.UPDATE,
         user=actor,
         organization=organization,
-        new_values={"target": target_id, "sources": get("sources_retired", [])},
-        reason=UNDO_REASON,
-        resource_type=RESOURCE,
+        new_values={"target": target_id, "sources": get("sources_retired", []), **audit.get("new_values", {})},
+        reason=audit.get("reason", UNDO_REASON),
+        resource_type=audit.get("resource_type", RESOURCE),
         resource_id=str(target_id),
     )
 

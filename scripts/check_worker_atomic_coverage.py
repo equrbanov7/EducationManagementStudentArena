@@ -160,6 +160,7 @@ INTENTIONAL_EXEMPTIONS = {
     "apps/registrar/management/commands/remove_share_students_20261123.py",
     "apps/registrar/management/commands/deactivate_journal_share_20261126.py",
     "apps/registrar/management/commands/split_shared_lessons_20261126.py",
+    "apps/registrar/management/commands/merge_334f_journals_20261126.py",
     "apps/registrar/management/commands/unlink_qiyabi_carry_20261123.py",
     "apps/registrar/management/commands/convert_intensive_to_group_20261123.py",
     "apps/registrar/management/commands/copy_moved_student_marks_20261123.py",
