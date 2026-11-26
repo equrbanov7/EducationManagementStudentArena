@@ -39,8 +39,9 @@ def matching_slot_lesson(
 
 
 def creation_collision(offering, user, *, date, start_time, slot=None, **fields):
+    """Return the user's exact column or a scoped warning; no override for non-interactive calls."""
     if user is None:
-        return None, slot_choice_message()
+        return None, None
     candidates = offering.lessons.filter(organization_id=offering.organization_id, date=date, start_time=start_time)
     scope = journal_scope(user, offering)
     visible = list(scoped_lessons(offering, candidates, scope))
