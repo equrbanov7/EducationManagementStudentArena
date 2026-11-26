@@ -266,7 +266,11 @@ def journal_detail(request, offering_id):
         "coursework_active": coursework_active,  # eyni üç yer — «Kurs işi» (sahib 2026-10-11)
         "coursework_rows": coursework_rows,
         "org_rubrics": _org_rubrics(offering.organization),
-        "can_edit": is_direct_editor and not journal_locked and not syllabus_gate["locked"],
+        # Profilə baxış (view-as) altında jurnal yalnız-oxudur (sahib 2026-11-27) — yazını middleware də bağlayır.
+        "can_edit": is_direct_editor
+        and not journal_locked
+        and not syllabus_gate["locked"]
+        and not getattr(request, "is_view_as", False),
         "handover_observer": handover_observer,
         # «Fəndən azad — N bal» sətirləri grid-in ən aşağısında (sahib 2026-11-27; tanınma ilə azad edilənlər).
         "recognized_rows": (

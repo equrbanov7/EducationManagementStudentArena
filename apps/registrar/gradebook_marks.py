@@ -125,7 +125,16 @@ def _corrected_mark_ids(existing) -> set:
 
 @transaction.atomic
 def save_marks(
-    *, offering, entries, by_user=None, enforce_day=True, report=False, request=None, full_edit=False, full_reason=""
+    *,
+    offering,
+    entries,
+    by_user=None,
+    enforce_day=True,
+    report=False,
+    request=None,
+    full_edit=False,
+    full_reason="",
+    override_locks=False,
 ):
     """Persist attendance/score cells for an offering (bulk, from the grid).
 
@@ -145,6 +154,10 @@ def save_marks(
     silir. Qapını keçən hər xana ``full_reason`` (təmizlənmiş səbəb) tələb edir — yoxdursa yazılmır və nəticədə
     ``reason_required`` (say) qayıdır; yazılanlar səbəblə ayrıca audit sətrinə düşür. Sənədli düzəlişli və üzrlü
     xana bu rejimdə də kilidlidir.
+
+    ``override_locks`` (sahib 2026-11-27: «əvvəlki tarixdə yazılmış i/e-ni, balı ancaq və ancaq RİM rəhbəri və RİM
+    işçisi dəyişə bilər») — çağıran ``journal_full_edit.rim_override`` ilə yoxlayıb. YALNIZ bu halda data bərpası
+    KİLİDLİ mövcud xananı dəyişir / təmizləyir; müəllimin data bərpası boş xanaya yazır, kilidli xana kilidli qalır.
     """
     from apps.registrar import gradebook
     from apps.registrar import journal_notifications as jn
@@ -249,7 +262,7 @@ def save_marks(
             # Kilidli xana yazılmır. Grid-in geri göndərdiyi EYNİ dəyər səssiz keçir; fərqli dəyər — kilid cavabı.
             if not (clearing or _differs(mark, entry, lesson)):
                 continue
-            if not full_edit or lock == journal_edit_windows.LOCK_CORRECTED:
+            if not (full_edit and override_locks) or lock == journal_edit_windows.LOCK_CORRECTED:
                 locked += 1
                 locked_reason = locked_reason or journal_edit_windows.lock_message(
                     lock, window=lock_window, presence_window=presence_window

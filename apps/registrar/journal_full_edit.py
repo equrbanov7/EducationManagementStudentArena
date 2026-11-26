@@ -19,7 +19,11 @@ NƏ AÇILIR (yalnız səbəb ilə — ``full_edit_reason``, ən azı :data:`REAS
 * dərs sətrini (tarix, növ, mövzu, saat, otaq, müəllim) redaktə etmək və dərsi XANALARI İLƏ silmək — redaktə
   pəncərəsi bitsə də;
 * q/b, i/e, balı dəyişmək və xananı TƏMİZLƏMƏK (``att__…=clear``) — 15 dəqiqəlik kilid, köçürülmüş xana və yazma
-  müddəti keçilir (DB trigger-i ``journal_unlock`` ilə — rəsmi yol);
+  müddəti keçilir (DB trigger-i ``journal_unlock`` ilə — rəsmi yol) — YALNIZ RİM (:func:`rim_override`);
+* SAHİB 2026-11-27: «əvvəlki tarixdə yazılmış i/e-ni, balı ancaq və ancaq RİM rəhbəri və RİM işçisi dəyişə bilər».
+  Müəllim bu rejimdə keçmiş günə dərs açır və BOŞ xanaya yazır; yazdığı q/b və bal 15 dəqiqə, i/e 1 gün sonra
+  (``journal_edit_windows``) donur. Kilidli xananı dəyişmək / təmizləmək, kilidli xanası olan dərsi silmək,
+  tarixini və ya növünü dəyişmək müəllimə bağlıdır (:func:`locked_lesson_refusal`);
 * hamısı bağlanmış («Jurnal bağlama» / yekunlaşdırılmış) jurnalda da.
 
 QORUNUR: RİM-in sənədli düzəlişi olan xana və üzrlü qayıb (yalnız rəsmi axın), imtahandan gələn ballar (Midterm /
@@ -63,6 +67,60 @@ def active_for(user, offering) -> bool:
     from .journal_access import is_direct_editor
 
     return is_direct_editor(user, offering)
+
+
+def rim_override(user, offering) -> bool:
+    """Kilidli (əvvəl yazılmış) xananı dəyişə bilən aktor (sahib 2026-11-27): RİM rəhbəri, RİM işçisi (DƏQİQ
+    ``journal.direct_edit``), superadmin, təşkilatın sahibi. Müəllim — yox."""
+    if not getattr(user, "is_authenticated", False):
+        return False
+    if getattr(user, "is_superuser", False) or getattr(user, "is_ikt_rehber", False):
+        return True
+    if getattr(offering.organization, "owner_id", None) == user.pk:
+        return True
+    from .journal_access import _has_direct_edit_key
+
+    return _has_direct_edit_key(user, offering)
+
+
+def locked_marks_count(lesson, *, now=None) -> int:
+    """Bu dərsin müəllimin artıq DƏYİŞƏ BİLMƏDİYİ xanaları (15 dəq. / 1 gün / köçürülmüş / yazma müddəti / üzrlü)."""
+    from . import journal_edit_windows
+    from .models import AttendanceStatus, LessonMark
+
+    now = now or timezone.now()
+    entry_open = journal_edit_windows.EntryRule.current(now=now).allows(lesson)
+    return sum(
+        1
+        for mark in LessonMark.objects.filter(lesson=lesson)
+        if mark.status == AttendanceStatus.EXCUSED
+        or journal_edit_windows.mark_lock_reason(mark, now=now, entry_open=entry_open)
+    )
+
+
+def locked_lesson_refusal(user, offering, lesson, action, data) -> str:
+    """Müəllim kilidli xanası olan dərsi silə, tarixini / növünü dəyişə bilməz (sahib 2026-11-27) — mesaj, yoxsa «».
+
+    Tarix/növ yalnız POST-da FƏRQLİ dəyər gələndə sayılır; mövzu, saat, otaq, müəllim dəyişikliyi sərbəstdir."""
+    if rim_override(user, offering):
+        return ""
+    if action == "delete_lesson":
+        changing = True
+    elif action == "update_lesson":
+        posted_date = _as_date(data.get("lesson_date")) if data.get("lesson_date") else None
+        posted_kind = data.get("lesson_kind") or None
+        changing = (posted_date is not None and posted_date != lesson.date) or (
+            posted_kind is not None and posted_kind != lesson.kind
+        )
+    else:
+        changing = False
+    if not changing or not locked_marks_count(lesson):
+        return ""
+    return pgettext(
+        _CTX,
+        "Bu dərsdə artıq dəyişdirilə bilməyən q/b, i/e və ya bal var — dərsi silmək, tarixini və ya növünü dəyişmək "
+        "olmaz. Dəyişiklik üçün RİM-ə müraciət edib təqdimat yazın.",
+    )
 
 
 def clean_reason(raw) -> str:
@@ -242,9 +300,12 @@ def delete_lesson(*, offering, lesson, by_user, reason, request=None) -> int:
 # ── Jurnal səhifəsi (GET) ─────────────────────────────────────────────────────
 
 
-def _unlock_grid(journal, *, journal_locked) -> None:
+def _unlock_grid(journal, *, journal_locked, override=False) -> None:
     """Grid-i redaktəyə aç: hər dərs sütunu redaktə/silinir, hər xana yazılır (sənədli düzəlişli / üzrlü xana
-    istisna). ``full_edit_needed`` — adi qayda ilə bağlı idi (JS səbəb sahəsini məcburi edir)."""
+    istisna). ``full_edit_needed`` — adi qayda ilə bağlı idi (JS səbəb sahəsini məcburi edir).
+
+    ``override=False`` (müəllim, sahib 2026-11-27): kilidli MÖVCUD xana kilidli qalır (dialoq «RİM-ə müraciət» deyir);
+    yalnız boş xana və pəncərəsi açıq xana yazılır."""
     from django.db.models import Count
 
     from .models import AttendanceStatus, LessonMark
@@ -268,17 +329,25 @@ def _unlock_grid(journal, *, journal_locked) -> None:
                 continue  # başqa laboratoriya qrupunun / passiv dərs — bərpa rejimində də xana deyil
             if cell["corrected"] or (mark is not None and mark.status == AttendanceStatus.EXCUSED):
                 continue
+            if not override and mark is not None and cell.get("lock_reason"):
+                continue  # əvvəl yazılmış, donmuş xana — yalnız RİM dəyişir
             cell.update(locked=False, lock_reason="", writable=True)
 
 
 def page_context(request, offering, context) -> dict:
     """``journal_detail`` kontekstinə: rejim açıqdırsa banner + səbəb dialoqu + açılmış grid/modal sərhədləri."""
-    if context.get("correction_mode") or not active_for(request.user, offering):
+    if (
+        context.get("correction_mode")
+        or getattr(request, "is_view_as", False)  # profilə baxış — jurnal yalnız-oxu (sahib 2026-11-27)
+        or not active_for(request.user, offering)
+    ):
         return {"full_edit_active": False}
     today = timezone.localdate()
     journal_locked = bool(context.get("journal_locked"))
+    override = rim_override(request.user, offering)
     result = {
         "full_edit_active": True,
+        "full_edit_rim_override": override,
         "full_edit_reason_min": REASON_MIN_LENGTH,
         "full_edit_reason_max": REASON_MAX_LENGTH,
         "full_edit_normal_min": context.get("lesson_date_min") or today,
@@ -289,7 +358,7 @@ def page_context(request, offering, context) -> dict:
     if grid or not journal_locked:
         result["can_edit"] = True  # bağlı jurnalın digər tabları (Midterm, yekun…) yalnız-oxu qalır
     if grid:
-        _unlock_grid(context["journal"], journal_locked=journal_locked)
+        _unlock_grid(context["journal"], journal_locked=journal_locked, override=override)
     start, _end = period_bounds(offering)
     result.update(lesson_date_min=start or today - _dt.timedelta(days=365), lesson_date_max=today)
     return result
@@ -311,10 +380,13 @@ __all__ = [
     "lesson_edit_needs_bypass",
     "lesson_needs_bypass",
     "lesson_snapshot",
+    "locked_lesson_refusal",
+    "locked_marks_count",
     "log",
     "log_lesson_added",
     "page_context",
     "period_bounds",
     "posted_reason",
     "reason_required_message",
+    "rim_override",
 ]

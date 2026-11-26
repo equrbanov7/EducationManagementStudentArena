@@ -158,6 +158,12 @@ def lesson_action(request, offering_id, lesson_id):
         messages.error(request, _("Dərs dəyişdirilmədi — 2 saatlıq düzəliş pəncərəsi bitib."))
         return _back(offering)
 
+    # Sahib 2026-11-27: kilidli xanası olan dərsi müəllim silə / tarixini / növünü dəyişə bilməz (yalnız RİM).
+    if not corrector_only and (
+        refusal := journal_full_edit.locked_lesson_refusal(request.user, offering, lesson, action, request.POST)
+    ):
+        messages.error(request, refusal)
+        return _back(offering)
     if action == "delete_lesson" and full_bypass:
         try:
             count = journal_full_edit.delete_lesson(

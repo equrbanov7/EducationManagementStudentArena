@@ -532,7 +532,9 @@ class ViewAsLimitedModeTests(ViewAsTestBase):
 
         self.assertTrue(allowed)
         self.assertTrue(all(name.startswith("registrar:journal") for name in allowed), sorted(allowed)[:5])
-        self.assertIn("registrar:journal_detail", allowed)
+        # Sahib 2026-11-27: xana / dərs yazısı view-as-də heç bir rejimdə yoxdur — yalnız alt-qrup siyahısı qalır.
+        self.assertNotIn("registrar:journal_detail", allowed)
+        self.assertIn("registrar:journal_guest_add", allowed)
         # Sənədli düzəliş axını RİM-in ÖZ kimliyi ilə qalır — impersonasiya altında yox.
         self.assertNotIn("registrar:correction_apply", allowed)
 

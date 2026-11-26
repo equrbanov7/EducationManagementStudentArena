@@ -8,6 +8,7 @@ Dərs modalında səbəb ayrıca sahədədir (_jd_lesson_modal.html). Server hə
     <div class="jd2-fe-banner__text">
         <b>{% trans "Data bərpası rejimi: keçmiş tarixli dəyişikliklər səbəb ilə açıqdır" context "registrar.journal_full_edit" %}</b>
         <span>{% trans "Keçmiş tarixə dərs əlavə edə, dərsi və mövzusunu dəyişə, dərsi qeydləri ilə birlikdə silə, q/b, i/e və balı dəyişib təmizləyə bilərsiniz. Hər belə dəyişiklik üçün yalnız qısa səbəb soruşulur və köhnə/yeni dəyərlə audit jurnalına yazılır." context "registrar.journal_full_edit" %}</span>
+        {% if not full_edit_rim_override %}<span>{% trans "Əvvəl yazılmış q/b, i/e və bal bu rejimdə də dəyişmir: q/b və bal yazılandan 15 dəqiqə, i/e 1 gün sonra donur. Belə qeydi, eləcə də onu daşıyan dərsi silmək və ya növünü dəyişmək yalnız RİM-ə müraciətlə mümkündür." context "registrar.journal_full_edit" %}</span>{% endif %}
         {% if journal_locked %}<span>{% trans "Jurnal bağlanıb — bu rejimdə dəyişiklik yenə səbəb ilə mümkündür." context "registrar.journal_full_edit" %}</span>{% endif %}
         <span>{% trans "İmtahandan gələn ballar (Midterm, yekun) və RİM-in sənədli düzəlişi olan xanalar bu rejimdə dəyişmir." context "registrar.journal_full_edit" %}</span>
     </div>
