@@ -18,7 +18,7 @@
     {% if selfwork_active %}<link rel="stylesheet" href="{% static 'registrar/css/selfwork_archive.css' %}?v=20260827-1">{% endif %}
     <link rel="stylesheet" href="{% static 'registrar/css/syllabus_view.css' %}?v=20261115-syledit">
     {% if syllabus_notice.show_banner %}<link rel="stylesheet" href="{% static 'registrar/css/journal_syllabus_peers.css' %}?v=20261108-peers">{% endif %}
-    <link rel="stylesheet" href="{% static 'registrar/css/journal_guest.css' %}?v=20261104-divider">
+    <link rel="stylesheet" href="{% static 'registrar/css/journal_guest.css' %}?v=20261127-divsticky">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_subject_exempt.css' %}?v=20261104-reason">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_removal_reason.css' %}?v=20261104-reason">
     <link rel="stylesheet" href="{% static 'registrar/css/journal_roster_restore.css' %}?v=20261115-restore">
@@ -366,7 +366,7 @@
     {# journal_grid 2 hissədə, SIRA VACİBDİR: çiplər/qaralama/təsdiq → dərs modalı (2026-09-21 bölgüsü). #}
     <script src="{% static 'registrar/js/journal_grid.js' %}?v=20261014-auto"></script>
     <script src="{% static 'registrar/js/journal_grid_lesson_modal.js' %}?v=20261107-sem1"></script>
-    <script src="{% static 'registrar/js/journal_lesson_prefill.js' %}?v=20261126-taken"></script>{# «Yeni dərs» dolu açılır (sahib 2026-10-10) #}
+    <script src="{% static 'registrar/js/journal_lesson_prefill.js' %}?v=20261127-slot2"></script>{# «Yeni dərs» dolu açılır (sahib 2026-10-10) #}
     <script src="{% static 'registrar/js/journal_lesson_topic.js' %}?v=20261025-topic"></script>{# plan seçimi ↔ sərbəst mövzu (2026-10-25) #}
     {% if lab_group_choices %}<script src="{% static 'registrar/js/journal_lesson_lab_group.js' %}?v=20261108-lab4"></script>{% endif %}{# Lab-1 / Lab-2 (sahib 2026-11-06) #}
     {% if seminar_group_choices %}<script src="{% static 'registrar/js/journal_lesson_seminar_group.js' %}?v=20261108-sem2"></script>{% endif %}{# 234 K1 / 234 K2 (sahib 2026-11-07) #}

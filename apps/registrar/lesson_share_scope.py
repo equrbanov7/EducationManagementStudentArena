@@ -20,14 +20,30 @@ def _other_subgroup(lesson, kind, lab_group, seminar_group) -> bool:
     return False
 
 
+#: Bir dərs saatı (cütlük, 90 dəqiqə) = 2 akademik saat. Sahib 2026-11-27 (Lalə Qurbanova): o saatda 1 saatlıq dərs
+#: varsa, ikinci 1 saatlıq dərs (məs. seminar + laboratoriya) da əlavə oluna bilər — cəmi 90 dəqiqədir.
+SLOT_HOURS = 2
+
+
+def slot_has_room(lessons, hours) -> bool:
+    """O saatdakı dərslərin saatı + yeni dərsin saatı cütlüyə (:data:`SLOT_HOURS`) sığırmı."""
+    if not hours:
+        return False
+    return sum(int(lesson.hours or 0) for lesson in lessons) + int(hours) <= SLOT_HOURS
+
+
 def has_slot_collision(
-    *, offering, date, start_time, instructor_id, kind, exclude=None, lab_group=None, seminar_group=None
+    *, offering, date, start_time, instructor_id, kind, exclude=None, lab_group=None, seminar_group=None, hours=None
 ):
+    """Eyni jurnalda eyni gün + saatda dərs var və yeni dərs ona sığmır.
+
+    ``hours`` verilibsə (yeni / redaktə olunan dərsin saatı) və o saatdakı dərslərlə birlikdə cütlüyə sığırsa
+    (1 + 1 ≤ 2 — sahib 2026-11-27) toqquşma yoxdur."""
     candidates = offering.lessons.filter(date=date, start_time=start_time)
     if exclude is not None:
         candidates = candidates.exclude(pk=exclude)
     lessons = [lesson for lesson in candidates if not _other_subgroup(lesson, kind, lab_group, seminar_group)]
-    if not lessons:
+    if not lessons or slot_has_room(lessons, hours):
         return False
     if not instructor_id or any(
         not lesson.instructor_id or lesson.instructor_id == instructor_id for lesson in lessons

@@ -135,14 +135,20 @@ def taken_slots(lessons) -> dict:
     adı. Müəllim tarix + saatı seçəndə modal deyir ki, o saatda artıq dərs var və yeni dərs onu DƏYİŞMİR (əvvəl
     server jurnalı köhnə dərsin sütununda açırdı, müəllim də onu ✎ ilə başqa dərsə çevirirdi). ``lessons`` —
     jurnalın BÜTÜN dərsləri (``journal_activation.lesson_rows``; toqquşma qaydası pay əhatəsindən asılı deyil). Alt
-    qrup (Lab / seminar) dərsi sayılmır — eyni saatda iki alt qrup qanunidir; qərarı server qaydası verir."""
+    qrup (Lab / seminar) dərsi sayılmır — eyni saatda iki alt qrup qanunidir; qərarı server qaydası verir. ``hours`` —
+    o saatdakı dərslərin cəmi (2026-11-27: 1 saatlıq dərsin yanına ikinci 1 saatlıq dərs sığır)."""
     taken: dict = {}
     for lesson in sorted(lessons, key=lambda row: row.created_at):
         if not lesson.start_time or lesson.lab_group or lesson.seminar_group:
             continue
         topic = (lesson.topic or "").strip()
         label = str(lesson.get_kind_display()) + (f" — {topic}" if topic else "")
-        taken.setdefault(f"{lesson.date.isoformat()}|{lesson.start_time:%H:%M}", {"kind": lesson.kind, "label": label})
+        row = taken.setdefault(
+            f"{lesson.date.isoformat()}|{lesson.start_time:%H:%M}", {"kind": lesson.kind, "label": label, "hours": 0}
+        )
+        # Sahib 2026-11-27: cütlük 2 saatdır — 1 saatlıq dərsin yanına ikinci 1 saatlıq dərs sığır (modal yalnız
+        # sığmayanda xəbərdar edir; qərar ``lesson_share_scope.slot_has_room``-dadır).
+        row["hours"] += int(lesson.hours or 0)
     return taken
 
 

@@ -73,7 +73,7 @@ class NewLessonSlotTakenTest(_Base):
             Lesson.objects.filter(pk=lab.pk).update(lab_group=1)  # alt qrup dərsi — eyni saatda Lab-2 qanunidir
         taken = self.prefill(dt.time(9, 0))["taken"]
         key = f"{self.day().isoformat()}|08:30"
-        self.assertEqual(taken[key], {"kind": "lecture", "label": "Mühazirə — ontogenez toxumalar"})
+        self.assertEqual(taken[key], {"kind": "lecture", "label": "Mühazirə — ontogenez toxumalar", "hours": 2})
         self.assertNotIn(f"{self.day().isoformat()}|10:10", taken)
 
     def test_modal_renders_both_warnings_hidden(self):
