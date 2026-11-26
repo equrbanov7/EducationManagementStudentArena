@@ -34,6 +34,13 @@ class WiringTest(SimpleTestCase):
         self.assertNotEqual(retire.RETIRED, misattached.RETIRED)
         self.assertEqual((retire.TARGET["author"], retire.TARGET["subject_code"]), (11622, "QKU-2416"))
 
+    def test_mr850_extra_targets(self):
+        # MR-000850: Rəhim Həsənovun «Etika» (QKU-69) yaz qaralamaları — 4 ayrı dosye, keeper yoxdur.
+        self.assertEqual(len({item["syllabus"] for item in retire.EXTRA}), 4)
+        for item in retire.EXTRA:
+            self.assertEqual((item["author"], item["subject_code"], item["keeper_subject_code"]), (9519, "QKU-69", ""))
+            self.assertIn("MR-000850", item["reason"])
+
 
 @pytest.fixture
 def world():
@@ -77,3 +84,21 @@ def test_refuses_when_author_differs(world):
     world["target"]["author"] = world["teacher"].pk + 999
     with pytest.raises(CommandError, match="syllabus_retire_scope_changed"):
         _run(world, retire.run)
+
+
+@pytest.mark.django_db
+def test_default_run_walks_every_target_and_skips_retired(world, monkeypatch):
+    Subject = apps.get_model("registrar", "Subject")
+    other = Subject.objects.create(organization=world["org"], code="ETK-69", name="Etika")
+    second = Syllabus.objects.create(
+        organization=world["org"], subject=other, author=world["teacher"], chair_unit=world["chair"]
+    )
+    extra = {**world["target"], "syllabus": str(second.pk), "subject_code": "ETK-69", "reason": "MR-000850 test"}
+    monkeypatch.setattr(retire, "TARGET", world["target"])
+    monkeypatch.setattr(retire, "EXTRA", (extra,))
+    counts = Counter()
+    retire.run(organization=world["org"], actor=world["teacher"], counts=counts, apply=True)
+    assert counts["syllabi_retired"] == 2
+    counts = Counter()
+    retire.run(organization=world["org"], actor=world["teacher"], counts=counts, apply=True)
+    assert counts["already_retired"] == 2
