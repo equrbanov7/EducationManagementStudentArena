@@ -38,7 +38,10 @@ def _guard(organization, syllabus, target) -> None:
     Syllabus, Share = _model("syllabus", "Syllabus"), _model("syllabus", "SyllabusShare")
     if syllabus.author_id != target["author"] or syllabus.subject.code != target["subject_code"]:
         raise CommandError("syllabus_retire_scope_changed")
-    if syllabus.offering_id and syllabus.offering.is_active:
+    # MR-000850/852 (2026-11-26): müəllimi təyin olunmamış («Vakant») jurnalın qaralaması hədəf açıq icazə veribsə
+    # passiv ola bilər — o jurnalı heç kim yazmır; müəllimi olan aktiv jurnal həmişə qorunur.
+    vacant_ok = target.get("vacant_offering_ok") and syllabus.offering_id and syllabus.offering.instructor_id is None
+    if syllabus.offering_id and syllabus.offering.is_active and not vacant_ok:
         raise CommandError("syllabus_retire_bound_to_active_journal")
     if (
         Share.objects.filter(syllabus=syllabus).exists()

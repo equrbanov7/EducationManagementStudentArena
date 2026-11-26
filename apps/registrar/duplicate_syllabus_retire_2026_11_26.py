@@ -26,9 +26,18 @@ TARGET = {
 }
 
 
+#: Qaralamalar yaz semestrinin müəllimi təyin olunmamış («Vakant») jurnallarına bağlıdır — qoruyucu yalnız belə jurnalı keçir.
+_VACANT = {"vacant_offering_ok": True}
 REASON_850 = "MR-000850 (2026-11-26): «Etika» QKU-69 üzrə yaz semestrinə yazılmış, jurnala bağlı olmayan boş qaralama"
 EXTRA = tuple(
-    {"syllabus": syllabus, "author": 9519, "subject_code": "QKU-69", "keeper_subject_code": "", "reason": REASON_850}
+    {
+        "syllabus": syllabus,
+        "author": 9519,
+        "subject_code": "QKU-69",
+        "keeper_subject_code": "",
+        "reason": REASON_850,
+        **_VACANT,
+    }
     for syllabus in (
         "8f5c4079-a231-4ea9-820d-8f3057421341",  # Marketinq (535 MRK)
         "53edaf58-6d6d-452c-9c53-2a0e91b3fdb7",  # Biznesin idarə edilməsi (535 Bİ)
@@ -40,7 +49,14 @@ EXTRA = tuple(
 # elmləri) üçün yaz semestrinə yazılmış, jurnala bağlı olmayan boş qaralamalar; müəllimin həmin qruplarda jurnalı yoxdur.
 REASON_852 = "MR-000852 (2026-11-26): «Etika və estetika» QKU-588 üzrə yaz semestrinə yazılmış, jurnalsız boş qaralama"
 EXTRA += tuple(
-    {"syllabus": syllabus, "author": 8374, "subject_code": "QKU-588", "keeper_subject_code": "", "reason": REASON_852}
+    {
+        "syllabus": syllabus,
+        "author": 8374,
+        "subject_code": "QKU-588",
+        "keeper_subject_code": "",
+        "reason": REASON_852,
+        **_VACANT,
+    }
     for syllabus in (
         "f0f99f04-12cb-4fe0-9ee9-424c254227b4",  # Meşəçilik (2235 M)
         "1fd1e6b8-3a8c-41ef-bb1e-d25f39a617f8",  # Kompüter elmləri (2234 KE)
