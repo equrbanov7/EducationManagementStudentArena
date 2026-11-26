@@ -249,6 +249,11 @@ def attach(user, offerings, *, selected_kind="", links=True):
         offering.journal_own_hours = sum(taught.get((offering.pk, kind), {}).get("hours", 0) for kind in count_kinds)
         offering.journal_contributed_lessons = sum(contributions.get((offering.pk, kind), 0) for kind in count_kinds)
         offering.journal_own_history_link = links and not current and bool(offering.journal_contributed_lessons)
+        # Broad viewer mirroring ``user`` (owner 2026-11-26): «Müəllimin yazdığı hissə» → ?own_history=1&teacher=<id>;
+        # the detail route re-checks that the viewer may open the full journal (journal_own_history._subject).
+        offering.journal_teacher_history_id = (
+            user.pk if not links and not current and offering.journal_contributed_lessons else None
+        )
         if links:
             attach_master_history(offering, kind=selected_kind)
 

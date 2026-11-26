@@ -359,11 +359,16 @@
             (groupsCount ? fmt(gettext("%(n)s qrup"), { n: groupsCount }) + " · " : "") +
             fmt(gettext("cəmi %(total)s · bölünüb %(assigned)s"), { total: hours(block.total), assigned: hours(totals.assigned) })
         );
+        // 2026-11-26: «Bölüşdür» addımlı «Bölgü sehrbazı»nı açır; köhnə cədvəl «Ətraflı cədvəl» kimi qalır.
         var button = editable
-            ? '<button type="button" class="wl-btn wl-btn--ghost wl-btn--sm" data-wl-kind-open data-card-id="' +
+            ? '<span class="wl-kind__actions"><button type="button" class="wl-btn wl-btn--primary wl-btn--sm" data-wl-wiz-open data-card-id="' +
+              esc(card.id) + '" data-kind="' + esc(kind) + '" title="' +
+              esc(gettext("Addım-addım: qrupları alt qruplara bölün, tələbələri yerləşdirin, hər bölməyə müəllim verin.")) +
+              '"><i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> ' + esc(gettext("Bölüşdür")) + "</button>" +
+              '<button type="button" class="wl-btn wl-btn--ghost wl-btn--sm" data-wl-kind-open data-card-id="' +
               esc(card.id) + '" data-kind="' + esc(kind) + '" title="' +
               esc(gettext("Hər qrupa müəllim və saat verin; qrupu Lab-1 / Lab-2 kimi alt qruplara da bölə bilərsiniz.")) +
-              '"><i class="fas fa-table-cells-large" aria-hidden="true"></i> ' + esc(gettext("Bölüşdür")) + "</button>"
+              '"><i class="fas fa-table-cells-large" aria-hidden="true"></i> ' + esc(gettext("Ətraflı cədvəl")) + "</button></span>"
             : "";
         return (
             '<section class="wl-kind wl-kind--' + esc(kind) + '">' +

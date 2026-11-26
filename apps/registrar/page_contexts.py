@@ -222,11 +222,10 @@ def journal_list_context(user, request=None) -> dict:
         ]
     )
 
-    # Səhifələmə (İKT rəhbəri bütün offering-ləri görür → çox sətir) birbaşa
-    # QUERYSET üzərində gedir (Paginator siyahı DEYİL, queryset alır) — yalnız
-    # görünən 20 sətir DB-dən LIMIT/OFFSET ilə gəlir. Filtr querystring-i
+    # Səhifələmə (İKT rəhbəri bütün offering-ləri görür → çox sətir) birbaşa QUERYSET üzərində gedir (Paginator
+    # siyahı DEYİL, queryset alır) — yalnız görünən 20 sətir DB-dən LIMIT/OFFSET ilə gəlir. Filtr querystring-i
     # qorunur (page istisna) ki, keçidlər filtri saxlasın.
-    from . import joint_journal_list, journal_group_reach
+    from . import joint_journal_list, journal_group_reach, journal_own_history
 
     if not is_broad and teaching_view == "current":
         qs = joint_journal_list.project(qs, organization=organization, user=user, selected_kind=selected_kind)
@@ -257,6 +256,7 @@ def journal_list_context(user, request=None) -> dict:
     from .journal_assignment_sources import attach_history_restore_actions
 
     attach_history_restore_actions(request, page_offerings, teacher_id=selected_teacher if is_broad else None)
+    journal_own_history.gate_list_links(request, page_offerings)  # «Müəllimin yazdığı hissə»: tam əhatə (2026-11-26)
     attach_labels(page_offerings, within=base_qs)
     jls.attach(page_offerings, occurrences)
     joint_journal_list.attach(page_offerings, user=user)

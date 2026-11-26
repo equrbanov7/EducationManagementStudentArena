@@ -42,7 +42,7 @@ class OwnHistoryUnknownAuthorTests(TestCase):
         response = detail(self.request(), offering)
         self.assertContains(response, "Own-null-absence")
         self.assertContains(response, "Own-null-zero")
-        self.assertRegex(response.content.decode(), r"<td>0(?:[.,]00)?</td>")
+        self.assertRegex(response.content.decode(), r">0(?:[.,]00)?</span>")
         self.assertContains(response, "Daxil edən şəxs məlum deyil", count=2)
         self.assertNotContains(response, "Öz daxil etdiyiniz qeyd")
         self.assertNotContains(response, 'name="score"')

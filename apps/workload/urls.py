@@ -35,6 +35,10 @@ urlpatterns = [
     path("duzelis/", views.amend, name="amend"),
     # Sahib 2026-11-09: «bir fənn = bir kart» — mühazirə axınlarının (patok) yazılması.
     path("patok/axinlar/", views.patok_streams, name="patok_streams"),
+    # Sahib 2026-11-26: «Bölgü sehrbazı» — seminar / lab bölgüsü addım-addım (jurnal bölmələri + bölgü bir yazıda).
+    path("bolgu/sehrbaz/", views.split_wizard_state, name="split_wizard_state"),
+    path("bolgu/sehrbaz/yadda-saxla/", views.split_wizard_save, name="split_wizard_save"),
+    path("bolgu/sehrbaz/jurnal/", views.split_wizard_journals, name="split_wizard_journals"),
     # Mərhələ 4 — zəncirin bütün mutasiyaları (tək endpoint)
     path("emel/", workload_action, name="action"),
     # Sahib 2026-10-23: Tədris şöbəsinin «Dərs yükü faylı» Excel şablonu

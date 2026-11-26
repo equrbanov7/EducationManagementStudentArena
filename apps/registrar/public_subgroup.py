@@ -9,6 +9,8 @@ Kənar modullar (accounts kabineti, 25% təkrar imtahan axını) YALNIZ bu adlar
 * ``undo_subgroup_placement(*, event_id, actor, reason, organization, request=None)``;
 * ``record_imported_placement(*, enrollment, actor, reason, details=None, load=None)`` — köçürmənin yazdığı
   «alt qrupdan əlavə» qeydiyyatına tarixçə sətri (legacy delta ``subgroups`` fazası);
+* «Bölgü sehrbazı» (2026-11-26): ``split_wizard_journal_state`` / ``split_wizard_registry_subgroups`` /
+  ``split_wizard_apply_sections`` (:class:`SplitWizardSectionError`) — jurnalın seminar alt qrupları + lab qrupları;
 * ``documented_subgroup_ids(enrollment_ids) -> set`` — «Alt qrup» nişanı yalnız sənədli yerləşdirməyə (2026-10-25);
 * oxu köməkçiləri: önbaxış (``evaluate_subgroup_placement``), uyğun jurnallar, tarixçə, əhatə qapısı.
 """
@@ -19,6 +21,10 @@ from . import credit_load as _credit_load
 from . import guest_merge  # noqa: F401 — «alt qrup birləşməsi» (release_source); legacy delta dedupe işlədir
 from . import subgroup_access, subgroup_placement_history, subgroup_placement_lookups, subgroup_placement_query
 from .journal_section_choices import offering_section_choices  # dərs yükü kartı: Lab-1/Lab-2, 234 K1/K2 (2026-11-09)
+from .split_wizard_sections import SectionSetupError as SplitWizardSectionError
+from .split_wizard_sections import apply_sections as split_wizard_apply_sections
+from .split_wizard_sections import journal_state as split_wizard_journal_state
+from .split_wizard_sections import registry_subgroups as split_wizard_registry_subgroups
 from .subgroup_documents import PlacementDocument
 from .subgroup_evidence import documented_subgroup_ids
 from .subgroup_placement import evaluate as evaluate_subgroup_placement
@@ -43,6 +49,7 @@ __all__ = [
     "PlacementDocument",
     "guest_merge",
     "SUBGROUP_PLACEMENT_PERMISSION",
+    "SplitWizardSectionError",
     "SubgroupPlacementError",
     "credit_limits",
     "credit_load",
@@ -51,6 +58,9 @@ __all__ = [
     "offering_section_choices",
     "place_in_subgroup",
     "record_imported_placement",
+    "split_wizard_apply_sections",
+    "split_wizard_journal_state",
+    "split_wizard_registry_subgroups",
     "student_active_record",
     "subgroup_access",
     "subgroup_placement_history",

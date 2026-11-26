@@ -3424,15 +3424,23 @@ msgstr "In %(count)s row(s) %(hours)s hours are not assigned to a teacher:"
 msgid "«Vakant» saxlanıldı: %(hours)s saat (%(rows)s sətir)."
 msgstr "Kept “Vacant”: %(hours)s hours (%(rows)s rows)."
 
-msgid "Eyni fənnin digər qruplarında saat fərqlidir. Səhvdirsə «Tapşırıq sətirləri» → «Redaktə» ilə düzəldin."
-msgstr "The hours differ from the other groups of the same subject. If this is a mistake, fix it via “Assignment rows” → “Edit”."
+msgid ""
+"Eyni fənnin digər qruplarında saat fərqlidir. Səhvdirsə «Tapşırıq sətirləri»"
+" → «Redaktə» ilə düzəldin."
+msgstr ""
+"The hours differ from the other groups of the same subject. If this is a "
+"mistake, fix it via “Assignment rows” → “Edit”."
 
 #, javascript-format
 msgid "digər qruplarda %(hours)s — saatı yoxlayın"
 msgstr "other groups have %(hours)s — check the hours"
 
-msgid "Bu sətrin qrupları mühazirəni bir neçə axında keçir, amma sətir qruplara ayrılmayıb."
-msgstr "The groups of this row attend the lecture in several streams, but the row is not split by group."
+msgid ""
+"Bu sətrin qrupları mühazirəni bir neçə axında keçir, amma sətir qruplara "
+"ayrılmayıb."
+msgstr ""
+"The groups of this row attend the lecture in several streams, but the row is"
+" not split by group."
 
 #, javascript-format
 msgid "%(n)s axın bir sətirdə"
@@ -3444,8 +3452,12 @@ msgstr "The stream's lecturer is on another card"
 msgid "Axına bağlanmayıb — mühazirə heç kimin yükünə düşmür"
 msgstr "Not linked to a stream — the lecture counts towards nobody's load"
 
-msgid "Bu qruplar mühazirəni birlikdə dinləyir: saat müəllimin yükünə 1 dəfə yazılır, jurnal hər qrupda açılır."
-msgstr "These groups attend the lecture together: the hours count towards the teacher's load once, and a journal is opened for every group."
+msgid ""
+"Bu qruplar mühazirəni birlikdə dinləyir: saat müəllimin yükünə 1 dəfə "
+"yazılır, jurnal hər qrupda açılır."
+msgstr ""
+"These groups attend the lecture together: the hours count towards the "
+"teacher's load once, and a journal is opened for every group."
 
 #, javascript-format
 msgid "%(n)s qrup birlikdə"
@@ -3458,34 +3470,50 @@ msgstr "single group"
 msgid "%(n)s axın · müəllim yükünə cəmi %(hours)s"
 msgstr "%(n)s streams · %(hours)s towards teacher load in total"
 
-msgid "Hansı qrupların mühazirəni birlikdə dinlədiyini (patok) və mühazirəçini seçin."
-msgstr "Choose which groups attend the lecture together and who the lecturer is."
+msgid ""
+"Hansı qrupların mühazirəni birlikdə dinlədiyini (patok) və mühazirəçini "
+"seçin."
+msgstr ""
+"Choose which groups attend the lecture together and who the lecturer is."
 
 msgid "Patok qur"
 msgstr "Create stream"
 
 #, javascript-format
 msgid "%(n)s qrup ayrıca keçir · müəllim yükünə cəmi %(hours)s"
-msgstr "%(n)s groups taught separately · %(hours)s towards teacher load in total"
+msgstr ""
+"%(n)s groups taught separately · %(hours)s towards teacher load in total"
 
 msgid "Mühazirəçi seç"
 msgstr "Choose lecturer"
 
-msgid "Axın (patok) — mühazirəni birlikdə dinləyən qruplar. Bir axının saatı müəllimin yükünə 1 dəfə yazılır, jurnal isə hər qrupda açılır."
-msgstr "A stream is a set of groups that attend the lecture together. A stream's hours count towards the teacher's load once, while a journal is opened for every group."
+msgid ""
+"Axın (patok) — mühazirəni birlikdə dinləyən qruplar. Bir axının saatı "
+"müəllimin yükünə 1 dəfə yazılır, jurnal isə hər qrupda açılır."
+msgstr ""
+"A stream is a set of groups that attend the lecture together. A stream's "
+"hours count towards the teacher's load once, while a journal is opened for "
+"every group."
 
 #, javascript-format
 msgid "Bölünməyib: %(hours)s"
 msgstr "Not distributed: %(hours)s"
 
-msgid "Bu qruplar məşğələni birlikdə keçir — saat müəllimin yükünə 1 dəfə yazılır."
-msgstr "These groups have the class together — the hours count towards the teacher's load once."
+msgid ""
+"Bu qruplar məşğələni birlikdə keçir — saat müəllimin yükünə 1 dəfə yazılır."
+msgstr ""
+"These groups have the class together — the hours count towards the teacher's"
+" load once."
 
 msgid "Qruplar birlikdə keçir"
 msgstr "Groups taught together"
 
-msgid "Saat bütün sətrə yazılıb. Hər qrupa ayrıca müəllim vermək üçün «Bölüşdür» düyməsinə basın."
-msgstr "The hours are recorded for the whole row. To give each group its own teacher, press “Distribute”."
+msgid ""
+"Saat bütün sətrə yazılıb. Hər qrupa ayrıca müəllim vermək üçün «Bölüşdür» "
+"düyməsinə basın."
+msgstr ""
+"The hours are recorded for the whole row. To give each group its own "
+"teacher, press “Distribute”."
 
 msgid "Qruplara ayrılmayıb"
 msgstr "Not split by group"
@@ -3503,8 +3531,12 @@ msgstr "No teacher assigned"
 msgid "cəmi %(total)s · bölünüb %(assigned)s"
 msgstr "%(total)s in total · %(assigned)s distributed"
 
-msgid "Hər qrupa müəllim və saat verin; qrupu Lab-1 / Lab-2 kimi alt qruplara da bölə bilərsiniz."
-msgstr "Give each group a teacher and hours; you can also split a group into subgroups such as Lab-1 / Lab-2."
+msgid ""
+"Hər qrupa müəllim və saat verin; qrupu Lab-1 / Lab-2 kimi alt qruplara da "
+"bölə bilərsiniz."
+msgstr ""
+"Give each group a teacher and hours; you can also split a group into "
+"subgroups such as Lab-1 / Lab-2."
 
 msgid "Qrup"
 msgstr "Group"
@@ -3528,15 +3560,23 @@ msgstr "Fully distributed"
 msgid "Natamam"
 msgstr "Incomplete"
 
-msgid "Bu fəndə heç bir axına bağlanmamış mühazirə sətri var — «Axınları dəyiş» ilə qrupları axına salın."
-msgstr "This subject has a lecture row that is not linked to any stream — use “Change streams” to put the groups into a stream."
+msgid ""
+"Bu fəndə heç bir axına bağlanmamış mühazirə sətri var — «Axınları dəyiş» ilə"
+" qrupları axına salın."
+msgstr ""
+"This subject has a lecture row that is not linked to any stream — use "
+"“Change streams” to put the groups into a stream."
 
 msgid "birlikdə dinləyir"
 msgstr "attend together"
 
 #, javascript-format
-msgid "Yekun: %(n)s axın · müəllimlərin yükünə cəmi %(load)s (axınlar birləşdirilməsəydi %(separate)s olardı)."
-msgstr "Result: %(n)s streams · %(load)s towards teacher load in total (without merging the streams it would be %(separate)s)."
+msgid ""
+"Yekun: %(n)s axın · müəllimlərin yükünə cəmi %(load)s (axınlar "
+"birləşdirilməsəydi %(separate)s olardı)."
+msgstr ""
+"Result: %(n)s streams · %(load)s towards teacher load in total (without "
+"merging the streams it would be %(separate)s)."
 
 #, javascript-format
 msgid "Yekun: %(n)s axın · müəllimlərin yükünə cəmi %(load)s."
@@ -3550,5 +3590,398 @@ msgstr "over-distributed: %(hours)s"
 msgid "bölünməyib: %(hours)s"
 msgstr "not distributed: %(hours)s"
 
-msgid "Bu saat qruplara ayrılmadan bütün sətrə yazılıb. Hər qrupa ayrıca müəllim vermək üçün buradakı müəllimi silin və yuxarıdakı qrupların altında «Müəllim əlavə et» düyməsinə basın."
-msgstr "These hours are recorded for the whole row without splitting by group. To give each group its own teacher, remove the teacher here and press “Add teacher” under the groups above."
+msgid ""
+"Bu saat qruplara ayrılmadan bütün sətrə yazılıb. Hər qrupa ayrıca müəllim "
+"vermək üçün buradakı müəllimi silin və yuxarıdakı qrupların altında «Müəllim"
+" əlavə et» düyməsinə basın."
+msgstr ""
+"These hours are recorded for the whole row without splitting by group. To "
+"give each group its own teacher, remove the teacher here and press “Add "
+"teacher” under the groups above."
+
+msgid " və "
+msgstr " and "
+
+#, python-format
+msgid "%(group)s: %(n)s tələbə yerləşdirilməyib."
+msgstr "%(group)s: %(n)s students are not placed."
+
+#, python-format
+msgid "%(group)s: iki bölmənin adı eynidir."
+msgstr "%(group)s: two sections have the same name."
+
+#, python-format
+msgid "%(group)s: «%(name)s» bölməsinə dərs bağlıdır."
+msgstr "%(group)s: lessons are linked to “%(name)s”."
+
+#, python-format
+msgid "%(groups)s laboratoriyanı birlikdə keçir — bir bölmə, bir müəllim."
+msgstr "%(groups)s take the lab together — one section, one teacher."
+
+#, python-format
+msgid "%(groups)s seminarı birlikdə keçir — bir bölmə, bir müəllim."
+msgstr "%(groups)s take the seminar together — one section, one teacher."
+
+#, python-format
+msgid "%(groups)s — seminar və laboratoriya:"
+msgstr "%(groups)s — seminar and laboratory:"
+
+#, python-format
+msgid "%(groups)s — sətrin saatı bölmələrə uyğun deyil"
+msgstr "%(groups)s — the row hours do not match the sections"
+
+#, python-format
+msgid ""
+"%(groups)s: %(kind)s üçün %(used)s paylanıb, sətrin cəmi %(total)s. «Sətri "
+"düzəlt» seçin və ya saatı azaldın."
+msgstr ""
+"%(groups)s: %(used)s allocated for %(kind)s, but the row total is %(total)s."
+" Choose “Fix the row” or reduce the hours."
+
+#, python-format
+msgid "%(kind)s cəmi: %(old)s → %(new)s"
+msgstr "%(kind)s total: %(old)s → %(new)s"
+
+#, python-format
+msgid "%(kind)s — %(group)s (bütün qrup)"
+msgstr "%(kind)s — %(group)s (whole group)"
+
+#, python-format
+msgid "%(kind)s — %(groups)s (birlikdə)"
+msgstr "%(kind)s — %(groups)s (together)"
+
+#, python-format
+msgid "%(list)s ilə bir sətir"
+msgstr "one row with %(list)s"
+
+#, python-format
+msgid "%(list)s kimi böl"
+msgstr "Split as %(list)s"
+
+#, python-format
+msgid "%(n)s alt qrup"
+msgstr "%(n)s subgroups"
+
+#, python-format
+msgid "%(n)s bölməyə müəllim seçilməyib — onların saatı «bölünməyib» qalacaq."
+msgstr ""
+"%(n)s sections have no teacher — their hours will stay “not allocated”."
+
+#, python-format
+msgid "%(n)s tələbə (plan)"
+msgstr "%(n)s students (plan)"
+
+#, python-format
+msgid "%(n)s tələbə · seminar planı %(h)s (bir alt qrup üçün)"
+msgstr "%(n)s students · seminar plan %(h)s (per subgroup)"
+
+#, python-format
+msgid "%(n)s-ci bölmənin adı"
+msgstr "Name of section %(n)s"
+
+#, python-format
+msgid "%(name)s başqa seminar alt qrupunun lab qrupundadır."
+msgstr "%(name)s is in a lab group of another seminar subgroup."
+
+#, python-format
+msgid "%(unit)s: saat sıfırdan böyük olmalıdır."
+msgstr "%(unit)s: hours must be greater than zero."
+
+#, python-format
+msgid "(+%(n)s başqa)"
+msgstr "(+%(n)s more)"
+
+msgid "2 alt qrup"
+msgstr "2 subgroups"
+
+msgid "3 alt qrup"
+msgstr "3 subgroups"
+
+msgid "4 alt qrup"
+msgstr "4 subgroups"
+
+#, python-format
+msgid "Addım %(n)s / %(total)s"
+msgstr "Step %(n)s / %(total)s"
+
+msgid ""
+"Addım-addım: qrupları alt qruplara bölün, tələbələri yerləşdirin, hər "
+"bölməyə müəllim verin."
+msgstr ""
+"Step by step: split groups into subgroups, place the students, give each "
+"section a teacher."
+
+#, python-format
+msgid ""
+"Axında keçir: aparıcı «%(groups)s», mühazirəçi — %(teacher)s. Dəyişmək üçün "
+"kartda «Axınları dəyiş»."
+msgstr ""
+"Taught in a stream: lead “%(groups)s”, lecturer — %(teacher)s. To change it "
+"use “Change streams” on the card."
+
+msgid "Bir tapşırıq sətrinin qrupları birlikdə seçilir."
+msgstr "The groups of one task row are selected together."
+
+msgid "Bu jurnalın bölmələrini dəyişməyə icazəniz yoxdur."
+msgstr "You are not allowed to change the sections of this journal."
+
+msgid "Bu köhnə bölgülər silinəcək:"
+msgstr "These old allocations will be removed:"
+
+msgid ""
+"Bu mərhələdə sətrin cəmi dəyişdirilmir — tədris şöbəsinə müraciət edin."
+msgstr ""
+"The row total is not changed at this stage — contact the teaching office."
+
+msgid ""
+"Bu qrupun jurnalı hələ yaradılmayıb. Tələbələri bölmək üçün əvvəlcə jurnalı "
+"yaradın — bölgü saatını isə indi də seçə bilərsiniz."
+msgstr ""
+"This group's journal has not been created yet. Create it first to split the "
+"students — the hours can be allocated now."
+
+msgid ""
+"Bu qrupun jurnalı hələ yoxdur — tapşırıq dekanlıqda təsdiqlənəndən sonra "
+"yaranacaq. İndi yalnız say seçilir, tələbələr sonra bölünür."
+msgstr ""
+"This group has no journal yet — it will be created after the dean's office "
+"approves the task. For now only the number is chosen; students are split "
+"later."
+
+msgid ""
+"Bölgü artıq təsdiqlənib — «Təsdiqlə» basanda düzəliş səbəbi və qeydi "
+"soruşulacaq."
+msgstr ""
+"The allocation is already approved — pressing “Confirm” will ask for an "
+"amendment reason and note."
+
+msgid "Bölgü yadda saxlandı."
+msgstr "Allocation saved."
+
+msgid "Bölmə"
+msgstr "Section"
+
+msgid "Bölünmür"
+msgstr "Not split"
+
+msgid "Bütün bölmələrə eyni müəllim"
+msgstr "Same teacher for all sections"
+
+msgid "Düzəldiləcək"
+msgstr "Will be fixed"
+
+msgid "Hamısına:"
+msgstr "For all:"
+
+#, python-format
+msgid "Heç bir bölməyə yerləşdirilməyib: %(n)s tələbə."
+msgstr "Not placed in any section: %(n)s students."
+
+msgid "Hər qrup ayrıca"
+msgstr "Each group separately"
+
+msgid "Hər seminar alt qrupunda neçə lab qrupu:"
+msgstr "Lab groups per seminar subgroup:"
+
+#, python-format
+msgid "Hər seminar alt qrupunu böl (%(n)s alt qrup)"
+msgstr "Split each seminar subgroup (%(n)s subgroups)"
+
+msgid "Jurnal bağlıdır"
+msgstr "Journal closed"
+
+msgid "Jurnal hələ yoxdur"
+msgstr "No journal yet"
+
+msgid "Jurnal yaradılmadı."
+msgstr "The journal was not created."
+
+msgid "Jurnalda aktiv tələbə yoxdur."
+msgstr "The journal has no active students."
+
+msgid "Jurnalı indi yarat"
+msgstr "Create the journal now"
+
+#, python-format
+msgid "Lab %(h)s"
+msgstr "Lab %(h)s"
+
+msgid "Lab qrupu sayı:"
+msgstr "Number of lab groups:"
+
+#, python-format
+msgid "Lab qrupu sayı: %(old)s → %(new)s"
+msgstr "Lab groups: %(old)s → %(new)s"
+
+#, python-format
+msgid "Lab: %(n)s qrup"
+msgstr "Lab: %(n)s groups"
+
+msgid "Laboratoriya"
+msgstr "Laboratory"
+
+msgid "Laboratoriya bütün qrupla keçir — bir bölmə, bir müəllim."
+msgstr "The lab is taught to the whole group — one section, one teacher."
+
+#, python-format
+msgid "Mühazirə %(h)s"
+msgstr "Lecture %(h)s"
+
+#, python-format
+msgid ""
+"Mühazirə bir neçə müəllim arasında bölünüb: %(list)s. Dəyişmək üçün «Ətraflı"
+" cədvəl»."
+msgstr ""
+"The lecture is split between several teachers: %(list)s. To change it use "
+"“Detailed table”."
+
+#, python-format
+msgid "Mühazirə — %(groups)s"
+msgstr "Lecture — %(groups)s"
+
+#, python-format
+msgid "Mühazirə — %(groups)s (bütün qrup)"
+msgstr "Lecture — %(groups)s (whole group)"
+
+msgid "Müəllim"
+msgstr "Teacher"
+
+msgid "Məlumat yüklənmədi. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "The data did not load. Refresh the page and try again."
+
+#, python-format
+msgid "Qrup/yarımqrup sayı: %(old)s → %(new)s"
+msgstr "Groups/subgroups: %(old)s → %(new)s"
+
+#, python-format
+msgid "Reyestrdə alt qruplar: %(list)s"
+msgstr "Registry subgroups: %(list)s"
+
+#, python-format
+msgid "Saxlanır: %(list)s"
+msgstr "Kept: %(list)s"
+
+msgid "Seminar"
+msgstr "Seminar"
+
+#, python-format
+msgid "Seminar %(h)s"
+msgstr "Seminar %(h)s"
+
+msgid "Seminar alt qrupundan doldur (əlifba ilə)"
+msgstr "Fill from the seminar subgroup (alphabetically)"
+
+msgid "Seminar bütün qrupla keçir — bir bölmə, bir müəllim."
+msgstr "The seminar is taught to the whole group — one section, one teacher."
+
+#, python-format
+msgid "Seminar: %(n)s alt qrup"
+msgstr "Seminar: %(n)s subgroups"
+
+msgid "Seminardan asılı olmadan"
+msgstr "Independent of the seminar"
+
+#, python-format
+msgid "Seçilib: %(n)s qrup"
+msgstr "Selected: %(n)s groups"
+
+msgid "Seçilmiş qruplarda laboratoriya saatı yoxdur — bu addımı keçin."
+msgstr "The selected groups have no lab hours — skip this step."
+
+msgid "Seçilmiş qruplarda seminar saatı yoxdur — bu addımı keçin."
+msgstr "The selected groups have no seminar hours — skip this step."
+
+msgid "Sətri düzəlt"
+msgstr "Fix the row"
+
+#, python-format
+msgid ""
+"Sətrin %(kind)s cəmi %(total)s, bölmələrə görə isə %(need)s lazımdır — "
+"«Yoxla» addımında sətri bir kliklə düzəldə bilərsiniz."
+msgstr ""
+"The row's %(kind)s total is %(total)s, but the sections need %(need)s — you "
+"can fix the row with one click in the Review step."
+
+msgid "Tələbə"
+msgstr "Students"
+
+msgid "Vakant"
+msgstr "Vacant"
+
+msgid "Vakant (müəllim sonra)"
+msgstr "Vacant (teacher later)"
+
+msgid "Yadda saxlanmadı."
+msgstr "Not saved."
+
+msgid "dəyişir"
+msgstr "changes"
+
+#, python-format
+msgid "lab planı %(h)s (bir lab qrupu üçün)"
+msgstr "lab plan %(h)s (per lab group)"
+
+#, python-format
+msgid "paylanıb %(used)s / cəmi %(total)s"
+msgstr "allocated %(used)s / total %(total)s"
+
+#, python-format
+msgid ""
+"«%(name)s» bölməsinə %(n)s dərs bağlıdır — bu bölmə silinə bilməz. Əvvəlcə "
+"jurnalda həmin dərslərin bölməsini dəyişin."
+msgstr ""
+"%(n)s lessons are linked to “%(name)s” — this section cannot be removed. "
+"First change those lessons' section in the journal."
+
+msgid "Əlifba ilə bərabər böl"
+msgstr "Split evenly (alphabetical)"
+
+msgid "Ən azı bir qrup seçin."
+msgstr "Choose at least one group."
+
+msgid "Ətraflı cədvəl"
+msgstr "Detailed table"
+
+msgid "Əvvəlcə seminarı alt qruplara bölün."
+msgstr "First split the seminar into subgroups."
+
+msgid "— Müəllim seçilməyib —"
+msgstr "— No teacher chosen —"
+
+msgid "— seçilməyib —"
+msgstr "— not chosen —"
+
+#, python-format
+msgid ""
+"«%(name)s» bölməsinə %(n)s dərs bağlıdır — onun tələbələri burada "
+"dəyişdirilmir (tələbəni jurnalın öz ekranında köçürün)."
+msgstr ""
+"%(n)s lessons are linked to “%(name)s” — its students are not changed here "
+"(move a student on the journal's own screen)."
+
+msgid "— Səbəb seçin —"
+msgstr "— Choose a reason —"
+
+msgid ""
+"Bölgü artıq təsdiqlənib — dəyişiklik audit jurnalına yazılır. Səbəbi seçin "
+"və qısa qeyd yazın."
+msgstr ""
+"The allocation is already approved — the change is written to the audit log."
+" Choose a reason and write a short note."
+
+msgid "Qeyd"
+msgstr "Note"
+
+msgid "Məsələn: seminar 2 alt qrupa bölündü"
+msgstr "For example: the seminar was split into 2 subgroups"
+
+msgid "Düzəliş səbəbi və qeydi məcburidir."
+msgstr "An amendment reason and note are required."
+
+#, python-format
+msgid ""
+"%(group)s: «%(name)s» bölməsində tələbə yoxdur — tələbə yerləşdirin və ya "
+"bölmə sayını azaldın."
+msgstr ""
+"%(group)s: section “%(name)s” has no students — place students or reduce the"
+" number of sections."

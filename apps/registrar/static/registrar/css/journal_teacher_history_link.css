@@ -1,0 +1,9 @@
+/* Jurnal siyahısı, geniş görünüş + seçilmiş müəllim + tarixçə: «Müəllimin yazdığı hissə» keçidi (sahib 2026-11-26). */
+.jl-page .jl-teacher-history { margin-top: 4px; }
+.jl-page .jl-teacher-history__link {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--ems-primary-700); font-size: var(--ems-fs-sm); font-weight: 700;
+    text-decoration: underline; text-underline-offset: 2px;
+}
+.jl-page .jl-teacher-history__link:hover,
+.jl-page .jl-teacher-history__link:focus-visible { color: var(--ems-primary-800); }

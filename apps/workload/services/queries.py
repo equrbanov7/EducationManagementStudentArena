@@ -264,6 +264,7 @@ def _serialize(task, rows: list, *, amend_targets=None) -> tuple[list[dict], lis
                 "student_count_text": row.student_count_text,
                 "union_count": row.union_count,
                 "subgroup_count": row.subgroup_count,
+                "lab_group_count": row.lab_group_count,
                 "credits": row.credits or (str(row.credits_value) if row.credits_value else ""),
                 "total_hours": row.total_hours,
                 "row_kind": row.row_kind,

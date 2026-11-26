@@ -168,6 +168,9 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
     </div>
 
     {% if offerings %}
+    {% comment %}Tarixçə görünüşünə qayıdış (sahib 2026-11-26): «öz yazdığım hissə» səhifəsi ?next= ilə siyahının süzgəclərini saxlayır.{% endcomment %}
+    {% url 'registrar:journal_list' as jl_list_url %}{% with jl_qs=journal_querystring|urlencode:'' %}{% with jl_history_next=jl_list_url|urlencode:''|add:'%3F'|add:jl_qs %}
+    {% if journal_teacher_mirrored and journal_teaching_view == "history" %}<link rel="stylesheet" href="{% static 'registrar/css/journal_teacher_history_link.css' %}?v=20261126">{% endif %}
     <div class="jl-table-wrap">
         <table class="jl-table">
             <thead>
@@ -183,7 +186,7 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
                 {% for offering in offerings %}
                 {% comment %}Seçilmiş dərs tipi jurnalın İÇİNƏ də keçir (sahib tələbi
                 2026-09-06).{% endcomment %}
-                <tr class="jl-row{% if offering.next_lesson.state == 'now' %} jl-row--now{% endif %}" data-jl-href="{% if offering.journal_entry_url %}{{ offering.journal_entry_url }}{% else %}{% url 'registrar:journal_detail' offering.id %}{% if offering.journal_own_history_link %}?own_history=1{% elif journal_selected_kind %}?kind={{ journal_selected_kind }}{% endif %}{% endif %}">
+                <tr class="jl-row{% if offering.next_lesson.state == 'now' %} jl-row--now{% endif %}" data-jl-href="{% if offering.journal_entry_url %}{{ offering.journal_entry_url }}{% else %}{% url 'registrar:journal_detail' offering.id %}{% if offering.journal_own_history_link %}?own_history=1&amp;next={{ jl_history_next }}{% elif journal_selected_kind %}?kind={{ journal_selected_kind }}{% endif %}{% endif %}">
                     <td class="jl-col-no">{{ row_offset|add:forloop.counter }}</td>
                     <td>
                         <div class="jl-group-line">
@@ -210,11 +213,12 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
                             {% if offering.is_evening %}<span aria-hidden="true">·</span> <span>{% trans "axşam (21:30-dək)" context "registrar.journal" %}</span>{% endif %}
                         </div>
                         {% include "registrar/partials/_journal_teacher_record.html" %}
+                        {% if offering.journal_teacher_history_id %}{% include "registrar/partials/_journal_teacher_history_link.html" %}{% endif %}
                     </td>
                     <td class="jl-col-kind" data-label="{% trans "DƏRS TİPİ" context "registrar.journal" %}">{% if offering.kind_label %}<span class="jl-kind">{{ offering.kind_label }}</span>{% else %}<span class="jl-kind jl-kind--none">—</span>{% endif %}</td>
                     <td class="jl-col-count" data-label="{% trans "TƏLƏBƏ SAYI" context "registrar.journal" %}"><span class="jl-students {% if not offering.student_count %}jl-students--zero{% endif %}"><i class="fas fa-user-group" aria-hidden="true"></i>{{ offering.student_count }}</span></td>
                     <td class="jl-col-action">
-                        <a class="jl-open-btn" href="{% if offering.journal_entry_url %}{{ offering.journal_entry_url }}{% else %}{% url 'registrar:journal_detail' offering.id %}{% if offering.journal_own_history_link %}?own_history=1{% elif journal_selected_kind %}?kind={{ journal_selected_kind }}{% endif %}{% endif %}">
+                        <a class="jl-open-btn" href="{% if offering.journal_entry_url %}{{ offering.journal_entry_url }}{% else %}{% url 'registrar:journal_detail' offering.id %}{% if offering.journal_own_history_link %}?own_history=1&amp;next={{ jl_history_next }}{% elif journal_selected_kind %}?kind={{ journal_selected_kind }}{% endif %}{% endif %}">
                             {% trans "Jurnalı aç" context "registrar.journal" %} <i class="fas fa-arrow-right" aria-hidden="true"></i>
                         </a>
                     </td>
@@ -251,6 +255,7 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
     {% endif %}
     {# Paylaşılan pagination komponenti (labs/assignments və s. ilə eyni). #}
     {% include "partials/_pagination.html" with page_obj=page_obj extra_query=journal_querystring %}
+    {% endwith %}{% endwith %}
     {% else %}
     <div class="journal-empty">
         {% trans "Bu filtrlərlə tədris fənni (offering) tapılmadı." context "registrar.journal" as jl_empty_title %}

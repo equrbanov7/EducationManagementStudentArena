@@ -164,6 +164,11 @@ class TeachingTaskRow(UUIDModel, TimeStampedModel, OrderedModel):
     student_count_text = models.CharField(max_length=100, blank=True, help_text="Birləşmədə «30 / 50».")
     union_count = models.PositiveSmallIntegerField(default=1, help_text="Mühazirə axını (birləşmə) sayı.")
     subgroup_count = models.PositiveSmallIntegerField(default=1, help_text="Qrup və yarımqrupların sayı.")
+    # Sahib 2026-11-26 («Bölgü sehrbazı»): seminar 2 alt qrupa, lab isə hər alt qrupda yenə 2-yə bölünəndə lab
+    # qruplarının sayı seminarınkından fərqlidir (2 → 4). 0 = ``subgroup_count`` ilə eyni (köhnə davranış).
+    lab_group_count = models.PositiveSmallIntegerField(
+        default=0, help_text="Laboratoriya qruplarının sayı; 0 — «Qrup/yarımqrup sayı» ilə eyni."
+    )
     lecture_plan = models.PositiveIntegerField(default=0)
     lecture_total = models.PositiveIntegerField(default=0)
     seminar_plan = models.PositiveIntegerField(default=0)
@@ -239,6 +244,11 @@ class TeachingTaskRow(UUIDModel, TimeStampedModel, OrderedModel):
     @property
     def contact_hours(self) -> int:
         return sum(int(getattr(self, field, 0) or 0) for field in CONTACT_TOTAL_FIELDS)
+
+    @property
+    def lab_groups_total(self) -> int:
+        """Lab çarpanı: ``lab_group_count`` verilibsə o, yoxsa ``subgroup_count`` (sahib 2026-11-26)."""
+        return int(self.lab_group_count or 0) or int(self.subgroup_count or 0)
 
     def activity_total(self, activity: str) -> int:
         field = ACTIVITY_TOTAL_FIELD.get(activity)

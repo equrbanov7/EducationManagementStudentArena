@@ -3404,15 +3404,23 @@ msgstr "%(count)s sətirdə %(hours)s saat müəllimə bölünməyib:"
 msgid "«Vakant» saxlanıldı: %(hours)s saat (%(rows)s sətir)."
 msgstr "«Vakant» saxlanıldı: %(hours)s saat (%(rows)s sətir)."
 
-msgid "Eyni fənnin digər qruplarında saat fərqlidir. Səhvdirsə «Tapşırıq sətirləri» → «Redaktə» ilə düzəldin."
-msgstr "Eyni fənnin digər qruplarında saat fərqlidir. Səhvdirsə «Tapşırıq sətirləri» → «Redaktə» ilə düzəldin."
+msgid ""
+"Eyni fənnin digər qruplarında saat fərqlidir. Səhvdirsə «Tapşırıq sətirləri»"
+" → «Redaktə» ilə düzəldin."
+msgstr ""
+"Eyni fənnin digər qruplarında saat fərqlidir. Səhvdirsə «Tapşırıq sətirləri»"
+" → «Redaktə» ilə düzəldin."
 
 #, javascript-format
 msgid "digər qruplarda %(hours)s — saatı yoxlayın"
 msgstr "digər qruplarda %(hours)s — saatı yoxlayın"
 
-msgid "Bu sətrin qrupları mühazirəni bir neçə axında keçir, amma sətir qruplara ayrılmayıb."
-msgstr "Bu sətrin qrupları mühazirəni bir neçə axında keçir, amma sətir qruplara ayrılmayıb."
+msgid ""
+"Bu sətrin qrupları mühazirəni bir neçə axında keçir, amma sətir qruplara "
+"ayrılmayıb."
+msgstr ""
+"Bu sətrin qrupları mühazirəni bir neçə axında keçir, amma sətir qruplara "
+"ayrılmayıb."
 
 #, javascript-format
 msgid "%(n)s axın bir sətirdə"
@@ -3424,8 +3432,12 @@ msgstr "Axının mühazirəçisi başqa kartdadır"
 msgid "Axına bağlanmayıb — mühazirə heç kimin yükünə düşmür"
 msgstr "Axına bağlanmayıb — mühazirə heç kimin yükünə düşmür"
 
-msgid "Bu qruplar mühazirəni birlikdə dinləyir: saat müəllimin yükünə 1 dəfə yazılır, jurnal hər qrupda açılır."
-msgstr "Bu qruplar mühazirəni birlikdə dinləyir: saat müəllimin yükünə 1 dəfə yazılır, jurnal hər qrupda açılır."
+msgid ""
+"Bu qruplar mühazirəni birlikdə dinləyir: saat müəllimin yükünə 1 dəfə "
+"yazılır, jurnal hər qrupda açılır."
+msgstr ""
+"Bu qruplar mühazirəni birlikdə dinləyir: saat müəllimin yükünə 1 dəfə "
+"yazılır, jurnal hər qrupda açılır."
 
 #, javascript-format
 msgid "%(n)s qrup birlikdə"
@@ -3438,8 +3450,12 @@ msgstr "tək qrup"
 msgid "%(n)s axın · müəllim yükünə cəmi %(hours)s"
 msgstr "%(n)s axın · müəllim yükünə cəmi %(hours)s"
 
-msgid "Hansı qrupların mühazirəni birlikdə dinlədiyini (patok) və mühazirəçini seçin."
-msgstr "Hansı qrupların mühazirəni birlikdə dinlədiyini (patok) və mühazirəçini seçin."
+msgid ""
+"Hansı qrupların mühazirəni birlikdə dinlədiyini (patok) və mühazirəçini "
+"seçin."
+msgstr ""
+"Hansı qrupların mühazirəni birlikdə dinlədiyini (patok) və mühazirəçini "
+"seçin."
 
 msgid "Patok qur"
 msgstr "Patok qur"
@@ -3451,21 +3467,31 @@ msgstr "%(n)s qrup ayrıca keçir · müəllim yükünə cəmi %(hours)s"
 msgid "Mühazirəçi seç"
 msgstr "Mühazirəçi seç"
 
-msgid "Axın (patok) — mühazirəni birlikdə dinləyən qruplar. Bir axının saatı müəllimin yükünə 1 dəfə yazılır, jurnal isə hər qrupda açılır."
-msgstr "Axın (patok) — mühazirəni birlikdə dinləyən qruplar. Bir axının saatı müəllimin yükünə 1 dəfə yazılır, jurnal isə hər qrupda açılır."
+msgid ""
+"Axın (patok) — mühazirəni birlikdə dinləyən qruplar. Bir axının saatı "
+"müəllimin yükünə 1 dəfə yazılır, jurnal isə hər qrupda açılır."
+msgstr ""
+"Axın (patok) — mühazirəni birlikdə dinləyən qruplar. Bir axının saatı "
+"müəllimin yükünə 1 dəfə yazılır, jurnal isə hər qrupda açılır."
 
 #, javascript-format
 msgid "Bölünməyib: %(hours)s"
 msgstr "Bölünməyib: %(hours)s"
 
-msgid "Bu qruplar məşğələni birlikdə keçir — saat müəllimin yükünə 1 dəfə yazılır."
-msgstr "Bu qruplar məşğələni birlikdə keçir — saat müəllimin yükünə 1 dəfə yazılır."
+msgid ""
+"Bu qruplar məşğələni birlikdə keçir — saat müəllimin yükünə 1 dəfə yazılır."
+msgstr ""
+"Bu qruplar məşğələni birlikdə keçir — saat müəllimin yükünə 1 dəfə yazılır."
 
 msgid "Qruplar birlikdə keçir"
 msgstr "Qruplar birlikdə keçir"
 
-msgid "Saat bütün sətrə yazılıb. Hər qrupa ayrıca müəllim vermək üçün «Bölüşdür» düyməsinə basın."
-msgstr "Saat bütün sətrə yazılıb. Hər qrupa ayrıca müəllim vermək üçün «Bölüşdür» düyməsinə basın."
+msgid ""
+"Saat bütün sətrə yazılıb. Hər qrupa ayrıca müəllim vermək üçün «Bölüşdür» "
+"düyməsinə basın."
+msgstr ""
+"Saat bütün sətrə yazılıb. Hər qrupa ayrıca müəllim vermək üçün «Bölüşdür» "
+"düyməsinə basın."
 
 msgid "Qruplara ayrılmayıb"
 msgstr "Qruplara ayrılmayıb"
@@ -3483,8 +3509,12 @@ msgstr "Müəllim təyin olunmayıb"
 msgid "cəmi %(total)s · bölünüb %(assigned)s"
 msgstr "cəmi %(total)s · bölünüb %(assigned)s"
 
-msgid "Hər qrupa müəllim və saat verin; qrupu Lab-1 / Lab-2 kimi alt qruplara da bölə bilərsiniz."
-msgstr "Hər qrupa müəllim və saat verin; qrupu Lab-1 / Lab-2 kimi alt qruplara da bölə bilərsiniz."
+msgid ""
+"Hər qrupa müəllim və saat verin; qrupu Lab-1 / Lab-2 kimi alt qruplara da "
+"bölə bilərsiniz."
+msgstr ""
+"Hər qrupa müəllim və saat verin; qrupu Lab-1 / Lab-2 kimi alt qruplara da "
+"bölə bilərsiniz."
 
 msgid "Qrup"
 msgstr "Qrup"
@@ -3508,15 +3538,23 @@ msgstr "Tam bölünüb"
 msgid "Natamam"
 msgstr "Natamam"
 
-msgid "Bu fəndə heç bir axına bağlanmamış mühazirə sətri var — «Axınları dəyiş» ilə qrupları axına salın."
-msgstr "Bu fəndə heç bir axına bağlanmamış mühazirə sətri var — «Axınları dəyiş» ilə qrupları axına salın."
+msgid ""
+"Bu fəndə heç bir axına bağlanmamış mühazirə sətri var — «Axınları dəyiş» ilə"
+" qrupları axına salın."
+msgstr ""
+"Bu fəndə heç bir axına bağlanmamış mühazirə sətri var — «Axınları dəyiş» ilə"
+" qrupları axına salın."
 
 msgid "birlikdə dinləyir"
 msgstr "birlikdə dinləyir"
 
 #, javascript-format
-msgid "Yekun: %(n)s axın · müəllimlərin yükünə cəmi %(load)s (axınlar birləşdirilməsəydi %(separate)s olardı)."
-msgstr "Yekun: %(n)s axın · müəllimlərin yükünə cəmi %(load)s (axınlar birləşdirilməsəydi %(separate)s olardı)."
+msgid ""
+"Yekun: %(n)s axın · müəllimlərin yükünə cəmi %(load)s (axınlar "
+"birləşdirilməsəydi %(separate)s olardı)."
+msgstr ""
+"Yekun: %(n)s axın · müəllimlərin yükünə cəmi %(load)s (axınlar "
+"birləşdirilməsəydi %(separate)s olardı)."
 
 #, javascript-format
 msgid "Yekun: %(n)s axın · müəllimlərin yükünə cəmi %(load)s."
@@ -3530,5 +3568,397 @@ msgstr "artıq bölünüb: %(hours)s"
 msgid "bölünməyib: %(hours)s"
 msgstr "bölünməyib: %(hours)s"
 
-msgid "Bu saat qruplara ayrılmadan bütün sətrə yazılıb. Hər qrupa ayrıca müəllim vermək üçün buradakı müəllimi silin və yuxarıdakı qrupların altında «Müəllim əlavə et» düyməsinə basın."
-msgstr "Bu saat qruplara ayrılmadan bütün sətrə yazılıb. Hər qrupa ayrıca müəllim vermək üçün buradakı müəllimi silin və yuxarıdakı qrupların altında «Müəllim əlavə et» düyməsinə basın."
+msgid ""
+"Bu saat qruplara ayrılmadan bütün sətrə yazılıb. Hər qrupa ayrıca müəllim "
+"vermək üçün buradakı müəllimi silin və yuxarıdakı qrupların altında «Müəllim"
+" əlavə et» düyməsinə basın."
+msgstr ""
+"Bu saat qruplara ayrılmadan bütün sətrə yazılıb. Hər qrupa ayrıca müəllim "
+"vermək üçün buradakı müəllimi silin və yuxarıdakı qrupların altında «Müəllim"
+" əlavə et» düyməsinə basın."
+
+msgid " və "
+msgstr " və "
+
+#, python-format
+msgid "%(group)s: %(n)s tələbə yerləşdirilməyib."
+msgstr "%(group)s: %(n)s tələbə yerləşdirilməyib."
+
+#, python-format
+msgid "%(group)s: iki bölmənin adı eynidir."
+msgstr "%(group)s: iki bölmənin adı eynidir."
+
+#, python-format
+msgid "%(group)s: «%(name)s» bölməsinə dərs bağlıdır."
+msgstr "%(group)s: «%(name)s» bölməsinə dərs bağlıdır."
+
+#, python-format
+msgid "%(groups)s laboratoriyanı birlikdə keçir — bir bölmə, bir müəllim."
+msgstr "%(groups)s laboratoriyanı birlikdə keçir — bir bölmə, bir müəllim."
+
+#, python-format
+msgid "%(groups)s seminarı birlikdə keçir — bir bölmə, bir müəllim."
+msgstr "%(groups)s seminarı birlikdə keçir — bir bölmə, bir müəllim."
+
+#, python-format
+msgid "%(groups)s — seminar və laboratoriya:"
+msgstr "%(groups)s — seminar və laboratoriya:"
+
+#, python-format
+msgid "%(groups)s — sətrin saatı bölmələrə uyğun deyil"
+msgstr "%(groups)s — sətrin saatı bölmələrə uyğun deyil"
+
+#, python-format
+msgid ""
+"%(groups)s: %(kind)s üçün %(used)s paylanıb, sətrin cəmi %(total)s. «Sətri "
+"düzəlt» seçin və ya saatı azaldın."
+msgstr ""
+"%(groups)s: %(kind)s üçün %(used)s paylanıb, sətrin cəmi %(total)s. «Sətri "
+"düzəlt» seçin və ya saatı azaldın."
+
+#, python-format
+msgid "%(kind)s cəmi: %(old)s → %(new)s"
+msgstr "%(kind)s cəmi: %(old)s → %(new)s"
+
+#, python-format
+msgid "%(kind)s — %(group)s (bütün qrup)"
+msgstr "%(kind)s — %(group)s (bütün qrup)"
+
+#, python-format
+msgid "%(kind)s — %(groups)s (birlikdə)"
+msgstr "%(kind)s — %(groups)s (birlikdə)"
+
+#, python-format
+msgid "%(list)s ilə bir sətir"
+msgstr "%(list)s ilə bir sətir"
+
+#, python-format
+msgid "%(list)s kimi böl"
+msgstr "%(list)s kimi böl"
+
+#, python-format
+msgid "%(n)s alt qrup"
+msgstr "%(n)s alt qrup"
+
+#, python-format
+msgid "%(n)s bölməyə müəllim seçilməyib — onların saatı «bölünməyib» qalacaq."
+msgstr ""
+"%(n)s bölməyə müəllim seçilməyib — onların saatı «bölünməyib» qalacaq."
+
+#, python-format
+msgid "%(n)s tələbə (plan)"
+msgstr "%(n)s tələbə (plan)"
+
+#, python-format
+msgid "%(n)s tələbə · seminar planı %(h)s (bir alt qrup üçün)"
+msgstr "%(n)s tələbə · seminar planı %(h)s (bir alt qrup üçün)"
+
+#, python-format
+msgid "%(n)s-ci bölmənin adı"
+msgstr "%(n)s-ci bölmənin adı"
+
+#, python-format
+msgid "%(name)s başqa seminar alt qrupunun lab qrupundadır."
+msgstr "%(name)s başqa seminar alt qrupunun lab qrupundadır."
+
+#, python-format
+msgid "%(unit)s: saat sıfırdan böyük olmalıdır."
+msgstr "%(unit)s: saat sıfırdan böyük olmalıdır."
+
+#, python-format
+msgid "(+%(n)s başqa)"
+msgstr "(+%(n)s başqa)"
+
+msgid "2 alt qrup"
+msgstr "2 alt qrup"
+
+msgid "3 alt qrup"
+msgstr "3 alt qrup"
+
+msgid "4 alt qrup"
+msgstr "4 alt qrup"
+
+#, python-format
+msgid "Addım %(n)s / %(total)s"
+msgstr "Addım %(n)s / %(total)s"
+
+msgid ""
+"Addım-addım: qrupları alt qruplara bölün, tələbələri yerləşdirin, hər "
+"bölməyə müəllim verin."
+msgstr ""
+"Addım-addım: qrupları alt qruplara bölün, tələbələri yerləşdirin, hər "
+"bölməyə müəllim verin."
+
+#, python-format
+msgid ""
+"Axında keçir: aparıcı «%(groups)s», mühazirəçi — %(teacher)s. Dəyişmək üçün "
+"kartda «Axınları dəyiş»."
+msgstr ""
+"Axında keçir: aparıcı «%(groups)s», mühazirəçi — %(teacher)s. Dəyişmək üçün "
+"kartda «Axınları dəyiş»."
+
+msgid "Bir tapşırıq sətrinin qrupları birlikdə seçilir."
+msgstr "Bir tapşırıq sətrinin qrupları birlikdə seçilir."
+
+msgid "Bu jurnalın bölmələrini dəyişməyə icazəniz yoxdur."
+msgstr "Bu jurnalın bölmələrini dəyişməyə icazəniz yoxdur."
+
+msgid "Bu köhnə bölgülər silinəcək:"
+msgstr "Bu köhnə bölgülər silinəcək:"
+
+msgid ""
+"Bu mərhələdə sətrin cəmi dəyişdirilmir — tədris şöbəsinə müraciət edin."
+msgstr ""
+"Bu mərhələdə sətrin cəmi dəyişdirilmir — tədris şöbəsinə müraciət edin."
+
+msgid ""
+"Bu qrupun jurnalı hələ yaradılmayıb. Tələbələri bölmək üçün əvvəlcə jurnalı "
+"yaradın — bölgü saatını isə indi də seçə bilərsiniz."
+msgstr ""
+"Bu qrupun jurnalı hələ yaradılmayıb. Tələbələri bölmək üçün əvvəlcə jurnalı "
+"yaradın — bölgü saatını isə indi də seçə bilərsiniz."
+
+msgid ""
+"Bu qrupun jurnalı hələ yoxdur — tapşırıq dekanlıqda təsdiqlənəndən sonra "
+"yaranacaq. İndi yalnız say seçilir, tələbələr sonra bölünür."
+msgstr ""
+"Bu qrupun jurnalı hələ yoxdur — tapşırıq dekanlıqda təsdiqlənəndən sonra "
+"yaranacaq. İndi yalnız say seçilir, tələbələr sonra bölünür."
+
+msgid ""
+"Bölgü artıq təsdiqlənib — «Təsdiqlə» basanda düzəliş səbəbi və qeydi "
+"soruşulacaq."
+msgstr ""
+"Bölgü artıq təsdiqlənib — «Təsdiqlə» basanda düzəliş səbəbi və qeydi "
+"soruşulacaq."
+
+msgid "Bölgü yadda saxlandı."
+msgstr "Bölgü yadda saxlandı."
+
+msgid "Bölmə"
+msgstr "Bölmə"
+
+msgid "Bölünmür"
+msgstr "Bölünmür"
+
+msgid "Bütün bölmələrə eyni müəllim"
+msgstr "Bütün bölmələrə eyni müəllim"
+
+msgid "Düzəldiləcək"
+msgstr "Düzəldiləcək"
+
+msgid "Hamısına:"
+msgstr "Hamısına:"
+
+#, python-format
+msgid "Heç bir bölməyə yerləşdirilməyib: %(n)s tələbə."
+msgstr "Heç bir bölməyə yerləşdirilməyib: %(n)s tələbə."
+
+msgid "Hər qrup ayrıca"
+msgstr "Hər qrup ayrıca"
+
+msgid "Hər seminar alt qrupunda neçə lab qrupu:"
+msgstr "Hər seminar alt qrupunda neçə lab qrupu:"
+
+#, python-format
+msgid "Hər seminar alt qrupunu böl (%(n)s alt qrup)"
+msgstr "Hər seminar alt qrupunu böl (%(n)s alt qrup)"
+
+msgid "Jurnal bağlıdır"
+msgstr "Jurnal bağlıdır"
+
+msgid "Jurnal hələ yoxdur"
+msgstr "Jurnal hələ yoxdur"
+
+msgid "Jurnal yaradılmadı."
+msgstr "Jurnal yaradılmadı."
+
+msgid "Jurnalda aktiv tələbə yoxdur."
+msgstr "Jurnalda aktiv tələbə yoxdur."
+
+msgid "Jurnalı indi yarat"
+msgstr "Jurnalı indi yarat"
+
+#, python-format
+msgid "Lab %(h)s"
+msgstr "Lab %(h)s"
+
+msgid "Lab qrupu sayı:"
+msgstr "Lab qrupu sayı:"
+
+#, python-format
+msgid "Lab qrupu sayı: %(old)s → %(new)s"
+msgstr "Lab qrupu sayı: %(old)s → %(new)s"
+
+#, python-format
+msgid "Lab: %(n)s qrup"
+msgstr "Lab: %(n)s qrup"
+
+msgid "Laboratoriya"
+msgstr "Laboratoriya"
+
+msgid "Laboratoriya bütün qrupla keçir — bir bölmə, bir müəllim."
+msgstr "Laboratoriya bütün qrupla keçir — bir bölmə, bir müəllim."
+
+#, python-format
+msgid "Mühazirə %(h)s"
+msgstr "Mühazirə %(h)s"
+
+#, python-format
+msgid ""
+"Mühazirə bir neçə müəllim arasında bölünüb: %(list)s. Dəyişmək üçün «Ətraflı"
+" cədvəl»."
+msgstr ""
+"Mühazirə bir neçə müəllim arasında bölünüb: %(list)s. Dəyişmək üçün «Ətraflı"
+" cədvəl»."
+
+#, python-format
+msgid "Mühazirə — %(groups)s"
+msgstr "Mühazirə — %(groups)s"
+
+#, python-format
+msgid "Mühazirə — %(groups)s (bütün qrup)"
+msgstr "Mühazirə — %(groups)s (bütün qrup)"
+
+msgid "Müəllim"
+msgstr "Müəllim"
+
+msgid "Məlumat yüklənmədi. Səhifəni yeniləyib yenidən cəhd edin."
+msgstr "Məlumat yüklənmədi. Səhifəni yeniləyib yenidən cəhd edin."
+
+#, python-format
+msgid "Qrup/yarımqrup sayı: %(old)s → %(new)s"
+msgstr "Qrup/yarımqrup sayı: %(old)s → %(new)s"
+
+#, python-format
+msgid "Reyestrdə alt qruplar: %(list)s"
+msgstr "Reyestrdə alt qruplar: %(list)s"
+
+#, python-format
+msgid "Saxlanır: %(list)s"
+msgstr "Saxlanır: %(list)s"
+
+msgid "Seminar"
+msgstr "Seminar"
+
+#, python-format
+msgid "Seminar %(h)s"
+msgstr "Seminar %(h)s"
+
+msgid "Seminar alt qrupundan doldur (əlifba ilə)"
+msgstr "Seminar alt qrupundan doldur (əlifba ilə)"
+
+msgid "Seminar bütün qrupla keçir — bir bölmə, bir müəllim."
+msgstr "Seminar bütün qrupla keçir — bir bölmə, bir müəllim."
+
+#, python-format
+msgid "Seminar: %(n)s alt qrup"
+msgstr "Seminar: %(n)s alt qrup"
+
+msgid "Seminardan asılı olmadan"
+msgstr "Seminardan asılı olmadan"
+
+#, python-format
+msgid "Seçilib: %(n)s qrup"
+msgstr "Seçilib: %(n)s qrup"
+
+msgid "Seçilmiş qruplarda laboratoriya saatı yoxdur — bu addımı keçin."
+msgstr "Seçilmiş qruplarda laboratoriya saatı yoxdur — bu addımı keçin."
+
+msgid "Seçilmiş qruplarda seminar saatı yoxdur — bu addımı keçin."
+msgstr "Seçilmiş qruplarda seminar saatı yoxdur — bu addımı keçin."
+
+msgid "Sətri düzəlt"
+msgstr "Sətri düzəlt"
+
+#, python-format
+msgid ""
+"Sətrin %(kind)s cəmi %(total)s, bölmələrə görə isə %(need)s lazımdır — "
+"«Yoxla» addımında sətri bir kliklə düzəldə bilərsiniz."
+msgstr ""
+"Sətrin %(kind)s cəmi %(total)s, bölmələrə görə isə %(need)s lazımdır — "
+"«Yoxla» addımında sətri bir kliklə düzəldə bilərsiniz."
+
+msgid "Tələbə"
+msgstr "Tələbə"
+
+msgid "Vakant"
+msgstr "Vakant"
+
+msgid "Vakant (müəllim sonra)"
+msgstr "Vakant (müəllim sonra)"
+
+msgid "Yadda saxlanmadı."
+msgstr "Yadda saxlanmadı."
+
+msgid "dəyişir"
+msgstr "dəyişir"
+
+#, python-format
+msgid "lab planı %(h)s (bir lab qrupu üçün)"
+msgstr "lab planı %(h)s (bir lab qrupu üçün)"
+
+#, python-format
+msgid "paylanıb %(used)s / cəmi %(total)s"
+msgstr "paylanıb %(used)s / cəmi %(total)s"
+
+#, python-format
+msgid ""
+"«%(name)s» bölməsinə %(n)s dərs bağlıdır — bu bölmə silinə bilməz. Əvvəlcə "
+"jurnalda həmin dərslərin bölməsini dəyişin."
+msgstr ""
+"«%(name)s» bölməsinə %(n)s dərs bağlıdır — bu bölmə silinə bilməz. Əvvəlcə "
+"jurnalda həmin dərslərin bölməsini dəyişin."
+
+msgid "Əlifba ilə bərabər böl"
+msgstr "Əlifba ilə bərabər böl"
+
+msgid "Ən azı bir qrup seçin."
+msgstr "Ən azı bir qrup seçin."
+
+msgid "Ətraflı cədvəl"
+msgstr "Ətraflı cədvəl"
+
+msgid "Əvvəlcə seminarı alt qruplara bölün."
+msgstr "Əvvəlcə seminarı alt qruplara bölün."
+
+msgid "— Müəllim seçilməyib —"
+msgstr "— Müəllim seçilməyib —"
+
+msgid "— seçilməyib —"
+msgstr "— seçilməyib —"
+
+#, python-format
+msgid ""
+"«%(name)s» bölməsinə %(n)s dərs bağlıdır — onun tələbələri burada "
+"dəyişdirilmir (tələbəni jurnalın öz ekranında köçürün)."
+msgstr ""
+"«%(name)s» bölməsinə %(n)s dərs bağlıdır — onun tələbələri burada "
+"dəyişdirilmir (tələbəni jurnalın öz ekranında köçürün)."
+
+msgid "— Səbəb seçin —"
+msgstr "— Səbəb seçin —"
+
+msgid ""
+"Bölgü artıq təsdiqlənib — dəyişiklik audit jurnalına yazılır. Səbəbi seçin "
+"və qısa qeyd yazın."
+msgstr ""
+"Bölgü artıq təsdiqlənib — dəyişiklik audit jurnalına yazılır. Səbəbi seçin "
+"və qısa qeyd yazın."
+
+msgid "Qeyd"
+msgstr "Qeyd"
+
+msgid "Məsələn: seminar 2 alt qrupa bölündü"
+msgstr "Məsələn: seminar 2 alt qrupa bölündü"
+
+msgid "Düzəliş səbəbi və qeydi məcburidir."
+msgstr "Düzəliş səbəbi və qeydi məcburidir."
+
+#, python-format
+msgid ""
+"%(group)s: «%(name)s» bölməsində tələbə yoxdur — tələbə yerləşdirin və ya "
+"bölmə sayını azaldın."
+msgstr ""
+"%(group)s: «%(name)s» bölməsində tələbə yoxdur — tələbə yerləşdirin və ya "
+"bölmə sayını azaldın."
