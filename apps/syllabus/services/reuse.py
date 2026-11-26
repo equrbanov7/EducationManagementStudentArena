@@ -48,8 +48,8 @@ from core.constants import AuditAction
 from ..constants import OPEN_STATUSES, PERM_EDIT, SECTION_ORDER, SectionKey, SyllabusStatus
 from ..models import ApprovalSource, ChangeKind, Syllabus, SyllabusSection, SyllabusVersion
 from ..state_machine import Transition, TransitionDenied, check
-from ..week_plan import fit_rows_to_hours
 from . import reuse_rules as rules
+from .copy_fit import fit_copied_week
 from .scoping import is_author
 from .source_lineage import lock_lineage, validate_source
 
@@ -364,12 +364,16 @@ def link(*, source, target, actor, request=None):
 
 
 @transaction.atomic
-def copy_adjust(*, source, target, actor, request=None, previous=False):
+def copy_adjust(*, source, target, actor, request=None, previous=False, source_fallback=None):
     """«Kopyala və uyğunlaşdır» — məzmun QARALAMA kimi yazılır, həftə hədəfin saatına uyğunlaşır.
 
     ``previous=True`` — «Keçən ildən köçür» AÇILIŞ/qaralama hədəfinə (2026-10-08): mənbə eyni
     fənnin BAŞQA semestrindəki (və ya semestrsiz baza) dosyesidir; əhatə qapısı
     ``copy_from_previous`` ilə eynidir (``copy_code``), nəticə həmişə QARALAMADIR.
+
+    Sahib 2026-11-26 (:mod:`.copy_fit`): mənbənin saatı hədəfdən FƏRQLİDİRSƏ (və ya bilinmirsə — köhnə sistemdən)
+    cədvəl hədəfin sətir sayına gətirilir (artıq sətir sondan kəsilir, çatışmayan boş əlavə olunur).
+    ``source_fallback`` — versiyasında saat olmayan mənbənin jurnalının rəsmi saatı (çağıran hesablayır).
     """
     from ..rules import for_version as rule_for_version
     from .drafts import _inherited_data, create_draft, recompute_completion, section_data_map
@@ -413,7 +417,9 @@ def copy_adjust(*, source, target, actor, request=None, previous=False):
         for section_id in SECTION_ORDER
     }
     week = dict(data_map.get(SectionKey.WEEK.value) or {})
-    rows, adjusted = fit_rows_to_hours(week.get("rows") or [], hours)
+    rows, adjusted, fit = fit_copied_week(
+        week.get("rows") or [], source=source, target_hours=hours, source_fallback=source_fallback
+    )
     if adjusted:
         data_map[SectionKey.WEEK.value] = {**week, "rows": rows}
     _write_sections(version, data_map, actor.user)
@@ -434,6 +440,7 @@ def copy_adjust(*, source, target, actor, request=None, previous=False):
             "source_syllabus": str(source.pk),
             "source_version": base.label,
             "week_adjusted": adjusted,
+            "week_fit": fit,
         },
     )
     return syllabus, version

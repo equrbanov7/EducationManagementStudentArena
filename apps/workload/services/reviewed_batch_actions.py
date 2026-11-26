@@ -201,6 +201,8 @@ def sync(plan, *, tasks, rows, actor):
                 rows=subset,
                 create=create,
                 _reviewed_choices=electives.for_rows(plan, subset) if create else None,
+                # Paket akademik məzmunun (sillabus daxil) dəyişmədiyini yoxlayır — plan saatı ayrıca əmrlə düzəlir.
+                syllabus_hours=False,
             )
             blocked = (
                 "blocked",

@@ -35,7 +35,7 @@ from . import reuse_context
 from .api import _body, _context, _fail
 from .labels import transition_text
 from .lookup import safe_uuid
-from .share_context import share_hours, share_text
+from .share_context import share_hours, share_text, source_fallback_hours
 
 logger = logging.getLogger(__name__)
 
@@ -140,8 +140,15 @@ def _single(request, organization, actor, payload, action):
         message = str(_LINKED) % {"group": reuse_context.group_label(source)}
     else:
         # `copy_previous` — «Keçən ildən köçür» (başqa semestr); `copy` — eyni semestrin qonşusu.
+        # Sahib 2026-11-26: saat fərqlidirsə (və ya köhnə sistemdən gələn mənbənin saatı bilinmirsə) cədvəl hədəfin
+        # sətir sayına SERVERDƏ gətirilir — dialoqun ön baxışı ilə eyni qərar (``services.copy_fit``).
         syllabus, version = services.reuse.copy_adjust(
-            source=source, target=target, actor=actor, request=request, previous=action == "copy_previous"
+            source=source,
+            target=target,
+            actor=actor,
+            request=request,
+            previous=action == "copy_previous",
+            source_fallback=source_fallback_hours(source),
         )
         message = _COPIED_PREVIOUS if action == "copy_previous" else _COPIED
     return _version_payload(version, message, syllabus=str(syllabus.pk), mode=action)

@@ -122166,3 +122166,74 @@ msgstr "Студент не восстановлен."
 msgctxt "registrar.journal_removal"
 msgid "Aktivlik yoxlaması (dondurulma)"
 msgstr "Проверка активности (заморозка)"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Mənbə: %(source)s · Bu jurnal: %(target)s"
+msgstr "Источник: %(source)s · Этот журнал: %(target)s"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "%(hours)s saat (%(rows)s həftə)"
+msgstr "%(hours)s ч. (недель: %(rows)s)"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "saat məlum deyil (%(rows)s həftə)"
+msgstr "часы неизвестны (недель: %(rows)s)"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "%(hours)s saat (%(rows)s sətir)"
+msgstr "%(hours)s ч. (строк: %(rows)s)"
+
+msgctxt "accounts.syllabus"
+msgid "Dərs saatları fərqlidir"
+msgstr "Учебные часы различаются"
+
+msgctxt "accounts.syllabus"
+msgid "Mənbənin dərs saatı məlum deyil"
+msgstr "Учебные часы источника неизвестны"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid ""
+"Kopyalananda qaralama bu jurnalın saatını alır, həftəlik plan %(rows)s sətrə"
+" gətirilir: sondan %(count)s sətir kəsiləcək."
+msgstr ""
+"При копировании черновик получает часы этого журнала, недельный план "
+"приводится к %(rows)s строкам: с конца будет удалено строк: %(count)s."
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid ""
+"Kopyalananda qaralama bu jurnalın saatını alır, həftəlik plan %(rows)s sətrə"
+" gətirilir: %(count)s boş sətir əlavə olunacaq."
+msgstr ""
+"При копировании черновик получает часы этого журнала, недельный план "
+"приводится к %(rows)s строкам: будет добавлено пустых строк: %(count)s."
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid ""
+"Kopyalananda qaralama bu jurnalın saatını alır; sətir sayı eynidir "
+"(%(rows)s) — saatlar bu jurnalın planına görə yenidən bölünəcək."
+msgstr ""
+"При копировании черновик получает часы этого журнала; число строк то же "
+"(%(rows)s) — часы будут перераспределены по плану этого журнала."
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Bu jurnalın rəsmi dərs saatı tapılmadı — həftəlik plan olduğu kimi "
+"köçürülür, saatı redaktorda seçin."
+msgstr ""
+"Официальные учебные часы этого журнала не найдены — недельный план "
+"копируется как есть, выберите часы в редакторе."
+
+msgctxt "accounts.syllabus"
+msgid "Bəli, uyğunlaşdırıb kopyala"
+msgstr "Да, скопировать с подгонкой"
+
+msgctxt "accounts.syllabus"
+msgid "Davam etmək üçün düyməni bir daha basın."
+msgstr "Чтобы продолжить, нажмите кнопку ещё раз."

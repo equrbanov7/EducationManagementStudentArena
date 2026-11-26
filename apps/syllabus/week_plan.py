@@ -167,8 +167,38 @@ def fit_rows_to_hours(rows, plan_hours) -> tuple:
     return rows, changed
 
 
+def _blank_row() -> dict:
+    return {"topic": "", "outcome": "", **{kind: 0 for kind in LESSON_HOUR_KINDS}}
+
+
+def fit_week_rows(rows, plan_hours) -> tuple:
+    """Saatı FƏRQLİ (və ya bilinməyən) mənbədən kopyalanan cədvəl → hədəfin sətir sayı (sahib 2026-11-26).
+
+    → ``(sətirlər, {"before", "after", "cut", "added"})``.  Qayda: 1 sətir = 1 dərs = 2 saat, sətir sayı
+    :func:`expected_week_rows`; artıq sətirlər SONDAN kəsilir, çatışmayan sətirlər boş əlavə olunur, saat bölgüsü
+    :func:`fit_rows_to_hours` ilə hədəfin planına gətirilir (mövzu/nəticə saxlanılır).  Plan boşdursa heç nə
+    dəyişmir.  Saatı EYNİ mənbə bu funksiyadan keçmir — müəllimin əlavə sətirləri orada toxunulmaz qalır.
+    """
+    rows = [dict(row) for row in (rows or []) if isinstance(row, dict)]
+    before = len(rows)
+    expected = expected_week_rows(plan_hours)
+    if not expected:
+        return rows, {"before": before, "after": before, "cut": 0, "added": 0}
+    # Əvvəl KƏS, sonra böl: kəsilən sətirdə qalan saat bölgüdən çıxmasın (cəm hədəfin planına bərabər olsun).
+    rows, _changed = fit_rows_to_hours(rows[:expected], plan_hours)
+    while len(rows) < expected:
+        rows.append(_blank_row())
+    return rows, {
+        "before": before,
+        "after": len(rows),
+        "cut": max(before - expected, 0),
+        "added": max(expected - before, 0),
+    }
+
+
 __all__ = [
     "default_distribution",
+    "fit_week_rows",
     "drop_unplanned_hours",
     "expected_week_rows",
     "fit_rows_to_hours",

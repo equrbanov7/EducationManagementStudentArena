@@ -1,23 +1,12 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   Sillabus — TƏKRAR İSTİFADƏ dialoqu (sahib tələbi 2026-10-08)
-   ───────────────────────────────────────────────────────────────────────────
-   «Bu fənnin bu semestr üçün artıq sillabusu var»: mənbə seçimi →
-   «Eyni sillabusu istifadə et (bağla)» | «Kopyala və uyğunlaşdır» |
-   «Hamısına tətbiq et»; bağlı dosyedə «Ayır» / «Mənbədən yenilə»; mənbədə
-   «Bağlı sillabuslara tətbiq et».
-
-   AJAX-safe (docs/frontend/AJAX_SAFE_JS_PATTERN.md): kliklər `EMSDelegate.on`
-   ilə document-ə BİR DƏFƏ deleqasiya olunur; dialoq düymənin ÖZ bölmə
-   panelindən tapılır (`[data-profile-section-panel]`) — siyahı və redaktor
-   panelləri eyni anda DOM-da ola bilər.  Mətn YOXDUR: etiketlər serverdən
-   (JSON) və ya `data-t-*` atributlarından gəlir.  Qərarları server verir —
-   düymənin aktivliyi yalnız göstərişdir.
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* Sillabus — TƏKRAR İSTİFADƏ dialoqu (sahib 2026-10-08): mənbə seçimi → «bağla» | «Kopyala və uyğunlaşdır» |
+   «Hamısına tətbiq et»; bağlı dosyedə «Ayır» / «Mənbədən yenilə»; mənbədə «Bağlı sillabuslara tətbiq et».
+   AJAX-safe (docs/frontend/AJAX_SAFE_JS_PATTERN.md): kliklər `EMSDelegate.on` ilə document-ə BİR DƏFƏ; dialoq
+   düymənin ÖZ bölmə panelindən (`[data-profile-section-panel]`). Mətnlər serverdən (JSON / `data-t-*`); qərarı
+   server verir. Saat fərqi (sahib 2026-11-26): `syllabus_reuse_fit.js` (`window.EMSSyllabusReuseFit`). */
 (function () {
     "use strict";
 
-    /* `copy` — «Keçən ildən köçür» (2026-10-08): eyni dialoq `mode=previous` ilə, yalnız kopyalama. */
-    /* `share` / `unshare` — bir sillabus, bir neçə jurnal (sahib 2026-10-27). */
+    /* `copy` — «Keçən ildən köçür» (`mode=previous`); `share`/`unshare` — bir sillabus, bir neçə jurnal. */
     var ACTIONS = ["reuse", "copy", "unlink", "sync", "propagate", "unshare"];
     var state = null;
     var confirmState = null;
@@ -189,6 +178,9 @@
             (row.hours_same ? "✓ " + t(panel, "hours-same") : "≠ " + t(panel, "hours-diff")) + " — " + row.hours_text
         );
         body.appendChild(hours);
+        if (window.EMSSyllabusReuseFit) {
+            window.EMSSyllabusReuseFit.card(body, row);
+        }
         if (row.linked_count) {
             body.appendChild(el("span", "syl-pick__note", fmt(t(panel, "linked-count"), { count: row.linked_count })));
         }
@@ -256,6 +248,8 @@
         });
         var source = selected();
         var blocked = state.data.target.blocked;
+        var fit = window.EMSSyllabusReuseFit;
+        fit && fit.reset(state.modal); /* başqa mənbə — «Kopyala» təsdiqi yenidən soruşulur */
         ["share", "link", "copy"].forEach(function (kind) {
             var button = state.modal.querySelector("[data-syl-reuse-do='" + kind + "']");
             var hint = state.modal.querySelector("[data-syl-reuse-hint='" + kind + "']");
@@ -265,7 +259,8 @@
             }
             button.disabled = !allowed;
             var okKey = kind + (state.mode === "previous" && kind === "copy" ? "-previous" : "") + "-ok";
-            hint.textContent = !source ? "" : allowed ? t(panel, okKey) : source[kind + "_reason"] || "";
+            var ok = kind === "copy" && fit ? fit.hint(source, t(panel, okKey)) : t(panel, okKey);
+            hint.textContent = !source ? "" : allowed ? ok : source[kind + "_reason"] || "";
             hint.classList.toggle("is-bad", Boolean(source) && !allowed);
         });
         renderCandidates(panel);
@@ -397,6 +392,10 @@
         var source = selected();
         if (!state || !source) {
             return;
+        }
+        var fit = window.EMSSyllabusReuseFit;
+        if (kind === "copy" && fit && fit.needsConfirm(state.modal, source)) {
+            return; /* saat fərqlidir — birinci klik xəbərdarlığı göstərir, ikinci klik icra edir */
         }
         var modal = state.modal;
         var payload = { action: kind === "copy" && state.mode === "previous" ? "copy_previous" : kind, source: source.id };

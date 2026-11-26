@@ -82,6 +82,8 @@ COUNTER_KEYS = (
     "elective_choice_conflict",
     "elective_choice_failed",
     "hours_updated",
+    # Sahib 2026-11-26: saatı dəyişən açılışın sillabus versiyalarının plan saatı (təsdiqlənmiş daxil) yeniləndi.
+    "syllabus_plan_hours_updated",
     "instructor_set",
     "instructor_replaced",
     "instructor_cleared",
@@ -209,7 +211,7 @@ def owner_snapshot(row) -> dict:
 class _Sync(SyncWrites, ElectiveFlow):
     """Bir keçid: sətirlər → hədəflər → açılış yaz/yenilə → qeydiyyat → hesabat."""
 
-    def __init__(self, task, *, actor, request, create, previous, reviewed_choices=None):
+    def __init__(self, task, *, actor, request, create, previous, reviewed_choices=None, syllabus_hours=True):
         self.task = task
         self.org_id = task.organization_id
         self.actor_user = getattr(actor, "user", None)
@@ -224,6 +226,10 @@ class _Sync(SyncWrites, ElectiveFlow):
         self.group_offering_ids: dict = {"mandatory": [], "elective": []}
         self.missing_seasons: dict = {}
         self.schedule_conflicts: list[dict] = []
+        # Saatı bu keçiddə dəyişən açılışlar — sillabus plan saatının öz-özünə sağalması (sahib 2026-11-26).
+        self.hours_offering_ids: list[str] = []
+        self._syllabus_hours = syllabus_hours
+        self._anchored = False
         self._closed = None
 
     def run(self, rows, *, anchor_id=None) -> dict:
@@ -235,6 +241,7 @@ class _Sync(SyncWrites, ElectiveFlow):
         self.missing_seasons = periods["missing_seasons"]
         only_groups = only_period = None
         if anchor_id is not None:
+            self._anchored = True
             only_groups, only_period = _anchor_scope(rows, anchor_id)
             if only_period is None:
                 self.counters["rows_skipped"] += 1
@@ -459,15 +466,49 @@ class _Sync(SyncWrites, ElectiveFlow):
         self.counters["slot_teachers_released"] += schedule_stale_teachers.release(
             offering_ids=self.offering_ids, by_user=self.actor_user, request=self.request
         )
+        self._refresh_syllabus_hours()
+
+    def _refresh_syllabus_hours(self) -> None:
+        """Sahib 2026-11-26: yük saatı dəyişəndə TƏSDİQLƏNMİŞ sillabusun da plan saatı rəsmi saata gəlir.
+
+        Sətir/təyinat keçidi (``anchor``) — onun bütün açılışları (növ payı cəmi dəyişmədən də dəyişə bilər, say
+        kiçikdir); bütöv sənəd keçidi — yalnız ``lesson_hours``-u dəyişən açılışlar.  Sillabusu olmayan açılış üçün
+        TƏK sorğu; qalıqları ``fix_syllabus_plan_hours`` əmri tutur.
+        """
+        if not self._syllabus_hours:
+            return
+        from apps.registrar.public import refresh_offering_syllabus_plan_hours
+
+        ids = self.offering_ids if self._anchored else self.hours_offering_ids
+        report = refresh_offering_syllabus_plan_hours(ids, user=self.actor_user, request=self.request)
+        self.counters["syllabus_plan_hours_updated"] += int(report.get("updated", 0))
 
 
 def sync_task_offerings(
-    task, *, actor=None, request=None, create=True, previous=UNKNOWN, rows=None, _reviewed_choices=None
+    task,
+    *,
+    actor=None,
+    request=None,
+    create=True,
+    previous=UNKNOWN,
+    rows=None,
+    _reviewed_choices=None,
+    syllabus_hours=True,
 ) -> dict:
-    """Sənədin bütün sətirləri → qrup açılışları (idempotent). Hesabat: :data:`COUNTER_KEYS` + id-lər."""
+    """Sənədin bütün sətirləri → qrup açılışları (idempotent). Hesabat: :data:`COUNTER_KEYS` + id-lər.
+
+    ``syllabus_hours=False`` — sillabus plan saatına toxunma (akademik məzmunun dəyişmədiyini yoxlayan
+    nəzərdən keçirilmiş təmir paketləri; qalıqları ``fix_syllabus_plan_hours`` tutur).
+    """
     rows = rows_queryset(task) if rows is None else rows
     return _Sync(
-        task, actor=actor, request=request, create=create, previous=previous, reviewed_choices=_reviewed_choices
+        task,
+        actor=actor,
+        request=request,
+        create=create,
+        previous=previous,
+        reviewed_choices=_reviewed_choices,
+        syllabus_hours=syllabus_hours,
     ).run(rows)
 
 

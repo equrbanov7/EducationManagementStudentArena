@@ -121110,3 +121110,74 @@ msgstr "Öğrenci geri yüklenmedi."
 msgctxt "registrar.journal_removal"
 msgid "Aktivlik yoxlaması (dondurulma)"
 msgstr "Etkinlik kontrolü (dondurma)"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Mənbə: %(source)s · Bu jurnal: %(target)s"
+msgstr "Kaynak: %(source)s · Bu yoklama defteri: %(target)s"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "%(hours)s saat (%(rows)s həftə)"
+msgstr "%(hours)s saat (%(rows)s hafta)"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "saat məlum deyil (%(rows)s həftə)"
+msgstr "saat bilinmiyor (%(rows)s hafta)"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "%(hours)s saat (%(rows)s sətir)"
+msgstr "%(hours)s saat (%(rows)s satır)"
+
+msgctxt "accounts.syllabus"
+msgid "Dərs saatları fərqlidir"
+msgstr "Ders saatleri farklı"
+
+msgctxt "accounts.syllabus"
+msgid "Mənbənin dərs saatı məlum deyil"
+msgstr "Kaynağın ders saatleri bilinmiyor"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid ""
+"Kopyalananda qaralama bu jurnalın saatını alır, həftəlik plan %(rows)s sətrə"
+" gətirilir: sondan %(count)s sətir kəsiləcək."
+msgstr ""
+"Kopyalandığında taslak bu defterin saatlerini alır, haftalık plan %(rows)s "
+"satıra getirilir: sondan %(count)s satır kesilecek."
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid ""
+"Kopyalananda qaralama bu jurnalın saatını alır, həftəlik plan %(rows)s sətrə"
+" gətirilir: %(count)s boş sətir əlavə olunacaq."
+msgstr ""
+"Kopyalandığında taslak bu defterin saatlerini alır, haftalık plan %(rows)s "
+"satıra getirilir: %(count)s boş satır eklenecek."
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid ""
+"Kopyalananda qaralama bu jurnalın saatını alır; sətir sayı eynidir "
+"(%(rows)s) — saatlar bu jurnalın planına görə yenidən bölünəcək."
+msgstr ""
+"Kopyalandığında taslak bu defterin saatlerini alır; satır sayısı aynı "
+"(%(rows)s) — saatler bu defterin planına göre yeniden dağıtılacak."
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Bu jurnalın rəsmi dərs saatı tapılmadı — həftəlik plan olduğu kimi "
+"köçürülür, saatı redaktorda seçin."
+msgstr ""
+"Bu defterin resmi ders saatleri bulunamadı — haftalık plan olduğu gibi "
+"kopyalanır, saatleri düzenleyicide seçin."
+
+msgctxt "accounts.syllabus"
+msgid "Bəli, uyğunlaşdırıb kopyala"
+msgstr "Evet, uyarlayarak kopyala"
+
+msgctxt "accounts.syllabus"
+msgid "Davam etmək üçün düyməni bir daha basın."
+msgstr "Devam etmek için düğmeye bir kez daha basın."

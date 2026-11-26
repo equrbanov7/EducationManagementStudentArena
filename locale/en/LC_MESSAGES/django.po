@@ -121952,3 +121952,75 @@ msgstr "The student was not restored."
 msgctxt "registrar.journal_removal"
 msgid "Aktivlik yoxlaması (dondurulma)"
 msgstr "Activity check (freeze)"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "Mənbə: %(source)s · Bu jurnal: %(target)s"
+msgstr "Source: %(source)s · This journal: %(target)s"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "%(hours)s saat (%(rows)s həftə)"
+msgstr "%(hours)s hours (%(rows)s weeks)"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "saat məlum deyil (%(rows)s həftə)"
+msgstr "hours unknown (%(rows)s weeks)"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid "%(hours)s saat (%(rows)s sətir)"
+msgstr "%(hours)s hours (%(rows)s rows)"
+
+msgctxt "accounts.syllabus"
+msgid "Dərs saatları fərqlidir"
+msgstr "Lesson hours differ"
+
+msgctxt "accounts.syllabus"
+msgid "Mənbənin dərs saatı məlum deyil"
+msgstr "The source's lesson hours are unknown"
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid ""
+"Kopyalananda qaralama bu jurnalın saatını alır, həftəlik plan %(rows)s sətrə"
+" gətirilir: sondan %(count)s sətir kəsiləcək."
+msgstr ""
+"When copied, the draft takes this journal's hours and the weekly plan is "
+"fitted to %(rows)s rows: %(count)s rows will be cut from the end."
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid ""
+"Kopyalananda qaralama bu jurnalın saatını alır, həftəlik plan %(rows)s sətrə"
+" gətirilir: %(count)s boş sətir əlavə olunacaq."
+msgstr ""
+"When copied, the draft takes this journal's hours and the weekly plan is "
+"fitted to %(rows)s rows: %(count)s empty rows will be added."
+
+#, python-format
+msgctxt "accounts.syllabus"
+msgid ""
+"Kopyalananda qaralama bu jurnalın saatını alır; sətir sayı eynidir "
+"(%(rows)s) — saatlar bu jurnalın planına görə yenidən bölünəcək."
+msgstr ""
+"When copied, the draft takes this journal's hours; the number of rows is the"
+" same (%(rows)s) — the hours will be redistributed according to this "
+"journal's plan."
+
+msgctxt "accounts.syllabus"
+msgid ""
+"Bu jurnalın rəsmi dərs saatı tapılmadı — həftəlik plan olduğu kimi "
+"köçürülür, saatı redaktorda seçin."
+msgstr ""
+"This journal's official lesson hours were not found — the weekly plan is "
+"copied as is; choose the hours in the editor."
+
+msgctxt "accounts.syllabus"
+msgid "Bəli, uyğunlaşdırıb kopyala"
+msgstr "Yes, fit and copy"
+
+msgctxt "accounts.syllabus"
+msgid "Davam etmək üçün düyməni bir daha basın."
+msgstr "Press the button once more to continue."

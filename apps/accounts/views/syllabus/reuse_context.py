@@ -23,7 +23,7 @@ from django.utils.translation import pgettext_lazy
 from apps.syllabus.models import ChangeKind, Syllabus
 from apps.syllabus.public import SyllabusStatus, services
 
-from . import share_context
+from . import copy_fit_context, share_context
 from .labels import HOUR_KIND_LABELS, STATUS_TONES, transition_text
 
 _CTX = "accounts.syllabus"
@@ -215,7 +215,17 @@ def _status(row):
 
 
 def _sibling_row(
-    row, *, actor, target, chair_id, target_code, candidates, chair_memo=None, share_state="", share_fallback=None
+    row,
+    *,
+    actor,
+    target,
+    chair_id,
+    target_code,
+    candidates,
+    chair_memo=None,
+    share_state="",
+    share_fallback=None,
+    copy_fit=None,
 ) -> dict:
     from .rows import approver_text
 
@@ -279,6 +289,8 @@ def _sibling_row(
             source_fallback=(share_fallback or {}).get(row.pk),
         ),
         "modes": modes,
+        # Sahib 2026-11-26: saat fərqi xəbərdarlığı + kopyalananda cədvəlin necə uyğunlaşacağı (copy_fit_context).
+        "copy_fit": copy_fit,
     }
 
 
@@ -318,8 +330,9 @@ def build_options(organization, actor, target) -> dict:
     )
     target_code = services.reuse_rules.target_state_code(target_syllabus)
     share_state = share_context.target_state(target) if siblings else ""
-    # Saat qaydası (sahib 2026-11-25) yalnız paylaşıma açıq hədəfdə lazımdır — versiyasız mənbələrin jurnal saatı TOPLU.
-    share_fallback = share_context.fallback_hours_map(siblings) if siblings and not share_state else {}
+    # Versiyasız (köhnə sistemdən) mənbələrin jurnal saatı TOPLU — paylaşım (2026-11-25) və kopyalama (2026-11-26) üçün.
+    share_fallback = share_context.fallback_hours_map(siblings) if siblings else {}
+    copy_fits = copy_fit_context.fit_map(siblings, target, share_fallback)
     chair_memo: dict = {}
     chair_id = services.reuse.target_chair_unit_id(target, actor)
     candidates = (
@@ -347,6 +360,7 @@ def build_options(organization, actor, target) -> dict:
                 chair_memo=chair_memo,
                 share_state=share_state,
                 share_fallback=share_fallback,
+                copy_fit=copy_fits.get(row.pk),
             )
             for row in siblings
         ],

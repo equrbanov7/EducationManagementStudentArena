@@ -5,6 +5,7 @@ View, API və management əmrləri buradan istifadə edir; modelə birbaşa
 :mod:`apps.syllabus.state_machine`-dədir).
 """
 
+from . import copy_fit  # noqa: F401 — saatı fərqli mənbədən kopyalama: cədvəl hədəfə gətirilir (sahib 2026-11-26)
 from . import sharing  # noqa: F401 — bir sillabus, bir neçə jurnal (sahib 2026-10-27)
 from . import reuse, reuse_rules, reuse_sync  # noqa: F401 — təkrar istifadə (bağla/kopyala/sinxron), 2026-10-08
 from .coverage import (  # noqa: F401
@@ -158,6 +159,7 @@ __all__ = [
     "request_revision",
     "resolve_actor",
     "resume_editing",
+    "copy_fit",
     "reuse",
     "reuse_origin",
     "reuse_rules",

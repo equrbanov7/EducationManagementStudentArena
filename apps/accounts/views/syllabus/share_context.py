@@ -57,6 +57,11 @@ def _fallback_hours(syllabus) -> dict:
     return {} if services.sharing.source_hours(syllabus) else official_plan_hours(syllabus)
 
 
+def source_fallback_hours(syllabus) -> dict:
+    """POST yolu (paylaşım və kopyalama, sahib 2026-11-26): versiyasız mənbənin jurnalının rəsmi saatı."""
+    return _fallback_hours(syllabus)
+
+
 def fallback_hours_map(rows) -> dict:
     """``{syllabus_id: mənbə jurnalın rəsmi saatı}`` — YALNIZ versiyasında saat olmayan mənbələr üçün, TOPLU.
 
@@ -208,6 +213,7 @@ __all__ = [
     "share_hours",
     "share_text",
     "shared_targets",
+    "source_fallback_hours",
     "sibling_share",
     "target_state",
 ]
