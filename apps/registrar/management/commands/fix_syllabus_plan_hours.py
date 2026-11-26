@@ -18,6 +18,9 @@ Nə edir
   doldurmaq ``--fill-empty`` ilə (köçürülmüş/bağlı nüsxələr; boş = «bilinmir», səhv deyil).
 * Mənbə tapılmayan versiyaya toxunulmur.  Quru icra defoltdur (``--apply`` ilə yazılır), idempotentdir, hər yazı
   ``audit_auditlog``-a düşür.  Stdout-a YALNIZ saylar çıxır (ad/qrup yoxdur).
+* Qayda 2026-11-26-dan ``apps/registrar/syllabus_plan_hours_sync.py``-dadır: yük sətri / tapşırıq sinxronu
+  (``workload.offering_sync``) açılışın saatını dəyişəndə eyni düzəliş DƏRHAL edilir; əmr hesabat və köhnə
+  qalıqlar üçündür (quru icrada «fix:*» sayı 0 olmalıdır).
 
 İstifadə::
 
@@ -31,20 +34,9 @@ from __future__ import annotations
 from collections import Counter
 
 from django.core.management.base import BaseCommand
-from django.db import transaction
 
-from apps.syllabus.models import SyllabusVersion
-from apps.syllabus.public import SyllabusStatus, services
-from core.audit import log_action
-from core.constants import AuditAction
-
+from ... import syllabus_plan_hours_sync as shared
 from ...plan_hours import plan_hours_for_offering
-
-_EDITABLE = {SyllabusStatus.DRAFT.value, SyllabusStatus.REVISION.value}
-
-
-def _norm(hours) -> dict:
-    return services.clean_override_hours(hours)
 
 
 class Command(BaseCommand):
@@ -66,23 +58,9 @@ class Command(BaseCommand):
         with rls_worker_atomic(), bypass_rls():
             self._run(**options)
 
-    def _expected(self, syllabus, memo) -> dict:
-        override = _norm(syllabus.plan_hours_override)
-        if override:
-            return override
-        offering = syllabus.offering if syllabus.offering_id else None
-        if offering is None:
-            return {}
-        if offering.pk not in memo:
-            memo[offering.pk] = _norm(plan_hours_for_offering(offering))
-        return memo[offering.pk]
-
     def _run(self, *, org_slug=None, fill_empty=False, apply=False, **_options):
-        queryset = (
-            SyllabusVersion.objects.exclude(status=SyllabusStatus.ARCHIVED.value)
-            .select_related("organization", "syllabus", "syllabus__offering", "syllabus__offering__group")
-            .order_by("organization_id", "syllabus_id", "created_at")
-        )
+        # Qayda ``syllabus_plan_hours_sync``-dədir — açılış sinxronu (2026-11-26) eyni qərarı dərhal verir.
+        queryset = shared.versions_queryset()
         if org_slug:
             queryset = queryset.filter(organization__slug=org_slug)
 
@@ -91,20 +69,13 @@ class Command(BaseCommand):
         memo: dict = {}
         for version in queryset.iterator(chunk_size=200):
             counts["scanned"] += 1
-            expected = self._expected(version.syllabus, memo)
-            stored = _norm(version.plan_hours)
-            if not expected:
-                counts["no_source"] += 1
+            expected = shared.expected_plan_hours(version.syllabus, memo, resolve=plan_hours_for_offering)
+            stored = shared.norm(version.plan_hours)
+            key, fix = shared.classify(version, stored, expected, fill_empty=fill_empty)
+            counts[key] += 1
+            if not fix:
                 continue
-            if stored == expected:
-                counts["ok"] += 1
-                continue
-            if not stored and version.status not in _EDITABLE and not fill_empty:
-                counts[f"empty_locked_skipped:{version.status}"] += 1
-                continue
-            kind = "fill" if not stored else ("lower" if sum(expected.values()) < sum(stored.values()) else "other")
-            counts[f"fix:{version.status}:{kind}"] += 1
-            if _norm(version.syllabus.plan_hours_override):
+            if shared.norm(version.syllabus.plan_hours_override):
                 counts["fix_from_override"] += 1
             planned.append((version, stored, expected))
 
@@ -116,24 +87,11 @@ class Command(BaseCommand):
             )
             return
 
-        written = 0
-        for version, stored, expected in planned:
-            with transaction.atomic():
-                fresh = SyllabusVersion.objects.select_related("organization", "syllabus").get(pk=version.pk)
-                if _norm(fresh.plan_hours) != stored or not services.write_version_plan_hours(fresh, expected):
-                    continue
-                written += 1
-                log_action(
-                    AuditAction.UPDATE,
-                    organization=fresh.organization,
-                    obj=fresh,
-                    old_values={"plan_hours": stored},
-                    new_values={"plan_hours": expected},
-                    reason="fix_syllabus_plan_hours: sillabus BİR qrupun saatıdır, müəllimin yükü deyil (sahib 2026-10-25)",
-                    resource_type="syllabus.version",
-                    resource_id=str(fresh.pk),
-                    resource_repr=f"{fresh.syllabus_id} {fresh.label}",
-                )
+        written = sum(
+            1
+            for version, stored, expected in planned
+            if shared.write_fix(version, stored, expected, reason=shared.REASON_COMMAND)
+        )
         self.stdout.write(
             self.style.SUCCESS(f"✅ {written} versiyanın plan saatı düzəldildi ({counts['scanned']} yoxlanıldı).")
         )

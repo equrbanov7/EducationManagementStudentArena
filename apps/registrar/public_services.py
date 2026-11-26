@@ -122,6 +122,7 @@ from .semester_open import offering_counts_by_chair  # noqa: F401
 from .syllabus_carry import choose_source as choose_syllabus_carry_source  # noqa: F401
 from .syllabus_carry import group_language as syllabus_group_language  # noqa: F401
 from .syllabus_pdf import render_syllabus_pdf  # noqa: F401
+from .syllabus_plan_hours_sync import refresh_offering_syllabus_plan_hours  # noqa: F401
 from .syllabus_reuse_targets import instructor_offering  # noqa: F401
 from .syllabus_reuse_targets import instructor_offerings  # noqa: F401
 from .syllabus_reuse_targets import plan_hours_by_offering  # noqa: F401
@@ -206,6 +207,7 @@ __all__ = [
     "offering_chairs",
     "offering_counts_by_chair",
     "plan_hours_by_offering",
+    "refresh_offering_syllabus_plan_hours",
     "plan_hours_for_offering",
     "inspect_reaudit_exam_target",
     "effective_exam_score",

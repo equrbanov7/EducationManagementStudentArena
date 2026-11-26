@@ -131,7 +131,9 @@ xülasə və çekmecə məntiqi qalır. Göndəriş ortaq `teaching_office.js`-d
 {% endif %}
 {% if 'syllabus-list' in asset_sections %}
 <script src="{% static 'accounts/js/profile/syllabus_list.js' %}?v=20261028-approved-edit"></script>
-<script src="{% static 'accounts/js/profile/syllabus_reuse.js' %}?v=20261027-share"></script>
+{# Sahib 2026-11-26: «Dərs saatları fərqlidir» — mənbə kartı + «Kopyala» ikinci klik təsdiqi (syllabus_reuse.js-dən ƏVVƏL). #}
+<script src="{% static 'accounts/js/profile/syllabus_reuse_fit.js' %}?v=20261126-hours"></script>
+<script src="{% static 'accounts/js/profile/syllabus_reuse.js' %}?v=20261126-hours"></script>
 {# Sahib 2026-10-27: bir sillabus — bir neçə jurnal (redaktorun paylaşım bloku). #}
 <script src="{% static 'accounts/js/profile/syllabus_share.js' %}?v=20261027-share"></script>
 {% comment %}Sahə toplayıcıları redaktor mühərrikindən ƏVVƏL yüklənməlidir —

@@ -194,7 +194,9 @@ def test_copy_adjusts_the_week_plan_to_the_target_hours(world):
     assert sum(row["seminar"] for row in rows) == 30
     assert sum(row["lab"] for row in rows) == 0
     source_topics = [row["topic"] for row in _sections(source_version)[SectionKey.WEEK.value]["rows"]]
-    assert [row["topic"] for row in rows][: len(source_topics)] == source_topics
+    # Sahib 2026-11-26: saat fərqlidir (30/16/14 → 30/30) — cədvəl hədəfin 15 sətrinə gətirilir (artıq boş sətir kəsilir).
+    assert len(rows) == 15
+    assert [row["topic"] for row in rows] == source_topics[:15]
     # Qalan bölmələr eynidir; nəticə adi təsdiq axınına düşür (100% → göndərmək olar).
     assert _sections(version)[SectionKey.LIT.value] == _sections(source_version)[SectionKey.LIT.value]
     assert syllabus.reused_from_id is None

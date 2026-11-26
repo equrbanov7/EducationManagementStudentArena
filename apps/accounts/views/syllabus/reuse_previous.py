@@ -18,6 +18,7 @@ from django.utils.translation import pgettext_lazy
 
 from apps.syllabus.public import SyllabusStatus, services
 
+from . import copy_fit_context, share_context
 from .labels import HOUR_KIND_LABELS, STATUS_TONES, transition_text
 from .reuse_context import _person, group_label, hours_text, target_block
 
@@ -34,7 +35,7 @@ def _period_title(row) -> str:
     return f"{period.year_display} · {period.name}"
 
 
-def _previous_row(row, *, actor, target, target_code) -> dict:
+def _previous_row(row, *, actor, target, target_code, copy_fit=None) -> dict:
     from .rows import approver_text
 
     rules = services.reuse_rules
@@ -67,6 +68,7 @@ def _previous_row(row, *, actor, target, target_code) -> dict:
         "can_copy": not copy_code,
         "copy_reason": transition_text(copy_code) if copy_code else "",
         "modes": {},
+        "copy_fit": copy_fit,
     }
 
 
@@ -82,10 +84,15 @@ def build_previous_options(organization, actor, target) -> dict:
         )
     )
     target_code = services.reuse_rules.target_state_code(target.syllabus)
+    # Sahib 2026-11-26: keçmiş (köhnə sistemdən də) sillabusun saatı bu jurnaldan fərqlidirsə — xəbərdarlıq + uyğunlaşma.
+    copy_fits = copy_fit_context.fit_map(rows, target, share_context.fallback_hours_map(rows))
     return {
         "mode": "previous",
         "target": target_block(target, target_code),
-        "siblings": [_previous_row(row, actor=actor, target=target, target_code=target_code) for row in rows],
+        "siblings": [
+            _previous_row(row, actor=actor, target=target, target_code=target_code, copy_fit=copy_fits.get(row.pk))
+            for row in rows
+        ],
         "candidates": [],
         "can_create_blank": target.syllabus is None,
     }

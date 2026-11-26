@@ -122,6 +122,8 @@ class SyncWrites:
             return
         self.counters["updated"] += 1
         self.counters["hours_updated"] += int("lesson_hours" in fields)
+        if "lesson_hours" in fields:
+            self.hours_offering_ids.append(str(offering.pk))
         if "instructor" in fields or moved:
             conflicts = self._timetable_conflicts(offering, new_id)
             self._audit_instructor(offering, old_id, new_id, outcome, entry["rows"], conflicts=conflicts)

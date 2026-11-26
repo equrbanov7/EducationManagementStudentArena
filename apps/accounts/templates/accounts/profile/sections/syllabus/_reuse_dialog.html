@@ -53,9 +53,20 @@ Context: `urls.reuse_options`, `urls.reuse_action`, `urls.action` (boş qaralama
         <div class="syl-reuse__option">
           <button type="button" class="syl-btn syl-btn--secondary" data-syl-reuse-do="copy">
             <i class="fas fa-copy" aria-hidden="true"></i>
-            {% trans "Kopyala və uyğunlaşdır" context "accounts.syllabus" %}
+            <span data-syl-reuse-copy-label>{% trans "Kopyala və uyğunlaşdır" context "accounts.syllabus" %}</span>
           </button>
           <p class="syl-reuse__hint" data-syl-reuse-hint="copy"></p>
+        </div>
+        {% comment %}Sahib 2026-11-26: saat fərqlidirsə «Kopyala» birinci klikdə bu xəbərdarlığı açır, ikinci klik icra edir
+        (syllabus_reuse_fit.js); cədvəlin kəsilməsi/uzadılması serverdə eyni qaydadır.{% endcomment %}
+        <div class="syl-reuse__fitbox" data-syl-reuse-fit role="alert" hidden>
+          <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+          <div class="syl-reuse__fitbox-text">
+            <strong data-syl-reuse-fit-warning></strong>
+            <span data-syl-reuse-fit-line></span>
+            <span data-syl-reuse-fit-action></span>
+            <span class="syl-reuse__fitbox-hint" data-syl-reuse-fit-hint></span>
+          </div>
         </div>
         <p class="syl-reuse__warn" data-syl-reuse-replace hidden>
           <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>

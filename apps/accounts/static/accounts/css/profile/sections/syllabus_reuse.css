@@ -357,3 +357,48 @@
         width: 100%;
     }
 }
+
+/* Sahib 2026-11-26: «Dərs saatları fərqlidir» — mənbə kartının saat sətri + «Kopyala» təsdiq qutusu
+   (syllabus_reuse_fit.js). */
+.syl-reuse__fit-line {
+    font-size: 0.76rem;
+    color: var(--ems-text-muted);
+    overflow-wrap: anywhere;
+}
+
+.syl-reuse__fit-warn {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--ems-warning-800);
+}
+
+.syl-reuse__fitbox {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--ems-warning-500);
+    border-radius: 11px;
+    background: var(--ems-warning-bg);
+    color: var(--ems-warning-800);
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.syl-reuse__fitbox[hidden] {
+    display: none;
+}
+
+.syl-reuse__fitbox-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.syl-reuse__fitbox-hint {
+    font-weight: 700;
+}
