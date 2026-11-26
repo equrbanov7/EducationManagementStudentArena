@@ -352,8 +352,14 @@ class LegacyJointContactTests(TestCase):
         mark.refresh_from_db()
         self.assertEqual(mark.score, Decimal(0))
         entries = [dict(lesson_id=lesson.pk, enrollment_id=mark.enrollment_id, status="absent", score="")]
+        # Kilidli xananı yalnız RİM dəyişir (sahib 2026-11-27) — çağıran ``rim_override``-u ``override_locks`` ilə ötürür.
         no_reason = gradebook.save_marks(
-            offering=lesson.offering, by_user=self.org.owner, entries=entries, full_edit=True, report=True
+            offering=lesson.offering,
+            by_user=self.org.owner,
+            entries=entries,
+            full_edit=True,
+            override_locks=True,
+            report=True,
         )
         self.assertEqual(no_reason["reason_required"], 1)
         mark.refresh_from_db()
@@ -364,6 +370,7 @@ class LegacyJointContactTests(TestCase):
             entries=entries,
             full_edit=True,
             full_reason="Reviewed attendance correction with supporting source",
+            override_locks=True,
             report=True,
         )
         self.assertEqual(written["written"], 1)

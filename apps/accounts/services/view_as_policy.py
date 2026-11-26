@@ -87,16 +87,29 @@ EXAM_OPERATION_URL_NAMES = frozenset(
 #:
 #: Sənədli düzəliş axını (`journal.correct` → PDF) YENƏ DƏ RİM-in ÖZ kimliyi
 #: ilə işləyir; bu siyahı gündəlik jurnal əməliyyatları üçündür.
+#:
+#: SAHİB 2026-11-27 bunu bal/davamiyyət/dərs üçün ƏVƏZ edir: «baxış icazəsi olanlar da edə bilməsin» — jurnalın
+#: xana və dərs yazısı (:data:`JOURNAL_MARK_WRITE_URL_NAMES`) view-as-in HEÇ BİR rejimində işləmir; RİM onu öz
+#: hesabı ilə edir (izi onsuz da RİM-in adınadır). Siyahıda yalnız alt-qrup siyahısı qalır.
 IKT_TECHNICAL_URL_NAMES = frozenset(
     {
-        # Jurnalın gündəlik yazma səthləri (bal, davamiyyət, dərs, kollokvium,
-        # sərbəst iş, alt-qrup siyahısı).
+        "registrar:journal_guest_add",
+        "registrar:journal_guest_remove",
+    }
+)
+
+#: Jurnalın xana (q/b, i/e, bal) və dərs yazma səthləri — view-as altında (FULL / LIMITED / READONLY) BAĞLIDIR
+#: (sahib 2026-11-27). Hədəf müəllimin adından yazılan qeyd müəllimin yazısı kimi görünürdü.
+JOURNAL_MARK_WRITE_URL_NAMES = frozenset(
+    {
         "registrar:journal_detail",
+        "registrar:joint_journal",
         "registrar:journal_lesson_action",
         "registrar:journal_kollokvium_save",
         "registrar:journal_selfwork_action",
-        "registrar:journal_guest_add",
-        "registrar:journal_guest_remove",
+        "registrar:journal_coursework_save",
+        "registrar:journal_activate_slot",
+        "registrar:journal_practical_toggle",
     }
 )
 
