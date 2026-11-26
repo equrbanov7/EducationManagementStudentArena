@@ -64,7 +64,7 @@
 .joh-empty { margin: 0; color: var(--ems-text-muted); font-size: 0.85rem; }
 
 /* ── Jurnal şəbəkəsi ────────────────────────────────────────────────────── */
-.joh-grid-wrap { overflow-x: auto; max-height: 70vh; overflow-y: auto; border: 1px solid var(--ems-neutral-200); border-radius: var(--ems-r-lg); }
+.joh-grid-wrap { overflow-x: auto; border: 1px solid var(--ems-neutral-200); border-radius: var(--ems-r-lg); }
 .joh-grid-wrap:focus-visible, .joh-table-wrap:focus-visible { outline: 2px solid var(--ems-primary-500); outline-offset: 2px; }
 .joh-grid { border-collapse: separate; border-spacing: 0; font-size: 0.8rem; min-width: 100%; }
 .joh-grid th, .joh-grid td { border-bottom: 1px solid var(--ems-neutral-100); border-right: 1px solid var(--ems-neutral-100); }
@@ -134,5 +134,5 @@
 
 @media print {
     .joh-back, .joh-tabs { display: none; }
-    .joh-grid-wrap { max-height: none; overflow: visible; }
+    .joh-grid-wrap { overflow: visible; }
 }

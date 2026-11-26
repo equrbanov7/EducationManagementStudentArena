@@ -24,7 +24,9 @@ def test_required_locales_include_scanned_history_messages_and_runtime_mo(lang):
     for ctx, msgid in keys:
         entry = po.find(msgid, msgctxt=ctx or None)
         assert entry is not None and entry.msgstr and "fuzzy" not in entry.flags, (lang, msgid)
-        assert runtime.gettext(msgid) == entry.msgstr, (lang, msgid)
+        # 2026-11-26: şablon kontekstli (``registrar.own_history``) sətirlər də işlədir — runtime kontekstlə oxunur.
+        found = runtime.pgettext(ctx, msgid) if ctx else runtime.gettext(msgid)
+        assert found == entry.msgstr, (lang, msgid)
     if lang != "az":
         assert runtime.gettext("Daxil edən şəxs məlum deyil") != "Daxil edən şəxs məlum deyil"
         assert runtime.gettext("Öz daxil etdiyiniz qeyd") != "Öz daxil etdiyiniz qeyd"
