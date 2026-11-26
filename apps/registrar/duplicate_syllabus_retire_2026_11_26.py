@@ -36,6 +36,16 @@ EXTRA = tuple(
         "a3041e7d-5ac9-43fb-a32b-c63b8a6c0bf7",  # Filologiya (335F1 / 335F2)
     )
 )
+# MR-000852 (2026-11-26, Nərmin Heydərova): «Etika və estetika» (QKU-588) — 2235 M (Meşəçilik) və 2234 KE (Kompüter
+# elmləri) üçün yaz semestrinə yazılmış, jurnala bağlı olmayan boş qaralamalar; müəllimin həmin qruplarda jurnalı yoxdur.
+REASON_852 = "MR-000852 (2026-11-26): «Etika və estetika» QKU-588 üzrə yaz semestrinə yazılmış, jurnalsız boş qaralama"
+EXTRA += tuple(
+    {"syllabus": syllabus, "author": 8374, "subject_code": "QKU-588", "keeper_subject_code": "", "reason": REASON_852}
+    for syllabus in (
+        "f0f99f04-12cb-4fe0-9ee9-424c254227b4",  # Meşəçilik (2235 M)
+        "1fd1e6b8-3a8c-41ef-bb1e-d25f39a617f8",  # Kompüter elmləri (2234 KE)
+    )
+)
 
 
 def run(*, organization, actor, counts, apply=False, target=None) -> None:
