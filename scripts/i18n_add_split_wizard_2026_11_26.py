@@ -540,8 +540,17 @@ STRINGS = {
         "Dağılım zaten onaylandı — «Onayla»ya basınca düzeltme nedeni ve notu sorulacak.",
         "Die Verteilung ist bereits freigegeben — bei „Bestätigen“ werden Änderungsgrund und Notiz abgefragt.",
     ),
-    ("djangojs", JS, "— Səbəb seçin —"): ("— Choose a reason —", "— Выберите причину —", "— Neden seçin —", "— Grund wählen —"),
-    ("djangojs", JS, "Bölgü artıq təsdiqlənib — dəyişiklik audit jurnalına yazılır. Səbəbi seçin və qısa qeyd yazın."): (
+    ("djangojs", JS, "— Səbəb seçin —"): (
+        "— Choose a reason —",
+        "— Выберите причину —",
+        "— Neden seçin —",
+        "— Grund wählen —",
+    ),
+    (
+        "djangojs",
+        JS,
+        "Bölgü artıq təsdiqlənib — dəyişiklik audit jurnalına yazılır. Səbəbi seçin və qısa qeyd yazın.",
+    ): (
         "The allocation is already approved — the change is written to the audit log. Choose a reason and write a short note.",
         "Распределение уже утверждено — изменение записывается в журнал аудита. Выберите причину и напишите короткое примечание.",
         "Dağılım zaten onaylandı — değişiklik denetim günlüğüne yazılır. Nedeni seçin ve kısa bir not yazın.",
@@ -561,7 +570,11 @@ STRINGS = {
         "Düzeltme nedeni ve notu zorunludur.",
         "Änderungsgrund und Notiz sind erforderlich.",
     ),
-    ("djangojs", JS, "%(group)s: «%(name)s» bölməsində tələbə yoxdur — tələbə yerləşdirin və ya bölmə sayını azaldın."): (
+    (
+        "djangojs",
+        JS,
+        "%(group)s: «%(name)s» bölməsində tələbə yoxdur — tələbə yerləşdirin və ya bölmə sayını azaldın.",
+    ): (
         "%(group)s: section “%(name)s” has no students — place students or reduce the number of sections.",
         "%(group)s: в секции «%(name)s» нет студентов — распределите студентов или уменьшите число секций.",
         "%(group)s: «%(name)s» bölümünde öğrenci yok — öğrenci yerleştirin veya bölüm sayısını azaltın.",
