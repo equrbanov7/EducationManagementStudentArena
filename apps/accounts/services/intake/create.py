@@ -339,6 +339,7 @@ def create_account(
     audit_reason="student_intake_created",
     membership_title="",
     employee_id="",
+    join_group_journals=True,
 ):
     """Bir hesab yaradır və ``(user, birdəfəlik parol)`` qaytarır.
 
@@ -384,6 +385,12 @@ def create_account(
 
     if kind == KIND_STUDENT:
         _write_academic_record(user, organization=organization, values=values, targets=student_targets or {})
+        # Sahib 2026-11-26 (Kalo / Ghaffar, 04-əcnəbilər 2026): qrupa yeni yazılan tələbə qrupun cari jurnallarına
+        # da düşsün — əvvəl reyestrdə görünür, jurnalda görünmürdü. Köçürmə (legacy) öz yazılışlarını yazır → False.
+        if join_group_journals and (student_targets or {}).get("group") is not None:
+            from apps.registrar.public import enroll_new_student_in_group_journals
+
+            enroll_new_student_in_group_journals(organization=organization, actor=actor, student_id=user.pk)
     elif kind == KIND_STAFF:
         from ..role_catalog import sync_profile_primary_role
 
