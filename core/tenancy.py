@@ -3,7 +3,9 @@ Shared helpers for request-scoped tenant filtering.
 """
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import F
 
+from core.membership_state import membership_epoch
 from core.rls import bypass_rls, set_rls_bypass, set_rls_tenant, set_rls_user
 
 TRUSTED_OWNER_CONTEXT_ATTR = "_owner_verified_organization_context"
@@ -62,6 +64,13 @@ def request_has_active_organization_context(request, *, allow_superadmin=True):
     if bool(getattr(request, TRUSTED_OWNER_CONTEXT_ATTR, False)):
         return user is not None and getattr(organization, "owner_id", None) == getattr(user, "id", None)
 
+    # A role may have been changed by an earlier operation in this request.
+    epoch = getattr(request, "_org_membership_epoch", None)
+    if epoch is not None and epoch != membership_epoch() and hasattr(user, "resolve_active_memberships"):
+        request._org_membership_epoch = membership_epoch()
+        memberships = user.resolve_active_memberships(organization)
+        request.org_memberships = memberships
+        request.org_permissions = list({key for row in memberships for key in row.role.permissions or []})
     memberships = getattr(request, "org_memberships", None) or []
     if not memberships:
         return False
@@ -104,6 +113,8 @@ def _resolve_profile_fallback_org(user, resolved_profile):
                 organization__is_active=True,
                 organization__status="active",
                 is_active=True,
+                role__is_active=True,
+                role__organization_id=F("organization_id"),
             ).values_list("organization_id", flat=True)
         )
         candidate_ids |= set(
@@ -165,6 +176,8 @@ def restore_request_organization_from_profile(request, *, profile=None, allow_mu
                 organization__is_active=True,
                 organization__status="active",
                 is_active=True,
+                role__is_active=True,
+                role__organization_id=F("organization_id"),
             )
             .select_related("organization", "role", "scope_unit")
             .order_by("-is_primary", "-role__level")
@@ -175,6 +188,8 @@ def restore_request_organization_from_profile(request, *, profile=None, allow_mu
                 organization__is_active=True,
                 organization__status="active",
                 is_active=True,
+                role__is_active=True,
+                role__organization_id=F("organization_id"),
             ).values_list("organization_id", flat=True)
         )
 

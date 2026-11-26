@@ -41,22 +41,27 @@
             </div>
             {% endif %}
 
+            {% if whatsapp %}
             <div class="ems-contact__info-card">
                 <span class="ems-contact__info-icon"><i class="fab fa-whatsapp" aria-hidden="true"></i></span>
                 <h3 class="ems-contact__info-title">WhatsApp</h3>
-                <a href="https://wa.me/994000000000" target="_blank" rel="noopener noreferrer" class="ems-contact__info-link">+994 (00) 000-00-00</a>
+                <a href="{{ whatsapp.url }}" target="_blank" rel="noopener noreferrer" class="ems-contact__info-link">{{ whatsapp.label }}</a>
                 <p class="ems-contact__info-hint">{% trans "Tez cavab üçün ən sürətli kanal" %}</p>
             </div>
 
+            {% endif %}
+            {% if whatsapp or contact_public_email %}
             <div class="ems-contact__info-card ems-contact__info-card--social">
                 <h3 class="ems-contact__info-title">{% trans "Bizi izləyin" %}</h3>
                 <div class="ems-contact__socials">
-                    <a href="https://wa.me/994000000000"
+                    {% if whatsapp %}
+                    <a href="{{ whatsapp.url }}"
                        target="_blank" rel="noopener noreferrer"
                        class="ems-contact__social"
                        aria-label="WhatsApp">
                         <i class="fab fa-whatsapp" aria-hidden="true"></i>
                     </a>
+                    {% endif %}
                     {% if contact_public_email %}
                     <a href="mailto:{{ contact_public_email }}"
                        class="ems-contact__social"
@@ -66,6 +71,7 @@
                     {% endif %}
                 </div>
             </div>
+            {% endif %}
         </aside>
 
         {# Form card #}
@@ -88,6 +94,7 @@
 
                     <form method="post" novalidate class="ems-contact__form" data-clarity-mask="True">
                         {% csrf_token %}
+                        <input type="hidden" name="submission_token" value="{{ submission_token }}">
 
                         {# Honeypot — visually & semantically hidden from real users #}
                         <div class="ems-contact__honeypot" aria-hidden="true">
@@ -189,4 +196,8 @@
     </section>
 
 </div>
+{% endblock %}
+
+{% block extraJs %}
+<script src="{% static 'contact/js/contact_form.js' %}" defer></script>
 {% endblock %}

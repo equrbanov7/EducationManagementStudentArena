@@ -42,6 +42,7 @@ from core import academic_rules
 
 from . import dashboard_data, journal_activation, journal_topics, lesson_rooms, schedule
 from .journal_list_schedule import GRACE
+from .journal_slot_selection import matching_schedule_slots
 from .lesson_share_scope import scoped_lessons
 
 #: Jurnal dərs tipləri (``LessonKind``) — modalın tip seçimi ilə eyni sıra.
@@ -78,7 +79,7 @@ def build(offering, context, *, now=None, scope=None) -> dict:
     labels: dict = {}
 
     def teacher_id(user) -> str:
-        if scope is not None and scope.enrollment_ids is not None:
+        if scope is not None and not scope.full and (not scope.is_owner or scope.enrollment_ids is not None):
             return str(scope.teacher_id)
         if user is None:
             return owner
@@ -102,10 +103,9 @@ def build(offering, context, *, now=None, scope=None) -> dict:
         "hours_by_kind": {kind: _hours(last_by_kind.get(kind)) for kind in KINDS},
         "instructor_labels": labels,
         "slots": {},
-        "taken": taken_slots(journal_activation.lesson_rows(offering, memo=True)),
+        "taken": taken_slots(lessons),
     }
-    candidates = open_slots(offering, today, todays)
-    rooms = _slot_rooms(offering, candidates)
+    candidates, rooms = _slot_options(offering, today, todays, last_instructor, scope)
     for slot in candidates:
         if slot.offering_id == offering.pk:
             slot.offering = offering  # «Praktiki məşğələ» adı jurnalın keşlənmiş fənnindən — slot başına sorğu yox
@@ -153,14 +153,19 @@ def taken_slots(lessons) -> dict:
 
 
 def open_slots(offering, today, todays_lessons) -> list:
-    """Bu günün cədvəl slotları, hələ ÖZ dərsi açılmayanlar (zolaqdakı «açılmayıb» qaydası).
+    """Eyni günün cədvəlindən yalnız birmənalı uyğun dərsi olan slotları çıxar."""
+    _, last_instructor, _ = journal_activation.lesson_facts(offering, today, memo=True)
+    slots, _ = _slot_options(offering, today, todays_lessons, last_instructor, scope=None)
+    return slots
 
-    Sahib 2026-11-15 (patok): bir jurnalda eyni saatda iki slot varsa birinci dərs yalnız BİR slotu bağlayır
-    (``journal_activation.match_slots``) — əvvəl ikinci slot da «açılıb» sayılır, modal başqa saatın slotunu doldururdu.
-    """
+
+def _slot_options(offering, today, lessons, last_instructor, scope):
     slots = journal_activation.slots_on(offering, today)
-    taken = journal_activation.match_slots(slots, todays_lessons)
-    return [slot for slot in slots if slot.pk not in taken]
+    if scope is not None:
+        slots = [slot for slot in slots if scope.allows_kind(journal_activation.slot_kind(slot))]
+    rooms = _slot_rooms(offering, slots)
+    taken = matching_schedule_slots(offering, slots, lessons, last_instructor, scope, rooms=rooms)
+    return [slot for slot in slots if slot.pk not in taken], rooms
 
 
 def pick_slot(slots, now):

@@ -1,0 +1,8 @@
+/* Keep wide question/test-case fields inside their own scroll container. */
+.main > .content {
+    min-width: 0;
+}
+.inline-group .tabular {
+    max-width: 100%;
+    overflow-x: auto;
+}

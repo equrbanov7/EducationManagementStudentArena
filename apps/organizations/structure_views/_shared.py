@@ -1,5 +1,7 @@
 """structure_views paketi — _shared."""
 
+from contextlib import nullcontext
+
 from django.apps import apps as django_apps
 from django.contrib import messages
 from django.db import IntegrityError, transaction
@@ -15,6 +17,7 @@ from core.search_text import tolerant_q
 from core.staff_position import visible_role_label
 
 from ..models import AcademicPeriod, Membership, Organization, OrgUnit
+from ..name_matching import RegistryNameTaken, registry_unit_write
 from ..views import (
     _can_manage_organization,
     _can_view_structure,
@@ -484,7 +487,12 @@ def _structure_page_view(
         "code": (request.POST.get("code") or "").strip(),
         "parent": (request.POST.get("parent") or "").strip(),
     }
-    form_errors, notice = action_handler(request, organization, scope, flags)
+    writes_name = form_values["action"] in {"", "create", "update"}
+    try:
+        with registry_unit_write(organization) if writes_name else nullcontext():
+            form_errors, notice = action_handler(request, organization, scope, flags)
+    except RegistryNameTaken as exc:
+        form_errors, notice = {"name": str(exc)}, ""
     if _is_ajax_request(request):
         if not form_errors:
             context = context_builder(request, organization, notice=notice)

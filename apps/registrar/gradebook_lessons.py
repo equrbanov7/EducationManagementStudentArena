@@ -1,9 +1,6 @@
 """Dərs (Lesson) CRUD — gradebook-un davamı.
 
-``gradebook.py`` modul-ölçü büdcəsinə görə bölünüb (``gradebook_components.py``
-ilə eyni nümunə): dərs sütununun yaradılması / redaktəsi / silinməsi buradadır.
-Bütün ictimai adlar ``gradebook``-dan re-eksport olunur — çağıranlar üçün API
-dəyişməyib.
+Dərs sütununun yaradılması, redaktəsi və silinməsi üçün ictimai API ``gradebook``-dan re-eksport olunur.
 
 Otaq (``room``) sahəsi opsionaldır: köhnə dərslərdə yoxdur, boş qala bilər.
 Redaktədə ``None`` MƏNALI dəyərdir ("otağı təmizlə"), ona görə "verilməyib"
@@ -40,8 +37,14 @@ _CTX = "registrar.journal_lessons"
 
 
 class SlotTakenError(LessonRuleError):
-    """Eyni jurnalda eyni gün + saat artıq dərs var (``has_slot_collision``) — «Yeni dərs» işləyicisi onu digər
-    qayda xətalarından ayırır: köhnə dərsin sütununa yalnız EYNİ növdə keçir (sahib 2026-11-26)."""
+    """Eyni saat tutulub. Yeganə uyğun sütun olduqda onu ünvan üçün saxla."""
+
+    @property
+    def lesson(self):
+        return self.args[1] if len(self.args) > 1 else None
+
+    def __str__(self):
+        return str(self.args[0])
 
 
 def _coerce_date(value):
@@ -239,19 +242,36 @@ def create_lesson(
     # aktivləşdirəndə dublikat sütun yaranırdı. Açılış sətri kilidlənir: EYNİ açılışa dərs yaratma
     # seriyalaşır, dublikat yoxlaması kilid altında gedir (başqa açılışlar gözləmir).
     CourseOffering.objects.select_for_update().filter(pk=offering.pk).values_list("pk", flat=True).first()
+    from .journal_slot_selection import creation_collision
     from .lesson_share_scope import has_slot_collision
 
+    instructor_id = getattr(instructor, "pk", None) or offering.instructor_id
     if start_time and has_slot_collision(
         offering=offering,
         date=parsed,
         start_time=start_time,
-        instructor_id=getattr(instructor, "pk", None) or offering.instructor_id,
+        instructor_id=instructor_id,
         kind=kind,
         lab_group=lab_group,
         seminar_group=seminar_group,
         hours=new_hours,
     ):
-        raise SlotTakenError(_slot_taken_message(parsed, start_time))
+        existing, warning = creation_collision(
+            offering,
+            created_by,
+            slot=slot,
+            date=parsed,
+            start_time=start_time,
+            end_time=end_time,
+            kind=kind,
+            instructor_id=instructor_id,
+            hours=new_hours,
+            room_id=getattr(room, "pk", None),
+            lab_group=lab_group,
+            seminar_group=seminar_group,
+            passive=passive,
+        )
+        raise SlotTakenError(warning or _slot_taken_message(parsed, start_time), existing)
     from .language_cohort_journal import validate_lesson
     from .passive_lessons import available, not_available_message
 

@@ -132,12 +132,11 @@ class AccountRoutingEmailBackend(BaseEmailBackend):
                     raise
                 last_exc = exc
                 logger.warning(
-                    "SMTP keçici xəta (%s), cəhd %s/%s, hesab=%s: %s",
+                    "SMTP keçici xəta (%s), cəhd %s/%s, hesab=%s",
                     type(exc).__name__,
                     attempt + 1,
                     len(plan),
                     account_key,
-                    str(exc)[:200],
                 )
         raise last_exc
 
@@ -156,10 +155,10 @@ class AccountRoutingEmailBackend(BaseEmailBackend):
                     try:
                         count, backend = self._send_one(backend, key, message, accounts)
                         sent += count
-                    except Exception:
+                    except Exception as exc:
                         if not self.fail_silently:
                             raise
-                        logger.exception("SMTP göndərişi alınmadı (fail_silently)")
+                        logger.warning("SMTP göndərişi alınmadı (%s)", type(exc).__name__)
             finally:
                 backend.close()
         return sent

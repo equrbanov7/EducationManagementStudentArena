@@ -465,6 +465,21 @@ class CourseOwnershipTenantFilteringTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(CourseMembership.objects.filter(course=self.course_a, user=self.external_student).exists())
 
+    def test_topic_modal_urls_accept_only_post_for_edits(self):
+        topic = CourseTopic.objects.create(course=self.course_a, title="Original", order=1)
+        add_url = reverse("courses:add_topic", args=[self.course_a.pk])
+        edit_url = reverse("courses:edit_topic", args=[topic.pk])
+        for url in (add_url, edit_url):
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 405)
+            self.assertEqual(set(response["Allow"].split(", ")), {"POST", "OPTIONS"})
+
+        response = self.client.post(edit_url, {"title": "Updated"}, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["topic"]["id"], topic.pk)
+        topic.refresh_from_db()
+        self.assertEqual(topic.title, "Updated")
+
     def test_owner_can_add_topic_ajax_and_dashboard_renders_it(self):
         response = self.client.post(
             reverse("courses:add_topic", kwargs={"course_id": self.course_a.id}),

@@ -36,10 +36,11 @@ def test_list_submissions_is_constant(ready):
         return rows
 
     _grow(ready, 2)
-    run()  # isinmə: bir dəfəlik keşlər (ContentType və s.) ölçüyə düşməsin
-    small = _count(run)
+    # Adding memberships invalidates the actor's authorization cache. Compare like-for-like reads.
+    small_cold, small_warm = _count(run), _count(run)
     _grow(ready, 6)
-    assert _count(run) == small <= 6
+    assert _count(run) == small_cold <= 6
+    assert _count(run) == small_warm <= 6
 
 
 def test_student_feed_is_constant(ready):

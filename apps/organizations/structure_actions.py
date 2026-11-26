@@ -32,6 +32,7 @@ from core.audit import log_action
 from core.constants import AuditAction
 
 from .models import Membership, Organization, OrgUnit
+from .name_matching import RegistryNameTaken, registry_unit_write
 from .structure_views.tree import TREE_TYPE_ORDER, tree_scope
 from .unit_head_assignment import apply_unit_head, head_target_is_student
 from .views import _has_org_permission, _unique_unit_slug, _visible_units_queryset
@@ -232,6 +233,12 @@ def structure_tree_action(request, slug):
             pgettext(_CTX, "Struktur ağacını idarə etmək səlahiyyətiniz yoxdur."), status=403, code="forbidden"
         )
 
+    if action in {"create_child", "rename"}:
+        try:
+            with registry_unit_write(organization):
+                return handler(request, organization, scope)
+        except RegistryNameTaken as exc:
+            return _error(str(exc), code="name_taken")
     return handler(request, organization, scope)
 
 

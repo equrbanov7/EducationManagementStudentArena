@@ -27,11 +27,16 @@ from __future__ import annotations
 
 import os
 
-from celery import Celery
+from celery import Celery, signals
+
+from core.celery_logging import install_worker_filters, protect_mail_headers
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.local")
 
-app = Celery("emsarena")
+app = Celery("emsarena", include=["core.email_tasks"])
+signals.before_task_publish.connect(protect_mail_headers)
+signals.after_setup_logger.connect(install_worker_filters)
+signals.after_setup_task_logger.connect(install_worker_filters)
 
 # Namespace all Celery config keys with ``CELERY_`` so they do not clash with
 # other Django settings.

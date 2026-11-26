@@ -32,11 +32,11 @@ def purge_old_notifications_task() -> dict:
 
 
 @shared_task(name="notifications.push_send", ignore_result=True)
-def push_send_task(notification_ids) -> dict:
+def push_send_task(notification_ids, after_device_id=None) -> dict:
     """Bildirişləri alıcıların telefonlarına (FCM) göndərir — bax ``apps/notifications/push/dispatch.py``.
 
     DB oxusu/yazısı ``_worker_scope``-da (RLS bypass + flaqla tranzaksiya), FCM HTTP sorğuları ondan KƏNARDA.
     """
     from .push.dispatch import deliver
 
-    return deliver(notification_ids, scope=_worker_scope)
+    return deliver(notification_ids, after_device_id=after_device_id, scope=_worker_scope)

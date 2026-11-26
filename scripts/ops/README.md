@@ -44,6 +44,23 @@ See `docs/operations/deployment.md` §12 «Off-site copy» (password file,
 `/etc/emsarena/offsite-backup.env`, `init`, timer). Until it is configured the
 `OffsiteBackupStale` alert fires.
 
+## Monthly off-site restore drill
+
+`.github/workflows/offsite-restore-drill.yml` runs monthly on a GitHub-hosted runner.
+Provision an initialized Restic repository dedicated to synthetic drills. In the
+`offsite-drill` GitHub environment, set `DRILL_RESTIC_REPOSITORY` (an S3 or REST URL)
+and `DRILL_RESTIC_PASSWORD`. For S3, set `DRILL_AWS_ACCESS_KEY_ID` and
+`DRILL_AWS_SECRET_ACCESS_KEY`. For an authenticated REST server, set
+`DRILL_REST_USERNAME` and `DRILL_REST_PASSWORD`. Limit the credentials to the
+drill repository. Retain snapshots according to its Restic retention policy.
+
+The drill archives a newly created PostgreSQL database and a private course
+attachment, discards the originals, then retrieves that exact encrypted snapshot.
+It checks the SHA-256 of both files, restores the dump to a second database, and
+reads the attachment through Django as its course owner. A missing repository,
+checksum mismatch, or failed download fails the workflow. Both scratch databases
+are dropped. The production dump drill continues on its existing schedule.
+
 ## Harden a fresh host
 ```bash
 sudo scripts/ops/server_hardening.sh

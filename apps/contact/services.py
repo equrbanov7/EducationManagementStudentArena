@@ -17,8 +17,10 @@ from __future__ import annotations
 
 import logging
 import threading
+from functools import partial
 
 from django.conf import settings
+from django.db import transaction
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext as _
@@ -214,21 +216,27 @@ def send_reply_to_contact(
 # ---------------------------------------------------------------------------
 # Public form entry point
 # ---------------------------------------------------------------------------
-def create_contact_message(*, form_cleaned_data: dict, request) -> ContactMessage:
+def create_contact_message(*, form_cleaned_data: dict, request, submission_key=None) -> ContactMessage:
     """Persist a contact message and trigger asynchronous notification."""
     ip = _extract_client_ip(request)
     user_agent = (request.META.get("HTTP_USER_AGENT") or "")[:512]
 
-    message = ContactMessage.objects.create(
-        name=form_cleaned_data["name"],
-        email=form_cleaned_data["email"],
-        phone=form_cleaned_data.get("phone", "") or "",
-        subject=form_cleaned_data["subject"],
-        message=form_cleaned_data["message"],
-        ip_address=ip,
-        user_agent=user_agent,
-    )
-    dispatch_contact_notification(message)
+    fields = {
+        "name": form_cleaned_data["name"],
+        "email": form_cleaned_data["email"],
+        "phone": form_cleaned_data.get("phone", "") or "",
+        "subject": form_cleaned_data["subject"],
+        "message": form_cleaned_data["message"],
+        "ip_address": ip,
+        "user_agent": user_agent,
+    }
+    if submission_key is None:
+        message = ContactMessage.objects.create(**fields)
+    else:
+        message, created = ContactMessage.objects.get_or_create(submission_key=submission_key, defaults=fields)
+        if not created:
+            return message
+    transaction.on_commit(partial(dispatch_contact_notification, message))
     return message
 
 

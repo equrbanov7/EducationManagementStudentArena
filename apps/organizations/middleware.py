@@ -21,6 +21,7 @@ Organization resolution order
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import connection, transaction
+from django.db.models import F
 from django.utils.functional import SimpleLazyObject
 
 from core.rls import apply_rls_request_context, bypass_rls, preset_rls_tenant_from_sql, reset_rls_context
@@ -28,7 +29,7 @@ from core.roles import ProfileRole
 from core.tenancy import TRUSTED_OWNER_CONTEXT_ATTR
 
 from .request_memberships import bind_request_memberships, drop_request_memberships, membership_epoch
-from .services import ensure_owner_membership, is_tenant_accessible_organization
+from .services import ensure_owner_membership, get_active_memberships, is_tenant_accessible_organization
 
 
 class OrganizationMiddleware:
@@ -52,18 +53,21 @@ class OrganizationMiddleware:
 
     @staticmethod
     def org_switcher_cache_key(user_id):
-        return f"ems:org_switcher:v1:{user_id}"
+        from django.core.cache import cache
+
+        version = cache.get("ems:org_switcher:role_version", "0")
+        return f"ems:org_switcher:v2:{version}:{user_id}"
 
     @classmethod
     def _cached_active_memberships(cls, user):
         """Navbar org-switcher üçün üzvlük siyahısı — 60s keşlə."""
         from django.core.cache import cache
 
-        key = cls.org_switcher_cache_key(user.pk)
         try:
+            key = cls.org_switcher_cache_key(user.pk)
             cached = cache.get(key)
         except Exception:
-            cached = None
+            return cls._fetch_active_memberships(user)
         if cached is not None:
             return cached
         memberships = cls._fetch_active_memberships(user)
@@ -77,12 +81,7 @@ class OrganizationMiddleware:
     def _fetch_active_memberships(user):
         """Return all active memberships for *user* across active organizations."""
         with bypass_rls():
-            return list(
-                user.memberships.filter(is_active=True, organization__is_active=True)
-                .filter(organization__status="active")
-                .select_related("organization", "role", "scope_unit")
-                .order_by("-is_primary", "-role__level")
-            )
+            return list(get_active_memberships(user))
 
     @staticmethod
     def _sole_active_organization():
@@ -114,7 +113,12 @@ class OrganizationMiddleware:
         """
         with bypass_rls():
             memberships = (
-                user.memberships.filter(is_active=True, organization__is_active=True)
+                user.memberships.filter(
+                    is_active=True,
+                    role__is_active=True,
+                    role__organization_id=F("organization_id"),
+                    organization__is_active=True,
+                )
                 .exclude(organization__status="active")
                 .select_related("organization")
                 .order_by("-is_primary", "id")
@@ -146,6 +150,8 @@ class OrganizationMiddleware:
         return (
             user.memberships.filter(
                 organization__slug=org_slug,
+                role__is_active=True,
+                role__organization_id=F("organization_id"),
                 organization__is_active=True,
                 is_active=True,
             )
@@ -216,6 +222,8 @@ class OrganizationMiddleware:
         drop_request_memberships(request.user)
         snapshot_epoch = membership_epoch()
         snapshot_rows = None
+
+        request._org_membership_epoch = snapshot_epoch
 
         # ── Step 1: restore org from session ──────────────────────────────
         org_slug = request.session.get("active_organization")

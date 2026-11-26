@@ -96,6 +96,7 @@ def test_final_center_consumers_authorize_under_nobypassrls_role(final_center):
 
     # Presence yazıları da 0 sətrə düşməməlidir.
     wait_c.session_id, wait_c.ticket_id = session.id, ticket.id
+    wait_c.channel_name = "synthetic-wait-channel"
     wait_c.entry_ticket_id, wait_c.entry_version = None, None
     _sync(FinalExamWaitConsumer, "_mark_connected_db")(wait_c, False)
     assert _sync(FinalExamWaitConsumer, "_heartbeat")(wait_c) is True

@@ -3985,3 +3985,6 @@ msgid ""
 msgstr ""
 "%(group)s: section “%(name)s” has no students — place students or reduce the"
 " number of sections."
+
+msgid "Seçim üçün variant yoxdur"
+msgstr "No options available"

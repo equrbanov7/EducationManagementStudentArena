@@ -6,7 +6,6 @@ fasad (views/__init__) bu adları ixrac etməyə davam edir."""
 from urllib.parse import urlencode
 
 from django.core.paginator import Paginator
-from django.db import transaction
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -16,6 +15,7 @@ from core.search_text import tolerant_q
 
 from ...kafedra_units import kafedra_unit_types
 from ...models import OrgUnit
+from ...name_matching import RegistryNameTaken, registry_unit_write
 from ..shared._helpers import (
     _can_manage_organization,
     _can_view_role_matrix,
@@ -153,15 +153,18 @@ def _create_structure_unit(request, organization):
     if errors:
         return False, errors
 
-    with transaction.atomic():
-        OrgUnit.objects.create(
-            organization=organization,
-            parent=parent,
-            unit_type=unit_type,
-            name=name,
-            slug=_unique_unit_slug(organization, name, unit_kind),
-            code=code,
-        )
+    try:
+        with registry_unit_write(organization):
+            OrgUnit.objects.create(
+                organization=organization,
+                parent=parent,
+                unit_type=unit_type,
+                name=name,
+                slug=_unique_unit_slug(organization, name, unit_kind),
+                code=code,
+            )
+    except RegistryNameTaken as exc:
+        return False, {"name": str(exc)}
     return True, {}
 
 

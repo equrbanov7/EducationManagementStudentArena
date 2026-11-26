@@ -12,6 +12,7 @@
     var AUTO_SUBMIT_LEAD_SECONDS = 3;
     var state = { ready: false, labId: 0, endTime: null, total: 0, startedAt: null, autoSubmitRequested: false, timer: null };
     var saveTimeouts = {};
+    var fileSaves = {};
     var I18N = {};
 
     function byId(id) {
@@ -58,6 +59,7 @@
         if (!el) { return false; }
         var d = el.dataset;
         state.labId = parseInt(d.labId, 10);
+        state.attempt = byId("labAttempt") && byId("labAttempt").value;
         state.endTime = new Date(d.endTime);
         state.total = parseInt(d.totalQuestions, 10) || 0;
         I18N = {
@@ -143,7 +145,7 @@
         fetch("/labs/" + state.labId + "/auto-save/", {
             method: "POST",
             headers: { "Content-Type": "application/json", "X-CSRFToken": csrf() },
-            body: JSON.stringify({ question_id: questionId, answer: answer })
+            body: JSON.stringify({ attempt_number: state.attempt, question_id: questionId, answer: answer })
         })
             .then(function (r) { return r.json(); })
             .then(function (data) {
@@ -164,23 +166,32 @@
             var nameEl = preview.querySelector(".file-name");
             if (nameEl) { nameEl.textContent = input.files[0].name; }
         }
-        var textarea = document.querySelector('[name="answer_' + questionId + '"]');
+        delete input.dataset.clearFile;
         var formData = new FormData();
+        formData.append("attempt_number", state.attempt);
         formData.append("question_id", questionId);
-        formData.append("answer", textarea ? textarea.value : "");
         formData.append("answer_file", input.files[0]);
-        setStatus(questionId, "saving");
-        fetch("/labs/" + state.labId + "/auto-save/", { method: "POST", body: formData, headers: { "X-CSRFToken": csrf() } })
-            .then(function (r) { return r.json(); })
-            .then(function (data) { setStatus(questionId, data.success ? "saved" : "error"); })
-            .catch(function () { setStatus(questionId, "error"); });
+        // Ardıcıl iki seçimdə sonuncu fayl qaralamada da sonuncu saxlanmalıdır.
+        var previous = fileSaves[questionId];
+        var entry = { file: input.files[0] };
+        entry.pending = (previous ? previous.pending : Promise.resolve()).then(function () {
+            setStatus(questionId, "saving");
+            return fetch("/labs/" + state.labId + "/auto-save/", { method: "POST", body: formData, headers: { "X-CSRFToken": csrf() } })
+                .then(readJsonResponse)
+                .then(function (data) { return data.success; });
+        }).catch(function () { return false; }).then(function (saved) {
+            entry.saved = saved;
+            setStatus(questionId, saved ? "saved" : "error");
+            return saved;
+        });
+        fileSaves[questionId] = entry;
     }
 
     /* `csp_event_handlers.js` «×» düyməsində `removeFile(questionId)` qlobalını çağırır. */
     window.removeFile = function (questionId) {
         var input = byId("file-" + questionId);
         var preview = byId("preview-" + questionId);
-        if (input) { input.value = ""; }
+        if (input) { input.value = ""; input.dataset.clearFile = "1"; }
         if (preview) { preview.hidden = true; }
     };
 
@@ -192,6 +203,8 @@
     }
 
     function setSubmitButtonState(isSubmitting) {
+        var controls = document.querySelectorAll("#labForm .answer-textarea, #labForm .file-input, #labForm .file-upload-area, #labForm .file-remove");
+        Array.prototype.forEach.call(controls, function (control) { control.disabled = isSubmitting; });
         var btn = byId("submitBtn");
         if (!btn) { return; }
         btn.disabled = isSubmitting;
@@ -210,11 +223,20 @@
 
     function submitLabForm() {
         var labForm = byId("labForm");
-        if (!labForm) { return; }
+        if (!labForm || state.submitting) { return; }
+        state.submitting = true;
+        // Mətnin yekun nüsxəsi debounce vaxtından asılı deyil. Sahələri kilidləməzdən əvvəl götür.
+        var body = new FormData(labForm);
         setSubmitButtonState(true);
         setConfirmButtonState(true);
-
-        fetch("/labs/" + state.labId + "/submit/", { method: "POST", body: new FormData(labForm), headers: { "X-CSRFToken": csrf() } })
+        Object.keys(fileSaves).forEach(function (questionId) {
+            var input = byId("file-" + questionId);
+            var entry = fileSaves[questionId];
+            if (input.dataset.clearFile) { body.set("clear_file_" + questionId, "1"); }
+            // Təsdiqlənmiş fayl artıq qaralamadadır. Davam edən və ya uğursuz faylı yekun sorğu özü daşıyır.
+            if (entry.saved && input.files[0] === entry.file) { body.delete(input.name); }
+        });
+        fetch("/labs/" + state.labId + "/submit/", { method: "POST", body: body, headers: { "X-CSRFToken": csrf() } })
             .then(readJsonResponse)
             .then(function (data) {
                 if (data.success) {
@@ -223,12 +245,14 @@
                     return;
                 }
                 notifyError(t("errorPrefix", "Error") + ": " + (data.error || t("errorUnknown", "Unknown error")));
+                state.submitting = false;
                 setSubmitButtonState(false);
                 setConfirmButtonState(false);
             })
             .catch(function (err) {
                 var payload = err && err.payload;
                 notifyError(payload && payload.error ? t("errorPrefix", "Error") + ": " + payload.error : t("errorServer", "Server error"));
+                state.submitting = false;
                 setSubmitButtonState(false);
                 setConfirmButtonState(false);
             });
@@ -301,6 +325,7 @@
         var card = ta.closest(".question-card");
         if (!card) { return; }
         var qId = card.dataset.questionId;
+        updateProgress();
         window.clearTimeout(saveTimeouts[qId]);
         saveTimeouts[qId] = window.setTimeout(function () {
             autoSave(qId, ta.value);

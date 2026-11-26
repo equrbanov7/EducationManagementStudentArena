@@ -23,6 +23,7 @@ from django.db.models import Exists, OuterRef, Q
 
 from apps.organizations.public import ancestor_unit_ids, request_active_memberships
 from core.constants import RoleScopeType
+from core.membership_state import membership_epoch
 from core.permissions import has_permission
 
 from ..constants import PERM_MANAGE, PERM_VIEW_ALL, RESPONDER_UNIT_CODE, ResolveBy
@@ -43,7 +44,8 @@ def active_memberships(user, organization):
     if user is None or organization is None or not getattr(user, "is_authenticated", False):
         return []
     cached = getattr(user, "_applications_memberships", None)
-    if cached is not None and cached[0] == organization.pk:
+    cache_key = (organization.pk, membership_epoch())
+    if cached is not None and cached[0] == cache_key:
         return cached[1]
     # Perf 2026-10-07: middleware-in eyni request-də oxuduğu sətirlər (eyni süzgəc);
     # sıra canlı sorğunun `Membership.Meta.ordering`-i ilə eynidir (`handler_role_for`).
@@ -64,7 +66,7 @@ def active_memberships(user, organization):
             ).select_related("role", "scope_unit")
         )
     try:
-        user._applications_memberships = (organization.pk, memberships)
+        user._applications_memberships = (cache_key, memberships)
     except Exception:  # noqa: BLE001 — AnonymousUser kimi obyektlər immutable ola bilər
         pass
     return memberships
@@ -191,7 +193,8 @@ def is_universal_responder(user, organization) -> bool:
     if user is None or organization is None or not getattr(user, "is_authenticated", False):
         return False
     cached = getattr(user, "_applications_responder", None)
-    if cached is not None and cached[0] == organization.pk:
+    cache_key = (organization.pk, membership_epoch())
+    if cached is not None and cached[0] == cache_key:
         return cached[1]
     unit = responder_unit(organization)
     result = bool(unit is not None and handles_unit(user, organization, unit, None))
