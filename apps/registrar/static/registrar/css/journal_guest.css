@@ -300,3 +300,24 @@
     text-transform: uppercase;
 }
 .jd2-guest-divider__cell i { margin-right: 6px; }
+
+/* Sahib 2026-11-27: fəndən azad olunan tələbə jurnalda qalır — «Azad — N bal», xanası yoxdur (yazılmır). */
+.jd2-recog-row .jd2-td-student { background: var(--ems-success-50, #ecfdf5); }
+.jd2-recog-cell {
+    padding: 6px 12px;
+    background: var(--ems-success-50, #ecfdf5);
+    color: var(--ems-gray-700, #374151);
+    font-size: 12px;
+    white-space: nowrap;
+}
+.jd2-recog-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: var(--ems-success-100, #d1fae5);
+    color: var(--ems-success-700, #047857);
+    font-weight: 700;
+}
+.jd2-recog-note { margin-left: 8px; color: var(--ems-gray-500, #6b7280); }

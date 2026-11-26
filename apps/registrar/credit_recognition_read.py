@@ -24,6 +24,7 @@ from core.search_text import tolerant_q
 
 from . import grading_scale, journal_scope
 from .models import AssessmentScheme, Enrollment, ExternalCreditRecognition, RecognitionProgram, StudentAcademicRecord
+from .models.external_recognition import DETAILED_PROGRAMS
 
 _CTX = "registrar.recognition"
 
@@ -99,7 +100,7 @@ def badge(recognition, organization=None) -> dict:
     letter, _gpa = grading_scale.score_to_letter(recognition.recognized_score, organization)
     return {
         "id": str(recognition.pk),
-        "label": pgettext(_CTX, "Xarici nəticə tanınıb"),
+        "label": pgettext(_CTX, "Fəndən azad — nəticə tanınıb"),
         "program": recognition.program,
         "program_label": recognition.program_label,
         "program_name": recognition.program_name,
@@ -122,7 +123,7 @@ def recognized_result(score, organization=None) -> dict:
     sətri ayırd etmədən oxuyur; giriş/çıxış balı yoxdur (``None``), yekun = tanınmış bal, nəticə «keçib»."""
     total = Decimal(int(score))
     letter, gpa = grading_scale.score_to_letter(total, organization)
-    label = pgettext(_CTX, "Xarici nəticə tanınıb")
+    label = pgettext(_CTX, "Fəndən azad — nəticə tanınıb")
     return {
         "entry_score": None,
         "entry_parts": None,
@@ -182,6 +183,38 @@ def student_period_badges(record, period) -> dict:
         revoked_at__isnull=True,
     ).select_related("subject")
     return {row.subject_id: badge(row, record.organization) for row in rows}
+
+
+def journal_rows(offering) -> list:
+    """Jurnal grid-inin ən aşağısındakı «Fəndən azad» sətirləri (sahib 2026-11-27: «sətir qalsın, Azad yazılsın»).
+
+    Tanınma ilə azad edilmiş qeydiyyat ``dropped``-dur (müəllim ona yazmır, qayıb həddi / imtahan siyahısı ona aid
+    deyil), amma tələbə jurnalda «Fəndən azad — 85 bal (B) · Kurs / sertifikat» kimi görünür. Bir sorğu."""
+    if offering is None:
+        return []
+    items = (
+        ExternalCreditRecognition.objects.filter(
+            organization_id=offering.organization_id,
+            enrollment__offering_id=offering.pk,
+            revoked_at__isnull=True,
+        )
+        .exclude(enrollment__status=Enrollment.Status.ENROLLED)
+        .select_related("student")
+        .order_by("student__last_name", "student__first_name")
+    )
+    rows = []
+    for item in items:
+        letter, _gpa = grading_scale.score_to_letter(item.recognized_score, offering.organization)
+        rows.append(
+            {
+                "student": item.student,
+                "score": item.recognized_score,
+                "letter": letter,
+                "program_label": item.program_label,
+                "institution": item.institution,
+            }
+        )
+    return rows
 
 
 # ── Heyət bölməsi ────────────────────────────────────────────────────────────
@@ -271,6 +304,7 @@ def build(request, organization) -> dict:
         "matches": _search(user, organization, query) if query else [],
         "selected": None,
         "programs": list(RecognitionProgram.choices),
+        "detailed_programs": sorted(DETAILED_PROGRAMS),  # forma bu səbəblərdə xarici fənn sahələrini açır
         "pass_score": pass_score(),
     }
     data["kpis"] = [
@@ -316,6 +350,7 @@ __all__ = [
     "override_keys",
     "pass_score",
     "recognized_result",
+    "journal_rows",
     "records_in_scope",
     "student_in_scope",
     "student_period_badges",

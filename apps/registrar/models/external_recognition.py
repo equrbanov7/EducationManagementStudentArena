@@ -42,10 +42,20 @@ def recognition_document_path(instance, filename: str) -> str:
 
 
 class RecognitionProgram(models.TextChoices):
+    """Səbəb (sahib 2026-11-27: «kurs, kollec nəticəsi və s. ola bilər — səbəb seçilsin, bal daxil edilsin, sənəd
+    məcburi»). Sıra formadakı sıradır; Erasmus+ / mübadilə (2026-10-25) qalır."""
+
+    COURSE = "course", pgettext_lazy(_CTX, "Kurs / sertifikat")
+    COLLEGE = "college", pgettext_lazy(_CTX, "Kollec nəticəsi")
+    OTHER_UNIVERSITY = "other_university", pgettext_lazy(_CTX, "Başqa ali məktəb")
     ERASMUS = "erasmus", pgettext_lazy(_CTX, "Erasmus+")
     EXCHANGE = "exchange", pgettext_lazy(_CTX, "Mübadilə proqramı")
-    OTHER_UNIVERSITY = "other_university", pgettext_lazy(_CTX, "Başqa ali məktəb")
     OTHER = "other", pgettext_lazy(_CTX, "Digər (adını yazın)")
+
+
+#: Xarici fənnin tam izi (ölkə, xarici fənn, kredit, qiymət, müddət) MƏCBURİ olan səbəblər — beynəlxalq mobillik.
+#: Qalanlarında (kurs, kollec, başqa ali məktəb, digər) yalnız səbəb + qurum + bal + sənəd (sahib 2026-11-27).
+DETAILED_PROGRAMS = frozenset({"erasmus", "exchange"})
 
 
 class ExternalCreditRecognition(UUIDModel, TimeStampedModel):
@@ -73,13 +83,15 @@ class ExternalCreditRecognition(UUIDModel, TimeStampedModel):
     #: Proqramın / səbəbin adı (sahib 2026-10-25: «təkcə Erasmus deyil — proqramın adı başqa da ola bilər»):
     #: «Digər»də MƏCBURİ (yay məktəbi, onlayn kurs, ikili diplom …), digər növlərdə dəqiqləşdirmə (məs. «KA171»).
     program_name = models.CharField(max_length=150, blank=True, default="")
-    institution = models.CharField(max_length=255)
-    country = models.CharField(max_length=100)
-    foreign_subject = models.CharField(max_length=300)
-    foreign_credit = models.DecimalField(max_digits=5, decimal_places=2)
-    foreign_grade = models.CharField(max_length=32)
+    #: Qurum (kursu keçirən təşkilat, kollec, universitet); «Digər»də boş ola bilər.
+    institution = models.CharField(max_length=255, blank=True, default="")
+    #: Xarici fənnin izi — :data:`DETAILED_PROGRAMS`-da məcburi, qalanlarında istəyə bağlı (2026-11-27).
+    country = models.CharField(max_length=100, blank=True, default="")
+    foreign_subject = models.CharField(max_length=300, blank=True, default="")
+    foreign_credit = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    foreign_grade = models.CharField(max_length=32, blank=True, default="")
     #: Xarici təhsil dövrü (məs. «2025/2026 yaz semestri»).
-    study_period = models.CharField(max_length=100)
+    study_period = models.CharField(max_length=100, blank=True, default="")
     #: Bizim 100 ballıq şkalada qarşılığı (tam ədəd, keçid həddindən aşağı deyil — servis yoxlayır).
     recognized_score = models.PositiveSmallIntegerField()
     #: Transkriptdə yazılan kredit (bizim tədris planının krediti; qərar anında snapshot).
@@ -122,7 +134,10 @@ class ExternalCreditRecognition(UUIDModel, TimeStampedModel):
             models.CheckConstraint(
                 condition=Q(recognized_score__gte=0, recognized_score__lte=100), name="reg_recog_score_range"
             ),
-            models.CheckConstraint(condition=Q(foreign_credit__gt=0), name="reg_recog_foreign_credit_positive"),
+            models.CheckConstraint(
+                condition=Q(foreign_credit__isnull=True) | Q(foreign_credit__gt=0),
+                name="reg_recog_foreign_credit_positive",
+            ),
             models.CheckConstraint(
                 condition=Q(program__in=[choice.value for choice in RecognitionProgram]), name="reg_recog_program"
             ),
@@ -167,6 +182,7 @@ class ExternalCreditRecognition(UUIDModel, TimeStampedModel):
 
 
 __all__ = [
+    "DETAILED_PROGRAMS",
     "RECOGNITION_DOCUMENT_PREFIX",
     "REVOKE_FIELDS",
     "ExternalCreditRecognition",

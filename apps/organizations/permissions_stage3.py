@@ -44,7 +44,8 @@ STAGE3_PERMISSION_LABELS = {
     # 2026-10-25 (sahib): Erasmus+ / mübadilə / başqa ali məktəbdə keçilmiş fənnin tanınması → fəndən azad.
     "student.credit_recognition": pgettext_lazy(
         _PERM_CTX,
-        "Xarici nəticəni tanımaq (Erasmus+, mübadilə, başqa ali məktəb, yay məktəbi və s.) və tələbəni fəndən azad etmək",
+        "Tələbəni fəndən azad etmək (kurs / sertifikat, kollec nəticəsi, başqa ali məktəb, Erasmus+ və s.) — səbəb, "
+        "yekun bal və sənədlə",
     ),
 }
 
