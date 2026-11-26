@@ -42,6 +42,7 @@ class WiringTest(SimpleTestCase):
             mr = item["reason"][:9]
             self.assertEqual((item["author"], item["subject_code"]), expected[mr])
             self.assertEqual(item["keeper_subject_code"], "")
+            self.assertTrue(item["vacant_offering_ok"])
 
 
 @pytest.fixture
@@ -104,3 +105,17 @@ def test_default_run_walks_every_target_and_skips_retired(world, monkeypatch):
     counts = Counter()
     retire.run(organization=world["org"], actor=world["teacher"], counts=counts, apply=True)
     assert counts["already_retired"] == 2
+
+
+@pytest.mark.django_db
+def test_vacant_offering_draft_is_retired_but_assigned_one_is_refused(world):
+    offering = world["offerings"]["o1"]
+    Syllabus.objects.filter(pk=world["dossier"].pk).update(offering=offering)
+    world["target"]["vacant_offering_ok"] = True
+    with pytest.raises(CommandError, match="syllabus_retire_bound_to_active_journal"):
+        _run(world, retire.run)  # müəllimi olan aktiv jurnal qorunur
+    type(offering).objects.filter(pk=offering.pk).update(instructor=None)
+    assert _run(world, retire.run)["syllabi_retired"] == 1
+    del world["target"]["vacant_offering_ok"]
+    world["dossier"].refresh_from_db()
+    assert world["dossier"].is_active is False
