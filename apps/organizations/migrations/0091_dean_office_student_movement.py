@@ -89,6 +89,10 @@ def forward(apps, schema_editor):
             )
         else:
             _grant(role, _PERMISSIONS)
+            # Geri dönüş rolu passivləşdirir — təkrar irəli miqrasiya onu yenidən açır.
+            if not role.is_active:
+                role.is_active = True
+                role.save(update_fields=["is_active"])
 
     ApplicationUnit = apps.get_model("applications", "ApplicationUnit")
     for unit in ApplicationUnit.objects.filter(code=_UNIT_CODE).iterator():
