@@ -175,3 +175,41 @@ class JournalRestoreInactiveFreezeTest(FreezeInactiveStudentsTest):
             Enrollment.objects.filter(pk=self.e1.pk).update(status=Enrollment.Status.SUSPENDED)
         row = self._rows(self.owner)[str(self.e1.pk)]  # akademik status — əmr dondurmayıb
         self.assertEqual((row["kind"], row["restorable"]), ("", False))
+
+
+class FreezeAuditVisibleToOrganizationTest(_LabWorld, TestCase):
+    """2026-11-27: dondurmanın blok sətri təşkilata bağlıdır və tələbənin adını daşıyır."""
+
+    def setUp(self):
+        with bypass_rls():
+            self.owner.is_superuser = True
+            self.owner.save(update_fields=["is_superuser"])
+            User.objects.filter(pk__in=[s.pk for s in self.students]).update(
+                date_joined=timezone.now() - datetime.timedelta(days=60)
+            )
+        self.lesson = self._lesson(kind=LessonKind.SEMINAR)
+
+    def test_block_and_freeze_rows_carry_organization_and_name(self):
+        from apps.audit.models import AuditLog
+
+        with bypass_rls():
+            LessonMark.objects.create(organization=self.org, lesson=self.lesson, enrollment=self.e1, status="present")
+            LessonMark.objects.create(organization=self.org, lesson=self.lesson, enrollment=self.e2, status="absent")
+        call_command(
+            "freeze_inactive_students_20261108",
+            "--org",
+            self.org.slug,
+            "--actor",
+            self.owner.username,
+            "--apply",
+            stdout=io.StringIO(),
+        )
+        student = User.objects.get(pk=self.e2.student_id)
+        with bypass_rls():
+            block = AuditLog.objects.get(
+                resource_type="User", resource_id=str(student.pk), reason__startswith="Account temporarily blocked"
+            )
+            freeze = AuditLog.objects.get(resource_type="accounts.inactive_student_freeze", resource_id=str(student.pk))
+        self.assertEqual(block.organization_id, self.org.pk)
+        self.assertEqual(block.user_id, self.owner.pk)
+        self.assertIn(student.username, freeze.resource_repr)

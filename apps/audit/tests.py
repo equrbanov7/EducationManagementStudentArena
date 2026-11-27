@@ -519,3 +519,44 @@ class AuditSearchTolerantTest(TestCase):
 
     def test_exact_uuid_still_matches_the_entry_id(self):
         self.assertEqual(self._found(str(self.by_group.pk)), {self.by_group.pk})
+
+
+class AuditSearchTargetUserTest(TestCase):
+    """2026-11-27 (Dmitriy Sevaçyev): ad axtarışı hesabın ÜZƏRİNDƏ aparılan əməliyyatı da tapır."""
+
+    def setUp(self):
+        self.actor = User.objects.create_user("audit_actor", "audit_actor@example.com", "TestPass123!")
+        self.target = User.objects.create_user("dmitriy.probe", "dmitriy.probe@example.com", "TestPass123!")
+        self.target.first_name, self.target.last_name = "Dmitriy", "Sevaçyev"
+        self.target.save(update_fields=["first_name", "last_name"])
+        user_ct = ContentType.objects.get_for_model(User)
+        # Köhnə toplu dondurma sətri kimi: obyekt hesabın özü, resource_repr boş.
+        self.on_target = AuditLog.objects.create(
+            user=self.actor,
+            action=AuditAction.UPDATE,
+            resource_type="accounts.inactive_student_freeze",
+            resource_id=str(self.target.pk),
+            content_type=user_ct,
+            object_id=str(self.target.pk),
+        )
+        # Başqa modelin eyni nömrəli obyekti uyğun gəlməməlidir.
+        self.same_id_other_model = AuditLog.objects.create(
+            user=self.actor,
+            action=AuditAction.UPDATE,
+            resource_type="probe",
+            content_type=ContentType.objects.get_for_model(AuditLog),
+            object_id=str(self.target.pk),
+        )
+
+    def _found(self, term):
+        from .views_filters import _search_q
+
+        return set(AuditLog.objects.filter(_search_q(term)).values_list("pk", flat=True))
+
+    def test_target_name_finds_operation_on_that_account(self):
+        for term in ("Sevaçyev", "sevacyev", "Dmitriy Sevacyev"):
+            with self.subTest(term=term):
+                self.assertEqual(self._found(term), {self.on_target.pk})
+
+    def test_unknown_name_matches_nothing(self):
+        self.assertEqual(self._found("Heçkimov"), set())
