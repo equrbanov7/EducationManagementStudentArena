@@ -236,3 +236,66 @@ class SubgroupPlanHoursTests(TestCase):
         _split_parts(None, kinds, lessons)
         self.assertEqual([2, 4], [part["held"] for part in kinds[0]["parts"]])
         self.assertEqual([30, 30], [part["planned"] for part in kinds[0]["parts"]])
+
+
+class CoTeacherSameKindHeadingTests(TestCase):
+    """MR-000879 (2026-11-27, 435 R ing): iki müəllim eyni jurnalda seminarı öz tələbələrinə ayrıca keçir (105 + 105).
+
+    Hər müəllimin şəxsi başlığı yalnız öz dərslərini sayır, planı alt qruplara bölünmür; təhvil verilmiş (cari planı
+    olmayan) köhnə müəllimin dərsləri isə cari sahibin başlığında qalır."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.org = make_org("heading-coteach")
+        cls.stack = make_structure(cls.org, code="HCOT")
+        cls.task = make_task(cls.org, cls.stack["chair"], status="amended")
+        cls.row = make_row(cls.task, cls.stack, lecture_total=0, seminar_total=210)
+        cls.aytac = get_user_model().objects.create_user("coteach-a", first_name="Aytac", last_name="A")
+        cls.gunay = get_user_model().objects.create_user("coteach-g", first_name="Günay", last_name="G")
+        for teacher in (cls.aytac, cls.gunay):
+            activate_member(cls.org, teacher, "teacher", permissions=TEACHER_PERMS)
+            TeacherAssignment.objects.create(
+                organization=cls.org, row=cls.row, teacher=teacher, activity="seminar", hours=105
+            )
+        cls.course = CourseOffering.objects.create(
+            organization=cls.org,
+            subject=cls.stack["subject"],
+            group=cls.stack["group"],
+            period=cls.stack["period"],
+            instructor=cls.aytac,
+            lesson_hours=210,
+        )
+        today = timezone.localdate()
+        for instructor, group, count in ((cls.aytac, 1, 3), (cls.gunay, 2, 2)):
+            for _ in range(count):
+                Lesson.objects.create(
+                    organization=cls.org,
+                    offering=cls.course,
+                    kind="seminar",
+                    instructor=instructor,
+                    hours=2,
+                    date=today,
+                    seminar_group=group,
+                )
+
+    def own(self, teacher):
+        return journal_teaching_summary(self.course, personal_actor=teacher, scope=journal_scope(teacher, self.course))
+
+    def test_each_teacher_counts_only_own_lessons_against_own_plan(self):
+        for teacher, held in ((self.aytac, 6), (self.gunay, 4)):
+            summary = self.own(teacher)
+            self.assertEqual((105, held), (summary["total"], summary["held_total"]))
+            seminar = summary["kinds"][0]
+            self.assertEqual(105, seminar["planned"])
+            self.assertNotIn("parts", seminar)  # öz planı 52 + 52 bölünmür
+
+    def test_full_view_is_unchanged(self):
+        summary = journal_teaching_summary(self.course)
+        # Tam görünüş (RİM) tələbə başına sayır — alt qrupların ən çoxu (6), hər iki müəllimin hissəsi ayrıca çipdə.
+        self.assertEqual((210, 6), (summary["total"], summary["kinds"][0]["held"]))
+        self.assertEqual([6, 4], [part["held"] for part in summary["kinds"][0]["parts"]])
+
+    def test_handed_over_teacher_lessons_stay_with_current_owner(self):
+        TeacherAssignment.objects.filter(row=self.row, teacher=self.gunay).delete()
+        summary = self.own(self.aytac)
+        self.assertEqual(10, summary["held_total"])
