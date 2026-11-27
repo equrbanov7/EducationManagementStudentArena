@@ -299,3 +299,17 @@ class CoTeacherSameKindHeadingTests(TestCase):
         TeacherAssignment.objects.filter(row=self.row, teacher=self.gunay).delete()
         summary = self.own(self.aytac)
         self.assertEqual(10, summary["held_total"])
+
+    def test_co_teacher_lesson_with_own_students_marks_counts(self):
+        """MR-000902 (935 BM): eyni dərs sütununda hər müəllim öz tələbələrini yazır — dərsin «müəllimi» Günaydır,
+        amma Aytacın tələbəsinin qeydi varsa, dərs Aytacın da saatına düşür."""
+        from apps.registrar.models import Enrollment, LessonMark
+
+        student = get_user_model().objects.create_user("coteach-s", first_name="Tələbə", last_name="S")
+        activate_member(self.org, student, "student")
+        enrollment = Enrollment.objects.create(organization=self.org, student=student, offering=self.course)
+        shared = Lesson.objects.filter(offering=self.course, instructor=self.gunay).first()
+        LessonMark.objects.create(organization=self.org, lesson=shared, enrollment=enrollment, status="present")
+        scope = Scope(enrollment_ids=frozenset({str(enrollment.pk)}), teacher_id=self.aytac.pk)
+        summary = journal_teaching_summary(self.course, personal_actor=self.aytac, scope=scope)
+        self.assertEqual((105, 8), (summary["total"], summary["held_total"]))
