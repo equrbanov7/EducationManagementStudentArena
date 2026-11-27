@@ -440,6 +440,40 @@ class Merge334FTest(TestCase):
         with self.assertRaisesMessage(CommandError, "f334_merge_check_needs_batch_only"):
             self._call("--check", f"--batch={batch}", "--apply")
 
+    def _target_of(self, subject):
+        return CourseOffering.objects.get(organization=self.org, subject=subject, group=self._parent(), is_active=True)
+
+    def test_merge_copies_planned_hours_to_target(self):
+        """2026-11-27: birləşmiş jurnal mənbənin planlı saatını alır (qayıb həddinin bazası)."""
+        with bypass_rls():
+            CourseOffering.objects.filter(pk__in=[o.pk for o in self.offerings.values()]).update(lesson_hours=40)
+        self._call("--apply")
+        with bypass_rls():
+            self.assertEqual(self._target_of(self.same).lesson_hours, 40)
+
+    def test_fix_hours_fills_empty_target_from_equal_sources(self):
+        _counts, _families, batch = self._call("--apply")
+        with bypass_rls():
+            target = self._target_of(self.same)
+            self.assertFalse(target.lesson_hours)
+            for group in (self.f1, self.f2):
+                CourseOffering.objects.filter(pk=self.offerings[(self.same.pk, group.pk)].pk).update(lesson_hours=30)
+        counts, _f, _b = self._call("--fix-hours", f"--batch={batch}")
+        self.assertEqual(counts["hours_targets_set"], "1")
+        with bypass_rls():
+            target.refresh_from_db()
+            self.assertFalse(target.lesson_hours)  # dry-run
+        counts, _f, _b = self._call("--fix-hours", f"--batch={batch}", "--apply")
+        self.assertEqual(counts["hours_targets_set"], "1")
+        self.assertIn("hours_sources_differ_or_empty", counts)  # digər ailənin mənbələri boşdur
+        with bypass_rls():
+            target.refresh_from_db()
+            self.assertEqual(target.lesson_hours, 30)
+        counts, _f, _b = self._call("--fix-hours", f"--batch={batch}", "--apply")
+        self.assertEqual(counts["hours_target_already_set"], "1")
+        with self.assertRaisesMessage(CommandError, "f334_merge_fix_hours_needs_batch_only"):
+            self._call("--fix-hours")
+
 
 def sections_of(offering) -> dict:
     return dict(SeminarGroup.objects.filter(offering=offering).values_list("unit_id", "number"))

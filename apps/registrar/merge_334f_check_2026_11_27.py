@@ -20,6 +20,8 @@ from django.apps import apps as django_apps
 from django.db.models import Sum
 
 from .absence_credit_read import credit_hours_map, effective_hours
+from .absence_limit import limit_percent_for_student
+from .exam_eligibility import lesson_hours_for
 from .guest_merge import carried_absence_hours
 from .merge_334f_2026_11_26 import RESOURCE
 
@@ -56,6 +58,27 @@ def _family(row, counts, report) -> None:
     tgt_ids = [e.pk for e in targets.values()]
     tgt_marks, tgt_credit = _absent_hours(tgt_ids, until=row.created_at), credit_hours_map(tgt_ids)
     counts["check_families"] += 1
+    offerings = {o.pk: o for o in CourseOffering.objects.filter(pk__in=sources)}
+    denominators = {pk: lesson_hours_for(o) for pk, o in offerings.items()}
+    target_denominator = lesson_hours_for(target)
+    report.append(
+        {
+            "kind": "hours",
+            "family": code,
+            "target": int(target.lesson_hours or 0),
+            "targetbase": int(target_denominator),
+            **{
+                f"{name}": int(offerings[pk].lesson_hours or 0)
+                for name, pk in zip(("first", "second"), sources)
+                if pk in offerings
+            },
+            **{
+                f"{name}base": int(denominators[pk])
+                for name, pk in zip(("first", "second"), sources)
+                if pk in denominators
+            },
+        }
+    )
     for student_id, rows in sorted(by_student.items()):
         target_row = targets.get(student_id)
         if target_row is None:
@@ -68,6 +91,12 @@ def _family(row, counts, report) -> None:
         tgt_raw = int(tgt_marks.get(target_row.pk) or 0) + carried_absence_hours(target_row)
         tgt = effective_hours(tgt_raw, tgt_credit.get(target_row.pk))
         counts["check_students"] += 1
+        percent = limit_percent_for_student(organization_id=target.organization_id, student_id=student_id)
+        base = max((denominators.get(e.offering_id, 0) for e in rows), default=0)
+        if base and src * 100 > base * percent:
+            counts["check_barred_before"] += 1
+        if target_denominator and tgt * 100 > target_denominator * percent:
+            counts["check_barred_after"] += 1
         if src == tgt:
             counts["check_students_equal"] += 1
             continue
@@ -101,4 +130,55 @@ def check(*, organization, batch: str, counts, report) -> None:
         _family(row, counts, report)
 
 
-__all__ = ["check"]
+HOURS_RESOURCE = f"{RESOURCE}.hours"
+HOURS_REASON = "MR-000836: birləşmiş 334F jurnalına mənbə jurnalların planlı auditoriya saatı (qayıb həddinin bazası)"
+
+
+def fix_hours(*, organization, actor, batch: str, counts) -> None:
+    """Birləşmiş jurnalın ``lesson_hours``-u boşdursa, hər iki mənbədəki EYNİ (> 0) planlı saatı yazır.
+
+    ``Merger._create_target`` bu sahəni köçürmürdü → qayıb həddi keçirilmiş dərslərin cəmindən hesablanırdı
+    (kiçik məxrəc → tələbələr «kəsilir»). Mənbələr fərqlidirsə və ya boşdursa toxunulmur (sayılır).
+    """
+    from core.audit import log_action
+    from core.constants import AuditAction
+
+    AuditLog, CourseOffering = _model("AuditLog", "audit"), _model("CourseOffering")
+    rows = AuditLog.objects.filter(
+        organization=organization, resource_type=RESOURCE, new_values__batch=batch, new_values__op="family"
+    ).order_by("created_at")
+    if not rows.exists():
+        counts["hours_batch_unknown"] += 1
+        return
+    for row in rows:
+        changes = row.changes or {}
+        sources = (changes.get("manifest") or {}).get("sources_retired") or []
+        target = CourseOffering.objects.select_for_update().filter(pk=changes.get("target")).first()
+        if target is None or not sources:
+            counts["hours_family_skipped"] += 1
+            continue
+        if int(target.lesson_hours or 0) > 0:
+            counts["hours_target_already_set"] += 1
+            continue
+        values = set(CourseOffering.objects.filter(pk__in=sources).values_list("lesson_hours", flat=True))
+        values = {int(v or 0) for v in values}
+        if len(values) != 1 or not next(iter(values)):
+            counts["hours_sources_differ_or_empty"] += 1
+            continue
+        hours = next(iter(values))
+        CourseOffering.objects.filter(pk=target.pk).update(lesson_hours=hours)
+        log_action(
+            AuditAction.UPDATE,
+            user=actor,
+            organization=organization,
+            obj=target,
+            old_values={"lesson_hours": int(target.lesson_hours or 0)},
+            new_values={"lesson_hours": hours, "batch": batch, "op": "hours"},
+            reason=HOURS_REASON,
+            resource_type=HOURS_RESOURCE,
+            resource_id=str(target.pk),
+        )
+        counts["hours_targets_set"] += 1
+
+
+__all__ = ["check", "fix_hours"]
