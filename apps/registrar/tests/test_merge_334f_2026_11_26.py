@@ -410,6 +410,36 @@ class Merge334FTest(TestCase):
         with self.assertRaisesMessage(CommandError, "f334_merge_undo_needs_batch"):
             self._call("--undo")
 
+    def test_check_compares_absence_hours_read_only(self):
+        """2026-11-27: ``--check`` mənbə və birləşmiş jurnalın qayıb saatını tələbə-tələbə tutuşdurur, heç nə yazmır."""
+        with bypass_rls():
+            source = self._source(self.same, self.f1)
+            LessonMark.objects.filter(lesson__offering=source).update(status="absent")
+        _counts, _families, batch = self._call("--apply")
+        counts, _families, _batch = self._call("--check", f"--batch={batch}")
+        self.assertEqual(counts["check_students_equal"], counts["check_students"])
+        self.assertNotIn("check_students_target_less", counts)
+        with bypass_rls():
+            student = self.students[self.f1.pk][0]
+            LessonMark.objects.filter(
+                enrollment__student=student, enrollment__status="enrolled", status="absent"
+            ).update(status="present")
+            before = self._snapshot()
+        out = StringIO()
+        call_command(
+            "merge_334f_journals_20261126",
+            *("--org", self.org.slug, "--actor", self.admin.username, "--check", f"--batch={batch}"),
+            stdout=out,
+        )
+        lines = out.getvalue().splitlines()
+        for line in lines:
+            self.assertRegex(line, LINE)
+        self.assertTrue(any("kind=check" in line and f"student={student.pk} " in line for line in lines))
+        with bypass_rls():
+            self.assertEqual(self._snapshot(), before)
+        with self.assertRaisesMessage(CommandError, "f334_merge_check_needs_batch_only"):
+            self._call("--check", f"--batch={batch}", "--apply")
+
 
 def sections_of(offering) -> dict:
     return dict(SeminarGroup.objects.filter(offering=offering).values_list("unit_id", "number"))
