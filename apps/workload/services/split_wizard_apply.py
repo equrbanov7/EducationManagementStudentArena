@@ -44,11 +44,20 @@ from core.constants import AuditAction
 from core.http_ids import parse_uuid
 
 from .assignments import _owner_snapshot, _sync_row
-from .offering_rules import multiplier, plan_reached_chair
+from .offering_rules import plan_reached_chair
 from .patok_streams import VACANT, _set_lecturer
 from .row_edit import assign_amended, save_row_amended, unassign_amended
 from .scoping import WorkloadDenied, ensure_can_distribute
-from .split_wizard import PLAN_FIELD, TOTAL_FIELD, can_fix_totals, deny, load_rows, parse_row_ids, row_groups
+from .split_wizard import (
+    PLAN_FIELD,
+    TOTAL_FIELD,
+    can_fix_totals,
+    deny,
+    load_rows,
+    parse_row_ids,
+    row_groups,
+    row_joint_modes,
+)
 
 _CTX = "workload.split_wizard"
 SECTION_KINDS = ("seminar", "lab")
@@ -102,12 +111,28 @@ def _parse_config(payload, rows) -> dict:
     for row in rows:
         item = row_items.get(row.pk) or {}
         groups = row_groups(row)
+        current = row_joint_modes(row, groups)
         modes = item.get("joint_by_activity")
         if modes is None:
-            modes = dict.fromkeys(SECTION_KINDS, bool(item.get("joint")))
+            legacy = bool(item.get("joint"))
+            # An open legacy tab cannot represent both modes. Its omitted assignments would be removed.
+            if (
+                current["seminar"] != current["lab"]
+                and _active(row, "lab")
+                and (_active(row, "seminar") or legacy != current["lab"])
+            ):
+                raise deny(
+                    "workload.wizard_refresh",
+                    pgettext(
+                        _CTX,
+                        "Bu sətirdə seminar və laboratoriyanın qrup bölgüsü fərqlidir. "
+                        "Səhifəni yeniləyib hər fəaliyyətin bölgüsünü ayrıca yoxlayın.",
+                    ),
+                )
+            modes = dict.fromkeys(SECTION_KINDS, legacy)
         if not isinstance(modes, dict) or any(not isinstance(value, bool) for value in modes.values()):
             raise deny("workload.wizard_units", pgettext(_CTX, "Bölmələr dəyişib — sehrbazı bağlayıb yenidən açın."))
-        joint = {kind: len(groups) > 1 and modes.get(kind, multiplier(row, kind) <= 1) for kind in SECTION_KINDS}
+        joint = {kind: len(groups) > 1 and modes.get(kind, current[kind]) for kind in SECTION_KINDS}
         per_group = {}
         for group in groups:
             entry = group_items.get((row.pk, group.pk)) or {}

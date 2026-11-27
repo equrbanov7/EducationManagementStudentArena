@@ -23,7 +23,7 @@ from ..services.split_wizard_apply import apply_wizard, ensure_journals
 from ._base import active_organization, actor_for, denied, json_body, no_org
 from .distribution_api import _resolve_task, _task_payload, _write_denied
 
-_WIZARD_CONFLICTS = frozenset({"workload.wizard_blocked"})
+_WIZARD_CONFLICTS = frozenset({"workload.wizard_blocked", "workload.wizard_refresh"})
 _WIZARD_FORBIDDEN = frozenset({"workload.wizard_forbidden"})
 
 

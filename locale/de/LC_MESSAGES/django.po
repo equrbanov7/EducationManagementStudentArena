@@ -123923,3 +123923,7 @@ msgstr "Anzahl der Laborgruppen und Untergruppen"
 msgctxt "accounts.workload"
 msgid "Plan saatını bir axın və ya bir qrup üçün yazın. Cəmi saat bütün axınlara və ya qruplara ayrılan yükdür. Məsələn, iki seminar qrupunun hərəsinə 15 saat ayrılırsa, cəmi 30 saatdır."
 msgstr "Geben Sie die Planstunden für einen Vorlesungszug oder eine Gruppe ein. Die Gesamtstunden umfassen alle Züge oder Gruppen. Zwei Seminargruppen mit je 15 Stunden ergeben insgesamt 30 Stunden."
+
+msgctxt "workload.split_wizard"
+msgid "Bu sətirdə seminar və laboratoriyanın qrup bölgüsü fərqlidir. Səhifəni yeniləyib hər fəaliyyətin bölgüsünü ayrıca yoxlayın."
+msgstr "In dieser Zeile sind die Gruppen für Seminar und Labor unterschiedlich eingeteilt. Laden Sie die Seite neu und prüfen Sie die Einteilung für jede Lehrveranstaltung getrennt."

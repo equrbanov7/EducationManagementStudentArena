@@ -90,6 +90,68 @@ class SplitWizardActivityModesTests(WizardBase):
     def test_seminar_groups_separate_labs_together(self):
         self.check_mixed_save("lab", "seminar")
 
+    def test_open_legacy_tab_cannot_erase_mixed_assignments_or_roster(self):
+        self.check_mixed_save("seminar", "lab")
+
+        def assignments():
+            return {
+                a.pk: (a.teacher_id, a.activity, a.hours, a.group_id, a.sub_number) for a in self._section_assignments()
+            }
+
+        before = assignments()
+        self.assertEqual(sum(values[1] == "lab" for values in before.values()), 5)
+        journals = {kind: self.journal_snapshot(kind) for kind in ("seminar", "lab")}
+        seminar = next(a for a in self._section_assignments() if a.activity == "seminar")
+        state = self._state().json()
+        rid = str(self.row.pk)
+        # The old UI reads the shared seminar teacher and sees an empty shared lab unit.
+        payload = self._payload(lecture=False, fix=False)
+        payload["rows"][0]["joint"] = state["rows"][0]["joint"]
+        payload["groups"] = [
+            {"row_id": rid, "group_id": group["id"], "apply_journal": False} for group in state["groups"]
+        ]
+        payload["units"] = [
+            {"row_id": rid, "activity": kind, "group_id": "", "teacher_id": teacher, "hours": hours}
+            for kind, teacher, hours in [("seminar", str(seminar.teacher_id), seminar.hours), ("lab", "", 15)]
+        ]
+        response = self._save(payload)
+        self.assertEqual(response.status_code, 409, response.content)
+        self.assertEqual(response.json()["error"], "workload.wizard_refresh")
+        self.assertEqual(assignments(), before)
+        for kind in journals:
+            self.assertEqual(self.journal_snapshot(kind), journals[kind])
+
+    def test_legacy_lab_only_uses_the_active_mode_and_rejects_a_stale_seminar_default(self):
+        second = self.add_second_group()
+        TeachingTaskRow.objects.filter(pk=self.row.pk).update(
+            seminar_plan=0, seminar_total=0, lab_total=30, subgroup_count=1, lab_group_count=2
+        )
+        state = self._state().json()["rows"][0]
+        self.assertEqual(state["joint_by_activity"], {"seminar": True, "lab": False})
+        self.assertFalse(state["joint"])
+        rid = str(self.row.pk)
+        payload = self._payload(lecture=False, fix=False)
+        payload["groups"] = []
+        payload["units"] = [
+            {
+                "row_id": rid,
+                "activity": "lab",
+                "group_id": str(group.pk),
+                "teacher_id": str(self.teachers[0].pk),
+                "hours": 15,
+            }
+            for group in (self.group, second)
+        ]
+        response = self._save(payload)
+        self.assertEqual(response.status_code, 200, response.content)
+        before = [(a.pk, a.teacher_id, a.group_id, a.hours) for a in self._section_assignments()]
+        self.assertEqual(len(before), 2)
+        payload["rows"][0]["joint"] = True
+        payload["units"] = [{"row_id": rid, "activity": "lab", "group_id": "", "teacher_id": "", "hours": 15}]
+        response = self._save(payload)
+        self.assertEqual(response.status_code, 409, response.content)
+        self.assertEqual([(a.pk, a.teacher_id, a.group_id, a.hours) for a in self._section_assignments()], before)
+
     def test_lab_follows_seminar_count_when_zero_and_old_joint_post_still_applies_to_both(self):
         self.add_second_group()
         TeachingTaskRow.objects.filter(pk=self.row.pk).update(subgroup_count=3, lab_group_count=0)
