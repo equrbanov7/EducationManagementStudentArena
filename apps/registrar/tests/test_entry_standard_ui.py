@@ -61,7 +61,7 @@ class EntryStandardUITest(EntryStandardFixture, TestCase):
             response = client.get(base, params)
             self.assertEqual(response.status_code, 200)
             self.assertContains(response, "data-entry-standard")
-            self.assertContains(response, "Aktivlik")
+            self.assertContains(response, "Seminar / Laboratoriya")  # sahib 2026-11-28: «Aktivlik» yox
             self.assertContains(response, "9,33")
             self.assertContains(response, "/30")
             body = response.content.decode()
