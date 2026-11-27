@@ -121714,3 +121714,7 @@ msgstr ""
 "Bərpa: tələbənin qayıdacağı qrupu seçin. Köhnə qrupu aktivdirsə, o avtomatik"
 " seçilir; arxivdədirsə başqa aktiv qrup seçin — tələbə həmin qrupun cari "
 "semestr jurnallarına qoşulur."
+
+msgctxt "applications"
+msgid "Axtarışa uyğun müraciət başqa bölmədədir:"
+msgstr "Axtarışa uyğun müraciət başqa bölmədədir:"

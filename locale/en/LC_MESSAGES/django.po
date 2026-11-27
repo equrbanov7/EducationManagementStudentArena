@@ -122441,3 +122441,7 @@ msgstr ""
 "Reinstatement: choose the group the student returns to. If the previous "
 "group is active it is selected automatically; if it is archived, choose "
 "another active group — the student joins its current-semester journals."
+
+msgctxt "applications"
+msgid "Axtarışa uyğun müraciət başqa bölmədədir:"
+msgstr "Matching applications are in another section:"

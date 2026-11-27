@@ -53,8 +53,21 @@ def application_list(request, *, organization):
     )
     paginator = Paginator(queryset, PAGE_SIZE)
     page = paginator.get_page(request.GET.get("page") or 1)
+    # Sahib 2026-11-28: «Mənə gələnlər»də «MR-886» axtaranda boş idi, halbuki müraciət başqa bölmədə idi.
+    elsewhere = (
+        queries.search_elsewhere(
+            organization=organization,
+            user=user,
+            search=request.GET.get("q", ""),
+            tab=tab,
+            stat=request.GET.get("stat", "open"),
+        )
+        if paginator.count == 0
+        else []
+    )
     return ok(
         {
+            "elsewhere": elsewhere,
             "results": [
                 row_payload(application, viewer_is_handler=access.is_current_handler(user, application))
                 for application in page.object_list

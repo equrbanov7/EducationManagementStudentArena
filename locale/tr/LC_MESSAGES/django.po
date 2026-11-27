@@ -121595,3 +121595,7 @@ msgstr ""
 "Geri alma: öğrencinin döneceği grubu seçin. Eski grubu aktifse otomatik "
 "seçilir; arşivdeyse başka bir aktif grup seçin — öğrenci o grubun bu dönemki"
 " yoklama defterlerine eklenir."
+
+msgctxt "applications"
+msgid "Axtarışa uyğun müraciət başqa bölmədədir:"
+msgstr "Aramaya uygun başvuru başka bir bölümde:"
