@@ -9,7 +9,7 @@
      • seminar/lab: bütün sətrə yazılmış saat TƏK xətdir («Qruplara ayrılmayıb»), qrup xətləri «təyin olunmayıb»
        demir; qarışıq halda boş qrup xətti «Ümumi bölgüyə daxildir»;
      • kartın vəziyyəti: «Tam bölünüb» / «Vakant: N s» / «Bölünməyib: N s»;
-     • qardaş qruplardan fərqlənən saat (45 əvəzinə 38, 30 əvəzinə 37) «saatı yoxlayın» nişanı alır;
+     • qardaş qruplardan fərqlənən saat (45 əvəzinə 38, 30 əvəzinə 37) neytral müqayisə ilə göstərilir;
      • yenidən çəkilişdən sonra: işlənən kart ekranda eyni yerdə, açıq «Tapşırıq sətirləri» açıq qalır, sağ panelin
        sürüşməsi saxlanır, saatı dəyişən müəllim «+7 s» ilə vurğulanır; sağ panel axtarışı süzür.
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -24,6 +24,7 @@ const { JSDOM } = require("jsdom");
 const ROOT = path.resolve(__dirname, "..", "..");
 const JS_DIR = path.join(ROOT, "apps/accounts/static/accounts/js/profile");
 const CARDS = fs.readFileSync(path.join(JS_DIR, "workload_distribution_cards.js"), "utf8");
+const EXPLORER = fs.readFileSync(path.join(JS_DIR, "workload_card_explorer.js"), "utf8");
 const ANCHOR = fs.readFileSync(path.join(JS_DIR, "workload_distribution_anchor.js"), "utf8");
 
 const HTML = `<!doctype html><html><body>
@@ -38,6 +39,7 @@ function boot() {
     const dom = new JSDOM(HTML, { runScripts: "outside-only", pretendToBeVisual: true, url: "https://ems.test/" });
     const { window } = dom;
     window.EMSReady = Object.assign(function (fn) { fn(); }, { once: function (key, fn) { fn(); } });
+    window.eval(EXPLORER);
     window.eval(CARDS);
     return window;
 }
@@ -118,7 +120,7 @@ test("qruplar ayrıca keçirsə «axın» sözü yoxdur — «N qrup ayrıca ke�
     assert.equal(host.querySelector(".wl-stream__tag"), null);
     assert.equal(host.querySelector(".wl-stream__mode"), null);
     assert.equal(host.querySelector(".wl-kind__rule"), null);
-    assert.match(host.querySelector(".wl-kind--lecture .wl-kind__sum").textContent, /2 qrup ayrıca keçir · müəllim yükünə cəmi 90 s/);
+    assert.match(host.querySelector(".wl-kind--lecture .wl-kind__sum").textContent, /2 qrup ayrıca keçir · Plan 90 s · bölünüb 90 s · qalıq 0 s/);
     assert.match(host.querySelector("[data-wl-streams-open]").textContent, /Patok qur/);
 });
 
@@ -185,7 +187,7 @@ test("kartın vəziyyəti: tam bölünüb / vakant saat / bölünməyib", () => 
     assert.ok(state.classList.contains("wl-state--open"));
 });
 
-test("qardaş qruplardan fərqlənən saat «saatı yoxlayın» nişanı alır (38 / 37 — 45 / 30 əvəzinə)", () => {
+test("qardaş qruplardan fərqlənən saat neytral müqayisə ilə göstərilir (38 / 37 — 45 / 30 əvəzinə)", () => {
     const window = boot();
     const host = render(window, card({
         lecture: { plan: 45, load_hours: 128, without_groups: [], streams: [
@@ -201,8 +203,8 @@ test("qardaş qruplardan fərqlənən saat «saatı yoxlayın» nişanı alır (
     }));
     const odd = [...host.querySelectorAll(".wl-badge--odd")];
     assert.equal(odd.length, 2);
-    assert.match(odd[0].textContent, /digər qruplarda 45 s/);
-    assert.match(odd[1].textContent, /digər qruplarda 30 s/);
+    assert.match(odd[0].textContent, /Digər qruplarda 45 s/);
+    assert.match(odd[1].textContent, /Digər qruplarda 30 s/);
     // Qiyabi qrupun az saatı səhv deyil — müqayisə təhsil forması üzrədir.
     const mixed = render(window, card({
         rows: [{ id: "r1", education_form: "eyani" }, { id: "r3", education_form: "eyani" }, { id: "q1", education_form: "qiyabi" }],
@@ -309,4 +311,133 @@ test("sağ panel axtarışı: ad ilə süzür (ə/ı fərqinə dözümlü), uyğ
     assert.equal(document.querySelector("[data-wl-teacher-none]").hidden, false);
     type("");
     assert.equal(document.querySelectorAll(".is-filtered-out").length, 0);
+});
+
+function bigCard() {
+    const lines = Array.from({ length: 25 }, (_, i) => {
+        const n = i + 1;
+        return line("row-" + n, "Qrup-" + n, 30, 30, [entry("id-" + n, n === 25 ? "Rəfiyev Əli" : "Müəllim " + n, 30)]);
+    });
+    return card({
+        groups: lines.map(item => ({ id: item.group_id, name: item.label })),
+        seminar: { total: 750, lines }, lab: { total: 750, lines },
+    });
+}
+
+function searchCard(window, host, query) {
+    const input = host.querySelector("[data-wl-card-search]");
+    input.value = query;
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+    return input;
+}
+
+test("25 seminar və laboratoriya bölgüsü dörd nəticədən başlayır, bütün sətrlər və ayrıca müəllim tapılır", () => {
+    const window = boot();
+    const data = bigCard();
+    const host = render(window, data);
+    const seminar = ".wl-kind--seminar";
+    const lab = ".wl-kind--lab";
+    const visible = kind => [...host.querySelectorAll(kind + " .wl-line:not([hidden])")];
+    const toggle = kind => host.querySelector(kind + " > [data-wl-preview-toggle]");
+    assert.equal(visible(seminar).length, 4);
+    assert.equal(visible(lab).length, 4);
+    const button = toggle(seminar);
+    assert.equal(button.getAttribute("aria-expanded"), "false");
+    assert.equal(host.querySelector(".wl-card__group-list").open, false);
+    button.click();
+    assert.equal(visible(seminar).length, 25);
+    assert.equal(button.getAttribute("aria-expanded"), "true");
+    assert.equal(visible(lab).length, 4);
+    searchCard(window, host, "refiyev eli");
+    assert.deepEqual(visible(seminar).map(row => row.dataset.rowId), ["row-25"]);
+    assert.equal(host.querySelector("[data-wl-search-status]").textContent, "2 nəticə");
+    assert.equal(visible(lab)[0].querySelector("[data-wl-assign-edit]").dataset.assignmentId, "id-25");
+    assert.equal(toggle(seminar).hidden, true);
+    searchCard(window, host, "Heç bir uyğun qrup");
+    assert.equal(host.querySelector(seminar).hidden, true);
+    assert.equal(host.querySelector("[data-wl-search-status]").textContent, "Uyğun nəticə tapılmadı.");
+    assert.equal(host.querySelector("[data-wl-card-rows]").hidden, false);
+    searchCard(window, host, "qrup-25");
+    const updated = render(window, data);
+    assert.equal(updated.querySelector("[data-wl-card-search]").value, "qrup-25");
+    assert.equal(visible(seminar).length, 1);
+    searchCard(window, host, "");
+    assert.equal(visible(seminar).length, 25);
+    toggle(seminar).click();
+    assert.equal(visible(seminar).length, 4);
+    searchCard(window, host, "qrup-20");
+    window.EMSWorkloadRender.cards(host, [data], {}, { fresh: true, teacher: "id-25" });
+    assert.equal(host.querySelector("[data-wl-card-search]").value, "");
+    assert.equal(visible(seminar).length, 4);
+    assert.ok(visible(seminar).some(row => row.querySelector(".is-match")));
+});
+
+test("mənbə sətri, axın və alt qrupun bölgüsü öz həqiqi cəmini saxlayır", () => {
+    const window = boot();
+    const data = card({
+        groups: [{ id: "A", name: "A" }, { id: "B", name: "B" }],
+        rows: [{ id: "r1", groups: [{ id: "A", name: "A" }, { id: "B", name: "B" }] }],
+        seminar: { total: 60, lines: [
+            line("r1", "A", 30, 60, [entry("1", "Müəllim", 24)], { assigned: 24, remaining: 36 }),
+            line("r1", "B", 30, 60, [], { assigned: 24, remaining: 36 }),
+        ] },
+        lab: { total: 20, lines: [line("r1", "A · B", 20, 20, [entry("2", "Müəllim", 20)], { joint: true, group_id: "" })] },
+        lecture: { load_hours: 22, streams: [
+            stream("r1", ["A", "B"], 22, [], { assigned: 18, remaining: 4 }),
+            stream("r2", ["Kənar"], 27, [], { orphan: true, assigned: 27, remaining: 27 }),
+        ] },
+    });
+    const host = render(window, data);
+    assert.match(host.querySelector(".wl-kind--seminar .wl-kind__sum").textContent, /2 qrup · Plan 60 s · bölünüb 24 s · qalıq 36 s/);
+    assert.match(host.querySelector(".wl-kind--lab .wl-kind__sum").textContent, /2 qrup · Plan 20 s · bölünüb 20 s · qalıq 0 s/);
+    assert.match(host.querySelector(".wl-kind--lecture .wl-kind__sum").textContent, /Plan 22 s · bölünüb 18 s · qalıq 4 s/);
+    assert.match(host.querySelector(".wl-state").textContent, /40 s/);
+    assert.equal(host.querySelector("[data-wl-card-search]"), null);
+    const source = host.querySelector("[data-wl-card-rows-toggle]");
+    assert.equal(host.querySelector("[data-wl-card-rows]").id, source.getAttribute("aria-controls"));
+    assert.match(source.textContent, /Plan sətirləri \(1\)/);
+});
+
+test("bir qrupun seminar və lab alt qrup planları, çox müəllim və seçilən bölgünün redaktə hədəfi", () => {
+    const window = boot();
+    const groups = [{ id: "G", name: "G" }];
+    const names = Array.from({ length: 9 }, (_, i) => entry(String(i + 1), "Şəxs " + (i + 1), 10, { sub_number: i + 1 }));
+    const lines = [line("r", "G", 30, 90, names, { sections: [{ number: 9, label: "Lab Son" }] })];
+    const data = card({ groups, rows: [{ id: "r", groups, subgroup_count: 2, lab_group_count: 4 }],
+        seminar: { total: 90, lines }, lab: { total: 90, lines } });
+    const host = render(window, data);
+    assert.ok(host.querySelector(".wl-card--simple .wl-lines--simple"));
+    assert.match(host.querySelector(".wl-kind--seminar .wl-line__badges").textContent, /Planda 2 alt qrup/);
+    assert.match(host.querySelector(".wl-kind--lab .wl-line__badges").textContent, /Planda 4 alt qrup/);
+    const list = host.querySelector(".wl-kind--lab .wl-line__entries");
+    assert.equal(list.querySelectorAll(".wl-chip:not([hidden])").length, 4);
+    searchCard(window, host, "sexs 9");
+    assert.equal(list.querySelectorAll(".wl-chip:not([hidden])").length, 1);
+    const chip = list.querySelector(".wl-chip:not([hidden])");
+    assert.equal(chip.querySelector("[data-wl-assign-edit]").dataset.assignmentId, "9");
+    assert.equal(chip.querySelector(".wl-chip__section").textContent, "Lab Son");
+    searchCard(window, host, "");
+    list.querySelector("[data-wl-preview-toggle]").click();
+    assert.equal(list.querySelectorAll(".wl-chip:not([hidden])").length, 9);
+    window.EMSWorkloadRender.cards(host, [card({ id: "extra", key: "extra" })], {}, { append: true });
+    assert.equal(list.querySelectorAll(".wl-chip:not([hidden])").length, 9);
+    assert.equal(host.querySelectorAll("[data-wl-card-search]").length, 1);
+});
+
+test("birgə axında və seminar sətrində 25 qrupun sonuncusu da axtarılır", () => {
+    const window = boot();
+    const groups = Array.from({ length: 25 }, (_, i) => ({ id: "Q" + i, name: "Q" + i }));
+    const names = groups.map(g => g.name);
+    const data = card({ groups, rows: [{ id: "r", groups }],
+        lecture: { load_hours: 20, streams: [stream("r", names, 20, [entry("a", "Mahir", 20)])] },
+        seminar: { total: 20, lines: [line("r", names.join(" · "), 20, 20, [entry("b", "Nigar", 20)], { joint: true, group_id: "" })] },
+    });
+    const host = render(window, data);
+    const displayed = () => [...host.querySelectorAll(".wl-kind .wl-pill:not([hidden])")].map(node => node.textContent);
+    assert.equal(displayed().length, 8);
+    searchCard(window, host, "q24");
+    assert.deepEqual(displayed(), ["Q24", "Q24"]);
+    searchCard(window, host, "Mahir");
+    assert.equal(host.querySelector(".wl-kind--seminar").hidden, true);
+    assert.equal(host.querySelector(".wl-kind--lecture .wl-stream__groups [data-wl-preview-toggle]").hidden, false);
 });

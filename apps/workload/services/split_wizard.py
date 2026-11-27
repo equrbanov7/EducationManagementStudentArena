@@ -27,7 +27,7 @@ from core.person_names import person_label
 from ..constants import AMENDMENT_SCOPED_STATUSES, EDITABLE_STATUSES, RowKind, TaskStatus
 from ..models import TeachingTaskRow
 from .group_aliases import verified_aliases
-from .offering_rules import per_group_hours, plan_reached_chair
+from .offering_rules import multiplier, per_group_hours, plan_reached_chair
 from .patok import is_partner, partner_lectures
 from .row_edit import amendment_needed
 from .scoping import WorkloadDenied, ensure_can_distribute
@@ -107,6 +107,10 @@ def row_groups(row) -> list:
     return sorted(row.groups.all(), key=lambda unit: (unit.name or "", str(unit.pk)))
 
 
+def row_joint_modes(row, groups) -> dict:
+    return {kind: len(groups) > 1 and multiplier(row, kind) <= 1 for kind in ("seminar", "lab")}
+
+
 def assignment_payload(assignment) -> dict:
     teacher = assignment.teacher
     return {
@@ -125,13 +129,15 @@ def assignment_payload(assignment) -> dict:
 def _row_payload(task, row, partners) -> dict:
     groups = row_groups(row)
     plans = per_group_hours(row)
+    joint = row_joint_modes(row, groups)
     partner = partners.get(row.pk) if is_partner(row) else None
     lectures = [a for a in row.assignments.all() if a.activity == "lecture"]
     return {
         "id": str(row.pk),
         "groups": [str(group.pk) for group in groups],
         "label": " · ".join(group.name for group in groups) or row.groups_text or "—",
-        "joint": len(groups) > 1 and int(row.subgroup_count or 1) <= 1,
+        "joint": joint["lab"] if row.lab_total and not row.seminar_total else joint["seminar"],
+        "joint_by_activity": joint,
         "plans": {activity: int(plans[activity]) for activity in ACTIVITIES},
         "plan_fields": {activity: int(getattr(row, PLAN_FIELD[activity]) or 0) for activity in ACTIVITIES},
         "totals": {activity: int(getattr(row, TOTAL_FIELD[activity]) or 0) for activity in ACTIVITIES},

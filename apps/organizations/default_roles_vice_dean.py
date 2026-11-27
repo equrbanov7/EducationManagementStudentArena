@@ -14,7 +14,7 @@ Yəni müavin fakültəni idarə etməyə kömək edir, amma:
 
 2026-11-27 (sahib: «dekanlıqda dondurma, bərpa, xaric və s. edə bilsin»): tələbə hərəkəti əmri
 (`student.movement` + `people.manage_academic` + `student.registry_view`) və dekanın gündəlik «Qruplar»
-açarı `unit.group_manage` ``default_roles_dean_office.apply_dean_office_grants`` ilə verilir (mövcud: 0090).
+açarı `unit.group_manage` ``default_roles_dean_office.apply_dean_office_grants`` ilə verilir (mövcud: 0091).
 Bu modul «Dekanlıq laborantı» rolunu da (``DEAN_OFFICE_ROLES``) universitet kataloquna ötürür.
 
 ⚠️ SƏVİYYƏ 75 (dekan 80-dir, `chair_head` 70): müavin kafedra müdirindən

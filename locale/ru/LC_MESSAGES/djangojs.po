@@ -3986,3 +3986,57 @@ msgstr ""
 
 msgid "Seçim üçün variant yoxdur"
 msgstr "Нет доступных вариантов"
+
+msgid "%(subject)s · %(program)s · Semestr %(semester)s · %(credits)s kredit"
+msgstr "%(subject)s · %(program)s · Семестр %(semester)s · Кредиты: %(credits)s"
+
+msgid "Plan sətirləri (%(n)s)"
+msgstr "Строки плана (%(n)s)"
+
+msgid "Saatlar qrupa görə dəyişir."
+msgstr "Часы различаются по группам."
+
+msgid "Digər qruplarda %(hours)s"
+msgstr "В других группах: %(hours)s"
+
+msgid "Plan %(total)s · bölünüb %(assigned)s · qalıq %(remaining)s"
+msgstr "План %(total)s · распределено %(assigned)s · осталось %(remaining)s"
+
+msgid "Qrup və ya müəllim axtar"
+msgstr "Поиск по группе или преподавателю"
+
+msgid "Hamısını göstər (%(n)s)"
+msgstr "Показать все (%(n)s)"
+
+msgid "Daha az göstər"
+msgstr "Свернуть список"
+
+msgid "Uyğun nəticə tapılmadı."
+msgstr "Совпадений не найдено."
+
+msgid "%(n)s nəticə"
+msgstr "Найдено: %(n)s"
+
+msgid "Qruplar (%(n)s)"
+msgstr "Группы (%(n)s)"
+
+msgid "Alt qruplar: %(sections)s"
+msgstr "Подгруппы: %(sections)s"
+
+msgid "Planda %(n)s alt qrup"
+msgstr "Подгрупп по плану: %(n)s"
+
+msgid "%(n)s axın"
+msgstr "Потоков: %(n)s"
+
+msgid "%(n)s qrup ayrıca keçir"
+msgstr "Отдельно занимаются групп: %(n)s"
+
+msgid "Qəbul ili %(years)s · mühazirə %(lecture)s s · seminar %(seminar)s s · laboratoriya %(lab)s s"
+msgstr "Год поступления %(years)s · лекции %(lecture)s ч · семинары %(seminar)s ч · лабораторные %(lab)s ч"
+
+msgid "Seçmə blok %(group)s"
+msgstr "Блок дисциплин по выбору %(group)s"
+
+msgid "Seçmə fənn"
+msgstr "Дисциплина по выбору"

@@ -269,7 +269,7 @@ def test_academic_scope_migration_backfills_legacy_queue_and_is_reversible(world
     app.refresh_from_db()
     assert app.current_scope_unit_id == world["tree"]["specialty"].pk
     unit = ApplicationUnit.objects.get(pk=app.current_unit_id)
-    # «Dekanlıq laborantı» (2026-11-27, organizations/0090) kataloqda 0011-dən sonra gəlir — 0011 ona toxunmur.
+    # «Dekanlıq laborantı» (2026-11-27, organizations/0091) kataloqda 0011-dən sonra gəlir — 0011 ona toxunmur.
     office = {"dean", "vice_dean", "program_coordinator", "tutor", "dean_office_assistant"}
     assert unit.requires_scope and set(unit.role_names) == office
     migration.unseed(apps, None)

@@ -32,7 +32,7 @@ from apps.registrar.tests.subgroup_base import SubgroupFixture
 from core.constants import OrgUnitType
 from core.rls import bypass_rls
 
-MIGRATION = importlib.import_module("apps.organizations.migrations.0090_dean_office_student_movement")
+MIGRATION = importlib.import_module("apps.organizations.migrations.0091_dean_office_student_movement")
 ACTION_URL = "accounts:student_registry_action"
 _MOVEMENT_KEYS = {"student.movement", "people.manage_academic"}
 

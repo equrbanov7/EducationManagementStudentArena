@@ -3988,3 +3988,57 @@ msgstr ""
 
 msgid "Seçim üçün variant yoxdur"
 msgstr "No options available"
+
+msgid "%(subject)s · %(program)s · Semestr %(semester)s · %(credits)s kredit"
+msgstr "%(subject)s · %(program)s · Semester %(semester)s · %(credits)s credits"
+
+msgid "Plan sətirləri (%(n)s)"
+msgstr "Plan rows (%(n)s)"
+
+msgid "Saatlar qrupa görə dəyişir."
+msgstr "Hours vary by group."
+
+msgid "Digər qruplarda %(hours)s"
+msgstr "Other groups: %(hours)s"
+
+msgid "Plan %(total)s · bölünüb %(assigned)s · qalıq %(remaining)s"
+msgstr "Planned %(total)s · assigned %(assigned)s · remaining %(remaining)s"
+
+msgid "Qrup və ya müəllim axtar"
+msgstr "Search by group or teacher"
+
+msgid "Hamısını göstər (%(n)s)"
+msgstr "Show all (%(n)s)"
+
+msgid "Daha az göstər"
+msgstr "Show fewer"
+
+msgid "Uyğun nəticə tapılmadı."
+msgstr "No matching results."
+
+msgid "%(n)s nəticə"
+msgstr "Results: %(n)s"
+
+msgid "Qruplar (%(n)s)"
+msgstr "Groups (%(n)s)"
+
+msgid "Alt qruplar: %(sections)s"
+msgstr "Subgroups: %(sections)s"
+
+msgid "Planda %(n)s alt qrup"
+msgstr "Planned subgroups: %(n)s"
+
+msgid "%(n)s axın"
+msgstr "Lecture streams: %(n)s"
+
+msgid "%(n)s qrup ayrıca keçir"
+msgstr "Groups taught separately: %(n)s"
+
+msgid "Qəbul ili %(years)s · mühazirə %(lecture)s s · seminar %(seminar)s s · laboratoriya %(lab)s s"
+msgstr "Admission year %(years)s · lectures %(lecture)s h · seminars %(seminar)s h · labs %(lab)s h"
+
+msgid "Seçmə blok %(group)s"
+msgstr "Elective block %(group)s"
+
+msgid "Seçmə fənn"
+msgstr "Elective subject"

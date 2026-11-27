@@ -3965,3 +3965,57 @@ msgstr ""
 
 msgid "Seçim üçün variant yoxdur"
 msgstr "Seçim üçün variant yoxdur"
+
+msgid "%(subject)s · %(program)s · Semestr %(semester)s · %(credits)s kredit"
+msgstr "%(subject)s · %(program)s · Semestr %(semester)s · %(credits)s kredit"
+
+msgid "Plan sətirləri (%(n)s)"
+msgstr "Plan sətirləri (%(n)s)"
+
+msgid "Saatlar qrupa görə dəyişir."
+msgstr "Saatlar qrupa görə dəyişir."
+
+msgid "Digər qruplarda %(hours)s"
+msgstr "Digər qruplarda %(hours)s"
+
+msgid "Plan %(total)s · bölünüb %(assigned)s · qalıq %(remaining)s"
+msgstr "Plan %(total)s · bölünüb %(assigned)s · qalıq %(remaining)s"
+
+msgid "Qrup və ya müəllim axtar"
+msgstr "Qrup və ya müəllim axtar"
+
+msgid "Hamısını göstər (%(n)s)"
+msgstr "Hamısını göstər (%(n)s)"
+
+msgid "Daha az göstər"
+msgstr "Daha az göstər"
+
+msgid "Uyğun nəticə tapılmadı."
+msgstr "Uyğun nəticə tapılmadı."
+
+msgid "%(n)s nəticə"
+msgstr "%(n)s nəticə"
+
+msgid "Qruplar (%(n)s)"
+msgstr "Qruplar (%(n)s)"
+
+msgid "Alt qruplar: %(sections)s"
+msgstr "Alt qruplar: %(sections)s"
+
+msgid "Planda %(n)s alt qrup"
+msgstr "Planda %(n)s alt qrup"
+
+msgid "%(n)s axın"
+msgstr "%(n)s axın"
+
+msgid "%(n)s qrup ayrıca keçir"
+msgstr "%(n)s qrup ayrıca keçir"
+
+msgid "Qəbul ili %(years)s · mühazirə %(lecture)s s · seminar %(seminar)s s · laboratoriya %(lab)s s"
+msgstr "Qəbul ili %(years)s · mühazirə %(lecture)s s · seminar %(seminar)s s · laboratoriya %(lab)s s"
+
+msgid "Seçmə blok %(group)s"
+msgstr "Seçmə blok %(group)s"
+
+msgid "Seçmə fənn"
+msgstr "Seçmə fənn"

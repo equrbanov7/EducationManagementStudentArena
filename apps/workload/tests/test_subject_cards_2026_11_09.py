@@ -160,7 +160,26 @@ class FamilyCardTests(CardsBase):
             credits="8",
             credits_value=0,
         )
-        self.assertEqual(family_key(row), family_key(self.row_mu))
+        for credit in ("8", "08", "8 kredit", "8.0 ECTS"):
+            with self.subTest(credit=credit):
+                row.credits = credit
+                self.assertEqual(family_key(row), family_key(self.row_mu))
+        row.credits = "8,5"
+        decimal_key = family_key(row)
+        self.assertNotEqual(decimal_key, family_key(self.row_mu))
+        row.credits = "8.5"
+        self.assertEqual(family_key(row), decimal_key)
+
+    def test_joint_credit_rows_keep_the_full_plan_credit(self):
+        plain = self.row_mu
+        joint = self._row([self.g_i, self.g_ml], lecture_total=30, credits="8 / 6", credits_value=8)
+        same = self._row([self.g_bi, self.g_mu], lecture_total=30, credits="8/6", credits_value=8)
+        reverse = self._row([self.g_mrk, self.g_dbi], lecture_total=30, credits="6 / 8", credits_value=6)
+        by_row = {pk: card for card in self._cards()["cards"] for pk in card["row_ids"]}
+        self.assertEqual(set(by_row[str(joint.pk)]["row_ids"]), {str(joint.pk), str(same.pk)})
+        self.assertNotEqual(by_row[str(plain.pk)]["key"], by_row[str(joint.pk)]["key"])
+        self.assertNotEqual(by_row[str(reverse.pk)]["key"], by_row[str(joint.pk)]["key"])
+        self.assertEqual(by_row[str(joint.pk)]["credits"], "8 / 6")
 
     def test_lecture_streams_follow_the_lead_links(self):
         lecture = self._algebra()["lecture"]

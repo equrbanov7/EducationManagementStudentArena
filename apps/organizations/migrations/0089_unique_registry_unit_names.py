@@ -3,6 +3,8 @@
 from django.db import migrations, models
 from django.db.models.functions import Collate
 
+from apps.organizations import registry_name_ddl_v1
+
 # Whitespace stripped by the registry forms (str.strip).
 _TRIM_CHARS = (
     "\t\n\v\f\r\x1c\x1d\x1e\x1f \x85\xa0\u1680"
@@ -24,48 +26,28 @@ _NAME = Collate(
 )
 
 
-def check_existing_names(apps, schema_editor):
-    schema_editor.execute("SET LOCAL app.bypass_rls = 'on'")
-    schema_editor.execute("LOCK TABLE organizations_orgunit IN SHARE ROW EXCLUSIVE MODE")
-    units = (
-        apps.get_model("organizations", "OrgUnit")
-        .objects.using(schema_editor.connection.alias)
-        .filter(_ACTIVE_REGISTRY)
-        .annotate(registry_kind=_FACULTY, registry_name=_NAME)
-    )
-    groups = (
-        units.order_by()
-        .values("organization_id", "registry_kind", "registry_name")
-        .annotate(total=models.Count("pk"))
-        .filter(total__gt=1)
-    )
-    count = groups.count()
-    if not count:
-        return
-    samples = []
-    for group in groups.order_by("organization_id", "registry_kind", "registry_name")[:5]:
-        rows = units.filter(
-            organization_id=group["organization_id"],
-            registry_kind=group["registry_kind"],
-            registry_name=group["registry_name"],
-        )
-        ids = ", ".join(str(pk) for pk in rows.order_by("pk").values_list("pk", flat=True)[:5])
-        samples.append(f"organization={group['organization_id']} total={group['total']} unit_ids=[{ids}]")
-    raise RuntimeError(
-        f"{count} active registry name collision group(s). Up to five groups and five unit IDs per group: "
-        + " | ".join(samples)
-        + ". Review these units, resolve their names or archive obsolete units, then retry. No unit was changed."
-    )
+_CONSTRAINT = models.UniqueConstraint(
+    "organization", _FACULTY, _NAME, condition=_ACTIVE_REGISTRY, name="orgunit_active_registry_name_uniq"
+)
+
+
+def install(apps, schema_editor):
+    model = apps.get_model("organizations", "OrgUnit")
+    native = _CONSTRAINT.create_sql(model, schema_editor)
+    schema_editor.execute(registry_name_ddl_v1.create_sql(native, _TRIM_CHARS), params=None)
+
+
+def uninstall(apps, schema_editor):
+    model = apps.get_model("organizations", "OrgUnit")
+    native = _CONSTRAINT.remove_sql(model, schema_editor)
+    schema_editor.execute(registry_name_ddl_v1.remove_sql(native), params=None)
 
 
 class Migration(migrations.Migration):
     dependencies = [("organizations", "0088_credit_recognition_rim_staff")]
     operations = [
-        migrations.RunPython(check_existing_names, migrations.RunPython.noop),
-        migrations.AddConstraint(
-            model_name="orgunit",
-            constraint=models.UniqueConstraint(
-                "organization", _FACULTY, _NAME, condition=_ACTIVE_REGISTRY, name="orgunit_active_registry_name_uniq"
-            ),
+        migrations.SeparateDatabaseAndState(
+            database_operations=[migrations.RunPython(install, uninstall)],
+            state_operations=[migrations.AddConstraint(model_name="orgunit", constraint=_CONSTRAINT)],
         ),
     ]

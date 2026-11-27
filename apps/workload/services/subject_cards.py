@@ -23,25 +23,31 @@ from __future__ import annotations
 
 import re
 from collections import OrderedDict
+from decimal import Decimal
 from types import SimpleNamespace
 
 from ..constants import Activity, RowKind
-from .offering_rules import per_group_hours
+from .offering_rules import multiplier, per_group_hours
 from .offering_shares import _assignment_group
 from .patok import is_partner, partner_lectures
 from .queries import _ACTIVITY_LABELS, MAX_PAGE_LIMIT, _label, _serialize, base_rows_queryset, task_rows
 
 TEACHING = (str(Activity.LECTURE), str(Activity.SEMINAR), str(Activity.LAB))
 _TOTAL = {"seminar": "seminar_total", "lab": "lab_total"}
-_CREDIT_RE = re.compile(r"\d+")
+_CREDIT_AMOUNT = re.compile(r"(\d+(?:[.,]\d+)?)(?:\s*(?:kredit|ects))?")
 
 
-def _credit_key(row) -> int:
-    value = int(getattr(row, "credits_value", 0) or 0)
-    if value:
-        return value
-    found = _CREDIT_RE.search(str(getattr(row, "credits", "") or ""))
-    return int(found.group()) if found else 0
+def _credit_key(row) -> str:
+    # Imported plan rows can carry ordered credits for joint groups, e.g. "6 / 7".
+    # credits_value is the reporting value and cannot distinguish such rows.
+    credit = row.credits or str(row.credits_value or 0)
+    parts = []
+    for raw in credit.split("/"):
+        label = " ".join(raw.casefold().split())
+        match = _CREDIT_AMOUNT.fullmatch(label)
+        amount = Decimal(match[1].replace(",", ".")).normalize() if match else None
+        parts.append(format(amount, "f") if amount is not None else label)
+    return "/".join(parts)
 
 
 def family_key(row) -> tuple:
@@ -310,7 +316,7 @@ def _kind_lines(rows, kind, payload_by_pk, balance, sections) -> dict:
                 (bucket if bucket is not None else shared).append(entry)
             else:
                 shared.append({**entry, "partial": True})
-        joint = int(row.subgroup_count or 1) <= 1
+        joint = multiplier(row, kind) <= 1
         if joint:
             lines.append(
                 {

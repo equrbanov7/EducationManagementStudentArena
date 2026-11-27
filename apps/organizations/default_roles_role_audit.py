@@ -120,7 +120,7 @@ def apply_role_audit_grants(roles):
                 permissions.append(key)
     # Tyutorun «qrup dövrəsi» (sahib 2026-11-19) — `default_roles_university.py` 600 sətir sərhədindədir.
     apply_tutor_circle_grants(roles)
-    # Dekanlıq tələbə hərəkəti (sahib 2026-11-27) — dekan / müavin; mövcud tenantlar: organizations/0090.
+    # Dekanlıq tələbə hərəkəti (sahib 2026-11-27) — dekan / müavin; mövcud tenantlar: organizations/0091.
     apply_dean_office_grants(roles)
     apply_role_parity(roles)
     return apply_post_parity_revokes(roles)

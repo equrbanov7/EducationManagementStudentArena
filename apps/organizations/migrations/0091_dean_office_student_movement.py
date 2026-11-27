@@ -119,7 +119,7 @@ def backward(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("organizations", "0089_unique_registry_unit_names"),
+        ("organizations", "0090_registry_name_guard"),
         ("applications", "0014_attachment_path_255"),
     ]
 

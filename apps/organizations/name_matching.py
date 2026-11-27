@@ -2,11 +2,14 @@
 
 from contextlib import contextmanager
 
-from django.db import IntegrityError, models, transaction
+from django.core.exceptions import ValidationError
+from django.db import DEFAULT_DB_ALIAS, IntegrityError, models, transaction
 from django.db.models.functions import Collate
 from django.utils.translation import pgettext
 
 from core.constants import OrgUnitType
+
+from . import registry_name_ddl_v1
 
 # Whitespace stripped by the registry forms (str.strip).
 _TRIM_CHARS = (
@@ -28,10 +31,45 @@ def registry_name_key(expression):
     return Collate(models.Func(nfc, template='LOWER(%(expressions)s COLLATE "az-x-icu")'), "C")
 
 
+class RegistryNameConstraint(models.UniqueConstraint):
+    def create_sql(self, model, schema_editor):
+        native = super().create_sql(model, schema_editor)
+        return registry_name_ddl_v1.create_sql(native, _TRIM_CHARS) if native is not None else None
+
+    def remove_sql(self, model, schema_editor):
+        native = super().remove_sql(model, schema_editor)
+        return registry_name_ddl_v1.remove_sql(native) if native is not None else None
+
+    def validate(self, model, instance, exclude=None, using=DEFAULT_DB_ALIAS):
+        try:
+            super().validate(model, instance, exclude=exclude, using=using)
+        except ValidationError:
+            if not instance._state.adding and instance.is_active:
+                # A legacy pair may retain its existing key while editing metadata.
+                types = (
+                    (OrgUnitType.FACULTY,)
+                    if instance.unit_type == OrgUnitType.FACULTY
+                    else (
+                        OrgUnitType.CHAIR,
+                        OrgUnitType.DEPARTMENT,
+                    )
+                )
+                previous = model._base_manager.using(using).filter(
+                    pk=instance.pk, organization_id=instance.organization_id, unit_type__in=types, is_active=True
+                )
+                if (
+                    previous.alias(old_key=registry_name_key("name"))
+                    .filter(old_key=registry_name_key(models.Value(instance.name)))
+                    .exists()
+                ):
+                    return
+            raise
+
+
 def registry_name_constraint():
     # chair and department both represent kafedra in the registry.
     faculty = models.Case(models.When(unit_type=OrgUnitType.FACULTY, then=1), default=0)
-    return models.UniqueConstraint(
+    return RegistryNameConstraint(
         "organization",
         faculty,
         registry_name_key("name"),
@@ -39,14 +77,6 @@ def registry_name_constraint():
             is_active=True, unit_type__in=(OrgUnitType.FACULTY, OrgUnitType.CHAIR, OrgUnitType.DEPARTMENT)
         ),
         name=REGISTRY_NAME_CONSTRAINT,
-    )
-
-
-def name_exists(queryset, name):
-    return (
-        queryset.alias(registry_name=registry_name_key("name"))
-        .filter(registry_name=registry_name_key(models.Value(name)))
-        .exists()
     )
 
 

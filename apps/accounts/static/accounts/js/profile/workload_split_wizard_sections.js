@@ -1,7 +1,7 @@
 /*
  * «Bölgü sehrbazı» — addım 2–3: Seminar, Laboratoriya + başlanğıc vəziyyət (`window.EMSWorkloadWizard`, 2026-11-26).
  *
- * Vəziyyət (`W.S`): `selected` {qrup: true}; `rows` {sətir: {joint, fix}}; `groups` {qrup: {seminar, lab, editable,
+ * Vəziyyət (`W.S`): `selected` {qrup: true}; `rows` {sətir: {joint_by_activity, fix}}; `groups` {qrup: {seminar, lab, editable,
  * reason}} — seminar `{numbers[], names[], units[], place{qeydiyyat: №}}`, lab `{mode: none|nested|flat, per,
  * numbers[], names[], place{}}`. Bölmələr jurnalın REAL nömrələri ilə saxlanılır (2026-11-26 review: «Lab-1
  * silinib, {2,3} qalıb» halında yenidən nömrələmə Lab-2-nin dərslərini başqa tələbələrə keçirirdi) — yeni bölmə ən
@@ -116,8 +116,11 @@
         S.groups = {};
         S.units = {};
         S.lecture = {};
-        (data.rows || []).forEach(function (row) { S.rows[row.id] = { joint: !!row.joint, fix: false }; });
-        (data.groups || []).forEach(function (group) { S.groups[group.id] = initGroup(group); });
+        (data.rows || []).forEach(function (row) { S.rows[row.id] = W.rowModes(row); });
+        (data.groups || []).forEach(function (group) {
+            var cfg = S.groups[group.id] = initGroup(group);
+            W.alignLabMode(W.row(group.row_id), cfg);
+        });
         var keep = S.selected;
         S.selected = {};
         Object.keys(keep || {}).forEach(function (id) { if (S.groups[id]) S.selected[id] = true; });
@@ -126,7 +129,6 @@
         }
     };
 
-    // ── köməkçilər ──────────────────────────────────────────────────────────
     function students(group) { return group.journal ? group.journal.students : []; }
 
     /** `{№: say, 0: yerləşməyən}`. */
@@ -179,11 +181,16 @@
         Object.keys(part.place).forEach(function (id) { if (part.numbers.indexOf(part.place[id]) < 0) delete part.place[id]; });
     }
 
+    function syncNestedRoster(group) {
+        var cfg = W.S.groups[group.id];
+        if (W.separateLab(W.row(group.row_id)) && cfg.lab.mode === "nested") cfg.lab.place = nestedFill(group, cfg, cfg.lab.place);
+    }
     function setSeminarCount(groupId, count) {
         var group = W.group(groupId);
         var cfg = W.S.groups[groupId];
         var pattern = (cfg.seminar.names || []).filter(function (x) { return /\d+$/.test(x || ""); })[0], prefix = pattern ? pattern.replace(/\d+$/, "") : group.name;
         resize(cfg.seminar, count, function (n) { return clip(prefix + n); });
+        if (!W.separateLab(W.row(group.row_id))) return;
         if (size(cfg.seminar) < 2) {
             if (cfg.lab.mode === "nested") setLabMode(groupId, "flat");
         } else if (cfg.lab.mode === "nested") {
@@ -270,7 +277,7 @@
             var index = sem.units.indexOf(st.unit_id);
             if (index >= 0) sem.place[st.id] = sem.numbers[index];
         });
-        if (W.S.groups[group.id].lab.mode === "nested") setLabMode(group.id, "nested");
+        if (W.separateLab(W.row(group.row_id)) && W.S.groups[group.id].lab.mode === "nested") setLabMode(group.id, "nested");
     }
 
     function registryName(group, unitId) {
@@ -348,16 +355,6 @@
         }).join("");
     }
 
-    function jointToggle(row) {
-        if (row.groups.length < 2) return "";
-        var joint = W.S.rows[row.id].joint;
-        return '<div class="wl-wiz-joint"><span class="wl-wiz-joint__label">' + esc(fmt(gettext("%(groups)s — seminar və laboratoriya:"), { groups: row.label })) + "</span>" +
-            '<div class="wl-wiz-seg" role="group">' +
-            '<button type="button" class="wl-wiz-seg__btn' + (joint ? " is-on" : "") + '" data-wl-wiz-joint="' + esc(row.id) + '" data-value="1" aria-pressed="' + joint + '">' + esc(gettext("Qruplar birlikdə keçir")) + "</button>" +
-            '<button type="button" class="wl-wiz-seg__btn' + (!joint ? " is-on" : "") + '" data-wl-wiz-joint="' + esc(row.id) + '" data-value="0" aria-pressed="' + !joint + '">' + esc(gettext("Hər qrup ayrıca")) + "</button>" +
-            "</div></div>";
-    }
-
     function seminarPanel(group) {
         var row = W.row(group.row_id);
         var cfg = W.S.groups[group.id];
@@ -393,8 +390,8 @@
         var html = "";
         W.selectedRows().forEach(function (row) {
             if (!W.active(row, "seminar")) return;
-            html += jointToggle(row);
-            if (W.S.rows[row.id].joint) {
+            html += W.jointToggle(row, "seminar");
+            if (W.isJoint(row, "seminar")) {
                 html += notice("info", fmt(gettext("%(groups)s seminarı birlikdə keçir — bir bölmə, bir müəllim."), { groups: row.label }));
                 return;
             }
@@ -406,7 +403,7 @@
     function sectionProblems(kind) {
         var problems = [];
         W.selectedRows().forEach(function (row) {
-            if (!W.active(row, kind) || W.S.rows[row.id].joint) return;
+            if (!W.active(row, kind) || W.isJoint(row, kind)) return;
             row.groups.forEach(function (id) {
                 var group = W.group(id);
                 var cfg = W.S.groups[id];
@@ -444,7 +441,7 @@
         var cfg = W.S.groups[group.id];
         var lab = cfg.lab;
         var locked = !!group.journal && !cfg.editable;
-        var canNest = size(cfg.seminar) >= 2;
+        var canNest = !W.isJoint(row, "seminar") && size(cfg.seminar) >= 2;
         var html = '<article class="wl-wiz-gp" data-wl-wiz-gpanel="' + esc(group.id) + '"><header class="wl-wiz-gp__head"><h4>' + esc(group.name) + "</h4>" +
             '<span class="wl-wiz-gp__meta">' + esc(fmt(gettext("lab planı %(h)s (bir lab qrupu üçün)"), { h: W.hours(row.plans.lab) })) + "</span></header>" +
             journalNotice(group) +
@@ -481,7 +478,8 @@
         var html = "";
         W.selectedRows().forEach(function (row) {
             if (!W.active(row, "lab")) return;
-            if (W.S.rows[row.id].joint) {
+            html += W.jointToggle(row, "lab");
+            if (W.isJoint(row, "lab")) {
                 html += notice("info", fmt(gettext("%(groups)s laboratoriyanı birlikdə keçir — bir bölmə, bir müəllim."), { groups: row.label }));
                 return;
             }
@@ -502,7 +500,7 @@
         W.selectedRows().forEach(function (row) {
             row.groups.forEach(function (id) {
                 var cfg = W.S.groups[id];
-                if (mixed || cfg.lab.mode !== "nested" || !cfg.editable) return;
+                if (mixed || !W.active(row, "lab") || W.isJoint(row, "lab") || cfg.lab.mode !== "nested" || !cfg.editable) return;
                 students(W.group(id)).forEach(function (st) {
                     var s = cfg.seminar.place[st.id];
                     var l = cfg.lab.place[st.id];
@@ -530,7 +528,9 @@
             rerender();
         });
         D.on("click", "[data-wl-wiz-joint]", function (event, btn) {
-            W.S.rows[btn.dataset.wlWizJoint].joint = btn.dataset.value === "1";
+            var row = W.row(btn.dataset.wlWizJoint), kind = btn.dataset.activity;
+            W.S.rows[row.id].joint_by_activity[kind] = btn.dataset.value === "1";
+            row.groups.forEach(function (id) { W.alignLabMode(row, W.S.groups[id]); });
             rerender();
         });
         D.on("click", "[data-wl-wiz-seminar-count]", function (event, btn) {
@@ -549,7 +549,7 @@
         D.on("click", "[data-wl-wiz-seminar-alpha]", function (event, btn) {
             var cfg = W.S.groups[btn.dataset.groupId];
             cfg.seminar.place = splitEven(students(W.group(btn.dataset.groupId)), cfg.seminar.numbers);
-            if (cfg.lab.mode === "nested") cfg.lab.place = nestedFill(W.group(btn.dataset.groupId), cfg, cfg.lab.place);
+            syncNestedRoster(W.group(btn.dataset.groupId));
             rerender();
         });
         D.on("click", "[data-wl-wiz-seminar-registry]", function (event, btn) {
@@ -561,7 +561,7 @@
             var part = cfg && cfg[btn.dataset.wlWizPlace];
             if (!part || !cfg.editable) return;
             part.place[btn.dataset.enrollment] = Number(btn.dataset.number);
-            if (btn.dataset.wlWizPlace === "seminar" && cfg.lab.mode === "nested") cfg.lab.place = nestedFill(W.group(btn.dataset.groupId), cfg, cfg.lab.place);
+            if (btn.dataset.wlWizPlace === "seminar") syncNestedRoster(W.group(btn.dataset.groupId));
             rerender();
         });
         D.on("input", "[data-wl-wiz-seminar-name]", function (event, field) {

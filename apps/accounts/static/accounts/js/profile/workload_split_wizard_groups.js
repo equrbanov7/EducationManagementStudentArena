@@ -102,16 +102,46 @@
         return W.selectedRows().length ? "" : gettext("Ən azı bir qrup seçin.");
     };
 
+    W.rowModes = function (row) {
+        var perKind = row.joint_by_activity || {};
+        return { fix: false, joint_by_activity: {
+            seminar: perKind.seminar == null ? !!row.joint : perKind.seminar,
+            lab: perKind.lab == null ? !!row.joint : perKind.lab,
+        } };
+    };
+
+    W.isJoint = function (row, kind) { return W.S.rows[row.id].joint_by_activity[kind]; };
+
+    W.separateLab = function (row) { return W.active(row, "lab") && !W.isJoint(row, "lab"); };
+
+    W.alignLabMode = function (row, cfg) {
+        if (!W.separateLab(row) || cfg.lab.mode !== "nested") return;
+        if (W.isJoint(row, "seminar") || cfg.lab.numbers.length !== cfg.seminar.numbers.length * cfg.lab.per) {
+            cfg.lab.mode = "flat";
+        }
+    };
+
+    W.jointToggle = function (row, kind) {
+        if (row.groups.length < 2) return "";
+        var joint = W.isJoint(row, kind);
+        var label = esc(row.label + " · " + (kind === "seminar" ? gettext("Seminar") : gettext("Laboratoriya")));
+        return '<div class="wl-wiz-joint"><span class="wl-wiz-joint__label">' + label + "</span>" +
+            '<div class="wl-wiz-seg" role="group" aria-label="' + label + '">' +
+            '<button type="button" class="wl-wiz-seg__btn' + (joint ? " is-on" : "") + '" data-wl-wiz-joint="' + esc(row.id) + '" data-activity="' + kind + '" data-value="1" aria-pressed="' + joint + '">' + esc(gettext("Qruplar birlikdə keçir")) + "</button>" +
+            '<button type="button" class="wl-wiz-seg__btn' + (!joint ? " is-on" : "") + '" data-wl-wiz-joint="' + esc(row.id) + '" data-activity="' + kind + '" data-value="0" aria-pressed="' + !joint + '">' + esc(gettext("Hər qrup ayrıca")) + "</button>" +
+            "</div></div>";
+    };
 
     /** Payload üçün: qrupun jurnal konfiqurasiyası (yalnız dəyişdirilə bilən jurnalda göndərilir). */
     W.groupPayload = function (row, groupId) {
         var cfg = W.S.groups[groupId];
         var group = W.group(groupId);
-        var joint = W.S.rows[row.id].joint;
+        var applySem = W.active(row, "seminar") && !W.isJoint(row, "seminar");
+        var applyLab = W.active(row, "lab") && !W.isJoint(row, "lab");
         var sem = cfg.seminar, lab = cfg.lab;
-        var semNumbers = W.active(row, "seminar") && !joint ? sem.numbers : [];
-        var labNumbers = W.active(row, "lab") && !joint ? lab.numbers : [];
-        var apply = !!(group.journal && cfg.editable && !joint);
+        var semNumbers = applySem ? sem.numbers : [];
+        var labNumbers = applyLab ? lab.numbers : [];
+        var apply = !!(group.journal && cfg.editable && (applySem || applyLab));
         var seminarPlace = {}, labPlace = {};
         if (apply) {
             students(group).forEach(function (st) {
@@ -129,7 +159,7 @@
                 units: sem.units.slice(0, semNumbers.length), placement: seminarPlace,
             },
             lab: {
-                count: labNumbers.length, numbers: labNumbers.slice(), nested: lab.mode === "nested",
+                count: labNumbers.length, numbers: labNumbers.slice(), nested: !W.isJoint(row, "seminar") && lab.mode === "nested",
                 names: lab.names.slice(0, labNumbers.length), placement: labPlace,
             },
         };

@@ -340,7 +340,7 @@ Rollar `foreign_students_head` (55) / `foreign_students_staff` (50), UNIT; şabl
 
 ## Dekanlıq tələbə hərəkəti + «Dekanlıq laborantı» — 2026-11-27 (əl ilə qeyd)
 
-Şablon `apps/organizations/default_roles_dean_office.py`, mövcud tenantlar `organizations/0090`.
+Şablon `apps/organizations/default_roles_dean_office.py`, mövcud tenantlar `organizations/0091`.
 
 - **Dekan / dekan müavini:** ＋ `student.movement` (dekanda `people.manage_academic` / `student.registry_view` əvvəldən
   var idi; müavinə üçü də) — fakültəsinin tələbəsini dondurur / bərpa edir / uzaqlaşdırır / məzun edir / qrupunu dəyişir.
