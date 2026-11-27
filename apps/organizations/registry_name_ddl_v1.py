@@ -33,6 +33,12 @@ DECLARE
     new_key text COLLATE pg_catalog."C";
     remaining bigint;
 BEGIN
+    -- Use the resulting row, including changes made by other BEFORE triggers.
+    IF TG_OP = 'UPDATE' AND OLD.name COLLATE pg_catalog."C" = NEW.name COLLATE pg_catalog."C"
+       AND OLD.organization_id = NEW.organization_id AND OLD.is_active = NEW.is_active
+       AND OLD.unit_type = NEW.unit_type THEN
+        RETURN NULL;
+    END IF;
     IF TG_OP <> 'INSERT' AND OLD.is_active AND OLD.unit_type IN ('faculty', 'chair', 'department') THEN
         old_key := ems_registry_guard.name_key(OLD.name);
     END IF;
@@ -74,7 +80,7 @@ $clear$;
 REVOKE ALL ON ALL FUNCTIONS IN SCHEMA ems_registry_guard FROM PUBLIC;
 REVOKE ALL ON ALL TABLES IN SCHEMA ems_registry_guard FROM PUBLIC;
 CREATE TRIGGER orgunit_registry_name_guard
-AFTER INSERT OR DELETE OR UPDATE OF organization_id, name, is_active, unit_type
+AFTER INSERT OR DELETE OR UPDATE
 ON public.organizations_orgunit FOR EACH ROW EXECUTE FUNCTION ems_registry_guard.track();
 CREATE TRIGGER orgunit_registry_name_truncate
 AFTER TRUNCATE ON public.organizations_orgunit FOR EACH STATEMENT EXECUTE FUNCTION ems_registry_guard.clear();
