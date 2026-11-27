@@ -48,7 +48,7 @@ def summarize(offering, *, personal_actor=None, scope=None):
     permitted = [lesson for lesson in lessons if scope is None or scope.allows_lesson(lesson)]
     visible = [lesson for lesson in permitted if allowed is None or lesson.kind in allowed]
     if personal_actor is not None and plan:
-        visible = _without_co_teachers(offering, visible, plan, personal_actor)
+        visible = _without_co_teachers(offering, visible, plan, personal_actor, scope)
     result = _summary(
         offering,
         visible,
@@ -100,13 +100,16 @@ def summarize(offering, *, personal_actor=None, scope=None):
     return result
 
 
-def _without_co_teachers(offering, lessons, plan, actor):
+def _without_co_teachers(offering, lessons, plan, actor, scope=None):
     """MR-000879 (2026-11-27, 435 R ing / 935 BM): bir jurnalda EYNİ növü iki müəllim öz tələbələrinə ayrıca keçir
     (hər birinin öz yük sətri var, məs. 105 + 105). Şəxsi başlıq yalnız öz dərslərini saymalıdır — əks halda
     «149 / 105 — hədd keçilib» və öz planı alt qruplara bölünürdü («75 / 52»).
 
     Həmkar = dərsin müəllimi HAZIRDA bu jurnalın həmin növünə öz planı olan başqa müəllimdir. Təhvildən sonra köhnə
-    müəllimin (cari planı yoxdur) və müəllifsiz köhnə dərslər əvvəlki kimi cari sahibin başlığında qalır."""
+    müəllimin (cari planı yoxdur) və müəllifsiz köhnə dərslər əvvəlki kimi cari sahibin başlığında qalır.
+
+    MR-000902 (935 BM / 935 BM ing): iki müəllim EYNİ dərs sütununda öz tələbələrini yazır — dərsin «müəllimi» yalnız
+    biridir. Həmkarın dərsində aktorun ÖZ tələbələrinin (pay əhatəsi) qeydi varsa, o dərs aktorun da dərsidir."""
     others = {
         lesson.instructor_id
         for lesson in lessons
@@ -119,7 +122,24 @@ def _without_co_teachers(offering, lessons, plan, actor):
             co_kinds[teacher_id] = kinds
     if not co_kinds:
         return lessons
-    return [lesson for lesson in lessons if lesson.kind not in co_kinds.get(lesson.instructor_id, ())]
+    foreign = [lesson for lesson in lessons if lesson.kind in co_kinds.get(lesson.instructor_id, ())]
+    marked = _lessons_with_own_marks(foreign, getattr(scope, "enrollment_ids", None))
+    return [
+        lesson for lesson in lessons if lesson.kind not in co_kinds.get(lesson.instructor_id, ()) or lesson.pk in marked
+    ]
+
+
+def _lessons_with_own_marks(lessons, enrollment_ids) -> set:
+    """Həmkarın dərslərindən aktorun öz tələbələrinə (pay əhatəsi) qeyd yazılanlar — bir sorğu. Pay yoxdursa boş."""
+    if not lessons or not enrollment_ids:
+        return set()
+    from .models import LessonMark
+
+    return set(
+        LessonMark.objects.filter(lesson__in=[lesson.pk for lesson in lessons], enrollment_id__in=enrollment_ids)
+        .values_list("lesson_id", flat=True)
+        .distinct()
+    )
 
 
 class _Teacher:
