@@ -10,7 +10,11 @@ from ...models import ProfileRole
 from ...policies import is_superadmin_user, permission_is_grantable, user_has_any_role
 from .constants import PROFILE_ROLE_LABELS, PROFILE_ROLE_NAMES, PROFILE_ROLE_NAMES_MANAGEABLE
 from .rbac_member_sections import can_notify, member_is_learner
-from .rbac_memberships import _bound_active_org_memberships, _invalidate_actor_permissions_cache  # noqa: F401
+from .rbac_memberships import (  # noqa: F401
+    _bound_active_org_memberships,
+    _collect_actor_permissions,
+    _invalidate_actor_permissions_cache,
+)
 from .rbac_sections import apply_permission_section_gates
 from .rbac_university_sections import alumni_sections, university_role_sections
 from .tenant import _bind_active_role_context
@@ -106,70 +110,6 @@ def _decorate_manage_role_profiles(profiles, *, actor_level, is_superadmin, orga
         profile.can_edit_roles = (
             is_superadmin or actor_level > target_level or (is_self_profile and owner_self_management_enabled)
         )
-
-
-def _collect_actor_permissions(user, organization, *, request=None):
-    """
-    Return two sets:
-    1. effective permissions user currently has in org
-    2. explicitly grantable permissions declared as `grant:<permission>` in role permissions
-
-    P1.4 — Per-request memoization (təhlükəsiz):
-    Eyni request boyunca eyni (user_id, organization_id) cütü üçün təkrar
-    DB sorğusu olmaması üçün nəticə `request._actor_perms_cache` dict-ində
-    saxlanılır. Cross-request cache yoxdur — RLS və icazə dəyişiklikləri
-    request başında həmişə yenidən qiymətləndirilir.
-
-    QA 2026-09 duplicate-query audit: `_role_capabilities` bu funksiyanı
-    HEÇ VAXT `request` ötürmədən çağırır (3x öz daxilində: sual bankı
-    axtarışı, müəllim-tələbə idarəsi, "Qruplar" bölməsi qapısı) — yəni yuxarıdakı
-    `request`-əsaslı keş faktiki İŞLƏMİRDİ, hər çağırış təzə SELECT idi.
-    `request` yoxdursa `user` obyektinə (eyni `apps.applications.services.
-    access.active_memberships` naxışı) düşürük — `request.user` bir request
-    daxilində SABİT obyektdir (`SimpleLazyObject` bir dəfə həll olunur), ona
-    görə bu, faktiki request-ömürlü keşdir, cross-request sızma yoxdur.
-    Mutasiya edən yol varsa `_invalidate_actor_permissions_cache(user)` çağırın.
-    """
-    from apps.organizations.models import Membership
-
-    user_id = getattr(user, "pk", None) or getattr(user, "id", None)
-    org_id = getattr(organization, "pk", None) or getattr(organization, "id", None)
-    cache_key = (user_id, org_id)
-    cache_owner = request if request is not None else user
-    if cache_owner is not None and user_id is not None and org_id is not None:
-        cache = getattr(cache_owner, "_actor_perms_cache", None)
-        if cache is None:
-            cache = {}
-            try:
-                cache_owner._actor_perms_cache = cache
-            except Exception:  # noqa: BLE001 — request obyekti immutable ola bilər
-                cache_owner = None
-        if cache_owner is not None and cache_key in cache:
-            cached_effective, cached_grantable = cache[cache_key]
-            # Cache-i mutasiya etməmək üçün surət qaytarırıq.
-            return set(cached_effective), set(cached_grantable)
-
-    effective_permissions = set()
-    grantable_permissions = set()
-
-    memberships = _bound_active_org_memberships(user, org_id)
-    if memberships is None:  # B21 (2026-10-13): deaktiv rol menyuya açar gətirmir — panel qapısı ilə eyni.
-        memberships = Membership.objects.filter(
-            user=user, organization=organization, is_active=True, role__is_active=True
-        ).select_related("role")
-    for membership in (m for m in memberships if getattr(m.role, "is_active", True)):
-        for permission in membership.role.permissions or []:
-            if permission.startswith("grant:"):
-                grantable_permissions.add(permission.split("grant:", 1)[1].strip())
-            else:
-                effective_permissions.add(permission)
-
-    if cache_owner is not None and user_id is not None and org_id is not None:
-        cache = getattr(cache_owner, "_actor_perms_cache", None)
-        if cache is not None:
-            cache[cache_key] = (set(effective_permissions), set(grantable_permissions))
-
-    return effective_permissions, grantable_permissions
 
 
 def _can_manage_roles(user, organization) -> bool:

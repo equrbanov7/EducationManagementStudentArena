@@ -326,6 +326,7 @@ class HrAnalyticsTest(TestCase):
             for index in range(12):
                 user = self._teacher(f"bulk{index}", "Ad", f"Soyad{index}", self.c3)
                 self._profile(user, "0.50")
+        measure()  # Refresh the permission snapshot after creating teachers.
         large = measure()
         self.assertEqual(small, large)
         self.assertLessEqual(large, 20)

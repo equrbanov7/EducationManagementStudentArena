@@ -99,7 +99,10 @@ class CreateContactMessageTest(TestCase):
 
     def test_persists_message_with_ip_and_user_agent(self):
         request = self.factory.post("/contact/", HTTP_USER_AGENT="TestAgent/1.0")
-        with patch("apps.contact.services.dispatch_contact_notification") as notify:
+        with (
+            self.captureOnCommitCallbacks(execute=True),
+            patch("apps.contact.services.dispatch_contact_notification") as notify,
+        ):
             message = create_contact_message(
                 form_cleaned_data=_valid_form_data(),
                 request=request,

@@ -523,6 +523,7 @@ def test_issue_severity_map_covers_every_structure_rule():
         "legacy_structure_department_type_unknown": "error",
         "legacy_structure_parent_missing": "warning",
         "legacy_structure_parent_cycle": "error",
+        "legacy_structure_name_collision": "error",
         "legacy_structure_name_blank": "warning",
         "legacy_structure_name_truncated": "info",
         "legacy_program_code_truncated": "warning",
@@ -608,8 +609,8 @@ def test_phase_run_builds_the_tree_and_seals_its_batches(structure_environment):
     assert report.phase_key == "academic_structure"
     assert report.order == 10
     assert report.observed_source_rows == 14 == report.declared_source_rows
-    assert dict(report.state_counts) == {"migrated": 13, "skipped": 0, "quarantined": 1}
-    assert report.staged_account_count == 13
+    assert dict(report.state_counts) == {"migrated": 12, "skipped": 0, "quarantined": 2}
+    assert report.staged_account_count == 12
     assert [(record.source_table, record.sequence) for record in report.batches] == [
         ("departments", 1),
         ("speciality", 1),
@@ -631,11 +632,10 @@ def test_phase_run_builds_the_tree_and_seals_its_batches(structure_environment):
         "academic_structure.groups.batch.1",
     ]
 
-    # Two departments literally share the name "Kollec": only a legacy-keyed
-    # slug keeps them from colliding on unique_together(organization, slug).
+    # Both source identities are accounted for. Only the first can be an active faculty.
     kollec = OrgUnit.objects.filter(organization=organization, name="Kollec").order_by("slug")
-    assert [unit.slug for unit in kollec] == ["myedu-dep-1", "myedu-dep-2"]
-    assert OrgUnit.objects.filter(organization=organization).count() == 13
+    assert [unit.slug for unit in kollec] == ["myedu-dep-1"]
+    assert OrgUnit.objects.filter(organization=organization).count() == 12
     assert OrgUnit.objects.get(slug="myedu-dep-3").parent.slug == "myedu-dep-5"
     assert OrgUnit.objects.get(slug="myedu-dep-3").unit_type == OrgUnitType.CHAIR
     assert OrgUnit.objects.get(slug="myedu-dep-1").unit_type == OrgUnitType.FACULTY
@@ -710,6 +710,10 @@ def test_phase_run_writes_settings_programs_and_issues(structure_environment):
     )
 
     issues = {(issue.legacy_pk, issue.rule_code): issue.severity for issue in LegacyMigrationIssue.objects.all()}
+    assert issues[("2", "legacy_structure_name_collision")] == "error"
+    assert not LegacyEntityObservation.objects.get(
+        run=run, entity_map__entity_type="department_unit", entity_map__legacy_pk="2"
+    ).target_pk
     assert issues[("4", "legacy_structure_department_type_unknown")] == "error"
     assert issues[("1", "legacy_structure_department_type_nonstandard")] == "warning"
     assert issues[("6", "legacy_structure_parent_missing")] == "warning"
@@ -751,12 +755,12 @@ def test_phase_run_replays_identically_and_detects_drift(structure_environment):
     assert replay == report
     assert LegacyImportBatch.objects.filter(run=run).count() == 8
     assert LegacyEntityObservation.objects.filter(run=run).count() == 18
-    assert OrgUnit.objects.filter(organization=organization).count() == 13
+    assert OrgUnit.objects.filter(organization=organization).count() == 12
 
-    # Department 2 carries no issue of its own, so the drift reaches the batch
+    # Department 5 carries no issue of its own, so the drift reaches the batch
     # replay check instead of tripping the ledger's issue-identity guard first.
     mutated = _department_rows()
-    mutated[1]["name"] = "Kollec (yenilənmiş)"
+    mutated[4]["name"] = "Fakültə B (yenilənmiş)"
     drifted = replace(
         context,
         source_connection_factory=_factory(
@@ -889,7 +893,8 @@ def test_phase_refuses_a_foreign_context_object():
 # ``(legacy_pk, state, decision_token)`` — the group token carries the derived
 # admission year — so these bytes must survive the refactor unchanged.
 _PINNED_CLASSIFICATION_DIGESTS = {
-    "departments": "4b4a20a999973d5d97eedd44dbbf868437e0ffbf894fa3c546a46d2f24e08d39",
+    # The second Kollec is now quarantined by the active registry name constraint.
+    "departments": "27e5698743454072af77feb6091c11152d57f7c502c9181e512a78bd20af5078",
     "speciality": "002c415228e1701390b9c50a2040c1b49659f87f348f4dd205f887cdd8b22733",
     "groups": "94278e4a58715159076e35474916a395113c00fc6a301afd4065bb8adb324c46",
 }

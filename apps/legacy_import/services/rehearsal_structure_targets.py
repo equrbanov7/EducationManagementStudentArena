@@ -21,9 +21,10 @@ from functools import partial
 from types import MappingProxyType
 
 from django.apps import apps as django_apps
-from django.db import transaction
+from django.db import IntegrityError, transaction
 
 from apps.legacy_import.models import LegacyEntityMap, LegacyEntityObservation, LegacyMigrationIssue
+from apps.organizations.public import is_registry_name_collision
 from core.constants import OrgUnitType
 
 from .ledger import upsert_entity_map, upsert_issue
@@ -75,7 +76,11 @@ ISSUE_SEVERITY = MappingProxyType(
             _SEVERITY.WARNING,
         ),
         **dict.fromkeys(
-            ("legacy_structure_department_type_unknown", "legacy_structure_parent_cycle"),
+            (
+                "legacy_structure_department_type_unknown",
+                "legacy_structure_parent_cycle",
+                "legacy_structure_name_collision",
+            ),
             _SEVERITY.ERROR,
         ),
     }
@@ -236,9 +241,16 @@ def _account_unit(context, source_table, entity_type, row, rule_codes, plan, iss
         if quarantined
         else partial(_ensure_org_unit, context, slug, unit_type, name, code, parent.target_pk, settings)
     )
-    state, entity_map, target_pk = _account_row(
-        context, entity_type, legacy_pk, row.source_row_hash, create, ORG_UNIT_MODEL_LABEL
-    )
+    account = partial(_account_row, context, entity_type, legacy_pk, row.source_row_hash, label=ORG_UNIT_MODEL_LABEL)
+    try:
+        state, entity_map, target_pk = account(create)
+    except IntegrityError as exc:
+        if not is_registry_name_collision(exc):
+            raise
+        state, entity_map, target_pk = account(None)
+    if state == _STATE.QUARANTINED and not quarantined:
+        # A replay returns the original observation without attempting the insert.
+        rule_codes = [*rule_codes, "legacy_structure_name_collision"]
     _write_issues(
         context, source_table, entity_type, legacy_pk, row.source_row_hash, entity_map, rule_codes, issue_counts
     )

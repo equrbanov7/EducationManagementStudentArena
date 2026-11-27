@@ -9,19 +9,28 @@ import re
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Max
 from django.http import JsonResponse
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods, require_POST
 
-from ...models import LabQuestion
+from ...models import LabBlock, LabQuestion
 from ..shared._helpers import (
     _get_tenant_block_or_404,
     _get_tenant_question_or_404,
     _normalize_extensions,
     _validate_and_prepare_lab_upload,
 )
+from .question_deletion import delete_unused_questions
 
 logger = logging.getLogger(__name__)
+
+
+def _first_available_number(block):
+    # The caller holds this lock until all questions in its batch have been saved.
+    LabBlock.objects.select_for_update().only("pk").get(pk=block.pk)
+    highest = block.questions.aggregate(highest=Max("question_number"))["highest"]
+    return (highest or 0) + 1
 
 
 @login_required
@@ -50,7 +59,7 @@ def create_question(request, block_id):
         with transaction.atomic():
             question = LabQuestion.objects.create(
                 block=block,
-                question_number=block.questions.count() + 1,
+                question_number=_first_available_number(block),
                 question_text=request.POST.get("question_text"),
                 points=request.POST.get("points", 0),
             )
@@ -110,8 +119,7 @@ def delete_question(request, pk):
             {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
         )
 
-    question.delete()
-    return JsonResponse({"success": True})
+    return delete_unused_questions(question)
 
 
 @login_required
@@ -181,17 +189,15 @@ def import_questions(request, block_id):
                 status=400,
             )
 
-        # Sualları DB-yə əlavə et
-        count = block.questions.count()
-        created_count = 0
-
-        for i, text in enumerate(questions, start=1):
-            LabQuestion.objects.create(
-                block=block,
-                question_number=count + i,
-                question_text=text,
+        with transaction.atomic():
+            start = _first_available_number(block)
+            LabQuestion.objects.bulk_create(
+                [
+                    LabQuestion(block=block, question_number=number, question_text=text)
+                    for number, text in enumerate(questions, start=start)
+                ]
             )
-            created_count += 1
+        created_count = len(questions)
 
         return JsonResponse(
             {

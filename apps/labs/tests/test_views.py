@@ -51,7 +51,7 @@ def _login_with_org(client, user, organization):
     session.save()
 
 
-class LabDetailBackUrlTest(TestCase):
+class LabDetailFixtureMixin:
     def setUp(self):
         self.client = Client()
         self.teacher = User.objects.create_user("lab_teacher", "lab_teacher@example.com", "StrongPass123!")
@@ -82,6 +82,8 @@ class LabDetailBackUrlTest(TestCase):
     def _login_as(self, user):
         _login_with_org(self.client, user, self.organization)
 
+
+class LabDetailBackUrlTest(LabDetailFixtureMixin, TestCase):
     def test_lab_detail_defaults_back_to_course_dashboard(self):
         self._login_as(self.student)
         response = self.client.get(reverse("labs:lab_detail", kwargs={"pk": self.lab.id}))

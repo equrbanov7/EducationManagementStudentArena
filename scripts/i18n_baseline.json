@@ -6,7 +6,7 @@
    "identity": 0,
    "missing_vs_source": 0,
    "raw_key_leak": 0,
-   "source_missing": 3,
+   "source_missing": 0,
    "total": 24242,
    "untranslated": 0
   },

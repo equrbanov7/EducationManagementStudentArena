@@ -297,6 +297,15 @@ class RoleAdmin(SuperadminBypassAdminMixin, admin.ModelAdmin):
     deactivate.short_description = "Deactivate selected roles"
 
 
+class MembershipRoleFilter(admin.RelatedFieldListFilter):
+    def field_choices(self, field, request, model_admin):
+        roles = Role.objects.select_related("organization").complex_filter(field.get_limit_choices_to())
+        ordering = self.field_admin_ordering(field, request, model_admin)
+        if ordering:
+            roles = roles.order_by(*ordering)
+        return [(role.pk, str(role)) for role in roles]
+
+
 @admin.register(Membership)
 class MembershipAdmin(SuperadminBypassAdminMixin, admin.ModelAdmin):
     """Admin interface for Membership model."""
@@ -309,7 +318,8 @@ class MembershipAdmin(SuperadminBypassAdminMixin, admin.ModelAdmin):
         "is_primary",
         "is_active",
     ]
-    list_filter = ["organization", "role", "is_primary", "is_active"]
+    list_filter = ["organization", ("role", MembershipRoleFilter), "is_primary", "is_active"]
+    list_select_related = ["user", "organization", "role__organization", "scope_unit__organization"]
     search_fields = [
         "user__username",
         "user__email",

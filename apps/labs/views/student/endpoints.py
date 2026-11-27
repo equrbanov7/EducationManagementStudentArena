@@ -56,13 +56,6 @@ def lab_detail(request, pk):
                 "block__order", "question_number"
             )
 
-            # Əgər hələ də sual yoxdursa, yenidən təyin et (exists() — count-dan ucuz).
-            if not questions.exists():
-                assignment.assign_questions()
-                questions = assignment.assigned_questions.select_related("block").order_by(
-                    "block__order", "question_number"
-                )
-
             # Submission yoxlaması
             submissions = LabSubmission.objects.filter(assignment=assignment).order_by("-submitted_at")
 
@@ -82,9 +75,8 @@ def lab_detail(request, pk):
 
     # Saved answers - yalnız cari cəhd üçün draft cavablar
     saved_answers = {}
-    if request.user.is_authenticated:
-        current_attempt = get_next_attempt_number(assignment)
-
+    current_attempt = get_next_attempt_number(assignment)
+    if assignment is not None:
         answers = LabAnswer.objects.filter(
             lab=lab,
             student=request.user,
@@ -99,6 +91,7 @@ def lab_detail(request, pk):
         "questions": questions,
         "assignment": assignment,
         "saved_answers": saved_answers,
+        "current_attempt": current_attempt,
         "has_submitted": has_submitted,
         "submission": submission,
         "attempt_count": attempt_count,

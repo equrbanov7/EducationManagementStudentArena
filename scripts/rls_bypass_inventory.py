@@ -90,6 +90,11 @@ CATEGORY_RULES = (
     # request-siz fon işi / idarə əmri; servis sorğuları açıq `organization` süzgəci daşıyır.
     ("apps/ai_assistant/retention.py", "D", "dövri log saxlama süpürgəsi (yalnız müddət üzrə DELETE)"),
     ("apps/subject_folder/tasks.py", "D", "Celery (rls_worker_atomic; sətrin öz təşkilatı)"),
+    (
+        "apps/subject_folder/services/notify.py",
+        "D",
+        "xülasənin təşkilat və müəllim açarları; göndəriş tenant daxilində",
+    ),
     ("apps/subject_folder/services/plagiarism/dispatch.py", "D", "Celery/sinxron oxşarlıq (engine org süzgəcli)"),
     ("apps/subject_folder/management/", "C", "idarə əmrləri"),
     ("apps/surveys/tasks.py", "D", "Celery (rls_worker_atomic; sorğunun öz təşkilatı)"),

@@ -1,4 +1,4 @@
-"""Keep the narrow Twisted HTTP/2 advisory exception behind its real boundary."""
+"""Keep Daphne on the private HTTP/1.1 upstream behind the TLS proxy."""
 
 import re
 from pathlib import Path
@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_twisted_has_no_public_listener_or_host_network():
     services = yaml.safe_load((ROOT / "docker-compose.prod.yml").read_text())["services"]
     app = services["app"]
-    assert not app.get("ports"), "Public app ports invalidate GHSA-vpp8-g58w-m8mp exception"
+    assert not app.get("ports"), "Only the reverse proxy should expose application traffic"
     assert not app.get("network_mode"), "App must remain behind the nginx bridge"
     assert app["networks"] == ["emsarena-network"]
 

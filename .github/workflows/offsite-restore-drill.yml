@@ -1,0 +1,51 @@
+name: Offsite DB and attachment restore drill
+on:
+  schedule:
+    - cron: "30 21 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: offsite-synthetic-restore-drill
+  cancel-in-progress: false
+
+jobs:
+  restore:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    environment: offsite-drill
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: drill
+          POSTGRES_PASSWORD: local-drill-only
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U drill" --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.11"
+      - name: Install drill tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y restic postgresql-client-16
+          echo /usr/lib/postgresql/16/bin >> "$GITHUB_PATH"
+          python -m pip install --require-hashes -r requirements/test.lock
+      - name: Archive, restore and open the private course attachment
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: "5432"
+          PGUSER: drill
+          PGPASSWORD: local-drill-only
+          RESTIC_REPOSITORY: ${{ secrets.DRILL_RESTIC_REPOSITORY }}
+          RESTIC_PASSWORD: ${{ secrets.DRILL_RESTIC_PASSWORD }}
+          RESTIC_REST_USERNAME: ${{ secrets.DRILL_REST_USERNAME }}
+          RESTIC_REST_PASSWORD: ${{ secrets.DRILL_REST_PASSWORD }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.DRILL_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.DRILL_AWS_SECRET_ACCESS_KEY }}
+        run: python scripts/ops/offsite_restore_drill.py

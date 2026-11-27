@@ -77,26 +77,9 @@ jobs:
           echo "::group::🔐 Pip Audit (known vulnerable dependencies — blocks merge)"
           for lock in requirements/production.lock requirements/test.lock; do
             echo "── ${lock}"
-            # İstisna (2026-10-15): CVE-2026-106454 — twisted.mail.imap4 `wildcardToRegexp` ReDoS. Düzəlmiş
-            # versiya hələ YOXDUR (26.4.0 sonuncudur); Twisted bizdə yalnız daphne/channels üçündür, IMAP serveri
-            # (twisted.mail) heç yerdə işlədilmir. Twisted düzəliş buraxan kimi bu istisnanı silib versiyanı qaldırın.
-            # İstisna (2026-10-24): CVE-2026-115774/115775/115776/115778 (twisted mail.imap4 / words xish / words IRC /
-            # conch telnet — bizdə heç biri işlədilmir) və CVE-2026-115877 (twisted.web başlıq dəyərində çılpaq CR/LF;
-            # daphne nginx-in ARXASINDADIR, nginx başlıqları yenidən qurub ötürür — smuggling çərçivəsi yaranmır).
-            # Düzəliş yalnız 26.10.0rc1-dədir (sabit buraxılış yox); 26.10.0 çıxan kimi istisnaları silib qaldırın.
-            # İstisna (2026-10-27): CVE-2026-83813 — twisted.names.dns.DNSDatagramProtocol (twisted-in DNS client-i).
-            # Bizdə twisted.names işlədilmir (repo-da import yoxdur); daphne reaktorun standart (thread) resolverini
-            # işlədir. Düzəliş yalnız 26.10.0rc1-dədir — 26.10.0 çıxan kimi bütün twisted istisnalarını silib qaldırın.
-            # 2026-10-30: GHSA-vpp8-g58w-m8mp affects Twisted's HTTP/2 server only.
-            # nginx terminates public h2; every app upstream uses HTTP/1.1, and app has no published port.
-            # tests/test_twisted_h2_boundary.py guards this boundary. Remove with the next stable Twisted fix
-            # (currently only 26.10.0rc1 is patched): https://github.com/twisted/twisted/security/advisories/GHSA-vpp8-g58w-m8mp
-            ignores=(--ignore-vuln GHSA-vpp8-g58w-m8mp --ignore-vuln CVE-2026-106454 --ignore-vuln CVE-2026-115774 --ignore-vuln CVE-2026-115775
-                     --ignore-vuln CVE-2026-115776 --ignore-vuln CVE-2026-115778 --ignore-vuln CVE-2026-115877
-                     --ignore-vuln CVE-2026-83813)
             # PyPI TLS handshakes can exceed pip-audit's 15s default on runners.
             # A timeout still blocks the job, just like an advisory finding.
-            pip-audit -r "$lock" --require-hashes --disable-pip --timeout 60 --desc on "${ignores[@]}" || {
+            pip-audit -r "$lock" --require-hashes --disable-pip --timeout 60 --desc on || {
               echo "::error::❌ pip-audit failed for ${lock}; review the advisory or network error above."
               exit 1
             }

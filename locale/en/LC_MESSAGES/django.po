@@ -122231,3 +122231,37 @@ msgstr "Required if “Other” is selected."
 msgctxt "registrar.recognition"
 msgid "Əsas sənəd (sertifikat, kollec arayışı, transkript və ya əmr)"
 msgstr "Main document (certificate, college statement, transcript or order)"
+
+msgctxt "registrar.journal_lessons"
+msgid "Bu dərs saatı tutulub. Jurnalda uyğun sütunu özünüz seçin və ya başqa dərs saatı seçin."
+msgstr "This lesson time is already in use. Select the appropriate journal column or choose another lesson time."
+
+msgctxt "labs.view.error"
+msgid "Invalid lab answer."
+msgstr "Invalid lab answer."
+
+msgctxt "labs.view.error"
+msgid "This attempt is no longer current. Reload the lab to continue."
+msgstr "This attempt is no longer current. Reload the lab to continue."
+
+msgctxt "labs.view.error"
+msgid "This item contains a question with student answers and cannot be deleted."
+msgstr "This item contains a question with student answers and cannot be deleted."
+
+msgid "Yenidən cəhd ver"
+msgstr "Allow another attempt"
+
+msgctxt "exams.final_center.error"
+msgid "Tələbənin davam edən cəhdi var."
+msgstr "The student has an attempt in progress."
+
+msgctxt "registrar.language_cohort"
+msgid "Səviyyə qrupunun siyahısını idarə et"
+msgstr "Manage the language level group roster"
+
+msgctxt "labs.view.error"
+msgid "The assigned questions have changed. Reload the lab before submitting."
+msgstr "The assigned questions have changed. Reload the lab before submitting."
+
+msgid "Əlaqə forması yeniləndi. Mesajınızı yoxlayıb yenidən göndərin."
+msgstr "The contact form has been refreshed. Review your message and send it again."

@@ -591,6 +591,7 @@ from apps.registrar.gradebook_components import (  # noqa: E402,F401
 
 # ── Dərs CRUD ayrıca modulda (modul-ölçü büdcəsi) — re-eksport ──────────────
 from apps.registrar.gradebook_lessons import (  # noqa: E402,F401
+    SlotTakenError,
     _coerce_date,
     create_lesson,
     delete_lesson,

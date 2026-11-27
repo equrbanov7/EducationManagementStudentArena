@@ -334,6 +334,9 @@ class LabQuestion(models.Model):
 
     class Meta:
         ordering = ["block", "question_number"]
+        constraints = [
+            models.UniqueConstraint(fields=("block", "question_number"), name="labs_question_block_number_uniq")
+        ]
         verbose_name = "Lab Sualı"
         verbose_name_plural = "Lab Sualları"
 

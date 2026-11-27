@@ -9,11 +9,13 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.utils.translation import pgettext
 from django.views.decorators.http import require_http_methods, require_POST
 
-from ...models import LabBlock
+from ...models import Lab, LabBlock
 from ..shared._helpers import _get_tenant_block_or_404, _get_tenant_lab_or_404
+from .question_deletion import delete_unused_questions
 
 logger = logging.getLogger(__name__)
 
@@ -121,8 +123,7 @@ def delete_block(request, pk):
             {"success": False, "error": pgettext("labs.view.permission", "permission_denied")}, status=403
         )
 
-    block.delete()
-    return JsonResponse({"success": True})
+    return delete_unused_questions(block)
 
 
 @login_required
@@ -142,12 +143,10 @@ def update_questions_per_student(request, pk):
     except (TypeError, ValueError):
         value = 0
 
-    lab.questions_per_student = value
-    lab.save(update_fields=["questions_per_student", "updated_at"])
-
-    # Mövcud assignment-ları yeni ayara görə yenilə.
-    for assignment in lab.assignments.all():
-        assignment.assign_questions()
+    # New settings are applied when an unstarted assignment is next opened.
+    Lab.objects.filter(pk=lab.pk).exclude(questions_per_student=value).update(
+        questions_per_student=value, updated_at=timezone.now()
+    )
 
     messages.success(request, pgettext("labs.blocks.message", "Tələbə başına sual sayı yeniləndi."))
     return redirect("labs:manage_blocks", pk=lab.id)

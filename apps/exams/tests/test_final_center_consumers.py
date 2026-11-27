@@ -14,6 +14,7 @@ from django.test import Client, TransactionTestCase, override_settings
 from django.utils import timezone
 
 from asgiref.sync import async_to_sync
+from channels.db import database_sync_to_async
 from channels.testing import WebsocketCommunicator
 
 from apps.accounts.models import ProfileRole
@@ -21,6 +22,7 @@ from apps.exams.domain.final_center import TICKET_STATUS_WAITING
 from apps.exams.models import Exam, ExamRoom, ExamRoomSession, FinalExamTicket
 from apps.exams.services.final_center import open_entry
 from apps.exams.tests.test_exam_center_policy import PASSWORD, _assign_user_to_org
+from apps.exams.tests.test_waiting_presence import PRESENCE_TEST_CACHES
 from apps.organizations.models import Organization
 from config.asgi import application
 from core.constants import OrganizationType
@@ -141,6 +143,45 @@ class FinalCenterConsumerAuthTests(TransactionTestCase):
             self._session_headers("fcc_student"),
         )
         self.assertTrue(connected)
+
+    @override_settings(CACHES=PRESENCE_TEST_CACHES, CHANNEL_LAYERS=settings.CHANNEL_LAYERS)
+    def test_two_wait_tabs_keep_monitor_and_room_start_connected_until_last_close(self):
+        from apps.exams.services.final_center import start_room
+        from apps.exams.services.final_center.monitor import session_monitor_snapshot
+
+        def monitor():
+            snapshot = session_monitor_snapshot(self.session)
+            row = next(row for row in snapshot["students"] if row["ticket_id"] == self.ticket.pk)
+            return snapshot["counts"]["connected"], row["connected"]
+
+        student_headers = self._session_headers("fcc_student")
+        wait_url = f"/ws/exams/final/wait/{self.ticket.pk}/"
+        a = WebsocketCommunicator(application, wait_url, headers=student_headers)
+        b = WebsocketCommunicator(application, wait_url, headers=student_headers)
+        room = WebsocketCommunicator(
+            application, f"/ws/exams/final/room/{self.session.pk}/", headers=self._session_headers("fcc_center")
+        )
+
+        async def scenario():
+            self.assertTrue((await room.connect())[0])
+            self.assertTrue((await a.connect())[0])
+            await room.receive_json_from()
+            self.assertTrue((await b.connect())[0])
+            await room.receive_json_from()
+            await a.disconnect()
+            self.assertTrue(await room.receive_nothing(timeout=0.1))
+            self.assertEqual(await database_sync_to_async(monitor)(), (1, True))
+            self.assertTrue(await database_sync_to_async(start_room)(self.session, self.center))
+            self.assertEqual(self.session.start_connected_count, 1)
+            await b.disconnect()
+            events = []
+            while "student_disconnected" not in events:
+                events.append((await room.receive_json_from())["event"])
+            self.assertEqual(events.count("student_disconnected"), 1)
+            self.assertEqual(await database_sync_to_async(monitor)(), (0, False))
+            await room.disconnect()
+
+        async_to_sync(scenario)()
 
     def test_wait_channel_rejects_other_student(self):
         connected = self._try_connect(

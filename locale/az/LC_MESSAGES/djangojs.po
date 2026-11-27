@@ -3962,3 +3962,6 @@ msgid ""
 msgstr ""
 "%(group)s: «%(name)s» bölməsində tələbə yoxdur — tələbə yerləşdirin və ya "
 "bölmə sayını azaldın."
+
+msgid "Seçim üçün variant yoxdur"
+msgstr "Seçim üçün variant yoxdur"

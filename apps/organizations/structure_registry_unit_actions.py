@@ -16,7 +16,7 @@ from core.constants import AuditAction, OrgUnitType
 from core.staff_position import visible_role_label
 
 from .models import Membership, OrgUnit
-from .name_matching import name_exists
+from .name_matching import RegistryNameTaken, name_exists, registry_unit_write
 from .structure_registry_helpers import (
     ARCHIVE_REASON_MIN,
     _active_member_user,
@@ -44,6 +44,14 @@ _CTX = "organizations.registry"
 
 
 def _save_unit(request, organization, scope, flags):
+    try:
+        with registry_unit_write(organization):
+            return _save_unit_locked(request, organization, scope, flags)
+    except RegistryNameTaken as exc:
+        return _error(str(exc), code="name_taken", field="name")
+
+
+def _save_unit_locked(request, organization, scope, flags):
     kind = (request.POST.get("kind") or "").strip()
     if kind not in ("faculty", "kafedra"):
         return _error(pgettext(_CTX, "Vahid növü tanınmadı."), code="bad_kind")
@@ -85,49 +93,48 @@ def _save_unit(request, organization, scope, flags):
     if unit is not None:
         siblings = siblings.exclude(pk=unit.pk)
     if name_exists(siblings, name):
-        return _error(pgettext(_CTX, "Bu adda bölmə artıq var."), code="name_taken", field="name")
+        raise RegistryNameTaken()
     if code and siblings.filter(code__iexact=code).exists():
         return _error(pgettext(_CTX, "Bu kodda bölmə artıq var."), code="code_taken", field="code")
 
-    with transaction.atomic():
-        if unit is None:
-            unit = OrgUnit.objects.create(
-                organization=organization,
-                parent=parent,
-                unit_type=OrgUnitType.FACULTY if is_faculty else OrgUnitType.CHAIR,
-                name=name,
-                slug=_unique_unit_slug(organization, name, kind),
-                code=code,
-            )
-            log_action(
-                action=AuditAction.CREATE,
-                user=request.user,
-                organization=organization,
-                obj=unit,
-                request=request,
-                reason=f"structure registry: {kind} created",
-                new_values={"name": name, "code": code, "parent": str(parent.id) if parent else ""},
-            )
-            message = pgettext(_CTX, "Fakültə yaradıldı.") if is_faculty else pgettext(_CTX, "Kafedra yaradıldı.")
-        else:
-            old_values = {"name": unit.name, "code": unit.code, "parent": str(unit.parent_id or "")}
-            unit.name = name
-            unit.code = code
-            if not is_faculty:
-                unit.parent = parent
-            # save() level/path-i yenidən hesablayır və törəmələrə yayır.
-            unit.save()
-            log_action(
-                action=AuditAction.UPDATE,
-                user=request.user,
-                organization=organization,
-                obj=unit,
-                request=request,
-                reason=f"structure registry: {kind} updated",
-                old_values=old_values,
-                new_values={"name": name, "code": code, "parent": str(unit.parent_id or "")},
-            )
-            message = pgettext(_CTX, "Fakültə yeniləndi.") if is_faculty else pgettext(_CTX, "Kafedra yeniləndi.")
+    if unit is None:
+        unit = OrgUnit.objects.create(
+            organization=organization,
+            parent=parent,
+            unit_type=OrgUnitType.FACULTY if is_faculty else OrgUnitType.CHAIR,
+            name=name,
+            slug=_unique_unit_slug(organization, name, kind),
+            code=code,
+        )
+        log_action(
+            action=AuditAction.CREATE,
+            user=request.user,
+            organization=organization,
+            obj=unit,
+            request=request,
+            reason=f"structure registry: {kind} created",
+            new_values={"name": name, "code": code, "parent": str(parent.id) if parent else ""},
+        )
+        message = pgettext(_CTX, "Fakültə yaradıldı.") if is_faculty else pgettext(_CTX, "Kafedra yaradıldı.")
+    else:
+        old_values = {"name": unit.name, "code": unit.code, "parent": str(unit.parent_id or "")}
+        unit.name = name
+        unit.code = code
+        if not is_faculty:
+            unit.parent = parent
+        # save() level/path-i yenidən hesablayır və törəmələrə yayır.
+        unit.save()
+        log_action(
+            action=AuditAction.UPDATE,
+            user=request.user,
+            organization=organization,
+            obj=unit,
+            request=request,
+            reason=f"structure registry: {kind} updated",
+            old_values=old_values,
+            new_values={"name": name, "code": code, "parent": str(unit.parent_id or "")},
+        )
+        message = pgettext(_CTX, "Fakültə yeniləndi.") if is_faculty else pgettext(_CTX, "Kafedra yeniləndi.")
     return _ok(message, unit_id=str(unit.id))
 
 

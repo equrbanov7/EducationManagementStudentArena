@@ -86,7 +86,12 @@ def invalidate_org_switcher_on_membership_change(sender, instance, **kwargs):
 @receiver([post_save, post_delete], sender=OrgUnit)
 @receiver([post_save, post_delete], sender=Organization)
 def invalidate_request_membership_snapshots(sender, **kwargs):
-    bump_membership_epoch()
+    if sender is Role and not kwargs.get("created", False):
+        from .role_queryset import invalidate_role_memberships
+
+        invalidate_role_memberships(kwargs.get("using"))
+    else:
+        bump_membership_epoch()
 
 
 # ── Cədvəl redaktorunun müəllim seçim keşi (PERF-1 F-16) ─────────────────────

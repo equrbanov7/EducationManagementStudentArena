@@ -1,8 +1,7 @@
 """Fənn qovluğunun Celery tapşırıqları.
 
-Hamısı ``rls_worker_atomic()`` + ``bypass_rls()`` ilə işləyir (request konteksti
-yoxdur); servis sorğuları açıq ``organization`` filtri daşıyır, tenant sərhədi
-yazılan sətrin ÖZ təşkilatındadır.
+Xülasə işi gözləyən təşkilat və müəllim açarlarını seçir. Hər xülasənin
+məzmununu həmin təşkilatın ayrıca RLS tranzaksiyasında hazırlayır.
 
 Dövri işlər üçün beat cədvəli (``config/settings/components/celery_cache.py``-yə
 orkestrator əlavə edir)::
@@ -54,13 +53,9 @@ def sync_journal_pending(include_blocked: bool = False):
 @shared_task(name="subject_folder.send_submission_digests")
 def send_submission_digests():
     """Müəllimlərə yeni göndərişlərin xülasəsi (interval daxilində artıq göndərilibsə ötürülür)."""
-    from core.rls import bypass_rls
-    from core.rls_pooling import rls_worker_atomic
+    from .services.notify import run_pending_digests
 
-    from .services.notify import send_submission_digests as _send
-
-    with rls_worker_atomic(), bypass_rls():
-        return _send(force=False)
+    return run_pending_digests()
 
 
 @shared_task(name="subject_folder.auto_assign_groups")

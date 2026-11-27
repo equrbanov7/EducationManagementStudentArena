@@ -57,6 +57,8 @@ class ContactMessage(models.Model):
     )
     message = models.TextField(_("Mesaj"), max_length=5000)
 
+    submission_key = models.UUIDField(null=True, unique=True, editable=False)
+
     # Metadata — never displayed to the public, only to staff.
     ip_address = models.GenericIPAddressField(_("IP ünvan"), null=True, blank=True)
     user_agent = models.CharField(_("User-Agent"), max_length=512, blank=True)

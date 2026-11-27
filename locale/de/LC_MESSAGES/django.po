@@ -123813,3 +123813,37 @@ msgctxt "registrar.recognition"
 msgid "Əsas sənəd (sertifikat, kollec arayışı, transkript və ya əmr)"
 msgstr ""
 "Hauptdokument (Zertifikat, College-Bescheinigung, Transkript oder Anordnung)"
+
+msgctxt "registrar.journal_lessons"
+msgid "Bu dərs saatı tutulub. Jurnalda uyğun sütunu özünüz seçin və ya başqa dərs saatı seçin."
+msgstr "Diese Unterrichtszeit ist bereits belegt. Wählen Sie die passende Spalte im Klassenbuch oder eine andere Unterrichtszeit."
+
+msgctxt "labs.view.error"
+msgid "Invalid lab answer."
+msgstr "Die Antwort zur Laboraufgabe ist ungültig."
+
+msgctxt "labs.view.error"
+msgid "This attempt is no longer current. Reload the lab to continue."
+msgstr "Dieser Versuch ist nicht mehr aktuell. Laden Sie die Laboraufgabe erneut, um fortzufahren."
+
+msgctxt "labs.view.error"
+msgid "This item contains a question with student answers and cannot be deleted."
+msgstr "Fragen mit Antworten von Studierenden und die zugehörigen Blöcke können nicht gelöscht werden."
+
+msgid "Yenidən cəhd ver"
+msgstr "Weiteren Versuch erlauben"
+
+msgctxt "exams.final_center.error"
+msgid "Tələbənin davam edən cəhdi var."
+msgstr "Die Person hat bereits einen laufenden Prüfungsversuch."
+
+msgctxt "registrar.language_cohort"
+msgid "Səviyyə qrupunun siyahısını idarə et"
+msgstr "Teilnehmerliste der Sprachstufengruppe verwalten"
+
+msgctxt "labs.view.error"
+msgid "The assigned questions have changed. Reload the lab before submitting."
+msgstr "Die zugewiesenen Fragen haben sich geändert. Laden Sie die Laboraufgabe vor der Abgabe erneut."
+
+msgid "Əlaqə forması yeniləndi. Mesajınızı yoxlayıb yenidən göndərin."
+msgstr "Das Kontaktformular wurde aktualisiert. Prüfen Sie Ihre Nachricht und senden Sie sie erneut."

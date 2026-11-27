@@ -6,7 +6,7 @@ All business logic that needs org-scoping should use these utilities.
 from uuid import UUID
 
 from django.contrib.auth import get_user_model
-from django.db.models import QuerySet
+from django.db.models import F, QuerySet
 
 from core.constants import ROLE_LEVELS
 from core.rls import bypass_rls
@@ -39,6 +39,8 @@ def get_active_memberships(user, organization=None):
         Membership.objects.filter(
             user=user,
             is_active=True,
+            role__is_active=True,
+            role__organization_id=F("organization_id"),
             organization__is_active=True,
             organization__status="active",
         )
@@ -65,6 +67,8 @@ def ensure_owner_membership(user, organization):
                 user=user,
                 organization=organization,
                 is_active=True,
+                role__is_active=True,
+                role__organization=organization,
             )
             .select_related("organization", "role", "scope_unit")
             .order_by("-is_primary", "-role__level", "id")
@@ -223,6 +227,8 @@ def organization_user_queryset(organization, queryset=None):
         memberships__organization__is_active=True,
         memberships__organization__status="active",
         memberships__is_active=True,
+        memberships__role__is_active=True,
+        memberships__role__organization=organization,
     ).distinct()
 
 
@@ -237,6 +243,8 @@ def organization_role_user_queryset(organization, role_names, queryset=None):
         memberships__organization=organization,
         memberships__organization__is_active=True,
         memberships__is_active=True,
+        memberships__role__is_active=True,
+        memberships__role__organization=organization,
         memberships__role__name__in=candidate_role_names,
     ).distinct()
 
@@ -271,6 +279,8 @@ def get_org_members(organization):
             organization__status="active",
             is_active=True,
             user__is_active=True,
+            role__is_active=True,
+            role__organization=organization,
         )
         .select_related("user", "role", "organization")
         .order_by("user__username", "-role__level", "id")

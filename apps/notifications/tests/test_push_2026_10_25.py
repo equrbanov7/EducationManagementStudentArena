@@ -163,6 +163,40 @@ class DeliveryTests(_PushCase):
         with bypass_rls():
             self.assertEqual(PushDevice.objects.filter(last_success_at__isnull=False).count(), 2)
 
+    def test_time_budget_resumes_each_device_in_stable_notification_order(self):
+        first = self._device(TOKEN_A)
+        second = self._device(TOKEN_B)
+        with mock.patch("apps.notifications.tasks.push_send_task.delay"):
+            notices = [self._notify(), self._notify()]
+        fake = FakeFCM()
+        # Eager Celery executes all continuations through the task's normal serialized arguments.
+        from apps.notifications.tasks import push_send_task
+
+        with (
+            mock.patch.object(dispatch, "TIME_BUDGET_SECONDS", -1),
+            mock.patch("apps.notifications.push.fcm.requests.Session", fake),
+        ):
+            push_send_task.delay([n.pk for n in notices])
+        self.assertEqual(
+            [(item["data"]["notification_id"], item["token"]) for item in fake.sent],
+            [(str(n.pk), token) for n in notices for token in (TOKEN_A, TOKEN_B)],
+        )
+        with bypass_rls():
+            self.assertEqual(
+                PushDevice.objects.filter(pk__in=[first.pk, second.pk], last_success_at__isnull=False).count(), 2
+            )
+
+    def test_cursor_applies_only_to_its_original_unread_notification(self):
+        device = self._device(TOKEN_A)
+        with mock.patch("apps.notifications.tasks.push_send_task.delay"):
+            read, unread = self._notify(), self._notify()
+        with bypass_rls():
+            InAppNotification.objects.filter(pk=read.pk).update(is_read=True)
+        fake = FakeFCM()
+        with mock.patch("apps.notifications.push.fcm.requests.Session", fake):
+            dispatch.deliver([read.pk, unread.pk], after_device_id=device.pk)
+        self.assertEqual([m["data"]["notification_id"] for m in fake.sent], [str(unread.pk)])
+
     def test_unregistered_token_is_deactivated(self):
         good = self._device(TOKEN_A)
         bad = self._device(TOKEN_B)

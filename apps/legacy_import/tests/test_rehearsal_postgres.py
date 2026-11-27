@@ -604,9 +604,9 @@ def test_structure_phase_writes_under_rls():
     report = AcademicStructurePhase().run(context)
 
     assert report.phase_key == "academic_structure"
-    assert dict(report.state_counts) == {"migrated": 13, "skipped": 0, "quarantined": 1}
-    # 5 departments (the type-9 row is quarantined) + 3 specialities + 5 groups.
-    assert OrgUnit.objects.filter(organization=organization).count() == 13
+    assert dict(report.state_counts) == {"migrated": 12, "skipped": 0, "quarantined": 2}
+    # 4 departments (unknown type and duplicate name are quarantined) + 3 specialities + 5 groups.
+    assert OrgUnit.objects.filter(organization=organization).count() == 12
     # One program per (speciality, observed degree): 10→bachelor+master, 11, 12.
     assert Program.objects.filter(organization=organization).count() == 4
 

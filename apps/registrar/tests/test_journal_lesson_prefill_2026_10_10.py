@@ -392,8 +392,8 @@ class PrefillBuildTest(LessonPrefillBase):
         self.assertEqual(data["topic"], "SQL")
 
     def test_offering_with_timetable_leaves_the_time_to_the_teacher(self):
-        for start, end in (("10:10", "11:40"), ("12:00", "13:30")):
-            self._lesson(kind=LessonKind.SEMINAR, start_time=_t(start), end_time=_t(end))
+        self._lesson(kind=LessonKind.SEMINAR, start_time=_t("10:10"), end_time=_t("11:40"))
+        self._lesson(kind=LessonKind.LAB, start_time=_t("12:00"), end_time=_t("13:30"), instructor=self.assistant)
         data = self._prefill("10:30")
         self.assertEqual(data["source"], "last")
         self.assertEqual(data["time"], "")

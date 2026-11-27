@@ -11,6 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from apps.accounts.models import ProfileRole
 from apps.organizations.public import get_active_memberships
 from core.constants import ROLE_LEVEL_ADMIN, ROLE_LEVEL_MODERATOR, ROLE_LEVEL_TEACHER, ROLE_LEVEL_TOP_ADMIN, ROLE_LEVELS
+from core.membership_state import has_active_role, membership_epoch
 
 User = get_user_model()
 
@@ -27,6 +28,11 @@ def _is_authenticated_user(self):
 
 
 def _set_active_organization_context(self, organization=None, *, memberships=None, permissions=None):
+    epoch = membership_epoch()
+    if getattr(self, "_active_membership_epoch", epoch) != epoch:
+        # Existing request attributes may still contain the old role objects.
+        memberships = permissions = None
+    self._active_membership_epoch = epoch
     self._active_organization = organization
     self._active_org_memberships = list(memberships) if memberships is not None else None
     self._active_org_permissions = list(permissions) if permissions is not None else None
@@ -47,24 +53,22 @@ def _resolve_active_organization_context(self):
     cached_memberships = getattr(self, "_active_org_memberships", None)
     active_organization = getattr(self, "_active_organization", None)
 
-    if cached_memberships is not None:
-        memberships = [membership for membership in cached_memberships if getattr(membership, "is_active", False)]
-        if active_organization is None:
-            return None, []
-        memberships = [
-            membership
-            for membership in memberships
-            if getattr(membership, "organization_id", None) == active_organization.id
-        ]
-        return active_organization, memberships
-
-    active_organization = getattr(self, "_active_organization", None)
     if active_organization is None:
         return None, []
+    if cached_memberships is not None and getattr(self, "_active_membership_epoch", None) == membership_epoch():
+        return active_organization, [row for row in cached_memberships if has_active_role(row, active_organization.pk)]
 
+    epoch = membership_epoch()
     memberships = list(get_active_memberships(self, active_organization))
     self._active_org_memberships = memberships
+    self._active_membership_epoch = epoch
     return active_organization, memberships
+
+
+def _resolve_active_memberships(self, organization):
+    if getattr(self, "_active_organization", None) != organization:
+        return []
+    return _resolve_active_organization_context(self)[1]
 
 
 def _get_active_organization(self):
@@ -188,6 +192,7 @@ def _is_top_admin(self):
     return self._highest_role_level() >= ROLE_LEVEL_TOP_ADMIN
 
 
+User.add_to_class("resolve_active_memberships", _resolve_active_memberships)
 User.add_to_class("set_active_organization_context", _set_active_organization_context)
 User.add_to_class("clear_active_organization_context", _clear_active_organization_context)
 User.add_to_class("get_active_organization", _get_active_organization)
