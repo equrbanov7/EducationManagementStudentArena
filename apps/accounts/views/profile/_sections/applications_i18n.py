@@ -32,6 +32,7 @@ def _rows() -> dict:
             _CTX, "Hələ müraciət göndərməmisiniz. «Yeni müraciət» düyməsi ilə başlaya bilərsiniz."
         ),
         "emptyHandlerNote": pgettext(_CTX, "Bu filtrə uyğun müraciət yoxdur — filtri dəyişin."),
+        "emptyElsewhere": pgettext(_CTX, "Axtarışa uyğun müraciət başqa bölmədədir:"),
     }
 
 

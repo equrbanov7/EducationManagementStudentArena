@@ -163,7 +163,7 @@
         return (
             '<div class="apx-empty"><i class="fas fa-comment-dots fa-2x" aria-hidden="true"></i>' +
             '<div class="apx-empty__title">' + NS.esc(title) + "</div>" +
-            '<div class="apx-empty__note">' + NS.esc(note) + "</div></div>"
+            '<div class="apx-empty__note">' + NS.esc(note) + "</div>" + (NS.elsewhereHtml ? NS.elsewhereHtml() : "") + "</div>"
         );
     }
 
@@ -231,6 +231,7 @@
                 NS.state.rows = options.append ? NS.state.rows.concat(payload.results) : payload.results;
                 NS.state.pages = payload.pages;
                 NS.state.total = payload.total;
+                NS.state.elsewhere = payload.elsewhere || [];
                 NS.state.counts = payload.counts || {};
                 renderTabs();
                 renderList();

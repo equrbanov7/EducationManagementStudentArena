@@ -124035,3 +124035,7 @@ msgstr ""
 "zurückkehrt. Ist die bisherige Gruppe aktiv, wird sie automatisch gewählt; "
 "ist sie archiviert, wählen Sie eine andere aktive Gruppe — die/der "
 "Studierende wird in deren Journale des laufenden Semesters aufgenommen."
+
+msgctxt "applications"
+msgid "Axtarışa uyğun müraciət başqa bölmədədir:"
+msgstr "Passende Anträge befinden sich in einem anderen Bereich:"

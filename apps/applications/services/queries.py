@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from django.db.models import Count, F, Prefetch, Q
 from django.utils import timezone
 
@@ -62,14 +64,56 @@ def _stat_q(stat: str) -> Q:
     return Q()
 
 
+#: «MR-886», «mr 886», «MR-000886», «886» — müraciət nömrəsi (sahib 2026-11-28: «MR-886» heç nə tapmırdı,
+#: çünki saxlanan nömrə sıfırla doldurulub — «MR-000886»).
+_NUMBER_RE = re.compile(r"^\s*(?:mr)?[\s\-–—_./#№]*0*(\d{1,9})\s*$", re.IGNORECASE)
+
+
+def number_q(text: str) -> Q | None:
+    """Axtarış mətni müraciət nömrəsidirsə — sıfır doldurmasından asılı olmayan dəqiq nömrə şərti; yoxsa ``None``."""
+    match = _NUMBER_RE.match(text or "")
+    if match is None:
+        return None
+    return Q(number__iregex=rf"^MR-0*{int(match.group(1))}$")
+
+
 def search_q(text: str) -> Q:
-    """Dözümlü axtarış (``core.search_text``): mövzu/ad az/ing hərfinə, nömrə ayırıcıya dözümlü; boş → ``Q()``."""
+    """Dözümlü axtarış (``core.search_text``): mövzu/ad az/ing hərfinə, nömrə ayırıcıya dözümlü; boş → ``Q()``.
+
+    Nömrə kimi yazılmış mətn («MR-886», «886») həm də dəqiq nömrə ilə uyğunlaşır."""
     query = tolerant_q(
         text,
         ("subject", "created_by__first_name", "created_by__last_name", "created_by__username"),
         compact_fields=("number",),
     )
+    by_number = number_q(text)
+    if by_number is not None:
+        query = by_number if query is None else query | by_number
     return Q() if query is None else query
+
+
+#: Boş axtarışda «başqa bölmədə var» işarəsi üçün yoxlanan tablar (sıra = göstərmə sırası).
+_ELSEWHERE_TABS = ("inbox", "watching", "mine", "all", "archive")
+
+
+def search_elsewhere(*, organization, user, search: str, tab: str, stat: str) -> list[dict]:
+    """Cari tab/status boş qaytaranda axtarışın HARADA tapıldığı: ``[{"tab", "stat", "count"}]``.
+
+    Yalnız istifadəçinin görə bildiyi tablar («Bütün müraciətlər» — nəzarətçiyə); sayğac açıq + bağlı birlikdə
+    (``stat="all"``), cari tabın özü yalnız status filtri onu gizlədəndə daxil olur."""
+    if not (search or "").strip():
+        return []
+    found = []
+    for other in _ELSEWHERE_TABS:
+        if other == "all" and not access.can_oversee(user, organization):
+            continue
+        if other == tab and stat in {"all", ""}:
+            continue
+        queryset = base_queryset(organization).filter(_tab_q(user, organization, other)).filter(search_q(search))
+        count = _count(queryset)
+        if count:
+            found.append({"tab": other, "stat": "all", "count": count})
+    return found
 
 
 def date_q(date_from=None, date_to=None) -> Q:
@@ -235,6 +279,8 @@ __all__ = [
     "handler_inbox_counts",
     "handler_kpis",
     "list_applications",
+    "number_q",
+    "search_elsewhere",
     "search_q",
     "sender_counts",
     "sender_kpis",
