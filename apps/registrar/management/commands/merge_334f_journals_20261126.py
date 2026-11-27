@@ -16,6 +16,7 @@ import re
 from django.core.management.base import BaseCommand, CommandError
 
 from ... import merge_334f_2026_11_26 as fixer
+from ... import merge_334f_check_2026_11_27 as checker
 from ... import merge_334f_undo_2026_11_26 as unfixer
 from .relocate_twin_enrollment import run_plan
 
@@ -53,6 +54,9 @@ class Command(BaseCommand):
         parser.add_argument("--apply", action="store_true", help="Faktiki yaz (defolt: dry-run)")
         parser.add_argument("--batch", default="", help="Qaçış id-si (m334f-…); --undo üçün məcburi")
         parser.add_argument("--undo", action="store_true", help="--batch qaçışını geri qaytar")
+        parser.add_argument(
+            "--check", action="store_true", help="--batch qaçışının qayıb saatlarını tutuşdur (yalnız oxuyur)"
+        )
 
     def handle(self, *args, **options):
         batch = str(options["batch"] or "").strip()
@@ -60,10 +64,14 @@ class Command(BaseCommand):
             raise CommandError("f334_merge_batch_invalid")
         if options["undo"] and not batch:
             raise CommandError("f334_merge_undo_needs_batch")
+        if options["check"] and (not batch or options["undo"] or options["apply"]):
+            raise CommandError("f334_merge_check_needs_batch_only")
         used, report = {}, []
 
         def runner(organization, actor, counts):
-            if options["undo"]:
+            if options["check"]:
+                checker.check(organization=organization, batch=batch, counts=counts, report=report)
+            elif options["undo"]:
                 unfixer.undo(organization=organization, actor=actor, counts=counts, batch=batch)
             else:
                 used["batch"] = fixer.run(
@@ -78,6 +86,10 @@ class Command(BaseCommand):
             raise
         except Exception as exc:  # noqa: BLE001 — prod-data-ops yalnız CommandError kodunu göstərir
             raise CommandError(failure_code(exc)) from None
+        if options["check"]:
+            for item in report:
+                self.stdout.write(f"{PREFIX} kind=check " + " ".join(f"{k}={_safe(v)}" for k, v in item.items()))
+            return
         for family, outcome, delta in report:
             self.stdout.write(family_line(family, outcome, delta))
         if used.get("batch") and options["apply"] and not options["undo"]:
