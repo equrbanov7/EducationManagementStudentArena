@@ -308,8 +308,18 @@ class CoTeacherSameKindHeadingTests(TestCase):
         student = get_user_model().objects.create_user("coteach-s", first_name="Tələbə", last_name="S")
         activate_member(self.org, student, "student")
         enrollment = Enrollment.objects.create(organization=self.org, student=student, offering=self.course)
-        shared = Lesson.objects.filter(offering=self.course, instructor=self.gunay).first()
+        shared = Lesson.objects.create(
+            organization=self.org,
+            offering=self.course,
+            kind="seminar",
+            instructor=self.gunay,
+            hours=2,
+            date=timezone.localdate(),
+        )
         LessonMark.objects.create(organization=self.org, lesson=shared, enrollment=enrollment, status="present")
+        # Günayın ÖZ alt qrupunun (seminar_group=2) dərsində Aytacın tələbəsinin köhnə qeydi sayılmır (435 R ing).
+        tagged = Lesson.objects.filter(offering=self.course, instructor=self.gunay, seminar_group=2).first()
+        LessonMark.objects.create(organization=self.org, lesson=tagged, enrollment=enrollment, status="present")
         scope = Scope(enrollment_ids=frozenset({str(enrollment.pk)}), teacher_id=self.aytac.pk)
         summary = journal_teaching_summary(self.course, personal_actor=self.aytac, scope=scope)
         self.assertEqual((105, 8), (summary["total"], summary["held_total"]))

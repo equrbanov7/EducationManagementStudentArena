@@ -122,7 +122,15 @@ def _without_co_teachers(offering, lessons, plan, actor, scope=None):
             co_kinds[teacher_id] = kinds
     if not co_kinds:
         return lessons
-    foreign = [lesson for lesson in lessons if lesson.kind in co_kinds.get(lesson.instructor_id, ())]
+    # Alt qrupu işarələnmiş dərs (seminar/lab qrupu) həmkarın öz alt qrupunundur — köhnə sistemdən gələn qeydlər
+    # orada aktorun tələbələrinə də yazılıb (435 R ing), ona görə yalnız işarəsiz ORTAQ sütunlar yoxlanır.
+    foreign = [
+        lesson
+        for lesson in lessons
+        if lesson.kind in co_kinds.get(lesson.instructor_id, ())
+        and not getattr(lesson, "seminar_group", None)
+        and not getattr(lesson, "lab_group", None)
+    ]
     marked = _lessons_with_own_marks(foreign, getattr(scope, "enrollment_ids", None))
     return [
         lesson for lesson in lessons if lesson.kind not in co_kinds.get(lesson.instructor_id, ()) or lesson.pk in marked
