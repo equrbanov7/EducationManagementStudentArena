@@ -373,6 +373,8 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
     # Qrup dəyişikliyi DB qapısı ilə yalnız rəsmi köçürmə xidmətinə buraxılır.
     section["movement_action_url"] = reverse("accounts:student_registry_action")
     section["group_options"] = payload.get("group_options", [])
+    # Hərəkət dialoqlarının (köçür / bərpa et) hədəf qrupları — `people.manage_academic` əhatəsi (sahib 2026-11-27).
+    section["movement_group_options"] = payload.get("movement_group_options", [])
     section["movement_form_data"] = {"data-tof-form": "1", "data-tof-url": section["movement_action_url"]}
     section["movement_hidden"] = [{"name": "record_id"}, {"name": "kind"}]
     # «Qrupu məzun et» (sahib 2026-11-25) — `organizations:group_graduate`, gizli `id` = açıq qrup.
@@ -383,8 +385,9 @@ def build_groups_section(request, section, *, active_organization, allowed_secti
     from apps.accounts.services.people.movements import leave_reason_options
 
     section["leave_reason_options"] = leave_reason_options()
-    # «Bərpa et» (2026-10-15): hədəf qrup = çekmecədə açıq qrup (JS prefill), əmr № + tarix məcburi.
-    section["reinstate_hidden"] = [{"name": "record_id"}, {"name": "kind"}, {"name": "target_group"}]
+    # «Bərpa et»: əmr № + tarix məcburi. Sahib 2026-11-27: hədəf qrup SEÇİLİR (görünən seçici, defolt — çekmecədə
+    # açıq qrup aktivdirsə o; arxiv qrupun tələbəsi üçün boş) — gizli `target_group` deyil.
+    section["reinstate_hidden"] = [{"name": "record_id"}, {"name": "kind"}]
     # Toplu əməlin formu AYRICA işarələnir: seçilmiş sətir id-ləri ora GÖNDƏRMƏ
     # anında əlavə olunur (dialoq doldurulması gizli sahələri sıfırlayır, ona
     # görə açılışda yazmaq işləmir) — bax `teaching_office_bulk.js`.

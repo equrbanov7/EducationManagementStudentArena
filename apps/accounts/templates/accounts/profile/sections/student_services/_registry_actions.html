@@ -31,7 +31,8 @@ ona görə SPA yükləyicisi tutmasın deyə `js-profile-section-link` sinfi YOX
         data-sr-move="{{ row.data.record_id }}"
         data-sr-name="{{ row.data.name }}"
         data-sr-status="{{ row.data.status }}"
-        data-sr-group="{{ row.data.group_name }}">
+        data-sr-group="{{ row.data.group_name }}"
+        data-sr-group-id="{% if row.data.group_active %}{{ row.data.group_id }}{% endif %}">
     {% trans "Hərəkət əmri" context "accounts.student_registry" %}
 </button>
 {% endif %}

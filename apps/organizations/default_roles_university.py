@@ -15,7 +15,7 @@ from .default_roles_stage2 import apply_stage2_grants
 from .default_roles_stage4 import apply_stage4_grants
 from .default_roles_student_services import STUDENT_SERVICES_ROLES, apply_student_services_grants
 from .default_roles_teaching_office import TEACHING_OFFICE_ROLES, apply_teaching_office_grants
-from .default_roles_vice_dean import VICE_DEAN_ROLES
+from .default_roles_vice_dean import DEAN_OFFICE_ROLES, VICE_DEAN_ROLES
 from .permissions_announcements import apply_announcement_grants
 from .permissions_appeal_subject import apply_subject_appeal_grants
 from .permissions_document_seal import apply_document_seal_grants
@@ -550,8 +550,8 @@ _grant_application_permissions(UNIVERSITY_ROLES)
 
 # Tələbə Xidmətləri Mərkəzi (Mərhələ 3) — bir yeni rol + `student.*` açarları.
 UNIVERSITY_ROLES.extend(STUDENT_SERVICES_ROLES)
-# Əlavələr (izahlar öz modullarında): 09-06 rim / vice_dean / oversight; 09-25 quality; 11-19 monitoring; 11-25 əcnəbi.
-UNIVERSITY_ROLES.extend(RIM_STAFF_ROLES + VICE_DEAN_ROLES + OVERSIGHT_ROLES + QUALITY_CONTROL_ROLES)
+# Əlavələr (izah öz modulunda): 09-06 rim/vice_dean/oversight; 09-25 quality; 11-19 monitoring; 11-25 əcnəbi; 11-27 dekanlıq.
+UNIVERSITY_ROLES.extend(RIM_STAFF_ROLES + VICE_DEAN_ROLES + OVERSIGHT_ROLES + QUALITY_CONTROL_ROLES + DEAN_OFFICE_ROLES)
 UNIVERSITY_ROLES.extend(MONITORING_ROLES + FOREIGN_STUDENTS_ROLES)
 apply_student_services_grants(UNIVERSITY_ROLES)
 _grant_application_permissions(UNIVERSITY_ROLES)

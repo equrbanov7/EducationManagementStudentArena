@@ -100,9 +100,10 @@
             // «Məzun et» (sahib 2026-11-25) — tək tələbə; bütöv qrup çekmecənin başındakı «Qrupu məzun et»-dədir.
             out.push('<button type="button" class="ems-btn ems-btn--sm" data-tof-open="tofStudentGraduateDialog" data-tof-student-name="' + esc(row.name) + '" data-tof-prefill=\'' + esc(prefill({ record_id: row.id, kind: "graduation" })) + '\'><i class="fas fa-graduation-cap" aria-hidden="true"></i> ' + esc(t("graduate")) + "</button>");
         }
-        // «Bərpa et» (2026-10-15): bu qrupa qaytarır — arxiv qrupa yox (server də hədəfi əhatədə yoxlayır).
-        if (state.canMove && state.groupActive && (row.status === "academic_leave" || row.status === "expelled" || row.status === "graduated")) {
-            out.push('<button type="button" class="ems-btn ems-btn--sm ems-btn--primary" data-tof-open="' + REINSTATE_DIALOG_ID + '" data-tof-student-name="' + esc(row.name) + '" data-tof-prefill=\'' + esc(prefill({ record_id: row.id, kind: "reinstatement", target_group: state.groupId || "" })) + '\'><i class="fas fa-rotate-left" aria-hidden="true"></i> ' + esc(t("reinstate")) + "</button>");
+        // «Bərpa et»: hədəf qrup dialoqda SEÇİLİR (sahib 2026-11-27) — defolt bu qrup (aktivdirsə); arxiv qrupun
+        // tələbəsi üçün seçici boş açılır. Server hədəfi hərəkət əhatəsində yenidən yoxlayır.
+        if (state.canMove && (row.status === "academic_leave" || row.status === "expelled" || row.status === "graduated")) {
+            out.push('<button type="button" class="ems-btn ems-btn--sm ems-btn--primary" data-tof-open="' + REINSTATE_DIALOG_ID + '" data-tof-reinstate data-tof-student-name="' + esc(row.name) + '" data-tof-prefill=\'' + esc(prefill({ record_id: row.id, kind: "reinstatement", target_group: state.groupActive ? (state.groupId || "") : "" })) + '\'><i class="fas fa-rotate-left" aria-hidden="true"></i> ' + esc(t("reinstate")) + "</button>");
             if (row.status === "academic_leave") { out.push(expelButton(row)); }
         }
         return out.join("");

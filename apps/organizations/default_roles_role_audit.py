@@ -18,6 +18,7 @@ Yeni açarlar (kataloq: ``permissions_role_audit.py``):
   Qeyri-universitet şablonları ``default_roles.py``-dadır; mövcud tenantlar — miqrasiya ``organizations/0062``.
 """
 
+from .default_roles_dean_office import apply_dean_office_grants
 from .permissions_tutor_circle import apply_tutor_circle_grants
 
 #: Rol adı → VERİLƏN açarlar. Açar, onun ``<prefiks>.*`` wildcard-ı və ya ``*`` artıq varsa atlanır.
@@ -119,6 +120,8 @@ def apply_role_audit_grants(roles):
                 permissions.append(key)
     # Tyutorun «qrup dövrəsi» (sahib 2026-11-19) — `default_roles_university.py` 600 sətir sərhədindədir.
     apply_tutor_circle_grants(roles)
+    # Dekanlıq tələbə hərəkəti (sahib 2026-11-27) — dekan / müavin; mövcud tenantlar: organizations/0091.
+    apply_dean_office_grants(roles)
     apply_role_parity(roles)
     return apply_post_parity_revokes(roles)
 

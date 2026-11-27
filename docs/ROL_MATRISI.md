@@ -338,6 +338,23 @@ Rollar `foreign_students_head` (55) / `foreign_students_staff` (50), UNIT; şabl
 - **Hamıya (açara görə):** qrup çekmecəsində «Tarixçə» (`student.records_view`; dondurulmuş qeydiyyatlar daxil,
   «dondurulana qədər bal»), «Məzun et» və «Qrupu məzun et» (`student.movement`).
 
+## Dekanlıq tələbə hərəkəti + «Dekanlıq laborantı» — 2026-11-27 (əl ilə qeyd)
+
+Şablon `apps/organizations/default_roles_dean_office.py`, mövcud tenantlar `organizations/0091`.
+
+- **Dekan / dekan müavini:** ＋ `student.movement` (dekanda `people.manage_academic` / `student.registry_view` əvvəldən
+  var idi; müavinə üçü də) — fakültəsinin tələbəsini dondurur / bərpa edir / uzaqlaşdırır / məzun edir / qrupunu dəyişir.
+  Müavinə əlavə `unit.group_manage` (tələbə əlavə et, «Qrupu dəyiş», starosta). Müavində `member.invite` / `member.edit`
+  / `unit.edit` / `journal.reassign` YOXDUR. Tyutor / koordinator dəyişmir (hərəkət açarı yoxdur).
+- **`dean_office_assistant` «Dekanlıq laborantı»** (58, UNIT — fakültə): «Qruplar» (baxış + idarə), `journal.roster`,
+  hərəkət açarları, «Tələbə reyestri», «Tarixçə», cədvəl (baxış + idarə), «Dekanlıq» müraciətləri, kataloq oxusu.
+  Dərs yükü, sillabus / sual təsdiqi, üzv idarəsi yoxdur. Heyət siyahısında fakültə / məktəb / dekanlıq bölməsindəki
+  «Laborant» bu rola düşür (kafedradakı — `lab_assistant`). Mövcud üzvlüklər:
+  `manage.py reassign_dean_office_laborants_20261127 --org qku [--names] [--apply]` (defolt dry-run).
+- **Əhatə:** yazı (hərəkət) əhatəsi `people.manage_academic` üzvlüyünün alt-ağacıdır — başqa fakültənin tələbəsi 404,
+  hədəf qrup da əhatədə olmalıdır. Çekmecədəki düymələr də yalnız qrup bu əhatədədirsə görünür.
+- **Bərpa et:** hədəf qrup seçilir (defolt — köhnə qrup aktivdirsə); arxiv qrupun tələbəsi də bərpa olunur.
+
 ## Tələlər (skriptdə həll olunub — silməyin)
 
 1. **`ALLOWED_HOSTS`.**  `django.test.Client` `testserver` host-u ilə gəlir;

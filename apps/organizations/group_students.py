@@ -34,6 +34,7 @@ from .groups_registry import (
     can_view_groups,
     group_manage_scope,
     group_scope,
+    movement_scope,
     student_record_scope_q,
 )
 from .models import Organization
@@ -161,7 +162,11 @@ def group_students(request, slug, unit_id):
                 else []
             ),
             "can_manage": can_manage,
-            "can_move_students": can_move_students(request),
+            # Sahib 2026-11-27 (dekanlıq): düymələr yalnız qrup HƏRƏKƏT əhatəsindədirsə — oxu əhatəsi fakültəyə
+            # genişlənə bilər, əmr isə dar əhatə ilə yazılır (server `movements.create_movement`-də yenidən yoxlayır).
+            "can_move_students": can_move_students(request)
+            and _visible_group(organization, movement_scope(request, organization), str(unit.pk), include_archived=True)
+            is not None,
         }
     )
 

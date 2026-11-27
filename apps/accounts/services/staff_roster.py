@@ -169,6 +169,16 @@ def parse_rows(rows):
     return people
 
 
+#: «Dekanlıq laborantı» rolu (``organizations.default_roles_dean_office``) — modul sərhədi üçün ad burada təkrarlanır.
+DEAN_OFFICE_ASSISTANT_ROLE = "dean_office_assistant"
+_DEAN_OFFICE_WORDS = ("məktəb", "fakültə", "dekanliq")  # `_norm` ilə müqayisə olunur: «ı» → «i»
+
+
+def _is_dean_office_section(unit: str) -> bool:
+    """Bölmə (``_norm`` edilmiş) dekanlıqdırmı: fakültə / məktəb / dekanlıq, amma kafedra deyil."""
+    return "kafedra" not in unit and any(word in unit for word in _DEAN_OFFICE_WORDS)
+
+
 def role_for(section: str, position: str) -> tuple[str, bool]:
     """(rol adı, xəritələndi?) — tanınmayan vəzifə `member`-ə düşür.
 
@@ -215,6 +225,12 @@ def role_for(section: str, position: str) -> tuple[str, bool]:
             if keyword in unit:
                 return role, True
         return FALLBACK_ROLE, False
+
+    # (4b) Dekanlıq laborantı (sahib 2026-11-27): fakültə / məktəb / dekanlıq bölməsindəki laborant — kafedra
+    #      laborantı (`lab_assistant`, dərs yükü + kafedra müraciətləri) DEYİL. «Məktəbəqədər … kafedrası» kimi
+    #      kafedra adları «məktəb» sözünü daşıyır — ona görə «kafedra» olan bölmə həmişə kafedradır.
+    if title.startswith("laborant") and _is_dean_office_section(unit):
+        return DEAN_OFFICE_ASSISTANT_ROLE, True
 
     # (5) Ümumi vəzifələr (tyutor, laborant, müəllim...).
     for prefix, role in POSITION_ROLE_RULES:

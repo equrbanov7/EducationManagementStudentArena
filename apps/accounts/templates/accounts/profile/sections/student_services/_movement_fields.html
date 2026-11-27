@@ -56,6 +56,8 @@ məcburiyyət serverdə (`registrar.movements.validate`) yoxlanılır.
         </select>
     </div>
     <p class="ems-field__hint">{% trans "Yalnız sizin əhatənizdəki, boş yeri olan qruplar." context "accounts.student_registry" %}</p>
+    {# Sahib 2026-11-27: bərpada «hansı qrupa bərpa olur» seçilir; defolt köhnə qrup (aktivdirsə) — student_registry.js. #}
+    <p class="ems-field__hint" data-sr-reinstate-hint hidden>{% trans "Bərpa: tələbənin qayıdacağı qrupu seçin. Köhnə qrupu aktivdirsə, o avtomatik seçilir; arxivdədirsə başqa aktiv qrup seçin — tələbə həmin qrupun cari semestr jurnallarına qoşulur." context "accounts.student_registry" %}</p>
 </div>
 
 <div class="ems-field" data-sr-need="program" hidden>
