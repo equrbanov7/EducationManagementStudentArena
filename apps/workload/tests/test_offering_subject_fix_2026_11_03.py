@@ -233,9 +233,13 @@ class OfferingSubjectFixTests(TestCase):
             organization=self.org, subject=self.right, period=self.period, group=self.group, is_active=False
         )
         Enrollment.objects.create(organization=self.org, offering=phantom, student=self.student)
-        with self.assertRaisesMessage(service.OfferingSubjectFixError, "target_offering_exists"):
+        with self.assertRaisesMessage(service.OfferingSubjectFixError, "target_offering_exists") as ctx:
             self.call(apply=True)
         self.assertTrue(CourseOffering.objects.filter(pk=phantom.pk).exists())
+        # Loga yalnız saylar: nə mane olur (2026-11-28).
+        details = ctx.exception.details
+        self.assertEqual((details["clash_count"], details["clash_active"]), (1, 0))
+        self.assertEqual(details["linked_registrar_enrollment"], 1)
 
     def test_load_row_on_old_subject_must_be_moved_too(self):
         with self.assertRaisesMessage(service.OfferingSubjectFixError, "load_row_required"):
