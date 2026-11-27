@@ -211,6 +211,32 @@ class OfferingSubjectFixTests(TestCase):
         self.assertEqual(self.offering.subject_id, self.wrong.pk)
         self.assertTrue(Syllabus.objects.filter(pk=self.wrong_syllabus.pk, offering=self.offering).exists())
 
+    def test_empty_cancelled_target_journal_is_removed(self):
+        """2026-11-28 (234 İT az): hədəf fənndə ləğv edilmiş, tam boş açılış — düzəliş onu silib davam edir."""
+        phantom = CourseOffering.objects.create(
+            organization=self.org, subject=self.right, period=self.period, group=self.group, is_active=False
+        )
+        dry = self.call()
+        self.assertEqual(dry["empty_offering_removed"], 1)
+        self.assertTrue(CourseOffering.objects.filter(pk=phantom.pk).exists())  # dry-run geri qaytarıldı
+        result = self.call(apply=True)
+        self.assertEqual((result["empty_offering_removed"], result["offering_subject_changed"]), (1, 1))
+        self.assertFalse(CourseOffering.objects.filter(pk=phantom.pk).exists())
+        self.offering.refresh_from_db()
+        self.assertEqual(self.offering.subject_id, self.right.pk)
+        self.assertEqual(Lesson.objects.filter(offering=self.offering).count(), 18)
+        receipt = AuditLog.objects.get(resource_type=service.RESOURCE, resource_id=str(self.offering.pk))
+        self.assertEqual(receipt.new_values["removed_empty_offerings"], [str(phantom.pk)])
+
+    def test_cancelled_target_journal_with_data_still_stops(self):
+        phantom = CourseOffering.objects.create(
+            organization=self.org, subject=self.right, period=self.period, group=self.group, is_active=False
+        )
+        Enrollment.objects.create(organization=self.org, offering=phantom, student=self.student)
+        with self.assertRaisesMessage(service.OfferingSubjectFixError, "target_offering_exists"):
+            self.call(apply=True)
+        self.assertTrue(CourseOffering.objects.filter(pk=phantom.pk).exists())
+
     def test_load_row_on_old_subject_must_be_moved_too(self):
         with self.assertRaisesMessage(service.OfferingSubjectFixError, "load_row_required"):
             self.call(apply=True, row_id="")
