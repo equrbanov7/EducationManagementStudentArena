@@ -155,7 +155,7 @@
                 var Render = window.EMSWorkloadRender;
                 if (Render) {
                     if (STATE.cards && Render.cards) {
-                        Render.cards(q("[data-wl-rows]"), STATE.cards, activityLabels(), { teacher: List.teacher() });
+                        Render.cards(q("[data-wl-rows]"), STATE.cards, activityLabels(), { teacher: List.teacher(), fresh: fresh });
                     } else {
                         Render.rows(q("[data-wl-rows]"), STATE.rows, activityLabels(), { teacher: List.teacher() });
                     }
@@ -178,7 +178,9 @@
     }
 
     /** Sətir modalının açılış siyahılarını (fənn/semestr/ixtisas/qrup) yüklə. */
+    var optionsRequest = 0;
     function loadOptions() {
+        var request = ++optionsRequest;
         var host = root();
         if (!host) return Promise.resolve();
         var params = filters();
@@ -188,7 +190,7 @@
         )
             .then(function (payload) {
                 var Render = window.EMSWorkloadRender;
-                if (!Render) return;
+                if (!Render || request !== optionsRequest || host !== root()) return;
                 Render.options(q('[data-wl-option="subjects"]'), payload.subjects, {
                     placeholder: gettext("Seçilməyib"),
                 });
@@ -287,11 +289,31 @@
         });
 
         // 2026-10-15: açılışlar YÜKLƏNƏNDƏN sonra doldurulur — əvvəl gec gələn siyahı fənn/semestri silirdi.
+        var rowModalRequest = 0;
         function openRowModal(row) {
+            var request = ++rowModalRequest;
+            var form = q("[data-wl-row-form]");
+            var title = q("[data-wl-row-title]");
+            var fields = q("[data-wl-row-fields]");
+            var save = q("[data-wl-save-row]");
+            if (!form || !fields || !save || !title) return;
+            title.textContent = row ? title.dataset.edit : title.dataset.create;
+            q("[data-wl-plan-picker]").hidden = true;
+            var planButton = q("[data-wl-import-curriculum]");
+            planButton.setAttribute("aria-expanded", "false");
+            planButton.disabled = false;
+            var transfer = form.querySelector("[data-wl-transfer]");
+            if (transfer) transfer.hidden = true;
             fillCatalogSelects();
+            form.reset();
+            form.setAttribute("aria-busy", "true");
+            fields.disabled = save.disabled = true;
             showError(q("[data-wl-row-error]"), "");
             loadOptions().then(function () {
-                forms().fillRow(q("[data-wl-row-form]"), row);
+                if (request !== rowModalRequest || form !== q("[data-wl-row-form]")) return;
+                forms().fillRow(form, row);
+                fields.disabled = save.disabled = false;
+                form.removeAttribute("aria-busy");
             });
             var instance = modal("[data-wl-row-modal]");
             if (instance) instance.show();
@@ -384,44 +406,57 @@
         // ── Düzəliş (amendment): dialoq və təkrar sorğu `workload_distribution_amend.js`-dədir ──
 
         // ── Tədris planından idxal ─────────────────────────────────────────
-        EMSDelegate.on("click", "[data-wl-import-curriculum]", function () {
+        EMSDelegate.on("click", "[data-wl-import-curriculum]", function (event, button) {
             var host = root();
-            if (!host) return;
-            var params = filters();
-            window.EMSCore.fetchJSON(
-                host.dataset.curriculumUrl + "?chair=" + encodeURIComponent(params.chair)
-            )
+            var box = q("[data-wl-plan-picker]");
+            if (!host || !box) return;
+            if (!box.hidden) {
+                box.hidden = true;
+                button.setAttribute("aria-expanded", "false");
+                return;
+            }
+            var request = rowModalRequest;
+            var chair = filters().chair;
+            button.disabled = true;
+            showError(q("[data-wl-row-error]"), "");
+            window.EMSCore.fetchJSON(host.dataset.curriculumUrl + "?chair=" + encodeURIComponent(chair))
                 .then(function (payload) {
-                    var form = q("[data-wl-row-form]");
-                    var first = (payload.results || [])[0];
-                    if (!first || !form) {
-                        showError(
-                            q("[data-wl-row-error]"),
-                            gettext("Bu kafedranın ixtisasları üçün aktiv tədris planı sətri tapılmadı.")
-                        );
+                    if (request !== rowModalRequest || host !== root() || chair !== filters().chair) return;
+                    var rows = payload.results || [];
+                    if (!rows.length) {
+                        showError(q("[data-wl-row-error]"), gettext("Bu kafedranın ixtisasları üçün aktiv tədris planı sətri tapılmadı."));
                         return;
                     }
-                    ["subject_id", "season", "degree_level", "specialty_id", "credits"].forEach(
-                        function (name) {
-                            var field = form.elements[name];
-                            if (field && first[name] != null) field.value = first[name];
+                    var select = q("[data-wl-plan-choice]");
+                    forms().planChoices(select, rows, function (row) {
+                        var label = fmt(gettext("%(subject)s · %(program)s · Semestr %(semester)s · %(credits)s kredit"), {
+                            subject: row.subject_name + (row.subject_code ? " (" + row.subject_code + ")" : ""),
+                            program: row.specialty_name, semester: row.semester_number, credits: row.credits || "—",
+                        });
+                        if (!row.has_variants) return label;
+                        var detail = fmt(gettext("Qəbul ili %(years)s · mühazirə %(lecture)s s · seminar %(seminar)s s · laboratoriya %(lab)s s"), {
+                            years: row.admission_years.join(", "), lecture: row.lecture_hours,
+                            seminar: row.seminar_hours, lab: row.lab_hours,
+                        });
+                        if (row.is_elective) {
+                            detail += " · " + (row.elective_group
+                                ? fmt(gettext("Seçmə blok %(group)s"), { group: row.elective_group })
+                                : gettext("Seçmə fənn"));
                         }
-                    );
-                    var creditsValue = form.elements.credits_value;
-                    if (creditsValue) creditsValue.value = first.credits_value || 0;
-                    showError(
-                        q("[data-wl-row-error]"),
-                        fmt(
-                            gettext(
-                                "Plandan %(count)s təklif tapıldı; birincisi doldurulub. Saatlar tədris planında saxlanmır — əl ilə yazın (təklif: %(hours)s saat)."
-                            ),
-                            { count: payload.count, hours: first.suggested_total_hours || 0 }
-                        )
-                    );
+                        return label + " · " + detail;
+                    });
+                    box.hidden = false;
+                    button.setAttribute("aria-expanded", "true");
+                    var toggle = box.querySelector(".bootstrap-single-select__toggle");
+                    (toggle || select).focus();
                 })
                 .catch(function (err) {
-                    showError(q("[data-wl-row-error]"), messageFor(err && err.payload));
-                });
+                    if (request === rowModalRequest && host === root()) showError(q("[data-wl-row-error]"), messageFor(err && err.payload));
+                })
+                .finally(function () { if (request === rowModalRequest) button.disabled = false; });
+        });
+        EMSDelegate.on("change", "[data-wl-plan-choice]", function (event, select) {
+            forms().applyPlanChoice(q("[data-wl-row-form]"), select);
         });
     }
 

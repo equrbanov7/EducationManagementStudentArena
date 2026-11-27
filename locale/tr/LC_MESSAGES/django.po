@@ -121419,3 +121419,83 @@ msgstr "Atanan sorular değişti. Teslim etmeden önce laboratuvar sayfasını y
 
 msgid "Əlaqə forması yeniləndi. Mesajınızı yoxlayıb yenidən göndərin."
 msgstr "İletişim formu yenilendi. Mesajınızı kontrol edip yeniden gönderin."
+
+msgctxt "accounts.workload"
+msgid "Kartlar kafedranın illik tədris tapşırığındakı sətirlərdən yaranır. Tədris şöbəsi sətirləri təsdiqlənmiş tədris planından və ya Excel faylından gətirə bilər."
+msgstr "Kartlar bölümün yıllık ders görevlendirmesindeki satırlardan oluşur. Öğretim birimi satırları onaylanmış öğretim planından veya bir Excel dosyasından aktarabilir."
+
+msgctxt "accounts.workload"
+msgid "Mövcud sətirdə saatları müəllimlərə bölün. Qrup, semestr və kredit üçün uyğun sətir yoxdursa, «Plan sətri əlavə et» ilə onu yarada bilərsiniz."
+msgstr "Mevcut satırdaki saatleri öğretim elemanlarına dağıtın. Gruba, yarıyıla ve krediye uygun bir satır yoksa «Plan satırı ekle» ile oluşturabilirsiniz."
+
+msgctxt "accounts.workload"
+msgid "Plan sətri əlavə et"
+msgstr "Plan satırı ekle"
+
+msgctxt "accounts.workload"
+msgid "«Plan sətirləri»ni açın, qrup və kreditə görə uyğun sətri tapıb «Redaktə»ni seçin."
+msgstr "«Plan satırları»nı açın, gruba ve krediye göre satırı bulup «Düzenle»yi seçin."
+
+msgctxt "accounts.workload"
+msgid "Plan sətrini redaktə et"
+msgstr "Plan satırını düzenle"
+
+msgctxt "accounts.workload"
+msgid "Tədris planından fənn seç"
+msgstr "Öğretim planından ders seç"
+
+msgctxt "accounts.workload"
+msgid "Tədris planının sətri"
+msgstr "Öğretim planı satırı"
+
+msgctxt "accounts.workload"
+msgid "Fənn, semestr və kreditə görə seçin"
+msgstr "Ders, yarıyıl ve krediye göre seçin"
+
+msgctxt "accounts.workload"
+msgid "Seçdiyiniz fənn, ixtisas, fəsil və kredit formaya köçürülür. Akademik dövrü, qrupları və dərs saatlarını yoxlayıb yadda saxlayın."
+msgstr "Seçtiğiniz ders, program, öğretim mevsimi ve kredi forma aktarılır. Kaydetmeden önce akademik dönemi, grupları ve ders saatlerini kontrol edin."
+
+msgctxt "accounts.workload"
+msgid "Fənn kataloqda yoxdursa, adını yazın"
+msgstr "Ders katalogda yoksa adını yazın"
+
+msgctxt "accounts.workload"
+msgid "Akademik qruplar"
+msgstr "Akademik gruplar"
+
+msgctxt "accounts.workload"
+msgid "Plandakı kredit"
+msgstr "Plandaki kredi"
+
+msgctxt "accounts.workload"
+msgid "Hesabat üçün əsas kredit"
+msgstr "Raporlama için temel kredi değeri"
+
+msgctxt "accounts.workload"
+msgid "Plandakı krediti olduğu kimi yazın, məsələn, 6 və ya 6 / 7. Hesabat üçün bir əsas kredit dəyəri daxil edin. Dərs saatları ayrıca göstərilir."
+msgstr "Krediyi planda yazıldığı gibi girin, örneğin 6 veya 6 / 7. Raporlama için tek bir temel kredi değeri girin. Ders saatleri ayrıca gösterilir."
+
+msgctxt "accounts.workload"
+msgid "Mühazirəni birlikdə dinləyən qruplar bir axın sayılır. Seminar və laboratoriya üçün ayrıca dərs keçən qrupları sayın. Laboratoriya sayı 0 olduqda seminar sayı götürülür."
+msgstr "Aynı dersi birlikte dinleyen gruplar tek bir ders grubu sayılır. Seminer ve laboratuvar için ayrı ders alan grupları sayın. Laboratuvar sayısı 0 ise seminer grubu sayısı kullanılır."
+
+msgctxt "accounts.workload"
+msgid "Mühazirə axınlarının sayı"
+msgstr "Ortak ders grubu sayısı"
+
+msgctxt "accounts.workload"
+msgid "Seminar qruplarının və altqruplarının sayı"
+msgstr "Seminer grubu ve alt grup sayısı"
+
+msgctxt "accounts.workload"
+msgid "Laboratoriya qruplarının və altqruplarının sayı"
+msgstr "Laboratuvar grubu ve alt grup sayısı"
+
+msgctxt "accounts.workload"
+msgid "Plan saatını bir axın və ya bir qrup üçün yazın. Cəmi saat bütün axınlara və ya qruplara ayrılan yükdür. Məsələn, iki seminar qrupunun hərəsinə 15 saat ayrılırsa, cəmi 30 saatdır."
+msgstr "Plan saatini tek bir ders grubu için yazın. Toplam saat tüm gruplara ayrılan yüktür. Örneğin iki seminer grubunun her birine 15 saat ayrılıyorsa toplam 30 saattir."
+
+msgctxt "workload.split_wizard"
+msgid "Bu sətirdə seminar və laboratoriyanın qrup bölgüsü fərqlidir. Səhifəni yeniləyib hər fəaliyyətin bölgüsünü ayrıca yoxlayın."
+msgstr "Bu satırda seminer ve laboratuvar grupları farklı düzenlenmiştir. Sayfayı yenileyip her etkinliğin grup dağılımını ayrı ayrı kontrol edin."

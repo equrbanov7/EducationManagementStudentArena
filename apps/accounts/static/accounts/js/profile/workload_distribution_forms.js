@@ -62,22 +62,36 @@
         return data;
     };
 
-    function reset(form) {
-        Array.prototype.forEach.call(form.elements, function (field) {
-            if (!field.name) return;
-            if (field.type === "checkbox") {
-                field.checked = false;
-                return;
-            }
-            if (field.multiple) {
-                Array.prototype.forEach.call(field.options, function (option) {
-                    option.selected = false;
-                });
-                return;
-            }
-            field.value = field.type === "number" ? "0" : "";
+    Forms.planChoices = function planChoices(select, rows, label) {
+        select.replaceChildren();
+        var placeholder = select.ownerDocument.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = select.dataset.placeholder;
+        select.appendChild(placeholder);
+        rows.forEach(function (row, index) {
+            var option = select.ownerDocument.createElement("option");
+            option.value = String(index);
+            option.textContent = label(row);
+            option.workloadPlanRow = row;
+            select.appendChild(option);
         });
-    }
+        select.value = "";
+        refresh(select);
+    };
+
+    Forms.applyPlanChoice = function applyPlanChoice(form, select) {
+        var option = select.options[select.selectedIndex];
+        var row = option && option.workloadPlanRow;
+        if (!row) return;
+        Forms.ensureOption(form.elements.subject_id, row.subject_id, row.subject_name);
+        Forms.ensureOption(form.elements.specialty_id, row.specialty_id, row.specialty_name);
+        ["subject_id", "specialty_id", "season", "degree_level", "credits", "credits_value"].forEach(function (name) {
+            var field = form.elements[name];
+            field.value = row[name] == null ? "" : row[name];
+            if (field.tagName === "SELECT") refresh(field);
+        });
+        form.elements.subject_text.value = "";
+    };
 
     /**
      * Yeni bölgünün saatı — fəaliyyətin QALIĞI (yoxdursa 1). 2026-11-11 («Tədqiqat analitikası»): defolt 1 idi,
@@ -92,7 +106,11 @@
     /** Sətir modalını sətrin CARİ dəyərləri ilə doldurur (`row=null` — boş forma). */
     Forms.fillRow = function fillRow(form, row) {
         if (!form) return;
-        reset(form);
+        form.reset();
+        var selectedGroups = form.elements.group_ids;
+        if (selectedGroups) {
+            Array.prototype.forEach.call(selectedGroups.options, function (option) { option.selected = false; });
+        }
         if (window.EMSWorkloadTransfer) window.EMSWorkloadTransfer.fill(form, row);
         if (!row) {
             // Boş forma da stilli seçicilərə yansısın (əvvəlki sətrin etiketi/qrupları qalmasın).

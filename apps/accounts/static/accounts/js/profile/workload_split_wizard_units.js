@@ -29,7 +29,7 @@
         var out = { seminar: [], lab: [] };
         KINDS.forEach(function (activity) {
             if (!W.active(row, activity)) return;
-            if (W.S.rows[row.id].joint) { out[activity].push({ group: "", sub: null }); return; }
+            if (W.isJoint(row, activity)) { out[activity].push({ group: "", sub: null }); return; }
             row.groups.forEach(function (groupId) {
                 var numbers = W.S.groups[groupId][activity].numbers;
                 if (numbers.length >= 2) numbers.forEach(function (n) { out[activity].push({ group: groupId, sub: n }); });
@@ -114,10 +114,12 @@
             var want = (row.plans[activity] || 0) * counts[activity];
             if (want !== row.totals[activity]) data[activity + "_total"] = want;
         });
-        var sub = counts.seminar || counts.lab || row.subgroup_count || 1;
-        var lab = counts.lab && counts.lab !== sub ? counts.lab : 0;
+        var sub = counts.seminar || row.subgroup_count;
         if (sub !== row.subgroup_count) data.subgroup_count = sub;
-        if (lab !== row.lab_group_count) data.lab_group_count = lab;
+        var followsChangedSeminar = row.lab_group_count && sub !== row.subgroup_count && counts.lab === sub;
+        if (counts.lab && (counts.lab !== (row.lab_group_count || sub) || followsChangedSeminar)) {
+            data.lab_group_count = counts.lab === sub ? 0 : counts.lab;
+        }
         return data;
     };
 
@@ -384,7 +386,7 @@
             task_id: D.state.task.id,
             row_ids: rows.map(function (row) { return row.id; }),
             rows: rows.map(function (row) {
-                return { row_id: row.id, joint: !!W.S.rows[row.id].joint, fix_totals: !!(W.S.rows[row.id].fix && Object.keys(W.fixData(row)).length) };
+                return { row_id: row.id, joint: W.isJoint(row, "seminar"), joint_by_activity: W.S.rows[row.id].joint_by_activity, fix_totals: !!(W.S.rows[row.id].fix && Object.keys(W.fixData(row)).length) };
             }),
             groups: groups,
             units: units,

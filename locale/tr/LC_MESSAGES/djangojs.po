@@ -3969,3 +3969,57 @@ msgstr ""
 
 msgid "Seçim üçün variant yoxdur"
 msgstr "Seçilebilecek seçenek yok"
+
+msgid "%(subject)s · %(program)s · Semestr %(semester)s · %(credits)s kredit"
+msgstr "%(subject)s · %(program)s · %(semester)s. yarıyıl · %(credits)s kredi"
+
+msgid "Plan sətirləri (%(n)s)"
+msgstr "Plan satırları (%(n)s)"
+
+msgid "Saatlar qrupa görə dəyişir."
+msgstr "Saatler gruba göre değişir."
+
+msgid "Digər qruplarda %(hours)s"
+msgstr "Diğer gruplarda %(hours)s"
+
+msgid "Plan %(total)s · bölünüb %(assigned)s · qalıq %(remaining)s"
+msgstr "Planlanan %(total)s · dağıtılan %(assigned)s · kalan %(remaining)s"
+
+msgid "Qrup və ya müəllim axtar"
+msgstr "Grup veya öğretim elemanı ara"
+
+msgid "Hamısını göstər (%(n)s)"
+msgstr "Tümünü göster (%(n)s)"
+
+msgid "Daha az göstər"
+msgstr "Daha az göster"
+
+msgid "Uyğun nəticə tapılmadı."
+msgstr "Eşleşen sonuç bulunamadı."
+
+msgid "%(n)s nəticə"
+msgstr "%(n)s sonuç"
+
+msgid "Qruplar (%(n)s)"
+msgstr "Gruplar (%(n)s)"
+
+msgid "Alt qruplar: %(sections)s"
+msgstr "Alt gruplar: %(sections)s"
+
+msgid "Planda %(n)s alt qrup"
+msgstr "Planda %(n)s alt grup"
+
+msgid "%(n)s axın"
+msgstr "%(n)s ortak ders grubu"
+
+msgid "%(n)s qrup ayrıca keçir"
+msgstr "Ayrı ders alan grup sayısı: %(n)s"
+
+msgid "Qəbul ili %(years)s · mühazirə %(lecture)s s · seminar %(seminar)s s · laboratoriya %(lab)s s"
+msgstr "Giriş yılı %(years)s · ders %(lecture)s sa · seminer %(seminar)s sa · laboratuvar %(lab)s sa"
+
+msgid "Seçmə blok %(group)s"
+msgstr "Seçmeli ders grubu %(group)s"
+
+msgid "Seçmə fənn"
+msgstr "Seçmeli ders"

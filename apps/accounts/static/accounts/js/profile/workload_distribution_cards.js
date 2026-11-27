@@ -10,7 +10,7 @@
  *   2 · SEMİNAR / 3 · LABORATORİYA — başlıqlı cədvəl (qrup · plan · müəllim və saat); bütün sətrə yazılmış («qruplara
  *       ayrılmamış») saat TƏK xətt kimi göstərilir, qrup xətləri əbəs yerə «təyin olunmayıb» demir;
  *   • kartın başında vəziyyət: «Tam bölünüb» / «Bölünməyib: N s»; qardaş qruplardan fərqlənən saat (45 əvəzinə 38,
- *     30 əvəzinə 37) «saatı yoxlayın» nişanı alır.
+ *     30 əvəzinə 37) neytral müqayisə ilə göstərilir.
  *
  * Saf render: fetch/listener YOX; `EMSWorkloadRender.rowHtml` (köhnə sətir kartı) açılan hissədə təkrar işlənir.
  */
@@ -36,6 +36,12 @@
 
     function hours(value) {
         return fmt(gettext("%(hours)s s"), { hours: value == null ? 0 : value });
+    }
+
+    function balanceLabel(total, assigned, remaining) {
+        return fmt(gettext("Plan %(total)s · bölünüb %(assigned)s · qalıq %(remaining)s"), {
+            total: hours(total), assigned: hours(assigned), remaining: hours(remaining)
+        });
     }
 
     function isMatch(entry, teacher) {
@@ -82,10 +88,10 @@
     function oddBadge(value, usual) {
         if (!usual || !(value > 0) || value === usual) return "";
         return (
-            '<span class="wl-badge wl-badge--warn wl-badge--odd" title="' +
-            esc(gettext("Eyni fənnin digər qruplarında saat fərqlidir. Səhvdirsə «Tapşırıq sətirləri» → «Redaktə» ilə düzəldin.")) +
-            '"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> ' +
-            esc(fmt(gettext("digər qruplarda %(hours)s — saatı yoxlayın"), { hours: hours(usual) })) + "</span>"
+            '<span class="wl-badge wl-badge--info wl-badge--odd" title="' +
+            esc(gettext("Saatlar qrupa görə dəyişir.")) +
+            '"><i class="fas fa-circle-info" aria-hidden="true"></i> ' +
+            esc(fmt(gettext("Digər qruplarda %(hours)s"), { hours: hours(usual) })) + "</span>"
         );
     }
 
@@ -120,19 +126,20 @@
     }
 
     function groupChips(groups) {
-        if (!groups || !groups.length) return "";
-        return (
-            '<ul class="wl-card__groups" aria-label="' + esc(gettext("Qruplar")) + '">' +
+        if (!groups || groups.length < 2) return "";
+        var list = '<ul class="wl-card__groups" aria-label="' + esc(gettext("Qruplar")) + '">' +
             groups.map(function (group) { return '<li class="wl-card__group">' + esc(group.name) + "</li>"; }).join("") +
-            "</ul>"
-        );
+            "</ul>";
+        if (groups.length <= 4) return list;
+        return '<details class="wl-card__group-list"><summary>' +
+            esc(fmt(gettext("Qruplar (%(n)s)"), { n: groups.length })) + "</summary>" + list + "</details>";
     }
 
     function kindHead(step, label, summary, button) {
         return (
             '<div class="wl-kind__head">' +
             '<span class="wl-kind__step" aria-hidden="true">' + step + "</span>" +
-            '<span class="wl-kind__label">' + esc(label) + "</span>" +
+            '<h4 class="wl-kind__label">' + esc(label) + "</h4>" +
             '<span class="wl-kind__sum">' + summary + "</span>" +
             (button || "") +
             "</div>"
@@ -190,11 +197,16 @@
         // «Axın» sözü yalnız həqiqi patok olanda işlənir; qruplar ayrıca keçirsə sadəcə «qrup → müəllim» siyahısıdır.
         var joint = streams.some(function (s) { return (s.groups || []).length > 1 || s.union_count > 1; });
         var usual = typicalByForm(card, streams.map(function (s) { return { row: s.lead_row_id, value: s.plan }; }));
-        var summary = joint
-            ? fmt(gettext("%(n)s axın · müəllim yükünə cəmi %(hours)s"), { n: streams.length, hours: hours(lecture.load_hours) })
-            : streams.length > 1
-                ? fmt(gettext("%(n)s qrup ayrıca keçir · müəllim yükünə cəmi %(hours)s"), { n: streams.length, hours: hours(lecture.load_hours) })
-                : hours(lecture.load_hours);
+        var assigned = 0;
+        var remaining = 0;
+        streams.forEach(function (stream) {
+            if (stream.orphan) return;
+            assigned += Number(stream.assigned) || 0;
+            remaining += Math.max(0, Number(stream.remaining) || 0);
+        });
+        var mode = joint ? fmt(gettext("%(n)s axın"), { n: streams.length }) :
+            streams.length > 1 ? fmt(gettext("%(n)s qrup ayrıca keçir"), { n: streams.length }) : "";
+        var summary = (mode ? mode + " · " : "") + balanceLabel(lecture.load_hours, assigned, remaining);
         var action = joint ? gettext("Axınları dəyiş") : streams.length > 1 ? gettext("Patok qur") : gettext("Mühazirəçi seç");
         var button = editable
             ? '<button type="button" class="wl-btn wl-btn--ghost wl-btn--sm" data-wl-streams-open data-card-id="' +
@@ -214,9 +226,10 @@
             '<ul class="wl-streams">' +
             streams
                 .map(function (stream, index) {
+                    var solo = card.groups.length === 1 && stream.groups.length === 1 && stream.groups[0].id === card.groups[0].id && !many;
                     var cls = stream.orphan ? " is-orphan" : stream.is_complete ? " is-complete" : " is-open";
                     return (
-                        '<li class="wl-stream' + cls + '" data-lead-row-id="' + esc(stream.lead_row_id) + '">' +
+                        '<li class="wl-stream' + cls + (solo ? " wl-stream--simple" : "") + '" data-lead-row-id="' + esc(stream.lead_row_id) + '">' +
                         (many ? '<span class="wl-stream__tag">' + esc(fmt(gettext("Axın %(n)s"), { n: index + 1 })) + "</span>" : "") +
                         '<span class="wl-stream__groups">' + pills(stream.groups) + "</span>" +
                         (many ? streamMode(stream) : "") +
@@ -283,8 +296,11 @@
         return hours(line.plan);
     }
 
-    function lineHtml(item, teacher, seenRows, usual) {
+    function lineHtml(item, teacher, seenRows, usual, kind, source) {
         var line = item.line;
+        var groups = source && source.groups || [];
+        var plannedSections = groups.length === 1 && (kind === "lab" ? source.lab_group_count || source.subgroup_count : source.subgroup_count);
+        var groupLabel = groups.length > 4 && (line.joint || line.shared) ? pills(groups) : esc(line.label);
         var badges = "";
         if (line.joint) {
             badges += '<span class="wl-badge wl-badge--info" title="' +
@@ -300,6 +316,15 @@
             badges += '<span class="wl-badge wl-badge--info">' + esc(gettext("Birgə — saat başqa sətirdədir")) + "</span>";
         }
         if (!line.shared && !line.joint) badges += oddBadge(line.plan, usual(line.row_id));
+        if (plannedSections > 1) {
+            badges += '<span class="wl-badge wl-badge--section">' +
+                esc(fmt(gettext("Planda %(n)s alt qrup"), { n: plannedSections })) + "</span>";
+        }
+        if (line.sections && line.sections.length) {
+            var sectionNames = line.sections.map(function (section) { return section.label; });
+            badges += '<span class="wl-badge wl-badge--section">' +
+                esc(fmt(gettext("Alt qruplar: %(sections)s"), { sections: sectionNames.join(", ") })) + "</span>";
+        }
         var first = !seenRows[line.row_id];
         seenRows[line.row_id] = true;
         if (first && line.remaining > 0 && !line.joint_elsewhere) {
@@ -321,11 +346,11 @@
         var done = line.entries.length && line.remaining <= 0;
         return (
             '<li class="wl-line' + (done ? " is-complete" : "") + (item.covered ? " is-covered" : "") + '" data-row-id="' +
-            esc(line.row_id) + '">' +
-            '<span class="wl-line__group">' + esc(line.label) + "</span>" +
+            esc(line.row_id) + '" data-group-id="' + esc(line.group_id || (line.shared ? "shared" : "joint")) + '">' +
+            '<span class="wl-line__identity"><span class="wl-line__group">' + groupLabel + "</span>" +
+            (badges ? '<span class="wl-line__badges">' + badges + "</span>" : "") + "</span>" +
             '<span class="wl-line__plan">' + esc(linePlan(item)) + "</span>" +
             entries +
-            (badges ? '<span class="wl-line__badges">' + badges + "</span>" : "") +
             "</li>"
         );
     }
@@ -350,14 +375,26 @@
         var seenRows = {};
         var items = arrange(lines);
         var totals = kindTotals(lines);
-        var groupsCount = lines.filter(function (line) { return line.group_id; }).length;
+        var groupIds = new Set();
+        var jointRows = new Set();
+        var sources = new Map();
+        lines.forEach(function (line) {
+            if (line.group_id) groupIds.add(line.group_id);
+            else if (line.joint) jointRows.add(line.row_id);
+        });
+        (card.rows || []).forEach(function (row) {
+            var groups = row.groups || [];
+            if (jointRows.has(row.id)) groups.forEach(function (group) { groupIds.add(group.id); });
+            sources.set(row.id, row);
+        });
         var usual = typicalByForm(
             card,
             lines.filter(function (line) { return line.group_id; }).map(function (line) { return { row: line.row_id, value: line.plan }; })
         );
+        var solo = card.groups.length === 1 && lines.every(function (line) { return line.group_id === card.groups[0].id; });
         var summary = esc(
-            (groupsCount ? fmt(gettext("%(n)s qrup"), { n: groupsCount }) + " · " : "") +
-            fmt(gettext("cəmi %(total)s · bölünüb %(assigned)s"), { total: hours(block.total), assigned: hours(totals.assigned) })
+            (groupIds.size > 1 ? fmt(gettext("%(n)s qrup"), { n: groupIds.size }) + " · " : "") +
+            balanceLabel(block.total, totals.assigned, totals.remaining)
         );
         // 2026-11-26: «Bölüşdür» addımlı «Bölgü sehrbazı»nı açır; köhnə cədvəl «Ətraflı cədvəl» kimi qalır.
         var button = editable
@@ -373,10 +410,10 @@
         return (
             '<section class="wl-kind wl-kind--' + esc(kind) + '">' +
             kindHead(step, labels[kind] || block.label || kind, summary, button) +
-            '<ul class="wl-lines">' +
+            '<ul class="wl-lines' + (solo ? " wl-lines--simple" : "") + '">' +
             '<li class="wl-lines__head" aria-hidden="true"><span>' + esc(gettext("Qrup")) + "</span><span>" +
             esc(gettext("Plan saatı")) + "</span><span>" + esc(gettext("Müəllim və saat")) + "</span></li>" +
-            items.map(function (item) { return lineHtml(item, teacher, seenRows, usual); }).join("") +
+            items.map(function (item) { return lineHtml(item, teacher, seenRows, usual, kind, sources.get(item.line.row_id)); }).join("") +
             "</ul>" +
             "</section>"
         );
@@ -391,7 +428,8 @@
             items
                 .map(function (item) {
                     return (
-                        '<div class="wl-act' + (item.is_complete ? " is-complete" : "") + '">' +
+                        '<div class="wl-act' + (item.is_complete ? " is-complete" : "") + '" data-row-id="' +
+                        esc(item.row_id) + '" data-activity="' + esc(item.activity) + '">' +
                         '<span class="wl-act__label">' + esc(item.label) + "</span>" +
                         '<span class="wl-act__bar"><span class="wl-act__fill" style="--wl-fill:' +
                         (item.total ? Math.min(100, Math.round((item.assigned * 100) / item.total)) : 0) + '%"></span></span>' +
@@ -445,9 +483,9 @@
     function cardHtml(card, labels, teacher) {
         if (card.intensive && typeof Render.rowHtml === "function") return Render.rowHtml(card.rows[0], labels, teacher);
         var editable = card.row_kind === "teaching";
-        var meta = [card.season_label];
+        var meta = [card.period_label || card.season_label];
         if (card.credits) meta.push(fmt(gettext("%(credits)s kredit"), { credits: card.credits }));
-        meta.push(fmt(gettext("%(n)s qrup"), { n: card.groups.length }));
+        meta.push(card.groups.length === 1 ? card.groups[0].name : fmt(gettext("%(n)s qrup"), { n: card.groups.length }));
         meta.push(fmt(gettext("%(hours)s saat"), { hours: card.total_hours }));
         if (card.student_count) meta.push(fmt(gettext("%(n)s tələbə"), { n: card.student_count }));
         (card.specialties || []).forEach(function (name) { meta.push(name); });
@@ -462,7 +500,7 @@
         if (seminar) step += 1;
         var lab = kindBlock(card, "lab", step, labels, teacher, editable);
         return (
-            '<article class="wl-card' + (card.teaching_complete ? " is-complete" : "") + '" role="listitem" data-wl-card data-card-id="' +
+            '<article class="wl-card' + (card.groups.length === 1 ? " wl-card--simple" : "") + (card.teaching_complete ? " is-complete" : "") + '" role="listitem" data-wl-card data-card-id="' +
             esc(card.id) + '" data-card-key="' + esc(card.key) + '">' +
             '<header class="wl-card__head"><div>' +
             '<h3 class="wl-card__subject">' + esc(card.subject) + "</h3>" +
@@ -472,8 +510,8 @@
             "</div></div>" +
             '<div class="wl-card__actions">' +
             stateBadge(card) +
-            '<button type="button" class="wl-btn wl-btn--ghost wl-btn--sm" data-wl-card-rows-toggle data-card-id="' + esc(card.id) + '">' +
-            '<i class="fas fa-table-list" aria-hidden="true"></i> ' + esc(fmt(gettext("Sətirlər (%(n)s)"), { n: rows.length })) +
+            '<button type="button" class="wl-btn wl-btn--ghost wl-btn--sm" data-wl-card-rows-toggle aria-expanded="false" aria-controls="wl-plan-' + esc(card.id) + '" data-card-id="' + esc(card.id) + '">' +
+            '<i class="fas fa-table-list" aria-hidden="true"></i> ' + esc(fmt(gettext("Plan sətirləri (%(n)s)"), { n: rows.length })) +
             "</button>" +
             "</div></header>" +
             groupChips(card.groups) +
@@ -485,8 +523,8 @@
             seminar +
             lab +
             otherBlock(card, teacher, editable) +
-            '<details class="wl-card__rows" data-wl-card-rows data-card-id="' + esc(card.id) + '">' +
-            "<summary>" + esc(fmt(gettext("Tapşırıq sətirləri (%(n)s) — redaktə, silmə, saatlar"), { n: rows.length })) + "</summary>" +
+            '<details class="wl-card__rows" data-wl-card-rows id="wl-plan-' + esc(card.id) + '" data-card-id="' + esc(card.id) + '">' +
+            "<summary>" + esc(fmt(gettext("Plan sətirləri (%(n)s)"), { n: rows.length })) + "</summary>" +
             '<div class="wl-card__rows-body">' + rowsHtml + "</div>" +
             "</details>" +
             "</article>"
@@ -499,8 +537,11 @@
         opts = opts || {};
         labels = labels || {};
         var html = (cards || []).map(function (card) { return cardHtml(card, labels, opts.teacher || ""); }).join("");
+        var explorer = window.EMSWorkloadCardExplorer;
+        var saved = explorer && !opts.append && !opts.fresh ? explorer.capture(host) : null;
         if (opts.append) host.insertAdjacentHTML("beforeend", html);
         else host.innerHTML = html;
+        if (explorer) explorer.bind(host, saved);
     };
 
     Cards.html = cardHtml;

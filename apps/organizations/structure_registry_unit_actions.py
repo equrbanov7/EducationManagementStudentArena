@@ -16,7 +16,7 @@ from core.constants import AuditAction, OrgUnitType
 from core.staff_position import visible_role_label
 
 from .models import Membership, OrgUnit
-from .name_matching import RegistryNameTaken, name_exists, registry_unit_write
+from .name_matching import RegistryNameTaken, registry_unit_write
 from .structure_registry_helpers import (
     ARCHIVE_REASON_MIN,
     _active_member_user,
@@ -71,10 +71,13 @@ def _save_unit_locked(request, organization, scope, flags):
     elif not flags["can_edit"]:
         return _forbidden(pgettext(_CTX, "Bölməni redaktə etmək üçün `unit.edit` səlahiyyəti lazımdır."))
 
-    name = (request.POST.get("name") or "").strip()
+    submitted_name = request.POST.get("name") or ""
+    name = submitted_name.strip()
     code = (request.POST.get("code") or "").strip()[:50]
     if not name:
         return _error(pgettext(_CTX, "Ad boş ola bilməz."), code="name_required", field="name")
+    if unit is not None and submitted_name == unit.name:
+        name = unit.name
     if len(name) > 255:
         return _error(pgettext(_CTX, "Ad maksimum 255 simvol ola bilər."), code="name_too_long", field="name")
     parent = None
@@ -88,12 +91,10 @@ def _save_unit_locked(request, organization, scope, flags):
                 pgettext(_CTX, "Seçilmiş fakültə tapılmadı və ya əhatənizdə deyil."), code="bad_parent", field="parent"
             )
 
-    # Unikallıq — eyni növdə eyni ad/kod ikinci dəfə yaradılmır (böyük/kiçik hərf fərqsiz).
+    # Names are checked by the database when saving, including on legacy duplicates.
     siblings = OrgUnit.objects.filter(organization=organization, is_active=True, unit_type__in=unit_types)
     if unit is not None:
         siblings = siblings.exclude(pk=unit.pk)
-    if name_exists(siblings, name):
-        raise RegistryNameTaken()
     if code and siblings.filter(code__iexact=code).exists():
         return _error(pgettext(_CTX, "Bu kodda bölmə artıq var."), code="code_taken", field="code")
 

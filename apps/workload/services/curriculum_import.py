@@ -14,6 +14,9 @@ kataloqunun ``Subject.ects``-i — qayda registrar-ın YEGANƏ həlledicisindəd
 
 from __future__ import annotations
 
+from itertools import groupby
+from operator import attrgetter
+
 from django.apps import apps as django_apps
 
 from ..constants import HOURS_PER_CREDIT, SEASON_BY_SEMESTER_PARITY, DegreeLevel, RowKind, Season
@@ -50,6 +53,8 @@ def _credits_for(plan_row) -> int:
 
 def curriculum_row_suggestions(*, organization, chair, limit: int = 200) -> list[dict]:
     """Kafedranın ixtisaslarının aktiv tədris planlarından sətir təklifləri."""
+    if limit <= 0:
+        return []
     specialty_ids = chair_specialty_ids(organization, chair)
     if not specialty_ids:
         return []
@@ -68,26 +73,40 @@ def curriculum_row_suggestions(*, organization, chair, limit: int = 200) -> list
             curriculum__is_active=True,
         )
         .select_related("subject", "curriculum", "curriculum__program", "curriculum__program__specialty_unit")
-        .order_by("curriculum__program__name", "semester_number", "order")[:limit]
+        .order_by(
+            "curriculum__program__name",
+            "curriculum__program_id",
+            "semester_number",
+            "subject__name",
+            "subject_id",
+            "-curriculum__admission_year",
+            "-curriculum__version",
+            "pk",
+        )
     )
-
-    suggestions: list[dict] = []
-    seen: set = set()
-    for plan_row in plan_rows:
-        subject = plan_row.subject
-        program = plan_row.curriculum.program
-        key = (subject.pk, plan_row.semester_number, program.pk)
-        if key in seen:
-            continue
-        seen.add(key)
-        credits = _credits_for(plan_row)
-        suggestions.append(
-            {
+    suggestions = []
+    families = groupby(plan_rows.iterator(), key=attrgetter("curriculum.program_id", "semester_number", "subject_id"))
+    for _, family in families:
+        variants = {}
+        for row in family:
+            credits = _credits_for(row)
+            contact = (row.lecture_hours, row.seminar_hours, row.lab_hours)
+            block = row.elective_group if row.is_elective else ""
+            key = (credits, contact, row.is_elective, block)
+            year = row.curriculum.admission_year
+            if key in variants:
+                years = variants[key]["admission_years"]
+                if years[-1] != year:  # The family is ordered by newest admission year first.
+                    years.append(year)
+                continue
+            subject = row.subject
+            program = row.curriculum.program
+            variants[key] = {
                 "subject_id": str(subject.pk),
                 "subject_code": subject.code,
                 "subject_name": subject.name,
-                "semester_number": plan_row.semester_number,
-                "season": str(SEASON_BY_SEMESTER_PARITY.get(plan_row.semester_number % 2, Season.FALL)),
+                "semester_number": row.semester_number,
+                "season": str(SEASON_BY_SEMESTER_PARITY.get(row.semester_number % 2, Season.FALL)),
                 "specialty_id": str(program.specialty_unit_id) if program.specialty_unit_id else "",
                 "specialty_name": program.name,
                 "degree_level": program.degree_level or DegreeLevel.BACHELOR,
@@ -95,10 +114,18 @@ def curriculum_row_suggestions(*, organization, chair, limit: int = 200) -> list
                 "credits": str(credits) if credits else "",
                 "credits_value": credits,
                 "suggested_total_hours": credits * HOURS_PER_CREDIT,
-                "is_elective": bool(plan_row.is_elective),
-                "elective_group": plan_row.elective_group,
+                "lecture_hours": row.lecture_hours,
+                "seminar_hours": row.seminar_hours,
+                "lab_hours": row.lab_hours,
+                "is_elective": row.is_elective,
+                "elective_group": block,
+                "admission_years": [year],
             }
-        )
+        for variant in variants.values():
+            variant["has_variants"] = len(variants) > 1
+            suggestions.append(variant)
+            if len(suggestions) >= limit:
+                return suggestions
     return suggestions
 
 
