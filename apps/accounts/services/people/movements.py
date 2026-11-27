@@ -274,11 +274,19 @@ def _reopen_access(record, *, order_number, order_date, actor) -> str:
     Postgres xətası tranzaksiyanı zəhərləyər və bütün əmr geri qayıdardı.
     """
     from django.db import transaction as db_transaction
+    from django.db.models import Q
 
     from apps.accounts.models import UserProfile
     from apps.accounts.services.identity_reinstate import order_evidence_digest, reinstate_student_access
 
-    profile = UserProfile.objects.filter(user_id=record.student_id, organization_id=record.organization_id).first()
+    # Xaric/məzun əmri (`registrar.movements._sync_access_state`) ilə EYNİ axtarış: təşkilatsız (köhnə idxal / nümunə)
+    # profil də. Əvvəl yalnız `organization_id = org` axtarılırdı — belə tələbənin girişi bağlanırdı, amma bərpa onu
+    # SƏSSİZCƏ arxivdə qoyurdu (xəbərdarlıq da çıxmırdı). 2026-11-27.
+    profile = (
+        UserProfile.objects.filter(user_id=record.student_id)
+        .filter(Q(organization_id=record.organization_id) | Q(organization__isnull=True))
+        .first()
+    )
     if profile is None or profile.access_state != UserProfile.AccessState.ARCHIVED:
         return ""
     digest = order_evidence_digest(

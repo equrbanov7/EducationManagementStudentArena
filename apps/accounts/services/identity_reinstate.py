@@ -31,6 +31,7 @@ from dataclasses import dataclass
 from django.contrib.auth import get_user_model
 from django.core.exceptions import PermissionDenied
 from django.db import connection, transaction
+from django.db.models import Q
 from django.utils import timezone
 
 from apps.audit.public import log_action
@@ -39,7 +40,6 @@ from core.constants import AuditAction
 from ..identity_models import AccountRestoreEvidence
 from ..models import UserProfile
 from .identity_access import IdentityAccessError, _real_actor
-from .identity_archive import _locked_profile
 
 User = get_user_model()
 
@@ -69,6 +69,34 @@ def order_evidence_digest(*, order_number: str, order_date, record_id, actor_id)
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
+def _locked_reinstate_profile(locked_user, organization):
+    """Bərpa olunan tələbənin profili — təşkilata bağlı, YAXUD təşkilatsız (``organization IS NULL``) sətir.
+
+    Niyə təşkilatsız da (2026-11-27). Xaric/məzun əmri girişi ``registrar.movements._sync_access_state``-də bağlayır
+    və o, köhnə idxaldan / nümunə hesablardan qalan ``organization IS NULL`` profili də TUTUR. Bərpa yolu isə yalnız
+    ``organization = org`` axtarırdı — belə tələbənin girişi bağlanır, amma heç vaxt açılmırdı. İndi iki yol eyni
+    sətri tapır. Tenant sərhədi zəifləmir: təşkilatsız profil yalnız hesabın BAŞQA təşkilatda üzvlüyü YOXDURSA
+    qəbul olunur (accounts 0039-dakı funksiya eyni şərti DB-də təkrarlayır və profili bu təşkilata bağlayır).
+    """
+
+    from apps.organizations.models import Membership
+
+    profile = (
+        UserProfile.objects.select_for_update()
+        .filter(user=locked_user)
+        .filter(Q(organization=organization) | Q(organization__isnull=True))
+        .first()
+    )
+    if profile is None:
+        raise PermissionDenied("identity_target_cross_tenant")
+    if (
+        profile.organization_id is None
+        and Membership.objects.filter(user=locked_user).exclude(organization=organization).exists()
+    ):
+        raise PermissionDenied("identity_target_cross_tenant")
+    return profile
+
+
 def _reinstate_with_postgres(*, evidence_id, locked_user, organization, actor, digest):
     """0021-dəki yeganə sanksiyalanmış səth — bütün qapılar funksiyanın içindədir."""
 
@@ -94,7 +122,12 @@ def _reinstate_without_postgres(*, evidence_id, locked_user, organization, actor
         membership.is_active = True
         membership.save(update_fields=["is_active", "updated_at"])
     profile.access_state = UserProfile.AccessState.ACTIVE
-    profile.save(update_fields=["access_state", "updated_at"])
+    fields = ["access_state", "updated_at"]
+    if profile.organization_id is None:
+        # Postgres funksiyası (0039) ilə eyni: təşkilatsız profil bu təşkilata bağlanır.
+        profile.organization = organization
+        fields.append("organization")
+    profile.save(update_fields=fields)
     AccountRestoreEvidence.objects.create(
         id=evidence_id,
         organization=organization,
@@ -126,7 +159,8 @@ def reinstate_student_access(*, user, organization, actor, evidence_digest, requ
     locked_user = User._default_manager.select_for_update().filter(pk=getattr(user, "pk", None)).first()
     if locked_user is None:
         raise IdentityAccessError("identity_target_missing")
-    profile = _locked_profile(locked_user, organization)
+    profile = _locked_reinstate_profile(locked_user, organization)
+    was_orgless = profile.organization_id is None
     if profile.access_state == UserProfile.AccessState.ACTIVE:
         locked_user.profile = profile
         return ReinstateResult(user=locked_user, reopened=False)
@@ -144,7 +178,7 @@ def reinstate_student_access(*, user, organization, actor, evidence_digest, requ
             actor=actor,
             digest=digest,
         )
-        profile.refresh_from_db(fields=["access_state", "updated_at"])
+        profile.refresh_from_db(fields=["access_state", "organization", "updated_at"])
     else:
         _reinstate_without_postgres(
             evidence_id=evidence_id,
@@ -161,10 +195,10 @@ def reinstate_student_access(*, user, organization, actor, evidence_digest, requ
         user=actor,
         organization=organization,
         obj=locked_user,
-        old_values={"access_state": "archived"},
-        new_values={"access_state": "active"},
+        old_values={"access_state": "archived", **({"organization": None} if was_orgless else {})},
+        new_values={"access_state": "active", **({"organization": str(organization.pk)} if was_orgless else {})},
         reason=REINSTATEMENT_REASON_CODE,
-        changes={"evidence_id": str(evidence_id)},
+        changes={"evidence_id": str(evidence_id), **({"orgless_profile_bound": True} if was_orgless else {})},
         request=request,
     )
     return ReinstateResult(user=locked_user, reopened=True)
