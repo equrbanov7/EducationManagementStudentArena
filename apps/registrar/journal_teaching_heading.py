@@ -47,6 +47,8 @@ def summarize(offering, *, personal_actor=None, scope=None):
     allowed = set(plan) if plan else (getattr(scope, "kinds", None) if personal_actor is not None else None)
     permitted = [lesson for lesson in lessons if scope is None or scope.allows_lesson(lesson)]
     visible = [lesson for lesson in permitted if allowed is None or lesson.kind in allowed]
+    if personal_actor is not None and plan:
+        visible = _without_co_teachers(offering, visible, plan, personal_actor)
     result = _summary(
         offering,
         visible,
@@ -96,6 +98,35 @@ def summarize(offering, *, personal_actor=None, scope=None):
             enrollment_ids={offering.pk: getattr(scope, "enrollment_ids", None)},
         )
     return result
+
+
+def _without_co_teachers(offering, lessons, plan, actor):
+    """MR-000879 (2026-11-27, 435 R ing / 935 BM): bir jurnalda EYNİ növü iki müəllim öz tələbələrinə ayrıca keçir
+    (hər birinin öz yük sətri var, məs. 105 + 105). Şəxsi başlıq yalnız öz dərslərini saymalıdır — əks halda
+    «149 / 105 — hədd keçilib» və öz planı alt qruplara bölünürdü («75 / 52»).
+
+    Həmkar = dərsin müəllimi HAZIRDA bu jurnalın həmin növünə öz planı olan başqa müəllimdir. Təhvildən sonra köhnə
+    müəllimin (cari planı yoxdur) və müəllifsiz köhnə dərslər əvvəlki kimi cari sahibin başlığında qalır."""
+    others = {
+        lesson.instructor_id
+        for lesson in lessons
+        if lesson.instructor_id and lesson.instructor_id != actor.pk and lesson.kind in plan
+    }
+    co_kinds = {}
+    for teacher_id in others:
+        kinds = set(current_plan(offering, _Teacher(teacher_id))) & set(plan)
+        if kinds:
+            co_kinds[teacher_id] = kinds
+    if not co_kinds:
+        return lessons
+    return [lesson for lesson in lessons if lesson.kind not in co_kinds.get(lesson.instructor_id, ())]
+
+
+class _Teacher:
+    """``current_plan`` yalnız ``pk`` oxuyur — həmkarın istifadəçi sətrini ayrıca yükləmək lazım deyil."""
+
+    def __init__(self, pk):
+        self.pk = pk
 
 
 def _split_parts(offering, kinds, lessons):
