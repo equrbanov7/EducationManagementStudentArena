@@ -103,6 +103,18 @@
         form.elements.hours.value = info && info.remaining > 0 ? info.remaining : 1;
     };
 
+    /**
+     * «Bölüşdür» tam bölünmüş fəaliyyətdə (qalıq 0) boş «Vakant» forması açırdı — istifadəçi müəllimin
+     * silindiyini düşünürdü (sahib 2026-11-28, 535 MRK «Menecment» 45/45). Növün TƏK təyinatı varsa onu
+     * redaktə üçün qaytarır; qalıq varsa və ya bir neçə müəllim varsa `null` (yeni təyinat forması).
+     */
+    Forms.fullAssignment = function fullAssignment(row, activity) {
+        var info = row && row.activities ? row.activities[activity] : null;
+        if (!info || info.remaining > 0) return null;
+        var same = (row.assignments || []).filter(function (item) { return item.activity === activity; });
+        return same.length === 1 ? same[0] : null;
+    };
+
     /** Sətir modalını sətrin CARİ dəyərləri ilə doldurur (`row=null` — boş forma). */
     Forms.fillRow = function fillRow(form, row) {
         if (!form) return;

@@ -364,7 +364,8 @@
 
         // ── Bölgü modalı ───────────────────────────────────────────────────
         EMSDelegate.on("click", "[data-wl-assign-open]", function (event, btn) {
-            openAssignModal(rowById(btn.dataset.rowId), btn.dataset.activity, null);
+            var row = rowById(btn.dataset.rowId); // tam bölünübsə — mövcud müəllimin redaktəsi (2026-11-28)
+            openAssignModal(row, btn.dataset.activity, forms().fullAssignment ? forms().fullAssignment(row, btn.dataset.activity) : null);
         });
 
         EMSDelegate.on("change", "[data-wl-assign-activity]", renderRemaining);
