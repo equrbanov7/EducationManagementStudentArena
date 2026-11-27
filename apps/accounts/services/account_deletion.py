@@ -16,6 +16,8 @@ from django.utils import timezone
 from apps.audit.public import log_action
 from core.constants import AuditAction
 
+from .account_audit import audit_organization as _audit_organization
+
 logger = logging.getLogger(__name__)
 User = get_user_model()
 
@@ -379,6 +381,7 @@ def restore_account(user, *, request=None, actor=None, reason=""):
         log_action(
             action=AuditAction.UPDATE,
             user=resolved_actor,
+            organization=_audit_organization(user, resolved_actor),
             obj=user,
             reason=f"Account restored by administrator. Reason: {str(reason or '-')[:300]}",
             changes={
@@ -414,7 +417,9 @@ def restore_account(user, *, request=None, actor=None, reason=""):
 _BLOCK_FIELDS = ("blocked_at", "blocked_by", "block_reason", "block_reason_code", "block_contact_code", "block_contact_note")  # fmt: skip
 
 
-def block_account(user, *, request=None, actor=None, reason="", reason_code="", contact_code="", contact_note=""):
+def block_account(
+    user, *, request=None, actor=None, reason="", reason_code="", contact_code="", contact_note="", organization=None
+):
     """
     Temporarily block a user account without marking it as deleted.
 
@@ -445,6 +450,7 @@ def block_account(user, *, request=None, actor=None, reason="", reason_code="", 
         log_action(
             action=AuditAction.UPDATE,
             user=resolved_actor,
+            organization=_audit_organization(user, resolved_actor, organization),
             obj=user,
             reason=f"Account temporarily blocked. Reason: {str(reason or '-')[:300]}",
             changes={
@@ -460,14 +466,10 @@ def block_account(user, *, request=None, actor=None, reason="", reason_code="", 
             resource_repr=f"{user.username} ({user.email})",
         )
 
-    logger.info(
-        "Account temporarily blocked for user %s (pk=%s)",
-        user.username,
-        user.pk,
-    )
+    logger.info("Account temporarily blocked for user %s (pk=%s)", user.username, user.pk)
 
 
-def unblock_account(user, *, request=None, actor=None, reason=""):
+def unblock_account(user, *, request=None, actor=None, reason="", organization=None):
     """
     Restore a temporarily blocked account back to active state.
     """
@@ -497,6 +499,7 @@ def unblock_account(user, *, request=None, actor=None, reason=""):
         log_action(
             action=AuditAction.UPDATE,
             user=resolved_actor,
+            organization=_audit_organization(user, resolved_actor, organization),
             obj=user,
             reason=f"Account unblocked. Reason: {str(reason or '-')[:300]}",
             changes={
@@ -511,11 +514,7 @@ def unblock_account(user, *, request=None, actor=None, reason=""):
             resource_repr=f"{user.username} ({user.email})",
         )
 
-    logger.info(
-        "Account unblocked for user %s (pk=%s)",
-        user.username,
-        user.pk,
-    )
+    logger.info("Account unblocked for user %s (pk=%s)", user.username, user.pk)
 
 
 def _has_academic_history(user) -> bool:

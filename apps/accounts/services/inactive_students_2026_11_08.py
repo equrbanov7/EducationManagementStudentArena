@@ -44,6 +44,14 @@ RESOURCE = "accounts.inactive_student_freeze"
 RECENT_DAYS = 14
 
 
+def _user_repr(user) -> str:
+    """Audit-də hədəf tələbənin adı — ad axtarışı sətri tapsın (2026-11-27)."""
+    if user is None:
+        return ""
+    full_name = (user.get_full_name() or "").strip()
+    return f"{full_name} ({user.username})" if full_name else user.username
+
+
 def _model(name):
     return django_apps.get_model("registrar", name)
 
@@ -141,7 +149,7 @@ def run(*, organization, actor, counts, undo=False, report=None, only=None) -> N
         Enrollment.objects.filter(pk__in=ids).update(status=Enrollment.Status.SUSPENDED, updated_at=timezone.now())
         blocked = user.is_active
         if blocked:
-            block_account(user, actor=actor, reason=REASON)
+            block_account(user, actor=actor, reason=REASON, organization=organization)
         counts["students_frozen"] += 1
         counts["enrollments_suspended"] += len(ids)
         counts["accounts_blocked" if blocked else "accounts_already_blocked"] += 1
@@ -158,6 +166,7 @@ def run(*, organization, actor, counts, undo=False, report=None, only=None) -> N
             reason=REASON,
             resource_type=RESOURCE,
             resource_id=str(user.pk),
+            resource_repr=_user_repr(user),
         )
 
 
@@ -179,7 +188,7 @@ def _undo(*, organization, actor, counts, only=None) -> None:
         counts["undo_enrollments_restored"] += restored
         user = users.get(int(row.resource_id))
         if changes.get("blocked") and user is not None and not user.is_active:
-            unblock_account(user, actor=actor, reason=UNDO_REASON)
+            unblock_account(user, actor=actor, reason=UNDO_REASON, organization=organization)
             counts["undo_accounts_unblocked"] += 1
         counts["undo_students"] += 1
         log_action(
@@ -193,6 +202,7 @@ def _undo(*, organization, actor, counts, only=None) -> None:
             reason=UNDO_REASON,
             resource_type=RESOURCE,
             resource_id=row.resource_id,
+            resource_repr=_user_repr(user),
         )
 
 

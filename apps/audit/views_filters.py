@@ -14,6 +14,7 @@ from urllib.parse import urlencode
 
 from django.apps import apps as django_apps
 from django.contrib.auth import get_user_model
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.utils import timezone
@@ -195,6 +196,27 @@ def parse_filters(request, *, is_superadmin: bool) -> dict:
     }
 
 
+#: Ad axtarışının HƏDƏF şəxs üzrə uyğunluğunda nəzərə alınan hesab sayının yuxarı həddi.
+TARGET_USER_LIMIT = 200
+
+
+def _target_user_q(term: str) -> Q:
+    """Adı axtarılan şəxsin ÜZƏRİNDƏ aparılan əməliyyatlar (obyekt = həmin hesab).
+
+    2026-11-27 (Dmitriy Sevaçyev): toplu dondurma sətri obyekti hesabın özü idi, amma ``resource_repr`` boş
+    qaldığı üçün ad axtarışı onu tapmırdı — yalnız İCRAÇININ adı və səbəb axtarılırdı. Köhnə sətirlər
+    dəyişdirilə bilmir (append-only), ona görə uyğunluq hədəf hesabın ``object_id``-si ilə qurulur.
+    """
+    user_query = tolerant_q(term, ("username", "first_name", "last_name"))
+    if user_query is None:
+        return Q()
+    user_model = get_user_model()
+    ids = [str(pk) for pk in user_model.objects.filter(user_query).values_list("pk", flat=True)[:TARGET_USER_LIMIT]]
+    if not ids:
+        return Q()
+    return Q(content_type=ContentType.objects.get_for_model(user_model), object_id__in=ids)
+
+
 def _search_q(term: str) -> Q:
     # Dözümlü (sahib 2026-09-26): adlar/səbəb az/ing hərfinə; obyekt təsviri (qrup adı ola bilər) və
     # identifikatorlar kod rejimində. Tam UUID əlavə olaraq dəqiq uyğunluqla yoxlanır.
@@ -205,6 +227,7 @@ def _search_q(term: str) -> Q:
     )
     if query is None:
         return Q()
+    query |= _target_user_q(term)
     try:
         as_uuid = uuid.UUID(term)
     except (ValueError, AttributeError):
