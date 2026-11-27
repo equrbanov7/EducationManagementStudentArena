@@ -2050,12 +2050,15 @@ jobs:
                   # 2026-11-27: eyni tələbənin oxşar adlı iki fənn jurnalı (kabinetdə «eyni fənn iki dəfə») — yalnız oxuyur.
                   test "$APPLY" != "true" || { echo "student-pairs yazmır — apply=false olmalıdır" >&2; exit 2; }
                   args+=(--only student_pairs) ;;
+                student-merge)
+                  # 2026-11-27: student-pairs cütlərindən müəllimi eyni, bir tərəfin tələbələri o birində olan jurnallar → bir jurnal.
+                  args+=(--only student_merge) ;;
                 journals|doubles|catalogue|codes|takers|similar) args+=(--only "$BATCH") ;;
                 catalogue-current) args+=(--only catalogue --current-only) ;;
                 dupsubj-*)
                   test "$APPLY" = "true" || { echo "undo yazır — apply=true + confirm=APPLY verin" >&2; exit 2; }
                   args+=(--undo --batch "$BATCH") ;;
-                *) echo "batch: boş, journals, doubles, catalogue, catalogue-current, codes, takers, similar, report, student-pairs və ya dupsubj-… olmalıdır" >&2; exit 2 ;;
+                *) echo "batch: boş, journals, doubles, catalogue, catalogue-current, codes, takers, similar, report, student-pairs, student-merge və ya dupsubj-… olmalıdır" >&2; exit 2 ;;
               esac
               ;;
             fill_empty_cells_20261110)

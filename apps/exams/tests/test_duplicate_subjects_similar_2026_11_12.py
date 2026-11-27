@@ -157,6 +157,61 @@ class SimilarJournalsTest(_MidtermSetup):
         with self.assertRaisesMessage(CommandError, "duplicate_subjects_apply_needs_explicit_step"):
             self._call("--only", "student_pairs", "--apply")
 
+    def test_student_merge_subgroup_journal_into_parent_and_undo_2026_11_27(self):
+        from apps.organizations.models import OrgUnit
+
+        with bypass_rls():
+            Subject.objects.filter(pk=self.offering.subject_id).update(name="Verilənlər bazası sistemləri")
+            Subject.objects.filter(pk=self.other.pk).update(name="Fizika")  # aynı qrupun cütü namizəd olmasın
+            third = Subject.objects.create(organization=self.org, code="QKU-267", name="Verilənlərin bazası sistemləri")
+            sub = OrgUnit.objects.create(
+                organization=self.org,
+                name="Alt-1",
+                slug="alt-1-x",
+                unit_type=self.group.unit_type,
+                parent=self.group.parent,
+            )
+            sub_off = CourseOffering.objects.create(
+                organization=self.org, subject=third, group=sub, period=self.period, instructor=self.teacher
+            )
+            row = Enrollment.objects.create(organization=self.org, student=self.student, offering=sub_off)
+            self._mark(self._lesson(sub_off, D2), row, "absent")
+            # Ana jurnalda alt qrupdan başqa tələbə də var (234 K az = K-1 + K-2).
+            from django.contrib.auth import get_user_model
+
+            from apps.organizations.models import Membership
+
+            mate = get_user_model().objects.create_user("sim_mate", "sim_mate@x.test", "pw")
+            Membership.objects.create(
+                organization=self.org, user=mate, role=self.org.roles.get(name="student"), is_active=True
+            )
+            Enrollment.objects.create(organization=self.org, student=mate, offering=self.offering)
+
+        def state():
+            with bypass_rls():
+                sub_off.refresh_from_db()
+                return sub_off.is_active, LessonMark.objects.filter(lesson__offering=self.offering).count()
+
+        counts, _batch, lines = self._call("--only", "student_merge")
+        self.assertEqual(counts["student_pairs_mergeable"], "1")
+        self.assertTrue(any(f"target={self.offering.pk}" in line and "result=merged" in line for line in lines), lines)
+        self.assertEqual(state(), (True, 1))  # dry-run
+        counts, batch, _lines = self._call("--only", "student_merge", "--apply")
+        self.assertEqual(counts["pairs_merged"], "1")
+        self.assertEqual(state(), (False, 2))  # D2 qayıbı ana jurnala keçdi, alt qrup jurnalı passiv
+        self._call("--undo", "--batch", batch, "--apply")
+        self.assertEqual(state(), (True, 1))
+
+    def test_student_merge_skips_when_teachers_differ(self):
+        with bypass_rls():
+            Subject.objects.filter(pk=self.offering.subject_id).update(name="Verilənlər bazası sistemləri")
+            Subject.objects.filter(pk=self.other.pk).update(name="Verilənlərin bazası sistemləri")
+            CourseOffering.objects.filter(pk=self.source.pk).update(instructor=self.owner)
+        counts, _batch, _lines = self._call("--only", "student_merge", "--apply")
+        self.assertEqual(counts["student_pairs_manual"], "1")
+        self.assertNotIn("pairs_merged", counts)
+        self.assertEqual(self._state(), (True, 1, 1))
+
     def test_numbered_parts_are_not_candidates(self):
         with bypass_rls():
             Subject.objects.filter(pk=self.offering.subject_id).update(name="Kompüter qrafikası-1")
