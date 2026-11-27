@@ -268,7 +268,8 @@ def _transcript_block(target, organization) -> dict:
                 "credit": row["credit"],
                 "teacher": row.get("teacher_name", ""),
                 "total": result.get("total") if result.get("graded") else None,
-                "letter": result.get("letter") or "",
+                # Davam edən fənnin hərfi yoxdur (2026-11-27, MR-000867: «F» kəsr kimi oxunurdu).
+                "letter": (result.get("letter") or "") if status != "pending" else "",
                 "status": status,
                 "fail_reason": row.get("fail_reason", ""),
                 "fail_reason_label": FAIL_REASON_LABELS.get(row.get("fail_reason", ""), ""),

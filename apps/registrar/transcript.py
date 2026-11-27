@@ -434,6 +434,11 @@ def build_student_own_record(*, student, organization):
     return build_student_overall_record(student=student, organization=organization, student_view=True)
 
 
+def _not_started(period) -> bool:
+    start = getattr(period, "start_date", None)
+    return bool(start and start > timezone.localdate())
+
+
 def build_student_overall_record(*, student, organization, student_view=False):
     """Per-subject academic record for the "Ümumi tədris məlumatı" (overall
     academic record) cabinet section — every subject the student has ever
@@ -492,6 +497,9 @@ def build_student_overall_record(*, student, organization, student_view=False):
                     "fail_reason": _fail_reason_code(result) if result["failed"] else "",
                     "retake": row.get("retake"),
                     "recognition": row.get("recognition"),
+                    # Başlamamış semestr (əvvəlcədən açılmış Yaz): dərs yoxdur, «giriş balı» yalnız boş davamiyyətin
+                    # tam sayılmasıdır — göstərilmir (2026-11-27, MR-000867: «10 bal» kəsr kimi oxunurdu).
+                    "not_started": _not_started(period),
                 }
             )
         semesters.append(
