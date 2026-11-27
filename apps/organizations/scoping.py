@@ -29,6 +29,7 @@ from dataclasses import dataclass, field, replace
 from django.db.models import Q, QuerySet
 
 from core.constants import RoleScopeType
+from core.membership_state import membership_epoch
 from core.permissions import has_permission
 
 #: Köhnə (silinmiş) ümumi resolverin org-wide həddi. Kodda artıq İŞLƏNMİR —
@@ -126,8 +127,9 @@ def _permission_scope_memberships(user, organization) -> list:
 
     org_pk = getattr(organization, "pk", None)
     cache = getattr(user, "_org_scope_memberships_cache", None)
-    if cache is not None and org_pk in cache:
-        return cache[org_pk]
+    cache_key = (org_pk, membership_epoch())
+    if cache is not None and cache_key in cache:
+        return cache[cache_key]
     # Perf 2026-10-07: middleware-in eyni request-də oxuduğu sətirlər (eyni süzgəc,
     # `role__is_active` Python-da) — yararsızdırsa canlı sorğu. Sıra əhəmiyyətsizdir.
     snapshot = request_active_memberships(user, organization)
@@ -150,7 +152,7 @@ def _permission_scope_memberships(user, organization) -> list:
         except Exception:  # noqa: BLE001 — bəzi user obyektləri immutable ola bilər (məs. AnonymousUser)
             cache = None
     if cache is not None:
-        cache[org_pk] = memberships
+        cache[cache_key] = memberships
     return memberships
 
 
@@ -260,9 +262,10 @@ def get_permission_scope(user, organization, permission: str, request=None) -> U
     cache_key = ("permission", user_id, org_id, permission)
     if request is not None:
         cache = getattr(request, "_unit_scope_cache", None)
-        if cache is None:
+        if cache is None or getattr(request, "_unit_scope_epoch", None) != membership_epoch():
             cache = {}
             request._unit_scope_cache = cache
+            request._unit_scope_epoch = membership_epoch()
         if cache_key in cache:
             return cache[cache_key]
 

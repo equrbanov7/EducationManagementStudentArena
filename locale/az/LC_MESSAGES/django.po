@@ -121504,6 +121504,49 @@ msgctxt "registrar.recognition"
 msgid "Əsas sənəd (sertifikat, kollec arayışı, transkript və ya əmr)"
 msgstr "Əsas sənəd (sertifikat, kollec arayışı, transkript və ya əmr)"
 
+msgctxt "registrar.journal_lessons"
+msgid ""
+"Bu dərs saatı tutulub. Jurnalda uyğun sütunu özünüz seçin və ya başqa dərs "
+"saatı seçin."
+msgstr ""
+"Bu dərs saatı tutulub. Jurnalda uyğun sütunu özünüz seçin və ya başqa dərs "
+"saatı seçin."
+
+msgctxt "labs.view.error"
+msgid "Invalid lab answer."
+msgstr "Laboratoriya cavabı düzgün deyil."
+
+msgctxt "labs.view.error"
+msgid "This attempt is no longer current. Reload the lab to continue."
+msgstr ""
+"Bu cəhd artıq cari deyil. Davam etmək üçün laboratoriya səhifəsini "
+"yeniləyin."
+
+msgctxt "labs.view.error"
+msgid ""
+"This item contains a question with student answers and cannot be deleted."
+msgstr "Tələbə cavabı olan sual və həmin sualın bloku silinə bilməz."
+
+msgid "Yenidən cəhd ver"
+msgstr "Yenidən cəhd ver"
+
+msgctxt "exams.final_center.error"
+msgid "Tələbənin davam edən cəhdi var."
+msgstr "Tələbənin davam edən cəhdi var."
+
+msgctxt "registrar.language_cohort"
+msgid "Səviyyə qrupunun siyahısını idarə et"
+msgstr "Səviyyə qrupunun siyahısını idarə et"
+
+msgctxt "labs.view.error"
+msgid "The assigned questions have changed. Reload the lab before submitting."
+msgstr ""
+"Təyin edilmiş suallar dəyişib. Təhvildən əvvəl laboratoriya səhifəsini "
+"yeniləyin."
+
+msgid "Əlaqə forması yeniləndi. Mesajınızı yoxlayıb yenidən göndərin."
+msgstr "Əlaqə forması yeniləndi. Mesajınızı yoxlayıb yenidən göndərin."
+
 msgctxt "accounts.groups"
 msgid "Bərpa olunacağı qrup"
 msgstr "Bərpa olunacağı qrup"

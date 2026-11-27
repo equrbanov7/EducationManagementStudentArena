@@ -24,7 +24,7 @@ _REASON = "Dekanlıq laborantı — lab_assistant → dean_office_assistant (sah
 
 
 def ensure_role(organization):
-    """Təşkilatda «Dekanlıq laborantı» rolu — yoxdursa şablondan yaradılır (miqrasiya 0089 ilə eyni dəst)."""
+    """Təşkilatda «Dekanlıq laborantı» rolu — yoxdursa şablondan yaradılır (miqrasiya 0090 ilə eyni dəst)."""
     Role = django_apps.get_model("organizations", "Role")
     spec = DEAN_OFFICE_ROLES[0]
     role = Role.objects.filter(organization=organization, name=DEAN_OFFICE_ASSISTANT_ROLE).first()

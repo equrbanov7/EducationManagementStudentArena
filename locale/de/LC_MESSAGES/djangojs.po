@@ -4052,3 +4052,6 @@ msgid ""
 msgstr ""
 "%(group)s: Abschnitt „%(name)s“ hat keine Studierenden — Studierende "
 "zuordnen oder die Abschnittszahl verringern."
+
+msgid "Seçim üçün variant yoxdur"
+msgstr "Keine Auswahlmöglichkeiten verfügbar"

@@ -287,7 +287,7 @@ class FinalExamWaitConsumer(AsyncJsonWebsocketConsumer):
         from apps.exams.models import FinalExamTicket
         from apps.exams.services.final_center import broadcast_to_staff, touch_presence
 
-        touch_presence(self.session_id, self.ticket_id, status=self._ticket_status)
+        touch_presence(self.session_id, self.ticket_id, status=self._ticket_status, connection_id=self.channel_name)
         updates = {"last_seen_at": timezone.now()}
         if reconnect:
             updates["reconnect_count"] = F("reconnect_count") + 1
@@ -313,7 +313,8 @@ class FinalExamWaitConsumer(AsyncJsonWebsocketConsumer):
     def _mark_disconnected(self):
         from apps.exams.services.final_center import broadcast_to_staff, drop_presence
 
-        drop_presence(self.session_id, self.ticket_id)
+        if not drop_presence(self.session_id, self.ticket_id, connection_id=self.channel_name):
+            return
         broadcast_to_staff(
             self.session_id,
             {"event": "student_disconnected", "ticket_id": self.ticket_id},
@@ -355,7 +356,7 @@ class FinalExamWaitConsumer(AsyncJsonWebsocketConsumer):
             and not entry_session_values_match(self.entry_ticket_id, self.entry_version, ticket)
         ):
             return False
-        touch_presence(self.session_id, self.ticket_id, status=self._ticket_status)
+        touch_presence(self.session_id, self.ticket_id, status=self._ticket_status, connection_id=self.channel_name)
         touch_ticket_last_seen(ticket)
         return True
 

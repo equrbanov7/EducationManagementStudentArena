@@ -52,7 +52,7 @@ def _migrated_tree(org, stack, *, code):
     )
     chair = OrgUnit.objects.create(
         organization=org,
-        name=f"{code}-kafedra",
+        name=f"{code}-köçürülmüş-kafedra",
         slug=f"{org.slug}-{code.lower()}-chair2",
         unit_type=OrgUnitType.CHAIR,
         parent=faculty,

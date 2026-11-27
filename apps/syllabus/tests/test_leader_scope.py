@@ -244,6 +244,7 @@ def test_switch_costs_a_bounded_number_of_queries(world):
             chair_unit=offering.group.parent,
             author=world["teacher2"],
         )
+    _section(world, "head")  # Refresh the scope snapshot after adding groups.
     with CaptureQueriesContext(connection) as large:
         _section(world, "head")
     assert len(large.captured_queries) == len(small.captured_queries)

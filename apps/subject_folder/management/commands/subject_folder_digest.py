@@ -25,12 +25,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         from apps.subject_folder.constants import SubmissionStatus
         from apps.subject_folder.models import Submission
-        from apps.subject_folder.services.notify import send_submission_digests
+        from apps.subject_folder.services.notify import run_pending_digests
 
         with rls_worker_atomic(), bypass_rls():
             pending = Submission.objects.filter(
                 status=SubmissionStatus.SUBMITTED, is_current=True, teacher_notified_at__isnull=True
             ).count()
-            sent = send_submission_digests(force=options["force"]) if options["apply"] else 0
+        sent = run_pending_digests(force=options["force"]) if options["apply"] else 0
         mode = "APPLY" if options["apply"] else "DRY-RUN"
         self.stdout.write(f"[{mode}] gözləyən göndəriş: {pending}; göndərilən xülasə: {sent}")

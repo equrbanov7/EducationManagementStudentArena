@@ -2,6 +2,14 @@
  * refresh/sync/init müqaviləsi saxlanır; sonradan əlavə olunan variantlar da izlənir. */
 (function () {
     var SEARCH_MIN_OPTIONS = 6;
+    var nextLabelId = 0;
+    function labelId(node) {
+        while (!node.id) {
+            var id = "ems-bs-label-" + (++nextLabelId);
+            if (!document.getElementById(id)) { node.id = id; }
+        }
+        return node.id;
+    }
 
     function gettext(text) {
         return typeof window.gettext === "function" ? window.gettext(text) : text;
@@ -31,14 +39,10 @@
         var desiredMax = 320; // CSS max-height (20rem) ilə uyğun
         var spaceBelow = viewportHeight - rect.bottom - gap - 8;
         var spaceAbove = rect.top - gap - 8;
-        // Menyunun TAM hündürlüyü aşağıda sığmırsa və yuxarıda daha çox yer
-        // varsa — yuxarı aç. Beləcə cədvəlin aşağı sətirlərində bütün seçimlər
-        // (məs. 0–10 kollokvium balları) SCROLL-suz görünür.
         var menuH = menu.scrollHeight || 300;
         var needed = Math.min(desiredMax, menuH);
         var openUp = spaceBelow < needed && spaceAbove > spaceBelow;
 
-        // `data-menu-min-width` (ixtiyari, px): dar düymə + geniş menyu (məs. telefon ölkə seçicisi).
         var holder = toggle.closest(".bootstrap-single-select");
         var minWidth = holder ? Number(holder.getAttribute("data-menu-min-width")) || 0 : 0;
         var menuWidth = Math.min(Math.max(rect.width, minWidth), window.innerWidth - 16);
@@ -89,8 +93,6 @@
 
         var wrapper = select.closest(".bootstrap-single-select");
         if (!wrapper && select.parentNode) {
-            // Django form widget-i (`{{ form.field }}`) sarğısız render olunur — sarğını
-            // burada qururuq ki, `data-bootstrap-select` atributu tək başına kifayət etsin.
             wrapper = document.createElement("div");
             wrapper.className = "bootstrap-single-select bootstrap-single-select--ems";
             select.parentNode.insertBefore(wrapper, select);
@@ -126,10 +128,7 @@
         var menu = document.createElement("div");
         menu.className = "dropdown-menu bootstrap-single-select__menu";
 
-        // Daxili axtarış: menyunun başında yapışqan axtarış sahəsi, variantlar
-        // müştəri tərəfində süzülür — seçim yenə native `<select>`-ə yazılır, yəni
-        // forma/filtr müqaviləsi dəyişmir. Elementlər TƏNBƏL yaradılır (ilk lazım
-        // olanda), göstərilib-göstərilməməsi isə hər `buildMenu()`-da qərarlaşır.
+        // Search controls are built only when needed.
         var searchWrap = null;
         var searchInput = null;
         var searchEmpty = null;
@@ -270,16 +269,27 @@
             var selectedOption = select.options[select.selectedIndex] || select.options[0];
             var hasValue = Boolean(select.value);
 
-            // `data-toggle-label` (ixtiyari): düymədə qısa etiket (məs. telefon kodu «🇦🇿 +994»), menyuda tam mətn.
-            label.textContent = selectedOption
-                ? selectedOption.getAttribute("data-toggle-label") || selectedOption.textContent
-                : "";
-            // Dar sahədə yazı «…» ilə kəsiləndə tam mətn ipucunda görünsün (məs. uzun korpus adı).
-            label.title = selectedOption ? selectedOption.textContent : "";
+            var remote = Boolean(select.getAttribute("data-live-search-url"));
+            var noOptions = !remote && !Array.prototype.some.call(select.options, function (item) {
+                return !item.hidden && !item.disabled && !(item.parentElement.tagName === "OPTGROUP" && item.parentElement.disabled);
+            });
+            var disabled = select.disabled || noOptions;
+            label.textContent = noOptions ? gettext("Seçim üçün variant yoxdur") : selectedOption
+                ? selectedOption.getAttribute("data-toggle-label") || selectedOption.textContent : gettext("Axtar…");
+            label.title = selectedOption ? selectedOption.textContent : label.textContent;
+            var labelledBy = select.getAttribute("aria-labelledby");
+            var name = select.getAttribute("aria-label");
+            if (!labelledBy && !name) { labelledBy = Array.prototype.map.call(select.labels || [], labelId).join(" "); }
+            if (labelledBy) { toggle.setAttribute("aria-labelledby", labelledBy + " " + labelId(label)); }
+            else { toggle.removeAttribute("aria-labelledby"); }
+            if (name) { toggle.setAttribute("aria-label", name + " " + label.textContent); }
+            else { toggle.removeAttribute("aria-label"); }
+            if (select.hasAttribute("aria-describedby")) { toggle.setAttribute("aria-describedby", select.getAttribute("aria-describedby")); }
+            else { toggle.removeAttribute("aria-describedby"); }
             toggle.classList.toggle("is-placeholder", !hasValue);
-            toggle.classList.toggle("is-disabled", select.disabled);
-            toggle.disabled = select.disabled;
-            toggle.setAttribute("aria-disabled", select.disabled ? "true" : "false");
+            toggle.classList.toggle("is-disabled", disabled);
+            toggle.disabled = disabled;
+            toggle.setAttribute("aria-disabled", String(disabled));
         }
 
         function syncSelectedState() {
@@ -290,8 +300,6 @@
             });
         }
 
-        // Menyu ilk açılışa qədər qurulmur (yuxarıdakı qeyd); `menuDirty` — native
-        // `<select>` dəyişib, düymələr növbəti açılışda yenidən qurulmalıdır.
         var menuDirty = true;
 
         function isMenuOpen() {
@@ -300,7 +308,6 @@
 
         function buildMenu() {
             menuDirty = false;
-            // Açıq menyu yenidən qurulanda (variantlar gəldi) yazılan sorğu və fokus itməsin.
             var keepQuery = isMenuOpen() && searchActive() ? searchInput.value : "";
             var hadFocus = searchActive() && document.activeElement === searchInput;
             menu.innerHTML = "";
@@ -315,9 +322,7 @@
             }
 
             Array.prototype.forEach.call(select.options, function (option, index) {
-                // Gizli option-ları menyuda göstərmə (native select davranışı) —
-                // kaskad/il filtri `option.hidden` ilə süzərsə, styled menyu da
-                // yalnız uyğun seçimləri göstərsin (məs. tələbə jurnalı yarım-il).
+                // Gizli variantlar açılan menyuda da gizli qalır.
                 if (option.hidden) {
                     return;
                 }
@@ -428,7 +433,6 @@
             }
         }
 
-        // Toggle-da yazılan hərf itməsin (əvvəl fokus axtarışa yalnız taymerlə keçirdi): menyu açılır, hərf axtarışa.
         toggle.addEventListener("keydown", function (event) {
             var key = event.key || "";
             if (key.length !== 1 || key === " " || event.ctrlKey || event.metaKey || event.altKey || event.isComposing || toggle.disabled) {
@@ -441,7 +445,6 @@
             focusSearch(event);
         });
 
-        // Fokusda əvvəlcədən qur — klaviatura istifadəçisi üçün ilk açılış gecikməsin.
         toggle.addEventListener("focus", ensureMenu);
 
         toggle.addEventListener("show.bs.dropdown", function () {
@@ -455,7 +458,6 @@
             if (searchActive()) {
                 searchInput.value = "";
                 applyLiveSearch();
-                // Fokus DƏRHAL axtarışda (ilk hərf itməsin); taymer — Bootstrap fokusu variantə aparsa.
                 focusSearch();
                 window.setTimeout(function () { focusSearch(); }, 0);
             }
@@ -469,7 +471,6 @@
             window.removeEventListener("scroll", onScrollWhileOpen, true);
             window.removeEventListener("resize", onScrollWhileOpen);
             resetMenuPosition(menu);
-            // Bağlananda sorğu təmizlənir — növbəti açılışda tam siyahı görünsün.
             if (searchActive() && searchInput.value) {
                 searchInput.value = "";
                 applyLiveSearch();
@@ -487,10 +488,9 @@
 
         select._bootstrapSelectApi = api;
         refresh();
-        // Variantlar `refresh()`-siz dəyişsə də (innerHTML, appendChild, `hidden`) axtarış köhnə siyahıda qalmasın.
         if (typeof window.MutationObserver === "function") {
             var watch = { childList: true, subtree: true, characterData: true, attributes: true };
-            watch.attributeFilter = ["hidden", "disabled", "label", "selected", "data-search", "data-subtext"];
+            watch.attributeFilter = ["hidden", "disabled", "label", "selected", "data-search", "data-subtext", "data-live-search-url", "aria-labelledby", "aria-label", "aria-describedby"];
             new window.MutationObserver(function () {
                 return window.document ? refresh() : null; // bağlanmış pəncərə (jsdom teardown) — yox
             }).observe(select, watch);

@@ -75,6 +75,7 @@ class PeopleQueryBudgetTest(TestCase):
                 small_payload = people.build_teachers_page(actor=actor, filters=filters)
             for index in range(12):
                 self.fx.add_teacher(f"ppl_bulk_t{index}", last=f"Bulkov{index}")
+            people.build_teachers_page(actor=actor, filters=filters)  # Refresh permissions after membership writes.
             with CaptureQueriesContext(connection) as large:
                 large_payload = people.build_teachers_page(actor=actor, filters=filters)
 
@@ -95,6 +96,7 @@ class PeopleQueryBudgetTest(TestCase):
                 small_payload = people.build_students_page(actor=actor, filters=filters)
             for index in range(12):
                 self.fx.add_student(f"ppl_bulk_s{index}", faculty="a", last=f"Bulkova{index}")
+            people.build_students_page(actor=actor, filters=filters)  # Refresh permissions after membership writes.
             with CaptureQueriesContext(connection) as large:
                 large_payload = people.build_students_page(actor=actor, filters=filters)
 

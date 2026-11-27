@@ -33,27 +33,11 @@ instansındadır, o isə hər request-də təzədən yaradılır; middleware hə
 
 from __future__ import annotations
 
-import itertools
 from dataclasses import dataclass
 
+from core.membership_state import bump_membership_epoch, membership_epoch
+
 _SNAPSHOT_ATTR = "_org_request_membership_snapshot"
-_epoch_source = itertools.count(1)
-_epoch = 0
-
-
-def membership_epoch() -> int:
-    """Cari epoxa — middleware onu üzvlük oxusundan ƏVVƏL götürür."""
-    return _epoch
-
-
-def bump_membership_epoch(*_args, **_kwargs) -> None:
-    """Üzvlük/rol/struktur yazısı oldu — bütün açıq snapshot-lar etibarsızdır.
-
-    ``itertools.count`` CPython-da atomikdir: yarışan iki artım da epoxanı
-    snapshot-un yadda saxladığı dəyərdən fərqli edir (fail-closed).
-    """
-    global _epoch
-    _epoch = next(_epoch_source)
 
 
 @dataclass(frozen=True)
@@ -90,7 +74,7 @@ def _row_matches(membership, org_pk) -> bool | None:
         return None
     if not Membership.role.is_cached(membership) or not Membership.scope_unit.is_cached(membership):
         return None
-    if membership.role.organization_id != org_pk:
+    if not membership.role.is_active or membership.role.organization_id != org_pk:
         return False
     if membership.scope_unit_id is not None:
         unit = membership.scope_unit
@@ -112,7 +96,7 @@ def request_active_memberships(user, organization) -> list | None:
     if snapshot is None:
         return None
     org_pk = getattr(organization, "pk", None)
-    if org_pk is None or snapshot.organization_id != org_pk or snapshot.epoch != _epoch:
+    if org_pk is None or snapshot.organization_id != org_pk or snapshot.epoch != membership_epoch():
         return None
     rows = []
     for membership in snapshot.rows:

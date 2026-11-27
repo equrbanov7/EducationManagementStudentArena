@@ -48,6 +48,7 @@ from core import academic_rules
 
 from . import dashboard_data, journal_topics, lesson_rooms
 from .journal_access import is_direct_editor, offering_or_404
+from .journal_slot_selection import activation_slot_facts, slot_choice_message
 from .lesson_share_scope import match_slots
 
 _CTX = "registrar.journal_activation"
@@ -247,6 +248,8 @@ def lesson_rows(offering, *, memo: bool = False) -> list:
             "off_schedule_reason",
             "lab_group",
             "seminar_group",
+            "is_passive",
+            "room_id",
             "instructor__first_name",
             "instructor__last_name",
             "instructor__username",
@@ -417,16 +420,8 @@ def _state(slot, lesson, now) -> str:
     return "past" if slot.end_time <= now else "upcoming"
 
 
-def strip_context(offering, context) -> dict:
-    """``journal_detail`` kontekstinə: ``lesson_slot_pattern`` (modal, hər tab) + ``today_strip`` (grid tabı).
-
-    Cədvəli olmayan açılışda heç biri yoxdur — səhifə köhnə kimi qalır.
-
-    Sahib 2026-10-14: «Bu günün cədvəl dərsləri» zolağı (böyük yaşıl kart) jurnaldan GÖTÜRÜLDÜ — «o
-    olmasa da olar». «Aktivləşdir» söndürülüdə (defolt) ``today_strip`` ümumiyyətlə qurulmur (sorğu da
-    yoxdur); «Yeni dərs» modalı bu günün slotundan yenə dolu açılır (``journal_lesson_prefill`` öz
-    hesabını aparır). Zolaq yalnız RİM «Aktivləşdir»i YANDIRANDA qalır — bir kliklik aktivləşdirmənin
-    yeganə girişi odur."""
+def strip_context(offering, context, *, scope=None) -> dict:
+    """Modalın cədvəl naxışı; aktivləşdirmə açıqdırsa qriddə bu günün görünən slotları və uyğun sütunlar."""
     if not offering_slots(offering):
         return {}
     extra = {"lesson_slot_pattern": slot_pattern(offering) if context.get("can_edit") else []}
@@ -438,8 +433,9 @@ def strip_context(offering, context) -> dict:
     today = timezone.localdate()
     now = timezone.localtime().time()
     todays_slots = slots_on(offering, today)
-    covered, last_instructor, todays_lessons = lesson_facts(offering, today, memo=True)
-    by_slot = match_slots(todays_slots, todays_lessons)  # eyni saatlı iki slot — hər biri öz dərsi ilə (patok)
+    covered, last_instructor, todays_lessons, by_slot = activation_slot_facts(
+        offering, todays_slots, today, scope=scope, memo=True
+    )
     topic_rows = context.get("topic_choices_meta") or []
     items = []
     matched = set()
@@ -516,6 +512,7 @@ def activate_slot(request, offering_id, slot_id):
     if slot is None:
         raise Http404
     from .journal_share_guard import slot_activation
+    from .journal_shares import journal_scope
 
     slot_allowed, share_teacher = slot_activation(request.user, offering, slot)  # bölünmüş jurnal (2026-10-26)
     if not slot_allowed:
@@ -534,9 +531,10 @@ def activate_slot(request, offering_id, slot_id):
         return redirect(back)
 
     today = timezone.localdate()
-    # Eyni saatlı ikinci slot (patok / Lab-1 + Lab-2) birincinin dərsi ilə «aktivləşdirilib» sayılmır (2026-11-15).
-    existing = match_slots(slots_on(offering, today), list(offering.lessons.filter(date=today))).get(slot.pk)
-    if existing is not None:
+    covered, last_instructor, _, by_slot = activation_slot_facts(
+        offering, slots_on(offering, today), today, scope=journal_scope(request.user, offering)
+    )
+    if (existing := by_slot.get(slot.pk)) is not None:
         messages.info(request, pgettext(_CTX, "Bu cədvəl dərsi bu gün artıq aktivləşdirilib."))
         return redirect(f"{back}#jd-lesson-{existing.pk}")
     error = hours_cap_error(offering, lesson_hours_for_slot(slot))
@@ -544,7 +542,6 @@ def activate_slot(request, offering_id, slot_id):
         messages.error(request, error)
         return redirect(back)
 
-    covered, last_instructor, _todays = lesson_facts(offering, today)
     topic = next_topic(journal_topics.lesson_topic_meta(offering, []), covered, slot.kind)
     try:
         lesson = gradebook.create_lesson(
@@ -556,7 +553,7 @@ def activate_slot(request, offering_id, slot_id):
             instructor=share_teacher or slot_teacher(offering, slot, last_instructor),
         )
     except gradebook.LessonRuleError as exc:
-        messages.error(request, str(exc))
+        messages.error(request, slot_choice_message() if isinstance(exc, gradebook.SlotTakenError) else str(exc))
         return redirect(back)
     messages.success(
         request,

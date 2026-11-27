@@ -1,7 +1,7 @@
 """labs model paketi — tapşırıq/təqdim/cavab."""
 
 from django.core.exceptions import PermissionDenied
-from django.db import models
+from django.db import models, transaction
 
 from core.upload_security import FileUploadValidator
 
@@ -52,15 +52,8 @@ class LabAssignment(models.Model):
         if not lab.can_student_access(student):
             raise PermissionDenied("You do not have permission to access this lab.")
 
-        assignment, created = cls.objects.get_or_create(lab=lab, student=student)
-
-        # Yeni assignment üçün həmişə sual təyin et.
-        # Mövcud assignment üçün yalnız hələ submission yoxdursa və assignment köhnəlibsə yenilə.
-        if created or not assignment.assigned_questions.exists():
-            assignment.assign_questions()
-        elif assignment.needs_reassignment():
-            assignment.assign_questions()
-
+        assignment, _ = cls.objects.get_or_create(lab=lab, student=student)
+        assignment.assign_questions()
         return assignment
 
     def _candidate_count(self):
@@ -93,6 +86,12 @@ class LabAssignment(models.Model):
         """
         Assignment köhnəlibsə (blok/sual sayı dəyişib və ya silinmiş suallar qalıbsa) True qaytarır.
         """
+        if (
+            self.submissions.exists()
+            or LabAnswer.objects.filter(lab_id=self.lab_id, student_id=self.student_id).exists()
+        ):
+            return False
+
         assigned_ids = set(self.assigned_questions.values_list("id", flat=True))
         if not assigned_ids:
             return True
@@ -103,10 +102,16 @@ class LabAssignment(models.Model):
 
         return len(assigned_ids) != self.expected_assigned_count()
 
+    @transaction.atomic
     def assign_questions(self):
         """
         Bu tələbəyə random suallar təyin et
         """
+
+        # Serialize the draw with the first answer and other requests opening the same assignment.
+        LabAssignment.objects.select_for_update().only("pk").get(pk=self.pk)
+        if not self.needs_reassignment():
+            return
 
         all_questions = []
 
@@ -233,7 +238,7 @@ class LabAnswer(models.Model):
     """
 
     lab = models.ForeignKey(Lab, on_delete=models.CASCADE, related_name="answers")
-    question = models.ForeignKey("LabQuestion", on_delete=models.CASCADE, related_name="answers")
+    question = models.ForeignKey("LabQuestion", on_delete=models.RESTRICT, related_name="answers")
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name="lab_answers")
 
     # Hansı cəhdə aiddir

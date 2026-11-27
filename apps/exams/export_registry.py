@@ -77,18 +77,11 @@ _EXAM_CENTER_ROLE_NAMES = ("exam_center", "exam_center_head", "exam_center_staff
 
 def _build_exam_center_stats_xlsx(*, user, organization, params):
     """«İmtahan statistikaları» böyük ixracı (2026-11-17) — icazə view-da (İmtahan Mərkəzi), burada təkrar."""
-    from django.apps import apps as django_apps
-
     from apps.exams.views.exam_center.statistics_export import build_stats_xlsx
 
-    # Worker-də sorğu / aktiv təşkilat konteksti yoxdur (``user.is_exam_center`` False olur) — rol üzvlük
-    # cədvəlindən yoxlanır: job-un təşkilatında aktiv İmtahan Mərkəzi / RİM rəhbəri üzvlüyü və ya superadmin.
-    membership = django_apps.get_model("organizations", "Membership")
     center_member = (
         organization is not None
-        and membership.objects.filter(
-            user=user, organization=organization, is_active=True, role__name__in=_EXAM_CENTER_ROLE_NAMES
-        ).exists()
+        and get_active_memberships(user, organization).filter(role__name__in=_EXAM_CENTER_ROLE_NAMES).exists()
     )
     if organization is None or not (center_member or getattr(user, "is_superadmin", False)):
         raise ValueError("export job permission mismatch")

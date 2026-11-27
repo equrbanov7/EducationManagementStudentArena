@@ -16,6 +16,8 @@ is consistent with login / OTP / register endpoints.
 from __future__ import annotations
 
 import logging
+from urllib.parse import urlencode
+from uuid import uuid4
 
 from django.conf import settings
 from django.contrib import messages
@@ -28,8 +30,10 @@ from django.views.decorators.http import require_http_methods
 
 from core.rate_limit import record_rate_limit_hit
 
+from .channels import whatsapp_channel
 from .forms import ContactForm
 from .services import create_contact_message
+from .submission import receipt_key, receipt_signer, received
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +62,12 @@ def contact_page(request: HttpRequest) -> HttpResponse:
     if not contact_page_enabled():  # sahib 2026-10-20: «Sistem tənzimləmələri → Açıq səhifələr»
         raise Http404
     brand = getattr(settings, "SITE_BRAND_NAME", "") or "Qərbi Kaspi Universiteti"
+    signer = receipt_signer(request)
+    token = request.POST.get("submission_token", "") if request.method == "POST" else ""
+    key = receipt_key(signer, token)
     seo_context = {
+        "whatsapp": whatsapp_channel(request),
+        "submission_token": token if key else signer.sign(str(uuid4())),
         "seo_title": _("Əlaqə – %(brand)s") % {"brand": brand},
         "seo_description": _(
             "%(brand)s ilə əlaqə saxlayın. Suallarınız, təklifləriniz və əməkdaşlıq istəkləriniz üçün bizə yazın."
@@ -71,6 +80,8 @@ def contact_page(request: HttpRequest) -> HttpResponse:
     }
 
     if request.method == "POST":
+        if received(key):
+            return redirect(reverse("contact") + "?" + urlencode({"receipt": token}))
         # ---- IP-based rate limit ----
         ip = _client_ip(request)
         limited, retry = record_rate_limit_hit("contact_ip", CONTACT_IP_RATE, ip)
@@ -88,6 +99,9 @@ def contact_page(request: HttpRequest) -> HttpResponse:
 
         form = ContactForm(request.POST)
         if form.is_valid():
+            if key is None:
+                form.add_error(None, _("Əlaqə forması yeniləndi. Mesajınızı yoxlayıb yenidən göndərin."))
+                return render(request, "contact/contact.html", {"form": form, **seo_context}, status=400)
             # ---- Email-based rate limit (only after format validation) ----
             email = form.cleaned_data["email"].lower()
             limited, _retry = record_rate_limit_hit("contact_email", CONTACT_EMAIL_RATE, email)
@@ -106,7 +120,7 @@ def contact_page(request: HttpRequest) -> HttpResponse:
             try:
                 # Persists synchronously and dispatches email in a daemon
                 # thread — the HTTP response is no longer blocked by SMTP I/O.
-                create_contact_message(form_cleaned_data=form.cleaned_data, request=request)
+                create_contact_message(form_cleaned_data=form.cleaned_data, request=request, submission_key=key)
             except Exception:
                 # Only DB-level failures land here; SMTP errors are caught
                 # inside the background thread and never surface to the user.
@@ -126,13 +140,13 @@ def contact_page(request: HttpRequest) -> HttpResponse:
                 request,
                 _("Mesajınız uğurla qəbul edildi. Tezliklə sizinlə əlaqə saxlayacağıq."),
             )
-            return redirect(reverse("contact") + "?sent=1")
+            return redirect(reverse("contact") + "?" + urlencode({"receipt": token}))
     else:
         form = ContactForm()
 
     context = {
         "form": form,
-        "submitted": request.GET.get("sent") == "1",
+        "submitted": received(receipt_key(signer, request.GET.get("receipt", ""))),
         **seo_context,
     }
     return render(request, "contact/contact.html", context)

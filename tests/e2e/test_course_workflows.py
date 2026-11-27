@@ -8,6 +8,8 @@ Covers:
 
 from __future__ import annotations
 
+from django.urls import reverse
+
 import pytest
 from playwright.sync_api import Page, expect
 
@@ -20,7 +22,6 @@ CREATE_COURSE_URL = f"{BASE_URL}/courses/create_course/"
 MY_COURSES_URL = f"{BASE_URL}/accounts/profile/?section=my-courses"
 ENROLLED_COURSES_URL = f"{BASE_URL}/accounts/profile/?section=assigned-courses"
 EXAM_GROUPS_URL = f"{BASE_URL}/exams/groups/"
-CREATE_GROUP_URL = f"{BASE_URL}/exams/groups/create/"
 
 
 # ── Unauthenticated access ────────────────────────────────────────────────────
@@ -101,15 +102,16 @@ class TestTeacherCoursePages:
         assert response is not None
         assert response.status < 500, f"Exam groups page returned HTTP {response.status}"
 
-    @pytest.mark.skipif(
-        not E2E_USERNAME or not E2E_PASSWORD,
-        reason="E2E_USERNAME / E2E_PASSWORD not set",
-    )
-    def test_create_group_page_loads(self, authenticated_page: Page) -> None:
-        """Group creation form page must load without a server error."""
-        response = authenticated_page.goto(CREATE_GROUP_URL)
-        assert response is not None
-        assert response.status < 500, f"Create group page returned HTTP {response.status}"
+    def test_create_group_page_loads(self, owner_page: Page) -> None:
+        """An organization owner can open the form that posts to the group creation endpoint."""
+        response = owner_page.goto(f"{BASE_URL}{reverse('exams:create_student_group')}")
+        assert response is not None and response.status == 200
+        details = owner_page.locator("[data-legacy-cohort-form-details]")
+        if details.count() and not details.evaluate("(element) => element.open"):
+            details.locator("summary").click()
+        form = owner_page.locator("#createGroupForm")
+        expect(form).to_have_attribute("action", reverse("exams:teacher_create_group"))
+        expect(form.locator("input[name='name']")).to_be_visible()
 
 
 # ── Student course access ─────────────────────────────────────────────────────

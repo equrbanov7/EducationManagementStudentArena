@@ -31,7 +31,7 @@ jurnal siyahısı (alt qrup), tələbə hərəkəti, «Tələbə reyestri», də
 ⚠️ SƏVİYYƏ 58 QƏSDƏNDİR (mühasib kimi): 80-dən aşağı — ``org_admin`` aliası yoxdur; 60-dan aşağı —
 ``User.is_teacher_or_above`` köhnə müəllim səthlərini açmır (laborant dərs demir; dərs deyirsə müəllim üzvlüyü ayrıdır).
 
-Mövcud tenantlar: miqrasiya ``organizations/0089``; mövcud laborant üzvlükləri ƏMRLƏ köçürülür
+Mövcud tenantlar: miqrasiya ``organizations/0090``; mövcud laborant üzvlükləri ƏMRLƏ köçürülür
 (``reassign_dean_office_laborants_20261127``, defolt dry-run).
 """
 
@@ -44,14 +44,14 @@ from .default_roles_shared import PEOPLE_DIRECTORY_READ
 DEAN_OFFICE_ASSISTANT_ROLE = "dean_office_assistant"
 DEAN_OFFICE_ASSISTANT_LEVEL = 58
 
-#: Tələbə hərəkətinin açarları (dekan / müavin / laborant üçün EYNİ; miqrasiya 0089 dondurur).
+#: Tələbə hərəkətinin açarları (dekan / müavin / laborant üçün EYNİ; miqrasiya 0090 dondurur).
 DEAN_OFFICE_MOVEMENT_PERMISSIONS = (
     "student.movement",
     "people.manage_academic",
     "student.registry_view",
 )
 
-#: Mövcud rollara verilən açarlar (şablon: ``apply_dean_office_grants``; mövcud tenantlar: 0089).
+#: Mövcud rollara verilən açarlar (şablon: ``apply_dean_office_grants``; mövcud tenantlar: 0090).
 DEAN_OFFICE_GRANTS: dict[str, tuple[str, ...]] = {
     "dean": DEAN_OFFICE_MOVEMENT_PERMISSIONS,
     "vice_dean": (*DEAN_OFFICE_MOVEMENT_PERMISSIONS, "unit.group_manage"),

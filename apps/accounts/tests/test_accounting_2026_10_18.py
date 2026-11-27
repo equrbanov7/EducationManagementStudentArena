@@ -532,6 +532,7 @@ class AccountingSectionTest(AccountingFixture, TestCase):
                 )
                 Enrollment.objects.create(organization=self.org, student=self.student, offering=offering)
                 self._lesson(offering, date(2026, 10, 2), "lecture")
+        measure()  # Match the warm permission snapshot used for the smaller cohort.
         large = measure()
         self.assertEqual(small, large)
         self.assertLessEqual(large, 16)

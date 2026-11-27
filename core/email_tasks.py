@@ -139,19 +139,15 @@ def send_account_otp_email(
         text_body = render_to_string(f"{template_prefix}.txt", context)
         html_body = render_to_string(f"{template_prefix}.html", context)
 
-        try:
-            message = EmailMultiAlternatives(
-                subject=_otp_subject_for_purpose(purpose),
-                body=text_body,
-                from_email=sender_for(purpose),
-                to=[recipient_email],
-            )
-            message.attach_alternative(html_body, "text/html")
-            message.send()
-            logger.info("Purpose-specific OTP email sent to %s for purpose %s", recipient_email, purpose)
-        except Exception as exc:
-            logger.exception("Failed to send purpose-specific OTP email to %s: %s", recipient_email, exc)
-            raise
+        message = EmailMultiAlternatives(
+            subject=_otp_subject_for_purpose(purpose),
+            body=text_body,
+            from_email=sender_for(purpose),
+            to=[recipient_email],
+        )
+        message.attach_alternative(html_body, "text/html")
+        message.send()
+        logger.info("OTP email sent")
 
 
 @shared_task(
@@ -222,19 +218,15 @@ def send_template_email_async(
         plain_message = plain_text_body(template_name, context, html_message)
         sender = from_email or settings.DEFAULT_FROM_EMAIL
 
-        try:
-            message = EmailMultiAlternatives(
-                subject=subject,
-                body=plain_message,
-                from_email=sender,
-                to=recipient_list,
-            )
-            message.attach_alternative(html_message, "text/html")
-            message.send()
-            logger.info("Template email '%s' sent to %d recipient(s)", subject, len(recipient_list))
-        except Exception as exc:
-            logger.exception("Failed to send template email '%s': %s", subject, exc)
-            raise
+        message = EmailMultiAlternatives(
+            subject=subject,
+            body=plain_message,
+            from_email=sender,
+            to=recipient_list,
+        )
+        message.attach_alternative(html_message, "text/html")
+        message.send()
+        logger.info("Template email sent to %d recipient(s)", len(recipient_list))
 
 
 @shared_task(
@@ -277,21 +269,17 @@ def send_new_post_notification_email(
         html_message = render_to_string("blog/emails/new_post_notification.html", context)
         plain_message = plain_text_body("blog/emails/new_post_notification.html", context, html_message)
 
-        try:
-            message = EmailMultiAlternatives(
-                subject=f"Yeni post: {post.title}",
-                body=plain_message,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                to=[settings.DEFAULT_FROM_EMAIL],
-                bcc=subscriber_emails,
-            )
-            message.attach_alternative(html_message, "text/html")
-            message.send()
-            logger.info(
-                "New-post notification for post %s sent to %d subscriber(s)",
-                post_pk,
-                len(subscriber_emails),
-            )
-        except Exception as exc:
-            logger.exception("Failed to send new-post notification for post %s: %s", post_pk, exc)
-            raise
+        message = EmailMultiAlternatives(
+            subject=f"Yeni post: {post.title}",
+            body=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[settings.DEFAULT_FROM_EMAIL],
+            bcc=subscriber_emails,
+        )
+        message.attach_alternative(html_message, "text/html")
+        message.send()
+        logger.info(
+            "New-post notification for post %s sent to %d subscriber(s)",
+            post_pk,
+            len(subscriber_emails),
+        )

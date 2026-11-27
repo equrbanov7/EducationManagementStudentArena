@@ -102,7 +102,7 @@ def _load(notification_ids):
     return notifications, devices, unread
 
 
-def _plan(notifications, devices, unread):
+def _plan(notifications, devices, unread, *, resume_notification_id, after_device_id):
     """``[(notification, device, message)]`` — susdurulmuş növlər atılır; mətn hər dil üçün bir dəfə qurulur."""
     from .messages import build_message, localized_text, normalize_language
 
@@ -110,6 +110,12 @@ def _plan(notifications, devices, unread):
     for notification in notifications:
         texts: dict = {}
         for device in devices.get(notification.recipient_id, ()):
+            if (
+                notification.pk == resume_notification_id
+                and after_device_id is not None
+                and device.pk <= after_device_id
+            ):
+                continue
             muted = device.muted_types if isinstance(device.muted_types, list) else []
             if notification.notification_type in muted:
                 continue
@@ -129,7 +135,7 @@ def _plan(notifications, devices, unread):
     return plan
 
 
-def deliver(notification_ids, *, scope=None, client_factory=None) -> dict:
+def deliver(notification_ids, *, after_device_id=None, scope=None, client_factory=None) -> dict:
     """Bildirişləri alıcıların aktiv cihazlarına göndərir; qaytarır: nəticə sayları (loq/test üçün)."""
     from apps.notifications.models import PushDevice
 
@@ -147,7 +153,7 @@ def deliver(notification_ids, *, scope=None, client_factory=None) -> dict:
 
     with scope():
         notifications, devices, unread = _load(ids)
-        plan = _plan(notifications, devices, unread)
+        plan = _plan(notifications, devices, unread, resume_notification_id=ids[0], after_device_id=after_device_id)
     if not plan:
         counts["no_target"] = len(ids)
         return dict(counts)
@@ -156,13 +162,15 @@ def deliver(notification_ids, *, scope=None, client_factory=None) -> dict:
     delivered: list = []
     deactivate: dict = defaultdict(list)
     leftover: list = []
+    resume_after = None
     started = time.monotonic()
     try:
         for index, (notification, device, message) in enumerate(plan):
-            if time.monotonic() - started > TIME_BUDGET_SECONDS:
-                # Qismən göndərilmiş bildiriş təkrarlanmır (eyni telefona iki push olmasın).
-                started_ids = {item[0].pk for item in plan[:index]}
-                leftover = sorted({item[0].pk for item in plan[index:]} - started_ids)
+            if index and time.monotonic() - started > TIME_BUDGET_SECONDS:
+                leftover = list(dict.fromkeys(item[0].pk for item in plan[index:]))
+                previous_notification, previous_device, _ = plan[index - 1]
+                if previous_notification.pk == notification.pk:
+                    resume_after = previous_device.pk
                 break
             result = client.send(message)
             counts[result.outcome] += 1
@@ -192,7 +200,7 @@ def deliver(notification_ids, *, scope=None, client_factory=None) -> dict:
     if leftover:
         from apps.notifications.tasks import push_send_task
 
-        push_send_task.delay(leftover)
+        push_send_task.delay(leftover, after_device_id=resume_after)
         counts["requeued"] = len(leftover)
     logger.info("Push: %s", dict(counts))
     return dict(counts)

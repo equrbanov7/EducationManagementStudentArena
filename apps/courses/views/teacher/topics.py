@@ -32,6 +32,7 @@ class AddTopicView(IsCourseOwnerMixin, CreateView):
 
     model = CourseTopic
     form_class = CourseTopicForm
+    http_method_names = ["post", "options"]
 
     def dispatch(self, request, *args, **kwargs):
         self.course = _get_owner_course_or_404(request, kwargs["course_id"])
@@ -81,6 +82,7 @@ class EditTopicView(IsCourseOwnerMixin, UpdateView):
 
     model = CourseTopic
     form_class = CourseTopicForm
+    http_method_names = ["post", "options"]
     pk_url_kwarg = "topic_id"
 
     def test_func(self):

@@ -22,6 +22,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q
+from django.db.models.functions import Coalesce
 from django.urls import NoReverseMatch, reverse
 from django.utils import timezone
 from django.utils.translation import pgettext
@@ -29,6 +30,7 @@ from django.utils.translation import pgettext
 from ..constants import SECTION_REVIEW, SECTION_STUDENT, FolderStatus, SubmissionStatus, TaskKind
 from ..errors import display_number
 from . import lookups, selfwork_rule
+from .locks import advisory_lock
 
 logger = logging.getLogger(__name__)
 
@@ -181,7 +183,7 @@ def _pending_digest_rows(organization_id=None, teacher_id=None):
 
     rows = Submission.objects.filter(
         status=SubmissionStatus.SUBMITTED, teacher_notified_at__isnull=True, is_current=True
-    ).select_related("task", "task__folder", "assignment__offering", "assignment__offering__instructor")
+    ).select_related("task")
     if organization_id is not None:
         rows = rows.filter(organization_id=organization_id)
     if teacher_id is not None:
@@ -199,7 +201,9 @@ def _recipient_id(submission):
     return submission.assignment.offering.instructor_id or submission.task.folder.owner_id
 
 
-def _send_digest(teacher, rows) -> None:
+def _send_digest(teacher, organization_id, rows) -> bool:
+    from apps.notifications.public import create_notification_for_users
+
     from ..models import Submission
 
     counts = defaultdict(int)
@@ -207,40 +211,89 @@ def _send_digest(teacher, rows) -> None:
         counts[row.task.title] += 1
     total = sum(counts.values())
     summary = " · ".join(f"{title} — {count}" for title, count in sorted(counts.items())[:8])
-    _dispatch(
-        [teacher],
+    created = create_notification_for_users(
+        recipients=[teacher],
         title=pgettext(_CTX, "Yoxlanılmalı yeni işlər: %(count)s") % {"count": total},
         message=summary,
         link=profile_link(SECTION_REVIEW),
-        organization_id=rows[0].organization_id,
+        organization=rows[0].organization,
+        notification_type="assignment",
         metadata={"event": EVENT_PREFIX + "digest", "count": total},
     )
-    Submission.objects.filter(pk__in=[row.pk for row in rows]).update(teacher_notified_at=timezone.now())
+    if not created:
+        return False
+    Submission.objects.filter(organization_id=organization_id, pk__in=[row.pk for row in rows]).update(
+        teacher_notified_at=timezone.now()
+    )
+    return True
+
+
+def pending_digest_recipients(organization_id=None, teacher_id=None):
+    rows = _pending_digest_rows(organization_id, teacher_id).annotate(
+        recipient_id=Coalesce("assignment__offering__instructor_id", "task__folder__owner_id")
+    )
+    return list(
+        rows.exclude(recipient_id=None)
+        .order_by("organization_id", "recipient_id")
+        .values_list("organization_id", "recipient_id")
+        .distinct()
+    )
+
+
+@transaction.atomic
+def _deliver_digest(organization_id, teacher_id, *, force):
+    from ..models import Submission
+
+    advisory_lock("sf", "digest", organization_id, teacher_id)
+    if (
+        not force
+        and Submission.objects.filter(
+            _teacher_q(teacher_id),
+            organization_id=organization_id,
+            teacher_notified_at__gte=timezone.now() - digest_interval(),
+        ).exists()
+    ):
+        return False
+    teacher = get_user_model().objects.filter(pk=teacher_id, is_active=True).first()
+    if teacher is None:
+        return False
+    rows = list(_pending_digest_rows(organization_id, teacher_id).select_for_update(of=("self",)))
+    return bool(rows) and _send_digest(teacher, organization_id, rows)
 
 
 def send_submission_digests(*, organization_id=None, teacher_id=None, force: bool = True) -> int:
-    """Gözləyən göndərişləri müəllimlər üzrə bir bildirişdə toplayır → göndərilən bildiriş sayı.
+    """Create one inbox entry per organization and teacher in the caller's visibility scope."""
+    recipients = pending_digest_recipients(organization_id, teacher_id)
+    return sum(_deliver_digest(org, teacher, force=force) for org, teacher in recipients)
 
-    ``force=False`` — müəllimə son ``digest_interval()`` ərzində xülasə gedibsə ötürülür.
-    """
-    user_model = get_user_model()
-    grouped = defaultdict(list)
-    for row in _pending_digest_rows(organization_id, teacher_id):
-        grouped[_recipient_id(row)].append(row)
-    sent = 0
-    cutoff = timezone.now() - digest_interval()
-    from ..models import Submission
 
-    for recipient_id, rows in grouped.items():
-        if recipient_id is None:
-            continue
-        if not force and Submission.objects.filter(_teacher_q(recipient_id), teacher_notified_at__gte=cutoff).exists():
-            continue
-        teacher = user_model.objects.filter(pk=recipient_id, is_active=True).first()
-        if teacher is None:
-            continue
-        _send_digest(teacher, rows)
-        sent += 1
+@transaction.atomic
+def deliver_pending_digest(organization_id, teacher_id, *, force=False):
+    """Run a committed submission or a trusted worker candidate in its own tenant context."""
+    from core.rls import apply_rls_request_context
+
+    apply_rls_request_context(user_id=teacher_id, org_id=organization_id, local=True)
+    return _deliver_digest(organization_id, teacher_id, force=force)
+
+
+def run_pending_digests(*, force=False):
+    """Deliver periodic or operator-requested digests independently for each tenant and recipient."""
+    from core.rls import bypass_rls
+    from core.rls_pooling import rls_worker_atomic
+
+    # Discover keys only. Read submission content and write each inbox in its own tenant transaction.
+    with rls_worker_atomic(), bypass_rls():
+        recipients = pending_digest_recipients()
+    sent = failed = 0
+    for organization_id, teacher_id in recipients:
+        try:
+            sent += deliver_pending_digest(organization_id, teacher_id, force=force)
+        except Exception as exc:
+            # One unavailable inbox must not starve other tenants. Its rows remain pending for the next run.
+            logger.error("subject_folder digest transaction failed (%s)", type(exc).__name__)
+            failed += 1
+    if failed:
+        raise RuntimeError(f"Failed to commit {failed} subject folder digest(s)")
     return sent
 
 
@@ -251,7 +304,8 @@ def submission_received(submission) -> None:
 
     def _run():
         try:
-            send_submission_digests(organization_id=organization_id, teacher_id=teacher_id, force=False)
+            if teacher_id is not None:
+                deliver_pending_digest(organization_id, teacher_id)
         except Exception:  # pragma: no cover — bildiriş göndərişi bloklamır
             logger.exception("subject_folder teacher digest failed")
 

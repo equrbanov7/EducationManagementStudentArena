@@ -154,3 +154,28 @@ test("re-init does not add a second toggle; disabled select disables the toggle"
     assert.ok(p.toggle.classList.contains("is-placeholder"));
     p.window.close();
 });
+
+test("empty select names its disabled button; adding a choice preserves the native label and hint", () => {
+    const p = page('<label for="term">Semestr</label><span id="term-hint">Tədris dövrü</span>' +
+        '<select id="term" data-bootstrap-select aria-describedby="term-hint"></select>');
+    const doc = p.window.document;
+    const names = () => p.toggle.getAttribute("aria-labelledby").split(" ").map(id => doc.getElementById(id).textContent);
+    assert.equal(p.toggle.disabled, true);
+    assert.deepEqual(names(), ["Semestr", "Seçim üçün variant yoxdur"]);
+    assert.equal(p.toggle.getAttribute("aria-describedby"), "term-hint");
+    p.select.add(new p.window.Option("Payız", "fall"));
+    p.window.EMSBootstrapSelect.refresh(p.select);
+    assert.equal(p.toggle.disabled, false);
+    assert.deepEqual(names(), ["Semestr", "Payız"]);
+    p.select.setAttribute("aria-labelledby", "term-hint");
+    p.window.EMSBootstrapSelect.refresh(p.select);
+    assert.deepEqual(names(), ["Tədris dövrü", "Payız"]);
+    p.window.close();
+});
+
+test("an empty remote search can still be opened and has a meaningful name", () => {
+    const p = page('<select data-bootstrap-select data-live-search="true" data-live-search-url="/choices/" aria-label="Kurs"></select>');
+    assert.equal(p.toggle.disabled, false);
+    assert.equal(p.toggle.getAttribute("aria-label"), "Kurs Axtar…");
+    p.window.close();
+});

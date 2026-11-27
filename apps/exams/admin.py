@@ -27,13 +27,18 @@ from .models import (
 # --- Exam related admin registrations ---
 
 
-class ExamQuestionOptionInline(admin.TabularInline):
+class QuestionTableInline(admin.TabularInline):
+    class Media:
+        css = {"all": ("exams/css/admin_question_inline.css",)}
+
+
+class ExamQuestionOptionInline(QuestionTableInline):
     model = ExamQuestionOption
     extra = 4
     can_delete = True
 
 
-class CodingTestCaseInline(admin.TabularInline):
+class CodingTestCaseInline(QuestionTableInline):
     model = CodingTestCase
     extra = 2
     fields = ("visibility", "input_data", "expected_output", "point_value", "order")

@@ -79,14 +79,14 @@ class LabAssignmentReassignmentTest(TestCase):
         with self.assertRaises(PermissionDenied):
             LabAssignment.get_or_create_for_student(self.lab, self.student)
 
-    def test_get_or_create_refreshes_assignment_even_when_submission_exists(self):
+    def test_get_or_create_preserves_questions_after_submission(self):
         block = LabBlock.objects.create(lab=self.lab, title="First", order=1)
         q1 = LabQuestion.objects.create(block=block, question_number=1, question_text="Q1")
 
         assignment = LabAssignment.get_or_create_for_student(self.lab, self.student)
         LabSubmission.objects.create(assignment=assignment, status="submitted", attempt_number=1)
 
-        q2 = LabQuestion.objects.create(block=block, question_number=2, question_text="Q2")
+        LabQuestion.objects.create(block=block, question_number=2, question_text="Q2")
         assignment = LabAssignment.get_or_create_for_student(self.lab, self.student)
 
-        self.assertEqual(set(assignment.assigned_questions.values_list("id", flat=True)), {q1.id, q2.id})
+        self.assertEqual(set(assignment.assigned_questions.values_list("id", flat=True)), {q1.id})

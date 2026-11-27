@@ -348,7 +348,9 @@ def journal_detail(request, offering_id):
         from apps.registrar.correction_views import build_correction_context
 
         context.update(build_correction_context(offering, request))
-    context.update(journal_activation.strip_context(offering, context))  # «Bu günün cədvəl dərsləri» (UNEC P1-1)
+    context.update(
+        journal_activation.strip_context(offering, context, scope=share_scope)
+    )  # «Bu günün cədvəl dərsləri» (UNEC P1-1)
     from apps.registrar import subject_exempt  # «Fəndən azad et» + «Azad edilənlər» (sahib 2026-10-15)
 
     context.update(subject_exempt.page_context(request.user, offering))

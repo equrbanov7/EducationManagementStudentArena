@@ -122442,6 +122442,51 @@ msgid "Əsas sənəd (sertifikat, kollec arayışı, transkript və ya əmr)"
 msgstr ""
 "Основной документ (сертификат, справка колледжа, транскрипт или приказ)"
 
+msgctxt "registrar.journal_lessons"
+msgid ""
+"Bu dərs saatı tutulub. Jurnalda uyğun sütunu özünüz seçin və ya başqa dərs "
+"saatı seçin."
+msgstr ""
+"Это время занятия уже занято. Выберите подходящий столбец в журнале или "
+"другое время занятия."
+
+msgctxt "labs.view.error"
+msgid "Invalid lab answer."
+msgstr "Недопустимый ответ на лабораторное задание."
+
+msgctxt "labs.view.error"
+msgid "This attempt is no longer current. Reload the lab to continue."
+msgstr ""
+"Эта попытка больше не актуальна. Чтобы продолжить, обновите страницу "
+"лабораторной работы."
+
+msgctxt "labs.view.error"
+msgid ""
+"This item contains a question with student answers and cannot be deleted."
+msgstr ""
+"Вопрос с ответом студента и блок, содержащий этот вопрос, удалить нельзя."
+
+msgid "Yenidən cəhd ver"
+msgstr "Разрешить ещё одну попытку"
+
+msgctxt "exams.final_center.error"
+msgid "Tələbənin davam edən cəhdi var."
+msgstr "У студента уже есть незавершённая попытка."
+
+msgctxt "registrar.language_cohort"
+msgid "Səviyyə qrupunun siyahısını idarə et"
+msgstr "Управление списком группы по уровню языка"
+
+msgctxt "labs.view.error"
+msgid "The assigned questions have changed. Reload the lab before submitting."
+msgstr ""
+"Назначенные вопросы изменились. Обновите страницу лабораторной работы перед "
+"сдачей."
+
+msgid "Əlaqə forması yeniləndi. Mesajınızı yoxlayıb yenidən göndərin."
+msgstr ""
+"Форма обратной связи обновлена. Проверьте сообщение и отправьте его ещё раз."
+
 msgctxt "accounts.groups"
 msgid "Bərpa olunacağı qrup"
 msgstr "Группа восстановления"

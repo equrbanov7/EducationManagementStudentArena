@@ -22,6 +22,8 @@ from core.constants import AcademicPeriodType, OrganizationType, OrgUnitType, Ro
 from core.models import ActiveManager, OrderedModel, TimeStampedModel, UUIDModel
 
 from .holiday_models import AcademicHoliday, HolidayKind  # noqa: F401  (bayram təqvimi; 600-sətir tavanı)
+from .name_matching import registry_name_constraint
+from .role_queryset import RoleQuerySet
 from .semester_meta import SemesterLockMixin  # noqa: F401  (ekran 07 kilid qatı)
 from .settings_store import ManagedSettingsSaveMixin  # save() törəmə settings açarlarını əzmir
 
@@ -212,10 +214,7 @@ class Organization(ManagedSettingsSaveMixin, UUIDModel, TimeStampedModel):
 
 
 class OrgUnit(UUIDModel, TimeStampedModel, OrderedModel):
-    """
-    Represents a unit within an organization (faculty, department, class, etc.).
-    Supports hierarchical structure with materialized path.
-    """
+    """An organizational unit in a materialized-path hierarchy."""
 
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name="units")
     parent = models.ForeignKey(
@@ -248,6 +247,7 @@ class OrgUnit(UUIDModel, TimeStampedModel, OrderedModel):
     class Meta:
         ordering = ["organization", "path", "order"]
         unique_together = [["organization", "slug"]]
+        constraints = [registry_name_constraint()]
         verbose_name = pgettext_lazy("organizations.model.org_unit.meta", "singular")
         verbose_name_plural = pgettext_lazy("organizations.model.org_unit.meta", "plural")
         indexes = [
@@ -501,7 +501,7 @@ class Role(UUIDModel, TimeStampedModel):
     is_system = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True, db_index=True)
 
-    objects = models.Manager()
+    objects = RoleQuerySet.as_manager()
     active = ActiveManager()
 
     class Meta:

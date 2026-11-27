@@ -56,6 +56,7 @@ DOCUMENT_VERIFY_BASE_URL = (os.getenv("DOCUMENT_VERIFY_BASE_URL") or "").strip()
 #   e-poçt altlığında həmin sətir/blok gizlənir.
 CONTACT_NOTIFY_EMAIL = (os.getenv("CONTACT_NOTIFY_EMAIL") or "").strip()
 CONTACT_SUPPORT_EMAIL = (os.getenv("CONTACT_SUPPORT_EMAIL") or "").strip()
+CONTACT_WHATSAPP_NUMBER = (os.getenv("CONTACT_WHATSAPP_NUMBER") or "").strip()
 CONTACT_PUBLIC_EMAIL = (os.getenv("CONTACT_PUBLIC_EMAIL") or "").strip()
 
 # Trial-exam ("sınaq imtahanı") request submissions are emailed here.
