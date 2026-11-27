@@ -249,6 +249,10 @@
 #   reinstate_part_time_graduates_20261115 — sahib 2026-11-15: köçürmədə səhvən «Məzun» (MZN-SINX-2026) edilmiş qiyabi
 #       bakalavrlar (qəbul 2021+) rəsmi «Bərpa» əmri ilə eyni qrupa qaytarılır, giriş açılır, cari jurnallara salınır.
 #       Defolt dry-run; `ptgrad-…` + apply geri qaytarır. Loga saylar və qrup adları (`pt_grad:`).
+#   reassign_dean_office_laborants_20261127 — sahib 2026-11-27: fakültə / dekanlıq bölməsinə bağlı AKTİV «Laborant»
+#       (lab_assistant) üzvlükləri → «Dekanlıq laborantı» (dean_office_assistant); kafedra laborantları toxunulmur.
+#       Defolt dry-run; apply bir tranzaksiyada, hər sətir audit. Loga bölmə adı + üzvlük id + saylar (ad YOX, --names
+#       verilmir — repo açıqdır).
 #   reopen_reinstated_student_access_20261127 — 2026-11-27: «Bərpa» əmri verilib, girişi arxivdə qalmış tələbələr
 #       (təşkilatsız profil) — giriş rəsmi bərpa səthi ilə açılır (sübut = həmin əmr). Defolt dry-run; `reopen-…` +
 #       apply geri qaytarır (yenidən arxiv). Loga YALNIZ saylar (`reopen_access:`).
@@ -635,6 +639,7 @@ on:
           - move_merged_fin_20261115
           - reinstate_part_time_graduates_20261115
           - reopen_reinstated_student_access_20261127
+          - reassign_dean_office_laborants_20261127
           - audit_exam_results_20261116
           - audit_language_business_grading_20261122
           - place_midterm_takers_20261116
@@ -1880,6 +1885,10 @@ jobs:
               fi
               # create_missing=true → qəbul ili bilinməyən (1950) qiyabilər də (sahib 2026-11-15 «Restore them»).
               test "$CREATE_MISSING" != "true" || args+=(--include-unknown-year)
+              ;;
+            reassign_dean_office_laborants_20261127)
+              # Sahib 2026-11-27: dekanlıq laborantları → yeni rol. Aktor yoxdur (audit sistem sətri); --names HEÇ VAXT.
+              args=(--org "$ORG")
               ;;
             reopen_reinstated_student_access_20261127)
               # 2026-11-27: bərpa əmri verilib, girişi arxivdə qalmış tələbələr. batch = reopen-… (undo, apply) və ya boş.
@@ -3164,6 +3173,17 @@ jobs:
             # Loga YALNIZ «pt_grad:» sətirləri (saylar, qrup adları, paket id — tələbə adı yoxdur) və rədd kodu.
             docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
             grep -E '^pt_grad: [a-z_]+=[^[:cntrl:]]{0,4000}$' "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
+            cat "$RUNNER_TEMP/summary.log"
+            if [ "${status:-0}" != 0 ]; then
+              grep -Eo 'CommandError: [a-z_0-9]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
+              rm -f "$RUNNER_TEMP/out.log"
+              exit "$status"
+            fi
+            rm -f "$RUNNER_TEMP/out.log"
+          elif [ "$COMMAND" = "reassign_dean_office_laborants_20261127" ]; then
+            # Loga YALNIZ «dean_office_laborants:» sətirləri (rejim, bölmə adı + üzvlük id, saylar) və rədd kodu.
+            docker exec -i "$APP_CONTAINER" python manage.py "$COMMAND" "${args[@]}" > "$RUNNER_TEMP/out.log" 2>&1 || status=$?
+            grep -E "^dean_office_laborants: (mode=(apply|dry_run)|(switch|reactivate) membership=[0-9a-f-]{36} unit=('[^'\"]{1,160}'|\"[^'\"]{1,160}\")|[a-z_]+=[0-9]+( [a-z_]+=[0-9]+)*)$" "$RUNNER_TEMP/out.log" > "$RUNNER_TEMP/summary.log" || true
             cat "$RUNNER_TEMP/summary.log"
             if [ "${status:-0}" != 0 ]; then
               grep -Eo 'CommandError: [a-z_0-9]+' "$RUNNER_TEMP/out.log" | head -n 1 || true
