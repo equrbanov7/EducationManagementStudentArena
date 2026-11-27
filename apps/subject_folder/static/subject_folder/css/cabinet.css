@@ -62,9 +62,12 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
+    height: 100%;
 }
 
+/* Sahib 2026-11-28: başlıq boş yeri tutur — kartın alt hissəsi (say + «Aç») bir sırada eyni hündürlükdə qalır. */
 .sfc-card__head {
+    flex: 1 1 auto;
     align-items: flex-start;
     gap: var(--ems-sp-3);
 }
@@ -75,6 +78,47 @@
 
 .sfc-card__title {
     overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+}
+
+.sfc-card__titles .sfc-eyebrow {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+}
+
+/* Kafedra siyahısı: material sayı solda, «Aç» sağda — bir sətir. */
+.sfc-card__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ems-sp-3);
+}
+
+.sfc-count {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ems-sp-2);
+    padding: 6px 12px;
+    border-radius: var(--ems-r-pill);
+    background: var(--ems-primary-50, var(--ems-neutral-50));
+    color: var(--ems-primary-700);
+    font-size: var(--ems-fs-sm);
+    font-weight: 600;
+}
+
+.sfc-count strong {
+    font-size: var(--ems-fs-md, 1rem);
+    font-weight: 800;
+}
+
+.sfc-count--empty {
+    background: var(--ems-neutral-50);
+    color: var(--ems-neutral-500);
 }
 
 .sfc-card__title a {

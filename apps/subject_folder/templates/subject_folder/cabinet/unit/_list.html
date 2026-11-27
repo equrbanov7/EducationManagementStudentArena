@@ -10,18 +10,15 @@
         <li class="ems-card sfc-card">
             <div class="ems-card__head sfc-card__head">
                 <div class="sfc-card__titles">
-                    <p class="sfc-eyebrow">{{ row.folder.subject.name }}</p>
-                    <h2 class="ems-card__title sfc-card__title"><a href="{{ row.url }}">{{ row.folder.title }}</a></h2>
+                    <p class="sfc-eyebrow" title="{{ row.folder.subject.name }}">{{ row.folder.subject.name }}</p>
+                    <h2 class="ems-card__title sfc-card__title" title="{{ row.folder.title }}"><a href="{{ row.url }}">{{ row.folder.title }}</a></h2>
                     <p class="ems-card__sub">{{ row.teacher }} · {{ row.period_label }}</p>
                 </div>
             </div>
-            <div class="ems-card__body">
-                <dl class="sfc-stats">
-                    <div class="sfc-stats__item"><dt>{% trans "Material" context "subject_folder.ui" %}</dt><dd>{{ row.materials }}</dd></div>
-                </dl>
-                <div class="sfc-card__foot">
-                    <a class="ems-btn ems-btn--sm sfc-card__open" href="{{ row.url }}">{% trans "Aç" context "subject_folder.ui" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
-                </div>
+            {# Sahib 2026-11-28: say və «Aç» bir sətirdə, kartın altında — bütün kartlarda eyni hündürlükdə. #}
+            <div class="ems-card__body sfc-card__row">
+                <span class="sfc-count{% if not row.materials %} sfc-count--empty{% endif %}"><i class="fas fa-file-lines" aria-hidden="true"></i> <strong>{{ row.materials }}</strong> {% trans "Material" context "subject_folder.ui" %}</span>
+                <a class="ems-btn ems-btn--sm sfc-card__open" href="{{ row.url }}">{% trans "Aç" context "subject_folder.ui" %} <i class="fas fa-arrow-right" aria-hidden="true"></i></a>
             </div>
         </li>
         {% endfor %}
