@@ -229,6 +229,9 @@ def _row(record, *, ancestors, period, movement_counts, subgroups=None) -> dict:
         "fin": str(getattr(getattr(student, "profile", None), "fin", "") or ""),
         "program_label": program_display_label(record.program.name, record.program.display_code),
         "group_name": str(getattr(group, "name", "") or ""),
+        # «Hərəkət əmri» → «Bərpa»: köhnə qrup aktivdirsə hədəf seçicisinin defoltudur (sahib 2026-11-27).
+        "group_id": str(record.group_id or ""),
+        "group_active": bool(getattr(group, "is_active", False)),
         # Cari semestrdə «alt qrupdan əlavə» olunduğu jurnalların qrupları (sahib 2026-10-25: «görünsün ki alt qrupdur»).
         "subgroup_names": (subgroups or {}).get(str(record.pk), []),
         "sector": sector,

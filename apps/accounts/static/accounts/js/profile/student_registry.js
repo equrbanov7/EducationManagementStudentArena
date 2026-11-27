@@ -253,6 +253,15 @@
                 box.hidden = !needs[name];
             }
         });
+        // Bərpa (sahib 2026-11-27): «hansı qrupa bərpa olur» seçilir — ipucu görünür, defolt köhnə qrup (aktivdirsə).
+        var reinstate = key === "reinstatement";
+        var reinstateHint = form.querySelector("[data-sr-reinstate-hint]");
+        if (reinstateHint) {
+            reinstateHint.hidden = !reinstate;
+        }
+        if (reinstate) {
+            applyDefaultGroup(form);
+        }
         // Dondurma səbəbi (sahib 2026-11-04): yalnız görünəndə məcburidir — gizli sahə təsdiqi bloklamasın.
         var leaveSelect = form.querySelector("[data-leave-reason-select]");
         if (leaveSelect) {
@@ -264,6 +273,29 @@
             if (window.EMSLeaveReason) {
                 window.EMSLeaveReason.sync(leaveSelect);
             }
+        }
+    }
+
+    /* Bərpa əmrinin hədəf qrupu: köhnə qrup aktivdirsə və seçici boşdursa onu seçir (variant yoxdursa əlavə edir —
+       ilkin siyahı 50 qrupla məhduddur). Server hədəfi əhatədə yenidən yoxlayır. */
+    function applyDefaultGroup(form) {
+        var select = form.querySelector("[data-sr-group-select]");
+        var id = form.getAttribute("data-sr-default-group") || "";
+        if (!select || !id || select.value) {
+            return;
+        }
+        var exists = Array.prototype.some.call(select.options, function (option) {
+            return option.value === id;
+        });
+        if (!exists) {
+            var option = document.createElement("option");
+            option.value = id;
+            option.textContent = form.getAttribute("data-sr-default-group-name") || id;
+            select.appendChild(option);
+        }
+        select.value = id;
+        if (window.EMSBootstrapSelect) {
+            window.EMSBootstrapSelect.refresh(select);
         }
     }
 
@@ -305,6 +337,10 @@
                 // Gec gələn ilkin siyahı müəllimin server axtarışını və seçimini əzməsin.
                 if (!groupSelect || !groupSelect._emsRemoteSearchStarted) {
                     fillSelect(groupSelect, payload.results || [], text);
+                    var checked = form.querySelector("[data-sr-kind]:checked");
+                    if (checked && checked.value === "reinstatement") {
+                        applyDefaultGroup(form);
+                    }
                 }
             })
             .catch(function () {
@@ -334,6 +370,8 @@
         if (hidden) {
             hidden.value = btn.getAttribute("data-sr-move");
         }
+        form.setAttribute("data-sr-default-group", btn.getAttribute("data-sr-group-id") || "");
+        form.setAttribute("data-sr-default-group-name", btn.getAttribute("data-sr-group") || "");
         var target = form.querySelector("[data-sr-target-name]");
         if (target) {
             target.textContent =

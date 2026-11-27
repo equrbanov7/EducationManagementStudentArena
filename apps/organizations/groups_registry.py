@@ -46,6 +46,9 @@ PERM_MANAGE = "unit.group_manage"
 #: Tələbə hərəkəti (akademik məzuniyyət / xaric) — `apps.accounts.services.people`
 #: ilə EYNİ açar; qrup çekmecəsindəki düymələr buna görə görünür/gizlənir.
 PERM_STUDENT_MOVEMENT = "student.movement"
+#: Hərəkətin İCRA açarı (akademik qeydə toxunmaq) — hədəf qrupun və tələbənin YAZI əhatəsi bununla
+#: (``accounts.services.people.academic.scoped_groups_qs`` ilə eyni; sahib 2026-11-27, dekanlıq).
+PERM_MANAGE_ACADEMIC = "people.manage_academic"
 #: QA-2 F-03 (2026-10-17): qrupun TƏLƏBƏ SİYAHISI (ad, istifadəçi adı, ixtisas) və «Fərdi tədris planı» DOCX-u
 #: yalnız tələbə tərəfi açarlarından birini daşıyana. ``unit.view`` təkcə STRUKTUR oxusudur — HR (heyət idxalı)
 #: onu daşıyır, tələbə kataloqu isə HR-a bağlıdır (rol auditi B6). Qrup idarəsi / tələbə hərəkəti də sayılır:
@@ -128,6 +131,29 @@ def can_manage_groups(request) -> bool:
 
 def can_move_students(request) -> bool:
     return _has_org_permission(request, PERM_STUDENT_MOVEMENT)
+
+
+def movement_scope(request, organization):
+    """Tələbə hərəkətinin YAZI əhatəsi — `people.manage_academic` daşıyan üzvlükdən (fakültəyə genişlənmir)."""
+    return get_permission_scope(request.user, organization, PERM_MANAGE_ACADEMIC, request=request)
+
+
+def movement_group_options(request, organization) -> list:
+    """Köçürmə / BƏRPA dialoqunun hədəf qrupları: hərəkət əhatəsindəki AKTİV qruplar (server də yoxlayır).
+
+    Əvvəl seçici OXU əhatəsindən (`unit.view`, fakültəyə genişlənən) qurulurdu — əhatədən kənar qrup seçiləndə
+    server 404 verirdi. Sahib 2026-11-27: bərpada hədəf qrup seçilir (köhnə qrup arxivdədirsə də).
+    """
+    if not (can_move_students(request) and _has_org_permission(request, PERM_MANAGE_ACADEMIC)):
+        return []
+    scope = movement_scope(request, organization)
+    return [
+        {"value": str(unit_id), "label": name}
+        for unit_id, name in _visible_units_queryset(organization, scope)
+        .filter(unit_type="group")
+        .order_by("name")
+        .values_list("id", "name")[:1000]
+    ]
 
 
 def can_view_group_students(request) -> bool:
@@ -480,6 +506,8 @@ def build_groups_registry(request, organization) -> dict:
             .order_by("name")
             .values_list("id", "name")[:1000]
         ],
+        # Bərpa / köçürmə əmrinin hədəf qrupları — HƏRƏKƏT əhatəsi ilə (sahib 2026-11-27).
+        "movement_group_options": movement_group_options(request, organization),
         "can_manage": can_manage,
         "can_move_students": can_move_students(request),
         "can_view_students": can_view_students,
@@ -508,6 +536,8 @@ __all__ = [
     "group_scope",
     "language_form_options",
     "language_options",
+    "movement_group_options",
+    "movement_scope",
     "scoped_filter_options",
     "student_record_scope_q",
 ]

@@ -30,12 +30,32 @@ audit + `StudentMovement` sətrində qalır (silinmir).{% endcomment %}
                 data-live-search-placeholder="{% trans 'Qrup adı ilə axtar…' context 'accounts.groups' %}"
                 data-live-search-empty="{% trans 'Uyğun qrup tapılmadı' context 'accounts.groups' %}">
             <option value="">{% trans "Seçin" context "accounts.groups" %}</option>
-            {% for option in groups_registry_section.group_options %}
+            {% for option in groups_registry_section.movement_group_options %}
             <option value="{{ option.value }}">{{ option.label }}</option>
             {% endfor %}
         </select>
     </div>
     <p class="ems-field__hint">{% trans "Yalnız sizin əhatənizdəki aktiv qruplar. Köçürmə cari tədris dövründə aparılır." context "accounts.groups" %}</p>
+</div>
+{% endif %}
+{% if movement_reinstate_target %}
+{% comment %}Sahib 2026-11-27: «köhnə qrup tələbəsini bərpa edərkən hansı qrupa bərpa olur, onu seçmək olsun».
+Defolt (JS prefill `target_group`) — çekmecədə açıq qrup AKTİVDİRSƏ o; arxiv qrupun tələbəsi üçün boş qalır və
+seçilməlidir. Tələbə seçilən qrupa rəsmi köçürmə xidməti ilə düşür, cari semestr jurnallarına avtomatik qoşulur.{% endcomment %}
+<div class="ems-field" data-tof-reinstate-target>
+    <label class="ems-field__label" for="{{ reason_id }}-target">{% trans "Bərpa olunacağı qrup" context "accounts.groups" %} <span class="ems-field__req" aria-hidden="true">*</span></label>
+    <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="ems-select bootstrap-single-select__native" id="{{ reason_id }}-target" name="target_group" data-live-search="true"
+                data-bootstrap-select data-ems-required data-tof-reinstate-group
+                data-live-search-placeholder="{% trans 'Qrup adı ilə axtar…' context 'accounts.groups' %}"
+                data-live-search-empty="{% trans 'Uyğun qrup tapılmadı' context 'accounts.groups' %}">
+            <option value="">{% trans "Seçin" context "accounts.groups" %}</option>
+            {% for option in groups_registry_section.movement_group_options %}
+            <option value="{{ option.value }}">{{ option.label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <p class="ems-field__hint">{% trans "Defolt — tələbənin köhnə qrupu (aktivdirsə). Köhnə qrup arxivdədirsə və ya tələbə başqa qrupa qayıdırsa, sizin əhatənizdəki aktiv qruplardan birini seçin: tələbə həmin qrupa köçürülür və onun cari semestr jurnallarına qoşulur." context "accounts.groups" %}</p>
 </div>
 {% endif %}
 {% if movement_until %}

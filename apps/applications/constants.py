@@ -241,7 +241,8 @@ DEFAULT_UNIT_SEED = (
         "code": "dekan",
         "name": "Dekanlıq",
         "note": "tələbə hərəkəti, akademik məsələlər",
-        "handler_role_names": ["dean", "vice_dean", "program_coordinator", "tutor"],
+        # 2026-11-27: «Dekanlıq laborantı» da emalçıdır (mövcud: organizations/0089).
+        "handler_role_names": ["dean", "vice_dean", "program_coordinator", "tutor", "dean_office_assistant"],
         "resolve_by": ResolveBy.SPECIALTY.value,
         "requires_scope": True,
         "default_sla_days": 5,

@@ -212,6 +212,8 @@ ROLE_FILTER_MAP = {
         # Əcnəbi tələbələrlə iş şöbəsi (sahib 2026-11-25) — «Əməkdaşlar» süzgəcində HƏDƏF.
         "foreign_students_head",
         "foreign_students_staff",
+        # Dekanlıq laborantı (sahib 2026-11-27).
+        "dean_office_assistant",
     },
 }
 

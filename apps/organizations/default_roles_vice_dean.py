@@ -8,10 +8,14 @@ DƏST: dekanın OXU və gündəlik əməliyyat səthi, QƏRAR açarları OLMADAN
 Yəni müavin fakültəni idarə etməyə kömək edir, amma:
 
 * `member.invite` / `member.edit` — YOXDUR (heyət qərarı dekanındır);
-* `people.manage_status` / `people.manage_academic` — YOXDUR (tələbə statusu
-  rəsmi əmrdir);
+* `people.manage_status` — YOXDUR (hesabın girişini dayandırmaq RİM işidir);
 * `journal.reassign` — YOXDUR (fənnin təhvili dekan qərarıdır);
 * `unit.edit` — YOXDUR (struktur dəyişikliyi).
+
+2026-11-27 (sahib: «dekanlıqda dondurma, bərpa, xaric və s. edə bilsin»): tələbə hərəkəti əmri
+(`student.movement` + `people.manage_academic` + `student.registry_view`) və dekanın gündəlik «Qruplar»
+açarı `unit.group_manage` ``default_roles_dean_office.apply_dean_office_grants`` ilə verilir (mövcud: 0089).
+Bu modul «Dekanlıq laborantı» rolunu da (``DEAN_OFFICE_ROLES``) universitet kataloquna ötürür.
 
 ⚠️ SƏVİYYƏ 75 (dekan 80-dir, `chair_head` 70): müavin kafedra müdirindən
 yuxarı, dekandan aşağı olmalıdır ki, rol-təyinat iyerarxiyası düzgün işləsin.
@@ -20,6 +24,7 @@ yuxarı, dekandan aşağı olmalıdır ki, rol-təyinat iyerarxiyası düzgün i
 
 from core.constants import RoleScopeType
 
+from .default_roles_dean_office import DEAN_OFFICE_ROLES
 from .default_roles_shared import PEOPLE_DIRECTORY_READ
 
 _VICE_DEAN_PERMISSIONS = [
@@ -52,3 +57,5 @@ VICE_DEAN_ROLES = [
         "description": "Vice dean — faculty read/day-to-day surface without decision keys",
     },
 ]
+
+__all__ = ["DEAN_OFFICE_ROLES", "VICE_DEAN_ROLES"]
