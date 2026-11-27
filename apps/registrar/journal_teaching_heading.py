@@ -125,9 +125,7 @@ def _without_co_teachers(offering, lessons, plan, actor, scope=None):
     foreign = [lesson for lesson in lessons if lesson.kind in co_kinds.get(lesson.instructor_id, ())]
     marked = _lessons_with_own_marks(foreign, getattr(scope, "enrollment_ids", None))
     return [
-        lesson
-        for lesson in lessons
-        if lesson.kind not in co_kinds.get(lesson.instructor_id, ()) or lesson.pk in marked
+        lesson for lesson in lessons if lesson.kind not in co_kinds.get(lesson.instructor_id, ()) or lesson.pk in marked
     ]
 
 
