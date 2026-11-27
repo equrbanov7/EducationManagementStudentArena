@@ -148,6 +148,13 @@ def _policy_block(policy, model, ids) -> str:
     return ""
 
 
+def _students_within(source, target) -> bool:
+    Enrollment = _model("Enrollment")
+    own = set(Enrollment.objects.filter(offering=source, status="enrolled").values_list("student_id", flat=True))
+    held = set(Enrollment.objects.filter(offering=target, status="enrolled").values_list("student_id", flat=True))
+    return bool(own) and own <= held
+
+
 def retired_source_ids(organization, offering_ids) -> set:
     """Bu modulla passiv edilmiş (və geri qaytarılmamış) W jurnalları — ``merge_subjects`` onları arxiv kartda saxlayır."""
     ids = [str(pk) for pk in offering_ids]
@@ -202,7 +209,10 @@ class JournalMerge(ScoreSteps):
         source, target = rows.get(str(pair.get("source"))), rows.get(str(pair.get("target")))
         if source is None or target is None:
             raise Blocked("pair_missing")
-        if source.pk == target.pk or (source.period_id, source.group_id) != (target.period_id, target.group_id):
+        if source.pk == target.pk or source.period_id != target.period_id:
+            raise Blocked("pair_invalid")
+        # 2026-11-27: başqa qrupun (alt qrup) jurnalı — yalnız onun HƏR aktiv tələbəsi hədəfdə artıq aktivdirsə.
+        if source.group_id != target.group_id and not (pair.get("cross_group") and _students_within(source, target)):
             raise Blocked("pair_invalid")
         if not source.is_active:
             raise Blocked("already_merged")

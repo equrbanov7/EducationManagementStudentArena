@@ -45,7 +45,7 @@ from core.rls import apply_rls_request_context, bypass_rls
 from core.rls_pooling import rls_worker_atomic
 
 PREFIX = "twin_merge:"
-OPS = (*duplicates.OPS, "takers", "similar")
+OPS = (*duplicates.OPS, "takers", "similar", "student_merge")
 #: Yalnız oxuyan hesabatlar (apply qəbul etmir).
 REPORTS = ("report", "student_pairs")
 
@@ -158,9 +158,20 @@ class Command(BaseCommand):
                     merged = []
                     if only == "similar":
                         self._similar(organization, actor, counts, batch, lines)
-                    elif only == "student_pairs":
+                    elif only in ("student_pairs", "student_merge"):
                         similar.student_pairs(
-                            organization, duplicates.current_period(organization), counts=counts, lines=lines
+                            organization,
+                            duplicates.current_period(organization),
+                            counts=counts,
+                            lines=lines,
+                            actor=actor,
+                            batch=batch,
+                            merge=only == "student_merge",
+                            audit={
+                                "kind": duplicates.KIND,
+                                "reason": duplicates.REASON,
+                                "resource": duplicates.RESOURCE,
+                            },
                         )
                     elif registrar_ops:
                         duplicates.run(

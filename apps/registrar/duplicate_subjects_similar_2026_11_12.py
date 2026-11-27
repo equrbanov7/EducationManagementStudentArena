@@ -85,11 +85,8 @@ def similar_kind(left: str, right: str) -> str:
     return ""
 
 
-def student_pairs(organization, period, *, counts, lines) -> None:
-    """YALNIZ OXUYUR (2026-11-27): eyni tələbənin cari dövrdə OXŞAR adlı iki fənn üzrə iki aktiv jurnalı — tələbə
-    kabinetində «eyni fənn iki dəfə». Qrupdan asılı deyil (ana qrup + alt qrup jurnalı da tutulur)."""
-    if period is None:
-        return
+def _student_pair_map(organization, period) -> dict:
+    """``{(offering_a, offering_b): (kind, {tələbə id})}`` — eyni tələbənin oxşar adlı iki aktiv jurnalı."""
     rows = (
         _model("Enrollment")
         ._base_manager.filter(
@@ -101,45 +98,129 @@ def student_pairs(organization, period, *, counts, lines) -> None:
     by_student = defaultdict(list)
     for student_id, offering_id, subject_id, name in rows:
         by_student[student_id].append((offering_id, subject_id, name))
-    pairs = defaultdict(set)
-    kinds = {}
+    pairs = {}
     for student_id, items in by_student.items():
         for index, left in enumerate(items):
             for right in items[index + 1 :]:
                 if left[1] == right[1]:
                     continue
                 kind = similar_kind(left[2], right[2])
-                if not kind:
-                    continue
-                key = tuple(sorted((left[0], right[0]), key=str))
-                pairs[key].add(student_id)
-                kinds[key] = kind
+                if kind:
+                    key = tuple(sorted((left[0], right[0]), key=str))
+                    pairs.setdefault(key, (kind, set()))[1].add(student_id)
+    return pairs
+
+
+def _active_students(offering) -> set:
+    rows = _model("Enrollment")._base_manager.filter(offering=offering, status="enrolled")
+    return set(rows.values_list("student_id", flat=True))
+
+
+def _last_lesson(offering):
+    return (
+        _model("Lesson")
+        ._base_manager.filter(offering=offering)
+        .order_by("-date")
+        .values_list("date", flat=True)
+        .first()
+    )
+
+
+def _student_pair_direction(left, right):
+    """``(source, target)`` və ya ``None``: mənbənin HƏR aktiv tələbəsi hədəfdədir; bərabərdirsə son dərsi olan hədəf."""
+    if left.instructor_id != right.instructor_id:
+        return None
+    a, b = _active_students(left), _active_students(right)
+    if a == b:
+        last_a, last_b = _last_lesson(left), _last_lesson(right)
+        if last_a == last_b:
+            return None
+        if last_a is None or (last_b is not None and last_b > last_a):
+            return left, right
+        return right, left
+    if a < b:
+        return left, right
+    if b < a:
+        return right, left
+    return None
+
+
+def student_pairs(organization, period, *, counts, lines, actor=None, batch="", merge=False, audit=None) -> list:
+    """2026-11-27: eyni tələbənin cari dövrdə OXŞAR adlı iki fənn üzrə iki aktiv jurnalı — tələbə kabinetində «eyni fənn
+    iki dəfə» (qrupdan asılı deyil: ana qrup + alt qrup jurnalı da tutulur). ``merge=False`` — YALNIZ OXUYUR.
+
+    ``merge=True``: müəllim eynidirsə və bir tərəfin bütün aktiv tələbələri o biri tərəfdədirsə (bərabərdirsə — son dərsi
+    olan hədəfdir), kiçik tərəf :class:`.duplicate_journal_merge_2026_11_11.JournalMerge` ilə böyüyünə birləşir (heç bir
+    xana itmir, paket geri qaytarılır); qalan cütlər yalnız hesabatdadır."""
+    if period is None:
+        return []
+    pairs = _student_pair_map(organization, period)
     offerings = {
         row.pk: row
         for row in _model("CourseOffering")
         ._base_manager.filter(pk__in={pk for key in pairs for pk in key})
         .select_related("subject")
     }
-    for number, (key, students) in enumerate(sorted(pairs.items(), key=lambda kv: (-len(kv[1]), str(kv[0]))), 1):
-        counts[f"student_pairs_{kinds[key]}"] += 1
+    merger = JournalMerge(organization=organization, actor=actor, counts=counts, batch=batch) if merge else None
+    merged = []
+    ordered = sorted(pairs.items(), key=lambda kv: (-len(kv[1][1]), str(kv[0])))
+    for number, (key, (kind, students)) in enumerate(ordered, 1):
+        counts[f"student_pairs_{kind}"] += 1
         counts["student_pairs_students"] += len(students)
         left, right = (offerings[pk] for pk in key)
-        lines.append(
-            " ".join(
+        direction = _student_pair_direction(left, right)
+        line = [
+            f"pair={number}",
+            f"kind={kind}",
+            f"students={len(students)}",
+            f"left={left.pk}",
+            f"left_code={(left.subject.code or 'none').lower()}",
+            f"left_group={left.group_id or 'none'}",
+            f"right={right.pk}",
+            f"right_code={(right.subject.code or 'none').lower()}",
+            f"right_group={right.group_id or 'none'}",
+            f"teachers={'same' if left.instructor_id == right.instructor_id else 'differ'}",
+            f"target={direction[1].pk if direction else 'none'}",
+        ]
+        counts["student_pairs_mergeable" if direction else "student_pairs_manual"] += 1
+        if merge and direction:
+            source, target = direction
+            plans = group_plans(target.group_id) if target.group_id else []
+            merger.run(
                 [
-                    f"pair={number}",
-                    f"kind={kinds[key]}",
-                    f"students={len(students)}",
-                    f"left={left.pk}",
-                    f"left_code={(left.subject.code or 'none').lower()}",
-                    f"left_group={left.group_id or 'none'}",
-                    f"right={right.pk}",
-                    f"right_code={(right.subject.code or 'none').lower()}",
-                    f"right_group={right.group_id or 'none'}",
-                    f"teachers={'same' if left.instructor_id == right.instructor_id else 'differ'}",
+                    {
+                        "source": str(source.pk),
+                        "target": str(target.pk),
+                        "reviewed": True,
+                        "cross_group": True,
+                        "curricula": plans,
+                    }
                 ]
             )
+            _index, delta = merger.report[-1]
+            done = bool(delta.get("pairs_merged"))
+            line.append(f"result={'merged' if done else (sorted(delta) or ['not_merged'])[0]}")
+            if done:
+                merged.append({"source": str(source.pk), "target": str(target.pk)})
+        lines.append(" ".join(line))
+    if merge and audit is not None:
+        log_action(
+            AuditAction.UPDATE,
+            user=actor,
+            organization=organization,
+            new_values={"ops": ["similar"], "pairs": len(merged)},
+            changes={
+                "kind": audit["kind"],
+                "batch": batch,
+                "ops": ["similar"],
+                "catalogue_audits": [],
+                "similar": merged,
+            },
+            reason=audit["reason"],
+            resource_type=audit["resource"],
+            resource_id=batch,
         )
+    return merged
 
 
 def group_plans(group_id) -> list:
