@@ -204,6 +204,6 @@ def build_section_titles() -> dict:
         # «Fənn qovluğu» (apps.subject_folder) — sidebar bəndləri ilə eyni mətnlər.
         "subject-folders": pgettext_lazy("profile.sidebar", "Fənn qovluqları"),
         "subject-folder-review": pgettext_lazy("profile.sidebar", "Tapşırıq yoxlaması"),
-        "my-subject-folders": pgettext_lazy("profile.sidebar", "Fənn qovluqlarım"),
+        "my-subject-folders": pgettext_lazy("profile.sidebar", "Dərs materiallarım"),
         "unit-subject-folders": pgettext_lazy("profile.sidebar", "Kafedra materialları"),
     }

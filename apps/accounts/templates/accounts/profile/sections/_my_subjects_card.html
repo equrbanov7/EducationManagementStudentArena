@@ -149,6 +149,12 @@ imtahana buraxılıram? (status badge — rəng + MƏTN, handoff §7) → sillab
                 <i class="fas fa-file-lines" aria-hidden="true"></i> {% trans "Sillabus (təsdiqlənmiş)" context "profile.subjects" %}
             </a>
             {% endif %}
+            {% if row.materials_url %}
+            {% comment %}Sahib 2026-11-28: fənnin «Dərs materialları» (müəllimin qovluğu) — kartdan birbaşa keçid.{% endcomment %}
+            <a class="msx-link" href="{{ row.materials_url }}" data-msx-materials>
+                <i class="fas fa-folder-open" aria-hidden="true"></i> {% trans "Dərs materialları" context "profile.subjects" %}
+            </a>
+            {% endif %}
             {% if row.course %}
             <a class="msx-link" href="{% url 'courses:course_dashboard' row.course.id %}">
                 <i class="fas fa-arrow-right" aria-hidden="true"></i> {% trans "Kurs materialı" context "profile.subjects" %}

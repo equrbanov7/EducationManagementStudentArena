@@ -64,6 +64,8 @@ class Command(BaseCommand):
             try:
                 result = fix_offering_subject(organization=organization, user=actor, apply=options["apply"], **values)
             except OfferingSubjectFixError as exc:
+                if exc.details:
+                    self.stdout.write(PREFIX + " " + " ".join(f"{k}={v}" for k, v in sorted(exc.details.items())))
                 raise CommandError(str(exc)) from None
             except DatabaseError:
                 raise CommandError("offering_subject_fix_database_conflict") from None

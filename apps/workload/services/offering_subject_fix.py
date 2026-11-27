@@ -45,7 +45,11 @@ REASON = "Jurnalın səhv fənn bağı yerində düzəldildi (dərslər, xanalar
 
 
 class OfferingSubjectFixError(ValueError):
-    pass
+    """``str(exc)`` — sabit rədd kodu; ``details`` — yalnız saylar (əmr loga ``açar=say`` kimi yazır)."""
+
+    def __init__(self, code, details=None):
+        super().__init__(code)
+        self.details = dict(details or {})
 
 
 def model(name):
@@ -72,8 +76,8 @@ def protected_hash(offering_id) -> str:
     )
 
 
-def _fail(code):
-    raise OfferingSubjectFixError(code)
+def _fail(code, details=None):
+    raise OfferingSubjectFixError(code, details)
 
 
 def _receipt(organization, offering_id):
@@ -117,8 +121,10 @@ class _Fix:
         )
         # 2026-11-28 (234 İT az «Verilənlər bazası sistemləri»): hədəf fənndə LƏĞV EDİLMİŞ və TAM BOŞ açılış
         # (heç bir bağlı sətir yoxdur) köhnə sinxronun qalığıdır — düzəlişdə silinir. Aktiv və ya datalı → dayan.
-        if any(clash.is_active or not _deletes_only_itself(clash) for clash in clashes):
-            _fail("target_offering_exists")
+        blocking = [clash for clash in clashes if clash.is_active or not _deletes_only_itself(clash)]
+        if blocking:
+            # 2026-11-28: iş logu yalnız saylar göstərir — nəyin mane olduğu (aktivlik + bağlı sətirlərin sayı) ilə.
+            _fail("target_offering_exists", _clash_details(blocking))
         self.phantoms = clashes
         self.phantom_ids = [str(clash.pk) for clash in clashes]
         if model("exams.Exam").objects.filter(journal_offerings=o).exclude(subject_id=self.target.pk).exists():
@@ -329,6 +335,33 @@ class _Fix:
             _fail("row_edit_denied_" + str(exc.code).replace("workload.", "").replace(".", "_"))
         self.counts["row_subject_changed"] += 1
         return old
+
+
+def _clash_details(clashes) -> dict:
+    """Mane olan açılış(lar) — ``clash_count``, ``clash_active`` və silinmə zəncirinin model-model sayları."""
+    from django.db.models.deletion import Collector, ProtectedError, RestrictedError
+
+    details = {"clash_count": len(clashes), "clash_active": sum(1 for clash in clashes if clash.is_active)}
+    for clash in clashes:
+        collector = Collector(using="default")
+        try:
+            collector.collect([clash])
+        except (ProtectedError, RestrictedError) as exc:
+            for obj in getattr(exc, "protected_objects", None) or getattr(exc, "restricted_objects", None) or ():
+                key = "protected_" + obj._meta.label_lower.replace(".", "_")
+                details[key] = details.get(key, 0) + 1
+            continue
+        for queryset in collector.fast_deletes:
+            count = queryset.count()
+            if count:
+                key = "linked_" + queryset.model._meta.label_lower.replace(".", "_")
+                details[key] = details.get(key, 0) + count
+        for model_class, objects in collector.data.items():
+            extra = len({obj.pk for obj in objects} - {clash.pk})
+            if extra:
+                key = "linked_" + model_class._meta.label_lower.replace(".", "_")
+                details[key] = details.get(key, 0) + extra
+    return details
 
 
 def _deletes_only_itself(offering) -> bool:

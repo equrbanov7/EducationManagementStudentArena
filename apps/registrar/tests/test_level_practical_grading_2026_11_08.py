@@ -222,7 +222,7 @@ class LevelSurfacesTests(TestCase):
         self.assertNotIn("(0–30 bal)", dashboard)
         subjects = self.get(self.student, profile + "?section=my-subjects")
         self.assertIn("Xarici dil səviyyə fənləri", subjects)
-        self.assertIn("Aktivlik (praktiki məşğələ)", subjects)
+        self.assertIn("Praktiki məşğələ", subjects)  # sahib 2026-11-28: «Aktivlik» yox
         journal = self.get(self.student, profile + f"?section=my-journal&subject={self.enrollment.pk}")
         self.assertIn("Praktiki məşğələ", journal)
 
