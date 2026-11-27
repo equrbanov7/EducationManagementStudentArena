@@ -49,8 +49,30 @@ def _base(key: str) -> str:
     return key
 
 
+#: Yiyəlik hal şəkilçiləri (qatlanmış: ı/ü → i/u) — «Verilənlər» / «Verilənlərin bazası sistemləri» (2026-11-27).
+GENITIVE_SUFFIXES = ("nin", "nun", "in", "un")
+
+
+def _words(name: str) -> list:
+    return [key for key in (normalized_subject_key(word) for word in str(name or "").split()) if key]
+
+
+def _genitive_pair(left: str, right: str) -> bool:
+    short, long_ = sorted((left, right), key=len)
+    tail = long_[len(short) :]
+    return short.isalpha() and len(short) >= 4 and long_.startswith(short) and tail in GENITIVE_SUFFIXES
+
+
+def _inflection(left: str, right: str) -> bool:
+    """Sözlər eynidir, YALNIZ bir və ya bir neçə söz yiyəlik şəkilçisi ilə fərqlənir (hərf səhvi sayılmır)."""
+    a, b = _words(left), _words(right)
+    if len(a) != len(b) or a == b:
+        return False
+    return all(x == y or _genitive_pair(x, y) for x, y in zip(a, b))
+
+
 def similar_kind(left: str, right: str) -> str:
-    """``same`` / ``qualifier`` və ya ``""`` (oxşar deyil)."""
+    """``same`` / ``qualifier`` / ``inflection`` və ya ``""`` (oxşar deyil)."""
     a, b = normalized_subject_key(left), normalized_subject_key(right)
     if not a or not b:
         return ""
@@ -58,7 +80,66 @@ def similar_kind(left: str, right: str) -> str:
         return "same"
     if _base(a) == _base(b):
         return "qualifier"
+    if _inflection(left, right):
+        return "inflection"
     return ""
+
+
+def student_pairs(organization, period, *, counts, lines) -> None:
+    """YALNIZ OXUYUR (2026-11-27): eyni tələbənin cari dövrdə OXŞAR adlı iki fənn üzrə iki aktiv jurnalı — tələbə
+    kabinetində «eyni fənn iki dəfə». Qrupdan asılı deyil (ana qrup + alt qrup jurnalı da tutulur)."""
+    if period is None:
+        return
+    rows = (
+        _model("Enrollment")
+        ._base_manager.filter(
+            organization=organization, status="enrolled", offering__period=period, offering__is_active=True
+        )
+        .values_list("student_id", "offering_id", "offering__subject_id", "offering__subject__name")
+        .order_by("student_id", "offering_id")
+    )
+    by_student = defaultdict(list)
+    for student_id, offering_id, subject_id, name in rows:
+        by_student[student_id].append((offering_id, subject_id, name))
+    pairs = defaultdict(set)
+    kinds = {}
+    for student_id, items in by_student.items():
+        for index, left in enumerate(items):
+            for right in items[index + 1 :]:
+                if left[1] == right[1]:
+                    continue
+                kind = similar_kind(left[2], right[2])
+                if not kind:
+                    continue
+                key = tuple(sorted((left[0], right[0]), key=str))
+                pairs[key].add(student_id)
+                kinds[key] = kind
+    offerings = {
+        row.pk: row
+        for row in _model("CourseOffering")
+        ._base_manager.filter(pk__in={pk for key in pairs for pk in key})
+        .select_related("subject")
+    }
+    for number, (key, students) in enumerate(sorted(pairs.items(), key=lambda kv: (-len(kv[1]), str(kv[0]))), 1):
+        counts[f"student_pairs_{kinds[key]}"] += 1
+        counts["student_pairs_students"] += len(students)
+        left, right = (offerings[pk] for pk in key)
+        lines.append(
+            " ".join(
+                [
+                    f"pair={number}",
+                    f"kind={kinds[key]}",
+                    f"students={len(students)}",
+                    f"left={left.pk}",
+                    f"left_code={(left.subject.code or 'none').lower()}",
+                    f"left_group={left.group_id or 'none'}",
+                    f"right={right.pk}",
+                    f"right_code={(right.subject.code or 'none').lower()}",
+                    f"right_group={right.group_id or 'none'}",
+                    f"teachers={'same' if left.instructor_id == right.instructor_id else 'differ'}",
+                ]
+            )
+        )
 
 
 def group_plans(group_id) -> list:
@@ -183,4 +264,4 @@ def run(*, organization, actor, counts, batch, lines, period, resource, kind, re
     return merged
 
 
-__all__ = ["EXCLUDED", "QUALIFIERS", "candidates", "group_plans", "run", "similar_kind"]
+__all__ = ["EXCLUDED", "QUALIFIERS", "candidates", "group_plans", "run", "similar_kind", "student_pairs"]

@@ -43,6 +43,16 @@ class SimilarKindTest(SimpleTestCase):
             similar.similar_kind("Kəmiyyət əsaslı tədqiqat metodları", "Keyfiyyət əsaslı tədqiqat metodları"), ""
         )
 
+    def test_genitive_inflection_2026_11_27(self):
+        self.assertEqual(
+            similar.similar_kind("Verilənlər bazası sistemləri", "Verilənlərin bazası sistemləri"), "inflection"
+        )
+        self.assertEqual(similar.similar_kind("Kompüterlər şəbəkəsi", "Kompüterlərin şəbəkəsi"), "inflection")
+        # hərf səhvi, rəqəm, fərqli söz sayı — oxşar deyil
+        self.assertEqual(similar.similar_kind("Verilənlər bazası sistemləri", "Verilənlər bazası sitemləri"), "")
+        self.assertEqual(similar.similar_kind("Verilənlər bazası", "Verilənlərin bazası sistemləri"), "")
+        self.assertEqual(similar.similar_kind("Dil-1", "Dil-1in"), "")
+
 
 class SimilarJournalsTest(_MidtermSetup):
     def setUp(self):
@@ -131,6 +141,21 @@ class SimilarJournalsTest(_MidtermSetup):
         self.assertEqual(counts["similar_skip_both_in_plan"], "1")
         self.assertNotIn("pairs_merged", counts)
         self.assertEqual(self._state(), (True, 1, 1))
+
+    def test_student_pairs_report_reads_only_2026_11_27(self):
+        with bypass_rls():
+            Subject.objects.filter(pk=self.offering.subject_id).update(name="Verilənlər bazası sistemləri")
+            Subject.objects.filter(pk=self.other.pk).update(name="Verilənlərin bazası sistemləri")
+            before = self._state()
+        counts, _batch, lines = self._call("--only", "student_pairs")
+        self.assertEqual(counts["student_pairs_inflection"], "1")
+        self.assertEqual(counts["student_pairs_students"], "1")
+        self.assertTrue(any("kind=inflection" in line and "students=1" in line for line in lines))
+        self.assertEqual(self._state(), before)
+        from django.core.management import CommandError
+
+        with self.assertRaisesMessage(CommandError, "duplicate_subjects_apply_needs_explicit_step"):
+            self._call("--only", "student_pairs", "--apply")
 
     def test_numbered_parts_are_not_candidates(self):
         with bypass_rls():
