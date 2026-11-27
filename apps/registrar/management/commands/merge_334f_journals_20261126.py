@@ -88,7 +88,8 @@ class Command(BaseCommand):
             raise CommandError(failure_code(exc)) from None
         if options["check"]:
             for item in report:
-                self.stdout.write(f"{PREFIX} kind=check " + " ".join(f"{k}={_safe(v)}" for k, v in item.items()))
+                kind = item.pop("kind", "check")
+                self.stdout.write(f"{PREFIX} kind={kind} " + " ".join(f"{k}={_safe(v)}" for k, v in item.items()))
             return
         for family, outcome, delta in report:
             self.stdout.write(family_line(family, outcome, delta))
