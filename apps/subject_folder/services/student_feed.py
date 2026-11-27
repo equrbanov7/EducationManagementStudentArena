@@ -53,6 +53,35 @@ def _task_state(task, assignment, deadline, current, now) -> dict:
     }
 
 
+def student_folder_ids_by_offering(*, organization, student, offering_ids) -> dict:
+    """«Fənlərim» kartından «Dərs materialları» keçidi (sahib 2026-11-28): ``{offering_id: [folder_id…]}`` —
+    :func:`student_folders` ilə EYNİ görünürlük qaydası (yazılış aktiv, təyinat aktiv, qovluq aktiv), TƏK sorğu."""
+    ids = [oid for oid in dict.fromkeys(offering_ids) if oid is not None]
+    if not ids or not lookups.is_authenticated(student):
+        return {}
+    enrolled = (
+        lookups.enrollment_model()
+        .objects.filter(organization=organization, student_id=student.pk, status=lookups.ENROLLED, offering_id__in=ids)
+        .values("offering_id")
+    )
+    rows = (
+        FolderAssignment.objects.filter(
+            organization=organization,
+            offering_id__in=enrolled,
+            is_active=True,
+            folder__status=FolderStatus.ACTIVE,
+        )
+        .order_by("assigned_at")
+        .values_list("offering_id", "folder_id")
+    )
+    result: dict = {}
+    for offering_id, folder_id in rows:
+        folders = result.setdefault(offering_id, [])
+        if folder_id not in folders:
+            folders.append(folder_id)
+    return result
+
+
 def student_folders(*, organization, student, period=None) -> list[dict]:
     """Tələbənin qovluqları → ``[{"folder", "assignment", "offering", "tasks": [task_state…],
     "counts": {"selfwork", "homework", "open", "returned", "done"}}]``."""

@@ -58,6 +58,7 @@ clear_deadline(assignment, task, *, by_user) ; window_state(deadline_or_None, no
     {"state": "open"|"not_open"|"late"|"closed", "opens_at", "due_at", "late_policy"}
 
 4. TƏLƏBƏ
+student_folder_ids_by_offering(*, organization, student, offering_ids) -> {offering_id: [folder_id…]}  (TƏK sorğu)
 student_folders(*, organization, student, period=None) -> [{"folder", "assignment", "offering",
     "tasks": [task_state], "counts": {"selfwork","homework","open","returned","done"}}]   (5 sorğu, sabit)
 student_task_view(task, assignment, student) -> {**task_state, "assignment", "attachments", "attempts",
@@ -202,7 +203,7 @@ from .services.review import (  # noqa: F401
     reopen,
     return_for_revision,
 )
-from .services.student_feed import student_folders, student_task_view  # noqa: F401
+from .services.student_feed import student_folder_ids_by_offering, student_folders, student_task_view  # noqa: F401
 from .services.submissions import remove_draft_file, save_draft, submit  # noqa: F401
 from .services.tasks import (  # noqa: F401
     add_task_attachment,
@@ -287,6 +288,7 @@ __all__ = [
     "set_task_published",
     "set_topic_hidden",
     "status_counts",
+    "student_folder_ids_by_offering",
     "student_folders",
     "student_task_view",
     "submission_detail",

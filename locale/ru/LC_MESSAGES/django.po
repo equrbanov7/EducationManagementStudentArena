@@ -122661,3 +122661,39 @@ msgstr ""
 msgctxt "applications"
 msgid "Axtarışa uyğun müraciət başqa bölmədədir:"
 msgstr "Подходящие обращения находятся в другом разделе:"
+
+msgctxt "registrar.activity_label"
+msgid "Seminar"
+msgstr "Семинар"
+
+msgctxt "registrar.activity_label"
+msgid "Laboratoriya"
+msgstr "Лаборатория"
+
+msgctxt "registrar.activity_label"
+msgid "Seminar / Laboratoriya"
+msgstr "Семинар / Лаборатория"
+
+msgctxt "registrar.activity_label"
+msgid "Praktiki məşğələ"
+msgstr "Практическое занятие"
+
+msgctxt "profile.sidebar"
+msgid "Dərs materiallarım"
+msgstr "Мои учебные материалы"
+
+msgctxt "subject_folder.ui"
+msgid "Dərs materiallarım"
+msgstr "Мои учебные материалы"
+
+msgctxt "profile.subjects"
+msgid "Dərs materialları"
+msgstr "Учебные материалы"
+
+msgctxt "profile.subjects"
+msgid "Giriş balı = davamiyyət + seminar / laboratoriya + midterm + sərbəst iş (imtahana qədər toplanan hissə); yekun bal = giriş balı + yekun imtahan."
+msgstr "Входной балл = посещаемость + семинар / лаборатория + мидтерм + самостоятельная работа (часть, набранная до экзамена); итоговый балл = входной балл + итоговый экзамен."
+
+msgctxt "profile.subjects"
+msgid "Giriş balı = davamiyyət + seminar / laboratoriya + midterm (imtahana qədər toplanan hissə); yekun bal = giriş balı + yekun imtahan. Fəndə həm seminar, həm laboratoriya varsa hər biri 5 bal sayılır (5 + 5)."
+msgstr "Входной балл = посещаемость + семинар / лаборатория + мидтерм (часть, набранная до экзамена); итоговый балл = входной балл + итоговый экзамен. Если в предмете есть и семинар, и лаборатория, каждый даёт 5 баллов (5 + 5)."

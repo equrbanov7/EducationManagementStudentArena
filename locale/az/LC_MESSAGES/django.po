@@ -121718,3 +121718,39 @@ msgstr ""
 msgctxt "applications"
 msgid "Axtarışa uyğun müraciət başqa bölmədədir:"
 msgstr "Axtarışa uyğun müraciət başqa bölmədədir:"
+
+msgctxt "registrar.activity_label"
+msgid "Seminar"
+msgstr "Seminar"
+
+msgctxt "registrar.activity_label"
+msgid "Laboratoriya"
+msgstr "Laboratoriya"
+
+msgctxt "registrar.activity_label"
+msgid "Seminar / Laboratoriya"
+msgstr "Seminar / Laboratoriya"
+
+msgctxt "registrar.activity_label"
+msgid "Praktiki məşğələ"
+msgstr "Praktiki məşğələ"
+
+msgctxt "profile.sidebar"
+msgid "Dərs materiallarım"
+msgstr "Dərs materiallarım"
+
+msgctxt "subject_folder.ui"
+msgid "Dərs materiallarım"
+msgstr "Dərs materiallarım"
+
+msgctxt "profile.subjects"
+msgid "Dərs materialları"
+msgstr "Dərs materialları"
+
+msgctxt "profile.subjects"
+msgid "Giriş balı = davamiyyət + seminar / laboratoriya + midterm + sərbəst iş (imtahana qədər toplanan hissə); yekun bal = giriş balı + yekun imtahan."
+msgstr "Giriş balı = davamiyyət + seminar / laboratoriya + midterm + sərbəst iş (imtahana qədər toplanan hissə); yekun bal = giriş balı + yekun imtahan."
+
+msgctxt "profile.subjects"
+msgid "Giriş balı = davamiyyət + seminar / laboratoriya + midterm (imtahana qədər toplanan hissə); yekun bal = giriş balı + yekun imtahan. Fəndə həm seminar, həm laboratoriya varsa hər biri 5 bal sayılır (5 + 5)."
+msgstr "Giriş balı = davamiyyət + seminar / laboratoriya + midterm (imtahana qədər toplanan hissə); yekun bal = giriş balı + yekun imtahan. Fəndə həm seminar, həm laboratoriya varsa hər biri 5 bal sayılır (5 + 5)."

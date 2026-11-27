@@ -92,6 +92,20 @@ class ActivityDetail:
     lab_mean: Decimal | None = None
     seminar_part: Decimal | None = None
     lab_part: Decimal | None = None
+    #: Fənnin SORĞUSUZ bilinən seminar/lab maskası (tələbənin öz balları ∪ hazır maska; tənbəl çağırış
+    #: çağırılmır) — yalnız görünüş: «Aktivlik» əvəzinə «Seminar» / «Laboratoriya» adı (sahib 2026-11-28).
+    kinds: int = 0
+
+    @property
+    def kind_label(self) -> str:
+        """``both`` / ``lab`` / ``seminar``; bilinmirsə boş sətir."""
+        if self.split or self.kinds & BOTH == BOTH:
+            return "both"
+        if self.kinds & LAB_BIT:
+            return LAB
+        if self.kinds & SEMINAR_BIT:
+            return SEMINAR
+        return ""
 
 
 def pooled_mean(score_sum, score_count) -> Decimal:
@@ -128,13 +142,17 @@ def activity(totals: LessonTotals, bits=None, *, split_enabled: bool) -> Activit
     sem_mean = _mean(totals.seminar, totals.seminar_count)
     lab_mean = _mean(totals.lab, totals.lab_count)
     own = totals.own_bits
+    known = own
     if split_enabled and own:
         kinds = own if own == BOTH else own | resolve(bits)
         if kinds & BOTH == BOTH:
             sem_part = half_part(totals.seminar, totals.seminar_count)
             lab_part = half_part(totals.lab, totals.lab_count)
-            return ActivityDetail(sem_part + lab_part, True, sem_mean, lab_mean, sem_part, lab_part)
-    return ActivityDetail(pooled_mean(totals.total, totals.count), False, sem_mean, lab_mean)
+            return ActivityDetail(sem_part + lab_part, True, sem_mean, lab_mean, sem_part, lab_part, BOTH)
+        known = kinds
+    elif isinstance(bits, int):
+        known = own | bits
+    return ActivityDetail(pooled_mean(totals.total, totals.count), False, sem_mean, lab_mean, kinds=known & BOTH)
 
 
 # ── Bal işarələri → cəmlər ───────────────────────────────────────────────────

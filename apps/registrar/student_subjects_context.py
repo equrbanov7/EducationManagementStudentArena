@@ -27,6 +27,7 @@ gəlir; yalnız çağırış toplu olub.
 from __future__ import annotations
 
 from decimal import Decimal
+from urllib.parse import urlencode
 
 from django.urls import reverse
 from django.utils.translation import pgettext_lazy
@@ -206,6 +207,25 @@ def enrich_subject_rows(*, organization, record, rows, journal_by_enrollment, pe
         row["ui"] = {"status": eligibility_status(row.get("eligibility"))}
 
 
+def attach_material_links(*, organization, record, rows) -> None:
+    """Sahib 2026-11-28: «Fənlərim» kartından fənnin «Dərs materialları»na keçid — tələbənin bu fənnə təyin
+    olunmuş aktiv qovluğu varsa ``row["materials_url"]`` (bir qovluq → birbaşa qovluq, bir neçə → siyahı); TƏK sorğu."""
+    from apps.subject_folder import public as folders  # dövri idxalın qarşısını alır (yalnız bu bölmə)
+
+    links = folders.student_folder_ids_by_offering(
+        organization=organization,
+        student=record.student,
+        offering_ids=[row["enrollment"].offering_id for row in rows],
+    )
+    base = reverse("accounts:profile")
+    for row in rows:
+        folder_ids = links.get(row["enrollment"].offering_id) or []
+        query = {"section": folders.SECTION_STUDENT}
+        if len(folder_ids) == 1:
+            query["sf_folder"] = folder_ids[0]
+        row["materials_url"] = f"{base}?{urlencode(query)}" if folder_ids else ""
+
+
 def kpi_summary(rows) -> dict:
     """KPI sırası — prototip (ekran 10 «Cari semestr»): toplanmış bal (orta),
     semestr krediti, buraxılmayan fənn, yekunlaşan fənn."""
@@ -344,6 +364,8 @@ def build_section(*, request, organization, record, period, semester_number) -> 
         journal_by_enrollment=journal_by_enrollment,
         period=period,
     )
+
+    attach_material_links(organization=organization, record=record, rows=data["subjects"])
 
     group_decisions = data["group_decisions"]
     elective_blocks = [
