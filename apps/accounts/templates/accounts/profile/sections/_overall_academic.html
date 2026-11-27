@@ -210,7 +210,7 @@ decoration over the same enrollment aggregation the "Transkript" section uses
                             </td>
                             <td data-label="{% trans 'Kredit' context 'profile.overall_academic' %}">{{ row.credit }}</td>
                             <td class="ta-left oa-cell--teacher" data-label="{% trans 'Müəllim' context 'profile.overall_academic' %}">{{ row.teacher_name|default:"—" }}</td>
-                            <td data-label="{% trans 'Giriş balı' context 'profile.overall_academic' %}">{% if row.recognition %}—{% else %}{{ row.result.entry_score|floatformat:'-2' }}{% endif %}</td>
+                            <td data-label="{% trans 'Giriş balı' context 'profile.overall_academic' %}">{% if row.recognition or row.not_started %}—{% else %}{{ row.result.entry_score|floatformat:'-2' }}{% endif %}</td>
                             <td data-label="{% trans 'Çıxış balı' context 'profile.overall_academic' %}">{% if row.result.graded and not row.recognition %}{{ row.result.effective_exam|floatformat:'-2' }}{% else %}—{% endif %}</td>
                             {# Qlif HƏR köçürülmüş sətirdə — semestr qeydindəki «nişanlı» sözünün qarşılığıdır. #}
                             <td data-label="{% trans 'Nəticə' context 'profile.overall_academic' %}">{% if row.result.passed or row.result.failed %}<strong>{{ row.result.total|floatformat:'-2' }}</strong>{% else %}—{% endif %}{% include "registrar/partials/_legacy_grade_mark.html" with legacy=row.legacy %}</td>
