@@ -109,13 +109,18 @@ class _Fix:
     # ── yoxlamalar (heç nə yazılmır) ────────────────────────────────────────
     def check_scope(self):
         o = self.offering
-        if (
+        clashes = list(
             model("registrar.CourseOffering")
-            .objects.filter(organization=self.org, subject=self.target, period_id=o.period_id, group_id=o.group_id)
+            .objects.select_for_update(of=("self",))
+            .filter(organization=self.org, subject=self.target, period_id=o.period_id, group_id=o.group_id)
             .exclude(pk=o.pk)
-            .exists()
-        ):
+        )
+        # 2026-11-28 (234 İT az «Verilənlər bazası sistemləri»): hədəf fənndə LƏĞV EDİLMİŞ və TAM BOŞ açılış
+        # (heç bir bağlı sətir yoxdur) köhnə sinxronun qalığıdır — düzəlişdə silinir. Aktiv və ya datalı → dayan.
+        if any(clash.is_active or not _deletes_only_itself(clash) for clash in clashes):
             _fail("target_offering_exists")
+        self.phantoms = clashes
+        self.phantom_ids = [str(clash.pk) for clash in clashes]
         if model("exams.Exam").objects.filter(journal_offerings=o).exclude(subject_id=self.target.pk).exists():
             _fail("exam_link_requires_review")
         if (
@@ -224,6 +229,27 @@ class _Fix:
         self.attach = source
 
     # ── yazı ──────────────────────────────────────────────────────────────
+    def remove_phantoms(self):
+        for phantom in self.phantoms:
+            log_action(
+                AuditAction.DELETE,
+                user=self.user,
+                organization=self.org,
+                resource_type="registrar.courseoffering",
+                resource_id=str(phantom.pk),
+                resource_repr="Boş, ləğv edilmiş açılış (fənn düzəlişinə mane olurdu)",
+                old_values={
+                    "subject": str(phantom.subject_id),
+                    "period": str(phantom.period_id),
+                    "group": str(phantom.group_id),
+                    "instructor": phantom.instructor_id,
+                    "is_active": phantom.is_active,
+                },
+                reason=REASON,
+            )
+            phantom.delete()
+            self.counts["empty_offering_removed"] += 1
+
     def change_offering_subject(self):
         o = self.offering
         if o.subject_id == self.target.pk:
@@ -305,6 +331,23 @@ class _Fix:
         return old
 
 
+def _deletes_only_itself(offering) -> bool:
+    """Açılışı silmək YALNIZ onun özünü silərmi (qeydiyyat, dərs, slot, sillabus, pay … heç nə bağlı deyil)."""
+    from django.db.models.deletion import Collector, ProtectedError, RestrictedError
+
+    collector = Collector(using="default")
+    try:
+        collector.collect([offering])
+    except (ProtectedError, RestrictedError):
+        return False
+    if any(queryset.exists() for queryset in collector.fast_deletes):
+        return False
+    return all(
+        model_class is type(offering) and {obj.pk for obj in objects} == {offering.pk}
+        for model_class, objects in collector.data.items()
+    )
+
+
 def _group_offering_ids(offering) -> list:
     return sorted(
         str(pk)
@@ -337,6 +380,7 @@ def fix_offering_subject(
     fix.check_detach(detach_syllabus_id)
     fix.check_attach(attach_syllabus_id)
     offering = fix.offering
+    fix.remove_phantoms()
     before_protected = protected_hash(offering.pk)
     before_group = _group_offering_ids(offering)
     old_subject = offering.subject_id
@@ -358,6 +402,7 @@ def fix_offering_subject(
             "own_syllabus_detached",
             "share_attached",
             "row_subject_changed",
+            "empty_offering_removed",
         )
     )
     if changed:
@@ -383,6 +428,7 @@ def fix_offering_subject(
                 "row": str(fix.row.pk) if fix.row is not None else None,
                 "detached_syllabus": str(fix.detach[1].pk) if fix.detach is not None else None,
                 "attached_syllabus": str(fix.attach.pk) if fix.attach is not None else None,
+                "removed_empty_offerings": fix.phantom_ids,
                 "protected_hash": before_protected,
                 "counts": dict(fix.counts),
             },
