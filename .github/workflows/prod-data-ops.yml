@@ -2454,7 +2454,10 @@ jobs:
               actor="$(superadmin_actor)"; test -n "$actor" || { echo "aktiv superadmin tapılmadı" >&2; exit 1; }
               echo "::add-mask::$actor"
               args=(--org "$ORG" --actor "$actor")
-              if [[ "$BATCH" =~ ^check:m334f-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$ ]]; then
+              if [[ "$BATCH" =~ ^hours:m334f-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$ ]]; then
+                # 2026-11-27: birləşmiş jurnallara mənbələrin planlı saatı (qayıb həddi) — apply ilə yazır.
+                args+=(--fix-hours "--batch=${BATCH#hours:}")
+              elif [[ "$BATCH" =~ ^check:m334f-[0-9]{8}-[0-9]{6}-[0-9a-f]{4}$ ]]; then
                 # 2026-11-27: qayıb saatlarının tələbə-tələbə tutuşdurulması — yalnız oxuyur (apply verilmir).
                 test "$APPLY" != "true" || { echo "check yalnız oxuyur — apply verməyin" >&2; exit 2; }
                 args+=(--check "--batch=${BATCH#check:}")

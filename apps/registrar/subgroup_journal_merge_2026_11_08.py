@@ -241,6 +241,11 @@ class Merger:
         if sample.instructor_id and target.instructor_id is None:
             target.instructor_id = sample.instructor_id
             target.save(update_fields=["instructor", "updated_at"])
+        # 2026-11-27 (MR-000836): planlı auditoriya saatı — qayıb həddinin bazası; boş qalsa hədd keçirilmiş
+        # dərslərin cəmindən hesablanır və tələbələr süni «kəsilir».
+        if not target.lesson_hours and sample.lesson_hours:
+            target.lesson_hours = sample.lesson_hours
+            target.save(update_fields=["lesson_hours", "updated_at"])
         manifest["target_created"].append(str(target.pk))
         self.counts["targets_created"] += 1
         return target

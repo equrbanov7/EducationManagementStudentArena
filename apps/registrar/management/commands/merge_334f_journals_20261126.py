@@ -57,6 +57,9 @@ class Command(BaseCommand):
         parser.add_argument(
             "--check", action="store_true", help="--batch qaçışının qayıb saatlarını tutuşdur (yalnız oxuyur)"
         )
+        parser.add_argument(
+            "--fix-hours", action="store_true", help="--batch jurnallarına mənbələrin planlı saatını yaz (dry-run)"
+        )
 
     def handle(self, *args, **options):
         batch = str(options["batch"] or "").strip()
@@ -66,10 +69,14 @@ class Command(BaseCommand):
             raise CommandError("f334_merge_undo_needs_batch")
         if options["check"] and (not batch or options["undo"] or options["apply"]):
             raise CommandError("f334_merge_check_needs_batch_only")
+        if options["fix_hours"] and (not batch or options["undo"] or options["check"]):
+            raise CommandError("f334_merge_fix_hours_needs_batch_only")
         used, report = {}, []
 
         def runner(organization, actor, counts):
-            if options["check"]:
+            if options["fix_hours"]:
+                checker.fix_hours(organization=organization, actor=actor, batch=batch, counts=counts)
+            elif options["check"]:
                 checker.check(organization=organization, batch=batch, counts=counts, report=report)
             elif options["undo"]:
                 unfixer.undo(organization=organization, actor=actor, counts=counts, batch=batch)
@@ -86,6 +93,8 @@ class Command(BaseCommand):
             raise
         except Exception as exc:  # noqa: BLE001 — prod-data-ops yalnız CommandError kodunu göstərir
             raise CommandError(failure_code(exc)) from None
+        if options["fix_hours"]:
+            return
         if options["check"]:
             for item in report:
                 kind = item.pop("kind", "check")
