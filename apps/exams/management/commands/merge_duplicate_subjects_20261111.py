@@ -46,6 +46,8 @@ from core.rls_pooling import rls_worker_atomic
 
 PREFIX = "twin_merge:"
 OPS = (*duplicates.OPS, "takers", "similar")
+#: Yalnız oxuyan hesabatlar (apply qəbul etmir).
+REPORTS = ("report", "student_pairs")
 
 
 def failure_code(exc: Exception) -> str:
@@ -60,7 +62,7 @@ class Command(BaseCommand):
         parser.add_argument("--org", required=True, help="Təşkilatın slug-ı (məs. qku)")
         parser.add_argument("--actor", required=True, help="Aktiv superadmin istifadəçi adı (audit müəllifi)")
         parser.add_argument("--apply", action="store_true", help="Faktiki yaz (defolt: dry-run)")
-        parser.add_argument("--only", choices=(*OPS, "report"), help="Yalnız bir əməliyyat (defolt: hamısı)")
+        parser.add_argument("--only", choices=(*OPS, *REPORTS), help="Yalnız bir əməliyyat (defolt: hamısı)")
         parser.add_argument("--batch", default="", help="Paket id-si (dupsubj-…); --undo üçün məcburi")
         parser.add_argument("--undo", action="store_true", help="--batch paketini geri qaytar")
         parser.add_argument(
@@ -139,7 +141,7 @@ class Command(BaseCommand):
         if actor is None:
             raise CommandError("actor_must_be_active_superuser")
         only = options["only"]
-        ops = OPS if only is None else (() if only == "report" else (only,))
+        ops = OPS if only is None else (() if only in REPORTS else (only,))
         batch = str(options["batch"] or "").strip()
         Organization = django_apps.get_model("organizations", "Organization")
         with rls_worker_atomic(), bypass_rls():
@@ -156,6 +158,10 @@ class Command(BaseCommand):
                     merged = []
                     if only == "similar":
                         self._similar(organization, actor, counts, batch, lines)
+                    elif only == "student_pairs":
+                        similar.student_pairs(
+                            organization, duplicates.current_period(organization), counts=counts, lines=lines
+                        )
                     elif registrar_ops:
                         duplicates.run(
                             organization=organization,
