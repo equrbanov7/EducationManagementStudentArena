@@ -81280,8 +81280,8 @@ msgid "Hələ açılmayıb"
 msgstr "Hələ açılmayıb"
 
 msgctxt "subject_folder.ui"
-msgid "Hələ fənn qovluğu yoxdur"
-msgstr "Hələ fənn qovluğu yoxdur"
+msgid "Hələ dərs materialı yoxdur"
+msgstr "Hələ dərs materialı yoxdur"
 
 msgctxt "subject_folder.ui"
 msgid "Hələ fənn qovluğunuz yoxdur"
@@ -81668,8 +81668,8 @@ msgid "Qovluqlara qayıt"
 msgstr "Qovluqlara qayıt"
 
 msgctxt "subject_folder.ui"
-msgid "Qovluqlarıma qayıt"
-msgstr "Qovluqlarıma qayıt"
+msgid "Dərs materiallarıma qayıt"
+msgstr "Dərs materiallarıma qayıt"
 
 msgctxt "subject_folder.ui"
 msgid "Qovluğu redaktə et"

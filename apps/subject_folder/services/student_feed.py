@@ -82,7 +82,7 @@ def student_folder_ids_by_offering(*, organization, student, offering_ids) -> di
     return result
 
 
-def student_folders(*, organization, student, period=None) -> list[dict]:
+def student_folders(*, organization, student, period=None, offering_id=None) -> list[dict]:
     """Tələbənin qovluqları → ``[{"folder", "assignment", "offering", "tasks": [task_state…],
     "counts": {"selfwork", "homework", "open", "returned", "done"}}]``."""
     if not lookups.is_authenticated(student):
@@ -92,6 +92,8 @@ def student_folders(*, organization, student, period=None) -> list[dict]:
     )
     if period is not None:
         enrollments = enrollments.filter(offering__period=period)
+    if offering_id is not None:
+        enrollments = enrollments.filter(offering_id=offering_id)
     offering_ids = list(enrollments.values_list("offering_id", flat=True))
     if not offering_ids:
         return []
