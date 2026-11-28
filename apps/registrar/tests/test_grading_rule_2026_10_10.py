@@ -21,11 +21,13 @@ from django.apps import apps as django_apps
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.db import IntegrityError, connection, transaction
+from django.template.loader import render_to_string
 from django.test import TestCase, override_settings
 
 import pytest
 
-from apps.registrar import activity_kinds, gradebook, interim_components, journal_extras
+from apps.registrar import activity_kinds, finals_batch, gradebook, interim_components, journal_extras, services
+from apps.registrar.gradebook_components import entry_parts_for
 from apps.registrar.management.commands import normalize_interim_components as normalize_command
 from apps.registrar.models import (
     AssessmentComponent,
@@ -35,6 +37,7 @@ from apps.registrar.models import (
     CurriculumSubject,
     PlanStatus,
     ScheduleSlot,
+    Subject,
 )
 from apps.registrar.tests.test_journal_rules import _setup_offering
 from core.rls import bypass_rls
@@ -91,11 +94,12 @@ def test_offering_kinds_are_read_only_when_needed():
         return activity_kinds.BOTH
 
     both = activity_kinds.activity(_totals((SEM, 8), (LAB, 6)), lazy_bits, split_enabled=True)
-    assert (both.value, calls) == (Decimal("7.00"), [])
+    assert (both.value, both.kind_label, calls) == (Decimal("7.00"), "both", [])
     pooled = activity_kinds.activity(_totals((SEM, 8)), lazy_bits, split_enabled=False)
     assert (pooled.value, calls) == (Decimal("8.00"), [])
     half = activity_kinds.activity(_totals((SEM, 8)), lazy_bits, split_enabled=True)
-    assert (half.value, calls) == (Decimal("4.00"), [1])
+    assert (half.value, half.kind_label, calls) == (Decimal("4.00"), "both", [1])
+    assert (pooled.kind_label, calls) == ("both", [1, 1])
 
 
 # ── Fənnin növləri (SQL maskası) ─────────────────────────────────────────────
@@ -113,15 +117,46 @@ class ActivityKindsResolverTest(TestCase):
         with bypass_rls():
             return activity_kinds.bits_map([self.offering.id])[self.offering.id]
 
-    def _slot(self, kind):
+    def _slot(self, kind, offering=None):
         ScheduleSlot.objects.create(
             organization=self.org,
-            offering=self.offering,
+            offering=offering or self.offering,
             weekday=1,
             start_time=datetime.time(9, 0),
             end_time=datetime.time(10, 20),
             kind=kind,
         )
+
+    def test_live_kind_labels_with_no_grades_and_shared_query(self):
+        with bypass_rls():
+            self._slot(LAB)
+            subject = Subject.objects.create(organization=self.org, code="SEM2", name="Seminar fənni")
+            CurriculumSubject.objects.create(
+                organization=self.org, curriculum=self.curriculum, subject=subject, semester_number=1
+            )
+            services.enroll_mandatory_subjects(record=self.record, period=self.period, semester_number=1)
+            seminar = self.student.enrollments.select_related("offering").get(offering__subject=subject)
+            self._slot(SEM, seminar.offering)
+            enrollments = [self.enrollment, seminar]
+            for split in (True, False):
+                with self.subTest(split=split), override_settings(ACADEMIC_ACTIVITY_SPLIT=split):
+                    batch = finals_batch.entry_batch(
+                        enrollments, marks_by_enrollment={}, organization=self.org, period=self.period
+                    )
+                    batch.provide_attendance(
+                        hours_map={e.offering_id: 60 for e in enrollments}, limits=25, exempt_ids=()
+                    )
+                    with self.assertNumQueries(0):
+                        parts = [entry_parts_for(e, 50, **batch.entry_kwargs(e)) for e in enrollments]
+                        self.assertEqual([p.activity for p in parts], [0, 0])
+                    with self.assertNumQueries(1):
+                        labels = [
+                            render_to_string("partials/ems_ui/_activity_label.html", {"parts": p}).strip()
+                            for p in parts
+                        ]
+                        self.assertEqual(labels, ["Laboratoriya", "Seminar"])
+                    with self.assertNumQueries(0):
+                        self.assertEqual([p.activity_detail.kind_label for p in parts], [LAB, SEM])
 
     def test_schedule_slots_then_scored_kinds(self):
         self.assertEqual(self._bits(), 0)
