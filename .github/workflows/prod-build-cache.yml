@@ -1,0 +1,45 @@
+name: Production Docker build cache
+
+on:
+  workflow_call:
+  schedule:
+    - cron: "17,47 * * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Build keşi üçün əməliyyat"
+        type: choice
+        required: true
+        default: budget
+        options:
+          - budget
+          - clear-unused
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-build-cache
+  cancel-in-progress: false
+
+jobs:
+  maintain:
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 25
+    steps:
+      - name: Tətbiq və geri dönüş image-lərini qoruyaraq build keşini təmizlə
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CACHE_MODE: ${{ inputs.mode || 'budget' }}
+        run: |
+          set -euo pipefail
+          script="$(mktemp "${RUNNER_TEMP}/build-cache.XXXXXX")"
+          trap 'rm -f -- "$script"' EXIT
+          curl -fsS --max-time 20 -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'Accept: application/vnd.github.raw+json' \
+            "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/contents/scripts/ops/build_cache_budget.sh?ref=${GITHUB_SHA}" \
+            -o "$script"
+          unset GH_TOKEN
+          ionice -c3 nice -n 19 bash "$script" "$CACHE_MODE" | tee -a "$GITHUB_STEP_SUMMARY"
