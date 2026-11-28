@@ -1,0 +1,91 @@
+{% load static i18n %}
+{% get_current_language as science_language %}
+<section class="profile-section-panel {% if active_section == 'science-room' %}is-active{% endif %}" data-profile-section-panel="science-room" data-science-room lang="{{ science_language }}"
+         data-physics="{% static 'labs/science_room/physics.js' %}" data-chemistry="{% static 'labs/science_room/chemistry.js' %}"
+         data-mathematics="{% static 'labs/science_room/mathematics.js' %}" data-biology="{% static 'labs/science_room/biology.js' %}"
+         data-astronomy="{% static 'labs/science_room/astronomy.js' %}"
+         data-bio-css="{% static 'labs/science_room/chemistry-biology.css' %}"
+         data-error="{% translate 'Təcrübəni açmaq alınmadı. Yenidən seçin.' %}" data-loading="{% translate 'Təcrübə açılır…' %}"
+         data-run-caption="{% translate 'Sınaq' %}" aria-label="{% translate 'Elmi laboratoriya' %}">
+  <link rel="stylesheet" href="{% static 'labs/science_room/room.css' %}">
+  <div class="sr-room">
+    <div class="sr-catalog" data-catalog>
+      <header class="sr-intro"><h2>{% translate "Təcrübələr" %}</h2><p>{% translate "Mövzunu seçin, avadanlığı sınaq masasına yerləşdirin və nəticəni müşahidə edin." %}</p></header>
+      <div class="sr-filters" role="group" aria-label="{% translate 'Fənn seçimi' %}">
+        <button type="button" data-filter="all" aria-pressed="true">{% translate "Hamısı" %}</button>
+        <button type="button" data-filter="physics" aria-pressed="false">{% translate "Fizika" %}</button>
+        <button type="button" data-filter="chemistry" aria-pressed="false">{% translate "Kimya" %}</button>
+        <button type="button" data-filter="mathematics" aria-pressed="false">{% translate "Riyaziyyat" %}</button>
+        <button type="button" data-filter="biology" aria-pressed="false">{% translate "Biologiya" %}</button>
+        <button type="button" data-filter="astronomy" aria-pressed="false">{% translate "Yer və kosmos" %}</button>
+      </div>
+      <div class="sr-cards">
+        <button type="button" class="sr-card" data-subject="physics" data-experiment="photoelectric">
+          <span class="sr-thumb"><svg viewBox="0 0 192 96" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 30l37 14m-36-2 34 13m-34 1 31 11" stroke="#cc8536"/><path d="M72 22h56c21 0 30 12 30 28s-10 29-29 29H72a28 28 0 0 1 0-57z" fill="#fff"/><path d="M75 34v33m48-28v24m-48-12h-9m57 0h27"/><path d="M69 78v9h65v-9"/><g fill="currentColor"><circle cx="89" cy="46" r="2"/><circle cx="102" cy="53" r="2"/><circle cx="113" cy="43" r="2"/></g></g></svg></span>
+          <span class="sr-card-copy"><span class="sr-subject">{% translate "Fizika" %}</span><strong>{% translate "Fotoeffekt" %}</strong></span><span class="sr-arrow" aria-hidden="true">→</span>
+        </button>
+        <button type="button" class="sr-card" data-subject="physics" data-experiment="pendulum">
+          <span class="sr-thumb"><svg viewBox="0 0 192 96" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M57 18h82m-70 0-5 7m18-7-5 7m18-7-5 7m18-7-5 7m18-7-5 7"/><path d="M98 20v55m0-55 29 50" stroke-dasharray="3 4" opacity=".56"/><path d="m98 20-27 49"/><circle cx="69" cy="72" r="9" fill="currentColor"/><circle cx="129" cy="73" r="9" opacity=".38"/><path d="M76 82q22 12 47 0" stroke-dasharray="3 4"/><circle cx="98" cy="20" r="3" fill="#cf954f"/></g></svg></span>
+          <span class="sr-card-copy"><span class="sr-subject">{% translate "Fizika" %}</span><strong>{% translate "Rəqqasın periodu" %}</strong></span><span class="sr-arrow" aria-hidden="true">→</span>
+        </button>
+        <button type="button" class="sr-card" data-subject="chemistry" data-experiment="indicator">
+          <span class="sr-thumb"><svg viewBox="0 0 192 96" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M46 24h26m-23 1v38a10 10 0 0 0 20 0V25m12-1h26m-23 1v38a10 10 0 0 0 20 0V25m12-1h26m-23 1v38a10 10 0 0 0 20 0V25"/><path d="M52 49h14v15a7 7 0 0 1-14 0z" fill="#dd8c83" stroke="none"/><path d="M87 44h14v20a7 7 0 0 1-14 0z" fill="#afbd84" stroke="none"/><path d="M122 52h14v12a7 7 0 0 1-14 0z" fill="#93a8d0" stroke="none"/><path d="M39 80h112"/></g></svg></span>
+          <span class="sr-card-copy"><span class="sr-subject">{% translate "Kimya" %}</span><strong>{% translate "pH indikatoru" %}</strong></span><span class="sr-arrow" aria-hidden="true">→</span>
+        </button>
+        <button type="button" class="sr-card" data-subject="chemistry" data-experiment="bubbles">
+          <span class="sr-thumb"><svg viewBox="0 0 192 96" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M62 20h31m-26 0v20L48 69q-4 9 7 9h49q10 0 6-9L89 40V20"/><path d="M56 63q14-8 29-1t18 1l6 11H51z" fill="#b8d2cd" stroke="none"/><circle cx="78" cy="56" r="3"/><circle cx="84" cy="44" r="2"/><circle cx="79" cy="31" r="2"/><path d="M124 29v45m-5 0h11"/><circle cx="124" cy="29" r="9" fill="#fff"/><path d="m124 29 4-4"/></g></svg></span>
+          <span class="sr-card-copy"><span class="sr-subject">{% translate "Kimya" %}</span><strong>{% translate "Qaz qabarcıqları" %}</strong></span><span class="sr-arrow" aria-hidden="true">→</span>
+        </button>
+        <button type="button" class="sr-card" data-subject="mathematics" data-experiment="linear">
+          <span class="sr-thumb"><svg viewBox="0 0 192 96" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M50 76h99M65 85V17" opacity=".7"/><path d="m66 19-2-3-3 4m84 53 4 3-4 3"/><path d="m53 73 77-48" stroke-width="3"/><path d="M83 57h32V38" stroke-dasharray="3 4" stroke="#b6873c"/><circle cx="83" cy="55" r="4" fill="#fff"/><circle cx="115" cy="35" r="4" fill="#fff"/></g></svg></span>
+          <span class="sr-card-copy"><span class="sr-subject">{% translate "Riyaziyyat" %}</span><strong>{% translate "Xətti funksiya" %}</strong></span><span class="sr-arrow" aria-hidden="true">→</span>
+        </button>
+        <button type="button" class="sr-card" data-subject="mathematics" data-experiment="probability">
+          <span class="sr-thumb"><svg viewBox="0 0 192 96" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g transform="translate(48 28) rotate(-9 21 21)"><rect width="42" height="42" rx="7" fill="#fff"/><g fill="currentColor"><circle cx="11" cy="11" r="2.5"/><circle cx="30" cy="11" r="2.5"/><circle cx="20" cy="21" r="2.5"/><circle cx="11" cy="31" r="2.5"/><circle cx="30" cy="31" r="2.5"/></g></g><path d="M104 73h46"/><path d="M108 69V56h6v13zm13 0V43h6v26zm13 0V30h6v39z" fill="#b5a5d1" stroke="none"/></g></svg></span>
+          <span class="sr-card-copy"><span class="sr-subject">{% translate "Riyaziyyat" %}</span><strong>{% translate "Ehtimal təcrübəsi" %}</strong></span><span class="sr-arrow" aria-hidden="true">→</span>
+        </button>
+        <button type="button" class="sr-card" data-subject="biology" data-experiment="photosynthesis">
+          <span class="sr-thumb"><svg viewBox="0 0 192 96" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="138" cy="26" r="8" fill="#f4cf79" stroke="none"/><path d="m138 10 0-4m13 8 4-4m-2 18h5m-32-14-4-4" stroke="#cca84d"/><path d="M64 72C48 46 68 29 113 28c-1 37-22 52-49 44z" fill="#bed7ac"/><path d="m54 82 48-45m-27 26-4-14m15 4 14-1m-5-10-1-6"/><path d="M111 72q15-7 22-19m-7 1 8-4 1 8" opacity=".55"/></g></svg></span>
+          <span class="sr-card-copy"><span class="sr-subject">{% translate "Biologiya" %}</span><strong>{% translate "Fotosintez" %}</strong></span><span class="sr-arrow" aria-hidden="true">→</span>
+        </button>
+        <button type="button" class="sr-card" data-subject="biology" data-experiment="transpiration">
+          <span class="sr-thumb"><svg viewBox="0 0 192 96" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M87 78V40m0 22L73 51m14 0 13-13"/><path d="M74 52Q54 56 54 36q19 0 20 16zm26-14q0-18 22-20-2 20-22 20zm-14 5Q68 35 76 18q16 10 10 25z" fill="#bed7ac"/><path d="M67 76h40l-6 13H73z" fill="#c6ba9c"/><path d="M124 58q7-6 1-13m14 9q8-7 3-14m-24 32q8-6 3-12" stroke="#78a8b2"/></g></svg></span>
+          <span class="sr-card-copy"><span class="sr-subject">{% translate "Biologiya" %}</span><strong>{% translate "Transpirasiya" %}</strong></span><span class="sr-arrow" aria-hidden="true">→</span>
+        </button>
+        <button type="button" class="sr-card" data-subject="astronomy" data-experiment="moonphase">
+          <span class="sr-thumb"><svg viewBox="0 0 192 96" aria-hidden="true" focusable="false"><g stroke="currentColor" stroke-width="1.7"><circle cx="48" cy="48" r="13" fill="currentColor"/><circle cx="82" cy="48" r="13" fill="currentColor"/><path d="M82 35a13 13 0 0 1 0 26c9-7 9-19 0-26z" fill="#fff2bf" stroke="none"/><circle cx="116" cy="48" r="13" fill="currentColor"/><path d="M116 35a13 13 0 0 1 0 26z" fill="#fff2bf" stroke="none"/><circle cx="150" cy="48" r="13" fill="#fff2bf"/></g><path d="M39 72c35 9 88 8 119-1" fill="none" stroke="currentColor" stroke-dasharray="2 4"/></svg></span>
+          <span class="sr-card-copy"><span class="sr-subject">{% translate "Yer və kosmos" %}</span><strong>{% translate "Ayın fazaları" %}</strong></span><span class="sr-arrow" aria-hidden="true">→</span>
+        </button>
+        <button type="button" class="sr-card" data-subject="astronomy" data-experiment="seasons">
+          <span class="sr-thumb"><svg viewBox="0 0 192 96" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8"><circle cx="66" cy="47" r="15" fill="#f5cf78" stroke="#bd9245"/><path d="m64 22-1-6m-11 16-6-5m4 21h-9m17 18-4 6m27-8 5 5" stroke="#bd9245"/><path d="M89 33h22m-22 14h20m-20 14h18" stroke="#bd9245" stroke-dasharray="3 4"/><circle cx="132" cy="48" r="21" fill="#bfd6d1"/><ellipse cx="132" cy="48" rx="7" ry="20" transform="rotate(23 132 48)"/><path d="m120 74 23-52m-29 20 36 13"/></g></svg></span>
+          <span class="sr-card-copy"><span class="sr-subject">{% translate "Yer və kosmos" %}</span><strong>{% translate "Fəsillər və Günəş hündürlüyü" %}</strong></span><span class="sr-arrow" aria-hidden="true">→</span>
+        </button>
+      </div>
+      <p role="status" class="sr-feedback" data-feedback></p>
+    </div>
+    <div class="sr-work" data-work hidden>
+      <button type="button" class="sr-back" data-back><span aria-hidden="true">←</span> {% translate "Təcrübələrə qayıt" %}</button>
+      <header class="sr-work-heading"><span class="sr-subject" data-context></span><h2 tabindex="-1" data-title></h2><p data-prompt></p></header>
+      <div class="sr-layout">
+        <aside class="sr-shelf"><h3>{% translate "Avadanlıq rəfi" %}</h3><p>{% translate "Avadanlığı seçin və ya masaya sürüşdürün." %}</p><div class="sr-tools" role="group" aria-label="{% translate 'Avadanlıq seçimi' %}" data-tools></div></aside>
+        <section class="sr-station" aria-label="{% translate 'Təcrübə masası' %}">
+          <div class="sr-station-head"><h3>{% translate "Təcrübə masası" %}</h3><span data-active-tool></span></div>
+          <div class="sr-bench" data-bench><svg viewBox="0 0 640 340" preserveAspectRatio="xMidYMid meet" role="img" data-svg></svg></div>
+          <p class="sr-setup" data-setup></p>
+          <div class="sr-console"><div class="sr-controls" data-controls></div>
+            <div class="sr-actions"><button type="button" class="sr-run" data-run><span aria-hidden="true">▷</span> {% translate "Sınağı başlat" %}</button><button type="button" class="sr-reset" data-reset>{% translate "Sınaqları və parametrləri sıfırla" %}</button></div>
+          </div>
+        </section>
+        <section class="sr-observation" aria-label="{% translate 'Müşahidə' %}"><div class="sr-observation-head"><h3>{% translate "Müşahidə" %}</h3><span data-count></span></div><dl data-results></dl><p data-explanation></p></section>
+        <div class="sr-history" data-history hidden><table>
+          <caption>{% translate "Son dörd sınağın müqayisəsi" %}</caption>
+          <thead><tr><th scope="col">{% translate "Sınaq" %}</th><th scope="col">{% translate "Avadanlıq və şərtlər" %}</th><th scope="col">{% translate "Ölçülən nəticələr" %}</th></tr></thead>
+          <tbody data-history-rows></tbody>
+        </table></div>
+      </div>
+      <span class="sr-announcer" aria-live="polite" aria-atomic="true" data-announce></span>
+    </div>
+    <noscript><p>{% translate "Təcrübələri açmaq üçün brauzerdə JavaScript-i aktiv edin." %}</p></noscript>
+  </div>
+  <script type="module" src="{% static 'labs/science_room/room.js' %}"{% if request.csp_nonce %} nonce="{{ request.csp_nonce }}"{% endif %}></script>
+</section>

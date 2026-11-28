@@ -134,6 +134,12 @@ def _nav_targets(caps):
         ("my-transcript", _("Transkript"), "fa-scroll", "transkript transcript gpa"),
         ("my-journal", _("Elektron jurnal"), "fa-book-open", "jurnal journal qiymət davamiyyət"),
         ("my-schedule", _("Dərs cədvəli"), "fa-calendar-week", "cədvəl schedule dərs vaxt"),
+        (
+            "science-room",
+            _("Laboratoriya otağı"),
+            "fa-flask",
+            "laboratoriya laboratoriya otağı fizika kimya bitki riyaziyyat biologiya",
+        ),
         ("academic-calendar", _("Akademik təqvim"), "fa-calendar-days", "təqvim calendar sessiya qeydiyyat"),
         ("journal-close", _("Jurnal bağlama"), "fa-lock", "jurnal bağla semestr rim"),
         (

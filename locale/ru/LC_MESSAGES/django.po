@@ -123239,3 +123239,114 @@ msgstr "Контроль журнала"
 msgctxt "registrar.schedule"
 msgid "Excel yüklə (.xlsx)"
 msgstr "Скачать Excel (.xlsx)"
+
+msgid "Avadanlıq rəfi"
+msgstr "Полка с оборудованием"
+
+msgid "Avadanlıq seçimi"
+msgstr "Выбор оборудования"
+
+msgid "Avadanlıq və şərtlər"
+msgstr "Оборудование и условия"
+
+msgid "Avadanlığı seçin və ya masaya sürüşdürün."
+msgstr "Выберите прибор или перетащите его на стол."
+
+msgid "Ayın fazaları"
+msgstr "Фазы Луны"
+
+msgid "Biologiya"
+msgstr "Биология"
+
+msgid "Ehtimal təcrübəsi"
+msgstr "Опыт с вероятностями"
+
+msgid "Elmi laboratoriya"
+msgstr "Научная лаборатория"
+
+msgid "Fizika"
+msgstr "Физика"
+
+msgid "Fotoeffekt"
+msgstr "Фотоэффект"
+
+msgid "Fotosintez"
+msgstr "Фотосинтез"
+
+msgid "Fənn seçimi"
+msgstr "Выбор предмета"
+
+msgid "Fəsillər və Günəş hündürlüyü"
+msgstr "Времена года и высота Солнца"
+
+msgid "Kimya"
+msgstr "Химия"
+
+msgid "Laboratoriya otağı"
+msgstr "Лаборатория"
+
+msgid ""
+"Mövzunu seçin, avadanlığı sınaq masasına yerləşdirin və nəticəni müşahidə "
+"edin."
+msgstr "Выберите тему, поместите прибор на стол и наблюдайте за результатом."
+
+msgid "Müşahidə"
+msgstr "Наблюдение"
+
+msgid "Qaz qabarcıqları"
+msgstr "Пузырьки газа"
+
+msgid "Riyaziyyat"
+msgstr "Математика"
+
+msgid "Rəqqasın periodu"
+msgstr "Период маятника"
+
+msgid "Son dörd sınağın müqayisəsi"
+msgstr "Сравнение последних четырёх опытов"
+
+msgid "Sınaq"
+msgstr "Опыт"
+
+msgid "Sınaqları və parametrləri sıfırla"
+msgstr "Сбросить опыты и параметры"
+
+msgid "Sınağı başlat"
+msgstr "Провести опыт"
+
+msgid "Transpirasiya"
+msgstr "Транспирация"
+
+msgid "Təcrübə açılır…"
+msgstr "Опыт открывается…"
+
+msgid "Təcrübə masası"
+msgstr "Лабораторный стол"
+
+msgid "Təcrübələr"
+msgstr "Опыты"
+
+msgid "Təcrübələri açmaq üçün brauzerdə JavaScript-i aktiv edin."
+msgstr "Для запуска опытов включите JavaScript в браузере."
+
+msgid "Təcrübələrə qayıt"
+msgstr "Вернуться к опытам"
+
+msgid "Təcrübəni açmaq alınmadı. Yenidən seçin."
+msgstr "Не удалось открыть опыт. Выберите его ещё раз."
+
+msgid "Xətti funksiya"
+msgstr "Линейная функция"
+
+msgid "Yer və kosmos"
+msgstr "Земля и космос"
+
+msgid "pH indikatoru"
+msgstr "Индикатор pH"
+
+msgid "Ölçülən nəticələr"
+msgstr "Результаты измерений"
+
+msgctxt "profile.sidebar"
+msgid "Laboratoriya otağı"
+msgstr "Лаборатория"

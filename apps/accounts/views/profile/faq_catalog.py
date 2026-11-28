@@ -449,6 +449,7 @@ CORE_GUIDES += (
 )
 # Tələbələr üçün tarixçə və jurnal, yazan müəllim üçün dərs və düzəliş ayrı suallardır.
 _REUSE = {
+    "science-room": "science-room",
     "journal-watch": "journal-watch",
     "my-journal": "grades",
     "my-results": "grades",

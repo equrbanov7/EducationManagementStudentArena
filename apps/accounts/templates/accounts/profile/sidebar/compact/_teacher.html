@@ -12,7 +12,7 @@ göstərilir. «İmtahan Nəzarət Sistemi» nəzarətçi təyin olunmuş müəl
 {% include "accounts/profile/sidebar/_home_menu_item.html" %}
 {% include "accounts/profile/sidebar/items/_faq.html" %}
 
-{% if "my-journal" in allowed_sections or "lab-groups" in allowed_sections or "my-schedule" in allowed_sections or "lessons-log" in allowed_sections or "subject-folders" in allowed_sections or "my-workload" in allowed_sections or "academic-calendar" in allowed_sections %}
+{% if "my-journal" in allowed_sections or "lab-groups" in allowed_sections or "my-schedule" in allowed_sections or "lessons-log" in allowed_sections or "subject-folders" in allowed_sections or "my-workload" in allowed_sections or "science-room" in allowed_sections or "academic-calendar" in allowed_sections %}
 <li class="sidebar-section" data-sidebar-section="teaching">
     <div class="sidebar-section-label sidebar-menu-group-label" id="sidebarSectionTeaching"><span class="sidebar-menu-group-title">{% trans "group_teaching" context "profile.sidebar" %}</span></div>
     <ul class="sidebar-section-items" aria-labelledby="sidebarSectionTeaching">
@@ -23,6 +23,7 @@ göstərilir. «İmtahan Nəzarət Sistemi» nəzarətçi təyin olunmuş müəl
         {% include "accounts/profile/sidebar/items/_subject_folders.html" %}
         {% include "accounts/profile/sidebar/items/_my_workload.html" %}
         {% include "accounts/profile/sidebar/items/_academic_calendar.html" %}
+            {% include "accounts/profile/sidebar/items/_science_room.html" %}
     </ul>
 </li>
 {% endif %}

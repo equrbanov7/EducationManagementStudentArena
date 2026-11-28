@@ -23,7 +23,7 @@ class NoRedirect(HTTPRedirectHandler):
         return None
 
 
-def signed_download(repo, asset):
+def signed_download(repo, asset, fallback_url=None):
     if not re.fullmatch(r"[\w.-]+/[\w.-]+", repo) or not isinstance(asset, int) or asset <= 0:
         raise ValueError("Invalid repository or asset")
     req = Request(
@@ -35,8 +35,8 @@ def signed_download(repo, asset):
     except HTTPError as exc:
         if exc.code == 302:
             url = exc.headers["Location"]
-        elif exc.code in {403, 404} and os.environ.get("FAQ_STOCK_DOWNLOAD_URL"):
-            url = os.environ["FAQ_STOCK_DOWNLOAD_URL"]
+        elif exc.code in {403, 404} and fallback_url:
+            url = fallback_url
         else:
             raise RuntimeError(f"GitHub declined the private stock download (HTTP {exc.code})") from None
     address = urlsplit(url)
@@ -95,70 +95,100 @@ def unpack(archive, stage, expected):
     (stage / ".gitkeep").touch()
 
 
+def fetch_package(package, work, stage, fallback):
+    encrypted = work / "stock.gpg"
+    archive = work / "stock.tar"
+    with (
+        signed_download(os.environ["GITHUB_REPOSITORY"], package["asset_id"], fallback) as response,
+        encrypted.open("xb") as out,
+    ):
+        remaining = package["encrypted"]["size"]
+        while remaining:
+            block = response.read(min(remaining, 1024 * 1024))
+            if not block:
+                raise ValueError("Truncated FAQ release")
+            out.write(block)
+            remaining -= len(block)
+        if response.read(1):
+            raise ValueError("Oversized FAQ release")
+    if not valid(encrypted, package["encrypted"]):
+        raise ValueError("Wrong encrypted FAQ release")
+    secret = os.environ["FAQ_STOCK_KEY"].encode()
+    env = {
+        key: val
+        for key, val in os.environ.items()
+        if key not in {"GH_TOKEN", "FAQ_STOCK_KEY", "FAQ_STOCK_DOWNLOAD_URL", "FAQ_STOCK_EXTRA_URLS"}
+    }
+    home = work / "gpg"
+    home.mkdir(mode=0o700)
+    subprocess.run(
+        [
+            "gpg",
+            "--homedir",
+            str(home),
+            "--no-options",
+            "--batch",
+            "--pinentry-mode",
+            "loopback",
+            "--passphrase-fd",
+            "0",
+            "--output",
+            str(archive),
+            "--decrypt",
+            str(encrypted),
+        ],
+        input=secret,
+        env=env,
+        check=True,
+    )
+    unpack(archive, stage, package["files"])
+
+
 def install(app_dir):
     manifest = json.loads(MANIFEST.read_text())
     target = app_dir / "apps/accounts/guide_media"
     target.parent.mkdir(parents=True, exist_ok=True)
     if target.is_symlink():
         raise ValueError("Invalid FAQ media directory")
-    expected = manifest["files"]
-    if target.exists() and {p.name for p in target.iterdir() if p.name != ".gitkeep"} == set(expected):
-        if all(valid(target / name, entry) for name, entry in expected.items()):
-            print(f"Verified {len(expected)} installed FAQ assets.")
-            return
-    media_bytes = sum(entry["size"] for entry in expected.values())
-    # Keep room for the downloaded package, its tar and the checked staging tree.
-    required = manifest["encrypted"]["size"] + 2 * media_bytes + 16 * 1024 * 1024
-    if shutil.disk_usage(target.parent).free < required:
+    packages = [manifest, *manifest.get("supplements", [])]
+    expected_names = set()
+    missing = []
+    reusable = []
+    for package in packages:
+        files = package["files"]
+        if expected_names.intersection(files) or not all(
+            re.fullmatch(r"[a-z0-9_-]+\.(mp4|vtt)", name) for name in files
+        ):
+            raise ValueError("Invalid package inventory")
+        expected_names.update(files)
+        if all(valid(target / name, entry) for name, entry in files.items()):
+            reusable.extend(files)
+        else:
+            missing.append(package)
+    if not missing and target.is_dir() and {p.name for p in target.iterdir()} == expected_names | {".gitkeep"}:
+        print(f"Verified {len(expected_names)} installed FAQ assets.")
+        return
+    # Intact bundles use hard links on the same filesystem. Only missing bundles need transfer space.
+    new_bytes = sum(e["size"] for group in missing for e in group["files"].values())
+    working_bytes = max((2 * group["encrypted"]["size"] for group in missing), default=0)
+    if shutil.disk_usage(target.parent).free < new_bytes + working_bytes + 16 * 1024 * 1024:
         raise RuntimeError("Not enough disk space to stage the verified FAQ update")
     with tempfile.TemporaryDirectory(prefix=".faq-install-", dir=target.parent) as workdir:
         work = Path(workdir)
-        encrypted, archive, stage = work / "stock.gpg", work / "stock.tar", work / "ready"
+        stage = work / "ready"
         stage.mkdir()
-        with (
-            signed_download(os.environ["GITHUB_REPOSITORY"], manifest["asset_id"]) as response,
-            encrypted.open("xb") as out,
-        ):
-            remaining = manifest["encrypted"]["size"]
-            while remaining:
-                block = response.read(min(remaining, 1024 * 1024))
-                if not block:
-                    raise ValueError("Truncated FAQ release")
-                out.write(block)
-                remaining -= len(block)
-            if response.read(1):
-                raise ValueError("Oversized FAQ release")
-        if not valid(encrypted, manifest["encrypted"]):
-            raise ValueError("Wrong encrypted FAQ release")
-        secret = os.environ["FAQ_STOCK_KEY"].encode()
-        env = {
-            key: val
-            for key, val in os.environ.items()
-            if key not in {"GH_TOKEN", "FAQ_STOCK_KEY", "FAQ_STOCK_DOWNLOAD_URL"}
-        }
-        home = work / "gpg"
-        home.mkdir(mode=0o700)
-        subprocess.run(
-            [
-                "gpg",
-                "--homedir",
-                str(home),
-                "--no-options",
-                "--batch",
-                "--pinentry-mode",
-                "loopback",
-                "--passphrase-fd",
-                "0",
-                "--output",
-                str(archive),
-                "--decrypt",
-                str(encrypted),
-            ],
-            input=secret,
-            env=env,
-            check=True,
-        )
-        unpack(archive, stage, expected)
+        for name in reusable:
+            os.link(target / name, stage / name)
+        fallbacks = json.loads(os.environ.get("FAQ_STOCK_EXTRA_URLS") or "{}")
+        for package in missing:
+            fallback = (
+                os.environ.get("FAQ_STOCK_DOWNLOAD_URL")
+                if package is manifest
+                else fallbacks.get(str(package["asset_id"]))
+            )
+            with tempfile.TemporaryDirectory(dir=work) as package_dir:
+                fetch_package(package, Path(package_dir), stage, fallback)
+        (stage / ".gitkeep").touch()
         previous = work / "previous"
         if target.exists():
             target.rename(previous)
@@ -168,7 +198,7 @@ def install(app_dir):
             if previous.exists():
                 previous.rename(target)
             raise
-    print(f"Installed and verified {len(expected)} private FAQ assets.")
+    print(f"Installed and verified {len(expected_names)} private FAQ assets.")
 
 
 if __name__ == "__main__":

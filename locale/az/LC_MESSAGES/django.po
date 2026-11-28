@@ -122292,3 +122292,116 @@ msgstr "Nəzarət"
 msgctxt "registrar.schedule"
 msgid "Excel yüklə (.xlsx)"
 msgstr "Excel yüklə (.xlsx)"
+
+msgid "Avadanlıq rəfi"
+msgstr "Avadanlıq rəfi"
+
+msgid "Avadanlıq seçimi"
+msgstr "Avadanlıq seçimi"
+
+msgid "Avadanlıq və şərtlər"
+msgstr "Avadanlıq və şərtlər"
+
+msgid "Avadanlığı seçin və ya masaya sürüşdürün."
+msgstr "Avadanlığı seçin və ya masaya sürüşdürün."
+
+msgid "Ayın fazaları"
+msgstr "Ayın fazaları"
+
+msgid "Biologiya"
+msgstr "Biologiya"
+
+msgid "Ehtimal təcrübəsi"
+msgstr "Ehtimal təcrübəsi"
+
+msgid "Elmi laboratoriya"
+msgstr "Elmi laboratoriya"
+
+msgid "Fizika"
+msgstr "Fizika"
+
+msgid "Fotoeffekt"
+msgstr "Fotoeffekt"
+
+msgid "Fotosintez"
+msgstr "Fotosintez"
+
+msgid "Fənn seçimi"
+msgstr "Fənn seçimi"
+
+msgid "Fəsillər və Günəş hündürlüyü"
+msgstr "Fəsillər və Günəş hündürlüyü"
+
+msgid "Kimya"
+msgstr "Kimya"
+
+msgid "Laboratoriya otağı"
+msgstr "Laboratoriya otağı"
+
+msgid ""
+"Mövzunu seçin, avadanlığı sınaq masasına yerləşdirin və nəticəni müşahidə "
+"edin."
+msgstr ""
+"Mövzunu seçin, avadanlığı sınaq masasına yerləşdirin və nəticəni müşahidə "
+"edin."
+
+msgid "Müşahidə"
+msgstr "Müşahidə"
+
+msgid "Qaz qabarcıqları"
+msgstr "Qaz qabarcıqları"
+
+msgid "Riyaziyyat"
+msgstr "Riyaziyyat"
+
+msgid "Rəqqasın periodu"
+msgstr "Rəqqasın periodu"
+
+msgid "Son dörd sınağın müqayisəsi"
+msgstr "Son dörd sınağın müqayisəsi"
+
+msgid "Sınaq"
+msgstr "Sınaq"
+
+msgid "Sınaqları və parametrləri sıfırla"
+msgstr "Sınaqları və parametrləri sıfırla"
+
+msgid "Sınağı başlat"
+msgstr "Sınağı başlat"
+
+msgid "Transpirasiya"
+msgstr "Transpirasiya"
+
+msgid "Təcrübə açılır…"
+msgstr "Təcrübə açılır…"
+
+msgid "Təcrübə masası"
+msgstr "Təcrübə masası"
+
+msgid "Təcrübələr"
+msgstr "Təcrübələr"
+
+msgid "Təcrübələri açmaq üçün brauzerdə JavaScript-i aktiv edin."
+msgstr "Təcrübələri açmaq üçün brauzerdə JavaScript-i aktiv edin."
+
+msgid "Təcrübələrə qayıt"
+msgstr "Təcrübələrə qayıt"
+
+msgid "Təcrübəni açmaq alınmadı. Yenidən seçin."
+msgstr "Təcrübəni açmaq alınmadı. Yenidən seçin."
+
+msgid "Xətti funksiya"
+msgstr "Xətti funksiya"
+
+msgid "Yer və kosmos"
+msgstr "Yer və kosmos"
+
+msgid "pH indikatoru"
+msgstr "pH indikatoru"
+
+msgid "Ölçülən nəticələr"
+msgstr "Ölçülən nəticələr"
+
+msgctxt "profile.sidebar"
+msgid "Laboratoriya otağı"
+msgstr "Laboratoriya otağı"

@@ -60,6 +60,7 @@ COMPACT_SIDEBAR_TREES = {
             "my-transcript",
             "overall-academic",
             "academic-calendar",
+            "science-room",
             "my-group",  # «Starosta» — baş tələbə (rol auditi 2026-10-13 B10)
             "my-subject-folders",
             "assigned-exams",
@@ -87,6 +88,7 @@ COMPACT_SIDEBAR_TREES = {
             "subject-folders",
             "my-workload",
             "academic-calendar",
+            "science-room",
             "syllabus-list",
             "unit-subject-folders",  # «Kafedra materialları» — laborant (2026-10-27)
             "question-bank",

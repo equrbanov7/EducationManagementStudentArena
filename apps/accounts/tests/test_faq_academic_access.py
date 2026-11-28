@@ -10,6 +10,7 @@ from django.utils import timezone
 from apps.accounts.models import FaqVideoGuide
 from apps.accounts.views.profile.faq_academic_access import academic_capabilities, academic_flags
 from apps.accounts.views.profile.faq_catalog import GUIDES
+from apps.accounts.views.profile.faq_tours import guide_url
 from apps.exams.models import ExamRoom, InvigilatorDuty
 from apps.subject_folder.tests import factories as f
 from core.constants import RoleScopeType
@@ -35,6 +36,8 @@ class AcademicFAQAccessTests(TestCase):
         cls.exam_staff = member("centre", "exam_center_staff")
         cls.exam_head = member("decision", "exam_center_head")
         cls.accountant = member("finance", "accountant")
+        cls.lab_assistant = member("lab-support", "lab_assistant")
+        cls.rim_head = member("rim-head", "ikt_rehber")
         cls.other.roles.get(name="exam_center_head").memberships.create(
             user=cls.teacher, organization=cls.other, is_active=True
         )
@@ -52,6 +55,39 @@ class AcademicFAQAccessTests(TestCase):
                     response = client.head(_url(key, ext), HTTP_RANGE="bytes=0-7")
                     self.assertEqual(response.status_code, 206 if key in allowed else 404)
         return keys
+
+    def test_science_room_faq_and_media_follow_the_active_academic_section(self):
+        key = "section-science-room"
+        guide = next(guide for guide in GUIDES if guide.key == key)
+        self.assertEqual((guide.section, guide.video), ("science-room", "science-room"))
+        profile = reverse("accounts:profile")
+        help_url = reverse("accounts:faq_section_help", kwargs={"section": "science-room"})
+        for extension in ("mp4", "vtt"):
+            self.assertEqual(self.client.head(_url(key, extension)).status_code, 404)
+        for user, org, allowed in (
+            (self.student, self.org, True),
+            (self.teacher, self.org, True),
+            (self.lab_assistant, self.org, True),
+            (self.rim_head, self.org, True),
+            (self.accountant, self.org, False),
+            (self.teacher, self.other, False),
+        ):
+            with self.subTest(user=user.pk, org=org.pk, allowed=allowed):
+                client = _client(user, org)
+                page = client.get(profile, {"section": "faq", "faq_guide": key})
+                faq = page.context["faq"]
+                self.assertEqual(key in faq["allowed_guide_keys"], allowed)
+                self.assertEqual([entry.key for entry in faq["page"]], [key] if allowed else [])
+                if allowed:
+                    self.assertContains(page, 'href="' + profile + '?section=science-room"')
+                self.assertRedirects(
+                    client.get(help_url),
+                    guide_url(key) if allowed else profile + "?section=faq",
+                    fetch_redirect_response=False,
+                )
+                for extension in ("mp4", "vtt"):
+                    media = client.head(_url(key, extension), HTTP_RANGE="bytes=0-7")
+                    self.assertEqual(media.status_code, 206 if allowed else 404)
 
     def test_teacher_journal_is_separate_from_paper_import_across_tenants_and_overrides(self):
         self.assertEqual({g.key for g in GUIDES if g.video == "paper"}, PAPER_GUIDES)

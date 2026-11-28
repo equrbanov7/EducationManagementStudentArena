@@ -55,7 +55,8 @@ REMOTE_JOURNAL_ACCESS_SECTION_PARTIALS: dict[str, str] = {
 
 #: ``sections_api``-a birləşən əlavə bölmələr (Əmək müqavilələri + Xarici nəticələrin tanınması).
 EXTRA_SECTION_PARTIALS: dict[str, str] = (
-    HR_CONTRACT_SECTION_PARTIALS
+    {"science-room": "accounts/profile/sections/_science_room.html"}
+    | HR_CONTRACT_SECTION_PARTIALS
     | RECOGNITION_SECTION_PARTIALS
     | TEACHING_APPEALS_SECTION_PARTIALS
     | UNIT_MATERIALS_SECTION_PARTIALS

@@ -1,6 +1,25 @@
 """Akademik reyestrlər, xidmətlər, təkrar təhsil və keyfiyyət."""
 
 ACADEMIC = {
+    "science-room": (
+        "Laboratoriya otağında təcrübəni necə aparım və sınaqların nəticələrini necə müqayisə edim?",
+        (
+            "«Laboratoriya otağı»nda fizika, kimya, riyaziyyat, biologiya və «Yer və kosmos» üzrə 10 təcrübədən "
+            "birini seçin. Fənn düymələri siyahını daraldır.",
+            "Avadanlıq rəfində aləti və varsa materialı seçin və ya masaya sürükləyin. Klaviatura ilə Tab "
+            "düyməsini basıb rəfə keçin. Ox düymələri ilə seçimi dəyişin. Məsələn, pH təcrübəsində "
+            "«Alma şirəsi»ni və ya «Limon şirəsi»ni seçə bilərsiniz.",
+            "Ölçü tənzimləyicilərini dəyişin və «Sınağı başlat» düyməsini basın. Sonra bir şərti dəyişib "
+            "yenidən sınaq aparın. «Son dörd sınağın müqayisəsi» cədvəlində son 4 sınağın avadanlığını, "
+            "şərtlərini və ölçülən nəticələrini yanaşı yoxlayın.",
+            "«Sınaqları və parametrləri sıfırla» düyməsi ilkin seçimi qaytarır və bu təcrübənin tarixçəsini "
+            "təmizləyir. Başqa mövzu üçün «Təcrübələrə qayıt» düyməsini seçin.",
+        ),
+        "elmi laboratoriya lab otağı təcrübə virtual otaq avadanlıq material rəf sınaq fizika kimya "
+        "riyaziyyat biologiya kosmos fotosintez rəqqas pH qaz qabarcıqları Ayın fazaları",
+        "science-room",
+        0,
+    ),
     "academic-calendar": (
         "Semestr, imtahan sessiyası və bayram günlərinin tarixlərini necə tapım?",
         (
