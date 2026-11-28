@@ -30,7 +30,7 @@
     {% endfor %}
 </ul>
 {% else %}
-    {% trans "Hələ fənn qovluğu yoxdur" context "subject_folder.ui" as st_title %}
+    {% trans "Hələ dərs materialı yoxdur" context "subject_folder.ui" as st_title %}
     {% trans "Müəllim qovluğu qrupunuza təyin edəndə burada görünəcək və bildiriş alacaqsınız." context "subject_folder.ui" as st_body %}
     {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-folder-open" %}
 {% endif %}

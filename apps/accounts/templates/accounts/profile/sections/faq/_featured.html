@@ -1,0 +1,45 @@
+{% load i18n static %}
+<section class="faq-film" data-faq-film aria-labelledby="faq-film-title"
+         data-language="{% translate 'Azərbaycanca' %}" data-play-error="{% translate 'Video açılmadı. Yenidən cəhd edin.' %}">
+    {{ faq.featured|json_script:"faq-film-data" }}
+    <div class="faq-film__stage" data-film-stage>
+        <div class="faq-film__poster" data-film-poster>
+            <img class="faq-film__art" src="{% static 'accounts/img/faq/cabinet-preview.svg' %}" width="640" height="360" alt="">
+            <div class="faq-film__intro">
+                {% if faq.featured.role_label %}<p class="faq-film__role">{{ faq.featured.role_label }}</p>{% endif %}
+                <h2 id="faq-film-title">{{ faq.featured.title }}</h2>
+                <div class="faq-film__play-row">
+                    <button type="button" class="faq-film__play" data-film-begin><span class="faq-film__triangle" aria-hidden="true"></span>{% translate "Əvvəldən başlat" %}</button>
+                    <span class="faq-film__duration" data-film-duration></span>
+                </div>
+            </div>
+        </div>
+        <div class="faq-film__screen" data-film-screen hidden></div>
+    </div>
+    <div class="faq-film__rail">
+        <details class="faq-film__drawer" data-film-drawer open>
+            <summary><span>{% translate "Video fəsilləri" %}</span><span class="faq-film__chapter-count" data-film-count></span></summary>
+            <div class="faq-film__filter">
+                <input type="search" data-film-filter aria-controls="faq-film-chapters" aria-label="{% translate 'Fəsil axtar' %}" placeholder="{% translate 'Fəsil axtar' %}">
+            </div>
+            <ol id="faq-film-chapters" class="faq-film__chapters" data-film-chapters></ol>
+            <div class="faq-film__pages" data-film-pages hidden>
+                <button type="button" data-film-prev aria-label="{% translate 'Əvvəlki səhifə' %}">‹</button>
+                <span data-film-page aria-live="polite"></span>
+                <button type="button" data-film-next aria-label="{% translate 'Növbəti səhifə' %}">›</button>
+            </div>
+            <p class="faq-film__empty" data-film-empty role="status" hidden>{% translate "Uyğun fəsil tapılmadı." %}</p>
+        </details>
+    </div>
+    <div class="faq-film__toolbar" data-film-toolbar hidden>
+        <label class="faq-film__timeline">
+            <span>{% translate "Ümumi vaxt xətti" %}</span>
+            <input type="range" data-film-range min="0" step="1" value="0">
+            <span data-film-clock aria-hidden="true"></span>
+        </label>
+        <div class="faq-film__now" data-film-now role="status"></div>
+        <button type="button" class="faq-film__restart" data-film-begin>{% translate "Əvvəldən başlat" %}</button>
+    </div>
+    <p class="faq-film__error" data-film-error role="alert" hidden></p>
+    <noscript>{% for source in faq.featured.sources %}{% if source.key == faq.featured.playlist.0 %}<a href="{{ source.src }}">{% translate "Təlimat videosunu aç" %}</a>{% endif %}{% endfor %}</noscript>
+</section>

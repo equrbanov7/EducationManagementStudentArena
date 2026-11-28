@@ -81280,8 +81280,8 @@ msgid "Hələ açılmayıb"
 msgstr "Hələ açılmayıb"
 
 msgctxt "subject_folder.ui"
-msgid "Hələ fənn qovluğu yoxdur"
-msgstr "Hələ fənn qovluğu yoxdur"
+msgid "Hələ dərs materialı yoxdur"
+msgstr "Hələ dərs materialı yoxdur"
 
 msgctxt "subject_folder.ui"
 msgid "Hələ fənn qovluğunuz yoxdur"
@@ -81668,8 +81668,8 @@ msgid "Qovluqlara qayıt"
 msgstr "Qovluqlara qayıt"
 
 msgctxt "subject_folder.ui"
-msgid "Qovluqlarıma qayıt"
-msgstr "Qovluqlarıma qayıt"
+msgid "Dərs materiallarıma qayıt"
+msgstr "Dərs materiallarıma qayıt"
 
 msgctxt "subject_folder.ui"
 msgid "Qovluğu redaktə et"
@@ -122405,3 +122405,36 @@ msgstr "Ölçülən nəticələr"
 msgctxt "profile.sidebar"
 msgid "Laboratoriya otağı"
 msgstr "Laboratoriya otağı"
+
+msgid "Axtarış nəticələrini yükləmək mümkün olmadı."
+msgstr "Axtarış nəticələrini yükləmək mümkün olmadı."
+
+msgid "Fəsil axtar"
+msgstr "Fəsil axtar"
+
+msgid "Suallar və cavablar"
+msgstr "Suallar və cavablar"
+
+msgid "Səhifəni aç"
+msgstr "Səhifəni aç"
+
+msgid "Uyğun fəsil tapılmadı."
+msgstr "Uyğun fəsil tapılmadı."
+
+msgid "Video açılmadı. Yenidən cəhd edin."
+msgstr "Video açılmadı. Yenidən cəhd edin."
+
+msgid "Video fəsilləri"
+msgstr "Video fəsilləri"
+
+msgid "Əvvəldən başlat"
+msgstr "Əvvəldən başlat"
+
+msgid "Kabinet üzrə tam video təlimat"
+msgstr "Kabinet üzrə tam video təlimat"
+
+msgid "Məsələn, şifrəmi necə dəyişim?"
+msgstr "Məsələn, şifrəmi necə dəyişim?"
+
+msgid "Ümumi vaxt xətti"
+msgstr "Ümumi vaxt xətti"

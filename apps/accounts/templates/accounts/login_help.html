@@ -3,7 +3,7 @@
 {% block title %}{% translate "İlk giriş və parolun bərpası" %} | {{ site_brand_name }}{% endblock %}
 {% block extraCss %}
 <link rel="stylesheet" href="{% static 'accounts/css/login.css' %}">
-<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/faq.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/faq.css' %}?v=20261128-film">
 {% endblock %}
 {% block content %}
 <main class="auth-page-wrapper"><div class="auth-card ems-faq">
@@ -11,5 +11,5 @@
     {% include "accounts/profile/sections/faq/_results.html" %}
     <p><a href="{% url 'accounts:login' %}">{% translate "Giriş səhifəsinə qayıt" %}</a></p>
 </div></main>
-<script src="{% static 'accounts/js/profile/faq.js' %}" defer></script>
+<script src="{% static 'accounts/js/profile/faq.js' %}?v=20261128-film" defer></script>
 {% endblock %}

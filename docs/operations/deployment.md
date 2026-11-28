@@ -697,6 +697,12 @@ trafiki də kəsir: node_exporter (9100) və arp-agent (8953) üçün yalnız k�
 Qalan (sahib qərarı): `legacy_import_*` cədvəlləri (1.2 GB) idxal bitəndə arxiv, 3 istifadəsiz
 `registrar_lessonmark` indeksi, off-site backup hədəfi.
 
+### Production build keşinin ölçüsü
+
+`Production Docker build cache` hər uğurlu `main` yerləşdirməsindən sonra və hər saatın 17-ci və 47-ci dəqiqəsində işləyir. Normal halda 12 GiB hədəfi aşılarsa, BuildKit ən köhnə istifadə olunmuş, silinə bilən build qeydlərindən başlayır. Docker-in yerləşdiyi diskdə tətbiq üçün əlçatan boş yer 20%-ə və ya daha aşağıya düşərsə, bütün təhlükəsiz silinə bilən build keşi avtomatik təmizlənir. Aktiv build-in istifadəsində olan və image-lərlə paylaşılan laylar ümumi həcmə daxil ola bilər. İşləyən tətbiqin və saxlanan release image-lərinin identifikatorları təmizləmədən əvvəl və sonra yoxlanır.
+
+Təcili yer boşaltmaq üçün Actions-da həmin workflow-un `clear-unused` rejimini seçin. Nəticədə Docker-in bildirdiyi silinmiş keş və fayl sistemində faktiki boş yer dəyişikliyi ayrıca göstərilir. Məlumat bazasının ehtiyat nüsxələri öz saxlama siyasətinə tabedir.
+
 ## 6. Static & Private Media Handling
 
 ### Static files

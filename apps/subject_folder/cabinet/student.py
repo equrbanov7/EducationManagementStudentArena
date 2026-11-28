@@ -9,6 +9,8 @@ oxşarlıq bayrağı və müəllimin daxili qeydləri burada yoxdur.
 
 from __future__ import annotations
 
+from collections import Counter
+
 from django.utils.translation import pgettext
 
 from .. import public
@@ -24,8 +26,18 @@ def student_panel(context) -> dict:
     request, organization, user, base = common.resolve(context)
     if organization is None or not lookups.is_authenticated(user):
         return {"state": "no_org"}
-    entries = public.student_folders(organization=organization, student=user)
-    urls = {**common.endpoint_urls(), "list": common.section_url(base, SECTION_STUDENT)}
+    offering_param = common.param(request, "offering")
+    offering_id = common.uuid_or_none(offering_param)
+    urls = {**common.endpoint_urls(), "list": common.section_url(base, SECTION_STUDENT, offering=offering_id)}
+    if offering_param and offering_id is None:
+        return {"state": "missing", "urls": urls}
+    entries = public.student_folders(organization=organization, student=user, offering_id=offering_id)
+    # Qovluq bir neçə açılışa təyin oluna bilər. Kartdan keçəndə seçilmiş təyinat qorunur.
+    folder_counts = Counter(entry["folder"].pk for entry in entries)
+    for entry in entries:
+        entry["link_offering_id"] = offering_id or (
+            entry["offering"].pk if folder_counts[entry["folder"].pk] > 1 else None
+        )
     folder_id = common.uuid_param(request, "folder")
     if folder_id is None:
         return _list_state(entries, base, urls)
@@ -42,7 +54,9 @@ def student_panel(context) -> dict:
 
 
 def _folder_url(base, entry, **params) -> str:
-    return common.section_url(base, SECTION_STUDENT, folder=entry["folder"].pk, **params)
+    return common.section_url(
+        base, SECTION_STUDENT, folder=entry["folder"].pk, offering=entry["link_offering_id"], **params
+    )
 
 
 def _teacher_name(entry) -> str:

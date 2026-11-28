@@ -13,7 +13,7 @@ Kontekst `sf_student_panel` tag-ından (`apps/subject_folder/cabinet/student.py`
 {% elif sp.state == "missing" %}
     {% trans "Qovluq və ya tapşırıq tapılmadı" context "subject_folder.ui" as st_title %}
     {% trans "Müəllim onu gizlədib və ya bu fənndə qeydiyyatınız yoxdur." context "subject_folder.ui" as st_body %}
-    {% trans "Qovluqlarıma qayıt" context "subject_folder.ui" as st_action %}
+    {% trans "Dərs materiallarıma qayıt" context "subject_folder.ui" as st_action %}
     {% include "partials/ems_ui/_empty.html" with state_title=st_title state_body=st_body state_icon="fa-folder-minus" state_action_label=st_action state_action_url=sp.urls.list %}
 {% elif sp.state == "task" %}
     {% include "subject_folder/cabinet/student/_task.html" %}

@@ -3,6 +3,7 @@
     {% if faq.page.paginator.count %}{% blocktranslate with first=faq.page.start_index last=faq.page.end_index total=faq.page.paginator.count %}{{ total }} sualdan {{ first }}–{{ last }} göstərilir{% endblocktranslate %}{% else %}{% translate "Uyğun sual tapılmadı." %}{% endif %}
 </p>
 {% for guide in faq.page %}
+<div class="ems-faq-result">
 <details class="ems-faq-item" data-faq-item data-faq-guide="{{ guide.key }}"{% if guide.key == faq.selected %} id="faq-guide" open{% endif %}>
     <summary><span class="ems-faq-question"><small>{{ guide.topic }}</small><strong>{{ guide.title }}</strong></span><span class="ems-faq-plus" aria-hidden="true"></span></summary>
     <div class="ems-faq-answer">
@@ -13,12 +14,14 @@
         {% if guide.video or guide.video_file %}
         <div class="ems-faq-media">
             {% url faq.media_route|default:"accounts:faq_media" guide.key "mp4" as media_url %}
-            <button type="button" class="ems-btn" data-faq-watch data-start="{% if guide.key == faq.selected %}{{ faq.chapter_start|unlocalize }}{% else %}{{ guide.start|unlocalize }}{% endif %}" data-src="{{ media_url }}"{% if guide.has_subtitles %} data-track="{% url faq.media_route|default:'accounts:faq_media' guide.key 'vtt' %}"{% endif %}
-                    data-language="{% translate 'Azərbaycanca' %}" aria-label="{% translate 'Videoya bax' %} · {{ guide.title }}"><span aria-hidden="true">▷</span> {% translate "Videoya bax" %} · {{ guide.length }}</button>
-            {% if guide.chapters %}
+            <button type="button" class="ems-btn" data-faq-watch data-guide-key="{{ guide.key }}" data-title="{{ guide.title }}"{% if guide.key == faq.selected and faq.requested_chapter %} data-faq-exact{% endif %}{% if guide.match_chapter %} data-faq-match{% endif %} data-start="{% if guide.key == faq.selected and faq.requested_chapter %}{{ faq.chapter_start|unlocalize }}{% elif guide.match_chapter %}{{ guide.match_chapter.start|unlocalize }}{% else %}{{ guide.start|unlocalize }}{% endif %}" data-src="{{ media_url }}"{% if guide.has_subtitles %} data-track="{% url faq.media_route|default:'accounts:faq_media' guide.key 'vtt' %}"{% endif %}
+                    data-language="{% translate 'Azərbaycanca' %}" aria-label="{% translate 'Videoya bax' %} · {{ guide.title }}"><span aria-hidden="true">▷</span> {% translate "Videoya bax" %} · {% if guide.match_chapter and guide.key != faq.selected %}{{ guide.match_chapter.time }} · {{ guide.match_chapter.title }}{% else %}{{ guide.length }}{% endif %}</button>
+            {% if profile_base_url and guide.chapters|length > 14 %}
+            <button type="button" class="ems-faq-drawer-link" data-faq-open-chapters>{% translate "Video fəsilləri" %} ({{ guide.chapters|length }})</button>
+            {% elif guide.chapters %}
             <details class="ems-faq-chapters"><summary>{% translate "Videoda mövzuya keç" %}</summary>
                 {% if guide.chapters|length > 14 %}<input type="search" data-faq-chapter-search aria-label="{% translate 'Videoda bölmə və ya tab axtar' %}" placeholder="{% translate 'Videoda bölmə və ya tab axtar' %}">{% endif %}
-                <ul>{% for chapter in guide.chapters %}<li><button type="button" data-faq-seek="{{ chapter.start|unlocalize }}"><time>{{ chapter.time }}</time> {{ chapter.title }}</button>{% if chapter.related %}{% for related in chapter.related %}{% if related.key in faq.allowed_guide_keys %}<a class="ems-faq-related" href="{{ profile_base_url }}?section=faq&amp;faq_guide={{ related.key|urlencode }}#faq-guide">{{ related.title }}</a>{% endif %}{% endfor %}{% elif chapter.guide and chapter.guide in faq.allowed_guide_keys %} <a class="ems-faq-related" href="{{ profile_base_url }}?section=faq&amp;faq_guide={{ chapter.guide|urlencode }}#faq-guide">{% translate "Bu əməliyyatın təlimatı" %}</a>{% endif %}</li>{% endfor %}</ul>
+                <ul>{% for chapter in guide.chapters %}<li><button type="button" data-faq-seek="{{ chapter.start|unlocalize }}"><time>{{ chapter.time }}</time> {{ chapter.title }}</button>{% if chapter.related %}{% for related in chapter.related %}{% if related.key in faq.allowed_guide_keys %}<a class="ems-faq-related" data-faq-page href="{{ profile_base_url }}?section=faq&amp;faq_guide={{ related.key|urlencode }}#faq-guide">{{ related.title }}</a>{% endif %}{% endfor %}{% elif chapter.guide and chapter.guide in faq.allowed_guide_keys %} <a class="ems-faq-related" data-faq-page href="{{ profile_base_url }}?section=faq&amp;faq_guide={{ chapter.guide|urlencode }}#faq-guide">{% translate "Bu əməliyyatın təlimatı" %}</a>{% endif %}</li>{% endfor %}</ul>
             </details>
             {% endif %}
             <noscript><a href="{{ media_url }}">{% translate "Təlimat videosunu aç" %}</a></noscript>
@@ -26,6 +29,12 @@
         {% endif %}
     </div>
 </details>
+{% if profile_base_url %}{% if guide.video or guide.video_file %}
+<button type="button" class="ems-faq-shortcut" data-faq-shortcut aria-label="{% translate 'Videoya bax' %} · {{ guide.title }}">
+    <span class="faq-film__triangle" aria-hidden="true"></span><span data-shortcut-time>{% if guide.match_chapter %}{{ guide.match_chapter.time }}{% else %}{% translate "Videoya bax" %}{% endif %}</span>
+</button>
+{% endif %}{% endif %}
+</div>
 {% empty %}
 <p>{% translate "Daha qısa ifadə ilə axtarın və ya bütün suallara qayıdın." %} <a data-faq-page href="{{ profile_base_url }}?section=faq">{% translate "Bütün suallar" %}</a></p>
 {% endfor %}

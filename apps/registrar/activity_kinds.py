@@ -21,8 +21,10 @@ lazım olan açılışlar üçün TƏK sorğu (:func:`bits_map`, :class:`Pending
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from collections.abc import Callable
+from dataclasses import dataclass, field
 from decimal import ROUND_HALF_UP, Decimal
+from functools import cached_property, partial
 
 from django.apps import apps as django_apps
 from django.db.models import Case, Exists, F, IntegerField, OuterRef, Q, Subquery, Value, When
@@ -92,18 +94,19 @@ class ActivityDetail:
     lab_mean: Decimal | None = None
     seminar_part: Decimal | None = None
     lab_part: Decimal | None = None
-    #: Fənnin SORĞUSUZ bilinən seminar/lab maskası (tələbənin öz balları ∪ hazır maska; tənbəl çağırış
-    #: çağırılmır) — yalnız görünüş: «Aktivlik» əvəzinə «Seminar» / «Laboratoriya» adı (sahib 2026-11-28).
     kinds: int = 0
+    # Hesab üçün lazım olmayan fənn növlərini başlıq göstəriləndə toplu oxu.
+    label_bits: Callable[[], int] | None = field(default=None, repr=False, compare=False)
 
-    @property
+    @cached_property
     def kind_label(self) -> str:
         """``both`` / ``lab`` / ``seminar``; bilinmirsə boş sətir."""
-        if self.split or self.kinds & BOTH == BOTH:
+        kinds = self.kinds | resolve(self.label_bits)
+        if self.split or kinds & BOTH == BOTH:
             return "both"
-        if self.kinds & LAB_BIT:
+        if kinds & LAB_BIT:
             return LAB
-        if self.kinds & SEMINAR_BIT:
+        if kinds & SEMINAR_BIT:
             return SEMINAR
         return ""
 
@@ -143,6 +146,7 @@ def activity(totals: LessonTotals, bits=None, *, split_enabled: bool) -> Activit
     lab_mean = _mean(totals.lab, totals.lab_count)
     own = totals.own_bits
     known = own
+    label_bits = None
     if split_enabled and own:
         kinds = own if own == BOTH else own | resolve(bits)
         if kinds & BOTH == BOTH:
@@ -152,7 +156,11 @@ def activity(totals: LessonTotals, bits=None, *, split_enabled: bool) -> Activit
         known = kinds
     elif isinstance(bits, int):
         known = own | bits
-    return ActivityDetail(pooled_mean(totals.total, totals.count), False, sem_mean, lab_mean, kinds=known & BOTH)
+    elif callable(bits) and own != BOTH:
+        label_bits = bits
+    return ActivityDetail(
+        pooled_mean(totals.total, totals.count), False, sem_mean, lab_mean, kinds=known & BOTH, label_bits=label_bits
+    )
 
 
 # ── Bal işarələri → cəmlər ───────────────────────────────────────────────────
@@ -365,7 +373,7 @@ class PendingBits:
 
     def lazy(self, offering_id):
         """``EntryRule.activity_bits`` üçün tənbəl dəyər (yalnız lazım olanda sorğu)."""
-        return lambda: self.get(offering_id)
+        return partial(self.get, offering_id)
 
 
 def splits(bits) -> bool:

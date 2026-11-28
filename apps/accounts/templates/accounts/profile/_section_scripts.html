@@ -23,7 +23,8 @@ MÜQAVİLƏ:
 {% load static %}
 {% if asset_phase == "pre" %}
 {% if 'faq' in asset_sections %}
-<script src="{% static 'accounts/js/profile/faq.js' %}"></script>
+<script src="{% static 'accounts/js/profile/faq_player.js' %}"></script>
+<script src="{% static 'accounts/js/profile/faq.js' %}?v=20261128-film"></script>
 {% endif %}
 {% if 'overall-academic' in asset_sections %}
 <script src="{% static 'accounts/js/profile/overall_academic.js' %}?v=20260926-search"></script>

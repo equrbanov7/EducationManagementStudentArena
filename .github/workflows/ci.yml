@@ -454,3 +454,10 @@ jobs:
           rsync -a --delete --exclude-from scripts/deploy/rsync-excludes.txt ./ "$APP_DIR/"
           cd "$APP_DIR"
           bash scripts/deploy/remote_deploy.sh
+
+  maintain-build-cache:
+    needs: deploy-production
+    if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.deploy-production.result == 'success'
+    uses: ./.github/workflows/prod-build-cache.yml
+    permissions:
+      contents: read

@@ -81183,8 +81183,8 @@ msgid "Hələ açılmayıb"
 msgstr "Henüz açılmadı"
 
 msgctxt "subject_folder.ui"
-msgid "Hələ fənn qovluğu yoxdur"
-msgstr "Henüz ders klasörü yok"
+msgid "Hələ dərs materialı yoxdur"
+msgstr "Henüz ders materyali yok"
 
 msgctxt "subject_folder.ui"
 msgid "Hələ fənn qovluğunuz yoxdur"
@@ -81572,8 +81572,8 @@ msgid "Qovluqlara qayıt"
 msgstr "Klasörlere dön"
 
 msgctxt "subject_folder.ui"
-msgid "Qovluqlarıma qayıt"
-msgstr "Klasörlerime dön"
+msgid "Dərs materiallarıma qayıt"
+msgstr "Ders materyallerime dön"
 
 msgctxt "subject_folder.ui"
 msgid "Qovluğu redaktə et"
@@ -122286,3 +122286,36 @@ msgstr "Ölçüm sonuçları"
 msgctxt "profile.sidebar"
 msgid "Laboratoriya otağı"
 msgstr "Laboratuvar odası"
+
+msgid "Axtarış nəticələrini yükləmək mümkün olmadı."
+msgstr "Arama sonuçları yüklenemedi."
+
+msgid "Fəsil axtar"
+msgstr "Bölüm ara"
+
+msgid "Suallar və cavablar"
+msgstr "Sorular ve yanıtlar"
+
+msgid "Səhifəni aç"
+msgstr "Sayfayı aç"
+
+msgid "Uyğun fəsil tapılmadı."
+msgstr "Eşleşen bölüm bulunamadı."
+
+msgid "Video açılmadı. Yenidən cəhd edin."
+msgstr "Video yüklenemedi. Tekrar deneyin."
+
+msgid "Video fəsilləri"
+msgstr "Video bölümleri"
+
+msgid "Əvvəldən başlat"
+msgstr "Baştan oynat"
+
+msgid "Kabinet üzrə tam video təlimat"
+msgstr "Panel için tam video rehber"
+
+msgid "Məsələn, şifrəmi necə dəyişim?"
+msgstr "Örneğin, şifremi nasıl değiştirebilirim?"
+
+msgid "Ümumi vaxt xətti"
+msgstr "Genel zaman çizelgesi"
