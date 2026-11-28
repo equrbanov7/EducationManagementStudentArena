@@ -1,0 +1,42 @@
+{
+  "name": "RIM-02-journal-watch",
+  "audience": "RİM üçün",
+  "section": "02 Nəzarət",
+  "order": "02.01",
+  "title": "Jurnal dəyişikliklərinə nəzarət və bildiriş ünvanları",
+  "summary": "RİM rəhbəri üçün ünvanın təsdiqi, şəxs və hadisə üzrə qaydalar, bildirişlər və jurnalın dəyişiklik tarixçəsi.",
+  "steps": [
+    {
+      "chapter": "Sistem tənzimləmələri → Nəzarət",
+      "say": "Rəqəmsal İnkişaf Mərkəzinin rəhbəri kabinetdə «Sistem tənzimləmələri» menyusunu genişləndirir və «Nəzarət» bölməsini açır. Burada hansı şəxsin jurnal qeydlərini izləyəcəyinizi, hansı hadisənin qeydə alınacağını və bildirişin ünvanını seçirsiniz. Aşağıdakı tarixçə nəticəni göstərir."
+    },
+    {
+      "chapter": "Bildiriş üçün ünvan əlavə edin",
+      "say": "Əvvəlcə «E-poçt ünvanları» bölməsinə keçin. Məktubu alacaq ünvanı daxil edib «Təsdiq məktubu göndər» düyməsini basın. Yeni ünvanın yanında «Təsdiq gözlənilir» yazılır. Bu nümunədə məktub yalnız yerli sınaq qutusuna çatır."
+    },
+    {
+      "chapter": "Ünvan sahibi məktubu təsdiqləyir",
+      "say": "Məktubdakı keçidi ünvanın sahibi açır. Açılan səhifədə «Ünvanımı təsdiqlə» düyməsi ilə razılığını bildirir. Rəhbər kabinetə qayıdıb səhifəni yeniləyir. Ünvanın yanında artıq «Təsdiqlənib» görünür və həmin ünvan qaydanın seçimləri arasında yer alır."
+    },
+    {
+      "chapter": "Qeydi yazan şəxsi və ya tələbəni tapın",
+      "say": "«Kimi izləyirsiniz?» siyahısında iki seçim var. «Qeydi yazan şəxs» seçilsə, jurnal qeydini daxil edən əməkdaş izlənir. Burada «Qeydi izlənilən tələbə»ni seçirik. Adı və ya istifadəçi adını yazıb «Şəxsi axtar» düyməsini basın, sonra «Şəxs» siyahısındakı nəticəni seçin."
+    },
+    {
+      "chapter": "Hadisəni və ünvanı seçib saxlayın",
+      "say": "Qayıb, iştirak, bal, mövcud qeydin düzəldilməsi və silinməsi ayrıca seçilir. Bu nümunədə tələbənin balındakı düzəliş üçün yeni təsdiqlənmiş ünvanı işarələyirik. «Nəzarət aktivdir» seçimini açıq saxlayıb «Yadda saxla» düyməsini basın. Ünvan seçilməsə, uyğun hadisə yalnız kabinetdə görünəcək."
+    },
+    {
+      "chapter": "Bir şəxs üçün ikinci qayda yaradın",
+      "say": "İndi eyni tələbəni bir də seçirik. Bu dəfə hadisələrdən yalnız «Qayıb yazılması»nı işarələyib fərqli ünvana bağlayırıq. Saxladıqdan sonra «İzlənən şəxslər»də qaydanı açın. Seçilmiş hadisənin və ünvanın birinci qaydadan fərqləndiyini burada yoxlaya bilərsiniz."
+    },
+    {
+      "chapter": "Qaydanı redaktə edin və ya dayandırın",
+      "say": "Qaydanın altında «Redaktə et» keçidini açın. Həmin şəxsin hadisələrini və bildiriş ünvanlarını buradan dəyişə bilərsiniz. Qaydaya fasilə vermək üçün «Nəzarət aktivdir» işarəsini götürüb saxlayın. Siyahıda «Dayandırılıb» görünür. Digər qaydanın vəziyyəti dəyişmir."
+    },
+    {
+      "chapter": "Jurnaldakı dəyişikliyin tarixçəsini oxuyun",
+      "say": "Tarixçədə nümunə tələbənin qayıb qeydi və daha sonra həmin qeydin iştiraka və səkkiz bala dəyişməsi görünür. Sətrin vaxtını, qeydi yazan şəxsi, tələbəni, fənni və dərsin tarixini oxuyun. «Dəyişiklik» sütununda əvvəlki və yeni qiymət yanaşı göstərilir. Uyğun qaydada ünvan seçilibsə, ilk bildiriş dərhal göndərilir. Sonrakı beş dəqiqə ərzində olan uyğun dəyişikliklər bir məktubda birləşdirilir."
+    }
+  ]
+}

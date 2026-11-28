@@ -82,6 +82,15 @@ sonra da işləsin (docs/frontend/AJAX_SAFE_JS_PATTERN.md). Dinamik dəyərlər
   {% include "partials/ems_ui/_content_header.html" with header_subtitle=apx_subtitle header_actions_include="accounts/profile/sections/_applications_header_actions.html" %}
 
   {# ── KPI kartları (dizayn §4.3) — dəyər/ton JS ilə doldurulur ─────────── #}
+  {% if 'faq' in allowed_sections %}
+  <a class="apx-faq-entry" href="{{ profile_base_url }}?section=faq" data-apx-faq>
+    <span class="apx-faq-entry__icon" aria-hidden="true"><i class="fas fa-circle-question"></i></span>
+    <span><strong>{% trans "Ən çox verilən suallar" %}</strong>
+      <small>{% trans "Sualını axtar, izahı oxu və əməliyyatı videoda izlə." %}</small></span>
+    <i class="fas fa-arrow-right" aria-hidden="true"></i>
+  </a>
+  {% endif %}
+
   <div class="apx-kpis">
     {% if applications_section.is_handler %}
     <button type="button" class="apx-kpi apx-kpi--primary" data-apx-kpi="inbox_open" data-tab="inbox" data-stat="open">
@@ -255,7 +264,7 @@ onları swap-dan sonra yenidən icra edir (init idempotentdir).{% endcomment %}
 <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_arayis.css' %}?v=20261019-arayis3">
 <script defer src="{% static 'accounts/js/profile/applications_arayis.js' %}?v=20261026-transcript1"></script>
 <script defer src="{% static 'accounts/js/profile/applications_search.js' %}?v=20261128-elsewhere"></script>
-<script defer src="{% static 'accounts/js/profile/applications.js' %}?v=20261128-elsewhere"></script>
+<script defer src="{% static 'accounts/js/profile/applications.js' %}?v=20261128-rim"></script>
 {% endif %}
 </section>
 {% endif %}

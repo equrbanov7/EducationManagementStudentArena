@@ -6,12 +6,15 @@ burada yalnız org-domain xidmətləri təqdim olunur.
 """
 
 from apps.organizations.groups_registry import (  # noqa: F401
+    can_manage_groups,
     can_view_group_students,
     can_view_groups,
+    group_manage_scope,
     group_meta,
     group_scope,
     visible_group,
 )
+from apps.organizations.journal_watch_access import can_manage_journal_watch, has_journal_watch_access
 from apps.organizations.name_matching import is_registry_name_collision
 from apps.organizations.permissions import (  # noqa: F401
     PERMISSION_CATEGORIES,
@@ -21,6 +24,7 @@ from apps.organizations.permissions import (  # noqa: F401
     is_grant_entry,
     strip_grant_prefix,
 )
+from apps.organizations.permissions_rim_staff import editable_permission_categories, has_faq_video_editor_grant
 from apps.organizations.scoping import (  # noqa: F401
     get_permission_scope,
     has_active_membership_permission,
@@ -64,9 +68,15 @@ from apps.organizations.views import (  # noqa: F401
 )
 
 __all__ = [
+    "can_manage_journal_watch",
+    "has_journal_watch_access",
+    "has_faq_video_editor_grant",
+    "editable_permission_categories",
     "register_student_transfer",
     "register_student_extra_group",
     "register_student_group_removal",
+    "can_manage_groups",
+    "group_manage_scope",
     "can_view_group_students",
     "can_view_groups",
     "group_meta",

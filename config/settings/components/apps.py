@@ -60,7 +60,7 @@ MIDDLEWARE = [
     "core.middleware.MetricsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "core.middleware.SecurityHeadersMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "core.static_middleware.StaticFilesMiddleware",
     # Təhlükəsizlik auditi 2026-10-05: qlobal gövdə limiti 5 MB; yalnız imtahan cavabı
     # POST-u böyük limit alır — POST-u oxuyan hər middleware-dən (CSRF) ƏVVƏL.
     "core.upload_limits.ExamAnswerUploadLimitMiddleware",

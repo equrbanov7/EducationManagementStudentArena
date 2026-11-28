@@ -70,6 +70,12 @@ def endpoints() -> dict:
     }
 
 
+def can_create_support_application(user, organization):
+    return bool(organization and routing.sender_family_for(user, organization)) and access.has_app_permission(
+        user, organization, PERM_CREATE
+    )
+
+
 def build_applications_context(request, *, organization) -> dict:
     """«Müraciətlərim» bölməsinin ilkin context-i (qalan hər şey AJAX-dır)."""
     user = getattr(request, "user", None)

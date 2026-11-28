@@ -96,3 +96,64 @@ test("missing chair/reason does not submit; pending request blocks double click 
     assert.equal(s.button.disabled, false);
     assert.equal(s.status.textContent, "<scope denied>");
 });
+
+function sourcePicker(fetchJSON) {
+    const state = setup(fetchJSON);
+    const { w, form } = state;
+    const dialog = w.document.createElement("section");
+    dialog.dataset.wlRowModal = "";
+    const root = w.document.createElement("div");
+    root.dataset.wlRoot = "";
+    root.dataset.rowsUrl = "/rows/";
+    w.document.body.append(root, dialog);
+    dialog.innerHTML = `<h2 data-wl-row-heading></h2><div data-wl-row-fields></div>
+        <div data-wl-transfer-picker hidden><input data-wl-transfer-search><select data-wl-transfer-source></select>
+        <button data-wl-transfer-more hidden></button><p data-wl-source-status></p></div>
+        <button data-wl-import-curriculum></button><button data-wl-save-row></button>`;
+    dialog.appendChild(form);
+    form.dataset.wlRowForm = "";
+    w.EMSWorkloadDist.q = selector => w.document.querySelector(selector);
+    w.EMSWorkloadDist.modal = () => ({ show() { dialog.dataset.shown = "1"; } });
+    return { ...state, dialog, picker: dialog.querySelector("[data-wl-transfer-source]") };
+}
+
+test("toolbar opens the existing dialog, pages the selected task and reuses the destination lookup", async () => {
+    const urls = [];
+    const s = sourcePicker(url => {
+        urls.push(new URL(url, "https://test.invalid"));
+        if (url.startsWith("/choices/")) return Promise.resolve({ results: [{ id: "target", name: "Kafedra" }] });
+        const second = urls.at(-1).searchParams.get("offset") === "50";
+        return Promise.resolve({ rows: second ? [{ id: "b", subject: "Fənn B", groups: [{ name: "Qrup 2" }] }]
+            : [{ id: "a", subject: "<Fənn A>", groups_text: "Qrup 1" }, { id: "skip", intensive: {} }],
+            next_offset: second ? 51 : 50, has_more: !second });
+    });
+    s.handlers["[data-wl-open-transfer]"]();
+    await tick();
+    assert.equal(s.dialog.dataset.shown, "1");
+    assert.equal(urls[0].searchParams.get("task"), "source-task");
+    assert.equal(s.dialog.querySelector("[data-wl-row-fields]").hidden, true);
+    assert.equal(s.picker.options.length, 2);
+    assert.equal(s.picker.options[1].textContent, "<Fənn A> · Qrup 1");
+    s.handlers["[data-wl-transfer-more]"]();
+    await tick();
+    assert.equal(s.picker.options[2].textContent, "Fənn B · Qrup 2");
+    s.picker.value = "b";
+    s.handlers["[data-wl-transfer-source]"]({}, s.picker);
+    await tick();
+    assert.equal(urls.at(-1).searchParams.get("row_id"), "b");
+    assert.equal(s.select.options[1].value, "target");
+    s.api.setMode(false);
+    assert.equal(s.dialog.querySelector("[data-wl-transfer-picker]").hidden, true);
+    assert.equal(s.dialog.querySelector("[data-wl-row-fields]").hidden, false);
+    assert.equal(s.dialog.querySelector("[data-wl-save-row]").hidden, false);
+});
+
+test("a late source response cannot repopulate a row editor reopened in its original mode", async () => {
+    let resolve;
+    const s = sourcePicker(() => new Promise(done => { resolve = done; }));
+    s.handlers["[data-wl-open-transfer]"]();
+    s.api.setMode(false);
+    resolve({ rows: [{ id: "old", subject: "Old" }], has_more: false });
+    await tick();
+    assert.equal(s.picker.options.length, 1);
+});

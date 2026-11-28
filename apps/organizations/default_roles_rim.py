@@ -30,7 +30,7 @@ rol şablonu YALNIZ təhlükəsiz başlanğıc dəstidir.
 from core.constants import RoleScopeType
 
 from .default_roles_shared import PEOPLE_DIRECTORY_READ
-from .permissions_rim_staff import RIM_STAFF_DAILY_PERMISSIONS
+from .permissions_rim_staff import PERM_FAQ_VIDEO_MANAGE, RIM_STAFF_DAILY_PERMISSIONS
 
 #: RİM əməkdaşının səthi — «görür və köməklik edir», «dəyişdirmir».
 _RIM_STAFF_PERMISSIONS = [
@@ -67,6 +67,7 @@ _RIM_STAFF_PERMISSIONS = [
     # 2026-11-12 (sahib): GÜNDƏLİK iş — RİM mərkəzi + parol sıfırlama, yük bölgüsü, fənn təhvili, qruplar / alt qrup,
     # jurnalda dərs günü əlavə et / sil, cədvəl redaktoru. Siyahı və QƏSDƏN verilməyənlər: ``permissions_rim_staff``.
     *RIM_STAFF_DAILY_PERMISSIONS,
+    PERM_FAQ_VIDEO_MANAGE,
 ]
 
 RIM_STAFF_ROLES = [

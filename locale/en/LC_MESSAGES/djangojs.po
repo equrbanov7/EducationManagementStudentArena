@@ -4042,3 +4042,24 @@ msgstr "Elective block %(group)s"
 
 msgid "Seçmə fənn"
 msgstr "Elective subject"
+
+msgid "Başqa kafedraya göndər"
+msgstr "Send to another department"
+
+msgid "Bu axtarışa uyğun sətir tapılmadı."
+msgstr "No rows matched your search."
+
+msgid "Müəllim və ayrılan saat"
+msgstr "Teacher and assigned hours"
+
+msgid "Qrup üzrə saat"
+msgstr "Hours per group"
+
+msgid "Sətir seçin"
+msgstr "Select a row"
+
+msgid "Sətirlər yüklənir…"
+msgstr "Loading rows…"
+
+msgid "Tapşırıq sətri"
+msgstr "Assignment row"

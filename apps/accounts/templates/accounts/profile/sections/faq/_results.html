@@ -1,0 +1,42 @@
+{% load i18n l10n %}
+<p class="ems-faq-count" role="status" tabindex="-1" data-faq-count>
+    {% if faq.page.paginator.count %}{% blocktranslate with first=faq.page.start_index last=faq.page.end_index total=faq.page.paginator.count %}{{ total }} sualdan {{ first }}–{{ last }} göstərilir{% endblocktranslate %}{% else %}{% translate "Uyğun sual tapılmadı." %}{% endif %}
+</p>
+{% for guide in faq.page %}
+<details class="ems-faq-item" data-faq-item data-faq-guide="{{ guide.key }}"{% if guide.key == faq.selected %} id="faq-guide" open{% endif %}>
+    <summary><span class="ems-faq-question"><small>{{ guide.topic }}</small><strong>{{ guide.title }}</strong></span><span class="ems-faq-plus" aria-hidden="true"></span></summary>
+    <div class="ems-faq-answer">
+        <ol>{% for step in guide.steps %}<li>{{ step }}</li>{% endfor %}</ol>
+        {% if guide.route %}<a class="ems-faq-link" href="{% url guide.route %}">{{ guide.destination }} <span aria-hidden="true">→</span></a>
+        {% elif guide.section == "my-journal" and not role_capabilities.is_student %}<a class="ems-faq-link" href="{% url 'registrar:journal_list' %}">{{ guide.destination }} <span aria-hidden="true">→</span></a>
+        {% elif guide.section %}<a class="ems-faq-link" href="{{ profile_base_url }}?section={{ guide.section }}">{{ guide.destination }} <span aria-hidden="true">→</span></a>{% endif %}
+        {% if guide.video or guide.video_file %}
+        <div class="ems-faq-media">
+            {% url faq.media_route|default:"accounts:faq_media" guide.key "mp4" as media_url %}
+            <button type="button" class="ems-btn" data-faq-watch data-start="{% if guide.key == faq.selected %}{{ faq.chapter_start|unlocalize }}{% else %}{{ guide.start|unlocalize }}{% endif %}" data-src="{{ media_url }}"{% if guide.has_subtitles %} data-track="{% url faq.media_route|default:'accounts:faq_media' guide.key 'vtt' %}"{% endif %}
+                    data-language="{% translate 'Azərbaycanca' %}" aria-label="{% translate 'Videoya bax' %} · {{ guide.title }}"><span aria-hidden="true">▷</span> {% translate "Videoya bax" %} · {{ guide.length }}</button>
+            {% if guide.chapters %}
+            <details class="ems-faq-chapters"><summary>{% translate "Videoda mövzuya keç" %}</summary>
+                {% if guide.chapters|length > 14 %}<input type="search" data-faq-chapter-search aria-label="{% translate 'Videoda bölmə və ya tab axtar' %}" placeholder="{% translate 'Videoda bölmə və ya tab axtar' %}">{% endif %}
+                <ul>{% for chapter in guide.chapters %}<li><button type="button" data-faq-seek="{{ chapter.start|unlocalize }}"><time>{{ chapter.time }}</time> {{ chapter.title }}</button>{% if chapter.related %}{% for related in chapter.related %}{% if related.key in faq.allowed_guide_keys %}<a class="ems-faq-related" href="{{ profile_base_url }}?section=faq&amp;faq_guide={{ related.key|urlencode }}#faq-guide">{{ related.title }}</a>{% endif %}{% endfor %}{% elif chapter.guide and chapter.guide in faq.allowed_guide_keys %} <a class="ems-faq-related" href="{{ profile_base_url }}?section=faq&amp;faq_guide={{ chapter.guide|urlencode }}#faq-guide">{% translate "Bu əməliyyatın təlimatı" %}</a>{% endif %}</li>{% endfor %}</ul>
+            </details>
+            {% endif %}
+            <noscript><a href="{{ media_url }}">{% translate "Təlimat videosunu aç" %}</a></noscript>
+        </div>
+        {% endif %}
+    </div>
+</details>
+{% empty %}
+<p>{% translate "Daha qısa ifadə ilə axtarın və ya bütün suallara qayıdın." %} <a data-faq-page href="{{ profile_base_url }}?section=faq">{% translate "Bütün suallar" %}</a></p>
+{% endfor %}
+{% if faq.page.has_other_pages %}
+<nav class="ems-faq-pages" aria-label="{% translate 'Sual səhifələri' %}">
+    {% if faq.page.has_previous %}<a data-faq-page href="{{ profile_base_url }}?section=faq&amp;faq_q={{ faq.query|urlencode }}&amp;faq_page={{ faq.page.previous_page_number }}" aria-label="{% translate 'Əvvəlki səhifə' %}">‹</a>{% endif %}
+    {% for number in faq.numbers %}
+    {% if number == faq.page.paginator.ELLIPSIS %}<span class="ems-faq-ellipsis" aria-hidden="true">{{ number }}</span>
+    {% elif number == faq.page.number %}<span aria-current="page">{{ number }}</span>
+    {% else %}<a data-faq-page href="{{ profile_base_url }}?section=faq&amp;faq_q={{ faq.query|urlencode }}&amp;faq_page={{ number }}" aria-label="{% translate 'Səhifə' %} {{ number }}">{{ number }}</a>{% endif %}
+    {% endfor %}
+    {% if faq.page.has_next %}<a data-faq-page href="{{ profile_base_url }}?section=faq&amp;faq_q={{ faq.query|urlencode }}&amp;faq_page={{ faq.page.next_page_number }}" aria-label="{% translate 'Növbəti səhifə' %}">›</a>{% endif %}
+</nav>
+{% endif %}

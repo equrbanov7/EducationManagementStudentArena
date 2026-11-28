@@ -1,0 +1,11 @@
+{% load i18n nav_icons %}
+{% if "faq" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=faq"
+       data-section="faq" data-title="{% translate 'Ən çox verilən suallar' %}" data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link js-profile-section-link {% if active_section == 'faq' %}active{% endif %}">
+        {% nav_icon "file-question-mark" "sidebar-menu-icon" %}
+        <span class="sidebar-menu-text">{% translate "Ən çox verilən suallar" %}</span>
+    </a>
+</li>
+{% endif %}

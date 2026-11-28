@@ -155,7 +155,13 @@ def test_dockerfile_writes_build_info_after_project_copy():
     assert "/app/docker/build-info.sh /app/build-info.json" in dockerfile
     # SHA dəyişəndə yalnız kiçik lay yenidən qurulsun: ARG pip layından SONRA.
     assert dockerfile.index("ARG BUILD_GIT_SHA") > dockerfile.index("requirements/production.lock")
-    assert dockerfile.index("ARG BUILD_GIT_SHA") > dockerfile.index("COPY --chown=appuser:appgroup . /app/")
+    project_copy = "COPY --exclude=apps/accounts/guide_media --chown=appuser:appgroup . /app/"
+    stock_media_copy = (
+        "COPY --link --chmod=a=rX apps/accounts/guide_media/.gitkeep "
+        "apps/accounts/guide_media/*.mp4 apps/accounts/guide_media/*.vtt "
+        "/app/apps/accounts/guide_media/"
+    )
+    assert dockerfile.index(stock_media_copy) < dockerfile.index(project_copy) < dockerfile.index("ARG BUILD_GIT_SHA")
     assert (ROOT / "docker/build-info.sh").exists()
     assert "build-info" not in (ROOT / ".dockerignore").read_text(encoding="utf-8")
 

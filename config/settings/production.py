@@ -299,6 +299,9 @@ if OBJECT_STORAGE_ENABLED:
         "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
     }
 
+# Only opt in with a bucket that denies all public reads (including CDN policies).
+FAQ_PRIVATE_S3_BUCKET = os.getenv("FAQ_PRIVATE_S3_BUCKET", "").strip()
+
 # Media files must not be served directly by Django in production.
 # Configure your web server (nginx/caddy) to serve MEDIA_ROOT with appropriate
 # access controls. Use the /media/download/<path>/ endpoint for authenticated access.

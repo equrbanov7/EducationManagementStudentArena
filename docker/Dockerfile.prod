@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.19@sha256:b6afd42430b15f2d2a4c5a02b919e98a525b785b1aaff16747d2f623364e39b6
 # Production Dockerfile for EMS Arena
 # Pin by digest for supply-chain security.  To update, pull the new tag and
 # replace the sha256 digest below:
@@ -88,11 +89,14 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
     && apt-get purge -y --auto-remove gcc libpq-dev libc6-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Stock FAQ media is read-only and shared across releases that only change code.
+COPY --link --chmod=a=rX apps/accounts/guide_media/.gitkeep apps/accounts/guide_media/*.mp4 apps/accounts/guide_media/*.vtt /app/apps/accounts/guide_media/
+
 # Copy the project owned by the runtime user directly (Faza 2, audit
 # 2026-07-02): the previous separate `RUN chown -R appuser /app` duplicated
 # every copied file into a second image layer (~2x app content).  With
 # --chown the ownership is set inside the COPY layer itself.
-COPY --chown=appuser:appgroup . /app/
+COPY --exclude=apps/accounts/guide_media --chown=appuser:appgroup . /app/
 
 # Entrypoints executable + writable runtime dirs.  Only /app itself and the
 # two runtime mount targets are chowned (non-recursive, cheap): staticfiles

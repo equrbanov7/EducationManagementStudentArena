@@ -79,16 +79,18 @@ def apply_permission_section_gates(
     """
     from apps.accounts.services.people.permissions import PERM_VIEW_STUDENTS, PERM_VIEW_TEACHERS
     from apps.accounts.services.rim.policy import RIM_PERMISSIONS
-    from core.permissions import has_permission
-
-    from .rbac_my_group import my_group_sections
-    from .rbac_scope_sections import faculties_section_visible, scope_gated_sections, teaches_workload
 
     # RİM rəhbəri (`ikt_rehber`) — SAHİBİN QƏRARI (2026-09-14 «hər şeyin icazəsi»,
     # 2026-09-21 «hər roldakı bütün özəllikləri görsün»): bölmə görünürlüyü üçün
     # sahib/superadmin kimi privileged sayılır. Rolun DB icazə siyahısı
     # tenantda əl ilə daralsa belə («Qruplar» bölməsi itmişdi) menyu itmir;
     # faktiki əməllər hər modulun öz servis qatında yenidən yoxlanılır.
+    from apps.organizations.public import has_journal_watch_access
+    from core.permissions import has_permission
+
+    from .rbac_my_group import my_group_sections
+    from .rbac_scope_sections import faculties_section_visible, scope_gated_sections, teaches_workload
+
     is_rim_head = _is_rim_head(user, organization)
     privileged = bool(is_superadmin or is_owner or is_rim_head)
 
@@ -356,6 +358,7 @@ def apply_permission_section_gates(
         (can_watch_legacy_grades, "legacy-grade-review"),
         # «Sistem tənzimləmələri» — sahib 2026-10-03: YALNIZ RİM rəhbəri və superadmin (açar qapısı yox).
         (bool(is_superadmin or is_rim_head), "system-settings"),
+        (is_rim_head and has_journal_watch_access(user, organization), "journal-watch"),
         # «Kənardan jurnal girişi» — sahib 2026-11-20: «Sistem tənzimləmələri» ilə EYNİ qapı (RİM rəhbəri / superadmin).
         (bool(is_superadmin or is_rim_head), "remote-journal-access"),
         # «Jurnal təmizliyi» — sahib 2026-10-10: eyni qapı; yazı servisdə `journal.correct` ilə yenidən yoxlanılır.

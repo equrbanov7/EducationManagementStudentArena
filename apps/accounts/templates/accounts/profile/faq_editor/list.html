@@ -1,0 +1,22 @@
+{% extends "base.html" %}{% load i18n static %}
+{% block title %}{% translate "Video dərsləri idarə et" %}{% endblock %}
+{% block extraCss %}{% include "partials/ems_ui/_assets.html" %}<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/faq_editor.css' %}">{% endblock %}
+{% block content %}
+<main class="faq-editor">
+  <a class="faq-editor__back" href="{% url 'accounts:profile' %}?section=faq">← {% translate "Ən çox verilən suallar" %}</a>
+  <header class="faq-editor__header"><div><h1>{% translate "Video dərsləri idarə et" %}</h1>
+    <p>{% translate "Dəyişikliklər aktiv təşkilatın kabinetində görünür." %}</p></div>
+    <a class="ems-btn ems-btn--primary" href="{% url 'accounts:faq_video_create' %}">{% translate "Video dərsi əlavə et" %}</a></header>
+  <form method="get" class="faq-editor__search" role="search"><label for="guide-search">{% translate "Ad və ya mövzu" %}</label><div>
+    <input class="ems-input" type="search" id="guide-search" name="q" value="{{ q }}" maxlength="120">
+    <button class="ems-btn ems-btn--secondary">{% translate "Axtar" %}</button></div></form>
+  <p>{{ page.paginator.count }} {% translate "dərs" %}</p>
+  <ul class="faq-editor__list">
+    {% for item in page %}<li><div><small>{{ item.topic }}{% if item.unclassified %} · {% translate "Əməliyyat seçimi gözlənilir" %}{% endif %}{% if item.hidden %} · {% translate "Kataloqdan çıxarılıb" %}{% endif %}</small><strong>{{ item.title }}</strong></div>
+      <a href="{% url 'accounts:faq_video_edit' key=item.key %}" aria-label="{% translate 'Redaktə et' %} · {{ item.title }}">{% translate "Redaktə et" %}</a></li>
+    {% empty %}<li>{% translate "Dərs tapılmadı." %}</li>{% endfor %}
+  </ul>
+  {% if page.has_other_pages %}<nav class="faq-editor__pages" aria-label="{% translate 'Dərs səhifələri' %}">
+    {% if page.has_previous %}<a href="?q={{ q|urlencode }}&amp;page={{ page.previous_page_number }}">← {% translate "Əvvəlki" %}</a>{% endif %}
+    <span>{{ page.number }} / {{ page.paginator.num_pages }}</span>{% if page.has_next %}<a href="?q={{ q|urlencode }}&amp;page={{ page.next_page_number }}">{% translate "Növbəti" %} →</a>{% endif %}</nav>{% endif %}
+</main>{% endblock %}

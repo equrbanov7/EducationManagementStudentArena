@@ -4,12 +4,13 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="wl-row-title" data-wl-row-title data-create="{% trans "Plan sətri əlavə et" context "accounts.workload" %}" data-edit="{% trans "Plan sətrini redaktə et" context "accounts.workload" %}">{% trans "Plan sətri əlavə et" context "accounts.workload" %}</h5>
+          <h5 class="modal-title" id="wl-row-title" data-wl-row-title data-wl-row-heading data-create="{% trans "Plan sətri əlavə et" context "accounts.workload" %}" data-edit="{% trans "Plan sətrini redaktə et" context "accounts.workload" %}">{% trans "Plan sətri əlavə et" context "accounts.workload" %}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Bağla' context 'accounts.workload' %}"></button>
         </div>
         <div class="modal-body">
           <form class="wl-form" data-wl-row-form novalidate>
             <input type="hidden" name="row_id" data-wl-row-id>
+            {% include "accounts/profile/sections/workload/_transfer_source_picker.html" %}
             <fieldset class="border-0 p-0 m-0" data-wl-row-fields>
             <div class="mb-3">
               <button type="button" class="wl-btn wl-btn--ghost" data-wl-import-curriculum aria-controls="wl-plan-picker" aria-expanded="false">

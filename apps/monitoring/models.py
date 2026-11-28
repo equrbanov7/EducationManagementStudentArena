@@ -166,3 +166,14 @@ class SecurityEvent(models.Model):
 
     def __str__(self):
         return f"[{self.get_severity_display()}] {self.get_event_type_display()} ×{self.count}"
+
+
+# Register the tenant-owned journal watch tables alongside platform monitoring models.
+from .journal_watch_models import (  # noqa: E402,F401
+    JournalWatch,
+    JournalWatchBatch,
+    JournalWatchEvent,
+    JournalWatchMailItem,
+    JournalWatchRecipient,
+    JournalWatchRoute,
+)

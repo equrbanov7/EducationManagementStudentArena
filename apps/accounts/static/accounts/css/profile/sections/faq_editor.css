@@ -1,0 +1,28 @@
+.faq-editor { max-width: 57rem; padding: 2rem 1rem 4rem; margin: auto; color: var(--bs-body-color, #1a2b40); }
+.faq-editor__back { display: inline-block; margin-bottom: 1.25rem; }
+.faq-editor__header, .faq-editor__list li, .faq-editor__pages { display: flex; gap: 1rem; align-items: center; justify-content: space-between; }
+.faq-editor__header { flex-wrap: wrap; margin-bottom: 1.5rem; }
+.faq-editor__header h1 { margin: 0 0 .4rem; font-size: clamp(1.5rem, 3vw, 2rem); }
+.faq-editor__header p, .faq-editor small { color: var(--bs-secondary-color, #495c6e); }
+.faq-editor__search div { display: flex; gap: .7rem; margin: .3rem 0 1rem; }
+.faq-editor__list { list-style: none; margin: 0; padding: 0; }
+.faq-editor__list li, .faq-editor__controls { padding: .9rem 0; border-top: 1px solid var(--bs-border-color, #d7e0ea); }
+.faq-editor__list strong, .faq-editor small { display: block; }
+.faq-editor__list a { white-space: nowrap; }
+.faq-editor__pages { justify-content: flex-start; margin-top: 1rem; }
+.faq-editor__form { display: grid; gap: 1.1rem; margin: 1rem 0; }
+.faq-editor__form label, .faq-editor__form legend { font-weight: 600; }
+.faq-editor__field { display: grid; gap: .3rem; }
+.faq-editor__form input:not([type="checkbox"], [type="hidden"]), .faq-editor__form textarea {
+    width: 100%; padding: .55rem .65rem; border: 1px solid var(--bs-border-color, #a8b9ca);
+    border-radius: .35rem; background: var(--bs-body-bg, white); color: inherit; font: inherit;
+}
+.faq-editor__roles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: .4rem 1rem; margin-top: .65rem; }
+.faq-editor__roles label { font-weight: normal; }
+.faq-editor__form fieldset { border: 1px solid var(--bs-border-color, #d7e0ea); padding: 1rem; }
+.faq-editor__form legend { font-size: 1rem; }
+.faq-editor__form button { justify-self: start; }
+.faq-editor__controls form { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; padding: .65rem 0; }
+.faq-editor__controls summary { cursor: pointer; }
+.faq-editor__error, .faq-editor .errorlist { color: var(--bs-danger-text-emphasis, #9c2323); }
+.faq-editor__all { display: inline-block; margin: .65rem 0 .15rem; }

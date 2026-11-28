@@ -34,7 +34,7 @@ from django.utils.translation import pgettext
 from apps.registrar.public import schedule as schedule_service
 from apps.registrar.public import schedule_conflicts, schedule_editor
 from apps.registrar.public import schedule_editor_actions as editor
-from apps.registrar.public import schedule_grid, schedule_manage, schedule_rooms
+from apps.registrar.public import schedule_exports, schedule_grid, schedule_manage, schedule_rooms
 
 from .kollokvium_windows import _current_semester, _season_label
 
@@ -231,6 +231,8 @@ def _selection(section, request, organization, period, *, permission):
     )
     teachers = _teachers_in_scope(scoped, organization=organization, period=period, assignments=assignments)
     section["scope_teachers"] = teachers
+    if period and not getattr(request, "is_view_as", False):
+        section["export_structure"] = schedule_exports.structure_choices(organization, scoped)
 
     view_mode = "teacher" if (request.GET.get(PREFIX + "view") or "").strip() == "teacher" else "group"
     section["view_mode"] = view_mode

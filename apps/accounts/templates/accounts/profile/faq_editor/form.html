@@ -1,0 +1,33 @@
+{% extends "base.html" %}{% load i18n static %}
+{% block title %}{% translate "Video dərsinin redaktoru" %}{% endblock %}
+{% block extraCss %}{% include "partials/ems_ui/_assets.html" %}<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/faq_editor.css' %}">{% endblock %}
+{% block content %}
+<main class="faq-editor">
+  <a class="faq-editor__back" href="{% url 'accounts:faq_video_editor' %}">← {% translate "Video dərslər" %}</a>
+  <header class="faq-editor__header"><div><h1>{% if editing %}{% translate "Video dərsini redaktə et" %}{% else %}{% translate "Video dərsi əlavə et" %}{% endif %}</h1>
+  {% if original %}<p>{% translate "İlkin dərsin kabinet bölməsi və giriş icazələri tətbiq olunur. Seçdiyiniz rollar auditoriyanı daraldır." %}</p>{% endif %}</div></header>
+  {% if operation_error %}<p role="alert" class="faq-editor__error">{{ operation_error }} <a href="">{% translate "Yenidən aç" %}</a></p>{% endif %}
+  {% if row.hidden %}<p role="status">{% translate "Bu dərs kataloqdan çıxarılıb. Saxladıqda yenidən görünəcək." %}</p>{% endif %}
+  {% if editing and not row.hidden %}<a href="{% url 'accounts:profile' %}?section=faq&amp;faq_guide={{ key|urlencode }}">{% translate "Dərsin kabinetdəki görünüşü" %}</a>{% endif %}
+  <form method="post" action="{% if key %}{% url 'accounts:faq_video_upload_edit' key=key %}{% else %}{% url 'accounts:faq_video_upload_create' %}{% endif %}" enctype="multipart/form-data" class="faq-editor__form">
+    {% csrf_token %}{% for field in form.hidden_fields %}{{ field }}{{ field.errors }}{% endfor %}{{ form.non_field_errors }}
+    {% for field in form.visible_fields %}
+      {% if field.name == 'audience' %}<fieldset><legend>{{ field.label }}</legend>
+        <small>{{ field.help_text }}</small><label class="faq-editor__all">{{ form.all_roles }} {{ form.all_roles.label }}</label><div class="faq-editor__roles">{% for checkbox in field %}<label>{{ checkbox.tag }} {{ checkbox.choice_label }}</label>{% endfor %}</div>{{ field.errors }}</fieldset>
+      {% elif field.name != "all_roles" %}<div class="faq-editor__field">{{ field.label_tag }}{{ field }}
+        {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{{ field.errors }}
+        {% if field.name == 'video' and editing %}<small>{% translate "Video faylını dəyişdikdə ona uyğun yeni subtitr yükləyə bilərsiniz." %}</small>{% endif %}</div>{% endif %}
+    {% endfor %}
+    <button class="ems-btn ems-btn--primary" type="submit" name="action" value="save">{% translate "Dərsi saxla" %}</button>
+  </form>
+  {% if editing %}<div class="faq-editor__controls">
+    {% if original and row %}<form method="post">{% csrf_token %}<input type="hidden" name="version" value="{{ form.version.value }}">
+      <button type="submit" name="action" value="restore" class="ems-btn">{% translate "İlkin dərsi bərpa et" %}</button></form>{% endif %}
+    {% if not row.hidden %}<details><summary>{% translate "Dərsi kataloqdan çıxar" %}</summary>
+      <form method="post">{% csrf_token %}<input type="hidden" name="version" value="{{ form.version.value }}"><label><input type="checkbox" name="confirm" value="yes" required> {% translate "Bu təşkilatın kataloqundan silinməni təsdiqləyirəm." %}</label>
+      <button type="submit" name="action" value="remove" class="ems-btn">{% translate "Sil" %}</button></form>
+    </details>{% endif %}
+  </div>{% endif %}
+</main>{% endblock %}
+
+{% block extraJs %}<script src="{% static 'accounts/js/profile/faq_editor.js' %}" defer></script>{% endblock %}

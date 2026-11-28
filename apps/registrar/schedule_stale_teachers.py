@@ -205,3 +205,10 @@ def release(*, offering_ids, by_user=None, request=None, reason=RELEASE_REASON) 
 
 
 __all__ = ["RELEASE_REASON", "current_q", "load_inherited_q", "owner_current_q", "release", "stale"]
+
+
+def personal_teacher_slot_q(teacher):
+    """Effective slot ownership, including vacancy and appointment corrections."""
+    from .schedule import taught_by_q
+
+    return (taught_by_q(teacher) & current_q()) | load_inherited_q(teacher)

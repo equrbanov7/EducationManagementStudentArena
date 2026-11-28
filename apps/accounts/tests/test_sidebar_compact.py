@@ -48,6 +48,7 @@ COMMENT_RE = re.compile(r"{%\s*comment\s*%}.*?{%\s*endcomment\s*%}|{#.*?#}", re.
 
 STUDENT_ORDER = [
     "dashboard",
+    "faq",
     "my-subjects",
     "my-schedule",
     "my-journal",
@@ -74,6 +75,7 @@ STUDENT_ORDER = [
 ]
 TEACHER_ORDER = [
     "dashboard",
+    "faq",
     "my-schedule",
     "lessons-log",
     "subject-folders",

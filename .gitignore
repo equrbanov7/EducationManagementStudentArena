@@ -231,3 +231,7 @@ db.sqlite3
 apps/syllabus/tests/e2e/*.html
 apps/syllabus/tests/e2e/*_texts.json
 apps/syllabus/tests/e2e/*_out.json
+
+# Private role recordings are provisioned on the host from the encrypted media release.
+apps/accounts/guide_media/*
+!apps/accounts/guide_media/.gitkeep

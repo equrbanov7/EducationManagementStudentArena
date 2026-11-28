@@ -36,6 +36,8 @@ output/
 tmp/
 logs/
 backups/
+# Offline masters and authoring inputs are excluded from the web image.
+tools/tutorials/
 
 media/
 staticfiles/
@@ -54,3 +56,4 @@ scripts/_*.txt
 
 .DS_Store
 .zshrc
+**/.faq-install-*

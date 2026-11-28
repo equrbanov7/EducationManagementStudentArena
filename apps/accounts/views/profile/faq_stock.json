@@ -1,0 +1,1449 @@
+{
+  "asset_id": 802777457,
+  "encrypted": {
+    "sha256": "fc8f612d834e54ce92674ab7f1cbafa5832b5319054b3ad7d4de2eb07cf7c094",
+    "size": 816752722
+  },
+  "files": {
+    "appeal.mp4": {
+      "sha256": "cd089f6dd52768dbc5a7b960f50f4f3dab2acd848bd77fe8252e0ea72e032ccc",
+      "size": 3128994
+    },
+    "appeal.vtt": {
+      "sha256": "94af22de530beddcafd9ac0e69dc87c344e28df8f8752f82911e2ac53a7a56b9",
+      "size": 1297
+    },
+    "document-verify.mp4": {
+      "sha256": "1592bcc9d2d6edcc1f399a55ceb82beda077ed8b7cf54916d8da1e3e2cfa3b4d",
+      "size": 1461374
+    },
+    "document-verify.vtt": {
+      "sha256": "87ba968209cf84e0a8c353c1cba0cca16f7d1053ad30735443febc386c412d3d",
+      "size": 944
+    },
+    "document.mp4": {
+      "sha256": "7901a1674617f8a9206ff54bb1482ad6661a702f90acf23b37cdcc04425bf0dc",
+      "size": 1976391
+    },
+    "document.vtt": {
+      "sha256": "3b4011f4ad3f69ac64f11c30bbd46f4f1cfb7fa9f940eb06a4130c9d528810b9",
+      "size": 1180
+    },
+    "faq-video-editor.mp4": {
+      "sha256": "3e8e2545eb266d6e2c57efd1ff6163eed99b0fb085d566342ab2f241d4b9a390",
+      "size": 6896245
+    },
+    "faq-video-editor.vtt": {
+      "sha256": "b131e19e350178ed4bfba680c102c551a39126d252a5cfa9888e55fc0dd905bc",
+      "size": 3710
+    },
+    "grades.mp4": {
+      "sha256": "9173aba3610f4fbe8f1f565f664690dc11376d60c279fa444c68ea1d4b5facc0",
+      "size": 6366648
+    },
+    "grades.vtt": {
+      "sha256": "4d91709771148c88683a62ede82f8ea0defc71d9aaa10dff041408aa612ae72a",
+      "size": 1937
+    },
+    "homework.mp4": {
+      "sha256": "fd8a6a4784b9ec9bfdb4fb3cc7ab12ecb6eaf5267ac186cf24330728065a609d",
+      "size": 3655379
+    },
+    "homework.vtt": {
+      "sha256": "162e2aa0e6489f4fd4a52333bcf7c8246312faffd0e695a47274879a1f131327",
+      "size": 1275
+    },
+    "journal-entry.mp4": {
+      "sha256": "e9d094695b40eaff57904599043845c9b60806684e15db43c877bc7d0465f9bc",
+      "size": 5487267
+    },
+    "journal-entry.vtt": {
+      "sha256": "e293c4ad9af568c92b9cfbbd8fbd9042a601da15ed46575f86e95d85a77a76f3",
+      "size": 1670
+    },
+    "journal-watch.mp4": {
+      "sha256": "cd97dc28b894383ef369cdbd0647f197c2febda2b398354eccc18a8abd837246",
+      "size": 8842182
+    },
+    "journal-watch.vtt": {
+      "sha256": "10730d36a954666caa30acc4884424d40c743c442353a7138a6f6cde79faeee2",
+      "size": 3233
+    },
+    "lab-group-placement.mp4": {
+      "sha256": "ad10a9cee5b8ed9e93b4cf88248fd21a4de0ff6ec32bedbcf87998036fae4f09",
+      "size": 4794951
+    },
+    "lab-group-placement.vtt": {
+      "sha256": "0b8bb2ba3c34e424cf47c7a3dec1cdb4083c25a0ba424da1429c03af00419f3d",
+      "size": 1652
+    },
+    "laborant-components.mp4": {
+      "sha256": "3a3f757659955018ab8f05059194dbc1f69f522d51cb43b2582f40e77b5bc3d5",
+      "size": 5174616
+    },
+    "laborant-components.vtt": {
+      "sha256": "79d876938888f757b60e5d6de6a22532d86a8032c1995779488e17b234e20bf9",
+      "size": 1672
+    },
+    "laborant-department.mp4": {
+      "sha256": "d85fca6dd509406cf8bc8fa5bd2ab4ca3494d7de2a088d46074783a747b49976",
+      "size": 5726922
+    },
+    "laborant-department.vtt": {
+      "sha256": "c29b72e2aa18af786f9f40ebc1b88c1653eb281031c1e595621c2dbbb9e9b231",
+      "size": 1939
+    },
+    "laborant-journal.mp4": {
+      "sha256": "234402c6153d7a3e8ed6a5bc665234b3fe84d0e8f4e7706a198bcb8264736a47",
+      "size": 6985628
+    },
+    "laborant-journal.vtt": {
+      "sha256": "cf27971827a715b52534b85f1f33054d1beb192c050c202ea53e3f17b0a321a3",
+      "size": 2846
+    },
+    "language-cohort-read.mp4": {
+      "sha256": "9b953477dfb26f8b1101827cbca6716b3c5f50c62d835df0e4be2e2139ee0d94",
+      "size": 635813
+    },
+    "language-cohort-read.vtt": {
+      "sha256": "606fb66a80525f2444e311682905958f1ee4b42b9c84d2287105f960f9184681",
+      "size": 274
+    },
+    "language-cohort.mp4": {
+      "sha256": "3d6a7a3531c8b42280c010032fe8360e9aeae3bb8aa36349388e60c43fd47700",
+      "size": 3009548
+    },
+    "language-cohort.vtt": {
+      "sha256": "eddd0d2d309871d52013e53d490b82723d324146f49cab8123314742ef0cdafd",
+      "size": 1238
+    },
+    "language-group-create.mp4": {
+      "sha256": "37032dc0c504d2fe464cf46d7d99a3ea26bffc7ca348e9c410389d148e7201ac",
+      "size": 6286100
+    },
+    "language-group-create.vtt": {
+      "sha256": "4a43c9c2e23c4e9b8541aa54bd3dd61e386f15afb448cb608870cff2808f7677",
+      "size": 2066
+    },
+    "login.mp4": {
+      "sha256": "e625a44a28465bc6c872b10741b196e2321dc9c03210947944f1829273be3c38",
+      "size": 1201726
+    },
+    "login.vtt": {
+      "sha256": "b55074ca0fbecf0118fb6c650eb43d17b06eed31007edac32d6edf0a342d112a",
+      "size": 1562
+    },
+    "material.mp4": {
+      "sha256": "0c5a9996dc314478ced7ea1206f12e0da8e7a2a9f12724399545b906e775b075",
+      "size": 1757025
+    },
+    "material.vtt": {
+      "sha256": "b43c038bf37de5143f1ecba3d48f41b49977bedd0aee4a31b2bbe46a6dd691f5",
+      "size": 841
+    },
+    "missing-journal.mp4": {
+      "sha256": "c83b28f771222f1b6e3064a33825eee198fd4879ce484515029eaba576787bcb",
+      "size": 3596544
+    },
+    "missing-journal.vtt": {
+      "sha256": "15de5ce7e14b7bc2fe1c53711b8df66123f7f3414c07a6465a39918dba4fe82d",
+      "size": 1938
+    },
+    "paper.mp4": {
+      "sha256": "666242dda2ee58e16b11e8618a1dead592c03039bf40ef42491f5ab1ebba82e5",
+      "size": 3256901
+    },
+    "paper.vtt": {
+      "sha256": "e85b9cfcd8d4371948d11f4f8f39577d72a04c522817bec35e36efe4bae92906",
+      "size": 1641
+    },
+    "pin.mp4": {
+      "sha256": "4fa5ee048499fd8dec388b7fa38905d4ddd057982598ddfcda2a24a86068150b",
+      "size": 2510012
+    },
+    "pin.vtt": {
+      "sha256": "e8ba7e04a526af811331cd45e0572a707559ba203fc3e40459d0e939f8494603",
+      "size": 1237
+    },
+    "practice-personal.mp4": {
+      "sha256": "757673374c9164450af1f06421661272f84da333b20c5fa699586aea5adca921",
+      "size": 1876571
+    },
+    "practice-personal.vtt": {
+      "sha256": "e6b20ea1acb90114cd8d07206a6c8d1fc30a941d82ea67589175c6d84203784b",
+      "size": 766
+    },
+    "quiz.mp4": {
+      "sha256": "5efd81f4d4de0704a69bd160fb4a5cd581c19ebbadeef7ca16a1f98365412a96",
+      "size": 1849011
+    },
+    "quiz.vtt": {
+      "sha256": "5518e4dcc78e5e2a3dc9ee0d5f4405684bd3c727e5b95873ca7111c2ad228967",
+      "size": 1054
+    },
+    "recover.mp4": {
+      "sha256": "2d2822b9b455f17647db3bde54da4aa8ffe8657baf6005ec16eaec234600bfab",
+      "size": 964891
+    },
+    "recover.vtt": {
+      "sha256": "c78f6dab3011826320fce658b2a26249488ffeec703ed887075ef406e797abd1",
+      "size": 1169
+    },
+    "request-transcript.mp4": {
+      "sha256": "d73912b6276acc6d620f6b8340c76636f6921e2fe7c4f3d47f28c7195bc57659",
+      "size": 3600348
+    },
+    "request-transcript.vtt": {
+      "sha256": "8ac565ebabfe2d6fc900d09a4838b377c16aa088ca648e3b3d9fe1093ad4911f",
+      "size": 1306
+    },
+    "reset.mp4": {
+      "sha256": "dba68837e93bcc45915566ee85fa3e1663cf55a2f43914e88d15d49b8deefc3e",
+      "size": 1697698
+    },
+    "reset.vtt": {
+      "sha256": "805e6518b1c30175eff10359003ae1604a4a2689d019b5f6c21bcb150571c1d2",
+      "size": 1158
+    },
+    "review.mp4": {
+      "sha256": "a53692eda2f367b3ccd2e980c02198c77c74292ce9aaff6054d7523d96b5aa29",
+      "size": 3000568
+    },
+    "review.vtt": {
+      "sha256": "e6596021068e98ae104cf7c03ff325918dffef15c22f1c1fcf1a6991d88da214",
+      "size": 1681
+    },
+    "room-monitor.mp4": {
+      "sha256": "b4c59f7a48b9702544daaa3c53881b8add0c3dd0cfd8897542917fb6fd3e4162",
+      "size": 1874881
+    },
+    "room-monitor.vtt": {
+      "sha256": "894c5e14ae07a1a676957c41a1d7317faa81d9e1b9e7ba86816b6fb7fe7b0071",
+      "size": 970
+    },
+    "schedule-excel-admin.mp4": {
+      "sha256": "34c188e0a52c9aab0b5e1dfafb3a733ff8373c347f2c3d369c1dc1d75b8999a6",
+      "size": 2179236
+    },
+    "schedule-excel-admin.vtt": {
+      "sha256": "e602ce7297a9f921efdd0e5999bbed0899c41ab989d6f7d22b1da19fa265b059",
+      "size": 1234
+    },
+    "schedule-excel-personal.mp4": {
+      "sha256": "69598f70bdb6ca362df769d3781d5f75e835684d7b4ba555478e1bb856e18dc3",
+      "size": 1056295
+    },
+    "schedule-excel-personal.vtt": {
+      "sha256": "a7769084a2919d0af04cfab71fa5af549ddd469d841bf12f37d58a0931e43407",
+      "size": 705
+    },
+    "schedule-manage.mp4": {
+      "sha256": "3185c77e65fec307985abfbd494e6f1e8b6e0af6f4d5eeef7d0e7855ee075702",
+      "size": 2831244
+    },
+    "schedule-manage.vtt": {
+      "sha256": "3788fb19524f1a79f6176feb0ac6ab52c02fef0abe688bde2cdd6ee4abad6193",
+      "size": 977
+    },
+    "schedule.mp4": {
+      "sha256": "f4221ff024c282bd86bc80723e57da1b60c9d3236bbb6c64bfbf25767234ea78",
+      "size": 1085346
+    },
+    "schedule.vtt": {
+      "sha256": "d420f78e47dbb9494cc94d4936e98e9f834bc56de7df46239b8249faa75f710f",
+      "size": 766
+    },
+    "section-academic-calendar.mp4": {
+      "sha256": "a1fc72fddcff7b2cceef4ff549f9f4cd37c7d303ab994233fb0481062dc31e0f",
+      "size": 351116
+    },
+    "section-academic-calendar.vtt": {
+      "sha256": "ce19e051b5283584c7dc84d4fe3d09a457fc85f388f1d31cf92c562f7c74fdcb",
+      "size": 432
+    },
+    "section-academic-records.mp4": {
+      "sha256": "6425b23fe1496a105c0224c3dfc88ec3caaf0efb7ce20732a3fa4f52f33aebe3",
+      "size": 373034
+    },
+    "section-academic-records.vtt": {
+      "sha256": "247b4c0b6c0271fa87994a4691e4d105b28f1cd1396cfc7f7b4301ca0ec09536",
+      "size": 528
+    },
+    "section-accounting.mp4": {
+      "sha256": "9de0bb1fd0364a810484c5c0229c9048e7a477556f57f9ad4ccc124ee6d98dfe",
+      "size": 395077
+    },
+    "section-accounting.vtt": {
+      "sha256": "f59973b5167c3764eea59ecc8e937fa106076a44d0ca6af8234d23211a3aae86",
+      "size": 485
+    },
+    "section-analytics.mp4": {
+      "sha256": "e1474ab65923b71668ea8674fc23ca6a1b117fe061b44cf1fd6f6d82372ac3ec",
+      "size": 423806
+    },
+    "section-analytics.vtt": {
+      "sha256": "56375e3cd428da60d038430d3962e6200cf92243ff6de4a505e1b64167c55679",
+      "size": 567
+    },
+    "section-announcements.mp4": {
+      "sha256": "6b4abc7c425c7b4bddf3ead1cf98ffe6d2a1a11682ba2a1f55502f10de69f963",
+      "size": 337779
+    },
+    "section-announcements.vtt": {
+      "sha256": "5d6ae05a72ccbd1c8567afbcd0eb597c0f00addfb9a7dcd215f3c567f71dd849",
+      "size": 413
+    },
+    "section-appeal-stats.mp4": {
+      "sha256": "efa41bbbcc2f1ba60d57bbc3683cf0cb5c48d3c77c863acfa9669149094711ad",
+      "size": 294719
+    },
+    "section-appeal-stats.vtt": {
+      "sha256": "a93164e3b03bb0f90a728ff0753c72d78b59501160d22eec7fe557e56284757b",
+      "size": 391
+    },
+    "section-applications.mp4": {
+      "sha256": "23f36fed10153792f2f583425f76b25727274e6a78301eb77af672b18adb7c90",
+      "size": 371644
+    },
+    "section-applications.vtt": {
+      "sha256": "7dccd22411ccf904442965044a942fe00c3f665ead9da744774ee3b4befa94dd",
+      "size": 448
+    },
+    "section-assigned-courses.mp4": {
+      "sha256": "e9d428a8bb00f2a249fd3d8f802700ebb9c4e89a53f6b04967ac7e08b5ee3e0c",
+      "size": 293453
+    },
+    "section-assigned-courses.vtt": {
+      "sha256": "0de112d873ac5931aa9b056782649189f523cb00b8a20b1867c04076a0567296",
+      "size": 399
+    },
+    "section-audit-log.mp4": {
+      "sha256": "8033654ec334a023fece71f48c379ad3aa112a1d0c900e74c99775e6f9743b59",
+      "size": 371320
+    },
+    "section-audit-log.vtt": {
+      "sha256": "68f2e95a3967cba96038ce1875c2813999d64d1a033a7ba9a7da587d9a4b9dfd",
+      "size": 437
+    },
+    "section-category-management.mp4": {
+      "sha256": "10787be134f41fe109fb0e8ec261e69d6b390aee0f538d71f509753c5f19c76d",
+      "size": 334716
+    },
+    "section-category-management.vtt": {
+      "sha256": "2f8c4609a472f030923da03d2f80a6b2918360cb7dd0bd26ba4ed777afa5d452",
+      "size": 473
+    },
+    "section-chair-profile.mp4": {
+      "sha256": "0b6bf04076df4c60c66305508960a2a8eefd806a91b81c8247ffcbad69ca705d",
+      "size": 373534
+    },
+    "section-chair-profile.vtt": {
+      "sha256": "ff56f22f55a0ab9811d85b7f2a34abefcc00c7842617bb6c36aa892fd2176fc2",
+      "size": 508
+    },
+    "section-change-password.mp4": {
+      "sha256": "09089581627c2a503b941416596c88eff42a84d23fd2ca6992adf1bec2318c6f",
+      "size": 491790
+    },
+    "section-change-password.vtt": {
+      "sha256": "fe3ee177701802822b5ceed621f7590860544ff48b9cacea65914a49d8689b02",
+      "size": 551
+    },
+    "section-courses.mp4": {
+      "sha256": "ef6a541388ccd539c1e3340ceda809d17959dabadb302cc35c32865bec1b1991",
+      "size": 265604
+    },
+    "section-courses.vtt": {
+      "sha256": "e8a2784aa009d2a0e1faaf44c09ee664836ea94470a84651a917c15db3fdb7e5",
+      "size": 384
+    },
+    "section-create-category.mp4": {
+      "sha256": "e8e49bd44024ee0ce836ef04aa930076b22cb61bb2e2ebbcd9d569a4087993a2",
+      "size": 309518
+    },
+    "section-create-category.vtt": {
+      "sha256": "1c18c38d9dfbf85cca8749af0ea61889fa24d693772e461adb3bf2a15669d6af",
+      "size": 454
+    },
+    "section-create-post.mp4": {
+      "sha256": "ac3b81031448ce3603c18093932e09165bd6876b270194463ca626548f48e496",
+      "size": 320625
+    },
+    "section-create-post.vtt": {
+      "sha256": "44641311c97077b5cd720ffbddcc599d21c2495c0d26ed735b8aa125f1a8cd99",
+      "size": 435
+    },
+    "section-credit-recognition.mp4": {
+      "sha256": "907116bcee20a609135ff26829ce7148e5674557074300a3688c56186006c0c8",
+      "size": 381154
+    },
+    "section-credit-recognition.vtt": {
+      "sha256": "991cefaabe974b720cc58abaa1c3bb27e732e4cc051c6ff479c411ae9a4efc5f",
+      "size": 460
+    },
+    "section-curriculum-editor.mp4": {
+      "sha256": "3e4e07b6bc44042a1b125632ed225d64e2d0119401c141dbd217c80b34692c02",
+      "size": 358817
+    },
+    "section-curriculum-editor.vtt": {
+      "sha256": "28ff52d1e48364a64ae520c2f297c8c50ee21fb30e9222bd72ccf7f4cd75e1aa",
+      "size": 472
+    },
+    "section-dashboard.mp4": {
+      "sha256": "7b7504b4c07ebac92b1fc2004f30467b0458946b1a5adc70ea965e186fa04267",
+      "size": 287706
+    },
+    "section-dashboard.vtt": {
+      "sha256": "4d7d57acd3380dd53c76d2ac4c4cb21d0870d629d45293e604bf2feec58f6b51",
+      "size": 337
+    },
+    "section-edit-profile.mp4": {
+      "sha256": "6c620d4c0477dbc0315685db970c60fe749c16f67710f310224091055b6389d8",
+      "size": 374893
+    },
+    "section-edit-profile.vtt": {
+      "sha256": "4fa665a1b06a81c0c7953a78693e51ccf0dfa6cf23b311f161784dfe51fa1758",
+      "size": 469
+    },
+    "section-evaluation-campaigns.mp4": {
+      "sha256": "18254bf90f151003cb8da902d31fcf424011d29770dc7e679a3640eebd340da8",
+      "size": 425325
+    },
+    "section-evaluation-campaigns.vtt": {
+      "sha256": "e4c2fa745c2dbb4cb3502f0493f7fd7d190b26c41ee1a600ad9094166a6ebcd3",
+      "size": 511
+    },
+    "section-evaluation-results.mp4": {
+      "sha256": "e941d66cbe343170f14661bf90b22e9d362a73d943b5c4a85b7a25d812770d5c",
+      "size": 343504
+    },
+    "section-evaluation-results.vtt": {
+      "sha256": "5f84d6aa2e987c63f7223e3dca8c7a7789369288a6238f011a9dde0d178a8a20",
+      "size": 463
+    },
+    "section-evaluation-survey.mp4": {
+      "sha256": "72306fff3993abfcba7f09eb0015533dfe2f8a27fc8a2c1e5eb373c1f1356511",
+      "size": 364873
+    },
+    "section-evaluation-survey.vtt": {
+      "sha256": "8bb2937af486fff0ec0c7a737255bdb315a22a2d22afa7e42fc51ddd39a32683",
+      "size": 462
+    },
+    "section-exam-center-pins.mp4": {
+      "sha256": "2f1677d451a51145914e38b10c47e3d3e315defc077e86e58df38fc1aa1ed7f4",
+      "size": 342847
+    },
+    "section-exam-center-pins.vtt": {
+      "sha256": "96d46cab0c79ca04081038e936f172ed4331170e148118279c8a4dadb782f874",
+      "size": 463
+    },
+    "section-exam-center-stats.mp4": {
+      "sha256": "447da22217eb6fd1f61cfe581a38f48b088ac1d1d73dd3aee4d5c1d4d48e2049",
+      "size": 350702
+    },
+    "section-exam-center-stats.vtt": {
+      "sha256": "ccc20de69f9b2fb3cce7b527908437fa8d22a5d9a6193e39ef14f4576d4c3891",
+      "size": 427
+    },
+    "section-faq.mp4": {
+      "sha256": "e7b33c77d8eacbd5e74120700ae7f16d3c6a0b1133f0296ef93d3a91da55ad47",
+      "size": 334800
+    },
+    "section-faq.vtt": {
+      "sha256": "0c97cb330e95dc11f51214c46d784263a24dcac0ab1def2aa5254b93dd5f7b80",
+      "size": 422
+    },
+    "section-groups-registry.mp4": {
+      "sha256": "c71095aabe9552918ad66f4d27dae82a90ebb7fce352533471ac7e4a378feb8d",
+      "size": 325258
+    },
+    "section-groups-registry.vtt": {
+      "sha256": "537df28ce94c9ed48e655dfbeb0c9288c39aafc6d042c53900dee45bb9610bb2",
+      "size": 464
+    },
+    "section-hr-analytics.mp4": {
+      "sha256": "e0687a8fae23c5bce17083b09bfc8b44c7c67cece69f540db16c0e39a0aa951f",
+      "size": 349637
+    },
+    "section-hr-analytics.vtt": {
+      "sha256": "ff9a46e41a99522d540c0130dfe1d2c7dbf649f9b08ecf4924caca649351a8e7",
+      "size": 468
+    },
+    "section-hr-contracts.mp4": {
+      "sha256": "7266453aec62fe0dc782a6b1ae2ac8d00a660147aa144cb16a1a3a4f739dc103",
+      "size": 444724
+    },
+    "section-hr-contracts.vtt": {
+      "sha256": "34efd19e0f2abcd0e20703eb8ed7edc2b4db4f1be66a4043b8952c805c81e0b0",
+      "size": 528
+    },
+    "section-journal-close.mp4": {
+      "sha256": "e809461b89c3ef379ca67ef9b0a6bf4d5231859b9b7b71213250a0b39ca0ee1f",
+      "size": 424851
+    },
+    "section-journal-close.vtt": {
+      "sha256": "b071c44d31ce990bf7409ff936f78f39afe0c10b50c76947536ffbbefbbb162a",
+      "size": 586
+    },
+    "section-journal-hygiene.mp4": {
+      "sha256": "6cb0dfe68a17bbfc18ea706257ed41d3c78c28c93ab4532eacd781aa17fd23d8",
+      "size": 528788
+    },
+    "section-journal-hygiene.vtt": {
+      "sha256": "570f8e6e5f5269dbf9450e6b7538df827adb46bfdff190d8b49105084c19b54f",
+      "size": 551
+    },
+    "section-journal-removals.mp4": {
+      "sha256": "e62dfc1ce6ee64f4bdee5831aeb58b0ad79c0afa91c3cbfe08329308672e405f",
+      "size": 441730
+    },
+    "section-journal-removals.vtt": {
+      "sha256": "e10b073edf8c858f01dec05ab529415277edee755f2b58e47757e12af3a69f41",
+      "size": 504
+    },
+    "section-kollokvium-windows.mp4": {
+      "sha256": "c207fba60e2f79ec12c00b6a0ba27ad4afad2d2da84a7c556fff0928e6ec9766",
+      "size": 357875
+    },
+    "section-kollokvium-windows.vtt": {
+      "sha256": "4fe0f25367cdbe1991830a0dae26ffede099dbb8cabf99aef7fe05e408f1332f",
+      "size": 493
+    },
+    "section-lab-groups.mp4": {
+      "sha256": "1b595175d4285bc515b558ca1583f03f88249c9a957597c52cafd1f986118663",
+      "size": 293561
+    },
+    "section-lab-groups.vtt": {
+      "sha256": "4fc9751f95bcacbbe286f46051aace935f7b639668fead9ddbad7e7121aea322",
+      "size": 412
+    },
+    "section-legacy-grade-review.mp4": {
+      "sha256": "8df670d66e90697ee45da298153b2b4f4c8d842b619201eb9f7a1741b4946783",
+      "size": 418972
+    },
+    "section-legacy-grade-review.vtt": {
+      "sha256": "6302b882daa9d75f9e9fc9b0e745d00774eabf607ad4d1a77d4f32a4ad8fa9cc",
+      "size": 544
+    },
+    "section-lessons-log.mp4": {
+      "sha256": "e712c13ed5fefd36f075e89ab0945b9afbe036e63dec5239b446b2a32b6d7b18",
+      "size": 418509
+    },
+    "section-lessons-log.vtt": {
+      "sha256": "d257ba176230af6bf8be86486aa6b5e3845ecb0bd8085ab21466cfaa93d4be31",
+      "size": 515
+    },
+    "section-manage-appeals.mp4": {
+      "sha256": "1263f1e0503f3fe61afa924abae39902679f03fd82c3a54fab6c6807da3a0e35",
+      "size": 351277
+    },
+    "section-manage-appeals.vtt": {
+      "sha256": "e5f6988409f1656d3e1084301c896f2e9d7b918cec8c2a7ce0c5a1ef307405af",
+      "size": 452
+    },
+    "section-manage-roles.mp4": {
+      "sha256": "ea9ed8793b67eb2a34c68b73b6d90cf735abae79aa0b1a2d4dae29ab57497083",
+      "size": 441179
+    },
+    "section-manage-roles.vtt": {
+      "sha256": "b89a78b005b45beae3b5061d70d416ab6cbf16e43b7bf75bb5f5478a373f016e",
+      "size": 435
+    },
+    "section-my-contracts.mp4": {
+      "sha256": "44c5e479f59f6db2122708a630f44b1e7c577ac4f1e7d023e5bf2c77c4101a36",
+      "size": 413101
+    },
+    "section-my-contracts.vtt": {
+      "sha256": "507bbcb71053871ca69b1be278c26e4e059774b46c0eeddb1dfb1eac3063401d",
+      "size": 472
+    },
+    "section-my-courses.mp4": {
+      "sha256": "2c82876abdedf9ea4f68dfddd665d9c1ae128a450010befeba8542ff142fb2cd",
+      "size": 379561
+    },
+    "section-my-courses.vtt": {
+      "sha256": "f6afba5aa8e8df86c81272e3439e44aeae25f9e3f157fd916c812c64b889c617",
+      "size": 434
+    },
+    "section-my-exams.mp4": {
+      "sha256": "f3ca7977af0aad9bc623db035fef0eb63a78269473b00db01d46b22f00340714",
+      "size": 339002
+    },
+    "section-my-exams.vtt": {
+      "sha256": "ce34c0e7b93cd6131358d343368cc197c6185c7ab4cc567ef220360925b948d1",
+      "size": 404
+    },
+    "section-my-group.mp4": {
+      "sha256": "6a26a024d765756290f731f61f0ff8fc2961068a69cd246e237e22aa4626e99a",
+      "size": 405796
+    },
+    "section-my-group.vtt": {
+      "sha256": "6a23b65c83695d87d7043ccf3c99a6826084c9d6486ef1ae9017eb9153ba2936",
+      "size": 483
+    },
+    "section-my-retakes.mp4": {
+      "sha256": "e297b3aec11283471aa0903d41220cee511fec430d6e813d649afea7b1a565fd",
+      "size": 380232
+    },
+    "section-my-retakes.vtt": {
+      "sha256": "d9d27374443d945efee84fcfe9dfb8c9582f599680f864e5b5615852bbf0d79f",
+      "size": 482
+    },
+    "section-my-schedule.mp4": {
+      "sha256": "8a671772f5e6fd088c3995c4cb05042b66ff5c77eb8a97820589843838811136",
+      "size": 340014
+    },
+    "section-my-schedule.vtt": {
+      "sha256": "86636d7cbdd46a0f821746385d51557f4d5b12cbf805b0967dc74b43556ac326",
+      "size": 432
+    },
+    "section-my-subjects.mp4": {
+      "sha256": "b59c6b5ab030b7fbdf57b3d469026a833577f816918d1e9b93c0575108e5c869",
+      "size": 321145
+    },
+    "section-my-subjects.vtt": {
+      "sha256": "633cd13603edecebfaff65e5bfba6331f77553f71998ef1752a9bb6c2e1ba38a",
+      "size": 354
+    },
+    "section-my-transcript.mp4": {
+      "sha256": "313250b0b84349260ef2a69ff85d8fb89f4e99c79435f35d845b9c61af02f342",
+      "size": 396593
+    },
+    "section-my-transcript.vtt": {
+      "sha256": "130607568a6f1c2af2abbb777b7e537eba50f8f789241b834680c6470f7d9172",
+      "size": 471
+    },
+    "section-my-workload.mp4": {
+      "sha256": "222f28e1956a9bcc652fb419e82e059f71cc7471f7f36a7e3ef1cc2abc2923ff",
+      "size": 380099
+    },
+    "section-my-workload.vtt": {
+      "sha256": "7614c4de59e83c1ce1d5fda4969179ae6114fbe7525a7d2d05819064bd9ac0e8",
+      "size": 522
+    },
+    "section-notifications.mp4": {
+      "sha256": "836eff074e735a9a561ff83efee727f383a80d2520a833dfc0b63473a1bc953c",
+      "size": 296637
+    },
+    "section-notifications.vtt": {
+      "sha256": "edfe5a107e16cb41793bd991d70671b6acb717c2824266dd262f835805f16adc",
+      "size": 444
+    },
+    "section-org-faculties.mp4": {
+      "sha256": "815f33fdcef855b3be429f1d01c2f5c4316b6b0c02afa86fe9854720a48e584d",
+      "size": 298295
+    },
+    "section-org-faculties.vtt": {
+      "sha256": "35cb5d80d1a5754c8e6f3698282a246e5964ea9b07fb7aeffe1a0a7ef527f547",
+      "size": 355
+    },
+    "section-org-kafedras.mp4": {
+      "sha256": "d0c0f5cd0944658fc1d085802e7806d95e3b7e20265927b8dca304a67c147739",
+      "size": 339075
+    },
+    "section-org-kafedras.vtt": {
+      "sha256": "f6d09722967892bf95ad5aaaa5f481e353084a81836f9687a261e507721300ec",
+      "size": 455
+    },
+    "section-org-members.mp4": {
+      "sha256": "60551e40be577a5aeacb525e3665454866023abc9db6073cdb3978304ca94d69",
+      "size": 303459
+    },
+    "section-org-members.vtt": {
+      "sha256": "d39ced7e793b3ae2ac880d15498f1139fc910fe3757fdf5e08a84640494a04cf",
+      "size": 386
+    },
+    "section-org-overview.mp4": {
+      "sha256": "414db1a38e4b865e027f50d98da0097719500450a28e759e70b375b6791e5dcd",
+      "size": 373525
+    },
+    "section-org-overview.vtt": {
+      "sha256": "974f8ddeadef3756e713025d5b2d4af0c2db817d3be901df21e1be00afa7f344",
+      "size": 477
+    },
+    "section-org-roles.mp4": {
+      "sha256": "9cad4b67a4db5defd56084137b1446308c3feb9bb0d83f7cf60a8efc07dc3830",
+      "size": 471442
+    },
+    "section-org-roles.vtt": {
+      "sha256": "7cea0f16aee661aefdfea3e8ecce9e2a6fa5a50400b232fd25bb9b4aa0227383",
+      "size": 440
+    },
+    "section-org-structure-tree.mp4": {
+      "sha256": "c6a3a637123a77391ef7269d6416bfb2e590051056538d022dabfc767ec80241",
+      "size": 365434
+    },
+    "section-org-structure-tree.vtt": {
+      "sha256": "49031c8f8dda057dabedc564404085aca3b46a9d8b14714973c553678d4e3a26",
+      "size": 461
+    },
+    "section-org-structure.mp4": {
+      "sha256": "70fbb859aa136d54ea5d10dd7df0ca6de71e9b23d2c57429004b91b441166f30",
+      "size": 389954
+    },
+    "section-org-structure.vtt": {
+      "sha256": "5c9d43212414d7034f7598786d29efbfae6f9d6bf10d539be7913c34d806089f",
+      "size": 498
+    },
+    "section-overall-academic.mp4": {
+      "sha256": "c9569ac23ccb88c5fba369bdb74e129248097d3a565527c1733a1cd464b0356c",
+      "size": 364444
+    },
+    "section-overall-academic.vtt": {
+      "sha256": "5e7bd4d5db414d4507ced571b84f0b8db7e0c79cfc456ff1e6652141e2ed1759",
+      "size": 419
+    },
+    "section-pending-answers.mp4": {
+      "sha256": "e564f2b6eb42af7054edae6b13cbd02ea370eae115c0097451b4b13b23b63965",
+      "size": 377747
+    },
+    "section-pending-answers.vtt": {
+      "sha256": "5dd21f25c24901760e53da310f7426c1e5f2f40ced86e8f7ce4246d74f1d8b10",
+      "size": 423
+    },
+    "section-pending-post-approvals.mp4": {
+      "sha256": "9f14e0a722c455f731fea3118bbd39bae69e738b41d668d179952cb998f130e3",
+      "size": 335652
+    },
+    "section-pending-post-approvals.vtt": {
+      "sha256": "80ae8c2ce020eb6463c892967ad077d822c570c67aa4fd4db08d44287909839b",
+      "size": 415
+    },
+    "section-pending-review.mp4": {
+      "sha256": "d2ced42846efac85602bef70abaeedd6468fc21feb683b4b2c8ec337277a3f70",
+      "size": 349672
+    },
+    "section-pending-review.vtt": {
+      "sha256": "382b991bbcc657413858bc47192e809c75d765671e804bc93c3b0639070e497e",
+      "size": 437
+    },
+    "section-people-students.mp4": {
+      "sha256": "73325e177c58d2c89d4f85a6ed8459546489f456c9c841863d620ea9ff73d173",
+      "size": 354696
+    },
+    "section-people-students.vtt": {
+      "sha256": "551c24d2efd7a680555c28462f9f7ce522c24877c7b3a384a59a1274256dd98a",
+      "size": 439
+    },
+    "section-people-teachers.mp4": {
+      "sha256": "18cddfc7a1ba903bbaa1813c31abcca8bfb53b708eb311b9c2e0a20b4994fb7c",
+      "size": 377050
+    },
+    "section-people-teachers.vtt": {
+      "sha256": "56fd95239a235e0c8de6867440257c569e3f8901128d51a5c3e57a0b724ea055",
+      "size": 491
+    },
+    "section-permission-editor.mp4": {
+      "sha256": "51c974a9984781509b4f002e27430169212f6f092552bc8e4006e3de546131e0",
+      "size": 429928
+    },
+    "section-permission-editor.vtt": {
+      "sha256": "fa33294fb0317c92a844f3c8b410dc824fcb6f739e795a4c6d1d41b45bfc9a9b",
+      "size": 458
+    },
+    "section-posts.mp4": {
+      "sha256": "915c27d6f2c84acf884ce47e568e0e59550d4344fce13d2114f0ec98dd223c4a",
+      "size": 278283
+    },
+    "section-posts.vtt": {
+      "sha256": "11dde296ec93f41f1bda3b1332184e1a315188426958259b0e1762b397f81f09",
+      "size": 436
+    },
+    "section-profile-info.mp4": {
+      "sha256": "0dc061dc4360f56f82746e16fa5b86cc1b2be76dbed26985de71a0a8d214520b",
+      "size": 364593
+    },
+    "section-profile-info.vtt": {
+      "sha256": "48e3b1c9974956072e910b56b8be48623d525b6bd5dab85dbc3af31125a7aa5d",
+      "size": 469
+    },
+    "section-programs-registry.mp4": {
+      "sha256": "9793126d1ae0c14a17dd46dc8812cf50fc60ad5c649bb35e494b2aa729482f4d",
+      "size": 317811
+    },
+    "section-programs-registry.vtt": {
+      "sha256": "2c958fa8a3c43f3ef076c3bb644ca6b2cf586dd68ce9c9bc5330cf85ada7c95e",
+      "size": 413
+    },
+    "section-publish-notification.mp4": {
+      "sha256": "9ecd66eee45fab515a95194eb323edc71ec3ed550a33f22439b5d50c84a616c1",
+      "size": 282404
+    },
+    "section-publish-notification.vtt": {
+      "sha256": "6222c197dad2c412f7a0cfcf476bb675e24544616e67f50fdd9f2342c4f43333",
+      "size": 379
+    },
+    "section-question-bank.mp4": {
+      "sha256": "e297d20120f61668751577806417813828ec0dc8cd64e136f542007110f9d05e",
+      "size": 297702
+    },
+    "section-question-bank.vtt": {
+      "sha256": "68391139b9b4b3256fc65d25865971f9673c9a1dacaeeb11ab320105f85b4b3a",
+      "size": 389
+    },
+    "section-question-chair-review.mp4": {
+      "sha256": "d86dcb044f34d2f75d8be7c8805abd1368fae0d6d36a1159d951bbe7f5d17b1d",
+      "size": 317920
+    },
+    "section-question-chair-review.vtt": {
+      "sha256": "2427fd44705de6a7f22ee0d1273b3114adab0f2556f5ce23bb5b6b73ed4ab1dc",
+      "size": 446
+    },
+    "section-question-submissions.mp4": {
+      "sha256": "58da150e68096e7fe2ba5de71091979cfecda6205302d32f5de43c02fe1fa0b1",
+      "size": 369714
+    },
+    "section-question-submissions.vtt": {
+      "sha256": "a97eef3a5193f84ea14597690327969c1ec52817ed26182c7337f5c83003fef9",
+      "size": 430
+    },
+    "section-registrar-catalog.mp4": {
+      "sha256": "4deeca3ee1f62e6ccc7b1f97a9aebc1c7786b3ea4bd5434d6b3d12d9e27a7891",
+      "size": 340644
+    },
+    "section-registrar-catalog.vtt": {
+      "sha256": "51da36504c0a6c8593ea778eea9b8888c5bdf90894de37734c7bbf376726a171",
+      "size": 420
+    },
+    "section-remote-journal-access.mp4": {
+      "sha256": "3599623548fff72356296b399b083133c8883edf55cf154890eec9fd1930a296",
+      "size": 403485
+    },
+    "section-remote-journal-access.vtt": {
+      "sha256": "2b8a9316afb026951e39b5baf8ec638ccc5ccc6a48574662f8856c48579a756f",
+      "size": 482
+    },
+    "section-retake-desk.mp4": {
+      "sha256": "aece23afd229d2e4a638e206ecd5b02e1610fe07f7098d8536a8e95cc310dafb",
+      "size": 415073
+    },
+    "section-retake-desk.vtt": {
+      "sha256": "187853c793f1d918863a679ae1f16b82d82651f9936af7e64757f4d4f5114fec",
+      "size": 577
+    },
+    "section-retake-windows.mp4": {
+      "sha256": "e7b00f4f44dc1ef37b0353fcd48ad7067b9ad84e3e7183878bc07beb37922c01",
+      "size": 355595
+    },
+    "section-retake-windows.vtt": {
+      "sha256": "39ba89391c4122719919c2202e32321dad999f6a8c678248012674380cce75da",
+      "size": 444
+    },
+    "section-review-results.mp4": {
+      "sha256": "997c0cbd14808947797a8c4b768fc8cf975889b0c7b93a522202d449d44340f3",
+      "size": 311982
+    },
+    "section-review-results.vtt": {
+      "sha256": "68f9194cb147e446b8a8d468ed6790abe9664515c6b75685f83292ac9c65d7a9",
+      "size": 406
+    },
+    "section-rim-center.mp4": {
+      "sha256": "e84034a162aac2aed6a53aee8e608ebfb3fc86a1a829adf8b279ab39583c3e95",
+      "size": 433171
+    },
+    "section-rim-center.vtt": {
+      "sha256": "c89fdebbd30faa86b0a8247a2729bed2ac792afc0de0c622fc926e8f66a5eb89",
+      "size": 505
+    },
+    "section-role-assignment.mp4": {
+      "sha256": "4c5185adea17b7cba5cd87ab655a76dc196311b556367918985cec4f7515fafe",
+      "size": 333422
+    },
+    "section-role-assignment.vtt": {
+      "sha256": "8e396d9eca25619252d53f6fa5cca450c7e820846e2cb769c772fa781a002082",
+      "size": 424
+    },
+    "section-semester-opening.mp4": {
+      "sha256": "871bb8e785d3332e253f201bcc9f770698c5cbeabb9b7c15f773045be9c087e1",
+      "size": 394602
+    },
+    "section-semester-opening.vtt": {
+      "sha256": "d67c0af5ffeb9b4dfaf7aee4fac6b8bd09b0a54a20765269cb336e776522794d",
+      "size": 503
+    },
+    "section-statistics.mp4": {
+      "sha256": "6e87602ea73c30d51b2b43c121047d16c4134ba36b1901b385de425511ace197",
+      "size": 352515
+    },
+    "section-statistics.vtt": {
+      "sha256": "06d49afcb3d520930fcb0238effbdad6f6156bb9bd24c4d7579ff2603f21686a",
+      "size": 442
+    },
+    "section-student-admission.mp4": {
+      "sha256": "e8aa655ae6202a65dd591159d3347bae8909bad937686232c94f9f428cd878fc",
+      "size": 376912
+    },
+    "section-student-admission.vtt": {
+      "sha256": "301eb021e7e1c538ec84ffd96065461536d860dc6cd26d4e99ce26a58b2b2171",
+      "size": 484
+    },
+    "section-student-intake.mp4": {
+      "sha256": "937a3b05e96be1cd274711533a75b958ffc5df52f3e284a59e4240ef0c5c2a9e",
+      "size": 300452
+    },
+    "section-student-intake.vtt": {
+      "sha256": "c417059ecad35347dea14be01275d2a3f173e1f882000ee2435d33e3a4b55abd",
+      "size": 396
+    },
+    "section-student-organization-management.mp4": {
+      "sha256": "438c6a879ba383c0b5a1622e5782dc4421ac68cdb73c8b4e2b802b9f8200eac7",
+      "size": 389803
+    },
+    "section-student-organization-management.vtt": {
+      "sha256": "4f2119f365c1c00377832a94cd70b927cd7a6fa957261c628a0b72f73ae34430",
+      "size": 479
+    },
+    "section-student-registry.mp4": {
+      "sha256": "12d18add50237a1d17e358e81a2d417c7b1e996029829a40c987fbe61ccf40c1",
+      "size": 367283
+    },
+    "section-student-registry.vtt": {
+      "sha256": "72a4087e059d27b2d2456acef21a17a108319a0a4619c560313792131d21245a",
+      "size": 500
+    },
+    "section-subgroup-placement.mp4": {
+      "sha256": "a54069ea4893a2f841813b5680f643da6a0055f986f89c5e7d12135f7a88949f",
+      "size": 369582
+    },
+    "section-subgroup-placement.vtt": {
+      "sha256": "c2ef1736af1c3eb8bd6dc2cbbc96afaaa4e816b6d9e088d324cf2a8db37b0a77",
+      "size": 438
+    },
+    "section-subgroup-students.mp4": {
+      "sha256": "734239d6eab96396998492372e8af6c194664dfd72b9cdfa2d93ec89619dfea2",
+      "size": 330588
+    },
+    "section-subgroup-students.vtt": {
+      "sha256": "88ca33f93b7ba7a2a7e4afcc1a73430950d47212c4d0da6e21f7ceecc003eb99",
+      "size": 416
+    },
+    "section-subject-catalog.mp4": {
+      "sha256": "c1dd63c57d3dce09f3232d14458739ab90009c8e9b13d553496d5c507d8d5a5e",
+      "size": 400001
+    },
+    "section-subject-catalog.vtt": {
+      "sha256": "4be560caf6ccaa1cfc24364e859a450d770cc5159d7dfed3a5fc001aebe7bb98",
+      "size": 535
+    },
+    "section-superadmin-ai.mp4": {
+      "sha256": "a81a39c9dba09428ca29364defadd3daff4931e05aa4c94c97e8e764e0b95edd",
+      "size": 413651
+    },
+    "section-superadmin-ai.vtt": {
+      "sha256": "497b300ecd0910e138a3e91be57b55c459cac2ed91f70e7a394e197f33d9b56e",
+      "size": 472
+    },
+    "section-superadmin-contact-messages.mp4": {
+      "sha256": "28bd8f28f2a591d417b4c78ff330d730c2e9f384ed0ea39fba20ef5760da52d4",
+      "size": 382887
+    },
+    "section-superadmin-contact-messages.vtt": {
+      "sha256": "6f3286a39381831e6c906aba838deb87e5764633e987686002afdc88520d3e84",
+      "size": 448
+    },
+    "section-superadmin-exam-rooms.mp4": {
+      "sha256": "5b7c8e613e309508734993338184f6834e6fc3f658a6af4f4e360a1a087cc97a",
+      "size": 374652
+    },
+    "section-superadmin-exam-rooms.vtt": {
+      "sha256": "c1af74ae4c763f48076add90d7d5131a34edd99e880b126f01d5ff34da4c2479",
+      "size": 450
+    },
+    "section-superadmin-org-features.mp4": {
+      "sha256": "43e54c394def60d779a6a87fe829dbd8c277372c500c3b74a9a0a4cdd4ea4251",
+      "size": 373388
+    },
+    "section-superadmin-org-features.vtt": {
+      "sha256": "6cab5a9d8693ea441ed89b5d40ff893e232740ba666f1171e1550e07d63f5950",
+      "size": 420
+    },
+    "section-superadmin-org-inspector.mp4": {
+      "sha256": "a2151135c6e7a520e787c31bd6ac51313f1b90bb7c70dd1a0141d6713192fa4c",
+      "size": 281786
+    },
+    "section-superadmin-org-inspector.vtt": {
+      "sha256": "d28e633f848be7dee405c12cfec7b1ff3a32006c38aecae5c6b066eba0ce0088",
+      "size": 347
+    },
+    "section-superadmin-organizations.mp4": {
+      "sha256": "6d9a6fc402d1dbe74888f4a90eeffe94cca0776af001b6add247d219f948c3ca",
+      "size": 370613
+    },
+    "section-superadmin-organizations.vtt": {
+      "sha256": "54e7ba5feb19233da0fce0afbd969fdbd18b0c0ab4f644ec7fbd68fb4def4f46",
+      "size": 478
+    },
+    "section-superadmin-users.mp4": {
+      "sha256": "b52697522fffa8184895d0b5a2749597ec6fab4d48d37aab10ee536000572bf9",
+      "size": 387533
+    },
+    "section-superadmin-users.vtt": {
+      "sha256": "69feb7bd5bdee001585ccfb6fb218db27c545789ba79d893aa5bc671b0860ba6",
+      "size": 459
+    },
+    "section-surveys-builder.mp4": {
+      "sha256": "9fd9f5dd5ceac5419a62852b3ad802d6fd2e311ec377ce7988470f49de268c1f",
+      "size": 363802
+    },
+    "section-surveys-builder.vtt": {
+      "sha256": "49eb9ac2acc75f2029dd9352680ef1c552f6d48ddabf91b7f74886ee9cbfbc9c",
+      "size": 463
+    },
+    "section-surveys-inbox.mp4": {
+      "sha256": "13fa1d4e68a831afd1d15a433c99e13f050853db99a0406ed456d2089f0b5bb4",
+      "size": 336189
+    },
+    "section-surveys-inbox.vtt": {
+      "sha256": "0b6fa3e61d3207c7b54f89b66543f904ac5482644a96dc0f3ca7e1dc404bd5e6",
+      "size": 428
+    },
+    "section-syllabus-list.mp4": {
+      "sha256": "719fc5792713c53fcfa1bcc90648f25ae553b22cdb9932677614cb22af1963fa",
+      "size": 413735
+    },
+    "section-syllabus-list.vtt": {
+      "sha256": "91c7b9d60af425fba053ce84e4a59fa0dcd8c543fb31421eef453fad54d65458",
+      "size": 504
+    },
+    "section-syllabus-review.mp4": {
+      "sha256": "ad0d652870a598b7ae6d7afac0baa5fdfbc46e676d3b467eae9d7b5c1cf1e29e",
+      "size": 322973
+    },
+    "section-syllabus-review.vtt": {
+      "sha256": "4db8f2cc3e36678463dc15b55124c3b5c86da4bac1750d40bffa1be4df49caf3",
+      "size": 443
+    },
+    "section-system-monitoring.mp4": {
+      "sha256": "6f85f9a24824da471b35552e938dbd8e312730fc5ce93268721b2e1629805a3b",
+      "size": 398949
+    },
+    "section-system-monitoring.vtt": {
+      "sha256": "7245f82ce0a6d2f8be726aab2d3782d5278aae30bc498ea16b665744d17943f9",
+      "size": 508
+    },
+    "section-system-settings.mp4": {
+      "sha256": "eac8397e28bc6c77733ca3afd3da1ad9a7964747df5c08cbe79db3e5e4a36c97",
+      "size": 322319
+    },
+    "section-system-settings.vtt": {
+      "sha256": "440fd3c35fdc349b4f017c3244e56e0cde4cde2074e1ac7dc596a4f440c9af02",
+      "size": 402
+    },
+    "section-teacher-intake.mp4": {
+      "sha256": "f82ca664656463d69a52fc57dc0e033053bcdeea8094ab08eb6d54de89efbc1f",
+      "size": 448280
+    },
+    "section-teacher-intake.vtt": {
+      "sha256": "71ed5c810d781f6306cdac32eb929a164fe4b7bcfd0117d90ef876771ce9f142",
+      "size": 505
+    },
+    "section-teaching-appeals.mp4": {
+      "sha256": "784b6468ecc20d0c7c682e94c9176ee1e59fbfb5b79daee8ca935a33ff719b44",
+      "size": 308473
+    },
+    "section-teaching-appeals.vtt": {
+      "sha256": "355c8c7e5dd90be88a88b1445d8632fd0c49954b192a17fc45f766913b61ef77",
+      "size": 387
+    },
+    "section-teaching-handover.mp4": {
+      "sha256": "431e94a23370d81d088be944b2b5f64d99f62e0ab00f649dabbc1e2de4ae87b8",
+      "size": 292034
+    },
+    "section-teaching-handover.vtt": {
+      "sha256": "548d0a07679cfdbb70ef57911f7768d393731b6b509825cbf652bd7da50a9ba0",
+      "size": 411
+    },
+    "section-unit-exams.mp4": {
+      "sha256": "cbb5cb4590e51739220df5172897012393a1692a9e4562458e62cd84173e0eda",
+      "size": 344908
+    },
+    "section-unit-exams.vtt": {
+      "sha256": "c360e35f3e4c93dd1d1bf9bc8291f4ff762e6297dab2d29cf40bb41e3743f7b7",
+      "size": 461
+    },
+    "section-unit-subject-folders.mp4": {
+      "sha256": "2afac4917b9617b2fa659347309a83b71c3585f82a037e9867237c1f69e1d245",
+      "size": 288734
+    },
+    "section-unit-subject-folders.vtt": {
+      "sha256": "1ed33f5ebeb3ba4d149a304b207465a76a3fab38073ee7877608c75860912a6f",
+      "size": 420
+    },
+    "section-workload-approval.mp4": {
+      "sha256": "d6c380265d9702a7bbe3ba4d72ce35127d281351e3f46f4c6a6bbb1b4fe7108c",
+      "size": 359599
+    },
+    "section-workload-approval.vtt": {
+      "sha256": "71772905eb8c5510abbc861ffc8fb1b5f9f386c9144f66d488795ac0a0b3a9a6",
+      "size": 447
+    },
+    "section-workload-center.mp4": {
+      "sha256": "452c1cae4cb4b0429a0dd44a85d672322b44c359696206344d0a5d3dba799082",
+      "size": 368048
+    },
+    "section-workload-center.vtt": {
+      "sha256": "9a32ceb9b5ed1789a70a81c630b3d569b617ac7c89479f1edae6ec57ce5cdb5d",
+      "size": 513
+    },
+    "section-workload-distribution.mp4": {
+      "sha256": "0aff8b5aac97bd24fe75097f6af875aed6ee08dff9110a2927938c96652cfa2c",
+      "size": 395159
+    },
+    "section-workload-distribution.vtt": {
+      "sha256": "c8ffe142cc784a59e1eeaf102ff1c5a45b3ba62c81aa3f3101cd95e8780fd33b",
+      "size": 550
+    },
+    "section-workload-overview.mp4": {
+      "sha256": "989129273c9ceb1ebb25c0509363a006347ae430edbc0d61119936c1fd754971",
+      "size": 349978
+    },
+    "section-workload-overview.vtt": {
+      "sha256": "40887bc909de97f08c5e849d077552645ded8041d5da9e22dee49af338f6eff1",
+      "size": 528
+    },
+    "section-workload-visa.mp4": {
+      "sha256": "b636a4e74b6b9424ab3e5884176891231fd65df2e99ac07cd2b3610e19bb6501",
+      "size": 419549
+    },
+    "section-workload-visa.vtt": {
+      "sha256": "eeaa63484e8377e55d199bba0e2f11569f38ed0dbd86d32c7b6775bada0e6380",
+      "size": 479
+    },
+    "student-syllabus.mp4": {
+      "sha256": "a252a5a900a734b917c7ed92f4f72eb074902638956be732672af5b4b1e6d534",
+      "size": 2574081
+    },
+    "student-syllabus.vtt": {
+      "sha256": "2ca223390717b637a8ed55a38ef40e2a9b531bdde5698d6693a6d9c4f279d769",
+      "size": 909
+    },
+    "support.mp4": {
+      "sha256": "90ff021c26f9dfa7b142f0f2ae3166dd811f789d7c242b4048f6a280649b9891",
+      "size": 3529812
+    },
+    "support.vtt": {
+      "sha256": "e0b470c437f66af8c5858c393b7289f41728007cea189e3022658560b4bf9533",
+      "size": 1729
+    },
+    "syllabus.mp4": {
+      "sha256": "58d115fd62971073a752c539292bd163a3a1f3c2ba7e558653a4045f37b48bd8",
+      "size": 3669260
+    },
+    "syllabus.vtt": {
+      "sha256": "f8ddc0317e8afc63563aa8d91f12c2d2273114a5f0e1130621ceedfdafa1d713",
+      "size": 1044
+    },
+    "teacher-load-read.mp4": {
+      "sha256": "e6eef1b54879afaf66ddfe3f8418047b67c19b693a034b7f18a2f799af925ce1",
+      "size": 205548
+    },
+    "teacher-load-read.vtt": {
+      "sha256": "63e400d55505dc690299d8588b95a285414b9bc2c4bab84fbfdcf43e397fae3c",
+      "size": 263
+    },
+    "tour-accountant.mp4": {
+      "sha256": "44b1ae33f9494f7deb6f8a75a27bf2a840c4f9492deab455dbf3fa0d5cc699b2",
+      "size": 4921987
+    },
+    "tour-accountant.vtt": {
+      "sha256": "7d6092ec845f5be696ee265f44117d2b61f46422fc6295f8a702688d7c3982c8",
+      "size": 4342
+    },
+    "tour-admin-unit-head.mp4": {
+      "sha256": "9b44ca2202992a64790b66c14ac88c80ece3a374145e372af31151665252ff62",
+      "size": 6555213
+    },
+    "tour-admin-unit-head.vtt": {
+      "sha256": "8f2493aff6fc60ff6c4f83b2c90c23de16f650647f30c7f7097e26a54954595f",
+      "size": 5997
+    },
+    "tour-alumni.mp4": {
+      "sha256": "ed8b65a244b72a5227b9eebb1fd0cf862b758b6a4bb3c590aa39616bc60625bc",
+      "size": 3165990
+    },
+    "tour-alumni.vtt": {
+      "sha256": "f518e1cf4198c8e49f2af2f90131b13b3194f9594fb60b21c305a77dd8902836",
+      "size": 2950
+    },
+    "tour-assistant.mp4": {
+      "sha256": "cf6669947bf497e96a309f0ef888967aeebd91f9d3485db7604746e05a335068",
+      "size": 7842957
+    },
+    "tour-assistant.vtt": {
+      "sha256": "d70fdadd3e9eb027bb6c6347a0b0432c8ae2b33281ed3b0a3e337040f13aabf3",
+      "size": 6934
+    },
+    "tour-board-chair.mp4": {
+      "sha256": "4550d294d5104bb52c7f1b22618b284ec12d464d0517197b688b01c282c11243",
+      "size": 60395248
+    },
+    "tour-board-chair.vtt": {
+      "sha256": "a0643fb2babc58298a3825b0c17dd6227fc6abd46f3f3bb1b358ef5d61aab6e0",
+      "size": 41918
+    },
+    "tour-chair-head.mp4": {
+      "sha256": "2cc1814800524f19d71641c1bfba5adf5e2db1c7a0e567b9d1c43ce0768579ba",
+      "size": 10814101
+    },
+    "tour-chair-head.vtt": {
+      "sha256": "df755c459139788e562051868c09fb5f5e82f47ee9c7ac7b5d8b48e9c1a25f0c",
+      "size": 9387
+    },
+    "tour-dean.mp4": {
+      "sha256": "8ab2afb1f8338ae7fc3b6c2b631c711355daa339d1d720c32d28f86f4a642042",
+      "size": 13867277
+    },
+    "tour-dean.vtt": {
+      "sha256": "73d0c09a78e1b0f334cfc61f4b9fc7f834a6af1cd1ca0a01a2e2e5e81d2fdfa1",
+      "size": 12250
+    },
+    "tour-exam-center-head.mp4": {
+      "sha256": "9bd59cda0b069acd9c43d413bc590089ac7f860ff400f6a230283cb303e12d8c",
+      "size": 21757335
+    },
+    "tour-exam-center-head.vtt": {
+      "sha256": "7cb68a0aae5d617457ec27f8d0271412547a9e237c8a50a4a560a785b861016d",
+      "size": 16672
+    },
+    "tour-exam-center-staff.mp4": {
+      "sha256": "534d95b9da364e0d56d22fd82c3c43aa9c3d7e02d68f4365d87b45b106c1d01e",
+      "size": 15874154
+    },
+    "tour-exam-center-staff.vtt": {
+      "sha256": "0ff22855df62cba645a103a2f0b24a7f922dc46b57418f691417671aaf3b76a1",
+      "size": 13209
+    },
+    "tour-foreign-students-head.mp4": {
+      "sha256": "43443d2ce0c4ef8afada91a00e7186f48a21e9ee11e7b22f2c5feaf3000c6896",
+      "size": 9500596
+    },
+    "tour-foreign-students-head.vtt": {
+      "sha256": "d0382a32765e92e3551374ec3faa2acb9b08d8980fbf1b9d30822920a13021d1",
+      "size": 8235
+    },
+    "tour-foreign-students-staff.mp4": {
+      "sha256": "b356bc22315078f72ea9ffeb825f11fc7718d5c7822790382edb01e73f8c6dcf",
+      "size": 9475608
+    },
+    "tour-foreign-students-staff.vtt": {
+      "sha256": "d1a730a35d352a2e9f15b915330f80d529f9475f14a5c395bffb4006242a5fa0",
+      "size": 8173
+    },
+    "tour-hr.mp4": {
+      "sha256": "1607472d69b6a4df94c32494ac644f4c4628f35cbf8ddf66db9423a403252776",
+      "size": 22984834
+    },
+    "tour-hr.vtt": {
+      "sha256": "34ee0a109532cfc4cb4ea95bb6398e60c89763f37b9336eb48c007a9cceff1a3",
+      "size": 16509
+    },
+    "tour-ikt-rehber.mp4": {
+      "sha256": "968783726e6a7b7f349b0341a86c2a71e8a0e7a78c115b7b38289ce78df9f9e3",
+      "size": 75130280
+    },
+    "tour-ikt-rehber.vtt": {
+      "sha256": "dfef7acbd372873aecf731efa853d3ee4eec88827c8622d44f3f2bcb564b61a0",
+      "size": 52570
+    },
+    "tour-lab-assistant.mp4": {
+      "sha256": "55feb131062c3a901ba889be0cf88589394ba4643cf4c8efb81a9c947e622a90",
+      "size": 8748887
+    },
+    "tour-lab-assistant.vtt": {
+      "sha256": "3e54d58cda564cecbe595d7f0bd494162aaef8b3539e247b2b2e34b2896f1f2f",
+      "size": 7485
+    },
+    "tour-lead-student.mp4": {
+      "sha256": "af9f9b851c311c64e818f9adb94642b34dd918f97977d288676cc5ccaa981028",
+      "size": 9436157
+    },
+    "tour-lead-student.vtt": {
+      "sha256": "f5bcda89b169538b61b2955da0242da44cc8e60c6c3689f6f724c412663ded1b",
+      "size": 7774
+    },
+    "tour-member.mp4": {
+      "sha256": "452f96457a3f9407aaf6ae5513e5f2c3dc473c3cfc236eb2196dfc98a208badc",
+      "size": 3966379
+    },
+    "tour-member.vtt": {
+      "sha256": "8016154f5678071beb85f350fd7ca4e1e3f7c2d57662d8814173af4d4e76caa5",
+      "size": 3729
+    },
+    "tour-monitoring-head.mp4": {
+      "sha256": "3fde382e693fa0b2f80624b58e8026e59555c1952d86fc8881049a46ed41a78d",
+      "size": 13146452
+    },
+    "tour-monitoring-head.vtt": {
+      "sha256": "df59a26d3b7ba3b6892eb6935cce134fb08b04f9cb3936d8a945b6b53c7ebfc6",
+      "size": 11029
+    },
+    "tour-monitoring-staff.mp4": {
+      "sha256": "e67ecf15d632d3043b95b1d1c0a5f3d8b0f380603a3be0b6c49b75505932b75f",
+      "size": 13262820
+    },
+    "tour-monitoring-staff.vtt": {
+      "sha256": "295f641090a92d62297a9d883e5cd509e35065c831608ac9759ef32008c65ae9",
+      "size": 10954
+    },
+    "tour-muellim.mp4": {
+      "sha256": "4a6398efbbb4c6c9cb3cb57683f8a681bb94b5b2f33415330444eb0d1d12bb2f",
+      "size": 10051936
+    },
+    "tour-muellim.vtt": {
+      "sha256": "6ce5cf8cd39399080d35a80aeecc6c408db4808b4edf0603620955c154067063",
+      "size": 8464
+    },
+    "tour-program-coordinator.mp4": {
+      "sha256": "e091ac31933c75a83f135666e4147ac21b9f90ec2953138b3dad8b92d3f670fc",
+      "size": 9203700
+    },
+    "tour-program-coordinator.vtt": {
+      "sha256": "fbfc262439f0601cc93c9833133668a7248445e99abfb7dc81f4cb4486652562",
+      "size": 8046
+    },
+    "tour-quality-control-head.mp4": {
+      "sha256": "fc8bc4ea6dea63b0e558c8878e2efc5d3d9d358f3b3985b8b4f1460304f193ca",
+      "size": 8431925
+    },
+    "tour-quality-control-head.vtt": {
+      "sha256": "68f39ef1270130ca878e3f3569649ebbf6b785b78c8e91d01e8152cc1aa66f90",
+      "size": 7414
+    },
+    "tour-quality-control-staff.mp4": {
+      "sha256": "069c3ded1b2735726f6677d437807ed10f9e090af55878b39f0a824424f559b0",
+      "size": 7389544
+    },
+    "tour-quality-control-staff.vtt": {
+      "sha256": "1cdce54b084d11ec74d9a8cfa6ac5ae6ecf7ddcfdf7f07205daa820d00c23124",
+      "size": 6519
+    },
+    "tour-rector.mp4": {
+      "sha256": "973733fb892f3741aacc9115b5cf55b477ba64817599c0e216e1415440a828b0",
+      "size": 60594524
+    },
+    "tour-rector.vtt": {
+      "sha256": "d2dffa1957e90c5caeb09e22bb6feaa16b334adf6870f5fdcac970eabd3a114c",
+      "size": 42289
+    },
+    "tour-rehber.mp4": {
+      "sha256": "39b826ed2b9e3e6a351b1dc8e7219f434a6b769871b4dc54e6a61d2ad4c4bea4",
+      "size": 80310568
+    },
+    "tour-rehber.vtt": {
+      "sha256": "ab6de397711f5ffca5f0d7bbb29e86b0e0e15027c459e69661c560e7da7d733e",
+      "size": 56106
+    },
+    "tour-rim-staff.mp4": {
+      "sha256": "3b95d4958bef190808fde067bfa0f26b9d97c13321e5a22f27644ada846889c8",
+      "size": 22708869
+    },
+    "tour-rim-staff.vtt": {
+      "sha256": "4079257bcdd9cfaf7bbb09928da1c4d263208a428f4aa90760b03b80bbfae025",
+      "size": 19304
+    },
+    "tour-student-services.mp4": {
+      "sha256": "f93c54120760a06c621c8e417761daf8a06145c595a25a5ad618b6e41e9302e3",
+      "size": 10642258
+    },
+    "tour-student-services.vtt": {
+      "sha256": "ceed6bd73c4338753ebb5b043a7ef4b7025a3063da319886fd6efa5830f6ce1d",
+      "size": 8735
+    },
+    "tour-teaching-office-head.mp4": {
+      "sha256": "91ced546d157d67a6d1c86db13204123b9bda7c33b7e31660633198c06acd97e",
+      "size": 18473716
+    },
+    "tour-teaching-office-head.vtt": {
+      "sha256": "79dc78a8d390c176c05eb0a99c2f09aa971a2b13eb8ac5a448a95bf6b6b2341b",
+      "size": 15251
+    },
+    "tour-teaching-office-staff.mp4": {
+      "sha256": "16a0b3d8fa30252b208c41ba764a684c3e96f74c42308d51490a4620043800b1",
+      "size": 15524344
+    },
+    "tour-teaching-office-staff.vtt": {
+      "sha256": "49f97dcd453c55803d879154863b2dde668ac4d885b3477a830120bb5cd560bb",
+      "size": 12881
+    },
+    "tour-telebe.mp4": {
+      "sha256": "406f1807f1b5435f1be0d62fda4075531c36461a8200a27e3716a1cfbec12ccc",
+      "size": 11943064
+    },
+    "tour-telebe.vtt": {
+      "sha256": "0fa014f6452a6191ea4539bdbd8fc90c1b527cb6361d63e69c138712d34a2e57",
+      "size": 9063
+    },
+    "tour-trustee.mp4": {
+      "sha256": "4bca87f173df9e742afc2f947a9ef22e098db046af81cc53847b07646f2168cd",
+      "size": 18768469
+    },
+    "tour-trustee.vtt": {
+      "sha256": "909d652b5712f06b54d25cf90e9ea7f8716aa61f9ed6f4aa50244d0dc482ddf0",
+      "size": 15149
+    },
+    "tour-tutor.mp4": {
+      "sha256": "7c0414d4174d10516eb37382c0f995ecf4ea46e40664d494f97d41f863995259",
+      "size": 9060524
+    },
+    "tour-tutor.vtt": {
+      "sha256": "baba54da3f89c61d2a79e991ac1917883718da27c58dd14a62ed69f7287419b9",
+      "size": 8113
+    },
+    "tour-vice-dean.mp4": {
+      "sha256": "6b394ea1fd6325f0b4a941faa3072e7eac59c270c419174894a5a0961ad226b9",
+      "size": 11444036
+    },
+    "tour-vice-dean.vtt": {
+      "sha256": "100c7daee679455077474ee803d1832b334817a7cb0f307dea2e19be9297e018",
+      "size": 10138
+    },
+    "tour-vice-rector.mp4": {
+      "sha256": "6339bf44b9a5f281cdbc798354aaf301f83ebc380fc358d7aedde949a0cc26c8",
+      "size": 30392089
+    },
+    "tour-vice-rector.vtt": {
+      "sha256": "64da6843b2b96c79a9923a447f4565cf151c037ae9b6dd69aa5ed1aff170f9ac",
+      "size": 23579
+    },
+    "workload-activities-staff.mp4": {
+      "sha256": "496b2806f1c9746cdc75d6c93c90a7c3dcfcf5763d73e38f2f2b36ab591c7c20",
+      "size": 1688202
+    },
+    "workload-activities-staff.vtt": {
+      "sha256": "fad0537f8cf244a5dae02b817ceec7f7e9081da3256b8803705cd617c9ae146d",
+      "size": 2442
+    },
+    "workload-explained.mp4": {
+      "sha256": "e93b2b3cf75080f558adc8dd321d83781e21b26922cdab5d9264b6d8c6807647",
+      "size": 10472560
+    },
+    "workload-explained.vtt": {
+      "sha256": "1f4ccdca47029de0b7e451e9394283fb9cd0ab8fb8c5a304b4bc06d45049e5be",
+      "size": 2771
+    },
+    "workload-lab-row-edit.mp4": {
+      "sha256": "9371c2c5672e4fc73432c7f54e5c6b49008124d6ec73cf0b03145940d8b981bf",
+      "size": 7997787
+    },
+    "workload-lab-row-edit.vtt": {
+      "sha256": "b885e6cf02577ac45afe165a5a46c7d9e851530000cd609f0fac15041eb636fb",
+      "size": 3109
+    },
+    "workload-practice-distribute.mp4": {
+      "sha256": "2714a94089e8bbb0dfd045a0e2356434d672731340260577f576c5ebfdacdb3d",
+      "size": 1884043
+    },
+    "workload-practice-distribute.vtt": {
+      "sha256": "b1d49587095bede6696b2e8044a29cfcfe493dcca52e1510c697b07e5f26eadf",
+      "size": 636
+    },
+    "workload-row-basics.mp4": {
+      "sha256": "f41d8cc41c74f51a4b9a808b99c8d4efbb4da7b560de7e590dfe264dda71450e",
+      "size": 4439954
+    },
+    "workload-row-basics.vtt": {
+      "sha256": "896b29a2fe775b97e686f6137740d6bcdbdfa4c23df4438349e2cff03df74ba3",
+      "size": 1461
+    }
+  }
+}

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="az"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ən çox verilən suallar · EMSArena</title>
+<style>
+:root{font:16px/1.55 system-ui,-apple-system,sans-serif;color:#1c3043;background:#f6f8fb;--line:#d9e2ea;--accent:#135777}*{box-sizing:border-box}body{margin:0}
+main{display:grid;grid-template-columns:15rem minmax(0,1fr);min-height:100vh}aside{background:#172e47;color:white;padding:2rem 1.3rem}aside h2{font-size:1.2rem;margin:0 0 2rem}aside a{color:#e5edf6;display:block;padding:.65rem 0}
+aside [aria-current]{color:white;font-weight:650;text-decoration:none}aside label{margin-top:1.8rem;display:block;color:#dbe8f1}aside select{max-width:100%;margin-top:.45rem;padding:.6rem;color:#162d42;background:white}
+article{width:min(100%,58rem);padding:clamp(1.1rem,4vw,3.8rem);margin:0 auto}h1{font-size:clamp(1.55rem,4vw,2.35rem);line-height:1.16;margin:0 0 1.55rem}input,button,select{font:inherit;border-radius:.45rem}
+#q{width:100%;padding:.7rem .85rem;border:1px solid #94a6b6;background:white}label[for=q]{display:block;font-weight:600;margin-bottom:.45rem}#count,.top{color:#546574}
+#results>details{border-bottom:1px solid var(--line);background:white;padding:0 1rem}#results>details:first-child{border-radius:.6rem .6rem 0 0}#results>details:last-child{border-radius:0 0 .6rem .6rem}
+#results>details>summary{display:flex;align-items:center;justify-content:space-between;gap:.6rem;list-style:none;cursor:pointer;padding:1rem 0}
+#results>details>summary::-webkit-details-marker{display:none}#results>details>summary::after{content:'+';font-size:1.3rem;color:var(--accent);padding:.1rem .5rem}#results>details[open]>summary::after{content:'−'}small{display:block;font-weight:500;color:#52697c}
+ol{padding-left:1.45rem;margin-top:0}li{margin:.45rem 0}.body{padding:0 0 1rem}button{cursor:pointer;border:1px solid #b5c4d0;background:#f6f9fc;color:#164866;padding:.45rem .8rem}
+video{display:block;width:100%;max-height:75vh;background:#121d28;border-radius:.5rem;margin:.8rem 0}.chapters{margin:.7rem 0}.chapters summary{cursor:pointer}.chapters button{display:block;border:0;background:transparent;text-align:start;padding:.35rem .1rem}.long{display:block;color:var(--accent);margin:.45rem 0}
+nav{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:1rem}nav button[aria-current]{color:white;background:var(--accent)}:focus-visible{outline:2px solid #317bbb;outline-offset:2px}[hidden]{display:none}
+@media(max-width:740px){main{display:block}aside{padding:.7rem 1.1rem;display:flex;align-items:center;flex-wrap:wrap;gap:.25rem .9rem}aside h2{font-size:1rem;margin:0}aside a,aside label{margin:0;padding:.2rem 0;font-size:.85rem}aside select{max-width:9rem;padding:.22rem;margin:.15rem}article{padding:1.2rem}}
+</style></head><body><main><aside><h2>EMSArena</h2><a href="FAQ.html" aria-current="page">Ən çox verilən suallar</a><a href="index.html">Video kitabxanası</a><label>Rol <select id="role"></select></label></aside>
+<article><h1>Ən çox verilən suallar</h1><label for="q">Hansı əməliyyatı etmək istəyirsiniz?</label><input type="search" id="q" placeholder="Sual və ya açar söz yazın"><p id="count" role="status" tabindex="-1"></p><div id="results"></div><nav id="pages" aria-label="Səhifələr"></nav></article></main>
+<script id="data" type="application/json">__MODEL__</script><script>
+const data=JSON.parse(document.getElementById("data").textContent),sel=document.getElementById("role"),input=document.getElementById("q"),results=document.getElementById("results"),count=document.getElementById("count");let page=1;
+const normal=s=>s.toLocaleLowerCase("az").replace(/ə/g,"e").replace(/ı/g,"i").normalize("NFD").replace(/\p{M}/gu,"");
+function node(tag,text,css){const n=document.createElement(tag);if(text)n.textContent=text;if(css)n.className=css;return n}
+function button(text,func){const b=node("button",text);b.type="button";b.onclick=func;return b}
+for(const [key,r] of Object.entries(data.roles)){sel.add(new Option(r.label,key))}
+const deep=new URLSearchParams(location.search);
+if(data.roles[deep.get("role")])sel.value=deep.get("role");
+if(Object.keys(data.roles).length===1)sel.closest("label").hidden=true;
+function article(g){
+ const details=node("details"),summary=node("summary"),heading=node("strong");heading.append(node("small",g.topic),document.createTextNode(g.title));summary.append(heading);details.append(summary);
+ const body=node("div","","body"),steps=node("ol");g.steps.forEach(s=>steps.append(node("li",s)));body.append(steps);details.append(body);
+ if(g.key===deep.get("guide"))details.open=true;
+ const m=data.media[g.video];let video,trackURL;
+ function play(t,focus){if(!video){video=node("video");video.controls=true;video.playsInline=true;video.preload="none";video.setAttribute("aria-label",g.title); const track=node("track");
+ track.kind="captions";track.srclang="az";track.label="Azərbaycanca";trackURL=URL.createObjectURL(new Blob([m.vtt],{type:"text/vtt"}));track.src=trackURL;video.append(track);
+ video.src=m.path;watch.after(video);watch.hidden=true;}
+ const go=()=>{video.currentTime=t;video.play().catch(()=>{});if(focus)video.focus()};if(video.readyState)go();else{video.addEventListener("loadedmetadata",go,{once:true});video.load();}}
+ const watch=button("▷  Videoya bax",()=>play(g.start||0,true));
+ if(m){
+   body.append(watch);
+   const chapters=node("details","","chapters");
+   chapters.append(node("summary","Videoda mövzuya keç"));
+   chapters.addEventListener("toggle",function buildChapters(){
+     if(!chapters.open)return;
+     chapters.removeEventListener("toggle",buildChapters);
+     const rows=node("div");
+     if(m.chapters.length>14){
+       const search=node("input");
+       search.type="search";
+       search.placeholder="Videoda bölmə və ya tab axtar";
+       search.setAttribute("aria-label",search.placeholder);
+       search.oninput=()=>{
+         const words=normal(search.value).trim().split(/\s+/);
+         for(const row of rows.children)row.hidden=!words.every(word=>normal(row.textContent).includes(word));
+       };
+       chapters.append(search);
+     }
+     const visible=new Set(data.roles[sel.value].ids);
+     for(const chapter of m.chapters){
+       const row=node("div");
+       row.append(button(chapter.time+"  "+chapter.title,()=>play(chapter.start,false)));
+       const links=chapter.related || (chapter.guide?[{key:chapter.guide,title:"Bu əməliyyatın təlimatı"}]:[]);
+       for(const related of links){
+         if(!visible.has(related.key))continue;
+         const link=node("a",related.title,"long");
+         link.href="FAQ.html?role="+encodeURIComponent(sel.value)+"&guide="+encodeURIComponent(related.key);
+         row.append(link);
+       }
+       rows.append(row);
+     }
+     chapters.append(rows);
+   });
+   body.append(chapters);
+ }
+ if(g.long && (sel.value==="all" || Object.keys(data.roles).length===1)){const a=node("a","Uzun videoda bu hissəyə keç","","");a.className="long";a.href="index.html?lesson="+encodeURIComponent(g.long)+"&t="+(g.longStart||0);body.append(a)}
+ function release(){if(!video)return;video.pause();video.removeAttribute("src");video.load();video.remove();video=null;watch.hidden=false;URL.revokeObjectURL(trackURL);}
+ details.addEventListener("toggle",()=>{if(!details.open)release()});details.release=release;return details;
+}
+const searchText=new Map();
+function textFor(guide){
+ if(!searchText.has(guide.key)){
+   const chapters=data.media[guide.video]?.chapters || [];
+   searchText.set(guide.key,normal([guide.title,guide.topic,guide.aliases,...guide.steps,...chapters.map(c=>c.title)].join(" ")));
+ }
+ return searchText.get(guide.key);
+}
+function render(){const r=data.roles[sel.value], wanted=new Set(r.ids), terms=normal(input.value).split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+const list=data.guides.filter(g=>wanted.has(g.key)&&terms.every(t=>textFor(g).includes(t)));const num=Math.max(1,Math.ceil(list.length/5));page=Math.min(page,num);
+for(const old of results.children)old.release?.();results.replaceChildren(...list.slice((page-1)*5,page*5).map(article));count.textContent=list.length?list.length+" sualdan "+((page-1)*5+1)+"–"+Math.min(page*5,list.length)+" göstərilir":"Uyğun sual tapılmadı.";if(!list.length)results.append(button("Bütün sualları göstər",()=>{input.value="";render();input.focus()}));
+const pages=document.getElementById("pages");pages.replaceChildren();if(num>1)for(let i=1;i<=num;i++){if(i!==1&&i!==num&&Math.abs(i-page)>1){if(i===2||i===page+2)pages.append(node("span","…"));continue;}const b=button(i,()=>{page=i;render();count.focus()});b.setAttribute("aria-label","Səhifə "+i);if(i===page)b.setAttribute("aria-current","page");pages.append(b)}}
+const targetIndex=data.guides.filter(g=>data.roles[sel.value].ids.includes(g.key)).findIndex(g=>g.key===deep.get("guide"));
+if(targetIndex>=0)page=Math.floor(targetIndex/5)+1;
+sel.onchange=input.oninput=()=>{page=1;render()};render();
+if(targetIndex>=0)results.querySelector("details[open]")?.scrollIntoView({block:"start"});
+</script></body></html>

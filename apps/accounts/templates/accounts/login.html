@@ -128,6 +128,7 @@
         <p class="auth-footer-text">
             {% trans "Hesabınız yoxdur? Giriş məlumatları üçün təşkilatınızın administratoru ilə əlaqə saxlayın." context "accounts.login" %}
         </p>
+        <p class="auth-footer-text"><a href="{% url 'accounts:login_help' %}">{% translate "İlk giriş və parolun bərpası · video təlimat" %}</a></p>
     </div>
 </div>
 {% endblock %}

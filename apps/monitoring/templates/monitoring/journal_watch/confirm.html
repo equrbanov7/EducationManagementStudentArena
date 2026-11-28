@@ -1,0 +1,8 @@
+{% load i18n static %}{% get_current_language as watch_language %}<!doctype html>
+<html lang="{{ watch_language }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="same-origin"><title>{% trans "Bildiriş ünvanının təsdiqi" %}</title></head>
+<body><main><h1>{% trans "Bildiriş ünvanının təsdiqi" %}</h1>
+{% if outcome %}<p>{{ outcome }}</p>{% else %}
+<p>{% trans "Bu ünvana EMS jurnal nəzarəti üzrə bildiriş gəlməsini təsdiqləyirsiniz?" %}</p>
+<form method="post">{% csrf_token %}<input type="hidden" name="token"><button disabled type="submit">{% trans "Ünvanımı təsdiqlə" %}</button></form>
+<script defer src="{% static 'monitoring/journal_watch_confirm.js' %}"></script>{% endif %}</main></body></html>

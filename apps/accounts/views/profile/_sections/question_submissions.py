@@ -314,6 +314,7 @@ def build_question_submissions_context(request, *, allowed_sections, active_sect
     from django.core.paginator import Paginator
     from django.db.models import Count, Q
 
+    from apps.accounts.services.learning_action_access import can_create_personal_exam, can_send_personal_questions
     from apps.exams.models import QuestionSubmission
     from apps.exams.public import EXAM_LANGUAGE_CHOICES, is_exam_center_user
     from core.search_text import tolerant_q
@@ -324,6 +325,7 @@ def build_question_submissions_context(request, *, allowed_sections, active_sect
         return _inactive_defaults()
 
     is_reviewer = is_exam_center_user(request.user)
+    create_url = reverse("exams:question_submission_create") if can_send_personal_questions(request) else ""
     scoped = QuestionSubmission.objects.filter(organization=organization)
     if is_reviewer:
         # MƏRKƏZ YALNIZ kafedra təsdiqindən keçmiş göndərişləri görür — kafedrada
@@ -386,11 +388,20 @@ def build_question_submissions_context(request, *, allowed_sections, active_sect
     selected = sources["selected"] if sources else {}
     state_title, state_body = ui.states(has_filters=has_filters, is_reviewer=is_reviewer)
 
+    subtitle = ui.subtitle(is_reviewer=is_reviewer)
+    if not (is_reviewer or create_url):
+        subtitle = pgettext(
+            "accounts.profile.question_submissions", "Əvvəlki sual göndərişlərinizin vəziyyətinə və qeydlərinə baxın."
+        )
+        if not has_filters:
+            state_body = ""
+
     section = {
-        "subtitle": ui.subtitle(is_reviewer=is_reviewer),
+        "subtitle": subtitle,
+        "can_create_exam": not is_reviewer and "my-exams" in allowed_sections and can_create_personal_exam(request),
         "is_reviewer": is_reviewer,
         # Mərkəz göndəriş yaratmır — başlıq əməli qutusu boş render olunmasın.
-        "header_actions": ("" if is_reviewer else "exams/teacher/partials/question_submissions/_header_actions.html"),
+        "header_actions": ("exams/teacher/partials/question_submissions/_header_actions.html" if create_url else ""),
         "kpi_tiles": ui.kpi_tiles(counts, active_status=filters["status"], is_reviewer=is_reviewer),
         "filter_fields": ui.filter_fields(
             filters=filters,
@@ -420,10 +431,10 @@ def build_question_submissions_context(request, *, allowed_sections, active_sect
         # Boş ekranda əsas addım düymə kimi görünür (müəllim, filtrsiz hal).
         "state_action_label": (
             pgettext("accounts.profile.question_submissions", "Yeni göndəriş")
-            if not (is_reviewer or has_filters or counts["total"])
+            if create_url and not (has_filters or counts["total"])
             else ""
         ),
-        "state_action_url": reverse("exams:question_submission_create"),
+        "state_action_url": create_url,
         "returned_count": counts["returned"],
     }
 
@@ -434,7 +445,7 @@ def build_question_submissions_context(request, *, allowed_sections, active_sect
         "question_submissions_total_count": counts["total"],
         # Müəllim üçün "düzəliş gözləyən", mərkəz üçün "rədd edilmiş" mənasında.
         "question_submissions_rejected_count": counts["returned"],
-        "question_submissions_create_url": reverse("exams:question_submission_create"),
+        "question_submissions_create_url": create_url,
         "question_submissions_clear_url": f"{reverse('accounts:profile')}?section=question-submissions",
         "question_submissions_pagination_query": _profile_query(active_params),
         "question_submissions_section": section,

@@ -8,7 +8,7 @@ from .default_roles_foreign_office import FOREIGN_STUDENTS_ROLES
 from .default_roles_monitoring import MONITORING_ROLES
 from .default_roles_oversight import OVERSIGHT_ROLES
 from .default_roles_quality import QUALITY_CONTROL_ROLES, apply_quality_control_grants
-from .default_roles_rim import RIM_STAFF_ROLES
+from .default_roles_rim import PERM_FAQ_VIDEO_MANAGE, RIM_STAFF_ROLES
 from .default_roles_role_audit import apply_role_audit_grants
 from .default_roles_shared import PEOPLE_DIRECTORY_READ, RIM_ACCOUNT_PERMISSIONS
 from .default_roles_stage2 import apply_stage2_grants
@@ -163,7 +163,7 @@ UNIVERSITY_ROLES = [
         # üçün) saxlanılır. `user.grant_privileged` də daxildir (əvvəl əsasnamə 5.5
         # ilə qəsdən kənarda idi — sahib «hər şey» dedi). Jurnalda birbaşa
         # redaktə `registrar/journal_access.is_direct_editor`-də eyni qərarla açıldı.
-        "permissions": ["*"],
+        "permissions": ["*", PERM_FAQ_VIDEO_MANAGE],
         "description": "ICT manager — documented journal-correction override (bypasses edit-window & closed semesters), full exam-centre + structure access; every action audited",
     },
     {

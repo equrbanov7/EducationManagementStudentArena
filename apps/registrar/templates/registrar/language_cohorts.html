@@ -22,6 +22,7 @@ Qruplar»-ın yanında / müəllimdə «Elektron jurnal»-ın yanında). Inline 
       <div class="lc-mark" aria-hidden="true"><i class="fas fa-language"></i></div>
       <div class="lcd-hero__title lcd-hero__title--stack">
         <h1 class="lc-title">{% trans "Xarici dil səviyyə qrupları" context "registrar.language_cohort" %}</h1>
+        {% include "accounts/profile/sections/faq/_external_help.html" with help_section="external-language" only %}
         <p class="lc-sub">{% trans "Səviyyə qrupu müxtəlif əsas qruplardan tələbələri bir jurnalda birləşdirir. Tələbələrin akademik qrupları dəyişmir." context "registrar.language_cohort" %}</p>
       </div>
     </div>

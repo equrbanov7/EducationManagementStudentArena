@@ -232,3 +232,23 @@
     line-height: 1.5;
     text-wrap: pretty;
 }
+
+.apx-faq-entry {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    border: 1px solid var(--ems-neutral-200);
+    border-inline-start: 3px solid var(--ems-primary, #2563eb);
+    border-radius: .65rem;
+    padding: .8rem 1rem;
+    margin-block: .75rem;
+    color: var(--ems-neutral-900);
+    background: var(--ems-surface, var(--bs-body-bg));
+    text-decoration: none;
+}
+.apx-faq-entry__icon, .apx-faq-entry > i { color: var(--ems-primary, #2563eb); }
+.apx-faq-entry__icon { font-size: 1.25rem; }
+.apx-faq-entry > i { margin-inline-start: auto; }
+.apx-faq-entry strong, .apx-faq-entry small { display: block; }
+.apx-faq-entry small { color: var(--ems-neutral-600); }
+.apx-faq-entry:hover, .apx-faq-entry:focus-visible { border-color: var(--ems-primary, #2563eb); }

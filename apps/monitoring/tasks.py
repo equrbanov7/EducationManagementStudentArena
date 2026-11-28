@@ -50,3 +50,11 @@ def collect_backup_age_task():
 
     with rls_worker_atomic():
         collect_backup_age()
+
+
+# Make journal outbox tasks discoverable without instantiating their model workflow at import time.
+from .journal_watch_mail import (  # noqa: E402,F401
+    deliver_confirmation,
+    deliver_journal_watch,
+    recover_journal_watch_outbox,
+)

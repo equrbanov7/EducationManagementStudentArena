@@ -111,8 +111,8 @@ def build_distribution_context(
     from core.http_ids import parse_uuid
 
     actor = resolve_actor(getattr(request, "user", None), organization, request=request)
-    can_manage = actor.has(PERM_MANAGE)
-    can_distribute = actor.has(PERM_DISTRIBUTE)
+    can_manage = actor.has(PERM_MANAGE) and actor.scope_for(PERM_MANAGE).has_structure_access
+    can_distribute = actor.has(PERM_DISTRIBUTE) and actor.scope_for(PERM_DISTRIBUTE).has_structure_access
     base = {
         "has_access": bool(organization is not None and (can_manage or can_distribute)),
         "can_manage": can_manage,
@@ -181,8 +181,13 @@ def build_distribution_context(
         .select_related("parent"),
         key=lambda unit: ((unit.parent.name if unit.parent_id else ""), unit.name),
     )
+    transfer_chairs = distributable_chair_ids(actor) if can_manage and can_distribute else set()
     base["chairs"] = [
-        {"id": str(unit.pk), "name": f"{unit.name} — {unit.parent.name}" if unit.parent_id else unit.name}
+        {
+            "id": str(unit.pk),
+            "name": f"{unit.name} — {unit.parent.name}" if unit.parent_id else unit.name,
+            "can_transfer": str(unit.pk) in transfer_chairs,
+        }
         for unit in chairs
     ]
     chair = None

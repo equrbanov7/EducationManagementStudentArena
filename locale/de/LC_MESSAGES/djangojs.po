@@ -4109,3 +4109,24 @@ msgstr "Wahlbereich %(group)s"
 
 msgid "Seçmə fənn"
 msgstr "Wahlfach"
+
+msgid "Başqa kafedraya göndər"
+msgstr "An einen anderen Fachbereich senden"
+
+msgid "Bu axtarışa uyğun sətir tapılmadı."
+msgstr "Keine passenden Zeilen gefunden."
+
+msgid "Müəllim və ayrılan saat"
+msgstr "Lehrkraft und zugewiesene Stunden"
+
+msgid "Qrup üzrə saat"
+msgstr "Stunden pro Gruppe"
+
+msgid "Sətir seçin"
+msgstr "Zeile auswählen"
+
+msgid "Sətirlər yüklənir…"
+msgstr "Zeilen werden geladen…"
+
+msgid "Tapşırıq sətri"
+msgstr "Zuweisungszeile"

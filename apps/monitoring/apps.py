@@ -8,7 +8,7 @@ class MonitoringConfig(AppConfig):
 
     def ready(self):  # pragma: no cover - import side effects
         # Təhlükəsizlik hadisəsi siqnalları (uğursuz login və s.).
-        from . import security  # noqa: F401
+        from . import journal_watch_events, security  # noqa: F401
 
         # Celery/backup gauge-ları scrape zamanı cache-dən oxuyan kollektor.
         from .collectors import register_cache_collector

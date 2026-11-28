@@ -4019,3 +4019,24 @@ msgstr "Seçmə blok %(group)s"
 
 msgid "Seçmə fənn"
 msgstr "Seçmə fənn"
+
+msgid "Başqa kafedraya göndər"
+msgstr "Başqa kafedraya göndər"
+
+msgid "Bu axtarışa uyğun sətir tapılmadı."
+msgstr "Bu axtarışa uyğun sətir tapılmadı."
+
+msgid "Müəllim və ayrılan saat"
+msgstr "Müəllim və ayrılan saat"
+
+msgid "Qrup üzrə saat"
+msgstr "Qrup üzrə saat"
+
+msgid "Sətir seçin"
+msgstr "Sətir seçin"
+
+msgid "Sətirlər yüklənir…"
+msgstr "Sətirlər yüklənir…"
+
+msgid "Tapşırıq sətri"
+msgstr "Tapşırıq sətri"

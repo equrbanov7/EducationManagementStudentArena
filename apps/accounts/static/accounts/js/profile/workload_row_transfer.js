@@ -48,8 +48,98 @@
         });
     };
 
+    var sourceSequence = 0;
+    var sourceOffset = 0;
+    var searchTimer;
+
+    api.updateButton = function (find, task) {
+        var button = find("[data-wl-open-transfer]");
+        if (!button) return;
+        var chair = find("[data-wl-chair] option:checked");
+        button.hidden = !task || !chair || !chair.hasAttribute("data-wl-transferable") ||
+            ["distributed", "amended"].indexOf(task.status) < 0;
+    };
+
+    api.setMode = function (transferOnly) {
+        var dist = window.EMSWorkloadDist;
+        var panel = dist && dist.q("[data-wl-row-modal]");
+        if (!panel) return;
+        ++sourceSequence;
+        clearTimeout(searchTimer);
+        panel.querySelector("[data-wl-transfer-picker]").hidden = !transferOnly;
+        panel.querySelector("[data-wl-row-fields]").hidden = transferOnly;
+        panel.querySelector("[data-wl-import-curriculum]").hidden = transferOnly;
+        panel.querySelector("[data-wl-save-row]").hidden = transferOnly;
+        panel.querySelector("[data-wl-row-heading]").textContent = transferOnly
+            ? gettext("Başqa kafedraya göndər") : gettext("Tapşırıq sətri");
+    };
+
+    function sourceRows(append) {
+        var dist = window.EMSWorkloadDist;
+        var task = dist.state.task;
+        var picker = dist.q("[data-wl-transfer-picker]");
+        if (!task || !picker || picker.hidden) return;
+        var select = picker.querySelector("[data-wl-transfer-source]");
+        var more = picker.querySelector("[data-wl-transfer-more]");
+        var message = picker.querySelector("[data-wl-source-status]");
+        var search = picker.querySelector("[data-wl-transfer-search]").value.trim();
+        var mine = ++sourceSequence;
+        var params = new URLSearchParams({ task: task.id, q: search, limit: 50, offset: append ? sourceOffset : 0, panel: 0 });
+        if (!append) {
+            sourceOffset = 0;
+            select.replaceChildren(new Option(gettext("Sətir seçin"), ""));
+            refresh(select);
+            api.fill(dist.q("[data-wl-row-form]"), null);
+        }
+        more.disabled = true;
+        message.textContent = gettext("Sətirlər yüklənir…");
+        window.EMSCore.fetchJSON(dist.q("[data-wl-root]").dataset.rowsUrl + "?" + params).then(function (result) {
+            if (mine !== sourceSequence || !dist.state.task || dist.state.task.id !== task.id) return;
+            (result.rows || []).forEach(function (row) {
+                if (row.intensive) return;
+                var groups = (row.groups || []).map(function (group) { return group.name; }).join(", ") || row.groups_text;
+                var label = [row.subject, groups, row.period_label || row.season_label, row.specialty].filter(Boolean).join(" · ");
+                select.add(new Option(label || row.id, row.id));
+            });
+            refresh(select);
+            sourceOffset = result.next_offset;
+            more.hidden = !result.has_more;
+            more.disabled = false;
+            message.textContent = select.options.length > 1 ? "" : gettext("Bu axtarışa uyğun sətir tapılmadı.");
+        }).catch(function (err) {
+            if (mine !== sourceSequence) return;
+            more.hidden = !append;
+            more.disabled = false;
+            message.textContent = dist.messageFor(err && err.payload);
+        });
+    }
+
     function bind() {
         if (!window.EMSDelegate) return;
+        window.EMSDelegate.on("click", "[data-wl-open-transfer]", function () {
+            var dist = window.EMSWorkloadDist;
+            if (!dist || !dist.state.task) return;
+            api.setMode(true);
+            dist.q("[data-wl-transfer-search]").value = "";
+            sourceRows(false);
+            var dialog = dist.modal("[data-wl-row-modal]");
+            if (dialog) dialog.show();
+        });
+        window.EMSDelegate.on("input", "[data-wl-transfer-search]", function () {
+            var dist = window.EMSWorkloadDist;
+            var source = dist.q("[data-wl-transfer-source]");
+            source.value = "";
+            refresh(source);
+            api.fill(dist.q("[data-wl-row-form]"), null);
+            clearTimeout(searchTimer);
+            ++sourceSequence;
+            searchTimer = setTimeout(function () { sourceRows(false); }, 250);
+        });
+        window.EMSDelegate.on("click", "[data-wl-transfer-more]", function () { sourceRows(true); });
+        window.EMSDelegate.on("change", "[data-wl-transfer-source]", function (event, select) {
+            var dist = window.EMSWorkloadDist;
+            api.fill(dist.q("[data-wl-row-form]"), select.value ? { id: select.value } : null);
+        });
         window.EMSDelegate.on("click", "[data-wl-transfer-submit]", function (event, button) {
             var box = button.closest("[data-wl-transfer]");
             if (!box || button.disabled) return;

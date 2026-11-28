@@ -412,7 +412,7 @@
             kindHead(step, labels[kind] || block.label || kind, summary, button) +
             '<ul class="wl-lines' + (solo ? " wl-lines--simple" : "") + '">' +
             '<li class="wl-lines__head" aria-hidden="true"><span>' + esc(gettext("Qrup")) + "</span><span>" +
-            esc(gettext("Plan saatı")) + "</span><span>" + esc(gettext("Müəllim və saat")) + "</span></li>" +
+            esc(gettext("Qrup üzrə saat")) + "</span><span>" + esc(gettext("Müəllim və ayrılan saat")) + "</span></li>" +
             items.map(function (item) { return lineHtml(item, teacher, seenRows, usual, kind, sources.get(item.line.row_id)); }).join("") +
             "</ul>" +
             "</section>"

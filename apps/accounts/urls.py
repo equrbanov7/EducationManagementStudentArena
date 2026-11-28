@@ -22,16 +22,26 @@ from .views import journal_removals as journal_removals_views
 from .views import lessons_log_lazy as lessons_log_lazy_views
 from .views import network_zone_page
 from .views import remote_journal_access as remote_journal_access_views
+from .views import schedule_download
 from .views import session_ping as session_ping_views
 from .views import subgroup_students as subgroup_students_views
 from .views import subgroup_students_export as subgroup_students_export_views
 from .views.profile import statistics_export_metrics as statistics_export_metrics_views
+from .views.profile.faq import login_help
+from .views.profile.faq_editor import edit_guide, editor, upload_guide
+from .views.profile.faq_media import faq_media, login_media
+from .views.profile.faq_section_help import section_help
 from .views.student_group_graduate import student_group_graduate
 
 app_name = "accounts"
 
 urlpatterns = [
     path("sebeke/jurnal-auth/", journal_remote_auth, name="journal_remote_auth"),
+    path("faq/video-upload/yeni/", upload_guide, name="faq_video_upload_create"),
+    path("faq/video-upload/<slug:key>/", upload_guide, name="faq_video_upload_edit"),
+    path("faq/idarə/", editor, name="faq_video_editor"),
+    path("faq/idarə/yeni/", edit_guide, name="faq_video_create"),
+    path("faq/idarə/<slug:key>/", edit_guide, name="faq_video_edit"),
     # Authentication
     # Şəbəkə zonası izah səhifəsi — nginx kənardan /jurnal/ və /manage/ sorğularını bura yönləndirir.
     path("sebeke/<slug:area>/", network_zone_page.network_zone_denied, name="network_zone_denied"),
@@ -41,6 +51,10 @@ urlpatterns = [
     # `verify-otp/`, `resend-otp/`) silindi — heç bir UI istifadə etmirdi, amma
     # parolsuz giriş (yalnız e-poçt OTP) və hesab orakulu yaradırdı.
     # First-login: provisioned users set their own password + verify email.
+    path("login/help/", login_help, name="login_help"),
+    path("login/help/media/<slug:key>/<str:extension>/", login_media, name="faq_public_media"),
+    path("faq/section/<slug:section>/", section_help, name="faq_section_help"),
+    path("faq/media/<slug:key>/<str:extension>/", faq_media, name="faq_media"),
     path("set-password/", views.set_initial_password_view, name="set_initial_password"),
     # 2026-10-17: girişdən sonra boş FİN / telefon / e-poçtun məcburi tamamlanması (apps/accounts/profile_completion.py).
     path("complete-profile/", views.complete_profile_view, name="complete_profile"),
@@ -337,6 +351,8 @@ urlpatterns = [
     # Cədvəl REDAKTORU (matris + hüceyrə dialoqu + drag&drop + park + tövsiyə).
     # Köhnə iki marşrut toxunulmur (registrar səthi hələ onları işlədir);
     # redaktorun bütün əməlləri allow-list ilə TƏK giriş nöqtəsindədir.
+    path("my-schedule/export/", schedule_download.download, {"personal": True}, name="my_schedule_export"),
+    path("schedule-manage/export/", schedule_download.download, {"personal": False}, name="schedule_manage_export"),
     path("schedule-manage/editor/", views.schedule_editor_action, name="schedule_editor_action"),
     # «Registrar (kataloq)» — kabinet bölməsinin dialoq əməlləri (2026-09-09).
     path("registrar-catalog/action/", views.registrar_catalog_action, name="registrar_catalog_action"),

@@ -526,6 +526,9 @@ def protected_media(request, path: str):
     clean_path = posixpath.normpath(path).lstrip("/")
     if clean_path == ".." or clean_path.startswith("../"):
         raise Http404("Invalid media path.")
+    # FAQ uploads have a guide-level audience and must always pass through that endpoint.
+    if clean_path.startswith("faq_guides/"):
+        raise Http404("Media file not found.")
 
     try:
         abs_path = safe_join(str(settings.MEDIA_ROOT), clean_path)

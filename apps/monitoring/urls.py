@@ -2,11 +2,14 @@
 
 from django.urls import path
 
-from . import views, views_summary
+from . import journal_watch_views, views, views_summary
 
 app_name = "monitoring"
 
 urlpatterns = [
+    path("journal-watch/people/", journal_watch_views.people, name="journal_watch_people"),
+    path("journal-watch/configure/", journal_watch_views.configure, name="journal_watch_configure"),
+    path("journal-watch/confirm/", journal_watch_views.confirm, name="journal_watch_confirm"),
     path("summary/", views_summary.summary_api, name="summary"),
     path("ai-analysis/", views_summary.ai_analysis_api, name="ai_analysis"),
     # WP9a (2026-10-10): `overview/` silindi — panel `summary/`-dən istifadə edir (2026-10-01).

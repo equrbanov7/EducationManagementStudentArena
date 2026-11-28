@@ -22,6 +22,9 @@ MÜQAVİLƏ:
 {% endcomment %}
 {% load static %}
 {% if asset_phase == "pre" %}
+{% if 'faq' in asset_sections %}
+<script src="{% static 'accounts/js/profile/faq.js' %}"></script>
+{% endif %}
 {% if 'overall-academic' in asset_sections %}
 <script src="{% static 'accounts/js/profile/overall_academic.js' %}?v=20260926-search"></script>
 {% endif %}
@@ -103,17 +106,17 @@ xülasə və çekmecə məntiqi qalır. Göndəriş ortaq `teaching_office.js`-d
 çökmür — sadəcə bölmə init olunmur).{% endcomment %}
 <script src="{% static 'accounts/js/profile/workload_distribution_render.js' %}?v=20261109-cards"></script>
 {# 2026-11-09: fənn kartı render-i (`EMSWorkloadRender.cards`) — render modulundan SONRA, əsas moduldan ƏVVƏL. #}
-<script src="{% static 'accounts/js/profile/workload_card_explorer.js' %}?v=20261127-plan"></script>
-<script src="{% static 'accounts/js/profile/workload_distribution_cards.js' %}?v=20261127-plan"></script>
+<script src="{% static 'accounts/js/profile/workload_card_explorer.js' %}?v=20261128-rim"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution_cards.js' %}?v=20261128-rim"></script>
 {# 2026-11-19: yer saxlanması (işlənən kart, açıq sətirlər, sağ panel) + sağ paneldə müəllim axtarışı — əsas moduldan ƏVVƏL. #}
 <script src="{% static 'accounts/js/profile/workload_distribution_anchor.js' %}?v=20261119-clarity"></script>
 {# 2026-10-25: tənbəl yükləmə + müəllimə görə süzgəc — əsas moduldan ƏVVƏL (o, `EMSWorkloadList`-i null-safe oxuyur). #}
 <script src="{% static 'accounts/js/profile/workload_distribution_list.js' %}?v=20261109-cards"></script>
-<script src="{% static 'accounts/js/profile/workload_distribution_forms.js' %}?v=20261128-fullassign"></script>
-<script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20261128-fullassign"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution_forms.js' %}?v=20261128-rim"></script>
+<script src="{% static 'accounts/js/profile/workload_distribution.js' %}?v=20261128-rim"></script>
 {# 2026-11-12: «Bölgünü təsdiqlə» dialoqu — natamam sətirlər + «Aydındır, Vakant saxla və təsdiqlə» (əsas moduldan SONRA). #}
 <script src="{% static 'accounts/js/profile/workload_distribution_confirm.js' %}?v=20261112-vacant"></script>
-<script src="{% static 'accounts/js/profile/workload_row_transfer.js' %}?v=20261030-transfer"></script>
+<script src="{% static 'accounts/js/profile/workload_row_transfer.js' %}?v=20261128-workload"></script>
 {% comment %}2026-10-15: təsdiqlənmiş bölgünün redaktəsi (düzəliş dialoqu + təkrar sorğu), fəaliyyətin
 çıxarılması, bölgünün redaktəsi, «Redaktə et» keçidinin sətir fokusu — əsas moduldan SONRA.{% endcomment %}
 <script src="{% static 'accounts/js/profile/workload_distribution_amend.js' %}?v=20261109-cards"></script>

@@ -79,6 +79,7 @@ from .structure_views.constants import KAFEDRA_UNIT_TYPES  # noqa: F401
 from .structure_views.constants import TEACHER_ROLE_NAMES  # noqa: F401
 from .structure_views.members_base import resolve_members_access  # noqa: F401
 from .structure_views.registry import unit_type_label  # noqa: F401
+from .structure_views.registry_base import registry_flags as unit_registry_flags  # noqa: F401
 from .student_privacy import STUDENT_ACCOUNT_PERMISSIONS  # noqa: F401
 from .student_privacy import holds_student_key  # noqa: F401
 from .student_privacy import request_holds_student_key  # noqa: F401
@@ -146,6 +147,7 @@ __all__ = [
     "work_calendar",
     "build_overview_data",
     "build_structure_tree_context",
+    "unit_registry_flags",
     "can_manage_org_settings",
     "can_manage_organization",
     "chair_detail_context",

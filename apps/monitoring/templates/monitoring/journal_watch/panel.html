@@ -1,0 +1,48 @@
+{% load i18n static journal_watch_panel %}{% journal_watch_panel as jw %}
+<section class="profile-section-panel is-active" data-profile-section-panel="journal-watch">
+{% if jw.has_access %}
+<link rel="stylesheet" href="{% static 'monitoring/journal_watch.css' %}">
+<div class="jw-panel">
+<h1>{% trans "Nəzarət" %}</h1>
+<p>{% trans "Qeydi yazan əməkdaşı və ya qeydi dəyişilən tələbəni seçin. İlk dəyişiklik seçilmiş ünvana dərhal bildirilir. Sonrakı beş dəqiqədəki dəyişikliklər bir məktubda toplanır." %}</p>
+{% url 'monitoring:journal_watch_configure' as config_url %}
+<div class="jw-grid"><div class="jw-card"><h2>{% if jw.editing %}{% trans "Qaydanı redaktə et" %}{% else %}{% trans "Nəzarət qaydası yarat" %}{% endif %}</h2>
+<form method="post" action="{{ config_url }}" data-jw-form
+ data-too-short="{% trans 'Ən azı iki hərf yazın.' %}" data-searching="{% trans 'Axtarılır…' %}"
+ data-choose="{% trans 'Nəticədən şəxsi seçin.' %}" data-empty="{% trans 'Şəxs tapılmadı.' %}"
+ data-retry="{% trans 'Axtarışı yenidən sınayın.' %}" data-search="{% url 'monitoring:journal_watch_people' %}">{% csrf_token %}
+<input type="hidden" name="action" value="save">
+{% if jw.editing %}<input type="hidden" name="watch_id" value="{{ jw.editing.pk }}">{% endif %}
+<label>{% trans "Kimi izləyirsiniz?" %}<select class="form-select" name="kind" required>{% for value,label in jw.person_choices %}<option value="{{ value }}"{% if jw.editing.person_kind == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+<label>{% trans "Ad, soyad və ya istifadəçi adı" %}<input type="search" class="form-control" data-jw-query maxlength="80" autocomplete="off"></label>
+<button type="button" class="btn btn-outline-primary" data-jw-search>{% trans "Şəxsi axtar" %}</button>
+<p role="status" data-jw-status></p>
+<label>{% trans "Şəxs" %}<select class="form-select" name="person" required>
+{% if jw.editing %}<option value="{{ jw.editing.person_id }}" selected>{% firstof jw.editing.person.get_full_name jw.editing.person.username %}</option>{% endif %}
+</select></label>
+<fieldset><legend>{% trans "Hansı hadisələr qeydə alınsın?" %}</legend>
+{% for value,label in jw.event_choices %}<label class="jw-check"><input type="checkbox" name="events" value="{{ value }}"{% if value in jw.editing.event_types %} checked{% endif %}> {{ label }}</label>{% endfor %}</fieldset>
+<fieldset><legend>{% trans "Bildiriş ünvanları" %}</legend>
+{% for rec in jw.recipients %}{% if rec.verified_at %}<label class="jw-check"><input type="checkbox" name="recipients" value="{{ rec.pk }}"{% if rec.pk in jw.selected_routes %} checked{% endif %}> {{ rec.email }}</label>{% endif %}{% endfor %}
+<p>{% trans "Ünvan seçməsəniz, hadisələr yalnız kabinetdə görünəcək." %}</p></fieldset>
+<label class="jw-check"><input name="active" type="checkbox"{% if not jw.editing or jw.editing.is_active %} checked{% endif %}> {% trans "Nəzarət aktivdir" %}</label>
+<button class="btn btn-primary">{% trans "Yadda saxla" %}</button></form></div>
+<div class="jw-card"><h2>{% trans "E-poçt ünvanları" %}</h2>
+<form method="post" action="{{ config_url }}">{% csrf_token %}<input type="hidden" name="action" value="recipient">
+<label>{% trans "E-poçt ünvanı" %}<input type="email" class="form-control" name="email" maxlength="254" required></label>
+<button class="btn btn-outline-primary">{% trans "Təsdiq məktubu göndər" %}</button></form>
+<ul>{% for rec in jw.recipients %}<li>{{ rec.email }} · {% if rec.verified_at %}{% trans "Təsdiqlənib" %}{% else %}{% trans "Təsdiq gözlənilir" %}{% endif %}
+<form method="post" action="{{ config_url }}">{% csrf_token %}<input type="hidden" name="action" value="remove_recipient"><input type="hidden" name="recipient_id" value="{{ rec.pk }}"><button class="btn btn-link" type="submit">{% trans "Ünvanı çıxar" %}</button></form></li>{% endfor %}</ul>
+<h2>{% trans "İzlənən şəxslər" %}</h2>{% for rule in jw.watches %}
+<details><summary>{% firstof rule.person.get_full_name rule.person.username %} · {{ rule.get_person_kind_display }} · {% if rule.is_active %}{% trans "Aktiv" %}{% else %}{% trans "Dayandırılıb" %}{% endif %}</summary>
+<p>{% for val,label in jw.event_choices %}{% if val in rule.event_types %}{{ label }}<br>{% endif %}{% endfor %}</p>
+<p>{% for route in rule.routes.all %}{{ route.recipient.email }}<br>{% endfor %}</p>
+<a href="?section=journal-watch&amp;watch_edit={{ rule.pk }}">{% trans "Redaktə et" %}</a>
+<form action="{{ config_url }}" method="post">{% csrf_token %}<input type="hidden" name="action" value="remove"><input type="hidden" name="watch_id" value="{{ rule.pk }}"><button class="btn btn-outline-danger">{% trans "Qaydanı sil" %}</button></form></details>
+{% empty %}<p>{% trans "Hələ nəzarət qaydası yaradılmayıb." %}</p>{% endfor %}</div></div>
+<h2>{% trans "Hadisə jurnalı" %}</h2>
+{% if jw.events %}<div class="jw-table"><table class="table"><thead><tr><th>{% trans "Vaxt" %}</th><th>{% trans "Qeydi yazan" %}</th><th>{% trans "Tələbə" %}</th><th>{% trans "Fənn və dərs tarixi" %}</th><th>{% trans "Dəyişiklik" %}</th></tr></thead><tbody>
+{% for ev in jw.events %}<tr><td>{{ ev.created_at|date:"d.m.Y H:i" }}</td><td>{{ ev.actor_label }}{% if ev.real_actor_label %} ({{ ev.real_actor_label }}){% endif %}</td><td>{{ ev.student_label }}</td><td>{{ ev.offering_label }} · {{ ev.lesson_date|date:"d.m.Y" }}</td><td>{{ ev.get_kind_display }}<br>{{ ev.old_display|default:"—" }} → {{ ev.new_display|default:"—" }}</td></tr>{% endfor %}</tbody></table></div>
+<nav aria-label="{% trans 'Səhifələr' %}">{% if jw.events.has_previous %}<a href="?section=journal-watch&amp;watch_page={{ jw.events.previous_page_number }}">{% trans "Əvvəlki" %}</a>{% endif %} {{ jw.events.number }} / {{ jw.events.paginator.num_pages }} {% if jw.events.has_next %}<a href="?section=journal-watch&amp;watch_page={{ jw.events.next_page_number }}">{% trans "Növbəti" %}</a>{% endif %}</nav>
+{% else %}<p>{% trans "Seçilmiş qaydalara uyğun jurnal dəyişikliyi qeydə alınmayıb." %}</p>{% endif %}
+</div><script defer src="{% static 'monitoring/journal_watch.js' %}"></script>{% endif %}</section>

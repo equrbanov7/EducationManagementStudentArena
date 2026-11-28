@@ -1,0 +1,29 @@
+{% load i18n %}
+<div class="mb-2">
+  {% if sec.view_mode == "teacher" and sec.teacher %}
+    <a class="btn btn-outline-primary btn-sm" href="{% url 'accounts:schedule_manage_export' %}?period={{ sec.period.pk }}&amp;w={{ sec.week.offset }}&amp;teacher={{ sec.teacher.pk }}" download><i class="fas fa-file-excel" aria-hidden="true"></i>{% trans "Müəllimin cədvəlini yüklə (.xlsx)" context "accounts.schedule_manage" %}</a>
+  {% elif sec.view_mode == "group" and sec.group %}
+    <a class="btn btn-outline-primary btn-sm" href="{% url 'accounts:schedule_manage_export' %}?period={{ sec.period.pk }}&amp;w={{ sec.week.offset }}&amp;group={{ sec.group.pk }}" download><i class="fas fa-file-excel" aria-hidden="true"></i>{% trans "Qrupun cədvəlini yüklə (.xlsx)" context "accounts.schedule_manage" %}</a>
+  {% endif %}
+</div>
+<details class="sedit-export mb-3">
+  <summary class="btn btn-outline-secondary btn-sm"><i class="fas fa-chevron-down me-1" aria-hidden="true"></i> <i class="fas fa-file-excel" aria-hidden="true"></i> {% trans "Filtrlə Excel-ə ixrac et" context "accounts.schedule_manage" %}</summary>
+  <form method="get" action="{% url 'accounts:schedule_manage_export' %}" class="row g-2 mt-2 align-items-end">
+    <input type="hidden" name="period" value="{{ sec.period.pk }}">
+    <input type="hidden" name="w" value="{{ sec.week.offset }}">
+    <p class="col-12 mb-1">{% trans "Faylda seçilmiş həftənin tarixli dərsləri və semestrin həftəlik planı var. Filtrləri birlikdə tətbiq edə bilərsiniz." context "accounts.schedule_manage" %}</p>
+    <label class="col-md-3">{% trans "Fakültə" context "accounts.schedule_manage" %}
+      <select class="form-select" name="faculty"><option value="">{% trans "Hamısı" context "accounts.schedule_manage" %}</option>{% for row in sec.export_structure.faculties %}<option value="{{ row.id }}">{{ row.name }}</option>{% endfor %}</select>
+    </label>
+    <label class="col-md-3">{% trans "Kafedra" context "accounts.schedule_manage" %}
+      <select class="form-select" name="chair"><option value="">{% trans "Hamısı" context "accounts.schedule_manage" %}</option>{% for row in sec.export_structure.chairs %}<option value="{{ row.id }}">{{ row.name }}</option>{% endfor %}</select>
+    </label>
+    <label class="col-md-3">{% trans "Qrup" context "accounts.schedule_manage" %}
+      <select class="form-select" name="group"><option value="">{% trans "Hamısı" context "accounts.schedule_manage" %}</option>{% for row in sec.groups %}<option value="{{ row.id }}">{{ row.name }}</option>{% endfor %}</select>
+    </label>
+    <label class="col-md-3">{% trans "Müəllim" context "accounts.schedule_manage" %}
+      <select class="form-select" name="teacher"><option value="">{% trans "Hamısı" context "accounts.schedule_manage" %}</option>{% for row in sec.scope_teachers %}<option value="{{ row.id }}">{{ row.name }}</option>{% endfor %}</select>
+    </label>
+    <div class="col-12"><button type="submit" class="btn btn-primary"><i class="fas fa-download" aria-hidden="true"></i> {% trans "Excel yüklə (.xlsx)" context "accounts.schedule_manage" %}</button></div>
+  </form>
+</details>

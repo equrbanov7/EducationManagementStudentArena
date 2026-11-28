@@ -80,6 +80,37 @@ class VisibilityTest(TestCase):
         open_campaign(self.w, mandatory=False)
         self.assertIn("evaluation-survey", self._allowed(student))
 
+    def test_evaluation_guide_media_and_section_link_follow_student_campaign(self):
+        from pathlib import Path
+        from tempfile import TemporaryDirectory
+        from unittest.mock import patch
+
+        from apps.surveys.services.campaigns import close_campaign
+
+        client = client_for(self.w["org"], self.w["students"][0])
+        key = "section-evaluation-survey"
+        guide_query = {"section": "faq", "faq_guide": key}
+        url = reverse("accounts:faq_media", args=(key, "mp4"))
+        help_url = reverse("accounts:faq_section_help", args=("evaluation-survey",))
+
+        def check(visible):
+            page = client.get(PROFILE, guide_query)
+            self.assertEqual(('data-faq-guide="' + key + '"') in page.content.decode(), visible)
+            link = client.get(help_url)
+            self.assertEqual("faq_guide=" in link["Location"], visible)
+            response = client.head(url, HTTP_RANGE="bytes=0-3")
+            self.assertEqual(response.status_code, 206 if visible else 404)
+
+        with TemporaryDirectory() as folder, patch("apps.accounts.views.profile.faq_media.BUILTIN_DIR", Path(folder)):
+            (Path(folder) / "section-evaluation-survey.mp4").write_bytes(b"sample")
+            check(False)
+            close_all(self.w)
+            campaign = open_campaign(self.w, mandatory=False)
+            check(True)
+            with bypass_rls():
+                close_campaign(campaign, by_user=self.w["owner"])
+            check(False)
+
 
 class CampaignsSectionTest(TestCase):
     @classmethod

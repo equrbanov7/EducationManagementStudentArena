@@ -307,6 +307,7 @@
             try { executeInlineScripts(node); } catch (e) { /* ignore */ }
             try { notifySectionLoaded(section, node); } catch (e) { /* ignore */ }
             ctx.updateSidebarActiveState(section);
+            updateSectionHelp(section);
             if (!options.quiet) {
                 focusSectionTitle();
             } else if (quiet.snap) {
@@ -478,6 +479,19 @@
                 });
         }
 
+        function updateSectionHelp(section) {
+            var help = document.querySelector("[data-cabinet-section-help]");
+            if (!help) return;
+            var url = new URL(help.dataset.pattern.replace("SECTIONKEY", encodeURIComponent(section)), location.href);
+            if (section === "system-settings") {
+                var panel = ctx.sectionsHost.querySelector('[data-profile-section-panel="system-settings"].is-active');
+                var group = panel && panel.dataset.profileSectionSub;
+                if (group && group !== "overview") url.searchParams.set("ss_group", group);
+            }
+            help.hidden = section === "faq";
+            help.href = url.href;
+        }
+
         function setActiveSection(section, updateUrl) {
             var hasTargetPanel = false;
             var targetIsPlaceholder = false;
@@ -500,6 +514,7 @@
             });
 
             ctx.updateSidebarActiveState(section);
+            updateSectionHelp(section);
             // İlkin yükləmə (`init.js`, updateUrl=false) fokusu oğurlamamalıdır —
             // yalnız istifadəçi naviqasiyasında (updateUrl=true) başlığa fokus.
             if (updateUrl) {

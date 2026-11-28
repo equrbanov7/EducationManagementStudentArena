@@ -1,0 +1,11 @@
+{% load i18n %}
+<div data-wl-transfer-picker hidden>
+  <label class="wl-form__field"><span>{% trans "Fənn və ya qrupu axtar" context "accounts.workload" %}</span>
+    <input type="search" class="form-control" data-wl-transfer-search autocomplete="off">
+  </label>
+  <label class="wl-form__field"><span>{% trans "Göndəriləcək tapşırıq sətri" context "accounts.workload" %}</span>
+    <select class="form-select" data-wl-transfer-source></select>
+  </label>
+  <button type="button" class="wl-btn wl-btn--ghost" data-wl-transfer-more hidden>{% trans "Daha çox sətir" context "accounts.workload" %}</button>
+  <p class="wl-aside__hint" data-wl-source-status role="status"></p>
+</div>
