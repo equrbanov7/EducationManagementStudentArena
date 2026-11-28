@@ -450,10 +450,8 @@ def schedule_context(request, organization, *, embedded=False) -> dict:
         author=exam_author,
     )
 
-    # HƏMİŞƏ görünən matris (sahib, 2026-09-09): sətirlər slotlardan yox,
-    # təşkilatın nömrələnmiş dərs saatlarından gəlir — cədvəl boş olanda da tam
-    # render olunur. Redaktor («Cədvəl idarəetməsi») ilə EYNİ partial + CSS.
-    from apps.registrar import schedule_grid
+    # Boş cədvəldə də nömrəli dərs saatları görünür. Matris redaktorla eyni şablonu və CSS-i işlədir.
+    from apps.registrar import schedule_exports, schedule_grid
 
     time_grid = schedule.build_time_grid(slots, week_context=week_context, exams_by_day=exams_by_day)
     matrix = schedule_grid.build_matrix(
@@ -496,6 +494,7 @@ def schedule_context(request, organization, *, embedded=False) -> dict:
         "standard_times": schedule.STANDARD_LESSON_TIMES,
         "schedule_nav_prefix": nav_prefix,
         "schedule_embedded": embedded,
+        "schedule_personal_export": role == "teacher" and schedule_exports.has_personal_teaching(request.user, slots),
         "schedule_can_manage": can_manage,
         "schedule_next_url": _profile_section_prefix("my-schedule").rstrip("&?") if embedded else "",
         "schedule_period_choices": period_view["choices"],
