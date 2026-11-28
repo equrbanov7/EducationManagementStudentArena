@@ -51,7 +51,7 @@ LEAN_FRAGMENT_CONTEXT = True  # qabıq dəyərləri tənbəl (``context_builder/
 # Bütün mövcud profile section-ları → partial template adı.
 SECTION_PARTIALS: dict[str, str] = EXTRA_SECTION_PARTIALS | {
     "faq": "accounts/profile/sections/_faq.html",
-    "journal-watch": "monitoring/journal_watch/panel.html",
+    "journal-watch": "accounts/profile/sections/_journal_watch.html",
     "dashboard": "accounts/profile/sections/_dashboard.html",
     "profile-info": "accounts/profile/sections/_profile_info.html",
     "notifications": "accounts/profile/sections/_notifications.html",
