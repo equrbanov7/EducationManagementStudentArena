@@ -814,7 +814,8 @@ class RimPrivilegedGrantTests(TestCase):
 
         university_roles = DEFAULT_ROLES[OrganizationType.UNIVERSITY]
         rim_role = next(role for role in university_roles if role["name"] == "ikt_rehber")
-        self.assertEqual(rim_role["permissions"], ["*"])
+        # FAQ editing additionally requires the explicit, template-only permission on a designated system role.
+        self.assertCountEqual(rim_role["permissions"], ["*", "faq.video.manage"])
         self.assertEqual(rim_role["level"], 95)
 
     def test_rim_role_can_manage_roles_and_permissions(self):

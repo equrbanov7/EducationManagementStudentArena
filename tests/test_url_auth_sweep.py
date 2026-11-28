@@ -29,11 +29,13 @@ from django.urls import URLPattern, URLResolver, get_resolver
 PUBLIC_ALLOWLIST = {
     # ── Autentifikasiya axını ────────────────────────────────────────────────
     "accounts:login",  # rol seçici (bax [[project_login_portal_split]])
+    "accounts:login_help",  # yalnız sabit ilk giriş və parol bərpası təlimatları
     "accounts:staff_login",  # /accounts/login/muellim/
     "accounts:student_login",  # /accounts/login/telebe/
     "accounts:logout",
     "accounts:session_ping",  # 2026-10-27: anonimə yalnız {"authenticated": false} + CSRF tokeni (məlumat yoxdur)
     "accounts:password_reset",
+    "monitoring:journal_watch_confirm",  # GET şəxs göstərmir, POST ünvanın birdəfəlik tokenini və CSRF tələb edir
     "accounts:password_reset_done",
     "accounts:password_reset_complete",
     # ── İmtahan girişləri: SESSİYA ilə yox, PIN/BİLET ilə qorunur ────────────
