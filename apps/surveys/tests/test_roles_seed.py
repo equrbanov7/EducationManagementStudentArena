@@ -44,7 +44,7 @@ class TemplateTest(SimpleTestCase):
             self.assertIn("survey.results.view", by_name[name]["permissions"], name)
         self.assertNotIn("survey.results.view", by_name["dean"]["permissions"])  # sahibin siyahısında yoxdur
         self.assertEqual(by_name["rector"]["permissions"], ["*"])
-        self.assertEqual(by_name["ikt_rehber"]["permissions"], ["*"])
+        self.assertCountEqual(by_name["ikt_rehber"]["permissions"], ["*", "faq.video.manage"])
 
     def test_migration_spec_matches_live_template(self):
         """Miqrasiya dondurulmuş spesifikasiya işlədir — şablonla EYNİ qalmalıdır."""

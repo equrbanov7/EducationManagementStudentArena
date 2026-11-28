@@ -5,12 +5,12 @@ from io import BytesIO
 from django.apps import apps
 
 from openpyxl import Workbook
-from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE, Cell
+from openpyxl.cell.cell import ERROR_CODES, ILLEGAL_CHARACTERS_RE, Cell
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
 from core.constants import OrgUnitType
-from core.export_safety import neutralise_cell, sheet_append
+from core.export_safety import sheet_append, sheet_cell
 
 from . import design_practical_scope, schedule
 from .models import CourseOffering, WeekType
@@ -35,19 +35,17 @@ NAVY = "17365A"
 TEAL = "176970"
 
 
-def _text(value):
-    return neutralise_cell(ILLEGAL_CHARACTERS_RE.sub("", value))
-
-
 def _append(ws, row):
     cells = []
     for value in row:
         if isinstance(value, str):
-            # Excel xəta koduna bənzəyən ad da (məs. "#N/A") hərfi mətndir.
-            value = Cell(ws, value=_text(value))
-            value.data_type = "s"
+            value = ILLEGAL_CHARACTERS_RE.sub("", value)
+            if value in ERROR_CODES:
+                # Excel xəta kodu ilə eyni olan ad da (məs. "#N/A") hərfi mətndir.
+                value = Cell(ws, value=value)
+                value.data_type = "s"
         cells.append(value)
-    ws.append(cells)
+    sheet_append(ws, cells)
 
 
 def _sheet(book, name, title, caption, headers, widths):
@@ -55,7 +53,7 @@ def _sheet(book, name, title, caption, headers, widths):
     last = get_column_letter(len(headers))
     for row, text in ((1, title), (2, caption)):
         ws.merge_cells(f"A{row}:{last}{row}")
-        cell = ws.cell(row=row, column=1, value=_text(text))
+        cell = sheet_cell(ws, row=row, column=1, value=ILLEGAL_CHARACTERS_RE.sub("", text))
         cell.data_type = "s"
         cell.fill = PatternFill("solid", fgColor=NAVY)
         cell.font = Font(name="Calibri", color="FFFFFF", bold=row == 1, size=17 if row == 1 else 11)
@@ -87,7 +85,7 @@ def _finish(ws, *, dated):
     last = get_column_letter(ws.max_column)
     ws.auto_filter.ref = f"A3:{last}{ws.max_row}"
     if ws.max_row == 3:
-        ws.cell(4, 1, "Seçimə uyğun dərs yoxdur.")
+        sheet_cell(ws, row=4, column=1, value="Seçimə uyğun dərs yoxdur.")
         ws.merge_cells(start_row=4, start_column=1, end_row=4, end_column=ws.max_column)
         return
     stripe = PatternFill("solid", fgColor="EEF5F7")

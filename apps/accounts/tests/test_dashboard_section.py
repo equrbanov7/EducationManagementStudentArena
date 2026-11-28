@@ -102,6 +102,13 @@ class DashboardSectionBase(TestCase):
             cls.faculty = OrgUnit.objects.create(
                 organization=cls.org, name="Mühəndislik", slug="dash-fac", unit_type=OrgUnitType.FACULTY
             )
+            cls.chair = OrgUnit.objects.create(
+                organization=cls.org,
+                parent=cls.faculty,
+                name="Riyaziyyat",
+                slug="dash-chair",
+                unit_type=OrgUnitType.CHAIR,
+            )
             cls.speciality = OrgUnit.objects.create(
                 organization=cls.org,
                 parent=cls.faculty,
@@ -148,6 +155,7 @@ class DashboardSectionBase(TestCase):
                     user=user,
                     organization=cls.org,
                     role=cls.org.roles.get(name=role_name),
+                    scope_unit=cls.chair if role_name == "chair_head" else None,
                     is_primary=True,
                     is_active=True,
                 )
@@ -250,6 +258,11 @@ class DashboardWidgetVisibilityTest(DashboardSectionBase):
         self.assertIn("workload-distribution", keys)
         self.assertIn("syllabus-review", keys)
         self.assertNotIn("student-intake", keys)
+
+    def test_chair_head_without_an_assigned_unit_has_no_distribution_widget(self):
+        with bypass_rls():
+            Membership.objects.filter(organization=self.org, user=self.actors["chair_head"]).update(scope_unit=None)
+        self.assertNotIn("workload-distribution", self.widget_keys(self.open_dashboard("chair_head")))
 
     def test_program_coordinator_sees_schedule_scope(self):
         keys = self.widget_keys(self.open_dashboard("program_coordinator"))

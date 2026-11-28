@@ -17,15 +17,10 @@ QƏSDƏN VERİLMƏYƏNLƏR (rəhbərdə qalır): ``role.*`` (rol/icazə verilmə
 Şablon ``default_roles_rim.py``-dadır; mövcud tenantlar — miqrasiya ``organizations/0082``.
 """
 
-from functools import lru_cache
-
 from django.utils.translation import pgettext_lazy
 
-from core.constants import RoleScopeType
-
+from .faq_video_access import PERM_FAQ_VIDEO_MANAGE, has_faq_video_editor_grant
 from .journal_direct_edit import PERM_JOURNAL_DIRECT_EDIT
-
-PERM_FAQ_VIDEO_MANAGE = "faq.video.manage"
 
 _PERM_CTX = "organizations.permission.label"
 
@@ -72,26 +67,6 @@ def merge_rim_staff_permissions(categories: dict, category_labels: dict, permiss
     if PERM_FAQ_VIDEO_MANAGE not in faq:
         faq.append(PERM_FAQ_VIDEO_MANAGE)
     permission_labels[PERM_FAQ_VIDEO_MANAGE] = pgettext_lazy(_PERM_CTX, "FAQ video dərslərini idarə etmək")
-
-
-@lru_cache(maxsize=16)
-def _faq_editor_roles(org_type):
-    from .default_roles import get_default_roles_for_org_type
-
-    return frozenset(
-        row["name"] for row in get_default_roles_for_org_type(org_type) if PERM_FAQ_VIDEO_MANAGE in row["permissions"]
-    )
-
-
-def has_faq_video_editor_grant(active_memberships) -> bool:
-    """Only active, seeded organization roles designated by the university template can edit."""
-    return any(
-        membership.role.is_system
-        and membership.role.scope_type == RoleScopeType.ORGANIZATION
-        and membership.role.name in _faq_editor_roles(membership.organization.org_type)
-        and PERM_FAQ_VIDEO_MANAGE in (membership.role.permissions or [])
-        for membership in active_memberships
-    )
 
 
 def editable_permission_categories():

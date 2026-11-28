@@ -13,13 +13,19 @@
  data-retry="{% trans 'Axtarışı yenidən sınayın.' %}" data-search="{% url 'monitoring:journal_watch_people' %}">{% csrf_token %}
 <input type="hidden" name="action" value="save">
 {% if jw.editing %}<input type="hidden" name="watch_id" value="{{ jw.editing.pk }}">{% endif %}
-<label>{% trans "Kimi izləyirsiniz?" %}<select class="form-select" name="kind" required>{% for value,label in jw.person_choices %}<option value="{{ value }}"{% if jw.editing.person_kind == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+<label for="jw-kind">{% trans "Kimi izləyirsiniz?" %}</label>
+<div class="bootstrap-single-select bootstrap-single-select--ems">
+  <select class="form-select bootstrap-single-select__native" data-bootstrap-select id="jw-kind" name="kind" required>{% for value,label in jw.person_choices %}<option value="{{ value }}"{% if jw.editing.person_kind == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+</div>
 <label>{% trans "Ad, soyad və ya istifadəçi adı" %}<input type="search" class="form-control" data-jw-query maxlength="80" autocomplete="off"></label>
 <button type="button" class="btn btn-outline-primary" data-jw-search>{% trans "Şəxsi axtar" %}</button>
 <p role="status" data-jw-status></p>
-<label>{% trans "Şəxs" %}<select class="form-select" name="person" required>
+<label for="jw-person">{% trans "Şəxs" %}</label>
+<div class="bootstrap-single-select bootstrap-single-select--ems">
+  <select class="form-select bootstrap-single-select__native" data-bootstrap-select id="jw-person" name="person" required>
 {% if jw.editing %}<option value="{{ jw.editing.person_id }}" selected>{% firstof jw.editing.person.get_full_name jw.editing.person.username %}</option>{% endif %}
-</select></label>
+</select>
+</div>
 <fieldset><legend>{% trans "Hansı hadisələr qeydə alınsın?" %}</legend>
 {% for value,label in jw.event_choices %}<label class="jw-check"><input type="checkbox" name="events" value="{{ value }}"{% if value in jw.editing.event_types %} checked{% endif %}> {{ label }}</label>{% endfor %}</fieldset>
 <fieldset><legend>{% trans "Bildiriş ünvanları" %}</legend>

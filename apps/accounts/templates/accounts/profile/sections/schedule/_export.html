@@ -12,18 +12,30 @@
     <input type="hidden" name="period" value="{{ sec.period.pk }}">
     <input type="hidden" name="w" value="{{ sec.week.offset }}">
     <p class="col-12 mb-1">{% trans "Faylda seçilmiş həftənin tarixli dərsləri və semestrin həftəlik planı var. Filtrləri birlikdə tətbiq edə bilərsiniz." context "accounts.schedule_manage" %}</p>
-    <label class="col-md-3">{% trans "Fakültə" context "accounts.schedule_manage" %}
-      <select class="form-select" name="faculty"><option value="">{% trans "Hamısı" context "accounts.schedule_manage" %}</option>{% for row in sec.export_structure.faculties %}<option value="{{ row.id }}">{{ row.name }}</option>{% endfor %}</select>
-    </label>
-    <label class="col-md-3">{% trans "Kafedra" context "accounts.schedule_manage" %}
-      <select class="form-select" name="chair"><option value="">{% trans "Hamısı" context "accounts.schedule_manage" %}</option>{% for row in sec.export_structure.chairs %}<option value="{{ row.id }}">{{ row.name }}</option>{% endfor %}</select>
-    </label>
-    <label class="col-md-3">{% trans "Qrup" context "accounts.schedule_manage" %}
-      <select class="form-select" name="group"><option value="">{% trans "Hamısı" context "accounts.schedule_manage" %}</option>{% for row in sec.groups %}<option value="{{ row.id }}">{{ row.name }}</option>{% endfor %}</select>
-    </label>
-    <label class="col-md-3">{% trans "Müəllim" context "accounts.schedule_manage" %}
-      <select class="form-select" name="teacher"><option value="">{% trans "Hamısı" context "accounts.schedule_manage" %}</option>{% for row in sec.scope_teachers %}<option value="{{ row.id }}">{{ row.name }}</option>{% endfor %}</select>
-    </label>
+    <div class="col-md-3">
+      <label for="sedit-export-faculty">{% trans "Fakültə" context "accounts.schedule_manage" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="form-select bootstrap-single-select__native" data-bootstrap-select id="sedit-export-faculty" name="faculty"><option value="">{% trans "Hamısı" context "accounts.schedule_manage" %}</option>{% for row in sec.export_structure.faculties %}<option value="{{ row.id }}">{{ row.name }}</option>{% endfor %}</select>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <label for="sedit-export-chair">{% trans "Kafedra" context "accounts.schedule_manage" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="form-select bootstrap-single-select__native" data-bootstrap-select id="sedit-export-chair" name="chair"><option value="">{% trans "Hamısı" context "accounts.schedule_manage" %}</option>{% for row in sec.export_structure.chairs %}<option value="{{ row.id }}">{{ row.name }}</option>{% endfor %}</select>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <label for="sedit-export-group">{% trans "Qrup" context "accounts.schedule_manage" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="form-select bootstrap-single-select__native" data-bootstrap-select id="sedit-export-group" name="group"><option value="">{% trans "Hamısı" context "accounts.schedule_manage" %}</option>{% for row in sec.groups %}<option value="{{ row.id }}">{{ row.name }}</option>{% endfor %}</select>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <label for="sedit-export-teacher">{% trans "Müəllim" context "accounts.schedule_manage" %}</label>
+      <div class="bootstrap-single-select bootstrap-single-select--ems">
+        <select class="form-select bootstrap-single-select__native" data-bootstrap-select id="sedit-export-teacher" name="teacher"><option value="">{% trans "Hamısı" context "accounts.schedule_manage" %}</option>{% for row in sec.scope_teachers %}<option value="{{ row.id }}">{{ row.name }}</option>{% endfor %}</select>
+      </div>
+    </div>
     <div class="col-12"><button type="submit" class="btn btn-primary"><i class="fas fa-download" aria-hidden="true"></i> {% trans "Excel yüklə (.xlsx)" context "accounts.schedule_manage" %}</button></div>
   </form>
 </details>
