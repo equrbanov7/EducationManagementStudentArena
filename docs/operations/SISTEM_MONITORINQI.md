@@ -228,6 +228,12 @@ API-ları üzərindən əlçatandır.
 
 ---
 
+### Disk istifadəsinin ölçülməsi və saxlama hədləri
+
+**Prod host maintenance → disk-usage** əməliyyatı `main` üzərində cari disk, Docker layları, keş, cildlər, ehtiyat nüsxələr və logların fiziki ölçülərini GitHub Actions xülasəsində göstərir. Ölçü pəncərəsi dörd dəqiqədir. İcazə və ya vaxt çatmayan qovluğun görünən həcmi aşağı sərhəd kimi işarələnir. Disk, Docker və qovluq cəmlərinə ortaq məlumatlar daxil ola bilər.
+
+Prometheus tamamlanmış TSDB bloklarını həm 15 günlük müddətlə, həm də `PROMETHEUS_RETENTION_SIZE` (standart `6GB`) ilə məhdudlaşdırır. WAL və cari blok əlavə yer tələb edir. Promtail yalnız həmin Compose layihəsinin konteynerlərini toplayır. Loki-də saxlanma müddəti 14 gündür. `LOKI_INGESTION_RATE_MB` standartda saniyədə 0.025 MiB (gündə təxminən 2.1 GiB gələn məlumat), `LOKI_INGESTION_BURST_MB` isə birdəfəlik 4 MiB qəbul edir. Davamlı yüksək axında Loki HTTP 429 qaytarır və Promtail məhdud sayda təkrar cəhddən sonra qeydləri itirə bilər. Sıxılma, indeks və kompaksiya Loki cildinin faktiki həcminə təsir edir. Hər istehsal konteynerində Docker yerli log rotasiyası 10 MB-lıq üç fayl saxlayır.
+
 ## 8. Deploy təlimatı
 
 Bütün dəyişikliklər `docker-compose.prod.yml`-dədir; deploy pipeline-ı (`main`-ə

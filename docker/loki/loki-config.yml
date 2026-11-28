@@ -44,8 +44,9 @@ compactor:
 
 limits_config:
   retention_period: 336h
-  ingestion_rate_mb: 8
-  ingestion_burst_size_mb: 16
+  # One tenant: 0.025 MiB/s is ~2.1 GiB/day of incoming log text; temporary bursts still fit.
+  ingestion_rate_mb: ${LOKI_INGESTION_RATE_MB:-0.025}
+  ingestion_burst_size_mb: ${LOKI_INGESTION_BURST_MB:-4}
   max_streams_per_user: 5000
   max_line_size: 256KB
   reject_old_samples: true

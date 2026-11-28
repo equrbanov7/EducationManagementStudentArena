@@ -18,12 +18,13 @@ on:
   workflow_dispatch:
     inputs:
       action:
-        description: "status / backup-status (yalnız oxuma), tune (sysctl + docker live-restore), prune (köhnə build keşi), bridge-fw (ufw: körpü → gateway 9100/8953), selfheal / selfheal-off (boot converge + autoheal), monitoring-pause / monitoring-resume (cadvisor/promtail/loki/grafana) və ya reboot"
+        description: "disk-usage / status / backup-status (yalnız oxuma), tune (sysctl + docker live-restore), prune (köhnə build keşi), bridge-fw (ufw: körpü → gateway 9100/8953), selfheal / selfheal-off (boot converge + autoheal), monitoring-pause / monitoring-resume (cadvisor/promtail/loki/grafana) və ya reboot"
         required: true
         default: status
         type: choice
         options:
           - status
+          - disk-usage
           - backup-status
           - tune
           - prune
@@ -51,8 +52,29 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  disk-usage:
+    if: inputs.action == 'disk-usage' && github.ref == 'refs/heads/main'
+    runs-on: [self-hosted]
+    environment: production
+    timeout-minutes: 5
+    steps:
+      - name: Disk ölçüləri (yalnız oxuma)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          report_script="$(mktemp "${RUNNER_TEMP}/disk-usage.XXXXXX")"
+          trap 'rm -f -- "$report_script"' EXIT
+          curl -fsS --max-time 20 -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'Accept: application/vnd.github.raw+json' \
+            "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/contents/scripts/ops/disk_usage.py?ref=${GITHUB_SHA}" \
+            -o "$report_script"
+          unset GH_TOKEN
+          timeout 240s ionice -c3 nice -n 19 python3 -B "$report_script" | tee -a "$GITHUB_STEP_SUMMARY"
+
   host:
     if: >-
+      github.event.inputs.action != 'disk-usage' &&
       (github.event.inputs.action != 'reboot' || github.event.inputs.confirm == 'REBOOT') &&
       (github.event.inputs.action != 'monitoring-pause' || github.event.inputs.confirm == 'PAUSE')
     runs-on: [self-hosted]
