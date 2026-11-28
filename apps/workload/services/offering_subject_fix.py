@@ -342,6 +342,8 @@ def _clash_details(clashes) -> dict:
     from django.db.models.deletion import Collector, ProtectedError, RestrictedError
 
     details = {"clash_count": len(clashes), "clash_active": sum(1 for clash in clashes if clash.is_active)}
+    # Jurnalın UUID-i şəxsi məlumat deyil — RİM onu açıb müqayisə etsin (ləğv edilmiş jurnal siyahıda görünmür).
+    details["clash_ids"] = "_".join(str(clash.pk) for clash in clashes)
     for clash in clashes:
         collector = Collector(using="default")
         try:
