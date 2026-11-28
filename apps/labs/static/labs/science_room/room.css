@@ -1,11 +1,11 @@
 [data-science-room] { scroll-margin-top: 4rem; }
 .sr-room {
-    --sr-ink: #203c3b;
-    --sr-muted: #536a67;
-    --sr-line: #d6e1dc;
-    --sr-paper: #fff;
-    --sr-tint: #eff5f1;
-    --sr-accent: #236451;
+    --sr-ink: var(--ems-text, #0f172a);
+    --sr-muted: var(--ems-neutral-600, #475569);
+    --sr-line: var(--ems-border, #e2e8f0);
+    --sr-paper: var(--ems-bg, #fff);
+    --sr-tint: var(--ems-primary-50, #eff6ff);
+    --sr-accent: var(--ems-primary-600, #2563eb);
     color: var(--sr-ink);
     font-family: inherit;
     line-height: 1.45;
@@ -16,7 +16,7 @@
 .sr-room [hidden] { display: none !important; }
 .sr-room button { font: inherit; color: inherit; cursor: pointer; }
 .sr-room button:focus-visible, .sr-room input:focus-visible {
-    outline: 3px solid #248566;
+    outline: 3px solid var(--sr-accent);
     outline-offset: 3px;
 }
 .sr-room h2, .sr-room h3, .sr-room p, .sr-room dl, .sr-room dd { margin: 0; }
@@ -107,7 +107,7 @@
     user-select: none;
     -webkit-user-select: none;
 }
-.sr-tool::before { content: ""; flex: none; width: .65rem; height: .65rem; border: 1.5px solid #799087; border-radius: 50%; }
+.sr-tool::before { content: ""; flex: none; width: .65rem; height: .65rem; border: 1.5px solid var(--ems-neutral-500, #64748b); border-radius: 50%; }
 .sr-tool[aria-pressed="true"] { border-color: var(--sr-accent); background: var(--sr-tint); font-weight: 650; }
 .sr-tool[aria-pressed="true"]::before { background: var(--sr-accent); border-color: var(--sr-accent); }
 .sr-tools[data-dragging] .sr-tool { cursor: grabbing; }
@@ -127,7 +127,7 @@
 .sr-control input { width: 100%; min-width: 0; grid-column: 1/-1; accent-color: var(--sr-accent); margin: 0; min-height: 1.7rem; }
 .sr-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; margin-top: .65rem; }
 .sr-run { background: var(--sr-accent); color: white !important; border: 1px solid var(--sr-accent); border-radius: .5rem; padding: .45rem .9rem; min-height: 2.65rem; font-weight: 650 !important; }
-.sr-run:hover { background: #1b4c3f; }
+.sr-run:hover { background: var(--ems-primary-700, #1d4ed8); }
 .sr-run span { margin-right: .25rem; }
 .sr-observation { grid-column: 2; padding: .95rem 1rem; }
 .sr-observation dl { display: flex; flex-wrap: wrap; margin: .8rem 0 .5rem; gap: .7rem 1.5rem; }
