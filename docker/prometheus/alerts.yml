@@ -60,6 +60,35 @@ groups:
           summary: "p95 gecikmə 2 saniyəni keçir"
           description: "10 dəqiqədir p95 latency {{ $value }}s səviyyəsindədir."
 
+      # Eyni cavab yalnız bir qaydada sayılır. Hədd həmin səthin trafiki ilə
+      # artır. Aşağı sərhəd seyrək rədləri, yuxarı sərhəd isə sıx trafikdə
+      # yüksək rədd sayının kiçik faiz içində itməsini nəzərə alır.
+      - alert: RoleLoginDenialBurst
+        expr: |
+          sum by (job) (increase(http_requests_total{job="emsarena-app",
+            path=~"/accounts/login/(telebe/|muellim/)?",status_code=~"401|403|429"}[5m]))
+          > clamp(0.20 * sum by (job) (increase(http_requests_total{job="emsarena-app",
+            path=~"/accounts/login/(telebe/|muellim/)?"}[5m])), 15, 60)
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Giriş səhifələrində HTTP rədləri artıb"
+          description: "Tələbə, əməkdaş və giriş seçimi səhifələrində 401, 403 və 429 cavablarının cəmi 5 dəqiqədir həddi keçir."
+
+      - alert: ApplicationDenialBurst
+        expr: |
+          sum by (job) (increase(http_requests_total{job="emsarena-app",
+            path!~"/accounts/login/(telebe/|muellim/)?",status_code=~"401|403|429"}[5m]))
+          > clamp(0.10 * sum by (job) (increase(http_requests_total{job="emsarena-app",
+            path!~"/accounts/login/(telebe/|muellim/)?"}[5m])), 60, 300)
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Tətbiqdə HTTP rədləri artıb"
+          description: "Giriş seçimi və rol üzrə giriş səhifələrindən kənarda 401, 403 və 429 cavablarının cəmi 5 dəqiqədir həddi keçir."
+
       # İmtahan autosave/submit yolunda server xətaları — imtahan bütövlüyü
       # üçün kritik siqnal. path etiketi MetricsMiddleware tərəfindən
       # normalizə olunur: /exams/<slug>/attempt/<id>/

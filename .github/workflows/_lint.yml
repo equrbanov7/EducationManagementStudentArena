@@ -101,6 +101,12 @@ jobs:
       - name: Public API boundary gate
         run: python scripts/public_api_boundaries.py --check
 
+      - name: Prometheus HTTP denial alert tests
+        run: |
+          prom_image=$(docker compose -f docker-compose.prod.yml config --no-interpolate --no-env-resolution --format json | jq -er '.services.prometheus.image')
+          docker run --rm --network none --entrypoint /bin/promtool \
+            -v "$PWD:/work:ro" -w /work "$prom_image" test rules tests/prometheus/http-denials.yml
+
       - name: 🗺️ Kontekst xəritəsi (jurnal modellərinə birbaşa import ratchet-i)
         run: python scripts/context_map.py --check
 

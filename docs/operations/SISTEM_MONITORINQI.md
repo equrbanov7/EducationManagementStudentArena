@@ -218,7 +218,9 @@ API-ları üzərindən əlçatandır.
 | Celery beat stale | — | 5dəq | e-poçt + in-app | 1s |
 | Backup köhnə | — | >26 saat | e-poçt + in-app | 1s |
 | TLS bitmə | <30 gün | <7 gün | e-poçt + in-app | 4s |
-| Brute-force login | 10+ uğursuz/15dəq | — | in-app + audit | dedup 15dəq |
+| Eyni IP-dən uğursuz girişlər | 10-cu cəhddə hadisə yaranır. Cəhdlər arasında 15 dəqiqə keçdikdə sayğac sıfırlanır | — | kabinetdə təhlükəsizlik hadisəsi | hadisələr 15 dəqiqə üzrə birləşdirilir |
+| Giriş səhifələrində HTTP 401/403/429 | Son 5 dəqiqəlik trafikin 20%-i, hədd 15–60 rədd | — | e-poçt + kabinetdə insident | 4 saat |
+| Tətbiqin digər səhifələrində HTTP 401/403/429 | Son 5 dəqiqəlik trafikin 10%-i, hədd 60–300 rədd | — | e-poçt + kabinetdə insident | 4 saat |
 | Alertmanager çatdırılma xətası (P1-3) | — | `notifications_failed_total` artımı / 5dəq | e-poçt + in-app (kanal xarabdırsa yalnız in-app/UI) | 1s |
 | Watchdog / deadman (P1-3) | həmişə yanır (`vector(1)`) | — | YALNIZ `heartbeat` e-poçtu, `WATCHDOG_REPEAT_INTERVAL` (24h) | — |
 
@@ -227,6 +229,16 @@ API-ları üzərindən əlçatandır.
 > edir). Alertmanager cooldown/qruplaşdırma `alertmanager.tmpl.yml`-dədir.
 
 ---
+
+### HTTP rədləri barədə bildiriş
+
+Prometheus hər 30 saniyədən bir bütün Django replikalarının `/metrics/` sayğaclarını oxuyur. `RoleLoginDenialBurst` giriş seçimi, tələbə və əməkdaş giriş səhifələrini izləyir. `ApplicationDenialBurst` digər tətbiq sorğularını izləyir. Hər qayda öz səhifələrində bütün metodlar üzrə 401, 403 və 429 cavablarını toplayır. Say hərəkətli beş dəqiqəlik pəncərə üzrə hesablanır və həddi ardıcıl beş dəqiqə keçəndə xəbərdarlıq yaranır.
+
+Məsələn, beş dəqiqədə 100 giriş sorğusu olduqda hədd 20 rəddir. Tətbiqin qalan hissəsində 5 000 sorğu olduqda yuxarı sərhəd tətbiq edilir və hədd 300 rəddir. Bunlar ilkin əməliyyat hədləridir. Texniki xidmət və imtahan saatlarında müşahidə olunan normal trafik əsasında dəyişdirilə bilər.
+
+Alertmanager `ops-all` vasitəsilə əməliyyat e-poçtuna və Monitorinq Mərkəzinin insidentlərinə xəbər verir. Xəbərdarlığın etiketlərində qaydanın adı, monitorinq hədəfinin adı və xəbərdarlıq səviyyəsi verilir. Araşdırma zamanı son icazə dəyişikliklərini, tətbiqin sorğu məhdudiyyətlərini və Monitorinq Mərkəzindəki təhlükəsizlik hadisələrini yoxlayın.
+
+Bu sayğac Django cavablarını əhatə edir. Nginx-in sorğunu tətbiqə ötürməzdən əvvəl verdiyi 429 cavabları yalnız proksi səviyyəsində görünür. Səhv paroldan sonra giriş forması HTTP 200 qaytardıqda eyni IP-dən təkrarlanan cəhdləri mövcud `login_brute_force` hadisəsi izləyir. HTTP xəbərdarlığı bütün istifadəçilər üzrə ümumi artımı göstərir.
 
 ### Disk istifadəsinin ölçülməsi və saxlama hədləri
 
