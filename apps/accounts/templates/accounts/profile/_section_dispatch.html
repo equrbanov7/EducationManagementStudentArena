@@ -217,7 +217,7 @@ uyğunsuzluğu tutur.
             {% elif active_section == "legacy-grade-review" and 'legacy-grade-review' in allowed_sections %}
                 {% include "accounts/profile/sections/_legacy_grade_review.html" %}
             {% elif active_section == "journal-watch" and "journal-watch" in allowed_sections %}
-                {% include "monitoring/journal_watch/panel.html" %}
+                {% include "accounts/profile/sections/_journal_watch.html" %}
             {% elif active_section == "system-settings" and 'system-settings' in allowed_sections %}
                 {% include "accounts/profile/sections/_system_settings.html" %}
             {% elif active_section == "remote-journal-access" and 'remote-journal-access' in allowed_sections %}
