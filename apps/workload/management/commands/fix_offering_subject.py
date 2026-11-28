@@ -42,6 +42,11 @@ class Command(BaseCommand):
         parser.add_argument("--detach-syllabus", default="", help="Ayrılacaq səhv sillabusun UUID-i (istəyə bağlı)")
         parser.add_argument("--attach-syllabus", default="", help="Paylaşma ilə bağlanacaq sillabusun UUID-i")
         parser.add_argument("--row", default="", help="Fənni dəyişəcək yük sətrinin UUID-i (istəyə bağlı)")
+        parser.add_argument(
+            "--replace-cancelled",
+            default="",
+            help="Hədəf fənndə ləğv edilmiş jurnal-surətin UUID-i: hər xanası mənbədə eynidirsə silinir (istəyə bağlı)",
+        )
         parser.add_argument("--apply", action="store_true", help="Faktiki yaz (defolt: dry-run)")
 
     def handle(self, *args, **options):
@@ -54,6 +59,7 @@ class Command(BaseCommand):
             "detach_syllabus_id": _uuid(options["detach_syllabus"], "detach_syllabus_invalid"),
             "attach_syllabus_id": _uuid(options["attach_syllabus"], "attach_syllabus_invalid"),
             "row_id": _uuid(options["row"], "row_invalid"),
+            "replace_cancelled_id": _uuid(options["replace_cancelled"], "replace_cancelled_invalid"),
         }
         Organization = django_apps.get_model("organizations", "Organization")
         with rls_worker_atomic(), bypass_rls():
