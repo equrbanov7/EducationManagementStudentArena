@@ -209,7 +209,8 @@ def enrich_subject_rows(*, organization, record, rows, journal_by_enrollment, pe
 
 def attach_material_links(*, organization, record, rows) -> None:
     """Sahib 2026-11-28: «Fənlərim» kartından fənnin «Dərs materialları»na keçid — tələbənin bu fənnə təyin
-    olunmuş aktiv qovluğu varsa ``row["materials_url"]`` (bir qovluq → birbaşa qovluq, bir neçə → siyahı); TƏK sorğu."""
+    olunmuş aktiv qovluğu varsa ``row["materials_url"]`` (bir qovluq → birbaşa qovluq, bir neçə → həmin açılışın siyahısı); TƏK sorğu.
+    """
     from apps.subject_folder import public as folders  # dövri idxalın qarşısını alır (yalnız bu bölmə)
 
     links = folders.student_folder_ids_by_offering(
@@ -219,8 +220,9 @@ def attach_material_links(*, organization, record, rows) -> None:
     )
     base = reverse("accounts:profile")
     for row in rows:
-        folder_ids = links.get(row["enrollment"].offering_id) or []
-        query = {"section": folders.SECTION_STUDENT}
+        offering_id = row["enrollment"].offering_id
+        folder_ids = links.get(offering_id) or []
+        query = {"section": folders.SECTION_STUDENT, "sf_offering": offering_id}
         if len(folder_ids) == 1:
             query["sf_folder"] = folder_ids[0]
         row["materials_url"] = f"{base}?{urlencode(query)}" if folder_ids else ""

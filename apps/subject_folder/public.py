@@ -59,7 +59,7 @@ clear_deadline(assignment, task, *, by_user) ; window_state(deadline_or_None, no
 
 4. TƏLƏBƏ
 student_folder_ids_by_offering(*, organization, student, offering_ids) -> {offering_id: [folder_id…]}  (TƏK sorğu)
-student_folders(*, organization, student, period=None) -> [{"folder", "assignment", "offering",
+student_folders(*, organization, student, period=None, offering_id=None) -> [{"folder", "assignment", "offering",
     "tasks": [task_state], "counts": {"selfwork","homework","open","returned","done"}}]   (5 sorğu, sabit)
 student_task_view(task, assignment, student) -> {**task_state, "assignment", "attachments", "attempts",
     "enrollment"}   — auditoriyada deyilsə FolderError
