@@ -732,6 +732,17 @@ lab files, etc.) are **not** served directly.  Access is controlled by Django:
 The `MEDIA_ACCEL_REDIRECT_URL` environment variable controls the prefix
 (default `/internal_media`) and must match the Nginx `location` block.
 
+### Özəl FAQ videolarının bərpası
+
+Deploy mövcud MP4 və VTT fayllarını manifestdəki SHA-256 ilə yoxlayır. Paket çatışmadıqda və ya dəyişdikdə onu şifrəli release arxivindən bərpa edir. «Install verified private FAQ recordings» addımı ehtiyat keçidin vaxtının bitdiyini bildirərsə, repozitoriyanın kökündə, qaralama release-i oxuya və `production` mühitinin sirlərini yeniləyə bilən operator hesabı ilə işlədin.
+
+```bash
+python3 -m scripts.deploy.refresh_faq_stock_urls
+gh run rerun <run-id> --failed
+```
+
+Birinci əmr hər arxivdən bir bayt oxuyub HTTP cavabını və tam fayl ölçüsünü yoxlayır, sonra vaxtla məhdud keçidləri `production` mühitində yeniləyir. Quraşdırmanın sonunda deploy hər video və subtitrin bütövlüyünü ayrıca yoxlayır.
+
 ### Storage volume management
 
 ```bash
