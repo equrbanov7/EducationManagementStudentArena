@@ -123350,3 +123350,36 @@ msgstr "Результаты измерений"
 msgctxt "profile.sidebar"
 msgid "Laboratoriya otağı"
 msgstr "Лаборатория"
+
+msgid "Axtarış nəticələrini yükləmək mümkün olmadı."
+msgstr "Не удалось загрузить результаты поиска."
+
+msgid "Fəsil axtar"
+msgstr "Поиск по главам"
+
+msgid "Suallar və cavablar"
+msgstr "Вопросы и ответы"
+
+msgid "Səhifəni aç"
+msgstr "Открыть страницу"
+
+msgid "Uyğun fəsil tapılmadı."
+msgstr "Подходящая глава не найдена."
+
+msgid "Video açılmadı. Yenidən cəhd edin."
+msgstr "Не удалось открыть видео. Попробуйте ещё раз."
+
+msgid "Video fəsilləri"
+msgstr "Главы видео"
+
+msgid "Əvvəldən başlat"
+msgstr "Смотреть с начала"
+
+msgid "Kabinet üzrə tam video təlimat"
+msgstr "Полное видеоруководство по личному кабинету"
+
+msgid "Məsələn, şifrəmi necə dəyişim?"
+msgstr "Например, как изменить пароль?"
+
+msgid "Ümumi vaxt xətti"
+msgstr "Общая шкала времени"

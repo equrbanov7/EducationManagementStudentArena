@@ -54,6 +54,9 @@ class Guide:
             "student-material": 1,
             "section-my-journal": 3,
             "journal-limit": 4,
+            "locked-mark": 5,
+            "exam-pin": 1,
+            "quiz-start": 2,
             "student-journal-correction": 5,
             "load-lab-hours": 6,
             "load-consult": 4,
@@ -63,10 +66,7 @@ class Guide:
         }.get(self.key)
         if chapter is not None and len(self.chapters) > chapter:
             return self.chapters[chapter]["start"]
-        return {
-            "locked-mark": 50.7,
-            "published-paper-score": 53,
-        }.get(self.key, 0)
+        return 53 if self.key == "published-paper-score" else 0
 
     @property
     def length(self):

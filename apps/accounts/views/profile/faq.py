@@ -1,8 +1,6 @@
 """Kabinetdə rol və icazə sahəsinə uyğun, səhifələnən təlimatlar."""
 
-import re
-import unicodedata
-from functools import lru_cache
+from dataclasses import dataclass
 
 from django.core.paginator import Paginator
 from django.http import HttpResponse, JsonResponse
@@ -19,8 +17,11 @@ from .._helpers import _load_user_profile, _role_capabilities
 from .faq_academic_access import academic_capabilities
 from .faq_catalog import GUIDES, PUBLIC_LOGIN_GUIDES
 from .faq_editor_catalog import can_manage_videos, list_entries
+from .faq_featured import chapter_details, featured_player
 from .faq_operational_access import operational_capabilities
-from .faq_tours import tour_capabilities
+from .faq_search import rank_guides
+from .faq_search import search_words as search_words  # noqa: F401 (existing public import)
+from .faq_tours import active_tour_roles, tour_capabilities, tour_catalog
 from .faq_visibility import guide_allowed
 from .section_assets import section_assets_payload
 
@@ -29,51 +30,53 @@ RESULTS_TEMPLATE = "accounts/profile/sections/faq/_results.html"
 PANEL_TEMPLATE = "accounts/profile/sections/_faq.html"
 
 
-def search_words(value):
-    value = unicodedata.normalize("NFKD", value.casefold().replace("ə", "e").replace("ı", "i"))
-    value = "".join(char for char in value if not unicodedata.combining(char))
-    return re.findall(r"[^\W_]+", value, re.UNICODE)
+@dataclass
+class _MatchedGuide:
+    guide: object
+    match_chapter: dict
+
+    def __getattr__(self, name):
+        return getattr(self.guide, name)
 
 
-def _search_text(guide):
-    chapter_titles = (c["title"] for c in guide.chapters)
-    return " ".join(search_words(" ".join((guide.title, guide.topic, guide.aliases, *guide.steps, *chapter_titles))))
-
-
-@lru_cache(maxsize=1)
-def _builtin_search():
-    return {g.key: (g, _search_text(g)) for g in GUIDES}
-
-
-def faq_page(params, sections, capabilities, request=None):
+def faq_page(params, sections, capabilities, request=None, *, include_featured=True):
     query = params.get("faq_q", "").strip()[:120]
-    terms = search_words(query)
+    selected = params.get("faq_guide", "")
     if request is None:
         guides = [g for g in GUIDES if guide_allowed(g, sections, capabilities)]
     else:
         guides = list_entries(request, sections=sections, capabilities=capabilities)
     allowed_guide_keys = frozenset(g.key for g in guides)
-    visible = []
-    for guide in guides:
-        if params.get("faq_guide") and guide.key != params["faq_guide"]:
-            continue
-        if terms:
-            item = _builtin_search().get(guide.key)
-            text = item[1] if item and item[0] is guide else _search_text(guide)
-            if not all(term in text for term in terms):
-                continue
-        visible.append(guide)
+    candidates = [g for g in guides if g.key == selected] if selected else guides
+    visible = candidates
+    if query:
+        visible = []
+        for hit in rank_guides(candidates, query):
+            guide = hit.guide
+            if hit.chapter_start is not None:
+                chapter = next((c for c in guide.chapters if c["start"] == hit.chapter_start), None)
+                if chapter:
+                    guide = _MatchedGuide(guide, chapter_details(chapter))
+            visible.append(guide)
     page = Paginator(visible, PAGE_SIZE).get_page(params.get("faq_page"))
     numbers = page.paginator.get_elided_page_range(page.number, on_each_side=1, on_ends=1)
-    selected = params.get("faq_guide", "")
-    start = 0
+    start, requested_chapter = 0, False
     if selected and visible:
         guide = visible[0]
         try:
             asked = float(params.get("faq_at", ""))
         except (TypeError, ValueError):
             asked = None
-        start = next((c["start"] for c in guide.chapters if c["start"] == asked), guide.start)
+        requested_chapter = any(c["start"] == asked for c in guide.chapters)
+        start = asked if requested_chapter else guide.start
+    featured = None
+    if include_featured:
+        roles = (
+            active_tour_roles(request)
+            if request is not None
+            else {r: d["label"] for r, d in tour_catalog().items() if capabilities.get("tour_member_" + r)}
+        )
+        featured = featured_player(guides, roles, ", ".join(dict.fromkeys(roles.values())))
     return {
         "allowed_guide_keys": allowed_guide_keys,
         "query": query,
@@ -82,6 +85,8 @@ def faq_page(params, sections, capabilities, request=None):
         "can_manage_videos": bool(request and can_manage_videos(request)),
         "selected": selected,
         "chapter_start": start,
+        "requested_chapter": requested_chapter,
+        "featured": featured,
     }
 
 
@@ -114,13 +119,14 @@ def faq_fragment(request):
     sections = capabilities["allowed_sections"]
     if "faq" not in sections:
         return JsonResponse({"ok": False, "error": "forbidden_or_unknown_section"}, status=403)
+    results_only = request.GET.get("faq_results") == "1"
     context = {
         "active_section": "faq",
         "role_capabilities": capabilities,
         "profile_base_url": reverse("accounts:profile"),
-        "faq": faq_page(request.GET, sections, capabilities, request=request),
+        "faq": faq_page(request.GET, sections, capabilities, request=request, include_featured=not results_only),
     }
-    if request.GET.get("faq_results") == "1":
+    if results_only:
         return HttpResponse(render_to_string(RESULTS_TEMPLATE, context))
     return JsonResponse(
         {

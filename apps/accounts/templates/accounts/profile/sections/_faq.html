@@ -3,20 +3,28 @@
 <section class="profile-section-panel ems-faq {% if active_section == 'faq' %}is-active{% endif %}"
          data-profile-section-panel="faq" data-faq-panel data-source-url="{{ profile_base_url }}?section=faq"
          data-results-url="{% url 'accounts:profile_section_fragment' section='faq' %}">
-    {% if faq.can_manage_videos %}
-    <p><a class="ems-btn ems-btn--sm" href="{% url 'accounts:faq_video_editor' %}">{% translate "Video dərsləri idarə et" %}</a></p>
+    {% if faq.featured.playlist %}
+        {% include "accounts/profile/sections/faq/_featured.html" %}
     {% endif %}
+    <div class="ems-faq-tools">
+        <h2>{% translate "Suallar və cavablar" %}</h2>
+        {% if faq.can_manage_videos %}<a class="ems-faq-link" href="{% url 'accounts:faq_video_editor' %}">{% translate "Video dərsləri idarə et" %}</a>{% endif %}
+    </div>
     {% cabinet_tour_links as tour_links %}
-    {% if tour_links %}<nav class="ems-faq-tour-links" aria-label="{% translate 'Rol üzrə video' %}">{% for tour in tour_links %}<a class="ems-btn ems-btn--sm" href="{{ tour.url }}">{{ tour.label }} · {% translate "Kabinet üzrə video" %}</a>{% endfor %}</nav>{% endif %}
+    {% if tour_links|length > 1 or tour_links and not faq.featured.playlist %}
+    <nav class="ems-faq-tour-links" aria-label="{% translate 'Rol üzrə video' %}">{% for tour in tour_links %}<a class="ems-btn ems-btn--sm" data-faq-page href="{{ tour.url }}">{{ tour.label }} · {% translate "Kabinet üzrə video" %}</a>{% endfor %}</nav>
+    {% endif %}
     <form method="get" action="{{ profile_base_url }}" role="search" class="ems-faq-search" data-faq-search>
         <input type="hidden" name="section" value="faq">
         <label for="faq-query">{% translate "Hansı əməliyyatı etmək istəyirsiniz?" %}</label>
         <div class="ems-faq-search__row">
+            <span class="ems-faq-search__field"><i class="fas fa-magnifying-glass" aria-hidden="true"></i>
             <input type="search" id="faq-query" name="faq_q" maxlength="120" value="{{ faq.query }}"
-                   placeholder="{% translate 'Sual və ya açar söz yazın' %}" aria-controls="faq-results">
+                   placeholder="{% translate 'Məsələn, şifrəmi necə dəyişim?' %}" aria-controls="faq-results"></span>
             <button type="submit" class="ems-btn ems-btn-primary">{% translate "Axtar" %}</button>
         </div>
     </form>
+    <p class="ems-faq-retry" data-faq-retry role="alert" hidden>{% translate "Axtarış nəticələrini yükləmək mümkün olmadı." %} <a href="{{ profile_base_url }}?section=faq" data-force-navigation="true">{% translate "Səhifəni aç" %}</a></p>
     <div id="faq-results" data-faq-results>
         {% include "accounts/profile/sections/faq/_results.html" %}
     </div>

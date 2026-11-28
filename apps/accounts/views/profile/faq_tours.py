@@ -82,21 +82,35 @@ def tour_rows():
         )
 
 
-def tour_roles(request):
+def active_tour_roles(request):
+    """Active tenant roles in primary order, including custom roles without a stock tour."""
     from .faq_editor_catalog import memberships
 
     org = getattr(request, "organization", None)
-    if not org or not request.user.is_authenticated or not request.user.is_active:
-        return ()
+    if (
+        not org
+        or not getattr(org, "is_active", True)
+        or getattr(org, "status", "active") != "active"
+        or not request.user.is_authenticated
+        or not request.user.is_active
+    ):
+        return {}
     if request.user.is_superuser:
-        return ("rehber",) if "rehber" in tour_catalog() else ()
+        return {"rehber": tour_catalog()["rehber"]["label"]} if "rehber" in tour_catalog() else {}
+    roles = {}
     aliases = {"student": "telebe", "teacher": "muellim"}
-    names = (
-        aliases.get(m.role.name, m.role.name)
-        for m in memberships(request)
-        if m.role.is_active and m.role.organization_id == org.pk and m.organization_id == org.pk
-    )
-    return tuple(dict.fromkeys(name for name in names if name in tour_catalog()))
+    for membership in memberships(request):
+        role = membership.role
+        if not role.is_active or role.organization_id != org.pk or membership.organization_id != org.pk:
+            continue
+        name = aliases.get(role.name, role.name)
+        label = tour_catalog().get(name, {}).get("label") or getattr(role, "display_name", "") or role.name
+        roles.setdefault(name, label)
+    return roles
+
+
+def tour_roles(request):
+    return tuple(name for name in active_tour_roles(request) if name in tour_catalog())
 
 
 def tour_capabilities(request):

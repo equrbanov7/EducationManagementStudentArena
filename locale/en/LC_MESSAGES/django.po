@@ -123142,3 +123142,36 @@ msgstr "Measurements"
 msgctxt "profile.sidebar"
 msgid "Laboratoriya otağı"
 msgstr "Laboratory room"
+
+msgid "Axtarış nəticələrini yükləmək mümkün olmadı."
+msgstr "The search results could not be loaded."
+
+msgid "Fəsil axtar"
+msgstr "Search chapters"
+
+msgid "Suallar və cavablar"
+msgstr "Questions and answers"
+
+msgid "Səhifəni aç"
+msgstr "Open page"
+
+msgid "Uyğun fəsil tapılmadı."
+msgstr "No matching chapter found."
+
+msgid "Video açılmadı. Yenidən cəhd edin."
+msgstr "The video could not be loaded. Try again."
+
+msgid "Video fəsilləri"
+msgstr "Video chapters"
+
+msgid "Əvvəldən başlat"
+msgstr "Play from the beginning"
+
+msgid "Kabinet üzrə tam video təlimat"
+msgstr "Full dashboard video guide"
+
+msgid "Məsələn, şifrəmi necə dəyişim?"
+msgstr "For example, how do I change my password?"
+
+msgid "Ümumi vaxt xətti"
+msgstr "Full video timeline"

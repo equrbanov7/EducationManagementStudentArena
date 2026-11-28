@@ -124763,3 +124763,36 @@ msgstr "Messergebnisse"
 msgctxt "profile.sidebar"
 msgid "Laboratoriya otağı"
 msgstr "Laborraum"
+
+msgid "Axtarış nəticələrini yükləmək mümkün olmadı."
+msgstr "Die Suchergebnisse konnten nicht geladen werden."
+
+msgid "Fəsil axtar"
+msgstr "Kapitel suchen"
+
+msgid "Suallar və cavablar"
+msgstr "Fragen und Antworten"
+
+msgid "Səhifəni aç"
+msgstr "Seite öffnen"
+
+msgid "Uyğun fəsil tapılmadı."
+msgstr "Kein passendes Kapitel gefunden."
+
+msgid "Video açılmadı. Yenidən cəhd edin."
+msgstr "Das Video konnte nicht geladen werden. Versuchen Sie es erneut."
+
+msgid "Video fəsilləri"
+msgstr "Videokapitel"
+
+msgid "Əvvəldən başlat"
+msgstr "Von Anfang an abspielen"
+
+msgid "Kabinet üzrə tam video təlimat"
+msgstr "Vollständige Videoanleitung für das Dashboard"
+
+msgid "Məsələn, şifrəmi necə dəyişim?"
+msgstr "Zum Beispiel: Wie ändere ich mein Passwort?"
+
+msgid "Ümumi vaxt xətti"
+msgstr "Gesamte Zeitleiste"

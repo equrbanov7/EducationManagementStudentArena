@@ -66,7 +66,7 @@ YENİ BÖLMƏNİN ASSET-İ (qısa qayda):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/profile_info.css' %}?v=20260912-1">
     {% comment %}Kimlik səthi (`.pfx*`) yalnız «Profil məlumatları»ndadır — fallback (naməlum bölmə → profil) `asset_sections_for`-dadır.{% endcomment %}
     {% if 'faq' in asset_sections %}
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/faq.css' %}">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/faq.css' %}?v=20261128-film">
     {% endif %}
     {% if 'profile-info' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/profile_identity.css' %}?v=20260907-redesign">
