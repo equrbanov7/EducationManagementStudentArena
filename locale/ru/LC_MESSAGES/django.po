@@ -122697,3 +122697,545 @@ msgstr "Входной балл = посещаемость + семинар / л
 msgctxt "profile.subjects"
 msgid "Giriş balı = davamiyyət + seminar / laboratoriya + midterm (imtahana qədər toplanan hissə); yekun bal = giriş balı + yekun imtahan. Fəndə həm seminar, həm laboratoriya varsa hər biri 5 bal sayılır (5 + 5)."
 msgstr "Входной балл = посещаемость + семинар / лаборатория + мидтерм (часть, набранная до экзамена); итоговый балл = входной балл + итоговый экзамен. Если в предмете есть и семинар, и лаборатория, каждый даёт 5 баллов (5 + 5)."
+
+msgid "%(name)s (qeyri-aktiv rol)"
+msgstr "%(name)s (неактивная роль)"
+
+msgid "%(total)s sualdan %(first)s–%(last)s göstərilir"
+msgstr "Показаны вопросы %(first)s–%(last)s из %(total)s"
+
+msgid "Ad və ya mövzu"
+msgstr "Название или тема"
+
+msgid "Ad, soyad və ya istifadəçi adı"
+msgstr "Имя, фамилия или имя пользователя"
+
+msgid "Axtarılır…"
+msgstr "Идёт поиск…"
+
+msgid "Axtarışı yenidən sınayın."
+msgstr "Повторите поиск."
+
+msgid "Azərbaycanca"
+msgstr "Азербайджанский"
+
+msgid "Bildiriş ünvanları"
+msgstr "Адреса для уведомлений"
+
+msgid "Bildiriş ünvanı siyahıdan çıxarıldı."
+msgstr "Адрес для уведомлений удалён из списка."
+
+msgid "Bildiriş ünvanının təsdiqi"
+msgstr "Подтверждение адреса для уведомлений"
+
+msgid ""
+"Bir və ya bir neçə rol seçin, yaxud «Bütün rollar» seçimini təsdiqləyin."
+msgstr "Выберите одну или несколько ролей либо подтвердите выбор всех ролей."
+
+msgid "Bu dərs kataloqdan çıxarılıb. Saxladıqda yenidən görünəcək."
+msgstr "Урок удалён из каталога. Сохраните его, чтобы он снова появился."
+
+msgid "Bu təşkilatın kataloqundan silinməni təsdiqləyirəm."
+msgstr "Подтверждаю удаление из каталога этой организации."
+
+msgid ""
+"Bu ünvana EMS jurnal nəzarəti üzrə bildiriş gəlməsini təsdiqləyirsiniz?"
+msgstr ""
+"Вы согласны получать уведомления об изменениях в журнале EMS по этому "
+"адресу?"
+
+msgid "Bu əməliyyatın təlimatı"
+msgstr "Инструкция по этой операции"
+
+msgid "Bölmənin videosu"
+msgstr "Видео раздела"
+
+msgid "Bütün rollar"
+msgstr "Все роли"
+
+msgid "Bütün suallar"
+msgstr "Все вопросы"
+
+msgid "Daha qısa ifadə ilə axtarın və ya bütün suallara qayıdın."
+msgstr "Введите более короткую фразу или вернитесь ко всем вопросам."
+
+msgid "Dərs başqa pəncərədə dəyişdirilib. Səhifəni yenidən açın."
+msgstr "Урок изменён в другом окне. Откройте страницу заново."
+
+msgid "Dərs səhifələri"
+msgstr "Страницы уроков"
+
+msgid "Dərs tapılmadı."
+msgstr "Урок не найден."
+
+msgid "Dərsi kataloqdan çıxar"
+msgstr "Убрать урок из каталога"
+
+msgid "Dərsi saxla"
+msgstr "Сохранить урок"
+
+msgid "Dərsin kabinetdəki görünüşü"
+msgstr "Предпросмотр урока в личном кабинете"
+
+msgid "Dəyişiklik"
+msgstr "Изменение"
+
+msgid "Dəyişikliklər aktiv təşkilatın kabinetində görünür."
+msgstr "Изменения появятся в личном кабинете выбранной организации."
+
+msgid "E-poçt ünvanları"
+msgstr "Адреса электронной почты"
+
+msgid "E-poçt ünvanı"
+msgstr "Адрес электронной почты"
+
+msgid "E-poçt ünvanı təsdiqləndi."
+msgstr "Адрес электронной почты подтверждён."
+
+msgid "Formanı yenidən açın."
+msgstr "Откройте форму заново."
+
+msgid "Fənn və dərs tarixi"
+msgstr "Дисциплина и дата занятия"
+
+msgid "Fəsillər artan vaxt sırası ilə videonun müddəti daxilində olmalıdır."
+msgstr ""
+"Время начала каждой главы должно возрастать и не выходить за длительность "
+"видео."
+
+msgid "Fəsillərin başlanğıc vaxtları və adları"
+msgstr "Время начала и названия глав"
+
+msgid "Giriş səhifəsinə qayıt"
+msgstr "Вернуться на страницу входа"
+
+msgid "Görə bilən rollar"
+msgstr "Роли с доступом"
+
+msgid "Hadisə jurnalı"
+msgstr "Журнал событий"
+
+msgid "Hansı hadisələr qeydə alınsın?"
+msgstr "Какие события записывать?"
+
+msgid "Hansı əməliyyatı etmək istəyirsiniz?"
+msgstr "Что вы хотите сделать?"
+
+msgid "Hələ nəzarət qaydası yaradılmayıb."
+msgstr "Правила отслеживания ещё не созданы."
+
+msgid "Hər addımı ayrıca sətirdə yazın."
+msgstr "Запишите каждый шаг на отдельной строке."
+
+msgid "Hər fəsil üçün mm:ss və ad yazın. Ən çox 1000 fəsil əlavə olunur."
+msgstr ""
+"Для каждой главы укажите мм:сс и название. Можно добавить до 1000 глав."
+
+msgid ""
+"Hər fəsli ayrıca sətirdə yazın, məsələn 00:00 Giriş və 01:35 Nəticəni "
+"yoxlamaq."
+msgstr ""
+"Пишите по одной главе на строку, например 00:00 Введение и 01:35 Проверка "
+"результата."
+
+msgid "Kabinet üzrə video"
+msgstr "Обзор личного кабинета"
+
+msgid "Kataloqdan çıxarılıb"
+msgstr "Убрано из каталога"
+
+msgid "Kimi izləyirsiniz?"
+msgstr "Чьи записи нужно отслеживать?"
+
+msgid "MP4 video"
+msgstr "Видео MP4"
+
+msgid "Mövcud subtitrləri çıxar"
+msgstr "Удалить текущие субтитры"
+
+msgid "Növbəti"
+msgstr "Далее"
+
+msgid "Növbəti səhifə"
+msgstr "Следующая страница"
+
+msgid "Nəticədən şəxsi seçin."
+msgstr "Выберите человека из результатов поиска."
+
+msgid "Nəzarət"
+msgstr "Контроль журнала"
+
+msgid "Nəzarət aktivdir"
+msgstr "Отслеживание активно"
+
+msgid "Nəzarət qaydası saxlanıldı."
+msgstr "Правило отслеживания сохранено."
+
+msgid "Nəzarət qaydası silindi."
+msgstr "Правило отслеживания удалено."
+
+msgid "Nəzarət qaydası yarat"
+msgstr "Создать правило отслеживания"
+
+msgid "Oxuna bilən video treki və müddəti olan MP4 faylı seçin."
+msgstr "Выберите MP4-файл с читаемой видеодорожкой и длительностью."
+
+msgid "Qaydanı redaktə et"
+msgstr "Изменить правило"
+
+msgid "Qaydanı sil"
+msgstr "Удалить правило"
+
+msgid "Qeydi yazan"
+msgstr "Автор записи"
+
+msgid ""
+"Qeydi yazan əməkdaşı və ya qeydi dəyişilən tələbəni seçin. İlk dəyişiklik "
+"seçilmiş ünvana dərhal bildirilir. Sonrakı beş dəqiqədəki dəyişikliklər bir "
+"məktubda toplanır."
+msgstr ""
+"Выберите сотрудника, который вносит запись, или студента, чья запись "
+"меняется. Первое изменение сразу вызывает письмо на выбранный адрес. "
+"Изменения за следующие пять минут объединяются в одно письмо."
+
+msgid "Rol üzrə video"
+msgstr "Видео по роли"
+
+msgid "Seçilmiş qaydalara uyğun jurnal dəyişikliyi qeydə alınmayıb."
+msgstr ""
+"Изменения журнала, соответствующие выбранным правилам, не зарегистрированы."
+
+msgid "Silməni təsdiqləyin."
+msgstr "Подтвердите удаление."
+
+msgid "Sorğu çox böyükdür. MP4 üçün ən çox 200 MiB qəbul edilir."
+msgstr "Файл слишком велик. Для MP4 допустимо не более 200 МиБ."
+
+msgid "Sual səhifələri"
+msgstr "Страницы вопросов"
+
+msgid "Sual və ya açar söz yazın"
+msgstr "Введите вопрос или ключевое слово"
+
+msgid "Sual və ya dərsin adı"
+msgstr "Вопрос или название урока"
+
+msgid "Sualını axtar, izahı oxu və əməliyyatı videoda izlə."
+msgstr ""
+"Найдите вопрос, прочитайте инструкцию и посмотрите, как выполнить действие."
+
+msgid "Subtitrlər"
+msgstr "Субтитры"
+
+msgid "Səhifələr"
+msgstr "Страницы"
+
+msgid "Təlimat videosunu aç"
+msgstr "Открыть обучающее видео"
+
+msgid "Təsdiq gözlənilir"
+msgstr "Ожидает подтверждения"
+
+msgid "Təsdiq məktubu göndər"
+msgstr "Отправить письмо для подтверждения"
+
+msgid "Təsdiq məktubu üçün sorğu qeydə alındı."
+msgstr "Запрос на отправку письма для подтверждения принят."
+
+msgid "Təsdiqlənib"
+msgstr "Подтверждено"
+
+msgid ""
+"UTF-8 formatında, videonun müddətinə uyğun vaxtlı və sadə mətnli WebVTT "
+"faylı seçin."
+msgstr ""
+"Выберите текстовый файл WebVTT в UTF-8 с метками времени в пределах "
+"длительности видео."
+
+msgid "Uyğun sual tapılmadı."
+msgstr "Подходящих вопросов не найдено."
+
+msgid "Video dərsi kataloqdan çıxarıldı."
+msgstr "Видеоурок убран из каталога."
+
+msgid "Video dərsi saxlanıldı."
+msgstr "Видеоурок сохранён."
+
+msgid "Video dərsi əlavə et"
+msgstr "Добавить видеоурок"
+
+msgid "Video dərsini redaktə et"
+msgstr "Изменить видеоурок"
+
+msgid "Video dərsinin redaktoru"
+msgstr "Редактор видеоурока"
+
+msgid "Video dərslər"
+msgstr "Видеоуроки"
+
+msgid "Video dərsləri idarə et"
+msgstr "Управление видеоуроками"
+
+msgid "Video faylını dəyişdikdə ona uyğun yeni subtitr yükləyə bilərsiniz."
+msgstr "При замене видео можно загрузить новые субтитры к нему."
+
+msgid "Videoda bölmə və ya tab axtar"
+msgstr "Найти раздел или вкладку в видео"
+
+msgid "Videoda göstərilən əməliyyatlar"
+msgstr "Операции, показанные в видео"
+
+msgid "Videoda mövzuya keç"
+msgstr "Перейти к теме в видео"
+
+msgid ""
+"Videonu yalnız seçdiyiniz bütün əməliyyatlara icazəsi olanlar görəcək. Ctrl "
+"və ya ⌘ ilə bir neçə əməliyyat seçə bilərsiniz."
+msgstr ""
+"Видео доступно пользователям с правами на все выбранные операции. "
+"Удерживайте Ctrl или ⌘ для выбора нескольких операций."
+
+msgid "Videoya bax"
+msgstr "Смотреть видео"
+
+msgid "Yeni dərs üçün MP4 video seçin."
+msgstr "Выберите видео MP4 для нового урока."
+
+msgid "Yeni subtitr yükləyərkən mövcud subtitri çıxarma seçimini götürün."
+msgstr "При загрузке новых субтитров снимите отметку удаления прежних."
+
+msgid "Yenidən aç"
+msgstr "Открыть снова"
+
+msgid "Yükləmənin ölçüsü düzgün deyil."
+msgstr "Некорректный размер файла."
+
+msgid "Ümumi təlimat (əlavə əməliyyat icazəsi tələb etmir)"
+msgstr "Общая инструкция (дополнительные права не требуются)"
+
+msgid "Ümumi təlimatı və ya videoda göstərilən əməliyyatları seçin."
+msgstr "Выберите общую инструкцию или операции, показанные в видео."
+
+msgid "Ünvan seçməsəniz, hadisələr yalnız kabinetdə görünəcək."
+msgstr "Если адрес не выбран, события будут видны только в кабинете."
+
+msgid "Ünvanı çıxar"
+msgstr "Удалить адрес"
+
+msgid "Ünvanımı təsdiqlə"
+msgstr "Подтвердить мой адрес"
+
+msgid "İlk giriş və parolun bərpası"
+msgstr "Первый вход и восстановление пароля"
+
+msgid "İlk giriş və parolun bərpası · video təlimat"
+msgstr "Первый вход и восстановление пароля · видеоинструкция"
+
+msgid "İlkin dərs bərpa edildi."
+msgstr "Исходный урок восстановлен."
+
+msgid "İlkin dərsi bərpa et"
+msgstr "Восстановить исходный урок"
+
+msgid ""
+"İlkin dərsin icazələri həmişə tətbiq olunur. Əlavə əməliyyat "
+"göstərirsinizsə, onu da seçin."
+msgstr ""
+"Права исходного урока действуют всегда. Выберите также показанные "
+"дополнительные операции."
+
+msgid ""
+"İlkin dərsin kabinet bölməsi və giriş icazələri tətbiq olunur. Seçdiyiniz "
+"rollar auditoriyanı daraldır."
+msgstr ""
+"Действуют раздел и права исходного урока. Выбор ролей дополнительно "
+"ограничивает аудиторию."
+
+msgid "İstəyə bağlı WebVTT faylı, ən çox 1 MB."
+msgstr "Необязательный файл WebVTT, до 1 МБ."
+
+msgid "İzahın addımları"
+msgstr "Шаги инструкции"
+
+msgid "İzlənən şəxslər"
+msgstr "Люди, чьи записи отслеживаются"
+
+msgid "Şəxs"
+msgstr "Человек"
+
+msgid "Şəxs tapılmadı."
+msgstr "Человек не найден."
+
+msgid "Şəxsi axtar"
+msgstr "Найти человека"
+
+msgid "Əməliyyat seçimi gözlənilir"
+msgstr "Нужно выбрать операции"
+
+msgid ""
+"Ən azı bir rol seçin. Dərsi hamıya göstərmək istəyirsinizsə, «Bütün rollar» "
+"seçimini ayrıca işarələyin."
+msgstr ""
+"Выберите хотя бы одну роль. Для показа всем отдельно отметьте «Все роли»."
+
+msgid "Ən azı iki hərf yazın."
+msgstr "Введите не менее двух букв."
+
+msgid "Ən çox 200 MiB."
+msgstr "До 200 МиБ."
+
+msgid "Ən çox verilən suallar"
+msgstr "Часто задаваемые вопросы"
+
+msgid "Əvvəlki səhifə"
+msgstr "Предыдущая страница"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Əvvəlki sual göndərişlərinizin vəziyyətinə və qeydlərinə baxın."
+msgstr "Посмотрите статус и примечания к ранее отправленным вопросам."
+
+msgctxt "accounts.schedule_manage"
+msgid "Excel yüklə (.xlsx)"
+msgstr "Скачать Excel (.xlsx)"
+
+msgctxt "accounts.schedule_manage"
+msgid "Fakültə"
+msgstr "Факультет"
+
+msgctxt "accounts.schedule_manage"
+msgid ""
+"Faylda seçilmiş həftənin tarixli dərsləri və semestrin həftəlik planı var. "
+"Filtrləri birlikdə tətbiq edə bilərsiniz."
+msgstr ""
+"Файл содержит занятия с датами на выбранную неделю и недельный план "
+"семестра. Фильтры можно сочетать."
+
+msgctxt "accounts.schedule_manage"
+msgid "Filtrlə Excel-ə ixrac et"
+msgstr "Применить фильтры и выгрузить в Excel"
+
+msgctxt "accounts.schedule_manage"
+msgid "Hamısı"
+msgstr "Все"
+
+msgctxt "accounts.schedule_manage"
+msgid "Kafedra"
+msgstr "Кафедра"
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllimin cədvəlini yüklə (.xlsx)"
+msgstr "Скачать расписание преподавателя (.xlsx)"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrupun cədvəlini yüklə (.xlsx)"
+msgstr "Скачать расписание группы (.xlsx)"
+
+msgctxt "accounts.workload"
+msgid "Başqa kafedraya göndər"
+msgstr "Передать другой кафедре"
+
+msgctxt "accounts.workload"
+msgid "Daha çox sətir"
+msgstr "Ещё строки"
+
+msgctxt "accounts.workload"
+msgid "Fənn və ya qrupu axtar"
+msgstr "Найти предмет или группу"
+
+msgctxt "accounts.workload"
+msgid "Göndəriləcək tapşırıq sətri"
+msgstr "Строка нагрузки для передачи"
+
+msgctxt "accounts.workload"
+msgid ""
+"Hər sətrə müəllimin keçirəcəyi saatı yazın. «Bütün qrup» ümumi təyinatdır. "
+"Nömrəli alt qrup seçimi göstərilirsə, həmin qrupu ayrıca təyin edə "
+"bilərsiniz. «Bölünməyib» bu fəaliyyət üçün hələ müəllimə verilməyən saatdır."
+msgstr ""
+"В каждой строке укажите часы преподавателя. «Вся группа» означает назначение"
+" всему составу. Если показаны нумерованные подгруппы, назначьте их отдельно."
+" Нераспределённые часы по этому виду занятий ещё не назначены преподавателю."
+
+msgctxt "accounts.workload"
+msgid "Müəllimə verilən saat"
+msgstr "Часы, назначенные преподавателю"
+
+msgctxt "accounts.workload"
+msgid ""
+"Qruplar reyestrdən seçilir. Yeni yükü «Sətir əlavə et» ilə daxil edin. "
+"Mövcud fənnin qrup və saatlarına kartdakı «Sətirlər» düyməsindən baxın."
+msgstr ""
+"Выбирайте группы из реестра. Для новой нагрузки нажмите «Добавить строку». "
+"Чтобы просмотреть группы и часы предмета, откройте «Строки» в его карточке."
+
+msgctxt "journal.watch"
+msgid "%(status)s · %(score)s bal"
+msgstr "%(status)s · баллы: %(score)s"
+
+msgctxt "journal.watch"
+msgid "Bal yazılması"
+msgstr "Выставлен балл"
+
+msgctxt "journal.watch"
+msgid ""
+"Bu ünvanda jurnal bildirişlərini almaq istəyirsinizsə, keçidi açıb "
+"təsdiqləyin. Keçid 24 saat qüvvədədir."
+msgstr ""
+"Чтобы получать уведомления об изменениях в журнале по этому адресу, откройте"
+" ссылку и подтвердите свой выбор. Ссылка действительна 24 часа."
+
+msgctxt "journal.watch"
+msgid "Jurnal bildirişləri üçün ünvanı təsdiqləyin"
+msgstr "Подтвердите адрес для уведомлений о журнале"
+
+msgctxt "journal.watch"
+msgid "Jurnalda izlənilən dəyişikliklər"
+msgstr "Отслеживаемые изменения в журнале"
+
+msgctxt "journal.watch"
+msgid "Mövcud qeydin düzəldilməsi"
+msgstr "Исправлена существующая запись"
+
+msgctxt "journal.watch"
+msgid "Qayıb yazılması"
+msgstr "Отмечен пропуск"
+
+msgctxt "journal.watch"
+msgid "Qeydi izlənilən tələbə"
+msgstr "Студент, чьи записи отслеживаются"
+
+msgctxt "journal.watch"
+msgid "Qeydi yazan şəxs"
+msgstr "Автор записи"
+
+msgctxt "journal.watch"
+msgid "Qeydin silinməsi"
+msgstr "Запись удалена"
+
+msgctxt "journal.watch"
+msgid ""
+"Yeni qeydlərin sayı: %(count)s. Ətraflı məlumatı kabinetdə «Nəzarət» "
+"bölməsindən açın."
+msgstr ""
+"Новых записей: %(count)s. Подробности доступны в разделе «Контроль журнала» "
+"в кабинете."
+
+msgctxt "journal.watch"
+msgid "İştirak yazılması"
+msgstr "Отмечено присутствие"
+
+msgctxt "organizations.permission.category"
+msgid "Video təlimatlar"
+msgstr "Видеоинструкции"
+
+msgctxt "organizations.permission.label"
+msgid "FAQ video dərslərini idarə etmək"
+msgstr "Управление видеоуроками раздела вопросов"
+
+msgctxt "profile.section"
+msgid "Nəzarət"
+msgstr "Контроль журнала"
+
+msgctxt "registrar.schedule"
+msgid "Excel yüklə (.xlsx)"
+msgstr "Скачать Excel (.xlsx)"

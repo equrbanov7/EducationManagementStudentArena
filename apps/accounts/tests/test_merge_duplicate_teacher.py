@@ -30,6 +30,11 @@ class TeacherMergePolicyTest(SimpleTestCase):
         self.assertEqual(policy.unclassified(), [])
         self.assertEqual(policy.stale(), [])
 
+    def test_journal_watch_follows_the_person_and_keeps_historical_identities(self):
+        self.assertEqual(policy.POLICY["monitoring.JournalWatch.person"], policy.REPOINT)
+        for field in ("actor", "real_actor", "student"):
+            self.assertEqual(policy.POLICY["monitoring.JournalWatchEvent." + field], policy.KEEP_EVIDENCE)
+
 
 class MergeDuplicateTeacherTest(_ShareBase):
     @classmethod

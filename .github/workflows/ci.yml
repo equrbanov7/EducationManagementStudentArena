@@ -434,6 +434,13 @@ jobs:
           # Prod hostda token diskdə qalmasın — deploy checkout-dan sonra git auth istəmir.
           persist-credentials: false
 
+      - name: Install verified private FAQ recordings
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FAQ_STOCK_KEY: ${{ secrets.FAQ_STOCK_KEY }}
+          FAQ_STOCK_DOWNLOAD_URL: ${{ secrets.FAQ_STOCK_DOWNLOAD_URL }}
+        run: python3 scripts/deploy/install_faq_stock.py "$APP_DIR"
+
       - name: 🚢 Deploy (docker-compose, in place)
         run: |
           set -euo pipefail

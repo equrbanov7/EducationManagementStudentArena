@@ -250,6 +250,7 @@ def _role_capabilities(user, profile):
             # qapısı YOXDUR: panel özü yalnız icazəli bölmələrin vidjetlərini
             # yığır, ona görə görünürlük hər üzv üçün eynidir.
             "dashboard",
+            "faq",
             "profile-info",
             "notifications",
             "posts",
@@ -293,6 +294,7 @@ def _role_capabilities(user, profile):
         allowed_sections = {
             # bax yuxarıdakı şərh — «Ana səhifə» hər kəsdə var.
             "dashboard",
+            "faq",
             "profile-info",
             "notifications",
             "posts",

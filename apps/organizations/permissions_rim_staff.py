@@ -19,6 +19,7 @@ QƏSDƏN VERİLMƏYƏNLƏR (rəhbərdə qalır): ``role.*`` (rol/icazə verilmə
 
 from django.utils.translation import pgettext_lazy
 
+from .faq_video_access import PERM_FAQ_VIDEO_MANAGE, has_faq_video_editor_grant
 from .journal_direct_edit import PERM_JOURNAL_DIRECT_EDIT
 
 _PERM_CTX = "organizations.permission.label"
@@ -61,9 +62,28 @@ def merge_rim_staff_permissions(categories: dict, category_labels: dict, permiss
     if PERM_JOURNAL_DIRECT_EDIT not in bucket:
         bucket.append(PERM_JOURNAL_DIRECT_EDIT)
     permission_labels[PERM_JOURNAL_DIRECT_EDIT] = _LABEL
+    category_labels["faq"] = pgettext_lazy("organizations.permission.category", "Video təlimatlar")
+    faq = categories.setdefault("faq", [])
+    if PERM_FAQ_VIDEO_MANAGE not in faq:
+        faq.append(PERM_FAQ_VIDEO_MANAGE)
+    permission_labels[PERM_FAQ_VIDEO_MANAGE] = pgettext_lazy(_PERM_CTX, "FAQ video dərslərini idarə etmək")
+
+
+def editable_permission_categories():
+    """Template-only grants stay out of the role editor's selectable and delegable keys."""
+    from .permissions import PERMISSION_CATEGORIES
+
+    return {
+        category: keys
+        for category, permissions in PERMISSION_CATEGORIES.items()
+        if (keys := [key for key in permissions if key != PERM_FAQ_VIDEO_MANAGE])
+    }
 
 
 __all__ = [
+    "PERM_FAQ_VIDEO_MANAGE",
+    "has_faq_video_editor_grant",
+    "editable_permission_categories",
     "PERM_JOURNAL_DIRECT_EDIT",
     "RIM_STAFF_DAILY_PERMISSIONS",
     "merge_rim_staff_permissions",

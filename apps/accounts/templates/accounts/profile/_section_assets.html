@@ -65,6 +65,9 @@ YENİ BÖLMƏNİN ASSET-İ (qısa qayda):
     <link rel="stylesheet" href="{% static 'accounts/css/profile/common.css' %}?v=20261019-lazy">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/profile_info.css' %}?v=20260912-1">
     {% comment %}Kimlik səthi (`.pfx*`) yalnız «Profil məlumatları»ndadır — fallback (naməlum bölmə → profil) `asset_sections_for`-dadır.{% endcomment %}
+    {% if 'faq' in asset_sections %}
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/faq.css' %}">
+    {% endif %}
     {% if 'profile-info' in asset_sections %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/profile_identity.css' %}?v=20260907-redesign">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/sections/profile_identity_aside.css' %}?v=20260907-redesign">
@@ -355,7 +358,7 @@ YENİ BÖLMƏNİN ASSET-İ (qısa qayda):
     `.apx-body` sütun qaydasını və cavab qutusunun fonunu QƏSDƏN üstələyir.{% endcomment %}
     <link rel="stylesheet" href="{% static 'accounts/css/profile/applications.css' %}?v=20261128-elsewhere">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_filters.css' %}?v=20261019-mob">
-    <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_detail.css' %}?v=20260907-modal">
+    <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_detail.css' %}?v=20261128-faq">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_modal.css' %}?v=20260907-modal">
     <link rel="stylesheet" href="{% static 'accounts/css/profile/applications_dialogs.css' %}?v=20260909-empty">
     {% endif %}

@@ -63,6 +63,11 @@ grid + legend — artıq heç nə. Müəllim üçün əlavə yalnız "Slot əlav
                     {% if week.offset == 0 %}{% if week.parity == 'odd' %}{% trans "Gələn həftə — ALT" context "registrar.schedule" %}{% else %}{% trans "Gələn həftə — ÜST" context "registrar.schedule" %}{% endif %}{% else %}{% if week.parity == 'odd' %}{% trans "Gələn həftə — ÜST" context "registrar.schedule" %}{% else %}{% trans "Gələn həftə — ALT" context "registrar.schedule" %}{% endif %}{% endif %}
                 </a>
             </div>
+            {% if schedule_personal_export and period and not request.is_view_as %}
+            <a class="sgx-primary-btn" href="{% url 'accounts:my_schedule_export' %}?period={{ period.pk }}&amp;w={{ week.offset }}" download>
+                <i class="fas fa-file-excel" aria-hidden="true"></i> {% trans "Excel yüklə (.xlsx)" context "registrar.schedule" %}
+            </a>
+            {% endif %}
             {% if schedule_can_manage and teacher_offerings %}
             <button type="button" class="sgx-primary-btn" data-sgx-open-add><i class="fas fa-plus"></i> {% trans "Slot əlavə et" context "registrar.schedule" %}</button>
             {% endif %}

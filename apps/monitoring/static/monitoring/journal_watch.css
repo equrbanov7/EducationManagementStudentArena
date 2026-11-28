@@ -1,0 +1,11 @@
+.jw-panel { max-width: 72rem; padding: clamp(.85rem, 2vw, 2rem); }
+.jw-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: 1rem; align-items: start; }
+.jw-card { padding: 1.1rem; border: 1px solid var(--bs-border-color,#d6dce5); border-radius: .6rem; }
+.jw-panel h1 { font-size: 1.65rem; }
+.jw-panel h2 { font-size: 1.2rem; margin: 1rem 0; }
+.jw-panel label:not(.jw-check), .jw-panel fieldset { display: block; margin: .8rem 0; }
+.jw-panel legend { font-size: 1rem; font-weight: 600; }
+.jw-check { display: block; }
+.jw-panel summary { cursor: pointer; padding: .4rem 0; }
+.jw-panel nav a { padding: .4rem; }
+.jw-table { overflow-x: auto; }

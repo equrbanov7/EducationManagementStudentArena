@@ -125,7 +125,7 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
           <option value="{{ workload_distribution_section.all_chairs_value }}" {% if workload_distribution_section.chair_id == workload_distribution_section.all_chairs_value %}selected{% endif %}>{% trans "Bütün kafedralar" context "accounts.workload" %}</option>
           {% endif %}
           {% for chair in workload_distribution_section.chairs %}
-          <option value="{{ chair.id }}" {% if chair.id == workload_distribution_section.chair_id %}selected{% endif %}>{{ chair.name }}</option>
+          <option value="{{ chair.id }}" {% if chair.can_transfer %}data-wl-transferable{% endif %} {% if chair.id == workload_distribution_section.chair_id %}selected{% endif %}>{{ chair.name }}</option>
           {% empty %}
           <option value="">{% trans "Əhatənizdə kafedra yoxdur" context "accounts.workload" %}</option>
           {% endfor %}
@@ -216,6 +216,7 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
         <i class="fas fa-rotate-left" aria-hidden="true"></i>
         <span>{% trans "Filtrləri sıfırla" context "accounts.workload" %}</span>
       </button>
+      {% if workload_distribution_section.can_manage %}
       <button type="button" class="wl-btn wl-btn--ghost" data-wl-create-task data-wl-chair-only>
         <i class="fas fa-plus" aria-hidden="true"></i>
         <span>{% trans "Tapşırıq yarat" context "accounts.workload" %}</span>
@@ -224,6 +225,12 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
         <i class="fas fa-table-list" aria-hidden="true"></i>
         <span>{% trans "Plan sətri əlavə et" context "accounts.workload" %}</span>
       </button>
+      {% endif %}
+      {% if workload_distribution_section.can_manage and workload_distribution_section.can_distribute %}
+      <button type="button" class="wl-btn wl-btn--ghost" data-wl-open-transfer data-wl-chair-only hidden>
+        <i class="fas fa-right-left" aria-hidden="true"></i> {% trans "Başqa kafedraya göndər" context "accounts.workload" %}
+      </button>
+      {% endif %}
       {% if workload_distribution_section.can_intensive %}
       <button type="button" class="wl-btn wl-btn--ghost" data-wl-open-intensive data-wl-chair-only>
         <i class="fas fa-bolt" aria-hidden="true"></i>
@@ -240,6 +247,7 @@ və `profile.html`-dən yüklənir; dinamik dəyərlər `data-*` atributları il
   <div class="wl__layout">
     {# ── Sol: sətirlər ──────────────────────────────────────────────── #}
     <div class="wl__main">
+      <p class="wl-aside__hint" data-wl-chair-only>{% trans "Qruplar reyestrdən seçilir. Yeni yükü «Sətir əlavə et» ilə daxil edin. Mövcud fənnin qrup və saatlarına kartdakı «Sətirlər» düyməsindən baxın." context "accounts.workload" %}</p>
       {% comment %}Sahib 2026-11-19: «axın yazısı aydın deyil, patokda / seminar bölünəndə qarışıqdır» — qısa izah,
       istəyən açır (kartın özü də addım-addım yazılıb: 1 Mühazirə · 2 Seminar · 3 Laboratoriya).{% endcomment %}
       <details class="wl-help" data-wl-chair-only>

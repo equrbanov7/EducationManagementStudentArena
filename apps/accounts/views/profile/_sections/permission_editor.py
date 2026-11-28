@@ -75,7 +75,9 @@ def build_permission_editor_section(
     capabilities,
 ):
     from apps.organizations.models import Role
-    from apps.organizations.public import PERMISSION_CATEGORIES
+    from apps.organizations.public import editable_permission_categories
+
+    permission_categories = editable_permission_categories()
 
     # `pe_role` — yeni filtr paneli; `role` köhnə dərin keçidlər (bildiriş
     # linkləri: `?section=permission-editor&role=<id>`) üçün saxlanılır.
@@ -83,7 +85,7 @@ def build_permission_editor_section(
     section.update(
         {
             "organization": management_org,
-            "permission_categories": PERMISSION_CATEGORIES,
+            "permission_categories": permission_categories,
             "actor_permissions": sorted(management_actor_permissions),
             "grantable_permissions": sorted(management_grantable_permissions),
             "can_manage_permissions": management_can_assign_roles,
@@ -143,7 +145,7 @@ def build_permission_editor_section(
 
     total_keys = 0
     modules = []
-    for category, permissions in PERMISSION_CATEGORIES.items():
+    for category, permissions in permission_categories.items():
         meta = _category_meta(category)
         rows = []
         for permission in permissions:
@@ -163,7 +165,7 @@ def build_permission_editor_section(
         modules.append(meta)
     section["modules"] = modules
 
-    active_count = total_keys if has_wildcard else len(active_keys & _flatten(PERMISSION_CATEGORIES))
+    active_count = total_keys if has_wildcard else len(active_keys & _flatten(permission_categories))
     section["kpi_tiles"] = [
         {
             "label": pgettext(_CTX, "Seçilmiş rol"),

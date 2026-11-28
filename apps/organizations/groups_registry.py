@@ -403,8 +403,8 @@ def build_groups_registry(request, organization) -> dict:
     # 2026-10-14: OXU əhatəsi fakültəyə genişləndi (kafedra/ixtisas tyutoru bütün fakültənin qruplarını görür),
     # YAZI isə dar `unit.group_manage` əhatəsindədir — sətir düymələri yalnız yazı əhatəsindəki qrupa (server
     # kənar qrupa onsuz da 404 qaytarır). Sorğusuz: əhatə bir dəfə, yoxlama yol üzrə.
-    can_manage = can_manage_groups(request)
-    manage_scope = group_manage_scope(request, organization) if can_manage else EMPTY_SCOPE
+    manage_scope = group_manage_scope(request, organization) if can_manage_groups(request) else EMPTY_SCOPE
+    can_manage = scope.has_structure_access and manage_scope.has_structure_access
     can_view_students = can_view_group_students(request)
     parent_names, subgroup_counts = _parent_links(organization, page_units)
     rows = []

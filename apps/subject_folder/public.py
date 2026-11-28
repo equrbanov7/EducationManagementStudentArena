@@ -220,6 +220,21 @@ from .services.topics import create_topic, delete_topic, reorder_topics, set_top
 
 REJECT_REASONS = RejectReason
 
+
+def teaching_folder_authority(user, organization):
+    """Return the actor's authority over their own folder material and assigned work."""
+    from .services import lookups
+
+    if lookups.is_org_admin(user, organization):
+        return True, True
+    if not lookups.has_instructor_authority(user, organization):
+        return False, False
+    folders = list_folders(organization=organization, actor=user).filter(owner=user)
+    taught = lookups.offering_model().objects.filter(organization=organization).filter(lookups.taught_offerings_q(user))
+    has_teaching = taught.exists()
+    return has_teaching or folders.exists(), has_teaching
+
+
 __all__ = [
     "JOURNAL_SYNC_TOKENS",
     "REJECT_REASONS",
@@ -295,6 +310,7 @@ __all__ = [
     "submit",
     "sync_submission_to_journal",
     "task_progress",
+    "teaching_folder_authority",
     "unassign",
     "update_folder",
     "update_material",

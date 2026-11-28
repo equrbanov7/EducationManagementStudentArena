@@ -14,6 +14,7 @@ from django.utils.translation import pgettext_lazy
 # Birbaşa-render şablonları sırf statikdir (tərcümə yoxdur) → modul sabiti.
 DIRECT_PROFILE_SECTION_TEMPLATES = {
     "dashboard": "accounts/profile/sections/_dashboard.html",
+    "faq": "accounts/profile/sections/_faq.html",
     "pending-answers": "accounts/profile/sections/_pending_answers.html",
     "pending-review": "accounts/profile/sections/_pending_review.html",
     "review-results": "accounts/profile/sections/_review_results.html",
@@ -36,6 +37,7 @@ DIRECT_PROFILE_SECTION_TEMPLATES = {
     "exam-score-entry": "accounts/profile/sections/_exam_score_entry.html",
     "legacy-grade-review": "accounts/profile/sections/_legacy_grade_review.html",
     "system-settings": "accounts/profile/sections/_system_settings.html",
+    "journal-watch": "monitoring/journal_watch/panel.html",
     "remote-journal-access": "accounts/profile/sections/_remote_journal_access.html",
     "journal-hygiene": "accounts/profile/sections/_journal_hygiene.html",
     "journal-removals": "accounts/profile/sections/_journal_removals.html",
@@ -81,6 +83,7 @@ def build_section_titles() -> dict:
     """Bölmə başlıqları xəritəsi (per-request — eager ``_()`` tərcümələri üçün)."""
     return {
         "dashboard": pgettext_lazy("profile.sidebar", "Ana səhifə"),
+        "faq": _("Ən çox verilən suallar"),
         "profile-info": pgettext_lazy("profile.section", "profile_info"),
         "notifications": pgettext_lazy("profile.section", "notifications"),
         "publish-notification": pgettext_lazy("profile.publish_notification", "title"),
@@ -133,6 +136,7 @@ def build_section_titles() -> dict:
         "kollokvium-windows": pgettext_lazy("profile.section", "Midterm pəncərələri"),
         "exam-score-entry": pgettext_lazy("profile.section", "İmtahan balının daxil edilməsi"),
         "legacy-grade-review": pgettext_lazy("profile.section", "Köçürülmüş nəticələrin dəqiqləşdirilməsi"),
+        "journal-watch": pgettext_lazy("profile.section", "Nəzarət"),
         "system-settings": pgettext_lazy("profile.section", "Sistem tənzimləmələri"),
         "remote-journal-access": pgettext_lazy("profile.section", "Kənardan jurnal girişi"),
         "journal-hygiene": pgettext_lazy("profile.section", "Jurnal təmizliyi"),

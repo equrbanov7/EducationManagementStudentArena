@@ -134,6 +134,10 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 60.0,  # seconds
     },
     # 2026-10-02: «resolved» webhook-u çatmayan köhnə insidentləri Alertmanager-in aktiv siyahısı ilə uzlaşdır.
+    "journal-watch-outbox-recovery": {
+        "task": "monitoring.recover_journal_watch_outbox",
+        "schedule": 300.0,
+    },
     "monitoring-reconcile-incidents": {
         "task": "monitoring.reconcile_incidents",
         "schedule": 600.0,  # seconds

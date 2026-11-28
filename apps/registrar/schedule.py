@@ -258,7 +258,7 @@ def _slots_for(queryset):
     cədvəldə görünmür. ``instructor`` (slotun öz müəllimi) LEFT JOIN ilə gəlir — etiket əlavə sorğu etmir."""
     return list(
         queryset.filter(is_parked=False, offering__is_active=True)
-        .select_related("offering", "offering__subject", "offering__group", "offering__instructor", "instructor")
+        .select_related("offering__subject__chair_unit", "offering__group", "offering__instructor", "instructor")
         .order_by("weekday", "start_time")
     )
 
@@ -315,7 +315,7 @@ def get_student_schedule(organization, student, group, period):
     )
 
 
-def get_teacher_schedule(*, organization, teacher, period):
+def get_teacher_schedule(*, organization, teacher, period, offerings=None):
     """All slots the teacher teaches in a period (teacher view).
 
     EFFEKTİV müəllimə görə (2026-09-25): öz açılışlarının override-sız slotları + başqa
@@ -323,13 +323,12 @@ def get_teacher_schedule(*, organization, teacher, period):
     2026-11-05: ona təyin olunmuş, amma jurnalı (sahib/pay/dərs) və dərs yükü olmayan slot göstərilmir
     (:mod:`apps.registrar.schedule_stale_teachers`). Müəllimi boş slotda jurnal sahibi yükdə yoxdursa (yük başqasına
     verilib) dərs sahibin yox, həmin növdə yükü olan müəllimin cədvəlinə düşür."""
-    from .schedule_stale_teachers import current_q, load_inherited_q
+    from .schedule_stale_teachers import personal_teacher_slot_q
 
-    return _slots_for(
-        ScheduleSlot.objects.filter(organization=organization, offering__period=period).filter(
-            (taught_by_q(teacher) & current_q()) | load_inherited_q(teacher)
-        )
-    )
+    slots = ScheduleSlot.objects.filter(organization=organization, offering__period=period)
+    if offerings is not None:
+        slots = slots.filter(offering__in=offerings)
+    return _slots_for(slots.filter(personal_teacher_slot_q(teacher)))
 
 
 def build_week_grid(slots, *, weekdays=_TEACHING_WEEKDAYS):

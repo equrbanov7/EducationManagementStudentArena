@@ -18,6 +18,7 @@ view-as altında gizlidir. Stil/skript xarici fayllardadır (CSP); JS AJAX-safe 
     {% trans "Sənəd yoxlaması" context "verification.staff" as page_title %}
     {% trans "Sistemin verdiyi rəsmi sənədlər (QR + kod). Kod üzrə və ya tələbə adı ilə axtarın; səhv verilmiş sənədi ləğv edin." context "verification.staff" as page_subtitle %}
     {% include "partials/ems_ui/_content_header.html" with header_title=page_title header_subtitle=page_subtitle %}
+    {% include "accounts/profile/sections/faq/_external_help.html" with help_section="external-seals" only %}
 
     <div class="dvs-toolbar">
         <form class="dvs-search" method="get" action="{% url 'verification:staff_list' %}" role="search">

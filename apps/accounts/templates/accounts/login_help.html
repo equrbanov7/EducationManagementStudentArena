@@ -1,0 +1,15 @@
+{% extends "base_auth.html" %}
+{% load static i18n %}
+{% block title %}{% translate "İlk giriş və parolun bərpası" %} | {{ site_brand_name }}{% endblock %}
+{% block extraCss %}
+<link rel="stylesheet" href="{% static 'accounts/css/login.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/css/profile/sections/faq.css' %}">
+{% endblock %}
+{% block content %}
+<main class="auth-page-wrapper"><div class="auth-card ems-faq">
+    <h1 class="auth-heading">{% translate "İlk giriş və parolun bərpası" %}</h1>
+    {% include "accounts/profile/sections/faq/_results.html" %}
+    <p><a href="{% url 'accounts:login' %}">{% translate "Giriş səhifəsinə qayıt" %}</a></p>
+</div></main>
+<script src="{% static 'accounts/js/profile/faq.js' %}" defer></script>
+{% endblock %}

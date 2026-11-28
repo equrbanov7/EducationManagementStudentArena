@@ -16,6 +16,7 @@ Bəndlərin markup-ı və görünürlük şərti `sidebar/items/`-dədir (heyət
 akkordeonu ilə ORTAQ). Bölmə etiketinin şərti içindəki bəndlərin şərtlərinin
 birləşməsidir — boş başlıq qalmır.{% endcomment %}
 {% include "accounts/profile/sidebar/_home_menu_item.html" %}
+{% include "accounts/profile/sidebar/items/_faq.html" %}
 
 {% if "my-subjects" in allowed_sections or "my-schedule" in allowed_sections or "my-journal" in allowed_sections or can_view_student_assignments or "my-transcript" in allowed_sections or "overall-academic" in allowed_sections or "academic-calendar" in allowed_sections or "my-group" in allowed_sections %}
 <li class="sidebar-section" data-sidebar-section="education">

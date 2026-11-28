@@ -4040,3 +4040,24 @@ msgstr "Блок дисциплин по выбору %(group)s"
 
 msgid "Seçmə fənn"
 msgstr "Дисциплина по выбору"
+
+msgid "Başqa kafedraya göndər"
+msgstr "Передать другой кафедре"
+
+msgid "Bu axtarışa uyğun sətir tapılmadı."
+msgstr "Не найдено строк по этому запросу."
+
+msgid "Müəllim və ayrılan saat"
+msgstr "Преподаватель и назначенные часы"
+
+msgid "Qrup üzrə saat"
+msgstr "Часы на группу"
+
+msgid "Sətir seçin"
+msgstr "Выберите строку"
+
+msgid "Sətirlər yüklənir…"
+msgstr "Загрузка строк…"
+
+msgid "Tapşırıq sətri"
+msgstr "Строка нагрузки"

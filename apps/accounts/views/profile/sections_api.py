@@ -40,6 +40,7 @@ from core.logging_utils import safe_log_value
 
 from .._dashboard_helpers.cheap_counts import compute_profile_badge_counts, count_assigned_tasks
 from .._helpers import _get_active_organization, _load_user_profile, _role_capabilities
+from .faq import faq_fragment
 from .section_assets import section_assets_payload
 from .sections_recognition import EXTRA_AJAX_SECTIONS, EXTRA_SECTION_PARTIALS
 
@@ -47,14 +48,10 @@ logger = logging.getLogger(__name__)
 
 LEAN_FRAGMENT_CONTEXT = True  # qabıq dəyərləri tənbəl (``context_builder/_lazy.py``); False → tam context (test)
 
-
-# --------------------------------------------------------------------------- #
-# Section mapping
-# --------------------------------------------------------------------------- #
-
 # Bütün mövcud profile section-ları → partial template adı.
 SECTION_PARTIALS: dict[str, str] = EXTRA_SECTION_PARTIALS | {
-    # «Ana səhifə» — kabinetin default bölməsi (FAZA 22).
+    "faq": "accounts/profile/sections/_faq.html",
+    "journal-watch": "accounts/profile/sections/_journal_watch.html",
     "dashboard": "accounts/profile/sections/_dashboard.html",
     "profile-info": "accounts/profile/sections/_profile_info.html",
     "notifications": "accounts/profile/sections/_notifications.html",
@@ -195,7 +192,7 @@ SECTION_PARTIALS: dict[str, str] = EXTRA_SECTION_PARTIALS | {
     "surveys-inbox": "accounts/profile/sections/_surveys_inbox.html",
     "surveys-builder": "accounts/profile/sections/_surveys_builder.html",
     # «Fənn qovluğu» (apps.subject_folder, 2026-09-25): müəllimin qovluqları + tapşırıq
-    # yoxlaması, tələbənin «Fənn qovluqlarım». Panel məzmunu `subject_folder_cabinet`
+    # yoxlaması, tələbənin «Dərs materiallarım». Panel məzmunu `subject_folder_cabinet`
     # tag-ı ilə qurulur; yazı `subject_folder:action` JSON endpoint-inə gedir.
     "subject-folders": "accounts/profile/sections/_subject_folders.html",
     "subject-folder-review": "accounts/profile/sections/_subject_folder_review.html",
@@ -211,7 +208,7 @@ SECTION_PARTIALS: dict[str, str] = EXTRA_SECTION_PARTIALS | {
 # AJAX-safe sections (P3.4) — read-mostly bölmələr. Form-heavy admin bölmələri normal full-page naviqasiyada qalır.
 AJAX_SAFE_SECTIONS: frozenset[str] = EXTRA_AJAX_SECTIONS | frozenset(
     {
-        # «Ana səhifə» tam server-render, YALNIZ-OXU xülasədir → AJAX-safe.
+        "faq",
         "dashboard",
         "profile-info",
         "notifications",
@@ -398,6 +395,8 @@ def profile_section_fragment(request: HttpRequest, section: str) -> HttpResponse
     P3-extra — `@never_cache` qoyulub. Bu response istifadəçi/sessiya/təşkilat-a
     bağlı olduğu üçün brauzer və ya proxy onu kəş etməməlidir.
     """
+    if section == "faq":
+        return faq_fragment(request)
     access = _ensure_section_allowed(request, section)
     if access is None:
         return JsonResponse(

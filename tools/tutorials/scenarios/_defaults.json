@@ -1,0 +1,20 @@
+{
+  "baseUrl": "http://qa.localhost:8023",
+  "loginPath": "/accounts/login/muellim/",
+  "user": "video.muellim",
+  "viewport": {
+    "width": 1366,
+    "height": 768
+  },
+  "voice": "az-AZ-BanuNeural",
+  "rate": "-5%",
+  "brand": "WCU",
+  "engine": "elevenlabs",
+  "elevenVoice": "DZaip8UahF0Qri1FxU8M",
+  "elevenVoiceName": "Amalya - Warm & Friendly",
+  "elevenModel": [
+    "eleven_v4",
+    "eleven_v3",
+    "eleven_multilingual_v2"
+  ]
+}

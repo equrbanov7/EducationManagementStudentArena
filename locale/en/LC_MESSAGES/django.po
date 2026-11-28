@@ -122491,3 +122491,543 @@ msgstr ""
 "Entry score = attendance + seminar / laboratory + midterm (the part earned "
 "before the exam); final score = entry score + final exam. If a subject has "
 "both seminars and laboratories, each counts for 5 points (5 + 5)."
+
+msgid "%(name)s (qeyri-aktiv rol)"
+msgstr "%(name)s (inactive role)"
+
+msgid "%(total)s sualdan %(first)s–%(last)s göstərilir"
+msgstr "Showing %(first)s–%(last)s of %(total)s questions"
+
+msgid "Ad və ya mövzu"
+msgstr "Name or topic"
+
+msgid "Ad, soyad və ya istifadəçi adı"
+msgstr "First name, last name or username"
+
+msgid "Axtarılır…"
+msgstr "Searching…"
+
+msgid "Axtarışı yenidən sınayın."
+msgstr "Try the search again."
+
+msgid "Azərbaycanca"
+msgstr "Azerbaijani"
+
+msgid "Bildiriş ünvanları"
+msgstr "Notification addresses"
+
+msgid "Bildiriş ünvanı siyahıdan çıxarıldı."
+msgstr "The notification address was removed."
+
+msgid "Bildiriş ünvanının təsdiqi"
+msgstr "Confirm notification address"
+
+msgid ""
+"Bir və ya bir neçə rol seçin, yaxud «Bütün rollar» seçimini təsdiqləyin."
+msgstr "Select one or more roles or confirm “All roles”."
+
+msgid "Bu dərs kataloqdan çıxarılıb. Saxladıqda yenidən görünəcək."
+msgstr ""
+"This lesson was removed from the catalogue. Save it to make it visible "
+"again."
+
+msgid "Bu təşkilatın kataloqundan silinməni təsdiqləyirəm."
+msgstr "I confirm removal from this organisation’s catalogue."
+
+msgid ""
+"Bu ünvana EMS jurnal nəzarəti üzrə bildiriş gəlməsini təsdiqləyirsiniz?"
+msgstr "Do you agree to receive EMS journal notifications at this address?"
+
+msgid "Bu əməliyyatın təlimatı"
+msgstr "Guide to this task"
+
+msgid "Bölmənin videosu"
+msgstr "Section video"
+
+msgid "Bütün rollar"
+msgstr "All roles"
+
+msgid "Bütün suallar"
+msgstr "All questions"
+
+msgid "Daha qısa ifadə ilə axtarın və ya bütün suallara qayıdın."
+msgstr "Try a shorter phrase or return to all questions."
+
+msgid "Dərs başqa pəncərədə dəyişdirilib. Səhifəni yenidən açın."
+msgstr "This lesson was changed in another window. Reopen the page."
+
+msgid "Dərs səhifələri"
+msgstr "Lesson pages"
+
+msgid "Dərs tapılmadı."
+msgstr "Lesson not found."
+
+msgid "Dərsi kataloqdan çıxar"
+msgstr "Remove lesson from catalogue"
+
+msgid "Dərsi saxla"
+msgstr "Save lesson"
+
+msgid "Dərsin kabinetdəki görünüşü"
+msgstr "Lesson preview in the dashboard"
+
+msgid "Dəyişiklik"
+msgstr "Change"
+
+msgid "Dəyişikliklər aktiv təşkilatın kabinetində görünür."
+msgstr "Changes appear in the active organisation’s dashboard."
+
+msgid "E-poçt ünvanları"
+msgstr "Email addresses"
+
+msgid "E-poçt ünvanı"
+msgstr "Email address"
+
+msgid "E-poçt ünvanı təsdiqləndi."
+msgstr "The email address was confirmed."
+
+msgid "Formanı yenidən açın."
+msgstr "Reopen the form."
+
+msgid "Fənn və dərs tarixi"
+msgstr "Subject and class date"
+
+msgid "Fəsillər artan vaxt sırası ilə videonun müddəti daxilində olmalıdır."
+msgstr "Chapter times must increase and stay within the video duration."
+
+msgid "Fəsillərin başlanğıc vaxtları və adları"
+msgstr "Chapter start times and names"
+
+msgid "Giriş səhifəsinə qayıt"
+msgstr "Return to login page"
+
+msgid "Görə bilən rollar"
+msgstr "Roles with access"
+
+msgid "Hadisə jurnalı"
+msgstr "Event log"
+
+msgid "Hansı hadisələr qeydə alınsın?"
+msgstr "Which events should be recorded?"
+
+msgid "Hansı əməliyyatı etmək istəyirsiniz?"
+msgstr "What would you like to do?"
+
+msgid "Hələ nəzarət qaydası yaradılmayıb."
+msgstr "No monitoring rules have been created yet."
+
+msgid "Hər addımı ayrıca sətirdə yazın."
+msgstr "Write each step on a separate line."
+
+msgid "Hər fəsil üçün mm:ss və ad yazın. Ən çox 1000 fəsil əlavə olunur."
+msgstr ""
+"Enter mm:ss and a title for each chapter. You can add up to 1,000 chapters."
+
+msgid ""
+"Hər fəsli ayrıca sətirdə yazın, məsələn 00:00 Giriş və 01:35 Nəticəni "
+"yoxlamaq."
+msgstr ""
+"Write one chapter per line, for example 00:00 Introduction and 01:35 Check "
+"the result."
+
+msgid "Kabinet üzrə video"
+msgstr "Dashboard tour"
+
+msgid "Kataloqdan çıxarılıb"
+msgstr "Removed from catalogue"
+
+msgid "Kimi izləyirsiniz?"
+msgstr "Whose changes should be monitored?"
+
+msgid "MP4 video"
+msgstr "Video file (MP4)"
+
+msgid "Mövcud subtitrləri çıxar"
+msgstr "Remove existing subtitles"
+
+msgid "Növbəti"
+msgstr "Next"
+
+msgid "Növbəti səhifə"
+msgstr "Next page"
+
+msgid "Nəticədən şəxsi seçin."
+msgstr "Select a person from the results."
+
+msgid "Nəzarət"
+msgstr "Journal monitoring"
+
+msgid "Nəzarət aktivdir"
+msgstr "Monitoring is active"
+
+msgid "Nəzarət qaydası saxlanıldı."
+msgstr "The monitoring rule was saved."
+
+msgid "Nəzarət qaydası silindi."
+msgstr "The monitoring rule was deleted."
+
+msgid "Nəzarət qaydası yarat"
+msgstr "Create monitoring rule"
+
+msgid "Oxuna bilən video treki və müddəti olan MP4 faylı seçin."
+msgstr "Select an MP4 file with a readable video track and duration."
+
+msgid "Qaydanı redaktə et"
+msgstr "Edit rule"
+
+msgid "Qaydanı sil"
+msgstr "Delete rule"
+
+msgid "Qeydi yazan"
+msgstr "Recorded by"
+
+msgid ""
+"Qeydi yazan əməkdaşı və ya qeydi dəyişilən tələbəni seçin. İlk dəyişiklik "
+"seçilmiş ünvana dərhal bildirilir. Sonrakı beş dəqiqədəki dəyişikliklər bir "
+"məktubda toplanır."
+msgstr ""
+"Select the staff member who enters the record or the student whose record "
+"changes. The first change triggers an immediate email to the selected "
+"address. Changes in the next five minutes are grouped in one email."
+
+msgid "Rol üzrə video"
+msgstr "Role-specific video"
+
+msgid "Seçilmiş qaydalara uyğun jurnal dəyişikliyi qeydə alınmayıb."
+msgstr "No journal changes matching the selected rules have been recorded."
+
+msgid "Silməni təsdiqləyin."
+msgstr "Confirm the deletion."
+
+msgid "Sorğu çox böyükdür. MP4 üçün ən çox 200 MiB qəbul edilir."
+msgstr "The upload is too large. MP4 files must be at most 200 MiB."
+
+msgid "Sual səhifələri"
+msgstr "Question pages"
+
+msgid "Sual və ya açar söz yazın"
+msgstr "Enter a question or keyword"
+
+msgid "Sual və ya dərsin adı"
+msgstr "Question or lesson title"
+
+msgid "Sualını axtar, izahı oxu və əməliyyatı videoda izlə."
+msgstr "Find your question, read the steps and watch how it works."
+
+msgid "Subtitrlər"
+msgstr "Subtitles"
+
+msgid "Səhifələr"
+msgstr "Pages"
+
+msgid "Təlimat videosunu aç"
+msgstr "Open tutorial video"
+
+msgid "Təsdiq gözlənilir"
+msgstr "Awaiting confirmation"
+
+msgid "Təsdiq məktubu göndər"
+msgstr "Send confirmation email"
+
+msgid "Təsdiq məktubu üçün sorğu qeydə alındı."
+msgstr "The confirmation email was requested."
+
+msgid "Təsdiqlənib"
+msgstr "Confirmed"
+
+msgid ""
+"UTF-8 formatında, videonun müddətinə uyğun vaxtlı və sadə mətnli WebVTT "
+"faylı seçin."
+msgstr ""
+"Choose a plain-text UTF-8 WebVTT file with timings within the video "
+"duration."
+
+msgid "Uyğun sual tapılmadı."
+msgstr "No matching question found."
+
+msgid "Video dərsi kataloqdan çıxarıldı."
+msgstr "Video lesson removed from catalogue."
+
+msgid "Video dərsi saxlanıldı."
+msgstr "Video lesson saved."
+
+msgid "Video dərsi əlavə et"
+msgstr "Add video lesson"
+
+msgid "Video dərsini redaktə et"
+msgstr "Edit video lesson"
+
+msgid "Video dərsinin redaktoru"
+msgstr "Video lesson editor"
+
+msgid "Video dərslər"
+msgstr "Video lessons"
+
+msgid "Video dərsləri idarə et"
+msgstr "Manage video lessons"
+
+msgid "Video faylını dəyişdikdə ona uyğun yeni subtitr yükləyə bilərsiniz."
+msgstr "When replacing the video, you can also upload new matching subtitles."
+
+msgid "Videoda bölmə və ya tab axtar"
+msgstr "Find a section or tab in the video"
+
+msgid "Videoda göstərilən əməliyyatlar"
+msgstr "Tasks shown in the video"
+
+msgid "Videoda mövzuya keç"
+msgstr "Jump to a topic in the video"
+
+msgid ""
+"Videonu yalnız seçdiyiniz bütün əməliyyatlara icazəsi olanlar görəcək. Ctrl "
+"və ya ⌘ ilə bir neçə əməliyyat seçə bilərsiniz."
+msgstr ""
+"Viewers need permission for every selected task. Use Ctrl or ⌘ to select "
+"multiple tasks."
+
+msgid "Videoya bax"
+msgstr "Watch video"
+
+msgid "Yeni dərs üçün MP4 video seçin."
+msgstr "Choose an MP4 video for the new lesson."
+
+msgid "Yeni subtitr yükləyərkən mövcud subtitri çıxarma seçimini götürün."
+msgstr "Clear the removal option when uploading new subtitles."
+
+msgid "Yenidən aç"
+msgstr "Reopen"
+
+msgid "Yükləmənin ölçüsü düzgün deyil."
+msgstr "Invalid upload size."
+
+msgid "Ümumi təlimat (əlavə əməliyyat icazəsi tələb etmir)"
+msgstr "General guide (no additional task permissions required)"
+
+msgid "Ümumi təlimatı və ya videoda göstərilən əməliyyatları seçin."
+msgstr "Select the general guide or the tasks shown in the video."
+
+msgid "Ünvan seçməsəniz, hadisələr yalnız kabinetdə görünəcək."
+msgstr "If you select no address, events will appear only in the dashboard."
+
+msgid "Ünvanı çıxar"
+msgstr "Remove address"
+
+msgid "Ünvanımı təsdiqlə"
+msgstr "Confirm my address"
+
+msgid "İlk giriş və parolun bərpası"
+msgstr "First sign-in and password recovery"
+
+msgid "İlk giriş və parolun bərpası · video təlimat"
+msgstr "First sign-in and password recovery · video guide"
+
+msgid "İlkin dərs bərpa edildi."
+msgstr "Original lesson restored."
+
+msgid "İlkin dərsi bərpa et"
+msgstr "Restore original lesson"
+
+msgid ""
+"İlkin dərsin icazələri həmişə tətbiq olunur. Əlavə əməliyyat "
+"göstərirsinizsə, onu da seçin."
+msgstr ""
+"The original lesson permissions always apply. Select any additional tasks "
+"shown."
+
+msgid ""
+"İlkin dərsin kabinet bölməsi və giriş icazələri tətbiq olunur. Seçdiyiniz "
+"rollar auditoriyanı daraldır."
+msgstr ""
+"The original dashboard section and permissions apply. Selected roles further"
+" limit the audience."
+
+msgid "İstəyə bağlı WebVTT faylı, ən çox 1 MB."
+msgstr "Optional WebVTT file, up to 1 MB."
+
+msgid "İzahın addımları"
+msgstr "Instruction steps"
+
+msgid "İzlənən şəxslər"
+msgstr "People being monitored"
+
+msgid "Şəxs"
+msgstr "Person"
+
+msgid "Şəxs tapılmadı."
+msgstr "No matching person was found."
+
+msgid "Şəxsi axtar"
+msgstr "Search for a person"
+
+msgid "Əməliyyat seçimi gözlənilir"
+msgstr "Task selection required"
+
+msgid ""
+"Ən azı bir rol seçin. Dərsi hamıya göstərmək istəyirsinizsə, «Bütün rollar» "
+"seçimini ayrıca işarələyin."
+msgstr ""
+"Select at least one role. To show the lesson to everyone, select “All roles”"
+" explicitly."
+
+msgid "Ən azı iki hərf yazın."
+msgstr "Enter at least two letters."
+
+msgid "Ən çox 200 MiB."
+msgstr "Up to 200 MiB."
+
+msgid "Ən çox verilən suallar"
+msgstr "Frequently asked questions"
+
+msgid "Əvvəlki səhifə"
+msgstr "Previous page"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Əvvəlki sual göndərişlərinizin vəziyyətinə və qeydlərinə baxın."
+msgstr "View the status and notes for your earlier question submissions."
+
+msgctxt "accounts.schedule_manage"
+msgid "Excel yüklə (.xlsx)"
+msgstr "Download Excel (.xlsx)"
+
+msgctxt "accounts.schedule_manage"
+msgid "Fakültə"
+msgstr "Faculty"
+
+msgctxt "accounts.schedule_manage"
+msgid ""
+"Faylda seçilmiş həftənin tarixli dərsləri və semestrin həftəlik planı var. "
+"Filtrləri birlikdə tətbiq edə bilərsiniz."
+msgstr ""
+"The file contains dated lessons for the selected week and the weekly "
+"semester plan. You can combine filters."
+
+msgctxt "accounts.schedule_manage"
+msgid "Filtrlə Excel-ə ixrac et"
+msgstr "Filter and export to Excel"
+
+msgctxt "accounts.schedule_manage"
+msgid "Hamısı"
+msgstr "All"
+
+msgctxt "accounts.schedule_manage"
+msgid "Kafedra"
+msgstr "Department"
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllimin cədvəlini yüklə (.xlsx)"
+msgstr "Download teacher timetable (.xlsx)"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrupun cədvəlini yüklə (.xlsx)"
+msgstr "Download group timetable (.xlsx)"
+
+msgctxt "accounts.workload"
+msgid "Başqa kafedraya göndər"
+msgstr "Send to another department"
+
+msgctxt "accounts.workload"
+msgid "Daha çox sətir"
+msgstr "More rows"
+
+msgctxt "accounts.workload"
+msgid "Fənn və ya qrupu axtar"
+msgstr "Find a subject or group"
+
+msgctxt "accounts.workload"
+msgid "Göndəriləcək tapşırıq sətri"
+msgstr "Assignment row to transfer"
+
+msgctxt "accounts.workload"
+msgid ""
+"Hər sətrə müəllimin keçirəcəyi saatı yazın. «Bütün qrup» ümumi təyinatdır. "
+"Nömrəli alt qrup seçimi göstərilirsə, həmin qrupu ayrıca təyin edə "
+"bilərsiniz. «Bölünməyib» bu fəaliyyət üçün hələ müəllimə verilməyən saatdır."
+msgstr ""
+"Enter the hours each teacher will teach in the corresponding row. “Whole "
+"group” assigns the entire group. If numbered subgroups appear, you can "
+"assign them separately. Unallocated hours have not yet been assigned to a "
+"teacher for this activity."
+
+msgctxt "accounts.workload"
+msgid "Müəllimə verilən saat"
+msgstr "Hours assigned to the teacher"
+
+msgctxt "accounts.workload"
+msgid ""
+"Qruplar reyestrdən seçilir. Yeni yükü «Sətir əlavə et» ilə daxil edin. "
+"Mövcud fənnin qrup və saatlarına kartdakı «Sətirlər» düyməsindən baxın."
+msgstr ""
+"Select groups from the registry. Use “Add row” for a new assignment. To view"
+" groups and hours for an existing subject, open “Rows” on its card."
+
+msgctxt "journal.watch"
+msgid "%(status)s · %(score)s bal"
+msgstr "%(status)s · %(score)s points"
+
+msgctxt "journal.watch"
+msgid "Bal yazılması"
+msgstr "Score entered"
+
+msgctxt "journal.watch"
+msgid ""
+"Bu ünvanda jurnal bildirişlərini almaq istəyirsinizsə, keçidi açıb "
+"təsdiqləyin. Keçid 24 saat qüvvədədir."
+msgstr ""
+"To receive journal notifications at this address, open the link and confirm."
+" The link is valid for 24 hours."
+
+msgctxt "journal.watch"
+msgid "Jurnal bildirişləri üçün ünvanı təsdiqləyin"
+msgstr "Confirm your address for journal notifications"
+
+msgctxt "journal.watch"
+msgid "Jurnalda izlənilən dəyişikliklər"
+msgstr "Monitored journal changes"
+
+msgctxt "journal.watch"
+msgid "Mövcud qeydin düzəldilməsi"
+msgstr "Existing entry corrected"
+
+msgctxt "journal.watch"
+msgid "Qayıb yazılması"
+msgstr "Absence entered"
+
+msgctxt "journal.watch"
+msgid "Qeydi izlənilən tələbə"
+msgstr "Student whose record is monitored"
+
+msgctxt "journal.watch"
+msgid "Qeydi yazan şəxs"
+msgstr "Person who entered the record"
+
+msgctxt "journal.watch"
+msgid "Qeydin silinməsi"
+msgstr "Entry cleared"
+
+msgctxt "journal.watch"
+msgid ""
+"Yeni qeydlərin sayı: %(count)s. Ətraflı məlumatı kabinetdə «Nəzarət» "
+"bölməsindən açın."
+msgstr ""
+"New entries: %(count)s. Open Journal monitoring in the dashboard for "
+"details."
+
+msgctxt "journal.watch"
+msgid "İştirak yazılması"
+msgstr "Attendance entered"
+
+msgctxt "organizations.permission.category"
+msgid "Video təlimatlar"
+msgstr "Video guides"
+
+msgctxt "organizations.permission.label"
+msgid "FAQ video dərslərini idarə etmək"
+msgstr "Manage FAQ video lessons"
+
+msgctxt "profile.section"
+msgid "Nəzarət"
+msgstr "Journal monitoring"
+
+msgctxt "registrar.schedule"
+msgid "Excel yüklə (.xlsx)"
+msgstr "Download Excel (.xlsx)"

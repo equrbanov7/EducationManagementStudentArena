@@ -152,3 +152,24 @@ test("fillRow saatları, ixtisası, qrupları doldurur və olmayan seçimi əlav
     assert.deepEqual(Array.from(values.group_ids), ["g1"]);
     assert.equal(values.period_id, "p1");
 });
+
+test("yeni yük sətri kataloqun görünən seçimini və say xanalarının ilkin dəyərini göndərir", () => {
+    const env = load([]);
+    const form = env.q("[data-wl-row-form]");
+    form.insertAdjacentHTML("beforeend", `
+        <select name="education_form"><option value="eyani">Əyani</option></select>
+        <select name="degree_level"><option value="bachelor">Bakalavr</option></select>
+        <select name="row_kind"><option value="teaching">Tədris</option></select>
+        <input type="number" name="subgroup_count" value="1">
+    `);
+    form.elements.subgroup_count.value = "2";
+    form.elements.subject_text.value = "Əvvəlki sətir";
+    env.win.EMSWorkloadForms.fillRow(form, null);
+    const values = env.win.EMSWorkloadForms.values(form);
+    assert.equal(values.season, "fall");
+    assert.equal(values.education_form, "eyani");
+    assert.equal(values.degree_level, "bachelor");
+    assert.equal(values.row_kind, "teaching");
+    assert.equal(values.subgroup_count, "1");
+    assert.equal(values.subject_text, "");
+});

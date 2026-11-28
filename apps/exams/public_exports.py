@@ -19,6 +19,7 @@ from .forms import ExamRoomForm  # noqa: F401
 from .navigation import append_query_params  # noqa: F401
 from .navigation import current_return_to  # noqa: F401
 from .services.access_policy import SECURE_EXAM_CATEGORIES  # noqa: F401
+from .services.access_policy import can_view_attempt_results  # noqa: F401
 from .services.access_policy import is_exam_center_user  # noqa: F401
 from .services.ai_summary import generate_appeal_statistics_summary  # noqa: F401
 from .services.center_exams import CENTER_EXAM_KINDS  # noqa: F401
@@ -37,9 +38,11 @@ from .services.exam_network import exam_network_allowed  # noqa: F401
 from .services.exam_network import exam_network_denied_message  # noqa: F401
 from .services.final_center import clear_entry_session  # noqa: F401
 from .services.final_center.cabinet import student_final_exam_contexts
+from .services.final_center.permissions import can_enter_supervision_surface  # noqa: F401
 from .services.manual_grading import answer_max_points  # noqa: F401
 from .services.question_chair_review import chair_queue_queryset  # noqa: F401
 from .services.question_chair_review import pending_chair_review_count  # noqa: F401
+from .services.question_chair_units import chair_queue_filter  # noqa: F401
 from .services.question_snapshot import delivered_question_render  # noqa: F401
 from .services.results_export import build_results_xlsx  # noqa: F401
 from .services.results_export import exam_attempt_rows as results_export_attempt_rows  # noqa: F401
@@ -52,6 +55,9 @@ from .views.student._final_device import hall_computer_blocked_response  # noqa:
 from .views.student._helpers import ensure_student_exam_tenant_context  # noqa: F401
 
 __all__ = [
+    "can_view_attempt_results",
+    "can_enter_supervision_surface",
+    "chair_queue_filter",
     "ATTEMPT_FINISHED_STATUSES",
     "CENTER_EXAM_KINDS",
     "attempt_in_center",

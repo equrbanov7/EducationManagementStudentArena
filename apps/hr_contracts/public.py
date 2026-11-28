@@ -33,6 +33,12 @@ from core.permissions import has_permission
 from .constants import EMPLOYEE_SECTION, HR_SECTION, NON_EMPLOYEE_ROLE_NAMES, PERM_MANAGE, PERM_VIEW, SNAPSHOT_KEY
 
 
+def contract_management_allowed(request):
+    from .services.access import resolve_actor
+
+    return resolve_actor(request).can_manage
+
+
 def hr_section_visible(permissions, *, privileged: bool = False) -> bool:
     permissions = list(permissions or [])
     return bool(privileged or has_permission(permissions, PERM_VIEW) or has_permission(permissions, PERM_MANAGE))
@@ -70,6 +76,7 @@ __all__ = [
     "HR_SECTION",
     "PERM_MANAGE",
     "PERM_VIEW",
+    "contract_management_allowed",
     "employee_section_visible",
     "hr_section_visible",
 ]

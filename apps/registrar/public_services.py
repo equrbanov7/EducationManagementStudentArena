@@ -47,6 +47,7 @@ from . import schedule_docx_match  # noqa: F401 — cədvəl → tapşırıq sə
 from . import schedule_docx_parse  # noqa: F401
 from . import schedule_editor  # noqa: F401
 from . import schedule_editor_actions  # noqa: F401
+from . import schedule_exports  # noqa: F401
 from . import schedule_grid  # noqa: F401
 from . import schedule_lock  # noqa: F401
 from . import schedule_manage  # noqa: F401
@@ -83,10 +84,12 @@ from .attendance import attendance_score  # noqa: F401
 from .cabinet_policy import transcript_policy  # noqa: F401
 from .catalog_registry import build_programs_registry  # noqa: F401
 from .catalog_registry import build_subject_catalog  # noqa: F401
+from .catalog_registry import can_manage_catalog, can_merge_subjects  # noqa: F401
 from .correction_reversals import revert_last_lesson_correction  # noqa: F401
 from .corrections import CORRECT_PERMISSION  # noqa: F401
 from .corrections import apply_correction, apply_lesson_correction  # noqa: F401
 from .curriculum_registry import build_curriculum_editor  # noqa: F401
+from .curriculum_registry import can_edit_plans  # noqa: F401
 from .finals import effective_exam_score  # noqa: F401
 from .gradebook import recompute_absence_hours  # noqa: F401
 from .grading_scale import bands_text  # noqa: F401
@@ -94,6 +97,7 @@ from .grading_scale import is_custom  # noqa: F401
 from .guest_merge import carry_over_map  # noqa: F401
 from .guest_roster import add_guest_student  # noqa: F401
 from .handover_actions import REVERT_BLOCKER_CODES  # noqa: F401
+from .integrity import is_authorized_instructor  # noqa: F401
 from .integrity import validate_active_member as validate_active_student_member  # noqa: F401
 from .journal_assignment_sources import register_joint_journal_candidates  # noqa: F401
 from .journal_assignment_sources import register_teacher_journal_assignments  # noqa: F401
@@ -118,6 +122,7 @@ from .reviewed_workload_share import (  # noqa: F401
     undo_reviewed_workload_share,
 )
 from .semester_open import build_semester_opening  # noqa: F401
+from .semester_open import can_open_semester  # noqa: F401
 from .semester_open import offering_counts_by_chair  # noqa: F401
 from .syllabus_carry import choose_source as choose_syllabus_carry_source  # noqa: F401
 from .syllabus_carry import group_language as syllabus_group_language  # noqa: F401
@@ -130,6 +135,8 @@ from .syllabus_reuse_targets import programs_by_offering  # noqa: F401
 from .teaching_activity import instructor_activity  # noqa: F401 — «Kadr analitikası» (2026-10-11)
 
 __all__ = [
+    "is_authorized_instructor",
+    "language_cohort_navigation",
     "absence_counter_preview",
     "credit_hours_map",
     "effective_hours",
@@ -152,6 +159,10 @@ __all__ = [
     "attendance_score",
     "bands_text",
     "build_curriculum_editor",
+    "can_manage_catalog",
+    "can_merge_subjects",
+    "can_edit_plans",
+    "can_open_semester",
     "build_programs_registry",
     "build_semester_opening",
     "build_subject_catalog",
@@ -231,6 +242,7 @@ __all__ = [
     "schedule_docx_parse",
     "schedule_editor",
     "schedule_editor_actions",
+    "schedule_exports",
     "schedule_grid",
     "schedule_lock",
     "schedule_manage",
@@ -276,3 +288,10 @@ __all__ += ["EntryAlignment", "EntryTarget", "align_archive_entries"]
 from .student_group_journals import enroll_new_student as enroll_new_student_in_group_journals  # noqa: E402,F401
 
 __all__.append("enroll_new_student_in_group_journals")
+
+
+def language_cohort_navigation(request, capabilities):
+    """Use the same cached visibility and URL as the cabinet sidebar."""
+    from .templatetags.language_cohort_links import language_cohort_nav
+
+    return language_cohort_nav({"request": request, "role_capabilities": capabilities})

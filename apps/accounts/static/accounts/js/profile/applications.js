@@ -443,7 +443,7 @@
     /** `?new_kind=` → «Yeni müraciət» dialoqu, növ öncədən seçilmiş. */
     function openPresetKind(root) {
         var code = root && root.dataset ? (root.dataset.newKind || "").trim() : "";
-        if (!code || root.dataset.canCreate !== "1" || !NS.openCreate) {
+        if (!code || root.dataset.canCreate !== "1" || !NS.dialogs) {
             return;
         }
         var kinds = (NS.catalog && NS.catalog.kinds) || [];
@@ -454,7 +454,7 @@
             return;
         }
         root.dataset.newKind = "";
-        NS.openCreate("create", null, code);
+        NS.dialogs.openCreate("create", null, code);
     }
 
     NS.boot = boot;
@@ -585,7 +585,7 @@
      * deyil), ona görə qeydiyyat primitivlər hazır olana qədər gözləyir.
      * `defer` ilk yüklənmədə bunu onsuz da tez edir — bu, ikinci qapıdır. */
     (function ready(attempt) {
-        if (window.EMSDelegate && window.EMSReady && NS.api) {
+        if (window.EMSDelegate && window.EMSReady && NS.api && NS.dialogs) {
             start();
             return;
         }

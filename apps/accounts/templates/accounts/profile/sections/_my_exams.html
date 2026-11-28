@@ -1,5 +1,6 @@
-{% load i18n %}
+{% load i18n learning_actions %}
 {% if can_view_owned_learning %}
+{% can_create_personal_exam request as may_create_exam %}
 {% comment %}
   Müəllim paneli — "İmtahanlarım".
   Status üzrə qruplaşdırılmış imtahanlar + KPI zolağı + kateqoriya çipləri.
@@ -45,12 +46,14 @@
           <span class="sr-only">{% trans "silinmiş imtahan" context "profile.my_exams.trash" %}</span>
         </a>
         {% endwith %}
+        {% if may_create_exam %}
         <button type="button"
                 class="ems-btn ems-btn--primary js-open-exam-form-modal"
                 data-exam-modal-mode="create"
                 data-exam-modal-url="{% url 'exams:create_exam' %}">
           <i class="fas fa-plus" aria-hidden="true"></i> {% trans "new_exam" context "profile.my_exams" %}
         </button>
+        {% endif %}
       </div>
     </header>
 
@@ -119,6 +122,7 @@
           </a>
         {% else %}
           <h3>{% trans "empty_title" context "profile.my_exams" %}</h3>
+          {% if may_create_exam %}
           <p>{% trans "empty_description" context "profile.my_exams" %}</p>
           <button type="button"
                   class="ems-btn ems-btn--primary js-open-exam-form-modal"
@@ -126,6 +130,7 @@
                   data-exam-modal-url="{% url 'exams:create_exam' %}">
             <i class="fas fa-plus" aria-hidden="true"></i> {% trans "create_first_exam" context "profile.my_exams" %}
           </button>
+          {% endif %}
         {% endif %}
       </div>
     {% endif %}

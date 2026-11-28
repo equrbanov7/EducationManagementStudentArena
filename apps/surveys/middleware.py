@@ -37,6 +37,7 @@ from .services.gate import compute_state, deferral_active, student_entries
 
 class SurveyGateMiddleware:
     CABINET_PREFIX = "/accounts/profile/"
+    FAQ_VIEW_PREFIXES = ("/accounts/faq/media/", "/accounts/faq/section/")
     EXEMPT_PREFIXES = ("/accounts/profile/api/badges/", "/accounts/profile/api/password-otp/")
     #: «Mənə təyin edilmiş imtahanlar» (2026-09-30): imtahan girişi sorğu ilə bağlanmır.
     #: Təhlükəsizlik baxışı 2026-09-30 (M5): qapı indi müəllim/heyətə də aiddir — imtahanı
@@ -64,7 +65,7 @@ class SurveyGateMiddleware:
 
     def __call__(self, request):
         path = request.path_info or ""
-        if not path.startswith(self.CABINET_PREFIX):
+        if not path.startswith((self.CABINET_PREFIX, *self.FAQ_VIEW_PREFIXES)):
             return self.get_response(request)
         today = timezone.localdate()
         blocked = self._campaign_blocks(request, today)

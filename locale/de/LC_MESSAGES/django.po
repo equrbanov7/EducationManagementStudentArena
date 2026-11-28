@@ -124086,3 +124086,566 @@ msgstr ""
 "Eingangspunktzahl = Anwesenheit + Seminar / Labor + Midterm (vor der Prüfung"
 " erreichter Teil); Endnote = Eingangspunktzahl + Abschlussprüfung. Hat ein "
 "Fach Seminar und Labor, zählt jedes 5 Punkte (5 + 5)."
+
+msgid "%(name)s (qeyri-aktiv rol)"
+msgstr "%(name)s (inaktive Rolle)"
+
+msgid "%(total)s sualdan %(first)s–%(last)s göstərilir"
+msgstr "Fragen %(first)s–%(last)s von %(total)s"
+
+msgid "Ad və ya mövzu"
+msgstr "Name oder Thema"
+
+msgid "Ad, soyad və ya istifadəçi adı"
+msgstr "Vorname, Nachname oder Benutzername"
+
+msgid "Axtarılır…"
+msgstr "Suche läuft…"
+
+msgid "Axtarışı yenidən sınayın."
+msgstr "Versuchen Sie die Suche erneut."
+
+msgid "Azərbaycanca"
+msgstr "Aserbaidschanisch"
+
+msgid "Bildiriş ünvanları"
+msgstr "Benachrichtigungsadressen"
+
+msgid "Bildiriş ünvanı siyahıdan çıxarıldı."
+msgstr "Die Benachrichtigungsadresse wurde entfernt."
+
+msgid "Bildiriş ünvanının təsdiqi"
+msgstr "Benachrichtigungsadresse bestätigen"
+
+msgid ""
+"Bir və ya bir neçə rol seçin, yaxud «Bütün rollar» seçimini təsdiqləyin."
+msgstr ""
+"Wählen Sie eine oder mehrere Rollen oder bestätigen Sie „Alle Rollen“."
+
+msgid "Bu dərs kataloqdan çıxarılıb. Saxladıqda yenidən görünəcək."
+msgstr ""
+"Diese Anleitung wurde aus dem Katalog entfernt. Speichern Sie sie, um sie "
+"wieder anzuzeigen."
+
+msgid "Bu təşkilatın kataloqundan silinməni təsdiqləyirəm."
+msgstr "Ich bestätige das Entfernen aus dem Katalog dieser Organisation."
+
+msgid ""
+"Bu ünvana EMS jurnal nəzarəti üzrə bildiriş gəlməsini təsdiqləyirsiniz?"
+msgstr ""
+"Möchten Sie unter dieser Adresse Benachrichtigungen zu Änderungen im EMS-"
+"Kursbuch erhalten?"
+
+msgid "Bu əməliyyatın təlimatı"
+msgstr "Anleitung zu diesem Vorgang"
+
+msgid "Bölmənin videosu"
+msgstr "Video zum Bereich"
+
+msgid "Bütün rollar"
+msgstr "Alle Rollen"
+
+msgid "Bütün suallar"
+msgstr "Alle Fragen"
+
+msgid "Daha qısa ifadə ilə axtarın və ya bütün suallara qayıdın."
+msgstr ""
+"Versuchen Sie einen kürzeren Suchbegriff oder kehren Sie zu allen Fragen "
+"zurück."
+
+msgid "Dərs başqa pəncərədə dəyişdirilib. Səhifəni yenidən açın."
+msgstr ""
+"Die Anleitung wurde in einem anderen Fenster geändert. Öffnen Sie die Seite "
+"erneut."
+
+msgid "Dərs səhifələri"
+msgstr "Anleitungsseiten"
+
+msgid "Dərs tapılmadı."
+msgstr "Anleitung nicht gefunden."
+
+msgid "Dərsi kataloqdan çıxar"
+msgstr "Anleitung aus dem Katalog entfernen"
+
+msgid "Dərsi saxla"
+msgstr "Anleitung speichern"
+
+msgid "Dərsin kabinetdəki görünüşü"
+msgstr "Vorschau der Anleitung im persönlichen Bereich"
+
+msgid "Dəyişiklik"
+msgstr "Änderung"
+
+msgid "Dəyişikliklər aktiv təşkilatın kabinetində görünür."
+msgstr ""
+"Die Änderungen erscheinen im persönlichen Bereich der aktiven Organisation."
+
+msgid "E-poçt ünvanları"
+msgstr "E-Mail-Adressen"
+
+msgid "E-poçt ünvanı"
+msgstr "E-Mail-Adresse"
+
+msgid "E-poçt ünvanı təsdiqləndi."
+msgstr "Die E-Mail-Adresse wurde bestätigt."
+
+msgid "Formanı yenidən açın."
+msgstr "Öffnen Sie das Formular erneut."
+
+msgid "Fənn və dərs tarixi"
+msgstr "Fach und Unterrichtsdatum"
+
+msgid "Fəsillər artan vaxt sırası ilə videonun müddəti daxilində olmalıdır."
+msgstr ""
+"Kapitelzeiten müssen aufsteigend sein und innerhalb der Videodauer liegen."
+
+msgid "Fəsillərin başlanğıc vaxtları və adları"
+msgstr "Startzeiten und Namen der Kapitel"
+
+msgid "Giriş səhifəsinə qayıt"
+msgstr "Zurück zur Anmeldeseite"
+
+msgid "Görə bilən rollar"
+msgstr "Rollen mit Zugriff"
+
+msgid "Hadisə jurnalı"
+msgstr "Ereignisprotokoll"
+
+msgid "Hansı hadisələr qeydə alınsın?"
+msgstr "Welche Ereignisse sollen erfasst werden?"
+
+msgid "Hansı əməliyyatı etmək istəyirsiniz?"
+msgstr "Was möchten Sie tun?"
+
+msgid "Hələ nəzarət qaydası yaradılmayıb."
+msgstr "Es wurden noch keine Überwachungsregeln erstellt."
+
+msgid "Hər addımı ayrıca sətirdə yazın."
+msgstr "Schreiben Sie jeden Schritt in eine eigene Zeile."
+
+msgid "Hər fəsil üçün mm:ss və ad yazın. Ən çox 1000 fəsil əlavə olunur."
+msgstr ""
+"Geben Sie für jedes Kapitel mm:ss und einen Titel ein. Bis zu 1000 Kapitel "
+"sind möglich."
+
+msgid ""
+"Hər fəsli ayrıca sətirdə yazın, məsələn 00:00 Giriş və 01:35 Nəticəni "
+"yoxlamaq."
+msgstr ""
+"Schreiben Sie jedes Kapitel in eine eigene Zeile, etwa 00:00 Einführung und "
+"01:35 Ergebnis prüfen."
+
+msgid "Kabinet üzrə video"
+msgstr "Rundgang durch den persönlichen Bereich"
+
+msgid "Kataloqdan çıxarılıb"
+msgstr "Aus dem Katalog entfernt"
+
+msgid "Kimi izləyirsiniz?"
+msgstr "Wessen Einträge möchten Sie verfolgen?"
+
+msgid "MP4 video"
+msgstr "MP4-Video"
+
+msgid "Mövcud subtitrləri çıxar"
+msgstr "Vorhandene Untertitel entfernen"
+
+msgid "Növbəti"
+msgstr "Weiter"
+
+msgid "Növbəti səhifə"
+msgstr "Nächste Seite"
+
+msgid "Nəticədən şəxsi seçin."
+msgstr "Wählen Sie eine Person aus den Suchergebnissen."
+
+msgid "Nəzarət"
+msgstr "Kursbuchüberwachung"
+
+msgid "Nəzarət aktivdir"
+msgstr "Überwachung aktiv"
+
+msgid "Nəzarət qaydası saxlanıldı."
+msgstr "Die Überwachungsregel wurde gespeichert."
+
+msgid "Nəzarət qaydası silindi."
+msgstr "Die Überwachungsregel wurde gelöscht."
+
+msgid "Nəzarət qaydası yarat"
+msgstr "Überwachungsregel erstellen"
+
+msgid "Oxuna bilən video treki və müddəti olan MP4 faylı seçin."
+msgstr "Wählen Sie eine MP4-Datei mit lesbarer Videospur und Laufzeitangabe."
+
+msgid "Qaydanı redaktə et"
+msgstr "Regel bearbeiten"
+
+msgid "Qaydanı sil"
+msgstr "Regel löschen"
+
+msgid "Qeydi yazan"
+msgstr "Eingetragen von"
+
+msgid ""
+"Qeydi yazan əməkdaşı və ya qeydi dəyişilən tələbəni seçin. İlk dəyişiklik "
+"seçilmiş ünvana dərhal bildirilir. Sonrakı beş dəqiqədəki dəyişikliklər bir "
+"məktubda toplanır."
+msgstr ""
+"Wählen Sie die Person, die den Eintrag verfasst, oder die betroffene "
+"studierende Person. Die erste Änderung löst sofort eine E-Mail an die "
+"gewählte Adresse aus. Weitere Änderungen innerhalb der nächsten fünf Minuten"
+" werden in einer E-Mail zusammengefasst."
+
+msgid "Rol üzrə video"
+msgstr "Video zur Rolle"
+
+msgid "Seçilmiş qaydalara uyğun jurnal dəyişikliyi qeydə alınmayıb."
+msgstr ""
+"Es wurden noch keine Kursbuchänderungen erfasst, die den gewählten Regeln "
+"entsprechen."
+
+msgid "Silməni təsdiqləyin."
+msgstr "Bestätigen Sie das Löschen."
+
+msgid "Sorğu çox böyükdür. MP4 üçün ən çox 200 MiB qəbul edilir."
+msgstr "Die Datei ist zu groß. Für MP4 sind höchstens 200 MiB erlaubt."
+
+msgid "Sual səhifələri"
+msgstr "Fragenseiten"
+
+msgid "Sual və ya açar söz yazın"
+msgstr "Frage oder Suchbegriff eingeben"
+
+msgid "Sual və ya dərsin adı"
+msgstr "Frage oder Titel der Anleitung"
+
+msgid "Sualını axtar, izahı oxu və əməliyyatı videoda izlə."
+msgstr ""
+"Suchen Sie Ihre Frage, lesen Sie die Anleitung und sehen Sie sich den Ablauf"
+" im Video an."
+
+msgid "Subtitrlər"
+msgstr "Untertitel"
+
+msgid "Səhifələr"
+msgstr "Seiten"
+
+msgid "Təlimat videosunu aç"
+msgstr "Anleitungsvideo öffnen"
+
+msgid "Təsdiq gözlənilir"
+msgstr "Bestätigung ausstehend"
+
+msgid "Təsdiq məktubu göndər"
+msgstr "Bestätigungs-E-Mail senden"
+
+msgid "Təsdiq məktubu üçün sorğu qeydə alındı."
+msgstr "Die Bestätigungs-E-Mail wurde angefordert."
+
+msgid "Təsdiqlənib"
+msgstr "Bestätigt"
+
+msgid ""
+"UTF-8 formatında, videonun müddətinə uyğun vaxtlı və sadə mətnli WebVTT "
+"faylı seçin."
+msgstr ""
+"Wählen Sie eine einfache WebVTT-Textdatei in UTF-8 mit Zeitmarken innerhalb "
+"der Videodauer."
+
+msgid "Uyğun sual tapılmadı."
+msgstr "Keine passende Frage gefunden."
+
+msgid "Video dərsi kataloqdan çıxarıldı."
+msgstr "Videoanleitung aus dem Katalog entfernt."
+
+msgid "Video dərsi saxlanıldı."
+msgstr "Videoanleitung gespeichert."
+
+msgid "Video dərsi əlavə et"
+msgstr "Videoanleitung hinzufügen"
+
+msgid "Video dərsini redaktə et"
+msgstr "Videoanleitung bearbeiten"
+
+msgid "Video dərsinin redaktoru"
+msgstr "Editor für Videoanleitungen"
+
+msgid "Video dərslər"
+msgstr "Videoanleitungen"
+
+msgid "Video dərsləri idarə et"
+msgstr "Videoanleitungen verwalten"
+
+msgid "Video faylını dəyişdikdə ona uyğun yeni subtitr yükləyə bilərsiniz."
+msgstr ""
+"Beim Ersetzen des Videos können Sie auch passende neue Untertitel hochladen."
+
+msgid "Videoda bölmə və ya tab axtar"
+msgstr "Bereich oder Registerkarte im Video suchen"
+
+msgid "Videoda göstərilən əməliyyatlar"
+msgstr "Im Video gezeigte Vorgänge"
+
+msgid "Videoda mövzuya keç"
+msgstr "Zu einem Thema im Video springen"
+
+msgid ""
+"Videonu yalnız seçdiyiniz bütün əməliyyatlara icazəsi olanlar görəcək. Ctrl "
+"və ya ⌘ ilə bir neçə əməliyyat seçə bilərsiniz."
+msgstr ""
+"Für das Video sind Rechte für alle ausgewählten Vorgänge erforderlich. Mit "
+"Strg oder ⌘ können Sie mehrere auswählen."
+
+msgid "Videoya bax"
+msgstr "Video ansehen"
+
+msgid "Yeni dərs üçün MP4 video seçin."
+msgstr "Wählen Sie für die neue Anleitung ein MP4-Video."
+
+msgid "Yeni subtitr yükləyərkən mövcud subtitri çıxarma seçimini götürün."
+msgstr ""
+"Deaktivieren Sie beim Hochladen neuer Untertitel die Option zum Entfernen "
+"der bisherigen."
+
+msgid "Yenidən aç"
+msgstr "Wieder öffnen"
+
+msgid "Yükləmənin ölçüsü düzgün deyil."
+msgstr "Ungültige Dateigröße."
+
+msgid "Ümumi təlimat (əlavə əməliyyat icazəsi tələb etmir)"
+msgstr "Allgemeine Anleitung (keine weiteren Berechtigungen erforderlich)"
+
+msgid "Ümumi təlimatı və ya videoda göstərilən əməliyyatları seçin."
+msgstr ""
+"Wählen Sie die allgemeine Anleitung oder die im Video gezeigten Vorgänge."
+
+msgid "Ünvan seçməsəniz, hadisələr yalnız kabinetdə görünəcək."
+msgstr ""
+"Wenn Sie keine Adresse auswählen, erscheinen die Ereignisse nur im Portal."
+
+msgid "Ünvanı çıxar"
+msgstr "Adresse entfernen"
+
+msgid "Ünvanımı təsdiqlə"
+msgstr "Meine Adresse bestätigen"
+
+msgid "İlk giriş və parolun bərpası"
+msgstr "Erste Anmeldung und Passwortwiederherstellung"
+
+msgid "İlk giriş və parolun bərpası · video təlimat"
+msgstr "Erste Anmeldung und Passwortwiederherstellung · Videoanleitung"
+
+msgid "İlkin dərs bərpa edildi."
+msgstr "Ursprüngliche Anleitung wiederhergestellt."
+
+msgid "İlkin dərsi bərpa et"
+msgstr "Ursprüngliche Anleitung wiederherstellen"
+
+msgid ""
+"İlkin dərsin icazələri həmişə tətbiq olunur. Əlavə əməliyyat "
+"göstərirsinizsə, onu da seçin."
+msgstr ""
+"Die Rechte der ursprünglichen Anleitung gelten immer. Wählen Sie auch die "
+"zusätzlich gezeigten Vorgänge."
+
+msgid ""
+"İlkin dərsin kabinet bölməsi və giriş icazələri tətbiq olunur. Seçdiyiniz "
+"rollar auditoriyanı daraldır."
+msgstr ""
+"Bereich und Rechte der ursprünglichen Anleitung gelten weiterhin. "
+"Ausgewählte Rollen schränken den Zugriff weiter ein."
+
+msgid "İstəyə bağlı WebVTT faylı, ən çox 1 MB."
+msgstr "Optionale WebVTT-Datei, höchstens 1 MB."
+
+msgid "İzahın addımları"
+msgstr "Anleitungsschritte"
+
+msgid "İzlənən şəxslər"
+msgstr "Personen mit Überwachungsregeln"
+
+msgid "Şəxs"
+msgstr "Person"
+
+msgid "Şəxs tapılmadı."
+msgstr "Keine passende Person gefunden."
+
+msgid "Şəxsi axtar"
+msgstr "Person suchen"
+
+msgid "Əməliyyat seçimi gözlənilir"
+msgstr "Auswahl der Vorgänge erforderlich"
+
+msgid ""
+"Ən azı bir rol seçin. Dərsi hamıya göstərmək istəyirsinizsə, «Bütün rollar» "
+"seçimini ayrıca işarələyin."
+msgstr ""
+"Wählen Sie mindestens eine Rolle. Soll die Anleitung für alle sichtbar sein,"
+" aktivieren Sie „Alle Rollen“."
+
+msgid "Ən azı iki hərf yazın."
+msgstr "Geben Sie mindestens zwei Buchstaben ein."
+
+msgid "Ən çox 200 MiB."
+msgstr "Höchstens 200 MiB."
+
+msgid "Ən çox verilən suallar"
+msgstr "Häufig gestellte Fragen"
+
+msgid "Əvvəlki səhifə"
+msgstr "Vorherige Seite"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Əvvəlki sual göndərişlərinizin vəziyyətinə və qeydlərinə baxın."
+msgstr ""
+"Sehen Sie den Status und die Hinweise zu Ihren früheren Frageneinreichungen."
+
+msgctxt "accounts.schedule_manage"
+msgid "Excel yüklə (.xlsx)"
+msgstr "Als Excel herunterladen (.xlsx)"
+
+msgctxt "accounts.schedule_manage"
+msgid "Fakültə"
+msgstr "Fakultät"
+
+msgctxt "accounts.schedule_manage"
+msgid ""
+"Faylda seçilmiş həftənin tarixli dərsləri və semestrin həftəlik planı var. "
+"Filtrləri birlikdə tətbiq edə bilərsiniz."
+msgstr ""
+"Die Datei enthält die datierten Termine der gewählten Woche und den "
+"Wochenplan des Semesters. Filter sind kombinierbar."
+
+msgctxt "accounts.schedule_manage"
+msgid "Filtrlə Excel-ə ixrac et"
+msgstr "Filtern und nach Excel exportieren"
+
+msgctxt "accounts.schedule_manage"
+msgid "Hamısı"
+msgstr "Alle"
+
+msgctxt "accounts.schedule_manage"
+msgid "Kafedra"
+msgstr "Lehrstuhl"
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllimin cədvəlini yüklə (.xlsx)"
+msgstr "Stundenplan der Lehrkraft herunterladen (.xlsx)"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrupun cədvəlini yüklə (.xlsx)"
+msgstr "Stundenplan der Gruppe herunterladen (.xlsx)"
+
+msgctxt "accounts.workload"
+msgid "Başqa kafedraya göndər"
+msgstr "An einen anderen Fachbereich senden"
+
+msgctxt "accounts.workload"
+msgid "Daha çox sətir"
+msgstr "Weitere Zeilen"
+
+msgctxt "accounts.workload"
+msgid "Fənn və ya qrupu axtar"
+msgstr "Fach oder Gruppe suchen"
+
+msgctxt "accounts.workload"
+msgid "Göndəriləcək tapşırıq sətri"
+msgstr "Zu übertragende Zuweisungszeile"
+
+msgctxt "accounts.workload"
+msgid ""
+"Hər sətrə müəllimin keçirəcəyi saatı yazın. «Bütün qrup» ümumi təyinatdır. "
+"Nömrəli alt qrup seçimi göstərilirsə, həmin qrupu ayrıca təyin edə "
+"bilərsiniz. «Bölünməyib» bu fəaliyyət üçün hələ müəllimə verilməyən saatdır."
+msgstr ""
+"Tragen Sie je Zeile die Unterrichtsstunden der Lehrkraft ein. „Ganze Gruppe“"
+" gilt für die gesamte Gruppe. Nummerierte Teilgruppen lassen sich einzeln "
+"zuweisen. Nicht verteilte Stunden sind für diese Tätigkeit noch keiner "
+"Lehrkraft zugewiesen."
+
+msgctxt "accounts.workload"
+msgid "Müəllimə verilən saat"
+msgstr "Der Lehrkraft zugewiesene Stunden"
+
+msgctxt "accounts.workload"
+msgid ""
+"Qruplar reyestrdən seçilir. Yeni yükü «Sətir əlavə et» ilə daxil edin. "
+"Mövcud fənnin qrup və saatlarına kartdakı «Sətirlər» düyməsindən baxın."
+msgstr ""
+"Wählen Sie Gruppen aus dem Verzeichnis. Mit „Zeile hinzufügen“ erfassen Sie "
+"neue Lehrlast. Gruppen und Stunden eines vorhandenen Fachs finden Sie unter "
+"„Zeilen“ auf der Fachkarte."
+
+msgctxt "journal.watch"
+msgid "%(status)s · %(score)s bal"
+msgstr "%(status)s · %(score)s Punkte"
+
+msgctxt "journal.watch"
+msgid "Bal yazılması"
+msgstr "Punktzahl eingetragen"
+
+msgctxt "journal.watch"
+msgid ""
+"Bu ünvanda jurnal bildirişlərini almaq istəyirsinizsə, keçidi açıb "
+"təsdiqləyin. Keçid 24 saat qüvvədədir."
+msgstr ""
+"Um an diese Adresse Benachrichtigungen zu Kursbuchänderungen zu erhalten, "
+"öffnen Sie den Link und bestätigen Sie die Adresse. Der Link ist 24 Stunden "
+"gültig."
+
+msgctxt "journal.watch"
+msgid "Jurnal bildirişləri üçün ünvanı təsdiqləyin"
+msgstr "Adresse für Kursbuchbenachrichtigungen bestätigen"
+
+msgctxt "journal.watch"
+msgid "Jurnalda izlənilən dəyişikliklər"
+msgstr "Überwachte Kursbuchänderungen"
+
+msgctxt "journal.watch"
+msgid "Mövcud qeydin düzəldilməsi"
+msgstr "Bestehender Eintrag korrigiert"
+
+msgctxt "journal.watch"
+msgid "Qayıb yazılması"
+msgstr "Abwesenheit eingetragen"
+
+msgctxt "journal.watch"
+msgid "Qeydi izlənilən tələbə"
+msgstr "Studierende Person, deren Eintrag verfolgt wird"
+
+msgctxt "journal.watch"
+msgid "Qeydi yazan şəxs"
+msgstr "Person, die den Eintrag vorgenommen hat"
+
+msgctxt "journal.watch"
+msgid "Qeydin silinməsi"
+msgstr "Eintrag gelöscht"
+
+msgctxt "journal.watch"
+msgid ""
+"Yeni qeydlərin sayı: %(count)s. Ətraflı məlumatı kabinetdə «Nəzarət» "
+"bölməsindən açın."
+msgstr ""
+"Neue Einträge: %(count)s. Einzelheiten finden Sie im Portal unter "
+"„Kursbuchüberwachung“."
+
+msgctxt "journal.watch"
+msgid "İştirak yazılması"
+msgstr "Anwesenheit eingetragen"
+
+msgctxt "organizations.permission.category"
+msgid "Video təlimatlar"
+msgstr "Videoanleitungen"
+
+msgctxt "organizations.permission.label"
+msgid "FAQ video dərslərini idarə etmək"
+msgstr "FAQ-Videoanleitungen verwalten"
+
+msgctxt "profile.section"
+msgid "Nəzarət"
+msgstr "Kursbuchüberwachung"
+
+msgctxt "registrar.schedule"
+msgid "Excel yüklə (.xlsx)"
+msgstr "Als Excel herunterladen (.xlsx)"

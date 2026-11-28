@@ -127,7 +127,7 @@ def build_center(request, organization) -> dict:
     from core.constants import OrgUnitType
 
     actor = resolve_actor(request.user, organization, request=request)
-    if not actor.has(PERM_MANAGE):
+    if not actor.has(PERM_MANAGE) or not actor.scope_for(PERM_MANAGE).has_structure_access:
         return {"has_access": False}
 
     params = request.GET

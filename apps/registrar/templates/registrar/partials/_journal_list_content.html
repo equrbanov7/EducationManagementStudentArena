@@ -15,6 +15,7 @@ başlığı artıq <h1> verdiyi üçün embed-də <h2>-yə enilir.{% endcomment 
         <div class="jd2-mark" aria-hidden="true"><i class="fas fa-book-open"></i></div>
         <div>
             <{% if embedded_in_shell %}h2{% else %}h1{% endif %} class="jd2-pagetitle">{% trans "Elektron jurnal" context "registrar.journal" %}</{% if embedded_in_shell %}h2{% else %}h1{% endif %}>
+            {% include "accounts/profile/sections/faq/_external_help.html" with help_section="external-journal" only %}
             <div class="jd2-pagesub"><i class="far fa-calendar" aria-hidden="true"></i> {% if journal_selected_year or journal_selected_season %}{{ journal_selected_year }}{% if journal_selected_year and journal_selected_season %} · {% endif %}{{ journal_selected_season }}{% else %}{% trans "Bütün semestrlər" context "registrar.journal" %}{% endif %}</div>
         </div>
         <div class="jl-head-meta">

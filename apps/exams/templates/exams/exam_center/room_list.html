@@ -27,6 +27,7 @@
       </p>
     </div>
     <div class="ems-header__actions">
+    {% include "accounts/profile/sections/faq/_external_help.html" with help_section="external-rooms" only %}
       {% if can_manage %}
       {% comment %}
         "Oturumlar" keçidi silindi (2026-07-29): istifadəçi üçün texniki və

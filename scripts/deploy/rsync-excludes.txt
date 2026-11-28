@@ -22,3 +22,5 @@ output/
 .env.*
 docker/nginx/certs/
 db.sqlite3
+
+/apps/accounts/guide_media/

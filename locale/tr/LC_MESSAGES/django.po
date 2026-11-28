@@ -121635,3 +121635,542 @@ msgstr "Giriş puanı = devam + seminer / laboratuvar + ara sınav + bireysel ç
 msgctxt "profile.subjects"
 msgid "Giriş balı = davamiyyət + seminar / laboratoriya + midterm (imtahana qədər toplanan hissə); yekun bal = giriş balı + yekun imtahan. Fəndə həm seminar, həm laboratoriya varsa hər biri 5 bal sayılır (5 + 5)."
 msgstr "Giriş puanı = devam + seminer / laboratuvar + ara sınav (sınava kadar toplanan kısım); final puanı = giriş puanı + final sınavı. Derste hem seminer hem laboratuvar varsa her biri 5 puan sayılır (5 + 5)."
+
+msgid "%(name)s (qeyri-aktiv rol)"
+msgstr "%(name)s (etkin olmayan rol)"
+
+msgid "%(total)s sualdan %(first)s–%(last)s göstərilir"
+msgstr "%(total)s sorunun %(first)s–%(last)s arası gösteriliyor"
+
+msgid "Ad və ya mövzu"
+msgstr "Ad veya konu"
+
+msgid "Ad, soyad və ya istifadəçi adı"
+msgstr "Ad, soyad veya kullanıcı adı"
+
+msgid "Axtarılır…"
+msgstr "Aranıyor…"
+
+msgid "Axtarışı yenidən sınayın."
+msgstr "Aramayı yeniden deneyin."
+
+msgid "Azərbaycanca"
+msgstr "Azerbaycanca"
+
+msgid "Bildiriş ünvanları"
+msgstr "Bildirim adresleri"
+
+msgid "Bildiriş ünvanı siyahıdan çıxarıldı."
+msgstr "Bildirim adresi listeden kaldırıldı."
+
+msgid "Bildiriş ünvanının təsdiqi"
+msgstr "Bildirim adresini doğrulama"
+
+msgid ""
+"Bir və ya bir neçə rol seçin, yaxud «Bütün rollar» seçimini təsdiqləyin."
+msgstr ""
+"Bir veya daha fazla rol seçin ya da “Tüm roller” seçeneğini onaylayın."
+
+msgid "Bu dərs kataloqdan çıxarılıb. Saxladıqda yenidən görünəcək."
+msgstr "Bu ders katalogdan kaldırıldı. Kaydettiğinizde yeniden görünür."
+
+msgid "Bu təşkilatın kataloqundan silinməni təsdiqləyirəm."
+msgstr "Bu kurumun kataloğundan kaldırmayı onaylıyorum."
+
+msgid ""
+"Bu ünvana EMS jurnal nəzarəti üzrə bildiriş gəlməsini təsdiqləyirsiniz?"
+msgstr ""
+"EMS yoklama ve not defteri bildirimlerini bu adreste almayı onaylıyor "
+"musunuz?"
+
+msgid "Bu əməliyyatın təlimatı"
+msgstr "Bu işlem için kılavuz"
+
+msgid "Bölmənin videosu"
+msgstr "Bölüm videosu"
+
+msgid "Bütün rollar"
+msgstr "Tüm roller"
+
+msgid "Bütün suallar"
+msgstr "Tüm sorular"
+
+msgid "Daha qısa ifadə ilə axtarın və ya bütün suallara qayıdın."
+msgstr "Daha kısa bir ifade deneyin veya tüm sorulara dönün."
+
+msgid "Dərs başqa pəncərədə dəyişdirilib. Səhifəni yenidən açın."
+msgstr "Ders başka bir pencerede değiştirildi. Sayfayı yeniden açın."
+
+msgid "Dərs səhifələri"
+msgstr "Ders sayfaları"
+
+msgid "Dərs tapılmadı."
+msgstr "Ders bulunamadı."
+
+msgid "Dərsi kataloqdan çıxar"
+msgstr "Dersi katalogdan kaldır"
+
+msgid "Dərsi saxla"
+msgstr "Dersi kaydet"
+
+msgid "Dərsin kabinetdəki görünüşü"
+msgstr "Dersin paneldeki görünümü"
+
+msgid "Dəyişiklik"
+msgstr "Değişiklik"
+
+msgid "Dəyişikliklər aktiv təşkilatın kabinetində görünür."
+msgstr "Değişiklikler etkin kurumun panelinde görünür."
+
+msgid "E-poçt ünvanları"
+msgstr "E-posta adresleri"
+
+msgid "E-poçt ünvanı"
+msgstr "E-posta adresi"
+
+msgid "E-poçt ünvanı təsdiqləndi."
+msgstr "E-posta adresi doğrulandı."
+
+msgid "Formanı yenidən açın."
+msgstr "Formu yeniden açın."
+
+msgid "Fənn və dərs tarixi"
+msgstr "Ders ve ders tarihi"
+
+msgid "Fəsillər artan vaxt sırası ilə videonun müddəti daxilində olmalıdır."
+msgstr "Bölüm zamanları artan sırada ve video süresi içinde olmalıdır."
+
+msgid "Fəsillərin başlanğıc vaxtları və adları"
+msgstr "Bölüm başlangıç zamanları ve adları"
+
+msgid "Giriş səhifəsinə qayıt"
+msgstr "Giriş sayfasına dön"
+
+msgid "Görə bilən rollar"
+msgstr "Erişebilen roller"
+
+msgid "Hadisə jurnalı"
+msgstr "Olay günlüğü"
+
+msgid "Hansı hadisələr qeydə alınsın?"
+msgstr "Hangi olaylar kaydedilsin?"
+
+msgid "Hansı əməliyyatı etmək istəyirsiniz?"
+msgstr "Hangi işlemi yapmak istiyorsunuz?"
+
+msgid "Hələ nəzarət qaydası yaradılmayıb."
+msgstr "Henüz izleme kuralı oluşturulmadı."
+
+msgid "Hər addımı ayrıca sətirdə yazın."
+msgstr "Her adımı ayrı satıra yazın."
+
+msgid "Hər fəsil üçün mm:ss və ad yazın. Ən çox 1000 fəsil əlavə olunur."
+msgstr ""
+"Her bölüm için dk:sn ve başlık girin. En fazla 1000 bölüm ekleyebilirsiniz."
+
+msgid ""
+"Hər fəsli ayrıca sətirdə yazın, məsələn 00:00 Giriş və 01:35 Nəticəni "
+"yoxlamaq."
+msgstr ""
+"Her bölümü ayrı satıra yazın, örneğin 00:00 Giriş ve 01:35 Sonucu kontrol "
+"et."
+
+msgid "Kabinet üzrə video"
+msgstr "Panel turu"
+
+msgid "Kataloqdan çıxarılıb"
+msgstr "Katalogdan kaldırıldı"
+
+msgid "Kimi izləyirsiniz?"
+msgstr "Kimin kayıtlarını izlemek istiyorsunuz?"
+
+msgid "MP4 video"
+msgstr "MP4 biçiminde video"
+
+msgid "Mövcud subtitrləri çıxar"
+msgstr "Mevcut altyazıları kaldır"
+
+msgid "Növbəti"
+msgstr "Sonraki"
+
+msgid "Növbəti səhifə"
+msgstr "Sonraki sayfa"
+
+msgid "Nəticədən şəxsi seçin."
+msgstr "Sonuçlardan bir kişi seçin."
+
+msgid "Nəzarət"
+msgstr "Defter takibi"
+
+msgid "Nəzarət aktivdir"
+msgstr "İzleme etkin"
+
+msgid "Nəzarət qaydası saxlanıldı."
+msgstr "İzleme kuralı kaydedildi."
+
+msgid "Nəzarət qaydası silindi."
+msgstr "İzleme kuralı silindi."
+
+msgid "Nəzarət qaydası yarat"
+msgstr "İzleme kuralı oluştur"
+
+msgid "Oxuna bilən video treki və müddəti olan MP4 faylı seçin."
+msgstr "Okunabilir bir video parçası ve süre bilgisi olan MP4 dosyası seçin."
+
+msgid "Qaydanı redaktə et"
+msgstr "Kuralı düzenle"
+
+msgid "Qaydanı sil"
+msgstr "Kuralı sil"
+
+msgid "Qeydi yazan"
+msgstr "Kaydı giren"
+
+msgid ""
+"Qeydi yazan əməkdaşı və ya qeydi dəyişilən tələbəni seçin. İlk dəyişiklik "
+"seçilmiş ünvana dərhal bildirilir. Sonrakı beş dəqiqədəki dəyişikliklər bir "
+"məktubda toplanır."
+msgstr ""
+"Kaydı giren personeli veya kaydı değişen öğrenciyi seçin. İlk değişiklik "
+"seçilen adrese hemen bildirilir. Sonraki beş dakikanın değişiklikleri tek "
+"e-postada toplanır."
+
+msgid "Rol üzrə video"
+msgstr "Role göre video"
+
+msgid "Seçilmiş qaydalara uyğun jurnal dəyişikliyi qeydə alınmayıb."
+msgstr "Seçilen kurallara uyan bir defter değişikliği kaydedilmedi."
+
+msgid "Silməni təsdiqləyin."
+msgstr "Silmeyi onaylayın."
+
+msgid "Sorğu çox böyükdür. MP4 üçün ən çox 200 MiB qəbul edilir."
+msgstr "Dosya çok büyük. MP4 için en fazla 200 MiB kabul edilir."
+
+msgid "Sual səhifələri"
+msgstr "Soru sayfaları"
+
+msgid "Sual və ya açar söz yazın"
+msgstr "Soru veya anahtar kelime girin"
+
+msgid "Sual və ya dərsin adı"
+msgstr "Soru veya ders adı"
+
+msgid "Sualını axtar, izahı oxu və əməliyyatı videoda izlə."
+msgstr "Sorunuzu bulun, açıklamayı okuyun ve işlemi videoda izleyin."
+
+msgid "Subtitrlər"
+msgstr "Altyazılar"
+
+msgid "Səhifələr"
+msgstr "Sayfalar"
+
+msgid "Təlimat videosunu aç"
+msgstr "Eğitim videosunu aç"
+
+msgid "Təsdiq gözlənilir"
+msgstr "Doğrulama bekleniyor"
+
+msgid "Təsdiq məktubu göndər"
+msgstr "Doğrulama e-postası gönder"
+
+msgid "Təsdiq məktubu üçün sorğu qeydə alındı."
+msgstr "Doğrulama e-postası talebi kaydedildi."
+
+msgid "Təsdiqlənib"
+msgstr "Doğrulandı"
+
+msgid ""
+"UTF-8 formatında, videonun müddətinə uyğun vaxtlı və sadə mətnli WebVTT "
+"faylı seçin."
+msgstr "Zamanları video süresine uygun, UTF-8 düz metin WebVTT dosyası seçin."
+
+msgid "Uyğun sual tapılmadı."
+msgstr "Eşleşen soru bulunamadı."
+
+msgid "Video dərsi kataloqdan çıxarıldı."
+msgstr "Video ders katalogdan kaldırıldı."
+
+msgid "Video dərsi saxlanıldı."
+msgstr "Video ders kaydedildi."
+
+msgid "Video dərsi əlavə et"
+msgstr "Video ders ekle"
+
+msgid "Video dərsini redaktə et"
+msgstr "Video dersi düzenle"
+
+msgid "Video dərsinin redaktoru"
+msgstr "Video dersi düzenleyicisi"
+
+msgid "Video dərslər"
+msgstr "Video dersler"
+
+msgid "Video dərsləri idarə et"
+msgstr "Video dersleri yönet"
+
+msgid "Video faylını dəyişdikdə ona uyğun yeni subtitr yükləyə bilərsiniz."
+msgstr "Videoyu değiştirirken ona uygun yeni altyazılar yükleyebilirsiniz."
+
+msgid "Videoda bölmə və ya tab axtar"
+msgstr "Videoda bölüm veya sekme ara"
+
+msgid "Videoda göstərilən əməliyyatlar"
+msgstr "Videoda gösterilen işlemler"
+
+msgid "Videoda mövzuya keç"
+msgstr "Videoda konuya git"
+
+msgid ""
+"Videonu yalnız seçdiyiniz bütün əməliyyatlara icazəsi olanlar görəcək. Ctrl "
+"və ya ⌘ ilə bir neçə əməliyyat seçə bilərsiniz."
+msgstr ""
+"Videoyu görmek için seçilen tüm işlemlere erişim gerekir. Birden fazla işlem"
+" seçmek için Ctrl veya ⌘ kullanın."
+
+msgid "Videoya bax"
+msgstr "Videoyu izle"
+
+msgid "Yeni dərs üçün MP4 video seçin."
+msgstr "Yeni ders için MP4 video seçin."
+
+msgid "Yeni subtitr yükləyərkən mövcud subtitri çıxarma seçimini götürün."
+msgstr ""
+"Yeni altyazı yüklerken mevcut altyazıyı kaldırma seçeneğini temizleyin."
+
+msgid "Yenidən aç"
+msgstr "Yeniden aç"
+
+msgid "Yükləmənin ölçüsü düzgün deyil."
+msgstr "Yükleme boyutu geçersiz."
+
+msgid "Ümumi təlimat (əlavə əməliyyat icazəsi tələb etmir)"
+msgstr "Genel kılavuz (ek işlem izni gerekmez)"
+
+msgid "Ümumi təlimatı və ya videoda göstərilən əməliyyatları seçin."
+msgstr "Genel kılavuzu veya videoda gösterilen işlemleri seçin."
+
+msgid "Ünvan seçməsəniz, hadisələr yalnız kabinetdə görünəcək."
+msgstr "Adres seçmezseniz olaylar yalnızca panelde görünür."
+
+msgid "Ünvanı çıxar"
+msgstr "Adresi kaldır"
+
+msgid "Ünvanımı təsdiqlə"
+msgstr "Adresimi doğrula"
+
+msgid "İlk giriş və parolun bərpası"
+msgstr "İlk giriş ve parola kurtarma"
+
+msgid "İlk giriş və parolun bərpası · video təlimat"
+msgstr "İlk giriş ve parola kurtarma · video kılavuz"
+
+msgid "İlkin dərs bərpa edildi."
+msgstr "Özgün ders geri yüklendi."
+
+msgid "İlkin dərsi bərpa et"
+msgstr "Özgün dersi geri yükle"
+
+msgid ""
+"İlkin dərsin icazələri həmişə tətbiq olunur. Əlavə əməliyyat "
+"göstərirsinizsə, onu da seçin."
+msgstr ""
+"Özgün dersin izinleri her zaman geçerlidir. Gösterdiğiniz ek işlemleri de "
+"seçin."
+
+msgid ""
+"İlkin dərsin kabinet bölməsi və giriş icazələri tətbiq olunur. Seçdiyiniz "
+"rollar auditoriyanı daraldır."
+msgstr ""
+"Özgün panel bölümü ve izinleri geçerlidir. Seçilen roller izleyici kitlesini"
+" daraltır."
+
+msgid "İstəyə bağlı WebVTT faylı, ən çox 1 MB."
+msgstr "İsteğe bağlı WebVTT dosyası, en fazla 1 MB."
+
+msgid "İzahın addımları"
+msgstr "Kılavuz adımları"
+
+msgid "İzlənən şəxslər"
+msgstr "İzlenen kişiler"
+
+msgid "Şəxs"
+msgstr "Kişi"
+
+msgid "Şəxs tapılmadı."
+msgstr "Kişi bulunamadı."
+
+msgid "Şəxsi axtar"
+msgstr "Kişi ara"
+
+msgid "Əməliyyat seçimi gözlənilir"
+msgstr "İşlem seçimi gerekiyor"
+
+msgid ""
+"Ən azı bir rol seçin. Dərsi hamıya göstərmək istəyirsinizsə, «Bütün rollar» "
+"seçimini ayrıca işarələyin."
+msgstr ""
+"En az bir rol seçin. Dersi herkese göstermek için “Tüm roller” seçeneğini "
+"ayrıca işaretleyin."
+
+msgid "Ən azı iki hərf yazın."
+msgstr "En az iki harf yazın."
+
+msgid "Ən çox 200 MiB."
+msgstr "En fazla 200 MiB."
+
+msgid "Ən çox verilən suallar"
+msgstr "Sık sorulan sorular"
+
+msgid "Əvvəlki səhifə"
+msgstr "Önceki sayfa"
+
+msgctxt "accounts.profile.question_submissions"
+msgid "Əvvəlki sual göndərişlərinizin vəziyyətinə və qeydlərinə baxın."
+msgstr "Önceki soru gönderimlerinizin durumunu ve notlarını görüntüleyin."
+
+msgctxt "accounts.schedule_manage"
+msgid "Excel yüklə (.xlsx)"
+msgstr "Excel indir (.xlsx)"
+
+msgctxt "accounts.schedule_manage"
+msgid "Fakültə"
+msgstr "Fakülte"
+
+msgctxt "accounts.schedule_manage"
+msgid ""
+"Faylda seçilmiş həftənin tarixli dərsləri və semestrin həftəlik planı var. "
+"Filtrləri birlikdə tətbiq edə bilərsiniz."
+msgstr ""
+"Dosya, seçili haftanın tarihli derslerini ve dönemin haftalık planını "
+"içerir. Filtreleri birlikte kullanabilirsiniz."
+
+msgctxt "accounts.schedule_manage"
+msgid "Filtrlə Excel-ə ixrac et"
+msgstr "Filtrele ve Excel’e aktar"
+
+msgctxt "accounts.schedule_manage"
+msgid "Hamısı"
+msgstr "Hepsi"
+
+msgctxt "accounts.schedule_manage"
+msgid "Kafedra"
+msgstr "Bölüm"
+
+msgctxt "accounts.schedule_manage"
+msgid "Müəllimin cədvəlini yüklə (.xlsx)"
+msgstr "Öğretmenin ders çizelgesini indir (.xlsx)"
+
+msgctxt "accounts.schedule_manage"
+msgid "Qrupun cədvəlini yüklə (.xlsx)"
+msgstr "Grubun ders çizelgesini indir (.xlsx)"
+
+msgctxt "accounts.workload"
+msgid "Başqa kafedraya göndər"
+msgstr "Başka bölüme gönder"
+
+msgctxt "accounts.workload"
+msgid "Daha çox sətir"
+msgstr "Daha fazla satır"
+
+msgctxt "accounts.workload"
+msgid "Fənn və ya qrupu axtar"
+msgstr "Ders veya grup ara"
+
+msgctxt "accounts.workload"
+msgid "Göndəriləcək tapşırıq sətri"
+msgstr "Gönderilecek görev satırı"
+
+msgctxt "accounts.workload"
+msgid ""
+"Hər sətrə müəllimin keçirəcəyi saatı yazın. «Bütün qrup» ümumi təyinatdır. "
+"Nömrəli alt qrup seçimi göstərilirsə, həmin qrupu ayrıca təyin edə "
+"bilərsiniz. «Bölünməyib» bu fəaliyyət üçün hələ müəllimə verilməyən saatdır."
+msgstr ""
+"Her satıra öğretmenin vereceği saati girin. “Tüm grup” grubun tamamı için "
+"atamadır. Numaralı alt gruplar görünüyorsa ayrı ayrı atanabilir. "
+"Dağıtılmayan saatler bu etkinlik için henüz öğretmene atanmamıştır."
+
+msgctxt "accounts.workload"
+msgid "Müəllimə verilən saat"
+msgstr "Öğretmene atanan saat"
+
+msgctxt "accounts.workload"
+msgid ""
+"Qruplar reyestrdən seçilir. Yeni yükü «Sətir əlavə et» ilə daxil edin. "
+"Mövcud fənnin qrup və saatlarına kartdakı «Sətirlər» düyməsindən baxın."
+msgstr ""
+"Grupları sicilden seçin. Yeni yük için “Satır ekle”yi kullanın. Mevcut "
+"dersin grupları ve saatleri için kartta “Satırlar”ı açın."
+
+msgctxt "journal.watch"
+msgid "%(status)s · %(score)s bal"
+msgstr "%(status)s · %(score)s puan"
+
+msgctxt "journal.watch"
+msgid "Bal yazılması"
+msgstr "Puan girişi"
+
+msgctxt "journal.watch"
+msgid ""
+"Bu ünvanda jurnal bildirişlərini almaq istəyirsinizsə, keçidi açıb "
+"təsdiqləyin. Keçid 24 saat qüvvədədir."
+msgstr ""
+"Bu adreste defter bildirimleri almak için bağlantıyı açıp onaylayın. "
+"Bağlantı 24 saat geçerlidir."
+
+msgctxt "journal.watch"
+msgid "Jurnal bildirişləri üçün ünvanı təsdiqləyin"
+msgstr "Defter bildirimleri için adresinizi doğrulayın"
+
+msgctxt "journal.watch"
+msgid "Jurnalda izlənilən dəyişikliklər"
+msgstr "Defterde izlenen değişiklikler"
+
+msgctxt "journal.watch"
+msgid "Mövcud qeydin düzəldilməsi"
+msgstr "Mevcut kaydın düzeltilmesi"
+
+msgctxt "journal.watch"
+msgid "Qayıb yazılması"
+msgstr "Devamsızlık girişi"
+
+msgctxt "journal.watch"
+msgid "Qeydi izlənilən tələbə"
+msgstr "Kaydı izlenen öğrenci"
+
+msgctxt "journal.watch"
+msgid "Qeydi yazan şəxs"
+msgstr "Kaydı giren kişi"
+
+msgctxt "journal.watch"
+msgid "Qeydin silinməsi"
+msgstr "Kaydın silinmesi"
+
+msgctxt "journal.watch"
+msgid ""
+"Yeni qeydlərin sayı: %(count)s. Ətraflı məlumatı kabinetdə «Nəzarət» "
+"bölməsindən açın."
+msgstr ""
+"Yeni kayıt sayısı: %(count)s. Ayrıntılar için panelde Defter takibi bölümünü"
+" açın."
+
+msgctxt "journal.watch"
+msgid "İştirak yazılması"
+msgstr "Katılım girişi"
+
+msgctxt "organizations.permission.category"
+msgid "Video təlimatlar"
+msgstr "Video kılavuzlar"
+
+msgctxt "organizations.permission.label"
+msgid "FAQ video dərslərini idarə etmək"
+msgstr "SSS video derslerini yönet"
+
+msgctxt "profile.section"
+msgid "Nəzarət"
+msgstr "Defter takibi"
+
+msgctxt "registrar.schedule"
+msgid "Excel yüklə (.xlsx)"
+msgstr "Excel indir (.xlsx)"

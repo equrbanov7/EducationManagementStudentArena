@@ -211,6 +211,8 @@ _REPOINT = (
     "timetable.TimetableRun.published_by",
     "trial_exams.TrialExamRequest.reply_sent_by",
     "trial_exams.TrialExamRequest.user",
+    # Gələcək jurnal dəyişiklikləri birləşdirilən şəxsin əsas hesabında izlənməlidir.
+    "monitoring.JournalWatch.person",
     # workload — dərs yükü
     "workload.LoadObjection.resolved_by",
     "workload.LoadObjection.teacher",
@@ -240,6 +242,10 @@ _KEEP_PERSONAL = (
 
 #: DB trigger-i UPDATE-i qadağan edən (append-only / dəyişməz) və ya tarixi «kim etdi» sübutu.
 _KEEP_EVIDENCE = (
+    # Jurnal hadisəsi yazılan anda iştirak etmiş hesabları saxlayır.
+    "monitoring.JournalWatchEvent.actor",
+    "monitoring.JournalWatchEvent.real_actor",
+    "monitoring.JournalWatchEvent.student",
     "accounts.TeachingPayRate.archived_by",
     "accounts.TeachingPayRate.created_by",
     "applications.ApplicationContentRevision.actor",

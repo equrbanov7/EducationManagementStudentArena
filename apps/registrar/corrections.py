@@ -170,6 +170,7 @@ def apply_correction(
         corrected_by_name=correction_author_name(by_user, request),
     )
 
+    previous_cell = "—" if was_empty else grade_audit.mark_repr(mark.status, mark.score)
     if field == CorrectionField.ATTENDANCE:
         if new_status not in AttendanceStatus.values:
             raise ValidationError(pgettext("registrar.correction", "Choose the new attendance value."))
@@ -207,6 +208,17 @@ def apply_correction(
             mark.save(update_fields=["status", "score", "updated_at"])
     correction.lesson_mark = mark
     correction.save()
+    current_cell = grade_audit.mark_repr(mark.status, mark.score)
+    if previous_cell != current_cell:
+        from core.journal_events import journal_cells_changed
+
+        journal_cells_changed.send(
+            sender=LessonMark,
+            offering=lesson.offering,
+            actor=by_user,
+            changes=[(lesson, enrollment, previous_cell, current_cell)],
+            request=request,
+        )
 
     recompute_absence_hours(enrollment=enrollment)
 

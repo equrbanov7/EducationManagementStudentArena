@@ -11,7 +11,7 @@ bir şeyi axtararkən rahatlıqla tapmaq üçün»). Əvvəl «İdarəetmə» qr
 {% if 'system-settings' in allowed_sections %}
 {% system_settings_nav as ssnav %}
 <li class="sidebar-menu-group" data-sidebar-group="system-settings">
-    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|system-settings|remote-journal-access|" %} open{% endif %}>
+    <details class="sidebar-group"{% if sidebar_menu_size < 32 or sidebar_active_key in "|system-settings|remote-journal-access|journal-watch|" %} open{% endif %}>
         {% trans "Sistem tənzimləmələri" context "profile.section" as group_label %}
         {% include "accounts/profile/sidebar/_group_summary.html" with group_icon="sliders-horizontal" %}
         <ul class="sidebar-menu-group-items">
@@ -26,6 +26,14 @@ bir şeyi axtararkən rahatlıqla tapmaq üçün»). Əvvəl «İdarəetmə» qr
                     <span class="sidebar-menu-text">{% trans "Ümumi baxış" context "accounts.runtime_settings" %}</span>
                 </a>
             </li>
+            {% if 'journal-watch' in allowed_sections and not request.is_view_as %}
+            <li class="sidebar-menu-item">
+                <a href="{{ profile_base_url }}?section=journal-watch" data-section="journal-watch"
+                   class="sidebar-menu-link {% if active_section == 'journal-watch' %}active{% endif %}">
+                    {% nav_icon "shield-check" "sidebar-menu-icon" %}<span class="sidebar-menu-text">{% trans "Nəzarət" %}</span>
+                </a>
+            </li>
+            {% endif %}
             {% for group in ssnav.groups %}
             <li class="sidebar-menu-item">
                 <a href="{{ group.url }}"

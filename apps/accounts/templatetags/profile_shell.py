@@ -52,6 +52,7 @@ COMPACT_SIDEBAR_TREES = {
     SIDEBAR_LAYOUT_STUDENT: frozenset(
         {
             "dashboard",
+            "faq",
             "my-subjects",
             "my-schedule",
             "my-journal",
@@ -78,6 +79,7 @@ COMPACT_SIDEBAR_TREES = {
     SIDEBAR_LAYOUT_TEACHER: frozenset(
         {
             "dashboard",
+            "faq",
             "my-journal",
             "lab-groups",  # «Lab qrupları» — lab saatlı jurnalın müəllimi (2026-11-07)
             "my-schedule",

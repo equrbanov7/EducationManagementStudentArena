@@ -15,6 +15,7 @@ from apps.registrar.models import CourseOffering, Enrollment, JournalShare, Less
 from apps.syllabus.models import Syllabus, SyllabusSection, SyllabusVersion
 from apps.workload.constants import TaskStatus
 from apps.workload.models import LoadObjection, TaskFacultySlice, TaskRowReview, TeacherAssignment, WorkloadAmendment
+from apps.workload.public import build_distribution_context
 from apps.workload.services import resolve_actor
 from apps.workload.services import row_transfer as service
 from apps.workload.services.repair_fingerprints import academic_fingerprint
@@ -206,6 +207,31 @@ class RowTransferTests(TestCase):
         self.assertEqual(self.source.rows.count(), 0)
         self.assertIn(str(self.row.pk), result["edit_url"])
         self.assertEqual(AuditLog.objects.filter(reason="workload.row_chair_transferred").count(), 1)
+
+    def test_toolbar_marks_only_source_chairs_with_both_write_permissions(self):
+        user = User.objects.create_user("transfer_toolbar_scopes")
+        activate_member(
+            self.org,
+            user,
+            "dual_chair",
+            permissions=PERMS,
+            scope_unit=self.stack["chair"],
+            scope_type=RoleScopeType.UNIT,
+        )
+        activate_member(
+            self.org,
+            user,
+            "manage_only_chair",
+            permissions=["workload.manage", "workload.view"],
+            scope_unit=self.target_chair,
+            scope_type=RoleScopeType.UNIT,
+        )
+        request = RequestFactory().get("/")
+        request.user = user
+        context = build_distribution_context(request, organization=self.org, chair_id=self.stack["chair"].pk)
+        flags = {chair["id"]: chair["can_transfer"] for chair in context["chairs"]}
+        self.assertTrue(flags[str(self.stack["chair"].pk)])
+        self.assertFalse(flags[str(self.target_chair.pk)])
 
     def test_two_chair_permissions_are_required(self):
         head = User.objects.create_user("source_head")

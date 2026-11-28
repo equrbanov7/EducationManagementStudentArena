@@ -1,5 +1,6 @@
-{% load i18n %}
+{% load i18n learning_actions %}
 {% if can_view_owned_learning %}
+{% can_create_personal_course request as may_create_course %}
 {% comment %}«Kurslarım» (müəllim) — 2026-10-18 redizayn. Başlıq qabıqdandır (`#profileSectionTitle`), burada yalnız
 alt başlıq + əməllər. KPI → filtr paneli (avto, server tərəfli, `mc_` prefiksi) → kart şəbəkəsi / siyahı → səhifələmə.
 Siyahı, sayğaclar və rəng `apps.courses.course_list` / `presentation`-dadır (sorğu sayı kart sayından asılı deyil).
@@ -53,6 +54,7 @@ onun üstündədir. E2E `[data-mc-card]` + içindəki ilk `/courses/<id>/dashboa
         <span class="mcl-empty__ic" aria-hidden="true"><i class="fas fa-layer-group"></i></span>
         <h3 class="mcl-empty__title">{% trans "empty_title" context "profile.my_courses" %}</h3>
         <p class="mcl-empty__body">{% trans "empty_description" context "profile.my_courses" %}</p>
+        {% if may_create_course %}
         <ol class="mcl-empty__steps">
             <li><span class="mcl-empty__num">1</span>{% trans "Kursu yaradın — ad və qısa təsvir kifayətdir." context "courses.list" %}</li>
             <li><span class="mcl-empty__num">2</span>{% trans "Mövzuları sillabusun həftəlik planından bir kliklə götürün." context "courses.list" %}</li>
@@ -64,6 +66,7 @@ onun üstündədir. E2E `[data-mc-card]` + içindəki ilk `/courses/<id>/dashboa
            data-success-section="my-courses">
             <i class="fas fa-plus" aria-hidden="true"></i> {% trans "create_first_course" context "profile.my_courses" %}
         </a>
+        {% endif %}
     </div>
     {% endif %}
 </section>

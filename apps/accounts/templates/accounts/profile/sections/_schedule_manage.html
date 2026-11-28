@@ -45,6 +45,10 @@ yoxdur), dinamik dəyərlər `data-*` atributları ilə ötürülür.{% endcomme
 
   {% include "partials/ems_ui/_filter_bar.html" with filter_section="schedule-manage" filter_prefix=sec.filters.prefix filter_fields=sec.filters.fields filter_base_url=profile_base_url filter_auto=True filter_bootstrap=True %}
 
+  {% if sec.period and sec.export_structure %}
+    {% include "accounts/profile/sections/schedule/_export.html" %}
+  {% endif %}
+
   {% if not sec.groups %}
     {% trans "Səlahiyyət sahənizdə qrup yoxdur" context "accounts.schedule_manage" as no_group_title %}
     {% trans "Üzvlüyünüzə struktur bölməsi (scope_unit) təyin edilməyibsə qrup siyahısı boş qalır." context "accounts.schedule_manage" as no_group_body %}

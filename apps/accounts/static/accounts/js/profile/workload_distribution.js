@@ -100,6 +100,7 @@
         /* QA-2 F-17: tapşırıq artıq varsa «Tapşırıq yarat» gizlənir (idempotent idi, amma çaşdırırdı). */
         var create = q("[data-wl-create-task]");
         if (create) create.hidden = !!STATE.task;
+        if (window.EMSWorkloadTransfer) window.EMSWorkloadTransfer.updateButton(q, STATE.task);
         var chip = q("[data-wl-status-chip]");
         if (!chip) return;
         if (!STATE.task) {
@@ -292,6 +293,7 @@
         var rowModalRequest = 0;
         function openRowModal(row) {
             var request = ++rowModalRequest;
+            if (window.EMSWorkloadTransfer) window.EMSWorkloadTransfer.setMode(false);
             var form = q("[data-wl-row-form]");
             var title = q("[data-wl-row-title]");
             var fields = q("[data-wl-row-fields]");
@@ -310,7 +312,8 @@
             fields.disabled = save.disabled = true;
             showError(q("[data-wl-row-error]"), "");
             loadOptions().then(function () {
-                if (request !== rowModalRequest || form !== q("[data-wl-row-form]")) return;
+                var picker = q("[data-wl-transfer-picker]");
+                if ((picker && !picker.hidden) || request !== rowModalRequest || form !== q("[data-wl-row-form]")) return;
                 forms().fillRow(form, row);
                 fields.disabled = save.disabled = false;
                 form.removeAttribute("aria-busy");

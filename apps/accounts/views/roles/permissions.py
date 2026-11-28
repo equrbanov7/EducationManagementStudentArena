@@ -30,7 +30,7 @@ User = get_user_model()
 def permission_editor(request):
     """Organization-scoped permission editor with add/remove enforcement."""
     from apps.organizations.models import Role
-    from apps.organizations.public import create_audit_log, get_all_permissions, get_user_org_role_level
+    from apps.organizations.public import create_audit_log, editable_permission_categories, get_user_org_role_level
     from core.permissions import has_permission
 
     org = _get_active_organization(request)
@@ -77,7 +77,7 @@ def permission_editor(request):
             )
             return redirect(f"{request.path}?role={selected_role.id}")
 
-        all_permissions = set(get_all_permissions())
+        all_permissions = {key for keys in editable_permission_categories().values() for key in keys}
         role_permissions = list(selected_role.permissions or [])
         role_permissions_set = set(role_permissions)
         old_permissions = sorted(role_permissions_set)

@@ -4023,3 +4023,24 @@ msgstr "Seçmeli ders grubu %(group)s"
 
 msgid "Seçmə fənn"
 msgstr "Seçmeli ders"
+
+msgid "Başqa kafedraya göndər"
+msgstr "Başka bölüme gönder"
+
+msgid "Bu axtarışa uyğun sətir tapılmadı."
+msgstr "Aramanızla eşleşen satır bulunamadı."
+
+msgid "Müəllim və ayrılan saat"
+msgstr "Öğretmen ve atanan saat"
+
+msgid "Qrup üzrə saat"
+msgstr "Grup başına saat"
+
+msgid "Sətir seçin"
+msgstr "Satır seçin"
+
+msgid "Sətirlər yüklənir…"
+msgstr "Satırlar yükleniyor…"
+
+msgid "Tapşırıq sətri"
+msgstr "Görev satırı"

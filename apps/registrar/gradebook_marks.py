@@ -195,6 +195,7 @@ def save_marks(
     touched: dict = {}
     prior_hours: dict = {}  # bildiriş keçidləri üçün yazıdan ƏVVƏLKİ qayıb saatları
     audit_changes = []
+    watch_changes = []
     notify_events = []
     to_create = []
     to_update = []
@@ -285,7 +286,9 @@ def save_marks(
             continue
         if clearing:
             to_clear.append(mark)
-            full_changes.append(_change(enrollment, lesson, grade_audit.mark_repr(mark.status, mark.score), "—"))
+            old = grade_audit.mark_repr(mark.status, mark.score)
+            full_changes.append(_change(enrollment, lesson, old, "—"))
+            watch_changes.append((lesson, enrollment, old, "—"))
             touched.setdefault(enrollment.id, enrollment)
             prior_hours.setdefault(enrollment.id, enrollment.absence_hours)
             written += 1
@@ -341,6 +344,7 @@ def save_marks(
         if old != new:
             # Data bərpası ilə yazılan xana səbəbli ayrıca audit sətrinə düşür (adi yazı — əvvəlki sətrə).
             (full_changes if bypass else audit_changes).append(_change(enrollment, lesson, old or "—", new))
+            watch_changes.append((lesson, enrollment, old or "—", new))
             # Tələbə bildirişləri: q/b qeydi və yeni/dəyişmiş bal.
             if status == AttendanceStatus.ABSENT and old_status != AttendanceStatus.ABSENT:
                 notify_events.append({"enrollment": enrollment, "kind": jn.EVENT_ABSENT, "lesson": lesson})
@@ -400,6 +404,12 @@ def save_marks(
             request=request,
         )
 
+    if watch_changes:
+        from core.journal_events import journal_cells_changed
+
+        journal_cells_changed.send(
+            sender=LessonMark, offering=offering, actor=by_user, changes=watch_changes, request=request
+        )
     if notify_events:
         transaction.on_commit(lambda: jn.send_journal_events(offering=offering, events=notify_events))
     if not report:
