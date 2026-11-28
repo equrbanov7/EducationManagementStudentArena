@@ -411,9 +411,9 @@ def build(
     midterm_by_offering = entry_standard.midterm_flags(
         [e.offering for e in enrollments], organization=organization, period=period, carried=carried
     )
-    # Komponenti olmayan Midterm açılışlarının maskası — yalnız lazım olanda, hamısına TƏK sorğu.
+    # Hazır maskası olmayan Midterm açılışlarını hesab və ya başlıq tələb edəndə toplu oxu.
     missing_bits = [oid for oid in offering_ids if midterm_by_offering.get(oid) and oid not in activity_bits]
-    pending_bits = activity_kinds.PendingBits(missing_bits) if flags.activity_split and missing_bits else None
+    pending_bits = activity_kinds.PendingBits(missing_bits) if missing_bits else None
 
     scores_by_enrollment: dict = defaultdict(list)
     if component_ids and enr_ids:

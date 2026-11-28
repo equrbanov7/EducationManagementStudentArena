@@ -46,11 +46,13 @@ class ActivityKindLabelTests(SimpleTestCase):
         self.assertTrue(detail.split)
         self.assertEqual(detail.kind_label, "both")
 
-    def test_no_marks_lazy_bits_are_not_resolved(self):
+    def test_no_marks_lazy_bits_are_resolved_once_for_the_label(self):
         calls = []
         detail = ak.activity(_totals(), lambda: calls.append(1) or ak.LAB_BIT, split_enabled=True)
         self.assertEqual(calls, [])  # sorğu yoxdur — tənbəl maska çağırılmır
-        self.assertEqual(detail.kind_label, "")
+        self.assertEqual(detail.kind_label, ak.LAB)
+        self.assertEqual(detail.kind_label, ak.LAB)
+        self.assertEqual(calls, [1])
 
     def test_no_marks_known_bits_used(self):
         detail = ak.activity(_totals(), ak.LAB_BIT, split_enabled=True)
