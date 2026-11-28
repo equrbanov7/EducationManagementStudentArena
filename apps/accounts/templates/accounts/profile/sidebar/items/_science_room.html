@@ -1,0 +1,13 @@
+{% load i18n nav_icons %}
+{% if "science-room" in allowed_sections %}
+<li class="sidebar-menu-item">
+    <a href="{{ profile_base_url }}?section=science-room"
+       data-section="science-room"
+       data-title="{% trans 'Laboratoriya otağı' context 'profile.sidebar' %}"
+       data-source-url="{{ profile_base_url }}"
+       class="sidebar-menu-link {% if active_section == 'science-room' %}active{% endif %}">
+        {% nav_icon "flask-conical" "sidebar-menu-icon" %}
+        <span class="sidebar-menu-text">{% trans "Laboratoriya otağı" context "profile.sidebar" %}</span>
+    </a>
+</li>
+{% endif %}

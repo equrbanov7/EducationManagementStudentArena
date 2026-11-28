@@ -123031,3 +123031,114 @@ msgstr "Journal monitoring"
 msgctxt "registrar.schedule"
 msgid "Excel yüklə (.xlsx)"
 msgstr "Download Excel (.xlsx)"
+
+msgid "Avadanlıq rəfi"
+msgstr "Equipment shelf"
+
+msgid "Avadanlıq seçimi"
+msgstr "Equipment selection"
+
+msgid "Avadanlıq və şərtlər"
+msgstr "Equipment and conditions"
+
+msgid "Avadanlığı seçin və ya masaya sürüşdürün."
+msgstr "Select a tool or drag it onto the bench."
+
+msgid "Ayın fazaları"
+msgstr "Phases of the Moon"
+
+msgid "Biologiya"
+msgstr "Biology"
+
+msgid "Ehtimal təcrübəsi"
+msgstr "Probability experiment"
+
+msgid "Elmi laboratoriya"
+msgstr "Science laboratory"
+
+msgid "Fizika"
+msgstr "Physics"
+
+msgid "Fotoeffekt"
+msgstr "Photoelectric effect"
+
+msgid "Fotosintez"
+msgstr "Photosynthesis"
+
+msgid "Fənn seçimi"
+msgstr "Choose a subject"
+
+msgid "Fəsillər və Günəş hündürlüyü"
+msgstr "Seasons and solar elevation"
+
+msgid "Kimya"
+msgstr "Chemistry"
+
+msgid "Laboratoriya otağı"
+msgstr "Laboratory room"
+
+msgid ""
+"Mövzunu seçin, avadanlığı sınaq masasına yerləşdirin və nəticəni müşahidə "
+"edin."
+msgstr "Choose a topic, place a tool on the bench and observe the result."
+
+msgid "Müşahidə"
+msgstr "Observation"
+
+msgid "Qaz qabarcıqları"
+msgstr "Gas bubbles"
+
+msgid "Riyaziyyat"
+msgstr "Mathematics"
+
+msgid "Rəqqasın periodu"
+msgstr "Pendulum period"
+
+msgid "Son dörd sınağın müqayisəsi"
+msgstr "Compare the last four trials"
+
+msgid "Sınaq"
+msgstr "Trial"
+
+msgid "Sınaqları və parametrləri sıfırla"
+msgstr "Reset trials and controls"
+
+msgid "Sınağı başlat"
+msgstr "Run trial"
+
+msgid "Transpirasiya"
+msgstr "Transpiration"
+
+msgid "Təcrübə açılır…"
+msgstr "Opening experiment…"
+
+msgid "Təcrübə masası"
+msgstr "Lab bench"
+
+msgid "Təcrübələr"
+msgstr "Experiments"
+
+msgid "Təcrübələri açmaq üçün brauzerdə JavaScript-i aktiv edin."
+msgstr "Enable JavaScript in your browser to open the experiments."
+
+msgid "Təcrübələrə qayıt"
+msgstr "Back to experiments"
+
+msgid "Təcrübəni açmaq alınmadı. Yenidən seçin."
+msgstr "Could not open this experiment. Select it again."
+
+msgid "Xətti funksiya"
+msgstr "Linear function"
+
+msgid "Yer və kosmos"
+msgstr "Earth and space"
+
+msgid "pH indikatoru"
+msgstr "pH indicator"
+
+msgid "Ölçülən nəticələr"
+msgstr "Measurements"
+
+msgctxt "profile.sidebar"
+msgid "Laboratoriya otağı"
+msgstr "Laboratory room"

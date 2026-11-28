@@ -102,6 +102,7 @@ def build_section_titles() -> dict:
         "overall-academic": pgettext_lazy("profile.section", "overall_academic"),
         # U12 — registrar kabinet bölmələri
         "my-schedule": pgettext_lazy("profile.sidebar", "Dərs cədvəli"),
+        "science-room": pgettext_lazy("profile.sidebar", "Laboratoriya otağı"),
         "academic-calendar": pgettext_lazy("profile.sidebar", "Akademik təqvim"),
         "my-journal": pgettext_lazy("profile.sidebar", "Elektron jurnal"),
         "lessons-log": pgettext_lazy("profile.sidebar", "Keçilmiş dərslər"),

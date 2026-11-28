@@ -45,6 +45,10 @@ def university_role_sections(
 
     if getattr(_u12_settings, "UNIVERSITY_MODE", True) and (has_active_org_context or is_superadmin):
         sections.update({"my-schedule", "academic-calendar"})
+        if has_active_org_context and (
+            is_student or is_teacher or is_tutor or is_unit_manager or is_org_admin or is_superadmin
+        ):
+            sections.add("science-room")
         # Müəllim/admin: sidebar linki jurnal iş sahəsini YENİ TABDA (/jurnal/) açır.
         # Tələbə: bölmə profil panelində öz jurnal xülasəsini göstərir (yalnız-oxu).
         if is_teacher or is_org_admin or is_superadmin or is_student or can_manage_journal_roster:

@@ -74,6 +74,8 @@ uyğunsuzluğu tutur.
                 {% include "accounts/profile/sections/_registrar_catalog.html" %}
             {% elif active_section == "applications" and 'applications' in allowed_sections %}
                 {% include "accounts/profile/sections/_applications.html" %}
+            {% elif active_section == "science-room" %}
+                {% include "accounts/profile/sections/_science_room.html" %}
             {% elif active_section == "academic-calendar" %}
                 {% include "accounts/profile/sections/_academic_calendar.html" %}
             {% elif active_section == "lessons-log" %}

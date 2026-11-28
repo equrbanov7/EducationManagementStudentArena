@@ -1,0 +1,35 @@
+.sci-cb-label, .sci-cb-caption, .sci-cb-small {
+    fill: #253d3a;
+    font-family: system-ui, sans-serif;
+}
+.sci-cb-label { font-size: 16px; }
+.sci-cb-caption { font-size: 17px; font-weight: 650; }
+.sci-cb-small { font-size: 13px; font-weight: 650; }
+.sci-cb-bubbles { fill: #eff9f5; fill-opacity: .8; stroke: #4f9099; stroke-width: 1.3; }
+@media (prefers-reduced-motion: no-preference) {
+    .sci-cb-drop { animation: sci-cb-drip 1.1s ease-in 2; }
+    .sci-cb-bubble { animation: sci-cb-rise 1.65s ease-out 2; }
+    .sci-cb-bubble:nth-child(3n) { animation-delay: .19s; }
+    .sci-cb-bubble:nth-child(3n + 1) { animation-delay: .38s; }
+    .sci-cb-vapour { animation: sci-cb-vapour 1.6s ease-out 2; }
+    .sci-cb-marker { animation: sci-cb-marker .9s ease-out; }
+}
+@keyframes sci-cb-drip {
+    from { transform: translateY(-8px); opacity: .15; }
+    38% { opacity: 1; }
+    to { transform: translateY(31px); opacity: 0; }
+}
+@keyframes sci-cb-rise {
+    from { transform: translateY(3px); opacity: .3; }
+    35% { opacity: 1; }
+    to { transform: translateY(-13px); opacity: .15; }
+}
+@keyframes sci-cb-vapour {
+    from { transform: translate(0, 5px); opacity: .25; }
+    35% { opacity: 1; }
+    to { transform: translate(4px, -9px); opacity: .25; }
+}
+@keyframes sci-cb-marker {
+    from { transform: translateX(7px); }
+    to { transform: translateX(0); }
+}

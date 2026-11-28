@@ -124649,3 +124649,117 @@ msgstr "Kursbuchüberwachung"
 msgctxt "registrar.schedule"
 msgid "Excel yüklə (.xlsx)"
 msgstr "Als Excel herunterladen (.xlsx)"
+
+msgid "Avadanlıq rəfi"
+msgstr "Geräteregal"
+
+msgid "Avadanlıq seçimi"
+msgstr "Geräteauswahl"
+
+msgid "Avadanlıq və şərtlər"
+msgstr "Geräte und Bedingungen"
+
+msgid "Avadanlığı seçin və ya masaya sürüşdürün."
+msgstr "Wählen Sie ein Gerät oder ziehen Sie es auf den Labortisch."
+
+msgid "Ayın fazaları"
+msgstr "Mondphasen"
+
+msgid "Biologiya"
+msgstr "Biologie"
+
+msgid "Ehtimal təcrübəsi"
+msgstr "Zufallsexperiment"
+
+msgid "Elmi laboratoriya"
+msgstr "Naturwissenschaftliches Labor"
+
+msgid "Fizika"
+msgstr "Physik"
+
+msgid "Fotoeffekt"
+msgstr "Photoelektrischer Effekt"
+
+msgid "Fotosintez"
+msgstr "Fotosynthese"
+
+msgid "Fənn seçimi"
+msgstr "Fachauswahl"
+
+msgid "Fəsillər və Günəş hündürlüyü"
+msgstr "Jahreszeiten und Sonnenhöhe"
+
+msgid "Kimya"
+msgstr "Chemie"
+
+msgid "Laboratoriya otağı"
+msgstr "Laborraum"
+
+msgid ""
+"Mövzunu seçin, avadanlığı sınaq masasına yerləşdirin və nəticəni müşahidə "
+"edin."
+msgstr ""
+"Wählen Sie ein Thema, stellen Sie ein Gerät auf den Labortisch und "
+"beobachten Sie das Ergebnis."
+
+msgid "Müşahidə"
+msgstr "Beobachtung"
+
+msgid "Qaz qabarcıqları"
+msgstr "Gasblasen"
+
+msgid "Riyaziyyat"
+msgstr "Mathematik"
+
+msgid "Rəqqasın periodu"
+msgstr "Schwingungsdauer des Pendels"
+
+msgid "Son dörd sınağın müqayisəsi"
+msgstr "Die letzten vier Versuche vergleichen"
+
+msgid "Sınaq"
+msgstr "Versuch"
+
+msgid "Sınaqları və parametrləri sıfırla"
+msgstr "Versuche und Einstellungen zurücksetzen"
+
+msgid "Sınağı başlat"
+msgstr "Versuch starten"
+
+msgid "Transpirasiya"
+msgstr "Transpiration"
+
+msgid "Təcrübə açılır…"
+msgstr "Versuch wird geöffnet…"
+
+msgid "Təcrübə masası"
+msgstr "Labortisch"
+
+msgid "Təcrübələr"
+msgstr "Experimente"
+
+msgid "Təcrübələri açmaq üçün brauzerdə JavaScript-i aktiv edin."
+msgstr ""
+"Aktivieren Sie JavaScript in Ihrem Browser, um die Experimente zu öffnen."
+
+msgid "Təcrübələrə qayıt"
+msgstr "Zurück zu den Experimenten"
+
+msgid "Təcrübəni açmaq alınmadı. Yenidən seçin."
+msgstr "Der Versuch konnte nicht geöffnet werden. Wählen Sie ihn erneut aus."
+
+msgid "Xətti funksiya"
+msgstr "Lineare Funktion"
+
+msgid "Yer və kosmos"
+msgstr "Erde und Weltraum"
+
+msgid "pH indikatoru"
+msgstr "pH-Indikator"
+
+msgid "Ölçülən nəticələr"
+msgstr "Messergebnisse"
+
+msgctxt "profile.sidebar"
+msgid "Laboratoriya otağı"
+msgstr "Laborraum"

@@ -122174,3 +122174,115 @@ msgstr "Defter takibi"
 msgctxt "registrar.schedule"
 msgid "Excel yüklə (.xlsx)"
 msgstr "Excel indir (.xlsx)"
+
+msgid "Avadanlıq rəfi"
+msgstr "Malzeme rafı"
+
+msgid "Avadanlıq seçimi"
+msgstr "Ekipman seçimi"
+
+msgid "Avadanlıq və şərtlər"
+msgstr "Ekipman ve koşullar"
+
+msgid "Avadanlığı seçin və ya masaya sürüşdürün."
+msgstr "Bir araç seçin veya masaya sürükleyin."
+
+msgid "Ayın fazaları"
+msgstr "Ay’ın evreleri"
+
+msgid "Biologiya"
+msgstr "Biyoloji"
+
+msgid "Ehtimal təcrübəsi"
+msgstr "Olasılık deneyi"
+
+msgid "Elmi laboratoriya"
+msgstr "Fen laboratuvarı"
+
+msgid "Fizika"
+msgstr "Fizik"
+
+msgid "Fotoeffekt"
+msgstr "Fotoelektrik etki"
+
+msgid "Fotosintez"
+msgstr "Fotosentez"
+
+msgid "Fənn seçimi"
+msgstr "Ders alanı seçimi"
+
+msgid "Fəsillər və Günəş hündürlüyü"
+msgstr "Mevsimler ve Güneş’in yüksekliği"
+
+msgid "Kimya"
+msgstr "Kimya bilimi"
+
+msgid "Laboratoriya otağı"
+msgstr "Laboratuvar odası"
+
+msgid ""
+"Mövzunu seçin, avadanlığı sınaq masasına yerləşdirin və nəticəni müşahidə "
+"edin."
+msgstr ""
+"Bir konu seçin, aracı deney masasına yerleştirin ve sonucu gözlemleyin."
+
+msgid "Müşahidə"
+msgstr "Gözlem"
+
+msgid "Qaz qabarcıqları"
+msgstr "Gaz kabarcıkları"
+
+msgid "Riyaziyyat"
+msgstr "Matematik"
+
+msgid "Rəqqasın periodu"
+msgstr "Sarkacın periyodu"
+
+msgid "Son dörd sınağın müqayisəsi"
+msgstr "Son dört denemeyi karşılaştır"
+
+msgid "Sınaq"
+msgstr "Deneme"
+
+msgid "Sınaqları və parametrləri sıfırla"
+msgstr "Denemeleri ve ayarları sıfırla"
+
+msgid "Sınağı başlat"
+msgstr "Deneyi başlat"
+
+msgid "Transpirasiya"
+msgstr "Bitkilerde terleme"
+
+msgid "Təcrübə açılır…"
+msgstr "Deney açılıyor…"
+
+msgid "Təcrübə masası"
+msgstr "Deney masası"
+
+msgid "Təcrübələr"
+msgstr "Deneyler"
+
+msgid "Təcrübələri açmaq üçün brauzerdə JavaScript-i aktiv edin."
+msgstr "Deneyleri açmak için tarayıcınızda JavaScript’i etkinleştirin."
+
+msgid "Təcrübələrə qayıt"
+msgstr "Deneylere dön"
+
+msgid "Təcrübəni açmaq alınmadı. Yenidən seçin."
+msgstr "Deney açılamadı. Yeniden seçin."
+
+msgid "Xətti funksiya"
+msgstr "Doğrusal fonksiyon"
+
+msgid "Yer və kosmos"
+msgstr "Yer ve uzay"
+
+msgid "pH indikatoru"
+msgstr "pH göstergesi"
+
+msgid "Ölçülən nəticələr"
+msgstr "Ölçüm sonuçları"
+
+msgctxt "profile.sidebar"
+msgid "Laboratoriya otağı"
+msgstr "Laboratuvar odası"
