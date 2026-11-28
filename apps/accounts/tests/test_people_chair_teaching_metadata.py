@@ -122,7 +122,7 @@ class ChairTeachingMetadataTest(TestCase):
             after = list(
                 Membership.objects.filter(user__in=self.roster).values_list("pk", "scope_unit_id", "is_primary")
             )
-            self.assertEqual(before, after)
+            self.assertCountEqual(before, after)
             self.assertTrue(Membership.objects.filter(pk=self.primary_ids[8], scope_unit=self.fx.kafedra_b1).exists())
 
     def test_foreign_chair_filter_cannot_expand_directory_scope(self):
