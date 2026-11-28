@@ -218,7 +218,7 @@ API-ları üzərindən əlçatandır.
 | Celery beat stale | — | 5dəq | e-poçt + in-app | 1s |
 | Backup köhnə | — | >26 saat | e-poçt + in-app | 1s |
 | TLS bitmə | <30 gün | <7 gün | e-poçt + in-app | 4s |
-| Brute-force login | 10+ uğursuz/15dəq | — | in-app + audit | dedup 15dəq |
+| Eyni IP-dən uğursuz girişlər | 10-cu cəhddə hadisə yaranır. Cəhdlər arasında 15 dəqiqə keçdikdə sayğac sıfırlanır | — | kabinetdə təhlükəsizlik hadisəsi | hadisələr 15 dəqiqə üzrə birləşdirilir |
 | Giriş səhifələrində HTTP 401/403/429 | Son 5 dəqiqəlik trafikin 20%-i, hədd 15–60 rədd | — | e-poçt + kabinetdə insident | 4 saat |
 | Tətbiqin digər səhifələrində HTTP 401/403/429 | Son 5 dəqiqəlik trafikin 10%-i, hədd 60–300 rədd | — | e-poçt + kabinetdə insident | 4 saat |
 | Alertmanager çatdırılma xətası (P1-3) | — | `notifications_failed_total` artımı / 5dəq | e-poçt + in-app (kanal xarabdırsa yalnız in-app/UI) | 1s |
