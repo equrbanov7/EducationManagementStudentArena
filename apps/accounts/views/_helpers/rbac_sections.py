@@ -17,6 +17,8 @@ ORTAQ MÜQAVİLƏ (dəyişdirməzdən əvvəl oxu):
 
 from __future__ import annotations
 
+from django.conf import settings
+
 #: «Təşkilat paneli»ni açan idarəetmə bölmələri — bunlardan biri varsa panel də var.
 ORG_OVERVIEW_SOURCE_SECTIONS = frozenset(
     {"org-members", "org-roles", "org-faculties", "org-kafedras", "org-structure-tree", "audit-log"}
@@ -316,6 +318,18 @@ def apply_permission_section_gates(
         organization is not None
         and has_permission(permissions or _effective_permissions(user, organization), "system.monitoring.view")
     )
+
+    # Academic support staff use the same practice room as teachers. The room contains synthetic material only.
+    if (
+        organization
+        and getattr(settings, "UNIVERSITY_MODE", True)
+        and (
+            privileged
+            or has_permission(permissions, "subject_folder.view_unit")
+            or has_permission(permissions, "faq.video.manage")
+        )
+    ):
+        allowed_sections.add("science-room")
 
     for enabled, section in (
         (can_view_monitoring, "system-monitoring"),

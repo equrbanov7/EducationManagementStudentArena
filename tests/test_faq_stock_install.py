@@ -52,3 +52,39 @@ def test_exact_media_contents_and_permissions(tmp_path):
     alias = stage / "other.mp4"
     alias.symlink_to(stage / "lesson.mp4")
     assert not valid(alias, entry(payload))
+
+
+def test_supplement_preserves_base_and_installs_only_verified_new_set(tmp_path, monkeypatch):
+    import json
+    from pathlib import Path
+
+    from scripts.deploy import install_faq_stock as installer
+
+    base = tmp_path / "apps/accounts/guide_media"
+    base.mkdir(parents=True)
+    base_video = base / "original.mp4"
+    base_video.write_bytes(b"base")
+    inode = base_video.stat().st_ino
+    manifest = tmp_path / "inventory.json"
+    extra = {"asset_id": 12, "encrypted": {"size": 50}, "files": {"lesson.vtt": entry(b"demo")}}
+    manifest.write_text(json.dumps({"asset_id": 11, "files": {"original.mp4": entry(b"base")}, "supplements": [extra]}))
+    monkeypatch.setattr(installer, "MANIFEST", manifest)
+    monkeypatch.setenv("FAQ_STOCK_EXTRA_URLS", '{"12":"supplement-only"}')
+    calls = []
+
+    def fetch(package, work, stage, fallback):
+        calls.append((package["asset_id"], fallback))
+        parcel = Path(work) / "parcel.tar"
+        archive(parcel, [("lesson.vtt", b"fail" if len(calls) == 1 else b"demo")])
+        unpack(parcel, stage, package["files"])
+
+    monkeypatch.setattr(installer, "fetch_package", fetch)
+    with pytest.raises(ValueError, match="digest"):
+        installer.install(tmp_path)
+    assert not (base / "lesson.vtt").exists()
+    assert base_video.read_bytes() == b"base"
+    installer.install(tmp_path)
+    installer.install(tmp_path)
+    assert calls == [(12, "supplement-only"), (12, "supplement-only")]
+    assert base_video.stat().st_ino == inode
+    assert (base / "lesson.vtt").read_bytes() == b"demo"

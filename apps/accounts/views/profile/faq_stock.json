@@ -1445,5 +1445,24 @@
       "sha256": "896b29a2fe775b97e686f6137740d6bcdbdfa4c23df4438349e2cff03df74ba3",
       "size": 1461
     }
-  }
+  },
+  "supplements": [
+    {
+      "asset_id": 802833565,
+      "encrypted": {
+        "sha256": "944faa141f448f0d4a30f5ec2f623fd9c2fc43d6876efb5822e263d3ac562627",
+        "size": 8018002
+      },
+      "files": {
+        "science-room.mp4": {
+          "sha256": "67fd6e0c90b0c48831e15bd6c7f178cbca4824981b4a93fb4e1a7475baf18b4d",
+          "size": 8007884
+        },
+        "science-room.vtt": {
+          "sha256": "02002cc1feb39de1f96a9c2c2810c90cb10074b8d52e6b7fc0617261e426ef91",
+          "size": 2768
+        }
+      }
+    }
+  ]
 }
