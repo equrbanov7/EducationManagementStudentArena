@@ -4,15 +4,17 @@ import hashlib
 import json
 import os
 import re
+import secrets
 import shutil
 import subprocess
 import sys
 import tarfile
 import tempfile
+from http.client import HTTPException
 from pathlib import Path
 from urllib.error import HTTPError
-from urllib.parse import urlsplit
-from urllib.request import HTTPRedirectHandler, Request, build_opener, urlopen
+from urllib.parse import urljoin, urlsplit
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 
 ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "apps/accounts/views/profile/faq_stock.json"
@@ -23,27 +25,88 @@ class NoRedirect(HTTPRedirectHandler):
         return None
 
 
-def signed_download(repo, asset, fallback_url=None):
-    if not re.fullmatch(r"[\w.-]+/[\w.-]+", repo) or not isinstance(asset, int) or asset <= 0:
+def github_asset_request(repo, asset, token):
+    if not re.fullmatch(r"[\w.-]+/[\w.-]+", repo) or type(asset) is not int or asset <= 0:
         raise ValueError("Invalid repository or asset")
     req = Request(
-        f"https://api.github.com/repos/{repo}/releases/assets/{asset}",
-        headers={"Authorization": "Bearer " + os.environ["GH_TOKEN"], "Accept": "application/octet-stream"},
+        f"https://api.github.com/repos/{repo}/releases/assets/{asset}?nonce={secrets.token_hex(16)}",
+        headers={"Accept": "application/octet-stream", "Cache-Control": "no-cache"},
     )
+    req.add_unredirected_header("Authorization", "Bearer " + token)
+    return req
+
+
+def release_asset_url(url):
     try:
-        return build_opener(NoRedirect()).open(req, timeout=60)
-    except HTTPError as exc:
-        if exc.code == 302:
-            url = exc.headers["Location"]
-        elif exc.code in {403, 404} and fallback_url:
-            url = fallback_url
-        else:
-            raise RuntimeError(f"GitHub declined the private stock download (HTTP {exc.code})") from None
-    address = urlsplit(url)
-    if address.scheme != "https" or address.hostname != "release-assets.githubusercontent.com":
+        address = urlsplit(url) if isinstance(url, str) else None
+    except ValueError:
+        address = None
+    hosts = {"release-assets.githubusercontent.com", "release-assets.githubusercontent.com:443"}
+    if not address or address.scheme != "https" or address.netloc.lower() not in hosts:
         raise RuntimeError("Unexpected release download host")
-    # Signed URL only. Never forward the API token to a storage host.
-    return urlopen(url, timeout=90)
+    return url
+
+
+def _open(opener, request, timeout):
+    try:
+        return opener.open(request, timeout=timeout)
+    except HTTPError as exc:
+        # HTTPError is also an HTTP response. Inspect its status and headers without logging its signed URL.
+        return exc
+    except (OSError, ValueError, HTTPException):
+        raise RuntimeError("Could not reach the private FAQ download service.") from None
+
+
+def _release_download(opener, url):
+    for _ in range(4):
+        # Create a new, unauthenticated request after validating each storage hop.
+        url = release_asset_url(url)
+        response = _open(opener, Request(url), timeout=90)
+        if response.status not in {301, 302, 303, 307, 308}:
+            return response
+        with response:
+            location = response.headers.get("Location")
+        if not location:
+            raise RuntimeError("Missing private FAQ download redirect.")
+        try:
+            url = urljoin(url, location)
+        except ValueError:
+            raise RuntimeError("Invalid private FAQ download redirect.") from None
+    raise RuntimeError("Too many private FAQ download redirects.")
+
+
+def signed_download(repo, asset, fallback_url=None):
+    opener = build_opener(NoRedirect())
+    # A cached redirect may carry an expired signature. Ask the API for a fresh one at most once.
+    for _ in range(2):
+        request = github_asset_request(repo, asset, os.environ["GH_TOKEN"])
+        response = _open(opener, request, timeout=60)
+        if response.status == 302:
+            with response:
+                location = response.headers.get("Location")
+            response = _release_download(opener, location)
+        elif response.status in {403, 404}:
+            # This credential cannot resolve the asset. Use its production fallback once.
+            with response:
+                code = response.status
+            break
+        if response.status == 200:
+            return response
+        with response:
+            code = response.status
+        if code not in {403, 404, 618}:
+            raise RuntimeError(f"Private FAQ download failed (HTTP {code}).")
+
+    if fallback_url:
+        response = _release_download(opener, fallback_url)
+        if response.status == 200:
+            return response
+        with response:
+            raise RuntimeError(
+                f"Production FAQ fallback for asset {asset} was rejected (HTTP {response.status}). "
+                "Refresh the signed URL with python3 -m scripts.deploy.refresh_faq_stock_urls."
+            )
+    raise RuntimeError(f"Private FAQ asset {asset} is unavailable (HTTP {code}). No production fallback is configured.")
 
 
 def valid(path, entry):
