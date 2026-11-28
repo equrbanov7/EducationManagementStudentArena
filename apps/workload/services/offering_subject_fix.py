@@ -47,9 +47,7 @@ REASON = "Jurnalın səhv fənn bağı yerində düzəldildi (dərslər, xanalar
 class OfferingSubjectFixError(ValueError):
     """``str(exc)`` — sabit rədd kodu; ``details`` — yalnız saylar (əmr loga ``açar=say`` kimi yazır)."""
 
-    def __init__(self, code, details=None):
-        super().__init__(code)
-        self.details = dict(details or {})
+    details: dict = {}
 
 
 def model(name):
@@ -77,7 +75,9 @@ def protected_hash(offering_id) -> str:
 
 
 def _fail(code, details=None):
-    raise OfferingSubjectFixError(code, details)
+    exc = OfferingSubjectFixError(code)
+    exc.details = dict(details or {})
+    raise exc
 
 
 def _receipt(organization, offering_id):
