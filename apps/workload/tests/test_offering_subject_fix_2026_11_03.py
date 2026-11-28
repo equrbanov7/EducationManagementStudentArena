@@ -240,6 +240,7 @@ class OfferingSubjectFixTests(TestCase):
         details = ctx.exception.details
         self.assertEqual((details["clash_count"], details["clash_active"]), (1, 0))
         self.assertEqual(details["linked_registrar_enrollment"], 1)
+        self.assertEqual(details["clash_ids"], str(phantom.pk))
 
     def test_load_row_on_old_subject_must_be_moved_too(self):
         with self.assertRaisesMessage(service.OfferingSubjectFixError, "load_row_required"):
