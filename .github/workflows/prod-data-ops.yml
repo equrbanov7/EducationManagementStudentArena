@@ -813,7 +813,7 @@ on:
         type: boolean
         default: false
       choices:
-        description: "import_teaching_*: işarəsiz seçmə bloku — SƏTİR=BƏND, vergüllə (məs. 144=1,145=1) · fix_offering_subject: detach=<sillabus UUID>,attach=<sillabus UUID> · merge_subjects: current-only (keçmiş dövr sətirləri mənbə kartda qalır)"
+        description: "import_teaching_*: işarəsiz seçmə bloku — SƏTİR=BƏND, vergüllə (məs. 144=1,145=1) · fix_offering_subject: detach=<sillabus UUID>,attach=<sillabus UUID>,replace=<ləğv edilmiş surət jurnalı UUID> · merge_subjects: current-only (keçmiş dövr sətirləri mənbə kartda qalır)"
         required: false
         default: ""
       teacher_map:
@@ -2599,13 +2599,14 @@ jobs:
                 args+=("--row=$ROW_GROUP")
               fi
               if [ -n "$CHOICES" ]; then
-                match "$CHOICES" "^(detach|attach)=${uuid_re}(,(detach|attach)=${uuid_re})?$" \
-                  || { echo "choices = detach=<UUID>,attach=<UUID> (hər biri istəyə bağlı)" >&2; exit 2; }
+                match "$CHOICES" "^(detach|attach|replace)=${uuid_re}(,(detach|attach|replace)=${uuid_re}){0,2}$" \
+                  || { echo "choices = detach=<UUID>,attach=<UUID>,replace=<UUID> (hər biri istəyə bağlı)" >&2; exit 2; }
                 IFS=',' read -r -a syllabus_parts <<< "$CHOICES"
                 for part in "${syllabus_parts[@]}"; do
                   case "$part" in
                     (detach=*) args+=("--detach-syllabus=${part#detach=}") ;;
                     (attach=*) args+=("--attach-syllabus=${part#attach=}") ;;
+                    (replace=*) args+=("--replace-cancelled=${part#replace=}") ;;
                   esac
                 done
               fi

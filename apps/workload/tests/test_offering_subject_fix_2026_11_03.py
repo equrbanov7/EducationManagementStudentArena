@@ -242,6 +242,53 @@ class OfferingSubjectFixTests(TestCase):
         self.assertEqual(details["linked_registrar_enrollment"], 1)
         self.assertEqual(details["clash_ids"], str(phantom.pk))
 
+    def _copy_journal(self, weeks=3, score=8):
+        """Sahib 2026-11-28 (234 İT az): hədəf fənndə ləğv edilmiş, ilk dərslərin KÖHNƏ surəti olan jurnal."""
+        copy = CourseOffering.objects.create(
+            organization=self.org, subject=self.right, period=self.period, group=self.group, is_active=False
+        )
+        enrollment = Enrollment.objects.create(organization=self.org, offering=copy, student=self.student)
+        for lesson in Lesson.objects.filter(offering=self.offering).order_by("date")[:weeks]:
+            twin = Lesson.objects.create(
+                organization=self.org, offering=copy, date=lesson.date, kind=lesson.kind, start_time=lesson.start_time
+            )
+            LessonMark.objects.create(
+                organization=self.org, lesson=twin, enrollment=enrollment, status="present", score=score
+            )
+        return copy
+
+    def test_cancelled_copy_is_replaced_and_source_marks_stay(self):
+        copy = self._copy_journal()
+        before = sorted(
+            LessonMark.objects.filter(lesson__offering=self.offering).values_list("lesson_id", "status", "score")
+        )
+        dry = self.call(replace_cancelled_id=str(copy.pk))
+        self.assertEqual((dry["copy_offering_removed"], dry["copy_marks_verified"]), (1, 3))
+        self.assertTrue(CourseOffering.objects.filter(pk=copy.pk).exists())  # dry-run geri qaytarıldı
+        result = self.call(replace_cancelled_id=str(copy.pk), apply=True)
+        self.assertEqual((result["copy_offering_removed"], result["offering_subject_changed"]), (1, 1))
+        self.assertEqual(result.get("empty_offering_removed", 0), 0)
+        self.assertFalse(CourseOffering.objects.filter(pk=copy.pk).exists())
+        self.offering.refresh_from_db()
+        self.assertEqual(self.offering.subject_id, self.right.pk)
+        after = sorted(
+            LessonMark.objects.filter(lesson__offering=self.offering).values_list("lesson_id", "status", "score")
+        )
+        self.assertEqual(after, before)  # i/e, q/b, bal — heç biri dəyişmir
+
+    def test_cancelled_copy_with_a_different_mark_is_kept(self):
+        copy = self._copy_journal(score=5)
+        with self.assertRaisesMessage(service.OfferingSubjectFixError, "replace_copy_differs") as ctx:
+            self.call(replace_cancelled_id=str(copy.pk), apply=True)
+        self.assertEqual(ctx.exception.details["copy_marks_differ"], 3)
+        self.assertTrue(CourseOffering.objects.filter(pk=copy.pk).exists())
+
+    def test_replace_id_must_be_the_clash(self):
+        copy = self._copy_journal()
+        with self.assertRaisesMessage(service.OfferingSubjectFixError, "target_offering_exists"):
+            self.call(replace_cancelled_id=str(self.sibling.pk), apply=True)
+        self.assertTrue(CourseOffering.objects.filter(pk=copy.pk).exists())
+
     def test_load_row_on_old_subject_must_be_moved_too(self):
         with self.assertRaisesMessage(service.OfferingSubjectFixError, "load_row_required"):
             self.call(apply=True, row_id="")

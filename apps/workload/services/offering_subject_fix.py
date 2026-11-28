@@ -111,7 +111,7 @@ class _Fix:
             self.original = self.receipt.get("old_subject") or ""  # təkrar qaçış: əvvəlki düzəlişin mənbə fənni
 
     # ── yoxlamalar (heç nə yazılmır) ────────────────────────────────────────
-    def check_scope(self):
+    def check_scope(self, replace_id=""):
         o = self.offering
         clashes = list(
             model("registrar.CourseOffering")
@@ -122,9 +122,18 @@ class _Fix:
         # 2026-11-28 (234 İT az «Verilənlər bazası sistemləri»): hədəf fənndə LƏĞV EDİLMİŞ və TAM BOŞ açılış
         # (heç bir bağlı sətir yoxdur) köhnə sinxronun qalığıdır — düzəlişdə silinir. Aktiv və ya datalı → dayan.
         blocking = [clash for clash in clashes if clash.is_active or not _deletes_only_itself(clash)]
-        if blocking:
+        replace_id = str(replace_id or "").strip().lower()
+        if blocking and replace_id and [str(clash.pk) for clash in blocking] == [replace_id]:
+            # Sahib 2026-11-28 (234 İT az): ləğv edilmiş, datalı jurnal eyni dərslərin KÖHNƏ SURƏTİdir — yalnız
+            # onun HƏR xanası mənbədə EYNİ dəyərlə varsa silinir; mənbə jurnalın heç bir xanası dəyişmir.
+            if blocking[0].is_active:
+                _fail("replace_target_active", _clash_details(blocking))
+            self._verify_copy(blocking[0])
+        elif blocking:
             # 2026-11-28: iş logu yalnız saylar göstərir — nəyin mane olduğu (aktivlik + bağlı sətirlərin sayı) ilə.
             _fail("target_offering_exists", _clash_details(blocking))
+        elif replace_id:
+            _fail("replace_target_not_found")
         self.phantoms = clashes
         self.phantom_ids = [str(clash.pk) for clash in clashes]
         if model("exams.Exam").objects.filter(journal_offerings=o).exclude(subject_id=self.target.pk).exists():
@@ -235,6 +244,32 @@ class _Fix:
         self.attach = source
 
     # ── yazı ──────────────────────────────────────────────────────────────
+    def _verify_copy(self, clash):
+        """Surətin hər xanası (tarix + dərs növü + tələbə → i/e·q/b + bal) mənbədə eyni olmalıdır; əks halda dayan."""
+        source = _mark_map(self.offering.pk)
+        copy = _mark_map(clash.pk)
+        source_lessons = set(
+            model("registrar.Lesson").objects.filter(offering=self.offering).values_list("date", "kind")
+        )
+        copy_lessons = set(model("registrar.Lesson").objects.filter(offering=clash).values_list("date", "kind"))
+        missing = differ = 0
+        for key, value in copy.items():
+            have = source.get(key)
+            if have is None:
+                missing += value != ("present", None)  # boş «iştirak» sətri = mənbədə sətir yoxdur
+            elif have != value:
+                differ += 1
+        details = {
+            "copy_marks": len(copy),
+            "copy_marks_missing": missing,
+            "copy_marks_differ": differ,
+            "copy_lessons_missing": len(copy_lessons - source_lessons),
+        }
+        if missing or differ or details["copy_lessons_missing"]:
+            _fail("replace_copy_differs", details)
+        self.counts["copy_marks_verified"] += len(copy)
+        self.counts["copy_offering_removed"] += 1
+
     def remove_phantoms(self):
         for phantom in self.phantoms:
             log_action(
@@ -243,7 +278,7 @@ class _Fix:
                 organization=self.org,
                 resource_type="registrar.courseoffering",
                 resource_id=str(phantom.pk),
-                resource_repr="Boş, ləğv edilmiş açılış (fənn düzəlişinə mane olurdu)",
+                resource_repr="Ləğv edilmiş açılış / köhnə surət (fənn düzəlişinə mane olurdu)",
                 old_values={
                     "subject": str(phantom.subject_id),
                     "period": str(phantom.period_id),
@@ -254,7 +289,8 @@ class _Fix:
                 reason=REASON,
             )
             phantom.delete()
-            self.counts["empty_offering_removed"] += 1
+            if not self.counts["copy_offering_removed"]:
+                self.counts["empty_offering_removed"] += 1
 
     def change_offering_subject(self):
         o = self.offering
@@ -366,6 +402,15 @@ def _clash_details(clashes) -> dict:
     return details
 
 
+def _mark_map(offering_id) -> dict:
+    rows = (
+        model("registrar.LessonMark")
+        .objects.filter(lesson__offering_id=offering_id)
+        .values_list("lesson__date", "lesson__kind", "enrollment__student_id", "status", "score")
+    )
+    return {(day, kind, student): (status, score) for day, kind, student, status, score in rows}
+
+
 def _deletes_only_itself(offering) -> bool:
     """Açılışı silmək YALNIZ onun özünü silərmi (qeydiyyat, dərs, slot, sillabus, pay … heç nə bağlı deyil)."""
     from django.db.models.deletion import Collector, ProtectedError, RestrictedError
@@ -404,13 +449,14 @@ def fix_offering_subject(
     detach_syllabus_id="",
     attach_syllabus_id="",
     row_id="",
+    replace_cancelled_id="",
     apply=False,
 ) -> dict:
     """Bax modul şərhi. ``apply=False`` — eyni yazılar icra olunur və GERİ QAYTARILIR (dəqiq dry-run)."""
     if not (user and user.is_active and user.is_superuser):
         _fail("active_superadmin_required")
     fix = _Fix(organization, user, offering_id, subject_id)
-    fix.check_scope()
+    fix.check_scope(replace_cancelled_id)
     fix.check_rows(row_id)
     fix.check_detach(detach_syllabus_id)
     fix.check_attach(attach_syllabus_id)
@@ -438,6 +484,7 @@ def fix_offering_subject(
             "share_attached",
             "row_subject_changed",
             "empty_offering_removed",
+            "copy_offering_removed",
         )
     )
     if changed:
