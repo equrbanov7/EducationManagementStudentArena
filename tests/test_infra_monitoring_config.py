@@ -461,7 +461,9 @@ def test_promtail_waits_for_socket_proxy_before_start_2026_10_17():
     assert promtail["entrypoint"] == ["/bin/sh", "-c"]
     script = promtail["command"][0]
     assert "until wget -q -O /dev/null http://docker-socket-proxy:2375/_ping" in script
-    assert script.rstrip().endswith("exec /usr/bin/promtail -config.file=/etc/promtail/promtail-config.yml")
+    assert script.rstrip().endswith(
+        "exec /usr/bin/promtail -config.file=/etc/promtail/promtail-config.yml -config.expand-env=true"
+    )
     # Compose interpolasiyası: qabıq dəyişənləri `$$` ilə qaçırılır (əks halda compose onları boşaldır).
     assert "$$((i+1))" in script and '"$$i"' in script
     host = yaml.safe_load(

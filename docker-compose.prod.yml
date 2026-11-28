@@ -1032,6 +1032,7 @@ services:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
       - --storage.tsdb.retention.time=${PROMETHEUS_RETENTION_TIME:-15d}
+      - --storage.tsdb.retention.size=${PROMETHEUS_RETENTION_SIZE:-6GB}
       # Audit 2026-10-07: --web.enable-lifecycle SİLİNDİ — autentifikasiyasız POST /-/quit,
       # /-/reload şəbəkədəki hər konteynerə açıq idi; deploy reload-u SIGHUP ilə edir
       # (remote_deploy.sh reload_prometheus_config).
@@ -1289,6 +1290,10 @@ services:
     container_name: emsarena-loki
     command:
       - -config.file=/etc/loki/loki-config.yml
+      - -config.expand-env=true
+    environment:
+      LOKI_INGESTION_RATE_MB: ${LOKI_INGESTION_RATE_MB:-0.025}
+      LOKI_INGESTION_BURST_MB: ${LOKI_INGESTION_BURST_MB:-4}
     volumes:
       - ./docker/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
       - loki_data:/loki
@@ -1410,7 +1415,9 @@ services:
       - >-
         i=0; until wget -q -O /dev/null http://docker-socket-proxy:2375/_ping; do
         i=$$((i+1)); [ "$$i" -ge 90 ] && echo "docker-socket-proxy cavab vermir" >&2 && exit 1; sleep 2; done;
-        exec /usr/bin/promtail -config.file=/etc/promtail/promtail-config.yml
+        exec /usr/bin/promtail -config.file=/etc/promtail/promtail-config.yml -config.expand-env=true
+    environment:
+      LOG_COMPOSE_PROJECT: ${COMPOSE_PROJECT_NAME:-educationmanagementstudentarena}
     # Təhlükəsizlik auditi 2026-10-07: xam /var/run/docker.sock mount-u SİLİNDİ —
     # docker_sd və log axını tcp://docker-socket-proxy:2375 üzərindən (yalnız GET).
     volumes:
